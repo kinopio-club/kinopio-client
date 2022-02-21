@@ -29,29 +29,31 @@ import utils from '@/utils.js'
 let showDebugMessages = true
 let snapshots = { cards: {}, connections: {}, connectionTypes: {} }
 
-const normalizeCardUpdates = (card) => {
-  const snapshot = snapshots.cards[card.id]
-  // createdCard
+const normalizeUpdates = (item, type) => {
+  const snapshot = snapshots[type + 's'][item.id]
+  // created
   if (!snapshot) {
+    type = `${type}Created`
     return {
-      update: 'createdCard',
-      new: card
+      type,
+      new: item
     }
-  // updatedCard
+  // updated
   } else {
-    let keys = Object.keys(card)
+    let keys = Object.keys(item)
     const ignoreKeys = ['nameUpdatedAt', 'height', 'width', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl']
-    let updatedKeys = keys.filter(key => card[key] !== snapshot[key] && !ignoreKeys.includes(key))
+    let updatedKeys = keys.filter(key => item[key] !== snapshot[key] && !ignoreKeys.includes(key))
     if (!updatedKeys.length) { return }
     updatedKeys.unshift('id')
     let prev = {}
     let updates = {}
     updatedKeys.forEach(key => {
       prev[key] = snapshot[key]
-      updates[key] = card[key]
+      updates[key] = item[key]
     })
+    type = `${type}Updated`
     return {
-      update: 'updatedCard',
+      type,
       prev,
       new: updates
     }
@@ -76,7 +78,7 @@ const self = {
       state.pointer = state.pointer + 1
       // TODO trim the earlier patches once state.patches.length > max (30)
       if (showDebugMessages) {
-        console.log('▶️ new patch, patches, pointer', patch, state.patches, state.pointer)
+        console.log('⏺ new patch, patches, pointer', patch, state.patches, state.pointer)
       }
     },
     clear: (state) => {
@@ -110,7 +112,11 @@ const self = {
     },
     snapshots: (context) => {
       const cards = utils.clone(context.rootState.currentCards.cards)
+      const connections = utils.clone(context.rootState.currentConnections.connections)
+      const connectionTypes = utils.clone(context.rootState.currentConnections.types)
       snapshots.cards = cards
+      snapshots.connections = connections
+      snapshots.connectionTypes = connectionTypes
     },
     pause: (context) => {
       context.commit('isPaused', true)
@@ -120,15 +126,20 @@ const self = {
       context.commit('isPaused', false)
     },
     add: (context, { cards, connections, connectionTypes }) => {
+      console.log(cards, connections)
       if (context.state.isPaused) { return }
       let patch = []
       cards = cards.map(card => {
-        return normalizeCardUpdates(card)
+        return normalizeUpdates(card, 'card')
+      })
+      connections = connections.map(connection => {
+        return normalizeUpdates(connection, 'connection')
       })
       patch = patch.concat(cards)
+      patch = patch.concat(connections)
       context.commit('add', patch)
     },
-    // Playback
+    // Playback/restore
     // ..todo playback methods here..
     undo: (context) => {
       const { isPaused, pointer, patches } = context.state
