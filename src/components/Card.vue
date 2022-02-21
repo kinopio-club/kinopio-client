@@ -1177,6 +1177,7 @@ export default {
         cardIds = multipleCardsSelectedIds
       }
       this.$store.commit('currentUserIsResizingCardIds', cardIds)
+      this.$store.dispatch('history/pause')
       const updates = {
         userId: this.$store.state.currentUser.id,
         cardIds: cardIds

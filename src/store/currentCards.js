@@ -276,8 +276,8 @@ const currentCards = {
       context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
       context.commit('hasEditedCurrentSpace', true, { root: true })
-      context.commit('update', card)
       context.dispatch('history/add', { cards: [card] }, { root: true })
+      context.commit('update', card)
       if (card.name) {
         context.dispatch('updateDimensionsAndMap', card.id)
       }
