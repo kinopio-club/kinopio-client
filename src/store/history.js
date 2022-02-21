@@ -78,6 +78,7 @@ const self = {
       // TODO trim the earlier patches once state.patches.length > max (30)
       if (showDebugMessages) {
         console.log('⏺ new patch, patches, pointer', patch, state.patches, state.pointer)
+        // console.log('⏺ history', { newPatch: patch, patches: state.patches, pointer: state.pointer })
       }
     },
     clear: (state) => {
