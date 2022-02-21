@@ -1198,7 +1198,8 @@ export default {
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('clearMultipleSelected')
       const cardId = this.id
-      this.$store.dispatch('currentCards/toggleCommentIsVisible', cardId)
+      const value = !this.card.commentIsVisible
+      this.$store.dispatch('currentCards/commentIsVisible', { cardId, value })
       this.$store.dispatch('currentCards/incrementZ', cardId)
       this.updateCardConnectionPathsIfOpenSpace()
     },
