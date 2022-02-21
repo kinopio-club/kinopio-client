@@ -28,16 +28,17 @@ import utils from '@/utils.js'
 
 let showDebugMessages = true
 
-const normalizeUpdates = ({ item, action, previous }) => {
+const normalizeUpdates = ({ item, itemType, previous }) => {
   // created
   if (!previous) {
-    action = `${action}Created`
+    const action = `${itemType}Created`
     return {
       action,
       new: item
     }
   // updated
   } else {
+    const action = `${itemType}Updated`
     let keys = Object.keys(item)
     const ignoreKeys = ['nameUpdatedAt', 'height', 'width', 'z', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl']
     let updatedKeys = keys.filter(key => item[key] !== previous[key] && !ignoreKeys.includes(key))
@@ -49,7 +50,6 @@ const normalizeUpdates = ({ item, action, previous }) => {
       prev[key] = previous[key]
       updates[key] = item[key]
     })
-    action = `${action}Updated`
     return {
       action,
       prev,
@@ -135,7 +135,7 @@ const self = {
           if (useSnapshot) {
             previous = context.state.snapshots['cards'][card.id]
           }
-          return normalizeUpdates({ item: card, action: 'card', previous })
+          return normalizeUpdates({ item: card, itemType: 'card', previous })
         })
         patch = patch.concat(cards)
       }
@@ -146,7 +146,7 @@ const self = {
           if (useSnapshot) {
             previous = context.state.snapshots['connections'][connection.id]
           }
-          return normalizeUpdates({ item: connection, action: 'connection', previous })
+          return normalizeUpdates({ item: connection, itemType: 'connection', previous })
         })
         patch = patch.concat(connections)
       }
@@ -157,7 +157,7 @@ const self = {
           if (useSnapshot) {
             previous = context.state.snapshots['connectionTypes'][type.id]
           }
-          return normalizeUpdates({ item: type, action: 'connectionType', previous })
+          return normalizeUpdates({ item: type, itemType: 'connectionType', previous })
         })
         patch = patch.concat(connectionTypes)
       }
