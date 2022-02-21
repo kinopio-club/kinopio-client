@@ -478,7 +478,7 @@ const currentCards = {
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('checkIfShouldIncreasePageSize', { cardId: currentDraggingCardId })
       context.dispatch('history/resume', null, { root: true })
-      context.dispatch('history/add', { cards, connections }, { root: true })
+      context.dispatch('history/add', { cards, connections, useSnapshot: true }, { root: true })
     },
     checkIfShouldIncreasePageSize: (context, { cardId }) => {
       const card = context.getters.byId(cardId)

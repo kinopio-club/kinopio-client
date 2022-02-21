@@ -443,7 +443,7 @@ export default {
         this.$store.dispatch('history/pause')
       } else {
         this.$store.dispatch('history/resume')
-        this.$store.dispatch('history/add', { cards: prevCards })
+        this.$store.dispatch('history/add', { cards: prevCards, useSnapshot: true })
       }
     }
   }

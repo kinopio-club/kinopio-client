@@ -765,7 +765,7 @@ export default {
       this.pastedName = ''
       this.updateCardName(newCards[0].name)
       this.$store.dispatch('history/resume')
-      this.$store.dispatch('history/add', { cards: newCards })
+      this.$store.dispatch('history/add', { cards: newCards, useSnapshot: true })
       this.$store.dispatch('history/pause')
       newCards.shift()
       this.addSplitCards(newCards)
@@ -1487,7 +1487,7 @@ export default {
       })
       this.$store.dispatch('history/resume')
       if (card.name || prevCardName) {
-        this.$store.dispatch('history/add', { cards: [card] })
+        this.$store.dispatch('history/add', { cards: [card], useSnapshot: true })
       }
     }
   },

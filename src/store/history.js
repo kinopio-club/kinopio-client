@@ -27,33 +27,34 @@
 import utils from '@/utils.js'
 
 let showDebugMessages = true
-let snapshots = { cards: {}, connections: {}, connectionTypes: {} }
 
-const normalizeUpdates = (item, type) => {
-  const snapshot = snapshots[type + 's'][item.id]
+const normalizeUpdates = ({ item, action, previous }) => {
   // created
-  if (!snapshot) {
-    type = `${type}Created`
+  if (!previous) {
+    action = `${action}Created`
     return {
-      type,
+      action,
       new: item
     }
   // updated
   } else {
     let keys = Object.keys(item)
-    const ignoreKeys = ['nameUpdatedAt', 'height', 'width', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl']
-    let updatedKeys = keys.filter(key => item[key] !== snapshot[key] && !ignoreKeys.includes(key))
+    const ignoreKeys = ['nameUpdatedAt', 'height', 'width', 'z', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl']
+    let updatedKeys = keys.filter(key => item[key] !== previous[key] && !ignoreKeys.includes(key))
+
+    console.log('😈', updatedKeys, keys, item, previous, item['commentIsVisible'], previous['commentIsVisible'])
+
     if (!updatedKeys.length) { return }
     updatedKeys.unshift('id')
     let prev = {}
     let updates = {}
     updatedKeys.forEach(key => {
-      prev[key] = snapshot[key]
+      prev[key] = previous[key]
       updates[key] = item[key]
     })
-    type = `${type}Updated`
+    action = `${action}Updated`
     return {
-      type,
+      action,
       prev,
       new: updates
     }
@@ -65,7 +66,8 @@ const self = {
   state: {
     patches: [],
     pointer: 0,
-    isPaused: false
+    isPaused: false,
+    snapshots: { cards: {}, connections: {}, connectionTypes: {} }
   },
   mutations: {
     add: (state, patch) => {
@@ -84,7 +86,7 @@ const self = {
     clear: (state) => {
       state.patches = []
       state.pointer = 0
-      snapshots = { cards: {}, connections: {}, connectionTypes: {} }
+      state.snapshots = { cards: {}, connections: {}, connectionTypes: {} }
       if (showDebugMessages) {
         console.log('⏏️ history cleared')
       }
@@ -103,6 +105,9 @@ const self = {
         state.pointer = state.pointer - 1
         state.pointer = Math.max(0, state.pointer)
       }
+    },
+    snapshots: (state, object) => {
+      state.snapshots = object
     }
   },
   actions: {
@@ -114,9 +119,7 @@ const self = {
       const cards = utils.clone(context.rootState.currentCards.cards)
       const connections = utils.clone(context.rootState.currentConnections.connections)
       const connectionTypes = utils.clone(context.rootState.currentConnections.types)
-      snapshots.cards = cards
-      snapshots.connections = connections
-      snapshots.connectionTypes = connectionTypes
+      context.commit('snapshots', { cards, connections, connectionTypes })
     },
     pause: (context) => {
       context.commit('isPaused', true)
@@ -125,20 +128,45 @@ const self = {
     resume: (context) => {
       context.commit('isPaused', false)
     },
-    add: (context, { cards, connections, connectionTypes }) => {
-      console.log(cards, connections)
+    add: (context, { cards, connections, connectionTypes, useSnapshot }) => {
       if (context.state.isPaused) { return }
       let patch = []
-      cards = cards.map(card => {
-        return normalizeUpdates(card, 'card')
-      })
-      connections = connections.map(connection => {
-        return normalizeUpdates(connection, 'connection')
-      })
-      patch = patch.concat(cards)
-      patch = patch.concat(connections)
+      // cards
+      if (cards) {
+        cards = cards.map(card => {
+          let previous = context.rootGetters['currentCards/byId'](card.id)
+          if (useSnapshot) {
+            previous = context.state.snapshots['cards'][card.id]
+          }
+          return normalizeUpdates({ item: card, action: 'card', previous })
+        })
+        patch = patch.concat(cards)
+      }
+      // connections
+      if (connections) {
+        connections = connections.map(connection => {
+          let previous = context.rootGetters['currentConnections/byId'](connection.id)
+          if (useSnapshot) {
+            previous = context.state.snapshots['connections'][connection.id]
+          }
+          return normalizeUpdates({ item: connection, action: 'connection', previous })
+        })
+        patch = patch.concat(connections)
+      }
+      // connection types
+      if (connectionTypes) {
+        connectionTypes = connectionTypes.map(type => {
+          let previous = context.rootGetters['currentConnections/typeById'](type.id)
+          if (useSnapshot) {
+            previous = context.state.snapshots['connectionTypes'][type.id]
+          }
+          return normalizeUpdates({ item: type, action: 'connectionType', previous })
+        })
+        patch = patch.concat(connectionTypes)
+      }
       context.commit('add', patch)
     },
+
     // Playback/restore
     // ..todo playback methods here..
     undo: (context) => {
