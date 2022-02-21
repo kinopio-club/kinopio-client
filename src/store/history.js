@@ -164,16 +164,15 @@ const self = {
       context.commit('add', patch)
     },
 
-    // Playback/restore
-    // ..todo playback methods here..
-    // on restore update connected connection paths, dispatch('currentCards/updateDimensionsAndMap')
     undo: (context) => {
       const { isPaused, pointer, patches } = context.state
       if (isPaused) { return }
       const pointerIsMin = pointer === 0
       if (pointerIsMin) { return }
-      // TODO apply prev history patch at pointer
       console.log('TODO undo', patches, pointer)
+      // TODO apply prev history patch at pointer
+      // TODO on restore update connected connection paths, dispatch('currentCards/updateDimensionsAndMap')
+      // TODO if card isRemoved then look for the card in currentCards.removedCards []
       context.commit(pointer, { decrement: true })
     },
     redo: (context) => {
