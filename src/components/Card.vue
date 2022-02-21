@@ -1199,6 +1199,7 @@ export default {
       this.$store.dispatch('clearMultipleSelected')
       const cardId = this.id
       const value = !this.card.commentIsVisible
+      this.$store.dispatch('history/snapshots')
       this.$store.dispatch('currentCards/commentIsVisible', { cardId, value })
       this.$store.dispatch('currentCards/incrementZ', cardId)
       this.updateCardConnectionPathsIfOpenSpace()

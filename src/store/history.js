@@ -41,9 +41,6 @@ const normalizeUpdates = ({ item, action, previous }) => {
     let keys = Object.keys(item)
     const ignoreKeys = ['nameUpdatedAt', 'height', 'width', 'z', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl']
     let updatedKeys = keys.filter(key => item[key] !== previous[key] && !ignoreKeys.includes(key))
-
-    console.log('😈', updatedKeys, keys, item, previous, item['commentIsVisible'], previous['commentIsVisible'])
-
     if (!updatedKeys.length) { return }
     updatedKeys.unshift('id')
     let prev = {}
@@ -169,6 +166,7 @@ const self = {
 
     // Playback/restore
     // ..todo playback methods here..
+    // on restore update connected connection paths, dispatch('currentCards/updateDimensionsAndMap')
     undo: (context) => {
       const { isPaused, pointer, patches } = context.state
       if (isPaused) { return }

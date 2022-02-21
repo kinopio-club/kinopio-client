@@ -460,8 +460,8 @@ const currentCards = {
       cards = cards.map(id => {
         let card = context.getters.byId(id)
         if (!card) { return }
-        const { x, y, z } = card
-        return { id, x, y, z }
+        const { x, y, z, commentIsVisible } = card
+        return { id, x, y, z, commentIsVisible }
       })
       cards = cards.filter(card => card)
       cards.forEach(card => {
@@ -476,7 +476,7 @@ const currentCards = {
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('checkIfShouldIncreasePageSize', { cardId: currentDraggingCardId })
       context.dispatch('history/resume', null, { root: true })
-      context.dispatch('history/add', { cards, connections, useSnapshot: true }, { root: true })
+      context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
     },
     checkIfShouldIncreasePageSize: (context, { cardId }) => {
       const card = context.getters.byId(cardId)
