@@ -267,10 +267,10 @@ const currentCards = {
       // prevent null position
       const keys = Object.keys(card)
       if (keys.includes('x') || keys.includes('y')) {
-        if (!card.x) {
+        if (card.x === undefined || card.x === null) {
           delete card.x
         }
-        if (!card.y) {
+        if (card.y === undefined || card.y === null) {
           delete card.y
         }
       }
