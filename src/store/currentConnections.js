@@ -243,6 +243,7 @@ export default {
       context.dispatch('updatePaths', { connections, shouldUpdateApi })
     },
     updateType: (context, type) => {
+      context.dispatch('history/add', { connectionTypes: [type] }, { root: true })
       context.commit('updateType', type)
       context.dispatch('broadcast/update', { updates: type, type: 'updateConnectionType', handler: 'currentConnections/updateType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'updateConnectionType', body: type }, { root: true })
