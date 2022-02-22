@@ -166,7 +166,7 @@ const self = {
       // connection types
       if (connectionTypes) {
         connectionTypes = connectionTypes.map(type => {
-          let previous = context.rootGetters['currentConnections/typeById'](type.id)
+          let previous = context.rootGetters['currentConnections/typeByTypeId'](type.id)
           if (useSnapshot) {
             previous = context.state.snapshots['connectionTypes'][type.id]
           }
