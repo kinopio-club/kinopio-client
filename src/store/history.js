@@ -79,11 +79,17 @@ const self = {
       utils.typeCheck({ value: patch, type: 'array', origin: 'history/add' })
       patch = patch.filter(item => Boolean(item))
       if (!patch.length) { return }
-      // TODO remove patches above pointer
-      // add patch and update pointer
+      // remove patches above pointer
+      state.patches = state.patches.slice(state.pointer)
+      // add patch
       state.patches.push(patch)
       state.pointer = state.pointer + 1
-      // TODO trim the earlier patches once state.patches.length > max (30)
+      // trim history
+      const max = 30
+      if (state.patches.length > max) {
+        state.patches.shift()
+        state.pointer = state.pointer - 1
+      }
       console.log('⏺ new patch, patches, pointer', patch, state.patches, state.pointer)
       // console.log('⏺ history', { newPatch: patch, patches: state.patches, pointer: state.pointer })
     },
