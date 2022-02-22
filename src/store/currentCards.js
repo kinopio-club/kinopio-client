@@ -256,6 +256,7 @@ const currentCards = {
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
       }, { root: true })
+      context.dispatch('history/add', { cards: [card] }, { root: true })
       context.commit('create', card)
       context.dispatch('updateCardMap')
     },

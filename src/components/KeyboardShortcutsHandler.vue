@@ -609,7 +609,8 @@ export default {
     // Paste
 
     pasteCards () {
-      const cards = this.$store.state.copiedCards
+      let cards = this.$store.state.copiedCards
+      cards = utils.clone(cards)
       const isCardsCreatedIsOverLimit = this.$store.getters['currentUser/cardsCreatedWillBeOverLimit'](cards.length)
       if (isCardsCreatedIsOverLimit) {
         this.$store.commit('notifyCardsCreatedIsOverLimit', true)
