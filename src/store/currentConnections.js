@@ -190,7 +190,6 @@ export default {
           connectionType[key] = type[key]
         })
       }
-      context.dispatch('history/add', { connectionTypes: [connectionType] }, { root: true })
       context.commit('createType', connectionType)
       context.dispatch('broadcast/update', { updates: connectionType, type: 'addConnectionType', handler: 'currentConnections/createType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
