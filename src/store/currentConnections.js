@@ -174,6 +174,7 @@ export default {
       connection.connectionTypeId = type.id
       context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
       context.dispatch('broadcast/update', { updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
+      context.dispatch('history/add', { connections: [connection] }, { root: true })
       context.commit('create', connection)
     },
     addType: (context, type) => {
@@ -197,6 +198,7 @@ export default {
     // update
 
     update: (context, connection) => {
+      context.dispatch('history/add', { connections: [connection] }, { root: true })
       context.commit('update', connection)
       context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       context.dispatch('broadcast/update', { updates: connection, type: 'updateConnectionTypeForConnection', handler: 'currentConnections/update' }, { root: true })
@@ -273,6 +275,7 @@ export default {
       context.dispatch('api/addToQueue', { name: 'removeConnection', body: connection }, { root: true })
       context.dispatch('broadcast/update', { updates: connection, type: 'removeConnection', handler: 'currentConnections/remove' }, { root: true })
       context.commit('remove', connection)
+      context.dispatch('history/add', { connections: [connection], isRemoved: true }, { root: true })
     },
     removeType: (context, type) => {
       context.dispatch('api/addToQueue', { name: 'removeConnectionType', body: type }, { root: true })

@@ -425,12 +425,14 @@ const currentCards = {
           delete card.x
         } else {
           card.x = Math.max(0, card.x + delta.x)
+          card.x = Math.round(card.x)
         }
         // y
         if (card.y === undefined || card.y === null) {
           delete card.y
         } else {
           card.y = Math.max(0, card.y + delta.y)
+          card.y = Math.round(card.y)
         }
         return card
       })
@@ -544,7 +546,7 @@ const currentCards = {
       if (cardHasContent) {
         card = utils.clone(card)
         card.isRemoved = true
-        context.dispatch('history/add', { cards: [card] }, { root: true })
+        context.dispatch('history/add', { cards: [card], isRemoved: true }, { root: true })
         context.commit('remove', card)
         context.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
       } else {

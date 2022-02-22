@@ -28,7 +28,15 @@ import utils from '@/utils.js'
 
 let showDebugMessages = true
 
-const normalizeUpdates = ({ item, itemType, previous }) => {
+const normalizeUpdates = ({ item, itemType, previous, isRemoved }) => {
+  // removed
+  if (isRemoved) {
+    const action = `${itemType}Removed`
+    return {
+      action,
+      new: item
+    }
+  }
   // created
   if (!previous) {
     const action = `${itemType}Created`
@@ -76,10 +84,8 @@ const self = {
       state.patches.push(patch)
       state.pointer = state.pointer + 1
       // TODO trim the earlier patches once state.patches.length > max (30)
-      if (showDebugMessages) {
-        console.log('⏺ new patch, patches, pointer', patch, state.patches, state.pointer)
-        // console.log('⏺ history', { newPatch: patch, patches: state.patches, pointer: state.pointer })
-      }
+      console.log('⏺ new patch, patches, pointer', patch, state.patches, state.pointer)
+      // console.log('⏺ history', { newPatch: patch, patches: state.patches, pointer: state.pointer })
     },
     clear: (state) => {
       state.patches = []
@@ -109,6 +115,9 @@ const self = {
     }
   },
   actions: {
+
+    // History System State
+
     reset: (context) => {
       context.commit('clear')
       context.dispatch('snapshots')
@@ -126,7 +135,10 @@ const self = {
     resume: (context) => {
       context.commit('isPaused', false)
     },
-    add: (context, { cards, connections, connectionTypes, useSnapshot }) => {
+
+    // Add Patch
+
+    add: (context, { cards, connections, connectionTypes, useSnapshot, isRemoved }) => {
       if (context.state.isPaused) { return }
       let patch = []
       // cards
@@ -136,7 +148,7 @@ const self = {
           if (useSnapshot) {
             previous = context.state.snapshots['cards'][card.id]
           }
-          return normalizeUpdates({ item: card, itemType: 'card', previous })
+          return normalizeUpdates({ item: card, itemType: 'card', previous, isRemoved })
         })
         patch = patch.concat(cards)
       }
@@ -147,7 +159,7 @@ const self = {
           if (useSnapshot) {
             previous = context.state.snapshots['connections'][connection.id]
           }
-          return normalizeUpdates({ item: connection, itemType: 'connection', previous })
+          return normalizeUpdates({ item: connection, itemType: 'connection', previous, isRemoved })
         })
         patch = patch.concat(connections)
       }
@@ -158,12 +170,14 @@ const self = {
           if (useSnapshot) {
             previous = context.state.snapshots['connectionTypes'][type.id]
           }
-          return normalizeUpdates({ item: type, itemType: 'connectionType', previous })
+          return normalizeUpdates({ item: type, itemType: 'connectionType', previous, isRemoved })
         })
         patch = patch.concat(connectionTypes)
       }
       context.commit('add', patch)
     },
+
+    // Undo or Redo Patch
 
     undo: (context) => {
       const { isPaused, pointer, patches } = context.state

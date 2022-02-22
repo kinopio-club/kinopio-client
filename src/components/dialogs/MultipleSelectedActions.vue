@@ -377,12 +377,14 @@ export default {
       }
     },
     toggleConnectCards (event) {
+      this.$store.dispatch('history/resume')
       if (this.cardsIsConnected) {
         this.disconnectCards()
       } else {
         this.connectCards(event)
       }
       this.checkIsCardsConnected()
+      this.$store.dispatch('history/pause')
     },
     connectCards (event) {
       const cardIds = this.multipleCardsSelectedIds
