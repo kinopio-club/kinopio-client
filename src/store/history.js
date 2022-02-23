@@ -204,19 +204,25 @@ const self = {
         console.log('⏮', item.action, item.new, item.prev)
         const { action } = item
         context.commit('isPaused', true)
-        if (action === 'cardUpdated') {
-          context.dispatch('currentCards/update', item.prev, { root: true })
-          context.dispatch('currentCards/updateDimensionsAndMap', item.prev.id, { root: true })
-          context.dispatch('currentConnections/updatePaths', { cardId: item.prev.id }, { root: true })
-          context.commit('triggerUpdateCardOverlaps', null, { root: true })
-        } else if (action === 'cardCreated') {
-          context.dispatch('currentCards/remove', item.new, { root: true })
-        } else if (action === 'cardRemoved') {
-          context.dispatch('currentCards/restoreRemoved', item.new, { root: true })
+        switch (action) {
+          case 'cardUpdated':
+            context.dispatch('currentCards/update', item.prev, { root: true })
+            context.dispatch('currentCards/updateDimensionsAndMap', item.prev.id, { root: true })
+            context.dispatch('currentConnections/updatePaths', { cardId: item.prev.id }, { root: true })
+            context.commit('triggerUpdateCardOverlaps', null, { root: true })
+            break
+          case 'cardCreated':
+            context.dispatch('currentCards/remove', item.new, { root: true })
+            break
+          case 'cardRemoved':
+            context.dispatch('currentCards/restoreRemoved', item.new, { root: true })
+            break
+          case 'connectionUpdated':
+            context.dispatch('currentConnections/update', item.prev, { root: true })
+            break
         }
         context.dispatch('resume')
       })
-      // TODO if card isRemoved then look for the card in currentCards.removedCards []
       context.commit('pointer', { decrement: true })
       console.log('undo completed', context.state.pointer, context.state.patches)
     },
