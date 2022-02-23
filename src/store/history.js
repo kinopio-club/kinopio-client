@@ -193,7 +193,6 @@ const self = {
 
     undo: (context) => {
       let { isPaused, pointer, patches } = context.state
-      console.log('⏮ undo patch called', isPaused, pointer, patches)
       if (isPaused) { return }
       if (pointer <= 0) {
         context.commit('pointer', { value: 0 })
@@ -201,11 +200,10 @@ const self = {
       }
       const index = pointer - 1
       const patch = patches[index]
+      context.commit('isPaused', true)
       patch.forEach(item => {
-        // console.log('⏮', item)
-        console.log('⏮', item.action, item.new, item.prev)
+        console.log('⏪', item)
         const { action } = item
-        context.commit('isPaused', true)
         switch (action) {
           case 'cardUpdated':
             context.dispatch('currentCards/update', item.prev, { root: true })
@@ -233,22 +231,28 @@ const self = {
             context.dispatch('currentConnections/updateType', item.prev, { root: true })
             break
         }
-        context.dispatch('resume')
       })
+      context.dispatch('resume')
       context.commit('pointer', { decrement: true })
-      console.log('undo completed', context.state.pointer, context.state.patches)
     },
 
     // Redo
 
     redo: (context) => {
       const { isPaused, pointer, patches } = context.state
+      console.log('🌴 redo patch called', isPaused, pointer, patches)
       if (isPaused) { return }
-      const pointerIsMax = pointer === patches.length
-      if (pointerIsMax) { return }
-      // context.commit('pointer', { increment: true })
-      console.log('⏭ Redo', patches, pointer)
-      // TODO apply new history patch at next context.state.pointer
+      const pointerIsNewest = pointer === patches.length
+      if (pointerIsNewest) { return }
+      const patch = patches[pointer]
+      context.commit('isPaused', true)
+      patch.forEach(item => {
+        console.log('⏩', item)
+        // const { action } = item
+        // TODO apply patch
+      })
+      context.dispatch('resume')
+      context.commit('pointer', { increment: true })
     }
   }
 }
