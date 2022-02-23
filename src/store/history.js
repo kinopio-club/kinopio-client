@@ -220,6 +220,13 @@ const self = {
           case 'connectionUpdated':
             context.dispatch('currentConnections/update', item.prev, { root: true })
             break
+          case 'connectionCreated':
+            context.dispatch('currentConnections/remove', item.new, { root: true })
+            break
+          case 'connectionRemoved':
+            const connection = utils.clone(item.new)
+            context.dispatch('currentConnections/add', { connection }, { root: true })
+            break
         }
         context.dispatch('resume')
       })
