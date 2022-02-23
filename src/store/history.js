@@ -84,15 +84,16 @@ const self = {
       // add patch to pointer
       state.patches.splice(state.pointer, 0, patch)
       state.pointer = state.pointer + 1
-      // TODO
-      // trim history
+      console.log('⏺ new patch, patches, pointer', patch, state.patches, state.pointer)
+      // console.log('⏺ history', { newPatch: patch, patches: state.patches, pointer: state.pointer })
+    },
+    trim: (state) => {
+      // TODO trim history from pointer as seperate commit method
       // const max = 30
       // if (state.patches.length > max) {
       //   state.patches.shift()
       //   state.pointer = state.pointer - 1
       // }
-      console.log('⏺ new patch, patches, pointer', patch, state.patches, state.pointer)
-      // console.log('⏺ history', { newPatch: patch, patches: state.patches, pointer: state.pointer })
     },
     clear: (state) => {
       state.patches = []
@@ -185,6 +186,7 @@ const self = {
         patch = patch.concat(connectionTypes)
       }
       context.commit('add', patch)
+      context.commit('trim')
     },
 
     // Undo
@@ -226,6 +228,9 @@ const self = {
           case 'connectionRemoved':
             const connection = utils.clone(item.new)
             context.dispatch('currentConnections/add', { connection }, { root: true })
+            break
+          case 'connectionTypeUpdated':
+            context.dispatch('currentConnections/updateType', item.prev, { root: true })
             break
         }
         context.dispatch('resume')
