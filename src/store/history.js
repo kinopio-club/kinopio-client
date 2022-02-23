@@ -187,12 +187,11 @@ const self = {
       context.commit('add', patch)
     },
 
-    // Undo or Redo Patch
+    // Undo
 
     undo: (context) => {
       let { isPaused, pointer, patches } = context.state
       console.log('⏮ undo patch called', isPaused, pointer, patches)
-
       if (isPaused) { return }
       if (pointer <= 0) {
         context.commit('pointer', { value: 0 })
@@ -200,7 +199,6 @@ const self = {
       }
       const index = pointer - 1
       const patch = patches[index]
-
       patch.forEach(item => {
         // console.log('⏮', item)
         console.log('⏮', item.action, item.new, item.prev)
@@ -212,12 +210,19 @@ const self = {
           context.dispatch('currentConnections/updatePaths', { cardId: item.prev.id }, { root: true })
           context.commit('triggerUpdateCardOverlaps', null, { root: true })
           context.dispatch('resume')
+        } else if (action === 'cardCreated') {
+          context.commit('isPaused', true)
+          context.dispatch('currentCards/remove', item.new, { root: true })
+          context.dispatch('resume')
         }
-        // else if () {}
       })
       // TODO if card isRemoved then look for the card in currentCards.removedCards []
       context.commit('pointer', { decrement: true })
+      console.log('undo completed', context.state.pointer, context.state.patches)
     },
+
+    // Redo
+
     redo: (context) => {
       const { isPaused, pointer, patches } = context.state
       if (isPaused) { return }
