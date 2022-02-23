@@ -442,7 +442,7 @@ export default {
           this.scrollIntoView()
           this.closeDialogs()
         })
-        this.$store.dispatch('history/pause')
+        this.$store.dispatch('history/snapshots')
       } else {
         this.$store.dispatch('history/resume')
         this.$store.dispatch('history/add', { cards: prevCards, useSnapshot: true })

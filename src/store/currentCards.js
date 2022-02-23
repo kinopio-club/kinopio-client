@@ -566,6 +566,7 @@ const currentCards = {
         context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
       }
       context.dispatch('updateCardMap')
+      context.commit('triggerUpdateCardOverlaps', null, { root: true })
     },
     deleteCard: (context, card) => {
       context.commit('deleteCard', card)

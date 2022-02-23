@@ -26,7 +26,7 @@
 
 import utils from '@/utils.js'
 
-let showDebugMessages = true
+let showDebugMessages = false
 
 const normalizeUpdates = ({ item, itemType, previous, isRemoved }) => {
   // removed
@@ -80,16 +80,17 @@ const self = {
       patch = patch.filter(item => Boolean(item))
       if (!patch.length) { return }
       // remove patches above pointer
-      state.patches = state.patches.slice(state.pointer)
-      // add patch
-      state.patches.push(patch)
+      state.patches = state.patches.slice(0, state.pointer)
+      // add patch to pointer
+      state.patches.splice(state.pointer, 0, patch)
       state.pointer = state.pointer + 1
+      // TODO
       // trim history
-      const max = 30
-      if (state.patches.length > max) {
-        state.patches.shift()
-        state.pointer = state.pointer - 1
-      }
+      // const max = 30
+      // if (state.patches.length > max) {
+      //   state.patches.shift()
+      //   state.pointer = state.pointer - 1
+      // }
       console.log('⏺ new patch, patches, pointer', patch, state.patches, state.pointer)
       // console.log('⏺ history', { newPatch: patch, patches: state.patches, pointer: state.pointer })
     },
@@ -107,13 +108,15 @@ const self = {
         console.log('⏸ history is paused', state.isPaused)
       }
     },
-    pointer: (state, { increment, decrement }) => {
+    pointer: (state, { increment, decrement, value }) => {
       if (increment) {
         state.pointer = state.pointer + 1
         state.pointer = Math.min(state.patches.length, state.pointer)
       } else if (decrement) {
         state.pointer = state.pointer - 1
         state.pointer = Math.max(0, state.pointer)
+      } else if (value) {
+        state.pointer = value
       }
     },
     snapshots: (state, object) => {
@@ -135,6 +138,7 @@ const self = {
       context.commit('snapshots', { cards, connections, connectionTypes })
     },
     pause: (context) => {
+      if (context.state.isPaused) { return }
       context.commit('isPaused', true)
       context.dispatch('snapshots')
     },
@@ -186,23 +190,41 @@ const self = {
     // Undo or Redo Patch
 
     undo: (context) => {
-      const { isPaused, pointer, patches } = context.state
+      let { isPaused, pointer, patches } = context.state
+      console.log('⏮ undo patch called', isPaused, pointer, patches)
+
       if (isPaused) { return }
-      const pointerIsMin = pointer === 0
-      if (pointerIsMin) { return }
-      console.log('TODO undo', patches, pointer)
-      // TODO apply prev history patch at pointer
-      // TODO on restore update connected connection paths, dispatch('currentCards/updateDimensionsAndMap')
+      if (pointer <= 0) {
+        context.commit('pointer', { value: 0 })
+        return
+      }
+      const index = pointer - 1
+      const patch = patches[index]
+
+      patch.forEach(item => {
+        // console.log('⏮', item)
+        console.log('⏮', item.action, item.new, item.prev)
+        const { action } = item
+        if (action === 'cardUpdated') {
+          context.commit('isPaused', true)
+          context.dispatch('currentCards/update', item.prev, { root: true })
+          context.dispatch('currentCards/updateDimensionsAndMap', item.prev.id, { root: true })
+          context.dispatch('currentConnections/updatePaths', { cardId: item.prev.id }, { root: true })
+          context.commit('triggerUpdateCardOverlaps', null, { root: true })
+          context.dispatch('resume')
+        }
+        // else if () {}
+      })
       // TODO if card isRemoved then look for the card in currentCards.removedCards []
-      context.commit(pointer, { decrement: true })
+      context.commit('pointer', { decrement: true })
     },
     redo: (context) => {
       const { isPaused, pointer, patches } = context.state
       if (isPaused) { return }
       const pointerIsMax = pointer === patches.length
       if (pointerIsMax) { return }
-      context.commit(pointer, { increment: true })
-      console.log('TODO redo', patches, pointer)
+      // context.commit('pointer', { increment: true })
+      console.log('⏭ Redo', patches, pointer)
       // TODO apply new history patch at next context.state.pointer
     }
   }
