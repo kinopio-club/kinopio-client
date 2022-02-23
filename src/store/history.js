@@ -203,22 +203,18 @@ const self = {
         // console.log('⏮', item)
         console.log('⏮', item.action, item.new, item.prev)
         const { action } = item
+        context.commit('isPaused', true)
         if (action === 'cardUpdated') {
-          context.commit('isPaused', true)
           context.dispatch('currentCards/update', item.prev, { root: true })
           context.dispatch('currentCards/updateDimensionsAndMap', item.prev.id, { root: true })
           context.dispatch('currentConnections/updatePaths', { cardId: item.prev.id }, { root: true })
           context.commit('triggerUpdateCardOverlaps', null, { root: true })
-          context.dispatch('resume')
         } else if (action === 'cardCreated') {
-          context.commit('isPaused', true)
           context.dispatch('currentCards/remove', item.new, { root: true })
-          context.dispatch('resume')
         } else if (action === 'cardRemoved') {
-          context.commit('isPaused', true)
           context.dispatch('currentCards/restoreRemoved', item.new, { root: true })
-          context.dispatch('resume')
         }
+        context.dispatch('resume')
       })
       // TODO if card isRemoved then look for the card in currentCards.removedCards []
       context.commit('pointer', { decrement: true })
