@@ -214,6 +214,10 @@ const self = {
           context.commit('isPaused', true)
           context.dispatch('currentCards/remove', item.new, { root: true })
           context.dispatch('resume')
+        } else if (action === 'cardRemoved') {
+          context.commit('isPaused', true)
+          context.dispatch('currentCards/restoreRemoved', item.new, { root: true })
+          context.dispatch('resume')
         }
       })
       // TODO if card isRemoved then look for the card in currentCards.removedCards []
