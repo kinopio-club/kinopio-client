@@ -204,31 +204,38 @@ const self = {
       patch.forEach(item => {
         console.log('⏪', item)
         const { action } = item
+        let card, connection, type
         switch (action) {
           case 'cardUpdated':
-            context.dispatch('currentCards/update', item.prev, { root: true })
-            context.dispatch('currentCards/updateDimensionsAndMap', item.prev.id, { root: true })
-            context.dispatch('currentConnections/updatePaths', { cardId: item.prev.id }, { root: true })
+            card = item.prev
+            context.dispatch('currentCards/update', card, { root: true })
+            context.dispatch('currentCards/updateDimensionsAndMap', card.id, { root: true })
+            context.dispatch('currentConnections/updatePaths', { cardId: card.id }, { root: true })
             context.commit('triggerUpdateCardOverlaps', null, { root: true })
             break
           case 'cardCreated':
-            context.dispatch('currentCards/remove', item.new, { root: true })
+            card = item.new
+            context.dispatch('currentCards/remove', card, { root: true })
             break
           case 'cardRemoved':
-            context.dispatch('currentCards/restoreRemoved', item.new, { root: true })
+            card = item.new
+            context.dispatch('currentCards/restoreRemoved', card, { root: true })
             break
           case 'connectionUpdated':
-            context.dispatch('currentConnections/update', item.prev, { root: true })
+            connection = item.prev
+            context.dispatch('currentConnections/update', connection, { root: true })
             break
           case 'connectionCreated':
-            context.dispatch('currentConnections/remove', item.new, { root: true })
+            connection = item.new
+            context.dispatch('currentConnections/remove', connection, { root: true })
             break
           case 'connectionRemoved':
-            const connection = utils.clone(item.new)
+            connection = utils.clone(item.new)
             context.dispatch('currentConnections/add', { connection }, { root: true })
             break
           case 'connectionTypeUpdated':
-            context.dispatch('currentConnections/updateType', item.prev, { root: true })
+            type = item.prev
+            context.dispatch('currentConnections/updateType', type, { root: true })
             break
         }
       })
