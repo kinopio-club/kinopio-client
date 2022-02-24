@@ -65,8 +65,8 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       .row
         .badge.title
           img.icon(src="@/assets/undo.svg")
-          span Restore Last Removed Card
-        .badge.keyboard-shortcut {{meta}}-Z
+          span Undo/Redo
+        .badge.keyboard-shortcut {{meta}}-Z/{{meta}}-Shift-Z
 
     //- Select
     .section-title
