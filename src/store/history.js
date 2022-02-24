@@ -247,7 +247,6 @@ const self = {
 
     redo: (context) => {
       const { isPaused, pointer, patches } = context.state
-      console.log('🌴 redo patch called', isPaused, pointer, patches)
       if (isPaused) { return }
       const pointerIsNewest = pointer === patches.length
       if (pointerIsNewest) { return }
@@ -255,8 +254,41 @@ const self = {
       context.commit('isPaused', true)
       patch.forEach(item => {
         console.log('⏩', item)
-        // const { action } = item
-        // TODO apply patch
+        const { action } = item
+        let card, connection, type
+        switch (action) {
+          case 'cardUpdated':
+            card = item.new
+            context.dispatch('currentCards/update', card, { root: true })
+            context.dispatch('currentCards/updateDimensionsAndMap', card.id, { root: true })
+            context.dispatch('currentConnections/updatePaths', { cardId: card.id }, { root: true })
+            context.commit('triggerUpdateCardOverlaps', null, { root: true })
+            break
+          case 'cardCreated':
+            card = item.new
+            context.dispatch('currentCards/restoreRemoved', card, { root: true })
+            break
+          case 'cardRemoved':
+            card = item.new
+            context.dispatch('currentCards/remove', card, { root: true })
+            break
+          case 'connectionUpdated':
+            connection = item.new
+            context.dispatch('currentConnections/update', connection, { root: true })
+            break
+          case 'connectionCreated':
+            connection = utils.clone(item.new)
+            context.dispatch('currentConnections/add', { connection }, { root: true })
+            break
+          case 'connectionRemoved':
+            connection = item.new
+            context.dispatch('currentConnections/remove', connection, { root: true })
+            break
+          case 'connectionTypeUpdated':
+            type = item.new
+            context.dispatch('currentConnections/updateType', type, { root: true })
+            break
+        }
       })
       context.dispatch('resume')
       context.commit('pointer', { increment: true })
