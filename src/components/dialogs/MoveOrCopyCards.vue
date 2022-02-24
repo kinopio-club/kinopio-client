@@ -184,8 +184,8 @@ export default {
       this.notifySuccess()
       if (this.actionIsMove) {
         this.removeCards(items.cards)
-        this.$store.dispatch('history/resume')
         items.isRemoved = true
+        this.$store.dispatch('history/resume')
         this.$store.dispatch('history/add', items)
       } else {
         this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
