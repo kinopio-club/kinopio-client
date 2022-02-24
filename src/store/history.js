@@ -99,9 +99,7 @@ const self = {
       state.patches = []
       state.pointer = 0
       state.snapshots = { cards: {}, connections: {}, connectionTypes: {} }
-      if (showDebugMessages) {
-        console.log('⏹ history cleared')
-      }
+      console.log('⏹ clear history')
     },
     isPaused: (state, value) => {
       state.isPaused = value
