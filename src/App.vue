@@ -144,8 +144,10 @@ export default {
       if (!isDoubleTap) { return }
       if (isTwoFingers) {
         this.$store.dispatch('history/undo')
+        this.$store.commit('addNotification', { message: 'Undo', icon: 'undo' })
       } else if (isThreeFingers) {
         this.$store.dispatch('history/redo')
+        this.$store.commit('addNotification', { message: 'Undo', icon: 'redo' })
       }
     },
     updateCardMap () {
