@@ -342,6 +342,13 @@ export default {
     },
     typeByConnection: (state, getters) => (connection) => {
       return getters.typeByTypeId(connection.connectionTypeId)
+    },
+    typeOrTypeForNewConnections: (state, getters) => (typeId) => {
+      if (getters.typeByTypeId(typeId)) {
+        return typeId
+      } else {
+        return getters.typeForNewConnections
+      }
     }
   }
 }

@@ -231,6 +231,11 @@ const self = {
             break
           case 'connectionRemoved':
             connection = utils.clone(item.new)
+            connection.connectionTypeId = context.rootGetters['currentConnections/typeOrTypeForNewConnections'](connection.connectionTypeId)
+            if (!connection.connectionTypeId) {
+              context.dispatch('currentConnections/addType', null, { root: true })
+              connection.connectionTypeId = context.rootGetters['currentConnections/typeForNewConnections']
+            }
             context.dispatch('currentConnections/add', { connection }, { root: true })
             break
           case 'connectionTypeUpdated':
