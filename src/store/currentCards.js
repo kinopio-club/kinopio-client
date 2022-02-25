@@ -418,6 +418,7 @@ const currentCards = {
         if (card.y === 0) { delta.y = Math.max(0, delta.y) }
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
       })
+      cards = cards.filter(card => Boolean(card))
       // prevent cards with null or negative positions
       cards = utils.clone(cards)
       cards = cards.map(card => {
@@ -523,6 +524,7 @@ const currentCards = {
     },
     incrementZ: (context, id) => {
       const card = context.getters.byId(id)
+      if (!card) { return }
       if (card.isLocked) { return }
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
       let cards = context.getters.all
