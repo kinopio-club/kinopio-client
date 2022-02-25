@@ -106,7 +106,7 @@ article(:style="positionStyle" :data-card-id="id" ref="card" :class="{'is-resizi
       //- Right buttons
       span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
         //- lock
-        .lock-button-wrap.inline-button-wrap(v-if="card.isLocked" @mouseup.left.stop="unlockCard" @touchend.stop="unlockCard")
+        .lock-button-wrap.inline-button-wrap(v-if="card.isLocked" @mouseup.left="unlockCard" @touchend="unlockCard")
           button.inline-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
             img.icon.lock-icon(src="@/assets/lock.svg")
           //- maintain connections when card is locked
@@ -889,6 +889,10 @@ export default {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     unlockCard (event) {
+      if (this.$store.state.currentUserIsDrawingConnection) {
+        return
+      }
+      event.stopPropagation()
       if (!this.canEditCard) {
         const position = utils.cursorPositionInPage(event)
         this.$store.commit('addNotificationWithPosition', { message: 'Card is Read Only', position, type: 'info' }, { root: true })
