@@ -117,12 +117,10 @@ export default {
     },
     async cancelSubscription () {
       this.loading.isCancelling = true
-      // const stripeIds = cache.stripeIds()
       try {
         await this.$store.dispatch('api/cancelSubscription', {
           userId: this.$store.state.currentUser.id
         })
-        this.$store.commit('currentUser/isUpgraded', false)
         this.$store.commit('addNotification', { message: 'Your account has been downgraded, and you will no longer be charged', type: 'success' })
         this.isCancelled = true
       } catch (error) {

@@ -42,7 +42,8 @@ export default {
     dialogSpaceFilters: null, // null, journals, spaces
     dialogSpaceFilterByUser: {},
     defaultSpaceBackground: undefined,
-    defaultSpaceBackgroundTint: undefined
+    defaultSpaceBackgroundTint: undefined,
+    downgradeAt: null
   },
   mutations: {
     color: (state, value) => {
@@ -340,7 +341,7 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       console.log('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
-      if (remoteUser.stripeSubscriptionId) {
+      if (remoteUser.stripeSubscriptionId || remoteUser.downgradeAt) {
         context.commit('isUpgraded', true)
       }
       const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
