@@ -96,7 +96,11 @@ export default {
   },
   computed: {
     user () { return this.$store.state.currentUser },
-    isUpgraded () { return this.user.isUpgraded },
+    isUpgraded () {
+      if (this.isCancelled) { return }
+      if (this.downgradeAt) { return }
+      return this.user.isUpgraded
+    },
     downgradeAt () {
       const date = this.info.downgradeAt
       if (!date) { return }

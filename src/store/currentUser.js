@@ -343,6 +343,8 @@ export default {
       context.commit('updateUser', remoteUser)
       if (remoteUser.stripeSubscriptionId || remoteUser.downgradeAt) {
         context.commit('isUpgraded', true)
+      } else {
+        context.commit('isUpgraded', false)
       }
       const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
       context.commit('otherTags', remoteTags, { root: true })
