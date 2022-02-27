@@ -3,46 +3,57 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
   section
     p Billing
 
-  section(v-if="!isUpgraded")
-    p(v-if="isCancelled")
-      span.badge.success Downgraded to free
-    p After you upgrade your account you'll be able to manage your payment details here
-    button(@click.left="triggerUpgradeUserIsVisible") Upgrade
+  section(v-if="loading.gettingBillingInfo")
+    Loader(:visible="true")
 
-  section(v-if="isUpgraded")
-    .loading-stripe(v-if="loading.gettingBillingInfo")
-      Loader(:visible="true")
-    .summary(v-if="!loading.gettingBillingInfo")
-      User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
+  template(v-if="!loading.gettingBillingInfo")
+    // downgraded
+    section(v-if="isAwaitingDowngrade")
       p
-        span You are paying
-          .badge.info ${{info.price}}/{{info.period}}
-    p(v-if="!loading.gettingBillingInfo && info.nextBillingDate") Next payment: {{info.nextBillingDate}}
-    p(v-if="!loading.gettingBillingInfo && info.cardType") {{info.cardType}} ••{{info.cardLast4}} – {{info.cardExpMonth}}/{{info.cardExpYear}}
-    p
-      .badge.success Thanks for supporting Kinopio
+        span.badge.success Subscription Cancelled
+      p Your plan will be downgraded to free on {{info.nextBillingDate || downgradeAt}}. You'll receive an email when that happens
 
-    .row
-      button(v-if="!cancelSubscriptionVisible" @click.left="toggleCancelSubscriptionVisible")
-        img.icon(src="@/assets/remove.svg")
-        span Downgrade to Free
-      span(v-if="cancelSubscriptionVisible")
+    //- free
+    section(v-if="!isUpgraded")
+      p(v-if="isAwaitingDowngrade")
+        span You can upgrade your account again whenever you're ready
+      p(v-else) After you upgrade your account you'll be able to manage your payment details here
+      button(@click.left="triggerUpgradeUserIsVisible") Upgrade
+
+    //- upgraded
+    section(v-if="isUpgraded")
+      .summary
+        User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
         p
-          span.badge.danger You won't be able to add new cards
-          span unless you upgrade your account again. All of your cards and spaces will still be accessible.
-        .segmented-buttons
-          button(@click.left="toggleCancelSubscriptionVisible")
-            span Cancel
-          button.danger(@click.left="cancelSubscription")
-            img.icon(src="@/assets/remove.svg")
-            span Downgrade
-            Loader(:visible="loading.isCancelling")
+          span You are paying
+            .badge.info ${{info.price}}/{{info.period}}
+      p(v-if="info.nextBillingDate") Next payment: {{info.nextBillingDate}}
+      p(v-if="info.cardType") {{info.cardType}} ••{{info.cardLast4}} – {{info.cardExpMonth}}/{{info.cardExpYear}}
+      p
+        .badge.success Thanks for supporting Kinopio
+      .row
+        button(v-if="!cancelSubscriptionVisible" @click.left="toggleCancelSubscriptionVisible")
+          img.icon(src="@/assets/remove.svg")
+          span Downgrade to Free
+        span(v-if="cancelSubscriptionVisible")
+          p
+            span.badge.danger You won't be able to add new cards
+            span unless you upgrade your account again. All of your cards and spaces will still be accessible.
+          .segmented-buttons
+            button(@click.left="toggleCancelSubscriptionVisible")
+              span Cancel
+            button.danger(@click.left="cancelSubscription")
+              img.icon(src="@/assets/remove.svg")
+              span Downgrade
+              Loader(:visible="loading.isCancelling")
 </template>
 
 <script>
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import { defineAsyncComponent } from 'vue'
+
+import dayjs from 'dayjs'
 const User = defineAsyncComponent({
   loader: () => import('@/components/User.vue')
 })
@@ -85,7 +96,15 @@ export default {
   },
   computed: {
     user () { return this.$store.state.currentUser },
-    isUpgraded () { return this.user.isUpgraded }
+    isUpgraded () { return this.user.isUpgraded },
+    downgradeAt () {
+      const date = this.info.downgradeAt
+      if (!date) { return }
+      return dayjs(date).format('MMM D, YYYY')
+    },
+    isAwaitingDowngrade () {
+      return this.isCancelled || this.downgradeAt
+    }
   },
   methods: {
     toggleCancelSubscriptionVisible () {
@@ -113,15 +132,18 @@ export default {
       this.loading.isCancelling = false
     },
     async getBillingInfo () {
-      if (!this.isUpgraded) { return }
       this.loading.gettingBillingInfo = true
-      // const stripeIds = cache.stripeIds()
       try {
         const info = await this.$store.dispatch('api/subscriptionInfo', {
           userId: this.$store.state.currentUser.id
         })
+        this.loading.gettingBillingInfo = false
         if (info.message === '🌷free') {
-          this.loading.gettingBillingInfo = false
+          this.info.downgradeAt = info.downgradeAt
+          return
+        }
+        if (!info.subscription) {
+          this.info.downgradeAt = info.downgradeAt
           return
         }
         const card = info.paymentMethod.card
@@ -133,14 +155,15 @@ export default {
           cardLast4: card.last4,
           cardExpMonth: card.exp_month,
           cardExpYear: card.exp_year,
-          nextBillingDate: info.nextBillingDate
+          nextBillingDate: info.nextBillingDate,
+          downgradeAt: info.downgradeAt
         }
-        console.log('🎡 stripe info', this.info)
+        console.log('🎡 billing info', this.info)
       } catch (error) {
         console.error('🚒', error)
         this.$store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
+        this.loading.gettingBillingInfo = false
       }
-      this.loading.gettingBillingInfo = false
     },
     updateDialogHeight () {
       if (!this.visible) { return }
@@ -176,8 +199,6 @@ export default {
       display inline-block
     p
       margin 0
-  .loading-stripe
-    margin-bottom 10px
   .row
     margin-top 10px
 </style>
