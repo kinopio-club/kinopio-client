@@ -105,17 +105,19 @@ export default {
       const isFromCard = event.target.classList[0] === 'card'
       const isCardScope = isFromCard || isFromCardName
       const isSpaceScope = event.target.tagName === 'BODY'
-      // Enter
+      const isFromInput = event.target.closest('input') || event.target.closest('textarea')
+      // Add Child Card
       if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addChildCard()
+      // Add Card
       } else if (key === 'Enter' && isSpaceScope) {
         this.addCard()
-      // Shift-Enter
-      // Undo
-      } else if (event.shiftKey && isMeta && key === 'z' && isSpaceScope) {
+      // Redo
+      } else if (event.shiftKey && isMeta && key === 'z' && !isFromInput) {
         event.preventDefault()
         this.$store.dispatch('history/redo')
-      } else if (isMeta && key === 'z' && isSpaceScope) {
+      // Undo
+      } else if (isMeta && key === 'z' && !isFromInput) {
         event.preventDefault()
         this.$store.dispatch('history/undo')
       // Copy
