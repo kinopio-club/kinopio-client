@@ -1175,6 +1175,7 @@ export default {
     startResizing (event) {
       if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
+      this.$store.dispatch('history/pause')
       this.$store.dispatch('closeAllDialogs', 'Card.startResizing')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('currentCards/incrementZ', this.id)
@@ -1185,7 +1186,6 @@ export default {
         cardIds = multipleCardsSelectedIds
       }
       this.$store.commit('currentUserIsResizingCardIds', cardIds)
-      this.$store.dispatch('history/pause')
       const updates = {
         userId: this.$store.state.currentUser.id,
         cardIds: cardIds

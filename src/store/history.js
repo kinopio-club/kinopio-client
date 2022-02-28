@@ -25,6 +25,7 @@
 //                     ░░░░░░░░░░░░░░░░░░░░░░░░
 
 import utils from '@/utils.js'
+import { nextTick } from 'vue'
 
 let showDebugMessages = false
 
@@ -206,9 +207,11 @@ const self = {
           case 'cardUpdated':
             card = item.prev
             context.dispatch('currentCards/update', card, { root: true })
-            context.dispatch('currentCards/updateDimensionsAndMap', card.id, { root: true })
-            context.dispatch('currentConnections/updatePaths', { cardId: card.id }, { root: true })
-            context.commit('triggerUpdateCardOverlaps', null, { root: true })
+            nextTick(() => {
+              context.dispatch('currentCards/updateDimensionsAndMap', card.id, { root: true })
+              context.dispatch('currentConnections/updatePaths', { cardId: card.id }, { root: true })
+              context.commit('triggerUpdateCardOverlaps', null, { root: true })
+            })
             break
           case 'cardCreated':
             card = item.new
@@ -262,9 +265,11 @@ const self = {
           case 'cardUpdated':
             card = item.new
             context.dispatch('currentCards/update', card, { root: true })
-            context.dispatch('currentCards/updateDimensionsAndMap', card.id, { root: true })
-            context.dispatch('currentConnections/updatePaths', { cardId: card.id }, { root: true })
-            context.commit('triggerUpdateCardOverlaps', null, { root: true })
+            nextTick(() => {
+              context.dispatch('currentCards/updateDimensionsAndMap', card.id, { root: true })
+              context.dispatch('currentConnections/updatePaths', { cardId: card.id }, { root: true })
+              context.commit('triggerUpdateCardOverlaps', null, { root: true })
+            })
             break
           case 'cardCreated':
             card = item.new
