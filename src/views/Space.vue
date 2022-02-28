@@ -171,6 +171,7 @@ export default {
     viewportWidth () { return this.$store.state.viewportWidth },
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
+    currentUser () { return this.$store.state.currentUser },
     isInteracting () {
       if (this.isDraggingCard || this.isDrawingConnection || this.isResizingCard) {
         return true
@@ -271,6 +272,15 @@ export default {
       const deltaX = endCursor.x - prevCursor.x
       this.$store.dispatch('currentCards/resize', { cardIds, deltaX })
     },
+    stopResizingCards () {
+      if (!this.$store.state.currentUserIsResizingCard) { return }
+      this.$store.dispatch('history/resume')
+      const cardIds = this.$store.state.currentUserIsResizingCardIds
+      const cards = cardIds.map(id => this.$store.getters['currentCards/byId'](id))
+      this.$store.dispatch('history/add', { cards, useSnapshot: true })
+      this.$store.commit('currentUserIsResizingCard', false)
+      this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserResizingCards' })
+    },
     interact (event) {
       endCursor = utils.cursorPositionInViewport(event)
       if (this.isDraggingCard) {
@@ -304,6 +314,7 @@ export default {
       return cursor
     },
     dragCard () {
+      this.$store.dispatch('history/pause')
       const prevCursor = this.cursor()
       const shouldPrevent = this.checkIfShouldPreventInteraction()
       if (shouldPrevent) { return }
@@ -419,7 +430,6 @@ export default {
       //   isDraggingCard: this.isDraggingCard,
       // }
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
-      const currentUser = this.$store.state.currentUser
       this.addInteractionBlur()
       if (event.touches) {
         this.$store.commit('triggerUpdatePositionInVisualViewport')
@@ -437,10 +447,7 @@ export default {
       this.$store.commit('importArenaChannelIsVisible', false)
       this.$store.commit('shouldAddCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
-      if (this.$store.state.currentUserIsResizingCard) {
-        this.$store.commit('currentUserIsResizingCard', false)
-        this.$store.commit('broadcast/updateStore', { updates: { userId: currentUser.id }, type: 'removeRemoteUserResizingCards' })
-      }
+      this.stopResizingCards()
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
       if (this.isDraggingCard) {

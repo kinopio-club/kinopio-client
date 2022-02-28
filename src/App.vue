@@ -38,6 +38,8 @@ import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import utils from '@/utils.js'
 
+let prevTwoFingerTime, prevThreeFingerTime
+
 export default {
   components: {
     Header,
@@ -70,10 +72,12 @@ export default {
     this.updateMetaDescription()
     this.$store.dispatch('currentSpace/updateBackgroundZoom')
     this.updateCardMap()
+    window.addEventListener('touchstart', this.touchUndo)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateUserHasScrolled)
     window.removeEventListener('scroll', this.updateCardMap)
+    window.removeEventListener('touchstart', this.touchUndo)
   },
   computed: {
     backgroundTint () {
@@ -119,6 +123,33 @@ export default {
     }
   },
   methods: {
+    touchUndo (event) {
+      const threshold = 250
+      const time = Date.now()
+      const isTwoFingers = event.touches.length === 2
+      const isThreeFingers = event.touches.length === 3
+      let prevTime
+      if (isTwoFingers) {
+        prevTime = prevTwoFingerTime
+        prevTwoFingerTime = time
+      } else if (isThreeFingers) {
+        prevTime = prevThreeFingerTime
+        prevThreeFingerTime = time
+      }
+      const isDoubleTap = utils.isBetween({
+        value: time - prevTime,
+        min: 20,
+        max: threshold
+      })
+      if (!isDoubleTap) { return }
+      if (isTwoFingers) {
+        this.$store.dispatch('history/undo')
+        this.$store.commit('addNotification', { message: 'Undo', icon: 'undo' })
+      } else if (isThreeFingers) {
+        this.$store.dispatch('history/redo')
+        this.$store.commit('addNotification', { message: 'Undo', icon: 'redo' })
+      }
+    },
     updateCardMap () {
       this.$store.dispatch('currentCards/updateCardMap')
     },

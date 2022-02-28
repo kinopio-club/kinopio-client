@@ -26,7 +26,6 @@ const self = {
       }, Math.min(reconnectTime, maxTime))
     },
     update: (context, update) => {
-      context.commit('undoHistory/add', update, { root: true })
       context.commit('update', update)
     }
   }

@@ -8,6 +8,8 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'press-and-hold'" src="@/assets/press-and-hold.svg" class="press-and-hold")
         img.icon(v-else-if="item.icon === 'add'" src="@/assets/add.svg" class="add")
         img.icon(v-else-if="item.icon === 'cut'" src="@/assets/cut.svg" class="cut")
+        img.icon(v-else-if="item.icon === 'undo'" src="@/assets/undo.svg" class="undo")
+        img.icon(v-else-if="item.icon === 'redo'" src="@/assets/undo.svg" class="redo")
       span {{item.message}}
 
   .persistent-item.danger.hidden#notify-local-storage-is-full
@@ -374,6 +376,9 @@ export default {
     color var(--primary-background)
     margin-right 6px
     font-size 12px
+
+  .redo
+    transform scaleX(-1)
 
 @keyframes notificationJiggle
   0%

@@ -112,9 +112,12 @@ export default {
         this.addCard()
       // Shift-Enter
       // Undo
+      } else if (event.shiftKey && isMeta && key === 'z' && isSpaceScope) {
+        event.preventDefault()
+        this.$store.dispatch('history/redo')
       } else if (isMeta && key === 'z' && isSpaceScope) {
         event.preventDefault()
-        this.restoreLastRemovedCard()
+        this.$store.dispatch('history/undo')
       // Copy
       } else if (isMeta && key === 'c' && (isSpaceScope || isFromCard)) {
         if (this.focusedCardIds().length) {
@@ -566,6 +569,7 @@ export default {
     },
 
     remove () {
+      this.$store.dispatch('history/resume')
       const selectedConnectionIds = this.$store.state.multipleConnectionsSelectedIds
       const cardIds = this.focusedCardIds()
       selectedConnectionIds.forEach(connectionId => {
@@ -582,16 +586,6 @@ export default {
       this.$store.dispatch('currentConnections/removeUnusedTypes')
       this.clearAllSelectedCards()
       this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.remove')
-    },
-
-    // Undo
-
-    restoreLastRemovedCard () {
-      const removedCards = this.$store.state.currentCards.removedCards
-      if (removedCards.length) {
-        const card = removedCards[0]
-        this.$store.dispatch('currentCards/restoreRemoved', card)
-      }
     },
 
     // Copy
@@ -615,7 +609,8 @@ export default {
     // Paste
 
     pasteCards () {
-      const cards = this.$store.state.copiedCards
+      let cards = this.$store.state.copiedCards
+      cards = utils.clone(cards)
       const isCardsCreatedIsOverLimit = this.$store.getters['currentUser/cardsCreatedWillBeOverLimit'](cards.length)
       if (isCardsCreatedIsOverLimit) {
         this.$store.commit('notifyCardsCreatedIsOverLimit', true)
