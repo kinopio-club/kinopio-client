@@ -260,6 +260,7 @@ export default {
       cache.saveStripeIds(stripeIds)
       this.loading.subscriptionIsBeingCreated = false
       this.$store.commit('currentUser/isUpgraded', true)
+      this.$store.commit('notifyCardsCreatedIsOverLimit', false)
       this.$store.commit('addNotification', { message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software', type: 'success' })
       this.$emit('closeDialog')
     },
