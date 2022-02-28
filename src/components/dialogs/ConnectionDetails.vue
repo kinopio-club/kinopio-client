@@ -7,7 +7,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
           img.icon(src="@/assets/connection-path.svg")
           .current-color(:style="{backgroundColor: typeColor}")
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
-      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
+      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="focus" @blur="blur")
 
     .row
       //- Remove
@@ -71,6 +71,8 @@ import last from 'lodash-es/last'
 import scrollIntoView from '@/scroll-into-view.js'
 import randomColor from 'randomcolor'
 
+let prevConnectionType
+
 export default {
   components: {
     ColorPicker,
@@ -86,13 +88,18 @@ export default {
       filter: '',
       filteredConnectionTypes: [],
       resultsSectionMaxHeight: undefined, // number
-      nextConnectionTypeColor: ''
+      nextConnectionTypeColor: '',
+      inputIsFocused: false
     }
   },
   computed: {
     visible () { return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId) },
     labelIsVisible () { return this.currentConnection.labelIsVisible },
-    currentConnectionType () { return this.$store.getters['currentConnections/typeByConnection'](this.currentConnection) },
+    currentConnectionType () {
+      const connectionType = this.$store.getters['currentConnections/typeByConnection'](this.currentConnection)
+      prevConnectionType = connectionType
+      return connectionType
+    },
     connectionTypes () { return this.$store.getters['currentConnections/allTypes'] },
     typeColor () { return this.currentConnectionType.color },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
@@ -219,6 +226,7 @@ export default {
         if (!element) { return }
         element.focus()
       })
+      this.inputIsFocused = true
     },
     updateResultsSectionMaxHeight () {
       const pinchZoom = utils.visualViewport().scale
@@ -263,14 +271,20 @@ export default {
     updateFilter (filter) {
       this.filter = filter
     },
-    resetPinchCounterZoomDecimal () {
+    focus () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
+      this.$store.dispatch('history/pause')
+      this.inputIsFocused = true
     },
     updatePinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     },
-    triggerUpdatePositionInVisualViewport () {
+    blur () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.$store.dispatch('history/resume')
+      const connectionType = utils.clone(this.currentConnectionType)
+      this.$store.dispatch('history/add', { connectionTypes: [connectionType], useSnapshot: true }, { root: true })
+      this.inputIsFocused = false
     },
     updateNextConnectionColor () {
       this.nextConnectionTypeColor = randomColor({ luminosity: 'light' })
@@ -294,7 +308,12 @@ export default {
         this.updatePinchCounterZoomDecimal()
         this.updateNextConnectionColor()
       } else {
+        this.$store.dispatch('history/resume')
         this.resultsSectionMaxHeight = undefined
+        if (this.inputIsFocused) {
+          this.$store.dispatch('history/add', { connectionTypes: [prevConnectionType], useSnapshot: true }, { root: true })
+          this.inputIsFocused = false
+        }
       }
     }
   }

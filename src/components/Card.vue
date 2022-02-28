@@ -11,7 +11,7 @@ article(:style="positionStyle" :data-card-id="id" ref="card" :class="{'is-resizi
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
 
-    :class="{jiggle: shouldJiggle, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio, 'is-locked': card.isLocked}",
+    :class="{jiggle: shouldJiggle, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio, 'is-locked': isLocked}",
     :style="cardStyle"
     :data-card-id="id"
     :data-card-x="x"
@@ -106,7 +106,7 @@ article(:style="positionStyle" :data-card-id="id" ref="card" :class="{'is-resizi
       //- Right buttons
       span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
         //- lock
-        .lock-button-wrap.inline-button-wrap(v-if="card.isLocked" @mouseup.left.stop="unlockCard" @touchend.stop="unlockCard")
+        .lock-button-wrap.inline-button-wrap(v-if="isLocked" @mouseup.left="unlockCard" @touchend="unlockCard")
           button.inline-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
             img.icon.lock-icon(src="@/assets/lock.svg")
           //- maintain connections when card is locked
@@ -313,8 +313,12 @@ export default {
     resizeIsVisible () {
       return Boolean(this.formats.image || this.formats.video)
     },
+    isLocked () {
+      if (!this.card) { return }
+      return this.card.isLocked
+    },
     resizeControlIsVisible () {
-      if (this.card.isLocked) { return }
+      if (this.isLocked) { return }
       return this.resizeIsVisible && this.canEditCard
     },
     shouldJiggle () {
@@ -382,7 +386,7 @@ export default {
       }
     },
     cardButtonsIsVisible () {
-      if (this.connectorIsVisible || this.card.isLocked || Boolean(this.formats.link || this.formats.file)) {
+      if (this.connectorIsVisible || this.isLocked || Boolean(this.formats.link || this.formats.file)) {
         return true
       } else {
         return false
@@ -539,7 +543,7 @@ export default {
     },
     isChecked () { return utils.nameIsChecked(this.name) },
     hasCheckbox () {
-      if (this.card.isLocked) { return }
+      if (this.isLocked) { return }
       return utils.checkboxFromString(this.name)
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
@@ -553,7 +557,7 @@ export default {
       let pointerEvents = 'auto'
       if (this.currentCardDetailsIsVisible) {
         z = 2147483646 // max z
-      } else if (this.card.isLocked) {
+      } else if (this.isLocked) {
         z = 0
         pointerEvents = 'none'
       }
@@ -889,6 +893,10 @@ export default {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     unlockCard (event) {
+      if (this.$store.state.currentUserIsDrawingConnection) {
+        return
+      }
+      event.stopPropagation()
       if (!this.canEditCard) {
         const position = utils.cursorPositionInPage(event)
         this.$store.commit('addNotificationWithPosition', { message: 'Card is Read Only', position, type: 'info' }, { root: true })
@@ -1119,7 +1127,7 @@ export default {
       return longestLineLength
     },
     removeCard () {
-      if (this.card.isLocked) { return }
+      if (this.isLocked) { return }
       if (this.canEditCard) {
         this.$store.dispatch('currentCards/remove', this.card)
       }
@@ -1177,6 +1185,7 @@ export default {
         cardIds = multipleCardsSelectedIds
       }
       this.$store.commit('currentUserIsResizingCardIds', cardIds)
+      this.$store.dispatch('history/pause')
       const updates = {
         userId: this.$store.state.currentUser.id,
         cardIds: cardIds
@@ -1198,7 +1207,9 @@ export default {
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('clearMultipleSelected')
       const cardId = this.id
-      this.$store.dispatch('currentCards/toggleCommentIsVisible', cardId)
+      const value = !this.card.commentIsVisible
+      this.$store.dispatch('history/snapshots')
+      this.$store.dispatch('currentCards/commentIsVisible', { cardId, value })
       this.$store.dispatch('currentCards/incrementZ', cardId)
       this.updateCardConnectionPathsIfOpenSpace()
     },
@@ -1223,7 +1234,7 @@ export default {
     },
     startDraggingCard (event) {
       isMultiTouch = false
-      if (this.card.isLocked) { return }
+      if (this.isLocked) { return }
       if (this.$store.state.currentUserIsPanningReady) { return }
       if (!this.canEditCard) { return }
       if (utils.isMultiTouch(event)) {
@@ -1246,7 +1257,7 @@ export default {
       this.$store.dispatch('currentCards/incrementSelectedZs')
     },
     showCardDetails (event) {
-      if (this.card.isLocked) { return }
+      if (this.isLocked) { return }
       if (this.$store.state.currentUserIsPainting) { return }
       if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
@@ -1372,7 +1383,7 @@ export default {
     // Touch
 
     notifyPressAndHoldToDrag () {
-      if (this.card.isLocked) { return }
+      if (this.isLocked) { return }
       const isDrawingConnection = this.$store.state.currentUserIsDrawingConnection
       if (isDrawingConnection) { return }
       const hasNotified = this.$store.state.hasNotifiedPressAndHoldToDrag
@@ -1391,7 +1402,7 @@ export default {
       shouldCancelLocking = false
     },
     startLocking (event) {
-      if (this.card.isLocked) { return }
+      if (this.isLocked) { return }
       this.updateTouchPosition(event)
       this.updateCurrentTouchPosition(event)
       if (this.isSelected) {

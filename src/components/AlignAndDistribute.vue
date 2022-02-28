@@ -59,8 +59,9 @@ export default {
     multipleConnectionsSelectedIds () { return this.$store.state.multipleConnectionsSelectedIds },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     cards () {
-      const cards = this.multipleCardsSelectedIds.map(cardId => {
+      let cards = this.multipleCardsSelectedIds.map(cardId => {
         let card = this.$store.getters['currentCards/byId'](cardId)
+        if (!card) { return }
         card = utils.clone(card)
         const element = document.querySelector(`article [data-card-id="${cardId}"]`)
         const rect = element.getBoundingClientRect()
@@ -68,6 +69,7 @@ export default {
         card.height = rect.height
         return card
       })
+      cards = cards.filter(card => Boolean(card))
       return cards || []
     },
     editableCards () {

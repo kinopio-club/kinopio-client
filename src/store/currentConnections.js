@@ -168,12 +168,14 @@ export default {
         endCardId: connection.endCardId
       })
       if (isExistingPath) { return }
+      type = type || context.getters.typeForNewConnections
       connection.id = connection.id || nanoid()
       connection.spaceId = currentSpaceId
       connection.userId = context.rootState.currentUser.id
       connection.connectionTypeId = type.id
       context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
       context.dispatch('broadcast/update', { updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
+      context.dispatch('history/add', { connections: [connection] }, { root: true })
       context.commit('create', connection)
     },
     addType: (context, type) => {
@@ -197,6 +199,7 @@ export default {
     // update
 
     update: (context, connection) => {
+      context.dispatch('history/add', { connections: [connection] }, { root: true })
       context.commit('update', connection)
       context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       context.dispatch('broadcast/update', { updates: connection, type: 'updateConnectionTypeForConnection', handler: 'currentConnections/update' }, { root: true })
@@ -241,6 +244,7 @@ export default {
       context.dispatch('updatePaths', { connections, shouldUpdateApi })
     },
     updateType: (context, type) => {
+      context.dispatch('history/add', { connectionTypes: [type] }, { root: true })
       context.commit('updateType', type)
       context.dispatch('broadcast/update', { updates: type, type: 'updateConnectionType', handler: 'currentConnections/updateType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'updateConnectionType', body: type }, { root: true })
@@ -273,6 +277,7 @@ export default {
       context.dispatch('api/addToQueue', { name: 'removeConnection', body: connection }, { root: true })
       context.dispatch('broadcast/update', { updates: connection, type: 'removeConnection', handler: 'currentConnections/remove' }, { root: true })
       context.commit('remove', connection)
+      context.dispatch('history/add', { connections: [connection], isRemoved: true }, { root: true })
     },
     removeType: (context, type) => {
       context.dispatch('api/addToQueue', { name: 'removeConnectionType', body: type }, { root: true })
@@ -337,6 +342,13 @@ export default {
     },
     typeByConnection: (state, getters) => (connection) => {
       return getters.typeByTypeId(connection.connectionTypeId)
+    },
+    typeOrTypeForNewConnections: (state, getters) => (typeId) => {
+      if (getters.typeByTypeId(typeId)) {
+        return typeId
+      } else {
+        return getters.typeForNewConnections
+      }
     }
   }
 }

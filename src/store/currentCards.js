@@ -26,7 +26,7 @@ const currentCards = {
   namespaced: true,
   state: {
     ids: [],
-    cards: {},
+    cards: {}, // {id, {card}}
     removedCards: [], // denormalized
     cardMap: []
   },
@@ -256,6 +256,7 @@ const currentCards = {
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
       }, { root: true })
+      context.dispatch('history/add', { cards: [card] }, { root: true })
       context.commit('create', card)
       context.dispatch('updateCardMap')
     },
@@ -266,16 +267,17 @@ const currentCards = {
       // prevent null position
       const keys = Object.keys(card)
       if (keys.includes('x') || keys.includes('y')) {
-        if (!card.x) {
+        if (card.x === undefined || card.x === null) {
           delete card.x
         }
-        if (!card.y) {
+        if (card.y === undefined || card.y === null) {
           delete card.y
         }
       }
       context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
       context.commit('hasEditedCurrentSpace', true, { root: true })
+      context.dispatch('history/add', { cards: [card] }, { root: true })
       context.commit('update', card)
       if (card.name) {
         context.dispatch('updateDimensionsAndMap', card.id)
@@ -352,10 +354,8 @@ const currentCards = {
         nameUpdatedAt: new Date()
       })
     },
-    toggleCommentIsVisible: (context, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleCommentIsVisible' })
-      const card = context.getters.byId(cardId)
-      const value = !card.commentIsVisible
+    commentIsVisible: (context, { cardId, value }) => {
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'commentIsVisible' })
       context.dispatch('update', {
         id: cardId,
         commentIsVisible: value
@@ -418,6 +418,7 @@ const currentCards = {
         if (card.y === 0) { delta.y = Math.max(0, delta.y) }
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
       })
+      cards = cards.filter(card => Boolean(card))
       // prevent cards with null or negative positions
       cards = utils.clone(cards)
       cards = cards.map(card => {
@@ -426,12 +427,14 @@ const currentCards = {
           delete card.x
         } else {
           card.x = Math.max(0, card.x + delta.x)
+          card.x = Math.round(card.x)
         }
         // y
         if (card.y === undefined || card.y === null) {
           delete card.y
         } else {
           card.y = Math.max(0, card.y + delta.y)
+          card.y = Math.round(card.y)
         }
         return card
       })
@@ -458,13 +461,17 @@ const currentCards = {
       } else {
         cards = [currentDraggingCardId]
       }
-      cards = cards.map(id => context.getters.byId(id))
+      cards = cards.map(id => {
+        let card = context.getters.byId(id)
+        if (!card) { return }
+        const { x, y, z, commentIsVisible } = card
+        return { id, x, y, z, commentIsVisible }
+      })
       cards = cards.filter(card => card)
       cards.forEach(card => {
-        const { id, x, y, z } = card
         context.dispatch('api/addToQueue', {
           name: 'updateCard',
-          body: { id, x, y, z }
+          body: card
         }, { root: true })
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
       })
@@ -472,6 +479,8 @@ const currentCards = {
       context.commit('currentConnections/updatePaths', connections, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('checkIfShouldIncreasePageSize', { cardId: currentDraggingCardId })
+      context.dispatch('history/resume', null, { root: true })
+      context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
     },
     checkIfShouldIncreasePageSize: (context, { cardId }) => {
       const card = context.getters.byId(cardId)
@@ -515,6 +524,7 @@ const currentCards = {
     },
     incrementZ: (context, id) => {
       const card = context.getters.byId(id)
+      if (!card) { return }
       if (card.isLocked) { return }
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
       let cards = context.getters.all
@@ -537,6 +547,9 @@ const currentCards = {
       card = context.getters.byId(card.id)
       const cardHasContent = Boolean(card.name)
       if (cardHasContent) {
+        card = utils.clone(card)
+        card.isRemoved = true
+        context.dispatch('history/add', { cards: [card], isRemoved: true }, { root: true })
         context.commit('remove', card)
         context.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
       } else {
@@ -555,6 +568,7 @@ const currentCards = {
         context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
       }
       context.dispatch('updateCardMap')
+      context.commit('triggerUpdateCardOverlaps', null, { root: true })
     },
     deleteCard: (context, card) => {
       context.commit('deleteCard', card)

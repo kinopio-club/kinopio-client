@@ -226,7 +226,7 @@ export default {
       this.selectCard(card)
     },
     relativeDate (card) {
-      return utils.shortRelativeTime(card.updatedAt)
+      return utils.shortRelativeTime(card.nameUpdatedAt || card.updatedAt)
     },
     updateHeights () {
       if (!this.visible) {

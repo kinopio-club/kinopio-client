@@ -616,6 +616,7 @@ export default {
     },
     restoreSpaceComplete: (context, { space, isRemote, timeStart }) => {
       context.commit('isLoadingSpace', false, { root: true })
+      context.dispatch('history/reset', null, { root: true })
       const timeEnd = utils.normalizeToUnixTime(new Date())
       let emoji = '🌳'
       if (isRemote) {
@@ -632,7 +633,6 @@ export default {
       })
       context.dispatch('updateSpacePageSize')
       if (isRemote) {
-        context.dispatch('undoHistory/playback', null, { root: true })
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', space)
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', space)
       }
@@ -669,9 +669,9 @@ export default {
       context.commit('shouldPreventNextEnterKey', false, { root: true })
       // restore local space
       context.commit('restoreSpace', emptySpace)
+      context.dispatch('history/reset', null, { root: true })
       space = utils.normalizeSpace(cachedSpace)
       context.dispatch('restoreSpaceInChunks', { space })
-      context.commit('undoHistory/clear', null, { root: true })
       // merge with remote space items updated, added, removed
       if (isLocalSpaceOnly) { return }
       let remoteSpace = await context.dispatch('getRemoteSpace', space)

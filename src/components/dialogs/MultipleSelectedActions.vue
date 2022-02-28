@@ -81,6 +81,8 @@ import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsP
 import CardStyleActions from '@/components/dialogs/CardStyleActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 
+let prevCards
+
 export default {
   name: 'MultipleSelectedActions',
   components: {
@@ -128,6 +130,7 @@ export default {
         return this.$store.getters['currentCards/byId'](cardId)
       })
       cards = cards.filter(card => Boolean(card))
+      prevCards = cards
       return cards
     },
     editableCards () {
@@ -374,12 +377,14 @@ export default {
       }
     },
     toggleConnectCards (event) {
+      this.$store.dispatch('history/resume')
       if (this.cardsIsConnected) {
         this.disconnectCards()
       } else {
         this.connectCards(event)
       }
       this.checkIsCardsConnected()
+      this.$store.dispatch('history/pause')
     },
     connectCards (event) {
       const cardIds = this.multipleCardsSelectedIds
@@ -410,6 +415,7 @@ export default {
       this.$store.dispatch('currentConnections/removeUnusedTypes')
     },
     remove () {
+      this.$store.dispatch('history/resume')
       this.editableConnections.forEach(connection => this.$store.dispatch('currentConnections/remove', connection))
       this.editableCards.forEach(card => this.$store.dispatch('currentCards/remove', card))
       this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.remove')
@@ -436,6 +442,10 @@ export default {
           this.scrollIntoView()
           this.closeDialogs()
         })
+        this.$store.dispatch('history/snapshots')
+      } else {
+        this.$store.dispatch('history/resume')
+        this.$store.dispatch('history/add', { cards: prevCards, useSnapshot: true })
       }
     }
   }

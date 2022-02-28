@@ -89,7 +89,7 @@ export default {
     buttonLabel () {
       const actionLabel = this.capitalize(this.actionLabel) // copy, move
       const pluralCard = this.capitalize(this.pluralCard) // card, cards
-      return `${actionLabel} ${pluralCard}`
+      return `${actionLabel} ${pluralCard} to Space`
     }
   },
   methods: {
@@ -184,6 +184,9 @@ export default {
       this.notifySuccess()
       if (this.actionIsMove) {
         this.removeCards(items.cards)
+        items.isRemoved = true
+        this.$store.dispatch('history/resume')
+        this.$store.dispatch('history/add', items)
       } else {
         this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
           delta: items.cards.length,

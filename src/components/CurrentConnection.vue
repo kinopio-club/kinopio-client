@@ -116,7 +116,10 @@ export default {
         this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
       } else if (isCurrentConnectionConnected) {
         const card = this.$store.getters['currentCards/byId'](cardElement.dataset.cardId)
-        if (card.isLocked) { return }
+        if (card.isLocked) {
+          this.$store.commit('currentConnectionSuccess', {})
+          return
+        }
         this.$store.commit('currentConnectionSuccess', card)
         updates.endCardId = card.id
         this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
@@ -157,6 +160,7 @@ export default {
       }
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.currentConnectionPath = undefined
+      prevCursor = undefined
     }
   }
 }

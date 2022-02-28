@@ -214,7 +214,7 @@ import utils from '@/utils.js'
 import qs from '@aguezz/qs-parse'
 import { nanoid } from 'nanoid'
 
-let prevCardId
+let prevCardId, prevCardName
 let previousTags = []
 let compositionEventEndTime = 0
 
@@ -743,12 +743,17 @@ export default {
       })
       cardNames = cardNames.flat()
       cardNames = cardNames.filter(name => Boolean(name.length))
-      let newCards = cardNames.map(cardName => {
+      // create new split cards
+      let newCards = cardNames.map((cardName, index) => {
         const indentAmount = 50
         const indentLevel = utils.numberOfLeadingTabs(cardName) || utils.numberOfLeadingDoubleSpaces(cardName)
         const indentX = indentLevel * indentAmount
+        let id = nanoid()
+        if (index === 0) {
+          id = this.card.id
+        }
         return {
-          id: nanoid(),
+          id,
           name: cardName.trim(),
           x: this.card.x + indentX,
           y: this.card.y,
@@ -759,6 +764,9 @@ export default {
       if (isPreview) { return newCards }
       this.pastedName = ''
       this.updateCardName(newCards[0].name)
+      this.$store.dispatch('history/resume')
+      this.$store.dispatch('history/add', { cards: newCards, useSnapshot: true })
+      this.$store.dispatch('history/pause')
       newCards.shift()
       this.addSplitCards(newCards)
     },
@@ -774,12 +782,13 @@ export default {
           prevCard = card
           return card
         })
-        newCards.forEach(card => {
+        newCards = newCards.map(card => {
           card = utils.updateCardDimensions(card)
           this.$store.dispatch('currentCards/update', {
             id: card.id,
             y: card.y
           })
+          return card
         })
         this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
           delta: newCards.length,
@@ -936,6 +945,7 @@ export default {
     },
     removeCard () {
       if (!this.canEditCard) { return }
+      this.$store.dispatch('history/resume')
       this.$store.dispatch('currentCards/remove', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
       this.triggerUpdatePositionInVisualViewport()
@@ -1450,6 +1460,8 @@ export default {
       this.updateMediaUrls()
       const connections = this.$store.getters['currentConnections/byCardId'](cardId)
       this.$store.commit('updateCurrentCardConnections', connections)
+      prevCardName = this.card.name
+      this.$store.dispatch('history/pause')
     },
     closeCard () {
       const cardId = prevCardId
@@ -1473,6 +1485,10 @@ export default {
         this.updateCardMap(cardId)
         this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
       })
+      this.$store.dispatch('history/resume')
+      if (card.name || prevCardName) {
+        this.$store.dispatch('history/add', { cards: [card], useSnapshot: true })
+      }
     }
   },
   watch: {

@@ -19,6 +19,10 @@ dialog.narrow.mobile-tips(v-if="visible" :open="visible" @click.stop="closeDialo
       img.icon(src="@/assets/press-and-hold.svg")
       span Drag selected cards
     video(autoplay loop muted playsinline src="https://kinopio-updates.us-east-1.linodeobjects.com/mobile-drag-painted.mp4" height="83")
+    p
+      img.icon(src="@/assets/undo.svg")
+      span Two finger double tap to undo, or with three fingers to redo
+    //- video TODO
   section(
     v-if="isNotApp"
     @mouseup.stop
