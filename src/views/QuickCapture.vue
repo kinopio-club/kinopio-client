@@ -18,6 +18,9 @@ main
           img.icon(src="@/assets/add.svg")
           span Add Card
           //- Loader(:visible=loading.addingCard), , disable
+      .row
+        .badge.success Card Added
+        //- .badge.danger Something Went Wrong (use generic, connection error)
 
 //- TODO use background/tint from current selected space (or blank)
 
