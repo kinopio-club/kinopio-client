@@ -21,7 +21,7 @@ dialog.narrow.mobile-tips(v-if="visible" :open="visible" @click.stop="closeDialo
     video(autoplay loop muted playsinline src="https://kinopio-updates.us-east-1.linodeobjects.com/mobile-drag-painted.mp4" height="83")
     p
       img.icon(src="@/assets/undo.svg")
-      span Two finger double tap to undo, or with three fingers to redo
+      span Two finger tap to undo, three finger tap to redo
     //- video TODO
   section(
     v-if="isNotApp"
