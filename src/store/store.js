@@ -44,7 +44,7 @@ const store = createStore({
     userHasScrolled: false,
     shouldPreventNextEnterKey: false,
     isEmbed: false,
-    isInbox: false,
+    isQuickCapture: false,
 
     // search
     searchIsVisible: false,
@@ -308,9 +308,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'isEmbed' })
       state.isEmbed = value
     },
-    isInbox: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isInbox' })
-      state.isInbox = value
+    isQuickCapture: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'isQuickCapture' })
+      state.isQuickCapture = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })

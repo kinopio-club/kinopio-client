@@ -7,11 +7,11 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/inbox',
-      name: 'inbox',
-      component: () => import('./views/Inbox.vue'),
+      path: '/quick-capture',
+      name: 'quick-capture',
+      component: () => import('./views/QuickCapture.vue'),
       beforeEnter: (to, from, next) => {
-        store.commit('isInbox', true)
+        store.commit('isQuickCapture', true)
         next()
       }
     }, {

@@ -1,6 +1,26 @@
 <template lang="pug">
-main.inbox
-  p yoloy
+main
+  dialog.card-details(data-name="quick-capture")
+    section
+      .textarea-wrap
+        textarea.name(
+          ref="name"
+          rows="1"
+          placeholder="Type text here, or paste a URL"
+        )
+      .row
+        button
+          span last space
+          img.down-arrow(src="@/assets/down-arrow.svg")
+          //- Loader(:visible=loading.spaces), disable
+      .row
+        button
+          img.icon(src="@/assets/add.svg")
+          span Add Card
+          //- Loader(:visible=loading.addingCard), , disable
+
+//- TODO use background/tint from current selected space (or blank)
+
 </template>
 
 <script>
@@ -19,12 +39,21 @@ export default {
   },
   created () {
     console.log('currentUserIsSignedIn', this.currentUserIsSignedIn)
+
+    // TODO split out cardDetailsName textarea component
+    // handle autofocus on input field
+
     // to initSpaces method =>
     // loading.spaces = true
     // get user spaces?
     // figure out current space
     // loading.spaces false
     // handles anon and remote (w currentUserIsSignedIn)
+
+    // update this.selectedSpace = last space?
+    // update background
+
+    // get/support tags? /
   },
   mounted () {
     window.addEventListener('mouseup', this.stopInteractions)
@@ -45,15 +74,39 @@ export default {
         spaces: false,
         addingCard: false
       },
-      spaces: []
+      spaces: [],
+      selectedSpace: {}
     }
   },
   computed: {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
+    // focusName (position) {
+    //   const element = this.$refs.name
+    //   const length = this.name.length
+    //   if (!element) { return }
+    //   element.focus()
+    //   if (position) {
+    //     element.setSelectionRange(position, position)
+    //   }
+    //   if (length) {
+    //     element.setSelectionRange(length, length)
+    //   }
+    //   this.triggerUpdatePositionInVisualViewport()
+    // },
+
     stopInteractions (event) {
-      if (event.target.closest('dialog')) { return }
+      let shouldIgnore
+      const dialog = event.target.closest('dialog')
+      if (!dialog) {
+        shouldIgnore = false
+      } else if (dialog && dialog.dataset.name === 'quick-capture') {
+        shouldIgnore = false
+      } else {
+        shouldIgnore = true
+      }
+      if (shouldIgnore) { return }
       console.log('💣 stopInteractions')
       this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
     }
@@ -62,25 +115,8 @@ export default {
 </script>
 
 <style lang="stylus">
-// .inbox
-//   width 100%
-//   height 100vh
-//   pointer-events none // so that painting can receive events
-//   position relative // used by svg connections
-//   transform-origin top left
-//   .card-overlap-indicator
-//     position absolute
-//     z-index calc(var(--max-z) - 70)
-//     pointer-events all
-//     cursor pointer
-//     span
-//       line-height 1.5
-
-// .is-interacting
-//   pointer-events all
-// .is-not-interacting
-//   *
-//     pointer-events none !important
-//     cursor default
-
+main
+  dialog
+    top 60px
+    left 25px
 </style>

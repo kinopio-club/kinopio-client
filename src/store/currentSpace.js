@@ -151,7 +151,7 @@ export default {
       let isRemote
       // restore from url
       if (spaceUrl) {
-        if (spaceUrl === 'inbox') { return }
+        if (spaceUrl === 'quick-capture') { return }
         console.log('🚃 Restore space from url', spaceUrl)
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
@@ -653,6 +653,7 @@ export default {
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
       context.commit('isLoadingSpace', true, { root: true })
+      context.commit('isQuickCapture', false, { root: true })
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id) || space
       const user = context.rootState.currentUser

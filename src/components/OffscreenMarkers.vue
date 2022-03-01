@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.offscreen-markers(:style="styles")
+aside.offscreen-markers(:style="styles" v-if="!isQuickCapture")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
@@ -68,6 +68,7 @@ export default {
       }
       return styles
     },
+    isQuickCapture () { return this.$store.state.isQuickCapture },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     hasDirectionTopLeft () { return this.hasDirection('topleft') },
     hasDirectionTopRight () { return this.hasDirection('topright') },

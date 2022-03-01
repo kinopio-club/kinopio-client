@@ -26,7 +26,11 @@ header(:style="visualViewportPosition")
             img.down-arrow(src="@/assets/down-arrow.svg")
           About(:visible="aboutIsVisible")
           KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-      .space-meta-rows(v-if="!isInbox")
+      .space-meta-rows(v-if="isQuickCapture")
+        p
+          span.badge.info Quick Capture
+
+      .space-meta-rows(v-if="!isQuickCapture")
         .space-details-row.segmented-buttons
           //- Current Space
           .button-wrap
@@ -96,7 +100,7 @@ header(:style="visualViewportPosition")
       .controls(v-if="!isEmbed")
         .top-controls
           //- Share
-          .button-wrap(v-if="!isInbox")
+          .button-wrap(v-if="!isQuickCapture")
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
               span Share
             Share(:visible="shareIsVisible")
@@ -239,7 +243,7 @@ export default {
   },
   computed: {
     isEmbed () { return this.$store.state.isEmbed },
-    isInbox () { return this.$store.state.isInbox },
+    isQuickCapture () { return this.$store.state.isQuickCapture },
     currentSpaceUrl () { return this.$store.getters['currentSpace/url'] },
     shouldShowNewStuffIsUpdated () {
       const newStuffIsUpdated = this.$store.state.newStuffIsUpdated
