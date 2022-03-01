@@ -44,6 +44,7 @@ const store = createStore({
     userHasScrolled: false,
     shouldPreventNextEnterKey: false,
     isEmbed: false,
+    isInbox: false,
 
     // search
     searchIsVisible: false,
@@ -306,6 +307,10 @@ const store = createStore({
     isEmbed: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isEmbed' })
       state.isEmbed = value
+    },
+    isInbox: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'isInbox' })
+      state.isInbox = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })

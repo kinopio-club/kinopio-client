@@ -16,6 +16,7 @@ header(:style="visualViewportPosition")
 
   nav(v-if="!isEmbed")
     .left
+      //- About
       .logo-about
         .button-wrap
           .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active : aboutIsVisible}" tabindex="0")
@@ -25,9 +26,9 @@ header(:style="visualViewportPosition")
             img.down-arrow(src="@/assets/down-arrow.svg")
           About(:visible="aboutIsVisible")
           KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-      .space-meta-rows
+      .space-meta-rows(v-if="!isInbox")
         .space-details-row.segmented-buttons
-          //- Space
+          //- Current Space
           .button-wrap
             button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
               .badge.info(v-show="currentSpaceIsTemplate")
@@ -93,9 +94,9 @@ header(:style="visualViewportPosition")
           User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
 
       .controls(v-if="!isEmbed")
-        //- Share
         .top-controls
-          .button-wrap
+          //- Share
+          .button-wrap(v-if="!isInbox")
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
               span Share
             Share(:visible="shareIsVisible")
@@ -238,6 +239,7 @@ export default {
   },
   computed: {
     isEmbed () { return this.$store.state.isEmbed },
+    isInbox () { return this.$store.state.isInbox },
     currentSpaceUrl () { return this.$store.getters['currentSpace/url'] },
     shouldShowNewStuffIsUpdated () {
       const newStuffIsUpdated = this.$store.state.newStuffIsUpdated
