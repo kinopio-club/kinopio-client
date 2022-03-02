@@ -299,7 +299,7 @@ export default {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       const parentCardId = this.$store.state.parentCardId
-      const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
+      let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
       const childCardId = this.$store.state.childCardId
       let childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
       const childCardData = this.$store.getters['currentCards/byId'](childCardId)
@@ -327,7 +327,8 @@ export default {
       }
       initialPosition = this.updateWithZoom(initialPosition)
       const position = this.nonOverlappingCardPosition(initialPosition)
-      this.$store.dispatch('currentCards/add', { position, isParentCard })
+      parentCard = this.$store.getters['currentCards/byId'](parentCardId)
+      this.$store.dispatch('currentCards/add', { position, isParentCard, backgroundColor: parentCard.backgroundColor })
       if (childCard) {
         this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
         this.$nextTick(() => {
@@ -340,7 +341,7 @@ export default {
       useSiblingConnectionType = false
       const parentCardId = this.$store.state.parentCardId
       const childCardId = this.$store.state.childCardId
-      const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
+      let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
       const childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
       let baseCard, baseCardId
       if (childCard) {
@@ -359,7 +360,8 @@ export default {
       }
       initialPosition = this.updateWithZoom(initialPosition)
       const position = this.nonOverlappingCardPosition(initialPosition)
-      this.$store.dispatch('currentCards/add', { position })
+      parentCard = this.$store.getters['currentCards/byId'](parentCardId)
+      this.$store.dispatch('currentCards/add', { position, backgroundColor: parentCard.backgroundColor })
       this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
       this.$nextTick(() => {
         this.addConnection(baseCardId)
