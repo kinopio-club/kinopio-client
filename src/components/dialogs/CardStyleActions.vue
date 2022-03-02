@@ -24,7 +24,14 @@ dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.lef
       .button-wrap(@click.left.stop="toggleColorPickerIsVisible")
         button.change-color(:disabled="!canEditSome" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{ background: cardsBackgroundColor }")
-        ColorPicker(:currentCollock.svor="cardsBackgroundColor" :visible="colorPickerIsVisible" :removeIsVisible="true" :otherColors="spaceCardBackgroundColors" @selectedColor="updateCardsBackgroundColor" @removeColor="removeCardsBackgroundColor")
+        ColorPicker(
+          :currentColor="cardsBackgroundColor"
+          :visible="colorPickerIsVisible"
+          :removeIsVisible="true"
+          :otherColors="spaceCardBackgroundColors"
+          @selectedColor="updateCardsBackgroundColor"
+          @removeColor="removeCardsBackgroundColor"
+        )
     .row
       //- Lock
       .button-wrap
