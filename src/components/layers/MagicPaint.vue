@@ -113,6 +113,7 @@ export default {
     window.addEventListener('scroll', this.updateCirclesWithScroll)
     window.addEventListener('scroll', this.updatePositionOffsetByPinchZoom)
     window.addEventListener('scroll', this.cancelLocking)
+    window.addEventListener('load', this.clearCircles)
   },
   beforeUnmount () {
     window.removeEventListener('mouseup', this.stopPainting)
@@ -120,6 +121,7 @@ export default {
     window.removeEventListener('scroll', this.updateCirclesWithScroll)
     window.removeEventListener('scroll', this.updatePositionOffsetByPinchZoom)
     window.removeEventListener('scroll', this.cancelLocking)
+    window.removeEventListener('load', this.clearCircles)
   },
   data () {
     return {
@@ -143,6 +145,11 @@ export default {
     isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting }
   },
   methods: {
+    clearCircles () {
+      initialCircles = []
+      paintingCircles = []
+      remotePaintingCircles = []
+    },
     dialogIsVisible () {
       let dialogs = document.querySelectorAll('dialog')
       const dialogIsVisible = Boolean(dialogs.length)
