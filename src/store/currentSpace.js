@@ -950,6 +950,8 @@ export default {
         element.style.backgroundSize = 'initial'
         return
       }
+      width = Math.round(width)
+      height = Math.round(height)
       element.style.backgroundSize = `${width}px ${height}px`
     },
 
