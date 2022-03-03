@@ -13,7 +13,7 @@ let useSiblingConnectionType
 let browserZoomLevel = 0
 let disableContextMenu = false
 
-let prevCursorPosition
+let prevCursorPosition, currentCursorPosition
 
 export default {
   name: 'KeyboardShortcutsHandler',
@@ -188,6 +188,10 @@ export default {
         if (!this.$store.state.currentUserIsPanningReady) {
           this.$store.commit('currentUserIsPanningReady', true)
         }
+      // Lock Cards
+      } else if (event.shiftKey && isMeta && key === 'l') {
+        event.preventDefault()
+        this.toggleLockCards()
       }
     },
     // on mouse wheel
@@ -237,6 +241,7 @@ export default {
     handleMouseMoveEvents (event) {
       const speed = 2
       const position = utils.cursorPositionInPage(event)
+      currentCursorPosition = position
       if (this.$store.state.currentUserIsBoxSelecting) {
         this.$store.commit('currentUserBoxSelectEnd', position)
       } else if (this.$store.state.currentUserIsPanning) {
@@ -299,7 +304,7 @@ export default {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       const parentCardId = this.$store.state.parentCardId
-      const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
+      let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
       const childCardId = this.$store.state.childCardId
       let childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
       const childCardData = this.$store.getters['currentCards/byId'](childCardId)
@@ -327,7 +332,8 @@ export default {
       }
       initialPosition = this.updateWithZoom(initialPosition)
       const position = this.nonOverlappingCardPosition(initialPosition)
-      this.$store.dispatch('currentCards/add', { position, isParentCard })
+      parentCard = this.$store.getters['currentCards/byId'](parentCardId)
+      this.$store.dispatch('currentCards/add', { position, isParentCard, backgroundColor: parentCard.backgroundColor })
       if (childCard) {
         this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
         this.$nextTick(() => {
@@ -340,7 +346,7 @@ export default {
       useSiblingConnectionType = false
       const parentCardId = this.$store.state.parentCardId
       const childCardId = this.$store.state.childCardId
-      const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
+      let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
       const childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
       let baseCard, baseCardId
       if (childCard) {
@@ -359,7 +365,8 @@ export default {
       }
       initialPosition = this.updateWithZoom(initialPosition)
       const position = this.nonOverlappingCardPosition(initialPosition)
-      this.$store.dispatch('currentCards/add', { position })
+      parentCard = this.$store.getters['currentCards/byId'](parentCardId)
+      this.$store.dispatch('currentCards/add', { position, backgroundColor: parentCard.backgroundColor })
       this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
       this.$nextTick(() => {
         this.addConnection(baseCardId)
@@ -690,6 +697,30 @@ export default {
           })
         })
       })
+    },
+
+    // Lock Cards
+
+    toggleLockCards () {
+      const multipleCardIds = this.$store.state.multipleCardsSelectedIds
+      const cardId = this.$store.state.cardDetailsIsVisibleForCardId
+      let cards
+      if (multipleCardIds.length) {
+        cards = multipleCardIds.map(id => this.$store.getters['currentCards/byId'](id))
+      } else if (cardId) {
+        cards = [this.$store.getters['currentCards/byId'](cardId)]
+      } else {
+        cards = this.$store.getters['currentCards/all']
+        cards = cards.filter(card => utils.isPointInsideCard(currentCursorPosition, card))
+      }
+      cards = cards.filter(card => Boolean(card))
+      if (!cards) { return }
+      const lockedCards = cards.filter(card => card.isLocked)
+      const shouldLock = cards.length !== lockedCards.length
+      cards.forEach(card => {
+        this.$store.dispatch('currentCards/update', { id: card.id, isLocked: shouldLock })
+      })
+      this.$store.dispatch('currentCards/updateCardMap')
     }
 
   }

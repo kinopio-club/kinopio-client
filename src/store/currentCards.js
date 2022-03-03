@@ -179,7 +179,7 @@ const currentCards = {
 
     // create
 
-    add: (context, { position, isParentCard, name, id }) => {
+    add: (context, { position, isParentCard, name, id, backgroundColor }) => {
       utils.typeCheck({ value: position, type: 'object', origin: 'addCard' })
       if (context.rootGetters['currentSpace/shouldPreventAddCard']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
@@ -200,7 +200,8 @@ const currentCards = {
         commentIsVisible: true,
         width: utils.emptyCard().width,
         height: utils.emptyCard().height,
-        isLocked: false
+        isLocked: false,
+        backgroundColor
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       card.spaceId = currentSpaceId

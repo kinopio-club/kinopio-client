@@ -556,6 +556,19 @@ export default {
     })
     return cardElement
   },
+  isPointInsideCard (point, card) {
+    const xIsInside = this.isBetween({
+      value: point.x,
+      min: card.x,
+      max: card.x + card.width
+    })
+    const yIsInside = this.isBetween({
+      value: point.y,
+      min: card.y,
+      max: card.y + card.height
+    })
+    return xIsInside && yIsInside
+  },
 
   // Connection Path Utils 🐙
 
@@ -1467,7 +1480,7 @@ export default {
     return {
       // https://regexr.com/5jmf1
       // matches [text](url)
-      linkPattern: /\[([^[]+)\]\(([^\n]+)\)/gmi,
+      linkPattern: /\[([^[]+)\]\(([^\n ]+)\)/gmi,
       // https://regexr.com/5jmeu
       // matches **text**
       boldPattern: /(\*\*)(.*?)\1/gmi,

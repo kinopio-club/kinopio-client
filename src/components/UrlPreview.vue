@@ -61,11 +61,25 @@ export default {
       title = title.replace('on Twitter', '')
       return title
     },
+    isTwitterUrl () {
+      return this.card.urlPreviewUrl.includes('https://twitter.com')
+    },
+    twitterDescription () {
+      if (!this.isTwitterUrl) { return }
+      const image = this.card.urlPreviewImage
+      let description = this.card.urlPreviewDescription
+      if (image || this.isImageCard) {
+        return utils.truncated(description)
+      } else {
+        return description
+      }
+    },
     description () {
       let description = this.card.urlPreviewDescription
       const image = this.card.urlPreviewImage
       const cardIsShort = this.card.height < 200
       const isCardView = !this.parentIsCardDetails
+      if (this.twitterDescription) { return this.twitterDescription }
       if (isCardView) {
         description = utils.truncated(description)
       }

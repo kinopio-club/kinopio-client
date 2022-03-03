@@ -14,6 +14,8 @@ aside.offscreen-markers(:style="styles" v-if="!isQuickCapture")
 <script>
 import utils from '@/utils.js'
 
+import debounce from 'lodash-es/debounce'
+
 const offscreenMarkers = new Worker('/web-workers/offscreen-markers.js')
 
 const maxIterations = 30
@@ -125,7 +127,10 @@ export default {
     hasDirection (direction) {
       return Boolean(this.offscreenCardsByDirection[direction].length)
     },
-    updateOffscreenMarkers () {
+    updateOffscreenMarkers: debounce(function () {
+      this.debouncedUpdateOffscreenMarkers()
+    }, 350),
+    debouncedUpdateOffscreenMarkers () {
       let cards = this.$store.getters['currentCards/all']
       cards = utils.clone(cards)
       const viewport = utils.visualViewport()
