@@ -720,6 +720,7 @@ export default {
       cards.forEach(card => {
         this.$store.dispatch('currentCards/update', { id: card.id, isLocked: shouldLock })
       })
+      this.$store.dispatch('currentCards/updateCardMap')
     }
 
   }
