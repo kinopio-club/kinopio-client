@@ -556,6 +556,19 @@ export default {
     })
     return cardElement
   },
+  isPointInsideCard (point, card) {
+    const xIsInside = this.isBetween({
+      value: point.x,
+      min: card.x,
+      max: card.x + card.width
+    })
+    const yIsInside = this.isBetween({
+      value: point.y,
+      min: card.y,
+      max: card.y + card.height
+    })
+    return xIsInside && yIsInside
+  },
 
   // Connection Path Utils 🐙
 

@@ -13,7 +13,7 @@ let useSiblingConnectionType
 let browserZoomLevel = 0
 let disableContextMenu = false
 
-let prevCursorPosition
+let prevCursorPosition, currentCursorPosition
 
 export default {
   name: 'KeyboardShortcutsHandler',
@@ -188,6 +188,10 @@ export default {
         if (!this.$store.state.currentUserIsPanningReady) {
           this.$store.commit('currentUserIsPanningReady', true)
         }
+      // Lock Cards
+      } else if (event.shiftKey && isMeta && key === 'l') {
+        event.preventDefault()
+        this.toggleLockCards()
       }
     },
     // on mouse wheel
@@ -237,6 +241,7 @@ export default {
     handleMouseMoveEvents (event) {
       const speed = 2
       const position = utils.cursorPositionInPage(event)
+      currentCursorPosition = position
       if (this.$store.state.currentUserIsBoxSelecting) {
         this.$store.commit('currentUserBoxSelectEnd', position)
       } else if (this.$store.state.currentUserIsPanning) {
@@ -691,6 +696,29 @@ export default {
             this.$store.commit('triggerFocusResultsFilter')
           })
         })
+      })
+    },
+
+    // Lock Cards
+
+    toggleLockCards () {
+      const multipleCardIds = this.$store.state.multipleCardsSelectedIds
+      const cardId = this.$store.state.cardDetailsIsVisibleForCardId
+      let cards
+      if (multipleCardIds.length) {
+        cards = multipleCardIds.map(id => this.$store.getters['currentCards/byId'](id))
+      } else if (cardId) {
+        cards = [this.$store.getters['currentCards/byId'](cardId)]
+      } else {
+        cards = this.$store.getters['currentCards/all']
+        cards = cards.filter(card => utils.isPointInsideCard(currentCursorPosition, card))
+      }
+      cards = cards.filter(card => Boolean(card))
+      if (!cards) { return }
+      const lockedCards = cards.filter(card => card.isLocked)
+      const shouldLock = cards.length !== lockedCards.length
+      cards.forEach(card => {
+        this.$store.dispatch('currentCards/update', { id: card.id, isLocked: shouldLock })
       })
     }
 
