@@ -3,8 +3,8 @@ main.space(
   :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
   @mousedown.left="initInteractions"
   @touchstart="initInteractions"
-  @gesturestart="updateVisualViewport"
-  @gesturechange="updateVisualViewport"
+  @touchmove="updatePositions"
+  @touchend="updatePositions"
   :style="styles"
 )
   svg.connections
@@ -203,7 +203,8 @@ export default {
       }
       return { x, y }
     },
-    updateVisualViewport () {
+    updatePositions (event) {
+      if (!utils.isMultiTouch(event)) { return }
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     correctCardConnectionPaths () {
@@ -245,6 +246,7 @@ export default {
       event.target.blur()
     },
     initInteractions (event) {
+      this.updatePositions(event)
       if (this.eventIsFromTextarea(event)) {
         shouldCancel = true
       } else {
