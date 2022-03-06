@@ -3,8 +3,6 @@ main.space(
   :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
   @mousedown.left="initInteractions"
   @touchstart="initInteractions"
-  @touchmove="updatePositions"
-  @touchend="updatePositions"
   :style="styles"
 )
   svg.connections
@@ -203,10 +201,6 @@ export default {
       }
       return { x, y }
     },
-    updatePositions (event) {
-      if (!utils.isMultiTouch(event)) { return }
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
-    },
     correctCardConnectionPaths () {
       const space = utils.clone(this.$store.state.currentSpace)
       const user = utils.clone(this.$store.state.currentUser)
@@ -246,7 +240,6 @@ export default {
       event.target.blur()
     },
     initInteractions (event) {
-      this.updatePositions(event)
       if (this.eventIsFromTextarea(event)) {
         shouldCancel = true
       } else {

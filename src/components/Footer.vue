@@ -1,5 +1,5 @@
 <template lang="pug">
-.footer-wrap(:style="visualViewportPosition")
+.footer-wrap(:style="position" :class="{'fade-out': shouldFadeOut}")
   .left(v-if="!isEmbed")
     footer
       Notifications
@@ -67,9 +67,11 @@ import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
-const maxIterations = 30
-let currentIteration, updatePositionTimer
 let updateFavoritesIntervalTimer, updateLiveSpacesIntervalTimer
+
+const fadeOutDuration = 10
+const updatePositionDuration = 60
+let fadeOutIteration, fadeOutTimer, updatePositionIteration, updatePositionTimer
 
 export default {
   name: 'Footer',
@@ -94,9 +96,10 @@ export default {
       exploreIsVisible: false,
       liveIsVisible: false,
       mobileTipsIsVisible: false,
-      visualViewportPosition: {},
+      position: {},
       liveSpaces: [],
-      isLoadingLiveSpaces: true
+      isLoadingLiveSpaces: true,
+      shouldFadeOut: false
     }
   },
   mounted () {
@@ -104,18 +107,18 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.closeDialogs()
       } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
-        currentIteration = 0
-        if (updatePositionTimer) { return }
-        updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+        this.updatePosition()
       } else if (mutation.type === 'unpinOtherDialogs') {
         this.$nextTick(() => {
           this.closeDialogs(mutation.payload)
         })
       }
     })
-    this.updatePositionInVisualViewport()
-    window.addEventListener('scroll', this.updatePositionInVisualViewport)
+    window.addEventListener('scroll', this.handleTouchInteractions)
+    window.addEventListener('gesturestart', this.handleTouchInteractions)
+    window.addEventListener('gesturechange', this.handleTouchInteractions)
     window.addEventListener('online', this.updateLiveSpaces)
+    this.updatePosition()
     this.updateFavorites()
     this.updateLiveSpaces()
     updateFavoritesIntervalTimer = setInterval(() => {
@@ -126,7 +129,9 @@ export default {
     }, 1000 * 60 * 5) // 5 minutes
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.updatePositionInVisualViewport)
+    window.removeEventListener('scroll', this.handleTouchInteractions)
+    window.removeEventListener('gesturestart', this.handleTouchInteractions)
+    window.removeEventListener('gesturechange', this.handleTouchInteractions)
     window.removeEventListener('online', this.updateLiveSpaces)
     clearInterval(updateFavoritesIntervalTimer)
     clearInterval(updateLiveSpacesIntervalTimer)
@@ -201,52 +206,6 @@ export default {
       if (!this.linksDialogIsPinned && exclude !== 'links') {
         this.linksIsVisible = false
       }
-    },
-    updatePositionFrame () {
-      currentIteration++
-      this.updatePositionInVisualViewport()
-      if (currentIteration < maxIterations) {
-        window.requestAnimationFrame(this.updatePositionFrame)
-      } else {
-        window.cancelAnimationFrame(updatePositionTimer)
-        updatePositionTimer = undefined
-      }
-    },
-    footerMarginBottom () {
-      if (this.isMobileOrTouch) {
-        return 20
-      } else {
-        return 0
-      }
-    },
-    updatePositionInVisualViewport () {
-      const viewport = utils.visualViewport()
-      const layoutViewport = document.getElementById('layout-viewport')
-      const pinchZoomScale = viewport.scale
-      const marginBottom = this.footerMarginBottom()
-      const pinchZoomOffsetLeft = viewport.offsetLeft
-      const pinchZoomOffsetTop = viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height
-      let style
-      if (pinchZoomScale === 1) {
-        style = {
-          'margin-bottom': marginBottom + 'px'
-        }
-      } else if (pinchZoomScale > 1) {
-        style = {
-          transform: `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`,
-          'transform-origin': 'left bottom',
-          'margin-bottom': marginBottom / pinchZoomScale + 'px'
-        }
-      } else {
-        style = {
-          transform: `translate(${pinchZoomOffsetLeft}px, 0px)`,
-          zoom: 1 / pinchZoomScale,
-          'transform-origin': 'left bottom',
-          'margin-bottom': marginBottom + 'px',
-          'margin-left': `-${pinchZoomOffsetLeft}px`
-        }
-      }
-      this.visualViewportPosition = style
     },
     toggleIsFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
@@ -330,6 +289,80 @@ export default {
         }
       })
       return normalizedSpaces
+    },
+
+    // fade out
+
+    handleTouchInteractions (event) {
+      if (!this.$store.state.isTouchDevice) { return }
+      this.fadeOut()
+      this.updatePosition()
+    },
+    fadeOut () {
+      fadeOutIteration = 0
+      if (fadeOutTimer) { return }
+      fadeOutTimer = window.requestAnimationFrame(this.fadeOutFrame)
+    },
+    cancelFadeOut () {
+      window.cancelAnimationFrame(fadeOutTimer)
+      fadeOutTimer = undefined
+      this.shouldFadeOut = false
+      this.cancelUpdatePosition()
+      this.updatePosition()
+    },
+    fadeOutFrame () {
+      fadeOutIteration++
+      this.shouldFadeOut = true
+      if (fadeOutIteration < fadeOutDuration) {
+        window.requestAnimationFrame(this.fadeOutFrame)
+      } else {
+        this.cancelFadeOut()
+      }
+    },
+
+    // update position
+
+    updatePosition () {
+      if (!this.$store.state.isTouchDevice) { return }
+      updatePositionIteration = 0
+      if (updatePositionTimer) { return }
+      updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+    },
+    cancelUpdatePosition () {
+      window.cancelAnimationFrame(updatePositionTimer)
+      updatePositionTimer = undefined
+    },
+    updatePositionFrame () {
+      updatePositionIteration++
+      this.updatePositionInVisualViewport()
+      if (updatePositionIteration < updatePositionDuration) {
+        window.requestAnimationFrame(this.updatePositionFrame)
+      } else {
+        this.cancelUpdatePosition()
+      }
+    },
+    updatePositionInVisualViewport () {
+      const viewport = utils.visualViewport()
+      const layoutViewport = document.getElementById('layout-viewport')
+      const scale = utils.roundFloat(viewport.scale)
+      const counterScale = utils.roundFloat(1 / viewport.scale)
+      const left = Math.round(viewport.offsetLeft)
+      const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height)
+      let style
+      if (scale > 1) {
+        style = {
+          transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
+          'transform-origin': 'left bottom'
+        }
+      } else {
+        style = {
+          transform: `translate(${left}px, 0px)`,
+          zoom: counterScale,
+          'transform-origin': 'left bottom',
+          'margin-left': `-${left}px`
+        }
+      }
+      this.position = style
     }
   }
 }
@@ -348,6 +381,9 @@ export default {
   right 8px
   max-width 100%
   pointer-events none
+  transition 0.2s opacity
+  &.fade-out
+    opacity 0
   .right
     pointer-events all
     @media(max-width 460px)

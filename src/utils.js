@@ -234,6 +234,11 @@ export default {
     const doubleSpaces = match[0].length / 2
     return doubleSpaces
   },
+  roundFloat (number) {
+    // https://stackoverflow.com/a/9453447
+    // returns 1.23
+    return Math.round(number * 100) / 100
+  },
   arrayExists (array) {
     this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayExists' })
     if (!array) {

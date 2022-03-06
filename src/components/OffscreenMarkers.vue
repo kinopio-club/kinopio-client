@@ -18,18 +18,19 @@ import debounce from 'lodash-es/debounce'
 
 const offscreenMarkers = new Worker('/web-workers/offscreen-markers.js')
 
-const maxIterations = 30
-let currentIteration, updatePositionTimer
+const updatePositionDuration = 10
+let updatePositionIteration, updatePositionTimer
 
 export default {
   name: 'OffscreenMarkers',
   mounted () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
-        currentIteration = 0
-        if (updatePositionTimer) { return }
-        updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+        this.updateOffscreenMarkers()
       }
+      window.addEventListener('scroll', this.handleTouchInteractions)
+      window.addEventListener('gesturestart', this.handleTouchInteractions)
+      window.addEventListener('gesturechange', this.handleTouchInteractions)
       if (mutation.type === 'isLoadingSpace') {
         this.updateOffscreenMarkers()
       }
@@ -113,22 +114,40 @@ export default {
     }
   },
   methods: {
-    updatePositionFrame () {
-      currentIteration++
-      this.updateOffscreenMarkers()
-      if (currentIteration < maxIterations) {
-        window.requestAnimationFrame(this.updatePositionFrame)
-      } else {
-        window.cancelAnimationFrame(updatePositionTimer)
-        updatePositionTimer = undefined
-      }
-    },
     hasDirection (direction) {
       return Boolean(this.offscreenCardsByDirection[direction].length)
     },
+
+    // fade out
+
+    handleTouchInteractions (event) {
+      if (!this.$store.state.isTouchDevice) { return }
+      this.updatePosition()
+    },
+
+    // update position
+
+    updatePosition () {
+      updatePositionIteration = 0
+      if (updatePositionTimer) { return }
+      updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+    },
+    cancelUpdatePosition () {
+      window.cancelAnimationFrame(updatePositionTimer)
+      updatePositionTimer = undefined
+    },
+    updatePositionFrame () {
+      updatePositionIteration++
+      this.updateOffscreenMarkers()
+      if (updatePositionIteration < updatePositionDuration) {
+        window.requestAnimationFrame(this.updatePositionFrame)
+      } else {
+        this.cancelUpdatePosition()
+      }
+    },
     updateOffscreenMarkers: debounce(function () {
       this.debouncedUpdateOffscreenMarkers()
-    }, 350),
+    }, 20),
     debouncedUpdateOffscreenMarkers () {
       let cards = this.$store.getters['currentCards/all']
       cards = utils.clone(cards)
@@ -159,6 +178,7 @@ edge = 4px
   pointer-events none
   z-index 1
   opacity 0.5
+  transition 0.2s all
   .marker
     width width
     height height
