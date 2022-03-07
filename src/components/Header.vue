@@ -705,6 +705,7 @@ header
     display flex
   .right
     display flex
+    flex-shrink 0
     .space-users
       display flex
       > .users
