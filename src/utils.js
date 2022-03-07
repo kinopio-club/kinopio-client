@@ -116,6 +116,17 @@ export default {
     const dialogIsVisible = Boolean(dialogs.length)
     return dialogIsVisible
   },
+  shouldIgnoreTouchInteraction (event) {
+    if (!event) { return true }
+    const isScroll = event.type === 'scroll'
+    const dialogIsVisible = this.dialogIsVisible()
+    if (dialogIsVisible) { return true }
+    if (isScroll) { return }
+    const fromDialog = event.target.closest('dialog')
+    const fromHeader = event.target.closest('header')
+    const fromFooter = event.target.closest('footer')
+    return fromDialog || fromHeader || fromFooter || dialogIsVisible
+  },
   cursorPositionInViewport (event) {
     let x, y
     if (event.touches) {
