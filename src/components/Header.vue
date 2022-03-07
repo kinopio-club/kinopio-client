@@ -29,7 +29,7 @@ header(:style="position" :class="{'fade-out': shouldFadeOut}")
         .space-details-row.segmented-buttons
           //- Space
           .button-wrap
-            button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+            button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
               .badge.info(v-show="currentSpaceIsTemplate")
                 span Template
               MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
@@ -599,8 +599,8 @@ header
       pointer-events all
   nav
     display flex
-    flex-grow 4
     justify-content space-between
+    width 100%
   .logo-about
     position relative
     display inline-block
@@ -661,7 +661,8 @@ header
       white-space nowrap
       overflow hidden
       text-overflow ellipsis
-      max-width 30vw
+    .space-name-button
+      max-width 100%
     dialog
       max-width initial
     > .button-wrap
