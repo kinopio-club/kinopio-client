@@ -117,6 +117,7 @@ export default {
     window.addEventListener('scroll', this.handleTouchInteractions)
     window.addEventListener('gesturestart', this.handleTouchInteractions)
     window.addEventListener('gesturechange', this.handleTouchInteractions)
+    window.addEventListener('touchend', this.handleTouchInteractions)
     window.addEventListener('online', this.updateLiveSpaces)
     this.updatePosition()
     this.updateFavorites()
@@ -132,6 +133,7 @@ export default {
     window.removeEventListener('scroll', this.handleTouchInteractions)
     window.removeEventListener('gesturestart', this.handleTouchInteractions)
     window.removeEventListener('gesturechange', this.handleTouchInteractions)
+    window.removeEventListener('touchend', this.handleTouchInteractions)
     window.removeEventListener('online', this.updateLiveSpaces)
     clearInterval(updateFavoritesIntervalTimer)
     clearInterval(updateLiveSpacesIntervalTimer)
@@ -293,8 +295,17 @@ export default {
 
     // fade out
 
+    shouldIgnoreEvent (event) {
+      if (event.type === 'scroll') { return }
+      if (!event) { return true }
+      const fromDialog = event.target.closest('dialog')
+      const fromHeader = event.target.closest('header')
+      const fromFooter = event.target.closest('footer')
+      return fromDialog || fromHeader || fromFooter
+    },
     handleTouchInteractions (event) {
       if (!this.$store.getters.isTouchDevice) { return }
+      if (this.shouldIgnoreEvent(event)) { return }
       this.fadeOut()
       this.updatePosition()
     },
