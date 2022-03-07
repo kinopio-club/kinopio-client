@@ -1188,6 +1188,9 @@ const store = createStore({
     },
     spaceCounterZoomDecimal: (state, getters) => {
       return 1 / getters.spaceZoomDecimal
+    },
+    isTouchDevice: (state) => {
+      return state.isTouchDevice || utils.isMobile()
     }
   },
 

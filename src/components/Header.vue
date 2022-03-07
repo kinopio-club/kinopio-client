@@ -476,7 +476,7 @@ export default {
     // fade out
 
     handleTouchInteractions (event) {
-      if (!this.$store.state.isTouchDevice) { return }
+      if (!this.$store.getters.isTouchDevice) { return }
       this.fadeOut()
       this.updatePosition()
     },
@@ -505,7 +505,7 @@ export default {
     // update position
 
     updatePosition () {
-      if (!this.$store.state.isTouchDevice) { return }
+      if (!this.$store.getters.isTouchDevice) { return }
       updatePositionIteration = 0
       if (updatePositionTimer) { return }
       updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)

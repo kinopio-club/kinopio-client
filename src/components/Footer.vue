@@ -149,12 +149,12 @@ export default {
       return favoriteSpaces.length
     },
     isMobileOrTouch () {
-      const isTouchDevice = this.$store.state.isTouchDevice
+      const isTouchDevice = this.$store.getters.isTouchDevice
       const isMobile = utils.isMobile()
       return isTouchDevice || isMobile
     },
     isVisible () {
-      const isTouchDevice = this.$store.state.isTouchDevice
+      const isTouchDevice = this.$store.getters.isTouchDevice
       const shouldExplicitlyHideFooter = this.$store.state.shouldExplicitlyHideFooter
       // only hide footer on touch devices
       if (!isTouchDevice) {
@@ -294,7 +294,7 @@ export default {
     // fade out
 
     handleTouchInteractions (event) {
-      if (!this.$store.state.isTouchDevice) { return }
+      if (!this.$store.getters.isTouchDevice) { return }
       this.fadeOut()
       this.updatePosition()
     },
@@ -323,7 +323,7 @@ export default {
     // update position
 
     updatePosition () {
-      if (!this.$store.state.isTouchDevice) { return }
+      if (!this.$store.getters.isTouchDevice) { return }
       updatePositionIteration = 0
       if (updatePositionTimer) { return }
       updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
