@@ -381,6 +381,7 @@ export default {
     return string.replace(/\.$/g, '')
   },
   removeTrailingSlash (string) {
+    if (!string) { return }
     // https://regexr.com/68l08
     return string.replace(/\/$/g, '')
   },
