@@ -655,8 +655,6 @@ header
   .space-details-row
     margin-top 8px
     display initial
-    @media(max-width 414px)
-      max-width calc(100% - 200px)
     button
       white-space nowrap
       overflow hidden
@@ -666,7 +664,8 @@ header
     dialog
       max-width initial
     > .button-wrap
-      max-width 100vw
+      max-width 60vw
+
       > button
         .privacy-icon
           margin-left 6px
@@ -703,6 +702,9 @@ header
     flex-direction column
   .left
     display flex
+    @media(max-width 414px)
+      max-width calc(100% - 100px)
+
   .right
     display flex
     flex-shrink 0
