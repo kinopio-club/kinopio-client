@@ -111,6 +111,11 @@ export default {
     }
     return height
   },
+  dialogIsVisible () {
+    let dialogs = document.querySelectorAll('dialog')
+    const dialogIsVisible = Boolean(dialogs.length)
+    return dialogIsVisible
+  },
   cursorPositionInViewport (event) {
     let x, y
     if (event.touches) {

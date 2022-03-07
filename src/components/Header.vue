@@ -197,6 +197,8 @@ export default {
         this.closeAllDialogs()
       } else if (mutation.type === 'triggerSpaceDetailsVisible') {
         this.spaceDetailsIsVisible = true
+      } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+        this.updatePosition()
       } else if (mutation.type === 'triggerSpaceDetailsInfoIsVisible') {
         this.spaceDetailsInfoIsVisible = true
       } else if (mutation.type === 'triggerSignUpOrInIsVisible') {
@@ -476,12 +478,15 @@ export default {
     // fade out
 
     shouldIgnoreEvent (event) {
-      if (event.type === 'scroll') { return }
       if (!event) { return true }
+      const isScroll = event.type === 'scroll'
+      const dialogIsVisible = utils.dialogIsVisible()
+      if (dialogIsVisible) { return true }
+      if (isScroll) { return }
       const fromDialog = event.target.closest('dialog')
       const fromHeader = event.target.closest('header')
       const fromFooter = event.target.closest('footer')
-      return fromDialog || fromHeader || fromFooter
+      return fromDialog || fromHeader || fromFooter || dialogIsVisible
     },
     handleTouchInteractions (event) {
       if (!this.$store.getters.isTouchDevice) { return }
