@@ -233,7 +233,7 @@ edge = 4px
   pointer-events none
   z-index 1
   opacity 0.5
-  transition 0.2s all
+  transition 0.2s opacity
   &.fade-out
     opacity 0
   .marker

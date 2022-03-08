@@ -1,5 +1,5 @@
 <template lang="pug">
-header(:style="position" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
+header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
   //- embed
   nav.embed-nav(v-if="isEmbed")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
@@ -251,6 +251,15 @@ export default {
     clearInterval(updateNotificationsIntervalTimer)
   },
   computed: {
+    isVisible () {
+      const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
+      const isTouchDevice = this.$store.getters.isTouchDevice
+      if (cardDetailsIsVisible && isTouchDevice) {
+        return false
+      } else {
+        return true
+      }
+    },
     isEmbed () { return this.$store.state.isEmbed },
     currentSpaceUrl () { return this.$store.getters['currentSpace/url'] },
     shouldShowNewStuffIsUpdated () {
