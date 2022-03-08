@@ -1,5 +1,5 @@
 <template lang="pug">
-.footer-wrap(:style="position" :class="{'fade-out': shouldFadeOut}")
+.footer-wrap(:style="position" :class="{'fade-out': isFadeOut}")
   .left(v-if="!isEmbed")
     footer
       Notifications
@@ -99,7 +99,7 @@ export default {
       position: {},
       liveSpaces: [],
       isLoadingLiveSpaces: true,
-      shouldFadeOut: false
+      isFadeOut: false
     }
   },
   mounted () {
@@ -309,13 +309,13 @@ export default {
     cancelFadeOut () {
       window.cancelAnimationFrame(fadeOutTimer)
       fadeOutTimer = undefined
-      this.shouldFadeOut = false
+      this.isFadeOut = false
       this.cancelUpdatePosition()
       this.updatePosition()
     },
     fadeOutFrame () {
       fadeOutIteration++
-      this.shouldFadeOut = true
+      this.isFadeOut = true
       if (fadeOutIteration < fadeOutDuration) {
         window.requestAnimationFrame(this.fadeOutFrame)
       } else {

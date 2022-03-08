@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.offscreen-markers(:style="styles" :class="{'fade-out': shouldFadeOut}")
+aside.offscreen-markers(:style="styles" :class="{'fade-out': isFadeOut}")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
@@ -61,7 +61,7 @@ export default {
         bottomleft: [],
         bottomright: []
       },
-      shouldFadeOut: false
+      isFadeOut: false
     }
   },
   computed: {
@@ -140,13 +140,13 @@ export default {
     cancelFadeOut () {
       window.cancelAnimationFrame(fadeOutTimer)
       fadeOutTimer = undefined
-      this.shouldFadeOut = false
+      this.isFadeOut = false
       this.cancelUpdatePosition()
       this.updatePosition()
     },
     fadeOutFrame () {
       fadeOutIteration++
-      this.shouldFadeOut = true
+      this.isFadeOut = true
       if (fadeOutIteration < fadeOutDuration) {
         window.requestAnimationFrame(this.fadeOutFrame)
       } else {

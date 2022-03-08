@@ -1,5 +1,5 @@
 <template lang="pug">
-header(:style="position" :class="{'fade-out': shouldFadeOut}")
+header(:style="position" :class="{'fade-out': isFadeOut}")
   //- embed
   nav.embed-nav(v-if="isEmbed")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
@@ -190,7 +190,7 @@ export default {
       notifications: [],
       notificationsIsLoading: true,
       addSpaceIsVisible: false,
-      shouldFadeOut: false
+      isFadeOut: false
     }
   },
   created () {
@@ -493,13 +493,13 @@ export default {
     cancelFadeOut () {
       window.cancelAnimationFrame(fadeOutTimer)
       fadeOutTimer = undefined
-      this.shouldFadeOut = false
+      this.isFadeOut = false
       this.cancelUpdatePosition()
       this.updatePosition()
     },
     fadeOutFrame () {
       fadeOutIteration++
-      this.shouldFadeOut = true
+      this.isFadeOut = true
       if (fadeOutIteration < fadeOutDuration) {
         window.requestAnimationFrame(this.fadeOutFrame)
       } else {
