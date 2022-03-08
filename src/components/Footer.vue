@@ -1,5 +1,5 @@
 <template lang="pug">
-.footer-wrap(:style="position" :class="{'fade-out': isFadeOut}")
+.footer-wrap(:style="position" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
   .left(v-if="!isEmbed")
     footer
       Notifications
@@ -69,9 +69,10 @@ import utils from '@/utils.js'
 
 let updateFavoritesIntervalTimer, updateLiveSpacesIntervalTimer
 
-const fadeOutDuration = 10
+const fadeOutDuration = 12
+const hiddenDuration = 12
 const updatePositionDuration = 60
-let fadeOutIteration, fadeOutTimer, updatePositionIteration, updatePositionTimer
+let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
 
 export default {
   name: 'Footer',
@@ -99,7 +100,8 @@ export default {
       position: {},
       liveSpaces: [],
       isLoadingLiveSpaces: true,
-      isFadeOut: false
+      isFadeOut: false,
+      isHidden: false
     }
   },
   mounted () {
@@ -112,6 +114,8 @@ export default {
         this.$nextTick(() => {
           this.closeDialogs(mutation.payload)
         })
+      } else if (mutation.type === 'triggerHideInterface') {
+        this.hidden()
       }
     })
     window.addEventListener('scroll', this.handleTouchInteractions)
@@ -291,6 +295,29 @@ export default {
         }
       })
       return normalizedSpaces
+    },
+
+    // hide
+
+    hidden (event) {
+      if (!this.$store.getters.isTouchDevice) { return }
+      hiddenIteration = 0
+      if (hiddenTimer) { return }
+      hiddenTimer = window.requestAnimationFrame(this.hiddenFrame)
+    },
+    hiddenFrame () {
+      hiddenIteration++
+      this.isHidden = true
+      if (hiddenIteration < hiddenDuration) {
+        window.requestAnimationFrame(this.hiddenFrame)
+      } else {
+        this.cancelHidden()
+      }
+    },
+    cancelHidden () {
+      window.cancelAnimationFrame(hiddenTimer)
+      hiddenTimer = undefined
+      this.isHidden = false
     },
 
     // fade out

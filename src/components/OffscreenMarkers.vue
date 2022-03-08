@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.offscreen-markers(:style="styles" :class="{'fade-out': isFadeOut}")
+aside.offscreen-markers(:style="styles" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
@@ -19,8 +19,9 @@ import debounce from 'lodash-es/debounce'
 const offscreenMarkers = new Worker('/web-workers/offscreen-markers.js')
 
 const updatePositionDuration = 10
-const fadeOutDuration = 10
-let fadeOutIteration, fadeOutTimer, updatePositionIteration, updatePositionTimer
+const fadeOutDuration = 12
+const hiddenDuration = 12
+let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
 
 export default {
   name: 'OffscreenMarkers',
@@ -28,19 +29,20 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         this.updatePosition()
-      }
-      window.addEventListener('scroll', this.handleTouchInteractions)
-      window.addEventListener('gesturestart', this.handleTouchInteractions)
-      window.addEventListener('gesturechange', this.handleTouchInteractions)
-      window.addEventListener('touchend', this.updatePosition)
-      if (mutation.type === 'isLoadingSpace') {
+      } else if (mutation.type === 'isLoadingSpace') {
         this.updatePosition()
+      } else if (mutation.type === 'triggerHideInterface') {
+        this.hidden()
       }
     })
     // window.addEventListener('scroll', this.updateOffscreenMarkers)
     offscreenMarkers.addEventListener('message', event => {
       this.offscreenCardsByDirection = event.data
     })
+    window.addEventListener('scroll', this.handleTouchInteractions)
+    window.addEventListener('gesturestart', this.handleTouchInteractions)
+    window.addEventListener('gesturechange', this.handleTouchInteractions)
+    window.addEventListener('touchend', this.updatePosition)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.handleTouchInteractions)
@@ -61,7 +63,8 @@ export default {
         bottomleft: [],
         bottomright: []
       },
-      isFadeOut: false
+      isFadeOut: false,
+      isHidden: false
     }
   },
   computed: {
@@ -122,6 +125,29 @@ export default {
   methods: {
     hasDirection (direction) {
       return Boolean(this.offscreenCardsByDirection[direction].length)
+    },
+
+    // hide
+
+    hidden (event) {
+      if (!this.$store.getters.isTouchDevice) { return }
+      hiddenIteration = 0
+      if (hiddenTimer) { return }
+      hiddenTimer = window.requestAnimationFrame(this.hiddenFrame)
+    },
+    hiddenFrame () {
+      hiddenIteration++
+      this.isHidden = true
+      if (hiddenIteration < hiddenDuration) {
+        window.requestAnimationFrame(this.hiddenFrame)
+      } else {
+        this.cancelHidden()
+      }
+    },
+    cancelHidden () {
+      window.cancelAnimationFrame(hiddenTimer)
+      hiddenTimer = undefined
+      this.isHidden = false
     },
 
     // fade out

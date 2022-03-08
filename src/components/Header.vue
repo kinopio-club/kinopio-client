@@ -1,5 +1,5 @@
 <template lang="pug">
-header(:style="position" :class="{'fade-out': isFadeOut}")
+header(:style="position" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
   //- embed
   nav.embed-nav(v-if="isEmbed")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
@@ -146,9 +146,10 @@ import uniqBy from 'lodash-es/uniqBy'
 
 let updateNotificationsIntervalTimer
 
-const fadeOutDuration = 10
+const fadeOutDuration = 12
+const hiddenDuration = 12
 const updatePositionDuration = 60
-let fadeOutIteration, fadeOutTimer, updatePositionIteration, updatePositionTimer
+let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
 
 export default {
   name: 'Header',
@@ -190,7 +191,8 @@ export default {
       notifications: [],
       notificationsIsLoading: true,
       addSpaceIsVisible: false,
-      isFadeOut: false
+      isFadeOut: false,
+      isHidden: false
     }
   },
   created () {
@@ -225,6 +227,8 @@ export default {
         if (mutation.payload !== 'spaceDetails') {
           this.closeAllDialogs()
         }
+      } else if (mutation.type === 'triggerHideInterface') {
+        this.hidden()
       }
     })
   },
@@ -477,11 +481,35 @@ export default {
       this.upgradeUserIsVisible = !isVisible
     },
 
+    // hide
+
+    hidden (event) {
+      if (!this.$store.getters.isTouchDevice) { return }
+      hiddenIteration = 0
+      if (hiddenTimer) { return }
+      hiddenTimer = window.requestAnimationFrame(this.hiddenFrame)
+    },
+    hiddenFrame () {
+      hiddenIteration++
+      this.isHidden = true
+      if (hiddenIteration < hiddenDuration) {
+        window.requestAnimationFrame(this.hiddenFrame)
+      } else {
+        this.cancelHidden()
+      }
+    },
+    cancelHidden () {
+      window.cancelAnimationFrame(hiddenTimer)
+      hiddenTimer = undefined
+      this.isHidden = false
+    },
+
     // fade out
 
     handleTouchInteractions (event) {
       if (!this.$store.getters.isTouchDevice) { return }
       if (utils.shouldIgnoreTouchInteraction(event)) { return }
+      console.log(event)
       this.fadeOut()
       this.updatePosition()
     },

@@ -362,6 +362,7 @@ const store = createStore({
     triggerUpdateRemoteDropGuideLine: () => {},
     triggerUpdateStopRemoteUserDropGuideLine: () => {},
     triggerUpdatePositionInVisualViewport: () => {},
+    triggerHideInterface: () => {},
     triggerUpgradeUserIsVisible: () => {},
     triggerUploadComplete: () => {},
     triggerPauseAllAudio: () => {},
