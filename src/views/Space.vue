@@ -373,7 +373,7 @@ export default {
       const fromDialog = event.target.closest('dialog')
       const fromHeader = event.target.closest('header')
       const fromFooter = event.target.closest('footer')
-      return fromDialog || fromHeader || fromFooter
+      return Boolean(fromDialog || fromHeader || fromFooter)
     },
     checkIfShouldHideFooter (event) {
       if (event.target.nodeType !== 1) { return } // firefox check

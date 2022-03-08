@@ -1,5 +1,6 @@
 <template lang="pug">
 header(:style="position" :class="{'fade-out': shouldFadeOut}")
+  //- embed
   nav.embed-nav(v-if="isEmbed")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
       button
@@ -14,6 +15,7 @@ header(:style="position" :class="{'fade-out': shouldFadeOut}")
           User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
           User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
 
+  //- standard
   nav(v-if="!isEmbed")
     .left
       .logo-about
