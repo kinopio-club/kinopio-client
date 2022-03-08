@@ -509,7 +509,6 @@ export default {
     handleTouchInteractions (event) {
       if (!this.$store.getters.isTouchDevice) { return }
       if (utils.shouldIgnoreTouchInteraction(event)) { return }
-      console.log(event)
       this.fadeOut()
       this.updatePosition()
     },
