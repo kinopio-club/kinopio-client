@@ -112,7 +112,13 @@ export default {
     return height
   },
   dialogIsVisible () {
-    let dialogs = document.querySelectorAll('dialog')
+    let elements = document.querySelectorAll('dialog')
+    let dialogs = []
+    elements.forEach(dialog => {
+      if (dialog.className !== 'card-details') {
+        dialogs.push(dialog)
+      }
+    })
     const dialogIsVisible = Boolean(dialogs.length)
     return dialogIsVisible
   },
