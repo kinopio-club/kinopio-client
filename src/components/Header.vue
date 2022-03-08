@@ -232,7 +232,7 @@ export default {
     window.addEventListener('scroll', this.handleTouchInteractions)
     window.addEventListener('gesturestart', this.handleTouchInteractions)
     window.addEventListener('gesturechange', this.handleTouchInteractions)
-    window.addEventListener('touchend', this.handleTouchInteractions)
+    window.addEventListener('touchend', this.updatePosition)
     this.updatePosition()
     this.updateNotifications()
     updateNotificationsIntervalTimer = setInterval(() => {
@@ -243,7 +243,7 @@ export default {
     window.removeEventListener('scroll', this.handleTouchInteractions)
     window.removeEventListener('gesturestart', this.handleTouchInteractions)
     window.removeEventListener('gesturechange', this.handleTouchInteractions)
-    window.removeEventListener('touchend', this.handleTouchInteractions)
+    window.removeEventListener('touchend', this.updatePosition)
     clearInterval(updateNotificationsIntervalTimer)
   },
   computed: {
