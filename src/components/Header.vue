@@ -227,7 +227,7 @@ export default {
         if (mutation.payload !== 'spaceDetails') {
           this.closeAllDialogs()
         }
-      } else if (mutation.type === 'triggerHideInterface') {
+      } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
       }
     })

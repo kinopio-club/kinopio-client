@@ -285,6 +285,11 @@ export default {
         paintingCirclesTimer = window.requestAnimationFrame(this.paintCirclesAnimationFrame)
       }
       this.createPaintingCircle(event)
+      this.triggerHideTouchInterface()
+    },
+    triggerHideTouchInterface () {
+      if (!this.$store.state.currentUserIsPaintingLocked) { return }
+      this.$store.commit('triggerHideTouchInterface')
     },
     createPaintingCircle (event) {
       if (this.isBoxSelecting) { return }

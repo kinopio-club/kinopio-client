@@ -31,7 +31,7 @@ export default {
         this.updatePosition()
       } else if (mutation.type === 'isLoadingSpace') {
         this.updatePosition()
-      } else if (mutation.type === 'triggerHideInterface') {
+      } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
       }
     })

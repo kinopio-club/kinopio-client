@@ -114,7 +114,7 @@ export default {
         this.$nextTick(() => {
           this.closeDialogs(mutation.payload)
         })
-      } else if (mutation.type === 'triggerHideInterface') {
+      } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
       }
     })
