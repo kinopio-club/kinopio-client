@@ -146,8 +146,8 @@ import uniqBy from 'lodash-es/uniqBy'
 
 let updateNotificationsIntervalTimer
 
-const fadeOutDuration = 12
-const hiddenDuration = 12
+const fadeOutDuration = 15
+const hiddenDuration = 15
 const updatePositionDuration = 60
 let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
 

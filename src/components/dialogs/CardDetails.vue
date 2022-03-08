@@ -1465,7 +1465,7 @@ export default {
       this.$store.dispatch('history/pause')
     },
     closeCard () {
-      this.$store.commit('triggerHideInterface')
+      this.$store.commit('triggerHideTouchInterface')
       const cardId = prevCardId
       const card = this.$store.getters['currentCards/byId'](cardId)
       this.closeDialogs(true)
