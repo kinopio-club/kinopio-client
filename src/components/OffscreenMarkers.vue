@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.offscreen-markers(:style="styles")
+aside.offscreen-markers(:style="styles" :class="{'fade-out': shouldFadeOut}")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
@@ -19,29 +19,34 @@ import debounce from 'lodash-es/debounce'
 const offscreenMarkers = new Worker('/web-workers/offscreen-markers.js')
 
 const updatePositionDuration = 10
-let updatePositionIteration, updatePositionTimer
+const fadeOutDuration = 10
+let fadeOutIteration, fadeOutTimer, updatePositionIteration, updatePositionTimer
 
 export default {
   name: 'OffscreenMarkers',
   mounted () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
-        this.updateOffscreenMarkers()
+        this.updatePosition()
       }
       window.addEventListener('scroll', this.handleTouchInteractions)
       window.addEventListener('gesturestart', this.handleTouchInteractions)
       window.addEventListener('gesturechange', this.handleTouchInteractions)
+      window.addEventListener('touchend', this.handleTouchInteractions)
       if (mutation.type === 'isLoadingSpace') {
-        this.updateOffscreenMarkers()
+        this.updatePosition()
       }
     })
-    window.addEventListener('scroll', this.updateOffscreenMarkers)
+    // window.addEventListener('scroll', this.updateOffscreenMarkers)
     offscreenMarkers.addEventListener('message', event => {
       this.offscreenCardsByDirection = event.data
     })
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.updateOffscreenMarkers)
+    window.removeEventListener('scroll', this.handleTouchInteractions)
+    window.removeEventListener('gesturestart', this.handleTouchInteractions)
+    window.removeEventListener('gesturechange', this.handleTouchInteractions)
+    window.removeEventListener('touchend', this.handleTouchInteractions)
   },
   data () {
     return {
@@ -55,7 +60,8 @@ export default {
         topright: [],
         bottomleft: [],
         bottomright: []
-      }
+      },
+      shouldFadeOut: false
     }
   },
   computed: {
@@ -121,8 +127,31 @@ export default {
     // fade out
 
     handleTouchInteractions (event) {
-      if (!this.$store.state.isTouchDevice) { return }
+      if (!this.$store.getters.isTouchDevice) { return }
+      if (utils.shouldIgnoreTouchInteraction(event)) { return }
+      this.fadeOut()
       this.updatePosition()
+    },
+    fadeOut () {
+      fadeOutIteration = 0
+      if (fadeOutTimer) { return }
+      fadeOutTimer = window.requestAnimationFrame(this.fadeOutFrame)
+    },
+    cancelFadeOut () {
+      window.cancelAnimationFrame(fadeOutTimer)
+      fadeOutTimer = undefined
+      this.shouldFadeOut = false
+      this.cancelUpdatePosition()
+      this.updatePosition()
+    },
+    fadeOutFrame () {
+      fadeOutIteration++
+      this.shouldFadeOut = true
+      if (fadeOutIteration < fadeOutDuration) {
+        window.requestAnimationFrame(this.fadeOutFrame)
+      } else {
+        this.cancelFadeOut()
+      }
     },
 
     // update position
@@ -179,6 +208,8 @@ edge = 4px
   z-index 1
   opacity 0.5
   transition 0.2s all
+  &.fade-out
+    opacity 0
   .marker
     width width
     height height
