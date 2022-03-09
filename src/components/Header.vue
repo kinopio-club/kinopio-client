@@ -237,6 +237,7 @@ export default {
     window.addEventListener('gesturestart', this.handleTouchInteractions)
     window.addEventListener('gesturechange', this.handleTouchInteractions)
     window.addEventListener('touchend', this.updatePosition)
+    visualViewport.addEventListener('resize', this.updatePosition)
     this.updatePosition()
     this.updateNotifications()
     updateNotificationsIntervalTimer = setInterval(() => {
@@ -248,6 +249,7 @@ export default {
     window.removeEventListener('gesturestart', this.handleTouchInteractions)
     window.removeEventListener('gesturechange', this.handleTouchInteractions)
     window.removeEventListener('touchend', this.updatePosition)
+    visualViewport.removeEventListener('resize', this.updatePosition)
     clearInterval(updateNotificationsIntervalTimer)
   },
   computed: {

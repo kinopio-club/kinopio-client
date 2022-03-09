@@ -125,9 +125,10 @@ export default {
   shouldIgnoreTouchInteraction (event) {
     if (!event) { return true }
     const isScroll = event.type === 'scroll'
+    const isResize = event.type === 'resize'
     const dialogIsVisible = this.dialogIsVisible()
     if (dialogIsVisible) { return true }
-    if (isScroll) { return }
+    if (isScroll || isResize) { return }
     const fromDialog = event.target.closest('dialog')
     const fromHeader = event.target.closest('header')
     const fromFooter = event.target.closest('footer')

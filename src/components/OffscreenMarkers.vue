@@ -43,12 +43,14 @@ export default {
     window.addEventListener('gesturestart', this.handleTouchInteractions)
     window.addEventListener('gesturechange', this.handleTouchInteractions)
     window.addEventListener('touchend', this.updatePosition)
+    visualViewport.addEventListener('resize', this.updatePosition)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.handleTouchInteractions)
     window.removeEventListener('gesturestart', this.handleTouchInteractions)
     window.removeEventListener('gesturechange', this.handleTouchInteractions)
     window.removeEventListener('touchend', this.updatePosition)
+    visualViewport.removeEventListener('resize', this.updatePosition)
   },
   data () {
     return {

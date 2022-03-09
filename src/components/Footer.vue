@@ -121,6 +121,7 @@ export default {
     window.addEventListener('gesturestart', this.handleTouchInteractions)
     window.addEventListener('gesturechange', this.handleTouchInteractions)
     window.addEventListener('touchend', this.updatePosition)
+    visualViewport.addEventListener('resize', this.updatePosition)
     window.addEventListener('online', this.updateLiveSpaces)
     this.updatePosition()
     this.updateFavorites()
@@ -137,6 +138,7 @@ export default {
     window.removeEventListener('gesturestart', this.handleTouchInteractions)
     window.removeEventListener('gesturechange', this.handleTouchInteractions)
     window.removeEventListener('touchend', this.updatePosition)
+    visualViewport.removeEventListener('resize', this.updatePosition)
     window.removeEventListener('online', this.updateLiveSpaces)
     clearInterval(updateFavoritesIntervalTimer)
     clearInterval(updateLiveSpacesIntervalTimer)
@@ -324,6 +326,8 @@ export default {
     handleTouchInteractions (event) {
       if (!this.$store.getters.isTouchDevice) { return }
       if (utils.shouldIgnoreTouchInteraction(event)) { return }
+      console.log('⏰', event.type, utils.visualViewport())
+
       this.fadeOut()
       this.updatePosition()
     },
