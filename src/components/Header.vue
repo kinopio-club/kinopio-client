@@ -1,5 +1,6 @@
 <template lang="pug">
-header(:style="visualViewportPosition")
+header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
+  //- embed
   nav.embed-nav(v-if="isEmbed")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
       button
@@ -14,6 +15,7 @@ header(:style="visualViewportPosition")
           User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
           User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
 
+  //- standard
   nav(v-if="!isEmbed")
     .left
       .logo-about
@@ -29,7 +31,7 @@ header(:style="visualViewportPosition")
         .space-details-row.segmented-buttons
           //- Space
           .button-wrap
-            button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+            button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
               .badge.info(v-show="currentSpaceIsTemplate")
                 span Template
               MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
@@ -142,9 +144,12 @@ import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 import uniqBy from 'lodash-es/uniqBy'
 
-const maxIterations = 30
-let currentIteration, updatePositionTimer
 let updateNotificationsIntervalTimer
+
+const fadeOutDuration = 15
+const hiddenDuration = 15
+const updatePositionDuration = 60
+let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
 
 export default {
   name: 'Header',
@@ -181,11 +186,13 @@ export default {
       upgradeUserIsVisible: false,
       spaceStatusIsVisible: false,
       offlineIsVisible: false,
-      visualViewportPosition: {},
+      position: {},
       readOnlyJiggle: false,
       notifications: [],
       notificationsIsLoading: true,
-      addSpaceIsVisible: false
+      addSpaceIsVisible: false,
+      isFadeOut: false,
+      isHidden: false
     }
   },
   created () {
@@ -194,6 +201,8 @@ export default {
         this.closeAllDialogs()
       } else if (mutation.type === 'triggerSpaceDetailsVisible') {
         this.spaceDetailsIsVisible = true
+      } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+        this.updatePosition()
       } else if (mutation.type === 'triggerSpaceDetailsInfoIsVisible') {
         this.spaceDetailsInfoIsVisible = true
       } else if (mutation.type === 'triggerSignUpOrInIsVisible') {
@@ -202,10 +211,6 @@ export default {
         this.keyboardShortcutsIsVisible = true
       } else if (mutation.type === 'triggerUpgradeUserIsVisible') {
         this.upgradeUserIsVisible = true
-      } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
-        currentIteration = 0
-        if (updatePositionTimer) { return }
-        updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
       } else if (mutation.type === 'currentUserIsPainting') {
         if (state.currentUserIsPainting) {
           this.addReadOnlyJiggle()
@@ -222,21 +227,41 @@ export default {
         if (mutation.payload !== 'spaceDetails') {
           this.closeAllDialogs()
         }
+      } else if (mutation.type === 'triggerHideTouchInterface') {
+        this.hidden()
       }
     })
   },
   mounted () {
-    window.addEventListener('scroll', this.updatePositionInVisualViewport)
+    window.addEventListener('scroll', this.handleTouchInteractions)
+    window.addEventListener('gesturestart', this.handleTouchInteractions)
+    window.addEventListener('gesturechange', this.handleTouchInteractions)
+    window.addEventListener('touchend', this.updatePosition)
+    visualViewport.addEventListener('resize', this.updatePosition)
+    this.updatePosition()
     this.updateNotifications()
     updateNotificationsIntervalTimer = setInterval(() => {
       this.updateNotifications()
     }, 1000 * 60 * 10) // 10 minutes
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.updatePositionInVisualViewport)
+    window.removeEventListener('scroll', this.handleTouchInteractions)
+    window.removeEventListener('gesturestart', this.handleTouchInteractions)
+    window.removeEventListener('gesturechange', this.handleTouchInteractions)
+    window.removeEventListener('touchend', this.updatePosition)
+    visualViewport.removeEventListener('resize', this.updatePosition)
     clearInterval(updateNotificationsIntervalTimer)
   },
   computed: {
+    isVisible () {
+      const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
+      const isTouchDevice = this.$store.getters.isTouchDevice
+      if (cardDetailsIsVisible && isTouchDevice) {
+        return false
+      } else {
+        return true
+      }
+    },
     isEmbed () { return this.$store.state.isEmbed },
     currentSpaceUrl () { return this.$store.getters['currentSpace/url'] },
     shouldShowNewStuffIsUpdated () {
@@ -410,38 +435,6 @@ export default {
         this.spaceDetailsIsVisible = false
       }
     },
-    updatePositionFrame () {
-      currentIteration++
-      this.updatePositionInVisualViewport()
-      if (currentIteration < maxIterations) {
-        window.requestAnimationFrame(this.updatePositionFrame)
-      } else {
-        window.cancelAnimationFrame(updatePositionTimer)
-        updatePositionTimer = undefined
-      }
-    },
-    updatePositionInVisualViewport () {
-      if (!window.visualViewport) { return }
-      const viewport = utils.visualViewport()
-      const pinchZoomScale = viewport.scale
-      const pinchZoomOffsetLeft = viewport.offsetLeft
-      const pinchZoomOffsetTop = viewport.offsetTop
-      if (pinchZoomScale === 1) { return }
-      let style
-      if (pinchZoomScale > 1) {
-        style = {
-          transform: `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`,
-          'transform-origin': 'left top'
-        }
-      } else {
-        style = {
-          transform: `translate(${pinchZoomOffsetLeft}px, 0px)`,
-          zoom: 1 / pinchZoomScale,
-          'transform-origin': 'left top'
-        }
-      }
-      this.visualViewportPosition = style
-    },
     toggleAboutIsVisible () {
       const isVisible = this.aboutIsVisible
       this.$store.dispatch('closeAllDialogs', 'Header.toggleAboutIsVisible')
@@ -499,6 +492,102 @@ export default {
       this.upgradeUserIsVisible = !isVisible
     },
 
+    // hide
+
+    hidden (event) {
+      if (!this.$store.getters.isTouchDevice) { return }
+      hiddenIteration = 0
+      if (hiddenTimer) { return }
+      hiddenTimer = window.requestAnimationFrame(this.hiddenFrame)
+    },
+    hiddenFrame () {
+      hiddenIteration++
+      this.isHidden = true
+      if (hiddenIteration < hiddenDuration) {
+        window.requestAnimationFrame(this.hiddenFrame)
+      } else {
+        this.cancelHidden()
+      }
+    },
+    cancelHidden () {
+      window.cancelAnimationFrame(hiddenTimer)
+      hiddenTimer = undefined
+      this.isHidden = false
+    },
+
+    // fade out
+
+    handleTouchInteractions (event) {
+      if (!this.$store.getters.isTouchDevice) { return }
+      if (utils.shouldIgnoreTouchInteraction(event)) { return }
+      this.fadeOut()
+      this.updatePosition()
+    },
+    fadeOut () {
+      fadeOutIteration = 0
+      if (fadeOutTimer) { return }
+      fadeOutTimer = window.requestAnimationFrame(this.fadeOutFrame)
+    },
+    cancelFadeOut () {
+      window.cancelAnimationFrame(fadeOutTimer)
+      fadeOutTimer = undefined
+      this.isFadeOut = false
+      this.cancelUpdatePosition()
+      this.updatePosition()
+    },
+    fadeOutFrame () {
+      fadeOutIteration++
+      this.isFadeOut = true
+      if (fadeOutIteration < fadeOutDuration) {
+        window.requestAnimationFrame(this.fadeOutFrame)
+      } else {
+        this.cancelFadeOut()
+      }
+    },
+
+    // update position
+
+    updatePosition () {
+      if (!this.$store.getters.isTouchDevice) { return }
+      updatePositionIteration = 0
+      if (updatePositionTimer) { return }
+      updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+    },
+    cancelUpdatePosition () {
+      window.cancelAnimationFrame(updatePositionTimer)
+      updatePositionTimer = undefined
+    },
+    updatePositionFrame () {
+      updatePositionIteration++
+      this.updatePositionInVisualViewport()
+      if (updatePositionIteration < updatePositionDuration) {
+        window.requestAnimationFrame(this.updatePositionFrame)
+      } else {
+        this.cancelUpdatePosition()
+      }
+    },
+    updatePositionInVisualViewport () {
+      const viewport = utils.visualViewport()
+      const scale = utils.roundFloat(viewport.scale)
+      const counterScale = utils.roundFloat(1 / viewport.scale)
+      const left = Math.round(viewport.offsetLeft)
+      const top = Math.round(viewport.offsetTop)
+      let style
+      if (scale > 1) {
+        style = {
+          transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
+          'transform-origin': 'left top'
+        }
+      } else {
+        style = {
+          transform: `translate(${left}px, 0px)`,
+          zoom: counterScale,
+          'transform-origin': 'left top'
+        }
+      }
+      this.position = style
+    },
+
     // notifications
 
     async updateNotifications () {
@@ -541,6 +630,7 @@ header
   padding 8px
   display flex
   justify-content space-between
+  transition 0.2s opacity
   nav,
   aside
     pointer-events none
@@ -550,8 +640,8 @@ header
       pointer-events all
   nav
     display flex
-    flex-grow 4
     justify-content space-between
+    width 100%
   .logo-about
     position relative
     display inline-block
@@ -606,17 +696,17 @@ header
   .space-details-row
     margin-top 8px
     display initial
-    @media(max-width 414px)
-      max-width calc(100% - 200px)
     button
       white-space nowrap
       overflow hidden
       text-overflow ellipsis
-      max-width 30vw
+    .space-name-button
+      max-width 100%
     dialog
       max-width initial
     > .button-wrap
-      max-width 100vw
+      max-width 60vw
+
       > button
         .privacy-icon
           margin-left 6px
@@ -653,8 +743,12 @@ header
     flex-direction column
   .left
     display flex
+    @media(max-width 414px)
+      max-width calc(100% - 100px)
+
   .right
     display flex
+    flex-shrink 0
     .space-users
       display flex
       > .users

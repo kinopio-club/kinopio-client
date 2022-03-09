@@ -3,8 +3,6 @@ main.space(
   :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
   @mousedown.left="initInteractions"
   @touchstart="initInteractions"
-  @gesturestart="updateVisualViewport"
-  @gesturechange="updateVisualViewport"
   :style="styles"
 )
   svg.connections
@@ -203,9 +201,6 @@ export default {
       }
       return { x, y }
     },
-    updateVisualViewport () {
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
-    },
     correctCardConnectionPaths () {
       const space = utils.clone(this.$store.state.currentSpace)
       const user = utils.clone(this.$store.state.currentUser)
@@ -378,7 +373,7 @@ export default {
       const fromDialog = event.target.closest('dialog')
       const fromHeader = event.target.closest('header')
       const fromFooter = event.target.closest('footer')
-      return fromDialog || fromHeader || fromFooter
+      return Boolean(fromDialog || fromHeader || fromFooter)
     },
     checkIfShouldHideFooter (event) {
       if (event.target.nodeType !== 1) { return } // firefox check

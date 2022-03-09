@@ -1,54 +1,53 @@
 <template lang="pug">
-.footer-wrap(:style="visualViewportPosition")
+.footer-wrap(:style="position")
   .left(v-if="!isEmbed")
     footer
       Notifications
-      section(v-if="isVisible")
-        //- Explore
-        .button-wrap
-          .segmented-buttons
-            button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
-              img.icon.sunglasses(src="@/assets/sunglasses.svg")
-              span Explore
-            button(@click.left="toggleLiveIsVisible" :class="{ active: liveIsVisible}")
-              img.icon.camera(src="@/assets/camera.svg")
-              span(v-if="liveSpaces.length") {{ liveSpaces.length }}
-          Explore(:visible="exploreIsVisible")
-          Live(:visible="liveIsVisible" :spaces="liveSpaces" :loading="isLoadingLiveSpaces")
-        //- Favorites
-        .button-wrap
-          .segmented-buttons
-            button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-              img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-              img.icon(v-else src="@/assets/heart-empty.svg")
-            button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
-              img.icon.down-arrow(src="@/assets/down-arrow.svg" :class="{ 'is-mobile-icon': isMobile }")
-              span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
-          Favorites(:visible="favoritesIsVisible")
-
-      section.controls(v-if="isVisible")
-        //- Removed
-        .button-wrap
-          button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
-            img.refresh.icon(src="@/assets/remove.svg")
-            span Removed
-          Removed(:visible="removedIsVisible")
-        //- Tags and Links
-        .button-wrap
-          .segmented-buttons
-            button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
-              span Tags
-            button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
-              span Links
-          Links(:visible="linksIsVisible")
-          Tags(:visible="tagsIsVisible")
-
-        //- Mobile Tips
-        .button-wrap(v-if="isMobileOrTouch" :style="{zIndex: mobileTipsZIndex}")
-          button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
-            img.icon(src="@/assets/press-and-hold.svg")
-            span Mobile Tips
-          MobileTips(:visible="mobileTipsIsVisible")
+      .controls(v-if="isVisible" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
+        section
+          //- Explore
+          .button-wrap
+            .segmented-buttons
+              button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
+                img.icon.sunglasses(src="@/assets/sunglasses.svg")
+                span Explore
+              button(@click.left="toggleLiveIsVisible" :class="{ active: liveIsVisible}")
+                img.icon.camera(src="@/assets/camera.svg")
+                span(v-if="liveSpaces.length") {{ liveSpaces.length }}
+            Explore(:visible="exploreIsVisible")
+            Live(:visible="liveIsVisible" :spaces="liveSpaces" :loading="isLoadingLiveSpaces")
+          //- Favorites
+          .button-wrap
+            .segmented-buttons
+              button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+                img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+                img.icon(v-else src="@/assets/heart-empty.svg")
+              button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
+                img.icon.down-arrow(src="@/assets/down-arrow.svg" :class="{ 'is-mobile-icon': isMobile }")
+                span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
+            Favorites(:visible="favoritesIsVisible")
+        section
+          //- Removed
+          .button-wrap
+            button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+              img.refresh.icon(src="@/assets/remove.svg")
+              span Removed
+            Removed(:visible="removedIsVisible")
+          //- Tags and Links
+          .button-wrap
+            .segmented-buttons
+              button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
+                span Tags
+              button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
+                span Links
+            Links(:visible="linksIsVisible")
+            Tags(:visible="tagsIsVisible")
+          //- Mobile Tips
+          .button-wrap(v-if="isMobileOrTouch" :style="{zIndex: mobileTipsZIndex}")
+            button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
+              img.icon(src="@/assets/press-and-hold.svg")
+              span Mobile Tips
+            MobileTips(:visible="mobileTipsIsVisible")
 
   .right(v-if="!isMobileOrTouch" :class="{'is-embed': isEmbed}")
     SpaceZoom
@@ -67,9 +66,12 @@ import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
-const maxIterations = 30
-let currentIteration, updatePositionTimer
 let updateFavoritesIntervalTimer, updateLiveSpacesIntervalTimer
+
+const fadeOutDuration = 15
+const hiddenDuration = 15
+const updatePositionDuration = 60
+let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
 
 export default {
   name: 'Footer',
@@ -94,9 +96,11 @@ export default {
       exploreIsVisible: false,
       liveIsVisible: false,
       mobileTipsIsVisible: false,
-      visualViewportPosition: {},
+      position: {},
       liveSpaces: [],
-      isLoadingLiveSpaces: true
+      isLoadingLiveSpaces: true,
+      isFadeOut: false,
+      isHidden: false
     }
   },
   mounted () {
@@ -104,18 +108,22 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.closeDialogs()
       } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
-        currentIteration = 0
-        if (updatePositionTimer) { return }
-        updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+        this.updatePosition()
       } else if (mutation.type === 'unpinOtherDialogs') {
         this.$nextTick(() => {
           this.closeDialogs(mutation.payload)
         })
+      } else if (mutation.type === 'triggerHideTouchInterface') {
+        this.hidden()
       }
     })
-    this.updatePositionInVisualViewport()
-    window.addEventListener('scroll', this.updatePositionInVisualViewport)
+    window.addEventListener('scroll', this.handleTouchInteractions)
+    window.addEventListener('gesturestart', this.handleTouchInteractions)
+    window.addEventListener('gesturechange', this.handleTouchInteractions)
+    window.addEventListener('touchend', this.updatePosition)
+    visualViewport.addEventListener('resize', this.updatePosition)
     window.addEventListener('online', this.updateLiveSpaces)
+    this.updatePosition()
     this.updateFavorites()
     this.updateLiveSpaces()
     updateFavoritesIntervalTimer = setInterval(() => {
@@ -126,7 +134,11 @@ export default {
     }, 1000 * 60 * 5) // 5 minutes
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.updatePositionInVisualViewport)
+    window.removeEventListener('scroll', this.handleTouchInteractions)
+    window.removeEventListener('gesturestart', this.handleTouchInteractions)
+    window.removeEventListener('gesturechange', this.handleTouchInteractions)
+    window.removeEventListener('touchend', this.updatePosition)
+    visualViewport.removeEventListener('resize', this.updatePosition)
     window.removeEventListener('online', this.updateLiveSpaces)
     clearInterval(updateFavoritesIntervalTimer)
     clearInterval(updateLiveSpacesIntervalTimer)
@@ -144,12 +156,12 @@ export default {
       return favoriteSpaces.length
     },
     isMobileOrTouch () {
-      const isTouchDevice = this.$store.state.isTouchDevice
+      const isTouchDevice = this.$store.getters.isTouchDevice
       const isMobile = utils.isMobile()
       return isTouchDevice || isMobile
     },
     isVisible () {
-      const isTouchDevice = this.$store.state.isTouchDevice
+      const isTouchDevice = this.$store.getters.isTouchDevice
       const shouldExplicitlyHideFooter = this.$store.state.shouldExplicitlyHideFooter
       // only hide footer on touch devices
       if (!isTouchDevice) {
@@ -201,52 +213,6 @@ export default {
       if (!this.linksDialogIsPinned && exclude !== 'links') {
         this.linksIsVisible = false
       }
-    },
-    updatePositionFrame () {
-      currentIteration++
-      this.updatePositionInVisualViewport()
-      if (currentIteration < maxIterations) {
-        window.requestAnimationFrame(this.updatePositionFrame)
-      } else {
-        window.cancelAnimationFrame(updatePositionTimer)
-        updatePositionTimer = undefined
-      }
-    },
-    footerMarginBottom () {
-      if (this.isMobileOrTouch) {
-        return 20
-      } else {
-        return 0
-      }
-    },
-    updatePositionInVisualViewport () {
-      const viewport = utils.visualViewport()
-      const layoutViewport = document.getElementById('layout-viewport')
-      const pinchZoomScale = viewport.scale
-      const marginBottom = this.footerMarginBottom()
-      const pinchZoomOffsetLeft = viewport.offsetLeft
-      const pinchZoomOffsetTop = viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height
-      let style
-      if (pinchZoomScale === 1) {
-        style = {
-          'margin-bottom': marginBottom + 'px'
-        }
-      } else if (pinchZoomScale > 1) {
-        style = {
-          transform: `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`,
-          'transform-origin': 'left bottom',
-          'margin-bottom': marginBottom / pinchZoomScale + 'px'
-        }
-      } else {
-        style = {
-          transform: `translate(${pinchZoomOffsetLeft}px, 0px)`,
-          zoom: 1 / pinchZoomScale,
-          'transform-origin': 'left bottom',
-          'margin-bottom': marginBottom + 'px',
-          'margin-left': `-${pinchZoomOffsetLeft}px`
-        }
-      }
-      this.visualViewportPosition = style
     },
     toggleIsFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
@@ -330,6 +296,104 @@ export default {
         }
       })
       return normalizedSpaces
+    },
+
+    // hide
+
+    hidden (event) {
+      if (!this.$store.getters.isTouchDevice) { return }
+      hiddenIteration = 0
+      if (hiddenTimer) { return }
+      hiddenTimer = window.requestAnimationFrame(this.hiddenFrame)
+    },
+    hiddenFrame () {
+      hiddenIteration++
+      this.isHidden = true
+      if (hiddenIteration < hiddenDuration) {
+        window.requestAnimationFrame(this.hiddenFrame)
+      } else {
+        this.cancelHidden()
+      }
+    },
+    cancelHidden () {
+      window.cancelAnimationFrame(hiddenTimer)
+      hiddenTimer = undefined
+      this.isHidden = false
+    },
+
+    // fade out
+
+    handleTouchInteractions (event) {
+      if (!this.$store.getters.isTouchDevice) { return }
+      if (utils.shouldIgnoreTouchInteraction(event)) { return }
+      this.fadeOut()
+      this.updatePosition()
+    },
+    fadeOut () {
+      fadeOutIteration = 0
+      if (fadeOutTimer) { return }
+      fadeOutTimer = window.requestAnimationFrame(this.fadeOutFrame)
+    },
+    cancelFadeOut () {
+      window.cancelAnimationFrame(fadeOutTimer)
+      fadeOutTimer = undefined
+      this.isFadeOut = false
+      this.cancelUpdatePosition()
+      this.updatePosition()
+    },
+    fadeOutFrame () {
+      fadeOutIteration++
+      this.isFadeOut = true
+      if (fadeOutIteration < fadeOutDuration) {
+        window.requestAnimationFrame(this.fadeOutFrame)
+      } else {
+        this.cancelFadeOut()
+      }
+    },
+
+    // update position
+
+    updatePosition () {
+      if (!this.$store.getters.isTouchDevice) { return }
+      updatePositionIteration = 0
+      if (updatePositionTimer) { return }
+      updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+    },
+    cancelUpdatePosition () {
+      window.cancelAnimationFrame(updatePositionTimer)
+      updatePositionTimer = undefined
+    },
+    updatePositionFrame () {
+      updatePositionIteration++
+      this.updatePositionInVisualViewport()
+      if (updatePositionIteration < updatePositionDuration) {
+        window.requestAnimationFrame(this.updatePositionFrame)
+      } else {
+        this.cancelUpdatePosition()
+      }
+    },
+    updatePositionInVisualViewport () {
+      const viewport = utils.visualViewport()
+      const layoutViewport = document.getElementById('layout-viewport')
+      const scale = utils.roundFloat(viewport.scale)
+      const counterScale = utils.roundFloat(1 / viewport.scale)
+      const left = Math.round(viewport.offsetLeft)
+      const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height)
+      let style
+      if (scale > 1) {
+        style = {
+          transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
+          'transform-origin': 'left bottom'
+        }
+      } else {
+        style = {
+          transform: `translate(${left}px, 0px)`,
+          zoom: counterScale,
+          'transform-origin': 'left bottom',
+          'margin-left': `-${left}px`
+        }
+      }
+      this.position = style
     }
   }
 }
@@ -367,18 +431,20 @@ footer
     margin 0
     height 11px
   .controls
-    margin-top 6px
-  > section
-    display flex
-    > .button-wrap
-      pointer-events all
-      margin-left 6px
-      display inline-block
-      dialog
-        top initial
-        bottom calc(100% - 8px)
-      &:first-child
-        margin-left 0
+    transition 0.2s opacity
+    > section
+      display flex
+      &:last-child
+        margin-top 6px
+      > .button-wrap
+        pointer-events all
+        margin-left 6px
+        display inline-block
+        dialog
+          top initial
+          bottom calc(100% - 8px)
+        &:first-child
+          margin-left 0
 
   .segmented-buttons
     .down-arrow

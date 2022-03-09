@@ -769,6 +769,9 @@ code
 .hidden
   display none
 
+.fade-out
+  opacity 0
+
 .users
   display inline-block
   > .user

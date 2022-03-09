@@ -1363,6 +1363,8 @@ export default {
           event.preventDefault()
           const spaceId = utils.spaceIdFromUrl(url)
           this.changeSpace({ id: spaceId })
+        } else if (event.type === 'touchend') {
+          window.location = url
         } else {
           // open url natively
         }

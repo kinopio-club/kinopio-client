@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.offscreen-markers(:style="styles")
+aside.offscreen-markers(v-if="isVisible" :style="styles" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
@@ -18,29 +18,39 @@ import debounce from 'lodash-es/debounce'
 
 const offscreenMarkers = new Worker('/web-workers/offscreen-markers.js')
 
-const maxIterations = 30
-let currentIteration, updatePositionTimer
+const updatePositionDuration = 10
+const fadeOutDuration = 15
+const hiddenDuration = 15
+let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
 
 export default {
   name: 'OffscreenMarkers',
   mounted () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
-        currentIteration = 0
-        if (updatePositionTimer) { return }
-        updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
-      }
-      if (mutation.type === 'isLoadingSpace') {
-        this.updateOffscreenMarkers()
+        this.updatePosition()
+      } else if (mutation.type === 'isLoadingSpace') {
+        this.updatePosition()
+      } else if (mutation.type === 'triggerHideTouchInterface') {
+        this.hidden()
       }
     })
     window.addEventListener('scroll', this.updateOffscreenMarkers)
     offscreenMarkers.addEventListener('message', event => {
       this.offscreenCardsByDirection = event.data
     })
+    window.addEventListener('scroll', this.handleTouchInteractions)
+    window.addEventListener('gesturestart', this.handleTouchInteractions)
+    window.addEventListener('gesturechange', this.handleTouchInteractions)
+    window.addEventListener('touchend', this.updatePosition)
+    visualViewport.addEventListener('resize', this.updatePosition)
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.updateOffscreenMarkers)
+    window.removeEventListener('scroll', this.handleTouchInteractions)
+    window.removeEventListener('gesturestart', this.handleTouchInteractions)
+    window.removeEventListener('gesturechange', this.handleTouchInteractions)
+    window.removeEventListener('touchend', this.updatePosition)
+    visualViewport.removeEventListener('resize', this.updatePosition)
   },
   data () {
     return {
@@ -54,18 +64,34 @@ export default {
         topright: [],
         bottomleft: [],
         bottomright: []
-      }
+      },
+      isFadeOut: false,
+      isHidden: false
     }
   },
   computed: {
+    isVisible () {
+      const isTouchDevice = this.$store.getters.isTouchDevice
+      // only hide markers on touch devices
+      if (!isTouchDevice) {
+        return true
+      }
+      let isVisible = true
+      if (this.dialogsVisible) { isVisible = false }
+      return isVisible
+    },
+    dialogsVisible () {
+      return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleSelectedActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
+    },
     styles () {
       const viewport = this.viewport
       const pinchZoomScale = viewport.scale
+      const counterPinchZoomScale = utils.roundFloat(1 / pinchZoomScale)
       const pinchZoomOffsetLeft = viewport.offsetLeft
       const pinchZoomOffsetTop = viewport.offsetTop
       let styles = {}
       if (pinchZoomScale > 1) {
-        styles.transform = `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`
+        styles.transform = `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${counterPinchZoomScale})`
         styles['transform-origin'] = 'left top'
       }
       return styles
@@ -113,22 +139,86 @@ export default {
     }
   },
   methods: {
-    updatePositionFrame () {
-      currentIteration++
-      this.updateOffscreenMarkers()
-      if (currentIteration < maxIterations) {
-        window.requestAnimationFrame(this.updatePositionFrame)
-      } else {
-        window.cancelAnimationFrame(updatePositionTimer)
-        updatePositionTimer = undefined
-      }
-    },
     hasDirection (direction) {
       return Boolean(this.offscreenCardsByDirection[direction].length)
     },
+
+    // hide
+
+    hidden (event) {
+      if (!this.$store.getters.isTouchDevice) { return }
+      hiddenIteration = 0
+      if (hiddenTimer) { return }
+      hiddenTimer = window.requestAnimationFrame(this.hiddenFrame)
+    },
+    hiddenFrame () {
+      hiddenIteration++
+      this.isHidden = true
+      if (hiddenIteration < hiddenDuration) {
+        window.requestAnimationFrame(this.hiddenFrame)
+      } else {
+        this.cancelHidden()
+      }
+    },
+    cancelHidden () {
+      window.cancelAnimationFrame(hiddenTimer)
+      hiddenTimer = undefined
+      this.isHidden = false
+    },
+
+    // fade out
+
+    handleTouchInteractions (event) {
+      if (!this.$store.getters.isTouchDevice) { return }
+      if (utils.shouldIgnoreTouchInteraction(event)) { return }
+      this.fadeOut()
+      this.updatePosition()
+    },
+    fadeOut () {
+      fadeOutIteration = 0
+      if (fadeOutTimer) { return }
+      fadeOutTimer = window.requestAnimationFrame(this.fadeOutFrame)
+    },
+    cancelFadeOut () {
+      window.cancelAnimationFrame(fadeOutTimer)
+      fadeOutTimer = undefined
+      this.isFadeOut = false
+      this.cancelUpdatePosition()
+      this.updatePosition()
+    },
+    fadeOutFrame () {
+      fadeOutIteration++
+      this.isFadeOut = true
+      if (fadeOutIteration < fadeOutDuration) {
+        window.requestAnimationFrame(this.fadeOutFrame)
+      } else {
+        this.cancelFadeOut()
+      }
+    },
+
+    // update position
+
+    updatePosition () {
+      updatePositionIteration = 0
+      if (updatePositionTimer) { return }
+      updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+    },
+    cancelUpdatePosition () {
+      window.cancelAnimationFrame(updatePositionTimer)
+      updatePositionTimer = undefined
+    },
+    updatePositionFrame () {
+      updatePositionIteration++
+      this.updateOffscreenMarkers()
+      if (updatePositionIteration < updatePositionDuration) {
+        window.requestAnimationFrame(this.updatePositionFrame)
+      } else {
+        this.cancelUpdatePosition()
+      }
+    },
     updateOffscreenMarkers: debounce(function () {
       this.debouncedUpdateOffscreenMarkers()
-    }, 350),
+    }, 20),
     debouncedUpdateOffscreenMarkers () {
       let cards = this.$store.getters['currentCards/all']
       cards = utils.clone(cards)
@@ -159,6 +249,7 @@ edge = 4px
   pointer-events none
   z-index 1
   opacity 0.5
+  transition 0.2s all
   .marker
     width width
     height height

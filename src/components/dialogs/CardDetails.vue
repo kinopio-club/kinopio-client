@@ -493,7 +493,7 @@ export default {
     pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
       let zoom
-      if (utils.isSignificantlyPinchZoomed()) {
+      if (this.pinchCounterZoomDecimal !== 1) {
         zoom = this.pinchCounterZoomDecimal
       } else {
         zoom = this.spaceCounterZoomDecimal
@@ -1447,6 +1447,7 @@ export default {
       this.$nextTick(() => {
         this.broadcastShowCardDetails()
         this.clearErrors()
+        this.updatePinchCounterZoomDecimal()
         this.scrollIntoViewAndFocus()
         this.updatePreviousTags()
         this.updateNameSplitIntoCardsCount()
@@ -1464,6 +1465,7 @@ export default {
       this.$store.dispatch('history/pause')
     },
     closeCard () {
+      this.$store.commit('triggerHideTouchInterface')
       const cardId = prevCardId
       const card = this.$store.getters['currentCards/byId'](cardId)
       this.closeDialogs(true)
