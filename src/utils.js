@@ -163,30 +163,34 @@ export default {
   },
   visualViewport () {
     const visualViewport = window.visualViewport
+    let viewport
     if (visualViewport) {
-      return {
+      viewport = {
         width: visualViewport.width,
         height: visualViewport.height,
         scale: visualViewport.scale,
         offsetLeft: Math.max(visualViewport.offsetLeft, 0),
-        offsetRight: Math.max(visualViewport.offsetRight, 0),
         offsetTop: Math.max(visualViewport.offsetTop, 0),
         pageLeft: visualViewport.pageLeft,
         pageTop: visualViewport.pageTop
       }
     } else {
       // firefox fallback, doesn't support pinch zooming
-      return {
+      viewport = {
         width: document.documentElement.clientWidth,
         height: document.documentElement.clientHeight,
         scale: document.documentElement.clientWidth / window.innerWidth,
         offsetLeft: 0,
-        offsetRight: 0,
         offsetTop: 0,
         pageLeft: window.scrollX,
         pageTop: window.scrollY
       }
     }
+    viewport.offsetLeft = Math.round(viewport.offsetLeft)
+    viewport.offsetTop = Math.round(viewport.offsetTop)
+    viewport.pageLeft = Math.round(viewport.pageLeft)
+    viewport.pageTop = Math.round(viewport.pageTop)
+    return viewport
   },
   pinchCounterZoomDecimal () {
     return 1 / this.visualViewport().scale

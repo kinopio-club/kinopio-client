@@ -71,11 +71,12 @@ export default {
     styles () {
       const viewport = this.viewport
       const pinchZoomScale = viewport.scale
+      const counterPinchZoomScale = utils.roundFloat(1 / pinchZoomScale)
       const pinchZoomOffsetLeft = viewport.offsetLeft
       const pinchZoomOffsetTop = viewport.offsetTop
       let styles = {}
       if (pinchZoomScale > 1) {
-        styles.transform = `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`
+        styles.transform = `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${counterPinchZoomScale})`
         styles['transform-origin'] = 'left top'
       }
       return styles
