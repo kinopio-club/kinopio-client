@@ -234,8 +234,6 @@ edge = 4px
   z-index 1
   opacity 0.5
   transition 0.2s opacity
-  &.fade-out
-    opacity 0
   .marker
     width width
     height height

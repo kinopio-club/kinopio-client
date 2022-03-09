@@ -1,54 +1,53 @@
 <template lang="pug">
-.footer-wrap(:style="position" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
+.footer-wrap(:style="position")
   .left(v-if="!isEmbed")
     footer
       Notifications
-      section(v-if="isVisible")
-        //- Explore
-        .button-wrap
-          .segmented-buttons
-            button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
-              img.icon.sunglasses(src="@/assets/sunglasses.svg")
-              span Explore
-            button(@click.left="toggleLiveIsVisible" :class="{ active: liveIsVisible}")
-              img.icon.camera(src="@/assets/camera.svg")
-              span(v-if="liveSpaces.length") {{ liveSpaces.length }}
-          Explore(:visible="exploreIsVisible")
-          Live(:visible="liveIsVisible" :spaces="liveSpaces" :loading="isLoadingLiveSpaces")
-        //- Favorites
-        .button-wrap
-          .segmented-buttons
-            button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-              img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-              img.icon(v-else src="@/assets/heart-empty.svg")
-            button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
-              img.icon.down-arrow(src="@/assets/down-arrow.svg" :class="{ 'is-mobile-icon': isMobile }")
-              span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
-          Favorites(:visible="favoritesIsVisible")
-
-      section.controls(v-if="isVisible")
-        //- Removed
-        .button-wrap
-          button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
-            img.refresh.icon(src="@/assets/remove.svg")
-            span Removed
-          Removed(:visible="removedIsVisible")
-        //- Tags and Links
-        .button-wrap
-          .segmented-buttons
-            button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
-              span Tags
-            button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
-              span Links
-          Links(:visible="linksIsVisible")
-          Tags(:visible="tagsIsVisible")
-
-        //- Mobile Tips
-        .button-wrap(v-if="isMobileOrTouch" :style="{zIndex: mobileTipsZIndex}")
-          button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
-            img.icon(src="@/assets/press-and-hold.svg")
-            span Mobile Tips
-          MobileTips(:visible="mobileTipsIsVisible")
+      .controls(v-if="isVisible" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
+        section
+          //- Explore
+          .button-wrap
+            .segmented-buttons
+              button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
+                img.icon.sunglasses(src="@/assets/sunglasses.svg")
+                span Explore
+              button(@click.left="toggleLiveIsVisible" :class="{ active: liveIsVisible}")
+                img.icon.camera(src="@/assets/camera.svg")
+                span(v-if="liveSpaces.length") {{ liveSpaces.length }}
+            Explore(:visible="exploreIsVisible")
+            Live(:visible="liveIsVisible" :spaces="liveSpaces" :loading="isLoadingLiveSpaces")
+          //- Favorites
+          .button-wrap
+            .segmented-buttons
+              button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+                img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+                img.icon(v-else src="@/assets/heart-empty.svg")
+              button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
+                img.icon.down-arrow(src="@/assets/down-arrow.svg" :class="{ 'is-mobile-icon': isMobile }")
+                span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
+            Favorites(:visible="favoritesIsVisible")
+        section
+          //- Removed
+          .button-wrap
+            button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+              img.refresh.icon(src="@/assets/remove.svg")
+              span Removed
+            Removed(:visible="removedIsVisible")
+          //- Tags and Links
+          .button-wrap
+            .segmented-buttons
+              button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
+                span Tags
+              button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
+                span Links
+            Links(:visible="linksIsVisible")
+            Tags(:visible="tagsIsVisible")
+          //- Mobile Tips
+          .button-wrap(v-if="isMobileOrTouch" :style="{zIndex: mobileTipsZIndex}")
+            button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
+              img.icon(src="@/assets/press-and-hold.svg")
+              span Mobile Tips
+            MobileTips(:visible="mobileTipsIsVisible")
 
   .right(v-if="!isMobileOrTouch" :class="{'is-embed': isEmbed}")
     SpaceZoom
@@ -411,9 +410,6 @@ export default {
   right 8px
   max-width 100%
   pointer-events none
-  transition 0.2s opacity
-  &.fade-out
-    opacity 0
   .right
     pointer-events all
     @media(max-width 460px)
@@ -433,18 +429,20 @@ footer
     margin 0
     height 11px
   .controls
-    margin-top 6px
-  > section
-    display flex
-    > .button-wrap
-      pointer-events all
-      margin-left 6px
-      display inline-block
-      dialog
-        top initial
-        bottom calc(100% - 8px)
-      &:first-child
-        margin-left 0
+    transition 0.2s opacity
+    > section
+      display flex
+      &:last-child
+        margin-top 6px
+      > .button-wrap
+        pointer-events all
+        margin-left 6px
+        display inline-block
+        dialog
+          top initial
+          bottom calc(100% - 8px)
+        &:first-child
+          margin-left 0
 
   .segmented-buttons
     .down-arrow

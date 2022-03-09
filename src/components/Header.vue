@@ -629,8 +629,6 @@ header
   display flex
   justify-content space-between
   transition 0.2s opacity
-  &.fade-out
-    opacity 0
   nav,
   aside
     pointer-events none
