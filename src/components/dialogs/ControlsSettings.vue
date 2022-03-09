@@ -69,5 +69,5 @@ export default {
 <style lang="stylus">
 .controls-settings
   overflow auto
-  width 218px
+  width 222px
 </style>
