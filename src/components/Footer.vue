@@ -379,7 +379,6 @@ export default {
       const counterScale = utils.roundFloat(1 / viewport.scale)
       const left = Math.round(viewport.offsetLeft)
       const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height)
-      // top = Math.max(top, -80)
       let style
       if (scale > 1) {
         style = {
