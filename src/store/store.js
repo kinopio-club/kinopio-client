@@ -185,10 +185,14 @@ const store = createStore({
     updatePageSizes: (state) => {
       const body = document.body
       const html = document.documentElement
-      state.pageWidth = Math.max(state.maxPageSizeWidth, body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
-      state.pageHeight = Math.max(state.maxPageSizeHeight, body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
-      state.viewportWidth = utils.visualViewport().width
-      state.viewportHeight = utils.visualViewport().height
+      const pageWidth = Math.max(state.maxPageSizeWidth, body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
+      const pageHeight = Math.max(state.maxPageSizeHeight, body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+      const viewportWidth = utils.visualViewport().width
+      const viewportHeight = utils.visualViewport().height
+      state.pageWidth = Math.round(pageWidth)
+      state.pageHeight = Math.round(pageHeight)
+      state.viewportWidth = Math.round(viewportWidth)
+      state.viewportHeight = Math.round(viewportHeight)
     },
     updateMaxPageSizes: (state, { width, height }) => {
       state.maxPageSizeWidth = width
@@ -367,6 +371,7 @@ const store = createStore({
     triggerUpdateRemoteDropGuideLine: () => {},
     triggerUpdateStopRemoteUserDropGuideLine: () => {},
     triggerUpdatePositionInVisualViewport: () => {},
+    triggerHideTouchInterface: () => {},
     triggerUpgradeUserIsVisible: () => {},
     triggerUploadComplete: () => {},
     triggerPauseAllAudio: () => {},
@@ -1193,6 +1198,9 @@ const store = createStore({
     },
     spaceCounterZoomDecimal: (state, getters) => {
       return 1 / getters.spaceZoomDecimal
+    },
+    isTouchDevice: (state) => {
+      return state.isTouchDevice || utils.isMobile()
     }
   },
 

@@ -111,6 +111,29 @@ export default {
     }
     return height
   },
+  dialogIsVisible () {
+    let elements = document.querySelectorAll('dialog')
+    let dialogs = []
+    elements.forEach(dialog => {
+      if (dialog.className !== 'card-details') {
+        dialogs.push(dialog)
+      }
+    })
+    const dialogIsVisible = Boolean(dialogs.length)
+    return dialogIsVisible
+  },
+  shouldIgnoreTouchInteraction (event) {
+    if (!event) { return true }
+    const isScroll = event.type === 'scroll'
+    const isResize = event.type === 'resize'
+    const dialogIsVisible = this.dialogIsVisible()
+    if (dialogIsVisible) { return true }
+    if (isScroll || isResize) { return }
+    const fromDialog = event.target.closest('dialog')
+    const fromHeader = event.target.closest('header')
+    const fromFooter = event.target.closest('footer')
+    return fromDialog || fromHeader || fromFooter || dialogIsVisible
+  },
   cursorPositionInViewport (event) {
     let x, y
     if (event.touches) {
@@ -141,30 +164,34 @@ export default {
   },
   visualViewport () {
     const visualViewport = window.visualViewport
+    let viewport
     if (visualViewport) {
-      return {
+      viewport = {
         width: visualViewport.width,
         height: visualViewport.height,
         scale: visualViewport.scale,
         offsetLeft: Math.max(visualViewport.offsetLeft, 0),
-        offsetRight: Math.max(visualViewport.offsetRight, 0),
         offsetTop: Math.max(visualViewport.offsetTop, 0),
         pageLeft: visualViewport.pageLeft,
         pageTop: visualViewport.pageTop
       }
     } else {
       // firefox fallback, doesn't support pinch zooming
-      return {
+      viewport = {
         width: document.documentElement.clientWidth,
         height: document.documentElement.clientHeight,
         scale: document.documentElement.clientWidth / window.innerWidth,
         offsetLeft: 0,
-        offsetRight: 0,
         offsetTop: 0,
         pageLeft: window.scrollX,
         pageTop: window.scrollY
       }
     }
+    viewport.offsetLeft = Math.round(viewport.offsetLeft)
+    viewport.offsetTop = Math.round(viewport.offsetTop)
+    viewport.pageLeft = Math.round(viewport.pageLeft)
+    viewport.pageTop = Math.round(viewport.pageTop)
+    return viewport
   },
   pinchCounterZoomDecimal () {
     return 1 / this.visualViewport().scale
@@ -233,6 +260,11 @@ export default {
     if (!match) { return 0 }
     const doubleSpaces = match[0].length / 2
     return doubleSpaces
+  },
+  roundFloat (number) {
+    // https://stackoverflow.com/a/9453447
+    // returns 1.23
+    return Math.round(number * 100) / 100
   },
   arrayExists (array) {
     this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayExists' })
@@ -376,6 +408,7 @@ export default {
     return string.replace(/\.$/g, '')
   },
   removeTrailingSlash (string) {
+    if (!string) { return }
     // https://regexr.com/68l08
     return string.replace(/\/$/g, '')
   },

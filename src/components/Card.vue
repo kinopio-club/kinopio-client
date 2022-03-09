@@ -636,7 +636,8 @@ export default {
       let cardHasUrlPreviewInfo = Boolean(this.card.urlPreviewTitle || this.card.urlPreviewDescription || this.card.urlPreviewImage)
       // TEMP experiment: remove card.urlPreviewErrorUrl checking to eliminate false positives. Observe if there's a downside irl and if this attribute should be removed entirely?
       // const isErrorUrl = this.card.urlPreviewErrorUrl && (this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl)
-      const url = this.card.urlPreviewUrl
+      let url = this.card.urlPreviewUrl
+      url = utils.removeTrailingSlash(url)
       cardHasUrlPreviewInfo = Boolean(cardHasUrlPreviewInfo && url)
       const nameHasUrl = this.card.name.includes(url)
       return this.card.urlPreviewIsVisible && cardHasUrlPreviewInfo && nameHasUrl
@@ -1362,6 +1363,8 @@ export default {
           event.preventDefault()
           const spaceId = utils.spaceIdFromUrl(url)
           this.changeSpace({ id: spaceId })
+        } else if (event.type === 'touchend') {
+          window.location = url
         } else {
           // open url natively
         }
