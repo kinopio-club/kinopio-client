@@ -35,7 +35,7 @@ export default {
         this.hidden()
       }
     })
-    // window.addEventListener('scroll', this.updateOffscreenMarkers)
+    window.addEventListener('scroll', this.updateOffscreenMarkers)
     offscreenMarkers.addEventListener('message', event => {
       this.offscreenCardsByDirection = event.data
     })
@@ -233,7 +233,7 @@ edge = 4px
   pointer-events none
   z-index 1
   opacity 0.5
-  transition 0.2s opacity
+  transition 0.2s all
   .marker
     width width
     height height
