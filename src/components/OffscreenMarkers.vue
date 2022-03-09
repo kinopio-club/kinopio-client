@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.offscreen-markers(:style="styles" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
+aside.offscreen-markers(v-if="isVisible" :style="styles" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
@@ -68,6 +68,19 @@ export default {
     }
   },
   computed: {
+    isVisible () {
+      const isTouchDevice = this.$store.getters.isTouchDevice
+      // only hide markers on touch devices
+      if (!isTouchDevice) {
+        return true
+      }
+      let isVisible = true
+      if (this.dialogsVisible) { isVisible = false }
+      return isVisible
+    },
+    dialogsVisible () {
+      return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleSelectedActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
+    },
     styles () {
       const viewport = this.viewport
       const pinchZoomScale = viewport.scale
