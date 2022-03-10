@@ -99,7 +99,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
           User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
           UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs" :dialogOnRight="true")
 
-      .controls(v-if="!isEmbed")
+      .controls(v-if="isSpace")
         .top-controls
           //- Share
           .button-wrap(v-if="!isAddPage")
@@ -111,8 +111,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
             button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
               span {{notificationsUnreadCount}}
             Notifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
-
-        .bottom-controls(v-if="!isAddPage")
+        .bottom-controls
           ResetPassword
           //- Sign Up or In
           .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
@@ -120,6 +119,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
               span Sign Up or In
               Loader(:visible="loadingSignUpOrIn")
             SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
+          //- Upgrade
           .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
             button(@click.left.stop="triggerUpgradeUserIsVisible")
               span Upgrade
@@ -269,6 +269,11 @@ export default {
     },
     isEmbed () { return this.$store.state.isEmbed },
     isAddPage () { return this.$store.state.isAddPage },
+    isSpace () {
+      const isPage = this.isEmbed || this.isAddPage
+      const isSpace = !isPage
+      return isSpace
+    },
     currentSpaceUrl () { return this.$store.getters['currentSpace/url'] },
     shouldShowNewStuffIsUpdated () {
       const newStuffIsUpdated = this.$store.state.newStuffIsUpdated
