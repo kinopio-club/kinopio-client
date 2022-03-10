@@ -1,6 +1,6 @@
 <template lang="pug">
 main
-  aside.notifications
+  aside.notifications(v-if="cardsCreatedIsOverLimit")
     .persistent-item.danger
       p To add more cards, you'll need to upgrade for $5/month
       .row
@@ -64,6 +64,7 @@ export default {
     // update background
 
     // get/support tags? /
+    // max characters
   },
   mounted () {
     window.addEventListener('mouseup', this.stopInteractions)
@@ -89,7 +90,8 @@ export default {
     }
   },
   computed: {
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] }
   },
   methods: {
     // focusName (position) {
