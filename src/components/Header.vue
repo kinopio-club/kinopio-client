@@ -112,7 +112,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
               span {{notificationsUnreadCount}}
             Notifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
 
-        .bottom-controls
+        .bottom-controls(v-if="!isAddPage")
           ResetPassword
           //- Sign Up or In
           .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
