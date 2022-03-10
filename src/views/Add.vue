@@ -7,7 +7,7 @@ main
         a(href="https://kinopio.club")
           button Upgrade →
 
-  dialog.card-details(data-name="add")
+  dialog.card-details(data-name="add-card")
     section
       .textarea-wrap
         textarea.name(
@@ -16,10 +16,17 @@ main
           placeholder="Type text here, or paste a URL"
         )
       .row
-        button
-          span last space
-          img.down-arrow(src="@/assets/down-arrow.svg")
-          //- Loader(:visible=loading.spaces), disable
+        .button-wrap
+          button(@click.stop="toggleSpacePickerIsVisible")
+            span last space
+            img.down-arrow(src="@/assets/down-arrow.svg")
+            //- Loader(:visible=loading.spaces), disable
+          SpacePicker(
+            :visible="spacePickerIsVisible"
+            :shouldShowNewSpace="true"
+            @closeDialog=""
+            @selectSpace=""
+          )
       .row
         button
           img.icon(src="@/assets/add.svg")
@@ -29,17 +36,19 @@ main
         .badge.success Card Added
         //- .badge.danger Something Went Wrong (use generic, connection error)
 
-//- TODO use background/tint from current selected space (or blank)
-
 </template>
 
 <script>
+import SpacePicker from '@/components/dialogs/SpacePicker.vue'
+import Loader from '@/components/Loader.vue'
+
 let processQueueIntervalTimer
 
 export default {
   name: 'Inbox',
   components: {
-    // BoxSelecting
+    SpacePicker,
+    Loader
   },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')
@@ -49,7 +58,6 @@ export default {
   },
   created () {
     console.log('currentUserIsSignedIn', this.currentUserIsSignedIn)
-
     // TODO split out cardDetailsName textarea component
     // handle autofocus on input field
 
@@ -86,7 +94,8 @@ export default {
         addingCard: false
       },
       spaces: [],
-      selectedSpace: {}
+      selectedSpace: {},
+      spacePickerIsVisible: false
     }
   },
   computed: {
@@ -94,6 +103,11 @@ export default {
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] }
   },
   methods: {
+    toggleSpacePickerIsVisible () {
+      const value = !this.spacePickerIsVisible
+      this.closeAllDialogs()
+      this.spacePickerIsVisible = value
+    },
     // focusName (position) {
     //   const element = this.$refs.name
     //   const length = this.name.length
@@ -107,20 +121,23 @@ export default {
     //   }
     //   this.triggerUpdatePositionInVisualViewport()
     // },
-
+    closeAllDialogs () {
+      this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
+      this.spacePickerIsVisible = false
+    },
     stopInteractions (event) {
+      console.log('💣 stopInteractions')
       let shouldIgnore
       const dialog = event.target.closest('dialog')
       if (!dialog) {
         shouldIgnore = false
-      } else if (dialog && dialog.dataset.name === 'add') {
+      } else if (dialog && dialog.dataset.name === 'add-card') {
         shouldIgnore = false
       } else {
         shouldIgnore = true
       }
       if (shouldIgnore) { return }
-      console.log('💣 stopInteractions')
-      this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
+      this.closeAllDialogs()
     }
   }
 }
@@ -131,7 +148,7 @@ main
   position absolute
   top 50px
   padding 8px
-  dialog
+  .card-details
     display block
     position static
 </style>
