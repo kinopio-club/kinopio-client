@@ -7,11 +7,11 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/quick-capture',
-      name: 'quick-capture',
-      component: () => import('./views/QuickCapture.vue'),
+      path: '/add',
+      name: 'add',
+      component: () => import('./views/Add.vue'),
       beforeEnter: (to, from, next) => {
-        store.commit('isQuickCapture', true)
+        store.commit('isAddPage', true)
         next()
       }
     }, {

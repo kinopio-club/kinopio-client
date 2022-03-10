@@ -72,10 +72,10 @@ export default {
   computed: {
     isVisible () {
       const isTouchDevice = this.$store.getters.isTouchDevice
-      if (!isTouchDevice) { return !this.isQuickCapture }
+      if (!isTouchDevice) { return !this.isAddPage }
       let isVisible = true
       if (this.dialogsVisible) { isVisible = false }
-      return isVisible && !this.isQuickCapture
+      return isVisible && !this.isAddPage
     },
     dialogsVisible () {
       return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleSelectedActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
@@ -93,7 +93,7 @@ export default {
       }
       return styles
     },
-    isQuickCapture () { return this.$store.state.isQuickCapture },
+    isAddPage () { return this.$store.state.isAddPage },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     hasDirectionTopLeft () { return this.hasDirection('topleft') },
     hasDirectionTopRight () { return this.hasDirection('topright') },

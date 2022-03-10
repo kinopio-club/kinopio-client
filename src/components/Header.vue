@@ -28,11 +28,11 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
             img.down-arrow(src="@/assets/down-arrow.svg")
           About(:visible="aboutIsVisible")
           KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-      .space-meta-rows(v-if="isQuickCapture")
+      .space-meta-rows(v-if="isAddPage")
         p
-          span.badge.info Quick Capture
+          span.badge.info Add Card
 
-      .space-meta-rows(v-if="!isQuickCapture")
+      .space-meta-rows(v-if="!isAddPage")
         .space-details-row.segmented-buttons
           //- Current Space
           .button-wrap
@@ -102,7 +102,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
       .controls(v-if="!isEmbed")
         .top-controls
           //- Share
-          .button-wrap(v-if="!isQuickCapture")
+          .button-wrap(v-if="!isAddPage")
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
               span Share
             Share(:visible="shareIsVisible")
@@ -268,7 +268,7 @@ export default {
       }
     },
     isEmbed () { return this.$store.state.isEmbed },
-    isQuickCapture () { return this.$store.state.isQuickCapture },
+    isAddPage () { return this.$store.state.isAddPage },
     currentSpaceUrl () { return this.$store.getters['currentSpace/url'] },
     shouldShowNewStuffIsUpdated () {
       const newStuffIsUpdated = this.$store.state.newStuffIsUpdated

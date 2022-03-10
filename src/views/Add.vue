@@ -1,6 +1,6 @@
 <template lang="pug">
 main
-  dialog.card-details(data-name="quick-capture")
+  dialog.card-details(data-name="add")
     section
       .textarea-wrap
         textarea.name(
@@ -104,7 +104,7 @@ export default {
       const dialog = event.target.closest('dialog')
       if (!dialog) {
         shouldIgnore = false
-      } else if (dialog && dialog.dataset.name === 'quick-capture') {
+      } else if (dialog && dialog.dataset.name === 'add') {
         shouldIgnore = false
       } else {
         shouldIgnore = true

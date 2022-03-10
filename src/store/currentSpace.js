@@ -653,7 +653,7 @@ export default {
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
       context.commit('isLoadingSpace', true, { root: true })
-      context.commit('isQuickCapture', false, { root: true })
+      context.commit('isAddPage', false, { root: true })
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id) || space
       const user = context.rootState.currentUser
