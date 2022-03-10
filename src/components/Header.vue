@@ -89,8 +89,8 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
             img.icon.cancel(src="@/assets/add.svg")
 
     .right
-      .space-users
-        .users.spectators(v-if="!isEmbed")
+      .space-users(v-if="isSpace")
+        .users.spectators
           User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
           User(v-if="!currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
         .users
@@ -98,6 +98,9 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
           User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
           User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
           UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs" :dialogOnRight="true")
+      .space-users(v-if="!isSpace")
+        .users.no-padding
+          User(:user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
 
       .controls(v-if="isSpace")
         .top-controls
@@ -823,6 +826,9 @@ header
     padding 0 7px
     border-radius 10px
     vertical-align 0
+
+  .no-padding
+    padding 0 !important
 
 .badge-jiggle
   animation-name notificationJiggle
