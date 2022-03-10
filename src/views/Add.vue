@@ -1,5 +1,13 @@
 <template lang="pug">
 main
+  //- .notifications
+  section
+    .badge.danger
+      p To add more cards, you'll need to upgrade for $5/month
+      .row
+        a(href="https://kinopio.club")
+          button Go to Kinopio to Upgrade →
+
   dialog.card-details(data-name="add")
     section
       .textarea-wrap
@@ -120,6 +128,8 @@ export default {
 <style lang="stylus">
 main
   dialog
-    top 60px
-    left 25px
+    display block
+    position static
+    // top 60px
+    // left 25px
 </style>

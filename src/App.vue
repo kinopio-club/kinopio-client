@@ -4,6 +4,7 @@
   @touchmove="broadcastCursor"
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
+  :class="{ 'is-add-page': isAddPage }"
 )
   #layout-viewport(:style="{ background: backgroundTint }")
   MagicPaint
@@ -96,11 +97,14 @@ export default {
         return false
       }
     },
+    isAddPage () { return this.$store.state.isAddPage },
     pageWidth () {
+      if (this.isAddPage) { return }
       const size = Math.max(this.$store.state.pageWidth, this.$store.state.viewportWidth)
       return size + 'px'
     },
     pageHeight () {
+      if (this.isAddPage) { return }
       const size = Math.max(this.$store.state.pageHeight, this.$store.state.viewportHeight)
       return size + 'px'
     },
@@ -286,6 +290,8 @@ body
     pointer-events none
     z-index 100
     font-size 12px
+  &.is-add-page
+    background-image none
 
 img,
 video
