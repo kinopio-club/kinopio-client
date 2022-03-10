@@ -31,6 +31,8 @@ main
         button
           img.icon(src="@/assets/add.svg")
           span Add Card
+        span.badge.secondary.shortcut-tip {{meta}}–Enter
+        //- span.shortcut-tip {{meta}}–Enter
           //- Loader(:visible=loading.addingCard), , disable
       .row
         .badge.success Card Added
@@ -41,6 +43,7 @@ main
 <script>
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 let processQueueIntervalTimer
 
@@ -100,7 +103,9 @@ export default {
   },
   computed: {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] }
+    cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
+    meta () { return utils.metaKey() }
+
   },
   methods: {
     toggleSpacePickerIsVisible () {
@@ -151,4 +156,6 @@ main
   .card-details
     display block
     position static
+  .shortcut-tip
+    margin-left 5px
 </style>
