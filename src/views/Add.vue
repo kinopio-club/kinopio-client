@@ -80,6 +80,7 @@ export default {
   mounted () {
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
+    window.addEventListener('keyup', this.handleShortcuts)
     // retry failed sync operations every 5 seconds
     processQueueIntervalTimer = setInterval(() => {
       this.$store.dispatch('api/processQueueOperations')
@@ -89,6 +90,7 @@ export default {
   beforeUnmount () {
     window.removeEventListener('mouseup', this.stopInteractions)
     window.removeEventListener('touchend', this.stopInteractions)
+    window.removeEventListener('keyup', this.handleShortcuts)
     clearInterval(processQueueIntervalTimer)
   },
   data () {
@@ -119,6 +121,9 @@ export default {
 
   },
   methods: {
+    handleShortcuts (event) {
+      if (event.key === 'Escape') { this.closeAllDialogs() }
+    },
     textareaSizes () {
       const textarea = this.$refs.name
       let modifier = 0
@@ -149,6 +154,7 @@ export default {
     createCard () {
       console.log('post todo api', this.newName)
       this.clear()
+      if (!this.newName) { }
     },
     clear () {
       this.newName = ''
