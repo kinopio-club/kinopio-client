@@ -9,22 +9,21 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
       .button-wrap
         a(href="https://help.kinopio.club/about/")
           button About Kinopio →
-    template(v-if="!isAddPage")
-      .row
-        .button-wrap
-          button(@click.left.stop="toggleHelpIsVisible" :class="{active: helpIsVisible}")
-            span Help
-          Help(:visible="helpIsVisible")
-        .button-wrap
-          button(@click.left.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
-            span What's New
-            img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
-          WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
-      .row
-        a(href="https://kinopio.club/pop-up-shop-u9XxpuIzz2_LvQUAayl65")
-          button
-            img.icon(src="@/assets/sticker.svg")
-            span Pop Up Shop →
+    .row
+      .button-wrap
+        button(@click.left.stop="toggleHelpIsVisible" :class="{active: helpIsVisible}")
+          span Help
+        Help(:visible="helpIsVisible")
+      .button-wrap
+        button(@click.left.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
+          span What's New
+          img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
+        WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
+    .row
+      a(href="https://kinopio.club/pop-up-shop-u9XxpuIzz2_LvQUAayl65")
+        button
+          img.icon(src="@/assets/sticker.svg")
+          span Pop Up Shop →
   section(v-if="!isAddPage")
     .row
       .button-wrap
@@ -36,7 +35,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         button(@click.left.stop="toggleAppsIsVisible" :class="{active: appsIsVisible}")
           span Desktop and Mobile Apps
         Apps(:visible="appsIsVisible")
-  section(v-if="!isAddPage")
+  section
     .row
       p Kinopio is made possible by people like you
     .row

@@ -14,13 +14,16 @@ main
           ref="name"
           rows="1"
           placeholder="Type text here, or paste a URL"
+          v-model="name"
+          :maxlength="maxCardLength"
+          @keydown.enter.exact.prevent="createCard"
         )
       .row
         .button-wrap
           button(@click.stop="toggleSpacePickerIsVisible")
-            span last space
+            span Last Space
             img.down-arrow(src="@/assets/down-arrow.svg")
-            //- Loader(:visible=loading.spaces), disable
+            //- Loader(:visible=loading.userSpaces), disable
           SpacePicker(
             :visible="spacePickerIsVisible"
             :shouldShowNewSpace="true"
@@ -28,22 +31,22 @@ main
             @selectSpace=""
           )
       .row
-        button
-          img.icon(src="@/assets/add.svg")
-          span Add Card
-        span.badge.secondary.shortcut-tip {{meta}}–Enter
-        //- span.shortcut-tip {{meta}}–Enter
-          //- Loader(:visible=loading.addingCard), , disable
-      .row
-        .badge.success Card Added
-        //- .badge.danger Something Went Wrong (use generic, connection error)
+        .button-wrap
+          button
+            img.icon(src="@/assets/add.svg")
+            span Add Card
+            //- Loader(:visible=loading.createCard), disable
+          .badge.label-badge
+            span Enter
+      //- .row
+        //- .badge.success Card Added
+        //- .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
 </template>
 
 <script>
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
-import utils from '@/utils.js'
 
 let processQueueIntervalTimer
 
@@ -61,11 +64,8 @@ export default {
   },
   created () {
     console.log('currentUserIsSignedIn', this.currentUserIsSignedIn)
-    // TODO split out cardDetailsName textarea component
-    // handle autofocus on input field
-
     // to initSpaces method =>
-    // loading.spaces = true
+    // loading.userSpaces = true
     // get user spaces?
     // figure out current space
     // loading.spaces false
@@ -84,6 +84,7 @@ export default {
     processQueueIntervalTimer = setInterval(() => {
       this.$store.dispatch('api/processQueueOperations')
     }, 5000)
+    this.focusName()
   },
   beforeUnmount () {
     window.removeEventListener('mouseup', this.stopInteractions)
@@ -92,43 +93,67 @@ export default {
   },
   data () {
     return {
-      loading: {
-        spaces: false,
-        addingCard: false
-      },
       spaces: [],
       selectedSpace: {},
-      spacePickerIsVisible: false
+      spacePickerIsVisible: false,
+      loading: {
+        createCard: false,
+        userSpaces: false
+      },
+      newName: ''
     }
   },
   computed: {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
-    meta () { return utils.metaKey() }
+    maxCardLength () { return 300 },
+    name: {
+      get () {
+        return this.newName
+      },
+      set (newName) {
+        this.newName = newName
+        this.textareaSizes()
+      }
+    }
 
   },
   methods: {
+    textareaSizes () {
+      const textarea = this.$refs.name
+      let modifier = 0
+      if (this.canEditCard) {
+        modifier = 1
+      }
+      textarea.style.height = textarea.scrollHeight + modifier + 'px'
+    },
+
     toggleSpacePickerIsVisible () {
       const value = !this.spacePickerIsVisible
       this.closeAllDialogs()
       this.spacePickerIsVisible = value
     },
-    // focusName (position) {
-    //   const element = this.$refs.name
-    //   const length = this.name.length
-    //   if (!element) { return }
-    //   element.focus()
-    //   if (position) {
-    //     element.setSelectionRange(position, position)
-    //   }
-    //   if (length) {
-    //     element.setSelectionRange(length, length)
-    //   }
-    //   this.triggerUpdatePositionInVisualViewport()
-    // },
+    focusName () {
+      const element = this.$refs.name
+      const length = element.value.length
+      if (!element) { return }
+      element.focus()
+      if (length) {
+        element.setSelectionRange(0, length)
+      }
+    },
     closeAllDialogs () {
       this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
       this.spacePickerIsVisible = false
+    },
+    createCard () {
+      console.log('post todo api', this.newName)
+      this.clear()
+    },
+    clear () {
+      this.newName = ''
+      // clear errors
+      // clear loading
     },
     stopInteractions (event) {
       console.log('💣 stopInteractions')
@@ -156,6 +181,11 @@ main
   .card-details
     display block
     position static
-  .shortcut-tip
-    margin-left 5px
+  .label-badge
+    position static
+    display inline-block
+    min-height 16px
+    padding 0px 3px
+    vertical-align 0
+    margin-left 4px
 </style>
