@@ -18,6 +18,7 @@ main
           :maxlength="maxCardLength"
           @keydown.enter.exact.prevent="createCard"
         )
+      //- space
       .row
         .button-wrap
           button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible, active: loading.userSpaces}")
@@ -32,6 +33,7 @@ main
             @selectSpace="updateCurrentSpace"
             :selectedSpace="currentSpace"
           )
+      //- add card
       .row
         .button-wrap
           button(@click.stop="createCard" :class="{active: loading.createCard}")
@@ -44,10 +46,11 @@ main
         //- success
         template(v-if="success")
           .badge.success
-            span Card Added to {{prevSucccessSpace.name}}
+            span Card Added to Space
             .row
-              a(:href="prevSucccessSpace.id")
-                button {{prevSucccessSpace.name}}
+              a(:href="prevSuccessSpace.id")
+                button
+                  span {{prevSuccessSpace.name}}
         //- error: card limit
         template(v-if="cardsCreatedIsOverLimit")
           .badge.danger
@@ -57,6 +60,8 @@ main
               button Upgrade →
         //- error: connection
         .badge.danger(v-if="error.connection") (シ_ _)シ Something went wrong, Please try again or contact support
+        //- error: max card length
+        .badge.danger(v-if="nameExceedsMaxCardLength") To fit small screens, cards can't be longer than {{maxCardLength}} characters
 
 </template>
 
@@ -67,6 +72,7 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 
 import dayjs from 'dayjs'
+import { nanoid } from 'nanoid'
 
 let processQueueIntervalTimer, shouldCancel
 
@@ -110,7 +116,8 @@ export default {
         userSpaces: false
       },
       error: {
-        connection: false
+        connection: false,
+        maxCardLength: false
       },
       success: false,
       newName: ''
@@ -129,10 +136,11 @@ export default {
         this.newName = newName
         this.textareaSizes()
         this.clearErrorsAndSuccess()
+        this.updateMaxCardLengthError()
       }
     },
     isErrorOrSuccess () {
-      return this.cardsCreatedIsOverLimit || this.error.connection || this.success
+      return this.error.maxCardLength || this.cardsCreatedIsOverLimit || this.error.connection || this.success
     }
   },
   methods: {
@@ -162,21 +170,39 @@ export default {
         element.setSelectionRange(0, length)
       }
     },
-    createCard () {
+    async createCard () {
       this.clearErrorsAndSuccess()
       if (this.cardsCreatedIsOverLimit) { return }
+      if (this.nameExceedsMaxCardLength) { return }
       if (this.loading.createCard) { return }
       if (!this.newName) { return }
       this.loading.createCard = true
-      console.log('post todo api', this.newName, this.currentSpace)
-      // POST card via api
+      console.log('🛫 create card', this.newName, this.currentSpace)
+      const body = [{
+        id: nanoid(),
+        name: this.newName,
+        x: 100,
+        y: 100,
+        z: 1,
+        spaceId: this.currentSpace.id
+      }]
+      await this.$store.dispatch('api/createCards', body)
       this.loading.createCard = false
-      this.currentSpace = this.prevSuccessSpace
+      this.prevSuccessSpace = utils.clone(this.currentSpace)
+      this.success = true
       this.newName = ''
+      this.focusName()
     },
     clearErrorsAndSuccess () {
       this.error.connection = false
       this.success = false
+    },
+    updateMaxCardLengthError () {
+      if (this.newName.length >= this.maxCardLength) {
+        this.error.maxCardLength = true
+      } else {
+        this.error.maxCardLength = false
+      }
     },
 
     // spaces
@@ -288,4 +314,7 @@ main
     margin-left 4px
   .loader
     margin-left 5px
+  .badge
+    button
+      margin-top 2px
 </style>
