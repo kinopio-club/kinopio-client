@@ -1,11 +1,11 @@
 <template lang="pug">
 main
-  aside.notifications(v-if="cardsCreatedIsOverLimit")
-    .persistent-item.danger
-      p To add more cards, you'll need to upgrade for $5/month
-      .row
-        a(href="https://kinopio.club")
-          button Upgrade →
+  //- aside.notifications(v-if="cardsCreatedIsOverLimit")
+  //-   .persistent-item.danger
+  //-     p To add more cards, you'll need to upgrade for $5/month
+  //-     .row
+  //-       a(href="https://kinopio.club")
+  //-         button Upgrade →
 
   dialog.card-details(data-name="add-card")
     section
@@ -20,13 +20,14 @@ main
         )
       .row
         .button-wrap
-          button(@click.stop="toggleSpacePickerIsVisible")
+          button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
             span Last Space
             img.down-arrow(src="@/assets/down-arrow.svg")
             //- Loader(:visible=loading.userSpaces), disable
           SpacePicker(
             :visible="spacePickerIsVisible"
             :shouldShowNewSpace="true"
+            :userSpaces="spaces"
             @closeDialog=""
             @selectSpace=""
           )
@@ -47,35 +48,17 @@ main
 <script>
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
+import cache from '@/cache.js'
 
-let processQueueIntervalTimer
+import dayjs from 'dayjs'
+
+let processQueueIntervalTimer, shouldCancel
 
 export default {
   name: 'Inbox',
   components: {
     SpacePicker,
     Loader
-  },
-  beforeCreate () {
-    this.$store.dispatch('currentUser/init')
-    // this.$store.dispatch('currentSpace/init')
-    // const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
-    // console.log('currentUserIsSignedIn', currentUserIsSignedIn)
-  },
-  created () {
-    console.log('currentUserIsSignedIn', this.currentUserIsSignedIn)
-    // to initSpaces method =>
-    // loading.userSpaces = true
-    // get user spaces?
-    // figure out current space
-    // loading.spaces false
-    // handles anon and remote (w currentUserIsSignedIn)
-
-    // update this.selectedSpace = last space?
-    // update background
-
-    // get/support tags? /
-    // max characters
   },
   mounted () {
     window.addEventListener('mouseup', this.stopInteractions)
@@ -86,6 +69,7 @@ export default {
       this.$store.dispatch('api/processQueueOperations')
     }, 5000)
     this.focusName()
+    this.init()
   },
   beforeUnmount () {
     window.removeEventListener('mouseup', this.stopInteractions)
@@ -96,6 +80,7 @@ export default {
   data () {
     return {
       spaces: [],
+      currentSpace: {},
       selectedSpace: {},
       spacePickerIsVisible: false,
       loading: {
@@ -118,11 +103,13 @@ export default {
         this.textareaSizes()
       }
     }
-
   },
   methods: {
-    handleShortcuts (event) {
-      if (event.key === 'Escape') { this.closeAllDialogs() }
+    async init () {
+      this.loading.userSpaces = true
+      this.$store.dispatch('currentUser/init')
+      await this.updateUserSpaces()
+      this.loading.userSpaces = false
     },
     textareaSizes () {
       const textarea = this.$refs.name
@@ -133,11 +120,8 @@ export default {
       textarea.style.height = textarea.scrollHeight + modifier + 'px'
     },
 
-    toggleSpacePickerIsVisible () {
-      const value = !this.spacePickerIsVisible
-      this.closeAllDialogs()
-      this.spacePickerIsVisible = value
-    },
+    // new card
+
     focusName () {
       const element = this.$refs.name
       const length = element.value.length
@@ -147,32 +131,102 @@ export default {
         element.setSelectionRange(0, length)
       }
     },
+    createCard () {
+      console.log('post todo api', this.newName)
+      this.clear()
+      if (this.loading.createCard) { return }
+      if (!this.newName) { }
+      // asdfsadf
+      // this.newName = ''
+    },
+    clear () {
+      // clear errors
+      // clear loading
+    },
+
+    // spaces
+
+    async updateUserSpaces () {
+      let spaces = cache.getAllSpaces()
+      if (this.currentUserIsSignedIn) {
+        try {
+          const remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
+          spaces = remoteSpaces || spaces
+        } catch (error) {
+          console.error('🚑', error)
+          // this.loading.error
+        }
+      }
+      spaces = this.sortSpacesByEditedAt(spaces)
+      spaces = this.updateFavoriteSpaces(spaces)
+      this.spaces = spaces
+    },
+    updateCurrentSpace (space) {
+      space = space || this.spaces[0]
+      console.log('🐙', space)
+      this.currentSpace = space
+      // set currentSpace , last accessed space (this.spaces[0])
+    },
+    sortSpacesByEditedAt (spaces) {
+      const sortedSpaces = spaces.sort((a, b) => {
+        const bEditedAt = dayjs(b.editedAt).unix()
+        const aEditedAt = dayjs(a.editedAt).unix()
+        return bEditedAt - aEditedAt
+      })
+      return sortedSpaces
+    },
+    orderByFavoriteSpaces (spaces) {
+      let favoriteSpaces = []
+      spaces = spaces.filter(space => {
+        if (space.isFavorite) {
+          favoriteSpaces.push(space)
+        } else {
+          return space
+        }
+      })
+      return favoriteSpaces.concat(spaces)
+    },
+    updateFavoriteSpaces (spaces) {
+      const userFavoriteSpaces = this.$store.state.currentUser.favoriteSpaces
+      const favoriteSpaceIds = userFavoriteSpaces.map(space => space.id)
+      spaces = spaces.map(space => {
+        if (favoriteSpaceIds.includes(space.id)) {
+          space.isFavorite = true
+        }
+        return space
+      })
+      spaces = this.orderByFavoriteSpaces(spaces)
+      return spaces
+    },
+
+    // handlers
+
     closeAllDialogs () {
       this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
       this.spacePickerIsVisible = false
     },
-    createCard () {
-      console.log('post todo api', this.newName)
-      this.clear()
-      if (!this.newName) { }
+    toggleSpacePickerIsVisible () {
+      const value = !this.spacePickerIsVisible
+      this.closeAllDialogs()
+      this.spacePickerIsVisible = value
     },
-    clear () {
-      this.newName = ''
-      // clear errors
-      // clear loading
+    handleShortcuts (event) {
+      if (event.key === 'Escape') { this.closeAllDialogs() }
+    },
+    shouldCancel (event) {
+      if (shouldCancel) {
+        shouldCancel = false
+        return true
+      }
+      if (event.target.nodeType === 9) { return true } // type 9 is Document
+      const fromHeader = event.target.closest('header')
+      const fromFooter = event.target.closest('footer')
+      const fromButton = event.target.closest('button')
+      return Boolean(fromButton || fromHeader || fromFooter)
     },
     stopInteractions (event) {
-      console.log('💣 stopInteractions')
-      let shouldIgnore
-      const dialog = event.target.closest('dialog')
-      if (!dialog) {
-        shouldIgnore = false
-      } else if (dialog && dialog.dataset.name === 'add-card') {
-        shouldIgnore = false
-      } else {
-        shouldIgnore = true
-      }
-      if (shouldIgnore) { return }
+      console.log('💣 stopInteractions', this.shouldCancel(event))
+      if (this.shouldCancel(event)) { return }
       this.closeAllDialogs()
     }
   }
