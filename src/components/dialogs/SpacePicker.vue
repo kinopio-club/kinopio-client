@@ -210,7 +210,9 @@ export default {
       space = utils.spaceDefaultBackground(space, currentUser)
       space = cache.updateIdsInSpace(space)
       console.log('🚚 create new space', space)
-      await this.$store.dispatch('api/createSpace', space)
+      if (this.currentUserIsSignedIn) {
+        await this.$store.dispatch('api/createSpace', space)
+      }
       this.isLoadingNewSpace = false
       this.selectSpace(space)
     },

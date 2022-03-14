@@ -50,7 +50,7 @@ main
             span To add more cards, you'll need to upgrade for $5/month
             .row
               a(:href="kinopioDomain")
-              button Upgrade →
+                button Upgrade →
         //- error: connection
         .badge.danger(v-if="error.general") (シ_ _)シ Something went wrong, Please try again or contact support
         //- error: max card length
@@ -60,7 +60,7 @@ main
           span You'll need to visit Kinopio once before you can add cards
           .row
             a(:href="kinopioDomain")
-            button Kinopio →
+              button Kinopio →
         //- error: spaces loading
         .badge.danger(v-if="error.spacesLoading")
           span Spaces loading, try again in a couple seconds
@@ -192,7 +192,7 @@ export default {
       }
       if (!this.newName) { return }
       this.loading.createCard = true
-      console.log('🛫 create card', this.newName, this.currentSpace)
+      console.log('🛫 create card', this.newName, this.currentSpace.name, this.currentSpace.id)
       const body = [{
         id: nanoid(),
         name: this.newName,
@@ -201,6 +201,7 @@ export default {
         z: 1,
         spaceId: this.currentSpace.id
       }]
+      cache.addToSpace({ cards: body, connections: [], connectionTypes: [] }, this.currentSpace.id)
       await this.$store.dispatch('api/createCards', body)
       this.loading.createCard = false
       this.prevSuccessSpace = utils.clone(this.currentSpace)
