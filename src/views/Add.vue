@@ -20,7 +20,7 @@ main
         )
       .row
         .button-wrap
-          button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
+          button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible, active: loading.userSpaces}")
             span(v-if="currentSpace.name") {{currentSpace.name}}
             span(v-else) Last Space
             img.down-arrow(src="@/assets/down-arrow.svg")
@@ -34,15 +34,29 @@ main
           )
       .row
         .button-wrap
-          button
+          button(@click.stop="createCard" :class="{active: loading.createCard}")
             img.icon(src="@/assets/add.svg")
             span Add Card
-            //- Loader(:visible=loading.createCard), disable
+            Loader(:visible="loading.createCard")
           .badge.label-badge
             span Enter
-      //- .row
-        //- .badge.success Card Added
-        //- .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+      .row(v-if="isErrorOrSuccess")
+        //- success
+        template(v-if="success")
+          .badge.success
+            span Card Added to {{prevSucccessSpace.name}}
+            .row
+              a(:href="prevSucccessSpace.id")
+                button {{prevSucccessSpace.name}}
+        //- error: card limit
+        template(v-if="cardsCreatedIsOverLimit")
+          .badge.danger
+            span To add more cards, you'll need to upgrade for $5/month
+            .row
+              a(:href="kinopioDomain")
+              button Upgrade →
+        //- error: connection
+        .badge.danger(v-if="error.connection") (シ_ _)シ Something went wrong, Please try again or contact support
 
 </template>
 
@@ -50,6 +64,7 @@ main
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
+import utils from '@/utils.js'
 
 import dayjs from 'dayjs'
 
@@ -94,10 +109,15 @@ export default {
         createCard: false,
         userSpaces: false
       },
+      error: {
+        connection: false
+      },
+      success: false,
       newName: ''
     }
   },
   computed: {
+    kinopioDomain () { return utils.kinopioDomain() },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
     maxCardLength () { return 300 },
@@ -108,7 +128,11 @@ export default {
       set (newName) {
         this.newName = newName
         this.textareaSizes()
+        this.clearErrorsAndSuccess()
       }
+    },
+    isErrorOrSuccess () {
+      return this.cardsCreatedIsOverLimit || this.error.connection || this.success
     }
   },
   methods: {
@@ -139,18 +163,20 @@ export default {
       }
     },
     createCard () {
-      this.clear()
+      this.clearErrorsAndSuccess()
+      if (this.cardsCreatedIsOverLimit) { return }
       if (this.loading.createCard) { return }
       if (!this.newName) { return }
+      this.loading.createCard = true
       console.log('post todo api', this.newName, this.currentSpace)
       // POST card via api
+      this.loading.createCard = false
+      this.currentSpace = this.prevSuccessSpace
       this.newName = ''
-      // this.currentSpace = this.prevSuccessSpace
-      // this.clear()
     },
-    clear () {
-      // clear errors
-      // clear loading
+    clearErrorsAndSuccess () {
+      this.error.connection = false
+      this.success = false
     },
 
     // spaces
@@ -163,7 +189,7 @@ export default {
           remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
         } catch (error) {
           console.error('🚑', error)
-          this.loading.error = true
+          this.error.connection = true
         }
       }
       spaces = remoteSpaces || spaces
@@ -173,11 +199,9 @@ export default {
       this.updateCurrentSpace()
     },
     updateCurrentSpace (space) {
-      console.log(space)
       space = space || this.spaces[0]
-      console.log('🐙', space)
       this.currentSpace = space
-      // set currentSpace , last accessed space (this.spaces[0])
+      console.log('🐙 currentSpace', this.currentSpace)
     },
     sortSpacesByEditedAt (spaces) {
       const sortedSpaces = spaces.sort((a, b) => {
@@ -262,4 +286,6 @@ main
     padding 0px 3px
     vertical-align 0
     margin-left 4px
+  .loader
+    margin-left 5px
 </style>
