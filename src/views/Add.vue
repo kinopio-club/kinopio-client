@@ -33,7 +33,7 @@ main
             img.icon(src="@/assets/add.svg")
             span Add Card
             Loader(:visible="loading.createCard")
-          .badge.label-badge
+          .badge.label-badge.keyboard-shortcut-tip
             span Enter
       .row(v-if="isErrorOrSuccess")
         //- success
@@ -55,7 +55,12 @@ main
         .badge.danger(v-if="error.general") (シ_ _)シ Something went wrong, Please try again or contact support
         //- error: max card length
         .badge.danger(v-if="error.maxLength") To fit small screens, cards can't be longer than {{maxCardLength}} characters
-
+        //- error: no spaces
+        .badge.danger(v-if="error.noSpaces")
+          span You'll need to visit Kinopio once before you can add cards
+          .row
+            a(:href="kinopioDomain")
+            button Upgrade →
 </template>
 
 <script>
@@ -113,7 +118,8 @@ export default {
       },
       error: {
         general: false,
-        maxLength: false
+        maxLength: false,
+        noSpaces: false
       },
       success: false,
       newName: ''
@@ -136,7 +142,7 @@ export default {
       }
     },
     isErrorOrSuccess () {
-      return this.error.maxLength || this.error.general || this.success
+      return this.error.maxLength || this.error.general || this.error.noSpaces || this.success
     }
   },
   methods: {
@@ -171,7 +177,10 @@ export default {
       if (this.cardsCreatedIsOverLimit) { return }
       if (this.error.maxLength) { return }
       if (this.loading.createCard) { return }
-      if (!this.currentSpace.id) { return }
+      if (!this.currentSpace.id) {
+        this.error.noSpaces = true
+        return
+      }
       if (!this.newName) { return }
       this.loading.createCard = true
       console.log('🛫 create card', this.newName, this.currentSpace)
@@ -193,6 +202,7 @@ export default {
     clearErrorsAndSuccess () {
       this.error.general = false
       this.success = false
+      this.error.noSpaces = false
     },
     updateMaxLengthError () {
       if (this.newName.length >= this.maxCardLength - 1) {
@@ -227,7 +237,13 @@ export default {
         this.focusName()
       }
       space = space || this.spaces[0]
-      this.currentSpace = space
+      console.log('🐙 currentSpace', space)
+      if (space) {
+        this.currentSpace = space
+      } else {
+        this.currentSpace = {}
+        this.error.noSpaces = true
+      }
     },
     sortSpacesByEditedAt (spaces) {
       const sortedSpaces = spaces.sort((a, b) => {
@@ -305,7 +321,7 @@ main
   .card-details
     display block
     position static
-  .label-badge
+  .keyboard-shortcut-tip
     position static
     display inline-block
     min-height 16px
