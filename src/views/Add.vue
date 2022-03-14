@@ -1,12 +1,5 @@
 <template lang="pug">
 main
-  //- aside.notifications(v-if="cardsCreatedIsOverLimit")
-  //-   .persistent-item.danger
-  //-     p To add more cards, you'll need to upgrade for $5/month
-  //-     .row
-  //-       a(href="https://kinopio.club")
-  //-         button Upgrade →
-
   dialog.card-details(data-name="add-card")
     section
       .textarea-wrap
@@ -21,7 +14,7 @@ main
       //- space
       .row
         .button-wrap
-          button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible, active: loading.userSpaces}")
+          button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
             span(v-if="currentSpace.name") {{currentSpace.name}}
             span(v-else) Last Space
             img.down-arrow(src="@/assets/down-arrow.svg")
@@ -36,7 +29,7 @@ main
       //- add card
       .row
         .button-wrap
-          button(@click.stop="createCard" :class="{active: loading.createCard}")
+          button(@click.stop="createCard" :class="{active: loading.createCard, disabled: error.maxLength}")
             img.icon(src="@/assets/add.svg")
             span Add Card
             Loader(:visible="loading.createCard")
@@ -59,9 +52,9 @@ main
               a(:href="kinopioDomain")
               button Upgrade →
         //- error: connection
-        .badge.danger(v-if="error.connection") (シ_ _)シ Something went wrong, Please try again or contact support
+        .badge.danger(v-if="error.general") (シ_ _)シ Something went wrong, Please try again or contact support
         //- error: max card length
-        .badge.danger(v-if="nameExceedsMaxCardLength") To fit small screens, cards can't be longer than {{maxCardLength}} characters
+        .badge.danger(v-if="error.maxLength") To fit small screens, cards can't be longer than {{maxCardLength}} characters
 
 </template>
 
@@ -116,8 +109,8 @@ export default {
         userSpaces: false
       },
       error: {
-        connection: false,
-        maxCardLength: false
+        general: false,
+        maxLength: false
       },
       success: false,
       newName: ''
@@ -136,11 +129,11 @@ export default {
         this.newName = newName
         this.textareaSizes()
         this.clearErrorsAndSuccess()
-        this.updateMaxCardLengthError()
+        this.updateMaxLengthError()
       }
     },
     isErrorOrSuccess () {
-      return this.error.maxCardLength || this.cardsCreatedIsOverLimit || this.error.connection || this.success
+      return this.error.maxLength || this.error.general || this.success
     }
   },
   methods: {
@@ -173,8 +166,9 @@ export default {
     async createCard () {
       this.clearErrorsAndSuccess()
       if (this.cardsCreatedIsOverLimit) { return }
-      if (this.nameExceedsMaxCardLength) { return }
+      if (this.error.maxLength) { return }
       if (this.loading.createCard) { return }
+      if (!this.currentSpace.id) { return }
       if (!this.newName) { return }
       this.loading.createCard = true
       console.log('🛫 create card', this.newName, this.currentSpace)
@@ -194,14 +188,14 @@ export default {
       this.focusName()
     },
     clearErrorsAndSuccess () {
-      this.error.connection = false
+      this.error.general = false
       this.success = false
     },
-    updateMaxCardLengthError () {
-      if (this.newName.length >= this.maxCardLength) {
-        this.error.maxCardLength = true
+    updateMaxLengthError () {
+      if (this.newName.length >= this.maxCardLength - 1) {
+        this.error.maxLength = true
       } else {
-        this.error.maxCardLength = false
+        this.error.maxLength = false
       }
     },
 
@@ -214,8 +208,8 @@ export default {
         try {
           remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
         } catch (error) {
-          console.error('🚑', error)
-          this.error.connection = true
+          console.error('🚑 updateUserSpaces', error)
+          this.error.general = true
         }
       }
       spaces = remoteSpaces || spaces
@@ -317,4 +311,8 @@ main
   .badge
     button
       margin-top 2px
+  .disabled
+    opacity 0.5
+    pointer-events none
+
 </style>
