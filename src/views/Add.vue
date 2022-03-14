@@ -39,7 +39,7 @@ main
         //- success
         template(v-if="success")
           .badge.success
-            span Card Added to Space
+            span Card Added at Top of Space
             .row
               a(:href="prevSuccessSpace.id")
                 button
@@ -74,6 +74,9 @@ export default {
   components: {
     SpacePicker,
     Loader
+  },
+  created () {
+    window.document.title = 'Add Card'
   },
   mounted () {
     window.addEventListener('mouseup', this.stopInteractions)
@@ -219,9 +222,12 @@ export default {
       this.updateCurrentSpace()
     },
     updateCurrentSpace (space) {
+      if (space) {
+        this.closeDialogs()
+        this.focusName()
+      }
       space = space || this.spaces[0]
       this.currentSpace = space
-      console.log('🐙 currentSpace', this.currentSpace)
     },
     sortSpacesByEditedAt (spaces) {
       const sortedSpaces = spaces.sort((a, b) => {
