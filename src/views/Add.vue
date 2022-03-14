@@ -52,7 +52,7 @@ main
               a(:href="kinopioDomain")
                 button Upgrade →
         //- error: connection
-        .badge.danger(v-if="error.general") (シ_ _)シ Something went wrong, Please try again or contact support
+        .badge.danger(v-if="error.unknown") (シ_ _)シ Something went wrong, Please try again or contact support
         //- error: max card length
         .badge.danger(v-if="error.maxLength") To fit small screens, cards can't be longer than {{maxCardLength}} characters
         //- error: no spaces
@@ -121,7 +121,7 @@ export default {
         userSpaces: false
       },
       error: {
-        general: false,
+        unknown: false,
         maxLength: false,
         noSpaces: false,
         spacesLoading: false
@@ -147,7 +147,7 @@ export default {
       }
     },
     isErrorOrSuccess () {
-      return this.error.maxLength || this.error.general || this.error.noSpaces || this.error.spacesLoading || this.success
+      return this.error.maxLength || this.error.unknown || this.error.noSpaces || this.error.spacesLoading || this.success
     }
   },
   methods: {
@@ -202,7 +202,12 @@ export default {
         spaceId: this.currentSpace.id
       }]
       cache.addToSpace({ cards: body, connections: [], connectionTypes: [] }, this.currentSpace.id)
-      await this.$store.dispatch('api/createCards', body)
+      try {
+        await this.$store.dispatch('api/createCards', body)
+      } catch (error) {
+        console.error('🚑 createCard', error)
+        this.error.unknown = true
+      }
       this.loading.createCard = false
       this.prevSuccessSpace = utils.clone(this.currentSpace)
       this.success = true
@@ -210,7 +215,7 @@ export default {
       this.focusName()
     },
     clearErrorsAndSuccess () {
-      this.error.general = false
+      this.error.unknown = false
       this.success = false
       this.error.noSpaces = false
       this.error.spacesLoading = false
@@ -233,7 +238,7 @@ export default {
           remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
         } catch (error) {
           console.error('🚑 updateUserSpaces', error)
-          this.error.general = true
+          this.error.unknown = true
         }
       }
       spaces = remoteSpaces || spaces
