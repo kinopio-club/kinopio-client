@@ -132,12 +132,12 @@ export default {
       }
     },
     createCard () {
-      console.log('post todo api', this.newName)
       this.clear()
       if (this.loading.createCard) { return }
-      if (!this.newName) { }
-      // asdfsadf
-      // this.newName = ''
+      if (!this.newName) { return }
+      console.log('post todo api', this.newName)
+      // POST card via api
+      this.newName = ''
     },
     clear () {
       // clear errors
@@ -148,15 +148,16 @@ export default {
 
     async updateUserSpaces () {
       let spaces = cache.getAllSpaces()
+      let remoteSpaces
       if (this.currentUserIsSignedIn) {
         try {
-          const remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
-          spaces = remoteSpaces || spaces
+          remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
         } catch (error) {
           console.error('🚑', error)
-          // this.loading.error
+          this.loading.error = true
         }
       }
+      spaces = remoteSpaces || spaces
       spaces = this.sortSpacesByEditedAt(spaces)
       spaces = this.updateFavoriteSpaces(spaces)
       this.spaces = spaces

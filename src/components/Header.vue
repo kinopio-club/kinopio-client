@@ -99,13 +99,18 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
           User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
           UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs" :dialogOnRight="true")
       .space-users(v-if="!isSpace")
-        .users.no-padding
+        .users(:class="{ 'no-padding': isEmbed}")
           User(:user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
+
+      .controls(v-if="isAddPage")
+        .top-controls
+          a(:href="host")
+            button Kinopio →
 
       .controls(v-if="isSpace")
         .top-controls
           //- Share
-          .button-wrap(v-if="!isAddPage")
+          .button-wrap
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
               span Share
             Share(:visible="shareIsVisible")
@@ -261,6 +266,7 @@ export default {
     clearInterval(updateNotificationsIntervalTimer)
   },
   computed: {
+    host () { return utils.host() },
     isVisible () {
       const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
       const isTouchDevice = this.$store.getters.isTouchDevice
