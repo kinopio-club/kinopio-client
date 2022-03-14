@@ -4,7 +4,9 @@
   @touchmove="broadcastCursor"
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
+  :class="{ 'no-background': isAddPage }"
 )
+  base(v-if="isAddPage" target="_blank")
   #layout-viewport(:style="{ background: backgroundTint }")
   MagicPaint
   OffscreenMarkers
@@ -96,11 +98,14 @@ export default {
         return false
       }
     },
+    isAddPage () { return this.$store.state.isAddPage },
     pageWidth () {
+      if (this.isAddPage) { return }
       const size = Math.max(this.$store.state.pageWidth, this.$store.state.viewportWidth)
       return size + 'px'
     },
     pageHeight () {
+      if (this.isAddPage) { return }
       const size = Math.max(this.$store.state.pageHeight, this.$store.state.viewportHeight)
       return size + 'px'
     },
@@ -286,6 +291,8 @@ body
     pointer-events none
     z-index 100
     font-size 12px
+  &.no-background
+    background-image none
 
 img,
 video
@@ -327,7 +334,7 @@ label // used for checkbox buttons
   color var(--primary)
   .down-arrow
     padding-left 4px
-    vertical-align middle
+    vertical-align 1px
   &.borderless
     border-color transparent
     background-color transparent

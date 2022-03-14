@@ -24,7 +24,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         button
           img.icon(src="@/assets/sticker.svg")
           span Pop Up Shop →
-  section
+  section(v-if="!isAddPage")
     .row
       .button-wrap
         button(@click.left.stop="toggleKeyboardShortcutsIsVisible" :class="{active: keyboardShortcutsIsVisible}")
@@ -122,7 +122,8 @@ export default {
     clearInterval(checkKinopioUpdatesIntervalTimer)
   },
   computed: {
-    newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated }
+    newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated },
+    isAddPage () { return this.$store.state.isAddPage }
   },
   methods: {
     toggleHelpIsVisible () {

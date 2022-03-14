@@ -18,7 +18,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
     UserBadges(:user="user")
 
   //- Current User
-  template(v-if="isCurrentUser ")
+  template(v-if="isCurrentUser")
     section
       .row
         .button-wrap
@@ -39,7 +39,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
     section.upgrade(v-if="!currentUserIsUpgraded")
       p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
       progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
-      .button-wrap
+      .button-wrap(v-if="!isAddPage")
         button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
           span Upgrade for Unlimited
         UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeDialogs")
@@ -57,7 +57,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
                 span {{spaceUser.name}}
             span is upgraded, so cards you create in this space won't change your card count
 
-    section
+    section(v-if="!isAddPage")
       .button-wrap
         button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
           span Settings
@@ -153,6 +153,7 @@ export default {
     cardsCreatedLimit () { return this.$store.state.cardsCreatedLimit },
     spaceUserIsUpgraded () { return this.$store.getters['currentSpace/spaceUserIsUpgraded'] },
     spaceUser () { return this.$store.state.currentSpace.users[0] },
+    isAddPage () { return this.$store.state.isAddPage },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
         return false

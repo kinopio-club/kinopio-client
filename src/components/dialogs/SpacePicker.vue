@@ -96,17 +96,6 @@ export default {
     }
   },
   computed: {
-    maxHeight () {
-      const favoritesDialog = document.querySelector('dialog.favorites')
-      let height = 120
-      if (favoritesDialog) {
-        const dialogHeight = favoritesDialog.offsetHeight
-        if (dialogHeight > 250) { height = dialogHeight }
-      } else {
-        return undefined
-      }
-      return height
-    },
     activeUser () {
       const currentUser = this.$store.state.currentUser
       return this.user || currentUser
@@ -221,7 +210,9 @@ export default {
       space = utils.spaceDefaultBackground(space, currentUser)
       space = cache.updateIdsInSpace(space)
       console.log('🚚 create new space', space)
-      await this.$store.dispatch('api/createSpace', space)
+      if (this.currentUserIsSignedIn) {
+        await this.$store.dispatch('api/createSpace', space)
+      }
       this.isLoadingNewSpace = false
       this.selectSpace(space)
     },
@@ -262,6 +253,8 @@ export default {
   .results-section
     padding-top 4px
     @media(max-height 700px)
+      max-height 50vh
+    @media(max-height 400px)
       max-height 40vh
   .error-container
     padding 4px

@@ -1,5 +1,5 @@
 <template lang="pug">
-.footer-wrap(:style="position")
+.footer-wrap(:style="position" v-if="!isAddPage")
   .left(v-if="!isEmbed")
     footer
       Notifications
@@ -144,6 +144,7 @@ export default {
     clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
+    isAddPage () { return this.$store.state.isAddPage },
     isEmbed () { return this.$store.state.isEmbed },
     currentUser () { return this.$store.state.currentUser },
     favoriteSpacesEditedCount () {

@@ -71,8 +71,8 @@ export default {
   },
   computed: {
     isVisible () {
+      if (this.isAddPage) { return }
       const isTouchDevice = this.$store.getters.isTouchDevice
-      // only hide markers on touch devices
       if (!isTouchDevice) {
         return true
       }
@@ -96,6 +96,7 @@ export default {
       }
       return styles
     },
+    isAddPage () { return this.$store.state.isAddPage },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     hasDirectionTopLeft () { return this.hasDirection('topleft') },
     hasDirectionTopRight () { return this.hasDirection('topright') },

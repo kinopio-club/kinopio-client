@@ -44,6 +44,7 @@ const store = createStore({
     userHasScrolled: false,
     shouldPreventNextEnterKey: false,
     isEmbed: false,
+    isAddPage: false,
 
     // search
     searchIsVisible: false,
@@ -310,6 +311,10 @@ const store = createStore({
     isEmbed: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isEmbed' })
       state.isEmbed = value
+    },
+    isAddPage: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'isAddPage' })
+      state.isAddPage = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })

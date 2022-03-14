@@ -7,6 +7,17 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/add',
+      name: 'add',
+      // route level code-splitting
+      // this generates a separate chunk (add.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import('./views/Add.vue'),
+      beforeEnter: (to, from, next) => {
+        store.commit('isAddPage', true)
+        next()
+      }
+    }, {
       path: '/',
       name: 'space',
       component: Space
@@ -149,14 +160,6 @@ const router = createRouter({
         next()
       }
     }
-    // {
-    //   path: '/legal',
-    //   name: 'legal',
-    //   // route level code-splitting
-    //   // this generates a separate chunk (about.[hash].js) for this route
-    //   // which is lazy-loaded when the route is visited.
-    //   component: () => import(/* webpackChunkName: "legal" */ './views/Legal.vue')
-    // }
   ]
 })
 

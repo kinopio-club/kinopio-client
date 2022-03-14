@@ -18,6 +18,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
   //- standard
   nav(v-if="!isEmbed")
     .left
+      //- About
       .logo-about
         .button-wrap
           .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active : aboutIsVisible}" tabindex="0")
@@ -27,9 +28,13 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
             img.down-arrow(src="@/assets/down-arrow.svg")
           About(:visible="aboutIsVisible")
           KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-      .space-meta-rows
+      .space-meta-rows(v-if="isAddPage")
+        p
+          span.badge.info Add Card
+
+      .space-meta-rows(v-if="!isAddPage")
         .space-details-row.segmented-buttons
-          //- Space
+          //- Current Space
           .button-wrap
             button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
               .badge.info(v-show="currentSpaceIsTemplate")
@@ -84,8 +89,8 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
             img.icon.cancel(src="@/assets/add.svg")
 
     .right
-      .space-users
-        .users.spectators(v-if="!isEmbed")
+      .space-users(v-if="isSpace")
+        .users.spectators
           User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
           User(v-if="!currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
         .users
@@ -93,10 +98,18 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
           User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
           User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
           UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs" :dialogOnRight="true")
+      .space-users(v-if="!isSpace")
+        .users(:class="{ 'no-padding': isEmbed}")
+          User(:user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
 
-      .controls(v-if="!isEmbed")
-        //- Share
+      .controls(v-if="isAddPage")
         .top-controls
+          a(:href="kinopioDomain")
+            button Kinopio →
+
+      .controls(v-if="isSpace")
+        .top-controls
+          //- Share
           .button-wrap
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
               span Share
@@ -106,7 +119,6 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
             button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
               span {{notificationsUnreadCount}}
             Notifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
-
         .bottom-controls
           ResetPassword
           //- Sign Up or In
@@ -115,6 +127,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
               span Sign Up or In
               Loader(:visible="loadingSignUpOrIn")
             SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
+          //- Upgrade
           .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
             button(@click.left.stop="triggerUpgradeUserIsVisible")
               span Upgrade
@@ -253,6 +266,7 @@ export default {
     clearInterval(updateNotificationsIntervalTimer)
   },
   computed: {
+    kinopioDomain () { return utils.kinopioDomain() },
     isVisible () {
       const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
       const isTouchDevice = this.$store.getters.isTouchDevice
@@ -263,6 +277,12 @@ export default {
       }
     },
     isEmbed () { return this.$store.state.isEmbed },
+    isAddPage () { return this.$store.state.isAddPage },
+    isSpace () {
+      const isOther = this.isEmbed || this.isAddPage
+      const isSpace = !isOther
+      return isSpace
+    },
     currentSpaceUrl () { return this.$store.getters['currentSpace/url'] },
     shouldShowNewStuffIsUpdated () {
       const newStuffIsUpdated = this.$store.state.newStuffIsUpdated
@@ -812,6 +832,9 @@ header
     padding 0 7px
     border-radius 10px
     vertical-align 0
+
+  .no-padding
+    padding 0 !important
 
 .badge-jiggle
   animation-name notificationJiggle
