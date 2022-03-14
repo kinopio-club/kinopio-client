@@ -302,6 +302,7 @@ export default {
     handleShortcuts (event) {
       if (event.key === 'Escape') { this.closeDialogs() }
     },
+    // based on Space.vue
     shouldCancel (event) {
       if (shouldCancel) {
         shouldCancel = false
