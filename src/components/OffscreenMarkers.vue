@@ -71,11 +71,14 @@ export default {
   },
   computed: {
     isVisible () {
+      if (this.isAddPage) { return }
       const isTouchDevice = this.$store.getters.isTouchDevice
-      if (!isTouchDevice) { return !this.isAddPage }
+      if (!isTouchDevice) {
+        return true
+      }
       let isVisible = true
       if (this.dialogsVisible) { isVisible = false }
-      return isVisible && !this.isAddPage
+      return isVisible
     },
     dialogsVisible () {
       return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleSelectedActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
