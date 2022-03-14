@@ -151,7 +151,6 @@ export default {
       let isRemote
       // restore from url
       if (spaceUrl) {
-        if (spaceUrl === 'quick-capture') { return }
         console.log('🚃 Restore space from url', spaceUrl)
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
