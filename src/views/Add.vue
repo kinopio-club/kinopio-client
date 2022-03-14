@@ -28,8 +28,7 @@ main
             :visible="spacePickerIsVisible"
             :shouldShowNewSpace="true"
             :userSpaces="spaces"
-            @closeDialog=""
-            @selectSpace=""
+            @selectSpace="updateCurrentSpace"
           )
       .row
         .button-wrap
@@ -81,6 +80,7 @@ export default {
     return {
       spaces: [],
       currentSpace: {},
+      prevSuccessSpace: {},
       selectedSpace: {},
       spacePickerIsVisible: false,
       loading: {
@@ -120,7 +120,7 @@ export default {
       textarea.style.height = textarea.scrollHeight + modifier + 'px'
     },
 
-    // new card
+    // card
 
     focusName () {
       const element = this.$refs.name
@@ -135,9 +135,11 @@ export default {
       this.clear()
       if (this.loading.createCard) { return }
       if (!this.newName) { return }
-      console.log('post todo api', this.newName)
+      console.log('post todo api', this.newName, this.currentSpace)
       // POST card via api
       this.newName = ''
+      // this.currentSpace = this.prevSuccessSpace
+      // this.clear()
     },
     clear () {
       // clear errors
@@ -161,6 +163,7 @@ export default {
       spaces = this.sortSpacesByEditedAt(spaces)
       spaces = this.updateFavoriteSpaces(spaces)
       this.spaces = spaces
+      this.updateCurrentSpace()
     },
     updateCurrentSpace (space) {
       space = space || this.spaces[0]
