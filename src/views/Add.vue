@@ -60,7 +60,11 @@ main
           span You'll need to visit Kinopio once before you can add cards
           .row
             a(:href="kinopioDomain")
-            button Upgrade →
+            button Kinopio →
+        //- error: spaces loading
+        .badge.danger(v-if="error.spacesLoading")
+          span Spaces loading, try again in a couple seconds
+
 </template>
 
 <script>
@@ -119,7 +123,8 @@ export default {
       error: {
         general: false,
         maxLength: false,
-        noSpaces: false
+        noSpaces: false,
+        spacesLoading: false
       },
       success: false,
       newName: ''
@@ -142,7 +147,7 @@ export default {
       }
     },
     isErrorOrSuccess () {
-      return this.error.maxLength || this.error.general || this.error.noSpaces || this.success
+      return this.error.maxLength || this.error.general || this.error.noSpaces || this.error.spacesLoading || this.success
     }
   },
   methods: {
@@ -177,6 +182,10 @@ export default {
       if (this.cardsCreatedIsOverLimit) { return }
       if (this.error.maxLength) { return }
       if (this.loading.createCard) { return }
+      if (this.loading.userSpaces) {
+        this.error.spacesLoading = true
+        return
+      }
       if (!this.currentSpace.id) {
         this.error.noSpaces = true
         return
@@ -203,6 +212,7 @@ export default {
       this.error.general = false
       this.success = false
       this.error.noSpaces = false
+      this.error.spacesLoading = false
     },
     updateMaxLengthError () {
       if (this.newName.length >= this.maxCardLength - 1) {
