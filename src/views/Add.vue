@@ -21,14 +21,16 @@ main
       .row
         .button-wrap
           button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
-            span Last Space
+            span(v-if="currentSpace.name") {{currentSpace.name}}
+            span(v-else) Last Space
             img.down-arrow(src="@/assets/down-arrow.svg")
-            //- Loader(:visible=loading.userSpaces), disable
+            Loader(:visible="loading.userSpaces")
           SpacePicker(
             :visible="spacePickerIsVisible"
             :shouldShowNewSpace="true"
             :userSpaces="spaces"
             @selectSpace="updateCurrentSpace"
+            :selectedSpace="currentSpace"
           )
       .row
         .button-wrap
@@ -69,6 +71,11 @@ export default {
     }, 5000)
     this.focusName()
     this.init()
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'closeAllDialogs') {
+        this.closeDialogs()
+      }
+    })
   },
   beforeUnmount () {
     window.removeEventListener('mouseup', this.stopInteractions)
@@ -166,6 +173,7 @@ export default {
       this.updateCurrentSpace()
     },
     updateCurrentSpace (space) {
+      console.log(space)
       space = space || this.spaces[0]
       console.log('🐙', space)
       this.currentSpace = space
@@ -205,17 +213,17 @@ export default {
 
     // handlers
 
-    closeAllDialogs () {
-      this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
+    closeDialogs () {
       this.spacePickerIsVisible = false
     },
     toggleSpacePickerIsVisible () {
+      if (this.loading.userSpaces) { return }
       const value = !this.spacePickerIsVisible
-      this.closeAllDialogs()
+      this.closeDialogs()
       this.spacePickerIsVisible = value
     },
     handleShortcuts (event) {
-      if (event.key === 'Escape') { this.closeAllDialogs() }
+      if (event.key === 'Escape') { this.closeDialogs() }
     },
     shouldCancel (event) {
       if (shouldCancel) {
@@ -223,15 +231,17 @@ export default {
         return true
       }
       if (event.target.nodeType === 9) { return true } // type 9 is Document
+      let fromDialog = event.target.closest('dialog')
+      fromDialog = fromDialog && fromDialog.dataset.name !== 'add-card'
+      const fromButton = event.target.closest('button')
       const fromHeader = event.target.closest('header')
       const fromFooter = event.target.closest('footer')
-      const fromButton = event.target.closest('button')
-      return Boolean(fromButton || fromHeader || fromFooter)
+      return Boolean(fromDialog || fromButton || fromHeader || fromFooter)
     },
     stopInteractions (event) {
       console.log('💣 stopInteractions', this.shouldCancel(event))
       if (this.shouldCancel(event)) { return }
-      this.closeAllDialogs()
+      this.$store.dispatch('closeAllDialogs', 'Add')
     }
   }
 }

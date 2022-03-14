@@ -104,7 +104,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
 
       .controls(v-if="isAddPage")
         .top-controls
-          a(:href="host")
+          a(:href="kinopioDomain")
             button Kinopio →
 
       .controls(v-if="isSpace")
@@ -266,7 +266,7 @@ export default {
     clearInterval(updateNotificationsIntervalTimer)
   },
   computed: {
-    host () { return utils.host() },
+    kinopioDomain () { return utils.kinopioDomain() },
     isVisible () {
       const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
       const isTouchDevice = this.$store.getters.isTouchDevice
