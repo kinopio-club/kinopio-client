@@ -251,6 +251,8 @@ export default {
   .results-section
     padding-top 4px
     @media(max-height 700px)
+      max-height 50vh
+    @media(max-height 400px)
       max-height 40vh
   .error-container
     padding 4px
