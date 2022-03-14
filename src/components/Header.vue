@@ -279,8 +279,8 @@ export default {
     isEmbed () { return this.$store.state.isEmbed },
     isAddPage () { return this.$store.state.isAddPage },
     isSpace () {
-      const isPage = this.isEmbed || this.isAddPage
-      const isSpace = !isPage
+      const isOther = this.isEmbed || this.isAddPage
+      const isSpace = !isOther
       return isSpace
     },
     currentSpaceUrl () { return this.$store.getters['currentSpace/url'] },
