@@ -4,7 +4,7 @@
   @touchmove="broadcastCursor"
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
-  :class="{ 'is-add-page': isAddPage }"
+  :class="{ 'no-background': isAddPage }"
 )
   base(v-if="isAddPage" target="_blank")
   #layout-viewport(:style="{ background: backgroundTint }")
@@ -291,7 +291,7 @@ body
     pointer-events none
     z-index 100
     font-size 12px
-  &.is-add-page
+  &.no-background
     background-image none
 
 img,
