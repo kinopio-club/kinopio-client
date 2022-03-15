@@ -15,6 +15,10 @@ main
       .row
         .button-wrap
           button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
+            //- today journal badge
+            span.badge.info.inline-badge(v-if="isTodayJournal" title="Today's journal")
+              img.icon.today-icon(src="@/assets/today.svg")
+            MoonPhase(:moonPhase="currentSpace.moonPhase")
             span(v-if="currentSpace.name") {{currentSpace.name}}
             span(v-else) Last Space
             img.down-arrow(src="@/assets/down-arrow.svg")
@@ -84,6 +88,7 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import MoonPhase from '@/components/MoonPhase.vue'
 
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
@@ -94,7 +99,8 @@ export default {
   name: 'Inbox',
   components: {
     SpacePicker,
-    Loader
+    Loader,
+    MoonPhase
   },
   created () {
     window.document.title = 'Add Card'
@@ -148,6 +154,16 @@ export default {
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
     maxCardLength () { return 300 },
     currentUser () { return this.$store.state.currentUser },
+    isTodayJournal () {
+      if (this.currentSpace.moonPhase) {
+        const createdAt = utils.journalSpaceDateFromName(this.currentSpace.name)
+        if (!createdAt) { return }
+        const today = utils.journalSpaceName()
+        return createdAt === today
+      } else {
+        return false
+      }
+    },
     name: {
       get () {
         return this.newName
