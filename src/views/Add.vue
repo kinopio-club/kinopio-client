@@ -10,11 +10,17 @@ main
           v-model="name"
           :maxlength="maxCardLength"
           @keydown.enter.exact.prevent="createCard"
+          @focusin="updateKeyboardShortcutTipIsVisible(true)"
+          @focusout="updateKeyboardShortcutTipIsVisible(false)"
         )
       //- space
       .row
         .button-wrap
           button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
+            //- today journal badge
+            span.badge.info.inline-badge(v-if="isTodayJournal" title="Today's journal")
+              img.icon.today-icon(src="@/assets/today.svg")
+            MoonPhase(:moonPhase="currentSpace.moonPhase")
             span(v-if="currentSpace.name") {{currentSpace.name}}
             span(v-else) Last Space
             img.down-arrow(src="@/assets/down-arrow.svg")
@@ -22,6 +28,7 @@ main
           SpacePicker(
             :visible="spacePickerIsVisible"
             :shouldShowNewSpace="true"
+            :shouldShowDailyJournalSpace="true"
             :userSpaces="spaces"
             @selectSpace="updateCurrentSpace"
             :selectedSpace="currentSpace"
@@ -33,7 +40,7 @@ main
             img.icon(src="@/assets/add.svg")
             span Add Card
             Loader(:visible="loading.createCard")
-          .badge.label-badge.keyboard-shortcut-tip
+          .badge.label-badge.keyboard-shortcut-tip(v-if="keyboardShortcutTipIsVisible")
             span Enter
       .row(v-if="isErrorOrSuccess")
         //- success
@@ -83,6 +90,7 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import MoonPhase from '@/components/MoonPhase.vue'
 
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
@@ -93,7 +101,8 @@ export default {
   name: 'Inbox',
   components: {
     SpacePicker,
-    Loader
+    Loader,
+    MoonPhase
   },
   created () {
     window.document.title = 'Add Card'
@@ -138,7 +147,8 @@ export default {
         spacesLoading: false
       },
       success: false,
-      newName: ''
+      newName: '',
+      keyboardShortcutTipIsVisible: false
     }
   },
   computed: {
@@ -147,6 +157,16 @@ export default {
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
     maxCardLength () { return 300 },
     currentUser () { return this.$store.state.currentUser },
+    isTodayJournal () {
+      if (this.currentSpace.moonPhase) {
+        const createdAt = utils.journalSpaceDateFromName(this.currentSpace.name)
+        if (!createdAt) { return }
+        const today = utils.journalSpaceName()
+        return createdAt === today
+      } else {
+        return false
+      }
+    },
     name: {
       get () {
         return this.newName
@@ -170,10 +190,8 @@ export default {
   },
   methods: {
     async init () {
-      this.loading.userSpaces = true
       this.$store.dispatch('currentUser/init')
       await this.updateUserSpaces()
-      this.loading.userSpaces = false
     },
     textareaSizes () {
       const textarea = this.$refs.name
@@ -248,22 +266,27 @@ export default {
 
     // spaces
 
-    async updateUserSpaces () {
-      let spaces = cache.getAllSpaces()
-      let remoteSpaces
-      if (this.currentUserIsSignedIn) {
-        try {
-          remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
-        } catch (error) {
-          console.error('🚑 updateUserSpaces', error)
-          this.error.unknown = true
-        }
-      }
-      spaces = remoteSpaces || spaces
+    updateUserSpacesWithSpaces (spaces) {
       spaces = this.sortSpacesByEditedAt(spaces)
       spaces = this.updateFavoriteSpaces(spaces)
       this.spaces = spaces
       this.updateCurrentSpace()
+    },
+    async updateUserSpaces () {
+      let spaces = cache.getAllSpaces()
+      this.updateUserSpacesWithSpaces(spaces)
+      this.loading.userSpaces = true
+      if (this.currentUserIsSignedIn) {
+        try {
+          const remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
+          this.updateUserSpacesWithSpaces(remoteSpaces)
+          this.loading.userSpaces = false
+        } catch (error) {
+          console.error('🚑 updateUserSpaces', error)
+          this.error.unknown = true
+          this.loading.userSpaces = false
+        }
+      }
     },
     updateCurrentSpace (space) {
       if (space) {
@@ -324,6 +347,9 @@ export default {
 
     // handlers
 
+    updateKeyboardShortcutTipIsVisible (value) {
+      this.keyboardShortcutTipIsVisible = value
+    },
     closeDialogs () {
       this.spacePickerIsVisible = false
     },

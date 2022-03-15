@@ -8,7 +8,7 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
       button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
   template(v-if="(parentIsCardDetails && currentUserIsSignedIn) || !parentIsCardDetails")
     // New Space
-    section.new-space-section(v-if="shouldShowNewSpace")
+    section.options(v-if="shouldShowNewSpace")
       .row
         button(@click="toggleNewSpaceIsVisible" :class="{ active: newSpaceIsVisible }")
           img.icon(src="@/assets/add.svg")
@@ -21,6 +21,14 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
           button(@click="createNewSpace")
             span Create New Space
             Loader(:visible="isLoadingNewSpace")
+    //- Daily Journal
+    section.options(v-if="shouldShowDailyJournalSpace")
+      .row
+        button(@click="selectOrCreateDailyJournalSpace")
+          img.icon(v-if="!todayJournalSpace" src="@/assets/add.svg")
+          MoonPhase(:moonPhase="moonPhase.name")
+          span Daily Journal
+
     // Type to Search
     section.info-section(v-if="parentIsCardDetails && !search")
       p
@@ -53,6 +61,8 @@ import words from '@/data/words.js'
 import newSpace from '@/data/new.json'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import moonphase from '@/moonphase.js'
+import MoonPhase from '@/components/MoonPhase.vue'
 
 import { nanoid } from 'nanoid'
 import fuzzy from '@/libs/fuzzy.js'
@@ -70,7 +80,8 @@ export default {
   components: {
     Loader,
     SpaceList,
-    User
+    User,
+    MoonPhase
   },
   props: {
     visible: Boolean,
@@ -84,7 +95,11 @@ export default {
     position: Object,
     search: String,
     cursorPosition: Number,
-    shouldShowNewSpace: Boolean
+    shouldShowNewSpace: Boolean,
+    shouldShowDailyJournalSpace: Boolean
+  },
+  mounted () {
+    this.moonPhase = moonphase()
   },
   data () {
     return {
@@ -139,7 +154,20 @@ export default {
       })
       return spaces
     },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    todayJournalSpace () {
+      const today = utils.journalSpaceName()
+      const todaySpace = this.spaces.find(space => {
+        if (space.moonPhase) {
+          const createdAt = utils.journalSpaceDateFromName(space.name)
+          if (!createdAt) { return }
+          return createdAt === today
+        } else {
+          return false
+        }
+      })
+      return todaySpace
+    }
   },
   methods: {
     handleFocusBeforeFirstItem () {
@@ -216,6 +244,22 @@ export default {
       this.isLoadingNewSpace = false
       this.selectSpace(space)
     },
+    async selectOrCreateDailyJournalSpace () {
+      if (this.todayJournalSpace) {
+        this.isLoadingNewSpace = false
+        this.selectSpace(this.todayJournalSpace)
+        return
+      }
+      const currentUser = this.$store.state.currentUser
+      const space = utils.journalSpace(null, currentUser)
+      console.log('🚚 create new journal space', space)
+      if (this.currentUserIsSignedIn) {
+        await this.$store.dispatch('api/createSpace', space)
+      }
+      this.isLoadingNewSpace = false
+      this.selectSpace(space)
+    },
+
     clearState () {
       this.newSpaceIsVisible = false
       this.newSpaceName = words.randomUniqueName()
@@ -265,6 +309,9 @@ export default {
   .info-section
     padding-bottom 4px
     border-top 0
-  .new-space-section
+  section.options
+    margin 0
+    width 100%
     padding-bottom 5px
+    border-top none
 </style>

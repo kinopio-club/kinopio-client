@@ -2,7 +2,6 @@ import helloSpace from '@/data/hello.json'
 import newSpace from '@/data/new.json'
 
 import words from '@/data/words.js'
-import moonphase from '@/moonphase.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -14,7 +13,6 @@ import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
 import defer from 'lodash-es/defer'
-import dayjs from 'dayjs'
 
 let otherSpacesQueue = [] // id
 let spectatorIdleTimers = []
@@ -315,46 +313,9 @@ export default {
       context.dispatch('loadBackground')
     },
     createNewJournalSpace: (context) => {
-      // name
-      let date = dayjs(new Date())
-      if (context.rootState.loadJournalSpaceTomorrow) {
-        date = date.add(1, 'day')
-      }
-      const moonPhase = moonphase(date)
-      const day = `${moonPhase.emoji} ${date.format('dddd')}` // 🌘 Tuesday
-      // meta
-      const spaceId = nanoid()
-      let space = utils.emptySpace(spaceId)
-      space.name = utils.journalSpaceName(context.rootState.loadJournalSpaceTomorrow)
-      space.privacy = 'private'
-      space.moonPhase = moonPhase.name
-      space.removedCards = []
-      space.userId = context.rootState.currentUser.id
-      space.connectionTypes = []
-      space.connections = []
-      space = utils.spaceDefaultBackground(space, context.rootState.currentUser)
-      // cards
-      space.cards.push({ id: nanoid(), name: day, x: 60, y: 100, frameId: 0 })
-      const userPrompts = context.rootState.currentUser.journalPrompts
-      userPrompts.forEach(prompt => {
-        if (!prompt.name) { return }
-        let card = { id: nanoid() }
-        if (prompt.packId) {
-          const pack = context.rootGetters['currentUser/packById'](prompt.packId)
-          const randomPrompt = utils.randomPrompt(pack)
-          const tag = utils.packTag(pack, card.id, space)
-          if (tag) { space.tags.push(tag) }
-          card.name = `[[${prompt.name}]] ${randomPrompt}`
-        } else {
-          card.name = prompt.name
-        }
-        const position = utils.promptCardPosition(space.cards, card.name)
-        card.x = position.x
-        card.y = position.y
-        card.z = 0
-        card.spaceId = spaceId
-        space.cards.push(card)
-      })
+      const isTomorrow = context.rootState.loadJournalSpaceTomorrow
+      const currentUser = utils.clone(context.rootState.currentUser)
+      const space = utils.journalSpace(isTomorrow, currentUser)
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
       context.dispatch('restoreSpaceInChunks', { space })
