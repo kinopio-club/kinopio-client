@@ -10,6 +10,8 @@ main
           v-model="name"
           :maxlength="maxCardLength"
           @keydown.enter.exact.prevent="createCard"
+          @focusin="updateKeyboardShortcutTipIsVisible(true)"
+          @focusout="updateKeyboardShortcutTipIsVisible(false)"
         )
       //- space
       .row
@@ -38,7 +40,7 @@ main
             img.icon(src="@/assets/add.svg")
             span Add Card
             Loader(:visible="loading.createCard")
-          .badge.label-badge.keyboard-shortcut-tip
+          .badge.label-badge.keyboard-shortcut-tip(v-if="keyboardShortcutTipIsVisible")
             span Enter
       .row(v-if="isErrorOrSuccess")
         //- success
@@ -145,7 +147,8 @@ export default {
         spacesLoading: false
       },
       success: false,
-      newName: ''
+      newName: '',
+      keyboardShortcutTipIsVisible: false
     }
   },
   computed: {
@@ -341,6 +344,9 @@ export default {
 
     // handlers
 
+    updateKeyboardShortcutTipIsVisible (value) {
+      this.keyboardShortcutTipIsVisible = value
+    },
     closeDialogs () {
       this.spacePickerIsVisible = false
     },
