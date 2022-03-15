@@ -39,11 +39,18 @@ main
         //- success
         template(v-if="success")
           .badge.success
-            span Card Added at Top of Space
+            .row
+              span Card Added at Top of Space
             .row
               a(:href="prevSuccessSpace.id")
                 button
                   span {{prevSuccessSpace.name}}
+            //- default
+            .row
+              label(:class="{active: currentIsUserDefaults}" @click.left.prevent="updateUserDefaults" @keydown.stop.enter="updateUserDefaults")
+                input(type="checkbox" v-model="currentIsUserDefaults")
+                span Set as Default
+
         //- error: card limit
         template(v-if="cardsCreatedIsOverLimit")
           .badge.danger
@@ -64,6 +71,10 @@ main
         //- error: spaces loading
         .badge.danger(v-if="error.spacesLoading")
           span Spaces loading, try again in a couple seconds
+
+  section.options
+    .row(v-if="success && defaultSpace && !currentIsUserDefaults")
+      span Default space is {{defaultSpace.name}}
 
 </template>
 
@@ -135,6 +146,7 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
     maxCardLength () { return 300 },
+    currentUser () { return this.$store.state.currentUser },
     name: {
       get () {
         return this.newName
@@ -148,6 +160,12 @@ export default {
     },
     isErrorOrSuccess () {
       return this.error.maxLength || this.error.unknown || this.error.noSpaces || this.error.spacesLoading || this.success
+    },
+    currentIsUserDefaults () {
+      return this.prevSuccessSpace.id === this.currentUser.defaultAddSpaceId
+    },
+    defaultSpace () {
+      return this.spaces.find(space => space.id === this.currentUser.defaultAddSpaceId)
     }
   },
   methods: {
@@ -252,7 +270,7 @@ export default {
         this.closeDialogs()
         this.focusName()
       }
-      space = space || this.spaces[0]
+      space = space || this.defaultSpace || this.spaces[0]
       console.log('🐙 currentSpace', space)
       if (space) {
         this.currentSpace = space
@@ -281,7 +299,7 @@ export default {
       return favoriteSpaces.concat(spaces)
     },
     updateFavoriteSpaces (spaces) {
-      const userFavoriteSpaces = this.$store.state.currentUser.favoriteSpaces
+      const userFavoriteSpaces = this.currentUser.favoriteSpaces
       const favoriteSpaceIds = userFavoriteSpaces.map(space => space.id)
       spaces = spaces.map(space => {
         if (favoriteSpaceIds.includes(space.id)) {
@@ -291,6 +309,17 @@ export default {
       })
       spaces = this.orderByFavoriteSpaces(spaces)
       return spaces
+    },
+
+    // default
+
+    updateUserDefaults () {
+      const shouldClear = this.prevSuccessSpace.id === this.currentUser.defaultAddSpaceId
+      if (shouldClear) {
+        this.$store.dispatch('currentUser/update', { defaultAddSpaceId: null })
+      } else {
+        this.$store.dispatch('currentUser/update', { defaultAddSpaceId: this.prevSuccessSpace.id })
+      }
     },
 
     // handlers
@@ -353,5 +382,14 @@ main
   .disabled
     opacity 0.5
     pointer-events none
-
+  .success
+    .row
+      margin-bottom 4px
+      &:last-child
+        margin-bottom 0
+  section.options
+    margin-top 10px
+    padding-left 8px
+    padding-right 8px
+    width 250px
 </style>

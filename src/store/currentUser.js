@@ -43,6 +43,7 @@ export default {
     dialogSpaceFilterByUser: {},
     defaultSpaceBackground: undefined,
     defaultSpaceBackgroundTint: undefined,
+    defaultAddSpaceId: undefined,
     downgradeAt: null
   },
   mutations: {
@@ -255,6 +256,10 @@ export default {
     defaultSpaceBackgroundTint: (state, value) => {
       state.defaultSpaceBackgroundTint = value
       cache.updateUser('defaultSpaceBackgroundTint', value)
+    },
+    defaultAddSpaceId: (state, value) => {
+      state.defaultAddSpaceId = value
+      cache.updateUser('defaultAddSpaceId', value)
     }
   },
   actions: {
