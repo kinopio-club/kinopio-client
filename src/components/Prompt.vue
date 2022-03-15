@@ -42,7 +42,7 @@ export default {
     isPack () { return Boolean(this.prompt.packId) },
     pack () {
       if (!this.isPack) { return }
-      return this.$store.getters['currentUser/packById'](this.prompt.packId)
+      return utils.promptPackById(this.prompt.packId)
     },
     name: {
       get () {

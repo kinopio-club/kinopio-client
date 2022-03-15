@@ -1,6 +1,5 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
-import promptPacks from '@/data/promptPacks.json'
 
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
@@ -651,10 +650,6 @@ export default {
       const currentUserIsSignedIn = getters.isSignedIn
       const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
       return !currentUserIsSignedIn && isInvitedToSpace
-    },
-    packById: (state, getters) => (packId) => {
-      packId = packId.toString()
-      return promptPacks.find(pack => pack.packId === packId)
     },
     shouldPreventCardsCreatedCountUpdate: (state, getters, rootState, rootGetters) => {
       const spaceUserIsUpgraded = rootGetters['currentSpace/spaceUserIsUpgraded']

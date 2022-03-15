@@ -22,6 +22,7 @@ main
           SpacePicker(
             :visible="spacePickerIsVisible"
             :shouldShowNewSpace="true"
+            :shouldShowDailyJournalSpace="true"
             :userSpaces="spaces"
             @selectSpace="updateCurrentSpace"
             :selectedSpace="currentSpace"

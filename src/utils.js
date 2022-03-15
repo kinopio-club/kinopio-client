@@ -1,5 +1,7 @@
 // functional methods that can see dom, but can't access components or store
 import cache from '@/cache.js'
+import promptPacks from '@/data/promptPacks.json'
+import moonphase from '@/moonphase.js'
 
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
@@ -7,7 +9,6 @@ import random from 'lodash-es/random'
 import last from 'lodash-es/last'
 import sortBy from 'lodash-es/sortBy'
 import times from 'lodash-es/times'
-
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
@@ -934,6 +935,54 @@ export default {
   },
 
   // Journal Space 🌚
+
+  promptPackById (packId) {
+    packId = packId.toString()
+    return promptPacks.find(pack => pack.packId === packId)
+  },
+  journalSpace (isTomorrow, currentUser) {
+    // name
+    let date = dayjs(new Date())
+    if (isTomorrow) {
+      date = date.add(1, 'day')
+    }
+    const moonPhase = moonphase(date)
+    const day = `${moonPhase.emoji} ${date.format('dddd')}` // 🌘 Tuesday
+    // meta
+    const spaceId = nanoid()
+    let space = this.emptySpace(spaceId)
+    space.name = this.journalSpaceName(isTomorrow)
+    space.privacy = 'private'
+    space.moonPhase = moonPhase.name
+    space.removedCards = []
+    space.userId = currentUser.id
+    space.connectionTypes = []
+    space.connections = []
+    space = this.spaceDefaultBackground(space, currentUser)
+    // cards
+    space.cards.push({ id: nanoid(), name: day, x: 60, y: 100, frameId: 0 })
+    const userPrompts = currentUser.journalPrompts
+    userPrompts.forEach(prompt => {
+      if (!prompt.name) { return }
+      let card = { id: nanoid() }
+      if (prompt.packId) {
+        const pack = this.promptPackById(prompt.packId)
+        const randomPrompt = this.randomPrompt(pack)
+        const tag = this.packTag(pack, card.id, space)
+        if (tag) { space.tags.push(tag) }
+        card.name = `[[${prompt.name}]] ${randomPrompt}`
+      } else {
+        card.name = prompt.name
+      }
+      const position = this.promptCardPosition(space.cards, card.name)
+      card.x = position.x
+      card.y = position.y
+      card.z = 0
+      card.spaceId = spaceId
+      space.cards.push(card)
+    })
+    return space
+  },
 
   journalSpaceName (isTomorrow) {
     let date = dayjs(new Date())
