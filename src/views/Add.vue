@@ -44,7 +44,7 @@ main
             .row
               a(:href="prevSuccessSpace.id")
                 button
-                  span {{prevSuccessSpace.name}}
+                  span {{prevSuccessSpace.name}} →
             //- default
             .row
               label(:class="{active: currentIsUserDefaults}" @click.left.prevent="updateUserDefaults" @keydown.stop.enter="updateUserDefaults")
