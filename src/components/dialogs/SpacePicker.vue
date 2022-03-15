@@ -24,8 +24,8 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
     //- Daily Journal
     section.options(v-if="shouldShowDailyJournalSpace")
       .row
-        button(@click="createDailyJournalSpace")
-          img.icon(src="@/assets/add.svg")
+        button(@click="selectOrCreateDailyJournalSpace")
+          img.icon(v-if="!todayJournalSpace" src="@/assets/add.svg")
           MoonPhase(:moonPhase="moonPhase.name")
           span Daily Journal
 
@@ -154,7 +154,20 @@ export default {
       })
       return spaces
     },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    todayJournalSpace () {
+      const today = utils.journalSpaceName()
+      const todaySpace = this.spaces.find(space => {
+        if (space.moonPhase) {
+          const createdAt = utils.journalSpaceDateFromName(space.name)
+          if (!createdAt) { return }
+          return createdAt === today
+        } else {
+          return false
+        }
+      })
+      return todaySpace
+    }
   },
   methods: {
     handleFocusBeforeFirstItem () {
@@ -231,7 +244,12 @@ export default {
       this.isLoadingNewSpace = false
       this.selectSpace(space)
     },
-    async createDailyJournalSpace () {
+    async selectOrCreateDailyJournalSpace () {
+      if (this.todayJournalSpace) {
+        this.isLoadingNewSpace = false
+        this.selectSpace(this.todayJournalSpace)
+        return
+      }
       const currentUser = this.$store.state.currentUser
       const space = utils.journalSpace(null, currentUser)
       console.log('🚚 create new journal space', space)

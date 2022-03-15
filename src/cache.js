@@ -149,6 +149,9 @@ export default {
   }, 200),
   addToSpace ({ cards, connections, connectionTypes }, spaceId) {
     let space = this.space(spaceId)
+    space.cards = space.cards || []
+    space.connections = space.connections || []
+    space.connectionTypes = space.connectionTypes || []
     cards.forEach(card => space.cards.push(card))
     connections.forEach(connection => space.connections.push(connection))
     connectionTypes.forEach(connectionType => space.connectionTypes.push(connectionType))

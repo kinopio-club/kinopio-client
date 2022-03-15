@@ -190,10 +190,8 @@ export default {
   },
   methods: {
     async init () {
-      this.loading.userSpaces = true
       this.$store.dispatch('currentUser/init')
       await this.updateUserSpaces()
-      this.loading.userSpaces = false
     },
     textareaSizes () {
       const textarea = this.$refs.name
@@ -268,22 +266,27 @@ export default {
 
     // spaces
 
-    async updateUserSpaces () {
-      let spaces = cache.getAllSpaces()
-      let remoteSpaces
-      if (this.currentUserIsSignedIn) {
-        try {
-          remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
-        } catch (error) {
-          console.error('🚑 updateUserSpaces', error)
-          this.error.unknown = true
-        }
-      }
-      spaces = remoteSpaces || spaces
+    updateUserSpacesWithSpaces (spaces) {
       spaces = this.sortSpacesByEditedAt(spaces)
       spaces = this.updateFavoriteSpaces(spaces)
       this.spaces = spaces
       this.updateCurrentSpace()
+    },
+    async updateUserSpaces () {
+      let spaces = cache.getAllSpaces()
+      this.updateUserSpacesWithSpaces(spaces)
+      this.loading.userSpaces = true
+      if (this.currentUserIsSignedIn) {
+        try {
+          const remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
+          this.updateUserSpacesWithSpaces(remoteSpaces)
+          this.loading.userSpaces = false
+        } catch (error) {
+          console.error('🚑 updateUserSpaces', error)
+          this.error.unknown = true
+          this.loading.userSpaces = false
+        }
+      }
     },
     updateCurrentSpace (space) {
       if (space) {
