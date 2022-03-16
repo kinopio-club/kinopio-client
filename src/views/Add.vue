@@ -1,5 +1,5 @@
 <template lang="pug">
-main
+main.add-page
   //- error: missing user api key
   aside.notifications(v-if="error.missingUserApikey")
     .persistent-item.sign-in
@@ -14,6 +14,13 @@ main
           button(type="submit" :class="{active : loading.signIn}")
             span Sign In
             Loader(:visible="loading.signIn")
+    .persistent-item.sign-in
+      .badge
+        p If you don't have an account yet, you can Sign Up for free
+        .row
+          a(:href="kinopioDomain")
+            button Kinopio →
+
   dialog.card-details(v-if="cardIsVisible" data-name="add-card")
     section
       .textarea-wrap
@@ -112,7 +119,7 @@ import { nanoid } from 'nanoid'
 let processQueueIntervalTimer, shouldCancel
 
 export default {
-  name: 'Inbox',
+  name: 'AddPage',
   components: {
     SpacePicker,
     Loader,
@@ -466,7 +473,7 @@ export default {
 </script>
 
 <style lang="stylus">
-main
+main.add-page
   position absolute
   top 50px
   padding 8px
@@ -502,6 +509,8 @@ main
     width 250px
   .notifications
     width 250px
+    .row
+      margin-top 10px
     .sign-in
       background var(--secondary-background)
       form
