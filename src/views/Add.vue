@@ -111,6 +111,7 @@ export default {
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
     window.addEventListener('keyup', this.handleShortcuts)
+    window.addEventListener('message', this.insertUrl)
     // retry failed sync operations every 5 seconds
     processQueueIntervalTimer = setInterval(() => {
       this.$store.dispatch('api/processQueueOperations')
@@ -127,6 +128,7 @@ export default {
     window.removeEventListener('mouseup', this.stopInteractions)
     window.removeEventListener('touchend', this.stopInteractions)
     window.removeEventListener('keyup', this.handleShortcuts)
+    window.removeEventListener('message', this.insertUrl)
     clearInterval(processQueueIntervalTimer)
   },
   data () {
@@ -189,6 +191,11 @@ export default {
     }
   },
   methods: {
+    insertUrl (event) {
+      const url = event.data
+      this.newName = url + this.newName
+      this.focusName()
+    },
     async init () {
       this.$store.dispatch('currentUser/init')
       await this.updateUserSpaces()
