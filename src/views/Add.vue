@@ -380,7 +380,6 @@ export default {
         this.error.noSpaces = false
       } else {
         this.currentSpace = {}
-        this.error.noSpaces = true
       }
     },
     sortSpacesByEditedAt (spaces) {
