@@ -224,13 +224,13 @@ export default {
       })
     },
     async init () {
+      this.$store.dispatch('currentUser/init')
       if (!this.currentUserIsSignedIn) {
         this.error.missingUserApikey = true
         return
       } else {
         this.error.missingUserApikey = false
       }
-      this.$store.dispatch('currentUser/init')
       await this.updateUserSpaces()
     },
     textareaSizes () {
@@ -358,16 +358,14 @@ export default {
       let spaces = cache.getAllSpaces()
       this.updateUserSpacesWithSpaces(spaces)
       this.loading.userSpaces = true
-      if (this.currentUserIsSignedIn) {
-        try {
-          const remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
-          this.updateUserSpacesWithSpaces(remoteSpaces)
-          this.loading.userSpaces = false
-        } catch (error) {
-          console.error('🚑 updateUserSpaces', error)
-          this.error.unknown = true
-          this.loading.userSpaces = false
-        }
+      try {
+        const remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
+        this.updateUserSpacesWithSpaces(remoteSpaces)
+        this.loading.userSpaces = false
+      } catch (error) {
+        console.error('🚑 updateUserSpaces', error)
+        this.error.unknown = true
+        this.loading.userSpaces = false
       }
     },
     updateCurrentSpace (space) {
