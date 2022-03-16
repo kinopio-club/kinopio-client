@@ -197,6 +197,7 @@ export default {
       this.$nextTick(() => {
         this.textareaSizes()
         this.focusName()
+        this.updateMaxLengthError()
       })
     },
     async init () {
