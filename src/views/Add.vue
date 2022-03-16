@@ -194,7 +194,9 @@ export default {
     insertUrl (event) {
       const url = event.data
       this.newName = url + this.newName
-      this.focusName()
+      this.$nextTick(() => {
+        this.focusName()
+      })
     },
     async init () {
       this.$store.dispatch('currentUser/init')
