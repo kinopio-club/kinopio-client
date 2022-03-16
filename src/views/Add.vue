@@ -195,6 +195,7 @@ export default {
       const url = event.data
       this.newName = url + this.newName
       this.$nextTick(() => {
+        this.textareaSizes()
         this.focusName()
       })
     },
