@@ -1,6 +1,20 @@
 <template lang="pug">
 main
-  dialog.card-details(data-name="add-card")
+  //- error: missing user api key
+  aside.notifications(v-if="error.missingUserApikey")
+    .persistent-item.sign-in
+      .badge
+        p To use this extension you'll need to sign in first
+        form(@submit.prevent="signIn")
+          input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
+          input(type="password" placeholder="Password" required v-model="password" @input="clearErrors")
+          .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+          .badge.danger(v-if="error.signInCredentials") Incorrect email or password
+          .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
+          button(type="submit" :class="{active : loading.signIn}")
+            span Sign In
+            Loader(:visible="loading.signIn")
+  dialog.card-details(v-if="cardIsVisible" data-name="add-card")
     section
       .textarea-wrap
         textarea.name(
@@ -133,6 +147,8 @@ export default {
   },
   data () {
     return {
+      email: '',
+      password: '',
       spaces: [],
       currentSpace: {},
       prevSuccessSpace: {},
@@ -140,13 +156,19 @@ export default {
       spacePickerIsVisible: false,
       loading: {
         createCard: false,
-        userSpaces: false
+        userSpaces: false,
+        signIn: false
       },
       error: {
         unknown: false,
         maxLength: false,
         noSpaces: false,
-        spacesLoading: false
+        spacesLoading: false,
+        missingUserApikey: false,
+        // sign in
+        tooManyAttempts: false,
+        signInCredentials: false,
+        unknownServerError: false
       },
       success: false,
       newName: '',
@@ -154,6 +176,7 @@ export default {
     }
   },
   computed: {
+    cardIsVisible () { return !this.error.missingUserApikey },
     kinopioDomain () { return utils.kinopioDomain() },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
@@ -201,11 +224,16 @@ export default {
       })
     },
     async init () {
+      if (!this.currentUserIsSignedIn) {
+        this.error.missingUserApikey = true
+        return
+      }
       this.$store.dispatch('currentUser/init')
       await this.updateUserSpaces()
     },
     textareaSizes () {
       const textarea = this.$refs.name
+      if (!textarea) { return }
       let modifier = 0
       if (this.canEditCard) {
         modifier = 1
@@ -213,12 +241,53 @@ export default {
       textarea.style.height = textarea.scrollHeight + modifier + 'px'
     },
 
+    // sign in
+
+    isSuccess (response) {
+      const success = [200, 201, 202, 204]
+      return Boolean(success.includes(response.status))
+    },
+    handleErrors (response) {
+      this.loading.signIn = false
+      this.error.signInCredentials = false
+      this.error.tooManyAttempts = false
+      this.error.unknownServerError = false
+      if (!response) {
+        this.error.unknownServerError = true
+        return
+      }
+      if (response.status === 401) {
+        this.error.signInCredentials = true
+      } else if (response.status === 429) {
+        this.error.tooManyAttempts = true
+      } else {
+        this.error.unknownServerError = true
+      }
+    },
+    async signIn (event) {
+      if (this.loading.signIn) { return }
+      const email = event.target[0].value.toLowerCase()
+      const password = event.target[1].value
+      this.loading.signIn = true
+      const response = await this.$store.dispatch('api/signIn', { email, password })
+      const result = await response.json()
+      this.loading.signIn = false
+      if (this.isSuccess(response)) {
+        this.$store.commit('currentUser/updateUser', result)
+        this.error.missingUserApikey = false
+        this.error.noSpaces = false
+        this.init()
+      } else {
+        this.handleErrors(result)
+      }
+    },
+
     // card
 
     focusName () {
       const element = this.$refs.name
-      const length = element.value.length
       if (!element) { return }
+      const length = element.value.length
       element.focus()
       if (length) {
         element.setSelectionRange(0, length)
@@ -308,6 +377,7 @@ export default {
       console.log('🐙 currentSpace', space)
       if (space) {
         this.currentSpace = space
+        this.error.noSpaces = false
       } else {
         this.currentSpace = {}
         this.error.noSpaces = true
@@ -416,6 +486,8 @@ main
   .badge
     button
       margin-top 2px
+    .loader
+      margin-right 0
   .disabled
     opacity 0.5
     pointer-events none
@@ -429,4 +501,14 @@ main
     padding-left 8px
     padding-right 8px
     width 250px
+  .notifications
+    width 250px
+    .sign-in
+      background var(--secondary-background)
+      form
+        margin-top 10px
+      input
+        margin-bottom 10px
+      button
+        margin 0
 </style>
