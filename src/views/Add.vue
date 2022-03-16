@@ -227,6 +227,8 @@ export default {
       if (!this.currentUserIsSignedIn) {
         this.error.missingUserApikey = true
         return
+      } else {
+        this.error.missingUserApikey = false
       }
       this.$store.dispatch('currentUser/init')
       await this.updateUserSpaces()
