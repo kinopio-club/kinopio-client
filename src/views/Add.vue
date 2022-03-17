@@ -100,7 +100,7 @@ main.add-page
         .badge.danger(v-if="error.spacesLoading")
           span Spaces loading, try again in a couple seconds
 
-  section.options
+  section.default-space-info
     .row(v-if="success && defaultSpace && !currentIsUserDefaults")
       span Default space is {{defaultSpace.name}}
 
@@ -502,7 +502,7 @@ main.add-page
       margin-bottom 4px
       &:last-child
         margin-bottom 0
-  section.options
+  section.default-space-info
     margin-top 10px
     padding-left 8px
     padding-right 8px
