@@ -310,7 +310,7 @@ export default {
     padding-bottom 4px
     border-top 0
   section.options
-    margin 0
+    margin 0 !important
     width 100%
     padding-bottom 5px
     border-top none
