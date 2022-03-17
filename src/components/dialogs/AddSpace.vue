@@ -157,7 +157,9 @@ export default {
       this.editPromptsIsVisible = value
     },
     showTemplatesIsVisible () {
+      this.closeAll()
       this.templatesIsVisible = true
+      this.updateDialogHeight()
     },
     hideTemplatesIsVisible () {
       this.closeAll()
@@ -218,6 +220,7 @@ export default {
 
 <style lang="stylus">
 .add-space
+  overflow auto
   &.short
     top -68px !important
   max-height calc(100vh - 230px)
