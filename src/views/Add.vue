@@ -16,7 +16,7 @@ main.add-page
             Loader(:visible="loading.signIn")
     .persistent-item.sign-in
       .badge
-        p If you don't have an account yet, you can Sign Up for free
+        p If you don't have a Kinopio account yet, you can Sign Up for free
         .row
           a(:href="kinopioDomain")
             button Kinopio →
