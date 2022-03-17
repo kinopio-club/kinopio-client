@@ -35,6 +35,11 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         button(@click.left.stop="toggleAppsIsVisible" :class="{active: appsIsVisible}")
           span Desktop and Mobile Apps
         Apps(:visible="appsIsVisible")
+    .row
+      a(href="https://help.kinopio.club/posts/extensions/")
+        button
+          span Browser Extensions →
+
   section
     .row
       p Kinopio is made possible by people like you
