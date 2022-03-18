@@ -149,7 +149,7 @@ export default {
     processQueueIntervalTimer = setInterval(() => {
       this.$store.dispatch('api/processQueueOperations')
     }, 5000)
-    this.focusName()
+    this.focusAndSelectName()
     this.init()
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
@@ -238,7 +238,7 @@ export default {
       this.newName = url + this.newName
       this.$nextTick(() => {
         this.textareaSizes()
-        this.focusName()
+        this.focusAndSelectName()
         this.updateMaxLengthError()
       })
     },
@@ -304,12 +304,15 @@ export default {
     },
 
     // card
-
     focusName () {
       const element = this.$refs.name
       if (!element) { return }
-      const length = element.value.length
       element.focus()
+    },
+    focusAndSelectName () {
+      const element = this.$refs.name
+      const length = element.value.length
+      this.focusName()
       if (length) {
         element.setSelectionRange(0, length)
       }
@@ -349,7 +352,7 @@ export default {
       this.prevSuccessSpace = utils.clone(this.currentSpace)
       this.success = true
       this.newName = ''
-      this.focusName()
+      this.focusAndSelectName()
     },
     clearErrorsAndSuccess () {
       this.error.unknown = false
@@ -403,7 +406,7 @@ export default {
     updateCurrentSpace (space) {
       if (space) {
         this.closeDialogs()
-        this.focusName()
+        this.focusAndSelectName()
       }
       space = space || this.defaultSpace || this.spaces[0]
       console.log('🐙 currentSpace', space)
