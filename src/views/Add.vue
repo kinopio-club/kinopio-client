@@ -8,12 +8,14 @@ main.add-page
         form(@submit.prevent="signIn")
           input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
           input(type="password" placeholder="Password" required v-model="password" @input="clearErrors")
-          .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-          .badge.danger(v-if="error.signInCredentials") Incorrect email or password
-          .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
           button(type="submit" :class="{active : loading.signIn}")
             span Sign In
             Loader(:visible="loading.signIn")
+        .sign-in-errors
+          .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+          .badge.danger(v-if="error.signInCredentials") Incorrect email or password
+          .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
+
     .persistent-item.sign-in
       .badge
         p If you don't have a Kinopio account yet, you can Sign Up for free
@@ -79,24 +81,26 @@ main.add-page
                 input(type="checkbox" v-model="currentIsUserDefaults")
                 span Set as Default
 
-        //- error: card limit
+        //- Errors
+
+        //- card limit
         template(v-if="cardsCreatedIsOverLimit")
           .badge.danger
             span To add more cards, you'll need to upgrade for $5/month
             .row
               a(:href="kinopioDomain")
                 button Upgrade →
-        //- error: connection
+        //- connection
         .badge.danger(v-if="error.unknown") (シ_ _)シ Something went wrong, Please try again or contact support
-        //- error: max card length
+        //- max card length
         .badge.danger(v-if="error.maxLength") To fit small screens, cards can't be longer than {{maxCardLength}} characters
-        //- error: no spaces
+        //- no spaces
         .badge.danger(v-if="error.noSpaces")
           span You'll need to visit Kinopio once before you can add cards
           .row
             a(:href="kinopioDomain")
               button Kinopio →
-        //- error: spaces loading
+        //- spaces loading
         .badge.danger(v-if="error.spacesLoading")
           span Spaces loading, try again in a couple seconds
 
@@ -519,4 +523,8 @@ main.add-page
         margin-bottom 10px
       button
         margin 0
+  .sign-in-errors
+    .badge
+      display inline-block
+      margin-top 10px
 </style>
