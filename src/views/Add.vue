@@ -35,6 +35,11 @@ main.add-page
           @keydown.enter.exact.prevent="createCard"
           @focusin="updateKeyboardShortcutTipIsVisible(true)"
           @focusout="updateKeyboardShortcutTipIsVisible(false)"
+
+          @keyup.alt.enter.exact.stop
+          @keyup.ctrl.enter.exact.stop
+          @keydown.alt.enter.exact.stop="insertLineBreak"
+          @keydown.ctrl.enter.exact.stop="insertLineBreak"
         )
       //- space
       .row
@@ -358,6 +363,19 @@ export default {
       } else {
         this.error.maxLength = false
       }
+    },
+    insertLineBreak (event) {
+      const position = this.$refs.name.selectionEnd
+      const name = this.newName
+      const newName = name.substring(0, position) + '\n' + name.substring(position)
+      setTimeout(() => {
+        this.setSelectionRange(position + 1, position + 1)
+      })
+      this.insertedLineBreak = true
+      this.newName = newName
+      this.$nextTick(() => {
+        this.textareaSizes()
+      })
     },
 
     // spaces
