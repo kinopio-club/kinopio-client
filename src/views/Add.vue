@@ -56,6 +56,9 @@ main.add-page
             @selectSpace="updateCurrentSpace"
             :selectedSpace="currentSpace"
           )
+        .button-wrap(v-if="currentSpace.id")
+          a(:href="currentSpace.id")
+            button →
       //- add card
       .row
         .button-wrap
