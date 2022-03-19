@@ -303,6 +303,41 @@ export default {
       }
     },
 
+    // url preview (from Card.vue)
+
+    async urlPreview (url) {
+      try {
+        let response = await this.$store.dispatch('api/urlPreview', url)
+        if (!response) { return }
+        let { data, host } = response
+        console.log('🚗 link preview', host, data)
+        const { links, meta } = data
+        return { links, meta }
+      } catch (error) {
+        console.warn('🚑 urlPreview', error, url)
+      }
+    },
+    previewImage ({ thumbnail }) {
+      const minWidth = 200
+      if (!thumbnail) { return '' }
+      let image = thumbnail.find(item => {
+        let shouldSkipImage = false
+        if (item.media) {
+          if (item.media.width < minWidth) {
+            shouldSkipImage = true
+          }
+        }
+        return item.href && !shouldSkipImage
+      })
+      if (!image) { return '' }
+      return image.href || ''
+    },
+    previewFavicon ({ icon }) {
+      if (!icon) { return '' }
+      let image = icon.find(item => item.href)
+      return image.href || ''
+    },
+
     // card
     focusName () {
       const element = this.$refs.name
@@ -332,15 +367,31 @@ export default {
       }
       if (!this.newName) { return }
       this.loading.createCard = true
-      console.log('🛫 create card', this.newName, this.currentSpace.name, this.currentSpace.id)
+      const url = utils.urlFromString(this.newName)
+      let urlPreview = {}
+      if (url) {
+        let { links, meta } = await this.urlPreview(url)
+        urlPreview = {
+          title: utils.truncated(meta.title || meta.site),
+          description: utils.truncated(meta.description, 280),
+          image: this.previewImage(links),
+          favicon: this.previewFavicon(links)
+        }
+      }
       const body = [{
         id: nanoid(),
         name: this.newName,
         x: 100,
         y: 100,
         z: 1,
-        spaceId: this.currentSpace.id
+        spaceId: this.currentSpace.id,
+        urlPreviewUrl: url,
+        urlPreviewTitle: urlPreview.title,
+        urlPreviewDescription: urlPreview.description,
+        urlPreviewImage: urlPreview.image,
+        urlPreviewFavicon: urlPreview.favicon
       }]
+      console.log('🛫 create card', body)
       cache.addToSpace({ cards: body, connections: [], connectionTypes: [] }, this.currentSpace.id)
       try {
         await this.$store.dispatch('api/createCards', body)
