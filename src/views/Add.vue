@@ -339,6 +339,7 @@ export default {
     },
 
     // card
+
     focusName () {
       const element = this.$refs.name
       if (!element) { return }
