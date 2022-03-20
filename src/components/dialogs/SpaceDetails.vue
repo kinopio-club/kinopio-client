@@ -23,7 +23,7 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
     .row
       //- Add Space
       .button-wrap
-        button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
+        button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
           img.icon(src="@/assets/add.svg")
           span Space
         AddSpace(:visible="addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace" @addJournalSpace="addJournalSpace")
