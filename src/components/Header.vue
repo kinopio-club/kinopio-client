@@ -70,6 +70,10 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
             button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
               img.icon(src="@/assets/add.svg")
             AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
+          //- Templates
+          .button-wrap
+            button(@click.left.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
+              img.icon.templates(src="@/assets/templates.svg")
           //- Search
           .button-wrap
             button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
@@ -207,7 +211,8 @@ export default {
       notificationsIsLoading: true,
       addSpaceIsVisible: false,
       isFadeOut: false,
-      isHidden: false
+      isHidden: false,
+      templatesIsVisible: false
     }
   },
   created () {
@@ -244,6 +249,8 @@ export default {
         }
       } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
+      } else if (mutation.type === 'triggerTemplatesIsVisible') {
+        this.templatesIsVisible = true
       }
     })
   },
@@ -453,6 +460,7 @@ export default {
       this.offlineIsVisible = false
       this.notificationsIsVisible = false
       this.addSpaceIsVisible = false
+      this.templatesIsVisible = false
       if (!spaceDetailsDialogIsPinned) {
         this.spaceDetailsIsVisible = false
       }
@@ -489,6 +497,11 @@ export default {
       const isVisible = this.addSpaceIsVisible
       this.$store.dispatch('closeAllDialogs', 'Header.toggleAddSpaceIsVisible')
       this.addSpaceIsVisible = !isVisible
+    },
+    toggleTemplatesIsVisible () {
+      const isVisible = this.templatesIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleTemplatesIsVisible')
+      this.templatesIsVisible = !isVisible
     },
     toggleSpaceStatusIsVisible () {
       const isVisible = this.spaceStatusIsVisible

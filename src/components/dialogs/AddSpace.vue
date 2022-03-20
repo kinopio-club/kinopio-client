@@ -8,7 +8,7 @@ dialog.add-space.narrow(
   ref="dialog"
   :style="{'max-height': dialogHeight + 'px'}"
 )
-  section(v-if="!templatesIsVisible")
+  section
     .row
       .segmented-buttons
         button(@click="addSpace")
@@ -195,7 +195,7 @@ export default {
     triggerTemplatesIsVisible () {
       this.closeAll()
       this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
-      this.$store.dispatch('triggerTemplatesIsVisible')
+      this.$store.commit('triggerTemplatesIsVisible')
     }
   },
   watch: {
