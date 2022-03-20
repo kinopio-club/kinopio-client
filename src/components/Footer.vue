@@ -5,12 +5,12 @@
       Notifications
       .controls(v-if="isVisible" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
         section
-          //- Explore
           .button-wrap
             .segmented-buttons
+              //- Explore
               button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
                 img.icon.sunglasses(src="@/assets/sunglasses.svg")
-                //- span Explore
+              // Live
               button(@click.left="toggleLiveIsVisible" :class="{ active: liveIsVisible}")
                 img.icon.camera(src="@/assets/camera.svg")
                 span(v-if="liveSpaces.length") {{ liveSpaces.length }}
