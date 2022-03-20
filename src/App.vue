@@ -604,6 +604,11 @@ dialog
   height 12px
   vertical-align -1px
 
+.icon.templates
+  padding 0
+  height 9px
+  vertical-align 0px
+
 label,
 li
   &:hover,

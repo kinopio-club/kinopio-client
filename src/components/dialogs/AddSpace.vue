@@ -8,14 +8,6 @@ dialog.add-space.narrow(
   ref="dialog"
   :style="{'max-height': dialogHeight + 'px'}"
 )
-  section
-    .row
-      .segmented-buttons
-        button(@click.left.stop="hideTemplatesIsVisible" :class="{ active: !templatesIsVisible }")
-          span New
-        button(@click.left.stop="showTemplatesIsVisible" :class="{ active: templatesIsVisible }")
-          span Templates
-
   section(v-if="!templatesIsVisible")
     .row
       .segmented-buttons
@@ -49,7 +41,11 @@ dialog.add-space.narrow(
   section(v-if="editPromptsIsVisible")
     PromptPackPicker(:visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack")
 
-  Templates(:visible="templatesIsVisible")
+  //- Templates
+  section
+    button(@click="triggerTemplatesIsVisible")
+      img.icon.templates(src="@/assets/templates.svg")
+      span Templates
 
 </template>
 
@@ -60,7 +56,6 @@ import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
-import Templates from '@/components/Templates.vue'
 
 import last from 'lodash-es/last'
 import { nanoid } from 'nanoid'
@@ -70,8 +65,7 @@ export default {
   components: {
     Prompt,
     PromptPackPicker,
-    MoonPhase,
-    Templates
+    MoonPhase
   },
   props: {
     visible: Boolean,
@@ -92,7 +86,6 @@ export default {
       moonPhase: {},
       editPromptsIsVisible: false,
       editNewSpaceIsVisible: false,
-      templatesIsVisible: false,
       urlIsCopied: false,
       promptPickerPosition: {
         left: 80,
@@ -157,15 +150,6 @@ export default {
       this.closeAll()
       this.editPromptsIsVisible = value
     },
-    showTemplatesIsVisible () {
-      this.closeAll()
-      this.templatesIsVisible = true
-      this.updateDialogHeight()
-    },
-    hideTemplatesIsVisible () {
-      this.closeAll()
-      this.templatesIsVisible = false
-    },
     closeAll () {
       this.editNewSpaceIsVisible = false
       this.editPromptsIsVisible = false
@@ -207,6 +191,11 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
+    },
+    triggerTemplatesIsVisible () {
+      this.closeAll()
+      this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
+      this.$store.dispatch('triggerTemplatesIsVisible')
     }
   },
   watch: {
@@ -230,8 +219,6 @@ export default {
     border 0
     border-radius 3px
     padding 4px
-  .templates
-    border-top 1px solid var(--primary)
   .button-down-arrow
     padding 0
 </style>
