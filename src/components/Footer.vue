@@ -5,12 +5,15 @@
       Notifications
       .controls(v-if="isVisible" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
         section
-          //- Explore
           .button-wrap
             .segmented-buttons
+              //- Explore
               button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
                 img.icon.sunglasses(src="@/assets/sunglasses.svg")
                 span Explore
+              button
+                img.icon.templates(src="@/assets/templates.svg")
+              //- Live
               button(@click.left="toggleLiveIsVisible" :class="{ active: liveIsVisible}")
                 img.icon.camera(src="@/assets/camera.svg")
                 span(v-if="liveSpaces.length") {{ liveSpaces.length }}
@@ -450,4 +453,10 @@ footer
   .segmented-buttons
     .down-arrow
       padding 0
+
+  .icon.templates
+    padding 0
+    height 9px
+    vertical-align 0px
+
   </style>

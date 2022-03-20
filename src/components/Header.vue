@@ -70,6 +70,10 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
             button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
               img.icon(src="@/assets/add.svg")
             AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
+          //- Templates
+          .button-wrap
+            button
+              img.icon.templates(src="@/assets/templates.svg")
           //- Search
           .button-wrap
             button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
@@ -842,6 +846,11 @@ header
 
   .no-padding
     padding 0 !important
+
+  .icon.templates
+    padding 0
+    height 9px
+    vertical-align 0px
 
 .badge-jiggle
   animation-name notificationJiggle
