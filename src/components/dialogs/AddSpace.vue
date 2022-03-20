@@ -11,7 +11,7 @@ dialog.add-space.narrow(
   section
     .row
       .segmented-buttons
-        button(@click="addSpace")
+        button.success(@click="addSpace")
           img.icon(src="@/assets/add.svg")
           span New Space
         button(@click.left.stop="toggleEditNewSpaceIsVisible" :class="{ active: editNewSpaceIsVisible }")

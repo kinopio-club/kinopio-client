@@ -233,7 +233,7 @@ export default {
   --danger-active-background #ff928b
 
   --info-background #90ffff
-  --success-background #98f49f
+  --success-background #67ffbb
   --search-background yellow
 
   // non-theme vars
@@ -362,6 +362,8 @@ label // used for checkbox buttons
       background-color var(--danger-active-background)
   &.success
     background var(--success-background)
+  &.info
+    background var(--info-background)
   .loader
     height 14px
     width 14px
