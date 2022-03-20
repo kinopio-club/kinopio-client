@@ -593,6 +593,7 @@ export default {
         defer(function () {
           if (space.id !== context.state.id) { return }
           if (!isRemote && isLoadingRemoteSpace) { return }
+          if (chunk[0].spaceId !== context.state.id) { return }
           // primary
           if (primaryIsCards) {
             context.commit('currentCards/restore', chunk, { root: true })
@@ -601,6 +602,7 @@ export default {
           }
           // secondary
           chunk = secondaryChunks[index]
+          if (chunk[0].spaceId !== context.state.id) { return }
           if (chunk && primaryIsCards) {
             context.commit('currentConnections/restore', chunk, { root: true })
           } else if (chunk) {
@@ -678,6 +680,7 @@ export default {
       if (isLocalSpaceOnly) { return }
       let remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (!remoteSpace) { return }
+      if (remoteSpace.id !== context.state.id) { return }
       const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
       if (spaceIsUnchanged) { return }
       isLoadingRemoteSpace = true
