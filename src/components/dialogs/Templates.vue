@@ -7,6 +7,8 @@ dialog.templates.narrow(
   ref="dialog"
   :style="{'max-height': dialogHeight + 'px'}"
 )
+  section
+    p Templates
   TemplatesComponent(:visible="true")
 
 </template>

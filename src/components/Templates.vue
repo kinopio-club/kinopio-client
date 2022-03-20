@@ -1,5 +1,5 @@
 <template lang="pug">
-.templates-component(v-if="visible" :open="visible" @click.left.stop)
+section.templates-component(v-if="visible" :open="visible" @click.left.stop)
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="spaces" :showCategory="true" @selectSpace="changeSpace")
 </template>
@@ -71,6 +71,7 @@ export default {
 
 <style lang="stylus">
 .templates-component
+  padding 0
   padding-top 4px
   .categories
     border-top 1px solid var(--primary)

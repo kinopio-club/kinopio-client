@@ -282,8 +282,6 @@ dialog.search
   max-height calc(100vh - 140px)
   @media(max-width 360px)
     left -40px
-  .search-wrap
-    padding-top 8px
   li
     display block !important
     .button-badge
