@@ -100,7 +100,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .button-wrap
         button.toggle-collaboration-info(@click.left.stop="toggleCollaborationInfoIsVisible" :class="{active : collaborationInfoIsVisible}")
           img.icon.time(src="@/assets/time.svg")
-    //- CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="[card]" @closeDialogs="closeDialogs")
+    CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="[card]" @closeDialogs="closeDialogs")
     CardCollaborationInfo(:visible="collaborationInfoIsVisible" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
     .row(v-if="nameSplitIntoCardsCount || hasUrls")
@@ -196,7 +196,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 </template>
 
 <script>
-import CardStyleActions from '@/components/dialogs/CardStyleActions.vue'
+import CardStyleActions from '@/components/CardStyleActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
@@ -1546,4 +1546,9 @@ export default {
   button
     .icon.time
       vertical-align -1px
+  .card-style-actions-component
+    padding 0
+  .card-style-actions-component + .row
+    margin-top 10px
+
 </style>
