@@ -32,6 +32,7 @@ export default {
     shouldEmailWeeklyReview: true,
     shouldShowMoreAlignOptions: false,
     shouldShowCardCollaborationInfo: false,
+    shouldShowMoreFooterControls: false,
     shouldInvertZoomDirection: false,
     shouldUseLastConnectionType: false,
     shouldOpenLinksInNewTab: false,
@@ -215,6 +216,10 @@ export default {
     shouldShowCardCollaborationInfo: (state, value) => {
       state.shouldShowCardCollaborationInfo = value
       cache.updateUser('shouldShowCardCollaborationInfo', value)
+    },
+    shouldShowMoreFooterControls: (state, value) => {
+      state.shouldShowMoreFooterControls = value
+      cache.updateUser('shouldShowMoreFooterControls', value)
     },
     shouldInvertZoomDirection: (state, value) => {
       state.shouldInvertZoomDirection = value
@@ -530,6 +535,14 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowCardCollaborationInfo: value
+        } }, { root: true })
+    },
+    shouldShowMoreFooterControls: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowMoreFooterControls' })
+      context.commit('shouldShowMoreFooterControls', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldShowMoreFooterControls: value
         } }, { root: true })
     },
     shouldInvertZoomDirection: (context, value) => {

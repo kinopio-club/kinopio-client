@@ -600,6 +600,10 @@ dialog
   dialog
     top calc(100% - 8px)
 
+.icon.sunglasses
+  height 12px
+  vertical-align -1px
+
 label,
 li
   &:hover,

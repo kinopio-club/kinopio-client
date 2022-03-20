@@ -10,7 +10,7 @@
             .segmented-buttons
               button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
                 img.icon.sunglasses(src="@/assets/sunglasses.svg")
-                span Explore
+                //- span Explore
               button(@click.left="toggleLiveIsVisible" :class="{ active: liveIsVisible}")
                 img.icon.camera(src="@/assets/camera.svg")
                 span(v-if="liveSpaces.length") {{ liveSpaces.length }}
@@ -32,8 +32,12 @@
               img.icon(src="@/assets/press-and-hold.svg")
               span Mobile Tips
             MobileTips(:visible="mobileTipsIsVisible")
+          //- Toggle More Controls
+          .button-wrap
+            button.toggle-more-controls(@click.left.stop="toggleMoreFooterControlsIsVisible" :class="{active : moreFooterControlsIsVisible}")
+              img.icon.down-arrow(src="@/assets/down-arrow.svg")
 
-        section
+        section(v-if="moreFooterControlsIsVisible")
           //- Removed
           .button-wrap
             button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
@@ -145,6 +149,7 @@ export default {
     clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
+    moreFooterControlsIsVisible () { return this.$store.state.currentUser.shouldShowMoreFooterControls },
     isAddPage () { return this.$store.state.isAddPage },
     isEmbed () { return this.$store.state.isEmbed },
     currentUser () { return this.$store.state.currentUser },
@@ -215,6 +220,11 @@ export default {
       if (!this.linksDialogIsPinned && exclude !== 'links') {
         this.linksIsVisible = false
       }
+    },
+    toggleMoreFooterControlsIsVisible () {
+      this.closeDialogs()
+      const isVisible = !this.$store.state.currentUser.shouldShowMoreFooterControls
+      this.$store.dispatch('currentUser/shouldShowMoreFooterControls', isVisible)
     },
     toggleIsFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
@@ -451,4 +461,10 @@ footer
   .segmented-buttons
     .down-arrow
       padding 0
+
+  button
+    .icon.down-arrow
+      padding 0
+    .icon.camera
+      vertical-align 0
   </style>
