@@ -78,7 +78,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
     .row
       //- Remove
       .button-wrap
-        button(:disabled="!canEditCard" @click.left="removeCard")
+        button.danger(:disabled="!canEditCard" @click.left="removeCard")
           img.icon(src="@/assets/remove.svg")
           span Remove
       //- [·]
@@ -101,7 +101,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Toggle Collaboration Info
       .button-wrap
         button.toggle-collaboration-info(@click.left.stop="toggleCollaborationInfoIsVisible" :class="{active : collaborationInfoIsVisible}")
-          img.down-arrow(src="@/assets/down-arrow.svg")
+          img.icon.time(src="@/assets/time.svg")
 
     CardCollaborationInfo(:visible="collaborationInfoIsVisible" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
@@ -1505,6 +1505,7 @@ export default {
 
 <style lang="stylus">
 .card-details
+  width 252px
   transform-origin top left
   > section
     background-color var(--secondary-background)
@@ -1542,4 +1543,7 @@ export default {
   .toggle-collaboration-info
     .down-arrow
       padding 0
+  button
+    .icon.time
+      vertical-align -1px
 </style>
