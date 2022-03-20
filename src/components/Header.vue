@@ -74,6 +74,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
           .button-wrap
             button(@click.left.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
               img.icon.templates(src="@/assets/templates.svg")
+            Templates(:visible="templatesIsVisible")
           //- Search
           .button-wrap
             button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
@@ -159,6 +160,7 @@ import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Search from '@/components/dialogs/Search.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
+import Templates from '@/components/dialogs/Templates.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 import uniqBy from 'lodash-es/uniqBy'
@@ -190,6 +192,7 @@ export default {
     Search,
     MoonPhase,
     AddSpace,
+    Templates,
     PrivacyIcon
   },
   data () {

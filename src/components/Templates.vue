@@ -1,5 +1,5 @@
 <template lang="pug">
-.templates(v-if="visible" :open="visible" @click.left.stop)
+.templates-component(v-if="visible" :open="visible" @click.left.stop)
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="spaces" :showCategory="true" @selectSpace="changeSpace")
 </template>
@@ -10,7 +10,7 @@ import SpaceList from '@/components/SpaceList.vue'
 import utils from '@/utils.js'
 
 export default {
-  name: 'Templates',
+  name: 'TemplatesComponent',
   components: {
     SpaceList
   },
@@ -70,7 +70,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.templates
+.templates-component
   padding-top 4px
   .categories
     border-top 1px solid var(--primary)
