@@ -38,6 +38,7 @@ export default {
     shouldOpenLinksInNewTab: false,
     shouldRightMouseButtonPan: false,
     shouldShowCurrentSpaceTags: false,
+    showInExploreUpdatedAt: null, // date
     dialogFavoritesFilters: null, // null, 'currentUser', 'otherUsers'
     dialogSpaceFilters: null, // null, journals, spaces
     dialogSpaceFilterByUser: {},
@@ -220,6 +221,10 @@ export default {
     shouldShowMoreFooterControls: (state, value) => {
       state.shouldShowMoreFooterControls = value
       cache.updateUser('shouldShowMoreFooterControls', value)
+    },
+    showInExploreUpdatedAt: (state, value) => {
+      state.showInExploreUpdatedAt = value
+      cache.updateUser('showInExploreUpdatedAt', value)
     },
     shouldInvertZoomDirection: (state, value) => {
       state.shouldInvertZoomDirection = value
@@ -543,6 +548,14 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowMoreFooterControls: value
+        } }, { root: true })
+    },
+    showInExploreUpdatedAt: (context, value) => {
+      utils.typeCheck({ value, type: 'object', origin: 'showInExploreUpdatedAt' })
+      context.commit('showInExploreUpdatedAt', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          showInExploreUpdatedAt: value
         } }, { root: true })
     },
     shouldInvertZoomDirection: (context, value) => {

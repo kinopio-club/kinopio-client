@@ -74,6 +74,10 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeightFromHeader(element)
       })
+    },
+    updateUserShowInExploreUpdatedAt () {
+      const date = new Date()
+      this.$store.dispatch('currentUser/showInExploreUpdatedAt', date)
     }
   },
   watch: {
@@ -81,6 +85,7 @@ export default {
       if (visible) {
         this.updateSpaces()
         this.updateDialogHeight()
+        this.updateUserShowInExploreUpdatedAt()
       }
     }
   }
