@@ -73,6 +73,7 @@ import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import Loader from '@/components/Loader.vue'
 import NameMatch from '@/components/NameMatch.vue'
 
+import dayjs from 'dayjs'
 import last from 'lodash-es/last'
 const User = defineAsyncComponent({
   loader: () => import('@/components/User.vue')
@@ -102,7 +103,8 @@ export default {
     isLoading: Boolean,
     parentIsSpaceDetails: Boolean,
     parentIsPinned: Boolean,
-    showCheckmarkSpace: Boolean
+    showCheckmarkSpace: Boolean,
+    userShowInExploreDate: String
   },
   data () {
     return {
@@ -156,6 +158,12 @@ export default {
   },
   methods: {
     isNew (space) {
+      if (this.userShowInExploreDate) {
+        const readDate = dayjs(this.userShowInExploreDate)
+        const spaceDate = dayjs(space.showInExploreUpdatedAt)
+        const delta = readDate.diff(spaceDate, 'second')
+        return delta < 0
+      }
       const isEditedByOtherUser = space.editedByUserId !== this.currentUser.id
       if (isEditedByOtherUser) {
         return space.isEdited

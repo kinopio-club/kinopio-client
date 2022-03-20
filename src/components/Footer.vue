@@ -10,11 +10,12 @@
               //- Explore
               button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
                 img.icon.sunglasses(src="@/assets/sunglasses.svg")
+                span(v-if="unreadExploreSpaces.length") {{ unreadExploreSpaces.length }}
               // Live
               button(@click.left="toggleLiveIsVisible" :class="{ active: liveIsVisible}")
                 img.icon.camera(src="@/assets/camera.svg")
                 span(v-if="liveSpaces.length") {{ liveSpaces.length }}
-            Explore(:visible="exploreIsVisible")
+            Explore(:visible="exploreIsVisible" @preloadedSpaces="exploreSpaces")
             Live(:visible="liveIsVisible" :spaces="liveSpaces" :loading="isLoadingLiveSpaces")
           //- Favorites
           .button-wrap
@@ -71,6 +72,8 @@ import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
+import dayjs from 'dayjs'
+
 let updateFavoritesIntervalTimer, updateLiveSpacesIntervalTimer
 
 const fadeOutDuration = 15
@@ -105,7 +108,8 @@ export default {
       liveSpaces: [],
       isLoadingLiveSpaces: true,
       isFadeOut: false,
-      isHidden: false
+      isHidden: false,
+      exploreSpaces: []
     }
   },
   mounted () {
@@ -137,6 +141,7 @@ export default {
     updateLiveSpacesIntervalTimer = setInterval(() => {
       this.updateLiveSpaces()
     }, 1000 * 60 * 5) // 5 minutes
+    this.updateExploreSpaces()
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.handleTouchInteractions)
@@ -205,6 +210,17 @@ export default {
         return -1
       }
       return 0
+    },
+    unreadExploreSpaces () {
+      let readDate = this.$store.state.currentUser.showInExploreUpdatedAt
+      if (!readDate) { return this.exploreSpaces }
+      readDate = dayjs(readDate)
+      const unreadSpaces = this.exploreSpaces.filter(space => {
+        const spaceDate = dayjs(space.showInExploreUpdatedAt)
+        const delta = readDate.diff(spaceDate, 'second')
+        return delta < 0
+      })
+      return unreadSpaces
     }
   },
   methods: {
@@ -308,6 +324,12 @@ export default {
         }
       })
       return normalizedSpaces
+    },
+
+    // preload explore spaces
+
+    async updateExploreSpaces () {
+      this.exploreSpaces = await this.$store.dispatch('api/getExploreSpaces')
     },
 
     // hide

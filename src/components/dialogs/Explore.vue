@@ -8,7 +8,7 @@ dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height'
       button(@click.left.stop="showTemplates" :class="{ active: templatesIsVisible }")
         span Templates
 
-  Community(:visible="!templatesIsVisible" :loading="loading" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace")
+  Community(:visible="!templatesIsVisible" :loading="loading" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace" :userShowInExploreDate="lastReadDate")
   Templates(:visible="templatesIsVisible")
 </template>
 
@@ -26,7 +26,8 @@ export default {
     Community
   },
   props: {
-    visible: Boolean
+    visible: Boolean,
+    preloadedSpaces: Object
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -41,7 +42,8 @@ export default {
       loading: false,
       spaces: [],
       newSpaces: [],
-      dialogHeight: null
+      dialogHeight: null,
+      lastReadDate: null
     }
   },
   methods: {
@@ -55,6 +57,9 @@ export default {
       if (this.loading) { return }
       if (this.templatesIsVisible) { return }
       this.loading = true
+      if (!this.spaces.length) {
+        this.spaces = this.preloadedSpaces || []
+      }
       this.spaces = await this.$store.dispatch('api/getExploreSpaces')
       this.newSpaces = this.spaces
       this.loading = false
@@ -76,6 +81,7 @@ export default {
       })
     },
     updateUserShowInExploreUpdatedAt () {
+      this.lastReadDate = this.$store.state.currentUser.showInExploreUpdatedAt.toString()
       const date = new Date()
       this.$store.dispatch('currentUser/showInExploreUpdatedAt', date)
     }

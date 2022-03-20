@@ -11,7 +11,7 @@
     p(v-if="loading")
       Loader(:visible="loading")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="spaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace")
+    SpaceList(:spaces="spaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace" :userShowInExploreDate="userShowInExploreDate")
 </template>
 
 <script>
@@ -30,7 +30,8 @@ export default {
   props: {
     visible: Boolean,
     loading: Boolean,
-    spaces: Array
+    spaces: Array,
+    userShowInExploreDate: String
   },
   created () {
     this.$store.subscribe((mutation, state) => {
