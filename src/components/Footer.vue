@@ -26,6 +26,13 @@
                 img.icon.down-arrow(src="@/assets/down-arrow.svg" :class="{ 'is-mobile-icon': isMobile }")
                 span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
             Favorites(:visible="favoritesIsVisible")
+          //- Mobile Tips
+          .button-wrap(v-if="isMobileOrTouch" :style="{zIndex: mobileTipsZIndex}")
+            button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
+              img.icon(src="@/assets/press-and-hold.svg")
+              span Mobile Tips
+            MobileTips(:visible="mobileTipsIsVisible")
+
         section
           //- Removed
           .button-wrap
@@ -42,12 +49,6 @@
                 span Links
             Links(:visible="linksIsVisible")
             Tags(:visible="tagsIsVisible")
-          //- Mobile Tips
-          .button-wrap(v-if="isMobileOrTouch" :style="{zIndex: mobileTipsZIndex}")
-            button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
-              img.icon(src="@/assets/press-and-hold.svg")
-              span Mobile Tips
-            MobileTips(:visible="mobileTipsIsVisible")
 
   .right(v-if="!isMobileOrTouch" :class="{'is-embed': isEmbed}")
     SpaceZoom
