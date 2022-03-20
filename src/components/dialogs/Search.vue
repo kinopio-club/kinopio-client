@@ -295,4 +295,8 @@ dialog.search
       max-width 48px
       border-radius 3px
       vertical-align middle
+  .time
+    vertical-align -1px
+    height 11px
+
 </style>

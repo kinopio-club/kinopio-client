@@ -73,7 +73,9 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
           //- Search
           .button-wrap
             button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
-              img.icon.search(v-if="!searchResultsCount" src="@/assets/search.svg")
+              template(v-if="!searchResultsCount")
+                img.icon.search(src="@/assets/search.svg")
+                img.icon.time(src="@/assets/time.svg")
               .badge.search.search-count-badge(v-if="searchResultsCount")
                 img.icon.search(src="@/assets/search.svg")
                 span {{searchResultsCount}}
@@ -757,6 +759,11 @@ header
     position relative
     .search-count-badge
       margin 0
+    .search-button
+      > .time
+        margin-left 5px
+        vertical-align -1px
+        height 11px
 
   aside
     display flex
