@@ -1,15 +1,6 @@
 <template lang="pug">
 dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
-  section.header
-    .segmented-buttons
-      button(@click.left.stop="hideTemplates" :class="{ active: !templatesIsVisible }")
-        span Community
-        Loader(:visible="loading")
-      button(@click.left.stop="showTemplates" :class="{ active: templatesIsVisible }")
-        span Templates
-
-  Community(:visible="!templatesIsVisible" :loading="loading" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace" :userShowInExploreDate="lastReadDate")
-  Templates(:visible="templatesIsVisible")
+  Community(:visible="true" :loading="loading" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace" :userShowInExploreDate="lastReadDate")
 </template>
 
 <script>
@@ -38,7 +29,6 @@ export default {
   },
   data () {
     return {
-      templatesIsVisible: false,
       loading: false,
       spaces: [],
       newSpaces: [],
@@ -47,15 +37,8 @@ export default {
     }
   },
   methods: {
-    showTemplates () {
-      this.templatesIsVisible = true
-    },
-    hideTemplates () {
-      this.templatesIsVisible = false
-    },
     async updateSpaces () {
       if (this.loading) { return }
-      if (this.templatesIsVisible) { return }
       this.loading = true
       if (!this.spaces.length) {
         this.spaces = this.preloadedSpaces || []
