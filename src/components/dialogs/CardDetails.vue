@@ -92,17 +92,15 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         button(:disabled="!canEditCard" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           img.icon.flower(src="@/assets/flower.svg")
         ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addFile")
-      //- Style
+      //- Toggle Style Actions
       .button-wrap
         button(:disabled="!canEditCard" @click.left.stop="toggleCardStyleActionsIsVisible" :class="{active : cardStyleActionsIsVisible}")
           span Style
-        CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="[card]" @closeDialogs="closeDialogs")
-
       //- Toggle Collaboration Info
       .button-wrap
         button.toggle-collaboration-info(@click.left.stop="toggleCollaborationInfoIsVisible" :class="{active : collaborationInfoIsVisible}")
           img.icon.time(src="@/assets/time.svg")
-
+    //- CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="[card]" @closeDialogs="closeDialogs")
     CardCollaborationInfo(:visible="collaborationInfoIsVisible" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
     .row(v-if="nameSplitIntoCardsCount || hasUrls")
@@ -239,7 +237,6 @@ export default {
   data () {
     return {
       lastSelectionStartPosition: 0,
-      cardStyleActionsIsVisible: false,
       imagePickerIsVisible: false,
       cardTipsIsVisible: false,
       initialSearch: '',
@@ -531,7 +528,8 @@ export default {
         borderRadius: borderRadius
       }
     },
-    collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo }
+    collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo },
+    cardStyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowCardStyleActions }
   },
   methods: {
     broadcastShowCardDetails () {
@@ -960,11 +958,6 @@ export default {
         textarea.style.height = textarea.scrollHeight + modifier + 'px'
       })
     },
-    toggleCardStyleActionsIsVisible () {
-      const isVisible = this.cardStyleActionsIsVisible
-      this.closeDialogs()
-      this.cardStyleActionsIsVisible = !isVisible
-    },
     toggleCardTipsIsVisible () {
       const isVisible = this.cardTipsIsVisible
       this.closeDialogs()
@@ -975,6 +968,14 @@ export default {
       this.closeDialogs()
       this.imagePickerIsVisible = !isVisible
       this.initialSearch = this.normalizedName
+    },
+    toggleCardStyleActionsIsVisible () {
+      this.closeDialogs()
+      const isVisible = !this.$store.state.currentUser.shouldShowCardStyleActions
+      this.$store.dispatch('currentUser/shouldShowCardStyleActions', isVisible)
+      this.$nextTick(() => {
+        this.scrollIntoView()
+      })
     },
     toggleCollaborationInfoIsVisible () {
       this.closeDialogs()
@@ -1018,7 +1019,6 @@ export default {
       this.$store.commit('triggerCardDetailsCloseDialogs')
       this.imagePickerIsVisible = false
       this.cardTipsIsVisible = false
-      this.cardStyleActionsIsVisible = false
       this.hidePickers()
       if (shouldSkipGlobalDialogs === true) { return }
       this.hideTagDetailsIsVisible()
