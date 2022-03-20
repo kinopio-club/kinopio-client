@@ -67,6 +67,7 @@ const currentCards = {
 
     update: (state, card) => {
       if (!utils.objectHasKeys(card)) { return }
+      if (!state.cards) { return }
       if (!card.id) {
         console.warn('🚑 could not update card', card)
         return
@@ -84,6 +85,7 @@ const currentCards = {
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
     move: (state, { cards, spaceId }) => {
+      if (!state.cards) { return }
       cards.forEach(card => {
         state.cards[card.id].x = card.x
         state.cards[card.id].y = card.y
