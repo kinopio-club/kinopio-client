@@ -41,7 +41,7 @@
         section(v-if="moreFooterControlsIsVisible")
           //- Removed
           .button-wrap
-            button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+            button.danger(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
               img.refresh.icon(src="@/assets/remove.svg")
               span Removed
             Removed(:visible="removedIsVisible")
