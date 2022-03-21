@@ -212,6 +212,9 @@ const store = createStore({
       state.pageWidth = width
     },
     closeAllDialogs: (state) => {
+      if (utils.dialogIsVisible()) {
+        state.shouldAddCard = false
+      }
       state.multipleSelectedActionsIsVisible = false
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
