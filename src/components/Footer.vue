@@ -10,7 +10,7 @@
               //- Explore
               button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
                 img.icon.sunglasses(src="@/assets/sunglasses.svg")
-                span(v-if="unreadExploreSpaces.length") {{ unreadExploreSpaces.length }}
+                span(v-if="unreadExploreSpacesLength") {{ unreadExploreSpacesLength }}
               // Live
               button(@click.left="toggleLiveIsVisible" :class="{ active: liveIsVisible}")
                 img.icon.camera(src="@/assets/camera.svg")
@@ -211,7 +211,7 @@ export default {
       }
       return 0
     },
-    unreadExploreSpaces () {
+    unreadExploreSpacesLength () {
       let readDate = this.$store.state.currentUser.showInExploreUpdatedAt
       console.log('🦆', readDate)
       if (!readDate) { return '50+' }
@@ -222,7 +222,7 @@ export default {
         console.log('🐢', space.name, delta, readDate, space.showInExploreUpdatedAt)
         return delta < 0
       })
-      return unreadSpaces
+      return unreadSpaces.length
     }
   },
   methods: {
