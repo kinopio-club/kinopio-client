@@ -28,29 +28,9 @@ export default {
   spaces () {
     return [
       {
-        id: 'BXblLMDGVn-mmRG9IUMeb',
-        categoryId: 1,
-        name: 'Note Taking'
-      },
-      {
         id: 'oVBOOfoO4qg7AzzUwweyf',
         categoryId: 1,
         name: 'Book Club'
-      },
-      {
-        id: 'ZHoXccPyfmTu7FMueXUEP',
-        categoryId: 1,
-        name: 'Research'
-      },
-      {
-        id: 'aKbPUalz4zHLqGwpDncDI',
-        categoryId: 2,
-        name: 'Journal'
-      },
-      {
-        id: 'YD_eqjNH7DQpgDKjEDSzu',
-        categoryId: 2,
-        name: 'Making Hard Decisions'
       },
       {
         id: 'IoH27fnouzCpoSj1vWg3s',
@@ -63,11 +43,6 @@ export default {
         name: 'Garage Sale'
       },
       {
-        id: 'u2Zc1bR0q7bRb16-K5o6X',
-        categoryId: 2,
-        name: 'Mind Map'
-      },
-      {
         id: 'b87U9WETGvl17BrKNsqDH',
         categoryId: 3,
         name: 'Meeting'
@@ -76,16 +51,6 @@ export default {
         id: 'GgDOqKvEEzTA93EYmAZrn',
         categoryId: 3,
         name: 'Mood Board'
-      },
-      {
-        id: 'QCtseqHqA1Ib0OwYETk7m',
-        categoryId: 3,
-        name: 'Weekly Planner'
-      },
-      {
-        id: 'DWCwVJNU8yu1cPs87BEQR',
-        categoryId: 4,
-        name: 'Sofware Architecture'
       },
       {
         id: 'WSzpRkVqSdv8GKCSCrwrg',
@@ -97,6 +62,9 @@ export default {
         categoryId: 4,
         name: 'Roadmap'
       }
+
+      // 🚑 missing templates: Note Taking, Research, Journal, Making Hard Decisions, Mind Map, Weekly Planner, Sofware Architecture
+      // 102293910caf3bbc3cdee8f07dd5e720ffd4e6e9
 
       // {
       //   id: '123',
