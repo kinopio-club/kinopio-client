@@ -77,24 +77,25 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
                 img.icon.templates(src="@/assets/templates.svg")
               Templates(:visible="templatesIsVisible")
           //- Search
-          .button-wrap
-            button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
-              template(v-if="!searchResultsCount")
-                img.icon.search(src="@/assets/search.svg")
-                img.icon.time(src="@/assets/time.svg")
-              .badge.search.search-count-badge(v-if="searchResultsCount")
-                img.icon.search(src="@/assets/search.svg")
-                span {{searchResultsCount}}
-              span.badge.info(v-if="totalFiltersActive")
-                img.icon(src="@/assets/filter.svg")
-                span {{totalFiltersActive}}
-            Search(:visible="searchIsVisible")
-          button(@click="showPreviousSearchCard" v-if="searchResultsCount")
-            img.icon.left-arrow(src="@/assets/down-arrow.svg")
-          button(@click="showNextSearchCard" v-if="searchResultsCount")
-            img.icon.right-arrow(src="@/assets/down-arrow.svg")
-          button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
-            img.icon.cancel(src="@/assets/add.svg")
+          .segmented-buttons
+            .button-wrap
+              button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
+                template(v-if="!searchResultsCount")
+                  img.icon.search(src="@/assets/search.svg")
+                  img.icon.time(src="@/assets/time.svg")
+                .badge.search.search-count-badge(v-if="searchResultsCount")
+                  img.icon.search(src="@/assets/search.svg")
+                  span {{searchResultsCount}}
+                span.badge.info(v-if="totalFiltersActive")
+                  img.icon(src="@/assets/filter.svg")
+                  span {{totalFiltersActive}}
+              Search(:visible="searchIsVisible")
+            button(@click="showPreviousSearchCard" v-if="searchResultsCount")
+              img.icon.left-arrow(src="@/assets/down-arrow.svg")
+            button(@click="showNextSearchCard" v-if="searchResultsCount")
+              img.icon.right-arrow(src="@/assets/down-arrow.svg")
+            button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
+              img.icon.cancel(src="@/assets/add.svg")
 
     .right
       .space-users(v-if="isSpace")
@@ -758,6 +759,7 @@ header
   .space-details-row,
   .space-functions-row
     > .segmented-buttons
+      display inline-block
       > .button-wrap
         > button
           border-radius 0
