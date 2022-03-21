@@ -10,18 +10,28 @@
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails}")
       .card-details-buttons(v-if="parentIsCardDetails" :class="{'has-padding': card.urlPreviewImage}")
-        .button-wrap
-          button(@click="hidePreview")
-            img.icon(src="@/assets/remove.svg")
-        .button-wrap
-          a(:href="card.urlPreviewUrl")
-            button.visit-button
-              img.icon.visit(src="@/assets/visit.svg")
+        .row.reverse-row
+          // remove
+          .button-wrap
+            button(@click="hidePreview")
+              img.icon(src="@/assets/remove.svg")
+          // link
+          .button-wrap
+            a(:href="card.urlPreviewUrl")
+              button.visit-button
+                img.icon.visit(src="@/assets/visit.svg")
+        .row
+          //- hide info
+          .button-wrap
+            button(@click="toggleHideUrlPreviewInfo" :class="{active : card.shouldHideUrlPreviewInfo}")
+              img.icon(src="@/assets/view.svg")
+              span Hide Info
+
       //- image
       img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
       img.preview-image(v-if="shouldLoadUrlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'side-image': isImageCard || parentIsCardDetails}" @load="updateDimensionsAndMap")
       //- info
-      .text(:class="{'side-text badge': !isImageCard && !parentIsCardDetails && shouldLoadUrlPreviewImage}" :style="{background: selectedColor}")
+      .text(:class="{'side-text badge': !isImageCard && !parentIsCardDetails && shouldLoadUrlPreviewImage, hidden: card.shouldHideUrlPreviewInfo}" :style="{background: selectedColor}")
         img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
         img.icon.favicon.open(v-else src="@/assets/open.svg")
         .title {{filteredTitle}}
@@ -109,6 +119,14 @@ export default {
     },
     updateDimensionsAndMap () {
       this.$store.dispatch('currentCards/updateDimensionsAndMap', this.card.id)
+    },
+    toggleHideUrlPreviewInfo () {
+      const value = !this.card.shouldHideUrlPreviewInfo
+      const card = {
+        id: this.card.id,
+        shouldHideUrlPreviewInfo: value
+      }
+      this.$store.dispatch('currentCards/update', card)
     }
   }
 }
@@ -172,8 +190,8 @@ export default {
     position absolute
     right 0
     top 0
-    display flex
-    flex-direction row-reverse
+    .reverse-row
+      flex-direction row-reverse
     &.has-padding
       padding 4px
     .visit-button
