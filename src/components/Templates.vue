@@ -7,7 +7,6 @@ section.templates-component(v-if="visible" :open="visible" @click.left.stop)
 <script>
 import templates from '@/data/templates.js'
 import SpaceList from '@/components/SpaceList.vue'
-import utils from '@/utils.js'
 
 export default {
   name: 'TemplatesComponent',
@@ -17,13 +16,6 @@ export default {
   props: {
     visible: Boolean,
     hideOptions: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateResultsSectionHeight()
-      }
-    })
   },
   data () {
     return {
@@ -47,23 +39,6 @@ export default {
   methods: {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
-    },
-    updateResultsSectionHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
-      })
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.updateResultsSectionHeight()
-      }
-    },
-    loading (loading) {
-      this.updateResultsSectionHeight()
     }
   }
 }
