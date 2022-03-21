@@ -1424,6 +1424,7 @@ export default {
       this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
       this.$store.dispatch('currentCards/update', update)
       this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
+      this.$store.dispatch('currentCards/updateDimensionsAndMap', cardId)
     },
     toggleUrlPreviewIsVisible () {
       const value = !this.card.urlPreviewIsVisible
