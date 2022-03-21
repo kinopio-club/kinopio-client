@@ -64,17 +64,18 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
               img.icon.offline(src="@/assets/offline.svg")
             Offline(:visible="offlineIsVisible")
 
-        .space-functions-row.segmented-buttons
-          //- Add Space
-          .button-wrap
-            button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
-              img.icon(src="@/assets/add.svg")
-            AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
-          //- Templates
-          .button-wrap
-            button(@click.left.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
-              img.icon.templates(src="@/assets/templates.svg")
-            Templates(:visible="templatesIsVisible")
+        .space-functions-row
+          .segmented-buttons.add-space-functions
+            //- Add Space
+            .button-wrap
+              button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
+                img.icon(src="@/assets/add.svg")
+              AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
+            //- Templates
+            .button-wrap
+              button(@click.left.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
+                img.icon.templates(src="@/assets/templates.svg")
+              Templates(:visible="templatesIsVisible")
           //- Search
           .button-wrap
             button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
@@ -730,6 +731,10 @@ header
       margin-right 0
       margin-left 6px
       vertical-align 0
+    > .time
+      margin-left 5px
+      vertical-align -1px
+      height 11px
 
   .space-details-row
     margin-top 8px
@@ -752,7 +757,7 @@ header
   // should not bubble down into dialogs
   .space-details-row,
   .space-functions-row
-    &.segmented-buttons
+    > .segmented-buttons
       > .button-wrap
         > button
           border-radius 0
@@ -775,11 +780,10 @@ header
     position relative
     .search-count-badge
       margin 0
-    .search-button
-      > .time
-        margin-left 5px
-        vertical-align -1px
-        height 11px
+
+  .add-space-functions
+    display inline-block
+    margin-right 6px
 
   aside
     display flex
