@@ -1,6 +1,6 @@
 <template lang="pug">
 dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
-  Community(:visible="true" :loading="loading" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace" :userShowInExploreDate="lastReadDate")
+  Community(:visible="true" :loading="loading" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace" :userShowInExploreDate="comparisonDate")
 </template>
 
 <script>
@@ -33,7 +33,7 @@ export default {
       spaces: [],
       newSpaces: [],
       dialogHeight: null,
-      lastReadDate: null
+      comparisonDate: null
     }
   },
   methods: {
@@ -63,10 +63,16 @@ export default {
         this.dialogHeight = utils.elementHeightFromHeader(element)
       })
     },
-    updateUserShowInExploreUpdatedAt () {
-      this.lastReadDate = this.$store.state.currentUser.showInExploreUpdatedAt.toString()
-      const date = new Date()
-      this.$store.dispatch('currentUser/showInExploreUpdatedAt', date)
+    async updateUserShowInExploreUpdatedAt () {
+      const localDate = new Date().toString()
+      this.comparisonDate = this.$store.state.currentUser.showInExploreUpdatedAt.toString() || localDate
+      let serverDate = await this.$store.dispatch('api/getDate')
+      if (serverDate) {
+        serverDate = serverDate.date
+      } else {
+        serverDate = this.comparisonDate
+      }
+      this.$store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
     }
   },
   watch: {

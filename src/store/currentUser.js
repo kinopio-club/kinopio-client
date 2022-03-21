@@ -564,7 +564,7 @@ export default {
         } }, { root: true })
     },
     showInExploreUpdatedAt: (context, value) => {
-      utils.typeCheck({ value, type: 'object', origin: 'showInExploreUpdatedAt' })
+      utils.typeCheck({ value, type: 'string', origin: 'showInExploreUpdatedAt' })
       context.commit('showInExploreUpdatedAt', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
