@@ -19,8 +19,8 @@ import debounce from 'lodash-es/debounce'
 const offscreenMarkers = new Worker('/web-workers/offscreen-markers.js')
 
 const updatePositionDuration = 10
-const fadeOutDuration = 15
-const hiddenDuration = 15
+const fadeOutDuration = 10
+const hiddenDuration = 10
 let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
 
 export default {

@@ -76,8 +76,8 @@ import dayjs from 'dayjs'
 
 let updateFavoritesIntervalTimer, updateLiveSpacesIntervalTimer
 
-const fadeOutDuration = 15
-const hiddenDuration = 15
+const fadeOutDuration = 10
+const hiddenDuration = 10
 const updatePositionDuration = 60
 let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
 
