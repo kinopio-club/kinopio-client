@@ -64,16 +64,9 @@ export default {
       })
     },
     async updateUserShowInExploreUpdatedAt () {
-      // const localDate = new Date().toString()
       this.comparisonDate = utils.clone(this.$store.state.currentUser.showInExploreUpdatedAt)
       let serverDate = await this.$store.dispatch('api/getDate')
       serverDate = serverDate.date
-      // if (serverDate) {
-      //   serverDate = serverDate.date
-      // } else {
-      //   serverDate = this.comparisonDate
-      // }
-      console.log('🐱', this.comparisonDate, serverDate)
       this.$store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
     }
   },
