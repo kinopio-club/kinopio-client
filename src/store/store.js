@@ -45,6 +45,7 @@ const store = createStore({
     shouldPreventNextEnterKey: false,
     isEmbed: false,
     isAddPage: false,
+    isAppStoreView: false,
 
     // search
     searchIsVisible: false,
@@ -315,6 +316,10 @@ const store = createStore({
     isAddPage: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isAddPage' })
       state.isAddPage = value
+    },
+    isAppStoreView: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'isAppStoreView' })
+      state.isAppStoreView = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })

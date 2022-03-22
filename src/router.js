@@ -14,6 +14,9 @@ const router = createRouter({
       // which is lazy-loaded when the route is visited.
       component: () => import('./views/Add.vue'),
       beforeEnter: (to, from, next) => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const isAppStoreView = urlParams.get('appStoreView')
+        store.commit('isAppStoreView', isAppStoreView)
         store.commit('isAddPage', true)
         next()
       }

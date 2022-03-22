@@ -43,7 +43,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
         button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
           span Upgrade for Unlimited
         UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeDialogs")
-      .row
+      .row(v-if="!isAppStoreView")
         p
           .badge.info $5/month
         a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
@@ -154,6 +154,7 @@ export default {
     spaceUserIsUpgraded () { return this.$store.getters['currentSpace/spaceUserIsUpgraded'] },
     spaceUser () { return this.$store.state.currentSpace.users[0] },
     isAddPage () { return this.$store.state.isAddPage },
+    isAppStoreView () { return this.$store.state.isAppStoreView },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
         return false

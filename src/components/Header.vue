@@ -104,7 +104,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
         .users(:class="{ 'no-padding': isEmbed}")
           User(:user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
 
-      .controls(v-if="isAddPage")
+      .controls(v-if="isAddPage && !isAppStoreView")
         .top-controls
           a(:href="kinopioDomain")
             button Kinopio →
@@ -280,6 +280,7 @@ export default {
     },
     isEmbed () { return this.$store.state.isEmbed },
     isAddPage () { return this.$store.state.isAddPage },
+    isAppStoreView () { return this.$store.state.isAppStoreView },
     isSpace () {
       const isOther = this.isEmbed || this.isAddPage
       const isSpace = !isOther
