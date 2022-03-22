@@ -16,7 +16,7 @@ main.add-page
           .badge.danger(v-if="error.signInCredentials") Incorrect email or password
           .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
 
-    .persistent-item.sign-in
+    .persistent-item.sign-in(v-if="!isAppStoreView")
       .badge
         p If you don't have a Kinopio account yet, you can Sign Up for free
         .row
@@ -103,7 +103,7 @@ main.add-page
         //- max card length
         .badge.danger(v-if="error.maxLength") To fit small screens, cards can't be longer than {{maxCardLength}} characters
         //- no spaces
-        .badge.danger(v-if="error.noSpaces")
+        .badge.danger(v-if="error.noSpaces && !isAppStoreView")
           span You'll need to visit Kinopio once before you can add cards
           .row
             a(:href="kinopioDomain")
@@ -230,7 +230,8 @@ export default {
     },
     defaultSpace () {
       return this.spaces.find(space => space.id === this.currentUser.defaultAddSpaceId)
-    }
+    },
+    isAppStoreView () { return this.$store.state.isAppStoreView }
   },
   methods: {
     insertUrl (event) {
