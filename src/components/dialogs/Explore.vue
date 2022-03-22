@@ -1,15 +1,6 @@
 <template lang="pug">
 dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
-  section.header
-    .segmented-buttons
-      button(@click.left.stop="hideTemplates" :class="{ active: !templatesIsVisible }")
-        span Community
-        Loader(:visible="loading")
-      button(@click.left.stop="showTemplates" :class="{ active: templatesIsVisible }")
-        span Templates
-
-  Community(:visible="!templatesIsVisible" :loading="loading" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace" :userShowInExploreDate="lastReadDate")
-  Templates(:visible="templatesIsVisible")
+  Community(:visible="true" :loading="loading" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace" :userShowInExploreDate="comparisonDate")
 </template>
 
 <script>
@@ -38,24 +29,16 @@ export default {
   },
   data () {
     return {
-      templatesIsVisible: false,
       loading: false,
       spaces: [],
       newSpaces: [],
       dialogHeight: null,
-      lastReadDate: null
+      comparisonDate: null
     }
   },
   methods: {
-    showTemplates () {
-      this.templatesIsVisible = true
-    },
-    hideTemplates () {
-      this.templatesIsVisible = false
-    },
     async updateSpaces () {
       if (this.loading) { return }
-      if (this.templatesIsVisible) { return }
       this.loading = true
       if (!this.spaces.length) {
         this.spaces = this.preloadedSpaces || []
@@ -80,10 +63,11 @@ export default {
         this.dialogHeight = utils.elementHeightFromHeader(element)
       })
     },
-    updateUserShowInExploreUpdatedAt () {
-      this.lastReadDate = this.$store.state.currentUser.showInExploreUpdatedAt.toString()
-      const date = new Date()
-      this.$store.dispatch('currentUser/showInExploreUpdatedAt', date)
+    async updateUserShowInExploreUpdatedAt () {
+      this.comparisonDate = utils.clone(this.$store.state.currentUser.showInExploreUpdatedAt)
+      let serverDate = await this.$store.dispatch('api/getDate')
+      serverDate = serverDate.date
+      this.$store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
     }
   },
   watch: {

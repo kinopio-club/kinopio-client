@@ -10,7 +10,7 @@
               //- Explore
               button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
                 img.icon.sunglasses(src="@/assets/sunglasses.svg")
-                span(v-if="unreadExploreSpaces.length") {{ unreadExploreSpaces.length }}
+                span(v-if="unreadExploreSpacesLength") {{ unreadExploreSpacesLength }}
               // Live
               button(@click.left="toggleLiveIsVisible" :class="{ active: liveIsVisible}")
                 img.icon.camera(src="@/assets/camera.svg")
@@ -41,7 +41,7 @@
         section(v-if="moreFooterControlsIsVisible")
           //- Removed
           .button-wrap
-            button.danger(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+            button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
               img.refresh.icon(src="@/assets/remove.svg")
               span Removed
             Removed(:visible="removedIsVisible")
@@ -76,8 +76,8 @@ import dayjs from 'dayjs'
 
 let updateFavoritesIntervalTimer, updateLiveSpacesIntervalTimer
 
-const fadeOutDuration = 15
-const hiddenDuration = 15
+const fadeOutDuration = 10
+const hiddenDuration = 10
 const updatePositionDuration = 60
 let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
 
@@ -211,16 +211,16 @@ export default {
       }
       return 0
     },
-    unreadExploreSpaces () {
+    unreadExploreSpacesLength () {
       let readDate = this.$store.state.currentUser.showInExploreUpdatedAt
-      if (!readDate) { return this.exploreSpaces }
+      if (!readDate) { return '50+' }
       readDate = dayjs(readDate)
       const unreadSpaces = this.exploreSpaces.filter(space => {
         const spaceDate = dayjs(space.showInExploreUpdatedAt)
         const delta = readDate.diff(spaceDate, 'second')
         return delta < 0
       })
-      return unreadSpaces
+      return unreadSpaces.length
     }
   },
   methods: {

@@ -172,6 +172,17 @@ const self = {
       }
     },
 
+    // Date
+
+    getDate: async (context) => {
+      try {
+        const response = await fetch(`${host}/date`)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 getDate', error)
+      }
+    },
+
     // Sign Up or In
 
     signUp: async (context, { email, password, currentUser }) => {

@@ -64,31 +64,38 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
               img.icon.offline(src="@/assets/offline.svg")
             Offline(:visible="offlineIsVisible")
 
-        .space-functions-row.segmented-buttons
-          //- Add Space
-          .button-wrap
-            button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
-              img.icon(src="@/assets/add.svg")
-            AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
+        .space-functions-row
+          .segmented-buttons.add-space-functions
+            //- Add Space
+            .button-wrap
+              button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
+                img.icon(src="@/assets/add.svg")
+              AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
+              Templates(:visible="templatesIsVisible")
+            //- Templates
+            //- .button-wrap
+            //-   button(@click.left.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
+            //-     img.icon.templates(src="@/assets/templates.svg")
           //- Search
-          .button-wrap
-            button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
-              template(v-if="!searchResultsCount")
-                img.icon.search(src="@/assets/search.svg")
-                img.icon.time(src="@/assets/time.svg")
-              .badge.search.search-count-badge(v-if="searchResultsCount")
-                img.icon.search(src="@/assets/search.svg")
-                span {{searchResultsCount}}
-              span.badge.info(v-if="totalFiltersActive")
-                img.icon(src="@/assets/filter.svg")
-                span {{totalFiltersActive}}
-            Search(:visible="searchIsVisible")
-          button(@click="showPreviousSearchCard" v-if="searchResultsCount")
-            img.icon.left-arrow(src="@/assets/down-arrow.svg")
-          button(@click="showNextSearchCard" v-if="searchResultsCount")
-            img.icon.right-arrow(src="@/assets/down-arrow.svg")
-          button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
-            img.icon.cancel(src="@/assets/add.svg")
+          .segmented-buttons
+            .button-wrap
+              button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
+                template(v-if="!searchResultsCount")
+                  img.icon.search(src="@/assets/search.svg")
+                  img.icon.time(src="@/assets/time.svg")
+                .badge.search.search-count-badge(v-if="searchResultsCount")
+                  img.icon.search(src="@/assets/search.svg")
+                  span {{searchResultsCount}}
+                span.badge.info(v-if="totalFiltersActive")
+                  img.icon(src="@/assets/filter.svg")
+                  span {{totalFiltersActive}}
+              Search(:visible="searchIsVisible")
+            button(@click="showPreviousSearchCard" v-if="searchResultsCount")
+              img.icon.left-arrow(src="@/assets/down-arrow.svg")
+            button(@click="showNextSearchCard" v-if="searchResultsCount")
+              img.icon.right-arrow(src="@/assets/down-arrow.svg")
+            button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
+              img.icon.cancel(src="@/assets/add.svg")
 
     .right
       .space-users(v-if="isSpace")
@@ -155,14 +162,15 @@ import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Search from '@/components/dialogs/Search.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
+import Templates from '@/components/dialogs/Templates.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 import uniqBy from 'lodash-es/uniqBy'
 
 let updateNotificationsIntervalTimer
 
-const fadeOutDuration = 15
-const hiddenDuration = 15
+const fadeOutDuration = 10
+const hiddenDuration = 10
 const updatePositionDuration = 60
 let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
 
@@ -186,6 +194,7 @@ export default {
     Search,
     MoonPhase,
     AddSpace,
+    Templates,
     PrivacyIcon
   },
   data () {
@@ -207,7 +216,8 @@ export default {
       notificationsIsLoading: true,
       addSpaceIsVisible: false,
       isFadeOut: false,
-      isHidden: false
+      isHidden: false,
+      templatesIsVisible: false
     }
   },
   created () {
@@ -244,6 +254,8 @@ export default {
         }
       } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
+      } else if (mutation.type === 'triggerTemplatesIsVisible') {
+        this.templatesIsVisible = true
       }
     })
   },
@@ -454,6 +466,7 @@ export default {
       this.offlineIsVisible = false
       this.notificationsIsVisible = false
       this.addSpaceIsVisible = false
+      this.templatesIsVisible = false
       if (!spaceDetailsDialogIsPinned) {
         this.spaceDetailsIsVisible = false
       }
@@ -490,6 +503,11 @@ export default {
       const isVisible = this.addSpaceIsVisible
       this.$store.dispatch('closeAllDialogs', 'Header.toggleAddSpaceIsVisible')
       this.addSpaceIsVisible = !isVisible
+    },
+    toggleTemplatesIsVisible () {
+      const isVisible = this.templatesIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleTemplatesIsVisible')
+      this.templatesIsVisible = !isVisible
     },
     toggleSpaceStatusIsVisible () {
       const isVisible = this.spaceStatusIsVisible
@@ -715,9 +733,12 @@ header
       margin-right 0
       margin-left 6px
       vertical-align 0
+    > .time
+      margin-left 5px
+      vertical-align -1px
+      height 11px
 
   .space-details-row
-    margin-top 8px
     display initial
     button
       white-space nowrap
@@ -737,7 +758,9 @@ header
   // should not bubble down into dialogs
   .space-details-row,
   .space-functions-row
+    > .segmented-buttons,
     &.segmented-buttons
+      display inline-block
       > .button-wrap
         > button
           border-radius 0
@@ -760,11 +783,10 @@ header
     position relative
     .search-count-badge
       margin 0
-    .search-button
-      > .time
-        margin-left 5px
-        vertical-align -1px
-        height 11px
+
+  .add-space-functions
+    display inline-block
+    margin-right 6px
 
   aside
     display flex

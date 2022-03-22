@@ -11,19 +11,12 @@ dialog.add-space.narrow(
   section
     .row
       .segmented-buttons
-        button(@click.left.stop="hideTemplatesIsVisible" :class="{ active: !templatesIsVisible }")
-          span New
-        button(@click.left.stop="showTemplatesIsVisible" :class="{ active: templatesIsVisible }")
-          span Templates
-
-  section(v-if="!templatesIsVisible")
-    .row
-      .segmented-buttons
-        button(@click="addSpace")
+        button.success(@click="addSpace")
           img.icon(src="@/assets/add.svg")
           span New Space
         button(@click.left.stop="toggleEditNewSpaceIsVisible" :class="{ active: editNewSpaceIsVisible }")
-          span Edit
+          img.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+
     //- Edit Space
     .row(v-if="editNewSpaceIsVisible")
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
@@ -36,7 +29,7 @@ dialog.add-space.narrow(
           MoonPhase(:moonPhase="moonPhase.name")
           span Daily Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
-          span Edit
+          img.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
     //- Edit Journal
     .row(v-if="editPromptsIsVisible")
       .button-wrap
@@ -48,7 +41,11 @@ dialog.add-space.narrow(
   section(v-if="editPromptsIsVisible")
     PromptPackPicker(:visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack")
 
-  Templates(:visible="templatesIsVisible")
+  //- Templates
+  section
+    button(@click="triggerTemplatesIsVisible")
+      img.icon.templates(src="@/assets/templates.svg")
+      span Templates
 
 </template>
 
@@ -59,7 +56,6 @@ import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
-import Templates from '@/components/Templates.vue'
 
 import last from 'lodash-es/last'
 import { nanoid } from 'nanoid'
@@ -69,8 +65,7 @@ export default {
   components: {
     Prompt,
     PromptPackPicker,
-    MoonPhase,
-    Templates
+    MoonPhase
   },
   props: {
     visible: Boolean,
@@ -91,7 +86,6 @@ export default {
       moonPhase: {},
       editPromptsIsVisible: false,
       editNewSpaceIsVisible: false,
-      templatesIsVisible: false,
       urlIsCopied: false,
       promptPickerPosition: {
         left: 80,
@@ -156,15 +150,6 @@ export default {
       this.closeAll()
       this.editPromptsIsVisible = value
     },
-    showTemplatesIsVisible () {
-      this.closeAll()
-      this.templatesIsVisible = true
-      this.updateDialogHeight()
-    },
-    hideTemplatesIsVisible () {
-      this.closeAll()
-      this.templatesIsVisible = false
-    },
     closeAll () {
       this.editNewSpaceIsVisible = false
       this.editPromptsIsVisible = false
@@ -206,6 +191,11 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
+    },
+    triggerTemplatesIsVisible () {
+      this.closeAll()
+      this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
+      this.$store.commit('triggerTemplatesIsVisible')
     }
   },
   watch: {
@@ -229,6 +219,6 @@ export default {
     border 0
     border-radius 3px
     padding 4px
-  .templates
-    border-top 1px solid var(--primary)
+  .button-down-arrow
+    padding 0
 </style>

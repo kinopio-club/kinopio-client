@@ -1,5 +1,5 @@
 <template lang="pug">
-.templates(v-if="visible" :open="visible" @click.left.stop)
+section.templates-component(v-if="visible" :open="visible" @click.left.stop)
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="spaces" :showCategory="true" @selectSpace="changeSpace")
 </template>
@@ -7,23 +7,15 @@
 <script>
 import templates from '@/data/templates.js'
 import SpaceList from '@/components/SpaceList.vue'
-import utils from '@/utils.js'
 
 export default {
-  name: 'Templates',
+  name: 'TemplatesComponent',
   components: {
     SpaceList
   },
   props: {
     visible: Boolean,
     hideOptions: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateResultsSectionHeight()
-      }
-    })
   },
   data () {
     return {
@@ -47,30 +39,14 @@ export default {
   methods: {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
-    },
-    updateResultsSectionHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
-      })
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.updateResultsSectionHeight()
-      }
-    },
-    loading (loading) {
-      this.updateResultsSectionHeight()
     }
   }
 }
 </script>
 
 <style lang="stylus">
-.templates
+.templates-component
+  padding 0
   padding-top 4px
   .categories
     border-top 1px solid var(--primary)

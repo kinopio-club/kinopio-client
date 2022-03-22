@@ -32,6 +32,7 @@ export default {
     shouldEmailWeeklyReview: true,
     shouldShowMoreAlignOptions: false,
     shouldShowCardCollaborationInfo: false,
+    shouldShowCardStyleActions: false,
     shouldShowMoreFooterControls: false,
     shouldInvertZoomDirection: false,
     shouldUseLastConnectionType: false,
@@ -217,6 +218,10 @@ export default {
     shouldShowCardCollaborationInfo: (state, value) => {
       state.shouldShowCardCollaborationInfo = value
       cache.updateUser('shouldShowCardCollaborationInfo', value)
+    },
+    shouldShowCardStyleActions: (state, value) => {
+      state.shouldShowCardStyleActions = value
+      cache.updateUser('shouldShowCardStyleActions', value)
     },
     shouldShowMoreFooterControls: (state, value) => {
       state.shouldShowMoreFooterControls = value
@@ -542,6 +547,14 @@ export default {
           shouldShowCardCollaborationInfo: value
         } }, { root: true })
     },
+    shouldShowCardStyleActions: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowCardStyleActions' })
+      context.commit('shouldShowCardStyleActions', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldShowCardStyleActions: value
+        } }, { root: true })
+    },
     shouldShowMoreFooterControls: (context, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowMoreFooterControls' })
       context.commit('shouldShowMoreFooterControls', value)
@@ -551,7 +564,7 @@ export default {
         } }, { root: true })
     },
     showInExploreUpdatedAt: (context, value) => {
-      utils.typeCheck({ value, type: 'object', origin: 'showInExploreUpdatedAt' })
+      utils.typeCheck({ value, type: 'string', origin: 'showInExploreUpdatedAt' })
       context.commit('showInExploreUpdatedAt', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {

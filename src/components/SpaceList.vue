@@ -12,7 +12,7 @@ span.space-list-wrap
     @focusPreviousItem="focusPreviousItemFromFilter"
     @selectItem="selectItemFromFilter"
   )
-  ul.results-list.space-list
+  ul.results-list.space-list(@wheel="showCompleteSpacesList" @touchmove="showCompleteSpacesList")
     template(v-for="space in spacesFiltered" :key="space.id")
       a(:href="space.url")
         li(
@@ -110,7 +110,8 @@ export default {
     return {
       filter: '',
       filteredSpaces: [],
-      focusOnId: ''
+      focusOnId: '',
+      shouldShowCompleteSpacesList: false
     }
   },
   mounted () {
@@ -122,8 +123,10 @@ export default {
         if (!utils.arrayHasItems(spaces)) {
           this.closeDialog()
         } else if (key === 'ArrowUp') {
+          this.showCompleteSpacesList()
           this.focusPreviousItem(currentIndex)
         } else if (key === 'ArrowDown') {
+          this.showCompleteSpacesList()
           this.focusNextItem(currentIndex)
         }
       }
@@ -150,13 +153,23 @@ export default {
     },
     spacesFiltered () {
       if (this.filter) {
-        return this.filteredSpaces
+        return this.truncateSpaces(this.filteredSpaces)
       } else {
-        return this.spaces
+        return this.truncateSpaces(this.spaces)
       }
     }
   },
   methods: {
+    truncateSpaces (spaces) {
+      if (this.shouldShowCompleteSpacesList) {
+        return spaces
+      }
+      const truncate = 25
+      return spaces.slice(0, truncate)
+    },
+    showCompleteSpacesList () {
+      this.shouldShowCompleteSpacesList = true
+    },
     isNew (space) {
       if (this.userShowInExploreDate) {
         const readDate = dayjs(this.userShowInExploreDate)
@@ -234,6 +247,7 @@ export default {
       return space.user || users[0]
     },
     focusPreviousItem (currentIndex) {
+      // this.showCompleteSpacesList()
       const spaces = this.spacesFiltered
       const focusedSpaceName = this.spaces.find(space => space.id === this.focusOnId)
       const firstItemIsFocused = this.search === focusedSpaceName
@@ -249,6 +263,7 @@ export default {
       }
     },
     focusNextItem (currentIndex) {
+      // this.showCompleteSpacesList()
       const spaces = this.spacesFiltered
       const lastItem = last(spaces)
       const lastItemIsFocused = lastItem.name === this.focusOnId

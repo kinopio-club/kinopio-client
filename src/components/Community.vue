@@ -3,7 +3,7 @@
   section
     p
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
-      span Cool Community Spaces
+      span Explore Community Spaces
       .button-wrap
         button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
           span RSS

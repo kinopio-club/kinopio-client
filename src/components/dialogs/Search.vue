@@ -280,10 +280,8 @@ export default {
 dialog.search
   top 16px
   max-height calc(100vh - 140px)
-  @media(max-width 360px)
+  @media(max-width 400px)
     left -40px
-  .search-wrap
-    padding-top 8px
   li
     display block !important
     .button-badge
