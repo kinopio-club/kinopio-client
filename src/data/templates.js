@@ -53,6 +53,11 @@ export default {
         name: 'Mood Board'
       },
       {
+        id: '1t4616FBkaJOxMdrt9O_p',
+        categoryId: 4,
+        name: 'Sofware Architecture'
+      },
+      {
         id: 'WSzpRkVqSdv8GKCSCrwrg',
         categoryId: 4,
         name: 'Database Schema'
@@ -63,7 +68,7 @@ export default {
         name: 'Roadmap'
       }
 
-      // 🚑 missing templates: Note Taking, Research, Journal, Making Hard Decisions, Mind Map, Weekly Planner, Sofware Architecture
+      // 🚑 missing templates: Note Taking, Research, Journal, Making Hard Decisions, Mind Map, Weekly Planner,
       // 102293910caf3bbc3cdee8f07dd5e720ffd4e6e9
       // TODO update template links on /about
 
