@@ -738,7 +738,6 @@ header
       height 11px
 
   .space-details-row
-    margin-top 8px
     display initial
     button
       white-space nowrap
@@ -758,7 +757,8 @@ header
   // should not bubble down into dialogs
   .space-details-row,
   .space-functions-row
-    > .segmented-buttons
+    > .segmented-buttons,
+    &.segmented-buttons
       display inline-block
       > .button-wrap
         > button
