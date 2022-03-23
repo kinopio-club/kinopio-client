@@ -1,5 +1,5 @@
 <template lang="pug">
-.media-preview(v-if="visible")
+.media-preview.row(v-if="visible")
   //- Image
   .row(v-if="formats.image")
     a(:href="formats.image")
