@@ -1,7 +1,7 @@
 <template lang="pug">
 .badge.status.explore-message(v-if="showInExplore && !isSpaceMember")
   img.icon.sunglasses(src="@/assets/sunglasses.svg")
-  span In Explore
+  span Explore
 
 .button-wrap.add-to-explore(v-if="isSpaceMember")
   button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
