@@ -306,6 +306,7 @@ const currentCards = {
         cards = context.getters.all
       }
       cards = utils.clone(cards)
+      cards = cards.filter(card => Boolean(card))
       cards.forEach(card => {
         const prevDimensions = {
           width: card.width,
