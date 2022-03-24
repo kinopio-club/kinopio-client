@@ -357,7 +357,7 @@ export default {
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
     },
     duplicateSpace: async (context) => {
-      let space = cache.space(context.state.id)
+      let space = utils.clone(context.state)
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.commit('clearSearch', null, { root: true })
