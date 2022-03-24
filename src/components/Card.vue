@@ -17,6 +17,7 @@ article(:style="positionStyle" :data-card-id="id" ref="card" :class="{'is-resizi
     :data-card-x="x"
     :data-card-y="y"
     :data-name-updated-at="updatedAt"
+    :data-is-locked="isLocked"
     tabindex="0"
     :data-droppable="true"
     @dragenter="checkIfUploadIsDraggedOver"
@@ -558,7 +559,7 @@ export default {
       if (this.currentCardDetailsIsVisible) {
         z = 2147483646 // max z
       } else if (this.isLocked) {
-        z = 0
+        z = -1
         pointerEvents = 'none'
       }
       return {
