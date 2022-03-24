@@ -77,6 +77,12 @@ export default {
       // 102293910caf3bbc3cdee8f07dd5e720ffd4e6e9
       // TODO update template links on /about
 
+      // Moodboarding
+      // Note taking
+      // Research
+      // Presentations
+      // Visual thinking
+
       // {
       //   id: '123',
       //   categoryId: 4,
