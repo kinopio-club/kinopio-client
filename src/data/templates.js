@@ -43,6 +43,11 @@ export default {
         name: 'Garage Sale'
       },
       {
+        id: 'Vn7WpQst9migsCwpEpGMo',
+        categoryId: 2,
+        name: 'Link In Bio'
+      },
+      {
         id: 'b87U9WETGvl17BrKNsqDH',
         categoryId: 3,
         name: 'Meeting'
