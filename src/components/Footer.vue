@@ -213,7 +213,7 @@ export default {
     },
     unreadExploreSpacesLength () {
       let readDate = this.$store.state.currentUser.showInExploreUpdatedAt
-      if (!readDate) { return '50+' }
+      if (!readDate) { return '20+' }
       readDate = dayjs(readDate)
       const unreadSpaces = this.exploreSpaces.filter(space => {
         const spaceDate = dayjs(space.showInExploreUpdatedAt)
