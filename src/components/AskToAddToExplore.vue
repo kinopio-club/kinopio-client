@@ -48,7 +48,17 @@ export default {
         this.error.userNeedsToSignUpOrIn = true
         return
       }
-      console.log('☮️ send notification') //
+      const userId = this.$store.state.currentUser.id
+      const spaceId = this.$store.state.currentSpace.id
+      let recipientUserIds = this.$store.getters['currentSpace/userIdsToNotify']
+      recipientUserIds = recipientUserIds.filter(id => Boolean(id))
+      const notification = {
+        type: 'askToAddToExplore',
+        userId,
+        spaceId,
+        recipientUserIds
+      }
+      this.$store.dispatch('api/addToQueue', { name: 'askToAddToExploreNotification', body: notification })
       this.creatorNotified = true
     },
     triggerSignUpOrInIsVisible () {
