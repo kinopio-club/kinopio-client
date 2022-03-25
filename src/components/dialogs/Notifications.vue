@@ -19,19 +19,34 @@ dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="
             .background(v-if="group.background" :style="{ backgroundImage: `url(${group.background})` }")
           span.badge.space-badge
             span {{group.spaceName}}
-        //- notification
+        //- notifications
         template(v-for="(notification in group.notifications")
-          li(@click="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }" :data-notification-id="notification.id")
-            p
-              span.badge.info(v-if="!notification.isRead") New
-              span.badge.user-badge.user-badge(:style="{background: notification.user.color}")
-                User(:user="notification.user" :isClickable="false" :hideYouLabel="true")
-                span {{notification.user.name}}
-            .notification-info
-              img.icon(src="@/assets/add.svg")
-              template(v-for="segment in notification.card.nameSegments")
-                img.card-image(v-if="segment.isImage" :src="segment.url")
-                NameSegment(:segment="segment")
+          //- space notification
+          template(v-if="isSpaceType(notification)")
+            li(@click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }" :data-notification-id="notification.id")
+              p
+                span.badge.info(v-if="!notification.isRead") New
+                img.icon.sunglasses(src="@/assets/sunglasses.svg")
+                span.badge.user-badge.user-badge(:style="{background: notification.user.color}")
+                  User(:user="notification.user" :isClickable="false" :hideYouLabel="true")
+                  span {{notification.user.name}}
+                span asked to add
+                span.badge.space-badge
+                  span {{group.spaceName}}
+                span to Explore
+          // card notification
+          template(v-if="!isSpaceType(notification) && notification.card")
+            li(@click="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }" :data-notification-id="notification.id")
+              p
+                span.badge.info(v-if="!notification.isRead") New
+                span.badge.user-badge.user-badge(:style="{background: notification.user.color}")
+                  User(:user="notification.user" :isClickable="false" :hideYouLabel="true")
+                  span {{notification.user.name}}
+              .notification-info
+                img.icon(src="@/assets/add.svg")
+                template(v-for="segment in notification.card.nameSegments")
+                  img.card-image(v-if="segment.isImage" :src="segment.url")
+                  NameSegment(:segment="segment")
 
 </template>
 
@@ -73,7 +88,9 @@ export default {
     groupedItems () {
       let groups = []
       this.notifications.forEach(item => {
-        item.card.nameSegments = this.cardNameSegments(item.card.name)
+        if (item.card) {
+          item.card.nameSegments = this.cardNameSegments(item.card.name)
+        }
         const groupIndex = groups.findIndex(group => group.spaceId === item.spaceId)
         if (groupIndex !== -1) {
           groups[groupIndex].notifications.push(item)
@@ -92,6 +109,13 @@ export default {
     }
   },
   methods: {
+    isSpaceType (notification) {
+      if (notification.type === 'askToAddToExplore') {
+        return true
+      } else {
+        return false
+      }
+    },
     backgroundTintStyles (tint) {
       if (tint) {
         return {
@@ -205,6 +229,8 @@ export default {
         box-shadow none
   .space-badge
     background-color var(--secondary-background)
+  span + .space-badge
+    margin-left 4px
 
   .background-wrap
     position relative
@@ -239,5 +265,7 @@ export default {
     height 14px
     vertical-align -3px
     margin-left 6px
+  .sunglasses
+    vertical-align -2px
 
 </style>
