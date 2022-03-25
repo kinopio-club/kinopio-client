@@ -14,9 +14,7 @@ dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="
       template(v-for="group in groupedItems")
         //- space
         li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
-          .background-wrap
-            .background-tint(:style="backgroundTintStyles(group.backgroundTint)")
-            .background(v-if="group.background" :style="{ backgroundImage: `url(${group.background})` }")
+          BackgroundPreview(v-if="group.space" :space="group.space")
           span.badge.space-badge
             span {{group.spaceName}}
         //- notifications
@@ -56,13 +54,15 @@ import User from '@/components/User.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import BackgroundPreview from '@/components/BackgroundPreview.vue'
 
 export default {
   name: 'Notifications',
   components: {
     Loader,
     User,
-    NameSegment
+    NameSegment,
+    BackgroundPreview
   },
   props: {
     visible: Boolean,
@@ -99,9 +99,7 @@ export default {
             spaceName: item.space.name,
             spaceId: item.spaceId,
             space: item.space,
-            notifications: [item],
-            background: item.space.background,
-            backgroundTint: item.space.backgroundTint
+            notifications: [item]
           })
         }
       })
@@ -114,16 +112,6 @@ export default {
         return true
       } else {
         return false
-      }
-    },
-    backgroundTintStyles (tint) {
-      if (tint) {
-        return {
-          background: tint,
-          mixBlendMode: 'multiply'
-        }
-      } else {
-        return {}
       }
     },
     cardDetailsIsVisible (cardId) {
@@ -232,26 +220,12 @@ export default {
   span + .space-badge
     margin-left 4px
 
-  .background-wrap
-    position relative
-    display inline
-
-  .background
-    border-radius 3px
-    display inline-grid
-    height 24px
-    width 24px
-    vertical-align middle
-    margin-right 3px
-    background-repeat no-repeat
-    background-size cover
-
-  .background-tint
-    width 24px
-    height 24px
-    border-radius 3px
-    position absolute
-    pointer-events none
+  .background-preview
+    .preview-wrap
+      margin-right 4px
+      height 24px
+      width 24px
+      vertical-align middle
 
   .card-image
     width 48px
