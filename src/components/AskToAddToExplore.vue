@@ -17,14 +17,6 @@
 <script>
 export default {
   name: 'AskToAddToExploreButton',
-  emits: ['updateSpaces'],
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'currentSpace/restoreSpace') {
-        this.clearErrors()
-      }
-    })
-  },
   data () {
     return {
       error: {
