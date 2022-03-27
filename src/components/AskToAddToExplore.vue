@@ -1,6 +1,6 @@
 <template lang="pug">
 .row(v-if="isVisible")
-  .button-wrap(v-if="!creatorNotified")
+  .button-wrap(v-if="!isAsked")
     button(@click.left.prevent="askToAddToExplore" @keydown.stop.enter="askToAddToExplore")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
       span Ask to Add to Explore
@@ -10,7 +10,7 @@
         span to propose spaces to be added to explore
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
-  .badge.success(v-if="creatorNotified") Space Creator Notified – Thank You for Sharing the Love
+  .badge.success(v-if="isAsked") Space Creator Notified – Thank You for Sharing the Love
 
 </template>
 
@@ -22,7 +22,7 @@ export default {
       error: {
         userNeedsToSignUpOrIn: false
       },
-      creatorNotified: false
+      isAsked: false
     }
   },
   computed: {
@@ -35,7 +35,7 @@ export default {
   },
   methods: {
     askToAddToExplore () {
-      if (this.creatorNotified) { return }
+      if (this.isAsked) { return }
       if (!this.currentUserIsSignedIn) {
         this.error.userNeedsToSignUpOrIn = true
         return
@@ -51,7 +51,7 @@ export default {
         recipientUserIds
       }
       this.$store.dispatch('api/addToQueue', { name: 'askToAddToExploreNotification', body: notification })
-      this.creatorNotified = true
+      this.isAsked = true
     },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'askToAddToExplore.triggerSignUpOrInIsVisible')
