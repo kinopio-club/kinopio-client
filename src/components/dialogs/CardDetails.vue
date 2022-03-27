@@ -1506,7 +1506,7 @@ export default {
 
 <style lang="stylus">
 .card-details
-  width 252px
+  width 254px
   transform-origin top left
   > section
     background-color var(--secondary-background)
