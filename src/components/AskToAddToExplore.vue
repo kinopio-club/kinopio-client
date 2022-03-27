@@ -50,7 +50,7 @@ export default {
         spaceId,
         recipientUserIds
       }
-      this.$store.dispatch('api/addToQueue', { name: 'askToAddToExploreNotification', body: notification })
+      this.$store.dispatch('api/addToQueue', { name: 'createAskToAddToExploreNotification', body: notification })
       this.isAsked = true
     },
     triggerSignUpOrInIsVisible () {
