@@ -20,32 +20,24 @@ dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="
             span {{group.spaceName}}
         //- notifications
         template(v-for="(notification in group.notifications")
-          //- space notification
-          template(v-if="isSpaceType(notification)")
-            li(@click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }" :data-notification-id="notification.id")
-              p
-                span.badge.info(v-if="!notification.isRead") New
-                img.icon.sunglasses(src="@/assets/sunglasses.svg")
-                span.badge.user-badge.user-badge(:style="{background: notification.user.color}")
-                  User(:user="notification.user" :isClickable="false" :hideYouLabel="true")
-                  span {{notification.user.name}}
+          li(@click="click(notification)" :class="{ active: isActive(notification) }" :data-notification-id="notification.id")
+            p
+              span.badge.info(v-if="!notification.isRead") New
+              img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="isAskToAddToExplore(notification)")
+              span.badge.user-badge.user-badge(:style="{background: notification.user.color}")
+                User(:user="notification.user" :isClickable="false" :hideYouLabel="true")
+                span {{notification.user.name}}
+              template(v-if="isAskToAddToExplore(notification)")
                 span asked to add
                 span.badge.space-badge
                   span {{group.spaceName}}
                 span to Explore
-          // card notification
-          template(v-if="!isSpaceType(notification) && notification.card")
-            li(@click="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }" :data-notification-id="notification.id")
-              p
-                span.badge.info(v-if="!notification.isRead") New
-                span.badge.user-badge.user-badge(:style="{background: notification.user.color}")
-                  User(:user="notification.user" :isClickable="false" :hideYouLabel="true")
-                  span {{notification.user.name}}
-              .notification-info
-                img.icon(src="@/assets/add.svg")
-                template(v-for="segment in notification.card.nameSegments")
-                  img.card-image(v-if="segment.isImage" :src="segment.url")
-                  NameSegment(:segment="segment")
+
+            .notification-info(v-if="isCard(notification)")
+              img.icon(src="@/assets/add.svg")
+              template(v-for="segment in notification.card.nameSegments")
+                img.card-image(v-if="segment.isImage" :src="segment.url")
+                NameSegment(:segment="segment")
 
 </template>
 
@@ -108,11 +100,28 @@ export default {
     }
   },
   methods: {
-    isSpaceType (notification) {
-      if (notification.type === 'askToAddToExplore') {
-        return true
-      } else {
-        return false
+    isAskToAddToExplore (notification) {
+      return notification.type === 'askToAddToExplore'
+    },
+    isCard (notification) {
+      return (notification.type === 'createCard' || notification.type === 'updateCard') && notification.card
+    },
+    isActive (notification) {
+      const isCard = this.isCard(notification)
+      const isAskToAddToExplore = this.isAskToAddToExplore(notification)
+      if (isCard) {
+        return this.cardDetailsIsVisible(notification.card.id)
+      } else if (isAskToAddToExplore) {
+        return this.spaceIsCurrentSpace(notification.spaceId)
+      }
+    },
+    click (notification) {
+      const isCard = this.isCard(notification)
+      const isAskToAddToExplore = this.isAskToAddToExplore(notification)
+      if (isCard) {
+        this.showCardDetails(notification.card.id)
+      } else if (isAskToAddToExplore) {
+        this.changeSpace(notification.spaceId)
       }
     },
     cardDetailsIsVisible (cardId) {
