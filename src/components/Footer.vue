@@ -412,7 +412,11 @@ export default {
       const scale = utils.roundFloat(viewport.scale)
       const counterScale = utils.roundFloat(1 / viewport.scale)
       const left = Math.round(viewport.offsetLeft)
-      const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height)
+      let offsetTop = 0
+      if (navigator.standalone) {
+        offsetTop = 10
+      }
+      const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height - (offsetTop))
       let style
       if (scale > 1) {
         style = {
@@ -420,8 +424,9 @@ export default {
           'transform-origin': 'left bottom'
         }
       } else {
+        if (offsetTop) { offsetTop = offsetTop + 5 }
         style = {
-          transform: `translate(${left}px, 0px)`,
+          transform: `translate(${left}px, ${-offsetTop}px)`,
           zoom: counterScale,
           'transform-origin': 'left bottom',
           'margin-left': `-${left}px`
