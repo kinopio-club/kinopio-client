@@ -491,6 +491,7 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 restoreRemovedSpace', error)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
       }
     },
 
@@ -516,6 +517,7 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 updateCards', error)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
       }
     },
     createCards: async (context, body) => {
@@ -527,6 +529,7 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 createCards', error)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
       }
     },
 
@@ -541,6 +544,7 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 updateConnectionTypes', error)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
       }
     },
     createConnectionTypes: async (context, body) => {
@@ -552,6 +556,7 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 createConnectionTypes', error)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
       }
     },
 
@@ -566,6 +571,7 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 updateConnections', error)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
       }
     },
     createConnections: async (context, body) => {
@@ -577,6 +583,7 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 createConnections', error)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
       }
     },
 
