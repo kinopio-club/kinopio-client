@@ -154,7 +154,9 @@ const self = {
       })
       try {
         console.log(`🛫 sending operations`, body)
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const space = context.rootState.currentSpace
+        if (!space.id) { throw 'operation missing spaceId' }
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space })
         const response = await fetch(`${host}/operations`, options)
         if (response.ok) {
           console.log('🛬 operations ok')
@@ -414,6 +416,7 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 createSpaces', error)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
       }
     },
     createSpace: async (context, space) => {
@@ -425,6 +428,7 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 createSpace', error)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
       }
     },
     getSpaceRemovedCards: async (context, space) => {

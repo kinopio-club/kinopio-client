@@ -20,6 +20,7 @@ export default {
     } catch (error) {
       showDebugMessages = true
       console.error('🚒 storeLocal could not save to localStorage', { key, value, valueType: typeof value }, error)
+      this.notifyCouldNotSave()
       this.pruneLocal()
     }
   },
