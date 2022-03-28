@@ -28,9 +28,9 @@ export default {
   computed: {
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
+    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     isVisible () {
-      return !this.canEditSpace && !this.showInExplore
+      return !this.isSpaceMember && !this.showInExplore
     }
   },
   methods: {
