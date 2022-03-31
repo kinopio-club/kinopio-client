@@ -63,10 +63,6 @@ dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :styl
                 span Add to Home Screen
                 img.icon.add(src="@/assets/add.svg")
               span (you'll need to scroll down)
-  //- section(v-if="!isDesktop")
-  //-   label(:class="{active: isJournalPath}" @click.left.prevent="toggleIsJournalPath" @keydown.stop.enter="toggleIsJournalPath")
-  //-     input(type="checkbox" v-model="isJournalPath")
-  //-     span Use /journal Url
 
 </template>
 
@@ -107,8 +103,7 @@ export default {
     return {
       dialogHeight: null,
       isDesktop: true,
-      isAndroid: false,
-      isJournalPath: false
+      isAndroid: false
     }
   },
   methods: {
@@ -117,11 +112,6 @@ export default {
     },
     toggleIsDesktop (value) {
       this.isDesktop = value
-      if (value) {
-        this.restoreUrlPath()
-      } else {
-        this.stripUrlPath()
-      }
     },
     updateDialogHeight () {
       if (!this.visible) { return }
@@ -134,9 +124,6 @@ export default {
       title = document.title
       pathname = window.location.pathname
       let url = '/'
-      if (this.isJournalPath) {
-        url = '/journal'
-      }
       // temporary url change for bookmarking, doesn't update vue-router history
       history.replaceState(history.state, '', url)
     },
@@ -150,10 +137,6 @@ export default {
       } else {
         this.isDesktop = true
       }
-    },
-    toggleIsJournalPath () {
-      this.isJournalPath = !this.isJournalPath
-      this.stripUrlPath()
     }
   },
   watch: {
@@ -161,6 +144,7 @@ export default {
       if (visible) {
         this.updateCurrentDeviceView()
         this.updateDialogHeight()
+        this.stripUrlPath()
       } else {
         this.restoreUrlPath()
       }
