@@ -1,5 +1,5 @@
 <template lang="pug">
-.row.url-preview(v-if="visible")
+.row.url-preview(v-if="visible && (previewHasInfo || previewHasImage)")
   Loader(:visible="loading")
   template(v-if="loading")
     .card-details-buttons(v-if="parentIsCardDetails")
