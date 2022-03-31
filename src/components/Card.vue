@@ -64,7 +64,7 @@ article(:style="positionStyle" :data-card-id="id" ref="card" :class="{'is-resizi
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(type="checkbox" v-model="checkboxState")
         //- Name
-        .badge.secondary
+        .badge.comment-badge
           .toggle-comment-wrap(@mouseup.left="toggleCommentIsVisible" @touchend="toggleCommentIsVisible")
             button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
               img.icon.view(v-if="commentIsVisible" src="@/assets/view-hidden.svg")
@@ -1953,6 +1953,9 @@ article
     display inline
     .user
       vertical-align bottom
+  .comment-badge
+    padding-left 0
+    padding-right 0
 
   .tappable-area
     margin-left 20px
