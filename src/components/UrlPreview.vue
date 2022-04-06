@@ -13,7 +13,7 @@
         .row.reverse-row
           // remove
           .button-wrap
-            button(@click="hidePreview")
+            button(@click="hidePreview" :disabled="!canEditCard")
               img.icon(src="@/assets/remove.svg")
           // link
           .button-wrap
@@ -23,11 +23,11 @@
         .row
           //- hide info
           .segmented-buttons
-            button(v-if="previewHasImage" @click="toggleHideUrlPreviewImage" :class="{active : card.shouldHideUrlPreviewImage}")
+            button(v-if="previewHasImage" @click="toggleHideUrlPreviewImage" :class="{active : card.shouldHideUrlPreviewImage}" :disabled="!canEditCard")
               img.icon(v-if="!card.shouldHideUrlPreviewImage" src="@/assets/view.svg")
               img.icon(v-if="card.shouldHideUrlPreviewImage" src="@/assets/view-hidden.svg")
               span Image
-            button(v-if="previewHasInfo" @click="toggleHideUrlPreviewInfo" :class="{active : card.shouldHideUrlPreviewInfo}")
+            button(v-if="previewHasInfo" @click="toggleHideUrlPreviewInfo" :class="{active : card.shouldHideUrlPreviewInfo}" :disabled="!canEditCard")
               img.icon(v-if="!card.shouldHideUrlPreviewInfo" src="@/assets/view.svg")
               img.icon(v-if="card.shouldHideUrlPreviewInfo" src="@/assets/view-hidden.svg")
               span Info
@@ -67,6 +67,12 @@ export default {
     }
   },
   computed: {
+    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    canEditCard () {
+      if (this.isSpaceMember) { return true }
+      if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
+      return false
+    },
     selectedColor () {
       if (!this.isSelected) { return }
       return this.user.color
@@ -216,4 +222,12 @@ export default {
       padding 4px
     .visit-button
       margin-right 6px
+  button
+    &:disabled
+      opacity 1
+      background-color var(--secondary-background)
+      border-color var(--primary-transparent)
+      img,
+      span
+        opacity 0.5
 </style>

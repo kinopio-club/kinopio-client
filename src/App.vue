@@ -219,6 +219,7 @@ export default {
   --primary black
   --primary-background white
   --text-link #143997
+  --primary-transparent rgba(0,0,0,0.5)
 
   // --secondary #818181
   --secondary-background #e3e3e3
