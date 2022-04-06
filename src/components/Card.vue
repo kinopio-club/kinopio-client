@@ -11,7 +11,7 @@ article(:style="positionStyle" :data-card-id="id" ref="card" :class="{'is-resizi
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
 
-    :class="{jiggle: shouldJiggle, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio, 'is-locked': isLocked}",
+    :class="{jiggle: shouldJiggle, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio, 'is-locked': isLocked, 'has-url-preview': cardUrlPreviewIsVisible }",
     :style="cardStyle"
     :data-card-id="id"
     :data-card-x="x"
@@ -64,7 +64,7 @@ article(:style="positionStyle" :data-card-id="id" ref="card" :class="{'is-resizi
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(type="checkbox" v-model="checkboxState")
         //- Name
-        .badge.secondary
+        .badge.comment-badge
           .toggle-comment-wrap(@mouseup.left="toggleCommentIsVisible" @touchend="toggleCommentIsVisible")
             button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
               img.icon.view(v-if="commentIsVisible" src="@/assets/view-hidden.svg")
@@ -141,7 +141,7 @@ article(:style="positionStyle" :data-card-id="id" ref="card" :class="{'is-resizi
                 img.connector-icon(src="@/assets/connector-closed.svg")
               template(v-else)
                 img.connector-icon(src="@/assets/connector-open.svg")
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible && !isHiddenInComment")
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible")
       UrlPreview(
         :visible="cardUrlPreviewIsVisible"
         :card="card"
@@ -642,7 +642,7 @@ export default {
       url = utils.removeTrailingSlash(url)
       cardHasUrlPreviewInfo = Boolean(cardHasUrlPreviewInfo && url)
       const nameHasUrl = this.card.name.includes(url)
-      return this.card.urlPreviewIsVisible && cardHasUrlPreviewInfo && nameHasUrl
+      return (this.card.urlPreviewIsVisible && cardHasUrlPreviewInfo && nameHasUrl) && !this.isHiddenInComment
       // return Boolean(this.card.urlPreviewIsVisible && this.card.urlPreviewUrl && cardHasUrlPreviewInfo) // && !isErrorUrl
     },
     tags () {
@@ -1647,9 +1647,10 @@ export default {
 
 <style lang="stylus">
 article
+  --card-width 235px
   pointer-events all
   position absolute
-  max-width 235px
+  max-width var(--card-width)
   -webkit-touch-callout none
   &.is-resizing
     *
@@ -1658,7 +1659,7 @@ article
     border-radius 3px
     user-select none
     background-color var(--secondary-background)
-    max-width 235px
+    max-width var(--card-width)
     cursor pointer
     touch-action manipulation
     &:hover,
@@ -1835,8 +1836,11 @@ article
       top 6px
       left 6px
 
+    &.has-url-preview
+      width var(--card-width)
+
     &.media-card
-      width 235px
+      width var(--card-width)
       background-color transparent
       &:hover,
       &.hover
@@ -1867,7 +1871,7 @@ article
           background-color var(--secondary-background)
 
     &.audio-card
-      width 235px
+      width var(--card-width)
       .card-content-wrap
         width 100%
         align-items initial
@@ -1953,6 +1957,9 @@ article
     display inline
     .user
       vertical-align bottom
+  .comment-badge
+    padding-left 0
+    padding-right 0
 
   .tappable-area
     margin-left 20px
