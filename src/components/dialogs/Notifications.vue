@@ -119,7 +119,7 @@ export default {
       const isCard = this.isCard(notification)
       const isAskToAddToExplore = this.isAskToAddToExplore(notification)
       if (isCard) {
-        this.showCardDetails(notification.card.id)
+        this.showCardDetails(notification)
       } else if (isAskToAddToExplore) {
         this.changeSpace(notification.spaceId)
       }
