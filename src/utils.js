@@ -1155,6 +1155,7 @@ export default {
   urlsFromString (string, skipProtocolCheck) {
     if (!string) { return [] }
     // remove markdown links
+    string = string.toLowerCase()
     const markdownLinks = string.match(this.markdown().linkPattern)
     if (markdownLinks) {
       markdownLinks.forEach(link => {
