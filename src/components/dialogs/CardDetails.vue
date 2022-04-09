@@ -863,6 +863,7 @@ export default {
       this.$store.dispatch('currentCards/update', update)
     },
     updateCardName (newName) {
+      if (!newName) { return }
       const cardId = this.$store.state.cardDetailsIsVisibleForCardId
       if (this.card.id !== cardId) {
         return
