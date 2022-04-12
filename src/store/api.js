@@ -773,8 +773,7 @@ const self = {
       if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        // const response = await fetch(`${host}/space/download/${spaceId}`, options)
-        const response = await fetch(`${host}/space/${spaceId}/download`, options)
+        const response = await fetch(`${host}/space/download/${spaceId}`, options)
         return response.blob()
       } catch (error) {
         console.error('🚒 downloadCurrentSpace', error)
