@@ -1200,6 +1200,7 @@ export default {
   },
   urlHasProtocol (url) {
     if (!url) { return }
+    url = url.toLowerCase()
     return url.startsWith('http://') || url.startsWith('https://')
   },
   urlWithoutProtocol (url) {
