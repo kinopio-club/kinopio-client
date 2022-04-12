@@ -12,24 +12,30 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     template(v-if="!spaceIsPrivate")
       input.url-textarea(ref="url" v-model="url")
-      //- Copy Url and Embed
-      .row(v-if="canNativeShare")
-        .segmented-buttons
-          button(@click.left="copyUrl")
-            span Copy Url
-          button(@click.left="shareUrl")
-            img.icon(src="@/assets/share.svg")
+      //- Share Options
+      .row
+        template(v-if="canNativeShare")
+          .segmented-buttons
+            //- Copy
+            button(@click.left="copyUrl")
+              span Copy Url
+            button(@click.left="shareUrl")
+              img.icon(src="@/assets/share.svg")
+        template(v-if="!canNativeShare")
+          //- Copy
+          .button-wrap
+            button(@click.left="copyUrl")
+              span Copy Url
+        //- Embed
         .button-wrap
           button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
             span Embed
           Embed(:visible="embedIsVisible")
-      .row(v-if="!canNativeShare")
-        button(@click.left="copyUrl")
-          span Copy Url
+        //- PDF
         .button-wrap
-          button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
-            span Embed
-          Embed(:visible="embedIsVisible")
+          button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
+            span PDF
+            //- Pdf(:visible="pdfIsVisible")
 
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
     p.share-private(v-if="spaceIsPrivate")
@@ -110,7 +116,8 @@ export default {
       userDetailsIsVisible: false,
       dialogHeight: null,
       spaceRssFeedIsVisible: false,
-      embedIsVisible: false
+      embedIsVisible: false,
+      pdfIsVisible: false
     }
   },
   computed: {
@@ -179,6 +186,11 @@ export default {
       }
       navigator.share(data)
     },
+    togglePdfIsVisible () {
+      const isVisible = this.pdfIsVisible
+      this.closeDialogs()
+      this.pdfIsVisible = !isVisible
+    },
     togglePrivacyPickerIsVisible () {
       const isVisible = this.privacyPickerIsVisible
       this.closeDialogs()
@@ -204,6 +216,7 @@ export default {
       this.inviteCollaboratorsIsVisible = false
       this.spaceRssFeedIsVisible = false
       this.embedIsVisible = false
+      this.pdfIsVisible = false
       this.userDetailsIsNotVisible()
     },
     showUserDetails (event, user) {
