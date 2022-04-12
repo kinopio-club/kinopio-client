@@ -1,5 +1,6 @@
 <template lang="pug">
 dialog.narrow.pdf(v-if="visible" :open="visible" @click.left.stop)
+  a#pdf-downlaod-anchor.hidden
   section
     p asldkfj
     //- p Download space PDF
@@ -10,24 +11,6 @@ dialog.narrow.pdf(v-if="visible" :open="visible" @click.left.stop)
 
   // handle upgraded users only
 
-    //- .row
-    //-   .segmented-buttons
-    //-     button(@click="toggleIframeIsVisible" :class="{ active: iframeIsVisible }")
-    //-       span iFrame
-    //-     button(@click="toggleUrlIsVisible" :class="{ active: !iframeIsVisible }")
-    //-       span Url
-
-    //- template(v-if="iframeIsVisible")
-    //-   textarea(ref="iframe") {{iframe}}
-    //-   button(@click="copy") Copy Code
-    //-   .row(v-if="isCopied")
-    //-     .badge.success.success-message Code Copied
-
-    //- template(v-if="!iframeIsVisible")
-    //-   input.url-textarea(ref="url" v-model="url")
-    //-   button(@click="copy") Copy Url
-    //-   .row(v-if="isCopied")
-    //-     .badge.success.success-message Url Copied
 </template>
 
 <script>
@@ -40,7 +23,6 @@ export default {
   },
   data () {
     return {
-      // iframeIsVisible: true,
       isLoading: false,
       isDownloaded: false
     }
@@ -52,32 +34,40 @@ export default {
     // },
   },
   methods: {
-    // toggleIframeIsVisible () {
-    //   this.iframeIsVisible = true
-    //   this.isCopied = false
-    // },
-    // toggleUrlIsVisible () {
-    //   this.iframeIsVisible = false
-    //   this.isCopied = false
-    // },
-    // copy () {
-    //   let element
-    //   if (this.iframeIsVisible) {
-    //     element = this.$refs.iframe
-    //   } else {
-    //     element = this.$refs.url
-    //   }
-    //   element.select()
-    //   element.setSelectionRange(0, 99999) // for mobile
-    //   document.execCommand('copy')
-    //   this.isCopied = true
-    // }
+    fileName () {
+      const spaceName = this.$store.state.currentSpace.name
+      const spaceId = this.$store.state.currentSpace.id
+      let fileName = spaceName || `kinopio-space-${spaceId}`
+      return fileName
+    },
+    downloadBlob (blob) {
+      const blobUrl = window.URL.createObjectURL(blob)
+      const fileName = this.fileName()
+      const downloadAnchor = document.getElementById('pdf-downlaod-anchor')
+      downloadAnchor.setAttribute('href', blobUrl)
+      downloadAnchor.setAttribute('download', `${fileName}.pdf`)
+      downloadAnchor.click()
+    },
+    async pdf () {
+      this.isLoading = true
+      try {
+        const url = await this.$store.dispatch('api/pdf')
+        const response = await fetch(url, { method: 'GET' })
+        const blob = await response.blob()
+        this.downloadBlob(blob)
+      } catch (error) {
+        console.error('🚒', error)
+        this.unknownServerError = true
+      }
+      this.isLoading = false
+    }
   },
   watch: {
     visible (visible) {
       if (visible) {
         this.isDownloaded = false
-        // this.isLoading = true
+        this.isLoading = false
+        this.pdf()
       }
     }
   }

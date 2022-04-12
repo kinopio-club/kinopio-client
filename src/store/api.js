@@ -696,6 +696,18 @@ const self = {
         console.error('🚒 createMultiplePresignedPosts', error)
       }
     },
+    pdf: async (context) => {
+      const spaceId = context.rootState.currentSpace.id
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/space/pdf/${spaceId}`, options)
+        let url = await normalizeResponse(response)
+        url = url.url
+        return url
+      } catch (error) {
+        console.error('🚒 pdf', error)
+      }
+    },
 
     // Notifications
 
@@ -761,7 +773,7 @@ const self = {
       if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/space/${spaceId}/download`, options)
+        const response = await fetch(`${host}/space/download/${spaceId}`, options)
         return response.blob()
       } catch (error) {
         console.error('🚒 downloadCurrentSpace', error)
