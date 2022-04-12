@@ -111,7 +111,6 @@ export default {
     if (utils.isAndroid()) {
       this.$store.commit('addNotification', { message: 'Android is currenly only partially supported. You may experience scrolling issues', type: 'danger' })
     }
-    this.$store.commit('addNotification', { message: 'Currently experiencing problems related to reading and saving image uploads', type: 'danger' })
 
     this.$store.dispatch('currentUser/restoreUserFavorites')
     window.addEventListener('scroll', this.updateCardOverlaps)
