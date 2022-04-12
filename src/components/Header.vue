@@ -633,8 +633,18 @@ export default {
 
     async updateNotifications () {
       this.notificationsIsLoading = true
-      this.notifications = await this.$store.dispatch('api/getNotifications') || []
+      let notifications = await this.$store.dispatch('api/getNotifications') || []
+      this.notifications = this.normalizeCardNotifications(notifications)
       this.notificationsIsLoading = false
+    },
+    normalizeCardNotifications (notifications) {
+      return notifications.filter(notification => {
+        const { type } = notification
+        const typeIsCard = type === 'createCard' || type === 'updateCard'
+        if (!typeIsCard) { return true }
+        if (!notification.card) { return }
+        return !notification.card.isRemoved
+      })
     },
     markAllAsRead () {
       const notifications = this.notifications.filter(notification => !notification.isRead)

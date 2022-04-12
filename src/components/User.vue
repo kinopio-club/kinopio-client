@@ -1,5 +1,5 @@
 <template lang="pug">
-.user(:data-user-id="user.id" ref="element" @keydown.stop.enter="toggleUserDetails" :class="{ active: userDetailsIsVisible}")
+.user(:data-user-id="user.id" :key="user.id" ref="element" @keydown.stop.enter="toggleUserDetails" :class="{ active: userDetailsIsVisible}")
   .user-avatar.anon-avatar(
     @mouseup.left.stop="toggleUserDetails"
     @touchend.stop="toggleUserDetails"

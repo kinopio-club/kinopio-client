@@ -882,8 +882,10 @@ export default {
       this.updateTags()
       if (this.notifiedMembers) { return }
       if (this.createdByUser.id !== this.$store.state.currentUser.id) { return }
-      this.$store.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: this.card.id, type: 'updateCard' })
-      this.notifiedMembers = true
+      if (card.name) {
+        this.$store.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: this.card.id, type: 'updateCard' })
+        this.notifiedMembers = true
+      }
     },
     updateCardMap (cardId) {
       this.$store.dispatch('currentCards/updateDimensionsAndMap', cardId)

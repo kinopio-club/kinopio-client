@@ -1,5 +1,5 @@
 <template lang="pug">
-article(:style="positionStyle" :data-card-id="id" ref="card" :class="{'is-resizing': isResizing}")
+article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{'is-resizing': isResizing}")
   .card(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
