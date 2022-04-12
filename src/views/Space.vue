@@ -1,5 +1,5 @@
 <template lang="pug">
-main#space.space(
+main.space(
   :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
   @mousedown.left="initInteractions"
   @touchstart="initInteractions"
