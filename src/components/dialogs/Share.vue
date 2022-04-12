@@ -35,7 +35,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         .button-wrap
           button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
             span PDF
-            //- Pdf(:visible="pdfIsVisible")
+          Pdf(:visible="pdfIsVisible")
 
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
     p.share-private(v-if="spaceIsPrivate")
@@ -77,6 +77,7 @@ import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
 import SpaceRssFeed from '@/components/dialogs/SpaceRssFeed.vue'
 import Embed from '@/components/dialogs/Embed.vue'
+import Pdf from '@/components/dialogs/Pdf.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
@@ -92,6 +93,7 @@ export default {
     InviteCollaborators,
     SpaceRssFeed,
     Embed,
+    Pdf,
     UserList,
     UserDetails
   },
@@ -285,7 +287,8 @@ export default {
   .description
     margin-top 3px
   dialog.privacy-picker,
-  dialog.embed
+  dialog.embed,
+  dialog.pdf
     left initial
     right 8px
   dialog.user-details
