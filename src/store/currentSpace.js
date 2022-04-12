@@ -610,6 +610,8 @@ export default {
         context.dispatch('currentCards/updateCardMap', null, { root: true })
         context.commit('triggerUpdateCardOverlaps', null, { root: true })
       })
+      const element = document.getElementById('space')
+      element.setAttribute('content-is-loaded', true)
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
       context.commit('isLoadingSpace', true, { root: true })

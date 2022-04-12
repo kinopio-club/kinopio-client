@@ -47,6 +47,12 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
       span.badge.success.last-child
         img.icon.open(src="@/assets/open.svg")
         span {{privacyName(0)}}
+    p
+      //- PDF
+      .button-wrap
+        button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
+          span PDF
+        Pdf(:visible="pdfIsVisible")
 
   section(v-if="spaceHasUrl && isSpaceMember")
     .button-wrap

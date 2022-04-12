@@ -28,6 +28,7 @@ export default {
     }
   },
   computed: {
+    userIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
     // url () {
     //   const spaceId = this.$store.state.currentSpace.id
     //   return `${utils.kinopioDomain()}/embed/?spaceId=${spaceId}&zoom=100`
@@ -49,6 +50,7 @@ export default {
       downloadAnchor.click()
     },
     async pdf () {
+      if (!this.userIsUpgraded) { return }
       this.isLoading = true
       try {
         const url = await this.$store.dispatch('api/pdf')
