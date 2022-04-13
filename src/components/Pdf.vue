@@ -24,9 +24,14 @@ export default {
   props: {
     visible: Boolean
   },
+  mounted () {
+    if (!this.visible) { return }
+    this.init()
+  },
   data () {
     return {
-      isLoading: false
+      isLoading: false,
+      unknownServerError: false
     }
   },
   computed: {
@@ -59,14 +64,17 @@ export default {
         this.unknownServerError = true
       }
       this.isLoading = false
+    },
+    init () {
+      this.unknownServerError = false
+      this.isLoading = false
+      this.pdf()
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
-        this.unknownServerError = false
-        this.isLoading = false
-        this.pdf()
+        this.init()
       }
     }
   }
