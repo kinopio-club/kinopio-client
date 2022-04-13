@@ -39,19 +39,28 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     .info-container(v-if="unknownServerError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
+  section(v-if="currentUserIsSignedIn")
+    //- PDF
+    .button-wrap
+      button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
+        span PDF
+    Pdf(:visible="pdfIsVisible")
+
 </template>
 
 <script>
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
+import Pdf from '@/components/Pdf.vue'
 
 import join from 'lodash-es/join'
 
 export default {
   name: 'Export',
   components: {
-    Loader
+    Loader,
+    Pdf
   },
   props: {
     visible: Boolean,
@@ -73,7 +82,8 @@ export default {
       dialogHeight: null,
       isLoadingCurrentSpace: false,
       isLoadingAllSpaces: false,
-      unknownServerError: false
+      unknownServerError: false,
+      pdfIsVisible: false
     }
   },
   computed: {
@@ -160,6 +170,10 @@ export default {
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'ShowInExploreButton.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
+    },
+    togglePdfIsVisible () {
+      const isVisible = this.pdfIsVisible
+      this.pdfIsVisible = !isVisible
     }
   },
   watch: {
@@ -167,6 +181,7 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.textIsCopied = false
+          this.pdfIsVisible = false
           this.scrollIntoView()
           this.spaceIsDuplicated = false
           this.updateDialogHeight()
@@ -200,5 +215,7 @@ export default {
   .hidden
     display none
   .info-container
+    margin-top 10px
+  .pdf
     margin-top 10px
 </style>

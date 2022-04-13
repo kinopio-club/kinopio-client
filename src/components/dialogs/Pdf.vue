@@ -1,75 +1,21 @@
 <template lang="pug">
-dialog.narrow.pdf(v-if="visible" :open="visible" @click.left.stop)
-  a#pdf-downlaod-anchor.hidden
+dialog.narrow(v-if="visible" :open="visible" @click.left.stop)
   section
-    template(v-if="isLoading")
-      Loader(:visible="true")
-      p Creating space PDF
-    template(v-if="unknownServerError")
-      p
-        .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-    template(v-if="!isLoading && !unknownServerError")
-      p {{fileName()}}.pdf
-      p
-        .badge.success Downloaded
+    p PDF
+  section
+    Pdf()
 </template>
 
 <script>
-import Loader from '@/components/Loader.vue'
+import Pdf from '@/components/Pdf.vue'
 
 export default {
-  name: 'Pdf',
+  name: 'PdfDialogWrap',
   components: {
-    Loader
+    Pdf
   },
   props: {
     visible: Boolean
-  },
-  data () {
-    return {
-      isLoading: false
-    }
-  },
-  computed: {
-    spaceName () { return this.$store.state.currentSpace.name }
-  },
-  methods: {
-    fileName () {
-      const spaceName = this.$store.state.currentSpace.name
-      const spaceId = this.$store.state.currentSpace.id
-      let fileName = spaceName || `kinopio-space-${spaceId}`
-      return fileName
-    },
-    downloadBlob (blob) {
-      const blobUrl = window.URL.createObjectURL(blob)
-      const fileName = this.fileName()
-      const downloadAnchor = document.getElementById('pdf-downlaod-anchor')
-      downloadAnchor.setAttribute('href', blobUrl)
-      downloadAnchor.setAttribute('download', `${fileName}.pdf`)
-      downloadAnchor.click()
-    },
-    async pdf () {
-      this.isLoading = true
-      try {
-        const url = await this.$store.dispatch('api/pdf')
-        const response = await fetch(url, { method: 'GET' })
-        const blob = await response.blob()
-        this.downloadBlob(blob)
-      } catch (error) {
-        console.error('🚒', error)
-        this.unknownServerError = true
-      }
-      this.isLoading = false
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.unknownServerError = false
-        this.isLoading = false
-        this.pdf()
-      }
-    }
   }
 }
 </script>
