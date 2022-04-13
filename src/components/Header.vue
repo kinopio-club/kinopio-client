@@ -71,11 +71,11 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
               button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
                 img.icon(src="@/assets/add.svg")
               AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
-              Templates(:visible="templatesIsVisible")
             //- Templates
-            //- .button-wrap
-            //-   button(@click.left.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
-            //-     img.icon.templates(src="@/assets/templates.svg")
+            .button-wrap
+              button(@click.left.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
+                img.icon.templates(src="@/assets/templates.svg")
+              Templates(:visible="templatesIsVisible")
           //- Search
           .segmented-buttons
             .button-wrap

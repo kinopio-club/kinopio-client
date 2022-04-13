@@ -4,7 +4,6 @@ dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height'
 </template>
 
 <script>
-import Templates from '@/components/Templates.vue'
 import Community from '@/components/Community.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -12,7 +11,6 @@ import utils from '@/utils.js'
 export default {
   name: 'Explore',
   components: {
-    Templates,
     Loader,
     Community
   },
