@@ -105,7 +105,7 @@ export default {
     },
     text () {
       const data = this.exportData.cards.map(card => { return card.name })
-      return join(data, '\n')
+      return join(data, '\n\n')
     },
     copyText () {
       const element = this.$refs.text
