@@ -123,7 +123,6 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
               span Share
             Share(:visible="shareIsVisible")
-            Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData" @updateSpaces="closeAllDialogs")
           //- Notifications
           .button-wrap
             button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
@@ -160,7 +159,6 @@ import Loader from '@/components/Loader.vue'
 import templates from '@/data/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
-import Export from '@/components/dialogs/Export.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Search from '@/components/dialogs/Search.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
@@ -192,7 +190,6 @@ export default {
     Loader,
     ImportArenaChannel,
     KeyboardShortcuts,
-    Export,
     UpgradeUser,
     Search,
     MoonPhase,
@@ -210,7 +207,6 @@ export default {
       notificationsIsVisible: false,
       loadingSignUpOrIn: false,
       keyboardShortcutsIsVisible: false,
-      exportIsVisible: false,
       upgradeUserIsVisible: false,
       spaceStatusIsVisible: false,
       offlineIsVisible: false,
@@ -260,8 +256,6 @@ export default {
         this.hidden()
       } else if (mutation.type === 'triggerTemplatesIsVisible') {
         this.templatesIsVisible = true
-      } else if (mutation.type === 'triggerExportIsVisible') {
-        this.exportIsVisible = true
       }
     })
   },
@@ -286,8 +280,6 @@ export default {
     clearInterval(updateNotificationsIntervalTimer)
   },
   computed: {
-    spaceName () { return this.$store.state.currentSpace.name },
-    exportData () { return this.$store.getters['currentSpace/all'] },
     kinopioDomain () { return utils.kinopioDomain() },
     isVisible () {
       const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
@@ -475,7 +467,6 @@ export default {
       this.notificationsIsVisible = false
       this.addSpaceIsVisible = false
       this.templatesIsVisible = false
-      this.exportIsVisible = false
       if (!spaceDetailsDialogIsPinned) {
         this.spaceDetailsIsVisible = false
       }
@@ -773,12 +764,6 @@ header
       > button
         .privacy-icon
           margin-left 6px
-
-  dialog.export
-    top calc(100% - 8px)
-    left initial
-    right 8px
-    max-height calc(100vh - 25px)
 
   // should not bubble down into dialogs
   .space-details-row,

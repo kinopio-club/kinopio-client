@@ -1,6 +1,4 @@
 <template lang="pug">
-//- currently unused
-//- called with DialogWrap(:visible="pdfIsVisible" :title="'PDF'" :childName="'pdf'")
 dialog.narrow.dialog-wrap(v-if="visible" :open="visible" @click.left.stop)
   section(v-if="title")
     p {{title}}

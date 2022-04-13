@@ -31,12 +31,11 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
             span Embed
           Embed(:visible="embedIsVisible")
-      .row
-        //- Export
+        //- PDF
         .button-wrap
-          button(@click.left.stop="triggerExportIsVisible")
-            img.icon.visit(src="@/assets/export.svg")
-            span Export
+          button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
+            span PDF
+          DialogWrap(:visible="pdfIsVisible" :title="'PDF'" :childName="'pdf'")
 
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
     template(v-if="spaceIsPrivate")
@@ -49,12 +48,12 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         span.badge.success.last-child
           img.icon.open(src="@/assets/open.svg")
           span {{privacyName(0)}}
-      //- Export
+      //- PDF
       p
         .button-wrap
-          button(@click.left.stop="triggerExportIsVisible")
-            img.icon.visit(src="@/assets/export.svg")
-            span Export
+          button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
+            span PDF
+          DialogWrap(:visible="pdfIsVisible" :title="'PDF'" :childName="'pdf'")
 
   section(v-if="spaceHasUrl && isSpaceMember")
     .button-wrap
@@ -85,6 +84,7 @@ import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
 import SpaceRssFeed from '@/components/dialogs/SpaceRssFeed.vue'
 import Embed from '@/components/dialogs/Embed.vue'
+import DialogWrap from '@/components/dialogs/DialogWrap.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
@@ -100,6 +100,7 @@ export default {
     InviteCollaborators,
     SpaceRssFeed,
     Embed,
+    DialogWrap,
     UserList,
     UserDetails
   },
@@ -124,7 +125,8 @@ export default {
       userDetailsIsVisible: false,
       dialogHeight: null,
       spaceRssFeedIsVisible: false,
-      embedIsVisible: false
+      embedIsVisible: false,
+      pdfIsVisible: false
     }
   },
   computed: {
@@ -181,10 +183,6 @@ export default {
       document.execCommand('copy')
       this.urlIsCopied = true
     },
-    triggerExportIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'Share.triggerSignUpOrInIsVisible')
-      this.$store.commit('triggerExportIsVisible')
-    },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'Share.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
@@ -196,6 +194,11 @@ export default {
         url: this.url
       }
       navigator.share(data)
+    },
+    togglePdfIsVisible () {
+      const isVisible = this.pdfIsVisible
+      this.closeDialogs()
+      this.pdfIsVisible = !isVisible
     },
     togglePrivacyPickerIsVisible () {
       const isVisible = this.privacyPickerIsVisible
@@ -222,6 +225,7 @@ export default {
       this.inviteCollaboratorsIsVisible = false
       this.spaceRssFeedIsVisible = false
       this.embedIsVisible = false
+      this.pdfIsVisible = false
       this.userDetailsIsNotVisible()
     },
     showUserDetails (event, user) {
