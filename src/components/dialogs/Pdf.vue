@@ -1,7 +1,13 @@
 <template lang="pug">
 dialog.narrow.pdf(v-if="visible" :open="visible" @click.left.stop)
   a#pdf-downlaod-anchor.hidden
-  section
+  // Upgrade
+  section(v-if="!userIsUpgraded")
+    p Upgrade your account to save space PDFs
+    button(@click.left.stop="triggerUpgradeUserIsVisible")
+      span Upgrade
+  // PDF
+  section(v-if="userIsUpgraded")
     template(v-if="isLoading")
       Loader(:visible="true")
       p Creating space PDF
@@ -9,9 +15,6 @@ dialog.narrow.pdf(v-if="visible" :open="visible" @click.left.stop)
       p {{fileName()}}.pdf
       p
         .badge.success Downloaded
-
-  // TODO handle upgraded users only
-
 </template>
 
 <script>
@@ -62,6 +65,10 @@ export default {
         this.unknownServerError = true
       }
       this.isLoading = false
+    },
+    triggerUpgradeUserIsVisible () {
+      this.$store.dispatch('closeAllDialogs', 'pdf')
+      this.$store.commit('triggerUpgradeUserIsVisible')
     }
   },
   watch: {
