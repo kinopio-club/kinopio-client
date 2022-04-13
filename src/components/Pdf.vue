@@ -2,8 +2,9 @@
 a#pdf-downlaod-anchor.hidden
 .pdf(v-if="visible")
   template(v-if="isLoading")
-    Loader(:visible="true")
-    p Creating space PDF
+    .row
+      Loader(:visible="true")
+      span Creating space PDF…
   template(v-if="unknownServerError")
     p
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
@@ -82,4 +83,11 @@ export default {
 </script>
 
 <style lang="stylus">
+.pdf
+  .loader
+    height 14px
+    width 14px
+    vertical-align 0px
+    margin-right 4px
+
 </style>
