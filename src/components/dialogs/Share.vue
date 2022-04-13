@@ -18,7 +18,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           .segmented-buttons
             //- Copy
             button(@click.left="copyUrl")
-              span Copy Url
+              span Copy
             button(@click.left="shareUrl")
               img.icon(src="@/assets/share.svg")
         template(v-if="!canNativeShare")
