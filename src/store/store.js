@@ -366,6 +366,7 @@ const store = createStore({
     triggerFocusResultsFilter: () => {},
     triggerFocusSpaceDetailsName: () => {},
     triggerSignUpOrInIsVisible: () => {},
+    triggerExportIsVisible: () => {},
     triggerArenaAuthenticationError: () => {},
     triggerKeyboardShortcutsIsVisible: () => {},
     triggerReadOnlyJiggle: () => {},
