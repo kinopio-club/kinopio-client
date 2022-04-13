@@ -1,17 +1,14 @@
 <template lang="pug">
 dialog.narrow.pdf(v-if="visible" :open="visible" @click.left.stop)
   a#pdf-downlaod-anchor.hidden
-  // Upgrade
-  section(v-if="!userIsUpgraded")
-    p Upgrade your account to save space PDFs
-    button(@click.left.stop="triggerUpgradeUserIsVisible")
-      span Upgrade
-  // PDF
-  section(v-if="userIsUpgraded")
+  section
     template(v-if="isLoading")
       Loader(:visible="true")
       p Creating space PDF
-    template(v-if="!isLoading")
+    template(v-if="unknownServerError")
+      p
+        .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+    template(v-if="!isLoading && !unknownServerError")
       p {{fileName()}}.pdf
       p
         .badge.success Downloaded
@@ -34,7 +31,6 @@ export default {
     }
   },
   computed: {
-    userIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     spaceName () { return this.$store.state.currentSpace.name }
   },
   methods: {
@@ -53,7 +49,6 @@ export default {
       downloadAnchor.click()
     },
     async pdf () {
-      if (!this.userIsUpgraded) { return }
       this.isLoading = true
       try {
         const url = await this.$store.dispatch('api/pdf')
@@ -65,15 +60,12 @@ export default {
         this.unknownServerError = true
       }
       this.isLoading = false
-    },
-    triggerUpgradeUserIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'pdf')
-      this.$store.commit('triggerUpgradeUserIsVisible')
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
+        this.unknownServerError = false
         this.isLoading = false
         this.pdf()
       }
