@@ -2,37 +2,37 @@
 dialog.narrow.pdf(v-if="visible" :open="visible" @click.left.stop)
   a#pdf-downlaod-anchor.hidden
   section
-    p asldkfj
-    //- p Download space PDF
+    template(v-if="isLoading")
+      Loader(:visible="true")
+      p Creating space PDF
+    template(v-if="!isLoading")
+      p {{fileName()}}.pdf
+      p
+        .badge.success Downloaded
 
-    // Generating... PDF for {{soaceName}}
-
-  //- section
-
-  // handle upgraded users only
+  // TODO handle upgraded users only
 
 </template>
 
 <script>
-// import utils from '@/utils.js'
+import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'Pdf',
+  components: {
+    Loader
+  },
   props: {
     visible: Boolean
   },
   data () {
     return {
-      isLoading: false,
-      isDownloaded: false
+      isLoading: false
     }
   },
   computed: {
-    userIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
-    // url () {
-    //   const spaceId = this.$store.state.currentSpace.id
-    //   return `${utils.kinopioDomain()}/embed/?spaceId=${spaceId}&zoom=100`
-    // },
+    userIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
+    spaceName () { return this.$store.state.currentSpace.name }
   },
   methods: {
     fileName () {
@@ -67,7 +67,6 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        this.isDownloaded = false
         this.isLoading = false
         this.pdf()
       }
@@ -77,8 +76,4 @@ export default {
 </script>
 
 <style lang="stylus">
-// .pdf
-//   cursor initial
-  // .success-message
-  //   margin-top 10px
 </style>

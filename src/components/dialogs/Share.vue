@@ -38,21 +38,22 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           Pdf(:visible="pdfIsVisible")
 
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
-    p.share-private(v-if="spaceIsPrivate")
-      span To share this space publically, set the privacy to
-      span.badge.info
-        img.icon.closed(src="@/assets/unlock.svg")
-        span {{privacyName(1)}}
-      span or
-      span.badge.success.last-child
-        img.icon.open(src="@/assets/open.svg")
-        span {{privacyName(0)}}
-    //- PDF
-    p
-      .button-wrap
-        button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
-          span PDF
-        Pdf(:visible="pdfIsVisible")
+    template(v-if="spaceIsPrivate")
+      p.share-private
+        span To share this space publically, set the privacy to
+        span.badge.info
+          img.icon.closed(src="@/assets/unlock.svg")
+          span {{privacyName(1)}}
+        span or
+        span.badge.success.last-child
+          img.icon.open(src="@/assets/open.svg")
+          span {{privacyName(0)}}
+      //- PDF
+      p
+        .button-wrap
+          button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
+            span PDF
+          Pdf(:visible="pdfIsVisible")
 
   section(v-if="spaceHasUrl && isSpaceMember")
     .button-wrap
