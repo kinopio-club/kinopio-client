@@ -12,35 +12,48 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     template(v-if="!spaceIsPrivate")
       input.url-textarea(ref="url" v-model="url")
-      //- Copy Url and Embed
-      .row(v-if="canNativeShare")
-        .segmented-buttons
-          button(@click.left="copyUrl")
-            span Copy Url
-          button(@click.left="shareUrl")
-            img.icon(src="@/assets/share.svg")
+      //- Share Options
+      .row
+        template(v-if="canNativeShare")
+          .segmented-buttons
+            //- Copy
+            button(@click.left="copyUrl")
+              span Copy Url
+            button(@click.left="shareUrl")
+              img.icon(src="@/assets/share.svg")
+        template(v-if="!canNativeShare")
+          //- Copy
+          .button-wrap
+            button(@click.left="copyUrl")
+              span Copy Url
+        //- Embed
         .button-wrap
           button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
             span Embed
           Embed(:visible="embedIsVisible")
-      .row(v-if="!canNativeShare")
-        button(@click.left="copyUrl")
-          span Copy Url
+        //- PDF
         .button-wrap
-          button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
-            span Embed
-          Embed(:visible="embedIsVisible")
+          button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
+            span PDF
+          DialogWrap(:visible="pdfIsVisible" :title="'PDF'" :childName="'pdf'")
 
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
-    p.share-private(v-if="spaceIsPrivate")
-      span To share this space publically, set the privacy to
-      span.badge.info
-        img.icon.closed(src="@/assets/unlock.svg")
-        span {{privacyName(1)}}
-      span or
-      span.badge.success.last-child
-        img.icon.open(src="@/assets/open.svg")
-        span {{privacyName(0)}}
+    template(v-if="spaceIsPrivate")
+      p.share-private
+        span To share this space publically, set the privacy to
+        span.badge.info
+          img.icon.closed(src="@/assets/unlock.svg")
+          span {{privacyName(1)}}
+        span or
+        span.badge.success.last-child
+          img.icon.open(src="@/assets/open.svg")
+          span {{privacyName(0)}}
+      //- PDF
+      p
+        .button-wrap
+          button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
+            span PDF
+          DialogWrap(:visible="pdfIsVisible" :title="'PDF'" :childName="'pdf'")
 
   section(v-if="spaceHasUrl && isSpaceMember")
     .button-wrap
@@ -71,6 +84,7 @@ import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
 import SpaceRssFeed from '@/components/dialogs/SpaceRssFeed.vue'
 import Embed from '@/components/dialogs/Embed.vue'
+import DialogWrap from '@/components/dialogs/DialogWrap.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
@@ -86,6 +100,7 @@ export default {
     InviteCollaborators,
     SpaceRssFeed,
     Embed,
+    DialogWrap,
     UserList,
     UserDetails
   },
@@ -110,7 +125,8 @@ export default {
       userDetailsIsVisible: false,
       dialogHeight: null,
       spaceRssFeedIsVisible: false,
-      embedIsVisible: false
+      embedIsVisible: false,
+      pdfIsVisible: false
     }
   },
   computed: {
@@ -179,6 +195,11 @@ export default {
       }
       navigator.share(data)
     },
+    togglePdfIsVisible () {
+      const isVisible = this.pdfIsVisible
+      this.closeDialogs()
+      this.pdfIsVisible = !isVisible
+    },
     togglePrivacyPickerIsVisible () {
       const isVisible = this.privacyPickerIsVisible
       this.closeDialogs()
@@ -204,6 +225,7 @@ export default {
       this.inviteCollaboratorsIsVisible = false
       this.spaceRssFeedIsVisible = false
       this.embedIsVisible = false
+      this.pdfIsVisible = false
       this.userDetailsIsNotVisible()
     },
     showUserDetails (event, user) {
@@ -272,7 +294,8 @@ export default {
   .description
     margin-top 3px
   dialog.privacy-picker,
-  dialog.embed
+  dialog.embed,
+  dialog.dialog-wrap
     left initial
     right 8px
   dialog.user-details
