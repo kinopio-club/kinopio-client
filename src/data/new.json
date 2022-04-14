@@ -11,6 +11,7 @@
   "background": "",
   "backgroundTint": "",
   "moonPhase": "",
+  "isTemplate": false,
   "cards": [
     {
       "id": "1",

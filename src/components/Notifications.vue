@@ -192,9 +192,10 @@ export default {
       return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
     },
     currentSpaceIsTemplate () {
-      const id = this.$store.state.currentSpace.id
+      const currentSpace = this.$store.state.currentSpace
+      if (currentSpace.isTemplate) { return true }
       const templateSpaceIds = templates.spaces().map(space => space.id)
-      return templateSpaceIds.includes(id)
+      return templateSpaceIds.includes(currentSpace.id)
     }
   },
   methods: {

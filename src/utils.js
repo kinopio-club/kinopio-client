@@ -962,6 +962,7 @@ export default {
     space.userId = currentUser.id
     space.connectionTypes = []
     space.connections = []
+    space.isTemplate = false
     space = this.spaceDefaultBackground(space, currentUser)
     // cards
     space.cards.push({ id: nanoid(), name: day, x: 60, y: 100, frameId: 0 })
