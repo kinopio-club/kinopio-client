@@ -12,7 +12,8 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     button(@click.left="duplicateSpace")
       img.icon(src="@/assets/add.svg")
       span Duplicate Space
-    .badge.success(v-if="spaceIsDuplicated") {{duplicatedSpaceName}} duplicated
+    .row(v-if="spaceIsDuplicated")
+      span.badge.success Space duplicated
 
   section
     // anon user
@@ -78,7 +79,6 @@ export default {
     return {
       textIsCopied: false,
       spaceIsDuplicated: false,
-      duplicatedSpaceName: '',
       dialogHeight: null,
       isLoadingCurrentSpace: false,
       isLoadingAllSpaces: false,
@@ -155,7 +155,6 @@ export default {
       scrollIntoView.scroll(element, isTouchDevice)
     },
     duplicateSpace () {
-      this.duplicatedSpaceName = this.$store.state.currentSpace.name
       this.$store.dispatch('currentSpace/duplicateSpace')
       this.spaceIsDuplicated = true
       this.$emit('updateSpaces')

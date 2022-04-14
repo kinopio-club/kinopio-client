@@ -367,6 +367,7 @@ export default {
       isLoadingRemoteSpace = false
       context.dispatch('loadSpace', { space: uniqueNewSpace, isLocalSpaceOnly: true })
       await context.dispatch('saveImportedSpace')
+      context.commit('addNotification', { message: `${space.name} is now yours to edit`, type: 'success' }, { root: true })
     },
     addSpace: (context) => {
       const user = context.rootState.currentUser
