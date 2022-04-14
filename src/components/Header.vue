@@ -37,8 +37,8 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
           //- Current Space
           .button-wrap
             button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
-              .badge.info(v-show="currentSpaceIsTemplate")
-                span Template
+              span(v-show="currentSpaceIsTemplate")
+                img.icon.templates(src="@/assets/templates.svg")
               MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
               span {{currentSpaceName}}
               PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
@@ -71,11 +71,11 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
               button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
                 img.icon(src="@/assets/add.svg")
               AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
-              Templates(:visible="templatesIsVisible")
             //- Templates
-            //- .button-wrap
-            //-   button(@click.left.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
-            //-     img.icon.templates(src="@/assets/templates.svg")
+            .button-wrap
+              button(@click.left.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
+                img.icon.templates(src="@/assets/templates.svg")
+              Templates(:visible="templatesIsVisible")
           //- Search
           .segmented-buttons
             .button-wrap
@@ -357,9 +357,10 @@ export default {
       return this.$store.state.isOnline
     },
     currentSpaceIsTemplate () {
-      const id = this.$store.state.currentSpace.id
+      const currentSpace = this.$store.state.currentSpace
+      if (currentSpace.isTemplate) { return true }
       const templateSpaceIds = templates.spaces().map(space => space.id)
-      return templateSpaceIds.includes(id)
+      return templateSpaceIds.includes(currentSpace.id)
     },
     shouldShowInExplore () {
       const privacy = this.$store.state.currentSpace.privacy
@@ -756,6 +757,8 @@ header
       text-overflow ellipsis
     .space-name-button
       max-width 100%
+      .icon.templates
+        margin-right 4px
     dialog
       max-width initial
     > .button-wrap

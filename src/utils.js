@@ -767,6 +767,7 @@ export default {
     space.showInExplore = false
     space.proposedShowInExplore = false
     space.privacy = 'private'
+    space.isTemplate = false
     space.cards = space.cards.map(card => {
       card.userId = null
       if (card.nameUpdatedByUserId) {
@@ -961,6 +962,7 @@ export default {
     space.userId = currentUser.id
     space.connectionTypes = []
     space.connections = []
+    space.isTemplate = false
     space = this.spaceDefaultBackground(space, currentUser)
     // cards
     space.cards.push({ id: nanoid(), name: day, x: 60, y: 100, frameId: 0 })
