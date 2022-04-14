@@ -767,6 +767,7 @@ export default {
     space.showInExplore = false
     space.proposedShowInExplore = false
     space.privacy = 'private'
+    space.isTemplate = false
     space.cards = space.cards.map(card => {
       card.userId = null
       if (card.nameUpdatedByUserId) {

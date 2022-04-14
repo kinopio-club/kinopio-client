@@ -47,7 +47,7 @@ span.space-list-wrap
           //- span(v-if="space.backgroundTint")
           //-   .badge.inline-badge.color-only-badge(:style="{ background: space.backgroundTint }")
           MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-          .badge.info.inline-badge(v-if="showCategory" :class="categoryClassName(space)") {{space.category}}
+          .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
           .badge.info.inline-badge(v-else-if="spaceIsTemplate(space)") Template
           //- space details
           .name
