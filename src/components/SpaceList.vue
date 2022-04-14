@@ -14,54 +14,57 @@ span.space-list-wrap
   )
   ul.results-list.space-list(@wheel="showCompleteSpacesList" @touchmove="showCompleteSpacesList")
     template(v-for="space in spacesFiltered" :key="space.id")
-      a(:href="space.url")
-        li(
-          @click.left.prevent.stop="selectSpace(space)"
-          :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
-          tabindex="0"
-          @keyup.enter="selectSpace(space.id)"
-        )
-          Loader(:visible="isLoadingSpace(space)")
-          //-
+      .space-wrap
+        a(:href="space.url")
+          li(
+            @click.left.prevent.stop="selectSpace(space)"
+            :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
+            tabindex="0"
+            @keyup.enter="selectSpace(space.id)"
+          )
+            Loader(:visible="isLoadingSpace(space)")
 
-          //- User(s)
-          template(v-if="showOtherUsers")
-            .users
+            //- User(s)
+            template(v-if="showOtherUsers")
+              .users
+                User(:user="user(space)" :isClickable="false" :key="user(space).id")
+                template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
+                  User(:user="otherUser" :isClickable="false")
+            template(v-else-if="showUser")
               User(:user="user(space)" :isClickable="false" :key="user(space).id")
-              template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
-                User(:user="otherUser" :isClickable="false")
-          template(v-else-if="showUser")
-            User(:user="user(space)" :isClickable="false" :key="user(space).id")
-          template(v-else-if="showCollaborator(space)")
-            User(:user="user(space)" :isClickable="false" :key="user(space).id")
-          //- NEW badge
-          span(v-if="isNew(space)")
-            .badge.info.inline-badge.new-badge New
-          //- today journal badge
-          span.badge.info.inline-badge(v-if="isTodayJournal(space)" title="Today's journal")
-            img.icon.today-icon(src="@/assets/today.svg")
-          //- space meta
-          span(v-if="space.isFavorite")
-            img.icon.favorite-icon(src="@/assets/heart.svg")
+            template(v-else-if="showCollaborator(space)")
+              User(:user="user(space)" :isClickable="false" :key="user(space).id")
+            //- NEW badge
+            span(v-if="isNew(space)")
+              .badge.info.inline-badge.new-badge New
+            //- today journal badge
+            span.badge.info.inline-badge(v-if="isTodayJournal(space)" title="Today's journal")
+              img.icon.today-icon(src="@/assets/today.svg")
+            //- space meta
+            span(v-if="space.isFavorite")
+              img.icon.favorite-icon(src="@/assets/heart.svg")
 
-          //- span(v-if="space.backgroundTint")
-          //-   .badge.inline-badge.color-only-badge(:style="{ background: space.backgroundTint }")
-          MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-          //- template
-          span(v-if="space.isTemplate || spaceIsTemplate(space)")
-            img.icon.templates(src="@/assets/templates.svg")
-          .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
-          //- space details
-          .name
-            span(v-if="this.filter")
-              NameMatch(:name="space.name" :indexes="space.matchIndexes")
-            span(v-else)
-              span {{space.name}}
-            template(v-if='space.privacy')
-              PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
-            img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
-          button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
-            img.icon.checkmark(src="@/assets/checkmark.svg")
+            //- span(v-if="space.backgroundTint")
+            //-   .badge.inline-badge.color-only-badge(:style="{ background: space.backgroundTint }")
+            MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
+            //- template
+            span(v-if="spaceIsTemplate(space)")
+              img.icon.templates(src="@/assets/templates.svg")
+            .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
+            //- space details
+            .name
+              span(v-if="this.filter")
+                NameMatch(:name="space.name" :indexes="space.matchIndexes")
+              span(v-else)
+                span {{space.name}}
+              template(v-if='space.privacy')
+                PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
+              img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
+            button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
+              img.icon.checkmark(src="@/assets/checkmark.svg")
+        button.duplicate(v-if="spaceIsActive(space) && spaceIsTemplate(space)")
+          img.icon(src="@/assets/add.svg")
+          span Duplicate
 
 </template>
 
@@ -232,6 +235,7 @@ export default {
       return Boolean(currentSpace === space.id)
     },
     spaceIsTemplate (space) {
+      if (space.isTemplate) { return true }
       const templateSpaceIds = templates.spaces().map(template => template.id)
       return templateSpaceIds.includes(space.id)
     },
@@ -400,6 +404,7 @@ export default {
 
   li
     position relative
+    width 100%
     .loader
       position absolute
       width 13px
@@ -407,4 +412,20 @@ export default {
       top 5px
     .icon.templates
       margin-right 4px
+
+  .space-wrap
+    position relative
+    // display flex
+    // align-items center
+    button.duplicate
+      position absolute
+      right 4px
+      top 3px
+      z-index 1
+      // margin-top 4px
+      padding 0
+      padding-left 6px
+      padding-right 6px
+      // margin-left 6px
+
 </style>
