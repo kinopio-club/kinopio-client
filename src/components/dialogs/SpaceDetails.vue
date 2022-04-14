@@ -332,9 +332,7 @@ export default {
       await this.$store.dispatch('currentUser/restoreUserFavorites')
     },
     duplicateSpace () {
-      const duplicatedSpaceName = this.$store.state.currentSpace.name + ' copy'
       this.$store.dispatch('currentSpace/duplicateSpace')
-      this.$store.commit('addNotification', { message: `${duplicatedSpaceName} is now yours to edit`, type: 'success' })
       this.updateLocalSpaces()
       this.updateWithRemoteSpaces()
     },
