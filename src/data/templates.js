@@ -48,14 +48,14 @@ export default {
         name: 'Link In Bio'
       },
       {
-        id: 'b87U9WETGvl17BrKNsqDH',
-        categoryId: 3,
-        name: 'Meeting'
-      },
-      {
         id: 'GgDOqKvEEzTA93EYmAZrn',
         categoryId: 3,
         name: 'Mood Board'
+      },
+      {
+        id: 'eodGGinm01LcP2hfTJ4wi',
+        categoryId: 3,
+        name: 'Meeting'
       },
       {
         id: '1t4616FBkaJOxMdrt9O_p',
