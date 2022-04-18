@@ -912,7 +912,7 @@ export default {
       compositionEventEndTime = event.timeStamp
     },
     handleEnterKey (event) {
-      const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 200
+      const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
       const pickersIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
       console.log('🎹 enter', {
         shouldPreventNextEnterKey: this.$store.state.shouldPreventNextEnterKey,
