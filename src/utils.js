@@ -1471,10 +1471,13 @@ export default {
   indexesOf (string, search) {
     // adapted from https://stackoverflow.com/a/3410549
     search = search.replaceAll('[', '\\[')
+    const prevSearch = search
+    search = search.replaceAll('?', '\\?')
+    const extraCharacters = 2 + (search.length - prevSearch.length)
     const searchPattern = new RegExp(search, 'gim')
     let results = []
     while (searchPattern.exec(string)) {
-      const position = searchPattern.lastIndex - search.length + 2
+      const position = searchPattern.lastIndex - search.length + extraCharacters
       results.push(position)
     }
     return results
