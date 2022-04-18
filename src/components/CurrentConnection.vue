@@ -12,6 +12,8 @@ path.current-connection(
 <script>
 import utils from '@/utils.js'
 
+import { nanoid } from 'nanoid'
+
 let prevCursor
 
 export default {
@@ -135,16 +137,27 @@ export default {
     createConnections () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       const startCardIds = this.$store.state.currentConnectionStartCardIds
-      const endCardId = currentConnectionSuccess.id
+      let endCardId
       if (currentConnectionSuccess.id) {
+        endCardId = currentConnectionSuccess.id
+      } else {
+        const zoom = this.$store.getters.spaceCounterZoomDecimal
+        let position = this.$store.state.prevCursorPosition
+        position = {
+          x: Math.round(position.x * zoom),
+          y: Math.round(position.y * zoom)
+        }
+        endCardId = nanoid()
+        this.$store.dispatch('currentCards/add', { position, id: endCardId })
+      }
+      // create connections to endCardId
+      this.$nextTick(() => {
         startCardIds.forEach(startCardId => {
           const path = utils.connectionBetweenCards(startCardId, endCardId)
           const connection = { startCardId, endCardId, path }
           this.addConnection(connection)
         })
-      } else {
-        this.$store.dispatch('currentConnections/removeUnusedTypes')
-      }
+      })
     },
     stopInteractions (event) {
       if (this.isDrawingConnection) {
