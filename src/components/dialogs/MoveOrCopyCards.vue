@@ -1,5 +1,14 @@
 <template lang="pug">
 dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
+  //- Copy Card Names
+  section(v-if="!actionIsMove")
+    textarea(ref="text") {{text()}}
+    button(@click.left="copyText")
+      img.icon.cut(src="@/assets/cut.svg")
+      span Copy Content
+    .row
+      .badge.success(v-if="textIsCopied") Card Content Copied
+
   section
     .row
       p {{actionLabelCapitalized}} {{pluralCard}} to space
@@ -18,15 +27,6 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
     .badge.danger Out of Cards
     p To add more cards you'll need to upgrade for $5/month
     button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
-
-  //- Copy Card Names
-  section(v-if="!actionIsMove")
-    textarea(ref="text") {{text()}}
-    button(@click.left="copyText")
-      img.icon.cut(src="@/assets/cut.svg")
-      span Copy Content
-    .row
-      .badge.success(v-if="textIsCopied") Card Content Copied
 
 </template>
 
