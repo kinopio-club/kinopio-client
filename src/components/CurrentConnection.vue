@@ -30,12 +30,21 @@ export default {
       }
     })
   },
+
   mounted () {
     // bind events to window to receive events when mouse is outside window
     window.addEventListener('mousemove', this.interact)
     window.addEventListener('touchmove', this.interact)
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'closeAllDialogs') {
+        if (this.isDrawingConnection) {
+          this.$store.commit('currentUserIsDrawingConnection', false)
+          this.$store.dispatch('currentConnections/removeUnusedTypes')
+        }
+      }
+    })
   },
   beforeUnmount () {
     window.removeEventListener('mousemove', this.interact)
