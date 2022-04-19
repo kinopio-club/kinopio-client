@@ -333,7 +333,11 @@ export default {
       initialPosition = this.updateWithZoom(initialPosition)
       const position = this.nonOverlappingCardPosition(initialPosition)
       parentCard = this.$store.getters['currentCards/byId'](parentCardId)
-      this.$store.dispatch('currentCards/add', { position, isParentCard, backgroundColor: parentCard.backgroundColor })
+      let backgroundColor
+      if (parentCard) {
+        backgroundColor = parentCard.backgroundColor
+      }
+      this.$store.dispatch('currentCards/add', { position, isParentCard, backgroundColor })
       if (childCard) {
         this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
         this.$nextTick(() => {
