@@ -1,7 +1,11 @@
 <template lang="pug">
 dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @click.left.stop="closeDialogs" :class="{narrow: !visibleFromTagList}")
   section.edit-card(v-if="showEditCard")
-    button(@click="showCardDetails(null)") Edit Card
+    button(@click="showCardDetails(null)")
+      span Edit Card
+    button.change-color.select-all(@click="selectCardsWithTag")
+      .current-color(:style="{backgroundColor: color}")
+      span Select
   section(:style="{backgroundColor: color}")
     .row.tag-title-row
       .row
@@ -212,6 +216,13 @@ export default {
     }
   },
   methods: {
+    selectCardsWithTag () {
+      const cards = this.$store.getters['currentCards/withTagName'](this.currentTag.name)
+      if (!cards.length) { return }
+      const cardIds = cards.map(card => card.id)
+      this.$store.dispatch('closeAllDialogs', 'TagDetails.selectCardsWithTag')
+      this.$store.commit('multipleCardsSelectedIds', cardIds)
+    },
     updatePosition () {
       if (!this.$store.state.tagDetailsPositionShouldUpdate) { return }
       const origin = this.$store.state.tagDetailsPosition
@@ -476,6 +487,12 @@ export default {
   transform-origin top left
   section.edit-card
     background-color var(--secondary-background)
+  button.select-all
+    width initial
+    .current-color
+      display inline-block
+      vertical-align -3px
+      margin-right 4px
   .tag-name
     margin-left 6px
   .results-section
