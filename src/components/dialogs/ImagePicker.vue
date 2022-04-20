@@ -100,7 +100,7 @@ dialog.image-picker(
           img(:src="image.previewUrl")
           a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
             button.small-button
-              span(v-if="image.sourceAuthor") {{image.sourceAuthor}}{{' '}}
+              span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
               span →
 
 </template>
@@ -371,10 +371,12 @@ export default {
           let url = image.urls.small
           url = utils.urlWithoutQueryString(url)
           url = url + qs
+          let name = image.user.first_name + ' ' + image.user.last_name
+          name = utils.truncated(name, 20)
           return {
             id: image.id,
             sourcePageUrl: image.user.links.html,
-            sourceAuthor: image.user.first_name,
+            sourceName: name,
             previewUrl: image.urls.thumb,
             url
           }
