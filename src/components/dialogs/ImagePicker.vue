@@ -13,7 +13,7 @@ dialog.image-picker(
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
           img.icon.sticker(src="@/assets/sticker.svg")
-        button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}" title="are.na")
+        button(@click.left.stop="toggleServiceIsUnsplash" :class="{active : serviceIsUnsplash}" title="unsplash")
           img.icon(src="@/assets/search.svg")
         button(@click.left.stop="toggleServiceIsGifs" :class="{active : serviceIsGifs}" title="gifs")
           span GIF
@@ -54,7 +54,7 @@ dialog.image-picker(
           span Backgrounds
         button(@click.left.stop="toggleServiceIsRecent" :class="{active : serviceIsRecent}")
           span Recent
-        button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
+        button(@click.left.stop="toggleServiceIsUnsplash" :class="{active : serviceIsUnsplash}")
           img.icon(src="@/assets/search.svg")
 
       .button-wrap(v-if="removeIsVisible")
@@ -99,7 +99,9 @@ dialog.image-picker(
         li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
           img(:src="image.previewUrl")
           a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
-            button.small-button →
+            button.small-button
+              span(v-if="image.sourceAuthor") {{image.sourceAuthor}}{{' '}}
+              span →
 
 </template>
 
@@ -111,12 +113,10 @@ import backgroundImages from '@/data/backgroundImages.json'
 import cache from '@/cache.js'
 
 import debounce from 'lodash-es/debounce'
-import sampleSize from 'lodash-es/sampleSize'
-import sample from 'lodash-es/sample'
 import uniq from 'lodash-es/uniq'
 
-let defaultArenaBlocksData
 const numberOfImages = 25
+const unsplashApiKey = 'qkjL_lJ4cIHqkV-Q90BjstyX9fH4vTe8bcqn6KU5NGc'
 
 export default {
   name: 'ImagePicker',
@@ -147,7 +147,7 @@ export default {
     return {
       images: [],
       search: '',
-      service: 'stickers', // 'stickers', 'gifs', 'arena', 'backgrounds', 'recent'
+      service: 'stickers', // 'stickers', 'gifs', 'unsplash', 'backgrounds', 'recent'
       loading: false,
       minDialogHeight: 400,
       dialogHeight: null,
@@ -179,7 +179,7 @@ export default {
       if (this.service === 'stickers' || this.service === 'gifs') {
         return 'giphy'
       } else {
-        return 'are.na'
+        return 'unsplash'
       }
     },
     placeholder () {
@@ -189,8 +189,8 @@ export default {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.cardId)
     },
-    serviceIsArena () {
-      return this.service === 'arena'
+    serviceIsUnsplash () {
+      return this.service === 'unsplash'
     },
     serviceIsStickers () {
       return this.service === 'stickers'
@@ -238,8 +238,8 @@ export default {
       this.service = 'recent'
       this.updateImagesFromCachedSpace()
     },
-    toggleServiceIsArena () {
-      this.service = 'arena'
+    toggleServiceIsUnsplash () {
+      this.service = 'unsplash'
       this.searchAgain()
     },
     toggleServiceIsStickers () {
@@ -282,53 +282,17 @@ export default {
       this.loading = true
       this.searchService()
     },
-    async defaultArenaBlocks () {
-      let url, params, data
-      if (defaultArenaBlocksData) {
-        data = defaultArenaBlocksData
-      } else {
-        const defaultChannels = ['mood-imagined', 'good-w8twljfeosy', 'natur-i0sr6kdr1xq', 'ggggraphic']
-        const channel = sample(defaultChannels)
-        url = new URL(`https://api.are.na/v2/channels/${channel}/contents`)
-        params = {
-          per: 30
-        }
-        url.search = new URLSearchParams(params).toString()
-        const response = await fetch(url)
-        data = await response.json()
-        data.blocks = data.contents
-        data.blocks = data.blocks.filter(block => {
-          return block.image && block.class !== 'Link'
-        })
-        data.blocks = data.blocks.map(block => {
-          let image = {}
-          image.image = block.image
-          image.id = block.id
-          image.user = {
-            username: ''
-          }
-          return image
-        })
-        defaultArenaBlocksData = data
-      }
-      data.blocks = sampleSize(data.blocks, numberOfImages)
-      return data
-    },
-    async searchArena () {
-      let url, params, data
+    async searchUnsplash () {
+      let url = new URL('https://api.unsplash.com/photos')
+      let params = { client_id: unsplashApiKey }
       if (this.search) {
-        url = new URL('https://api.are.na/v2/search/blocks')
-        params = {
-          q: this.search,
-          'filter[type]': 'image'
-        }
-        url.search = new URLSearchParams(params).toString()
-        const response = await fetch(url)
-        data = await response.json()
-      } else {
-        data = await this.defaultArenaBlocks()
+        url = new URL('https://api.unsplash.com/search/photos')
+        params.query = this.search
       }
-      this.normalizeResults(data, 'arena')
+      url.search = new URLSearchParams(params).toString()
+      const response = await fetch(url)
+      const data = await response.json()
+      this.normalizeResults(data, 'unsplash')
     },
     async searchGiphy (isStickers) {
       let resource = 'gifs'
@@ -363,8 +327,8 @@ export default {
         return
       }
       try {
-        if (this.serviceIsArena) {
-          await this.searchArena()
+        if (this.serviceIsUnsplash) {
+          await this.searchUnsplash()
         } else if (this.serviceIsStickers) {
           const isStickers = true
           await this.searchGiphy(isStickers)
@@ -391,22 +355,28 @@ export default {
       this.resultsSectionHeight = null
     },
     normalizeResults (data, service) {
-      console.log('🍓', service, data)
-      const arena = service === 'arena' && this.serviceIsArena
+      const unsplash = service === 'unsplash' && this.serviceIsUnsplash
       const giphy = service === 'giphy' && (this.serviceIsStickers || this.serviceIsGifs)
       const backgrounds = service === 'backgrounds' && this.serviceIsBackgrounds
-      // are.na
-      if (arena) {
-        data.blocks = data.blocks.filter(image => {
-          return Boolean(image.image) && image.class !== 'Link'
-        })
-        this.images = data.blocks.map(image => {
-          const url = image.image.original.url
+      // unsplash
+      if (unsplash) {
+        if (data.results) {
+          data = data.results
+        }
+        this.images = data.map(image => {
+          let qs = `?w=600&img=true`
+          if (this.isBackgroundImage) {
+            qs = `?w=1080&h=1080&q=60&img=true`
+          }
+          let url = image.urls.small
+          url = utils.urlWithoutQueryString(url)
+          url = url + qs
           return {
             id: image.id,
-            sourcePageUrl: `https://www.are.na/block/${image.id}`,
-            previewUrl: image.image.display.url,
-            url: url + '?img=.jpg'
+            sourcePageUrl: image.user.links.html,
+            sourceAuthor: image.user.first_name,
+            previewUrl: image.urls.thumb,
+            url
           }
         })
       // giphy
@@ -458,7 +428,18 @@ export default {
       this.images = []
       this.searchService()
     },
+    pingUnsplash (image) {
+      // when a user selects a photo, use the download endpoint to let unsplash know
+      image = this.images.find(unsplashImage => unsplashImage.id === image.id)
+      let url = new URL(`https://api.unsplash.com/photos/${image.id}/download`)
+      let params = { client_id: unsplashApiKey }
+      url.search = new URLSearchParams(params).toString()
+      fetch(url)
+    },
     selectImage (image) {
+      if (this.serviceIsUnsplash) {
+        this.pingUnsplash(image)
+      }
       this.$emit('selectImage', image)
     },
     scrollIntoView () {
@@ -628,8 +609,8 @@ export default {
         position absolute
         top 6px
         left 6px
-  .arena
-    width 18px
+  // .arena
+  //   width 18px
 
   &.background-image-picker
     padding-top 4px
