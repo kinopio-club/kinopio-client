@@ -25,7 +25,7 @@ dialog.narrow.multiple-selected-actions(
         button(:disabled="!canEditSome.cards" @click.left.stop="toggleCardStyleActionsIsVisible" :class="{active : cardStyleActionsIsVisible}")
           span Style
 
-    CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="cards" @closeDialogs="closeDialogs" :class="{ 'row-is-below': !connectionsIsSelected }")
+    CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="cards" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }")
 
     //- Edit Connections
     .row.edit-connection-types(v-if="connectionsIsSelected")
@@ -495,6 +495,6 @@ export default {
     .button-wrap
       margin-left 0
       margin-right 6px
-    &.row-is-below
+    &.last-row
       margin-bottom -10px
 </style>

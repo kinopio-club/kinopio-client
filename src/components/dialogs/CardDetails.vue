@@ -100,10 +100,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .button-wrap
         button.toggle-collaboration-info(@click.left.stop="toggleCollaborationInfoIsVisible" :class="{active : collaborationInfoIsVisible}")
           img.icon.time(src="@/assets/time.svg")
-    CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="[card]" @closeDialogs="closeDialogs")
+    CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowCardStyleActions }")
     CardCollaborationInfo(:visible="collaborationInfoIsVisible" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
-    .row(v-if="nameSplitIntoCardsCount || hasUrls")
+    .row(v-if="nameMetaRowIsVisible")
       //- Show Url
       .button-wrap(v-if="hasUrls")
         button(:disabled="!canEditCard" @click.left.stop="toggleUrlsIsVisible" :class="{active: urlsIsVisible}")
@@ -116,7 +116,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           img.icon(src="@/assets/split-vertically.svg")
           span Split Card ({{nameSplitIntoCardsCount}})
 
-    .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment || isInSearchResultsCards")
+    .row.badges-row(v-if="badgesRowIsVisible")
       //- Search result
       span.badge.search(v-if="isInSearchResultsCards")
         img.icon.search(src="@/assets/search.svg")
@@ -300,6 +300,9 @@ export default {
     })
   },
   computed: {
+    rowIsBelowCardStyleActions () { return this.nameMetaRowIsVisible || this.badgesRowIsVisible || this.collaborationInfoIsVisible || this.cardHasMedia || this.cardUrlPreviewIsVisible },
+    nameMetaRowIsVisible () { return this.nameSplitIntoCardsCount || this.hasUrls },
+    badgesRowIsVisible () { return this.tagsInCard.length || this.card.linkToSpaceId || this.nameIsComment || this.isInSearchResultsCards },
     parentElement () { return this.$refs.dialog },
     card () {
       const cardId = this.$store.state.cardDetailsIsVisibleForCardId
@@ -1549,9 +1552,9 @@ export default {
   button
     .icon.time
       vertical-align -1px
-  .card-style-actions-component
-    padding 0
-  .card-style-actions-component + .row
-    margin-top 10px
+
+  .card-style-actions
+    &.last-row
+      margin-bottom -10px
 
 </style>
