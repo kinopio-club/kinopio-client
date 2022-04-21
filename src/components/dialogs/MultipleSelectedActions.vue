@@ -97,7 +97,6 @@ export default {
       copyCardsIsVisible: false,
       moveCardsIsVisible: false,
       multipleConnectionsPickerVisible: false,
-      // cardStyleActionsIsVisible: false,
       cardsIsConnected: false,
       cardsHaveCheckboxes: false,
       cardsCheckboxIsChecked: false,
