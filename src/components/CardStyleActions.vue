@@ -1,6 +1,5 @@
-
 <template lang="pug">
-section.card-style-actions-component(v-if="visible" @click.left.stop="closeDialogs")
+section.card-style-actions(v-if="visible" @click.left.stop="closeDialogs")
   .row
     //- h1
     .button-wrap
@@ -49,7 +48,7 @@ import uniq from 'lodash-es/uniq'
 const defaultCardBackgroundColor = '#c9c9c9'
 
 export default {
-  name: 'CardStyleActionsComponent',
+  name: 'CardStyleActions',
   components: {
     FramePicker,
     TagPickerStyleActions,
@@ -256,7 +255,9 @@ export default {
 </script>
 
 <style lang="stylus">
-.card-style-actions-component
+.card-style-actions
+  padding 0
   .button-wrap
     vertical-align middle
+    margin-bottom 10px
 </style>

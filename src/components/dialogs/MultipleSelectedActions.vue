@@ -24,7 +24,8 @@ dialog.narrow.multiple-selected-actions(
       .button-wrap
         button(:disabled="!canEditSome.cards" @click.left.stop="toggleCardStyleActionsIsVisible" :class="{active : cardStyleActionsIsVisible}")
           span Style
-        CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="cards" :backgroundColor="userColor" @closeDialogs="closeDialogs")
+
+    CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="cards" @closeDialogs="closeDialogs")
 
     //- Edit Connections
     .row.edit-connection-types(v-if="connectionsIsSelected")
@@ -78,7 +79,7 @@ import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import MoveOrCopyCards from '@/components/dialogs/MoveOrCopyCards.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
-import CardStyleActions from '@/components/dialogs/CardStyleActions.vue'
+import CardStyleActions from '@/components/CardStyleActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 
 let prevCards
@@ -316,7 +317,7 @@ export default {
       this.copyCardsIsVisible = false
       this.moveCardsIsVisible = false
       this.multipleConnectionsPickerVisible = false
-      this.cardStyleActionsIsVisible = false
+      this.$store.commit('triggerCardDetailsCloseDialogs')
     },
     connectionType (event) {
       let connectionType = last(this.$store.getters['currentConnections/allTypes'])
@@ -483,4 +484,12 @@ export default {
       padding-top 3px
       .segmented-colors
         margin-left 5px
+
+  .card-style-actions
+    padding 0
+    .row
+      display block
+    .button-wrap
+      margin-left 0
+      margin-right 6px
 </style>
