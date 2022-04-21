@@ -33,6 +33,7 @@ export default {
     shouldShowMoreAlignOptions: false,
     shouldShowCardCollaborationInfo: false,
     shouldShowCardStyleActions: false,
+    shouldShowMultiCardStyleActions: false,
     shouldShowMoreFooterControls: false,
     shouldInvertZoomDirection: false,
     shouldUseLastConnectionType: false,
@@ -222,6 +223,10 @@ export default {
     shouldShowCardStyleActions: (state, value) => {
       state.shouldShowCardStyleActions = value
       cache.updateUser('shouldShowCardStyleActions', value)
+    },
+    shouldShowMultiCardStyleActions: (state, value) => {
+      state.shouldShowMultiCardStyleActions = value
+      cache.updateUser('shouldShowMultiCardStyleActions', value)
     },
     shouldShowMoreFooterControls: (state, value) => {
       state.shouldShowMoreFooterControls = value
@@ -553,6 +558,14 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowCardStyleActions: value
+        } }, { root: true })
+    },
+    shouldShowMultiCardStyleActions: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowMultiCardStyleActions' })
+      context.commit('shouldShowMultiCardStyleActions', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldShowMultiCardStyleActions: value
         } }, { root: true })
     },
     shouldShowMoreFooterControls: (context, value) => {

@@ -25,7 +25,7 @@ dialog.narrow.multiple-selected-actions(
         button(:disabled="!canEditSome.cards" @click.left.stop="toggleCardStyleActionsIsVisible" :class="{active : cardStyleActionsIsVisible}")
           span Style
 
-    CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="cards" @closeDialogs="closeDialogs")
+    CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="cards" @closeDialogs="closeDialogs" :class="{ 'row-is-below': !connectionsIsSelected }")
 
     //- Edit Connections
     .row.edit-connection-types(v-if="connectionsIsSelected")
@@ -97,7 +97,7 @@ export default {
       copyCardsIsVisible: false,
       moveCardsIsVisible: false,
       multipleConnectionsPickerVisible: false,
-      cardStyleActionsIsVisible: false,
+      // cardStyleActionsIsVisible: false,
       cardsIsConnected: false,
       cardsHaveCheckboxes: false,
       cardsCheckboxIsChecked: false,
@@ -105,6 +105,7 @@ export default {
     }
   },
   computed: {
+    cardStyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowMultiCardStyleActions },
     visible () { return this.$store.state.multipleSelectedActionsIsVisible },
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     position () {
@@ -309,9 +310,12 @@ export default {
       this.multipleConnectionsPickerVisible = !isVisible
     },
     toggleCardStyleActionsIsVisible () {
-      const isVisible = this.cardStyleActionsIsVisible
       this.closeDialogs()
-      this.cardStyleActionsIsVisible = !isVisible
+      const isVisible = !this.$store.state.currentUser.shouldShowMultiCardStyleActions
+      this.$store.dispatch('currentUser/shouldShowMultiCardStyleActions', isVisible)
+      this.$nextTick(() => {
+        this.scrollIntoView()
+      })
     },
     closeDialogs () {
       this.copyCardsIsVisible = false
@@ -492,4 +496,6 @@ export default {
     .button-wrap
       margin-left 0
       margin-right 6px
+    &.row-is-below
+      margin-bottom -10px
 </style>
