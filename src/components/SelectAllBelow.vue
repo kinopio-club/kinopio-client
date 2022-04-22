@@ -1,7 +1,7 @@
 <template lang="pug">
 .select-all-below(v-if="isVisible" :style="{ top: positionY + 'px' }")
   .badge.label-badge(:style="{ 'background-color': userColor }" @click="selectAllBelow")
-    img(src="@/assets/brush-y.svg")
+    img.icon(src="@/assets/brush-y.svg")
     .pointer(:style="{ 'background-color': userColor }")
 </template>
 
@@ -24,10 +24,12 @@ export default {
   },
   computed: {
     userColor () { return this.$store.state.currentUser.color },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() }
   },
   methods: {
     initInteractions (event) {
+      if (!this.canEditSpace) { return }
       const edgeThreshold = 45
       const header = 60
       const footer = 40
@@ -46,9 +48,14 @@ export default {
         this.isVisible = false
       }
     },
-    selectAllBelow () {
-      const positionY = Math.round(this.positionY * this.spaceCounterZoomDecimal)
-      console.log('💖', positionY)
+    selectAllBelow (event) {
+      let position = utils.cursorPositionInPage(event)
+      position = {
+        x: position.x * this.spaceCounterZoomDecimal,
+        y: position.y * this.spaceCounterZoomDecimal
+      }
+      this.$store.commit('triggerSelectAllCardsBelowCursor', position)
+      this.$store.commit('multipleSelectedActionsIsVisible', false)
     }
   }
 }

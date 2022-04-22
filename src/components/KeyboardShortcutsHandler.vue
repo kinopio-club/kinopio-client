@@ -21,6 +21,10 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerAddCard') {
         this.addCard()
+      } else if (mutation.type === 'triggerSelectAllCardsBelowCursor') {
+        const position = mutation.payload
+        console.log('🚛', position)
+        this.selectAllCardsBelowCursor(position)
       }
     })
   },
@@ -648,7 +652,7 @@ export default {
     selectAllCardsBelowCursor (position) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
-      position = position || this.$store.state.prevCursorPosition
+      position = position || currentCursorPosition
       const zoom = this.$store.getters.spaceZoomDecimal
       let cards = utils.clone(this.$store.getters['currentCards/all'])
       cards = cards.filter(card => (card.y * zoom) > position.y)
@@ -656,6 +660,10 @@ export default {
       this.$store.commit('multipleSelectedActionsPosition', position)
       this.$store.commit('multipleSelectedActionsIsVisible', true)
       this.$store.commit('multipleCardsSelectedIds', cards)
+      if (!cards.length) {
+        console.log('🚛🚛🚛')
+        // TODO handle no cards below current position
+      }
     },
 
     // Select All Cards
