@@ -401,6 +401,7 @@ const store = createStore({
     triggerCardDetailsCloseDialogs: () => {},
     triggerSpaceDetailsCloseDialogs: () => {},
     triggerTemplatesIsVisible: () => {},
+    triggerSelectAllCardsBelowCursor: (state, position) => {},
 
     // Cards
 

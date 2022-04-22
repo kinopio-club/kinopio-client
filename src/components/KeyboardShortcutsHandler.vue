@@ -21,6 +21,9 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerAddCard') {
         this.addCard()
+      } else if (mutation.type === 'triggerSelectAllCardsBelowCursor') {
+        const position = mutation.payload
+        this.selectAllCardsBelowCursor(position)
       }
     })
   },
@@ -141,7 +144,7 @@ export default {
       // Select All Cards Below Cursor
       } else if (isMeta && event.shiftKey && key === 'a' && isSpaceScope) {
         event.preventDefault()
-        this.selectAllCardsBelowCursor(event)
+        this.selectAllCardsBelowCursor()
       // Select All Cards
       } else if (isMeta && key === 'a' && isSpaceScope) {
         event.preventDefault()
@@ -645,17 +648,21 @@ export default {
 
     // Select All Cards Below Cursor
 
-    selectAllCardsBelowCursor (event) {
+    selectAllCardsBelowCursor (position) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
+      position = position || currentCursorPosition
       const zoom = this.$store.getters.spaceZoomDecimal
-      const cursor = this.$store.state.prevCursorPosition
       let cards = utils.clone(this.$store.getters['currentCards/all'])
-      cards = cards.filter(card => (card.y * zoom) > cursor.y)
+      cards = cards.filter(card => (card.y * zoom) > position.y)
       cards = cards.map(card => card.id)
-      this.$store.commit('multipleSelectedActionsPosition', cursor)
-      this.$store.commit('multipleSelectedActionsIsVisible', true)
-      this.$store.commit('multipleCardsSelectedIds', cards)
+      if (cards.length) {
+        this.$store.commit('multipleSelectedActionsPosition', position)
+        this.$store.commit('multipleSelectedActionsIsVisible', true)
+        this.$store.commit('multipleCardsSelectedIds', cards)
+      } else {
+        this.$store.commit('addNotification', { message: 'No cards below', icon: 'brush-y', type: 'info' })
+      }
     },
 
     // Select All Cards
