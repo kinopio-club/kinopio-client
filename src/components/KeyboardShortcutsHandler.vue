@@ -141,7 +141,7 @@ export default {
       // Select All Cards Below Cursor
       } else if (isMeta && event.shiftKey && key === 'a' && isSpaceScope) {
         event.preventDefault()
-        this.selectAllCardsBelowCursor(event)
+        this.selectAllCardsBelowCursor()
       // Select All Cards
       } else if (isMeta && key === 'a' && isSpaceScope) {
         event.preventDefault()
@@ -645,15 +645,15 @@ export default {
 
     // Select All Cards Below Cursor
 
-    selectAllCardsBelowCursor (event) {
+    selectAllCardsBelowCursor (position) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
+      position = position || this.$store.state.prevCursorPosition
       const zoom = this.$store.getters.spaceZoomDecimal
-      const cursor = this.$store.state.prevCursorPosition
       let cards = utils.clone(this.$store.getters['currentCards/all'])
-      cards = cards.filter(card => (card.y * zoom) > cursor.y)
+      cards = cards.filter(card => (card.y * zoom) > position.y)
       cards = cards.map(card => card.id)
-      this.$store.commit('multipleSelectedActionsPosition', cursor)
+      this.$store.commit('multipleSelectedActionsPosition', position)
       this.$store.commit('multipleSelectedActionsIsVisible', true)
       this.$store.commit('multipleCardsSelectedIds', cards)
     },

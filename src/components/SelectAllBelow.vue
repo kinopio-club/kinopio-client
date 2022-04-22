@@ -1,24 +1,44 @@
 <template lang="pug">
-.select-all-below
-  //- .tick.small(:style="{ 'background-color': userColor }")
-  //- .tick(:style="{ 'background-color': userColor }")
-
-  .badge.label-badge.button-badge(:style="{ 'background-color': userColor }")
+.select-all-below(v-if="isVisible" :style="{ top: positionY + 'px' }")
+  .badge.label-badge(:style="{ 'background-color': userColor }" @click="selectAllBelow")
     img(src="@/assets/brush-y.svg")
-
-  //- .tick(:style="{ 'background-color': userColor }")
-  //- .tick.small(:style="{ 'background-color': userColor }")
+    .pointer(:style="{ 'background-color': userColor }")
 </template>
 
 <script>
-// import utils from '@/utils.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'SelectAllBelow',
+  mounted () {
+    window.addEventListener('mousemove', this.initInteractions)
+  },
+  beforeUnmount () {
+    window.removeEventListener('mousemove', this.initInteractions)
+  },
+  data () {
+    return {
+      isVisible: false,
+      positionY: 250
+    }
+  },
   computed: {
     userColor () { return this.$store.state.currentUser.color }
   },
-  method: {
+  methods: {
+    initInteractions (event) {
+      const edgeThreshold = 60
+      const position = utils.cursorPositionInViewport(event)
+      if (position.x <= edgeThreshold) {
+        this.positionY = position.y
+        this.isVisible = true
+      } else {
+        this.isVisible = false
+      }
+    },
+    selectAllBelow () {
+      console.log('🌈', this.positionY)
+    }
   }
 }
 </script>
@@ -27,7 +47,7 @@ export default {
 .select-all-below
   position fixed
   left 0
-  top 250px // temp
+  top 250px
   pointer-events all
   cursor pointer
   .badge
@@ -36,23 +56,24 @@ export default {
     border-bottom-right-radius 6px
     padding 0
     margin 0
-    position initial
-    box-shadow none
+    position relative
+    box-shadow 0
     margin-bottom 8px
+    &:hover
+      box-shadow var(--button-hover-shadow)
+    &:active
+      box-shadow var(--button-active-inset-shadow)
 
   img
-    // filter invert(100%)
     padding 3px
     margin-left 6px
     margin-right 8px
 
-  // todo unused?
-  .tick
+  .pointer
+    position absolute
     background-color var(--primary)
     height 1px
     width 12px
-    margin-bottom 8px
-    &.small
-      width 6px
-      margin-bottom 12px
+    right -12px
+    top 10px
 </style>
