@@ -10,7 +10,7 @@
   #layout-viewport(:style="{ background: backgroundTint }")
   MagicPaint
   OffscreenMarkers
-  //- router-view is Space
+  //- router-view is Space or Add
   router-view
   Header
   Footer
