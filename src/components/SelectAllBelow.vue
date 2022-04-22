@@ -1,6 +1,6 @@
 <template lang="pug">
-.select-all-below(v-if="isVisible" :style="{ top: positionY + 'px' }")
-  .badge.label-badge(:style="{ 'background-color': userColor }" @click="selectAllBelow")
+.select-all-below(v-if="isVisible" :style="{ top: positionY + 'px' }" @click="selectAllBelow")
+  .badge.label-badge(:style="{ 'background-color': userColor }")
     img.icon(src="@/assets/brush-y.svg")
     .pointer(:style="{ 'background-color': userColor }")
 </template>
