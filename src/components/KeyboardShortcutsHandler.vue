@@ -23,7 +23,6 @@ export default {
         this.addCard()
       } else if (mutation.type === 'triggerSelectAllCardsBelowCursor') {
         const position = mutation.payload
-        console.log('🚛', position)
         this.selectAllCardsBelowCursor(position)
       }
     })
@@ -657,12 +656,12 @@ export default {
       let cards = utils.clone(this.$store.getters['currentCards/all'])
       cards = cards.filter(card => (card.y * zoom) > position.y)
       cards = cards.map(card => card.id)
-      this.$store.commit('multipleSelectedActionsPosition', position)
-      this.$store.commit('multipleSelectedActionsIsVisible', true)
-      this.$store.commit('multipleCardsSelectedIds', cards)
-      if (!cards.length) {
-        console.log('🚛🚛🚛')
-        // TODO handle no cards below current position
+      if (cards.length) {
+        this.$store.commit('multipleSelectedActionsPosition', position)
+        this.$store.commit('multipleSelectedActionsIsVisible', true)
+        this.$store.commit('multipleCardsSelectedIds', cards)
+      } else {
+        this.$store.commit('addNotification', { message: 'No cards below', icon: 'brush-y', type: 'info' })
       }
     },
 

@@ -10,6 +10,7 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'cut'" src="@/assets/cut.svg" class="cut")
         img.icon(v-else-if="item.icon === 'undo'" src="@/assets/undo.svg" class="undo")
         img.icon(v-else-if="item.icon === 'redo'" src="@/assets/undo.svg" class="redo")
+        img.icon(v-else-if="item.icon === 'brush-y'" src="@/assets/brush-y.svg" class="brush-y")
       span {{item.message}}
 
   .persistent-item.danger.hidden#notify-local-storage-is-full
