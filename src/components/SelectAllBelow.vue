@@ -28,8 +28,17 @@ export default {
   methods: {
     initInteractions (event) {
       const edgeThreshold = 60
+      const header = 60
+      const footer = 40
       const position = utils.cursorPositionInViewport(event)
-      if (position.x <= edgeThreshold) {
+      const viewport = utils.visualViewport()
+      const isInThreshold = position.x <= edgeThreshold
+      const isBetweenControls = utils.isBetween({
+        value: position.y,
+        min: header,
+        max: viewport.height - footer
+      })
+      if (isInThreshold && isBetweenControls) {
         this.positionY = position.y
         this.isVisible = true
       } else {
