@@ -27,7 +27,7 @@ export default {
 .select-all-below
   position fixed
   left 0
-  top 250px
+  top 250px // temp
   pointer-events all
   cursor pointer
   .badge

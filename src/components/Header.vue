@@ -140,7 +140,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
           .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
             button(@click.left.stop="triggerUpgradeUserIsVisible")
               span Upgrade
-
+  SelectAllBelow
 </template>
 
 <script>
@@ -165,6 +165,8 @@ import AddSpace from '@/components/dialogs/AddSpace.vue'
 import Templates from '@/components/dialogs/Templates.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
+import SelectAllBelow from '@/components/SelectAllBelow.vue'
+
 import uniqBy from 'lodash-es/uniqBy'
 
 let updateNotificationsIntervalTimer
@@ -195,7 +197,8 @@ export default {
     MoonPhase,
     AddSpace,
     Templates,
-    PrivacyIcon
+    PrivacyIcon,
+    SelectAllBelow
   },
   data () {
     return {
