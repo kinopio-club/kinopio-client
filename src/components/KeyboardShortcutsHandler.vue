@@ -661,7 +661,8 @@ export default {
         this.$store.commit('multipleSelectedActionsIsVisible', true)
         this.$store.commit('multipleCardsSelectedIds', cards)
       } else {
-        this.$store.commit('addNotification', { message: 'No cards below', icon: 'brush-y', type: 'info' })
+        this.$store.commit('multipleSelectedActionsIsVisible', false)
+        this.$store.commit('multipleCardsSelectedIds', [])
       }
     },
 

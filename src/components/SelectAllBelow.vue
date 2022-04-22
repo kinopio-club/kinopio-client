@@ -1,24 +1,29 @@
 <template lang="pug">
-.select-all-below(v-if="isVisible" :style="{ top: positionY + 'px' }" @click="selectAllBelow")
-  .badge.label-badge(:style="{ 'background-color': userColor }")
+.select-all-below(v-if="isVisible" :style="{ top: positionY + 'px' }")
+  .badge.label-badge(:style="{ 'background-color': userColor }" @mousedown="handleMouseDown")
     img.icon(src="@/assets/brush-y.svg")
-    .pointer(:style="{ 'background-color': userColor }")
+    .pointer(:style="{ 'background-color': userColor }" :class="{ wide: isSelecting }")
 </template>
 
 <script>
 import utils from '@/utils.js'
 
+import debounce from 'lodash-es/debounce'
+
 export default {
   name: 'SelectAllBelow',
   mounted () {
-    window.addEventListener('mousemove', this.initInteractions)
+    window.addEventListener('mousemove', this.handleMouseMove)
+    window.addEventListener('mouseup', this.handleMouseUp)
   },
   beforeUnmount () {
-    window.removeEventListener('mousemove', this.initInteractions)
+    window.removeEventListener('mousemove', this.handleMouseMove)
+    window.removeEventListener('mouseup', this.handleMouseUp)
   },
   data () {
     return {
       isVisible: false,
+      isSelecting: false,
       positionY: 250
     }
   },
@@ -28,11 +33,15 @@ export default {
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() }
   },
   methods: {
-    initInteractions (event) {
+    handleMouseDown (event) {
+      this.isSelecting = true
+      this.selectAllBelow(event)
+    },
+    handleMouseMove (event) {
       if (!this.canEditSpace) { return }
       const edgeThreshold = 45
-      const header = 60
-      const footer = 40
+      const header = document.querySelector('header').getBoundingClientRect().height + 10
+      const footer = document.querySelector('.footer-wrap').getBoundingClientRect().height + 10
       const position = utils.cursorPositionInViewport(event)
       const viewport = utils.visualViewport()
       const isInThreshold = position.x <= edgeThreshold
@@ -41,13 +50,26 @@ export default {
         min: header,
         max: viewport.height - footer
       })
-      if (isInThreshold && isBetweenControls) {
+      const isInPosition = isInThreshold && isBetweenControls
+      if (isInPosition || this.isSelecting) {
         this.positionY = position.y
         this.isVisible = true
       } else {
         this.isVisible = false
       }
+      if (this.isSelecting) {
+        this.debouncedSelectAllBelow(event)
+      }
     },
+    handleMouseUp (event) {
+      if (!this.isSelecting) { return }
+      this.isSelecting = false
+      this.selectAllBelow(event)
+      this.isVisible = false
+    },
+    debouncedSelectAllBelow: debounce(function (event) {
+      this.selectAllBelow(event)
+    }, 10, { leading: true }),
     selectAllBelow (event) {
       let position = utils.cursorPositionInPage(event)
       position = {
@@ -92,6 +114,8 @@ export default {
     background-color var(--primary)
     height 1px
     width 12px
-    right -12px
+    left 30px
     top 10px
+    &.wide
+      width 100vw
 </style>
