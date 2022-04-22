@@ -23,7 +23,8 @@ export default {
     }
   },
   computed: {
-    userColor () { return this.$store.state.currentUser.color }
+    userColor () { return this.$store.state.currentUser.color },
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
   },
   methods: {
     initInteractions (event) {
@@ -46,7 +47,8 @@ export default {
       }
     },
     selectAllBelow () {
-      console.log('🌈', this.positionY)
+      const positionY = Math.round(this.positionY * this.spaceCounterZoomDecimal)
+      console.log('💖', positionY)
     }
   }
 }
