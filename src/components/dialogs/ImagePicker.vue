@@ -364,13 +364,13 @@ export default {
           data = data.results
         }
         this.images = data.map(image => {
-          let qs = `?w=600&img=true`
-          if (this.isBackgroundImage) {
-            qs = `?w=1080&h=1080&q=60&img=true`
-          }
+          // let qs = `?w=600&img=true`
+          // if (this.isBackgroundImage) {
+          //   qs = `?w=1080&h=1080&q=60&img=true`
+          // }
           let url = image.urls.small
-          url = utils.urlWithoutQueryString(url)
-          url = url + qs
+          // url = utils.urlWithoutQueryString(url)
+          // url = url + qs
           let name = image.user.first_name + ' ' + image.user.last_name
           name = utils.truncated(name, 20)
           return {
