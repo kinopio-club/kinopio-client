@@ -133,6 +133,7 @@ const store = createStore({
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
+    preventMultipleSelectedActionsIsVisible: false,
     multipleSelectedActionsPosition: {},
     multipleCardsSelectedIds: [],
     previousMultipleCardsSelectedIds: [],
@@ -717,6 +718,10 @@ const store = createStore({
     multipleSelectedActionsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'multipleSelectedActionsIsVisible' })
       state.multipleSelectedActionsIsVisible = value
+    },
+    preventMultipleSelectedActionsIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'preventMultipleSelectedActionsIsVisible' })
+      state.preventMultipleSelectedActionsIsVisible = value
     },
     multipleSelectedActionsPosition: (state, position) => {
       utils.typeCheck({ value: position, type: 'object', origin: 'multipleSelectedActionsPosition' })

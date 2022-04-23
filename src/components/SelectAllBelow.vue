@@ -65,14 +65,17 @@ export default {
       this.isSelecting = false
       this.selectAllBelow(event)
       this.isVisible = false
+      setTimeout(() => {
+        this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
+      }, 100)
     },
     debouncedSelectAllBelow: debounce(function (event) {
       this.selectAllBelow(event)
     }, 10, { leading: true }),
     selectAllBelow (event) {
       let position = utils.cursorPositionInPage(event)
+      this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
       this.$store.commit('triggerSelectAllCardsBelowCursor', position)
-      this.$store.commit('multipleSelectedActionsIsVisible', false)
     }
   }
 }

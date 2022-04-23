@@ -651,12 +651,15 @@ export default {
     selectAllCardsBelowCursor (position) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
+      const preventMultipleSelectedActionsIsVisible = this.$store.state.preventMultipleSelectedActionsIsVisible
       position = position || currentCursorPosition
       const zoom = this.$store.getters.spaceZoomDecimal
       let cards = utils.clone(this.$store.getters['currentCards/all'])
       cards = cards.filter(card => (card.y * zoom) > position.y)
       cards = cards.map(card => card.id)
-      if (cards.length) {
+      if (cards.length && preventMultipleSelectedActionsIsVisible) {
+        this.$store.commit('multipleCardsSelectedIds', cards)
+      } else if (cards.length) {
         this.$store.commit('multipleSelectedActionsPosition', position)
         this.$store.commit('multipleSelectedActionsIsVisible', true)
         this.$store.commit('multipleCardsSelectedIds', cards)

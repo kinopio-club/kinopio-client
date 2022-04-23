@@ -391,6 +391,7 @@ export default {
     showMultipleSelectedActions (event) {
       if (this.spaceIsReadOnly) { return }
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
+      if (this.$store.state.preventMultipleSelectedActionsIsVisible) { return }
       const isMultipleSelected = this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length
       if (isMultipleSelected) {
         const position = utils.cursorPositionInPage(event)
