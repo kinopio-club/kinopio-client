@@ -29,7 +29,6 @@ export default {
   },
   computed: {
     userColor () { return this.$store.state.currentUser.color },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() }
   },
   methods: {
@@ -72,10 +71,6 @@ export default {
     }, 10, { leading: true }),
     selectAllBelow (event) {
       let position = utils.cursorPositionInPage(event)
-      position = {
-        x: position.x * this.spaceCounterZoomDecimal,
-        y: position.y * this.spaceCounterZoomDecimal
-      }
       this.$store.commit('triggerSelectAllCardsBelowCursor', position)
       this.$store.commit('multipleSelectedActionsIsVisible', false)
     }
