@@ -610,6 +610,9 @@ export default {
         context.dispatch('currentCards/updateDimensions', null, { root: true })
         context.dispatch('currentCards/updateCardMap', null, { root: true })
         context.commit('triggerUpdateCardOverlaps', null, { root: true })
+        nextTick(() => {
+          context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
+        })
       })
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
