@@ -1,5 +1,5 @@
 import utils from '@/utils.js'
-import cache from '@/cache.js'
+
 // store modules
 import api from '@/store/api.js'
 import broadcast from '@/store/broadcast.js'
@@ -9,6 +9,7 @@ import currentSpace from '@/store/currentSpace.js'
 import currentCards from '@/store/currentCards.js'
 import currentConnections from '@/store/currentConnections.js'
 import upload from '@/store/upload.js'
+import cache from '@/store/cache.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
@@ -1197,9 +1198,9 @@ const store = createStore({
       const space = otherSpaces.find(otherSpace => otherSpace.id === spaceId)
       return space
     },
-    cachedOrOtherSpaceById: (state, getters) => (spaceId) => {
+    cachedOrOtherSpaceById: (state, getters, rootState, rootGetters) => (spaceId) => {
       const currentSpace = state.currentSpace
-      const cachedSpace = cache.space(spaceId)
+      const cachedSpace = rootGetters['cache/space'](spaceId)
       if (spaceId === currentSpace.id) {
         return utils.clone(currentSpace)
       } else if (utils.objectHasKeys(cachedSpace)) {
@@ -1227,7 +1228,8 @@ const store = createStore({
     currentSpace,
     currentCards,
     currentConnections,
-    upload
+    upload,
+    cache
   },
   plugins: [websocket()]
 })
