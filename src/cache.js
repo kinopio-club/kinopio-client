@@ -60,11 +60,12 @@ export default {
     }
     this.notifyCouldNotSave()
   },
-  getLocal (key) {
-    try {
-      return JSON.parse(window.localStorage[key])
-    } catch (error) {}
-  },
+  //
+  // getLocal (key) {
+  //   try {
+  //     return JSON.parse(window.localStorage[key])
+  //   } catch (error) {}
+  // },
   removeLocal (key) {
     try {
       window.localStorage.removeItem(key)
@@ -93,24 +94,24 @@ export default {
 
   // Space
 
-  space (spaceId) {
-    return this.getLocal(`space-${spaceId}`) || {}
-  },
-  getAllSpaces () {
-    const keys = Object.keys(window.localStorage)
-    const spaceKeys = keys.filter(key => key.startsWith('space-'))
-    const spaces = spaceKeys.map(key => {
-      return this.getLocal(key)
-    })
-    const spacesWithNames = spaces.map(space => {
-      space.name = space.name || `space-${space.id}`
-      return space
-    })
-    const sortedSpaces = spacesWithNames.sort((a, b) => {
-      return b.cacheDate - a.cacheDate
-    })
-    return sortedSpaces
-  },
+  // space (spaceId) {
+  //   return this.getLocal(`space-${spaceId}`) || {}
+  // },
+  // getAllSpaces () {
+  //   const keys = Object.keys(window.localStorage)
+  //   const spaceKeys = keys.filter(key => key.startsWith('space-'))
+  //   const spaces = spaceKeys.map(key => {
+  //     return this.getLocal(key)
+  //   })
+  //   const spacesWithNames = spaces.map(space => {
+  //     space.name = space.name || `space-${space.id}`
+  //     return space
+  //   })
+  //   const sortedSpaces = spacesWithNames.sort((a, b) => {
+  //     return b.cacheDate - a.cacheDate
+  //   })
+  //   return sortedSpaces
+  // },
   updateSpace (key, value, spaceId) {
     let space = this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
@@ -210,58 +211,59 @@ export default {
     this.storeLocal(`space-${space.id}`, space)
     this.removeLocal(spaceKey)
   },
-  getAllRemovedSpaces () {
-    const keys = Object.keys(window.localStorage)
-    const spaceKeys = keys.filter(key => key.startsWith('removed-space-'))
-    const spaces = spaceKeys.map(key => {
-      return this.getLocal(key)
-    })
-    const sortedSpaces = spaces.sort((a, b) => {
-      return b.removeDate - a.removeDate
-    })
-    return sortedSpaces
-  },
+  // getAllRemovedSpaces () {
+  //   const keys = Object.keys(window.localStorage)
+  //   const spaceKeys = keys.filter(key => key.startsWith('removed-space-'))
+  //   const spaces = spaceKeys.map(key => {
+  //     return this.getLocal(key)
+  //   })
+  //   const sortedSpaces = spaces.sort((a, b) => {
+  //     return b.removeDate - a.removeDate
+  //   })
+  //   return sortedSpaces
+  // },
 
   // Tags
 
-  allCardsByTagName (name) {
-    let spaces = this.getAllSpaces()
-    let cards = [] // card name, id, spaceid
-    spaces.forEach(space => {
-      if (!space.tags) { return }
-      const tags = space.tags.filter(tag => tag.name === name)
-      if (!utils.arrayHasItems(tags)) { return }
-      const cardIds = tags.map(tag => tag.cardId)
-      space.cards.forEach(card => {
-        if (cardIds.includes(card.id)) {
-          card.spaceName = space.name
-          cards.push(card)
-        }
-      })
-    })
-    return cards
-  },
-  tagByName (name) {
-    let spaces = this.getAllSpaces()
-    let tags = []
-    spaces.forEach(space => {
-      if (!utils.arrayHasItems(space.tags)) { return }
-      tags = tags.concat(space.tags)
-    })
-    const tag = tags.find(tag => tag.name === name)
-    return tag
-  },
-  allTags () {
-    const spaces = this.getAllSpaces()
-    let tags = []
-    spaces.forEach(space => {
-      if (utils.arrayHasItems(space.tags)) {
-        space.tags.forEach(tag => tags.push(tag))
-      }
-    })
-    tags.reverse()
-    return tags
-  },
+  // allCardsByTagName (name) {
+  //   let spaces = this.getAllSpaces()
+  //   let cards = [] // card name, id, spaceid
+  //   spaces.forEach(space => {
+  //     if (!space.tags) { return }
+  //     const tags = space.tags.filter(tag => tag.name === name)
+  //     if (!utils.arrayHasItems(tags)) { return }
+  //     const cardIds = tags.map(tag => tag.cardId)
+  //     space.cards.forEach(card => {
+  //       if (cardIds.includes(card.id)) {
+  //         card.spaceName = space.name
+  //         cards.push(card)
+  //       }
+  //     })
+  //   })
+  //   return cards
+  // },
+  // tagByName (name) {
+  //   let spaces = this.getAllSpaces()
+  //   let tags = []
+  //   spaces.forEach(space => {
+  //     if (!utils.arrayHasItems(space.tags)) { return }
+  //     tags = tags.concat(space.tags)
+  //   })
+  //   const tag = tags.find(tag => tag.name === name)
+  //   return tag
+  // },
+  // allTags () {
+  //   const spaces = this.getAllSpaces()
+  //   let tags = []
+  //   spaces.forEach(space => {
+  //     if (utils.arrayHasItems(space.tags)) {
+  //       space.tags.forEach(tag => tags.push(tag))
+  //     }
+  //   })
+  //   tags.reverse()
+  //   return tags
+  // },
+
   updateTagColorInAllSpaces (tag) {
     const spaces = this.getAllSpaces()
     spaces.forEach(space => {
