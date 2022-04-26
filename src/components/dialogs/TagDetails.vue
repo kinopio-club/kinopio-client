@@ -72,7 +72,6 @@ import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
-import cache from '@/cache.js'
 
 import uniqBy from 'lodash-es/uniqBy'
 import sortBy from 'lodash-es/sortBy'
@@ -315,7 +314,7 @@ export default {
         return this.color
       }
       const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
-      const cachedTag = cache.tagByName(segment.name)
+      const cachedTag = this.$store.getters['cache/tagByName'](segment.name)
       if (spaceTag) {
         return spaceTag.color
       } else if (cachedTag) {

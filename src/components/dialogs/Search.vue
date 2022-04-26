@@ -40,7 +40,6 @@ import User from '@/components/User.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import Filters from '@/components/Filters.vue'
 import utils from '@/utils.js'
-import cache from '@/cache.js'
 
 import dayjs from 'dayjs'
 import orderBy from 'lodash-es/orderBy'
@@ -128,7 +127,7 @@ export default {
     },
     segmentTagColor (segment) {
       const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
-      const cachedTag = cache.tagByName(segment.name)
+      const cachedTag = this.$store.getters['cache/tagByName'](segment.name)
       if (spaceTag) {
         return spaceTag.color
       } else if (cachedTag) {
