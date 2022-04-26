@@ -273,7 +273,7 @@ export default {
   },
   actions: {
     init: (context) => {
-      const cachedUser = cache.user()
+      const cachedUser = context.rootGetters['cache/user']
       if (utils.objectHasKeys(cachedUser)) {
         console.log('🌸 Restore user from cache', cachedUser.id)
         context.commit('restoreUser', cachedUser)

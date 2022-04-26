@@ -27,7 +27,6 @@ dialog.narrow.api-key(v-if="visible" :open="visible" @click.left.stop ref="dialo
 </template>
 
 <script>
-import cache from '@/cache.js'
 import utils from '@/utils.js'
 
 export default {
@@ -66,8 +65,7 @@ export default {
       })
     },
     revealKey () {
-      this.key = cache.user().apiKey
-      console.log(this.key, cache.user().apiKey)
+      this.key = this.$store.getters['cache/user'].apiKey
       this.keyIsRevealed = true
     },
     copyKey () {
