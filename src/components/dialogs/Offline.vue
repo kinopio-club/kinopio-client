@@ -14,7 +14,6 @@ dialog.narrow.offline(v-if="visible" :open="visible" ref="dialog" :class="{'righ
 </template>
 
 <script>
-import cache from '@/cache.js'
 import utils from '@/utils.js'
 
 export default {
@@ -57,7 +56,7 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        this.queue = cache.queue()
+        this.queue = this.$store.getters['cache/queue']
         this.checkIfShouldBeOnRightSide()
       }
     }

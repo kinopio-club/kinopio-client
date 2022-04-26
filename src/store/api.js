@@ -117,7 +117,7 @@ const self = {
       body.spaceId = context.rootState.currentSpace.id
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       if (!currentUserIsSignedIn) { return }
-      let queue = cache.queue()
+      let queue = context.rootGetters['cache/queue']
       const request = {
         name,
         body
@@ -138,8 +138,8 @@ const self = {
     processQueueOperations: async (context) => {
       let body
       const apiKey = context.rootState.currentUser.apiKey
-      const queue = cache.queue()
-      const queueBuffer = cache.queueBuffer()
+      const queue = context.rootGetters['cache/queue']
+      const queueBuffer = context.rootGetters['cache/queueBuffer']
       if (!shouldRequest({ apiKey }) || !queue.length) { return }
       if (queueBuffer.length) {
         body = queueBuffer
