@@ -699,10 +699,11 @@ export default {
         return 'spectator'
       }
     },
-    isInvitedButCannotEditSpace: (state, getters, rootState) => (space) => {
+    isInvitedButCannotEditSpace: (state, getters, rootState, rootGetters) => (space) => {
       space = space || rootState.currentSpace
       const currentUserIsSignedIn = getters.isSignedIn
-      const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
+      const invitedSpaces = rootGetters['cache/invitedSpaces']
+      const isInvitedToSpace = Boolean(invitedSpaces.find(invitedSpace => invitedSpace.id === space.id))
       return !currentUserIsSignedIn && isInvitedToSpace
     },
     shouldPreventCardsCreatedCountUpdate: (state, getters, rootState, rootGetters) => {
