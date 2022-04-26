@@ -323,7 +323,7 @@ export default {
       })
       name = name.trim()
       let newNames = []
-      // split cards by name while > maxCardLength
+      // split names while > maxCardLength
       do {
         let newName = name.substring(0, this.maxCardLength)
         const lastSpace = newName.lastIndexOf(' ')
