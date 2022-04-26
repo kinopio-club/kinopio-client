@@ -247,7 +247,8 @@ const currentCards = {
             name: tag,
             defaultColor: context.rootState.currentUser.color,
             cardId: card.id,
-            spaceId: context.state.id
+            spaceId: context.state.id,
+            tags: this.$store.getters['cache/allTags']
           })
           context.dispatch('currentSpace/addTag', tag, { root: true }) // TODO to tag module?
         })

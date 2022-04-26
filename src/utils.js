@@ -1,5 +1,4 @@
 // functional methods that can see dom, but can't access components or store
-import cache from '@/cache.js'
 import promptPacks from '@/data/promptPacks.json'
 import moonphase from '@/moonphase.js'
 
@@ -816,10 +815,9 @@ export default {
     }
     return userId
   },
-  uniqueSpaceItems (items, nullCardUsers) {
+  uniqueSpaceItems (user, items, nullCardUsers) {
     const cardIdDeltas = []
     const connectionTypeIdDeltas = []
-    const user = cache.user()
     items.cards = items.cards.map(card => {
       const userId = this.itemUserId(user, card, nullCardUsers)
       const newId = nanoid()
@@ -1453,9 +1451,9 @@ export default {
     tags = tags.map(tag => tag.substring(2, tag.length - 2))
     return tags
   },
-  newTag ({ name, defaultColor, cardId, spaceId }) {
+  newTag ({ name, defaultColor, cardId, spaceId, tags }) {
     let color
-    const existingTag = cache.allTags().find(tag => tag.name === name)
+    const existingTag = tags.find(tag => tag.name === name)
     if (existingTag) {
       color = existingTag.color
     }

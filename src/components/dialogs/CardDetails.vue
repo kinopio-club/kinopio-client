@@ -1357,7 +1357,8 @@ export default {
           name: tagName,
           defaultColor: this.newTagColor || this.$store.state.currentUser.color,
           cardId: this.card.id,
-          spaceId: this.$store.state.currentSpace.id
+          spaceId: this.$store.state.currentSpace.id,
+          tags: this.$store.getters['cache/allTags']
         })
         if (this.previousSelectedTag.name === tagName) {
           tag.color = this.previousSelectedTag.color

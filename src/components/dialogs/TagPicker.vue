@@ -21,7 +21,6 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
 
 <script>
 import scrollIntoView from '@/scroll-into-view.js'
-import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
@@ -134,7 +133,7 @@ export default {
     updateTags () {
       const spaceTags = this.$store.getters['currentSpace/spaceTags']
       this.tags = spaceTags || []
-      const cachedTags = cache.allTags()
+      const cachedTags = this.$store.getters['cache/allTags']
       const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
       this.tags = mergedTags
       this.updateRemoteTags()

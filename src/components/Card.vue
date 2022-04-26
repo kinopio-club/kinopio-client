@@ -614,7 +614,8 @@ export default {
               name: segment.name,
               defaultColor: this.$store.state.currentUser.color,
               cardId: this.id,
-              spaceId: this.$store.state.currentSpace.id
+              spaceId: this.$store.state.currentSpace.id,
+              tags: this.$store.getters['cache/allTags']
             })
             console.warn('🦋 create missing tag', segment.name, tag, this.card)
             this.$store.dispatch('currentSpace/addTag', tag)

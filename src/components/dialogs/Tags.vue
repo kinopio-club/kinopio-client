@@ -23,7 +23,6 @@ dialog.tags.narrow.is-pinnable(@click.stop v-if="visible" :open="visible" ref="d
 <script>
 import TagList from '@/components/TagList.vue'
 import utils from '@/utils.js'
-import cache from '@/cache.js'
 
 import uniqBy from 'lodash-es/uniqBy'
 import debounce from 'lodash-es/debounce'
@@ -119,7 +118,7 @@ export default {
     updateTags () {
       const spaceTags = this.$store.getters['currentSpace/spaceTags']
       this.tags = spaceTags || []
-      const cachedTags = cache.allTags()
+      const cachedTags = this.$store.getters['cache/allTags']
       const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
       this.tags = mergedTags
       this.debouncedUpdateRemoteTags()
