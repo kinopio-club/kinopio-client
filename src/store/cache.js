@@ -67,6 +67,12 @@ export default {
       return sortedSpaces
     },
 
+    // User
+
+    user: (state, getters) => {
+      return getters.getLocal('user') || {}
+    },
+
     // Tags
 
     cardsByTagName: (state, getters) => (name) => {
@@ -106,7 +112,21 @@ export default {
       })
       tags.reverse()
       return tags
-    }
+    },
 
+    // API Queue
+
+    queue: (state, getters) => {
+      return getters.getLocal('queue') || []
+    },
+    queueBuffer: (state, getters) => {
+      return getters.getLocal('queueBuffer') || []
+    },
+
+    // Invited Spaces
+
+    invitedSpaces: (state, getters) => {
+      return getters.getLocal('invitedSpaces') || []
+    }
   }
 }

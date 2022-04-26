@@ -80,9 +80,9 @@ export default {
 
   // User
 
-  user () {
-    return this.getLocal('user') || {}
-  },
+  // user () {
+  //   return this.getLocal('user') || {}
+  // },
   updateUser (key, value) {
     let user = this.user()
     user[key] = value
@@ -288,9 +288,9 @@ export default {
 
   // API Queue
 
-  queue () {
-    return this.getLocal('queue') || []
-  },
+  // queue () {
+  //   return this.getLocal('queue') || []
+  // },
   saveQueue (queue) {
     this.storeLocal('queue', queue)
   },
@@ -300,9 +300,9 @@ export default {
 
   // API Queue Buffer
 
-  queueBuffer () {
-    return this.getLocal('queueBuffer') || []
-  },
+  // queueBuffer () {
+  //   return this.getLocal('queueBuffer') || []
+  // },
   saveQueueBuffer (queue) {
     this.storeLocal('queueBuffer', queue)
   },
@@ -312,9 +312,9 @@ export default {
 
   // Invited Spaces
 
-  invitedSpaces () {
-    return this.getLocal('invitedSpaces') || []
-  },
+  // invitedSpaces () {
+  //   return this.getLocal('invitedSpaces') || []
+  // },
   saveInvitedSpace (space) {
     space = {
       id: space.id,
