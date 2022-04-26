@@ -254,7 +254,7 @@ export default {
       otherSpacesQueue = []
     },
     saveOtherSpace: async (context, { spaceId, shouldAddToQueue }) => {
-      const cachedSpace = cache.space(spaceId)
+      const cachedSpace = context.rootGetters['cache/space'](spaceId)
       const spaceIsCached = Boolean(cachedSpace.id)
       if (spaceIsCached) {
         const space = utils.normalizeSpaceMetaOnly(cachedSpace)
@@ -438,7 +438,7 @@ export default {
       return utils.normalizeRemoteSpace(remoteSpace)
     },
     removeLocalSpaceIfUserIsRemoved: (context, space) => {
-      const cachedSpace = cache.space(space.id)
+      const cachedSpace = context.rootGetters['cache/space'](space.id)
       const currentUserIsRemovedFromSpace = utils.objectHasKeys(cachedSpace)
       context.dispatch('currentUser/removeFavorite', { type: 'space', item: space }, { root: true })
       if (currentUserIsRemovedFromSpace) {
@@ -619,7 +619,7 @@ export default {
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('isAddPage', false, { root: true })
       const emptySpace = utils.emptySpace(space.id)
-      const cachedSpace = cache.space(space.id) || space
+      const cachedSpace = context.rootGetters['cache/space'](space.id) || space
       const user = context.rootState.currentUser
       cachedSpace.id = cachedSpace.id || space.id
       // clear state
@@ -679,7 +679,7 @@ export default {
     loadLastSpace: async (context) => {
       let space
       const user = context.rootState.currentUser
-      let spaceToRestore = cache.space(user.lastSpaceId)
+      let spaceToRestore = context.rootGetters['cache/space'](user.lastSpaceId)
       if (spaceToRestore.id) {
         space = spaceToRestore
       } else if (user.lastSpaceId) {

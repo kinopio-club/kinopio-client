@@ -23,7 +23,6 @@ dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog" :class="{
 
 <script>
 import Loader from '@/components/Loader.vue'
-import cache from '@/cache.js'
 import utils from '@/utils.js'
 
 export default {
@@ -70,7 +69,7 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        const cachedSpace = cache.space(this.currentSpace.id)
+        const cachedSpace = this.$store.getters['cache/space'](this.currentSpace.id)
         this.spaceIsCached = utils.arrayHasItems(cachedSpace.cards)
         this.checkIfShouldBeOnRightSide()
       }

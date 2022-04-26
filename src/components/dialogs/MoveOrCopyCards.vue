@@ -158,7 +158,7 @@ export default {
       await this.$store.dispatch('api/createCards', cards)
       await this.$store.dispatch('api/createConnectionTypes', connectionTypes)
       await this.$store.dispatch('api/createConnections', connections)
-      const spaceIsCached = Boolean(cache.space(this.selectedSpace.id).cards)
+      const spaceIsCached = Boolean(this.$store.getters['cache/space'](this.selectedSpace.id).cards)
       if (!spaceIsCached) {
         const space = { id: this.selectedSpace.id }
         let remoteSpace = await this.$store.dispatch('api/getSpace', { space, shouldRequestRemote: true })

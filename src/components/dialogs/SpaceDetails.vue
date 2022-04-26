@@ -318,7 +318,7 @@ export default {
     },
     updateCachedSpacesDate () {
       this.spaces.forEach(space => {
-        const cachedSpace = cache.space(space.id)
+        const cachedSpace = this.$store.getters['cache/space'](space.id)
         const isCachedSpace = utils.objectHasKeys(cachedSpace)
         const shouldUpdate = space.editedAt !== cachedSpace.editedAt
         if (isCachedSpace && shouldUpdate) {

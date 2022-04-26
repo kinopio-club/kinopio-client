@@ -365,7 +365,7 @@ export default {
         if (card.spaceId) {
           space = { id: card.spaceId }
         } else {
-          space = cache.space(card.spaceId)
+          space = this.$store.getters['cache/space'](card.spaceId)
         }
         this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       } else {

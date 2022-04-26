@@ -296,7 +296,7 @@ export default {
       this.$store.commit('currentUser/apiKey', apiKey)
       const userHasCachedSpaces = cache.getAllSpaces().length
       if (userHasCachedSpaces) {
-        const updatedCurrentSpace = cache.space(this.$store.state.currentSpace.id)
+        const updatedCurrentSpace = this.$store.getters['cache/space'](this.$store.state.currentSpace.id)
         this.$store.commit('currentSpace/restoreSpace', updatedCurrentSpace)
         await this.$store.dispatch('api/createSpaces')
       }

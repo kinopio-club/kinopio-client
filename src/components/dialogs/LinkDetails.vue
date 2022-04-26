@@ -41,7 +41,6 @@ import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
-import cache from '@/cache.js'
 import templates from '@/data/templates.js'
 
 import join from 'lodash-es/join'
@@ -159,7 +158,7 @@ export default {
         if (card.spaceId) {
           space = { id: card.spaceId }
         } else {
-          space = cache.space(card.spaceId)
+          space = this.$store.getters['cache/space'](card.spaceId)
         }
         this.$store.dispatch('currentSpace/changeSpace', { space })
       } else {
