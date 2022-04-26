@@ -62,7 +62,6 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
 import merge from 'lodash-es/merge'
 
 import scrollIntoView from '@/scroll-into-view.js'
-import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
@@ -236,7 +235,7 @@ export default {
       this.updateRemovedSpaces()
     },
     updateLocalRemovedSpaces () {
-      this.removedSpaces = cache.getAllRemovedSpaces()
+      this.removedSpaces = this.$store.getters['cache/allRemovedSpaces']
     },
     updateRemovedSpaces () {
       this.updateLocalRemovedSpaces()

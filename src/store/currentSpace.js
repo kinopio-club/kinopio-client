@@ -756,7 +756,7 @@ export default {
     },
     deleteAllRemovedSpaces: (context) => {
       const userId = context.rootState.currentUser.id
-      const removedSpaces = cache.getAllRemovedSpaces()
+      const removedSpaces = context.rootGetters['cache/allRemovedSpaces']
       removedSpaces.forEach(space => cache.deleteSpace(space))
       context.dispatch('api/addToQueue', { name: 'deleteAllRemovedSpaces', body: { userId } }, { root: true })
     },

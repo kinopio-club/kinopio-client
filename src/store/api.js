@@ -402,7 +402,7 @@ const self = {
       try {
         let spaces = context.rootGetters['cache/allSpaces']
         spaces = spaces.map(space => normalizeSpaceToRemote(space))
-        let removedSpaces = cache.getAllRemovedSpaces()
+        let removedSpaces = context.rootGetters['cache/allRemovedSpaces']
         removedSpaces = removedSpaces.map(space => {
           space.isRemoved = true
           space.removedByUserId = context.rootState.currentUser.id
