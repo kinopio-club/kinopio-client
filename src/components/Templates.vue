@@ -14,7 +14,6 @@ section.templates-component(v-if="visible" :open="visible" @click.left.stop)
 <script>
 import templates from '@/data/templates.js'
 import SpaceList from '@/components/SpaceList.vue'
-import cache from '@/cache.js'
 
 import dayjs from 'dayjs'
 
@@ -64,7 +63,7 @@ export default {
       this.updateWithRemoteSpaces()
     },
     localSpaces () {
-      let localSpaces = cache.getAllSpaces().filter(space => {
+      let localSpaces = this.$store.getters['cache/allSpaces'].filter(space => {
         return space.isTemplate
       })
       localSpaces = this.sortSpacesByEditedAt(localSpaces)

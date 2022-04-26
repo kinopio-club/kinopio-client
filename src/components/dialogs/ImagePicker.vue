@@ -108,7 +108,6 @@ import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
-import cache from '@/cache.js'
 
 import debounce from 'lodash-es/debounce'
 import sampleSize from 'lodash-es/sampleSize'
@@ -251,7 +250,7 @@ export default {
       this.searchAgain()
     },
     updateImagesFromCachedSpace () {
-      let spaces = cache.getAllSpaces()
+      let spaces = this.$store.getters['cache/allSpaces']
       spaces = spaces.filter(space => space.id !== this.$store.state.currentSpace.id)
       let images = []
       spaces.forEach(space => {

@@ -206,7 +206,7 @@ export default {
 
     updateAllSpacesWithNewUserId () {
       const userId = this.$store.state.currentUser.id
-      const spaces = cache.getAllSpaces()
+      const spaces = this.$store.getters['cache/allSpaces']
       const userHasCachedSpaces = spaces.length
       if (!userHasCachedSpaces) { return }
       spaces.forEach(space => {
@@ -294,7 +294,7 @@ export default {
 
     async createSpaces (apiKey) {
       this.$store.commit('currentUser/apiKey', apiKey)
-      const userHasCachedSpaces = cache.getAllSpaces().length
+      const userHasCachedSpaces = this.$store.getters['cache/allSpaces'].length
       if (userHasCachedSpaces) {
         const updatedCurrentSpace = this.$store.getters['cache/space'](this.$store.state.currentSpace.id)
         this.$store.commit('currentSpace/restoreSpace', updatedCurrentSpace)

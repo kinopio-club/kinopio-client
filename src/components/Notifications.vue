@@ -99,7 +99,6 @@ aside.notifications(@click.left="closeAllDialogs")
 </template>
 
 <script>
-import cache from '@/cache.js'
 import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 import templates from '@/data/templates.js'
@@ -256,7 +255,7 @@ export default {
       const space = this.$store.state.currentSpace
       this.$store.dispatch('currentSpace/deleteSpace', space)
       this.$store.commit('notifySpaceIsRemoved', false)
-      const firstSpace = cache.getAllSpaces()[0]
+      const firstSpace = this.$store.getters['cache/allSpaces'][0]
       this.$store.dispatch('currentSpace/loadSpace', { space: firstSpace })
     },
     resetNotifyCardsCreatedIsNearLimit () {

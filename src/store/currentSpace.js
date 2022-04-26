@@ -442,7 +442,7 @@ export default {
       const currentUserIsRemovedFromSpace = utils.objectHasKeys(cachedSpace)
       context.dispatch('currentUser/removeFavorite', { type: 'space', item: space }, { root: true })
       if (currentUserIsRemovedFromSpace) {
-        context.commit('currentUser/resetLastSpaceId', null, { root: true })
+        context.dispatch('currentUser/resetLastSpaceId', null, { root: true })
         cache.deleteSpace(space)
         const emptySpace = utils.emptySpace(space.id)
         context.commit('restoreSpace', emptySpace)
@@ -470,7 +470,7 @@ export default {
       })
     },
     loadJournalSpace: async (context) => {
-      const spaces = cache.getAllSpaces()
+      const spaces = context.rootGetters['cache/allSpaces']
       const journalName = utils.journalSpaceName(context.rootState.loadJournalSpaceTomorrow)
       const journalSpace = spaces.find(space => space.name === journalName)
       if (journalSpace) {

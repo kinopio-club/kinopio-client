@@ -443,7 +443,7 @@ export default {
       this.updateCurrentSpace()
     },
     async updateUserSpaces () {
-      let spaces = cache.getAllSpaces()
+      let spaces = this.$store.getters['cache/allSpaces']
       this.updateUserSpacesWithSpaces(spaces)
       this.loading.userSpaces = true
       try {

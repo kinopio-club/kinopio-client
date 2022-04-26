@@ -400,7 +400,7 @@ const self = {
     },
     createSpaces: async (context) => {
       try {
-        let spaces = cache.getAllSpaces()
+        let spaces = context.rootGetters['cache/allSpaces']
         spaces = spaces.map(space => normalizeSpaceToRemote(space))
         let removedSpaces = cache.getAllRemovedSpaces()
         removedSpaces = removedSpaces.map(space => {

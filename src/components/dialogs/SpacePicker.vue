@@ -183,7 +183,7 @@ export default {
       if (this.userSpaces) {
         this.spaces = this.userSpaces
       } else {
-        this.spaces = cache.getAllSpaces()
+        this.spaces = this.$store.getters['cache/allSpaces']
         this.updateWithRemoteSpaces()
       }
       this.excludeCurrentSpace()

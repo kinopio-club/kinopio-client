@@ -55,7 +55,6 @@ import PromptPackPicker from '@/components/dialogs/PromptPackPicker.vue'
 import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
-import cache from '@/cache.js'
 
 import last from 'lodash-es/last'
 import { nanoid } from 'nanoid'
@@ -121,7 +120,7 @@ export default {
       }
     },
     addSpace () {
-      const noUserSpaces = !cache.getAllSpaces().length
+      const noUserSpaces = !this.$store.getters['cache/allSpaces'].length
       if (noUserSpaces) {
         window.location.href = '/'
       } else {

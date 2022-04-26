@@ -262,7 +262,7 @@ export default {
     debouncedUpdateLocalSpaces: debounce(async function () {
       this.$nextTick(() => {
         const currentUser = this.$store.state.currentUser
-        let userSpaces = cache.getAllSpaces().filter(space => {
+        let userSpaces = this.$store.getters['cache/allSpaces'].filter(space => {
           return this.$store.getters['currentUser/canEditSpace'](space)
         })
         userSpaces = this.updateWithExistingRemoteSpaces(userSpaces)

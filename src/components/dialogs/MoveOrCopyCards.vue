@@ -205,7 +205,7 @@ export default {
       })
     },
     updateSpaces () {
-      const spaces = cache.getAllSpaces()
+      const spaces = this.$store.getters['cache/allSpaces']
       this.spaces = spaces.filter(space => {
         const spaceIsNotCurrent = space.id !== this.currentSpace.id
         const spaceHasId = Boolean(space.id)
