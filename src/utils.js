@@ -403,6 +403,25 @@ export default {
       return 'Ctrl'
     }
   },
+  splitBySentences (string) {
+    if (!string) { return }
+    let sentences = string.split('. ')
+    sentences = sentences.filter(sentence => Boolean(sentence.length))
+    // re-add sentence periods removed by split
+    sentences = sentences.map((sentence, index) => {
+      if (index < sentences.length - 1) {
+        sentence = sentence + '.'
+      }
+      return sentence
+    })
+    return sentences
+  },
+  splitByParagraphs (string) {
+    if (!string) { return }
+    let paragraphs = string.split('\n')
+    paragraphs = paragraphs.filter(paragraph => Boolean(paragraph.length))
+    return paragraphs
+  },
   capitalizeFirstLetter (string) {
     // 'dreams' -> 'Dreams'
     return string.charAt(0).toUpperCase() + string.slice(1)

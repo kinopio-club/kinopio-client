@@ -690,33 +690,14 @@ export default {
         this.nameSplitIntoCardsCount = 0
       }
     },
-    splitBySentences (string) {
-      if (!string) { return }
-      let sentences = string.split('. ')
-      sentences = sentences.filter(sentence => Boolean(sentence.length))
-      // re-add sentence periods removed by split
-      sentences = sentences.map((sentence, index) => {
-        if (index < sentences.length - 1) {
-          sentence = sentence + '.'
-        }
-        return sentence
-      })
-      return sentences
-    },
-    splitByParagraphs (string) {
-      if (!string) { return }
-      let paragraphs = string.split('\n')
-      paragraphs = paragraphs.filter(paragraph => Boolean(paragraph.length))
-      return paragraphs
-    },
     splitCards (event, isPreview) {
       const originalName = (this.pastedName || this.name).trim()
       // split names by paragraph and sentence
-      const paragraphs = this.splitByParagraphs(originalName) || []
+      const paragraphs = utils.splitByParagraphs(originalName) || []
       let cardNames = paragraphs.map(paragraph => {
         let sentences
         if (paragraph.length > this.maxCardLength) {
-          sentences = this.splitBySentences(paragraph)
+          sentences = utils.splitBySentences(paragraph)
         }
         return sentences || paragraph
       })

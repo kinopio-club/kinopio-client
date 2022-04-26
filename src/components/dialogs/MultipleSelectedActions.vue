@@ -290,33 +290,77 @@ export default {
   },
   methods: {
     mergeSelectedCards () {
-      const maxCardLength = this.maxCardLength
-      const maxCardHeight = 300
-      const distanceBetween = 12
+      const spaceBetweenCards = 12
       let name = ''
       this.cards.forEach(card => {
         name = `${name}\n\n${card.name.trim()}`
       })
       name = name.trim()
+      let newNames = []
+      // split cards by name while > maxCardLength
+      do {
+        let newName = name.substring(0, this.maxCardLength)
+        const lastSpace = newName.lastIndexOf(' ')
+        const lastLineBreak = newName.lastIndexOf('\n')
+        const shouldSplitByMaxLength = lastSpace === -1 && lastLineBreak === -1
+        if (name.length < this.maxCardLength) {
+          newName = name
+          name = ''
+        } else if (shouldSplitByMaxLength) {
+          // newName = newName
+          name = name.substring(this.maxCardLength)
+        } else if (lastSpace >= lastLineBreak) {
+          newName = name.substring(0, lastSpace)
+          name = name.substring(lastSpace)
+        } else {
+          newName = name.substring(0, lastLineBreak)
+          name = name.substring(lastLineBreak)
+        }
+        newNames.push(newName)
+      } while (name.length > this.maxCardLength)
+
+      newNames.push(name)
+      newNames = newNames.filter(name => Boolean(name))
       let position = { x: this.cards[0].x, y: this.cards[0].y }
-      const newCardsToCreate = Math.ceil(name.length / maxCardLength)
       let newCards = []
       this.remove()
       // create cards
-      for (let index = 0; index < newCardsToCreate; index++) {
-        const newName = name.substring(0, maxCardLength)
-        name = name.substring(maxCardLength)
+      newNames.forEach((newName, index) => {
         let newCard = {
           id: nanoid(),
           name: newName,
-          position
+          x: position.x,
+          y: position.y
         }
-        newCard.position.y = position.y + ((maxCardHeight + distanceBetween) * index)
-        this.$store.dispatch('currentCards/add', newCard)
         newCards.push(newCard)
-      }
+      })
+      this.$store.dispatch('currentCards/addMultiple', newCards)
       prevCards = newCards // for history
-      this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.mergeSelectedCards')
+      // position new cards
+      this.$nextTick(() => {
+        newCards = newCards.map((card, index) => {
+          if (!index) { return card }
+          const prevCard = newCards[index - 1]
+          const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+          const prevCardRect = element.getBoundingClientRect()
+          card.y = prevCard.y + (prevCardRect.height * this.spaceCounterZoomDecimal) + spaceBetweenCards
+          return card
+        })
+        newCards = newCards.map(card => {
+          card = utils.updateCardDimensions(card)
+          this.$store.dispatch('currentCards/update', {
+            id: card.id,
+            y: card.y
+          })
+          return card
+        })
+        this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+          delta: newCards.length,
+          shouldIncrement: true
+        })
+        this.$store.dispatch('closeAllDialogs', 'CardDetails.addSplitCards')
+        this.$store.dispatch('currentCards/updateCardMap') // temp: cant select cards?
+      })
     },
     toggleAllLabelsAreVisible () {
       const isVisible = !this.allLabelsAreVisible
