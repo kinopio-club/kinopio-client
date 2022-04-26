@@ -48,6 +48,10 @@ dialog.narrow.multiple-selected-actions(
       button(:disabled="!canEditSome.any" @click.left="remove")
         img.icon(src="@/assets/remove.svg")
         span {{ removeLabel }}
+      //- Merge
+      button(v-if="multipleCardsIsSelected" @click="mergeSelectedCards")
+        img.icon(src="@/assets/merge.svg")
+        span Merge
 
     template(v-if="multipleCardsSelectedIds.length")
       .row
@@ -71,16 +75,16 @@ dialog.narrow.multiple-selected-actions(
 </template>
 
 <script>
-import { nanoid } from 'nanoid'
-import last from 'lodash-es/last'
-import uniq from 'lodash-es/uniq'
-
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import MoveOrCopyCards from '@/components/dialogs/MoveOrCopyCards.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import CardStyleActions from '@/components/CardStyleActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
+
+import { nanoid } from 'nanoid'
+import last from 'lodash-es/last'
+import uniq from 'lodash-es/uniq'
 
 let prevCards
 
@@ -104,6 +108,7 @@ export default {
     }
   },
   computed: {
+    maxCardLength () { return 300 },
     cardStyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowMultiCardStyleActions },
     visible () { return this.$store.state.multipleSelectedActionsIsVisible },
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
@@ -284,6 +289,35 @@ export default {
     }
   },
   methods: {
+    mergeSelectedCards () {
+      const maxCardLength = this.maxCardLength
+      const maxCardHeight = 300
+      const distanceBetween = 12
+      let name = ''
+      this.cards.forEach(card => {
+        name = `${name}\n\n${card.name.trim()}`
+      })
+      name = name.trim()
+      let position = { x: this.cards[0].x, y: this.cards[0].y }
+      const newCardsToCreate = Math.ceil(name.length / maxCardLength)
+      let newCards = []
+      this.remove()
+      // create cards
+      for (let index = 0; index < newCardsToCreate; index++) {
+        const newName = name.substring(0, maxCardLength)
+        name = name.substring(maxCardLength)
+        let newCard = {
+          id: nanoid(),
+          name: newName,
+          position
+        }
+        newCard.position.y = position.y + ((maxCardHeight + distanceBetween) * index)
+        this.$store.dispatch('currentCards/add', newCard)
+        newCards.push(newCard)
+      }
+      prevCards = newCards // for history
+      this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.mergeSelectedCards')
+    },
     toggleAllLabelsAreVisible () {
       const isVisible = !this.allLabelsAreVisible
       this.editableConnections.forEach(connection => {
