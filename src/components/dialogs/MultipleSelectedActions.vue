@@ -289,8 +289,34 @@ export default {
     }
   },
   methods: {
-    mergeSelectedCards () {
+    positionNewCards (newCards) {
       const spaceBetweenCards = 12
+      this.$nextTick(() => {
+        newCards = newCards.map((card, index) => {
+          if (!index) { return card }
+          const prevCard = newCards[index - 1]
+          const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+          const prevCardRect = element.getBoundingClientRect()
+          card.y = prevCard.y + (prevCardRect.height * this.spaceCounterZoomDecimal) + spaceBetweenCards
+          return card
+        })
+        newCards = newCards.map(card => {
+          card = utils.updateCardDimensions(card)
+          this.$store.dispatch('currentCards/update', {
+            id: card.id,
+            y: card.y
+          })
+          return card
+        })
+        this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+          delta: newCards.length,
+          shouldIncrement: true
+        })
+        this.$store.dispatch('closeAllDialogs', 'CardDetails.addSplitCards')
+        this.$store.dispatch('currentCards/updateCardMap') // temp: cant select cards?
+      })
+    },
+    mergeSelectedCards () {
       let name = ''
       this.cards.forEach(card => {
         name = `${name}\n\n${card.name.trim()}`
@@ -324,7 +350,7 @@ export default {
       let position = { x: this.cards[0].x, y: this.cards[0].y }
       let newCards = []
       this.remove()
-      // create cards
+      // create merged cards
       newNames.forEach((newName, index) => {
         let newCard = {
           id: nanoid(),
@@ -336,31 +362,7 @@ export default {
       })
       this.$store.dispatch('currentCards/addMultiple', newCards)
       prevCards = newCards // for history
-      // position new cards
-      this.$nextTick(() => {
-        newCards = newCards.map((card, index) => {
-          if (!index) { return card }
-          const prevCard = newCards[index - 1]
-          const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
-          const prevCardRect = element.getBoundingClientRect()
-          card.y = prevCard.y + (prevCardRect.height * this.spaceCounterZoomDecimal) + spaceBetweenCards
-          return card
-        })
-        newCards = newCards.map(card => {
-          card = utils.updateCardDimensions(card)
-          this.$store.dispatch('currentCards/update', {
-            id: card.id,
-            y: card.y
-          })
-          return card
-        })
-        this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-          delta: newCards.length,
-          shouldIncrement: true
-        })
-        this.$store.dispatch('closeAllDialogs', 'CardDetails.addSplitCards')
-        this.$store.dispatch('currentCards/updateCardMap') // temp: cant select cards?
-      })
+      this.positionNewCards(newCards)
     },
     toggleAllLabelsAreVisible () {
       const isVisible = !this.allLabelsAreVisible
