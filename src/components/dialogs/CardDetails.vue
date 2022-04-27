@@ -771,8 +771,11 @@ export default {
         newCards = newCards.map(card => {
           card = utils.updateCardDimensions(card)
           this.$store.dispatch('currentCards/update', {
+            name: card.name,
             id: card.id,
-            y: card.y
+            y: card.y,
+            width: card.width,
+            height: card.height
           })
           return card
         })
