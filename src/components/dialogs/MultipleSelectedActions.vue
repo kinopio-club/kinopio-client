@@ -313,9 +313,15 @@ export default {
         this.$store.dispatch('closeAllDialogs', 'CardDetails.addSplitCards')
       })
     },
+    cardsSortedByY () {
+      return this.cards.sort((a, b) => {
+        return a.y - b.y
+      })
+    },
     mergeSelectedCards () {
       let name = ''
-      this.cards.forEach(card => {
+      const cards = this.cardsSortedByY()
+      cards.forEach(card => {
         name = `${name}\n\n${card.name.trim()}`
       })
       name = name.trim()
@@ -344,7 +350,7 @@ export default {
 
       newNames.push(name)
       newNames = newNames.filter(name => Boolean(name))
-      let position = { x: this.cards[0].x, y: this.cards[0].y }
+      let position = { x: cards[0].x, y: cards[0].y }
       let newCards = []
       this.remove()
       // create merged cards
