@@ -403,6 +403,7 @@ const store = createStore({
     triggerSpaceDetailsCloseDialogs: () => {},
     triggerTemplatesIsVisible: () => {},
     triggerSelectAllCardsBelowCursor: (state, position) => {},
+    triggerSplitCard: (state, cardId) => {},
 
     // Cards
 
