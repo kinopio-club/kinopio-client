@@ -1905,6 +1905,7 @@ article
     bottom 0px
     display flex
     .resize-button-wrap
+      z-index 1
       cursor ew-resize
       button
         cursor ew-resize
