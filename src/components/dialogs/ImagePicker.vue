@@ -598,8 +598,6 @@ export default {
         position absolute
         top 6px
         left 6px
-  // .arena
-  //   width 18px
 
   &.background-image-picker
     padding-top 4px
