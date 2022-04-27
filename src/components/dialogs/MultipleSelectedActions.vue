@@ -304,16 +304,13 @@ export default {
           card = utils.updateCardDimensions(card)
           this.$store.dispatch('currentCards/update', {
             id: card.id,
-            y: card.y
+            y: card.y,
+            width: card.width,
+            height: card.height
           })
           return card
         })
-        this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-          delta: newCards.length,
-          shouldIncrement: true
-        })
         this.$store.dispatch('closeAllDialogs', 'CardDetails.addSplitCards')
-        this.$store.dispatch('currentCards/updateCardMap') // temp: cant select cards?
       })
     },
     mergeSelectedCards () {
