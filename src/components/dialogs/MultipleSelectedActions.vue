@@ -322,6 +322,7 @@ export default {
           card = utils.updateCardDimensions(card)
           this.$store.dispatch('currentCards/update', {
             id: card.id,
+            name: card.name,
             y: card.y,
             width: card.width,
             height: card.height
