@@ -153,8 +153,7 @@ export default {
       this.appsIsVisible = !isVisible
     },
     async getNewStuff () {
-      const response = await fetch('https://api.are.na/v2/channels/kinopio-what-s-new/contents?direction=desc')
-      const data = await response.json()
+      const data = await this.$store.dispatch('api/getNewStuff')
       return data
     },
     checkNewStuffIsUpdated (latestUpdateId) {
