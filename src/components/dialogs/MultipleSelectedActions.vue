@@ -49,11 +49,11 @@ dialog.narrow.multiple-selected-actions(
         img.icon(src="@/assets/remove.svg")
         span {{ removeLabel }}
       //- Merge
-      button(v-if="multipleCardsIsSelected" @click="mergeSelectedCards")
+      button(v-if="multipleCardsIsSelected" @click="mergeSelectedCards" :disabled="!canEditAll.cards")
         img.icon(src="@/assets/merge.svg")
         span Merge
       //- Split
-      button(v-if="cardCanBySplit" @click="splitCard")
+      button(v-if="cardCanBySplit" @click="splitCard" :disabled="!canEditAll.cards")
         img.icon(src="@/assets/split.svg")
         span Split
 
