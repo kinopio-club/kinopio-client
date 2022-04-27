@@ -13,7 +13,7 @@ dialog.image-picker(
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
           img.icon.sticker(src="@/assets/sticker.svg")
-        button(@click.left.stop="toggleServiceIsUnsplash" :class="{active : serviceIsUnsplash}" title="unsplash")
+        button(@click.left.stop="toggleServiceIsBing" :class="{active : serviceIsBing}" title="bing")
           img.icon(src="@/assets/search.svg")
         button(@click.left.stop="toggleServiceIsGifs" :class="{active : serviceIsGifs}" title="gifs")
           span GIF
@@ -54,7 +54,7 @@ dialog.image-picker(
           span Backgrounds
         button(@click.left.stop="toggleServiceIsRecent" :class="{active : serviceIsRecent}")
           span Recent
-        button(@click.left.stop="toggleServiceIsUnsplash" :class="{active : serviceIsUnsplash}")
+        button(@click.left.stop="toggleServiceIsBing" :class="{active : serviceIsBing}")
           img.icon(src="@/assets/search.svg")
 
       .button-wrap(v-if="removeIsVisible")
@@ -116,7 +116,6 @@ import debounce from 'lodash-es/debounce'
 import uniq from 'lodash-es/uniq'
 
 const numberOfImages = 25
-const unsplashApiKey = 'qkjL_lJ4cIHqkV-Q90BjstyX9fH4vTe8bcqn6KU5NGc'
 
 export default {
   name: 'ImagePicker',
@@ -147,7 +146,7 @@ export default {
     return {
       images: [],
       search: '',
-      service: 'stickers', // 'stickers', 'gifs', 'unsplash', 'backgrounds', 'recent'
+      service: 'stickers', // 'stickers', 'gifs', 'bing', 'backgrounds', 'recent'
       loading: false,
       minDialogHeight: 400,
       dialogHeight: null,
@@ -179,18 +178,22 @@ export default {
       if (this.service === 'stickers' || this.service === 'gifs') {
         return 'giphy'
       } else {
-        return 'unsplash'
+        return 'bing'
       }
     },
     placeholder () {
-      return `Search ${utils.capitalizeFirstLetter(this.provider)}`
+      let label = this.provider
+      if (label === 'bing') {
+        label = 'images'
+      }
+      return `Search ${utils.capitalizeFirstLetter(label)}`
     },
     cardPendingUpload () {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.cardId)
     },
-    serviceIsUnsplash () {
-      return this.service === 'unsplash'
+    serviceIsBing () {
+      return this.service === 'bing'
     },
     serviceIsStickers () {
       return this.service === 'stickers'
@@ -238,8 +241,8 @@ export default {
       this.service = 'recent'
       this.updateImagesFromCachedSpace()
     },
-    toggleServiceIsUnsplash () {
-      this.service = 'unsplash'
+    toggleServiceIsBing () {
+      this.service = 'bing'
       this.searchAgain()
     },
     toggleServiceIsStickers () {
@@ -282,17 +285,16 @@ export default {
       this.loading = true
       this.searchService()
     },
-    async searchUnsplash () {
-      let url = new URL('https://api.unsplash.com/photos')
-      let params = { client_id: unsplashApiKey }
-      if (this.search) {
-        url = new URL('https://api.unsplash.com/search/photos')
-        params.query = this.search
-      }
+    async searchBing () {
+      let url = new URL('https://api.bing.microsoft.com/v7.0/images/search')
+      const headers = new Headers({
+        'Ocp-Apim-Subscription-Key': 'ce6e720f52f84cc490885ec6cbb56dce'
+      })
+      let params = { q: this.search || 'animals' }
       url.search = new URLSearchParams(params).toString()
-      const response = await fetch(url)
+      const response = await fetch(url, { method: 'GET', headers })
       const data = await response.json()
-      this.normalizeResults(data, 'unsplash')
+      this.normalizeResults(data, 'bing')
     },
     async searchGiphy (isStickers) {
       let resource = 'gifs'
@@ -327,8 +329,8 @@ export default {
         return
       }
       try {
-        if (this.serviceIsUnsplash) {
-          await this.searchUnsplash()
+        if (this.serviceIsBing) {
+          await this.searchBing()
         } else if (this.serviceIsStickers) {
           const isStickers = true
           await this.searchGiphy(isStickers)
@@ -355,30 +357,17 @@ export default {
       this.resultsSectionHeight = null
     },
     normalizeResults (data, service) {
-      const unsplash = service === 'unsplash' && this.serviceIsUnsplash
+      const bing = service === 'bing' && this.serviceIsBing
       const giphy = service === 'giphy' && (this.serviceIsStickers || this.serviceIsGifs)
       const backgrounds = service === 'backgrounds' && this.serviceIsBackgrounds
-      // unsplash
-      if (unsplash) {
-        if (data.results) {
-          data = data.results
-        }
+      // bing
+      if (bing) {
+        data = data.value
         this.images = data.map(image => {
-          // let qs = `?w=600&img=true`
-          // if (this.isBackgroundImage) {
-          //   qs = `?w=1080&h=1080&q=60&img=true`
-          // }
-          let url = image.urls.small
-          // url = utils.urlWithoutQueryString(url)
-          // url = url + qs
-          let name = image.user.first_name + ' ' + image.user.last_name
-          name = utils.truncated(name, 20)
           return {
-            id: image.id,
-            sourcePageUrl: image.user.links.html,
-            sourceName: name,
-            previewUrl: image.urls.thumb,
-            url
+            id: image.imageid,
+            previewUrl: image.thumbnailUrl,
+            url: image.contentUrl
           }
         })
       // giphy
@@ -430,18 +419,7 @@ export default {
       this.images = []
       this.searchService()
     },
-    pingUnsplash (image) {
-      // when a user selects a photo, use the download endpoint to let unsplash know
-      image = this.images.find(unsplashImage => unsplashImage.id === image.id)
-      let url = new URL(`https://api.unsplash.com/photos/${image.id}/download`)
-      let params = { client_id: unsplashApiKey }
-      url.search = new URLSearchParams(params).toString()
-      fetch(url)
-    },
     selectImage (image) {
-      if (this.serviceIsUnsplash) {
-        this.pingUnsplash(image)
-      }
       this.$emit('selectImage', image)
     },
     scrollIntoView () {
