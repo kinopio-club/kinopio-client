@@ -114,6 +114,7 @@ import cache from '@/cache.js'
 
 import debounce from 'lodash-es/debounce'
 import uniq from 'lodash-es/uniq'
+import sample from 'lodash-es/sample'
 
 const numberOfImages = 25
 
@@ -290,7 +291,15 @@ export default {
       const headers = new Headers({
         'Ocp-Apim-Subscription-Key': 'ce6e720f52f84cc490885ec6cbb56dce'
       })
-      let params = { q: this.search || 'animals' }
+      const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
+      const defaultSearch = sample(defaultSearches)
+      let params = { q: this.search || defaultSearch }
+      if (this.isBackgroundImage) {
+        params.size = 'large'
+        params.maxWidth = 1800
+      } else {
+        params.maxWidth = 600
+      }
       url.search = new URLSearchParams(params).toString()
       const response = await fetch(url, { method: 'GET', headers })
       const data = await response.json()
