@@ -52,6 +52,10 @@ dialog.narrow.multiple-selected-actions(
       button(v-if="multipleCardsIsSelected" @click="mergeSelectedCards")
         img.icon(src="@/assets/merge.svg")
         span Merge
+      //- Split
+      button(v-if="cardCanBySplit" @click="splitCard")
+        img.icon(src="@/assets/split.svg")
+        span Split
 
     template(v-if="multipleCardsSelectedIds.length")
       .row
@@ -129,8 +133,13 @@ export default {
     // cards
 
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
-    cardsIsSelected () { return Boolean(this.multipleCardsSelectedIds.length > 0) },
-    multipleCardsIsSelected () { return Boolean(this.multipleCardsSelectedIds.length > 1) },
+    cardCanBySplit () {
+      if (!this.oneCardIsSelected) { return }
+      return this.cards[0].name.includes('\n')
+    },
+    oneCardIsSelected () { return this.multipleCardsSelectedIds.length === 1 },
+    cardsIsSelected () { return this.multipleCardsSelectedIds.length > 0 },
+    multipleCardsIsSelected () { return this.multipleCardsSelectedIds.length > 1 },
     cards () {
       let cards = this.multipleCardsSelectedIds.map(cardId => {
         return this.$store.getters['currentCards/byId'](cardId)
@@ -289,6 +298,15 @@ export default {
     }
   },
   methods: {
+    splitCard () {
+      // open card details and trigger the split from there
+      const cardId = this.cards[0].id
+      this.$store.dispatch('clearMultipleSelected')
+      this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.splitCard')
+      this.$store.commit('preventCardDetailsOpeningAnimation', true)
+      this.$store.commit('cardDetailsIsVisibleForCardId', cardId)
+      this.$store.commit('triggerSplitCard', cardId)
+    },
     positionNewCards (newCards) {
       const spaceBetweenCards = 12
       this.$nextTick(() => {
@@ -310,7 +328,7 @@ export default {
           })
           return card
         })
-        this.$store.dispatch('closeAllDialogs', 'CardDetails.addSplitCards')
+        this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.positionNewCards')
       })
     },
     cardsSortedByY () {

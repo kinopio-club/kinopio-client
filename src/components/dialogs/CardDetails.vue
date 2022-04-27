@@ -281,6 +281,10 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUnloadPage' && this.visible) {
         this.closeCard()
+      } else if (mutation.type === 'triggerSplitCard' && this.visible) {
+        const cardId = mutation.payload
+        if (cardId !== this.card.id) { return }
+        this.splitCards()
       } else if (mutation.type === 'cardDetailsIsVisibleForCardId') {
         const cardId = mutation.payload
         if (prevCardId) {
