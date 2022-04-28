@@ -62,7 +62,7 @@ export default {
       })
     },
     async updateUserShowInExploreUpdatedAt () {
-      this.comparisonDate = utils.clone(this.$store.state.currentUser.showInExploreUpdatedAt)
+      this.comparisonDate = this.$store.state.currentUser.showInExploreUpdatedAt
       let serverDate = await this.$store.dispatch('api/getDate')
       serverDate = serverDate.date
       this.$store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
