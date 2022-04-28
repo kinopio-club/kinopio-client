@@ -35,6 +35,7 @@
   .badge.info(v-if="!canEditSpace") Read Only
   AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
 AskToAddToExplore
+SpaceDetailsTags
 
 </template>
 
@@ -45,6 +46,7 @@ import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
+import SpaceDetailsTags from '@/components/SpaceDetailsTags.vue'
 
 export default {
   name: 'SpaceDetailsInfo',
@@ -55,7 +57,8 @@ export default {
     Loader,
     PrivacyButton,
     AddToExplore,
-    AskToAddToExplore
+    AskToAddToExplore,
+    SpaceDetailsTags
   },
   props: {
     shouldHideExplore: Boolean,
