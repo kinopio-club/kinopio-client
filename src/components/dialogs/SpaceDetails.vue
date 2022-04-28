@@ -40,7 +40,7 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
         SpaceFilters(:visible="spaceFiltersIsVisible" :spaces="filteredSpaces")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" @selectSpace="changeSpace")
+    SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" :showCreateNewSpaceFromSearch="true" @selectSpace="changeSpace" @addSpace="addSpace")
 </template>
 
 <script>
@@ -86,6 +86,8 @@ export default {
             element.setSelectionRange(0, element.value.length)
           })
         })
+      } else if (mutation.type === 'triggerSpaceDetailsUpdateLocalSpaces') {
+        this.updateLocalSpaces()
       } else if (mutation.type === 'updatePageSizes') {
         this.updateHeights()
       } else if (mutation.type === 'currentUser/favoriteSpaces') {

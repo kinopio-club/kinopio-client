@@ -286,10 +286,10 @@ export default {
       context.dispatch('updateOtherUsers')
       context.dispatch('updateOtherSpaces')
     },
-    createNewSpace: (context) => {
+    createNewSpace: (context, { name }) => {
       window.scrollTo(0, 0)
       let space = utils.clone(newSpace)
-      space.name = words.randomUniqueName()
+      space.name = name || words.randomUniqueName()
       space.id = nanoid()
       space.createdAt = new Date()
       space.editedAt = new Date()
@@ -369,10 +369,10 @@ export default {
       await context.dispatch('saveImportedSpace')
       context.commit('addNotification', { message: `${space.name} is now yours to edit`, type: 'success' }, { root: true })
     },
-    addSpace: (context) => {
+    addSpace: (context, space) => {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
-      context.dispatch('createNewSpace')
+      context.dispatch('createNewSpace', space)
       const cards = context.rootGetters['currentCards/all']
       if (cards.length) {
         context.dispatch('currentConnections/updatePaths', { cardId: cards[1].id, connections: context.rootGetters['currentConnections/all'] }, { root: true })

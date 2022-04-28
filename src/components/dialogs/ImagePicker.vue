@@ -77,7 +77,7 @@ dialog.image-picker(
         @focus="resetPinchCounterZoomDecimal"
       )
       button.borderless.clear-input-wrap(@click.left="clearSearch")
-        img.icon(src="@/assets/add.svg")
+        img.icon.cancel(src="@/assets/add.svg")
     //- .row.search-options-row
     //-   //- p
     //-   //-   span Blobs

@@ -817,7 +817,6 @@ code
   height 20px
   img
     padding 0
-    transform rotate(45deg)
     vertical-align 2px
 
 .url-textarea

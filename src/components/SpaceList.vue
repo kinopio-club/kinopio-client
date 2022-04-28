@@ -6,6 +6,7 @@ span.space-list-wrap
     :placeholder="placeholder"
     :isLoading="isLoading"
     :parentIsPinned="parentIsPinned"
+    :showCreateNewSpaceFromSearch="showCreateNewSpaceFromSearch"
     @updateFilter="updateFilter"
     @updateFilteredItems="updateFilteredSpaces"
     @focusNextItem="focusNextItemFromFilter"
@@ -109,7 +110,8 @@ export default {
     parentIsSpaceDetails: Boolean,
     parentIsPinned: Boolean,
     showCheckmarkSpace: Boolean,
-    userShowInExploreDate: String
+    userShowInExploreDate: String,
+    showCreateNewSpaceFromSearch: Boolean
   },
   data () {
     return {

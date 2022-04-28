@@ -366,6 +366,7 @@ const store = createStore({
     triggerSpaceDetailsInfoIsVisible: () => {},
     triggerFocusResultsFilter: () => {},
     triggerFocusSpaceDetailsName: () => {},
+    triggerSpaceDetailsUpdateLocalSpaces: () => {},
     triggerSignUpOrInIsVisible: () => {},
     triggerArenaAuthenticationError: () => {},
     triggerKeyboardShortcutsIsVisible: () => {},
