@@ -2,9 +2,23 @@
 .row.space-details-tags(v-if="isVisible")
   button(:class="{active: currentSpaceHasTag}")
     span Tag
-  .horizontal-row
-    .badge.button-badge.test1.active my cool tag
-    //- .badge.button-badge.test2 feature
+  .horizontal-row(v-if="currentSpaceHasTag")
+    .badge.test1
+      //- img.icon.cancel(src="@/assets/add.svg")
+      //- img.icon(src="@/assets/remove.svg")
+
+      span my cool tag
+      //- img.icon.cancel(src="@/assets/add.svg")
+
+        //- span.badge.button-badge(
+        //-   :style="{backgroundColor: tag.color}"
+        //-   :class="{ active: currentSelectedTag.name === tag.name }"
+        //-   tabindex="0"
+        //-   @click.left.stop="showTagDetailsIsVisible($event, tag)"
+        //-   @touchend.stop="showTagDetailsIsVisible($event, tag)"
+        //-   @keyup.stop.enter="showTagDetailsIsVisible($event, tag)"
+        //- ) {{tag.name}}
+
 </template>
 
 <script>
@@ -58,9 +72,8 @@ export default {
     margin-left 6px
     .badge + .badge
       margin-left 6px
-
+    // .cancel
+    //   margin-left 4px
   .test1
     background-color #fcc3f6
-  .test2
-    background-color #df75f4
 </style>
