@@ -286,9 +286,13 @@ export default {
       context.dispatch('updateOtherUsers')
       context.dispatch('updateOtherSpaces')
     },
-    createNewSpace: (context, { name }) => {
+    createNewSpace: (context, space) => {
       window.scrollTo(0, 0)
-      let space = utils.clone(newSpace)
+      let name
+      if (space) {
+        name = space.name
+      }
+      space = utils.clone(newSpace)
       space.name = name || words.randomUniqueName()
       space.id = nanoid()
       space.createdAt = new Date()
