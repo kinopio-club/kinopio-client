@@ -124,6 +124,13 @@ export default {
         })
       } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
+      } else if (mutation.type === 'triggerRemovedIsVisible') {
+        if (!this.moreFooterControlsIsVisible) {
+          this.$store.dispatch('currentUser/shouldShowMoreFooterControls', true)
+        }
+        this.$nextTick(() => {
+          this.toggleRemovedIsVisible()
+        })
       }
     })
     window.addEventListener('scroll', this.handleTouchInteractions)

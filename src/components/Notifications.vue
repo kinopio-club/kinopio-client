@@ -34,7 +34,7 @@ aside.notifications(@click.left="closeAllDialogs")
   .item.info(v-if="notifyCurrentSpaceIsNowRemoved" @animationend="resetNotifyCurrentSpaceIsNowRemoved")
     p Restore or permanently delete spaces through
     .row
-      button
+      button(@click.stop="showRemoved")
         img.icon(src="@/assets/remove.svg")
         span Removed
 
@@ -277,6 +277,10 @@ export default {
     },
     resetNotifyCurrentSpaceIsNowRemoved () {
       this.$store.commit('notifyCurrentSpaceIsNowRemoved', false)
+    },
+    showRemoved () {
+      this.resetNotifyCurrentSpaceIsNowRemoved()
+      this.$store.commit('triggerRemovedIsVisible')
     },
     resetNotifyCardsCreatedIsNearLimit () {
       this.$store.commit('notifyCardsCreatedIsNearLimit', false)

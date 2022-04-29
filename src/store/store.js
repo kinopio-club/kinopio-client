@@ -407,6 +407,7 @@ const store = createStore({
     triggerTemplatesIsVisible: () => {},
     triggerSelectAllCardsBelowCursor: (state, position) => {},
     triggerSplitCard: (state, cardId) => {},
+    triggerRemovedIsVisible: () => {},
 
     // Cards
 
