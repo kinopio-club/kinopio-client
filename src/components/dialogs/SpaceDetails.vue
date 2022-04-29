@@ -122,10 +122,11 @@ export default {
     currentSpaceIsHidden () { return this.$store.state.currentSpace.isHidden },
     style () { return { maxHeight: this.dialogHeight + 'px' } },
     spaceName () { return this.$store.state.currentSpace.name },
+    spaceFilterShowHiddenIsActive () { return this.$store.state.currentUser.dialogSpaceFilterShowHidden },
     dialogSpaceFilters () { return this.$store.state.currentUser.dialogSpaceFilters },
     dialogSpaceFilterByUser () { return this.$store.state.currentUser.dialogSpaceFilterByUser },
     spaceFiltersIsActive () {
-      return Boolean(this.dialogSpaceFilters || utils.objectHasKeys(this.dialogSpaceFilterByUser))
+      return Boolean(this.spaceFilterShowHiddenIsActive || this.dialogSpaceFilters || utils.objectHasKeys(this.dialogSpaceFilterByUser))
     },
     filteredSpaces () {
       let spaces
@@ -138,6 +139,12 @@ export default {
         spaces = this.nonJournalSpaces
       } else {
         spaces = this.spaces
+      }
+      // filter by hidden spaces
+      if (this.spaceFilterShowHiddenIsActive) {
+        spaces = spaces.filter(space => space.isHidden)
+      } else {
+        spaces = spaces.filter(space => !space.isHidden)
       }
       // filter by user
       if (utils.objectHasKeys(this.dialogSpaceFilterByUser)) {
