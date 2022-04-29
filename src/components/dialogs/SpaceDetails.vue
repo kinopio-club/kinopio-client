@@ -4,9 +4,12 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
     SpaceDetailsInfo(@updateSpaces="updateLocalSpaces" @closeDialogs="closeDialogs")
     //- Remove
     .button-wrap(v-if="isSpaceMember")
-      button(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
-        img.icon(src="@/assets/remove.svg")
-        span {{removeLabel}}
+      .segmented-buttons
+        button(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
+          img.icon(src="@/assets/remove.svg")
+          span {{removeLabel}}
+        button(@click.stop="toggleHideSpaceisVisible" :class="{ active: hideSpaceIsVisible }")
+          img.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
     //-  Duplicate
     .button-wrap(v-if="!isSpaceMember")
       button(@click.left="duplicateSpace")
@@ -110,7 +113,8 @@ export default {
       dialogHeight: null,
       journalSpaces: [],
       nonJournalSpaces: [],
-      spaceFiltersIsVisible: false
+      spaceFiltersIsVisible: false,
+      hideSpaceIsVisible: false
     }
   },
   computed: {
@@ -199,11 +203,17 @@ export default {
       this.closeDialogs()
       this.addSpaceIsVisible = !isVisible
     },
+    toggleHideSpaceisVisible () {
+      const isVisible = this.hideSpaceIsVisible
+      this.closeDialogs()
+      this.hideSpaceIsVisible = !isVisible
+    },
     closeDialogs () {
       this.exportIsVisible = false
       this.importIsVisible = false
       this.addSpaceIsVisible = false
       this.spaceFiltersIsVisible = false
+      this.hideSpaceIsVisible = false
       this.$store.commit('triggerSpaceDetailsCloseDialogs')
     },
     changeSpace (space) {
@@ -404,4 +414,6 @@ export default {
     padding-bottom 0
   &.is-pinned
     left -65px
+  .button-down-arrow
+    padding 0
 </style>
