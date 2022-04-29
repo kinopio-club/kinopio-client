@@ -31,6 +31,13 @@ aside.notifications(@click.left="closeAllDialogs")
     p Hidden spaces revealed through
       img.icon.filter-icon(src="@/assets/filter.svg")
 
+  .item.info(v-if="notifyCurrentSpaceIsNowRemoved" @animationend="resetNotifyCurrentSpaceIsNowRemoved")
+    p Restore or permanently delete spaces through
+    .row
+      button
+        img.icon(src="@/assets/remove.svg")
+        span Removed
+
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
     p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $5/month
     .row
@@ -180,6 +187,7 @@ export default {
     notifyMoveOrCopyToSpace () { return this.$store.state.notifyMoveOrCopyToSpace },
     notifyMoveOrCopyToSpaceDetails () { return this.$store.state.notifyMoveOrCopyToSpaceDetails },
     notifySpaceIsHidden () { return this.$store.state.notifySpaceIsHidden },
+    notifyCurrentSpaceIsNowRemoved () { return this.$store.state.notifyCurrentSpaceIsNowRemoved },
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsSignedIn () {
@@ -266,6 +274,9 @@ export default {
     },
     resetNotifySpaceIsHidden () {
       this.$store.commit('notifySpaceIsHidden', false)
+    },
+    resetNotifyCurrentSpaceIsNowRemoved () {
+      this.$store.commit('notifyCurrentSpaceIsNowRemoved', false)
     },
     resetNotifyCardsCreatedIsNearLimit () {
       this.$store.commit('notifyCardsCreatedIsNearLimit', false)

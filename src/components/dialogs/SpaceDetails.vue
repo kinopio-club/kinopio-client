@@ -247,6 +247,7 @@ export default {
         this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', currentUser)
       } else {
         this.$store.dispatch('currentSpace/removeCurrentSpace')
+        this.$store.commit('notifyCurrentSpaceIsNowRemoved', true)
       }
       if (utils.arrayExists(this.remoteSpaces)) {
         this.remoteSpaces = this.remoteSpaces.filter(space => space.id !== currentSpaceId)
