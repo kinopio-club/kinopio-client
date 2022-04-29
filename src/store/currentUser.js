@@ -9,6 +9,7 @@ export default {
   state: {
     id: nanoid(),
     lastSpaceId: '',
+    prevLastSpaceId: '',
     color: randomColor({ luminosity: 'light' }),
     name: undefined,
     description: undefined,
@@ -44,6 +45,7 @@ export default {
     dialogFavoritesFilters: null, // null, 'currentUser', 'otherUsers'
     dialogSpaceFilters: null, // null, journals, spaces
     dialogSpaceFilterByUser: {},
+    dialogSpaceFilterShowHidden: false,
     defaultSpaceBackground: undefined,
     defaultSpaceBackgroundTint: undefined,
     defaultAddSpaceId: undefined,
@@ -71,6 +73,7 @@ export default {
       cache.updateUser('email', value)
     },
     lastSpaceId: (state, spaceId) => {
+      state.prevLastSpaceId = state.lastSpaceId
       state.lastSpaceId = spaceId
       cache.updateUser('lastSpaceId', spaceId)
     },
@@ -267,6 +270,10 @@ export default {
     dialogSpaceFilterByUser: (state, value) => {
       state.dialogSpaceFilterByUser = value
       cache.updateUser('dialogSpaceFilterByUser', value)
+    },
+    dialogSpaceFilterShowHidden: (state, value) => {
+      state.dialogSpaceFilterShowHidden = value
+      cache.updateUser('dialogSpaceFilterShowHidden', value)
     },
     defaultSpaceBackground: (state, value) => {
       state.defaultSpaceBackground = value

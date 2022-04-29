@@ -2,11 +2,16 @@
 dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   section
     SpaceDetailsInfo(@updateSpaces="updateLocalSpaces" @closeDialogs="closeDialogs")
-    //- Remove
     .button-wrap(v-if="isSpaceMember")
-      button(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
-        img.icon(src="@/assets/remove.svg")
-        span {{removeLabel}}
+      .segmented-buttons
+        //- Remove
+        button(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
+          img.icon(src="@/assets/remove.svg")
+          span {{removeLabel}}
+        // Hide Space
+        button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
+          img.icon(v-if="!currentSpaceIsHidden" src="@/assets/view.svg")
+          img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
     //-  Duplicate
     .button-wrap(v-if="!isSpaceMember")
       button(@click.left="duplicateSpace")
@@ -114,12 +119,14 @@ export default {
     }
   },
   computed: {
+    currentSpaceIsHidden () { return this.$store.state.currentSpace.isHidden },
     style () { return { maxHeight: this.dialogHeight + 'px' } },
     spaceName () { return this.$store.state.currentSpace.name },
+    spaceFilterShowHiddenIsActive () { return this.$store.state.currentUser.dialogSpaceFilterShowHidden },
     dialogSpaceFilters () { return this.$store.state.currentUser.dialogSpaceFilters },
     dialogSpaceFilterByUser () { return this.$store.state.currentUser.dialogSpaceFilterByUser },
     spaceFiltersIsActive () {
-      return Boolean(this.dialogSpaceFilters || utils.objectHasKeys(this.dialogSpaceFilterByUser))
+      return Boolean(this.spaceFilterShowHiddenIsActive || this.dialogSpaceFilters || utils.objectHasKeys(this.dialogSpaceFilterByUser))
     },
     filteredSpaces () {
       let spaces
@@ -132,6 +139,12 @@ export default {
         spaces = this.nonJournalSpaces
       } else {
         spaces = this.spaces
+      }
+      // filter by hidden spaces
+      if (this.spaceFilterShowHiddenIsActive) {
+        spaces = spaces.filter(space => space.isHidden)
+      } else {
+        spaces = spaces.filter(space => !space.isHidden)
       }
       // filter by user
       if (utils.objectHasKeys(this.dialogSpaceFilterByUser)) {
@@ -167,6 +180,12 @@ export default {
     dialogIsPinned () { return this.$store.state.spaceDetailsDialogIsPinned }
   },
   methods: {
+    toggleHideSpace () {
+      const value = !this.currentSpaceIsHidden
+      this.$store.dispatch('currentSpace/updateSpace', { isHidden: value })
+      this.updateLocalSpaces()
+      this.$store.commit('notifySpaceIsHidden', value)
+    },
     toggleSpaceFiltersIsVisible () {
       const isVisible = this.spaceFiltersIsVisible
       this.closeDialogs()
@@ -215,7 +234,8 @@ export default {
       const currentSpace = this.$store.state.currentSpace
       const spaces = this.spaces.filter(space => space.id !== currentSpace.id)
       if (spaces.length) {
-        this.$store.dispatch('currentSpace/changeSpace', { space: spaces[0] })
+        const cachedSpace = this.$store.getters.cachedOrOtherSpaceById(this.$store.state.currentUser.prevLastSpaceId)
+        this.$store.dispatch('currentSpace/changeSpace', { space: cachedSpace || spaces[0] })
       } else {
         this.addSpace()
       }
@@ -228,6 +248,7 @@ export default {
         this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', currentUser)
       } else {
         this.$store.dispatch('currentSpace/removeCurrentSpace')
+        this.$store.commit('notifyCurrentSpaceIsNowRemoved', true)
       }
       if (utils.arrayExists(this.remoteSpaces)) {
         this.remoteSpaces = this.remoteSpaces.filter(space => space.id !== currentSpaceId)
@@ -404,4 +425,6 @@ export default {
     padding-bottom 0
   &.is-pinned
     left -65px
+  .button-down-arrow
+    padding 0
 </style>

@@ -162,6 +162,7 @@ const store = createStore({
     notifyConnectionError: false,
     notifyServerCouldNotSave: false,
     notifySpaceIsRemoved: false,
+    notifyCurrentSpaceIsNowRemoved: false,
     notifySignUpToEditSpace: false,
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
@@ -169,6 +170,7 @@ const store = createStore({
     notifyMoveOrCopyToSpace: false,
     notifyMoveOrCopyToSpaceDetails: {},
     hasNotifiedPressAndHoldToDrag: false,
+    notifySpaceIsHidden: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -405,6 +407,7 @@ const store = createStore({
     triggerTemplatesIsVisible: () => {},
     triggerSelectAllCardsBelowCursor: (state, position) => {},
     triggerSplitCard: (state, cardId) => {},
+    triggerRemovedIsVisible: () => {},
 
     // Cards
 
@@ -919,6 +922,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'notifySpaceIsRemoved' })
       state.notifySpaceIsRemoved = value
     },
+    notifyCurrentSpaceIsNowRemoved: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'notifyCurrentSpaceIsNowRemoved' })
+      state.notifyCurrentSpaceIsNowRemoved = value
+    },
     notifySignUpToEditSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'notifySignUpToEditSpace' })
       state.notifySignUpToEditSpace = value
@@ -949,6 +956,10 @@ const store = createStore({
     hasNotifiedPressAndHoldToDrag: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'hasNotifiedPressAndHoldToDrag' })
       state.hasNotifiedPressAndHoldToDrag = value
+    },
+    notifySpaceIsHidden: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'notifySpaceIsHidden' })
+      state.notifySpaceIsHidden = value
     },
 
     // Notifications with Position

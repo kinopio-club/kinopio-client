@@ -6,6 +6,15 @@ dialog.narrow.space-filters(v-if="visible" :open="visible" @click.left.stop ref=
     button(@click.left="clearAllFilters")
       img.icon.cancel(src="@/assets/add.svg")
       span Clear all
+
+    .row
+      .checkbox-wrap
+        label(:class="{active: showHiddenSpace}")
+          input(type="checkbox" v-model="showHiddenSpace")
+          img.icon(v-if="!showHiddenSpace" src="@/assets/view.svg")
+          img.icon(v-if="showHiddenSpace" src="@/assets/view-hidden.svg")
+          span Hidden Spaces
+
     .segmented-buttons
       button(@click="showAllSpaces" :class="{active: allIsActive}") All
       button(@click="showJournalsOnly" :class="{active: journalsIsActive}")
@@ -61,9 +70,21 @@ export default {
       users = users.filter(user => Boolean(user))
       users = uniqBy(users, 'id')
       return users
+    },
+    showHiddenSpace: {
+      get () {
+        return this.$store.state.currentUser.dialogSpaceFilterShowHidden
+      },
+      set () {
+        this.toggleShowHiddenSpace()
+      }
     }
   },
   methods: {
+    toggleShowHiddenSpace () {
+      const value = !this.$store.state.currentUser.dialogSpaceFilterShowHidden
+      this.$store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: value })
+    },
     showJournalsOnly () {
       this.updateFilter('journals')
     },
@@ -89,6 +110,7 @@ export default {
     clearAllFilters () {
       this.showAllSpaces()
       this.updateUserFilter({})
+      this.$store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: false })
     }
   }
 }
@@ -104,4 +126,6 @@ export default {
     left -110px
   .collaborators
     max-height calc(100vh - 200px)
+  button + .row
+    margin-top 10px
 </style>
