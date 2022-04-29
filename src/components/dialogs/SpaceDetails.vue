@@ -234,7 +234,8 @@ export default {
       const currentSpace = this.$store.state.currentSpace
       const spaces = this.spaces.filter(space => space.id !== currentSpace.id)
       if (spaces.length) {
-        this.$store.dispatch('currentSpace/changeSpace', { space: spaces[0] })
+        const cachedSpace = this.$store.getters.cachedOrOtherSpaceById(this.$store.state.currentUser.prevLastSpaceId)
+        this.$store.dispatch('currentSpace/changeSpace', { space: cachedSpace || spaces[0] })
       } else {
         this.addSpace()
       }
