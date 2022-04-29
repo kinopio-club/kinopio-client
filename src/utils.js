@@ -774,7 +774,7 @@ export default {
     return space
   },
   emptySpace (spaceId) {
-    return { id: spaceId, moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [] }
+    return { id: spaceId, moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [], isHidden: true }
   },
   clearSpaceMeta (space, type) {
     space.originSpaceId = space.id

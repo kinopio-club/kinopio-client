@@ -2,14 +2,17 @@
 dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   section
     SpaceDetailsInfo(@updateSpaces="updateLocalSpaces" @closeDialogs="closeDialogs")
-    //- Remove
     .button-wrap(v-if="isSpaceMember")
       .segmented-buttons
+        //- Remove
         button(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
           img.icon(src="@/assets/remove.svg")
           span {{removeLabel}}
-        button(@click.stop="toggleHideSpaceisVisible" :class="{ active: hideSpaceIsVisible }")
+        // Hide Space
+        button(@click.stop="toggleHideSpaceisVisible" :class="{ active: hideSpaceIsVisible || currentSpaceIsHidden }")
           img.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+      HideSpace(:visible="hideSpaceIsVisible" @updateSpaces="updateLocalSpaces")
+
     //-  Duplicate
     .button-wrap(v-if="!isSpaceMember")
       button(@click.left="duplicateSpace")
@@ -53,6 +56,7 @@ import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
 import SpaceFilters from '@/components/dialogs/SpaceFilters.vue'
+import HideSpace from '@/components/dialogs/HideSpace.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import templates from '@/data/templates.js'
 import utils from '@/utils.js'
@@ -73,7 +77,8 @@ export default {
     Import,
     AddSpace,
     SpaceFilters,
-    SpaceList
+    SpaceList,
+    HideSpace
   },
   props: {
     visible: Boolean
@@ -118,6 +123,7 @@ export default {
     }
   },
   computed: {
+    currentSpaceIsHidden () { return this.$store.state.currentSpace.isHidden },
     style () { return { maxHeight: this.dialogHeight + 'px' } },
     spaceName () { return this.$store.state.currentSpace.name },
     dialogSpaceFilters () { return this.$store.state.currentUser.dialogSpaceFilters },
