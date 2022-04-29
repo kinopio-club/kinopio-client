@@ -18,10 +18,10 @@ span.space-list-wrap
       .space-wrap
         a(:href="space.url")
           li(
-            @click.left.prevent.stop="selectSpace(space)"
+            @click.left="selectSpace($event, space)"
             :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
             tabindex="0"
-            @keyup.enter="selectSpace(space.id)"
+            @keyup.enter="selectSpace(null, space)"
           )
             Loader(:visible="isLoadingSpace(space)")
 
@@ -140,7 +140,7 @@ export default {
       if (mutation.type === 'triggerPickerSelect') {
         const spaces = this.spaces
         const currentSpace = spaces.find(space => space.id === this.focusOnId)
-        this.selectSpace(currentSpace)
+        this.selectSpace(null, currentSpace)
         this.$store.commit('shouldPreventNextEnterKey', true)
       }
     })
@@ -288,7 +288,15 @@ export default {
         this.focusOnId = lastItem.id
       }
     },
-    selectSpace (space) {
+    selectSpace (event, space) {
+      if (event) {
+        if (event.metaKey || event.ctrlKey) {
+          return
+        } else {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+      }
       if (shouldPreventSelectSpace) {
         shouldPreventSelectSpace = false
         return
@@ -317,7 +325,7 @@ export default {
       const spaces = this.spacesFiltered
       const space = spaces.find(space => space.id === this.focusOnId)
       this.$store.commit('shouldPreventNextEnterKey', true)
-      this.selectSpace(space)
+      this.selectSpace(null, space)
     },
     checkmarkSpace (space) {
       shouldPreventSelectSpace = true
