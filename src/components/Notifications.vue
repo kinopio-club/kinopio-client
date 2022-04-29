@@ -27,6 +27,10 @@ aside.notifications(@click.left="closeAllDialogs")
     img.icon(src="@/assets/hand.svg")
     span Hold and drag to pan
 
+  .item.info(v-if="notifySpaceIsHidden" @animationend="resetNotifySpaceIsHidden")
+    p Hidden spaces revealed through
+      img.icon.filter-icon(src="@/assets/filter.svg")
+
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
     p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $5/month
     .row
@@ -175,6 +179,7 @@ export default {
     notifyKinopioUpdatesAreAvailable () { return this.$store.state.notifyKinopioUpdatesAreAvailable },
     notifyMoveOrCopyToSpace () { return this.$store.state.notifyMoveOrCopyToSpace },
     notifyMoveOrCopyToSpaceDetails () { return this.$store.state.notifyMoveOrCopyToSpaceDetails },
+    notifySpaceIsHidden () { return this.$store.state.notifySpaceIsHidden },
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsSignedIn () {
@@ -258,6 +263,9 @@ export default {
       this.$store.commit('notifySpaceIsRemoved', false)
       const firstSpace = cache.getAllSpaces()[0]
       this.$store.dispatch('currentSpace/loadSpace', { space: firstSpace })
+    },
+    resetNotifySpaceIsHidden () {
+      this.$store.commit('notifySpaceIsHidden', false)
     },
     resetNotifyCardsCreatedIsNearLimit () {
       this.$store.commit('notifyCardsCreatedIsNearLimit', false)
@@ -379,6 +387,10 @@ export default {
 
   .redo
     transform scaleX(-1)
+
+  .filter-icon
+    margin 0
+    margin-left 4px
 
 @keyframes notificationJiggle
   0%

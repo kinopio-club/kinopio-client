@@ -169,6 +169,7 @@ const store = createStore({
     notifyMoveOrCopyToSpace: false,
     notifyMoveOrCopyToSpaceDetails: {},
     hasNotifiedPressAndHoldToDrag: false,
+    notifySpaceIsHidden: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -949,6 +950,10 @@ const store = createStore({
     hasNotifiedPressAndHoldToDrag: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'hasNotifiedPressAndHoldToDrag' })
       state.hasNotifiedPressAndHoldToDrag = value
+    },
+    notifySpaceIsHidden: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'notifySpaceIsHidden' })
+      state.notifySpaceIsHidden = value
     },
 
     // Notifications with Position

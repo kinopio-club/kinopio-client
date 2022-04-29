@@ -9,10 +9,9 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
           img.icon(src="@/assets/remove.svg")
           span {{removeLabel}}
         // Hide Space
-        button(@click.stop="toggleHideSpaceisVisible" :class="{ active: hideSpaceIsVisible || currentSpaceIsHidden }")
-          img.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
-      HideSpace(:visible="hideSpaceIsVisible" @updateSpaces="updateLocalSpaces")
-
+        button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
+          img.icon(v-if="!currentSpaceIsHidden" src="@/assets/view.svg")
+          img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
     //-  Duplicate
     .button-wrap(v-if="!isSpaceMember")
       button(@click.left="duplicateSpace")
@@ -56,7 +55,6 @@ import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
 import SpaceFilters from '@/components/dialogs/SpaceFilters.vue'
-import HideSpace from '@/components/dialogs/HideSpace.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import templates from '@/data/templates.js'
 import utils from '@/utils.js'
@@ -77,8 +75,7 @@ export default {
     Import,
     AddSpace,
     SpaceFilters,
-    SpaceList,
-    HideSpace
+    SpaceList
   },
   props: {
     visible: Boolean
@@ -118,8 +115,7 @@ export default {
       dialogHeight: null,
       journalSpaces: [],
       nonJournalSpaces: [],
-      spaceFiltersIsVisible: false,
-      hideSpaceIsVisible: false
+      spaceFiltersIsVisible: false
     }
   },
   computed: {
@@ -177,6 +173,12 @@ export default {
     dialogIsPinned () { return this.$store.state.spaceDetailsDialogIsPinned }
   },
   methods: {
+    toggleHideSpace () {
+      const value = !this.currentSpaceIsHidden
+      this.$store.dispatch('currentSpace/updateSpace', { isHidden: value })
+      this.updateLocalSpaces()
+      this.$store.commit('notifySpaceIsHidden', value)
+    },
     toggleSpaceFiltersIsVisible () {
       const isVisible = this.spaceFiltersIsVisible
       this.closeDialogs()
@@ -209,17 +211,11 @@ export default {
       this.closeDialogs()
       this.addSpaceIsVisible = !isVisible
     },
-    toggleHideSpaceisVisible () {
-      const isVisible = this.hideSpaceIsVisible
-      this.closeDialogs()
-      this.hideSpaceIsVisible = !isVisible
-    },
     closeDialogs () {
       this.exportIsVisible = false
       this.importIsVisible = false
       this.addSpaceIsVisible = false
       this.spaceFiltersIsVisible = false
-      this.hideSpaceIsVisible = false
       this.$store.commit('triggerSpaceDetailsCloseDialogs')
     },
     changeSpace (space) {
