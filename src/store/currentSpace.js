@@ -19,7 +19,7 @@ let spectatorIdleTimers = []
 let notifiedCardAdded = []
 let isLoadingRemoteSpace
 
-export default {
+const currentSpace = {
   namespaced: true,
   state: utils.clone(helloSpace),
   mutations: {
@@ -885,16 +885,19 @@ export default {
 
     // Background
 
-    loadBackground: (context) => {
+    loadBackground: async (context) => {
       const element = document.querySelector('.app')
       if (!element) { return }
       const background = context.state.background
-      if (utils.urlIsImage(background)) {
-        element.style.backgroundImage = `url(${background})`
-      } else {
+      if (!utils.urlIsImage(background)) {
         element.style.backgroundImage = ''
+        context.dispatch('updateBackgroundZoom')
       }
-      context.dispatch('updateBackgroundZoom')
+      const image = await utils.loadImage(background)
+      if (image) {
+        element.style.backgroundImage = `url(${background})`
+        context.dispatch('updateBackgroundZoom')
+      }
     },
     updateBackgroundZoom: async (context) => {
       const element = document.querySelector('.app')
@@ -925,11 +928,7 @@ export default {
       width = width * spaceZoomDecimal
       height = height * spaceZoomDecimal
       if (width === 0 || height === 0) {
-        if (isRetina) {
-          element.style.backgroundSize = '50%'
-        } else {
-          element.style.backgroundSize = 'initial'
-        }
+        element.style.backgroundSize = 'initial'
         return
       }
       width = Math.round(width)
@@ -1107,3 +1106,5 @@ export default {
     }
   }
 }
+
+export default currentSpace
