@@ -904,12 +904,18 @@ export default {
       const spaceZoomDecimal = context.rootGetters.spaceZoomDecimal
       let backgroundImage = element.style.backgroundImage
       backgroundImage = utils.urlFromCSSBackgroundImage(backgroundImage)
+      let isRetina
       let image = new Image()
       let width, height
       if (backgroundImage) {
+        isRetina = backgroundImage.includes('-2x.') || backgroundImage.includes('@2x.')
         image.src = backgroundImage
         width = image.width
         height = image.height
+        if (isRetina) {
+          width = width / 2
+          height = height / 2
+        }
       } else {
         width = defaultBackground.width
         height = defaultBackground.height
@@ -917,7 +923,11 @@ export default {
       width = width * spaceZoomDecimal
       height = height * spaceZoomDecimal
       if (width === 0 || height === 0) {
-        element.style.backgroundSize = 'initial'
+        if (isRetina) {
+          element.style.backgroundSize = '50%'
+        } else {
+          element.style.backgroundSize = 'initial'
+        }
         return
       }
       width = Math.round(width)
