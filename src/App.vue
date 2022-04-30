@@ -280,7 +280,7 @@ body
   overflow auto // enables window.scrollBy support
 
 .app
-  background-image url('assets/background.svg')
+  background-image url('assets/background-2x.png')
   position relative
   > .label-badge
     color var(--primary-background)
