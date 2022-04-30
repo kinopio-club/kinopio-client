@@ -4,6 +4,7 @@ import newSpace from '@/data/new.json'
 import words from '@/data/words.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import backgroundImageMigration from '@/data/backgroundImageMigration.json'
 
 import { nextTick } from 'vue'
 import randomColor from 'randomcolor'
@@ -885,18 +886,31 @@ const currentSpace = {
 
     // Background
 
+    backgroundImageMigration: (context) => {
+      // temp migration, added Apr 2022
+      const prev = context.state.background
+      const index = backgroundImageMigration.findIndex(image => image.prev === prev)
+      if (index === -1) { return }
+      const newBackground = backgroundImageMigration[index].new
+      context.dispatch('updateSpace', { background: newBackground })
+    },
     loadBackground: async (context) => {
       const element = document.querySelector('.app')
       if (!element) { return }
+      context.dispatch('backgroundImageMigration')
       const background = context.state.background
       if (!utils.urlIsImage(background)) {
         element.style.backgroundImage = ''
         context.dispatch('updateBackgroundZoom')
       }
-      const image = await utils.loadImage(background)
-      if (image) {
-        element.style.backgroundImage = `url(${background})`
-        context.dispatch('updateBackgroundZoom')
+      try {
+        const image = await utils.loadImage(background)
+        if (image) {
+          element.style.backgroundImage = `url(${background})`
+          context.dispatch('updateBackgroundZoom')
+        }
+      } catch (error) {
+        console.warn('🚑 loadBackground', error)
       }
     },
     updateBackgroundZoom: async (context) => {
