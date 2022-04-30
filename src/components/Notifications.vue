@@ -27,6 +27,17 @@ aside.notifications(@click.left="closeAllDialogs")
     img.icon(src="@/assets/hand.svg")
     span Hold and drag to pan
 
+  .item.info(v-if="notifySpaceIsHidden" @animationend="resetNotifySpaceIsHidden")
+    p Hidden spaces revealed through
+      img.icon.filter-icon(src="@/assets/filter.svg")
+
+  .item.info(v-if="notifyCurrentSpaceIsNowRemoved" @animationend="resetNotifyCurrentSpaceIsNowRemoved")
+    p Restore or permanently delete spaces through
+    .row
+      button(@click.stop="showRemoved")
+        img.icon(src="@/assets/remove.svg")
+        span Removed
+
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
     p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $5/month
     .row
@@ -175,6 +186,8 @@ export default {
     notifyKinopioUpdatesAreAvailable () { return this.$store.state.notifyKinopioUpdatesAreAvailable },
     notifyMoveOrCopyToSpace () { return this.$store.state.notifyMoveOrCopyToSpace },
     notifyMoveOrCopyToSpaceDetails () { return this.$store.state.notifyMoveOrCopyToSpaceDetails },
+    notifySpaceIsHidden () { return this.$store.state.notifySpaceIsHidden },
+    notifyCurrentSpaceIsNowRemoved () { return this.$store.state.notifyCurrentSpaceIsNowRemoved },
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsSignedIn () {
@@ -258,6 +271,16 @@ export default {
       this.$store.commit('notifySpaceIsRemoved', false)
       const firstSpace = cache.getAllSpaces()[0]
       this.$store.dispatch('currentSpace/loadSpace', { space: firstSpace })
+    },
+    resetNotifySpaceIsHidden () {
+      this.$store.commit('notifySpaceIsHidden', false)
+    },
+    resetNotifyCurrentSpaceIsNowRemoved () {
+      this.$store.commit('notifyCurrentSpaceIsNowRemoved', false)
+    },
+    showRemoved () {
+      this.resetNotifyCurrentSpaceIsNowRemoved()
+      this.$store.commit('triggerRemovedIsVisible')
     },
     resetNotifyCardsCreatedIsNearLimit () {
       this.$store.commit('notifyCardsCreatedIsNearLimit', false)
@@ -379,6 +402,10 @@ export default {
 
   .redo
     transform scaleX(-1)
+
+  .filter-icon
+    margin 0
+    margin-left 4px
 
 @keyframes notificationJiggle
   0%

@@ -774,7 +774,7 @@ export default {
     return space
   },
   emptySpace (spaceId) {
-    return { id: spaceId, moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [] }
+    return { id: spaceId, moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [], isHidden: false }
   },
   clearSpaceMeta (space, type) {
     space.originSpaceId = space.id
@@ -787,6 +787,7 @@ export default {
     space.proposedShowInExplore = false
     space.privacy = 'private'
     space.isTemplate = false
+    space.isHidden = false
     space.cards = space.cards.map(card => {
       card.userId = null
       if (card.nameUpdatedByUserId) {
@@ -982,6 +983,7 @@ export default {
     space.connectionTypes = []
     space.connections = []
     space.isTemplate = false
+    space.isHidden = false
     space = this.spaceDefaultBackground(space, currentUser)
     // cards
     space.cards.push({ id: nanoid(), name: day, x: 60, y: 100, frameId: 0 })

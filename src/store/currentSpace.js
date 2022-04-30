@@ -309,6 +309,8 @@ export default {
       }
       space.userId = context.rootState.currentUser.id
       space = utils.spaceDefaultBackground(space, context.rootState.currentUser)
+      space.isTemplate = false
+      space.isHidden = false
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('clearSearch', null, { root: true })
