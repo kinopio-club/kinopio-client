@@ -20,6 +20,15 @@ let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
 
 export default {
+  loadImage (src) {
+    // from https://stackoverflow.com/a/5058336
+    return new Promise((resolve, reject) => {
+      const image = new Image()
+      image.addEventListener('load', resolve)
+      image.addEventListener('error', reject)
+      image.src = src
+    })
+  },
   assetUrl (path, type) {
     if (type) {
       return `@/assets/${path}.${type}`
