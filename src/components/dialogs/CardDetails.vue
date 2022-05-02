@@ -11,7 +11,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         v-model="name"
         @keydown.prevent.enter.exact
 
-        @compositionend="updateCompositionEventEndTime"
+        @compositionend="compositionend"
+        @compositionstart="compositionstart"
+        @compositionupdate="compositionupdate"
+
         @keydown.enter.exact="handleEnterKey"
         @keyup.stop.esc
         @keydown.esc="closeCardAndFocus"
@@ -897,13 +900,21 @@ export default {
       this.insertedLineBreak = true
       this.updateCardName(newName)
     },
-    updateCompositionEventEndTime (event) {
+    compositionstart (event) {
+      console.log('🍉 compositionstart', event, event.data)
+    },
+    compositionupdate (event) {
+      console.log('🍉 compositionupdate', event, event.data)
+    },
+    compositionend (event) {
+      console.log('🍉🍉 compositionend', event, event.data, event.timeStamp)
       // for non-latin input
       // https://stackoverflow.com/questions/51226598/what-is-javascripts-compositionevent-please-give-examples
       compositionEventEndTime = event.timeStamp
     },
     handleEnterKey (event) {
       const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
+      console.log('🍉🍉🍉 keydown handleEnterKey isCompositionEvent', compositionEventEndTime, isCompositionEvent, event.timeStamp, event.timeStamp - compositionEventEndTime)
       const pickersIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
       console.log('🎹 enter', {
         shouldPreventNextEnterKey: this.$store.state.shouldPreventNextEnterKey,
@@ -917,7 +928,6 @@ export default {
       } else if (this.insertedLineBreak) {
         this.insertedLineBreak = false
       } else if (isCompositionEvent) {
-
       } else {
         this.closeCard()
         this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
