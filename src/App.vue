@@ -40,7 +40,7 @@ import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import utils from '@/utils.js'
 
-let multiTouch
+let multiTouchAction, shouldCancelUndo
 
 export default {
   components: {
@@ -75,12 +75,14 @@ export default {
     this.$store.dispatch('currentSpace/updateBackgroundZoom')
     this.updateCardMap()
     window.addEventListener('touchstart', this.touchUndoStart)
+    window.addEventListener('gesturechange', this.touchUndoCancel)
     window.addEventListener('touchend', this.touchUndoEnd)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateUserHasScrolled)
     window.removeEventListener('scroll', this.updateCardMap)
     window.removeEventListener('touchstart', this.touchUndoStart)
+    window.removeEventListener('gesturechange', this.touchUndoCancel)
     window.removeEventListener('touchend', this.touchUndoEnd)
   },
   computed: {
@@ -131,32 +133,36 @@ export default {
   },
   methods: {
     touchUndoStart (event) {
+      shouldCancelUndo = false
       if (!utils.isMultiTouch(event)) {
-        multiTouch = null
+        multiTouchAction = null
         return
       }
       this.$store.commit('shouldAddCard', false)
-      const time = Date.now()
       if (event.touches.length === 2) {
-        multiTouch = { action: 'undo', time }
+        multiTouchAction = 'undo'
       } else if (event.touches.length === 3) {
-        multiTouch = { action: 'redo', time }
+        multiTouchAction = 'redo'
       }
     },
+    touchUndoCancel () {
+      shouldCancelUndo = true
+    },
     touchUndoEnd () {
-      if (!multiTouch) { return }
-      const threshold = 150
-      const time = Date.now()
-      const isTap = time - multiTouch.time < threshold
-      if (!isTap) { return }
-      if (multiTouch.action === 'undo') {
+      if (shouldCancelUndo) {
+        shouldCancelUndo = false
+        multiTouchAction = ''
+        return
+      }
+      if (!multiTouchAction) { return }
+      if (multiTouchAction === 'undo') {
         this.$store.dispatch('history/undo')
         this.$store.commit('addNotification', { message: 'Undo', icon: 'undo' })
-      } else if (multiTouch.action === 'redo') {
+      } else if (multiTouchAction === 'redo') {
         this.$store.dispatch('history/redo')
         this.$store.commit('addNotification', { message: 'Redo', icon: 'redo' })
       }
-      multiTouch = null
+      multiTouchAction = null
     },
     updateCardMap () {
       this.$store.dispatch('currentCards/updateCardMap')
