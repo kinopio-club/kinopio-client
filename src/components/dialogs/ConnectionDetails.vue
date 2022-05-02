@@ -19,8 +19,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         img.icon(v-else src="@/assets/view-hidden.svg")
         span Label
       //- Filter
-      label(@@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
-        input(type="checkbox" v-model="isFilteredInSpace")
+      button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
         img.icon(src="@/assets/filter.svg")
 
     p.edit-message(v-if="!canEditConnection")
