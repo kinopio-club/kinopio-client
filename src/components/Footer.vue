@@ -45,7 +45,7 @@
               img.refresh.icon(src="@/assets/remove.svg")
               span Removed
             Removed(:visible="removedIsVisible")
-          //- Tags and Links
+          //- Tags, Links
           .button-wrap
             .segmented-buttons
               button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
@@ -54,6 +54,11 @@
                 span Links
             Links(:visible="linksIsVisible")
             Tags(:visible="tagsIsVisible")
+          //- Comments
+          .button-wrap
+            button(@click.left="toggleCommentsIsVisible" :class="{ active: commentsIsVisible}")
+              img.refresh.icon(src="@/assets/comment.svg")
+            Comments(:visible="commentsIsVisible")
 
   .right(v-if="!isMobileOrTouch" :class="{'is-embed': isEmbed}")
     SpaceZoom
@@ -65,6 +70,7 @@ import Live from '@/components/dialogs/Live.vue'
 import Removed from '@/components/dialogs/Removed.vue'
 import Links from '@/components/dialogs/Links.vue'
 import Tags from '@/components/dialogs/Tags.vue'
+import Comments from '@/components/dialogs/Comments.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
 import MobileTips from '@/components/dialogs/MobileTips.vue'
 import Notifications from '@/components/Notifications.vue'
@@ -90,6 +96,7 @@ export default {
     Notifications,
     Links,
     Tags,
+    Comments,
     Favorites,
     MobileTips,
     Loader,
@@ -109,7 +116,8 @@ export default {
       isLoadingLiveSpaces: true,
       isFadeOut: false,
       isHidden: false,
-      exploreSpaces: []
+      exploreSpaces: [],
+      commentsIsVisible: false
     }
   },
   mounted () {
@@ -271,6 +279,11 @@ export default {
       const isVisible = this.linksIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleLinksIsVisible')
       this.linksIsVisible = !isVisible
+    },
+    toggleCommentsIsVisible () {
+      const isVisible = this.commentsIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleCommentsIsVisible')
+      this.commentsIsVisible = !isVisible
     },
     toggleTagsIsVisible () {
       const isVisible = this.tagsIsVisible
