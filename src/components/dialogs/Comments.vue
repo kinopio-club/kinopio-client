@@ -26,26 +26,6 @@ dialog.comments.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialog" :
     p
       span.badge.secondary Card → Style →
         img.icon.comment-icon(src="@/assets/comment.svg")
-
-  //-     .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-  //-       button
-  //-         img.icon.pin(src="@/assets/pin.svg")
-
-  //- section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-  //-   .button-wrap(v-if="userSpacesToggleShouldBeVisible" @click.left.prevent="toggleCurrentUserSpacesIsVisibleOnly" @keydown.stop.enter="toggleCurrentUserSpacesIsVisibleOnly")
-  //-     label(:class="{ active: currentUserSpacesIsVisibleOnly }")
-  //-       input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
-  //-       User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
-  //-   SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="dialogIsPinned")
-
-  //- section(v-else-if="loading")
-  //-   Loader(:visible="loading")
-  //- section(v-else)
-  //-   p Spaces with cards that link to this space can be found here.
-  //-   p Type
-  //-     span {{' '}}
-  //-     span.badge.secondary /
-  //-     span when editing a card to create links
 </template>
 
 <script>
@@ -103,13 +83,6 @@ export default {
       const isPinned = !this.dialogIsPinned
       this.$store.dispatch('commentsDialogIsPinned', isPinned)
     },
-    // toggleCurrentUserSpacesIsVisibleOnly () {
-    //   this.currentUserSpacesIsVisibleOnly = !this.currentUserSpacesIsVisibleOnly
-    // },
-    // changeSpace (space) {
-    //   this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
-    //   this.$store.dispatch('closeAllDialogs', 'Links.closeAllDialogs')
-    // },
     updateDialogHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
@@ -129,7 +102,6 @@ export default {
     visible (visible) {
       if (visible) {
         this.updateDialogHeight()
-        // this.updateLinks()
         this.updateResultsSectionHeight()
       }
     }
