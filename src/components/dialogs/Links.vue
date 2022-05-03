@@ -164,6 +164,5 @@ export default {
         width 17px
         height 16px
   &.is-pinned
-    z-index 0
     left -86px
 </style>

@@ -57,7 +57,7 @@
           //- Comments
           .button-wrap
             button(@click.left="toggleCommentsIsVisible" :class="{ active: commentsIsVisible}")
-              img.refresh.icon(src="@/assets/comment.svg")
+              img.icon(src="@/assets/comment.svg")
             Comments(:visible="commentsIsVisible")
 
   .right(v-if="!isMobileOrTouch" :class="{'is-embed': isEmbed}")

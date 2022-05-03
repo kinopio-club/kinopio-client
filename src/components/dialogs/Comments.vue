@@ -7,10 +7,10 @@ dialog.comments.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialog" :
         button
           img.icon.pin(src="@/assets/pin.svg")
 
-  section.results-section
-    ul.results-list(v-if="comments")
+  section.results-section(v-if="comments.length")
+    ul.results-list
       template(v-for="(card in comments")
-        li
+        li(@click="showCardDetails(card)")
           p
             span.badge.user-badge.user-badge(:style="{background: card.user.color}")
               User(:user="card.user" :isClickable="false" :hideYouLabel="true")
@@ -20,6 +20,12 @@ dialog.comments.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialog" :
             template(v-for="segment in card.nameSegments")
               img.card-image(v-if="segment.isImage" :src="segment.url")
               NameSegment(:segment="segment")
+
+  section.no-comments-section(v-if="!comments.length")
+    p No comment cards in this space yet
+    p
+      span.badge.secondary Card → Style →
+        img.icon.comment-icon(src="@/assets/comment.svg")
 
   //-     .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
   //-       button
@@ -87,6 +93,9 @@ export default {
     dialogIsPinned () { return this.$store.state.commentsDialogIsPinned }
   },
   methods: {
+    showCardDetails (card) {
+      this.$store.dispatch('currentCards/showCardDetails', card.id)
+    },
     userById (userId) {
       return this.$store.getters['currentSpace/userById'](userId)
     },
@@ -130,7 +139,10 @@ export default {
 
 <style lang="stylus">
 .comments
-
+  @media(max-width 414px)
+    left -40px
+  @media(max-width 350px)
+    left -90px
   .results-section
     border-top 1px solid var(--primary)
     padding-top 4px
@@ -141,8 +153,12 @@ export default {
   .comment-name
     margin-top 4px
   &.is-pinned
-    z-index 0
-    left -86px
+    left -186px
   .comment-icon
     vertical-align -3px
+
+  .no-comments-section
+    .comment-icon
+      margin-left 4px
+      vertical-align -2px
 </style>

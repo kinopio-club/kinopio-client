@@ -171,6 +171,5 @@ export default {
     > .button-wrap
       padding 4px
   &.is-pinned
-    z-index 0
     left -86px
 </style>
