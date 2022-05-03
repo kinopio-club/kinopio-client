@@ -1,8 +1,26 @@
 <template lang="pug">
-dialog.links.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
+dialog.comments.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   section
     .title-row
-      p Spaces that Link Here
+      p Comments
+      .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
+        button
+          img.icon.pin(src="@/assets/pin.svg")
+
+  section.results-section
+    ul.results-list(v-if="comments")
+      template(v-for="(card in comments")
+        li
+          p
+            span.badge.user-badge.user-badge(:style="{background: card.user.color}")
+              User(:user="card.user" :isClickable="false" :hideYouLabel="true")
+              span {{card.user.name}}
+          .comment-name
+            img.icon.comment-icon(src="@/assets/comment.svg")
+            template(v-for="segment in card.nameSegments")
+              img.card-image(v-if="segment.isImage" :src="segment.url")
+              NameSegment(:segment="segment")
+
   //-     .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
   //-       button
   //-         img.icon.pin(src="@/assets/pin.svg")
@@ -25,19 +43,15 @@ dialog.links.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialog" :sty
 </template>
 
 <script>
-// import Loader from '@/components/Loader.vue'
-// import SpaceList from '@/components/SpaceList.vue'
-// import User from '@/components/User.vue'
+import User from '@/components/User.vue'
+import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
-
-// import debounce from 'lodash-es/debounce'
 
 export default {
   name: 'Comments',
   components: {
-    // Loader,
-    // SpaceList,
-    // User
+    NameSegment,
+    User
   },
   props: {
     visible: Boolean
@@ -47,8 +61,6 @@ export default {
       if (mutation.type === 'updatePageSizes') {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
-      } else if (mutation.type === 'currentSpace/restoreSpace' && this.visible) {
-        // this.updateLinks()
       }
     })
   },
@@ -56,42 +68,31 @@ export default {
     return {
       resultsSectionHeight: null,
       dialogHeight: null
-      // links: [],
-      // loading: false,
-      // spaces: [],
-      // prevSpaceId: '',
-      // currentUserSpacesIsVisibleOnly: false
     }
   },
   computed: {
-    // currentUser () { return this.$store.state.currentUser },
-    // shouldShowSpaces () {
-    //   const spaces = this.spaces || []
-    //   return !this.loading && spaces.length
-    // },
-    // filteredSpaces () {
-    //   if (this.currentUserSpacesIsVisibleOnly) {
-    //     return this.spaces.filter(space => space.userId === this.currentUser.id)
-    //   } else {
-    //     return this.spaces
-    //   }
-    // },
-    // userSpacesToggleShouldBeVisible () {
-    //   const otherUserSpaces = this.spaces.filter(space => space.userId !== this.currentUser.id) || []
-    //   let isOtherUserSpaces = Boolean(otherUserSpaces.length)
-    //   const shouldForceToggleVisible = !isOtherUserSpaces && this.spaces.length
-    //   if (isOtherUserSpaces || shouldForceToggleVisible) {
-    //     return true
-    //   } else {
-    //     return false
-    //   }
-    // },
-    dialogIsPinned () { return this.$store.state.linksDialogIsPinned }
+    comments () {
+      let cards = utils.clone(this.$store.state.currentSpace.cards)
+      cards = cards.filter(card => {
+        if (card.isComment) { return true }
+        return utils.isNameComment(card.name)
+      })
+      cards = cards.map(card => {
+        card.user = this.userById(card.userId)
+        card.nameSegments = utils.cardNameSegments(card.name)
+        return card
+      })
+      return cards
+    },
+    dialogIsPinned () { return this.$store.state.commentsDialogIsPinned }
   },
   methods: {
+    userById (userId) {
+      return this.$store.getters['currentSpace/userById'](userId)
+    },
     toggleDialogIsPinned () {
       const isPinned = !this.dialogIsPinned
-      this.$store.dispatch('linksDialogIsPinned', isPinned)
+      this.$store.dispatch('commentsDialogIsPinned', isPinned)
     },
     // toggleCurrentUserSpacesIsVisibleOnly () {
     //   this.currentUserSpacesIsVisibleOnly = !this.currentUserSpacesIsVisibleOnly
@@ -107,24 +108,6 @@ export default {
         this.dialogHeight = utils.elementHeightFromHeader(element)
       })
     },
-    // async updateLinks () {
-    //   const spaceId = this.$store.state.currentSpace.id
-    //   if (this.prevSpaceId === spaceId) { return }
-    //   this.spaces = []
-    //   this.loading = true
-    //   this.debouncedUpdateLinks()
-    // },
-    // debouncedUpdateLinks: debounce(async function () {
-    //   const spaceId = this.$store.state.currentSpace.id
-    //   const links = await this.$store.dispatch('api/getCardsWithLinkToSpaceId', spaceId)
-    //   this.loading = false
-    //   this.prevSpaceId = spaceId
-    //   if (!links) { return }
-    //   if (!links.spaces.length) { return }
-    //   if (links.spaces.length) {
-    //     this.spaces = links.spaces
-    //   }
-    // }, 350, { leading: true }),
     updateResultsSectionHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
@@ -141,29 +124,25 @@ export default {
         this.updateResultsSectionHeight()
       }
     }
-    // loading (loading) {
-    //   this.updateResultsSectionHeight()
-    // }
   }
 }
 </script>
 
 <style lang="stylus">
 .comments
+
   .results-section
     border-top 1px solid var(--primary)
     padding-top 4px
+    li
+      display block
   .button-wrap
     padding 4px
-  label
-    .user
-      vertical-align -5px
-      transform translateY(-1px)
-      margin-right 5px
-      .user-avatar
-        width 17px
-        height 16px
+  .comment-name
+    margin-top 4px
   &.is-pinned
     z-index 0
     left -86px
+  .comment-icon
+    vertical-align -3px
 </style>

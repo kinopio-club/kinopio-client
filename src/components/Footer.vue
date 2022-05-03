@@ -217,6 +217,7 @@ export default {
     },
     linksDialogIsPinned () { return this.$store.state.linksDialogIsPinned },
     tagsDialogIsPinned () { return this.$store.state.tagsDialogIsPinned },
+    commentsDialogIsPinned () { return this.$store.state.commentsDialogIsPinned },
     dialogsArePinned () { return this.linksDialogIsPinned || this.tagsDialogIsPinned },
     mobileTipsZIndex () {
       if (this.mobileTipsIsVisible) {
@@ -250,6 +251,9 @@ export default {
       }
       if (!this.linksDialogIsPinned && exclude !== 'links') {
         this.linksIsVisible = false
+      }
+      if (!this.commentsDialogIsPinned && exclude !== 'comments') {
+        this.commentsIsVisible = false
       }
     },
     toggleMoreFooterControlsIsVisible () {
