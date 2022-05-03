@@ -1541,8 +1541,4 @@ export default {
     .icon.time
       vertical-align -1px
 
-  .card-style-actions
-    &.last-row
-      margin-bottom -10px
-
 </style>
