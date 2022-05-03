@@ -37,7 +37,7 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
     .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
-    template(v-if="!nameIsComment")
+    template(v-if="!isComment")
       //- Video
       video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateCardMap")
         source(:src="formats.video")
@@ -58,7 +58,7 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
-      .card-comment(v-if="nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-comment(v-if="isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
@@ -86,7 +86,7 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
               source(:src="formats.video")
 
       //- Not Comment
-      .card-content(v-if="!nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-content(v-if="!isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -113,7 +113,7 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
 
         template(v-else)
           //- Url →
-          a.url-wrap(v-if="cardButtonUrl && !nameIsComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
+          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
             .url.inline-button-wrap
               button.inline-button(:style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -414,7 +414,7 @@ export default {
       }
     },
     isHiddenInComment () {
-      if (this.nameIsComment && !this.commentIsVisible) {
+      if (this.isComment && !this.commentIsVisible) {
         return true
       } else {
         return false
@@ -510,7 +510,7 @@ export default {
       })
     },
     pendingUploadDataUrl () {
-      if (!this.cardPendingUpload || this.nameIsComment) { return }
+      if (!this.cardPendingUpload || this.isComment) { return }
       return this.cardPendingUpload.imageDataUrl
     },
     urls () {
@@ -522,13 +522,13 @@ export default {
       this.updateMediaUrls(urls)
       return urls || []
     },
-    nameIsComment () { return utils.isNameComment(this.name) },
+    isComment () { return this.card.isComment || utils.isNameComment(this.name) },
     isVisualCard () {
-      if (this.nameIsComment) { return }
+      if (this.isComment) { return }
       return this.formats.image || this.formats.video
     },
     isAudioCard () {
-      if (this.nameIsComment) { return }
+      if (this.isComment) { return }
       return this.formats.audio
     },
     cardHasMedia () { return this.formats.image || this.formats.video || this.formats.audio },
@@ -1374,9 +1374,8 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'spaceDetails.changeSpace')
     },
     removeCommentBrackets (name) {
-      if (!this.nameIsComment) {
-        return name
-      }
+      if (!this.isComment) { return name }
+      if (this.card.isComment) { return name }
       const commentPattern = utils.commentPattern()
       const comments = name.match(commentPattern)
       comments.forEach(comment => {

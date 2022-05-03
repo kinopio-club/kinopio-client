@@ -219,7 +219,8 @@ export default {
         card = {
           id: card.id,
           name: utils.nameWithoutCommentPattern(card.name),
-          isComment
+          isComment,
+          commentIsVisible: false
         }
         if (!card.name) {
           delete card.name
