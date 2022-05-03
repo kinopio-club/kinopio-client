@@ -10,6 +10,7 @@ dialog.more-filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{
       label(:class="{active: filterComments}" @click.left.prevent="toggleFilterComments" @keydown.stop.enter="toggleFilterComments")
         input(type="checkbox" v-model="filterComments")
         img.icon.comment-icon(src="@/assets/comment.svg")
+        span Hide
 
   section.results-section.connection-types(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="allItems" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredItems")

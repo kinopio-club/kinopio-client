@@ -785,12 +785,7 @@ export default {
 
     // filters
     filtersIsActive () {
-      const types = this.$store.state.filteredConnectionTypeIds
-      const frames = this.$store.state.filteredFrameIds
-      const tags = this.$store.state.filteredTagNames
-      const itemFiltersIsActive = Boolean(types.length + frames.length + tags.length)
-      const filterUncheckedIsActive = this.$store.state.currentUser.filterUnchecked
-      return itemFiltersIsActive || filterUncheckedIsActive
+      return Boolean(this.$store.getters['currentUser/totalFitlersActive'])
     },
     isCardFilteredByTags () {
       const tagNames = this.$store.state.filteredTagNames
@@ -817,9 +812,13 @@ export default {
       if (!filterUncheckedIsActive) { return }
       return this.hasCheckbox && !this.isChecked
     },
+    isCardFilteredByComment () {
+      const filterCommentsIsActive = this.$store.state.currentUser.filterComments
+      return filterCommentsIsActive && !this.isComment
+    },
     isFiltered () {
       if (this.filtersIsActive) {
-        const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame || this.isCardFilteredByUnchecked
+        const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame || this.isCardFilteredByUnchecked || this.isCardFilteredByComment
         if (isInFilter) {
           return false
         } else {
