@@ -56,23 +56,7 @@ export default {
       framesInUse = uniq(framesInUse.filter(frame => frame))
       return framesInUse.map(frame => frames[frame])
     },
-    totalFiltersActive () {
-      const currentUser = this.currentUser
-      let userFilters = 0
-      if (currentUser.filterShowUsers) {
-        userFilters += 1
-      }
-      if (currentUser.filterShowDateUpdated) {
-        userFilters += 1
-      }
-      if (currentUser.filterUnchecked) {
-        userFilters += 1
-      }
-      const tagNames = this.$store.state.filteredTagNames
-      const connections = this.$store.state.filteredConnectionTypeIds
-      const frames = this.$store.state.filteredFrameIds
-      return userFilters + tagNames.length + connections.length + frames.length
-    },
+    totalFiltersActive () { return this.$store.getters['currentUser/totalFitlersActive'] },
     currentUser () { return this.$store.state.currentUser },
     filterShowUsers () { return this.currentUser.filterShowUsers },
     filterShowDateUpdated () { return this.currentUser.filterShowDateUpdated },

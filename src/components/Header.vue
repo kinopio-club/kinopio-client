@@ -377,23 +377,7 @@ export default {
     },
     searchIsVisible () { return this.$store.state.searchIsVisible },
     searchResultsCount () { return this.$store.state.searchResultsCards.length },
-    totalFiltersActive () {
-      const currentUser = this.$store.state.currentUser
-      let userFilters = 0
-      if (currentUser.filterShowUsers) {
-        userFilters += 1
-      }
-      if (currentUser.filterShowDateUpdated) {
-        userFilters += 1
-      }
-      if (currentUser.filterUnchecked) {
-        userFilters += 1
-      }
-      const tagNames = this.$store.state.filteredTagNames
-      const connections = this.$store.state.filteredConnectionTypeIds
-      const frames = this.$store.state.filteredFrameIds
-      return userFilters + tagNames.length + connections.length + frames.length
-    },
+    totalFiltersActive () { return this.$store.getters['currentUser/totalFitlersActive'] },
     searchResultsOrFilters () {
       if (this.searchResultsCount || this.totalFiltersActive) {
         return true

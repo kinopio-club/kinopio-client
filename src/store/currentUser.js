@@ -26,6 +26,7 @@ export default {
     filterShowDateUpdated: false,
     filterShowAbsoluteDates: false,
     filterUnchecked: false,
+    filterComments: false,
     journalPrompts: [],
     newSpacesAreBlank: false,
     shouldEmailNotifications: true,
@@ -174,6 +175,11 @@ export default {
       utils.typeCheck({ value, type: 'boolean', origin: 'filterUnchecked' })
       state.filterUnchecked = value
       cache.updateUser('filterUnchecked', value)
+    },
+    filterComments: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'filterComments' })
+      state.filterComments = value
+      cache.updateUser('filterComments', value)
     },
     addJournalPrompt: (state, newPrompt) => {
       let prompts = utils.clone(state.journalPrompts) || []
@@ -490,11 +496,19 @@ export default {
           filterUnchecked: value
         } }, { root: true })
     },
+    toggleFilterComments: (context, value) => {
+      context.commit('filterComments', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          filterComments: value
+        } }, { root: true })
+    },
     clearUserFilters: (context) => {
       context.dispatch('toggleFilterShowUsers', false)
       context.dispatch('toggleFilterShowDateUpdated', false)
       context.dispatch('toggleFilterShowAbsoluteDates', false)
       context.dispatch('toggleFilterUnchecked', false)
+      context.dispatch('toggleFilterComments', false)
     },
     addJournalPrompt: (context, prompt) => {
       utils.typeCheck({ value: prompt, type: 'object', origin: 'addJournalPrompt' })
@@ -716,6 +730,25 @@ export default {
       if (spaceUserIsUpgraded && !spaceUserIsCurrentUser) {
         return true
       }
+    },
+    totalFitlersActive: (state, getters, rootState) => {
+      let userFilters = 0
+      if (state.filterShowUsers) {
+        userFilters += 1
+      }
+      if (state.filterShowDateUpdated) {
+        userFilters += 1
+      }
+      if (state.filterUnchecked) {
+        userFilters += 1
+      }
+      if (state.filterComments) {
+        userFilters += 1
+      }
+      const tagNames = rootState.filteredTagNames
+      const connections = rootState.filteredConnectionTypeIds
+      const frames = rootState.filteredFrameIds
+      return userFilters + tagNames.length + connections.length + frames.length
     }
   }
 }
