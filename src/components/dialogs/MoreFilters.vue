@@ -5,12 +5,7 @@ dialog.more-filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{
     button(@click.left="clearAllFilters")
       img.icon.cancel(src="@/assets/add.svg")
       span Clear All
-    //- Comments
-    .button-wrap
-      label(:class="{active: filterComments}" @click.left.prevent="toggleFilterComments" @keydown.stop.enter="toggleFilterComments")
-        input(type="checkbox" v-model="filterComments")
-        img.icon.comment-icon(src="@/assets/comment.svg")
-        span Hide
+      span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
 
   section.results-section.connection-types(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="allItems" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredItems")
@@ -70,7 +65,7 @@ export default {
     }
   },
   computed: {
-    filterComments () { return this.$store.state.currentUser.filterComments },
+    totalFiltersActive () { return this.$store.getters['currentUser/totalFitlersActive'] },
     connectionTypes () {
       return utils.clone(this.$store.getters['currentConnections/allTypes'])
     },
@@ -130,10 +125,6 @@ export default {
     }
   },
   methods: {
-    toggleFilterComments () {
-      const value = !this.filterComments
-      this.$store.dispatch('currentUser/toggleFilterComments', value)
-    },
     updateFilteredItems (items) {
       this.filteredItems = items
     },
@@ -247,6 +238,9 @@ dialog.more-filters
     overflow scroll
   input[type="checkbox"]
     margin-top 1px
-  .comment-icon
-    vertical-align -2px
+  .total-filters-active
+    margin 0
+    margin-left 5px
+    margin-top -8px
+    transform translateY(2px)
 </style>

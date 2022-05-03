@@ -18,6 +18,14 @@ section.filters
         img.icon(src="@/assets/filter.svg")
         span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
       MoreFilters(:visible="moreFiltersVisible")
+  .row
+    //- Comments
+    .button-wrap
+      label(:class="{active: filterComments}" @click.left.prevent="toggleFilterComments" @keydown.stop.enter="toggleFilterComments")
+        input(type="checkbox" v-model="filterComments")
+        img.icon.comment-icon(src="@/assets/comment.svg")
+        span Hide
+
 </template>
 
 <script>
@@ -60,7 +68,8 @@ export default {
     currentUser () { return this.$store.state.currentUser },
     filterShowUsers () { return this.currentUser.filterShowUsers },
     filterShowDateUpdated () { return this.currentUser.filterShowDateUpdated },
-    filterUnchecked () { return this.currentUser.filterUnchecked }
+    filterUnchecked () { return this.currentUser.filterUnchecked },
+    filterComments () { return this.$store.state.currentUser.filterComments }
   },
   methods: {
     toggleMoreFiltersVisible () {
@@ -80,6 +89,10 @@ export default {
     toggleFilterUnchecked () {
       const value = !this.filterUnchecked
       this.$store.dispatch('currentUser/toggleFilterUnchecked', value)
+    },
+    toggleFilterComments () {
+      const value = !this.filterComments
+      this.$store.dispatch('currentUser/toggleFilterComments', value)
     }
   }
 }
@@ -103,4 +116,6 @@ export default {
     dialog.more-filters
       left initial
       right 8px
+  .comment-icon
+    vertical-align -2px
 </style>
