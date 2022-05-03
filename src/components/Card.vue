@@ -86,8 +86,6 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
             video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateCardMap")
               source(:src="formats.video")
 
-          span(v-if="!commentIsVisible") …
-
       //- Not Comment
       .card-content(v-if="!nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- Audio
@@ -1961,6 +1959,9 @@ article
   .comment-badge
     padding-left 0
     padding-right 0
+    .user-badge,
+    .user
+      margin-right 0
 
   .tappable-area
     margin-left 20px
