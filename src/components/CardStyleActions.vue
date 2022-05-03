@@ -31,10 +31,15 @@ section.card-style-actions(v-if="visible" @click.left.stop="closeDialogs")
         @selectedColor="updateCardsBackgroundColor"
         @removeColor="removeCardsBackgroundColor"
       )
-      //- Lock
+    //- Lock
     .button-wrap
       button(:disabled="!canEditSome" @click="toggleIsLocked" :class="{active: isLocked}")
         img.icon(src="@/assets/lock.svg")
+    //- Comment
+    .button-wrap
+      button
+        img.icon(src="@/assets/comment.svg")
+
 </template>
 
 <script>

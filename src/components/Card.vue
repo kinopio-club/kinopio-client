@@ -67,8 +67,7 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
         .badge.comment-badge
           .toggle-comment-wrap(@mouseup.left="toggleCommentIsVisible" @touchend="toggleCommentIsVisible")
             button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
-              img.icon.view(v-if="commentIsVisible" src="@/assets/view-hidden.svg")
-              img.icon.view(v-else src="@/assets/view.svg")
+              img.icon.view(src="@/assets/comment.svg")
           //- User
           template(v-if="commentIsVisible")
             .badge.user-badge.user-badge.comment-user-badge(:style="{background: createdByUser.color}")
