@@ -37,7 +37,7 @@ section.card-style-actions(v-if="visible" @click.left.stop="closeDialogs")
         img.icon(src="@/assets/lock.svg")
     //- Comment
     .button-wrap
-      button
+      button(:disabled="!canEditSome" @click="toggleIsComment" :class="{active: isComment}")
         img.icon(src="@/assets/comment.svg")
 
 </template>
@@ -121,6 +121,10 @@ export default {
     isLocked () {
       const cards = this.cards.filter(card => card.isLocked)
       return Boolean(cards.length === this.cards.length)
+    },
+    isComment () {
+      const cards = this.cards.filter(card => card.isComment)
+      return Boolean(cards.length === this.cards.length)
     }
   },
   methods: {
@@ -201,6 +205,24 @@ export default {
         card = {
           id: card.id,
           isLocked
+        }
+        this.$store.dispatch('currentCards/update', card)
+      })
+      this.$store.dispatch('currentCards/updateCardMap')
+    },
+    toggleIsComment () {
+      let isComment = true
+      if (this.isComment) {
+        isComment = false
+      }
+      this.cards.forEach(card => {
+        card = {
+          id: card.id,
+          name: utils.nameWithoutCommentPattern(card.name),
+          isComment
+        }
+        if (!card.name) {
+          delete card.name
         }
         this.$store.dispatch('currentCards/update', card)
       })
