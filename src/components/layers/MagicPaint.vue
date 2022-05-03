@@ -157,11 +157,13 @@ export default {
       // ignore pinned dialogs
       let pinnedDialogs = []
       dialogs.forEach(dialog => {
-        if (dialog.dataset['is-pinned']) {
+        if (dialog.dataset['is-pinned'] === 'true') {
           pinnedDialogs.push(dialog)
         }
       })
-      if (pinnedDialogs.length !== dialogs.length) {
+      if (dialogs.length === pinnedDialogs.length) {
+        return false
+      } else if (dialogs.length) {
         return true
       } else {
         return false
