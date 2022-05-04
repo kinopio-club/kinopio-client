@@ -56,15 +56,12 @@ export default {
   data () {
     return {
       resultsSectionHeight: null,
-      dialogHeight: null,
-      comments: []
+      dialogHeight: null
     }
   },
   computed: {
-    dialogIsPinned () { return this.$store.state.commentsDialogIsPinned }
-  },
-  methods: {
-    updateComments () {
+    dialogIsPinned () { return this.$store.state.commentsDialogIsPinned },
+    comments () {
       let cards = this.$store.getters['currentCards/all']
       cards = utils.clone(cards)
       cards = cards.filter(card => {
@@ -78,8 +75,10 @@ export default {
       })
       cards = sortBy(cards, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
       cards.reverse()
-      this.comments = cards
-    },
+      return cards
+    }
+  },
+  methods: {
     showCardDetails (card) {
       const filterComments = this.$store.state.currentUser.filterComments
       if (filterComments) {
@@ -114,7 +113,6 @@ export default {
       if (visible) {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
-        this.updateComments()
       }
     }
   }
