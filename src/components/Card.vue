@@ -783,7 +783,8 @@ export default {
       return Boolean(connections.length)
     },
 
-    // filters
+    // Filters
+
     filtersIsActive () {
       return Boolean(this.$store.getters['currentUser/totalFiltersActive'])
     },
@@ -814,17 +815,13 @@ export default {
     },
     isCardFilteredByComment () {
       const filterCommentsIsActive = this.$store.state.currentUser.filterComments
-      return filterCommentsIsActive && !this.isComment
+      return filterCommentsIsActive && this.isComment
     },
     isFiltered () {
-      if (this.filtersIsActive) {
-        const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame || this.isCardFilteredByUnchecked || this.isCardFilteredByComment
-        if (isInFilter) {
-          return false
-        } else {
-          return true
-        }
-      } else { return false }
+      if (!this.filtersIsActive) { return }
+      const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame || this.isCardFilteredByUnchecked || this.isCardFilteredByComment
+      console.log(this.card.name, this.isCardFilteredByTags, this.isConnectionFilteredByType, this.isCardFilteredByFrame, this.isCardFilteredByUnchecked, this.isCardFilteredByComment)
+      return !isInFilter
     },
     isLoadingUrlPreview () {
       const cardIds = this.$store.state.urlPreviewLoadingForCardIds
