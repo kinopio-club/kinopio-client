@@ -420,7 +420,9 @@ export default {
       if (this.userCantEditSpace) { return }
       const zoom = this.spaceCounterZoomDecimal
       const cardMap = this.$store.state.currentCards.cardMap
+      const filterComments = this.$store.state.currentUser.filterComments
       cardMap.forEach(card => {
+        if (filterComments && card.isComment) { return }
         const cardX = card.x
         const cardY = card.y
         const pointX = (point.x + window.scrollX) * zoom

@@ -796,6 +796,7 @@ code
 
 .is-hidden-by-opacity
   opacity 0
+  pointer-events none !important
 
 .fade-out
   opacity 0
