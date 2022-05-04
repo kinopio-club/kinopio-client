@@ -1,5 +1,12 @@
 <template lang="pug">
-article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{'is-resizing': isResizing, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}")
+article(
+  :style="positionStyle"
+  :data-card-id="id"
+  :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
+  :key="id"
+  ref="card"
+  :class="{'is-resizing': isResizing, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
+)
   .card(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"

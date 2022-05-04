@@ -7,6 +7,7 @@ path.connection-path(
   :data-end-card="endCardId"
   :data-id="id"
   :data-type-name="typeName"
+  :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
   :key="id"
   :d="path"
   @mousedown.left="startDraggingConnection"
