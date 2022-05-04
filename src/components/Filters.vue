@@ -69,7 +69,7 @@ export default {
     filterShowUsers () { return this.currentUser.filterShowUsers },
     filterShowDateUpdated () { return this.currentUser.filterShowDateUpdated },
     filterUnchecked () { return this.currentUser.filterUnchecked },
-    filterComments () { return this.$store.state.currentUser.filterComments }
+    filterComments () { return this.currentUser.filterComments }
   },
   methods: {
     toggleMoreFiltersVisible () {
