@@ -65,7 +65,7 @@ export default {
   },
   methods: {
     updateComments () {
-      let cards = this.$store.state.currentSpace.cards
+      let cards = this.$store.getters['currentCards/all']
       cards = utils.clone(cards)
       cards = cards.filter(card => {
         if (card.isComment) { return true }
