@@ -450,6 +450,7 @@ export default {
       const pointX = (point.x + window.scrollX) * zoom
       const pointY = (point.y + window.scrollY) * zoom
       paths.forEach(path => {
+        if (path.dataset.isHiddenByCommentFilter === 'true') { return }
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
         let svgPoint = svg.createSVGPoint()
