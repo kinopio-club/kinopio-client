@@ -33,6 +33,9 @@ import User from '@/components/User.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 
+import sortBy from 'lodash-es/sortBy'
+import dayjs from 'dayjs'
+
 export default {
   name: 'Comments',
   components: {
@@ -73,6 +76,8 @@ export default {
         card.nameSegments = utils.cardNameSegments(card.name)
         return card
       })
+      cards = sortBy(cards, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
+      cards.reverse()
       this.comments = cards
     },
     showCardDetails (card) {
