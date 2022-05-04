@@ -238,7 +238,7 @@ export default {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
+        this.dialogHeight = utils.elementHeightFromHeader(element)
       })
     }
   },
