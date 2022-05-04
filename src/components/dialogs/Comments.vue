@@ -53,12 +53,17 @@ export default {
   data () {
     return {
       resultsSectionHeight: null,
-      dialogHeight: null
+      dialogHeight: null,
+      comments: []
     }
   },
   computed: {
-    comments () {
-      let cards = utils.clone(this.$store.state.currentSpace.cards)
+    dialogIsPinned () { return this.$store.state.commentsDialogIsPinned }
+  },
+  methods: {
+    updateComments () {
+      let cards = this.$store.state.currentSpace.cards
+      cards = utils.clone(cards)
       cards = cards.filter(card => {
         if (card.isComment) { return true }
         return utils.isNameComment(card.name)
@@ -68,11 +73,8 @@ export default {
         card.nameSegments = utils.cardNameSegments(card.name)
         return card
       })
-      return cards
+      this.comments = cards
     },
-    dialogIsPinned () { return this.$store.state.commentsDialogIsPinned }
-  },
-  methods: {
     showCardDetails (card) {
       this.$store.dispatch('currentCards/showCardDetails', card.id)
     },
@@ -103,6 +105,7 @@ export default {
       if (visible) {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
+        this.updateComments()
       }
     }
   }
