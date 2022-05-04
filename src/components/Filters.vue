@@ -64,7 +64,7 @@ export default {
       framesInUse = uniq(framesInUse.filter(frame => frame))
       return framesInUse.map(frame => frames[frame])
     },
-    totalFiltersActive () { return this.$store.getters['currentUser/totalFitlersActive'] },
+    totalFiltersActive () { return this.$store.getters['currentUser/totalFiltersActive'] },
     currentUser () { return this.$store.state.currentUser },
     filterShowUsers () { return this.currentUser.filterShowUsers },
     filterShowDateUpdated () { return this.currentUser.filterShowDateUpdated },

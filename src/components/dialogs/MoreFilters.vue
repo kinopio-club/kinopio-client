@@ -65,7 +65,7 @@ export default {
     }
   },
   computed: {
-    totalFiltersActive () { return this.$store.getters['currentUser/totalFitlersActive'] },
+    totalFiltersActive () { return this.$store.getters['currentUser/totalFiltersActive'] },
     connectionTypes () {
       return utils.clone(this.$store.getters['currentConnections/allTypes'])
     },

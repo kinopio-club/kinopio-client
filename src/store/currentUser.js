@@ -731,7 +731,7 @@ export default {
         return true
       }
     },
-    totalFitlersActive: (state, getters, rootState) => {
+    totalFiltersActive: (state, getters, rootState) => {
       let userFilters = 0
       if (state.filterShowUsers) {
         userFilters += 1

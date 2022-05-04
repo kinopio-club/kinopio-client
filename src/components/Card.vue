@@ -785,7 +785,7 @@ export default {
 
     // filters
     filtersIsActive () {
-      return Boolean(this.$store.getters['currentUser/totalFitlersActive'])
+      return Boolean(this.$store.getters['currentUser/totalFiltersActive'])
     },
     isCardFilteredByTags () {
       const tagNames = this.$store.state.filteredTagNames

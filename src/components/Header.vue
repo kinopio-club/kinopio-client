@@ -377,7 +377,7 @@ export default {
     },
     searchIsVisible () { return this.$store.state.searchIsVisible },
     searchResultsCount () { return this.$store.state.searchResultsCards.length },
-    totalFiltersActive () { return this.$store.getters['currentUser/totalFitlersActive'] },
+    totalFiltersActive () { return this.$store.getters['currentUser/totalFiltersActive'] },
     searchResultsOrFilters () {
       if (this.searchResultsCount || this.totalFiltersActive) {
         return true
