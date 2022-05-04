@@ -81,6 +81,10 @@ export default {
       this.comments = cards
     },
     showCardDetails (card) {
+      const filterComments = this.$store.state.currentUser.filterComments
+      if (filterComments) {
+        this.$store.dispatch('currentUser/toggleFilterComments', false)
+      }
       this.$store.dispatch('currentCards/showCardDetails', card.id)
     },
     userById (userId) {
