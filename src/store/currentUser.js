@@ -731,14 +731,18 @@ export default {
         return true
       }
     },
-    totalFiltersActive: (state, getters, rootState) => {
-      let userFilters = 0
+    totalFiltersActive: (state, getters) => {
+      let userFilters = getters.totalCardFadingFiltersActive
       if (state.filterShowUsers) {
         userFilters += 1
       }
       if (state.filterShowDateUpdated) {
         userFilters += 1
       }
+      return userFilters
+    },
+    totalCardFadingFiltersActive: (state, getters, rootState) => {
+      let userFilters = 0
       if (state.filterUnchecked) {
         userFilters += 1
       }

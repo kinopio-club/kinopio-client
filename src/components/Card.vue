@@ -786,19 +786,21 @@ export default {
     // Filters
 
     filtersIsActive () {
-      return Boolean(this.$store.getters['currentUser/totalFiltersActive'])
+      return Boolean(this.$store.getters['currentUser/totalCardFadingFiltersActive'])
     },
     isCardFilteredByTags () {
       const tagNames = this.$store.state.filteredTagNames
-      const isFiltered = this.tags.find(tag => {
+      if (!tagNames.length) { return }
+      const hasTag = this.tags.find(tag => {
         if (tagNames.includes(tag.name)) {
           return true
         }
       })
-      return isFiltered
+      return hasTag
     },
     isConnectionFilteredByType () {
       const typeIds = this.$store.state.filteredConnectionTypeIds
+      if (!typeIds) { return }
       const filteredTypes = this.connectionTypes.filter(type => {
         return typeIds.includes(type.id)
       })
@@ -806,21 +808,24 @@ export default {
     },
     isCardFilteredByFrame () {
       const frameIds = this.$store.state.filteredFrameIds
-      return frameIds.includes(this.frameId)
+      if (!frameIds.length) { return }
+      const hasFrame = frameIds.includes(this.frameId)
+      return hasFrame
     },
     isCardFilteredByUnchecked () {
       const filterUncheckedIsActive = this.$store.state.currentUser.filterUnchecked
       if (!filterUncheckedIsActive) { return }
-      return this.hasCheckbox && !this.isChecked
+      return !this.isChecked && this.hasCheckbox
     },
     isCardFilteredByComment () {
       const filterCommentsIsActive = this.$store.state.currentUser.filterComments
-      return filterCommentsIsActive && this.isComment
+      if (!filterCommentsIsActive) { return }
+      return !this.isComment
     },
     isFiltered () {
       if (!this.filtersIsActive) { return }
       const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame || this.isCardFilteredByUnchecked || this.isCardFilteredByComment
-      console.log(this.card.name, this.isCardFilteredByTags, this.isConnectionFilteredByType, this.isCardFilteredByFrame, this.isCardFilteredByUnchecked, this.isCardFilteredByComment)
+      console.log('🐥', this.card.name, this.isCardFilteredByTags, this.isConnectionFilteredByType, this.isCardFilteredByFrame, this.isCardFilteredByUnchecked, this.isCardFilteredByComment)
       return !isInFilter
     },
     isLoadingUrlPreview () {
