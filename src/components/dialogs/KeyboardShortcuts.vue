@@ -136,6 +136,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           img.icon.time(src="@/assets/unchecked.svg")
           span Toggle Cards Unchecked Filter
         .badge.keyboard-shortcut 3
+    article
+      .row
+        .badge.title
+          img.icon.time(src="@/assets/comment.svg")
+          span Toggle Hide Comment Cards
+        .badge.keyboard-shortcut 4
 
     //- Connect
     .section-title
