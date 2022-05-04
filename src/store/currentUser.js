@@ -739,14 +739,14 @@ export default {
       if (state.filterShowDateUpdated) {
         userFilters += 1
       }
+      if (state.filterComments) {
+        userFilters += 1
+      }
       return userFilters
     },
     totalCardFadingFiltersActive: (state, getters, rootState) => {
       let userFilters = 0
       if (state.filterUnchecked) {
-        userFilters += 1
-      }
-      if (state.filterComments) {
         userFilters += 1
       }
       const tagNames = rootState.filteredTagNames

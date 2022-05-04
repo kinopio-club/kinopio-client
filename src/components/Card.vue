@@ -1,5 +1,5 @@
 <template lang="pug">
-article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{'is-resizing': isResizing}")
+article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{'is-resizing': isResizing, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}")
   .card(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
@@ -817,15 +817,14 @@ export default {
       if (!filterUncheckedIsActive) { return }
       return !this.isChecked && this.hasCheckbox
     },
-    isCardFilteredByComment () {
+    isCardHiddenByCommentFilter () {
       const filterCommentsIsActive = this.$store.state.currentUser.filterComments
       if (!filterCommentsIsActive) { return }
-      return !this.isComment
+      return this.isComment
     },
     isFiltered () {
       if (!this.filtersIsActive) { return }
-      const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame || this.isCardFilteredByUnchecked || this.isCardFilteredByComment
-      console.log('🐥', this.card.name, this.isCardFilteredByTags, this.isConnectionFilteredByType, this.isCardFilteredByFrame, this.isCardFilteredByUnchecked, this.isCardFilteredByComment)
+      const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame || this.isCardFilteredByUnchecked
       return !isInFilter
     },
     isLoadingUrlPreview () {

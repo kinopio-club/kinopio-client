@@ -794,6 +794,9 @@ code
 .hidden
   display none
 
+.is-hidden-by-opacity
+  opacity 0
+
 .fade-out
   opacity 0
 

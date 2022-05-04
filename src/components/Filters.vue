@@ -11,24 +11,24 @@ section.filters
       label(:class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
         input(type="checkbox" v-model="filterShowDateUpdated")
         img.icon.time(src="@/assets/time.svg")
-  .row
     //- Todo
     .button-wrap
       label(:class="{active: filterUnchecked}" @click.left.prevent="toggleFilterUnchecked" @keydown.stop.enter="toggleFilterUnchecked")
         input(type="checkbox" v-model="filterUnchecked")
         span Todo
-    //- Comments Hide
-    .button-wrap
-      label(:class="{active: filterComments}" @click.left.prevent="toggleFilterComments" @keydown.stop.enter="toggleFilterComments")
-        input(type="checkbox" v-model="filterComments")
-        img.icon.comment-icon(src="@/assets/comment.svg")
-        span Hide
     //- More Filters
     .button-wrap
       button(:class="{active: moreFiltersVisible, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreFiltersVisible")
         img.icon(src="@/assets/filter.svg")
         span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
       MoreFilters(:visible="moreFiltersVisible")
+  .row
+    //- Comments Hide
+    .button-wrap
+      label(:class="{active: filterComments}" @click.left.prevent="toggleFilterComments" @keydown.stop.enter="toggleFilterComments")
+        input(type="checkbox" v-model="filterComments")
+        img.icon.comment-icon(src="@/assets/comment.svg")
+        span Hide
 
 </template>
 
@@ -93,12 +93,10 @@ export default {
     toggleFilterUnchecked () {
       const value = !this.filterUnchecked
       this.$store.dispatch('currentUser/toggleFilterUnchecked', value)
-      this.$store.dispatch('currentUser/toggleFilterComments', false)
     },
     toggleFilterComments () {
       const value = !this.filterComments
       this.$store.dispatch('currentUser/toggleFilterComments', value)
-      this.$store.dispatch('currentUser/toggleFilterUnchecked', false)
     }
   }
 }
