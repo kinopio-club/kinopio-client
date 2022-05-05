@@ -10,7 +10,8 @@ self.onmessage = function (event) {
       x: card.x * zoom,
       y: card.y * zoom,
       width: card.width * zoom,
-      height: card.height * zoom
+      height: card.height * zoom,
+      isComment: card.isComment
     }
     return isCardInViewport(card, viewport)
   })

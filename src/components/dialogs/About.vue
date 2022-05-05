@@ -27,9 +27,8 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
   section(v-if="!isAddPage")
     .row
       .button-wrap
-        button(@click.left.stop="toggleKeyboardShortcutsIsVisible" :class="{active: keyboardShortcutsIsVisible}")
+        button(@click.left.stop="toggleKeyboardShortcutsIsVisible")
           span Keyboard Shortcuts
-        KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
     .row
       .button-wrap
         button(@click.left.stop="toggleAppsIsVisible" :class="{active: appsIsVisible}")
@@ -65,7 +64,6 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
 
 <script>
 import WhatsNew from '@/components/dialogs/WhatsNew.vue'
-import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import Help from '@/components/dialogs/Help.vue'
 import Apps from '@/components/dialogs/Apps.vue'
 import utils from '@/utils.js'
@@ -79,7 +77,6 @@ export default {
   name: 'About',
   components: {
     WhatsNew,
-    KeyboardShortcuts,
     Help,
     Apps
   },
@@ -100,7 +97,6 @@ export default {
     return {
       helpIsVisible: false,
       whatsNewIsVisible: false,
-      keyboardShortcutsIsVisible: false,
       appsIsVisible: false,
       newStuff: [],
       isIPhone: false,
@@ -143,9 +139,8 @@ export default {
       this.$store.commit('newStuffIsUpdated', false)
     },
     toggleKeyboardShortcutsIsVisible () {
-      const isVisible = this.keyboardShortcutsIsVisible
-      this.closeDialogs()
-      this.keyboardShortcutsIsVisible = !isVisible
+      this.$store.dispatch('closeAllDialogs', 'About.toggleKeyboardShortcutsIsVisible')
+      this.$store.commit('triggerKeyboardShortcutsIsVisible')
     },
     toggleAppsIsVisible () {
       const isVisible = this.appsIsVisible
@@ -173,7 +168,6 @@ export default {
     closeDialogs () {
       this.helpIsVisible = false
       this.whatsNewIsVisible = false
-      this.keyboardShortcutsIsVisible = false
       this.appsIsVisible = false
     },
     updateDialogHeight () {

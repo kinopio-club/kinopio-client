@@ -96,6 +96,10 @@ export default {
         let value = this.$store.state.currentUser.filterUnchecked
         value = !value
         this.$store.dispatch('currentUser/toggleFilterUnchecked', value)
+      } else if (key === '4' && isSpaceScope) {
+        let value = this.$store.state.currentUser.filterComments
+        value = !value
+        this.$store.dispatch('currentUser/toggleFilterComments', value)
       } else if (key === ' ' && isSpaceScope) {
         this.$store.commit('currentUserIsPanningReady', false)
       }

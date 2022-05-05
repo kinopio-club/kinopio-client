@@ -1715,6 +1715,13 @@ export default {
     if (isCode) { return }
     return Boolean(comment)
   },
+  nameWithoutCommentPattern (name) {
+    if (!name) { return }
+    if (!this.isNameComment) { return name }
+    name = name.replaceAll('((', '')
+    name = name.replaceAll('))', '')
+    return name
+  },
   removeMarkdownCodeblocksFromString (string) {
     if (!string) { return '' }
     const segments = this.markdownSegments(string)

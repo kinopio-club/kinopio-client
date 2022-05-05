@@ -899,6 +899,7 @@ const currentSpace = {
       if (!element) { return }
       context.dispatch('backgroundImageMigration')
       const background = context.state.background
+      if (!background) { return }
       if (!utils.urlIsImage(background)) {
         element.style.backgroundImage = ''
         context.dispatch('updateBackgroundZoom')

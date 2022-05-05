@@ -1,9 +1,11 @@
 <template lang="pug">
 dialog.more-filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" @click.stop)
   section
+    //- Clear
     button(@click.left="clearAllFilters")
       img.icon.cancel(src="@/assets/add.svg")
-      span Clear all
+      span Clear All
+      span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
 
   section.results-section.connection-types(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="allItems" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredItems")
@@ -63,6 +65,7 @@ export default {
     }
   },
   computed: {
+    totalFiltersActive () { return this.$store.getters['currentUser/totalFiltersActive'] },
     connectionTypes () {
       return utils.clone(this.$store.getters['currentConnections/allTypes'])
     },
@@ -235,4 +238,9 @@ dialog.more-filters
     overflow scroll
   input[type="checkbox"]
     margin-top 1px
+  .total-filters-active
+    margin 0
+    margin-left 5px
+    margin-top -8px
+    transform translateY(2px)
 </style>

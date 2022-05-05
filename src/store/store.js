@@ -121,6 +121,7 @@ const store = createStore({
     // pinned dialogs
     linksDialogIsPinned: false,
     tagsDialogIsPinned: false,
+    commentsDialogIsPinned: false,
     spaceDetailsDialogIsPinned: false,
 
     // dragging
@@ -673,6 +674,7 @@ const store = createStore({
       console.log('📌 unpin dialogs except', exclude)
       state.linksDialogIsPinned = false
       state.tagsDialogIsPinned = false
+      state.commentsDialogIsPinned = false
       state.spaceDetailsDialogIsPinned = false
     },
     linksDialogIsPinned: (state, value) => {
@@ -682,6 +684,10 @@ const store = createStore({
     tagsDialogIsPinned: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'tagsDialogIsPinned' })
       state.tagsDialogIsPinned = value
+    },
+    commentsDialogIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'commentsDialogIsPinned' })
+      state.commentsDialogIsPinned = value
     },
     spaceDetailsDialogIsPinned: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsDialogIsPinned' })
@@ -1181,6 +1187,11 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'tagsDialogIsPinned' })
       context.commit('unpinOtherDialogs', 'tags')
       context.commit('tagsDialogIsPinned', value)
+    },
+    commentsDialogIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'commentsDialogIsPinned' })
+      context.commit('unpinOtherDialogs', 'comments')
+      context.commit('commentsDialogIsPinned', value)
     },
     spaceDetailsDialogIsPinned: (context, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsDialogIsPinned' })

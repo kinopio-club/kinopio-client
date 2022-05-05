@@ -113,7 +113,7 @@ export default {
   },
   computed: {
     maxCardLength () { return 300 },
-    cardStyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowMultiCardStyleActions },
+    cardStyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowMultiCardStyleActions && this.cardsIsSelected },
     visible () { return this.$store.state.multipleSelectedActionsIsVisible },
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     position () {
@@ -590,13 +590,4 @@ export default {
       .segmented-colors
         margin-left 5px
 
-  .card-style-actions
-    padding 0
-    .row
-      display block
-    .button-wrap
-      margin-left 0
-      margin-right 6px
-    &.last-row
-      margin-bottom -10px
 </style>

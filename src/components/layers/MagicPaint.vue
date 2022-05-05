@@ -157,11 +157,13 @@ export default {
       // ignore pinned dialogs
       let pinnedDialogs = []
       dialogs.forEach(dialog => {
-        if (dialog.dataset['is-pinned']) {
+        if (dialog.dataset['is-pinned'] === 'true') {
           pinnedDialogs.push(dialog)
         }
       })
-      if (pinnedDialogs.length !== dialogs.length) {
+      if (dialogs.length === pinnedDialogs.length) {
+        return false
+      } else if (dialogs.length) {
         return true
       } else {
         return false
@@ -418,7 +420,9 @@ export default {
       if (this.userCantEditSpace) { return }
       const zoom = this.spaceCounterZoomDecimal
       const cardMap = this.$store.state.currentCards.cardMap
+      const filterComments = this.$store.state.currentUser.filterComments
       cardMap.forEach(card => {
+        if (filterComments && card.isComment) { return }
         const cardX = card.x
         const cardY = card.y
         const pointX = (point.x + window.scrollX) * zoom
@@ -446,6 +450,7 @@ export default {
       const pointX = (point.x + window.scrollX) * zoom
       const pointY = (point.y + window.scrollY) * zoom
       paths.forEach(path => {
+        if (path.dataset['is-hidden-by-comment-filter'] === 'true') { return }
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
         let svgPoint = svg.createSVGPoint()

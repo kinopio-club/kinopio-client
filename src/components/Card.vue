@@ -1,5 +1,12 @@
 <template lang="pug">
-article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{'is-resizing': isResizing}")
+article(
+  :style="positionStyle"
+  :data-card-id="id"
+  :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
+  :key="id"
+  ref="card"
+  :class="{'is-resizing': isResizing, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
+)
   .card(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
@@ -37,7 +44,7 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
     .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
-    template(v-if="!nameIsComment")
+    template(v-if="!isComment")
       //- Video
       video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateCardMap")
         source(:src="formats.video")
@@ -58,7 +65,7 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
-      .card-comment(v-if="nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-comment(v-if="isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
@@ -67,8 +74,7 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
         .badge.comment-badge
           .toggle-comment-wrap(@mouseup.left="toggleCommentIsVisible" @touchend="toggleCommentIsVisible")
             button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
-              img.icon.view(v-if="commentIsVisible" src="@/assets/view-hidden.svg")
-              img.icon.view(v-else src="@/assets/view.svg")
+              img.icon.view(src="@/assets/comment.svg")
           //- User
           template(v-if="commentIsVisible")
             .badge.user-badge.user-badge.comment-user-badge(:style="{background: createdByUser.color}")
@@ -86,10 +92,8 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
             video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateCardMap")
               source(:src="formats.video")
 
-          span(v-if="!commentIsVisible") …
-
       //- Not Comment
-      .card-content(v-if="!nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-content(v-if="!isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -116,7 +120,7 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
 
         template(v-else)
           //- Url →
-          a.url-wrap(v-if="cardButtonUrl && !nameIsComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
+          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
             .url.inline-button-wrap
               button.inline-button(:style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -417,7 +421,7 @@ export default {
       }
     },
     isHiddenInComment () {
-      if (this.nameIsComment && !this.commentIsVisible) {
+      if (this.isComment && !this.commentIsVisible) {
         return true
       } else {
         return false
@@ -513,7 +517,7 @@ export default {
       })
     },
     pendingUploadDataUrl () {
-      if (!this.cardPendingUpload || this.nameIsComment) { return }
+      if (!this.cardPendingUpload || this.isComment) { return }
       return this.cardPendingUpload.imageDataUrl
     },
     urls () {
@@ -525,13 +529,13 @@ export default {
       this.updateMediaUrls(urls)
       return urls || []
     },
-    nameIsComment () { return utils.isNameComment(this.name) },
+    isComment () { return this.card.isComment || utils.isNameComment(this.name) },
     isVisualCard () {
-      if (this.nameIsComment) { return }
+      if (this.isComment) { return }
       return this.formats.image || this.formats.video
     },
     isAudioCard () {
-      if (this.nameIsComment) { return }
+      if (this.isComment) { return }
       return this.formats.audio
     },
     cardHasMedia () { return this.formats.image || this.formats.video || this.formats.audio },
@@ -786,26 +790,24 @@ export default {
       return Boolean(connections.length)
     },
 
-    // filters
+    // Filters
+
     filtersIsActive () {
-      const types = this.$store.state.filteredConnectionTypeIds
-      const frames = this.$store.state.filteredFrameIds
-      const tags = this.$store.state.filteredTagNames
-      const itemFiltersIsActive = Boolean(types.length + frames.length + tags.length)
-      const filterUncheckedIsActive = this.$store.state.currentUser.filterUnchecked
-      return itemFiltersIsActive || filterUncheckedIsActive
+      return Boolean(this.$store.getters['currentUser/totalCardFadingFiltersActive'])
     },
     isCardFilteredByTags () {
       const tagNames = this.$store.state.filteredTagNames
-      const isFiltered = this.tags.find(tag => {
+      if (!tagNames.length) { return }
+      const hasTag = this.tags.find(tag => {
         if (tagNames.includes(tag.name)) {
           return true
         }
       })
-      return isFiltered
+      return hasTag
     },
     isConnectionFilteredByType () {
       const typeIds = this.$store.state.filteredConnectionTypeIds
+      if (!typeIds) { return }
       const filteredTypes = this.connectionTypes.filter(type => {
         return typeIds.includes(type.id)
       })
@@ -813,22 +815,24 @@ export default {
     },
     isCardFilteredByFrame () {
       const frameIds = this.$store.state.filteredFrameIds
-      return frameIds.includes(this.frameId)
+      if (!frameIds.length) { return }
+      const hasFrame = frameIds.includes(this.frameId)
+      return hasFrame
     },
     isCardFilteredByUnchecked () {
       const filterUncheckedIsActive = this.$store.state.currentUser.filterUnchecked
       if (!filterUncheckedIsActive) { return }
-      return this.hasCheckbox && !this.isChecked
+      return !this.isChecked && this.hasCheckbox
+    },
+    isCardHiddenByCommentFilter () {
+      const filterCommentsIsActive = this.$store.state.currentUser.filterComments
+      if (!filterCommentsIsActive) { return }
+      return this.isComment
     },
     isFiltered () {
-      if (this.filtersIsActive) {
-        const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame || this.isCardFilteredByUnchecked
-        if (isInFilter) {
-          return false
-        } else {
-          return true
-        }
-      } else { return false }
+      if (!this.filtersIsActive) { return }
+      const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame || this.isCardFilteredByUnchecked
+      return !isInFilter
     },
     isLoadingUrlPreview () {
       const cardIds = this.$store.state.urlPreviewLoadingForCardIds
@@ -1377,9 +1381,8 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'spaceDetails.changeSpace')
     },
     removeCommentBrackets (name) {
-      if (!this.nameIsComment) {
-        return name
-      }
+      if (!this.isComment) { return name }
+      if (this.card.isComment) { return name }
       const commentPattern = utils.commentPattern()
       const comments = name.match(commentPattern)
       comments.forEach(comment => {
@@ -1961,6 +1964,9 @@ article
   .comment-badge
     padding-left 0
     padding-right 0
+    .user-badge,
+    .user
+      margin-right 0
 
   .tappable-area
     margin-left 20px
