@@ -223,11 +223,13 @@ export default {
     },
     // on mouse down
     handleMouseDownEvents (event) {
+      const middleMouseButton = 1
       const rightMouseButton = 2
+      const isMiddleClick = middleMouseButton === event.button
       const isRightClick = rightMouseButton === event.button
       const isSpaceScope = event.target.id === 'magic-painting'
       const shouldBoxSelect = event.shiftKey && isSpaceScope
-      const shouldPan = isRightClick && isSpaceScope
+      const shouldPan = (isRightClick || isMiddleClick) && isSpaceScope
       const position = utils.cursorPositionInPage(event)
       if (shouldBoxSelect) {
         event.preventDefault()
