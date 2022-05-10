@@ -210,7 +210,8 @@ export default {
       return this.showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator && isUser
     },
     categoryClassName (space) {
-      return space.category.toLowerCase()
+      const className = utils.normalizeString(space.category)
+      return className
     },
     updateFilteredSpaces (spaces) {
       this.filteredSpaces = spaces
