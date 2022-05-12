@@ -28,6 +28,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
     .row
       .button-wrap
         button(@click.left.stop="toggleKeyboardShortcutsIsVisible")
+          .badge.keyboard-shortcut.badge-in-button ?
           span Keyboard Shortcuts
     .row
       .button-wrap
@@ -198,4 +199,6 @@ export default {
   .updated
     margin 0
     margin-left 3px
+  .keyboard-shortcut
+    padding 0 4px !important
 </style>
