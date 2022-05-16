@@ -42,8 +42,8 @@
           //- Removed
           .button-wrap
             button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
-              img.refresh.icon(src="@/assets/remove.svg")
-              span Removed
+              img.icon(src="@/assets/remove.svg")
+              img.icon.remove-undo(src="@/assets/undo.svg")
             Removed(:visible="removedIsVisible")
           //- Tags, Links
           .button-wrap

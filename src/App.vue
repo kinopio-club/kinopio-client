@@ -791,6 +791,10 @@ code
 .pin
   vertical-align 0
 
+.remove-undo
+  margin-left 5px
+  width 10px
+
 .hidden
   display none
 
