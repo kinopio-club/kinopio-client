@@ -48,6 +48,11 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
     img.icon(src="@/assets/lock.svg")
     span Payments securely processed by Stripe. Card info is not sent to Kinopio.
 
+  //- section
+  //-   p p.s. A discount is available for students and those with financial need.
+  //-     span {{' '}}
+  //-       a(href="mailto:hi@kinopio.club")
+
 </template>
 
 <script>
