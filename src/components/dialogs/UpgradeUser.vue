@@ -5,8 +5,8 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
       p Upgrade your account for unlimited cards and uploads
     .row
       .segmented-buttons
-        button(:class="{active: priceIsMonthly}" @click.left="togglePriceIsMonthly(true)") $5/month
-        button(:class="{active: !priceIsMonthly}" @click.left="togglePriceIsMonthly(false)") $55/year
+        button(:class="{active: priceIsMonthly}" @click.left="togglePriceIsMonthly(true)") $8/month
+        button(:class="{active: !priceIsMonthly}" @click.left="togglePriceIsMonthly(false)") $88/year
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
@@ -34,8 +34,8 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
       .summary
         User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
         .badge.info
-          span(v-if="priceIsMonthly") $5/month
-          span(v-else) $55/year
+          span(v-if="priceIsMonthly") $8/month
+          span(v-else) $88/year
 
       button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
         span Upgrade Account
