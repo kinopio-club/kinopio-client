@@ -121,11 +121,11 @@ export default {
     priceId () {
       let monthly, yearly
       if (import.meta.env.MODE === 'development') {
-        monthly = 'price_1IjPHfDFIr5ywhwoFUltkq7s'
-        yearly = 'price_1IjPHQDFIr5ywhwoFMHQ3tPq'
+        monthly = 'price_1L046SDFIr5ywhwoMfsIW1W5'
+        yearly = 'price_1L046iDFIr5ywhwoeRIDE5rN'
       } else {
-        monthly = 'price_1IjOp1DFIr5ywhwou6V7nRkE'
-        yearly = 'price_1IjOgJDFIr5ywhwoQtQIacSa'
+        monthly = 'price_1L042wDFIr5ywhwo6xOXzWuy'
+        yearly = 'price_1L043hDFIr5ywhwoDu6hXowm'
       }
       if (this.priceIsMonthly) {
         return monthly
