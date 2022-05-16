@@ -36,6 +36,7 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
         .badge.info
           span(v-if="priceIsMonthly") $8/month
           span(v-else) $88/year
+        span Tax Included
 
       button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
         span Upgrade Account
