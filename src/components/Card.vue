@@ -11,6 +11,10 @@ article(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
 
+    @mouseenter="initStickToCursor"
+    @mousemove="stickToCursor"
+    @mouseout="unstickToCursor"
+
     @touchstart="startLocking"
     @touchmove="updateCurrentTouchPosition"
     @touchend="showCardDetailsTouch"
@@ -229,6 +233,10 @@ const lockingDuration = 100 // ms
 let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 const defaultCardPosition = 100
 
+// sticky
+let isAnimationUnsticking = false
+let preventSticking = false
+
 export default {
   components: {
     Frames,
@@ -297,7 +305,9 @@ export default {
       nameIsOnlyMarkdownLink: false,
       isLocking: true,
       lockingPercent: 0,
-      lockingAlpha: 0
+      lockingAlpha: 0,
+      translateX: 0,
+      translateY: 0
     }
   },
   computed: {
@@ -429,6 +439,9 @@ export default {
     },
     currentCardDetailsIsVisible () {
       return this.id === this.$store.state.cardDetailsIsVisibleForCardId
+    },
+    shouldNotStick () {
+      return this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isConnectingTo || this.isConnectingFrom
     },
     cardStyle () {
       let backgroundColor
@@ -572,7 +585,8 @@ export default {
         zIndex: z,
         width: this.resizeWidth,
         maxWidth: this.resizeWidth,
-        pointerEvents
+        pointerEvents,
+        transform: `translate(${this.translateX}, ${this.translateY})`
       }
     },
     canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) },
@@ -863,6 +877,57 @@ export default {
     userDetailsIsVisible () { return this.$store.state.cardUserDetailsIsVisibleForCardId === this.id }
   },
   methods: {
+
+    // sticky
+
+    initStickToCursor () {
+      preventSticking = false
+      if (this.shouldNotStick) {
+        preventSticking = true
+      }
+    },
+    stickToCursor (event) {
+      const stretchResistanceX = 40
+      const stretchResistanceY = 80
+      if (isAnimationUnsticking) { return }
+      if (preventSticking) { return }
+      if (this.shouldNotStick) {
+        this.translateX = 0
+        this.translateY = 0
+        preventSticking = true
+        return
+      }
+      const isButtonHover = event.target.closest('.inline-button-wrap')
+      if (isButtonHover) {
+        this.translateX = 0
+        this.translateY = 0
+        return
+      }
+      const width = this.card.width
+      const height = this.card.height
+      let centerX = this.x + (width / 2)
+      let centerY = this.y + (height / 2)
+      const position = utils.cursorPositionInPage(event)
+      // position from card center
+      const xFromCenter = position.x - centerX
+      const yFromCenter = position.y - centerY
+      // percentage from center to card edge
+      const xPercent = (xFromCenter / (width / 2))
+      const yPercent = (yFromCenter / (height / 2))
+      let xOffset = (xPercent * this.x) / stretchResistanceX
+      xOffset = Math.round(xOffset)
+      let yOffset = (yPercent * this.y) / stretchResistanceY
+      yOffset = Math.round(yOffset)
+      this.translateX = xOffset + 'px'
+      this.translateY = yOffset + 'px'
+    },
+    unstickToCursor () {
+      console.log('🍅')
+      this.translateX = 0
+      this.translateY = 0
+      // isAnimationUnsticking = true
+    },
+
     updateTypeForConnection (connectionId) {
       const newType = this.$store.getters['currentConnections/typeForNewConnections']
       console.warn('🚑 connection was missing type', { cardId: this.id, connectionId, newType })
