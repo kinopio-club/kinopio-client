@@ -887,8 +887,8 @@ export default {
       }
     },
     stickToCursor (event) {
-      const stretchResistanceX = 40
-      const stretchResistanceY = 80
+      const stretchResistanceX = 6
+      const stretchResistanceY = 6
       if (isAnimationUnsticking) { return }
       if (preventSticking) { return }
       if (this.shouldNotStick) {
@@ -905,18 +905,21 @@ export default {
       }
       const width = this.card.width
       const height = this.card.height
-      let centerX = this.x + (width / 2)
-      let centerY = this.y + (height / 2)
+      const halfWidth = width / 2
+      const halfHeight = height / 2
+      let centerX = this.x + halfWidth
+      let centerY = this.y + halfHeight
       const position = utils.cursorPositionInPage(event)
       // position from card center
       const xFromCenter = position.x - centerX
       const yFromCenter = position.y - centerY
       // percentage from center to card edge
-      const xPercent = (xFromCenter / (width / 2))
-      const yPercent = (yFromCenter / (height / 2))
-      let xOffset = (xPercent * this.x) / stretchResistanceX
+      const xPercent = (xFromCenter / halfWidth)
+      const yPercent = (yFromCenter / halfHeight)
+      // calc sticky offset
+      let xOffset = (xPercent * halfWidth) / stretchResistanceX
       xOffset = Math.round(xOffset)
-      let yOffset = (yPercent * this.y) / stretchResistanceY
+      let yOffset = (yPercent * halfHeight) / stretchResistanceY
       yOffset = Math.round(yOffset)
       this.translateX = xOffset + 'px'
       this.translateY = yOffset + 'px'
