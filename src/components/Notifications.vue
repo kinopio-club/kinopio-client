@@ -39,12 +39,12 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon.remove-undo(src="@/assets/undo.svg")
 
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
-    p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $5/month
+    p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $8/month
     .row
       button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
   .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimit" :class="{'notification-jiggle': notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
-    p To add more cards, you'll need to upgrade for $5/month
+    p To add more cards, you'll need to upgrade for $8/month
     .row
       button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 

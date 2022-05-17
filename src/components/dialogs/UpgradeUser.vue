@@ -5,8 +5,8 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
       p Upgrade your account for unlimited cards and uploads
     .row
       .segmented-buttons
-        button(:class="{active: priceIsMonthly}" @click.left="togglePriceIsMonthly(true)") $5/month
-        button(:class="{active: !priceIsMonthly}" @click.left="togglePriceIsMonthly(false)") $55/year
+        button(:class="{active: priceIsMonthly}" @click.left="togglePriceIsMonthly(true)") $8/month
+        button(:class="{active: !priceIsMonthly}" @click.left="togglePriceIsMonthly(false)") $88/year
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
@@ -34,8 +34,9 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
       .summary
         User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
         .badge.info
-          span(v-if="priceIsMonthly") $5/month
-          span(v-else) $55/year
+          span(v-if="priceIsMonthly") $8/month
+          span(v-else) $88/year
+        span Tax Included
 
       button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
         span Upgrade Account
@@ -46,6 +47,11 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
   section(v-if="currentUserIsSignedIn")
     img.icon(src="@/assets/lock.svg")
     span Payments securely processed by Stripe. Card info is not sent to Kinopio.
+
+  section
+    p
+      a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost/") Discount available
+      span {{' '}} for students and those with financial need
 
 </template>
 
@@ -120,11 +126,11 @@ export default {
     priceId () {
       let monthly, yearly
       if (import.meta.env.MODE === 'development') {
-        monthly = 'price_1IjPHfDFIr5ywhwoFUltkq7s'
-        yearly = 'price_1IjPHQDFIr5ywhwoFMHQ3tPq'
+        monthly = 'price_1L046SDFIr5ywhwoMfsIW1W5'
+        yearly = 'price_1L046iDFIr5ywhwoeRIDE5rN'
       } else {
-        monthly = 'price_1IjOp1DFIr5ywhwou6V7nRkE'
-        yearly = 'price_1IjOgJDFIr5ywhwoQtQIacSa'
+        monthly = 'price_1L042wDFIr5ywhwo6xOXzWuy'
+        yearly = 'price_1L043hDFIr5ywhwoDu6hXowm'
       }
       if (this.priceIsMonthly) {
         return monthly
