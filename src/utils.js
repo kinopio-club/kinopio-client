@@ -20,6 +20,14 @@ let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
 
 export default {
+  userPrefersReducedMotion () {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (query.matches) {
+      return true
+    } else {
+      return false
+    }
+  },
   loadImage (src) {
     // from https://stackoverflow.com/a/5058336
     return new Promise((resolve, reject) => {

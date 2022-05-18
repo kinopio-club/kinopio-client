@@ -882,7 +882,7 @@ export default {
 
     initStickToCursor () {
       preventSticking = false
-      if (this.shouldNotStick) {
+      if (this.shouldNotStick || utils.userPrefersReducedMotion()) {
         preventSticking = true
       }
     },
