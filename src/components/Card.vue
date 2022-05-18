@@ -951,10 +951,13 @@ export default {
       const element = this.$refs.card
       const animation = element.animate(keyframes, timing)
       animation.onfinish = () => {
-        this.translateX = 0
-        this.translateY = 0
-        this.isAnimationUnsticking = false
+        this.clearStickToCursor()
       }
+    },
+    clearStickToCursor () {
+      this.translateX = 0
+      this.translateY = 0
+      this.isAnimationUnsticking = false
     },
 
     updateTypeForConnection (connectionId) {
@@ -1393,6 +1396,7 @@ export default {
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
       this.updatePreviousResultCardId()
+      this.clearStickToCursor()
     },
     updatePreviousResultCardId () {
       const search = this.$store.state.search
