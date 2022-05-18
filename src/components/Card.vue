@@ -887,8 +887,7 @@ export default {
       }
     },
     stickToCursor (event) {
-      const stretchResistanceX = 6
-      const stretchResistanceY = 6
+      const stretchResistance = 6
       if (this.isAnimationUnsticking) { return }
       if (preventSticking) { return }
       if (this.shouldNotStick) {
@@ -917,9 +916,9 @@ export default {
       const xPercent = (xFromCenter / halfWidth)
       const yPercent = (yFromCenter / halfHeight)
       // calc sticky offset
-      let xOffset = (xPercent * halfWidth) / stretchResistanceX
+      let xOffset = (xPercent * halfWidth) / stretchResistance
       xOffset = Math.round(xOffset)
-      let yOffset = (yPercent * halfHeight) / stretchResistanceY
+      let yOffset = (yPercent * halfHeight) / stretchResistance
       yOffset = Math.round(yOffset)
       this.translateX = xOffset + 'px'
       this.translateY = yOffset + 'px'
