@@ -933,12 +933,13 @@ export default {
         easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
         iterations: 1
       }
+      const swings = [-0.9, 0.6, -0.4, 0.2, 0] // [-1, 0.75, -0.5, 0.25, 0]
       let keyframes = [
-        { transform: `translate(${xOffset * -1}px,   ${yOffset * -1}px)`, offset: 50 },
-        { transform: `translate(${xOffset * 0.75}px, ${yOffset * 0.75}px)`, offset: 75 },
-        { transform: `translate(${xOffset * -0.5}px, ${yOffset * -0.5}px)`, offset: 50 },
-        { transform: `translate(${xOffset * 0.25}px, ${yOffset * 0.25}px)`, offset: 100 },
-        { transform: `translate(${xOffset * 0}px,    ${yOffset * 0}px)`, offset: 100 }
+        { transform: `translate(${xOffset * swings[0]}px,   ${yOffset * swings[0]}px)`, offset: 50 },
+        { transform: `translate(${xOffset * swings[1]}px, ${yOffset * swings[1]}px)`, offset: 75 },
+        { transform: `translate(${xOffset * swings[2]}px, ${yOffset * swings[2]}px)`, offset: 50 },
+        { transform: `translate(${xOffset * swings[3]}px, ${yOffset * swings[3]}px)`, offset: 100 },
+        { transform: `translate(${xOffset * swings[4]}px,    ${yOffset * swings[4]}px)`, offset: 100 }
       ]
       let lastOffset = 0
       keyframes = keyframes.map(keyframe => {
