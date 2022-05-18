@@ -13,7 +13,7 @@ article(
 
     @mouseenter="initStickToCursor"
     @mousemove="stickToCursor"
-    @mouseout="unstickToCursor"
+    @mouseleave="unstickToCursor"
 
     @touchstart="startLocking"
     @touchmove="updateCurrentTouchPosition"
