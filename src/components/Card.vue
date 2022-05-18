@@ -234,7 +234,6 @@ let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 const defaultCardPosition = 100
 
 // sticky
-let isAnimationUnsticking = false
 let preventSticking = false
 
 export default {
@@ -307,7 +306,8 @@ export default {
       lockingPercent: 0,
       lockingAlpha: 0,
       translateX: 0,
-      translateY: 0
+      translateY: 0,
+      isAnimationUnsticking: false
     }
   },
   computed: {
@@ -889,7 +889,7 @@ export default {
     stickToCursor (event) {
       const stretchResistanceX = 6
       const stretchResistanceY = 6
-      if (isAnimationUnsticking) { return }
+      if (this.isAnimationUnsticking) { return }
       if (preventSticking) { return }
       if (this.shouldNotStick) {
         this.translateX = 0
@@ -925,10 +925,36 @@ export default {
       this.translateY = yOffset + 'px'
     },
     unstickToCursor () {
-      console.log('🍅')
-      this.translateX = 0
-      this.translateY = 0
-      // isAnimationUnsticking = true
+      this.isAnimationUnsticking = true
+      const xOffset = parseInt(this.translateX)
+      const yOffset = parseInt(this.translateY)
+      const timing = {
+        duration: 375,
+        easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
+        iterations: 1
+      }
+      let keyframes = [
+        { transform: `translate(${xOffset * -1}px,   ${yOffset * -1}px)`, offset: 50 },
+        { transform: `translate(${xOffset * 0.75}px, ${yOffset * 0.75}px)`, offset: 75 },
+        { transform: `translate(${xOffset * -0.5}px, ${yOffset * -0.5}px)`, offset: 50 },
+        { transform: `translate(${xOffset * 0.25}px, ${yOffset * 0.25}px)`, offset: 100 },
+        { transform: `translate(${xOffset * 0}px,    ${yOffset * 0}px)`, offset: 100 }
+      ]
+      let lastOffset = 0
+      keyframes = keyframes.map(keyframe => {
+        keyframe.offset = lastOffset + (keyframe.offset / timing.duration)
+        keyframe.offset = utils.roundFloat(keyframe.offset)
+        lastOffset = keyframe.offset
+        return keyframe
+      })
+      // play animation
+      const element = this.$refs.card
+      const animation = element.animate(keyframes, timing)
+      animation.onfinish = () => {
+        this.translateX = 0
+        this.translateY = 0
+        this.isAnimationUnsticking = false
+      }
     },
 
     updateTypeForConnection (connectionId) {
