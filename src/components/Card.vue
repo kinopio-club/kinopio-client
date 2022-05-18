@@ -441,7 +441,7 @@ export default {
       return this.id === this.$store.state.cardDetailsIsVisibleForCardId
     },
     shouldNotStick () {
-      return this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isConnectingTo || this.isConnectingFrom
+      return this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isConnectingTo || this.isConnectingFrom || this.isLocked
     },
     cardStyle () {
       let backgroundColor
