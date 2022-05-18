@@ -928,8 +928,8 @@ export default {
       this.isAnimationUnsticking = true
       const xOffset = parseInt(this.translateX)
       const yOffset = parseInt(this.translateY)
-      const timing = {
-        duration: 375,
+      let timing = {
+        duration: 0, // sum of keyframe offsets
         easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
         iterations: 1
       }
@@ -941,6 +941,9 @@ export default {
         { transform: `translate(${xOffset * swings[3]}px, ${yOffset * swings[3]}px)`, offset: 100 },
         { transform: `translate(${xOffset * swings[4]}px,    ${yOffset * swings[4]}px)`, offset: 100 }
       ]
+      keyframes.forEach(keyframe => {
+        timing.duration = timing.duration + keyframe.offset
+      })
       let lastOffset = 0
       keyframes = keyframes.map(keyframe => {
         keyframe.offset = lastOffset + (keyframe.offset / timing.duration)
