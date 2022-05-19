@@ -11,6 +11,10 @@ article(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
 
+    @mouseenter="initStickToCursor"
+    @mousemove="stickToCursor"
+    @mouseleave="unstickToCursor"
+
     @touchstart="startLocking"
     @touchmove="updateCurrentTouchPosition"
     @touchend="showCardDetailsTouch"
@@ -229,6 +233,9 @@ const lockingDuration = 100 // ms
 let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 const defaultCardPosition = 100
 
+// sticky
+let preventSticking = false
+
 export default {
   components: {
     Frames,
@@ -297,7 +304,10 @@ export default {
       nameIsOnlyMarkdownLink: false,
       isLocking: true,
       lockingPercent: 0,
-      lockingAlpha: 0
+      lockingAlpha: 0,
+      translateX: 0,
+      translateY: 0,
+      isAnimationUnsticking: false
     }
   },
   computed: {
@@ -429,6 +439,9 @@ export default {
     },
     currentCardDetailsIsVisible () {
       return this.id === this.$store.state.cardDetailsIsVisibleForCardId
+    },
+    shouldNotStick () {
+      return this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isConnectingTo || this.isConnectingFrom || this.isLocked
     },
     cardStyle () {
       let backgroundColor
@@ -572,7 +585,8 @@ export default {
         zIndex: z,
         width: this.resizeWidth,
         maxWidth: this.resizeWidth,
-        pointerEvents
+        pointerEvents,
+        transform: `translate(${this.translateX}, ${this.translateY})`
       }
     },
     canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) },
@@ -863,6 +877,92 @@ export default {
     userDetailsIsVisible () { return this.$store.state.cardUserDetailsIsVisibleForCardId === this.id }
   },
   methods: {
+
+    // sticky
+
+    initStickToCursor () {
+      preventSticking = false
+      if (this.shouldNotStick || utils.userPrefersReducedMotion()) {
+        preventSticking = true
+      }
+    },
+    stickToCursor (event) {
+      const stretchResistance = 6
+      if (this.isAnimationUnsticking) { return }
+      if (preventSticking) { return }
+      if (this.shouldNotStick) {
+        this.translateX = 0
+        this.translateY = 0
+        preventSticking = true
+        return
+      }
+      const isButtonHover = event.target.closest('.inline-button-wrap')
+      if (isButtonHover) {
+        this.translateX = 0
+        this.translateY = 0
+        return
+      }
+      const width = this.card.width
+      const height = this.card.height
+      const halfWidth = width / 2
+      const halfHeight = height / 2
+      let centerX = this.x + halfWidth
+      let centerY = this.y + halfHeight
+      const position = utils.cursorPositionInPage(event)
+      // position from card center
+      const xFromCenter = position.x - centerX
+      const yFromCenter = position.y - centerY
+      // percentage from center to card edge
+      const xPercent = (xFromCenter / halfWidth)
+      const yPercent = (yFromCenter / halfHeight)
+      // calc sticky offset
+      let xOffset = (xPercent * halfWidth) / stretchResistance
+      xOffset = Math.round(xOffset)
+      let yOffset = (yPercent * halfHeight) / stretchResistance
+      yOffset = Math.round(yOffset)
+      this.translateX = xOffset + 'px'
+      this.translateY = yOffset + 'px'
+    },
+    unstickToCursor () {
+      this.isAnimationUnsticking = true
+      const xOffset = parseInt(this.translateX)
+      const yOffset = parseInt(this.translateY)
+      let timing = {
+        duration: 0, // sum of keyframe offsets
+        easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
+        iterations: 1
+      }
+      const swings = [-0.9, 0.6, -0.4, 0.2, 0] // [-1, 0.75, -0.5, 0.25, 0]
+      let keyframes = [
+        { transform: `translate(${xOffset * swings[0]}px,   ${yOffset * swings[0]}px)`, offset: 50 },
+        { transform: `translate(${xOffset * swings[1]}px, ${yOffset * swings[1]}px)`, offset: 75 },
+        { transform: `translate(${xOffset * swings[2]}px, ${yOffset * swings[2]}px)`, offset: 50 },
+        { transform: `translate(${xOffset * swings[3]}px, ${yOffset * swings[3]}px)`, offset: 100 },
+        { transform: `translate(${xOffset * swings[4]}px,    ${yOffset * swings[4]}px)`, offset: 100 }
+      ]
+      keyframes.forEach(keyframe => {
+        timing.duration = timing.duration + keyframe.offset
+      })
+      let lastOffset = 0
+      keyframes = keyframes.map(keyframe => {
+        keyframe.offset = lastOffset + (keyframe.offset / timing.duration)
+        keyframe.offset = utils.roundFloat(keyframe.offset)
+        lastOffset = keyframe.offset
+        return keyframe
+      })
+      // play animation
+      const element = this.$refs.card
+      const animation = element.animate(keyframes, timing)
+      animation.onfinish = () => {
+        this.clearStickToCursor()
+      }
+    },
+    clearStickToCursor () {
+      this.translateX = 0
+      this.translateY = 0
+      this.isAnimationUnsticking = false
+    },
+
     updateTypeForConnection (connectionId) {
       const newType = this.$store.getters['currentConnections/typeForNewConnections']
       console.warn('🚑 connection was missing type', { cardId: this.id, connectionId, newType })
@@ -1299,6 +1399,7 @@ export default {
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
       this.updatePreviousResultCardId()
+      this.clearStickToCursor()
     },
     updatePreviousResultCardId () {
       const search = this.$store.state.search
