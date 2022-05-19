@@ -142,8 +142,9 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
               span Upgrade
           //- Sidebar
           .button-wrap
-            button
+            button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
               img.icon.right-arrow(src="@/assets/down-arrow.svg" :class="{ 'is-mobile-icon': isMobile }")
+            Sidebar(:visible="sidebarIsVisible")
   SelectAllBelow
 </template>
 
@@ -167,6 +168,7 @@ import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Search from '@/components/dialogs/Search.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
 import Templates from '@/components/dialogs/Templates.vue'
+import Sidebar from '@/components/dialogs/Sidebar.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 import SelectAllBelow from '@/components/SelectAllBelow.vue'
@@ -202,7 +204,8 @@ export default {
     AddSpace,
     Templates,
     PrivacyIcon,
-    SelectAllBelow
+    SelectAllBelow,
+    Sidebar
   },
   data () {
     return {
@@ -224,7 +227,8 @@ export default {
       addSpaceIsVisible: false,
       isFadeOut: false,
       isHidden: false,
-      templatesIsVisible: false
+      templatesIsVisible: false,
+      sidebarIsVisible: false
     }
   },
   created () {
@@ -459,6 +463,7 @@ export default {
       this.notificationsIsVisible = false
       this.addSpaceIsVisible = false
       this.templatesIsVisible = false
+      this.sidebarIsVisible = false
       if (!spaceDetailsDialogIsPinned) {
         this.spaceDetailsIsVisible = false
       }
@@ -500,6 +505,11 @@ export default {
       const isVisible = this.templatesIsVisible
       this.$store.dispatch('closeAllDialogs', 'Header.toggleTemplatesIsVisible')
       this.templatesIsVisible = !isVisible
+    },
+    toggleSidebarIsVisible () {
+      const isVisible = this.sidebarIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleSidebarIsVisible')
+      this.sidebarIsVisible = !isVisible
     },
     toggleSpaceStatusIsVisible () {
       const isVisible = this.spaceStatusIsVisible

@@ -38,14 +38,14 @@
           //-   button.toggle-more-controls(@click.left.stop="toggleMoreFooterControlsIsVisible" :class="{active : moreFooterControlsIsVisible}")
           //-     img.icon.down-arrow(src="@/assets/down-arrow.svg")
 
-        section
+        //- section
           //- (v-if="moreFooterControlsIsVisible")
           //- Removed
-          .button-wrap
-            button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
-              img.icon(src="@/assets/remove.svg")
-              img.icon.remove-undo(src="@/assets/undo.svg")
-            Removed(:visible="removedIsVisible")
+          //- .button-wrap
+          //-   button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+          //-     img.icon(src="@/assets/remove.svg")
+          //-     img.icon.remove-undo(src="@/assets/undo.svg")
+          //-   Removed(:visible="removedIsVisible")
           //- Tags, Links
           //- .button-wrap
           //-   .segmented-buttons
