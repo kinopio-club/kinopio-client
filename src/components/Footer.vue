@@ -31,8 +31,9 @@
           .button-wrap(v-if="isMobileOrTouch" :style="{zIndex: mobileTipsZIndex}")
             button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
               img.icon(src="@/assets/press-and-hold.svg")
-              span Mobile Tips
+              span Tips
             MobileTips(:visible="mobileTipsIsVisible")
+
           //- Toggle More Controls
           //- .button-wrap
           //-   button.toggle-more-controls(@click.left.stop="toggleMoreFooterControlsIsVisible" :class="{active : moreFooterControlsIsVisible}")
@@ -68,7 +69,6 @@
 <script>
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
-import Removed from '@/components/dialogs/Removed.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
 import MobileTips from '@/components/dialogs/MobileTips.vue'
 import Notifications from '@/components/Notifications.vue'
@@ -90,7 +90,6 @@ export default {
   components: {
     Explore,
     Live,
-    Removed,
     Notifications,
     Favorites,
     MobileTips,
@@ -99,10 +98,10 @@ export default {
   },
   data () {
     return {
-      removedIsVisible: false,
+      // removedIsVisible: false,
       favoritesIsVisible: false,
-      linksIsVisible: false,
-      tagsIsVisible: false,
+      // linksIsVisible: false,
+      // tagsIsVisible: false,
       exploreIsVisible: false,
       liveIsVisible: false,
       mobileTipsIsVisible: false,
@@ -111,8 +110,8 @@ export default {
       isLoadingLiveSpaces: true,
       isFadeOut: false,
       isHidden: false,
-      exploreSpaces: [],
-      commentsIsVisible: false
+      exploreSpaces: []
+      // commentsIsVisible: false
     }
   },
   mounted () {

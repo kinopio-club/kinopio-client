@@ -1,61 +1,61 @@
 <template lang="pug">
-dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
-  section
-    .segmented-buttons
-      button(@click.left="showCards" :class="{active: cardsVisible}")
-        img.icon(src="@/assets/remove.svg")
-        span Cards in this Space
-      button(@click.left="showSpaces" :class="{active: !cardsVisible}")
-        img.icon(src="@/assets/remove.svg")
-        span Spaces
+//- dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+section
+  .segmented-buttons
+    button(@click.left="showCards" :class="{active: cardsVisible}")
+      img.icon(src="@/assets/remove.svg")
+      span Cards in this Space
+    button(@click.left="showSpaces" :class="{active: !cardsVisible}")
+      img.icon(src="@/assets/remove.svg")
+      span Spaces
 
-  section(v-if="!items.length")
+section(v-if="!items.length")
+  .row(v-if="isLoading")
+    Loader(:visible="loading.cards || loading.spaces")
+  template(v-if="cardsVisible")
+    p Removed cards from {{currentSpaceName}} can be restored here
+    p(v-if="!currentUserCanEditSpace")
+      span.badge.info
+        PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
+        span You need to be a collaborator
+  template(v-if="!cardsVisible")
+    p Removed spaces can be restored here
+
+section.results-section(v-if="items.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+  section.results-actions
     .row(v-if="isLoading")
       Loader(:visible="loading.cards || loading.spaces")
-    template(v-if="cardsVisible")
-      p Removed cards from {{currentSpaceName}} can be restored here
-      p(v-if="!currentUserCanEditSpace")
-        span.badge.info
-          PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
-          span You need to be a collaborator
-    template(v-if="!cardsVisible")
-      p Removed spaces can be restored here
+    button(@click="toggleDeleteAllConfirmationIsVisible" v-if="!deleteAllConfirmationIsVisible")
+      img.icon(src="@/assets/remove.svg")
+      span Delete All
+    template(v-if="deleteAllConfirmationIsVisible")
+      p
+        span Permanently delete all removed {{cardsOrSpacesLabel}} and uploads?
+      .segmented-buttons
+        button(@click.left.stop="toggleDeleteAllConfirmationIsVisible")
+          img.icon.cancel(src="@/assets/add.svg")
+          span Cancel
+        button.danger(@click.left.stop="deleteAll")
+          img.icon(src="@/assets/remove.svg")
+          span Delete All
 
-  section.results-section(v-if="items.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    section.results-actions
-      .row(v-if="isLoading")
-        Loader(:visible="loading.cards || loading.spaces")
-      button(@click="toggleDeleteAllConfirmationIsVisible" v-if="!deleteAllConfirmationIsVisible")
-        img.icon(src="@/assets/remove.svg")
-        span Delete All
-      template(v-if="deleteAllConfirmationIsVisible")
-        p
-          span Permanently delete all removed {{cardsOrSpacesLabel}} and uploads?
-        .segmented-buttons
-          button(@click.left.stop="toggleDeleteAllConfirmationIsVisible")
-            img.icon.cancel(src="@/assets/add.svg")
-            span Cancel
-          button.danger(@click.left.stop="deleteAll")
-            img.icon(src="@/assets/remove.svg")
-            span Delete All
+  ul.results-list
+    template(v-for="item in items" :key="item.id")
+      li(@click.left="restore(item)" tabindex="0" v-on:keyup.enter="restore(item)" :data-item-id="item.id")
+        .badge
+          img.undo.icon(src="@/assets/undo.svg")
+        .name {{item.name}}
+        button(v-if="!isRemoveConfirmationVisible(item)" @click.left.stop="showRemoveConfirmation(item)")
+          img.icon(src="@/assets/remove.svg")
 
-    ul.results-list
-      template(v-for="item in items" :key="item.id")
-        li(@click.left="restore(item)" tabindex="0" v-on:keyup.enter="restore(item)" :data-item-id="item.id")
-          .badge
-            img.undo.icon(src="@/assets/undo.svg")
-          .name {{item.name}}
-          button(v-if="!isRemoveConfirmationVisible(item)" @click.left.stop="showRemoveConfirmation(item)")
-            img.icon(src="@/assets/remove.svg")
-
-          .remove-confirmation(v-if="isRemoveConfirmationVisible(item)")
-            p Permanently delete?
-            .segmented-buttons
-              button(@click.left.stop="hideRemoveConfirmation")
-                img.icon.cancel(src="@/assets/add.svg")
-              button.danger(@click.left.stop="deleteItem(item)")
-                img.icon(src="@/assets/remove.svg")
-                span Delete
+        .remove-confirmation(v-if="isRemoveConfirmationVisible(item)")
+          p Permanently delete?
+          .segmented-buttons
+            button(@click.left.stop="hideRemoveConfirmation")
+              img.icon.cancel(src="@/assets/add.svg")
+            button.danger(@click.left.stop="deleteItem(item)")
+              img.icon(src="@/assets/remove.svg")
+              span Delete
 </template>
 
 <script>
