@@ -1,27 +1,27 @@
 <template lang="pug">
-//- dialog.links.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
-section
-  .title-row
-    p Spaces that Link Here
-    .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-      button
-        img.icon.pin(src="@/assets/pin.svg")
+//- dialog.links.narrow.is-pinnable( :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
+//- section
+//-   .title-row
+//-     p Spaces that Link Here
+//-     .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
+//-       button
+//-         img.icon.pin(src="@/assets/pin.svg")
+.links(v-if="visible")
+  section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+    .button-wrap(v-if="userSpacesToggleShouldBeVisible" @click.left.prevent="toggleCurrentUserSpacesIsVisibleOnly" @keydown.stop.enter="toggleCurrentUserSpacesIsVisibleOnly")
+      label(:class="{ active: currentUserSpacesIsVisibleOnly }")
+        input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
+        User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
+    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="dialogIsPinned")
 
-section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-  .button-wrap(v-if="userSpacesToggleShouldBeVisible" @click.left.prevent="toggleCurrentUserSpacesIsVisibleOnly" @keydown.stop.enter="toggleCurrentUserSpacesIsVisibleOnly")
-    label(:class="{ active: currentUserSpacesIsVisibleOnly }")
-      input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
-      User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
-  SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="dialogIsPinned")
-
-section(v-else-if="loading")
-  Loader(:visible="loading")
-section(v-else)
-  p Spaces with cards that link to this space can be found here.
-  p Type
-    span {{' '}}
-    span.badge.secondary /
-    span when editing a card to create links
+  section(v-else-if="loading")
+    Loader(:visible="loading")
+  section(v-else)
+    p Spaces with cards that link to this space can be found here.
+    p Type
+      span {{' '}}
+      span.badge.secondary /
+      span when editing a card to create links
 </template>
 
 <script>
@@ -150,8 +150,9 @@ export default {
 
 <style lang="stylus">
 .links
-  .results-section
+  section
     border-top 1px solid var(--primary)
+  .results-section
     padding-top 4px
   .button-wrap
     padding 4px
@@ -163,6 +164,6 @@ export default {
       .user-avatar
         width 17px
         height 16px
-  &.is-pinned
-    left -86px
+  // &.is-pinned
+  //   left -86px
 </style>

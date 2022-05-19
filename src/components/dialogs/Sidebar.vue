@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.sidebar.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.sidebar.narrow.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     .row.title-row-flex
       .button-wrap
@@ -20,7 +20,7 @@ dialog.sidebar.narrow(v-if="visible" :open="visible" @click.left.stop="closeDial
         img.icon.remove-undo(src="@/assets/undo.svg")
 
   Tags(:visible="tagsIsVisible")
-  //- Links(:visible="linksIsVisible")
+  Links(:visible="linksIsVisible")
   //-   Comments(:visible="commentsIsVisible")
   //-   Removed(:visible="removedIsVisible")
 
@@ -126,4 +126,12 @@ export default {
     transform rotate(180deg)
   // section.no-border
   //   border none
+  .tags,
+  .links,
+  .comments,
+  .removed
+    section
+      &:first-child
+        border-top-left-radius 0
+        border-top-right-radius 0
 </style>
