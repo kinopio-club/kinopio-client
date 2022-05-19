@@ -4,30 +4,27 @@ dialog.sidebar.narrow(v-if="visible" :open="visible" @click.left.stop="closeDial
     .row.title-row-flex
       .button-wrap
         .segmented-buttons
-          button
-            //- (@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
+          button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
             span Tags
-          button
-            //- (@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
+          button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
             span Links
-          button
-            //- (@click.left="toggleCommentsIsVisible" :class="{ active: commentsIsVisible}")
+          button(@click.left="toggleCommentsIsVisible" :class="{ active: commentsIsVisible}")
             img.icon.comment-icon(src="@/assets/comment.svg")
-          button
-            //- (@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+          button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
             img.icon(src="@/assets/remove.svg")
             img.icon.remove-undo(src="@/assets/undo.svg")
 
       .title-row
-        .button-wrap.pin-button-wrap
-          //- (@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
+        .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
           button
-            img.icon.pin(src="@/assets/pin.svg")
+            img.icon.pin.right-pin(src="@/assets/pin.svg")
 
-        //- Links(:visible="linksIsVisible")
-        //- Tags(:visible="tagsIsVisible")
-        //-   Comments(:visible="commentsIsVisible")
-        //-   Removed(:visible="removedIsVisible")
+  section
+    p asdf
+    //- Links(:visible="linksIsVisible")
+    //- Tags(:visible="tagsIsVisible")
+    //-   Comments(:visible="commentsIsVisible")
+    //-   Removed(:visible="removedIsVisible")
 
 </template>
 
@@ -49,7 +46,12 @@ export default {
   },
   data () {
     return {
-      dialogHeight: null
+      dialogHeight: null,
+      tagsIsVisible: true,
+      linksIsVisible: false,
+      commentsIsVisible: false,
+      removedIsVisible: false,
+      dialogIsPinned: false
     }
   },
   created () {
@@ -60,6 +62,35 @@ export default {
     })
   },
   methods: {
+    clearIsVisible () {
+      this.linksIsVisible = false
+      this.tagsIsVisible = false
+      this.commentsIsVisible = false
+      this.removedIsVisible = false
+    },
+    toggleTagsIsVisible () {
+      const value = !this.tagsIsVisible
+      this.clearIsVisible()
+      this.tagsIsVisible = value
+    },
+    toggleLinksIsVisible () {
+      const value = !this.linksIsVisible
+      this.clearIsVisible()
+      this.linksIsVisible = value
+    },
+    toggleCommentsIsVisible () {
+      const value = !this.commentsIsVisible
+      this.clearIsVisible()
+      this.commentsIsVisible = value
+    },
+    toggleRemovedIsVisible () {
+      const value = !this.removedIsVisible
+      this.clearIsVisible()
+      this.removedIsVisible = value
+    },
+    toggleDialogIsPinned () {
+      this.dialogIsPinned = !this.dialogIsPinned
+    },
     updateDialogHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
@@ -90,5 +121,6 @@ export default {
     justify-content space-between
     .comment-icon
       vertical-align -2px
-
+  .right-pin
+    transform rotate(180deg)
 </style>
