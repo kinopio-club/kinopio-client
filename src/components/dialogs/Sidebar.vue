@@ -21,7 +21,7 @@ dialog.sidebar.narrow.is-pinnable(v-if="visible" :open="visible" @click.left.sto
 
   Tags(:visible="tagsIsVisible")
   Links(:visible="linksIsVisible")
-  //-   Comments(:visible="commentsIsVisible")
+  Comments(:visible="commentsIsVisible")
   //-   Removed(:visible="removedIsVisible")
 
 </template>
