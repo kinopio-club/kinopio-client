@@ -140,6 +140,10 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
           .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
             button(@click.left.stop="triggerUpgradeUserIsVisible")
               span Upgrade
+          //- Sidebar
+          .button-wrap
+            button
+              img.icon.right-arrow(src="@/assets/down-arrow.svg" :class="{ 'is-mobile-icon': isMobile }")
   SelectAllBelow
 </template>
 
@@ -722,10 +726,10 @@ header
 
   .left-arrow
     transform rotate(90deg)
-    vertical-align 1px
+    vertical-align 2px
   .right-arrow
     transform rotate(-90deg)
-    vertical-align 1px
+    vertical-align 2px
   .search-button
     .badge
       margin-right 0

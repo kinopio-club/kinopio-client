@@ -34,11 +34,12 @@
               span Mobile Tips
             MobileTips(:visible="mobileTipsIsVisible")
           //- Toggle More Controls
-          .button-wrap
-            button.toggle-more-controls(@click.left.stop="toggleMoreFooterControlsIsVisible" :class="{active : moreFooterControlsIsVisible}")
-              img.icon.down-arrow(src="@/assets/down-arrow.svg")
+          //- .button-wrap
+          //-   button.toggle-more-controls(@click.left.stop="toggleMoreFooterControlsIsVisible" :class="{active : moreFooterControlsIsVisible}")
+          //-     img.icon.down-arrow(src="@/assets/down-arrow.svg")
 
-        section(v-if="moreFooterControlsIsVisible")
+        section
+          //- (v-if="moreFooterControlsIsVisible")
           //- Removed
           .button-wrap
             button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
@@ -46,19 +47,19 @@
               img.icon.remove-undo(src="@/assets/undo.svg")
             Removed(:visible="removedIsVisible")
           //- Tags, Links
-          .button-wrap
-            .segmented-buttons
-              button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
-                span Tags
-              button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
-                span Links
-            Links(:visible="linksIsVisible")
-            Tags(:visible="tagsIsVisible")
-          //- Comments
-          .button-wrap
-            button(@click.left="toggleCommentsIsVisible" :class="{ active: commentsIsVisible}")
-              img.icon(src="@/assets/comment.svg")
-            Comments(:visible="commentsIsVisible")
+          //- .button-wrap
+          //-   .segmented-buttons
+          //-     button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
+          //-       span Tags
+          //-     button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
+          //-       span Links
+          //-   Links(:visible="linksIsVisible")
+          //-   Tags(:visible="tagsIsVisible")
+          //- //- Comments
+          //- .button-wrap
+          //-   button(@click.left="toggleCommentsIsVisible" :class="{ active: commentsIsVisible}")
+          //-     img.icon(src="@/assets/comment.svg")
+          //-   Comments(:visible="commentsIsVisible")
 
   .right(v-if="!isMobileOrTouch" :class="{'is-embed': isEmbed}")
     SpaceZoom
