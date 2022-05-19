@@ -10,21 +10,19 @@ dialog.sidebar.narrow(v-if="visible" :open="visible" @click.left.stop="closeDial
             span Links
           button(@click.left="toggleCommentsIsVisible" :class="{ active: commentsIsVisible}")
             img.icon.comment-icon(src="@/assets/comment.svg")
-          button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
-            img.icon(src="@/assets/remove.svg")
-            img.icon.remove-undo(src="@/assets/undo.svg")
-
       .title-row
         .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
           button
             img.icon.pin.right-pin(src="@/assets/pin.svg")
+    .row
+      button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+        img.icon(src="@/assets/remove.svg")
+        img.icon.remove-undo(src="@/assets/undo.svg")
 
-  section
-    p asdf
-    //- Tags(:visible="tagsIsVisible")
-    //- Links(:visible="linksIsVisible")
-    //-   Comments(:visible="commentsIsVisible")
-    //-   Removed(:visible="removedIsVisible")
+  Tags(:visible="tagsIsVisible")
+  //- Links(:visible="linksIsVisible")
+  //-   Comments(:visible="commentsIsVisible")
+  //-   Removed(:visible="removedIsVisible")
 
 </template>
 
@@ -62,6 +60,9 @@ export default {
     })
   },
   methods: {
+    closeDialogs () {
+      this.$store.commit('tagDetailsIsVisible', false)
+    },
     clearIsVisible () {
       this.linksIsVisible = false
       this.tagsIsVisible = false
@@ -123,4 +124,6 @@ export default {
       vertical-align -2px
   .right-pin
     transform rotate(180deg)
+  // section.no-border
+  //   border none
 </style>
