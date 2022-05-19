@@ -12,16 +12,22 @@ dialog.sidebar.narrow(v-if="visible" :open="visible" @click.left.stop="closeDial
             span Links
           button
             //- (@click.left="toggleCommentsIsVisible" :class="{ active: commentsIsVisible}")
-            img.icon(src="@/assets/comment.svg")
+            img.icon.comment-icon(src="@/assets/comment.svg")
+          button
+            //- (@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+            img.icon(src="@/assets/remove.svg")
+            img.icon.remove-undo(src="@/assets/undo.svg")
 
-      .button-wrap
-        button
-          //- (@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
-          img.icon(src="@/assets/remove.svg")
-          img.icon.remove-undo(src="@/assets/undo.svg")
+      .title-row
+        .button-wrap.pin-button-wrap
+          //- (@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
+          button
+            img.icon.pin(src="@/assets/pin.svg")
 
         //- Links(:visible="linksIsVisible")
         //- Tags(:visible="tagsIsVisible")
+        //-   Comments(:visible="commentsIsVisible")
+        //-   Removed(:visible="removedIsVisible")
 
 </template>
 
@@ -78,8 +84,11 @@ export default {
   left initial
   right 8px
   max-height calc(100vh - 25px)
+  width 215px !important
   .title-row-flex
     display flex
     justify-content space-between
+    .comment-icon
+      vertical-align -2px
 
 </style>
