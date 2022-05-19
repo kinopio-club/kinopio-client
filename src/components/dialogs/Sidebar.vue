@@ -27,9 +27,17 @@ dialog.sidebar.narrow(v-if="visible" :open="visible" @click.left.stop="closeDial
 
 <script>
 import utils from '@/utils.js'
+import Links from '@/components/Links.vue'
+import Tags from '@/components/Tags.vue'
+import Comments from '@/components/Comments.vue'
 
 export default {
   name: 'Sidebar',
+  components: {
+    Links,
+    Tags,
+    Comments
+  },
   props: {
     visible: Boolean
   },

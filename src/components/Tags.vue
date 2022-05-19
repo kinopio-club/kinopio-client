@@ -1,23 +1,23 @@
 <template lang="pug">
-dialog.tags.narrow.is-pinnable(@click.stop v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
-  section
-    .title-row
-      p Tags
-      .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-        button
-          img.icon.pin(src="@/assets/pin.svg")
-  section.results-section(v-if="tags.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    .button-wrap(@click.left.prevent="toggleShouldShowCurrentSpaceTags" @keydown.stop.enter="toggleShouldShowCurrentSpaceTags")
-      label(:class="{ active: shouldShowCurrentSpaceTags }")
-        input(type="checkbox" v-model="shouldShowCurrentSpaceTags")
-        span In Current Space
-    TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags" :parentIsPinned="dialogIsPinned")
-  section(v-else)
-    p Use tags to help cards stand out, and to connect ideas across spaces.
-    p Type
-      span {{' '}}
-      span.badge.secondary [[
-      span when editing a card to create tags
+//- dialog.tags.narrow.is-pinnable(@click.stop v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
+section
+  .title-row
+    p Tags
+    .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
+      button
+        img.icon.pin(src="@/assets/pin.svg")
+section.results-section(v-if="tags.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+  .button-wrap(@click.left.prevent="toggleShouldShowCurrentSpaceTags" @keydown.stop.enter="toggleShouldShowCurrentSpaceTags")
+    label(:class="{ active: shouldShowCurrentSpaceTags }")
+      input(type="checkbox" v-model="shouldShowCurrentSpaceTags")
+      span In Current Space
+  TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags" :parentIsPinned="dialogIsPinned")
+section(v-else)
+  p Use tags to help cards stand out, and to connect ideas across spaces.
+  p Type
+    span {{' '}}
+    span.badge.secondary [[
+    span when editing a card to create tags
 </template>
 
 <script>

@@ -1,31 +1,31 @@
 <template lang="pug">
-dialog.comments.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
-  section
-    .title-row
-      p Comments
-      .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-        button
-          img.icon.pin(src="@/assets/pin.svg")
+//- dialog.comments.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
+section
+  .title-row
+    p Comments
+    .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
+      button
+        img.icon.pin(src="@/assets/pin.svg")
 
-  section.results-section(v-if="comments.length")
-    ul.results-list
-      template(v-for="(card in comments")
-        li(@click="showCardDetails(card)")
-          p
-            span.badge.user-badge.user-badge(:style="{background: card.user.color}")
-              User(:user="card.user" :isClickable="false" :hideYouLabel="true")
-              span {{card.user.name}}
-          .comment-name
-            img.icon.comment-icon(src="@/assets/comment.svg")
-            template(v-for="segment in card.nameSegments")
-              img.card-image(v-if="segment.isImage" :src="segment.url")
-              NameSegment(:segment="segment")
+section.results-section(v-if="comments.length")
+  ul.results-list
+    template(v-for="(card in comments")
+      li(@click="showCardDetails(card)")
+        p
+          span.badge.user-badge.user-badge(:style="{background: card.user.color}")
+            User(:user="card.user" :isClickable="false" :hideYouLabel="true")
+            span {{card.user.name}}
+        .comment-name
+          img.icon.comment-icon(src="@/assets/comment.svg")
+          template(v-for="segment in card.nameSegments")
+            img.card-image(v-if="segment.isImage" :src="segment.url")
+            NameSegment(:segment="segment")
 
-  section.no-comments-section(v-if="!comments.length")
-    p No comment cards in this space yet
-    p
-      span.badge.secondary Card → Style →
-        img.icon.comment-icon(src="@/assets/comment.svg")
+section.no-comments-section(v-if="!comments.length")
+  p No comment cards in this space yet
+  p
+    span.badge.secondary Card → Style →
+      img.icon.comment-icon(src="@/assets/comment.svg")
 </template>
 
 <script>

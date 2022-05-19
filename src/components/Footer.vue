@@ -69,9 +69,6 @@
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
 import Removed from '@/components/dialogs/Removed.vue'
-import Links from '@/components/dialogs/Links.vue'
-import Tags from '@/components/dialogs/Tags.vue'
-import Comments from '@/components/dialogs/Comments.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
 import MobileTips from '@/components/dialogs/MobileTips.vue'
 import Notifications from '@/components/Notifications.vue'
@@ -95,9 +92,6 @@ export default {
     Live,
     Removed,
     Notifications,
-    Links,
-    Tags,
-    Comments,
     Favorites,
     MobileTips,
     Loader,
