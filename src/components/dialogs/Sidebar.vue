@@ -22,7 +22,7 @@ dialog.sidebar.narrow.is-pinnable(v-if="visible" :open="visible" @click.left.sto
   Tags(:visible="tagsIsVisible")
   Links(:visible="linksIsVisible")
   Comments(:visible="commentsIsVisible")
-  //-   Removed(:visible="removedIsVisible")
+  Removed(:visible="removedIsVisible")
 
 </template>
 
@@ -31,13 +31,15 @@ import utils from '@/utils.js'
 import Links from '@/components/Links.vue'
 import Tags from '@/components/Tags.vue'
 import Comments from '@/components/Comments.vue'
+import Removed from '@/components/Removed.vue'
 
 export default {
   name: 'Sidebar',
   components: {
     Links,
     Tags,
-    Comments
+    Comments,
+    Removed
   },
   props: {
     visible: Boolean
