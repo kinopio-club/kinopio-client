@@ -21,8 +21,8 @@ dialog.sidebar.narrow(v-if="visible" :open="visible" @click.left.stop="closeDial
 
   section
     p asdf
-    //- Links(:visible="linksIsVisible")
     //- Tags(:visible="tagsIsVisible")
+    //- Links(:visible="linksIsVisible")
     //-   Comments(:visible="commentsIsVisible")
     //-   Removed(:visible="removedIsVisible")
 
