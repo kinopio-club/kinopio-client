@@ -9,11 +9,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
         MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
         span {{currentSpaceName}} →
     .right
-      .space-users
-        .users
-          User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
-          User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-          User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+      SpaceUsers
 
   //- standard
   nav(v-if="!isEmbed")
@@ -98,26 +94,16 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
               img.icon.cancel(src="@/assets/add.svg")
 
     .right
-      .space-users(v-if="isSpace")
-        .users.spectators
-          User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-          User(v-if="!currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
-        .users
-          User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-          User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-          User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
-          UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs" :dialogOnRight="true")
-      .space-users(v-if="!isSpace")
-        .users(:class="{ 'no-padding': isEmbed}")
-          User(:user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
-
       .controls(v-if="isAddPage && !isAppStoreView")
         .top-controls
+          SpaceUsers
           a(:href="kinopioDomain")
             button Kinopio →
 
       .controls(v-if="isSpace")
         .top-controls
+          SpaceUsers
+          UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs" :dialogOnRight="true")
           //- Share
           .button-wrap
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
@@ -172,8 +158,7 @@ import Sidebar from '@/components/dialogs/Sidebar.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 import SelectAllBelow from '@/components/SelectAllBelow.vue'
-
-import uniqBy from 'lodash-es/uniqBy'
+import SpaceUsers from '@/components/SpaceUsers.vue'
 
 let updateNotificationsIntervalTimer
 
@@ -205,7 +190,8 @@ export default {
     Templates,
     PrivacyIcon,
     SelectAllBelow,
-    Sidebar
+    Sidebar,
+    SpaceUsers
   },
   data () {
     return {
@@ -318,22 +304,7 @@ export default {
     importArenaChannelIsVisible () { return this.$store.state.importArenaChannelIsVisible },
     currentSpace () { return this.$store.state.currentSpace },
     currentUser () { return this.$store.state.currentUser },
-    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    users () {
-      let users = utils.clone(this.currentSpace.users)
-      return users.filter(user => user.id !== this.currentUser.id)
-    },
-    collaborators () {
-      let collaborators = this.currentSpace.collaborators
-      return collaborators.filter(user => user.id !== this.currentUser.id)
-    },
-    spectators () {
-      let spectators = this.currentSpace.spectators
-      spectators = spectators.filter(user => user.id !== this.currentUser.id)
-      spectators = uniqBy(spectators, 'id')
-      return spectators
-    },
-    userIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
+    userIsUpgraded () { return this.currentUser.isUpgraded },
     currentSpaceName () {
       const id = this.$store.state.currentSpace.id
       const name = this.$store.state.currentSpace.name
@@ -814,20 +785,15 @@ header
   .right
     display flex
     flex-shrink 0
-    .space-users
-      display flex
-      > .users
-        padding-right 6px
-        max-width 40vw
-        display flex
-        flex-wrap wrap
-        justify-content flex-end
-        align-content flex-start
 
   .controls
     display inline-table
     .button-wrap + .button-wrap
       margin-left 6px
+
+  .top-controls
+    display flex
+    justify-content flex-end
 
   .bottom-controls
     margin-top 5px
@@ -863,10 +829,6 @@ header
   .invisible-badge
     position absolute
     left 3px
-
-  .users
-    > .upgrade-user
-      max-height calc(100vh - 50px)
 
   .icon.offline
     height 13px
