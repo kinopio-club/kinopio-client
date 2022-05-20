@@ -135,6 +135,8 @@ export default {
   right 8px
   max-height calc(100vh - 25px)
   width 215px !important
+  &.is-pinned
+    top -13px
   .title-row-flex
     display flex
     justify-content space-between
