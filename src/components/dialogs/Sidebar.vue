@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.sidebar.narrow.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.sidebar.narrow.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   section
     .row.title-row-flex
       .button-wrap
@@ -20,7 +20,7 @@ dialog.sidebar.narrow.is-pinnable(v-if="visible" :open="visible" @click.left.sto
         img.icon.remove-undo(src="@/assets/undo.svg")
 
   Tags(:visible="tagsIsVisible")
-  Links(:visible="linksIsVisible")
+  Links(:visible="linksIsVisible" :parentIsPinned="dialogIsPinned")
   Comments(:visible="commentsIsVisible")
   Removed(:visible="removedIsVisible")
 
@@ -50,8 +50,7 @@ export default {
       tagsIsVisible: true,
       linksIsVisible: false,
       commentsIsVisible: false,
-      removedIsVisible: false,
-      dialogIsPinned: false
+      removedIsVisible: false
     }
   },
   created () {
@@ -61,7 +60,14 @@ export default {
       }
     })
   },
+  computed: {
+    dialogIsPinned () { return this.$store.state.sidebarIsPinned }
+  },
   methods: {
+    toggleDialogIsPinned () {
+      const isPinned = !this.dialogIsPinned
+      this.$store.dispatch('sidebarIsPinned', isPinned)
+    },
     closeDialogs () {
       this.$store.commit('tagDetailsIsVisible', false)
     },
@@ -73,26 +79,27 @@ export default {
     },
     toggleTagsIsVisible () {
       const value = !this.tagsIsVisible
+      if (!value) { return }
       this.clearIsVisible()
       this.tagsIsVisible = value
     },
     toggleLinksIsVisible () {
       const value = !this.linksIsVisible
+      if (!value) { return }
       this.clearIsVisible()
       this.linksIsVisible = value
     },
     toggleCommentsIsVisible () {
       const value = !this.commentsIsVisible
+      if (!value) { return }
       this.clearIsVisible()
       this.commentsIsVisible = value
     },
     toggleRemovedIsVisible () {
       const value = !this.removedIsVisible
+      if (!value) { return }
       this.clearIsVisible()
       this.removedIsVisible = value
-    },
-    toggleDialogIsPinned () {
-      this.dialogIsPinned = !this.dialogIsPinned
     },
     updateDialogHeight () {
       if (!this.visible) { return }

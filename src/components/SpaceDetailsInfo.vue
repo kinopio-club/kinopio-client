@@ -130,7 +130,7 @@ export default {
         return inProgress && isSpace
       })
     },
-    dialogIsPinned () { return this.$store.state.spaceDetailsDialogIsPinned }
+    dialogIsPinned () { return this.$store.state.spaceDetailsIsPinned }
   },
   methods: {
     textareaSize () {
@@ -140,7 +140,7 @@ export default {
     },
     toggleDialogIsPinned () {
       const isPinned = !this.dialogIsPinned
-      this.$store.dispatch('spaceDetailsDialogIsPinned', isPinned)
+      this.$store.dispatch('spaceDetailsIsPinned', isPinned)
     },
     toggleBackgroundIsVisible () {
       const isVisible = this.backgroundIsVisible

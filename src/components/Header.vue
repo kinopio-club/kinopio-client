@@ -259,10 +259,6 @@ export default {
         this.showNextSearchCard()
       } else if (mutation.type === 'triggerShowPreviousSearchCard') {
         this.showPreviousSearchCard()
-      } else if (mutation.type === 'unpinOtherDialogs') {
-        if (mutation.payload !== 'spaceDetails') {
-          this.closeAllDialogs()
-        }
       } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
       } else if (mutation.type === 'triggerTemplatesIsVisible') {
@@ -451,7 +447,8 @@ export default {
       this.readOnlyJiggle = false
     },
     closeAllDialogs () {
-      const spaceDetailsDialogIsPinned = this.$store.state.spaceDetailsDialogIsPinned
+      const spaceDetailsIsPinned = this.$store.state.spaceDetailsIsPinned
+      const sidebarIsPinned = this.$store.state.sidebarIsPinned
       this.aboutIsVisible = false
       this.spaceDetailsInfoIsVisible = false
       this.signUpOrInIsVisible = false
@@ -463,9 +460,11 @@ export default {
       this.notificationsIsVisible = false
       this.addSpaceIsVisible = false
       this.templatesIsVisible = false
-      this.sidebarIsVisible = false
-      if (!spaceDetailsDialogIsPinned) {
+      if (!spaceDetailsIsPinned) {
         this.spaceDetailsIsVisible = false
+      }
+      if (!sidebarIsPinned) {
+        this.sidebarIsVisible = false
       }
     },
     toggleAboutIsVisible () {

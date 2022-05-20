@@ -28,7 +28,7 @@
                 span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
             Favorites(:visible="favoritesIsVisible")
           //- Mobile Tips
-          .button-wrap(v-if="isMobileOrTouch" :style="{zIndex: mobileTipsZIndex}")
+          .button-wrap(v-if="isMobileOrTouch")
             button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
               img.icon(src="@/assets/press-and-hold.svg")
               span Tips
@@ -120,10 +120,6 @@ export default {
         this.closeDialogs()
       } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         this.updatePosition()
-      } else if (mutation.type === 'unpinOtherDialogs') {
-        this.$nextTick(() => {
-          this.closeDialogs(mutation.payload)
-        })
       } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
       } else if (mutation.type === 'triggerRemovedIsVisible') {
@@ -209,18 +205,6 @@ export default {
     isMobileStandalone () {
       return utils.isMobile() && navigator.standalone // is homescreen app
     },
-    linksDialogIsPinned () { return this.$store.state.linksDialogIsPinned },
-    tagsDialogIsPinned () { return this.$store.state.tagsDialogIsPinned },
-    commentsDialogIsPinned () { return this.$store.state.commentsDialogIsPinned },
-    dialogsArePinned () { return this.linksDialogIsPinned || this.tagsDialogIsPinned },
-    mobileTipsZIndex () {
-      if (this.mobileTipsIsVisible) {
-        return 0
-      } else if (this.dialogsArePinned) {
-        return -1
-      }
-      return 0
-    },
     unreadExploreSpacesLength () {
       let readDate = this.$store.state.currentUser.showInExploreUpdatedAt
       if (!readDate) { return '20+' }
@@ -240,15 +224,6 @@ export default {
       this.exploreIsVisible = false
       this.liveIsVisible = false
       this.mobileTipsIsVisible = false
-      if (!this.tagsDialogIsPinned && exclude !== 'tags') {
-        this.tagsIsVisible = false
-      }
-      if (!this.linksDialogIsPinned && exclude !== 'links') {
-        this.linksIsVisible = false
-      }
-      if (!this.commentsDialogIsPinned && exclude !== 'comments') {
-        this.commentsIsVisible = false
-      }
     },
     toggleMoreFooterControlsIsVisible () {
       this.closeDialogs()

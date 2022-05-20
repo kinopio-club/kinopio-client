@@ -119,10 +119,8 @@ const store = createStore({
     currentSelectedLink: {},
 
     // pinned dialogs
-    linksDialogIsPinned: false,
-    tagsDialogIsPinned: false,
-    commentsDialogIsPinned: false,
-    spaceDetailsDialogIsPinned: false,
+    spaceDetailsIsPinned: false,
+    sidebarIsPinned: false,
 
     // dragging
     currentDraggingCardId: '',
@@ -670,28 +668,13 @@ const store = createStore({
 
     // Pinned Dialogs
 
-    unpinOtherDialogs: (state, exclude) => {
-      console.log('📌 unpin dialogs except', exclude)
-      state.linksDialogIsPinned = false
-      state.tagsDialogIsPinned = false
-      state.commentsDialogIsPinned = false
-      state.spaceDetailsDialogIsPinned = false
+    sidebarIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'sidebarIsPinned' })
+      state.sidebarIsPinned = value
     },
-    linksDialogIsPinned: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'linksDialogIsPinned' })
-      state.linksDialogIsPinned = value
-    },
-    tagsDialogIsPinned: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'tagsDialogIsPinned' })
-      state.tagsDialogIsPinned = value
-    },
-    commentsDialogIsPinned: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'commentsDialogIsPinned' })
-      state.commentsDialogIsPinned = value
-    },
-    spaceDetailsDialogIsPinned: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsDialogIsPinned' })
-      state.spaceDetailsDialogIsPinned = value
+    spaceDetailsIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsIsPinned' })
+      state.spaceDetailsIsPinned = value
     },
 
     // Connection Details
@@ -1178,25 +1161,14 @@ const store = createStore({
     },
 
     // Pinned Dialogs
-    linksDialogIsPinned: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'linksDialogIsPinned' })
-      context.commit('unpinOtherDialogs', 'links')
-      context.commit('linksDialogIsPinned', value)
+
+    sidebarIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'sidebarIsPinned' })
+      context.commit('sidebarIsPinned', value)
     },
-    tagsDialogIsPinned: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'tagsDialogIsPinned' })
-      context.commit('unpinOtherDialogs', 'tags')
-      context.commit('tagsDialogIsPinned', value)
-    },
-    commentsDialogIsPinned: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'commentsDialogIsPinned' })
-      context.commit('unpinOtherDialogs', 'comments')
-      context.commit('commentsDialogIsPinned', value)
-    },
-    spaceDetailsDialogIsPinned: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsDialogIsPinned' })
-      context.commit('unpinOtherDialogs', 'spaceDetails')
-      context.commit('spaceDetailsDialogIsPinned', value)
+    spaceDetailsIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsIsPinned' })
+      context.commit('spaceDetailsIsPinned', value)
     }
   },
   getters: {

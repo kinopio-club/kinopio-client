@@ -62,7 +62,6 @@ export default {
     }
   },
   computed: {
-    dialogIsPinned () { return this.$store.state.commentsDialogIsPinned },
     comments () {
       let cards = this.$store.getters['currentCards/all']
       cards = utils.clone(cards)
@@ -90,10 +89,6 @@ export default {
     },
     userById (userId) {
       return this.$store.getters['currentSpace/userById'](userId)
-    },
-    toggleDialogIsPinned () {
-      const isPinned = !this.dialogIsPinned
-      this.$store.dispatch('commentsDialogIsPinned', isPinned)
     },
     updateResultsSectionHeight () {
       if (!this.visible) { return }

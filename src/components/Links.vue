@@ -12,7 +12,7 @@
       label(:class="{ active: currentUserSpacesIsVisibleOnly }")
         input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
         User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
-    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="dialogIsPinned")
+    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="parentIsPinned")
 
   section(v-else-if="loading")
     Loader(:visible="loading")
@@ -40,7 +40,8 @@ export default {
     User
   },
   props: {
-    visible: Boolean
+    visible: Boolean,
+    parentIsPinned: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -87,14 +88,9 @@ export default {
       } else {
         return false
       }
-    },
-    dialogIsPinned () { return this.$store.state.linksDialogIsPinned }
+    }
   },
   methods: {
-    toggleDialogIsPinned () {
-      const isPinned = !this.dialogIsPinned
-      this.$store.dispatch('linksDialogIsPinned', isPinned)
-    },
     toggleCurrentUserSpacesIsVisibleOnly () {
       this.currentUserSpacesIsVisibleOnly = !this.currentUserSpacesIsVisibleOnly
     },
