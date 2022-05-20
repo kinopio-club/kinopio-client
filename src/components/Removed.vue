@@ -80,10 +80,12 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
         this.updateResultsSectionHeight()
       }
     })
+  },
+  mounted () {
+    this.init()
   },
   data () {
     return {
@@ -96,7 +98,6 @@ export default {
         spaces: false
       },
       resultsSectionHeight: null,
-      dialogHeight: null,
       deleteAllConfirmationIsVisible: false
     }
   },
@@ -133,6 +134,12 @@ export default {
     }
   },
   methods: {
+    init () {
+      this.deleteAllConfirmationIsVisible = false
+      this.updateRemovedCards()
+      this.updateRemovedSpaces()
+      this.updateResultsSectionHeight()
+    },
     toggleDeleteAllConfirmationIsVisible () {
       this.deleteAllConfirmationIsVisible = !this.deleteAllConfirmationIsVisible
     },
@@ -171,18 +178,11 @@ export default {
         this.deleteAllSpaces()
       }
     },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeightFromHeader(element)
-      })
-    },
     updateResultsSectionHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+        this.resultsSectionHeight = utils.elementHeight(element, true)
       })
     },
 
@@ -282,11 +282,7 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        this.deleteAllConfirmationIsVisible = false
-        this.updateRemovedCards()
-        this.updateRemovedSpaces()
-        this.updateDialogHeight()
-        this.updateResultsSectionHeight()
+        this.init()
       }
     }
   }

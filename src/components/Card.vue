@@ -952,6 +952,7 @@ export default {
       })
       // play animation
       const element = this.$refs.card
+      if (!element) { return }
       const animation = element.animate(keyframes, timing)
       animation.onfinish = () => {
         this.clearStickToCursor()

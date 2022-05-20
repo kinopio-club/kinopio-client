@@ -45,17 +45,19 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
         this.updateResultsSectionHeight()
       } else if (mutation.type === 'currentSpace/restoreSpace' && this.visible) {
         this.updateLinks()
       }
     })
   },
+  mounted () {
+    this.updateLinks()
+    this.updateResultsSectionHeight()
+  },
   data () {
     return {
       resultsSectionHeight: null,
-      dialogHeight: null,
       links: [],
       loading: false,
       spaces: [],
@@ -100,13 +102,6 @@ export default {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       this.$store.dispatch('closeAllDialogs', 'Links.closeAllDialogs')
     },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeightFromHeader(element)
-      })
-    },
     async updateLinks () {
       const spaceId = this.$store.state.currentSpace.id
       if (this.prevSpaceId === spaceId) { return }
@@ -129,14 +124,13 @@ export default {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+        this.resultsSectionHeight = utils.elementHeight(element, true)
       })
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
-        this.updateDialogHeight()
         this.updateLinks()
         this.updateResultsSectionHeight()
       }
@@ -164,6 +158,4 @@ export default {
       .user-avatar
         width 17px
         height 16px
-  // &.is-pinned
-  //   left -86px
 </style>

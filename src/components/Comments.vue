@@ -49,15 +49,16 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
         this.updateResultsSectionHeight()
       }
     })
   },
+  mounted () {
+    this.updateResultsSectionHeight()
+  },
   data () {
     return {
-      resultsSectionHeight: null,
-      dialogHeight: null
+      resultsSectionHeight: null
     }
   },
   computed: {
@@ -94,25 +95,17 @@ export default {
       const isPinned = !this.dialogIsPinned
       this.$store.dispatch('commentsDialogIsPinned', isPinned)
     },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeightFromHeader(element)
-      })
-    },
     updateResultsSectionHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+        this.resultsSectionHeight = utils.elementHeight(element, true)
       })
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
-        this.updateDialogHeight()
         this.updateResultsSectionHeight()
       }
     }

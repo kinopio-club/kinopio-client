@@ -49,7 +49,6 @@ export default {
       ]
 
       if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
         this.updateResultsSectionHeight()
       } else if (mutation.type === 'currentSpace/removeTags') {
         this.removeTag(mutation.payload)
@@ -69,7 +68,6 @@ export default {
   data () {
     return {
       resultsSectionHeight: null,
-      dialogHeight: null,
       tags: [],
       isLoadingRemoteTags: false
     }
@@ -115,13 +113,6 @@ export default {
       this.tags = tags
       this.$store.commit('remoteTagsIsFetched', false)
     },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeightFromHeader(element)
-      })
-    },
     updateTags () {
       const spaceTags = this.$store.getters['currentSpace/spaceTags']
       this.tags = spaceTags || []
@@ -150,14 +141,13 @@ export default {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+        this.resultsSectionHeight = utils.elementHeight(element, true)
       })
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
-        this.updateDialogHeight()
         this.updateTags()
         this.updateResultsSectionHeight()
       }
