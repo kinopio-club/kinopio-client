@@ -32,7 +32,7 @@ span.tag-list(@click.left="closeDialogs")
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
-import utils from '@/utils.js'
+// import utils from '@/utils.js'
 
 export default {
   name: 'TagList',
@@ -44,7 +44,8 @@ export default {
     isLoading: Boolean,
     parentIsPinned: Boolean,
     shouldEmitSelectTag: Boolean,
-    currentTags: Array
+    currentTags: Array,
+    positionTagsOnLeftSide: Boolean
   },
   data () {
     return {
@@ -79,7 +80,6 @@ export default {
     },
     updatePosition (event, tag) {
       let rect
-      const viewport = utils.visualViewport()
       if (event) {
         rect = event.target.getBoundingClientRect()
       } else {
@@ -93,8 +93,13 @@ export default {
         pageX: window.scrollX,
         pageY: window.scrollY
       }
-      const minY = ((viewport.height * viewport.scale) / 2) + window.scrollY
-      position.y = Math.min(position.y, minY)
+      if (this.positionTagsOnLeftSide) {
+        const tagDetailsWidth = 50
+        position.x = rect.x - rect.width - tagDetailsWidth + 20
+      }
+      // const viewport = utils.visualViewport()
+      // const minY = ((viewport.height * viewport.scale) / 2) + window.scrollY
+      // position.y = Math.min(position.y, minY)
       this.$store.commit('tagDetailsPosition', position)
       this.$store.commit('tagDetailsPositionShouldUpdate', true)
     },
