@@ -1,14 +1,6 @@
 <template lang="pug">
-//- dialog.comments.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
-//- section
-//-   .title-row
-//-     p Comments
-//-     .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-//-       button
-//-         img.icon.pin(src="@/assets/pin.svg")
-
 .comments(v-if="visible")
-  section.results-section(v-if="comments.length")
+  section.results-section(v-if="comments.length" ref="results")
     ul.results-list
       template(v-for="(card in comments")
         li(@click="showCardDetails(card)")

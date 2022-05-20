@@ -4,22 +4,27 @@ dialog.sidebar.narrow.is-pinnable(v-if="visible" :open="visible" @click.left.sto
     .row.title-row-flex
       .button-wrap
         .segmented-buttons
+          //- Tags
           button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
             span Tags
+          //- Links
           button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
             span Links
+          //- Comments
           button(@click.left="toggleCommentsIsVisible" :class="{ active: commentsIsVisible}")
             img.icon.comment-icon(src="@/assets/comment.svg")
+      //- Pin
       .title-row
         .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
           button
             img.icon.pin.right-pin(src="@/assets/pin.svg")
     .row
+      //- Removed
       button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
         img.icon(src="@/assets/remove.svg")
         img.icon.remove-undo(src="@/assets/undo.svg")
 
-  Tags(:visible="tagsIsVisible")
+  Tags(:visible="tagsIsVisible" :parentIsPinned="dialogIsPinned")
   Links(:visible="linksIsVisible" :parentIsPinned="dialogIsPinned")
   Comments(:visible="commentsIsVisible")
   Removed(:visible="removedIsVisible")

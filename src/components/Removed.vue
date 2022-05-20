@@ -1,5 +1,4 @@
 <template lang="pug">
-//- dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
 .removed(v-if="visible")
   section
     .segmented-buttons

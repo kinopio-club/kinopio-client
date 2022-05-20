@@ -1,11 +1,4 @@
 <template lang="pug">
-//- dialog.links.narrow.is-pinnable( :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
-//- section
-//-   .title-row
-//-     p Spaces that Link Here
-//-     .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-//-       button
-//-         img.icon.pin(src="@/assets/pin.svg")
 .links(v-if="visible")
   section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     .button-wrap(v-if="userSpacesToggleShouldBeVisible" @click.left.prevent="toggleCurrentUserSpacesIsVisibleOnly" @keydown.stop.enter="toggleCurrentUserSpacesIsVisibleOnly")

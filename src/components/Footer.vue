@@ -34,34 +34,6 @@
               span Tips
             MobileTips(:visible="mobileTipsIsVisible")
 
-          //- Toggle More Controls
-          //- .button-wrap
-          //-   button.toggle-more-controls(@click.left.stop="toggleMoreFooterControlsIsVisible" :class="{active : moreFooterControlsIsVisible}")
-          //-     img.icon.down-arrow(src="@/assets/down-arrow.svg")
-
-        //- section
-          //- (v-if="moreFooterControlsIsVisible")
-          //- Removed
-          //- .button-wrap
-          //-   button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
-          //-     img.icon(src="@/assets/remove.svg")
-          //-     img.icon.remove-undo(src="@/assets/undo.svg")
-          //-   Removed(:visible="removedIsVisible")
-          //- Tags, Links
-          //- .button-wrap
-          //-   .segmented-buttons
-          //-     button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
-          //-       span Tags
-          //-     button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
-          //-       span Links
-          //-   Links(:visible="linksIsVisible")
-          //-   Tags(:visible="tagsIsVisible")
-          //- //- Comments
-          //- .button-wrap
-          //-   button(@click.left="toggleCommentsIsVisible" :class="{ active: commentsIsVisible}")
-          //-     img.icon(src="@/assets/comment.svg")
-          //-   Comments(:visible="commentsIsVisible")
-
   .right(v-if="!isMobileOrTouch" :class="{'is-embed': isEmbed}")
     SpaceZoom
 </template>
@@ -98,10 +70,7 @@ export default {
   },
   data () {
     return {
-      // removedIsVisible: false,
       favoritesIsVisible: false,
-      // linksIsVisible: false,
-      // tagsIsVisible: false,
       exploreIsVisible: false,
       liveIsVisible: false,
       mobileTipsIsVisible: false,
@@ -111,7 +80,6 @@ export default {
       isFadeOut: false,
       isHidden: false,
       exploreSpaces: []
-      // commentsIsVisible: false
     }
   },
   mounted () {
@@ -122,13 +90,13 @@ export default {
         this.updatePosition()
       } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
-      } else if (mutation.type === 'triggerRemovedIsVisible') {
-        if (!this.moreFooterControlsIsVisible) {
-          this.$store.dispatch('currentUser/shouldShowMoreFooterControls', true)
-        }
-        this.$nextTick(() => {
-          this.toggleRemovedIsVisible()
-        })
+      // } else if (mutation.type === 'triggerRemovedIsVisible') {
+      //   if (!this.moreFooterControlsIsVisible) {
+      //     this.$store.dispatch('currentUser/shouldShowMoreFooterControls', true)
+      //   }
+      //   this.$nextTick(() => {
+      //     this.toggleRemovedIsVisible()
+      //   })
       }
     })
     window.addEventListener('scroll', this.handleTouchInteractions)
@@ -159,7 +127,6 @@ export default {
     clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
-    moreFooterControlsIsVisible () { return this.$store.state.currentUser.shouldShowMoreFooterControls },
     isAddPage () { return this.$store.state.isAddPage },
     isEmbed () { return this.$store.state.isEmbed },
     currentUser () { return this.$store.state.currentUser },
@@ -219,16 +186,10 @@ export default {
   },
   methods: {
     closeDialogs (exclude) {
-      this.removedIsVisible = false
       this.favoritesIsVisible = false
       this.exploreIsVisible = false
       this.liveIsVisible = false
       this.mobileTipsIsVisible = false
-    },
-    toggleMoreFooterControlsIsVisible () {
-      this.closeDialogs()
-      const isVisible = !this.$store.state.currentUser.shouldShowMoreFooterControls
-      this.$store.dispatch('currentUser/shouldShowMoreFooterControls', isVisible)
     },
     toggleIsFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
@@ -238,30 +199,10 @@ export default {
         this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
       }
     },
-    toggleRemovedIsVisible () {
-      const isVisible = this.removedIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleRemovedIsVisible')
-      this.removedIsVisible = !isVisible
-    },
     toggleFavoritesIsVisible () {
       const isVisible = this.favoritesIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleFavoritesIsVisible')
       this.favoritesIsVisible = !isVisible
-    },
-    toggleLinksIsVisible () {
-      const isVisible = this.linksIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleLinksIsVisible')
-      this.linksIsVisible = !isVisible
-    },
-    toggleCommentsIsVisible () {
-      const isVisible = this.commentsIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleCommentsIsVisible')
-      this.commentsIsVisible = !isVisible
-    },
-    toggleTagsIsVisible () {
-      const isVisible = this.tagsIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleTagsIsVisible')
-      this.tagsIsVisible = !isVisible
     },
     toggleExploreIsVisible () {
       const isVisible = this.exploreIsVisible
