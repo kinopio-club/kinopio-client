@@ -1,11 +1,4 @@
 <template lang="pug">
-//- .space-users
-  //- embed
-  //- .users
-  //-   User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
-  //-   User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-  //-   User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-
 .space-users(v-if="!isAddPage")
   .users.spectators
     User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
@@ -25,31 +18,13 @@
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
-// import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
-
 import uniqBy from 'lodash-es/uniqBy'
 
 export default {
   name: 'TagList',
   components: {
     User
-    // UpgradeUser
   },
-  props: {
-    // tags: Array,
-  },
-  created () {
-    // this.$store.subscribe((mutation, state) => {
-    //   if (mutation.type === 'triggerUpgradeUserIsVisible') {
-    //     this.upgradeUserIsVisible = true
-    //   }
-    // })
-  },
-  // data () {
-  //   return {
-  //     upgradeUserIsVisible: false,
-  //   }
-  // },
   computed: {
     isAddPage () { return this.$store.state.isAddPage },
     currentUser () { return this.$store.state.currentUser },
@@ -69,9 +44,6 @@ export default {
       spectators = uniqBy(spectators, 'id')
       return spectators
     }
-
-  },
-  methods: {
   }
 }
 </script>
