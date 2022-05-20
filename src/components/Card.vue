@@ -441,7 +441,8 @@ export default {
       return this.id === this.$store.state.cardDetailsIsVisibleForCardId
     },
     shouldNotStick () {
-      return this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isConnectingTo || this.isConnectingFrom || this.isLocked
+      const userIsConnecting = this.$store.state.currentConnectionStartCardIds.length
+      return userIsConnecting || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked
     },
     cardStyle () {
       let backgroundColor
@@ -890,7 +891,8 @@ export default {
       const stretchResistance = 6
       if (this.isAnimationUnsticking) { return }
       if (preventSticking) { return }
-      if (this.shouldNotStick) {
+      const isOverCheckbox = event.target.className === 'checkbox-wrap'
+      if (this.shouldNotStick || isOverCheckbox) {
         this.translateX = 0
         this.translateY = 0
         preventSticking = true
