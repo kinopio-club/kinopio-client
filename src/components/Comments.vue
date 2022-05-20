@@ -5,9 +5,9 @@
       template(v-for="(card in comments")
         li(@click="showCardDetails(card)")
           p
-            span.badge.user-badge.user-badge(:style="{background: card.user.color}")
+            span.badge.user-badge(:style="{background: userColor(card)}")
               User(:user="card.user" :isClickable="false" :hideYouLabel="true")
-              span {{card.user.name}}
+              span {{userName(card)}}
           .comment-name
             img.icon.comment-icon(src="@/assets/comment.svg")
             template(v-for="segment in card.nameSegments")
@@ -72,6 +72,18 @@ export default {
     }
   },
   methods: {
+    userColor (card) {
+      if (!card) { return }
+      if (card.user) {
+        return card.user.color
+      }
+    },
+    userName (card) {
+      if (!card) { return }
+      if (card.user) {
+        return card.user.name
+      }
+    },
     showCardDetails (card) {
       const filterComments = this.$store.state.currentUser.filterComments
       if (filterComments) {
@@ -124,4 +136,6 @@ export default {
     .comment-icon
       margin-left 4px
       vertical-align -2px
+  .user-badge
+    background var(--secondary-active-background)
 </style>

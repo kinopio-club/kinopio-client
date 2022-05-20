@@ -6,7 +6,7 @@
         input(type="checkbox" v-model="shouldShowCurrentSpaceTags")
         span In Current Space
     TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags" :parentIsPinned="parentIsPinned" :positionTagsOnLeftSide="true")
-  section.no-boder(v-else)
+  section(v-else)
     p Use tags to help cards stand out, and to connect ideas across spaces.
     p Type
       span {{' '}}
