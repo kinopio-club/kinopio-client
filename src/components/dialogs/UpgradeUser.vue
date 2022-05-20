@@ -34,15 +34,13 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
       .summary
         User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
         .badge.info
-          span(v-if="priceIsMonthly") $8/month
-          span(v-else) $88/year
-        span Tax Included
+          span {{current.amount}}/{{current.period}}
 
       button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
         span Upgrade Account
         Loader(:visible="loading.subscriptionIsBeingCreated")
 
-      p You'll be billed immediately and then each {{monthOrYear}}. You can cancel anytime.
+      p You'll be billed {{current.amount}} immediately and then each {{current.period}}. You can cancel anytime.
 
   section(v-if="currentUserIsSignedIn")
     img.icon(src="@/assets/lock.svg")
@@ -116,13 +114,6 @@ export default {
   computed: {
     user () { return this.$store.state.currentUser },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    monthOrYear () {
-      if (this.priceIsMonthly) {
-        return 'month'
-      } else {
-        return 'year'
-      }
-    },
     priceId () {
       let monthly, yearly
       if (import.meta.env.MODE === 'development') {
@@ -136,6 +127,19 @@ export default {
         return monthly
       } else {
         return yearly
+      }
+    },
+    current () {
+      if (this.priceIsMonthly) {
+        return {
+          amount: '$8',
+          period: 'month'
+        }
+      } else {
+        return {
+          amount: '$88',
+          period: 'year'
+        }
       }
     }
   },
