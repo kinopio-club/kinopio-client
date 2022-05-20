@@ -891,7 +891,8 @@ export default {
       const stretchResistance = 6
       if (this.isAnimationUnsticking) { return }
       if (preventSticking) { return }
-      if (this.shouldNotStick) {
+      const isOverCheckbox = event.target.className === 'checkbox-wrap'
+      if (this.shouldNotStick || isOverCheckbox) {
         this.translateX = 0
         this.translateY = 0
         preventSticking = true
