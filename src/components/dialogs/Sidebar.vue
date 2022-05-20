@@ -62,6 +62,10 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updatePageSizes') {
         this.updateDialogHeight()
+      } else if (mutation.type === 'triggerRemovedIsVisible') {
+        this.$nextTick(() => {
+          this.toggleRemovedIsVisible()
+        })
       }
     })
   },

@@ -263,6 +263,8 @@ export default {
         this.hidden()
       } else if (mutation.type === 'triggerTemplatesIsVisible') {
         this.templatesIsVisible = true
+      } else if (mutation.type === 'triggerRemovedIsVisible') {
+        this.sidebarIsVisible = true
       }
     })
   },
