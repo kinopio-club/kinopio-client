@@ -129,7 +129,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
           //- Sidebar
           .button-wrap
             button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
-              img.icon(src="@/assets/sidebar.svg")
+              img.icon.right-arrow(src="@/assets/down-arrow.svg")
             Sidebar(:visible="sidebarIsVisible")
   SelectAllBelow
 </template>
