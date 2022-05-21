@@ -1412,7 +1412,7 @@ export default {
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
       this.updatePreviousResultCardId()
-      this.clearStickToCursor()
+      this.clearPositionOffsets()
     },
     updatePreviousResultCardId () {
       const search = this.$store.state.search
