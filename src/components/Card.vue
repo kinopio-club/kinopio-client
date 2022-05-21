@@ -234,7 +234,10 @@ let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 const defaultCardPosition = 100
 
 // sticky
+const stickyTimerDuration = 500
 let preventSticking = false
+let stickyTimerComplete = false
+let stickyTimer
 
 export default {
   components: {
@@ -886,22 +889,28 @@ export default {
       if (this.shouldNotStick || utils.userPrefersReducedMotion()) {
         preventSticking = true
       }
+      stickyTimer = setTimeout(() => {
+        stickyTimerComplete = true
+      }, stickyTimerDuration)
+    },
+    clearStickyTimer () {
+      clearTimeout(stickyTimer)
+      stickyTimerComplete = false
     },
     stickToCursor (event) {
       const stretchResistance = 6
       if (this.isAnimationUnsticking) { return }
       if (preventSticking) { return }
+      if (!stickyTimerComplete) { return }
       const isOverCheckbox = event.target.className === 'checkbox-wrap'
       if (this.shouldNotStick || isOverCheckbox) {
-        this.translateX = 0
-        this.translateY = 0
+        this.clearPositionOffsets()
         preventSticking = true
         return
       }
       const isButtonHover = event.target.closest('.inline-button-wrap')
       if (isButtonHover) {
-        this.translateX = 0
-        this.translateY = 0
+        this.clearPositionOffsets()
         return
       }
       const width = this.card.width
@@ -926,6 +935,7 @@ export default {
       this.translateY = yOffset + 'px'
     },
     unstickToCursor () {
+      this.clearStickyTimer()
       this.isAnimationUnsticking = true
       const xOffset = parseInt(this.translateX)
       const yOffset = parseInt(this.translateY)
@@ -957,13 +967,13 @@ export default {
       if (!element) { return }
       const animation = element.animate(keyframes, timing)
       animation.onfinish = () => {
-        this.clearStickToCursor()
+        this.clearPositionOffsets()
+        this.isAnimationUnsticking = false
       }
     },
-    clearStickToCursor () {
+    clearPositionOffsets () {
       this.translateX = 0
       this.translateY = 0
-      this.isAnimationUnsticking = false
     },
 
     updateTypeForConnection (connectionId) {
