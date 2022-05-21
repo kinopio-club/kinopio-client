@@ -36,7 +36,6 @@ export default {
     shouldShowCardCollaborationInfo: false,
     shouldShowCardStyleActions: false,
     shouldShowMultiCardStyleActions: false,
-    shouldShowMoreFooterControls: false,
     shouldInvertZoomDirection: false,
     shouldUseLastConnectionType: false,
     shouldOpenLinksInNewTab: false,
@@ -236,10 +235,6 @@ export default {
     shouldShowMultiCardStyleActions: (state, value) => {
       state.shouldShowMultiCardStyleActions = value
       cache.updateUser('shouldShowMultiCardStyleActions', value)
-    },
-    shouldShowMoreFooterControls: (state, value) => {
-      state.shouldShowMoreFooterControls = value
-      cache.updateUser('shouldShowMoreFooterControls', value)
     },
     showInExploreUpdatedAt: (state, value) => {
       state.showInExploreUpdatedAt = value
@@ -587,14 +582,6 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowMultiCardStyleActions: value
-        } }, { root: true })
-    },
-    shouldShowMoreFooterControls: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowMoreFooterControls' })
-      context.commit('shouldShowMoreFooterControls', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          shouldShowMoreFooterControls: value
         } }, { root: true })
     },
     showInExploreUpdatedAt: (context, value) => {

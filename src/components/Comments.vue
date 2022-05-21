@@ -1,20 +1,13 @@
 <template lang="pug">
-dialog.comments.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
-  section
-    .title-row
-      p Comments
-      .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-        button
-          img.icon.pin(src="@/assets/pin.svg")
-
-  section.results-section(v-if="comments.length")
+.comments(v-if="visible")
+  section.results-section(v-if="comments.length" ref="results")
     ul.results-list
       template(v-for="(card in comments")
         li(@click="showCardDetails(card)")
           p
-            span.badge.user-badge.user-badge(:style="{background: card.user.color}")
+            span.badge.user-badge(:style="{background: userColor(card)}")
               User(:user="card.user" :isClickable="false" :hideYouLabel="true")
-              span {{card.user.name}}
+              span {{userName(card)}}
           .comment-name
             img.icon.comment-icon(src="@/assets/comment.svg")
             template(v-for="segment in card.nameSegments")
@@ -48,19 +41,19 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
         this.updateResultsSectionHeight()
       }
     })
   },
+  mounted () {
+    this.updateResultsSectionHeight()
+  },
   data () {
     return {
-      resultsSectionHeight: null,
-      dialogHeight: null
+      resultsSectionHeight: null
     }
   },
   computed: {
-    dialogIsPinned () { return this.$store.state.commentsDialogIsPinned },
     comments () {
       let cards = this.$store.getters['currentCards/all']
       cards = utils.clone(cards)
@@ -79,6 +72,18 @@ export default {
     }
   },
   methods: {
+    userColor (card) {
+      if (!card) { return }
+      if (card.user) {
+        return card.user.color
+      }
+    },
+    userName (card) {
+      if (!card) { return }
+      if (card.user) {
+        return card.user.name
+      }
+    },
     showCardDetails (card) {
       const filterComments = this.$store.state.currentUser.filterComments
       if (filterComments) {
@@ -89,29 +94,17 @@ export default {
     userById (userId) {
       return this.$store.getters['currentSpace/userById'](userId)
     },
-    toggleDialogIsPinned () {
-      const isPinned = !this.dialogIsPinned
-      this.$store.dispatch('commentsDialogIsPinned', isPinned)
-    },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeightFromHeader(element)
-      })
-    },
     updateResultsSectionHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+        this.resultsSectionHeight = utils.elementHeight(element, true)
       })
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
-        this.updateDialogHeight()
         this.updateResultsSectionHeight()
       }
     }
@@ -143,4 +136,6 @@ export default {
     .comment-icon
       margin-left 4px
       vertical-align -2px
+  .user-badge
+    background var(--secondary-active-background)
 </style>

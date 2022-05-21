@@ -465,7 +465,7 @@ dialog
   border-radius 3px
   overscroll-behavior-y contain
   &.is-pinnable
-    transition left 0.1s
+    transition left 0.1s, top 0.1s
   &.narrow
     width 203px
   button,

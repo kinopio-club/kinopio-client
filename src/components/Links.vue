@@ -1,18 +1,11 @@
 <template lang="pug">
-dialog.links.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
-  section
-    .title-row
-      p Spaces that Link Here
-      .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-        button
-          img.icon.pin(src="@/assets/pin.svg")
-
+.links(v-if="visible")
   section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     .button-wrap(v-if="userSpacesToggleShouldBeVisible" @click.left.prevent="toggleCurrentUserSpacesIsVisibleOnly" @keydown.stop.enter="toggleCurrentUserSpacesIsVisibleOnly")
       label(:class="{ active: currentUserSpacesIsVisibleOnly }")
         input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
         User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
-    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="dialogIsPinned")
+    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="parentIsPinned")
 
   section(v-else-if="loading")
     Loader(:visible="loading")
@@ -40,22 +33,25 @@ export default {
     User
   },
   props: {
-    visible: Boolean
+    visible: Boolean,
+    parentIsPinned: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
         this.updateResultsSectionHeight()
       } else if (mutation.type === 'currentSpace/restoreSpace' && this.visible) {
         this.updateLinks()
       }
     })
   },
+  mounted () {
+    this.updateLinks()
+    this.updateResultsSectionHeight()
+  },
   data () {
     return {
       resultsSectionHeight: null,
-      dialogHeight: null,
       links: [],
       loading: false,
       spaces: [],
@@ -85,27 +81,15 @@ export default {
       } else {
         return false
       }
-    },
-    dialogIsPinned () { return this.$store.state.linksDialogIsPinned }
+    }
   },
   methods: {
-    toggleDialogIsPinned () {
-      const isPinned = !this.dialogIsPinned
-      this.$store.dispatch('linksDialogIsPinned', isPinned)
-    },
     toggleCurrentUserSpacesIsVisibleOnly () {
       this.currentUserSpacesIsVisibleOnly = !this.currentUserSpacesIsVisibleOnly
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       this.$store.dispatch('closeAllDialogs', 'Links.closeAllDialogs')
-    },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeightFromHeader(element)
-      })
     },
     async updateLinks () {
       const spaceId = this.$store.state.currentSpace.id
@@ -129,14 +113,13 @@ export default {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+        this.resultsSectionHeight = utils.elementHeight(element, true)
       })
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
-        this.updateDialogHeight()
         this.updateLinks()
         this.updateResultsSectionHeight()
       }
@@ -150,8 +133,9 @@ export default {
 
 <style lang="stylus">
 .links
-  .results-section
+  section
     border-top 1px solid var(--primary)
+  .results-section
     padding-top 4px
   .button-wrap
     padding 4px
@@ -163,6 +147,4 @@ export default {
       .user-avatar
         width 17px
         height 16px
-  &.is-pinned
-    left -86px
 </style>

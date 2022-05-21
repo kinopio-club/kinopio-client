@@ -177,7 +177,7 @@ export default {
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
     },
-    dialogIsPinned () { return this.$store.state.spaceDetailsDialogIsPinned }
+    dialogIsPinned () { return this.$store.state.spaceDetailsIsPinned }
   },
   methods: {
     toggleHideSpace () {

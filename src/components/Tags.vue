@@ -1,17 +1,11 @@
 <template lang="pug">
-dialog.tags.narrow.is-pinnable(@click.stop v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
-  section
-    .title-row
-      p Tags
-      .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-        button
-          img.icon.pin(src="@/assets/pin.svg")
+.tags(v-if="visible")
   section.results-section(v-if="tags.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     .button-wrap(@click.left.prevent="toggleShouldShowCurrentSpaceTags" @keydown.stop.enter="toggleShouldShowCurrentSpaceTags")
       label(:class="{ active: shouldShowCurrentSpaceTags }")
         input(type="checkbox" v-model="shouldShowCurrentSpaceTags")
         span In Current Space
-    TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags" :parentIsPinned="dialogIsPinned")
+    TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags" :parentIsPinned="parentIsPinned" :positionTagsOnLeftSide="true")
   section(v-else)
     p Use tags to help cards stand out, and to connect ideas across spaces.
     p Type
@@ -34,7 +28,8 @@ export default {
     TagList
   },
   props: {
-    visible: Boolean
+    visible: Boolean,
+    parentIsPinned: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -47,7 +42,6 @@ export default {
       ]
 
       if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
         this.updateResultsSectionHeight()
       } else if (mutation.type === 'currentSpace/removeTags') {
         this.removeTag(mutation.payload)
@@ -60,10 +54,13 @@ export default {
       }
     })
   },
+  mounted () {
+    this.updateTags()
+    this.updateResultsSectionHeight()
+  },
   data () {
     return {
       resultsSectionHeight: null,
-      dialogHeight: null,
       tags: [],
       isLoadingRemoteTags: false
     }
@@ -77,14 +74,9 @@ export default {
       } else {
         return this.tags
       }
-    },
-    dialogIsPinned () { return this.$store.state.tagsDialogIsPinned }
+    }
   },
   methods: {
-    toggleDialogIsPinned () {
-      const isPinned = !this.dialogIsPinned
-      this.$store.dispatch('tagsDialogIsPinned', isPinned)
-    },
     toggleShouldShowCurrentSpaceTags () {
       const value = !this.shouldShowCurrentSpaceTags
       this.$store.dispatch('currentUser/update', { shouldShowCurrentSpaceTags: value })
@@ -108,13 +100,6 @@ export default {
       })
       this.tags = tags
       this.$store.commit('remoteTagsIsFetched', false)
-    },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeightFromHeader(element)
-      })
     },
     updateTags () {
       const spaceTags = this.$store.getters['currentSpace/spaceTags']
@@ -144,14 +129,13 @@ export default {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+        this.resultsSectionHeight = utils.elementHeight(element, true)
       })
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
-        this.updateDialogHeight()
         this.updateTags()
         this.updateResultsSectionHeight()
       }
@@ -170,6 +154,4 @@ export default {
     padding-top 4px
     > .button-wrap
       padding 4px
-  &.is-pinned
-    left -86px
 </style>

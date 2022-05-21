@@ -9,11 +9,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
         MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
         span {{currentSpaceName}} →
     .right
-      .space-users
-        .users
-          User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
-          User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-          User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+      SpaceUsers
 
   //- standard
   nav(v-if="!isEmbed")
@@ -98,26 +94,16 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
               img.icon.cancel(src="@/assets/add.svg")
 
     .right
-      .space-users(v-if="isSpace")
-        .users.spectators
-          User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-          User(v-if="!currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
-        .users
-          User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-          User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-          User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
-          UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs" :dialogOnRight="true")
-      .space-users(v-if="!isSpace")
-        .users(:class="{ 'no-padding': isEmbed}")
-          User(:user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
-
       .controls(v-if="isAddPage && !isAppStoreView")
         .top-controls
+          SpaceUsers
           a(:href="kinopioDomain")
             button Kinopio →
 
       .controls(v-if="isSpace")
         .top-controls
+          SpaceUsers
+          UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs" :dialogOnRight="true")
           //- Share
           .button-wrap
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
@@ -140,6 +126,11 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
           .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
             button(@click.left.stop="triggerUpgradeUserIsVisible")
               span Upgrade
+          //- Sidebar
+          .button-wrap
+            button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
+              img.icon(src="@/assets/sidebar.svg")
+            Sidebar(:visible="sidebarIsVisible")
   SelectAllBelow
 </template>
 
@@ -163,11 +154,11 @@ import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Search from '@/components/dialogs/Search.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
 import Templates from '@/components/dialogs/Templates.vue'
+import Sidebar from '@/components/dialogs/Sidebar.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 import SelectAllBelow from '@/components/SelectAllBelow.vue'
-
-import uniqBy from 'lodash-es/uniqBy'
+import SpaceUsers from '@/components/SpaceUsers.vue'
 
 let updateNotificationsIntervalTimer
 
@@ -198,7 +189,9 @@ export default {
     AddSpace,
     Templates,
     PrivacyIcon,
-    SelectAllBelow
+    SelectAllBelow,
+    Sidebar,
+    SpaceUsers
   },
   data () {
     return {
@@ -220,7 +213,8 @@ export default {
       addSpaceIsVisible: false,
       isFadeOut: false,
       isHidden: false,
-      templatesIsVisible: false
+      templatesIsVisible: false,
+      sidebarIsVisible: false
     }
   },
   created () {
@@ -251,14 +245,12 @@ export default {
         this.showNextSearchCard()
       } else if (mutation.type === 'triggerShowPreviousSearchCard') {
         this.showPreviousSearchCard()
-      } else if (mutation.type === 'unpinOtherDialogs') {
-        if (mutation.payload !== 'spaceDetails') {
-          this.closeAllDialogs()
-        }
       } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
       } else if (mutation.type === 'triggerTemplatesIsVisible') {
         this.templatesIsVisible = true
+      } else if (mutation.type === 'triggerRemovedIsVisible') {
+        this.sidebarIsVisible = true
       }
     })
   },
@@ -312,22 +304,7 @@ export default {
     importArenaChannelIsVisible () { return this.$store.state.importArenaChannelIsVisible },
     currentSpace () { return this.$store.state.currentSpace },
     currentUser () { return this.$store.state.currentUser },
-    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    users () {
-      let users = utils.clone(this.currentSpace.users)
-      return users.filter(user => user.id !== this.currentUser.id)
-    },
-    collaborators () {
-      let collaborators = this.currentSpace.collaborators
-      return collaborators.filter(user => user.id !== this.currentUser.id)
-    },
-    spectators () {
-      let spectators = this.currentSpace.spectators
-      spectators = spectators.filter(user => user.id !== this.currentUser.id)
-      spectators = uniqBy(spectators, 'id')
-      return spectators
-    },
-    userIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
+    userIsUpgraded () { return this.currentUser.isUpgraded },
     currentSpaceName () {
       const id = this.$store.state.currentSpace.id
       const name = this.$store.state.currentSpace.name
@@ -443,7 +420,8 @@ export default {
       this.readOnlyJiggle = false
     },
     closeAllDialogs () {
-      const spaceDetailsDialogIsPinned = this.$store.state.spaceDetailsDialogIsPinned
+      const spaceDetailsIsPinned = this.$store.state.spaceDetailsIsPinned
+      const sidebarIsPinned = this.$store.state.sidebarIsPinned
       this.aboutIsVisible = false
       this.spaceDetailsInfoIsVisible = false
       this.signUpOrInIsVisible = false
@@ -455,8 +433,11 @@ export default {
       this.notificationsIsVisible = false
       this.addSpaceIsVisible = false
       this.templatesIsVisible = false
-      if (!spaceDetailsDialogIsPinned) {
+      if (!spaceDetailsIsPinned) {
         this.spaceDetailsIsVisible = false
+      }
+      if (!sidebarIsPinned) {
+        this.sidebarIsVisible = false
       }
     },
     toggleAboutIsVisible () {
@@ -496,6 +477,11 @@ export default {
       const isVisible = this.templatesIsVisible
       this.$store.dispatch('closeAllDialogs', 'Header.toggleTemplatesIsVisible')
       this.templatesIsVisible = !isVisible
+    },
+    toggleSidebarIsVisible () {
+      const isVisible = this.sidebarIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleSidebarIsVisible')
+      this.sidebarIsVisible = !isVisible
     },
     toggleSpaceStatusIsVisible () {
       const isVisible = this.spaceStatusIsVisible
@@ -722,10 +708,10 @@ header
 
   .left-arrow
     transform rotate(90deg)
-    vertical-align 1px
+    vertical-align 2px
   .right-arrow
     transform rotate(-90deg)
-    vertical-align 1px
+    vertical-align 2px
   .search-button
     .badge
       margin-right 0
@@ -799,20 +785,15 @@ header
   .right
     display flex
     flex-shrink 0
-    .space-users
-      display flex
-      > .users
-        padding-right 6px
-        max-width 40vw
-        display flex
-        flex-wrap wrap
-        justify-content flex-end
-        align-content flex-start
 
   .controls
     display inline-table
     .button-wrap + .button-wrap
       margin-left 6px
+
+  .top-controls
+    display flex
+    justify-content flex-end
 
   .bottom-controls
     margin-top 5px
@@ -848,10 +829,6 @@ header
   .invisible-badge
     position absolute
     left 3px
-
-  .users
-    > .upgrade-user
-      max-height calc(100vh - 50px)
 
   .icon.offline
     height 13px
