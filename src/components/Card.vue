@@ -234,7 +234,7 @@ let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 const defaultCardPosition = 100
 
 // sticky
-const stickyTimerDuration = 500
+const stickyTimerDuration = 400
 let preventSticking = false
 let stickyTimerComplete = false
 let stickyTimer
