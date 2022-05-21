@@ -150,25 +150,6 @@ export default {
       paintingCircles = []
       remotePaintingCircles = []
     },
-    dialogIsVisible () {
-      let dialogs = document.querySelectorAll('dialog')
-      const dialogIsVisible = Boolean(dialogs.length)
-      if (!dialogIsVisible) { return }
-      // ignore pinned dialogs
-      let pinnedDialogs = []
-      dialogs.forEach(dialog => {
-        if (dialog.dataset['is-pinned'] === 'true') {
-          pinnedDialogs.push(dialog)
-        }
-      })
-      if (dialogs.length === pinnedDialogs.length) {
-        return false
-      } else if (dialogs.length) {
-        return true
-      } else {
-        return false
-      }
-    },
     updatePositionOffsetByPinchZoom () {
       if (!window.visualViewport) { return }
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop
@@ -320,7 +301,7 @@ export default {
         this.$store.commit('currentUserIsPainting', true)
         this.createInitialCircle()
       }
-      if (!multipleCardsIsSelected && !this.dialogIsVisible()) {
+      if (!multipleCardsIsSelected && !utils.unpinnedDialogIsVisible()) {
         this.$store.commit('shouldAddCard', true)
       }
       if (!event.shiftKey) {

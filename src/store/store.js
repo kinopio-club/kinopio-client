@@ -215,7 +215,7 @@ const store = createStore({
       state.pageWidth = width
     },
     closeAllDialogs: (state) => {
-      if (utils.dialogIsVisible()) {
+      if (utils.unpinnedDialogIsVisible()) {
         state.shouldAddCard = false
       }
       state.multipleSelectedActionsIsVisible = false

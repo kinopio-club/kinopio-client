@@ -140,6 +140,25 @@ export default {
     const dialogIsVisible = Boolean(dialogs.length)
     return dialogIsVisible
   },
+  unpinnedDialogIsVisible () {
+    let dialogs = document.querySelectorAll('dialog')
+    const dialogIsVisible = Boolean(dialogs.length)
+    if (!dialogIsVisible) { return }
+    // ignore pinned dialogs
+    let pinnedDialogs = []
+    dialogs.forEach(dialog => {
+      if (dialog.dataset['is-pinned'] === 'true') {
+        pinnedDialogs.push(dialog)
+      }
+    })
+    if (dialogs.length === pinnedDialogs.length) {
+      return false
+    } else if (dialogs.length) {
+      return true
+    } else {
+      return false
+    }
+  },
   shouldIgnoreTouchInteraction (event) {
     if (!event) { return true }
     const isScroll = event.type === 'scroll'
