@@ -95,7 +95,7 @@ export default {
       }
       if (this.positionTagsOnLeftSide) {
         const tagDetailsWidth = 50
-        position.x = rect.x - rect.width - tagDetailsWidth + 20
+        position.x = rect.x - rect.width - tagDetailsWidth + window.scrollX + 20
       }
       // const viewport = utils.visualViewport()
       // const minY = ((viewport.height * viewport.scale) / 2) + window.scrollY
