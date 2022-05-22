@@ -45,7 +45,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
         UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeDialogs")
       .row(v-if="!isAppStoreView")
         p
-          .badge.info $6/month
+          .badge.info $6/mo, $60/yr
         a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
           button Help →
       .row(v-if="spaceUserIsUpgraded")
