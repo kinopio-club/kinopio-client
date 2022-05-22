@@ -234,7 +234,7 @@ let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 const defaultCardPosition = 100
 
 // sticky
-const stickyTimerDuration = 400
+const stickyTimerDuration = 250
 let preventSticking = false
 let stickyTimerComplete = false
 let stickyTimer
@@ -314,6 +314,7 @@ export default {
     }
   },
   computed: {
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     isResizing () { return this.$store.state.currentUserIsResizingCard },
     dataTags () {
       let tags = utils.tagsFromStringWithoutBrackets(this.card.name)
@@ -919,7 +920,11 @@ export default {
       const halfHeight = height / 2
       let centerX = this.x + halfWidth
       let centerY = this.y + halfHeight
-      const position = utils.cursorPositionInPage(event)
+      let position = utils.cursorPositionInPage(event)
+      position = {
+        x: position.x * this.spaceCounterZoomDecimal,
+        y: position.y * this.spaceCounterZoomDecimal
+      }
       // position from card center
       const xFromCenter = position.x - centerX
       const yFromCenter = position.y - centerY
