@@ -5,8 +5,9 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
       p Upgrade your account for unlimited cards and uploads
     .row
       .segmented-buttons
-        button(:class="{active: priceIsMonthly}" @click.left="togglePriceIsMonthly(true)") $8/month
-        button(:class="{active: !priceIsMonthly}" @click.left="togglePriceIsMonthly(false)") $88/year
+        button(:class="{active: priceIsMonthly}" @click.left="togglePriceIsMonthly(true)") $6/month
+        button(:class="{active: !priceIsMonthly}" @click.left="togglePriceIsMonthly(false)") $60/year
+          .badge.label-badge -17%
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
@@ -46,10 +47,10 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
     img.icon(src="@/assets/lock.svg")
     span Payments securely processed by Stripe. Card info is not sent to Kinopio.
 
-  section
-    p
-      a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost/") Discount available
-      span {{' '}} for students and those with financial need
+  //- section
+  //-   p
+  //-     a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost/") Discount available
+  //-     span {{' '}} for students and those with financial need
 
 </template>
 
@@ -120,8 +121,8 @@ export default {
         monthly = 'price_1L046SDFIr5ywhwoMfsIW1W5'
         yearly = 'price_1L046iDFIr5ywhwoeRIDE5rN'
       } else {
-        monthly = 'price_1L042wDFIr5ywhwo6xOXzWuy'
-        yearly = 'price_1L043hDFIr5ywhwoDu6hXowm'
+        monthly = 'price_1L2GvBDFIr5ywhwobbE35dhA'
+        yearly = 'price_1L2ErWDFIr5ywhwodsKxEEAq'
       }
       if (this.priceIsMonthly) {
         return monthly
@@ -132,12 +133,12 @@ export default {
     current () {
       if (this.priceIsMonthly) {
         return {
-          amount: '$8',
+          amount: '$6',
           period: 'month'
         }
       } else {
         return {
-          amount: '$88',
+          amount: '$60',
           period: 'year'
         }
       }
@@ -369,4 +370,15 @@ export default {
   .loading-stripe,
   .badge.danger
     margin-bottom 10px
+  button
+    position relative
+  .label-badge
+    color var(--primary-background)
+    font-size 12px
+    min-height initial
+    position absolute
+    left initial
+    right -15px
+    top -6px
+    margin 0
 </style>
