@@ -25,7 +25,7 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
 
   .error-card-limit(v-if="cardsCreatedIsOverLimit")
     .badge.danger Out of Cards
-    p To add more cards you'll need to upgrade for $8/month
+    p To add more cards you'll need to upgrade
     button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
 </template>
