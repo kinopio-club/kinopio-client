@@ -94,7 +94,7 @@ main.add-page
         //- card limit
         template(v-if="cardsCreatedIsOverLimit")
           .badge.danger
-            span To add more cards, you'll need to upgrade for $6/month
+            span To add more cards, you'll need to upgrade
             .row
               a(:href="kinopioDomain")
                 button Upgrade →
