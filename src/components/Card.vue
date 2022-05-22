@@ -903,8 +903,10 @@ export default {
       if (this.isAnimationUnsticking) { return }
       if (preventSticking) { return }
       if (!stickyTimerComplete) { return }
-      const isOverCheckbox = event.target.className === 'checkbox-wrap'
-      if (this.shouldNotStick || isOverCheckbox) {
+      const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap']
+      const elements = ['button', 'progress']
+      const isOverButton = classes.includes(event.target.className) || elements.includes(event.type)
+      if (this.shouldNotStick || isOverButton) {
         this.clearPositionOffsets()
         preventSticking = true
         return
