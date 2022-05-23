@@ -413,10 +413,14 @@ export default {
     },
     cardButtonUrl () {
       const link = this.formats.link
+      const file = this.formats.file
       if (utils.urlIsValidTld(link) || utils.urlIsSpace(link)) {
         return link
+      } else if (utils.urlHasProtocol(file)) {
+        return file
+      } else {
+        return null
       }
-      return this.formats.file
     },
     webUrl () {
       const link = this.formats.link

@@ -1248,8 +1248,9 @@ export default {
     if (skipProtocolCheck) { return urls }
     // ensure url has protocol
     urls = urls.map(url => {
+      const isFile = this.urlIsFile(url, true)
       const hasProtocol = this.urlHasProtocol(url)
-      if (hasProtocol) {
+      if (isFile || hasProtocol) {
         return url
       } else {
         return `https://${url}`
@@ -1305,10 +1306,12 @@ export default {
     const isAudio = url.match(audioUrlPattern)
     return Boolean(isAudio)
   },
-  urlIsFile (url) {
+  urlIsFile (url, skipProtocolCheck) {
     if (!url) { return }
-    const hasProtocol = this.urlHasProtocol(url)
-    if (!hasProtocol) { return }
+    if (!skipProtocolCheck) {
+      const hasProtocol = this.urlHasProtocol(url)
+      if (!hasProtocol) { return }
+    }
     url = url + ' '
     const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic)(?:\n| |\?|&)/igm)
     const isFile = url.toLowerCase().match(fileUrlPattern)
@@ -1336,7 +1339,7 @@ export default {
     if (!this.urlIsFile(url)) { return }
     // https://regexr.com/4rjtu
     // /filename.pdf from end of string
-    const filePattern = new RegExp(/\/[A-Za-z0-9-]+\.[A-Za-z.0-9-]+$/gim)
+    const filePattern = new RegExp(/\/[A-z0-9-]+\.[A-z.0-9-]+(\?[A-z.0-9-=]*)*$/gim)
     let file = url.match(filePattern)
 
     if (!file) { return }
