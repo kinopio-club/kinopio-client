@@ -34,7 +34,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.title
             img.icon.hand(src="@/assets/hand.svg")
             span Drag to Pan
-          .badge.keyboard-shortcut Space/Middle-Click/Right-Click Drag
+          .badge.keyboard-shortcut Space/Right-Click Drag
       article
         .row
           .badge.title
