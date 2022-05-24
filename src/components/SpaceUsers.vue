@@ -1,5 +1,14 @@
 <template lang="pug">
-.space-users(v-if="!isAddPage")
+//- Add Page
+.space-users(v-if="isAddPage")
+  .users
+    User(:user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
+//- Embed
+.space-users(v-else-if="isEmbed")
+  .users
+    User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+//- Normal Space
+.space-users(v-else)
   .users.spectators
     User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
     User(v-if="!currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
@@ -7,10 +16,6 @@
     User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
     User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
     User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
-
-.space-users(v-if="isAddPage")
-  .users
-    User(:user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
 
 </template>
 
@@ -26,6 +31,7 @@ export default {
     User
   },
   computed: {
+    isEmbed () { return this.$store.state.isEmbed },
     isAddPage () { return this.$store.state.isAddPage },
     currentUser () { return this.$store.state.currentUser },
     currentSpace () { return this.$store.state.currentSpace },
