@@ -1447,7 +1447,9 @@ export default {
       isSignedIn,
       isSpectator,
       isCollaborator,
-      isUpgraded: user.isUpgraded
+      isUpgraded: user.isUpgraded,
+      isModerator: user.isModerator,
+      isGuideMaker: user.isGuideMaker
     }
   },
   spaceMeta (space) {
