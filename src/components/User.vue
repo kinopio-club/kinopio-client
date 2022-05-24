@@ -1,11 +1,11 @@
 <template lang="pug">
-.user(:data-user-id="user.id" :key="user.id" ref="element" @keydown.stop.enter="toggleUserDetails" :class="{ active: userDetailsIsVisible}")
+.user(:data-user-id="userId" :key="userId" ref="element" @keydown.stop.enter="toggleUserDetails" :class="{ active: userDetailsIsVisible}")
   .user-avatar.anon-avatar(
     @mouseup.left.stop="toggleUserDetails"
     @touchend.stop="toggleUserDetails"
     ref="user"
     :class="{ clickable: isClickable, active: userDetailsIsVisible, 'is-small': isSmall }"
-    :style="{backgroundColor: user.color}"
+    :style="{backgroundColor: userColor}"
   )
     .label-badge.you-badge(v-if="isCurrentUser && !hideYouLabel")
       span YOU
@@ -50,7 +50,18 @@ export default {
     unsubscribe()
   },
   computed: {
-    isCurrentUser () { return this.user.id === this.$store.state.currentUser.id }
+    userId () {
+      if (!this.user) { return }
+      return this.user.id
+    },
+    userColor () {
+      if (!this.user) { return }
+      return this.user.color
+    },
+    isCurrentUser () {
+      if (!this.user) { return }
+      return this.user.id === this.$store.state.currentUser.id
+    }
   },
   methods: {
     // displaySide () {

@@ -50,7 +50,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
           img.icon.cancel(src="@/assets/add.svg")
           span Too Big
       p
-        span Background images should be smaller than 600kb
+        span Background images should be smaller than 1mb
     .error-container(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
@@ -298,7 +298,7 @@ export default {
       input.click()
     },
     isFileTooBig (file) {
-      const sizeLimit = 1024 * 1024 * 0.650 // 600kb~
+      const sizeLimit = 1024 * 1024 * 1.250 // ~1mb
       if (file.size > sizeLimit) {
         return true
       }

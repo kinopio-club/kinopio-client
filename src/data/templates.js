@@ -6,17 +6,17 @@ export default {
         id: 0,
         name: 'All'
       },
-      {
-        id: 1,
-        name: 'Learning'
-      },
+      // {
+      //   id: 1,
+      //   name: 'Learning'
+      // },
       {
         id: 2,
         name: 'Life'
       },
       {
         id: 3,
-        name: 'Planning'
+        name: 'Work & School'
       },
       {
         id: 4,
@@ -29,7 +29,7 @@ export default {
     return [
       {
         id: 'oVBOOfoO4qg7AzzUwweyf',
-        categoryId: 1,
+        categoryId: 2,
         name: 'Book Club'
       },
       {

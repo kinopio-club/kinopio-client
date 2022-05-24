@@ -4,6 +4,7 @@ import newSpace from '@/data/new.json'
 import words from '@/data/words.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import backgroundImageMigration from '@/data/backgroundImageMigration.json'
 
 import { nextTick } from 'vue'
 import randomColor from 'randomcolor'
@@ -19,7 +20,7 @@ let spectatorIdleTimers = []
 let notifiedCardAdded = []
 let isLoadingRemoteSpace
 
-export default {
+const currentSpace = {
   namespaced: true,
   state: utils.clone(helloSpace),
   mutations: {
@@ -286,10 +287,14 @@ export default {
       context.dispatch('updateOtherUsers')
       context.dispatch('updateOtherSpaces')
     },
-    createNewSpace: (context) => {
+    createNewSpace: (context, space) => {
       window.scrollTo(0, 0)
-      let space = utils.clone(newSpace)
-      space.name = words.randomUniqueName()
+      let name
+      if (space) {
+        name = space.name
+      }
+      space = utils.clone(newSpace)
+      space.name = name || words.randomUniqueName()
       space.id = nanoid()
       space.createdAt = new Date()
       space.editedAt = new Date()
@@ -305,6 +310,8 @@ export default {
       }
       space.userId = context.rootState.currentUser.id
       space = utils.spaceDefaultBackground(space, context.rootState.currentUser)
+      space.isTemplate = false
+      space.isHidden = false
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('clearSearch', null, { root: true })
@@ -369,10 +376,10 @@ export default {
       await context.dispatch('saveImportedSpace')
       context.commit('addNotification', { message: `${space.name} is now yours to edit`, type: 'success' }, { root: true })
     },
-    addSpace: (context) => {
+    addSpace: (context, space) => {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
-      context.dispatch('createNewSpace')
+      context.dispatch('createNewSpace', space)
       const cards = context.rootGetters['currentCards/all']
       if (cards.length) {
         context.dispatch('currentConnections/updatePaths', { cardId: cards[1].id, connections: context.rootGetters['currentConnections/all'] }, { root: true })
@@ -879,16 +886,34 @@ export default {
 
     // Background
 
-    loadBackground: (context) => {
+    backgroundImageMigration: (context) => {
+      // temp migration, added Apr 2022
+      const prev = context.state.background
+      const index = backgroundImageMigration.findIndex(image => image.prev === prev)
+      if (index === -1) { return }
+      const newBackground = backgroundImageMigration[index].new
+      context.dispatch('updateSpace', { background: newBackground })
+    },
+    loadBackground: async (context) => {
       const element = document.querySelector('.app')
       if (!element) { return }
+      context.dispatch('backgroundImageMigration')
       const background = context.state.background
-      if (utils.urlIsImage(background)) {
-        element.style.backgroundImage = `url(${background})`
-      } else {
+      if (!utils.urlIsImage(background)) {
         element.style.backgroundImage = ''
+        context.dispatch('updateBackgroundZoom')
       }
-      context.dispatch('updateBackgroundZoom')
+      try {
+        const image = await utils.loadImage(background)
+        if (image) {
+          element.style.backgroundImage = `url(${background})`
+          context.dispatch('updateBackgroundZoom')
+        }
+      } catch (error) {
+        if (background) {
+          console.warn('🚑 loadBackground', background, error)
+        }
+      }
     },
     updateBackgroundZoom: async (context) => {
       const element = document.querySelector('.app')
@@ -900,12 +925,18 @@ export default {
       const spaceZoomDecimal = context.rootGetters.spaceZoomDecimal
       let backgroundImage = element.style.backgroundImage
       backgroundImage = utils.urlFromCSSBackgroundImage(backgroundImage)
+      let isRetina
       let image = new Image()
       let width, height
       if (backgroundImage) {
+        isRetina = backgroundImage.includes('-2x.') || backgroundImage.includes('@2x.')
         image.src = backgroundImage
         width = image.width
         height = image.height
+        if (isRetina) {
+          width = width / 2
+          height = height / 2
+        }
       } else {
         width = defaultBackground.width
         height = defaultBackground.height
@@ -1091,3 +1122,5 @@ export default {
     }
   }
 }
+
+export default currentSpace

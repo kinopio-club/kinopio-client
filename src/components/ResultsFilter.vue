@@ -19,8 +19,10 @@
     @keyup.delete.stop
     @keyup.clear.stop
   )
+  button.borderless.clear-input-wrap(v-if="addSpaceIsVisible" @click="addSpace")
+    img.icon.add(src="@/assets/add.svg")
   button.borderless.clear-input-wrap(@click.left="clearFilter")
-    img.icon(src="@/assets/add.svg")
+    img.icon.cancel(src="@/assets/add.svg")
 </template>
 
 <script>
@@ -42,7 +44,8 @@ export default {
     placeholder: String,
     initialValue: String,
     isLoading: Boolean,
-    parentIsPinned: Boolean
+    parentIsPinned: Boolean,
+    showCreateNewSpaceFromSearch: Boolean
   },
   data () {
     return {
@@ -75,6 +78,9 @@ export default {
     })
   },
   computed: {
+    addSpaceIsVisible () {
+      return this.showCreateNewSpaceFromSearch && this.filter.length > 1
+    },
     inputPlaceholder () {
       return this.placeholder || 'Search'
     },
@@ -114,6 +120,16 @@ export default {
     }
   },
   methods: {
+    addSpace () {
+      const name = this.filter
+      window.scrollTo(0, 0)
+      this.$store.dispatch('currentSpace/addSpace', { name })
+      this.$nextTick(() => {
+        this.clearFilter()
+        this.$store.commit('triggerSpaceDetailsUpdateLocalSpaces')
+        this.$store.commit('triggerFocusSpaceDetailsName')
+      })
+    },
     focusFilterInput () {
       const element = this.$refs.filterInput
       if (!element) { return }
@@ -153,4 +169,8 @@ export default {
     margin-right 3px
     flex-shrink 0
     margin-top 2px
+  .clear-input-wrap
+    flex-shrink 0
+    .icon
+      width 8px
 </style>

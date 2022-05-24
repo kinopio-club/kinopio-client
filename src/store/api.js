@@ -174,14 +174,22 @@ const self = {
       }
     },
 
-    // Date
+    // Meta
 
     getDate: async (context) => {
       try {
-        const response = await fetch(`${host}/date`)
+        const response = await fetch(`${host}/meta/date`)
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 getDate', error)
+      }
+    },
+    getNewStuff: async (context) => {
+      try {
+        const response = await fetch(`${host}/meta/new-stuff`)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 getNewStuff', error)
       }
     },
 

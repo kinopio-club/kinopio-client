@@ -5,8 +5,9 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
       p Upgrade your account for unlimited cards and uploads
     .row
       .segmented-buttons
-        button(:class="{active: priceIsMonthly}" @click.left="togglePriceIsMonthly(true)") $5/month
-        button(:class="{active: !priceIsMonthly}" @click.left="togglePriceIsMonthly(false)") $55/year
+        button(:class="{active: priceIsMonthly}" @click.left="togglePriceIsMonthly(true)") $6/month
+        button(:class="{active: !priceIsMonthly}" @click.left="togglePriceIsMonthly(false)") $60/year
+          .badge.label-badge -17%
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
@@ -34,18 +35,22 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
       .summary
         User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
         .badge.info
-          span(v-if="priceIsMonthly") $5/month
-          span(v-else) $55/year
+          span {{current.amount}}/{{current.period}}
 
       button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
         span Upgrade Account
         Loader(:visible="loading.subscriptionIsBeingCreated")
 
-      p You'll be billed immediately and then each {{monthOrYear}}. You can cancel anytime.
+      p You'll be billed {{current.amount}} immediately and then each {{current.period}}. You can cancel anytime.
 
   section(v-if="currentUserIsSignedIn")
     img.icon(src="@/assets/lock.svg")
     span Payments securely processed by Stripe. Card info is not sent to Kinopio.
+
+  //- section
+  //-   p
+  //-     a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost/") Discount available
+  //-     span {{' '}} for students and those with financial need
 
 </template>
 
@@ -110,26 +115,32 @@ export default {
   computed: {
     user () { return this.$store.state.currentUser },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    monthOrYear () {
-      if (this.priceIsMonthly) {
-        return 'month'
-      } else {
-        return 'year'
-      }
-    },
     priceId () {
       let monthly, yearly
       if (import.meta.env.MODE === 'development') {
-        monthly = 'price_1IjPHfDFIr5ywhwoFUltkq7s'
-        yearly = 'price_1IjPHQDFIr5ywhwoFMHQ3tPq'
+        monthly = 'price_1L046SDFIr5ywhwoMfsIW1W5'
+        yearly = 'price_1L046iDFIr5ywhwoeRIDE5rN'
       } else {
-        monthly = 'price_1IjOp1DFIr5ywhwou6V7nRkE'
-        yearly = 'price_1IjOgJDFIr5ywhwoQtQIacSa'
+        monthly = 'price_1L2GvBDFIr5ywhwobbE35dhA'
+        yearly = 'price_1L2ErWDFIr5ywhwodsKxEEAq'
       }
       if (this.priceIsMonthly) {
         return monthly
       } else {
         return yearly
+      }
+    },
+    current () {
+      if (this.priceIsMonthly) {
+        return {
+          amount: '$6',
+          period: 'month'
+        }
+      } else {
+        return {
+          amount: '$60',
+          period: 'year'
+        }
       }
     }
   },
@@ -359,4 +370,15 @@ export default {
   .loading-stripe,
   .badge.danger
     margin-bottom 10px
+  button
+    position relative
+  .label-badge
+    color var(--primary-background)
+    font-size 12px
+    min-height initial
+    position absolute
+    left initial
+    right -15px
+    top -6px
+    margin 0
 </style>

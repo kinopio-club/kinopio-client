@@ -27,13 +27,24 @@ aside.notifications(@click.left="closeAllDialogs")
     img.icon(src="@/assets/hand.svg")
     span Hold and drag to pan
 
+  .item.info(v-if="notifySpaceIsHidden" @animationend="resetNotifySpaceIsHidden")
+    p Hidden spaces revealed through
+      img.icon.filter-icon(src="@/assets/filter.svg")
+
+  .item.info(v-if="notifyCurrentSpaceIsNowRemoved" @animationend="resetNotifyCurrentSpaceIsNowRemoved")
+    p Space is removed. Restore or permanently delete spaces through
+    .row
+      button(@click.stop="showRemoved")
+        img.icon(src="@/assets/remove.svg")
+        img.icon.remove-undo(src="@/assets/undo.svg")
+
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
-    p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $5/month
+    p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade
     .row
       button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
   .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimit" :class="{'notification-jiggle': notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
-    p To add more cards, you'll need to upgrade for $5/month
+    p To add more cards, you'll need to upgrade
     .row
       button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
@@ -174,6 +185,8 @@ export default {
     notifyKinopioUpdatesAreAvailable () { return this.$store.state.notifyKinopioUpdatesAreAvailable },
     notifyMoveOrCopyToSpace () { return this.$store.state.notifyMoveOrCopyToSpace },
     notifyMoveOrCopyToSpaceDetails () { return this.$store.state.notifyMoveOrCopyToSpaceDetails },
+    notifySpaceIsHidden () { return this.$store.state.notifySpaceIsHidden },
+    notifyCurrentSpaceIsNowRemoved () { return this.$store.state.notifyCurrentSpaceIsNowRemoved },
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsSignedIn () {
@@ -257,6 +270,16 @@ export default {
       this.$store.commit('notifySpaceIsRemoved', false)
       const firstSpace = this.$store.getters['cache/allSpaces'][0]
       this.$store.dispatch('currentSpace/loadSpace', { space: firstSpace })
+    },
+    resetNotifySpaceIsHidden () {
+      this.$store.commit('notifySpaceIsHidden', false)
+    },
+    resetNotifyCurrentSpaceIsNowRemoved () {
+      this.$store.commit('notifyCurrentSpaceIsNowRemoved', false)
+    },
+    showRemoved () {
+      this.resetNotifyCurrentSpaceIsNowRemoved()
+      this.$store.commit('triggerRemovedIsVisible')
     },
     resetNotifyCardsCreatedIsNearLimit () {
       this.$store.commit('notifyCardsCreatedIsNearLimit', false)
@@ -378,6 +401,10 @@ export default {
 
   .redo
     transform scaleX(-1)
+
+  .filter-icon
+    margin 0
+    margin-left 4px
 
 @keyframes notificationJiggle
   0%

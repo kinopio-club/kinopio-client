@@ -19,6 +19,23 @@ let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
 
 export default {
+  userPrefersReducedMotion () {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (query.matches) {
+      return true
+    } else {
+      return false
+    }
+  },
+  loadImage (src) {
+    // from https://stackoverflow.com/a/5058336
+    return new Promise((resolve, reject) => {
+      const image = new Image()
+      image.addEventListener('load', resolve)
+      image.addEventListener('error', reject)
+      image.src = src
+    })
+  },
   assetUrl (path, type) {
     if (type) {
       return `@/assets/${path}.${type}`
@@ -121,6 +138,25 @@ export default {
     })
     const dialogIsVisible = Boolean(dialogs.length)
     return dialogIsVisible
+  },
+  unpinnedDialogIsVisible () {
+    let dialogs = document.querySelectorAll('dialog')
+    const dialogIsVisible = Boolean(dialogs.length)
+    if (!dialogIsVisible) { return }
+    // ignore pinned dialogs
+    let pinnedDialogs = []
+    dialogs.forEach(dialog => {
+      if (dialog.dataset['is-pinned'] === 'true') {
+        pinnedDialogs.push(dialog)
+      }
+    })
+    if (dialogs.length === pinnedDialogs.length) {
+      return false
+    } else if (dialogs.length) {
+      return true
+    } else {
+      return false
+    }
   },
   shouldIgnoreTouchInteraction (event) {
     if (!event) { return true }
@@ -401,6 +437,25 @@ export default {
     } else {
       return 'Ctrl'
     }
+  },
+  splitBySentences (string) {
+    if (!string) { return }
+    let sentences = string.split('. ')
+    sentences = sentences.filter(sentence => Boolean(sentence.length))
+    // re-add sentence periods removed by split
+    sentences = sentences.map((sentence, index) => {
+      if (index < sentences.length - 1) {
+        sentence = sentence + '.'
+      }
+      return sentence
+    })
+    return sentences
+  },
+  splitByParagraphs (string) {
+    if (!string) { return }
+    let paragraphs = string.split('\n')
+    paragraphs = paragraphs.filter(paragraph => Boolean(paragraph.length))
+    return paragraphs
   },
   capitalizeFirstLetter (string) {
     // 'dreams' -> 'Dreams'
@@ -754,7 +809,7 @@ export default {
     return space
   },
   emptySpace (spaceId) {
-    return { id: spaceId, moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [] }
+    return { id: spaceId, moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [], isHidden: false }
   },
   clearSpaceMeta (space, type) {
     space.originSpaceId = space.id
@@ -767,6 +822,7 @@ export default {
     space.proposedShowInExplore = false
     space.privacy = 'private'
     space.isTemplate = false
+    space.isHidden = false
     space.cards = space.cards.map(card => {
       card.userId = null
       if (card.nameUpdatedByUserId) {
@@ -961,6 +1017,7 @@ export default {
     space.connectionTypes = []
     space.connections = []
     space.isTemplate = false
+    space.isHidden = false
     space = this.spaceDefaultBackground(space, currentUser)
     // cards
     space.cards.push({ id: nanoid(), name: day, x: 60, y: 100, frameId: 0 })
@@ -1189,8 +1246,9 @@ export default {
     if (skipProtocolCheck) { return urls }
     // ensure url has protocol
     urls = urls.map(url => {
+      const isFile = this.urlIsFile(url, true)
       const hasProtocol = this.urlHasProtocol(url)
-      if (hasProtocol) {
+      if (isFile || hasProtocol) {
         return url
       } else {
         return `https://${url}`
@@ -1246,10 +1304,12 @@ export default {
     const isAudio = url.match(audioUrlPattern)
     return Boolean(isAudio)
   },
-  urlIsFile (url) {
+  urlIsFile (url, skipProtocolCheck) {
     if (!url) { return }
-    const hasProtocol = this.urlHasProtocol(url)
-    if (!hasProtocol) { return }
+    if (!skipProtocolCheck) {
+      const hasProtocol = this.urlHasProtocol(url)
+      if (!hasProtocol) { return }
+    }
     url = url + ' '
     const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic)(?:\n| |\?|&)/igm)
     const isFile = url.toLowerCase().match(fileUrlPattern)
@@ -1277,7 +1337,7 @@ export default {
     if (!this.urlIsFile(url)) { return }
     // https://regexr.com/4rjtu
     // /filename.pdf from end of string
-    const filePattern = new RegExp(/\/[A-Za-z0-9-]+\.[A-Za-z.0-9-]+$/gim)
+    const filePattern = new RegExp(/\/[A-z0-9-]+\.[A-z.0-9-]+(\?[A-z.0-9-=]*)*$/gim)
     let file = url.match(filePattern)
 
     if (!file) { return }
@@ -1471,6 +1531,7 @@ export default {
     search = search.replaceAll('[', '\\[')
     const prevSearch = search
     search = search.replaceAll('?', '\\?')
+    search = search.replaceAll('$', '\\$')
     const extraCharacters = 2 + (search.length - prevSearch.length)
     const searchPattern = new RegExp(search, 'gim')
     let results = []
@@ -1682,6 +1743,13 @@ export default {
     if (code) { isCode = code[0].includes(comment[0]) }
     if (isCode) { return }
     return Boolean(comment)
+  },
+  nameWithoutCommentPattern (name) {
+    if (!name) { return }
+    if (!this.isNameComment) { return name }
+    name = name.replaceAll('((', '')
+    name = name.replaceAll('))', '')
+    return name
   },
   removeMarkdownCodeblocksFromString (string) {
     if (!string) { return '' }

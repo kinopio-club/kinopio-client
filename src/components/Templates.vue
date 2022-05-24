@@ -117,7 +117,7 @@ export default {
       background-color #f0e68c
     &.life
       background-color #b9a8ff
-    &.planning
+    &.work-school
       background-color #ffc0cb
     &.product
       background-color #ee83ee

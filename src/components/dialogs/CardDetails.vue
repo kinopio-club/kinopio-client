@@ -281,6 +281,10 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUnloadPage' && this.visible) {
         this.closeCard()
+      } else if (mutation.type === 'triggerSplitCard' && this.visible) {
+        const cardId = mutation.payload
+        if (cardId !== this.card.id) { return }
+        this.splitCards()
       } else if (mutation.type === 'cardDetailsIsVisibleForCardId') {
         const cardId = mutation.payload
         if (prevCardId) {
@@ -690,33 +694,14 @@ export default {
         this.nameSplitIntoCardsCount = 0
       }
     },
-    splitBySentences (string) {
-      if (!string) { return }
-      let sentences = string.split('. ')
-      sentences = sentences.filter(sentence => Boolean(sentence.length))
-      // re-add sentence periods removed by split
-      sentences = sentences.map((sentence, index) => {
-        if (index < sentences.length - 1) {
-          sentence = sentence + '.'
-        }
-        return sentence
-      })
-      return sentences
-    },
-    splitByParagraphs (string) {
-      if (!string) { return }
-      let paragraphs = string.split('\n')
-      paragraphs = paragraphs.filter(paragraph => Boolean(paragraph.length))
-      return paragraphs
-    },
     splitCards (event, isPreview) {
       const originalName = (this.pastedName || this.name).trim()
       // split names by paragraph and sentence
-      const paragraphs = this.splitByParagraphs(originalName) || []
+      const paragraphs = utils.splitByParagraphs(originalName) || []
       let cardNames = paragraphs.map(paragraph => {
         let sentences
         if (paragraph.length > this.maxCardLength) {
-          sentences = this.splitBySentences(paragraph)
+          sentences = utils.splitBySentences(paragraph)
         }
         return sentences || paragraph
       })
@@ -786,8 +771,11 @@ export default {
         newCards = newCards.map(card => {
           card = utils.updateCardDimensions(card)
           this.$store.dispatch('currentCards/update', {
+            name: card.name,
             id: card.id,
-            y: card.y
+            y: card.y,
+            width: card.width,
+            height: card.height
           })
           return card
         })
@@ -1553,9 +1541,5 @@ export default {
   button
     .icon.time
       vertical-align -1px
-
-  .card-style-actions
-    &.last-row
-      margin-bottom -10px
 
 </style>

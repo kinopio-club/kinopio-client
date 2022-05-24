@@ -28,32 +28,11 @@
                 span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
             Favorites(:visible="favoritesIsVisible")
           //- Mobile Tips
-          .button-wrap(v-if="isMobileOrTouch" :style="{zIndex: mobileTipsZIndex}")
+          .button-wrap(v-if="isMobileOrTouch")
             button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
               img.icon(src="@/assets/press-and-hold.svg")
-              span Mobile Tips
+              span Tips
             MobileTips(:visible="mobileTipsIsVisible")
-          //- Toggle More Controls
-          .button-wrap
-            button.toggle-more-controls(@click.left.stop="toggleMoreFooterControlsIsVisible" :class="{active : moreFooterControlsIsVisible}")
-              img.icon.down-arrow(src="@/assets/down-arrow.svg")
-
-        section(v-if="moreFooterControlsIsVisible")
-          //- Removed
-          .button-wrap
-            button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
-              img.refresh.icon(src="@/assets/remove.svg")
-              span Removed
-            Removed(:visible="removedIsVisible")
-          //- Tags and Links
-          .button-wrap
-            .segmented-buttons
-              button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
-                span Tags
-              button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
-                span Links
-            Links(:visible="linksIsVisible")
-            Tags(:visible="tagsIsVisible")
 
   .right(v-if="!isMobileOrTouch" :class="{'is-embed': isEmbed}")
     SpaceZoom
@@ -62,9 +41,6 @@
 <script>
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
-import Removed from '@/components/dialogs/Removed.vue'
-import Links from '@/components/dialogs/Links.vue'
-import Tags from '@/components/dialogs/Tags.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
 import MobileTips from '@/components/dialogs/MobileTips.vue'
 import Notifications from '@/components/Notifications.vue'
@@ -86,10 +62,7 @@ export default {
   components: {
     Explore,
     Live,
-    Removed,
     Notifications,
-    Links,
-    Tags,
     Favorites,
     MobileTips,
     Loader,
@@ -97,10 +70,7 @@ export default {
   },
   data () {
     return {
-      removedIsVisible: false,
       favoritesIsVisible: false,
-      linksIsVisible: false,
-      tagsIsVisible: false,
       exploreIsVisible: false,
       liveIsVisible: false,
       mobileTipsIsVisible: false,
@@ -118,10 +88,6 @@ export default {
         this.closeDialogs()
       } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         this.updatePosition()
-      } else if (mutation.type === 'unpinOtherDialogs') {
-        this.$nextTick(() => {
-          this.closeDialogs(mutation.payload)
-        })
       } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
       }
@@ -154,7 +120,6 @@ export default {
     clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
-    moreFooterControlsIsVisible () { return this.$store.state.currentUser.shouldShowMoreFooterControls },
     isAddPage () { return this.$store.state.isAddPage },
     isEmbed () { return this.$store.state.isEmbed },
     currentUser () { return this.$store.state.currentUser },
@@ -200,17 +165,6 @@ export default {
     isMobileStandalone () {
       return utils.isMobile() && navigator.standalone // is homescreen app
     },
-    linksDialogIsPinned () { return this.$store.state.linksDialogIsPinned },
-    tagsDialogIsPinned () { return this.$store.state.tagsDialogIsPinned },
-    dialogsArePinned () { return this.linksDialogIsPinned || this.tagsDialogIsPinned },
-    mobileTipsZIndex () {
-      if (this.mobileTipsIsVisible) {
-        return 0
-      } else if (this.dialogsArePinned) {
-        return -1
-      }
-      return 0
-    },
     unreadExploreSpacesLength () {
       let readDate = this.$store.state.currentUser.showInExploreUpdatedAt
       if (!readDate) { return '20+' }
@@ -225,22 +179,10 @@ export default {
   },
   methods: {
     closeDialogs (exclude) {
-      this.removedIsVisible = false
       this.favoritesIsVisible = false
       this.exploreIsVisible = false
       this.liveIsVisible = false
       this.mobileTipsIsVisible = false
-      if (!this.tagsDialogIsPinned && exclude !== 'tags') {
-        this.tagsIsVisible = false
-      }
-      if (!this.linksDialogIsPinned && exclude !== 'links') {
-        this.linksIsVisible = false
-      }
-    },
-    toggleMoreFooterControlsIsVisible () {
-      this.closeDialogs()
-      const isVisible = !this.$store.state.currentUser.shouldShowMoreFooterControls
-      this.$store.dispatch('currentUser/shouldShowMoreFooterControls', isVisible)
     },
     toggleIsFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
@@ -250,25 +192,10 @@ export default {
         this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
       }
     },
-    toggleRemovedIsVisible () {
-      const isVisible = this.removedIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleRemovedIsVisible')
-      this.removedIsVisible = !isVisible
-    },
     toggleFavoritesIsVisible () {
       const isVisible = this.favoritesIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleFavoritesIsVisible')
       this.favoritesIsVisible = !isVisible
-    },
-    toggleLinksIsVisible () {
-      const isVisible = this.linksIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleLinksIsVisible')
-      this.linksIsVisible = !isVisible
-    },
-    toggleTagsIsVisible () {
-      const isVisible = this.tagsIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleTagsIsVisible')
-      this.tagsIsVisible = !isVisible
     },
     toggleExploreIsVisible () {
       const isVisible = this.exploreIsVisible

@@ -1,9 +1,10 @@
 <template lang="pug">
 .prompt-pack-picker(v-if="visible" @click.left.stop ref="dialog")
-  p
-    img.icon(src="@/assets/add.svg")
-    span Add random prompts
-  .results-section
+  button(@click="toggleRandomPromptsIsVisible" :class="{active: randomPromptsIsVisible}")
+    img.icon(v-if="!randomPromptsIsVisible" src="@/assets/view.svg")
+    img.icon(v-if="randomPromptsIsVisible" src="@/assets/view-hidden.svg")
+    span More Prompts
+  .results-section(v-if="randomPromptsIsVisible")
     ul.results-list
       template(v-for="pack in packs")
         PromptPack(:pack="pack" @select="select")
@@ -32,7 +33,8 @@ export default {
   },
   data () {
     return {
-      dialogHeight: null
+      dialogHeight: null,
+      randomPromptsIsVisible: false
     }
   },
   computed: {
@@ -40,6 +42,9 @@ export default {
     userJournalQuestions () { return this.$store.state.currentUser.journalQuestions }
   },
   methods: {
+    toggleRandomPromptsIsVisible () {
+      this.randomPromptsIsVisible = !this.randomPromptsIsVisible
+    },
     select (pack) {
       this.$emit('select', pack)
     },
@@ -63,6 +68,7 @@ export default {
 
 <style lang="stylus">
 .prompt-pack-picker
+  margin-top 10px
   button
     .badge
       margin 0

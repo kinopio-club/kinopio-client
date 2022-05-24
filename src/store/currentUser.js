@@ -9,6 +9,7 @@ export default {
   state: {
     id: nanoid(),
     lastSpaceId: '',
+    prevLastSpaceId: '',
     color: randomColor({ luminosity: 'light' }),
     name: undefined,
     description: undefined,
@@ -25,6 +26,7 @@ export default {
     filterShowDateUpdated: false,
     filterShowAbsoluteDates: false,
     filterUnchecked: false,
+    filterComments: false,
     journalPrompts: [],
     newSpacesAreBlank: false,
     shouldEmailNotifications: true,
@@ -34,7 +36,6 @@ export default {
     shouldShowCardCollaborationInfo: false,
     shouldShowCardStyleActions: false,
     shouldShowMultiCardStyleActions: false,
-    shouldShowMoreFooterControls: false,
     shouldInvertZoomDirection: false,
     shouldUseLastConnectionType: false,
     shouldOpenLinksInNewTab: false,
@@ -44,6 +45,7 @@ export default {
     dialogFavoritesFilters: null, // null, 'currentUser', 'otherUsers'
     dialogSpaceFilters: null, // null, journals, spaces
     dialogSpaceFilterByUser: {},
+    dialogSpaceFilterShowHidden: false,
     defaultSpaceBackground: undefined,
     defaultSpaceBackgroundTint: undefined,
     defaultAddSpaceId: undefined,
@@ -71,6 +73,7 @@ export default {
       cache.updateUser('email', value)
     },
     lastSpaceId: (state, spaceId) => {
+      state.prevLastSpaceId = state.lastSpaceId
       state.lastSpaceId = spaceId
       cache.updateUser('lastSpaceId', spaceId)
     },
@@ -162,6 +165,11 @@ export default {
       state.filterUnchecked = value
       cache.updateUser('filterUnchecked', value)
     },
+    filterComments: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'filterComments' })
+      state.filterComments = value
+      cache.updateUser('filterComments', value)
+    },
     addJournalPrompt: (state, newPrompt) => {
       let prompts = utils.clone(state.journalPrompts) || []
       prompts.push(newPrompt)
@@ -218,10 +226,6 @@ export default {
       state.shouldShowMultiCardStyleActions = value
       cache.updateUser('shouldShowMultiCardStyleActions', value)
     },
-    shouldShowMoreFooterControls: (state, value) => {
-      state.shouldShowMoreFooterControls = value
-      cache.updateUser('shouldShowMoreFooterControls', value)
-    },
     showInExploreUpdatedAt: (state, value) => {
       state.showInExploreUpdatedAt = value
       cache.updateUser('showInExploreUpdatedAt', value)
@@ -257,6 +261,10 @@ export default {
     dialogSpaceFilterByUser: (state, value) => {
       state.dialogSpaceFilterByUser = value
       cache.updateUser('dialogSpaceFilterByUser', value)
+    },
+    dialogSpaceFilterShowHidden: (state, value) => {
+      state.dialogSpaceFilterShowHidden = value
+      cache.updateUser('dialogSpaceFilterShowHidden', value)
     },
     defaultSpaceBackground: (state, value) => {
       state.defaultSpaceBackground = value
@@ -485,11 +493,19 @@ export default {
           filterUnchecked: value
         } }, { root: true })
     },
+    toggleFilterComments: (context, value) => {
+      context.commit('filterComments', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          filterComments: value
+        } }, { root: true })
+    },
     clearUserFilters: (context) => {
       context.dispatch('toggleFilterShowUsers', false)
       context.dispatch('toggleFilterShowDateUpdated', false)
       context.dispatch('toggleFilterShowAbsoluteDates', false)
       context.dispatch('toggleFilterUnchecked', false)
+      context.dispatch('toggleFilterComments', false)
     },
     addJournalPrompt: (context, prompt) => {
       utils.typeCheck({ value: prompt, type: 'object', origin: 'addJournalPrompt' })
@@ -568,14 +584,6 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowMultiCardStyleActions: value
-        } }, { root: true })
-    },
-    shouldShowMoreFooterControls: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowMoreFooterControls' })
-      context.commit('shouldShowMoreFooterControls', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          shouldShowMoreFooterControls: value
         } }, { root: true })
     },
     showInExploreUpdatedAt: (context, value) => {
@@ -712,6 +720,29 @@ export default {
       if (spaceUserIsUpgraded && !spaceUserIsCurrentUser) {
         return true
       }
+    },
+    totalFiltersActive: (state, getters) => {
+      let userFilters = getters.totalCardFadingFiltersActive
+      if (state.filterShowUsers) {
+        userFilters += 1
+      }
+      if (state.filterShowDateUpdated) {
+        userFilters += 1
+      }
+      if (state.filterComments) {
+        userFilters += 1
+      }
+      return userFilters
+    },
+    totalCardFadingFiltersActive: (state, getters, rootState) => {
+      let userFilters = 0
+      if (state.filterUnchecked) {
+        userFilters += 1
+      }
+      const tagNames = rootState.filteredTagNames
+      const connections = rootState.filteredConnectionTypeIds
+      const frames = rootState.filteredFrameIds
+      return userFilters + tagNames.length + connections.length + frames.length
     }
   }
 }

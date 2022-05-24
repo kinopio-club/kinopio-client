@@ -150,23 +150,6 @@ export default {
       paintingCircles = []
       remotePaintingCircles = []
     },
-    dialogIsVisible () {
-      let dialogs = document.querySelectorAll('dialog')
-      const dialogIsVisible = Boolean(dialogs.length)
-      if (!dialogIsVisible) { return }
-      // ignore pinned dialogs
-      let pinnedDialogs = []
-      dialogs.forEach(dialog => {
-        if (dialog.dataset['is-pinned']) {
-          pinnedDialogs.push(dialog)
-        }
-      })
-      if (pinnedDialogs.length !== dialogs.length) {
-        return true
-      } else {
-        return false
-      }
-    },
     updatePositionOffsetByPinchZoom () {
       if (!window.visualViewport) { return }
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop
@@ -318,7 +301,7 @@ export default {
         this.$store.commit('currentUserIsPainting', true)
         this.createInitialCircle()
       }
-      if (!multipleCardsIsSelected && !this.dialogIsVisible()) {
+      if (!multipleCardsIsSelected && !utils.unpinnedDialogIsVisible()) {
         this.$store.commit('shouldAddCard', true)
       }
       if (!event.shiftKey) {
@@ -418,7 +401,9 @@ export default {
       if (this.userCantEditSpace) { return }
       const zoom = this.spaceCounterZoomDecimal
       const cardMap = this.$store.state.currentCards.cardMap
+      const filterComments = this.$store.state.currentUser.filterComments
       cardMap.forEach(card => {
+        if (filterComments && card.isComment) { return }
         const cardX = card.x
         const cardY = card.y
         const pointX = (point.x + window.scrollX) * zoom
@@ -446,6 +431,7 @@ export default {
       const pointX = (point.x + window.scrollX) * zoom
       const pointY = (point.y + window.scrollY) * zoom
       paths.forEach(path => {
+        if (path.dataset['is-hidden-by-comment-filter'] === 'true') { return }
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
         let svgPoint = svg.createSVGPoint()

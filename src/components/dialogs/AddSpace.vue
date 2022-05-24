@@ -38,8 +38,7 @@ dialog.add-space.narrow(
           span Add Daily Prompt
     template(v-if="editPromptsIsVisible" )
       Prompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
-  section(v-if="editPromptsIsVisible")
-    PromptPackPicker(:visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack")
+    PromptPackPicker(v-if="editPromptsIsVisible" :visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack")
 
   //- Templates
   section

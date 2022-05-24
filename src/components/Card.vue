@@ -1,8 +1,19 @@
 <template lang="pug">
-article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{'is-resizing': isResizing}")
+article(
+  :style="positionStyle"
+  :data-card-id="id"
+  :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
+  :key="id"
+  ref="card"
+  :class="{'is-resizing': isResizing, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
+)
   .card(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
+
+    @mouseenter="initStickToCursor"
+    @mousemove="stickToCursor"
+    @mouseleave="unstickToCursor"
 
     @touchstart="startLocking"
     @touchmove="updateCurrentTouchPosition"
@@ -37,7 +48,7 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
     .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
-    template(v-if="!nameIsComment")
+    template(v-if="!isComment")
       //- Video
       video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateCardMap")
         source(:src="formats.video")
@@ -58,7 +69,7 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
-      .card-comment(v-if="nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-comment(v-if="isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
@@ -67,8 +78,7 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
         .badge.comment-badge
           .toggle-comment-wrap(@mouseup.left="toggleCommentIsVisible" @touchend="toggleCommentIsVisible")
             button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
-              img.icon.view(v-if="commentIsVisible" src="@/assets/view-hidden.svg")
-              img.icon.view(v-else src="@/assets/view.svg")
+              img.icon.view(src="@/assets/comment.svg")
           //- User
           template(v-if="commentIsVisible")
             .badge.user-badge.user-badge.comment-user-badge(:style="{background: createdByUser.color}")
@@ -86,10 +96,8 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
             video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateCardMap")
               source(:src="formats.video")
 
-          span(v-if="!commentIsVisible") …
-
       //- Not Comment
-      .card-content(v-if="!nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-content(v-if="!isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -116,7 +124,7 @@ article(:style="positionStyle" :data-card-id="id" :key="id" ref="card" :class="{
 
         template(v-else)
           //- Url →
-          a.url-wrap(v-if="cardButtonUrl && !nameIsComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
+          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
             .url.inline-button-wrap
               button.inline-button(:style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -225,6 +233,12 @@ const lockingDuration = 100 // ms
 let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 const defaultCardPosition = 100
 
+// sticky
+const stickyTimerDuration = 250
+let preventSticking = false
+let stickyTimerComplete = false
+let stickyTimer
+
 export default {
   components: {
     Frames,
@@ -293,10 +307,14 @@ export default {
       nameIsOnlyMarkdownLink: false,
       isLocking: true,
       lockingPercent: 0,
-      lockingAlpha: 0
+      lockingAlpha: 0,
+      translateX: 0,
+      translateY: 0,
+      isAnimationUnsticking: false
     }
   },
   computed: {
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     isResizing () { return this.$store.state.currentUserIsResizingCard },
     dataTags () {
       let tags = utils.tagsFromStringWithoutBrackets(this.card.name)
@@ -395,10 +413,14 @@ export default {
     },
     cardButtonUrl () {
       const link = this.formats.link
+      const file = this.formats.file
       if (utils.urlIsValidTld(link) || utils.urlIsSpace(link)) {
         return link
+      } else if (utils.urlHasProtocol(file)) {
+        return file
+      } else {
+        return null
       }
-      return this.formats.file
     },
     webUrl () {
       const link = this.formats.link
@@ -417,7 +439,7 @@ export default {
       }
     },
     isHiddenInComment () {
-      if (this.nameIsComment && !this.commentIsVisible) {
+      if (this.isComment && !this.commentIsVisible) {
         return true
       } else {
         return false
@@ -425,6 +447,10 @@ export default {
     },
     currentCardDetailsIsVisible () {
       return this.id === this.$store.state.cardDetailsIsVisibleForCardId
+    },
+    shouldNotStick () {
+      const userIsConnecting = this.$store.state.currentConnectionStartCardIds.length
+      return userIsConnecting || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked
     },
     cardStyle () {
       let backgroundColor
@@ -513,7 +539,7 @@ export default {
       })
     },
     pendingUploadDataUrl () {
-      if (!this.cardPendingUpload || this.nameIsComment) { return }
+      if (!this.cardPendingUpload || this.isComment) { return }
       return this.cardPendingUpload.imageDataUrl
     },
     urls () {
@@ -525,13 +551,13 @@ export default {
       this.updateMediaUrls(urls)
       return urls || []
     },
-    nameIsComment () { return utils.isNameComment(this.name) },
+    isComment () { return this.card.isComment || utils.isNameComment(this.name) },
     isVisualCard () {
-      if (this.nameIsComment) { return }
+      if (this.isComment) { return }
       return this.formats.image || this.formats.video
     },
     isAudioCard () {
-      if (this.nameIsComment) { return }
+      if (this.isComment) { return }
       return this.formats.audio
     },
     cardHasMedia () { return this.formats.image || this.formats.video || this.formats.audio },
@@ -568,7 +594,8 @@ export default {
         zIndex: z,
         width: this.resizeWidth,
         maxWidth: this.resizeWidth,
-        pointerEvents
+        pointerEvents,
+        transform: `translate(${this.translateX}, ${this.translateY})`
       }
     },
     canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) },
@@ -787,26 +814,24 @@ export default {
       return Boolean(connections.length)
     },
 
-    // filters
+    // Filters
+
     filtersIsActive () {
-      const types = this.$store.state.filteredConnectionTypeIds
-      const frames = this.$store.state.filteredFrameIds
-      const tags = this.$store.state.filteredTagNames
-      const itemFiltersIsActive = Boolean(types.length + frames.length + tags.length)
-      const filterUncheckedIsActive = this.$store.state.currentUser.filterUnchecked
-      return itemFiltersIsActive || filterUncheckedIsActive
+      return Boolean(this.$store.getters['currentUser/totalCardFadingFiltersActive'])
     },
     isCardFilteredByTags () {
       const tagNames = this.$store.state.filteredTagNames
-      const isFiltered = this.tags.find(tag => {
+      if (!tagNames.length) { return }
+      const hasTag = this.tags.find(tag => {
         if (tagNames.includes(tag.name)) {
           return true
         }
       })
-      return isFiltered
+      return hasTag
     },
     isConnectionFilteredByType () {
       const typeIds = this.$store.state.filteredConnectionTypeIds
+      if (!typeIds) { return }
       const filteredTypes = this.connectionTypes.filter(type => {
         return typeIds.includes(type.id)
       })
@@ -814,22 +839,24 @@ export default {
     },
     isCardFilteredByFrame () {
       const frameIds = this.$store.state.filteredFrameIds
-      return frameIds.includes(this.frameId)
+      if (!frameIds.length) { return }
+      const hasFrame = frameIds.includes(this.frameId)
+      return hasFrame
     },
     isCardFilteredByUnchecked () {
       const filterUncheckedIsActive = this.$store.state.currentUser.filterUnchecked
       if (!filterUncheckedIsActive) { return }
-      return this.hasCheckbox && !this.isChecked
+      return !this.isChecked && this.hasCheckbox
+    },
+    isCardHiddenByCommentFilter () {
+      const filterCommentsIsActive = this.$store.state.currentUser.filterComments
+      if (!filterCommentsIsActive) { return }
+      return this.isComment
     },
     isFiltered () {
-      if (this.filtersIsActive) {
-        const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame || this.isCardFilteredByUnchecked
-        if (isInFilter) {
-          return false
-        } else {
-          return true
-        }
-      } else { return false }
+      if (!this.filtersIsActive) { return }
+      const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame || this.isCardFilteredByUnchecked
+      return !isInFilter
     },
     isLoadingUrlPreview () {
       const cardIds = this.$store.state.urlPreviewLoadingForCardIds
@@ -860,6 +887,107 @@ export default {
     userDetailsIsVisible () { return this.$store.state.cardUserDetailsIsVisibleForCardId === this.id }
   },
   methods: {
+
+    // sticky
+
+    initStickToCursor () {
+      preventSticking = false
+      if (this.shouldNotStick || utils.userPrefersReducedMotion()) {
+        preventSticking = true
+      }
+      stickyTimer = setTimeout(() => {
+        stickyTimerComplete = true
+      }, stickyTimerDuration)
+    },
+    clearStickyTimer () {
+      clearTimeout(stickyTimer)
+      stickyTimerComplete = false
+    },
+    stickToCursor (event) {
+      const stretchResistance = 6
+      if (this.isAnimationUnsticking) { return }
+      if (preventSticking) { return }
+      if (!stickyTimerComplete) { return }
+      const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap']
+      const elements = ['button', 'progress']
+      const isOverButton = classes.includes(event.target.className) || elements.includes(event.type)
+      if (this.shouldNotStick || isOverButton) {
+        this.clearPositionOffsets()
+        preventSticking = true
+        return
+      }
+      const isButtonHover = event.target.closest('.inline-button-wrap')
+      if (isButtonHover) {
+        this.clearPositionOffsets()
+        return
+      }
+      const width = this.card.width
+      const height = this.card.height
+      const halfWidth = width / 2
+      const halfHeight = height / 2
+      let centerX = this.x + halfWidth
+      let centerY = this.y + halfHeight
+      let position = utils.cursorPositionInPage(event)
+      position = {
+        x: position.x * this.spaceCounterZoomDecimal,
+        y: position.y * this.spaceCounterZoomDecimal
+      }
+      // position from card center
+      const xFromCenter = position.x - centerX
+      const yFromCenter = position.y - centerY
+      // percentage from center to card edge
+      const xPercent = (xFromCenter / halfWidth)
+      const yPercent = (yFromCenter / halfHeight)
+      // calc sticky offset
+      let xOffset = (xPercent * halfWidth) / stretchResistance
+      xOffset = Math.round(xOffset)
+      let yOffset = (yPercent * halfHeight) / stretchResistance
+      yOffset = Math.round(yOffset)
+      this.translateX = xOffset + 'px'
+      this.translateY = yOffset + 'px'
+    },
+    unstickToCursor () {
+      this.clearStickyTimer()
+      this.isAnimationUnsticking = true
+      const xOffset = parseInt(this.translateX)
+      const yOffset = parseInt(this.translateY)
+      let timing = {
+        duration: 0, // sum of keyframe offsets
+        easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
+        iterations: 1
+      }
+      const swings = [-0.9, 0.6, -0.4, 0.2, 0] // [-1, 0.75, -0.5, 0.25, 0]
+      let keyframes = [
+        { transform: `translate(${xOffset * swings[0]}px,   ${yOffset * swings[0]}px)`, offset: 50 },
+        { transform: `translate(${xOffset * swings[1]}px, ${yOffset * swings[1]}px)`, offset: 75 },
+        { transform: `translate(${xOffset * swings[2]}px, ${yOffset * swings[2]}px)`, offset: 50 },
+        { transform: `translate(${xOffset * swings[3]}px, ${yOffset * swings[3]}px)`, offset: 100 },
+        { transform: `translate(${xOffset * swings[4]}px,    ${yOffset * swings[4]}px)`, offset: 100 }
+      ]
+      keyframes.forEach(keyframe => {
+        timing.duration = timing.duration + keyframe.offset
+      })
+      let lastOffset = 0
+      keyframes = keyframes.map(keyframe => {
+        keyframe.offset = lastOffset + (keyframe.offset / timing.duration)
+        keyframe.offset = utils.roundFloat(keyframe.offset)
+        lastOffset = keyframe.offset
+        return keyframe
+      })
+      // play animation
+      const element = this.$refs.card
+      if (!element) { return }
+      const animation = element.animate(keyframes, timing)
+      animation.onfinish = () => {
+        this.clearPositionOffsets()
+        this.isAnimationUnsticking = false
+      }
+    },
+    clearPositionOffsets () {
+      this.translateX = 0
+      this.translateY = 0
+    },
+
     updateTypeForConnection (connectionId) {
       const newType = this.$store.getters['currentConnections/typeForNewConnections']
       console.warn('🚑 connection was missing type', { cardId: this.id, connectionId, newType })
@@ -1296,6 +1424,7 @@ export default {
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
       this.updatePreviousResultCardId()
+      this.clearPositionOffsets()
     },
     updatePreviousResultCardId () {
       const search = this.$store.state.search
@@ -1378,9 +1507,8 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'spaceDetails.changeSpace')
     },
     removeCommentBrackets (name) {
-      if (!this.nameIsComment) {
-        return name
-      }
+      if (!this.isComment) { return name }
+      if (this.card.isComment) { return name }
       const commentPattern = utils.commentPattern()
       const comments = name.match(commentPattern)
       comments.forEach(comment => {
@@ -1906,6 +2034,7 @@ article
     bottom 0px
     display flex
     .resize-button-wrap
+      z-index 1
       cursor ew-resize
       button
         cursor ew-resize
@@ -1961,6 +2090,9 @@ article
   .comment-badge
     padding-left 0
     padding-right 0
+    .user-badge,
+    .user
+      margin-right 0
 
   .tappable-area
     margin-left 20px

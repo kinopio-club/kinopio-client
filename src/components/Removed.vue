@@ -1,10 +1,10 @@
 <template lang="pug">
-dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+.removed(v-if="visible")
   section
     .segmented-buttons
       button(@click.left="showCards" :class="{active: cardsVisible}")
         img.icon(src="@/assets/remove.svg")
-        span Cards in this Space
+        span Cards in Space
       button(@click.left="showSpaces" :class="{active: !cardsVisible}")
         img.icon(src="@/assets/remove.svg")
         span Spaces
@@ -78,10 +78,12 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
         this.updateResultsSectionHeight()
       }
     })
+  },
+  mounted () {
+    this.init()
   },
   data () {
     return {
@@ -94,7 +96,6 @@ export default {
         spaces: false
       },
       resultsSectionHeight: null,
-      dialogHeight: null,
       deleteAllConfirmationIsVisible: false
     }
   },
@@ -131,6 +132,12 @@ export default {
     }
   },
   methods: {
+    init () {
+      this.deleteAllConfirmationIsVisible = false
+      this.updateRemovedCards()
+      this.updateRemovedSpaces()
+      this.updateResultsSectionHeight()
+    },
     toggleDeleteAllConfirmationIsVisible () {
       this.deleteAllConfirmationIsVisible = !this.deleteAllConfirmationIsVisible
     },
@@ -169,18 +176,11 @@ export default {
         this.deleteAllSpaces()
       }
     },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeightFromHeader(element)
-      })
-    },
     updateResultsSectionHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+        this.resultsSectionHeight = utils.elementHeight(element, true)
       })
     },
 
@@ -280,11 +280,7 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        this.deleteAllConfirmationIsVisible = false
-        this.updateRemovedCards()
-        this.updateRemovedSpaces()
-        this.updateDialogHeight()
-        this.updateResultsSectionHeight()
+        this.init()
       }
     }
   }
@@ -294,10 +290,12 @@ export default {
 <style lang="stylus">
 .removed
   overflow auto
+  // > section
+  border-top 1px solid var(--primary)
   .results-section
     max-height initial
-    border-top 1px solid var(--primary)
-    padding-top 4px
+    // border-top 1px solid var(--primary)
+    // padding-top 4px
     .button-wrap
       margin-left 4px
       margin-top 4px
@@ -314,10 +312,12 @@ export default {
   .remove-confirmation
     margin-left 6px
     min-width 130px
+    text-align right
     .segmented-buttons
       margin-top 5px
   .badge
     min-width 19px
   .results-actions
     padding 4px
+    padding-top 0
 </style>

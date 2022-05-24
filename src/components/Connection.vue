@@ -7,6 +7,7 @@ path.connection-path(
   :data-end-card="endCardId"
   :data-id="id"
   :data-type-name="typeName"
+  :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
   :key="id"
   :d="path"
   @mousedown.left="startDraggingConnection"
@@ -15,7 +16,7 @@ path.connection-path(
   @touchend.stop="showConnectionDetails"
   @keyup.stop.backspace="removeConnection"
   @keyup.stop.enter="showConnectionDetailsOnKeyup"
-  :class="{active: isSelected || detailsIsVisible || remoteDetailsIsVisible || isRemoteSelected || isCurrentCardConnection, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline }"
+  :class="{active: isSelected || detailsIsVisible || remoteDetailsIsVisible || isRemoteSelected || isCurrentCardConnection, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline, 'is-hidden-by-opacity': isHiddenByCommentFilter }"
   ref="connection"
   tabindex="0"
   @dragover.prevent
@@ -41,14 +42,11 @@ export default {
         if (!selected) {
           this.cancelAnimation()
         }
-      }
-      if (mutation.type === 'currentCards/move') {
+      } else if (mutation.type === 'currentCards/move') {
         this.cancelAnimation()
-      }
-      if (mutation.type === 'currentConnections/remove') {
+      } else if (mutation.type === 'currentConnections/remove') {
         this.controlCurve = undefined
-      }
-      if (mutation.type === 'triggerShowConnectionDetails') {
+      } else if (mutation.type === 'triggerShowConnectionDetails') {
         if (mutation.payload.connectionId === this.id) {
           const isFromStore = true
           this.showConnectionDetails(mutation.payload.event, isFromStore)
@@ -64,6 +62,19 @@ export default {
     }
   },
   computed: {
+    cards () {
+      const cards = utils.clone(this.$store.getters['currentCards/all'])
+      const startCard = cards.find(card => card.id === this.startCardId)
+      const endCard = cards.find(card => card.id === this.endCardId)
+      return { startCard, endCard }
+    },
+    isHiddenByCommentFilter () {
+      const filterCommentsIsActive = this.$store.state.currentUser.filterComments
+      if (!filterCommentsIsActive) { return }
+      const startCard = this.cards.startCard
+      const endCard = this.cards.endCard
+      return startCard.isComment || endCard.isComment
+    },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.connection.id },
@@ -127,9 +138,8 @@ export default {
     },
     isCardsFilteredByFrame () {
       const frameIds = this.$store.state.filteredFrameIds
-      const cards = utils.clone(this.$store.getters['currentCards/all'])
-      const startCard = cards.filter(card => card.id === this.startCardId)[0]
-      const endCard = cards.filter(card => card.id === this.endCardId)[0]
+      const startCard = this.cards.startCard
+      const endCard = this.cards.endCard
       const startCardInFilter = frameIds.includes(startCard.frameId)
       const endCardInFilter = frameIds.includes(endCard.frameId)
       return startCardInFilter || endCardInFilter

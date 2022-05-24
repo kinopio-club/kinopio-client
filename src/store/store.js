@@ -120,9 +120,8 @@ const store = createStore({
     currentSelectedLink: {},
 
     // pinned dialogs
-    linksDialogIsPinned: false,
-    tagsDialogIsPinned: false,
-    spaceDetailsDialogIsPinned: false,
+    spaceDetailsIsPinned: false,
+    sidebarIsPinned: false,
 
     // dragging
     currentDraggingCardId: '',
@@ -163,6 +162,7 @@ const store = createStore({
     notifyConnectionError: false,
     notifyServerCouldNotSave: false,
     notifySpaceIsRemoved: false,
+    notifyCurrentSpaceIsNowRemoved: false,
     notifySignUpToEditSpace: false,
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
@@ -170,6 +170,7 @@ const store = createStore({
     notifyMoveOrCopyToSpace: false,
     notifyMoveOrCopyToSpaceDetails: {},
     hasNotifiedPressAndHoldToDrag: false,
+    notifySpaceIsHidden: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -215,7 +216,7 @@ const store = createStore({
       state.pageWidth = width
     },
     closeAllDialogs: (state) => {
-      if (utils.dialogIsVisible()) {
+      if (utils.unpinnedDialogIsVisible()) {
         state.shouldAddCard = false
       }
       state.multipleSelectedActionsIsVisible = false
@@ -367,6 +368,7 @@ const store = createStore({
     triggerSpaceDetailsInfoIsVisible: () => {},
     triggerFocusResultsFilter: () => {},
     triggerFocusSpaceDetailsName: () => {},
+    triggerSpaceDetailsUpdateLocalSpaces: () => {},
     triggerSignUpOrInIsVisible: () => {},
     triggerArenaAuthenticationError: () => {},
     triggerKeyboardShortcutsIsVisible: () => {},
@@ -404,6 +406,8 @@ const store = createStore({
     triggerSpaceDetailsCloseDialogs: () => {},
     triggerTemplatesIsVisible: () => {},
     triggerSelectAllCardsBelowCursor: (state, position) => {},
+    triggerSplitCard: (state, cardId) => {},
+    triggerRemovedIsVisible: () => {},
 
     // Cards
 
@@ -665,23 +669,13 @@ const store = createStore({
 
     // Pinned Dialogs
 
-    unpinOtherDialogs: (state, exclude) => {
-      console.log('📌 unpin dialogs except', exclude)
-      state.linksDialogIsPinned = false
-      state.tagsDialogIsPinned = false
-      state.spaceDetailsDialogIsPinned = false
+    sidebarIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'sidebarIsPinned' })
+      state.sidebarIsPinned = value
     },
-    linksDialogIsPinned: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'linksDialogIsPinned' })
-      state.linksDialogIsPinned = value
-    },
-    tagsDialogIsPinned: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'tagsDialogIsPinned' })
-      state.tagsDialogIsPinned = value
-    },
-    spaceDetailsDialogIsPinned: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsDialogIsPinned' })
-      state.spaceDetailsDialogIsPinned = value
+    spaceDetailsIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsIsPinned' })
+      state.spaceDetailsIsPinned = value
     },
 
     // Connection Details
@@ -918,6 +912,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'notifySpaceIsRemoved' })
       state.notifySpaceIsRemoved = value
     },
+    notifyCurrentSpaceIsNowRemoved: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'notifyCurrentSpaceIsNowRemoved' })
+      state.notifyCurrentSpaceIsNowRemoved = value
+    },
     notifySignUpToEditSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'notifySignUpToEditSpace' })
       state.notifySignUpToEditSpace = value
@@ -948,6 +946,10 @@ const store = createStore({
     hasNotifiedPressAndHoldToDrag: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'hasNotifiedPressAndHoldToDrag' })
       state.hasNotifiedPressAndHoldToDrag = value
+    },
+    notifySpaceIsHidden: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'notifySpaceIsHidden' })
+      state.notifySpaceIsHidden = value
     },
 
     // Notifications with Position
@@ -1160,20 +1162,14 @@ const store = createStore({
     },
 
     // Pinned Dialogs
-    linksDialogIsPinned: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'linksDialogIsPinned' })
-      context.commit('unpinOtherDialogs', 'links')
-      context.commit('linksDialogIsPinned', value)
+
+    sidebarIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'sidebarIsPinned' })
+      context.commit('sidebarIsPinned', value)
     },
-    tagsDialogIsPinned: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'tagsDialogIsPinned' })
-      context.commit('unpinOtherDialogs', 'tags')
-      context.commit('tagsDialogIsPinned', value)
-    },
-    spaceDetailsDialogIsPinned: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsDialogIsPinned' })
-      context.commit('unpinOtherDialogs', 'spaceDetails')
-      context.commit('spaceDetailsDialogIsPinned', value)
+    spaceDetailsIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsIsPinned' })
+      context.commit('spaceDetailsIsPinned', value)
     }
   },
   getters: {

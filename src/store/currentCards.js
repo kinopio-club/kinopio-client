@@ -185,7 +185,6 @@ const currentCards = {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
       }
-
       let cards = context.getters.all
       const highestCardZ = utils.highestCardZ(cards)
       let card = {
@@ -225,6 +224,8 @@ const currentCards = {
           z: card.z || context.state.ids.length + 1,
           name: card.name,
           frameId: card.frameId || 0,
+          width: utils.emptyCard().width,
+          height: utils.emptyCard().height,
           userId: context.rootState.currentUser.id,
           backgroundColor: card.backgroundColor
         }
@@ -232,6 +233,9 @@ const currentCards = {
         context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
         context.commit('create', card)
       })
+      context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+        delta: newCards.length
+      }, { root: true })
       context.dispatch('updateCardMap')
     },
     paste: (context, { card, cardId }) => {

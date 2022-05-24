@@ -48,6 +48,14 @@ dialog.narrow.multiple-selected-actions(
       button(:disabled="!canEditSome.any" @click.left="remove")
         img.icon(src="@/assets/remove.svg")
         span {{ removeLabel }}
+      //- Merge
+      button(v-if="multipleCardsIsSelected" @click="mergeSelectedCards" :disabled="!canEditAll.cards")
+        img.icon(src="@/assets/merge.svg")
+        span Merge
+      //- Split
+      button(v-if="cardCanBySplit" @click="splitCard" :disabled="!canEditAll.cards")
+        img.icon(src="@/assets/split.svg")
+        span Split
 
     template(v-if="multipleCardsSelectedIds.length")
       .row
@@ -71,16 +79,16 @@ dialog.narrow.multiple-selected-actions(
 </template>
 
 <script>
-import { nanoid } from 'nanoid'
-import last from 'lodash-es/last'
-import uniq from 'lodash-es/uniq'
-
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import MoveOrCopyCards from '@/components/dialogs/MoveOrCopyCards.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import CardStyleActions from '@/components/CardStyleActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
+
+import { nanoid } from 'nanoid'
+import last from 'lodash-es/last'
+import uniq from 'lodash-es/uniq'
 
 let prevCards
 
@@ -104,7 +112,8 @@ export default {
     }
   },
   computed: {
-    cardStyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowMultiCardStyleActions },
+    maxCardLength () { return 300 },
+    cardStyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowMultiCardStyleActions && this.cardsIsSelected },
     visible () { return this.$store.state.multipleSelectedActionsIsVisible },
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     position () {
@@ -124,8 +133,13 @@ export default {
     // cards
 
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
-    cardsIsSelected () { return Boolean(this.multipleCardsSelectedIds.length > 0) },
-    multipleCardsIsSelected () { return Boolean(this.multipleCardsSelectedIds.length > 1) },
+    cardCanBySplit () {
+      if (!this.oneCardIsSelected) { return }
+      return this.cards[0].name.includes('\n')
+    },
+    oneCardIsSelected () { return this.multipleCardsSelectedIds.length === 1 },
+    cardsIsSelected () { return this.multipleCardsSelectedIds.length > 0 },
+    multipleCardsIsSelected () { return this.multipleCardsSelectedIds.length > 1 },
     cards () {
       let cards = this.multipleCardsSelectedIds.map(cardId => {
         return this.$store.getters['currentCards/byId'](cardId)
@@ -284,6 +298,94 @@ export default {
     }
   },
   methods: {
+    splitCard () {
+      // open card details and trigger the split from there
+      const cardId = this.cards[0].id
+      this.$store.dispatch('clearMultipleSelected')
+      this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.splitCard')
+      this.$store.commit('preventCardDetailsOpeningAnimation', true)
+      this.$store.commit('cardDetailsIsVisibleForCardId', cardId)
+      this.$store.commit('triggerSplitCard', cardId)
+    },
+    positionNewCards (newCards) {
+      const spaceBetweenCards = 12
+      this.$nextTick(() => {
+        newCards = newCards.map((card, index) => {
+          if (!index) { return card }
+          const prevCard = newCards[index - 1]
+          const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+          const prevCardRect = element.getBoundingClientRect()
+          card.y = prevCard.y + (prevCardRect.height * this.spaceCounterZoomDecimal) + spaceBetweenCards
+          return card
+        })
+        newCards = newCards.map(card => {
+          card = utils.updateCardDimensions(card)
+          this.$store.dispatch('currentCards/update', {
+            id: card.id,
+            name: card.name,
+            y: card.y,
+            width: card.width,
+            height: card.height
+          })
+          return card
+        })
+        this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.positionNewCards')
+      })
+    },
+    cardsSortedByY () {
+      return this.cards.sort((a, b) => {
+        return a.y - b.y
+      })
+    },
+    mergeSelectedCards () {
+      let name = ''
+      const cards = this.cardsSortedByY()
+      cards.forEach(card => {
+        name = `${name}\n\n${card.name.trim()}`
+      })
+      name = name.trim()
+      let newNames = []
+      // split names while > maxCardLength
+      do {
+        let newName = name.substring(0, this.maxCardLength)
+        const lastSpace = newName.lastIndexOf(' ')
+        const lastLineBreak = newName.lastIndexOf('\n')
+        const shouldSplitByMaxLength = lastSpace === -1 && lastLineBreak === -1
+        if (name.length < this.maxCardLength) {
+          newName = name
+          name = ''
+        } else if (shouldSplitByMaxLength) {
+          // newName = newName
+          name = name.substring(this.maxCardLength)
+        } else if (lastSpace >= lastLineBreak) {
+          newName = name.substring(0, lastSpace)
+          name = name.substring(lastSpace)
+        } else {
+          newName = name.substring(0, lastLineBreak)
+          name = name.substring(lastLineBreak)
+        }
+        newNames.push(newName)
+      } while (name.length > this.maxCardLength)
+
+      newNames.push(name)
+      newNames = newNames.filter(name => Boolean(name))
+      let position = { x: cards[0].x, y: cards[0].y }
+      let newCards = []
+      this.remove()
+      // create merged cards
+      newNames.forEach((newName, index) => {
+        let newCard = {
+          id: nanoid(),
+          name: newName,
+          x: position.x,
+          y: position.y
+        }
+        newCards.push(newCard)
+      })
+      this.$store.dispatch('currentCards/addMultiple', newCards)
+      prevCards = newCards // for history
+      this.positionNewCards(newCards)
+    },
     toggleAllLabelsAreVisible () {
       const isVisible = !this.allLabelsAreVisible
       this.editableConnections.forEach(connection => {
@@ -488,13 +590,4 @@ export default {
       .segmented-colors
         margin-left 5px
 
-  .card-style-actions
-    padding 0
-    .row
-      display block
-    .button-wrap
-      margin-left 0
-      margin-right 6px
-    &.last-row
-      margin-bottom -10px
 </style>

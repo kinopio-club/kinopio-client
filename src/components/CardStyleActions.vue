@@ -31,10 +31,15 @@ section.card-style-actions(v-if="visible" @click.left.stop="closeDialogs")
         @selectedColor="updateCardsBackgroundColor"
         @removeColor="removeCardsBackgroundColor"
       )
-      //- Lock
+    //- Lock
     .button-wrap
       button(:disabled="!canEditSome" @click="toggleIsLocked" :class="{active: isLocked}")
         img.icon(src="@/assets/lock.svg")
+    //- Comment
+    .button-wrap
+      button(:disabled="!canEditSome" @click="toggleIsComment" :class="{active: isComment}")
+        img.icon(src="@/assets/comment.svg")
+
 </template>
 
 <script>
@@ -115,6 +120,10 @@ export default {
     },
     isLocked () {
       const cards = this.cards.filter(card => card.isLocked)
+      return Boolean(cards.length === this.cards.length)
+    },
+    isComment () {
+      const cards = this.cards.filter(card => card.isComment)
       return Boolean(cards.length === this.cards.length)
     }
   },
@@ -201,6 +210,25 @@ export default {
       })
       this.$store.dispatch('currentCards/updateCardMap')
     },
+    toggleIsComment () {
+      let isComment = true
+      if (this.isComment) {
+        isComment = false
+      }
+      this.cards.forEach(card => {
+        card = {
+          id: card.id,
+          name: utils.nameWithoutCommentPattern(card.name),
+          isComment,
+          commentIsVisible: false
+        }
+        if (!card.name) {
+          delete card.name
+        }
+        this.$store.dispatch('currentCards/update', card)
+      })
+      this.$store.dispatch('currentCards/updateCardMap')
+    },
     prependToCards (pattern) {
       this.cards.forEach(card => {
         const name = this.normalizedName(card.name) || ''
@@ -254,10 +282,17 @@ export default {
 }
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 .card-style-actions
   padding 0
+  .row
+    display block
   .button-wrap
+    margin-left 0
+    margin-right 6px
     vertical-align middle
     margin-bottom 10px
+  &.last-row
+    margin-bottom -10px
+
 </style>

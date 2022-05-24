@@ -1,23 +1,35 @@
 <template lang="pug">
 section.filters
   .row
+    //- Users
     .button-wrap
       label.show-users(:class="{active: filterShowUsers}" @click.left.prevent="toggleFilterShowUsers" @keydown.stop.enter="toggleFilterShowUsers")
         input(type="checkbox" v-model="filterShowUsers")
         User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true" :isSmall="true")
+    //- Time
     .button-wrap
       label(:class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
         input(type="checkbox" v-model="filterShowDateUpdated")
         img.icon.time(src="@/assets/time.svg")
+    //- Todo
     .button-wrap
       label(:class="{active: filterUnchecked}" @click.left.prevent="toggleFilterUnchecked" @keydown.stop.enter="toggleFilterUnchecked")
         input(type="checkbox" v-model="filterUnchecked")
         span Todo
+    //- More Filters
     .button-wrap
       button(:class="{active: moreFiltersVisible, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreFiltersVisible")
         img.icon(src="@/assets/filter.svg")
         span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
       MoreFilters(:visible="moreFiltersVisible")
+  .row
+    //- Comments Hide
+    .button-wrap
+      label(:class="{active: filterComments}" @click.left.prevent="toggleFilterComments" @keydown.stop.enter="toggleFilterComments")
+        input(type="checkbox" v-model="filterComments")
+        img.icon.comment-icon(src="@/assets/comment.svg")
+        span Hide
+
 </template>
 
 <script>
@@ -56,27 +68,12 @@ export default {
       framesInUse = uniq(framesInUse.filter(frame => frame))
       return framesInUse.map(frame => frames[frame])
     },
-    totalFiltersActive () {
-      const currentUser = this.currentUser
-      let userFilters = 0
-      if (currentUser.filterShowUsers) {
-        userFilters += 1
-      }
-      if (currentUser.filterShowDateUpdated) {
-        userFilters += 1
-      }
-      if (currentUser.filterUnchecked) {
-        userFilters += 1
-      }
-      const tagNames = this.$store.state.filteredTagNames
-      const connections = this.$store.state.filteredConnectionTypeIds
-      const frames = this.$store.state.filteredFrameIds
-      return userFilters + tagNames.length + connections.length + frames.length
-    },
+    totalFiltersActive () { return this.$store.getters['currentUser/totalFiltersActive'] },
     currentUser () { return this.$store.state.currentUser },
     filterShowUsers () { return this.currentUser.filterShowUsers },
     filterShowDateUpdated () { return this.currentUser.filterShowDateUpdated },
-    filterUnchecked () { return this.currentUser.filterUnchecked }
+    filterUnchecked () { return this.currentUser.filterUnchecked },
+    filterComments () { return this.currentUser.filterComments }
   },
   methods: {
     toggleMoreFiltersVisible () {
@@ -96,6 +93,10 @@ export default {
     toggleFilterUnchecked () {
       const value = !this.filterUnchecked
       this.$store.dispatch('currentUser/toggleFilterUnchecked', value)
+    },
+    toggleFilterComments () {
+      const value = !this.filterComments
+      this.$store.dispatch('currentUser/toggleFilterComments', value)
     }
   }
 }
@@ -119,4 +120,6 @@ export default {
     dialog.more-filters
       left initial
       right 8px
+  .comment-icon
+    vertical-align -2px
 </style>
