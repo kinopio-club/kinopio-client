@@ -9,10 +9,10 @@
   },
   {
     "name": "Moderator",
-    "description": "Moderators maintain the community <a href='https://club.kinopio.club>forum</a> and <a href='https://discord.gg/h2sR45Nby8'>discord</a>"
+    "description": "Moderators maintain the community <a href='https://club.kinopio.club'>forum</a> and <a href='https://discord.gg/h2sR45Nby8'>discord</a>"
   },
   {
-    "name": "Guide Makers",
+    "name": "GuideMaker",
     "description": "Guide Makers have written helpful <a href='https://help.kinopio.club/guides/'>guides</a> about their spaces"
   }
 ]
