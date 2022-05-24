@@ -6,7 +6,7 @@
 //- Embed
 .space-users(v-else-if="isEmbed")
   .users
-    User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+    User(v-for="user in members" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
 //- Normal Space
 .space-users(v-else)
   .users.spectators
@@ -36,6 +36,9 @@ export default {
     currentUser () { return this.$store.state.currentUser },
     currentSpace () { return this.$store.state.currentSpace },
     currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    members () {
+      return this.currentSpace.users
+    },
     users () {
       let users = utils.clone(this.currentSpace.users)
       return users.filter(user => user.id !== this.currentUser.id)
