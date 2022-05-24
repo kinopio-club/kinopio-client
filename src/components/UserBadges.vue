@@ -55,7 +55,6 @@ export default {
 <style lang="stylus">
 .user-badges
   flex-wrap wrap
-  margin-top -10px
   .badge
     margin-top 10px
   .moderator

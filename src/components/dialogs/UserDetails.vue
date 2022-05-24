@@ -13,8 +13,6 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
         p(v-if="!websiteUrl") {{user.website}}
         a(:href="websiteUrl" v-if="websiteUrl")
           span {{user.website}}
-          button.inline-button
-            img.icon.visit.arrow-icon(src="@/assets/visit.svg")
     UserBadges(:user="user")
 
   //- Current User
