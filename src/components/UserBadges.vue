@@ -1,14 +1,17 @@
 <template lang="pug">
 .row.user-badges(v-if="isBadges")
-  .badge.button-badge.status(v-if="user.isSpectator" @click.stop="spectatorDescription" :class="{active: activeBadge === 'spectator'}")
+  .badge.button-badge.status(v-if="user.isSpectator" @click.stop="toggleDescription('Spectators')" :class="{active: name === 'Spectators'}")
     span Spectator
-  .badge.button-badge.success(v-if="user.isUpgraded" @click.stop="upgradedDescription" :class="{active: activeBadge === 'upgraded'}")
+  .badge.button-badge.success(v-if="user.isUpgraded" @click.stop="toggleDescription('Upgraded')" :class="{active: name === 'Upgraded'}")
     span Upgraded
 .row(v-if="description")
-  .badge.status {{description}}
+  .badge.status(v-html="description")
 </template>
 
 <script>
+
+import userBadges from '@/data/userBadges.json'
+
 export default {
   name: 'UserBadges',
   props: {
@@ -16,44 +19,23 @@ export default {
   },
   data () {
     return {
-      description: '',
-      activeBadge: ''
+      name: '',
+      description: ''
     }
   },
   computed: {
-    isBadges () { return this.user.isSpectator || this.user.isUpgraded },
-    spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
-    isCurrentUser () { return this.user.id === this.$store.state.currentUser.id }
+    isBadges () { return this.user.isSpectator || this.user.isUpgraded }
   },
   methods: {
-    toggleDescription (description, badge) {
-      if (this.description === description) {
+    toggleDescription (name) {
+      if (this.name === name) {
+        this.name = ''
         this.description = ''
-        this.activeBadge = ''
-      } else {
-        this.description = description
-        this.activeBadge = badge
+        return
       }
-    },
-    spectatorDescription () {
-      const badge = 'spectator'
-      let description
-      if (this.spacePrivacyIsOpen) {
-        description = 'Spectators can edit open spaces'
-      } else {
-        description = 'Spectators can view public spaces'
-      }
-      this.toggleDescription(description, badge)
-    },
-    upgradedDescription () {
-      const badge = 'upgraded'
-      let description
-      if (this.isCurrentUser) {
-        description = 'You can create unlimited cards – thanks for upgrading!'
-      } else {
-        description = 'Upgraded users can create unlimited cards'
-      }
-      this.toggleDescription(description, badge)
+      const badge = userBadges.find(userBadge => userBadge.name === name)
+      this.name = badge.name
+      this.description = badge.description
     }
   }
 }
