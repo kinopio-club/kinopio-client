@@ -289,7 +289,7 @@ export default {
     async searchBing () {
       let url = new URL('https://api.bing.microsoft.com/v7.0/images/search')
       const headers = new Headers({
-        'Ocp-Apim-Subscription-Key': 'ce6e720f52f84cc490885ec6cbb56dce'
+        'Ocp-Apim-Subscription-Key': '1b8fd229ada041c59701469809a34bf4'
       })
       const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
       const defaultSearch = sample(defaultSearches)
