@@ -20,6 +20,8 @@ self.onmessage = function (event) {
 
 // based on utils.isCardInViewport
 const isCardInViewport = (card, viewport) => {
+  viewport.width = viewport.width * 2
+  viewport.height = viewport.height * 2
   // x
   const isStartInViewportX = card.x > viewport.pageLeft || card.x + card.width > viewport.pageLeft
   const isEndInViewportX = card.x < viewport.pageLeft + viewport.width
