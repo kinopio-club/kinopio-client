@@ -12,11 +12,11 @@
   OffscreenMarkers
   //- router-view is Space or Add
   router-view
-  Minimap
   Header
   Footer
   TagDetails
   LinkDetails
+  Minimap
   WindowHistoryHandler
   KeyboardShortcutsHandler
   .preload

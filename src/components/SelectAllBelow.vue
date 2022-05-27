@@ -38,6 +38,7 @@ export default {
     },
     handleMouseMove (event) {
       if (!this.canEditSpace) { return }
+      if (this.$store.state.minimapIsVisible) { return }
       const edgeThreshold = 45
       const header = document.querySelector('header').getBoundingClientRect().height + 10
       const footer = document.querySelector('.footer-wrap').getBoundingClientRect().height + 10
