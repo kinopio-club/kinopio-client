@@ -101,7 +101,7 @@ export default {
         value = !value
         this.$store.dispatch('currentUser/toggleFilterComments', value)
       } else if (key === ' ' && isSpaceScope) {
-        this.$store.commit('currentUserIsPanningReady', false)
+        this.$store.commit('minimapIsVisible', false)
       }
     },
     // on key down
@@ -189,11 +189,11 @@ export default {
         }
         event.preventDefault()
         this.$store.commit('triggerSpaceZoomIn')
-      // Panning
+      // Minimap
       } else if (key === ' ' && isSpaceScope) {
         event.preventDefault()
-        if (!this.$store.state.currentUserIsPanningReady) {
-          this.$store.commit('currentUserIsPanningReady', true)
+        if (!this.$store.state.minimapIsVisible) {
+          this.$store.commit('minimapIsVisible', true)
         }
       // Lock Cards
       } else if (event.shiftKey && isMeta && key === 'l') {

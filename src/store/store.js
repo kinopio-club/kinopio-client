@@ -70,6 +70,9 @@ const store = createStore({
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
 
+    // minimap
+    minimapIsVisible: false,
+
     // box selecting
     currentUserIsBoxSelecting: false,
     currentUserBoxSelectStart: {},
@@ -564,6 +567,13 @@ const store = createStore({
     updateRemoteUserResizingCards: (state, update) => {
       state.remoteUserResizingCards = state.remoteUserResizingCards.filter(remoteUser => remoteUser.userId !== update.userId)
       state.remoteUserResizingCards = state.remoteUserResizingCards.concat(update)
+    },
+
+    // Minimap
+
+    minimapIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'minimapIsVisible' })
+      state.minimapIsVisible = value
     },
 
     // Dragging
