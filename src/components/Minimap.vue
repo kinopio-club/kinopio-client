@@ -1,11 +1,14 @@
 <template lang="pug">
-.overlay.minimap(v-if="isVisible" @click="closeAllDialogs")
+.overlay.minimap(v-if="isVisible" @click="scrollTo" @pointerup="endPanningViewport" :style="overlayStyle")
   .overlay-background(:style="overlayBackgroundStyle")
-  .viewport(:style="viewportStyle")
+  .viewport(:style="viewportStyle" @pointerdown="startPanningViewport")
     .viewport-header(:style="viewportHeaderStyle")
   .cards(:style="cardsStyle")
     template(v-for="card in cards")
       .card(:style="cardStyle(card)" :data-card-minimap-id="card.id")
+  //- template(v-for="user in spaceMembers")
+    //- UserLabel(:user="user") // see Space.vue
+
 </template>
 
 <script>
@@ -17,66 +20,95 @@ export default {
   name: 'ComponentName',
   components: {
   },
-  // created () {
-  //   this.$store.subscribe((mutation, state) => {
-  //     if (mutation.type === 'closeAllDialogs') {
-  //       this.closeAllDialogs()
-  //     }
-  //   })
-  // },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerUpdateRemoteUserCursor') {
+        this.updateRemoteCursors()
+      }
+    })
+  },
   mounted () {
     window.addEventListener('scroll', this.updateViewport)
+    window.addEventListener('mousemove', this.moveViewport)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateViewport)
+    window.removeEventListener('mousemove', this.moveViewport)
   },
   data () {
     return {
       boundary: {},
       scale: 1,
       cards: [],
-      viewport: {}
-      // cursors: {}, todo remote and local
+      viewport: {},
+      isPanningViewport: false,
+      cursor: null
     }
   },
   computed: {
     isVisible () { return this.$store.state.minimapIsVisible },
+    spaceMembers () {
+      const excludeCurrentUser = true
+      return this.$store.getters['currentSpace/members'](excludeCurrentUser)
+    },
+
+    overlayStyle () {
+      return { cursor: this.cursor }
+    },
+
     overlayBackgroundStyle () {
       const backgroundColor = this.$store.state.currentSpace.backgroundTint
-      return { backgroundColor }
+      return {
+        backgroundColor,
+        cursor: this.cursor
+      }
     },
     cardsStyle () {
       return {
-        transform: `scale(${this.scale})`
+        transform: `scale(${this.scale})`,
+        cursor: this.cursor
       }
     },
     viewportStyle () {
       // const borderRadius = 5
       // const borderWidth = 4
-      console.log('🌈', this.viewport)
       return {
         borderColor: this.viewport.color,
         // transform: `scale(${this.scale})`,
         left: this.viewport.left * this.scale + 'px',
         top: this.viewport.top * this.scale + 'px',
         width: this.viewport.width * this.scale + 'px',
-        height: this.viewport.height * this.scale + 'px'
+        height: this.viewport.height * this.scale + 'px',
+        cursor: this.cursor
         // borderRadius: Math.round(borderRadius / this.scale) + 'px'
       }
     },
     viewportHeaderStyle () {
       return {
-        backgroundColor: this.viewport.color
+        backgroundColor: this.viewport.color,
+        cursor: this.cursor
       }
     }
   },
   methods: {
+    startPanningViewport () {
+      this.isPanningViewport = true
+      this.cursor = 'grabbing'
+    },
+    endPanningViewport () {
+      this.isPanningViewport = false
+      this.cursor = null
+    },
+    moveViewport () {
+      if (!this.isVisible) { return }
+      if (!this.isPanningViewport) { return }
+      console.log('🚛 is panning vp') // todo
+    },
     update () {
       this.updateBoundary()
       this.updateScale()
       this.updateViewport()
       this.updateCards()
-      console.log('🍅', this.boundary, this.scale, this.cards)
     },
     updateBoundary () {
       const cards = this.$store.getters['currentCards/all']
@@ -141,18 +173,36 @@ export default {
         left: card.x + 'px',
         top: card.y + 'px',
         backgroundColor: card.backgroundColor,
-        borderRadius: Math.round(borderRadius / this.scale) + 'px'
+        borderRadius: Math.round(borderRadius / this.scale) + 'px',
+        cursor: this.cursor
       }
       return position
     },
-    closeAllDialogs () {
+    scrollTo (event) {
       this.$store.dispatch('closeAllDialogs', 'minimap')
+      const viewportWidth = this.$store.state.viewportWidth
+      const viewportHeight = this.$store.state.viewportHeight
+      let position = {
+        x: event.clientX / this.scale,
+        y: event.clientY / this.scale
+      }
+      let scrollTo = {
+        x: position.x - (viewportWidth / 2),
+        y: position.y - (viewportHeight / 2)
+      }
+      scrollTo = {
+        left: Math.max(0, scrollTo.x),
+        top: Math.max(0, scrollTo.y),
+        behavior: 'smooth'
+      }
+      // const shouldCancel = window.scrollX === scrollTo.left && window.scrollY && scrollTo.top
+      // if (shouldCancel) { return }
+      window.scrollTo(scrollTo)
     }
   },
   watch: {
     isVisible (value) {
       if (value) {
-        // this.closeAllDialogs()
         this.update()
       }
     }
@@ -168,6 +218,7 @@ export default {
   left 0
   width 100vw
   height 100vh
+  cursor pointer
   .overlay-background
     background-color var(--primary-background)
     opacity 0.8
@@ -185,6 +236,7 @@ export default {
     border 1px solid
     border-radius 5px
     z-index 1
+    cursor grab
     .viewport-header
       height 10px
       border-top-left-radius 3px
