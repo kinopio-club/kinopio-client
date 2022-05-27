@@ -11,10 +11,6 @@ export default {
   props: {
     visible: Boolean
   },
-  data () {
-    return {
-    }
-  },
   created () {
   //   this.$store.subscribe((mutation, state) => {
   //     if (mutation.type === 'closeAllDialogs') {
@@ -25,6 +21,10 @@ export default {
   mounted () {
   },
   beforeUnmount () {
+  },
+  data () {
+    return {
+    }
   },
   computed: {
     // kinopioDomain () { return utils.kinopioDomain() },

@@ -12,6 +12,7 @@
   OffscreenMarkers
   //- router-view is Space or Add
   router-view
+  Minimap
   Header
   Footer
   TagDetails
@@ -38,6 +39,7 @@ import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
+import Minimap from '@/components/Minimap.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -51,7 +53,8 @@ export default {
     WindowHistoryHandler,
     TagDetails,
     LinkDetails,
-    OffscreenMarkers
+    OffscreenMarkers,
+    Minimap
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
