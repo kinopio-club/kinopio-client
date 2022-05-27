@@ -1,13 +1,13 @@
 <template lang="pug">
-.overlay(v-if="isVisible")
+.overlay.minimap(v-if="isVisible" @click="closeAllDialogs")
   .background(:style="overlayBackgroundStyle")
-  .card
-//- .minimap(v-if="isVisible")
-//-   p blank template, please duplicate
+  template(v-for="card in cards")
+    .card(:style="cardPosition(card)" :data-card-minimap-id="card.id")
 </template>
 
 <script>
-// const padding = 100
+const padding = 100
+const maxScale = 0.4
 
 export default {
   name: 'ComponentName',
@@ -26,7 +26,7 @@ export default {
   data () {
     return {
       boundary: {},
-      multiplier: 1,
+      scale: 1,
       cards: []
       // cursorPosition: {},
     }
@@ -41,10 +41,10 @@ export default {
   methods: {
     update () {
       this.updateBoundary()
-      this.updateMultiplier()
+      this.updateScale()
       // this.updateViewportBoundary()
       this.updateCards()
-      console.log('🍅', this.boundary, this.multiplier, this.cards)
+      console.log('🍅', this.boundary, this.scale, this.cards)
     },
     updateBoundary () {
       const cards = this.$store.getters['currentCards/all']
@@ -62,26 +62,41 @@ export default {
       })
       this.boundary = { width, height }
     },
-    updateMultiplier () {
+    updateScale () {
       const viewportWidth = this.$store.state.viewportWidth
       const viewportHeight = this.$store.state.viewportHeight
-      const multiplierX = viewportWidth / this.boundary.width
-      const multiplierY = viewportHeight / this.boundary.height
-      let multiplier = Math.min(multiplierX, multiplierY)
-      this.multiplier = multiplier
+      const scaleX = viewportWidth / this.boundary.width
+      const scaleY = viewportHeight / this.boundary.height
+      let scale = Math.min(scaleX, scaleY)
+      scale = Math.min(scale, maxScale)
+      this.scale = scale
     },
     updateCards () {
       let cards = this.$store.getters['currentCards/all']
       cards = cards.map(card => {
         return {
           id: card.id,
-          x: Math.round(card.x * this.multiplier),
-          y: Math.round(card.y * this.multiplier),
-          width: Math.round(card.width * this.multiplier),
-          height: Math.round(card.height * this.multiplier)
+          x: Math.round(card.x * this.scale),
+          y: Math.round(card.y * this.scale),
+          width: Math.round(card.width * this.scale),
+          height: Math.round(card.height * this.scale),
+          backgroundColor: card.backgroundColor
         }
       })
       this.cards = cards
+    },
+    cardPosition (card) {
+      const position = {
+        width: card.width + 'px',
+        height: card.height + 'px',
+        left: card.x + padding + 'px',
+        top: card.y + padding + 'px',
+        backgroundColor: card.backgroundColor
+      }
+      return position
+    },
+    closeAllDialogs () {
+      this.$store.dispatch('closeAllDialogs', 'minimap')
     }
   },
   watch: {
@@ -95,7 +110,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.overlay,
+.overlay.minimap,
 .background
   position fixed
   top 0
@@ -107,10 +122,6 @@ export default {
     opacity 0.8
   .card
     position absolute
-    width 100px
-    height 50px
-    top 100px
-    left 100px
     border-radius 3px
-    background-color #e3e3e3
+    background-color var(--secondary-background)
 </style>
