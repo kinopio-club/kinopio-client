@@ -1,9 +1,11 @@
 <template lang="pug">
 .overlay.minimap(v-if="isVisible" @click="closeAllDialogs")
   .overlay-background(:style="overlayBackgroundStyle")
-  .cards(:style="position")
+  .viewport(:style="viewportStyle")
+    .viewport-header(:style="viewportHeaderStyle")
+  .cards(:style="cardsStyle")
     template(v-for="card in cards")
-      .card(:style="cardPosition(card)" :data-card-minimap-id="card.id")
+      .card(:style="cardStyle(card)" :data-card-minimap-id="card.id")
 </template>
 
 <script>
@@ -22,9 +24,12 @@ export default {
   //     }
   //   })
   // },
-  // mounted () {
-  // this.update()
-  // },
+  mounted () {
+    window.addEventListener('scroll', this.updateViewport)
+  },
+  beforeUnmount () {
+    window.removeEventListener('scroll', this.updateViewport)
+  },
   data () {
     return {
       boundary: {},
@@ -40,9 +45,28 @@ export default {
       const backgroundColor = this.$store.state.currentSpace.backgroundTint
       return { backgroundColor }
     },
-    position () {
+    cardsStyle () {
       return {
         transform: `scale(${this.scale})`
+      }
+    },
+    viewportStyle () {
+      // const borderRadius = 5
+      // const borderWidth = 4
+      console.log('🌈', this.viewport)
+      return {
+        borderColor: this.viewport.color,
+        // transform: `scale(${this.scale})`,
+        left: this.viewport.left * this.scale + 'px',
+        top: this.viewport.top * this.scale + 'px',
+        width: this.viewport.width * this.scale + 'px',
+        height: this.viewport.height * this.scale + 'px'
+        // borderRadius: Math.round(borderRadius / this.scale) + 'px'
+      }
+    },
+    viewportHeaderStyle () {
+      return {
+        backgroundColor: this.viewport.color
       }
     }
   },
@@ -81,6 +105,7 @@ export default {
       this.scale = scale
     },
     updateViewport () {
+      if (!this.isVisible) { return }
       const color = this.$store.state.currentUser.color
       let width = this.$store.state.viewportWidth
       let height = this.$store.state.viewportHeight
@@ -93,7 +118,6 @@ export default {
         left: x,
         top: y
       }
-      // todo update on scroll
     },
     updateCards () {
       let cards = this.$store.getters['currentCards/all']
@@ -109,7 +133,7 @@ export default {
       })
       this.cards = cards
     },
-    cardPosition (card) {
+    cardStyle (card) {
       const borderRadius = 1.2
       const position = {
         width: card.width + 'px',
@@ -151,7 +175,20 @@ export default {
     position absolute
     left 0
     padding 20px
+    opacity 0.9
   .card
     position absolute
     background-color var(--secondary-background)
+  .viewport
+    position absolute
+    transform-origin top left
+    border 1px solid
+    border-radius 5px
+    z-index 1
+    .viewport-header
+      height 10px
+      border-top-left-radius 3px
+      border-top-right-radius 3px
+      z-index 1
+
 </style>

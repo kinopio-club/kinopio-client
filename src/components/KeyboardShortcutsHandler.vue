@@ -101,7 +101,7 @@ export default {
         value = !value
         this.$store.dispatch('currentUser/toggleFilterComments', value)
       } else if (key === ' ' && isSpaceScope) {
-        this.$store.commit('minimapIsVisible', false)
+        // this.$store.commit('minimapIsVisible', false)
       }
     },
     // on key down
