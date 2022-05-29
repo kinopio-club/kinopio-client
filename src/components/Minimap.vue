@@ -5,7 +5,7 @@
     .viewport(:style="viewportStyle" @pointerdown="startPanningViewport" :class="{ blink: !isPanningViewport }")
     .viewport-top(:style="viewportChildStyle" @pointerdown="startPanningViewport")
     .viewport-background(:style="viewportChildStyle")
-  .cards(:style="cardsStyle")
+  .cards-wrap
     template(v-for="card in cards")
       .card(:style="cardStyle(card)" :data-card-minimap-id="card.id")
   //- template(v-for="user in spaceMembers")
@@ -62,12 +62,6 @@ export default {
       const backgroundColor = this.$store.state.currentSpace.backgroundTint
       return {
         backgroundColor,
-        cursor: this.cursor
-      }
-    },
-    cardsStyle () {
-      return {
-        transform: `scale(${this.scale})`,
         cursor: this.cursor
       }
     },
@@ -173,14 +167,12 @@ export default {
       this.cards = cards
     },
     cardStyle (card) {
-      const borderRadius = 1.2
+      const offset = 10 // .cards margin / 2
       const position = {
-        width: card.width + 'px',
-        height: card.height + 'px',
-        left: card.x + 'px',
-        top: card.y + 'px',
-        backgroundColor: card.backgroundColor,
-        borderRadius: Math.round(borderRadius / this.scale) + 'px',
+        width: `${card.width * this.scale}px`,
+        height: `${card.height * this.scale}px`,
+        left: `${card.x * this.scale - offset}px`,
+        top: `${card.y * this.scale - offset}px`,
         cursor: this.cursor
       }
       return position
@@ -228,14 +220,15 @@ export default {
   .overlay-background
     background-color var(--primary-background)
     opacity 0.8
-  .cards
+  .cards-wrap
     position absolute
     left 0
-    padding 20px
+    margin 20px
     opacity 0.9
   .card
     position absolute
     background-color var(--secondary-background)
+    border-radius 1px
   .viewport-wrap
     position absolute
     &:hover
