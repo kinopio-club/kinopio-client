@@ -1,10 +1,10 @@
 <template lang="pug">
 .overlay.minimap(v-if="isVisible" @click="scrollTo" @pointerup="endPanningViewport" :style="overlayStyle")
   .overlay-background(:style="overlayBackgroundStyle")
-  .viewport-wrap
+  .viewport-wrap(:style="viewportWrapStyle")
     .viewport(:style="viewportStyle" @pointerdown="startPanningViewport" :class="{ blink: !isPanningViewport }")
-    .viewport-header(:style="viewportHeaderStyle" @pointerdown="startPanningViewport")
-    .viewport-background(:style="viewportBackgroundStyle")
+    .viewport-header(:style="viewportChildStyle" @pointerdown="startPanningViewport")
+    .viewport-background(:style="viewportChildStyle")
   .cards(:style="cardsStyle")
     template(v-for="card in cards")
       .card(:style="cardStyle(card)" :data-card-minimap-id="card.id")
@@ -75,31 +75,22 @@ export default {
     viewportTop () { return this.viewport.top * this.scale },
     viewportWidth () { return this.viewport.width * this.scale },
     viewportHeight () { return this.viewport.height * this.scale },
-    viewportStyle () {
+    viewportWrapStyle () {
       return {
         left: `${this.viewportLeft}px`,
         top: `${this.viewportTop}px`,
         width: `${this.viewportWidth}px`,
-        height: `${this.viewportHeight}px`,
+        height: `${this.viewportHeight}px`
+      }
+    },
+    viewportStyle () {
+      return {
         borderColor: this.viewport.color,
         cursor: this.cursor
       }
     },
-    viewportHeaderStyle () {
+    viewportChildStyle () {
       return {
-        left: `${this.viewportLeft}px`,
-        top: `${this.viewportTop}px`,
-        width: `${this.viewportWidth}px`,
-        backgroundColor: this.viewport.color,
-        cursor: this.cursor
-      }
-    },
-    viewportBackgroundStyle () {
-      return {
-        left: `${this.viewportLeft}px`,
-        top: `${this.viewportTop}px`,
-        width: `${this.viewportWidth}px`,
-        height: `${this.viewportHeight}px`,
         backgroundColor: this.viewport.color,
         cursor: this.cursor
       }
@@ -245,15 +236,23 @@ export default {
     position absolute
     background-color var(--secondary-background)
   .viewport-wrap
+    position absolute
     &:hover
       .viewport-header
         height 14px
+  .viewport,
+  .viewport-header,
+  .viewport-background
+    top 0
+    left 0
+    width 100%
+    height 100%
+    z-index 1
   .viewport
     position absolute
     transform-origin top left
     border 2px solid
     border-radius 5px
-    z-index 1
     cursor grab
     &:hover
       box-shadow var(--active-shadow)
@@ -265,12 +264,10 @@ export default {
     height 12px
     border-top-left-radius 5px
     border-top-right-radius 5px
-    z-index 1
     cursor grab
     &:hover
       height 14px
   .viewport-background
-    z-index 1
     position absolute
     opacity 0.3
     pointer-events none
