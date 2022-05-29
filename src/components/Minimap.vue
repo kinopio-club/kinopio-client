@@ -7,7 +7,7 @@
     .viewport-background(:style="viewportChildStyle")
   .cards-wrap
     template(v-for="card in cards")
-      .card(:style="cardStyle(card)" :data-card-minimap-id="card.id")
+      .card(:style="cardStyle(card)" :class="{ 'transparent-background': card.imageUrl }" :data-card-minimap-id="card.id")
   //- template(v-for="user in spaceMembers")
     //- UserLabel(:user="user") // see Space.vue
 
@@ -152,28 +152,46 @@ export default {
         top: y
       }
     },
+    imageUrlFromCard (card) {
+      const imageUrlIsUrlPreview = card.urlPreviewImage && card.urlPreviewIsVisible
+      if (imageUrlIsUrlPreview) {
+        return card.urlPreviewImage
+      }
+      const urls = utils.urlsFromString(card.name)
+      if (urls) {
+        return urls.find(url => utils.urlIsImage(url))
+      }
+    },
     updateCards () {
       let cards = this.$store.getters['currentCards/all']
       cards = cards.map(card => {
+        const imageUrl = this.imageUrlFromCard(card)
         return {
           id: card.id,
           x: Math.round(card.x),
           y: Math.round(card.y),
           width: Math.round(card.width),
           height: Math.round(card.height),
-          backgroundColor: card.backgroundColor
+          backgroundColor: card.backgroundColor,
+          imageUrl
         }
       })
       this.cards = cards
     },
     cardStyle (card) {
       const offset = 10 // .cards margin / 2
+      let backgroundImage
+      if (card.imageUrl) {
+        backgroundImage = `url('${card.imageUrl}')`
+      }
       const position = {
-        width: `${card.width * this.scale}px`,
-        height: `${card.height * this.scale}px`,
-        left: `${card.x * this.scale - offset}px`,
-        top: `${card.y * this.scale - offset}px`,
-        cursor: this.cursor
+        width: `${Math.round(card.width * this.scale)}px`,
+        height: `${Math.round(card.height * this.scale)}px`,
+        left: `${Math.round(card.x * this.scale - offset)}px`,
+        top: `${Math.round(card.y * this.scale - offset)}px`,
+        cursor: this.cursor,
+        backgroundColor: card.backgroundColor,
+        backgroundImage
       }
       return position
     },
@@ -229,6 +247,9 @@ export default {
     position absolute
     background-color var(--secondary-background)
     border-radius 1px
+    background-size cover
+    &.transparent-background
+      background-color transparent !important
   .viewport-wrap
     position absolute
     &:hover
