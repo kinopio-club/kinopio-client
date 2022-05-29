@@ -70,23 +70,26 @@ export default {
         cursor: this.cursor
       }
     },
+    viewportLeft () { return this.viewport.left * this.scale },
+    viewportTop () { return this.viewport.top * this.scale },
+    viewportWidth () { return this.viewport.width * this.scale },
+    viewportHeight () { return this.viewport.height * this.scale },
     viewportStyle () {
-      // const borderRadius = 5
-      // const borderWidth = 4
       return {
         borderColor: this.viewport.color,
-        // transform: `scale(${this.scale})`,
-        left: this.viewport.left * this.scale + 'px',
-        top: this.viewport.top * this.scale + 'px',
-        width: this.viewport.width * this.scale + 'px',
-        height: this.viewport.height * this.scale + 'px',
+        left: this.viewportLeft + 'px',
+        top: this.viewportTop + 'px',
+        width: this.viewportWidth + 'px',
+        height: this.viewportHeight + 'px',
         cursor: this.cursor
-        // borderRadius: Math.round(borderRadius / this.scale) + 'px'
       }
     },
     viewportHeaderStyle () {
       return {
         backgroundColor: this.viewport.color,
+        left: (this.viewportLeft - 1) + 'px',
+        top: (this.viewportTop - 1) + 'px',
+        width: (this.viewportWidth - 2) + 'px',
         cursor: this.cursor
       }
     }
@@ -233,7 +236,7 @@ export default {
   .viewport
     position absolute
     transform-origin top left
-    border 1px solid
+    border 2px solid
     border-radius 5px
     z-index 1
     cursor grab
@@ -242,9 +245,9 @@ export default {
     &:active
       box-shadow var(--active-shadow)
     .viewport-header
-      height 10px
-      border-top-left-radius 3px
-      border-top-right-radius 3px
+      height 12px
+      border-top-left-radius 2px
+      border-top-right-radius 2px
       z-index 1
 
 </style>
