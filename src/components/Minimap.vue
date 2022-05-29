@@ -3,7 +3,7 @@
   .overlay-background(:style="overlayBackgroundStyle")
   .viewport-wrap(:style="viewportWrapStyle")
     .viewport(:style="viewportStyle" @pointerdown="startPanningViewport" :class="{ blink: !isPanningViewport }")
-    .viewport-header(:style="viewportChildStyle" @pointerdown="startPanningViewport")
+    .viewport-top(:style="viewportChildStyle" @pointerdown="startPanningViewport")
     .viewport-background(:style="viewportChildStyle")
   .cards(:style="cardsStyle")
     template(v-for="card in cards")
@@ -239,10 +239,10 @@ export default {
   .viewport-wrap
     position absolute
     &:hover
-      .viewport-header
+      .viewport-top
         height 12px
   .viewport,
-  .viewport-header,
+  .viewport-top,
   .viewport-background
     top 0
     left 0
@@ -260,11 +260,11 @@ export default {
       animation none
     &:active
       box-shadow 8px 8px 0 var(--light-shadow)
-  .viewport-header
+  .viewport-top
     position absolute
     height 10px
-    border-top-left-radius 3px
-    border-top-right-radius 3px
+    border-top-left-radius 2px
+    border-top-right-radius 2px
     cursor grab
     left 2px
     top 2px
