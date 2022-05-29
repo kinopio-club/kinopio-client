@@ -76,20 +76,20 @@ export default {
     viewportHeight () { return this.viewport.height * this.scale },
     viewportStyle () {
       return {
+        left: `${this.viewportLeft}px`,
+        top: `${this.viewportTop}px`,
+        width: `${this.viewportWidth}px`,
+        height: `${this.viewportHeight}px`,
         borderColor: this.viewport.color,
-        left: this.viewportLeft + 'px',
-        top: this.viewportTop + 'px',
-        width: this.viewportWidth + 'px',
-        height: this.viewportHeight + 'px',
         cursor: this.cursor
       }
     },
     viewportHeaderStyle () {
       return {
+        left: `${this.viewportLeft - 1}px`,
+        top: `${this.viewportTop - 1}px`,
+        width: `${this.viewportWidth - 2}px`,
         backgroundColor: this.viewport.color,
-        left: (this.viewportLeft - 1) + 'px',
-        top: (this.viewportTop - 1) + 'px',
-        width: (this.viewportWidth - 2) + 'px',
         cursor: this.cursor
       }
     }
