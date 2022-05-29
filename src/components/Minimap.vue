@@ -1,9 +1,9 @@
 <template lang="pug">
 .overlay.minimap(v-if="isVisible" @click="scrollTo" @pointerup="endPanningViewport" :style="overlayStyle")
   .overlay-background(:style="overlayBackgroundStyle")
-  .viewport(:style="viewportStyle" @pointerdown="startPanningViewport")
-    //- :class="{ jiggle: isPanningViewport }"
-    .viewport-header(:style="viewportHeaderStyle")
+  .viewport-wrap
+    .viewport(:style="viewportStyle" @pointerdown="startPanningViewport" :class="{ blink: !isPanningViewport }")
+    .viewport-header(:style="viewportHeaderStyle" @pointerdown="startPanningViewport")
   .cards(:style="cardsStyle")
     template(v-for="card in cards")
       .card(:style="cardStyle(card)" :data-card-minimap-id="card.id")
@@ -86,9 +86,9 @@ export default {
     },
     viewportHeaderStyle () {
       return {
-        left: `${this.viewportLeft - 1}px`,
-        top: `${this.viewportTop - 1}px`,
-        width: `${this.viewportWidth - 2}px`,
+        left: `${this.viewportLeft}px`,
+        top: `${this.viewportTop}px`,
+        width: `${this.viewportWidth}px`,
         backgroundColor: this.viewport.color,
         cursor: this.cursor
       }
@@ -233,6 +233,10 @@ export default {
   .card
     position absolute
     background-color var(--secondary-background)
+  .viewport-wrap
+    &:hover
+      .viewport-header
+        height 14px
   .viewport
     position absolute
     transform-origin top left
@@ -241,13 +245,29 @@ export default {
     z-index 1
     cursor grab
     &:hover
-      box-shadow var(--hover-shadow)
-    &:active
       box-shadow var(--active-shadow)
-    .viewport-header
-      height 12px
-      border-top-left-radius 2px
-      border-top-right-radius 2px
-      z-index 1
+      animation none
+    &:active
+      box-shadow 8px 8px 0 var(--light-shadow)
+  .viewport-header
+    position absolute
+    height 12px
+    border-top-left-radius 5px
+    border-top-right-radius 5px
+    z-index 1
+    cursor grab
+    &:hover
+      height 14px
+  .blink
+    animation-duration 0.2s
+    animation-name blink
+    animation-iteration-count infinite
+    animation-direction alternate
+    animation-timing-function ease-out
 
+@keyframes blink
+  0%
+    opacity 1
+  100%
+    opacity 0.6
 </style>
