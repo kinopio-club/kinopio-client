@@ -4,6 +4,7 @@
   .viewport-wrap
     .viewport(:style="viewportStyle" @pointerdown="startPanningViewport" :class="{ blink: !isPanningViewport }")
     .viewport-header(:style="viewportHeaderStyle" @pointerdown="startPanningViewport")
+    .viewport-background(:style="viewportBackgroundStyle")
   .cards(:style="cardsStyle")
     template(v-for="card in cards")
       .card(:style="cardStyle(card)" :data-card-minimap-id="card.id")
@@ -89,6 +90,16 @@ export default {
         left: `${this.viewportLeft}px`,
         top: `${this.viewportTop}px`,
         width: `${this.viewportWidth}px`,
+        backgroundColor: this.viewport.color,
+        cursor: this.cursor
+      }
+    },
+    viewportBackgroundStyle () {
+      return {
+        left: `${this.viewportLeft}px`,
+        top: `${this.viewportTop}px`,
+        width: `${this.viewportWidth}px`,
+        height: `${this.viewportHeight}px`,
         backgroundColor: this.viewport.color,
         cursor: this.cursor
       }
@@ -258,13 +269,20 @@ export default {
     cursor grab
     &:hover
       height 14px
-  .blink
-    animation-duration 0.2s
-    animation-name blink
-    animation-iteration-count infinite
-    animation-direction alternate
-    animation-timing-function ease-out
+  .viewport-background
+    z-index 1
+    position absolute
+    opacity 0.3
+    pointer-events none
+    border-radius 5px
+    mix-blend-mode multiply
 
+.blink
+  animation-duration 0.2s
+  animation-name blink
+  animation-iteration-count infinite
+  animation-direction alternate
+  animation-timing-function ease-out
 @keyframes blink
   0%
     opacity 1
