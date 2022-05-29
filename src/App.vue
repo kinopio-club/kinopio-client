@@ -22,7 +22,7 @@
   .preload
     .logo-hover
     .logo-active
-  .badge.label-badge.development(v-if="isDevelopment") DEV
+  .badge.label-badge.development-badge(v-if="isDevelopment") DEV
   //- pre-cached icons
   .icons.hidden
     img.icon(src="@/assets/offline.svg")
@@ -291,12 +291,12 @@ body
 .app
   background-image url('assets/background-2x.png')
   position relative
-  > .label-badge
+  > .development-badge
     color var(--primary-background)
     min-height initial
     left initial
-    right 10px
-    bottom 60px
+    right 0px
+    bottom 80px
     position fixed
     pointer-events none
     z-index 100

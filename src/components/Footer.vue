@@ -34,8 +34,9 @@
               span Tips
             MobileTips(:visible="mobileTipsIsVisible")
 
-  .right(v-if="!isMobileOrTouch" :class="{'is-embed': isEmbed}")
-    SpaceZoom
+  .right(:class="{'is-embed': isEmbed}")
+    button(@click="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }") MM
+    SpaceZoom(v-if="!isMobileOrTouch")
 </template>
 
 <script>
@@ -120,6 +121,7 @@ export default {
     clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
+    minimapIsVisible () { return this.$store.state.minimapIsVisible },
     isAddPage () { return this.$store.state.isAddPage },
     isEmbed () { return this.$store.state.isEmbed },
     currentUser () { return this.$store.state.currentUser },
@@ -178,6 +180,10 @@ export default {
     }
   },
   methods: {
+    toggleMinimapIsVislble () {
+      this.closeDialogs()
+      this.$store.commit('minimapIsVisible', !this.minimapIsVisible)
+    },
     closeDialogs (exclude) {
       this.favoritesIsVisible = false
       this.exploreIsVisible = false
@@ -380,8 +386,7 @@ export default {
   pointer-events none
   .right
     pointer-events all
-    @media(max-width 460px)
-     display none
+    text-align right
     &.is-embed
       position absolute
       right 0
