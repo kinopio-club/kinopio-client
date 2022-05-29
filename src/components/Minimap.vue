@@ -2,6 +2,7 @@
 .overlay.minimap(v-if="isVisible" @click="scrollTo" @pointerup="endPanningViewport" :style="overlayStyle")
   .overlay-background(:style="overlayBackgroundStyle")
   .viewport(:style="viewportStyle" @pointerdown="startPanningViewport")
+    //- :class="{ jiggle: isPanningViewport }"
     .viewport-header(:style="viewportHeaderStyle")
   .cards(:style="cardsStyle")
     template(v-for="card in cards")
@@ -29,11 +30,11 @@ export default {
   },
   mounted () {
     window.addEventListener('scroll', this.updateViewport)
-    window.addEventListener('mousemove', this.moveViewport)
+    window.addEventListener('mousemove', this.panViewport)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateViewport)
-    window.removeEventListener('mousemove', this.moveViewport)
+    window.removeEventListener('mousemove', this.panViewport)
   },
   data () {
     return {
@@ -91,7 +92,7 @@ export default {
     }
   },
   methods: {
-    startPanningViewport () {
+    startPanningViewport (event) {
       this.isPanningViewport = true
       this.cursor = 'grabbing'
     },
@@ -99,10 +100,10 @@ export default {
       this.isPanningViewport = false
       this.cursor = null
     },
-    moveViewport () {
+    panViewport (event) {
       if (!this.isVisible) { return }
       if (!this.isPanningViewport) { return }
-      console.log('🚛 is panning vp') // todo
+      this.scrollTo(event, 'auto')
     },
     update () {
       this.updateBoundary()
@@ -178,7 +179,8 @@ export default {
       }
       return position
     },
-    scrollTo (event) {
+    scrollTo (event, behavior) {
+      behavior = behavior || 'smooth'
       this.$store.dispatch('closeAllDialogs', 'minimap')
       const viewportWidth = this.$store.state.viewportWidth
       const viewportHeight = this.$store.state.viewportHeight
@@ -193,10 +195,8 @@ export default {
       scrollTo = {
         left: Math.max(0, scrollTo.x),
         top: Math.max(0, scrollTo.y),
-        behavior: 'smooth'
+        behavior
       }
-      // const shouldCancel = window.scrollX === scrollTo.left && window.scrollY && scrollTo.top
-      // if (shouldCancel) { return }
       window.scrollTo(scrollTo)
     }
   },
@@ -237,6 +237,10 @@ export default {
     border-radius 5px
     z-index 1
     cursor grab
+    &:hover
+      box-shadow var(--hover-shadow)
+    &:active
+      box-shadow var(--active-shadow)
     .viewport-header
       height 10px
       border-top-left-radius 3px
