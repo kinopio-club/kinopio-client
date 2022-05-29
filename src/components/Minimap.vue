@@ -71,10 +71,10 @@ export default {
         cursor: this.cursor
       }
     },
-    viewportLeft () { return this.viewport.left * this.scale },
-    viewportTop () { return this.viewport.top * this.scale },
-    viewportWidth () { return this.viewport.width * this.scale },
-    viewportHeight () { return this.viewport.height * this.scale },
+    viewportLeft () { return Math.round(this.viewport.left * this.scale) },
+    viewportTop () { return Math.round(this.viewport.top * this.scale) },
+    viewportWidth () { return Math.round(this.viewport.width * this.scale) },
+    viewportHeight () { return Math.round(this.viewport.height * this.scale) },
     viewportWrapStyle () {
       return {
         left: `${this.viewportLeft}px`,
@@ -100,6 +100,7 @@ export default {
     startPanningViewport (event) {
       this.isPanningViewport = true
       this.cursor = 'grabbing'
+      this.scrollTo(event, 'auto')
     },
     endPanningViewport () {
       this.isPanningViewport = false
@@ -239,7 +240,7 @@ export default {
     position absolute
     &:hover
       .viewport-header
-        height 14px
+        height 12px
   .viewport,
   .viewport-header,
   .viewport-background
@@ -261,19 +262,25 @@ export default {
       box-shadow 8px 8px 0 var(--light-shadow)
   .viewport-header
     position absolute
-    height 12px
-    border-top-left-radius 5px
-    border-top-right-radius 5px
+    height 10px
+    border-top-left-radius 3px
+    border-top-right-radius 3px
     cursor grab
+    left 2px
+    top 2px
+    width calc(100% - 4px)
     &:hover
-      height 14px
+      height 12px
   .viewport-background
     position absolute
     opacity 0.3
     pointer-events none
-    border-radius 5px
+    border-radius 3px
     mix-blend-mode multiply
-
+    top 12px
+    height calc(100% - 14px)
+    left 2px
+    width calc(100% - 4px)
 .blink
   animation-duration 0.2s
   animation-name blink
