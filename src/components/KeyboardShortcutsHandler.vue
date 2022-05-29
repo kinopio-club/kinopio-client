@@ -3,8 +3,8 @@
 
 <script>
 import utils from '@/utils.js'
-
 import scrollIntoView from '@/scroll-into-view.js'
+
 import last from 'lodash-es/last'
 import { nanoid } from 'nanoid'
 

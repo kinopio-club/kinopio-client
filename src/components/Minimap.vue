@@ -2,9 +2,9 @@
 .overlay.minimap(v-if="isVisible" @click="scrollTo" @pointerup="endPanningViewport" :style="overlayStyle")
   .overlay-background(:style="overlayBackgroundStyle")
   .viewport-wrap(:style="viewportWrapStyle")
-    .viewport(:style="viewportStyle" @pointerdown="startPanningViewport" :class="{ blink: !isPanningViewport }")
+    .viewport.blink(:style="viewportStyle" @pointerdown="startPanningViewport")
     .viewport-top(:style="viewportChildStyle" @pointerdown="startPanningViewport")
-    .viewport-background(:style="viewportChildStyle")
+    //- .viewport-background(:style="viewportChildStyle")
   .cards-wrap
     template(v-for="card in cards")
       .card(:style="cardStyle(card)" :class="{ 'transparent-background': card.imageUrl }" :data-card-minimap-id="card.id")
@@ -59,7 +59,8 @@ export default {
     },
 
     overlayBackgroundStyle () {
-      const backgroundColor = this.$store.state.currentSpace.backgroundTint
+      const currentSpace = this.$store.state.currentSpace
+      let backgroundColor = currentSpace.backgroundTint || currentSpace.backgroundColor
       return {
         backgroundColor,
         cursor: this.cursor
@@ -237,7 +238,7 @@ export default {
   cursor pointer
   .overlay-background
     background-color var(--primary-background)
-    opacity 0.8
+    opacity 0.9
   .cards-wrap
     position absolute
     left 0
@@ -250,14 +251,17 @@ export default {
     background-size cover
     &.transparent-background
       background-color transparent !important
+
+  --viewport-top-height 10px
+  --viewport-top-inset 2px
   .viewport-wrap
     position absolute
     &:hover
       .viewport-top
-        height 12px
+        height calc(var(--viewport-top-height) + 2px)
   .viewport,
-  .viewport-top,
-  .viewport-background
+  .viewport-top
+  // .viewport-background //
     top 0
     left 0
     width 100%
@@ -269,6 +273,7 @@ export default {
     border 2px solid
     border-radius 5px
     cursor grab
+    box-shadow var(--hover-shadow)
     &:hover
       box-shadow var(--active-shadow)
       animation none
@@ -276,25 +281,26 @@ export default {
       box-shadow 8px 8px 0 var(--light-shadow)
   .viewport-top
     position absolute
-    height 10px
+    height var(--viewport-top-height)
     border-top-left-radius 2px
     border-top-right-radius 2px
     cursor grab
-    left 2px
-    top 2px
-    width calc(100% - 4px)
-    &:hover
-      height 12px
-  .viewport-background
-    position absolute
-    opacity 0.3
-    pointer-events none
-    border-radius 3px
-    mix-blend-mode multiply
-    top 12px
-    height calc(100% - 14px)
-    left 2px
-    width calc(100% - 4px)
+    left var(--viewport-top-inset)
+    top var(--viewport-top-inset)
+    width calc(100% - (var(--viewport-top-inset) * 2))
+    // &:hover
+    //   height calc(var(--viewport-top-height) + 2)
+  // .viewport-background
+  //   position absolute
+  //   opacity 0
+  //   pointer-events none
+  //   border-radius 3px
+  //   mix-blend-mode multiply
+  //   top 12px
+  //   height calc(100% - 14px)
+  //   left 2px
+  //   width calc(100% - 4px)
+  //   z-index 0
 .blink
   animation-duration 0.2s
   animation-name blink
