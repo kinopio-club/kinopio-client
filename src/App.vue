@@ -621,6 +621,9 @@ dialog
   height 9px
   vertical-align 0px
 
+.icon.minimap
+  height 13px
+
 label,
 li
   &:hover,
