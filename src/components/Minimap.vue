@@ -1,9 +1,9 @@
 <template lang="pug">
-.overlay.minimap(v-if="isVisible" @click="scrollTo" @pointerup="endPanningViewport" :style="overlayStyle" @touchmove.stop.prevent)
+.overlay.minimap(v-if="isVisible" @click="scrollTo" @touchend="scrollTo" @pointerup="endPanningViewport" :style="overlayStyle" @touchmove.stop.prevent)
   .overlay-background(:style="overlayBackgroundStyle")
   .viewport-wrap(:style="viewportWrapStyle")
-    .viewport.blink(:style="viewportStyle" @pointerdown="startPanningViewport")
-    .viewport-top(:style="viewportChildStyle" @pointerdown="startPanningViewport")
+    .viewport.blink(:style="viewportStyle" @pointerdown="startPanningViewport" @mousemove="panViewport" @touchmove="panViewport")
+    .viewport-top(:style="viewportChildStyle" @pointerdown="startPanningViewport" @mousemove="panViewport" @touchmove="panViewport")
       .button-wrap(@pointerdown.stop @pointerup="hideMinimap")
         button.small-button.active
           img.icon(src="@/assets/minimap.svg")
@@ -33,11 +33,9 @@ export default {
   },
   mounted () {
     window.addEventListener('scroll', this.updateViewport)
-    window.addEventListener('mousemove', this.panViewport)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateViewport)
-    window.removeEventListener('mousemove', this.panViewport)
   },
   data () {
     return {
@@ -111,13 +109,13 @@ export default {
       if (!this.isPanningViewport) { return }
       this.scrollTo(event, 'auto')
     },
-    update () {
-      this.updateBoundary()
-      this.updateScale()
+    init () {
+      this.initBoundary()
+      this.initScale()
       this.updateViewport()
-      this.updateCards()
+      this.initCards()
     },
-    updateBoundary () {
+    initBoundary () {
       const cards = this.$store.getters['currentCards/all']
       let width = 0
       let height = 0
@@ -133,7 +131,7 @@ export default {
       })
       this.boundary = { width, height }
     },
-    updateScale () {
+    initScale () {
       const viewportWidth = this.$store.state.viewportWidth
       const viewportHeight = this.$store.state.viewportHeight
       const scaleX = viewportWidth / this.boundary.width
@@ -168,7 +166,7 @@ export default {
         return urls.find(url => utils.urlIsImage(url))
       }
     },
-    updateCards () {
+    initCards () {
       let cards = this.$store.getters['currentCards/all']
       const maxImageUrls = 20
       let imageUrls = 0
@@ -236,7 +234,7 @@ export default {
   watch: {
     isVisible (value) {
       if (value) {
-        this.update()
+        this.init()
       }
     }
   }
