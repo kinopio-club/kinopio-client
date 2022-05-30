@@ -300,7 +300,6 @@ export default {
     box-shadow var(--hover-shadow)
     &:hover
       box-shadow var(--active-shadow)
-      animation none
     &:active
       box-shadow 8px 8px 0 var(--light-shadow)
   .viewport-top
