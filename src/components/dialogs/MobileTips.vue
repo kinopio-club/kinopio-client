@@ -2,6 +2,13 @@
 dialog.narrow.mobile-tips(v-if="visible" :open="visible" @click.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     p Mobile Tips
+      //- Apps
+      .button-wrap(v-if="isNotApp" @mouseup.stop @touchend.stop)
+        button.small-button(@click.left.stop="toggleAppsIsVisible" :class="{active: appsIsVisible}")
+          img.icon(src="@/assets/apple.svg")
+          span Get Apps
+        Apps(:visible="appsIsVisible")
+
   section(
     @mouseup.stop
     @touchend.stop
@@ -22,17 +29,6 @@ dialog.narrow.mobile-tips(v-if="visible" :open="visible" @click.stop="closeDialo
     p
       img.icon(src="@/assets/undo.svg")
       span Two finger tap to undo, three finger tap to redo
-    //- video TODO
-  section(
-    v-if="isNotApp"
-    @mouseup.stop
-    @touchend.stop
-  )
-    .button-wrap
-      button(@click.left.stop="toggleAppsIsVisible" :class="{active: appsIsVisible}")
-        img.icon(src="@/assets/apple.svg")
-        span Get Mobile Apps
-      Apps(:visible="appsIsVisible")
 </template>
 
 <script>
@@ -73,8 +69,10 @@ export default {
     updateDialogHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
+        this.$nextTick(() => {
+          let element = this.$refs.dialog
+          this.dialogHeight = utils.elementHeightFromHeader(element)
+        })
       })
     }
   },
@@ -96,11 +94,15 @@ export default {
   &.narrow
     width 215px
   .apps
-    top initial
-    bottom 8px
+    top 8px !important
   video
     margin-left -1px
     margin-top -1px
     border-radius 3px
+  .small-button
+    padding 0
+    padding-left 6px
+    padding-right 6px
+    margin-left 6px
 
 </style>
