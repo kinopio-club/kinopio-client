@@ -34,8 +34,9 @@
               span Tips
             MobileTips(:visible="mobileTipsIsVisible")
 
-  .right(:class="{'is-embed': isEmbed}")
-    button(@click="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }") MM
+  .right(:class="{'is-embed': isEmbed, 'fade-out': isFadeOut, 'hidden': isHidden}")
+    button(@pointerup="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
+      span MM
     SpaceZoom(v-if="!isMobileOrTouch")
 </template>
 
@@ -387,6 +388,7 @@ export default {
   .right
     pointer-events all
     text-align right
+    transition 0.2s opacity
     &.is-embed
       position absolute
       right 0
