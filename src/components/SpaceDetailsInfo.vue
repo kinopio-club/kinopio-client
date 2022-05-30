@@ -21,7 +21,7 @@
       rows="1"
       placeholder="name"
       v-model="spaceName"
-      @keydown.enter.stop.prevent
+      @keydown.enter.stop.prevent="closeAllDialogs"
     )
   //- Pin Dialog
   .title-row(v-if="!shouldHidePin")
@@ -162,6 +162,9 @@ export default {
     },
     updateSpaces () {
       this.$emit('updateSpaces')
+    },
+    closeAllDialogs () {
+      this.$store.dispatch('closeAllDialogs', 'SpaceDetailsInfo')
     }
   }
 }
