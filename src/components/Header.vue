@@ -277,9 +277,12 @@ export default {
   computed: {
     kinopioDomain () { return utils.kinopioDomain() },
     isVisible () {
+      const minimapIsVisible = this.$store.state.minimapIsVisible
       const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
       const isTouchDevice = this.$store.getters.isTouchDevice
-      if (cardDetailsIsVisible && isTouchDevice) {
+      if (minimapIsVisible) {
+        return false
+      } else if (cardDetailsIsVisible && isTouchDevice) {
         return false
       } else {
         return true
