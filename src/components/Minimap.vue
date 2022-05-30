@@ -18,6 +18,8 @@
 <script>
 import utils from '@/utils.js'
 
+import debounce from 'lodash-es/debounce'
+
 const maxScale = 0.4
 
 export default {
@@ -33,9 +35,11 @@ export default {
   },
   mounted () {
     window.addEventListener('scroll', this.updateViewport)
+    window.addEventListener('resize', this.debouncedInit)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateViewport)
+    window.removeEventListener('resize', this.debouncedInit)
   },
   data () {
     return {
@@ -109,6 +113,9 @@ export default {
       if (!this.isPanningViewport) { return }
       this.scrollTo(event, 'auto')
     },
+    debouncedInit: debounce(async function () {
+      this.init()
+    }, 350),
     init () {
       this.initBoundary()
       this.initScale()
