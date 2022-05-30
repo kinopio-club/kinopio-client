@@ -1,21 +1,22 @@
 <template lang="pug">
-.overlay.minimap(v-if="isVisible" @click="scrollTo" @touchend="scrollTo" @pointerup="endPanningViewport" :style="overlayBackgroundStyle" @touchmove.stop.prevent)
+.overlay.minimap(v-if="isVisible" @click="scrollTo" @pointerup="endPanningViewport" @mousemove="panViewport" :style="overlayBackgroundStyle" @touchmove.stop.prevent)
   .overlay-background(:style="overlayBackgroundStyle")
   .viewport-wrap(:style="viewportWrapStyle")
-    .viewport.blink(:style="viewportStyle" @pointerdown="startPanningViewport" @mousemove="panViewport" @touchmove="panViewport")
-    .viewport-top(:style="viewportChildStyle" @pointerdown="startPanningViewport" @mousemove="panViewport" @touchmove="panViewport")
+    .viewport.blink(:style="viewportStyle" @pointerdown="startPanningViewport")
+    .viewport-top(:style="viewportChildStyle" @pointerdown="startPanningViewport")
       .button-wrap(@pointerdown.stop @pointerup="hideMinimap")
         button.small-button.active
           img.icon(src="@/assets/minimap.svg")
   .cards-wrap
     template(v-for="card in cards")
       .card(:style="cardStyle(card)" :class="{ 'transparent-background': card.imageUrl }" :data-card-minimap-id="card.id")
-  //- template(v-for="user in spaceMembers")
-    //- UserLabel(:user="user") // see Space.vue , scale prop
+  template(v-for="user in spaceMembers")
+    UserLabel(:user="user" :scale="scale")
 
 </template>
 
 <script>
+import UserLabel from '@/components/UserLabel.vue'
 import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
@@ -25,13 +26,7 @@ const maxScale = 0.4
 export default {
   name: 'ComponentName',
   components: {
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerUpdateRemoteUserCursor') {
-        this.updateRemoteCursors()
-      }
-    })
+    UserLabel
   },
   mounted () {
     window.addEventListener('scroll', this.updateViewport)
@@ -52,11 +47,11 @@ export default {
     }
   },
   computed: {
-    isVisible () { return this.$store.state.minimapIsVisible },
     spaceMembers () {
       const excludeCurrentUser = true
       return this.$store.getters['currentSpace/members'](excludeCurrentUser)
     },
+    isVisible () { return this.$store.state.minimapIsVisible },
     overlayBackgroundStyle () {
       return { cursor: this.cursor }
     },
@@ -249,14 +244,14 @@ export default {
   cursor pointer
   .overlay-background
     background-color var(--primary-background)
-    opacity 0.1
+    opacity 0.3
   .cards-wrap
     position absolute
     left 0
     margin 20px
   .card
     position absolute
-    background-color var(--secondary-active-background)
+    background-color var(--secondary-background)
     border-radius 3px
     background-size cover
     box-shadow 2px 2px 0 var(--light-shadow)

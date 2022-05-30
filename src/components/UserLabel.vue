@@ -13,7 +13,8 @@ let visibleTimer, currentIteration
 export default {
   name: 'UserLabel',
   props: {
-    user: Object
+    user: Object,
+    scale: Number
   },
   mounted () {
     this.$store.subscribe((mutation, state) => {
@@ -43,17 +44,23 @@ export default {
     }
   },
   computed: {
-    userHasName () {
-      return Boolean(this.user.name)
-    }
+    userHasName () { return Boolean(this.user.name) },
+    minimapIsVisible () { return this.$store.state.minimapIsVisible }
   },
   methods: {
     updatePositionWithZoom (cursor) {
-      const counterZoom = 1 / cursor.zoom
-      this.left = this.left * counterZoom
-      this.top = this.top * counterZoom
+      let multiplier = 1
+      if (this.scale) {
+        multiplier = this.scale
+      } else {
+        const counterZoom = 1 / cursor.zoom
+        multiplier = counterZoom
+      }
+      this.left = this.left * multiplier
+      this.top = this.top * multiplier
     },
     checkIsOnscreen () {
+      if (this.minimapIsVisible) { return }
       const isBetweenX = utils.isBetween({
         value: this.left,
         min: window.scrollX,
@@ -106,7 +113,6 @@ export default {
         this.top = maxY - 16
       }
     }
-
   }
 }
 </script>
@@ -116,6 +122,7 @@ export default {
   pointer-events none
   position absolute
   z-index calc(var(--max-z) - 50)
+  display inline-block
   .anon-avatar
     width 15px
     height 15px
