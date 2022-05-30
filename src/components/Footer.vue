@@ -36,7 +36,7 @@
 
   .right(:class="{'is-embed': isEmbed, 'fade-out': isFadeOut, 'hidden': isHidden}")
     button(@pointerup="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
-      span MM
+      img.icon(src="@/assets/minimap.svg")
     SpaceZoom(v-if="!isMobileOrTouch")
 </template>
 

@@ -165,8 +165,14 @@ export default {
     },
     updateCards () {
       let cards = this.$store.getters['currentCards/all']
+      const maxImageUrls = 20
+      let imageUrls = 0
       cards = cards.map(card => {
-        const imageUrl = this.imageUrlFromCard(card)
+        let imageUrl
+        if (imageUrls <= maxImageUrls) {
+          imageUrl = this.imageUrlFromCard(card)
+          if (imageUrl) { imageUrls += 1 }
+        }
         return {
           id: card.id,
           x: Math.round(card.x),
