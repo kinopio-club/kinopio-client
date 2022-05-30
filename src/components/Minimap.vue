@@ -254,7 +254,7 @@ export default {
   cursor pointer
   .overlay-background
     background-color var(--primary-background)
-    opacity 0.4
+    opacity 0.5
   .cards-wrap
     position absolute
     left 0
