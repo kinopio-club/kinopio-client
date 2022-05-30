@@ -1,5 +1,5 @@
 <template lang="pug">
-.overlay.minimap(v-if="isVisible" @click="scrollTo" @pointerup="endPanningViewport" :style="overlayStyle")
+.overlay.minimap(v-if="isVisible" @click="scrollTo" @pointerup="endPanningViewport" :style="overlayStyle" @touchmove.stop.prevent)
   .overlay-background(:style="overlayBackgroundStyle")
   .viewport-wrap(:style="viewportWrapStyle")
     .viewport.blink(:style="viewportStyle" @pointerdown="startPanningViewport")
@@ -96,7 +96,6 @@ export default {
   methods: {
     hideMinimap () {
       this.$store.commit('minimapIsVisible', false)
-      // this.$store.commit('triggerMinimapHiddenByButton')
     },
     startPanningViewport (event) {
       this.isPanningViewport = true
