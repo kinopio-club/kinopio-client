@@ -14,7 +14,6 @@ import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
 import defer from 'lodash-es/defer'
-import AverageColor from 'fast-average-color'
 
 let otherSpacesQueue = [] // id
 let spectatorIdleTimers = []
@@ -909,7 +908,6 @@ const currentSpace = {
         if (image) {
           element.style.backgroundImage = `url(${background})`
           context.dispatch('updateBackgroundZoom')
-          context.dispatch('updateBackgroundColor')
         }
       } catch (error) {
         if (background) {
@@ -952,23 +950,6 @@ const currentSpace = {
       width = Math.round(width)
       height = Math.round(height)
       element.style.backgroundSize = `${width}px ${height}px`
-    },
-    updateBackgroundColor: async (context) => {
-      // TODO STAGING CHECK custom bk images for built in bks?
-      const background = context.state.background
-      if (!background) {
-        context.dispatch('updateSpace', { backgroundColor: '' })
-        return
-      }
-      try {
-        const averageColor = new AverageColor()
-        let backgroundColor = await averageColor.getColorAsync(background)
-        backgroundColor = backgroundColor.hex
-        context.dispatch('updateSpace', { backgroundColor })
-      } catch (error) {
-        console.warn('🚑 updateBackgroundColor', background, error)
-        context.dispatch('updateSpace', { backgroundColor: '' })
-      }
     },
 
     // Tags
