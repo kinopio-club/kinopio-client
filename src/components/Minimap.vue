@@ -1,5 +1,5 @@
 <template lang="pug">
-.overlay.minimap(v-if="isVisible" @click="scrollTo" @pointerup="endPanningViewport" @mousemove="panViewport" :style="overlayBackgroundStyle" @touchmove.stop.prevent)
+.overlay.minimap(v-if="isVisible" @click="scrollTo" @pointerup="endPanningViewport" @mousemove="panViewport" :style="overlayStyle" @touchmove.stop.prevent)
   .overlay-background(:style="overlayBackgroundStyle")
   .viewport-wrap(:style="viewportWrapStyle")
     .viewport.blink(:style="viewportStyle" @pointerdown="startPanningViewport")
@@ -9,7 +9,7 @@
           img.icon(src="@/assets/minimap.svg")
   .cards-wrap
     template(v-for="card in cards")
-      .card(:style="cardStyle(card)" :class="{ 'transparent-background': card.imageUrl }" :data-card-minimap-id="card.id")
+      .card(:style="cardStyle(card)" :class="{ 'transparent-background': card.imageUrl, 'is-in-viewport': isInViewport(card) }" :data-card-minimap-id="card.id")
   template(v-for="user in spaceMembers")
     UserLabel(:user="user" :scale="scale")
 
@@ -52,8 +52,15 @@ export default {
       return this.$store.getters['currentSpace/members'](excludeCurrentUser)
     },
     isVisible () { return this.$store.state.minimapIsVisible },
-    overlayBackgroundStyle () {
+    overlayStyle () {
       return { cursor: this.cursor }
+    },
+    overlayBackgroundStyle () {
+      const backgroundColor = this.$store.state.currentSpace.backgroundTint
+      return {
+        cursor: this.cursor,
+        backgroundColor
+      }
     },
     viewportLeft () { return Math.round(this.viewport.left * this.scale) },
     viewportTop () { return Math.round(this.viewport.top * this.scale) },
@@ -197,6 +204,9 @@ export default {
       }
       return position
     },
+    isInViewport (card) {
+      return utils.isCardInViewport(card)
+    },
     scrollTo (event, behavior) {
       behavior = behavior || 'smooth'
       this.$store.dispatch('closeAllDialogs', 'minimap')
@@ -244,7 +254,7 @@ export default {
   cursor pointer
   .overlay-background
     background-color var(--primary-background)
-    opacity 0.3
+    opacity 0.4
   .cards-wrap
     position absolute
     left 0
@@ -254,9 +264,11 @@ export default {
     background-color var(--secondary-background)
     border-radius 3px
     background-size cover
-    box-shadow 2px 2px 0 var(--light-shadow)
+    transition 0.3s box-shadow
     &.transparent-background
       background-color transparent !important
+    &.is-in-viewport
+      box-shadow 3px 3px 0 var(--light-shadow)
 
   // copied from Community.vue
   .small-button
