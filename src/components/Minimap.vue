@@ -4,12 +4,14 @@
   .viewport-wrap(:style="viewportWrapStyle")
     .viewport.blink(:style="viewportStyle" @pointerdown="startPanningViewport")
     .viewport-top(:style="viewportChildStyle" @pointerdown="startPanningViewport")
-    //- .viewport-background(:style="viewportChildStyle")
+      .button-wrap(@pointerdown.stop @pointerup="hideMinimap")
+        button.small-button.active
+          img.icon(src="@/assets/minimap.svg")
   .cards-wrap
     template(v-for="card in cards")
       .card(:style="cardStyle(card)" :class="{ 'transparent-background': card.imageUrl }" :data-card-minimap-id="card.id")
   //- template(v-for="user in spaceMembers")
-    //- UserLabel(:user="user") // see Space.vue
+    //- UserLabel(:user="user") // see Space.vue , scale prop
 
 </template>
 
@@ -92,6 +94,10 @@ export default {
     }
   },
   methods: {
+    hideMinimap () {
+      this.$store.commit('minimapIsVisible', false)
+      // this.$store.commit('triggerMinimapHiddenByButton')
+    },
     startPanningViewport (event) {
       this.isPanningViewport = true
       this.cursor = 'grabbing'
@@ -258,7 +264,14 @@ export default {
     &.transparent-background
       background-color transparent !important
 
-  --viewport-top-height 10px
+  // copied from Community.vue
+  .small-button
+    padding 0
+    padding-left 6px
+    padding-right 6px
+    margin-left 6px
+
+  --viewport-top-height 22px
   --viewport-top-inset 2px
   .viewport-wrap
     position absolute
@@ -267,7 +280,6 @@ export default {
         height calc(var(--viewport-top-height) + 2px)
   .viewport,
   .viewport-top
-  // .viewport-background //
     top 0
     left 0
     width 100%
@@ -294,19 +306,15 @@ export default {
     left var(--viewport-top-inset)
     top var(--viewport-top-inset)
     width calc(100% - (var(--viewport-top-inset) * 2))
-    // &:hover
-    //   height calc(var(--viewport-top-height) + 2)
-  // .viewport-background
-  //   position absolute
-  //   opacity 0
-  //   pointer-events none
-  //   border-radius 3px
-  //   mix-blend-mode multiply
-  //   top 12px
-  //   height calc(100% - 14px)
-  //   left 2px
-  //   width calc(100% - 4px)
-  //   z-index 0
+    text-align right
+    .button-wrap
+      padding-top 2px
+      padding-right 1px
+    .small-button
+      margin 0
+      img
+        height 11px
+
 .blink
   animation-duration 0.2s
   animation-name blink
