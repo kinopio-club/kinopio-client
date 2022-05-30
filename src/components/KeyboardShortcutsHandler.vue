@@ -12,6 +12,7 @@ const incrementPosition = 12
 let useSiblingConnectionType
 let browserZoomLevel = 0
 let disableContextMenu = false
+let spaceKeyIsDown = false
 
 let prevCursorPosition, currentCursorPosition
 
@@ -102,6 +103,7 @@ export default {
         this.$store.dispatch('currentUser/toggleFilterComments', value)
       } else if (key === ' ' && isSpaceScope) {
         this.$store.commit('minimapIsVisible', false)
+        spaceKeyIsDown = false
       }
     },
     // on key down
@@ -192,6 +194,8 @@ export default {
       // Minimap
       } else if (key === ' ' && isSpaceScope) {
         event.preventDefault()
+        if (spaceKeyIsDown) { return }
+        spaceKeyIsDown = true
         if (!this.$store.state.minimapIsVisible) {
           this.$store.commit('minimapIsVisible', true)
         }
