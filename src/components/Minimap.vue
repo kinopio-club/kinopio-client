@@ -213,17 +213,22 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'minimap')
       const viewportWidth = this.$store.state.viewportWidth
       const viewportHeight = this.$store.state.viewportHeight
-      let position = {
-        x: event.clientX / this.scale,
-        y: event.clientY / this.scale
+      let position = utils.cursorPositionInViewport(event)
+      position = {
+        x: position.x / this.scale,
+        y: position.y / this.scale
       }
       let scrollTo = {
         x: position.x - (viewportWidth / 2),
         y: position.y - (viewportHeight / 2)
       }
       scrollTo = {
-        left: Math.max(0, scrollTo.x),
-        top: Math.max(0, scrollTo.y),
+        x: Math.round(scrollTo.x),
+        y: Math.round(scrollTo.y)
+      }
+      scrollTo = {
+        left: scrollTo.x,
+        top: scrollTo.y,
         behavior
       }
       window.scrollTo(scrollTo)
