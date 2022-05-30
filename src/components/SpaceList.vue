@@ -302,6 +302,7 @@ export default {
         shouldPreventSelectSpace = false
         return
       }
+      if (!space) { return }
       this.$emit('selectSpace', space)
     },
     closeDialog () {

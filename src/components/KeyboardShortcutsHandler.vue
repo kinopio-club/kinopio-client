@@ -61,7 +61,7 @@ export default {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
       } else if (key === 'n' && isSpaceScope) {
         this.$store.dispatch('currentSpace/addSpace')
-        this.$store.commit('addNotification', { message: 'New space created', icon: 'add', type: 'success', label: 'N' })
+        this.$store.commit('addNotification', { message: 'New space created', icon: 'add', type: 'success', label: 'n' })
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
       // Backspace, Clear, Delete
       } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
