@@ -8,13 +8,6 @@
       .button-wrap(@pointerdown.stop @pointerup="hideMinimap")
         button.small-button.active
           img.icon(src="@/assets/minimap.svg")
-
-  //- connections
-  //- canvas(:style="overlayStyle")
-  template(v-for="connection in connections")
-    p {{connection.path}}
-    //- Connection(:connection="connection")
-
   //- cards
   .cards-wrap
     template(v-for="card in cards")
@@ -22,7 +15,8 @@
   //- remote users
   template(v-for="user in spaceMembers")
     UserLabel(:user="user" :scale="scale")
-
+  //- connections
+  canvas#minimap-connections
 </template>
 
 <script>
@@ -32,6 +26,7 @@ import utils from '@/utils.js'
 import debounce from 'lodash-es/debounce'
 
 const maxScale = 0.4
+let canvas, context
 
 export default {
   name: 'ComponentName',
@@ -134,6 +129,10 @@ export default {
       this.updateViewport()
       this.initConnections()
       this.initCards()
+      this.$nextTick(() => {
+        this.initConnectionCanvas()
+        this.drawConnections()
+      })
     },
     initBoundary () {
       const cards = this.$store.getters['currentCards/all']
@@ -177,30 +176,71 @@ export default {
         top: y
       }
     },
+    scrollTo (event, behavior) {
+      behavior = behavior || 'smooth'
+      this.$store.dispatch('closeAllDialogs', 'minimap')
+      const viewportWidth = this.$store.state.viewportWidth
+      const viewportHeight = this.$store.state.viewportHeight
+      const zoom = this.$store.getters.spaceZoomDecimal
+      let position = utils.cursorPositionInViewport(event)
+      position = {
+        x: position.x * zoom,
+        y: position.y * zoom
+      }
+      position = {
+        x: position.x / this.scale,
+        y: position.y / this.scale
+      }
+      let scrollTo = {
+        x: position.x - (viewportWidth / 2),
+        y: position.y - (viewportHeight / 2)
+      }
+      scrollTo = {
+        x: Math.round(scrollTo.x),
+        y: Math.round(scrollTo.y)
+      }
+      scrollTo = {
+        left: scrollTo.x,
+        top: scrollTo.y,
+        behavior
+      }
+      window.scrollTo(scrollTo)
+    },
+
+    // Connections
+
     scaleCoordinates (coords) {
       const zoom = this.$store.getters.spaceZoomDecimal
-      const retinaMultiplier = 2
       // x
       coords.x = coords.x * zoom
       coords.x = coords.x * this.scale
-      coords.x = Math.round(coords.x * retinaMultiplier)
+      coords.x = Math.round(coords.x * window.devicePixelRatio)
       // y
       coords.y = coords.y * zoom
       coords.y = coords.y * this.scale
-      coords.y = Math.round(coords.y * retinaMultiplier)
+      coords.y = Math.round(coords.y * window.devicePixelRatio)
       return coords
     },
     scaleConnectionPath (path) {
       let pathStart = utils.coordsFromConnectionPath(path)
       let pathCurvePoint = utils.curveControlPointFromPath(path)
       let pathEnd = utils.endCoordsFromConnectionPath(path)
-      // console.log('💖', path, pathStart, pathCurvePoint, pathEnd, this.scale)
       pathStart = this.scaleCoordinates(pathStart)
       pathCurvePoint = this.scaleCoordinates(pathCurvePoint)
       pathEnd = this.scaleCoordinates(pathEnd)
       path = `m${pathStart.x},${pathStart.y} q${pathCurvePoint.x},${pathCurvePoint.y} ${pathEnd.x},${pathEnd.y}`
-      // console.log('💖💖', path, pathStart, pathCurvePoint, pathEnd, this.scale)
       return path
+    },
+    initConnectionCanvas () {
+      canvas = document.getElementById('minimap-connections')
+      context = canvas.getContext('2d')
+      const viewportWidth = this.$store.state.viewportWidth
+      const viewportHeight = this.$store.state.viewportHeight
+      canvas.width = viewportWidth * window.devicePixelRatio
+      canvas.height = viewportHeight * window.devicePixelRatio
+      canvas.style.width = viewportWidth + 'px'
+      canvas.style.height = viewportHeight + 'px'
+      context.scale(window.devicePixelRatio, window.devicePixelRatio)
     },
     initConnections () {
       let connections = utils.clone(this.$store.getters['currentConnections/all'])
@@ -210,6 +250,14 @@ export default {
       })
       this.connections = connections
     },
+    drawConnections () {
+      // clearRect
+      console.log('🔮 draw', this.connections)
+      // https://developer.mozilla.org/en-US/docs/Web/API/Path2D/Path2D
+    },
+
+    // Cards
+
     imageUrlFromCard (card) {
       const imageUrlIsUrlPreview = card.urlPreviewImage && card.urlPreviewIsVisible
       if (imageUrlIsUrlPreview) {
@@ -268,36 +316,6 @@ export default {
         height: card.height * zoom
       }
       return utils.isCardInViewport(card)
-    },
-    scrollTo (event, behavior) {
-      behavior = behavior || 'smooth'
-      this.$store.dispatch('closeAllDialogs', 'minimap')
-      const viewportWidth = this.$store.state.viewportWidth
-      const viewportHeight = this.$store.state.viewportHeight
-      const zoom = this.$store.getters.spaceZoomDecimal
-      let position = utils.cursorPositionInViewport(event)
-      position = {
-        x: position.x * zoom,
-        y: position.y * zoom
-      }
-      position = {
-        x: position.x / this.scale,
-        y: position.y / this.scale
-      }
-      let scrollTo = {
-        x: position.x - (viewportWidth / 2),
-        y: position.y - (viewportHeight / 2)
-      }
-      scrollTo = {
-        x: Math.round(scrollTo.x),
-        y: Math.round(scrollTo.y)
-      }
-      scrollTo = {
-        left: scrollTo.x,
-        top: scrollTo.y,
-        behavior
-      }
-      window.scrollTo(scrollTo)
     }
   },
   watch: {
@@ -336,13 +354,15 @@ export default {
       background-color transparent !important
     &.is-in-viewport
       box-shadow 5px 5px 0 var(--light-shadow)
-
   // copied from Community.vue
   .small-button
     padding 0
     padding-left 6px
     padding-right 6px
     margin-left 6px
+
+  // canvas
+  //   background-color pink
 
   --viewport-top-height 22px
   --viewport-top-inset 2px
