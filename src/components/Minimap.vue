@@ -36,6 +36,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'spaceZoomPercent') {
+        if (!this.isVisible) { return }
         this.$nextTick(() => {
           this.debouncedInit()
         })
@@ -245,8 +246,14 @@ export default {
     initConnections () {
       let connections = utils.clone(this.$store.getters['currentConnections/all'])
       connections = connections.map(connection => {
-        connection.path = this.scaleConnectionPath(connection.path)
-        return connection
+        const path = this.scaleConnectionPath(connection.path)
+        let color = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
+        color = color.color
+        return {
+          id: connection.id,
+          path,
+          color
+        }
       })
       this.connections = connections
     },
