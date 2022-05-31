@@ -258,9 +258,14 @@ export default {
       this.connections = connections
     },
     drawConnections () {
-      // clearRect
-      console.log('🔮 draw', this.connections)
-      // https://developer.mozilla.org/en-US/docs/Web/API/Path2D/Path2D
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.lineWidth = 4
+      context.lineCap = 'round'
+      this.connections.forEach(connection => {
+        context.strokeStyle = connection.color
+        const path = new Path2D(connection.path)
+        context.stroke(path)
+      })
     },
 
     // Cards
@@ -347,6 +352,7 @@ export default {
   .overlay-background
     background-color var(--primary-background)
     opacity 0.5
+    mix-blend-mode plus-darker
   .cards-wrap
     position absolute
     left 0
@@ -367,9 +373,6 @@ export default {
     padding-left 6px
     padding-right 6px
     margin-left 6px
-
-  // canvas
-  //   background-color pink
 
   --viewport-top-height 22px
   --viewport-top-inset 2px
