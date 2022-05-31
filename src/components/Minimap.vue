@@ -151,11 +151,12 @@ export default {
     },
     updateViewport () {
       if (!this.isVisible) { return }
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
       const color = this.$store.state.currentUser.color
-      let width = this.$store.state.viewportWidth
-      let height = this.$store.state.viewportHeight
-      let x = window.scrollX
-      let y = window.scrollY
+      let width = this.$store.state.viewportWidth * zoom
+      let height = this.$store.state.viewportHeight * zoom
+      let x = window.scrollX * zoom
+      let y = window.scrollY * zoom
       this.viewport = {
         color,
         width: width,
@@ -214,6 +215,13 @@ export default {
       return position
     },
     isInViewport (card) {
+      const zoom = this.$store.getters.spaceZoomDecimal
+      card = {
+        x: card.x * zoom,
+        y: card.y * zoom,
+        width: card.width * zoom,
+        height: card.height * zoom
+      }
       return utils.isCardInViewport(card)
     },
     scrollTo (event, behavior) {
@@ -221,7 +229,12 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'minimap')
       const viewportWidth = this.$store.state.viewportWidth
       const viewportHeight = this.$store.state.viewportHeight
+      const zoom = this.$store.getters.spaceZoomDecimal
       let position = utils.cursorPositionInViewport(event)
+      position = {
+        x: position.x * zoom,
+        y: position.y * zoom
+      }
       position = {
         x: position.x / this.scale,
         y: position.y / this.scale
