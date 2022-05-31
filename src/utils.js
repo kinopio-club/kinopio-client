@@ -736,7 +736,7 @@ export default {
       x: coords[1],
       y: coords[2]
     }
-    return coords
+    return this.integerCoords(coords)
   },
   curveControlPointFromPath (path) {
     // https://regexr.com/6mptt
@@ -747,7 +747,7 @@ export default {
       x: coords[1],
       y: coords[2]
     }
-    return coords
+    return this.integerCoords(coords)
   },
   endCoordsFromConnectionPath (path) {
     // https://regexr.com/6mpru
@@ -763,7 +763,13 @@ export default {
       x: coords[0],
       y: coords[1]
     }
-    return coords
+    return this.integerCoords(coords)
+  },
+  integerCoords (coords) {
+    return {
+      x: parseInt(coords.x),
+      y: parseInt(coords.y)
+    }
   },
 
   // Painting 🖌

@@ -70,6 +70,7 @@ export default {
       // Escape
       } else if (key === 'Escape') {
         this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
+        this.$store.commit('minimapIsVisible', false)
       // → Left
       } else if (key === 'ArrowLeft' && (isSpaceScope || isFromCard)) {
         this.focusNearestCardLeft()

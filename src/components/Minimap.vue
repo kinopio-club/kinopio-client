@@ -8,6 +8,8 @@
       .button-wrap(@pointerdown.stop @pointerup="hideMinimap")
         button.small-button.active
           img.icon(src="@/assets/minimap.svg")
+  //- connections
+  canvas#minimap-connections
   //- cards
   .cards-wrap
     template(v-for="card in cards")
@@ -15,8 +17,6 @@
   //- remote users
   template(v-for="user in spaceMembers")
     UserLabel(:user="user" :scale="scale")
-  //- connections
-  canvas#minimap-connections
 </template>
 
 <script>
@@ -211,15 +211,13 @@ export default {
     // Connections
 
     scaleCoordinates (coords) {
-      const zoom = this.$store.getters.spaceZoomDecimal
+      const offset = 15
       // x
-      coords.x = coords.x * zoom
-      coords.x = coords.x * this.scale
-      coords.x = Math.round(coords.x * window.devicePixelRatio)
+      coords.x = (coords.x + offset) * this.scale
+      coords.x = Math.round(coords.x)
       // y
-      coords.y = coords.y * zoom
-      coords.y = coords.y * this.scale
-      coords.y = Math.round(coords.y * window.devicePixelRatio)
+      coords.y = (coords.y + offset) * this.scale
+      coords.y = Math.round(coords.y)
       return coords
     },
     scaleConnectionPath (path) {
@@ -352,7 +350,9 @@ export default {
   .overlay-background
     background-color var(--primary-background)
     opacity 0.5
-    mix-blend-mode plus-darker
+  canvas
+    position absolute
+    opacity 0.99
   .cards-wrap
     position absolute
     left 0
