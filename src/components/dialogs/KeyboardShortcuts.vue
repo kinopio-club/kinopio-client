@@ -32,6 +32,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
+            img.icon.minimap(src="@/assets/minimap.svg")
+            span Minimap
+          .badge.keyboard-shortcut Hold Space
+      article
+        .row
+          .badge.title
             img.icon.hand(src="@/assets/hand.svg")
             span Drag to Pan
           .badge.keyboard-shortcut Right-Click Drag
