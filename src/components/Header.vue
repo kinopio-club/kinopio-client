@@ -1,5 +1,5 @@
 <template lang="pug">
-header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidden': isHidden, disabled: minimapIsVisible }")
+header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidden': isHidden, 'hidden-by-mindmap': minimapIsVisible }")
   //- embed
   nav.embed-nav(v-if="isEmbed")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
@@ -657,7 +657,7 @@ header
   display flex
   justify-content space-between
   transition 0.2s opacity
-  &.disabled
+  &.hidden-by-mindmap
     opacity 0.2
   nav,
   aside
