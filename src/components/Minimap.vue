@@ -9,7 +9,7 @@
         button.small-button.active
           img.icon(src="@/assets/minimap.svg")
   //- connections
-  canvas#minimap-connections
+  canvas#connections
   //- cards
   .cards-wrap
     template(v-for="card in cards")
@@ -26,6 +26,7 @@ import utils from '@/utils.js'
 import debounce from 'lodash-es/debounce'
 
 const maxScale = 0.4
+const offset = 10 // container margin / 2
 let canvas, context
 
 export default {
@@ -212,12 +213,11 @@ export default {
     // Connections
 
     scaleCoordinates (coords) {
-      const offset = 15
       // x
-      coords.x = (coords.x + offset) * this.scale
+      coords.x = (coords.x - offset) * this.scale
       coords.x = Math.round(coords.x)
       // y
-      coords.y = (coords.y + offset) * this.scale
+      coords.y = (coords.y - offset) * this.scale
       coords.y = Math.round(coords.y)
       return coords
     },
@@ -232,7 +232,7 @@ export default {
       return path
     },
     initConnectionCanvas () {
-      canvas = document.getElementById('minimap-connections')
+      canvas = document.getElementById('connections')
       context = canvas.getContext('2d')
       const viewportWidth = this.$store.state.viewportWidth
       const viewportHeight = this.$store.state.viewportHeight
@@ -302,7 +302,6 @@ export default {
       this.cards = cards
     },
     cardStyle (card) {
-      const offset = 10 // .cards margin / 2
       let backgroundImage
       if (card.imageUrl) {
         backgroundImage = `url('${card.imageUrl}')`
@@ -351,10 +350,10 @@ export default {
   .overlay-background
     background-color var(--primary-background)
     opacity 0.5
-  canvas
-    position absolute
+  canvas#connections
     opacity 0.99
-  .cards-wrap
+  .cards-wrap,
+  canvas#connections
     position absolute
     left 0
     margin 20px
