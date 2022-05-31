@@ -692,7 +692,6 @@ export default {
     return this.connectionPathBetweenCoords(start, end)
   },
   curveControlPoint (start, end) {
-    // TODO: as you're drawing, manipulate the curvecontrolpoint to be more pleasing
     // q defines a quadratic curve control point
     return 'q90,40'
   },
