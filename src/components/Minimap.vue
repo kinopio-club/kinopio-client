@@ -184,6 +184,7 @@ export default {
       const viewportHeight = this.$store.state.viewportHeight
       const zoom = this.$store.getters.spaceZoomDecimal
       let position = utils.cursorPositionInViewport(event)
+      if (position.x < 0 || position.y < 0) { return }
       position = {
         x: position.x * zoom,
         y: position.y * zoom
