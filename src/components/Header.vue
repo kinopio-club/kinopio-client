@@ -656,7 +656,7 @@ header
   padding 8px
   display flex
   justify-content space-between
-  transition 0.2s opacity
+  transition 0.4s opacity
   &.disabled
     opacity 0.2
   nav,
