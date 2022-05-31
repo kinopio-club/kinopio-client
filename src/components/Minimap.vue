@@ -268,7 +268,7 @@ export default {
     &.transparent-background
       background-color transparent !important
     &.is-in-viewport
-      box-shadow 3px 3px 0 var(--light-shadow)
+      box-shadow 5px 5px 0 var(--light-shadow)
 
   // copied from Community.vue
   .small-button
