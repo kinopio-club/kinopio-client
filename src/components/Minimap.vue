@@ -177,12 +177,36 @@ export default {
         top: y
       }
     },
+    scaleCoordinates (coords) {
+      const zoom = this.$store.getters.spaceZoomDecimal
+      const retinaMultiplier = 2
+      // x
+      coords.x = coords.x * zoom
+      coords.x = coords.x * this.scale
+      coords.x = Math.round(coords.x * retinaMultiplier)
+      // y
+      coords.y = coords.y * zoom
+      coords.y = coords.y * this.scale
+      coords.y = Math.round(coords.y * retinaMultiplier)
+      return coords
+    },
+    scaleConnectionPath (path) {
+      let pathStart = utils.coordsFromConnectionPath(path)
+      let pathCurvePoint = utils.curveControlPointFromPath(path)
+      let pathEnd = utils.endCoordsFromConnectionPath(path)
+      // console.log('💖', path, pathStart, pathCurvePoint, pathEnd, this.scale)
+      pathStart = this.scaleCoordinates(pathStart)
+      pathCurvePoint = this.scaleCoordinates(pathCurvePoint)
+      pathEnd = this.scaleCoordinates(pathEnd)
+      path = `m${pathStart.x},${pathStart.y} q${pathCurvePoint.x},${pathCurvePoint.y} ${pathEnd.x},${pathEnd.y}`
+      // console.log('💖💖', path, pathStart, pathCurvePoint, pathEnd, this.scale)
+      return path
+    },
     initConnections () {
-      let connections = this.$store.getters['currentConnections/all']
-      connections.forEach(connection => {
-        const path = connection.path
-        console.log('💖', path, utils.coordsFromConnectionPath(path), utils.curveControlPointFromPath(path), utils.endCoordsFromConnectionPath(path), this.scale)
-        // scale coords
+      let connections = utils.clone(this.$store.getters['currentConnections/all'])
+      connections = connections.map(connection => {
+        connection.path = this.scaleConnectionPath(connection.path)
+        return connection
       })
       this.connections = connections
     },
