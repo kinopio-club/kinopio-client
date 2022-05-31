@@ -1,5 +1,5 @@
 <template lang="pug">
-header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
+header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidden': isHidden, disabled: minimapIsVisible }")
   //- embed
   nav.embed-nav(v-if="isEmbed")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
@@ -276,13 +276,11 @@ export default {
   },
   computed: {
     kinopioDomain () { return utils.kinopioDomain() },
+    minimapIsVisible () { return this.$store.state.minimapIsVisible },
     isVisible () {
-      const minimapIsVisible = this.$store.state.minimapIsVisible
       const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
       const isTouchDevice = this.$store.getters.isTouchDevice
-      if (minimapIsVisible) {
-        return false
-      } else if (cardDetailsIsVisible && isTouchDevice) {
+      if (cardDetailsIsVisible && isTouchDevice) {
         return false
       } else {
         return true
@@ -659,6 +657,8 @@ header
   display flex
   justify-content space-between
   transition 0.2s opacity
+  &.disabled
+    opacity 0.2
   nav,
   aside
     pointer-events none
