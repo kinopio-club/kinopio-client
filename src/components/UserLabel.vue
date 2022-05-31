@@ -49,15 +49,15 @@ export default {
   },
   methods: {
     updatePositionWithZoom (cursor) {
-      let multiplier = 1
+      let scale = 1
       if (this.scale) {
-        multiplier = this.scale
+        scale = this.scale
       } else {
         const counterZoom = 1 / cursor.zoom
-        multiplier = counterZoom
+        scale = counterZoom
       }
-      this.left = this.left * multiplier
-      this.top = this.top * multiplier
+      this.left = this.left * scale
+      this.top = this.top * scale
     },
     checkIsOnscreen () {
       if (this.minimapIsVisible) { return }
