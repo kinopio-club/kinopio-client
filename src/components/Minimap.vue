@@ -28,6 +28,15 @@ export default {
   components: {
     UserLabel
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'spaceZoomPercent') {
+        this.$nextTick(() => {
+          this.debouncedInit()
+        })
+      }
+    })
+  },
   mounted () {
     window.addEventListener('scroll', this.updateViewport)
     window.addEventListener('resize', this.debouncedInit)
@@ -107,7 +116,7 @@ export default {
     },
     debouncedInit: debounce(async function () {
       this.init()
-    }, 350),
+    }, { leading: true }, 350),
     init () {
       this.initBoundary()
       this.initScale()
