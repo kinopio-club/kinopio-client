@@ -362,7 +362,7 @@ export default {
     background-color var(--secondary-background)
     border-radius 3px
     background-size cover
-    transition 0.3s box-shadow
+    transition 0.5s box-shadow
     &.transparent-background
       background-color transparent !important
     &.is-in-viewport
