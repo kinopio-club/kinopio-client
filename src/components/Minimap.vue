@@ -1,15 +1,25 @@
 <template lang="pug">
 .overlay.minimap(v-if="isVisible" @click="scrollTo" @pointerup="endPanningViewport" @mousemove="panViewport" :style="overlayStyle" @touchmove.stop.prevent)
   .overlay-background(:style="overlayBackgroundStyle")
+  //- viewport box
   .viewport-wrap(:style="viewportWrapStyle")
     .viewport.blink(:style="viewportStyle" @pointerdown="startPanningViewport")
     .viewport-top(:style="viewportChildStyle" @pointerdown="startPanningViewport")
       .button-wrap(@pointerdown.stop @pointerup="hideMinimap")
         button.small-button.active
           img.icon(src="@/assets/minimap.svg")
+
+  //- connections
+  //- canvas(:style="overlayStyle")
+  template(v-for="connection in connections")
+    p {{connection.path}}
+    //- Connection(:connection="connection")
+
+  //- cards
   .cards-wrap
     template(v-for="card in cards")
       .card(:style="cardStyle(card)" :class="{ 'transparent-background': card.imageUrl, 'is-in-viewport': isInViewport(card) }" :data-card-minimap-id="card.id")
+  //- remote users
   template(v-for="user in spaceMembers")
     UserLabel(:user="user" :scale="scale")
 
@@ -52,7 +62,8 @@ export default {
       cards: [],
       viewport: {},
       isPanningViewport: false,
-      cursor: null
+      cursor: null,
+      connections: []
     }
   },
   computed: {
@@ -121,6 +132,7 @@ export default {
       this.initBoundary()
       this.initScale()
       this.updateViewport()
+      this.initConnections()
       this.initCards()
     },
     initBoundary () {
@@ -164,6 +176,15 @@ export default {
         left: x,
         top: y
       }
+    },
+    initConnections () {
+      let connections = this.$store.getters['currentConnections/all']
+      connections.forEach(connection => {
+        const path = connection.path
+        console.log('💖', path, utils.coordsFromConnectionPath(path), utils.curveControlPointFromPath(path), utils.endCoordsFromConnectionPath(path), this.scale)
+        // scale coords
+      })
+      this.connections = connections
     },
     imageUrlFromCard (card) {
       const imageUrlIsUrlPreview = card.urlPreviewImage && card.urlPreviewIsVisible
