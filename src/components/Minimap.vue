@@ -25,7 +25,6 @@ import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
 
-const maxScale = 0.4
 const offset = 10 // container margin / 2
 let canvas, context
 
@@ -153,13 +152,13 @@ export default {
       this.boundary = { width, height }
     },
     initScale () {
-      const viewportWidth = this.$store.state.viewportWidth
-      const viewportHeight = this.$store.state.viewportHeight
+      const maxScale = 0.4
+      const viewportWidth = this.$store.state.viewportWidth - offset
+      const viewportHeight = this.$store.state.viewportHeight - offset
       const scaleX = viewportWidth / this.boundary.width
       const scaleY = viewportHeight / this.boundary.height
-      const squish = 0.1
-      let scale = Math.max(scaleX, scaleY)
-      scale = Math.min(utils.roundFloat(scale - squish), maxScale)
+      let scale = Math.min(scaleX, scaleY)
+      scale = Math.min(utils.roundFloat(scale * 0.95), maxScale)
       this.scale = scale
     },
     updateViewport () {
