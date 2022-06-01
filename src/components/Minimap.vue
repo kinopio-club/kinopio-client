@@ -281,7 +281,7 @@ export default {
     },
     initCards () {
       let cards = this.$store.getters['currentCards/all']
-      const maxImageUrls = 20
+      const maxImageUrls = 40
       let imageUrls = 0
       cards = cards.map(card => {
         let imageUrl
