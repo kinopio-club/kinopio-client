@@ -157,8 +157,8 @@ export default {
       const viewportHeight = this.$store.state.viewportHeight
       const scaleX = viewportWidth / this.boundary.width
       const scaleY = viewportHeight / this.boundary.height
-      const squish = 0.05
-      let scale = Math.min(scaleX, scaleY)
+      const squish = 0.1
+      let scale = Math.max(scaleX, scaleY)
       scale = Math.min(utils.roundFloat(scale - squish), maxScale)
       this.scale = scale
     },
