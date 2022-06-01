@@ -68,6 +68,7 @@ export default {
       return this.$store.getters['currentSpace/members'](excludeCurrentUser)
     },
     isVisible () { return this.$store.state.minimapIsVisible },
+    minimapToggledByButton () { return this.$store.state.minimapToggledByButton },
     overlayStyle () {
       return { cursor: this.cursor }
     },
@@ -118,7 +119,7 @@ export default {
     },
     panViewport (event) {
       if (!this.isVisible) { return }
-      if (!this.isPanningViewport) { return }
+      if (!this.isPanningViewport && this.minimapToggledByButton) { return }
       this.scrollTo(event, 'auto')
     },
     debouncedInit: debounce(async function () {

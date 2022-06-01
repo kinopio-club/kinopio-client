@@ -198,6 +198,7 @@ export default {
         if (spaceKeyIsDown) { return }
         spaceKeyIsDown = true
         if (!this.$store.state.minimapIsVisible) {
+          this.$store.commit('minimapToggledByButton', false)
           this.$store.commit('minimapIsVisible', true)
         }
       // Lock Cards
