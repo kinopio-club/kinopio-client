@@ -692,7 +692,6 @@ export default {
     return this.connectionPathBetweenCoords(start, end)
   },
   curveControlPoint (start, end) {
-    // TODO: as you're drawing, manipulate the curvecontrolpoint to be more pleasing
     // q defines a quadratic curve control point
     return 'q90,40'
   },
@@ -729,14 +728,47 @@ export default {
   },
   coordsFromConnectionPath (path) {
     // https://regexr.com/66idp
-    // matches first 2 digit groups in path: m295,284 q90,40 87,57
+    // matches first 2 digit groups in path: m295,284 q90,40 87,57 → [295, 284]
     const pathCoordsPattern = new RegExp(/m([\d.]{1,}),([\d.]{1,})/)
     let coords = path.match(pathCoordsPattern)
     coords = {
       x: coords[1],
       y: coords[2]
     }
-    return coords
+    return this.integerCoords(coords)
+  },
+  curveControlPointFromPath (path) {
+    // https://regexr.com/6mptt
+    // matches 'q'-digits-,-digits-space: m295,284 q90,40 87,57 → "q90,40"
+    const pathCoordsPattern = new RegExp(/q([\d.]{1,}),([\d.]{1,})/)
+    let coords = path.match(pathCoordsPattern)
+    coords = {
+      x: coords[1],
+      y: coords[2]
+    }
+    return this.integerCoords(coords)
+  },
+  endCoordsFromConnectionPath (path) {
+    // https://regexr.com/6mpru
+    // matches end of string after the last space character: m295,284 q90,40 87,57 → "87,57"
+    const endPathPattern = new RegExp(/([^ ]*$)/gm)
+    const endPath = path.match(endPathPattern)[0]
+    // https://regexr.com/6mpsj
+    // split end path into coordinates: "87,57" → [87, 57]
+    const coordsPattern = new RegExp(/([\d-.]*)/gm)
+    let coords = endPath.match(coordsPattern)
+    coords = coords.filter(value => Boolean(value))
+    coords = {
+      x: coords[0],
+      y: coords[1]
+    }
+    return this.integerCoords(coords)
+  },
+  integerCoords (coords) {
+    return {
+      x: parseInt(coords.x),
+      y: parseInt(coords.y)
+    }
   },
 
   // Painting 🖌

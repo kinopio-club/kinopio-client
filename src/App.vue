@@ -16,12 +16,13 @@
   Footer
   TagDetails
   LinkDetails
+  Minimap
   WindowHistoryHandler
   KeyboardShortcutsHandler
   .preload
     .logo-hover
     .logo-active
-  .badge.label-badge.development(v-if="isDevelopment") DEV
+  .badge.label-badge.development-badge(v-if="isDevelopment") DEV
   //- pre-cached icons
   .icons.hidden
     img.icon(src="@/assets/offline.svg")
@@ -38,6 +39,7 @@ import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
+import Minimap from '@/components/Minimap.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -51,7 +53,8 @@ export default {
     WindowHistoryHandler,
     TagDetails,
     LinkDetails,
-    OffscreenMarkers
+    OffscreenMarkers,
+    Minimap
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
@@ -288,12 +291,12 @@ body
 .app
   background-image url('assets/background-2x.png')
   position relative
-  > .label-badge
+  > .development-badge
     color var(--primary-background)
     min-height initial
     left initial
-    right 10px
-    bottom 60px
+    right 0px
+    bottom 80px
     position fixed
     pointer-events none
     z-index 100
@@ -617,6 +620,9 @@ dialog
   padding 0
   height 9px
   vertical-align 0px
+
+.icon.minimap
+  height 13px
 
 label,
 li

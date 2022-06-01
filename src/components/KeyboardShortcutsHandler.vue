@@ -3,8 +3,8 @@
 
 <script>
 import utils from '@/utils.js'
-
 import scrollIntoView from '@/scroll-into-view.js'
+
 import last from 'lodash-es/last'
 import { nanoid } from 'nanoid'
 
@@ -12,6 +12,7 @@ const incrementPosition = 12
 let useSiblingConnectionType
 let browserZoomLevel = 0
 let disableContextMenu = false
+let spaceKeyIsDown = false
 
 let prevCursorPosition, currentCursorPosition
 
@@ -69,6 +70,7 @@ export default {
       // Escape
       } else if (key === 'Escape') {
         this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
+        this.$store.commit('minimapIsVisible', false)
       // → Left
       } else if (key === 'ArrowLeft' && (isSpaceScope || isFromCard)) {
         this.focusNearestCardLeft()
@@ -101,7 +103,8 @@ export default {
         value = !value
         this.$store.dispatch('currentUser/toggleFilterComments', value)
       } else if (key === ' ' && isSpaceScope) {
-        this.$store.commit('currentUserIsPanningReady', false)
+        this.$store.commit('minimapIsVisible', false)
+        spaceKeyIsDown = false
       }
     },
     // on key down
@@ -189,11 +192,13 @@ export default {
         }
         event.preventDefault()
         this.$store.commit('triggerSpaceZoomIn')
-      // Panning
+      // Minimap
       } else if (key === ' ' && isSpaceScope) {
         event.preventDefault()
-        if (!this.$store.state.currentUserIsPanningReady) {
-          this.$store.commit('currentUserIsPanningReady', true)
+        if (spaceKeyIsDown) { return }
+        spaceKeyIsDown = true
+        if (!this.$store.state.minimapIsVisible) {
+          this.$store.commit('minimapIsVisible', true)
         }
       // Lock Cards
       } else if (event.shiftKey && isMeta && key === 'l') {

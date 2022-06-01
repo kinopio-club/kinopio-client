@@ -34,7 +34,9 @@
               span Tips
             MobileTips(:visible="mobileTipsIsVisible")
 
-  .right(v-if="!isMobileOrTouch" :class="{'is-embed': isEmbed}")
+  .right(v-if="!isMobileOrTouch" :class="{'is-embed': isEmbed, 'fade-out': isFadeOut, 'hidden': isHidden}")
+    button(@pointerup="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
+      img.icon.minimap(src="@/assets/minimap.svg")
     SpaceZoom
 </template>
 
@@ -120,6 +122,7 @@ export default {
     clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
+    minimapIsVisible () { return this.$store.state.minimapIsVisible },
     isAddPage () { return this.$store.state.isAddPage },
     isEmbed () { return this.$store.state.isEmbed },
     currentUser () { return this.$store.state.currentUser },
@@ -178,6 +181,10 @@ export default {
     }
   },
   methods: {
+    toggleMinimapIsVislble () {
+      this.closeDialogs()
+      this.$store.commit('minimapIsVisible', !this.minimapIsVisible)
+    },
     closeDialogs (exclude) {
       this.favoritesIsVisible = false
       this.exploreIsVisible = false
@@ -380,8 +387,8 @@ export default {
   pointer-events none
   .right
     pointer-events all
-    @media(max-width 460px)
-     display none
+    text-align right
+    transition 0.2s opacity
     &.is-embed
       position absolute
       right 0
