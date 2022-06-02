@@ -56,7 +56,7 @@ export default {
       const key = event.key
       // console.warn('🎹', key)
       const isFromCard = event.target.classList[0] === 'card'
-      const isSpaceScope = event.target.tagName === 'BODY'
+      const isSpaceScope = event.target.tagName === 'BODY' || event.target.className === 'card'
       // ?
       if (key === '?' && isSpaceScope) {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
@@ -114,7 +114,7 @@ export default {
       const isFromCardName = event.target.closest('dialog.card-details')
       const isFromCard = event.target.classList[0] === 'card'
       const isCardScope = isFromCard || isFromCardName
-      const isSpaceScope = event.target.tagName === 'BODY'
+      const isSpaceScope = event.target.tagName === 'BODY' || event.target.className === 'card'
       const isFromInput = event.target.closest('input') || event.target.closest('textarea')
       // Add Child Card
       if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
