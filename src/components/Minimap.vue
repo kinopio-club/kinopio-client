@@ -5,7 +5,7 @@
   .viewport-wrap(:style="viewportWrapStyle")
     .viewport.blink(:style="viewportStyle" @pointerdown="startPanningViewport")
     .viewport-top(:style="viewportChildStyle" @pointerdown="startPanningViewport")
-      .button-wrap(@pointerdown.stop @pointerup="hideMinimap")
+      .button-wrap(@pointerdown.stop @pointerup.stop="hideMinimap")
         button.small-button.active
           img.icon(src="@/assets/minimap.svg")
   //- connections
