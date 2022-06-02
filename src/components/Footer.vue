@@ -34,10 +34,11 @@
               span Tips
             MobileTips(:visible="mobileTipsIsVisible")
 
-  .right(v-if="!isMobileOrTouch" :class="{'is-embed': isEmbed, 'fade-out': isFadeOut, 'hidden': isHidden}")
+  .right(:class="{'is-embed': isEmbed, 'fade-out': isFadeOut, 'hidden': isHidden}")
     button(@pointerup="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
       img.icon.minimap(src="@/assets/minimap.svg")
-    SpaceZoom
+    template(v-if="!isMobileOrTouch")
+      SpaceZoom
 </template>
 
 <script>

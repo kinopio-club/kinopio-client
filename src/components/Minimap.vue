@@ -1,5 +1,5 @@
 <template lang="pug">
-.overlay.minimap(v-if="isVisible" @click="scrollTo" @pointerup="endPanningViewport" @mousemove="panViewport" :style="overlayStyle" @touchmove.stop.prevent)
+.overlay.minimap(v-if="isVisible" @pointerup="endPanningViewport" @pointermove="panViewport" :style="overlayStyle" @touchmove.stop.prevent)
   .overlay-background(:style="overlayBackgroundStyle")
   //- viewport box
   .viewport-wrap(:style="viewportWrapStyle")
@@ -112,9 +112,10 @@ export default {
       this.cursor = 'grabbing'
       this.scrollTo(event, 'auto')
     },
-    endPanningViewport () {
+    endPanningViewport (event) {
       this.isPanningViewport = false
       this.cursor = null
+      this.scrollTo(event)
     },
     panViewport (event) {
       if (!this.isVisible) { return }
