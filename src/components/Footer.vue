@@ -183,7 +183,6 @@ export default {
   methods: {
     toggleMinimapIsVislble () {
       this.closeDialogs()
-      this.$store.commit('minimapToggledByButton', true)
       this.$store.commit('minimapIsVisible', !this.minimapIsVisible)
     },
     closeDialogs (exclude) {

@@ -72,7 +72,6 @@ const store = createStore({
 
     // minimap
     minimapIsVisible: false,
-    minimapToggledByButton: false,
 
     // box selecting
     currentUserIsBoxSelecting: false,
@@ -575,10 +574,6 @@ const store = createStore({
     minimapIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'minimapIsVisible' })
       state.minimapIsVisible = value
-    },
-    minimapToggledByButton: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'minimapToggledByButton' })
-      state.minimapToggledByButton = value
     },
 
     // Dragging
