@@ -1,5 +1,5 @@
 <template lang="pug">
-.overlay.minimap(v-if="isVisible" @pointerup.stop.prevent="endPanningViewport" @pointermove.stop.prevent="panViewport" :style="overlayStyle" @pointerdown.stop.prevent)
+.overlay.minimap(v-if="isVisible" @pointerup.stop.prevent="endPanningViewport" @mousemove.stop.prevent="panViewport" @touchmove.stop.prevent @pointerdown.stop.prevent :style="overlayStyle")
   .overlay-background(:style="overlayBackgroundStyle")
   //- viewport box
   .viewport-wrap(:style="viewportWrapStyle")
