@@ -24,9 +24,9 @@ dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="
             p
               span.badge.info(v-if="!notification.isRead") New
               img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="isAskToAddToExplore(notification)")
-              span.badge.user-badge.user-badge(:style="{background: notification.user.color}")
+              span.badge.user-badge.user-badge(:style="{background: userColor(notification)}")
                 User(:user="notification.user" :isClickable="false" :hideYouLabel="true")
-                span {{notification.user.name}}
+                span {{userName(notification)}}
               template(v-if="isAskToAddToExplore(notification)")
                 span asked to add
                 span.badge.space-badge
@@ -186,6 +186,16 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
+    },
+    userColor (notification) {
+      if (notification.user) {
+        return notification.user.color
+      }
+    },
+    userName (notification) {
+      if (notification.user) {
+        return notification.user.name
+      }
     }
   },
   watch: {
