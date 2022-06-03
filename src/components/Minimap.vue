@@ -1,11 +1,11 @@
 <template lang="pug">
-.overlay.minimap(v-if="isVisible" @pointerup.stop.prevent="endPanningViewport" @pointermove.stop.prevent="panViewport" :style="overlayStyle" @pointerdown.stop.prevent)
+.overlay.minimap(v-if="isVisible" @pointerup="endPanningViewport" @pointermove="panViewport" :style="overlayStyle" @touchmove.stop.prevent)
   .overlay-background(:style="overlayBackgroundStyle")
   //- viewport box
   .viewport-wrap(:style="viewportWrapStyle")
     .viewport.blink(:style="viewportStyle" @pointerdown="startPanningViewport")
     .viewport-top(:style="viewportChildStyle" @pointerdown="startPanningViewport")
-      .button-wrap(@pointerdown.stop @pointerup.stop="hideMinimap")
+      .button-wrap(@pointerdown.stop @pointerup="hideMinimap")
         button.small-button.active
           img.icon(src="@/assets/minimap.svg")
   //- connections
