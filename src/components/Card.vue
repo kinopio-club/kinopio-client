@@ -221,6 +221,8 @@ import User from '@/components/User.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 
+import dayjs from 'dayjs'
+
 let isMultiTouch
 let initialTouchEvent = {}
 let touchPosition = {}
@@ -284,6 +286,7 @@ export default {
   },
   data () {
     return {
+      sessionStartDate: new Date(),
       isRemoteConnecting: false,
       remoteConnectionColor: '',
       uploadIsDraggedOver: false,
@@ -883,7 +886,11 @@ export default {
         borderRadius: borderRadius
       }
     },
-    userDetailsIsVisible () { return this.$store.state.cardUserDetailsIsVisibleForCardId === this.id }
+    userDetailsIsVisible () { return this.$store.state.cardUserDetailsIsVisibleForCardId === this.id },
+    preventUpdatePrevPreview () {
+      const updateDelta = dayjs(this.updatedAt).diff(this.sessionStartDate, 'second')
+      return updateDelta < 0
+    }
   },
   methods: {
 
@@ -1667,7 +1674,8 @@ export default {
     // url preview
 
     async updateUrlPreview () {
-      if (!this.canEditCard) { return }
+      if (this.preventUpdatePrevPreview) { return }
+      if (!this.cnEditCard) { return }
       this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
       const cardId = this.card.id
       let url = this.webUrl
