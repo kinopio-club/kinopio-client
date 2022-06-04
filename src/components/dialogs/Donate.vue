@@ -1,8 +1,11 @@
 <template lang="pug">
 dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
-    p option, one time fee
+    p optionally, support ongoing development of Kinopio
     p support
+      .badge.donor
+        span Donor
+
   section
     .row
       .segmented-buttons
@@ -10,14 +13,24 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
         button $20
         button $50
         button Custom
+  section
+    .row
+      User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
+      .badge.info
+        span ${{currentAmount}}/once
+
   //- section if currentAmount
+  //- p(v-else) You'll be billed {{currentAmount}} immediately, one time only
 
 </template>
 
 <script>
+import User from '@/components/User.vue'
+
 export default {
   name: 'Donate',
   components: {
+    User
   },
   props: {
     visible: Boolean
@@ -42,7 +55,17 @@ export default {
     }
   },
   computed: {
+    currentUser () { return this.$store.state.currentUser }
     // kinopioDomain () { return utils.kinopioDomain() },
+
+    // customAmount
+    // customAmountIsValid () {
+    // set vmodel
+    //   // parseFloat()
+    //   // utils round Float
+    //   const min = 1
+    //   const max = 999999
+    // }
   },
   methods: {
     async getBillingInfo () {
@@ -74,5 +97,14 @@ dialog.donate
   max-height calc(100vh - 210px)
   left initial
   right 8px
+  .summary
+    margin-top 10px
+    margin-bottom 10px
+  .badge
+    display inline-block
+  .user
+    margin-right 6px
+  .donor
+    background-color var(--user-badge-donor)
 
 </style>
