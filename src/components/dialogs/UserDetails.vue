@@ -43,9 +43,8 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
       p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
       progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
       .button-wrap(v-if="!isAddPage")
-        button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
+        button(@click.left.stop="triggerUpgradeUserIsVisible")
           span Upgrade for Unlimited
-        UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeDialogs")
       .row(v-if="!isAppStoreView")
         p
           .badge.info $6/mo, $60/yr
@@ -103,7 +102,6 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
-import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Donate from '@/components/dialogs/Donate.vue'
 import Loader from '@/components/Loader.vue'
 import UserBadges from '@/components/UserBadges.vue'
@@ -123,7 +121,6 @@ export default {
     Loader,
     UserBadges,
     SpacePicker,
-    UpgradeUser,
     Donate
   },
   props: {
@@ -138,7 +135,6 @@ export default {
       colorPickerIsVisible: false,
       donateIsVisible: false,
       userSettingsIsVisible: false,
-      upgradeUserIsVisible: false,
       loadingUserspaces: false,
       spacePickerIsVisible: false,
       userSpaces: [],
@@ -236,15 +232,9 @@ export default {
       this.closeDialogs()
       this.userSettingsIsVisible = !isVisible
     },
-    toggleUpgradeUserIsVisible () {
-      if (utils.isMobile()) {
-        this.$store.commit('closeAllDialogs', 'UserDetails.toggleUpgradeUserIsVisible')
-        this.$store.commit('triggerUpgradeUserIsVisible')
-      } else {
-        const isVisible = this.upgradeUserIsVisible
-        this.closeDialogs()
-        this.upgradeUserIsVisible = !isVisible
-      }
+    triggerUpgradeUserIsVisible () {
+      this.$store.commit('closeAllDialogs', 'UserDetails.triggerUpgradeUserIsVisible')
+      this.$store.commit('triggerUpgradeUserIsVisible')
     },
     toggleDonateIsVisible () {
       const isVisible = this.donateIsVisible
@@ -260,7 +250,6 @@ export default {
       this.colorPickerIsVisible = false
       this.userSettingsIsVisible = false
       this.spacePickerIsVisible = false
-      this.upgradeUserIsVisible = false
       this.donateIsVisible = false
     },
     updateUserColor (newValue) {

@@ -1,7 +1,14 @@
 <template lang="pug">
-dialog.donate(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     p donate donate donate donate
+  section
+    .row
+      .segmented-buttons
+        button $5
+        button $20
+        button $100
+
 </template>
 
 <script>
