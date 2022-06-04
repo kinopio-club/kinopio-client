@@ -1,13 +1,16 @@
 <template lang="pug">
 dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
-    p donate donate donate donate
+    p option, one time fee
+    p support
   section
     .row
       .segmented-buttons
         button $5
         button $20
-        button $100
+        button $50
+        button Custom
+  //- section if currentAmount
 
 </template>
 
@@ -32,12 +35,35 @@ export default {
   },
   data () {
     return {
+      currentAmount: 0,
+      loading: {
+        gettingBillingInfo: false
+      }
     }
   },
   computed: {
     // kinopioDomain () { return utils.kinopioDomain() },
   },
   methods: {
+    async getBillingInfo () {
+      this.gettingBillingInfo = true
+      try {
+        const info = await this.$store.dispatch('api/subscriptionInfo', {
+          userId: this.$store.state.currentUser.id
+        })
+        console.log('🚛', info, info.subscription.customer)
+      } catch (error) {
+        console.error('🚒', error)
+      }
+      this.gettingBillingInfo = false
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.getBillingInfo()
+      }
+    }
   }
 }
 </script>
