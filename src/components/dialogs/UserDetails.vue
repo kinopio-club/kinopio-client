@@ -32,6 +32,11 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
           button.inline-button
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       UserBadges(:user="user")
+      template(v-if="currentUserIsUpgraded")
+        .button-wrap
+          button(@click.left.stop="toggleDonateIsVisible" :class="{active: donateIsVisible}")
+            span Donate
+          Donate(:visible="donateIsVisible")
 
     //- Unlimited cards from member
     section.upgrade(v-if="!currentUserIsUpgraded")
@@ -99,6 +104,7 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
+import Donate from '@/components/dialogs/Donate.vue'
 import Loader from '@/components/Loader.vue'
 import UserBadges from '@/components/UserBadges.vue'
 import cache from '@/cache.js'
@@ -117,7 +123,8 @@ export default {
     Loader,
     UserBadges,
     SpacePicker,
-    UpgradeUser
+    UpgradeUser,
+    Donate
   },
   props: {
     user: Object,
@@ -129,6 +136,7 @@ export default {
   data () {
     return {
       colorPickerIsVisible: false,
+      donateIsVisible: false,
       userSettingsIsVisible: false,
       upgradeUserIsVisible: false,
       loadingUserspaces: false,
@@ -238,6 +246,11 @@ export default {
         this.upgradeUserIsVisible = !isVisible
       }
     },
+    toggleDonateIsVisible () {
+      const isVisible = this.donateIsVisible
+      this.closeDialogs()
+      this.donateIsVisible = !isVisible
+    },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
       this.closeDialogs()
@@ -248,6 +261,7 @@ export default {
       this.userSettingsIsVisible = false
       this.spacePickerIsVisible = false
       this.upgradeUserIsVisible = false
+      this.donateIsVisible = false
     },
     updateUserColor (newValue) {
       this.updateUser({ color: newValue })
