@@ -51,27 +51,28 @@ export default {
   computed: {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     price () {
-      let monthId, yearId
-      if (import.meta.env.MODE === 'development') {
-        monthId = 'price_1L046SDFIr5ywhwoMfsIW1W5'
-        yearId = 'price_1L046iDFIr5ywhwoeRIDE5rN'
-      } else {
-        monthId = 'price_1L2GvBDFIr5ywhwobbE35dhA'
-        yearId = 'price_1L2ErWDFIr5ywhwodsKxEEAq'
-      }
+      let price
       if (this.priceIsMonthly) {
-        return {
+        price = {
           amount: '$6',
           period: 'month',
-          id: monthId
+          id: 'price_1L2GvBDFIr5ywhwobbE35dhA'
         }
       } else {
-        return {
+        price = {
           amount: '$60',
           period: 'year',
-          id: yearId
+          id: 'price_1L2ErWDFIr5ywhwodsKxEEAq'
         }
       }
+      if (import.meta.env.MODE === 'development') {
+        if (this.priceIsMonthly) {
+          price.id = 'price_1L7200DFIr5ywhwoAJGkA7yK'
+        } else {
+          price.id = 'price_1L720NDFIr5ywhwo0wS5PWAv'
+        }
+      }
+      return price
     }
   },
   methods: {
