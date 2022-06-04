@@ -258,6 +258,7 @@ export default {
       this.connections = connections
     },
     drawConnections () {
+      if (!context) { return }
       context.clearRect(0, 0, canvas.width, canvas.height)
       context.lineWidth = 4
       context.lineCap = 'round'
