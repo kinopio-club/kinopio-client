@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keydown.stop :class="{'right-side': dialogOnRight}" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keydown.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     .row
       p Upgrade your account for unlimited cards and uploads
@@ -32,8 +32,7 @@ export default {
     Checkout
   },
   props: {
-    visible: Boolean,
-    dialogOnRight: Boolean
+    visible: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -105,9 +104,8 @@ export default {
 .upgrade-user
   overflow auto
   max-height calc(100vh - 210px)
-  &.right-side
-    left initial
-    right 8px
+  left initial
+  right 8px
   .badge
     display inline-block
   button

@@ -34,9 +34,8 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
       UserBadges(:user="user")
       template(v-if="currentUserIsUpgraded")
         .button-wrap
-          button(@click.left.stop="toggleDonateIsVisible" :class="{active: donateIsVisible}")
+          button(@click.left.stop="triggerDonateIsVisible")
             span Donate
-          Donate(:visible="donateIsVisible")
 
     //- Unlimited cards from member
     section.upgrade(v-if="!currentUserIsUpgraded")
@@ -102,7 +101,6 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
-import Donate from '@/components/dialogs/Donate.vue'
 import Loader from '@/components/Loader.vue'
 import UserBadges from '@/components/UserBadges.vue'
 import cache from '@/cache.js'
@@ -120,8 +118,7 @@ export default {
     User,
     Loader,
     UserBadges,
-    SpacePicker,
-    Donate
+    SpacePicker
   },
   props: {
     user: Object,
@@ -133,7 +130,6 @@ export default {
   data () {
     return {
       colorPickerIsVisible: false,
-      donateIsVisible: false,
       userSettingsIsVisible: false,
       loadingUserspaces: false,
       spacePickerIsVisible: false,
@@ -236,10 +232,9 @@ export default {
       this.$store.commit('closeAllDialogs', 'UserDetails.triggerUpgradeUserIsVisible')
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
-    toggleDonateIsVisible () {
-      const isVisible = this.donateIsVisible
-      this.closeDialogs()
-      this.donateIsVisible = !isVisible
+    triggerDonateIsVisible () {
+      this.$store.commit('closeAllDialogs', 'UserDetails.triggerDonateIsVisible')
+      this.$store.commit('triggerDonateIsVisible')
     },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
@@ -250,7 +245,6 @@ export default {
       this.colorPickerIsVisible = false
       this.userSettingsIsVisible = false
       this.spacePickerIsVisible = false
-      this.donateIsVisible = false
     },
     updateUserColor (newValue) {
       this.updateUser({ color: newValue })

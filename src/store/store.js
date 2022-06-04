@@ -387,6 +387,7 @@ const store = createStore({
     triggerUpdatePositionInVisualViewport: () => {},
     triggerHideTouchInterface: () => {},
     triggerUpgradeUserIsVisible: () => {},
+    triggerDonateIsVisible: () => {},
     triggerUploadComplete: () => {},
     triggerPauseAllAudio: () => {},
     triggerScrollCardIntoView: (state, cardId) => {},

@@ -43,5 +43,10 @@ export default {
 </script>
 
 <style lang="stylus">
-// .donate
+.donate
+  overflow auto
+  max-height calc(100vh - 210px)
+  left initial
+  right 8px
+
 </style>
