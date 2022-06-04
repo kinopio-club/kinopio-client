@@ -1,26 +1,41 @@
 <template lang="pug">
 dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
-    p optionally, support ongoing development of Kinopio
-    p support
-      .badge.donor
+    p Donate
+  section
+    p As you may know, Kinopio is built by me, Pirijan.
+    p Donations help support me. I'm both grateful and flattered that you're even here.
+    p
+      span You'll also get a {{' '}}
+      span.badge.donor
         span Donor
-
-  section
-    .row
+      span badge on your user profile
+    p
       .segmented-buttons
-        button $5
-        button $20
-        button $50
-        button Custom
-  section
-    .row
-      User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
-      .badge.info
-        span ${{currentAmount}}/once
+        button(@click="updateAmount(5)" :class="{ active: this.currentAmount === 5 }")
+          span $5
+        button(@click="updateAmount(20)" :class="{ active: this.currentAmount === 20 }")
+          span $20
+        button(@click="updateAmount(50)" :class="{ active: this.currentAmount === 50 }")
+          span $50
+        button(@click="toggleCustomAmountIsVisible" :class="{ active: customAmountIsVisible }")
+          span Custom
 
-  //- section if currentAmount
-  //- p(v-else) You'll be billed {{currentAmount}} immediately, one time only
+    p(v-if="customAmountIsVisible")
+      .row
+        span $
+        input.name.user-details-name(placeholder="100" v-model="customAmount" ref="input" type="number")
+
+    template(v-if="currentAmount")
+      p
+        .row
+          User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
+          .badge.info
+            span ${{currentAmount}}/once
+      button
+        span Donate
+        //- Loader(:visible="isLoading")
+      p You'll be billed ${{currentAmount}}, to the payment method you used to upgrade
 
 </template>
 
@@ -35,56 +50,59 @@ export default {
   props: {
     visible: Boolean
   },
-  created () {
-  //   this.$store.subscribe((mutation, state) => {
-  //     if (mutation.type === 'closeAllDialogs') {
-  //       this.closeAllDialogs()
-  //     }
-  //   })
-  },
-  mounted () {
-  },
-  beforeUnmount () {
-  },
   data () {
     return {
+      customAmountIsVisible: false,
       currentAmount: 0,
-      loading: {
-        gettingBillingInfo: false
-      }
+      isLoading: false
     }
   },
   computed: {
+    customAmount: {
+      get () {
+        return this.currentAmount
+      },
+      set (value) {
+        value = parseInt(value)
+        this.currentAmount = value
+      }
+    },
     currentUser () { return this.$store.state.currentUser }
-    // kinopioDomain () { return utils.kinopioDomain() },
-
-    // customAmount
-    // customAmountIsValid () {
-    // set vmodel
-    //   // parseFloat()
-    //   // utils round Float
-    //   const min = 1
-    //   const max = 999999
-    // }
   },
   methods: {
-    async getBillingInfo () {
-      this.gettingBillingInfo = true
+    toggleCustomAmountIsVisible (value) {
+      value = !this.customAmountIsVisible
+      this.customAmountIsVisible = value
+      if (!value) { return }
+      this.$nextTick(() => {
+        const element = this.$refs.input
+        const length = this.currentAmount.toString().length
+        element.focus()
+        element.setSelectionRange(0, length)
+      })
+    },
+    updateAmount (value) {
+      this.currentAmount = value
+      this.customAmountIsVisible = false
+    },
+    donate () {
+      this.isLoading = true
       try {
-        const info = await this.$store.dispatch('api/subscriptionInfo', {
-          userId: this.$store.state.currentUser.id
-        })
-        console.log('🚛', info, info.subscription.customer)
+        // const result = await this.$store.dispatch('api/donate', {
+        //   value: parseInt(this.currentAmount)
+        // })
+        // console.log('🚛', result)
       } catch (error) {
         console.error('🚒', error)
+        // this.error =
       }
-      this.gettingBillingInfo = false
+      this.isLoading = false
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
-        this.getBillingInfo()
+        this.currentAmount = 0
       }
     }
   }
@@ -106,5 +124,4 @@ dialog.donate
     margin-right 6px
   .donor
     background-color var(--user-badge-donor)
-
 </style>

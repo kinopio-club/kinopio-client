@@ -17,7 +17,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
 
   //- Current User
   template(v-if="isCurrentUser")
-    section
+    section.current-user
       .row
         .button-wrap
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
@@ -330,6 +330,9 @@ export default {
   &.right-side
     left initial
     right 8px
+  .current-user
+    .user-badges
+      margin-top -10px
   .user-details-name
     margin-left 6px
   .error-message
