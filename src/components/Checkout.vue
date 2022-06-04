@@ -26,7 +26,7 @@
     .badge.info
       span {{price.amount}}/{{price.period}}
 
-  button(@click.left="checkout" :class="{active : loading.subscriptionIsBeingCreated}")
+  button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
     span {{actionLabel}}
     Loader(:visible="loading.subscriptionIsBeingCreated")
 
@@ -258,7 +258,7 @@ export default {
         this.error.stripeErrorMessage = 'Your credit card was declined. Please try again with a different card'
       }
     },
-    async checkout () {
+    async subscribe () {
       this.clearErrors()
       if (!this.name || !this.email) {
         this.error.allFieldsAreRequired = true
