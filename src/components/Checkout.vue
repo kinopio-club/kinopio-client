@@ -68,18 +68,9 @@ export default {
     priceIsMonthly: Boolean
 
   },
-  // created () {
-  //   this.$store.subscribe((mutation, state) => {
-  //     if (mutation.type === 'updatePageSizes') {
-  //       this.updateDialogHeight()
-  //     }
-  //   })
-  // },
   mounted () {
-    console.log('🌈🌈🌈')
     this.loadStripe()
   },
-
   data () {
     return {
       name: '',
@@ -95,8 +86,6 @@ export default {
         stripeError: false,
         stripeErrorMessage: ''
       }
-      // dialogHeight: null,
-      // priceIsMonthly: true
     }
   },
   computed: {
@@ -138,6 +127,11 @@ export default {
     }
   },
   methods: {
+    shouldHideFooter (event) {
+      const isTouchDevice = this.$store.state.isTouchDevice
+      if (!isTouchDevice) { return }
+      this.$store.commit('shouldHideFooter', true)
+    },
     clearErrors () {
       this.error.unknownServerError = false
       this.error.allFieldsAreRequired = false
@@ -188,7 +182,6 @@ export default {
       this.loading.stripeElementsIsMounted = true
     },
     async loadStripe () {
-      console.log('💖💖💖💖')
       if (!this.currentUserIsSignedIn) { return }
       this.loading.stripeIsLoading = true
       if (!this.$store.state.stripeIsLoaded) {
@@ -319,25 +312,12 @@ export default {
       }
       this.loading.subscriptionIsBeingCreated = false
     }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        console.log('🌈', visible)
-        this.loadStripe()
-      }
-    }
   }
 }
 </script>
 
 <style lang="stylus">
-.upgrade-user
-  overflow auto
-  max-height calc(100vh - 210px)
-  &.right-side
-    left initial
-    right 8px
+.checkout
   .user
     margin-right 6px
     vertical-align middle
@@ -349,15 +329,4 @@ export default {
   .loading-stripe,
   .badge.danger
     margin-bottom 10px
-  button
-    position relative
-  .label-badge
-    color var(--primary-background)
-    font-size 12px
-    min-height initial
-    position absolute
-    left initial
-    right -15px
-    top -6px
-    margin 0
 </style>

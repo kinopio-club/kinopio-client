@@ -52,11 +52,6 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
-    shouldHideFooter (event) {
-      const isTouchDevice = this.$store.state.isTouchDevice
-      if (!isTouchDevice) { return }
-      this.$store.commit('shouldHideFooter', true)
-    },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('closeAllDialogs', 'UpgradeUser.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
@@ -89,17 +84,8 @@ export default {
   &.right-side
     left initial
     right 8px
-  .user
-    margin-right 6px
-    vertical-align middle
-  .summary
-    margin-top 10px
-    margin-bottom 10px
   .badge
     display inline-block
-  .loading-stripe,
-  .badge.danger
-    margin-bottom 10px
   button
     position relative
   .label-badge
