@@ -1,7 +1,5 @@
 <template lang="pug">
-//- todo handles error and loading
-
-.checkout(v-if="currentUserIsSignedIn")
+.upgrade-user-subscribe(v-if="currentUserIsSignedIn")
   //- https://stripe.com/docs/testing
   //- name on card:   someone
   //- email:          hi@pirijan.com
@@ -27,11 +25,10 @@
       span {{price.amount}}/{{price.period}}
 
   button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
-    span {{actionLabel}}
+    span Upgrade Account
     Loader(:visible="loading.subscriptionIsBeingCreated")
 
-  p(v-if="isAccountUpgrade") You'll be billed {{price.amount}} immediately and then each {{price.period}}. You can cancel anytime.
-  p(v-else) You'll be billed {{price.amount}} immediately, one time only
+  p You'll be billed {{price.amount}} immediately and then each {{price.period}}. You can cancel anytime.
 
 </template>
 
@@ -58,14 +55,13 @@ if (import.meta.env.MODE === 'development') {
 }
 
 export default {
-  name: 'Checkout',
+  name: 'UpgradeUserSubscribe',
   components: {
     User,
     Loader
   },
   props: {
     visible: Boolean,
-    isAccountUpgrade: Boolean,
     priceIsMonthly: Boolean,
     price: Object
   },
@@ -228,7 +224,7 @@ export default {
       this.$store.commit('currentUser/isUpgraded', true)
       this.$store.commit('notifyCardsCreatedIsOverLimit', false)
       this.$store.commit('addNotification', { message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software', type: 'success' })
-      this.$store.dispatch('closeAllDialogs', 'Checkout')
+      this.$store.dispatch('closeAllDialogs', 'Subscribe')
     },
     paymentIntent () {
       if (invoice) {
@@ -290,7 +286,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.checkout
+.upgrade-user-subscribe
   .user
     margin-right 6px
     vertical-align middle

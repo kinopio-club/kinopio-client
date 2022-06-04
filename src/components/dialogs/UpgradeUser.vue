@@ -11,9 +11,7 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-
-    Checkout(:visible="currentUserIsSignedIn" :isAccountUpgrade="true" :priceIsMonthly="priceIsMonthly" :price="price")
-
+    UpgradeUserSubscribe(:visible="currentUserIsSignedIn" :priceIsMonthly="priceIsMonthly" :price="price")
   section(v-if="currentUserIsSignedIn")
     img.icon(src="@/assets/lock.svg")
     span Payments securely processed by Stripe. Card info is not sent to Kinopio.
@@ -21,7 +19,7 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
 </template>
 
 <script>
-import Checkout from '@/components/Checkout.vue'
+import UpgradeUserSubscribe from '@/components/UpgradeUserSubscribe.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
@@ -29,7 +27,7 @@ export default {
   name: 'UpgradeUser',
   components: {
     Loader,
-    Checkout
+    UpgradeUserSubscribe
   },
   props: {
     visible: Boolean
