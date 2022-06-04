@@ -779,10 +779,6 @@ export default {
           })
           return card
         })
-        this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-          delta: newCards.length,
-          shouldIncrement: true
-        })
         this.$store.dispatch('closeAllDialogs', 'CardDetails.addSplitCards')
       })
     },
