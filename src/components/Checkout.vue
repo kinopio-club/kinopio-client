@@ -31,6 +31,7 @@
     Loader(:visible="loading.subscriptionIsBeingCreated")
 
   p(v-if="isAccountUpgrade") You'll be billed {{price.amount}} immediately and then each {{price.period}}. You can cancel anytime.
+  p(v-else) You'll be billed {{price.amount}} immediately, one time only
 
 </template>
 
@@ -227,7 +228,7 @@ export default {
       this.$store.commit('currentUser/isUpgraded', true)
       this.$store.commit('notifyCardsCreatedIsOverLimit', false)
       this.$store.commit('addNotification', { message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software', type: 'success' })
-      this.$emit('closeDialog')
+      this.$store.dispatch('closeAllDialogs', 'Checkout')
     },
     paymentIntent () {
       if (invoice) {
