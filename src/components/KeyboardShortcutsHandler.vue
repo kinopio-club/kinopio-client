@@ -61,6 +61,7 @@ export default {
       if (key === '?' && isSpaceScope) {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
       } else if (key === 'n' && isSpaceScope) {
+        if (utils.unpinnedDialogIsVisible()) { return }
         this.$store.dispatch('currentSpace/addSpace')
         this.$store.commit('addNotification', { message: 'New space created', icon: 'add', type: 'success', label: 'n' })
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
