@@ -35,6 +35,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
       template(v-if="currentUserIsUpgraded")
         .button-wrap
           button(@click.left.stop="triggerDonateIsVisible")
+            img.icon(src="@/assets/donate.svg")
             span Donate
 
     //- Unlimited cards from member
@@ -335,7 +336,6 @@ export default {
     margin-top 10px
   .moon
     vertical-align -2px
-
   .upgrade
     progress
       margin-top 2px

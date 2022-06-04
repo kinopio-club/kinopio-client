@@ -43,7 +43,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.donate
+dialog.donate
   overflow auto
   max-height calc(100vh - 210px)
   left initial

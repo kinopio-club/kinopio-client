@@ -36,5 +36,5 @@ export default {
 </script>
 
 <style lang="stylus">
-// .dialog-name
+// dialog.dialog-name
 </style>
