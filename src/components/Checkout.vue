@@ -24,13 +24,13 @@
   .summary
     User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
     .badge.info
-      span {{current.amount}}/{{current.period}}
+      span {{price.amount}}/{{price.period}}
 
   button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
     span {{actionLabel}}
     Loader(:visible="loading.subscriptionIsBeingCreated")
 
-  p(v-if="isAccountUpgrade") You'll be billed {{current.amount}} immediately and then each {{current.period}}. You can cancel anytime.
+  p(v-if="isAccountUpgrade") You'll be billed {{price.amount}} immediately and then each {{price.period}}. You can cancel anytime.
 
 </template>
 
@@ -65,8 +65,8 @@ export default {
   props: {
     visible: Boolean,
     isAccountUpgrade: Boolean,
-    priceIsMonthly: Boolean
-
+    priceIsMonthly: Boolean,
+    price: Object
   },
   mounted () {
     this.loadStripe()
@@ -96,35 +96,7 @@ export default {
       return 'Donate'
     },
     user () { return this.$store.state.currentUser },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    priceId () {
-      let monthly, yearly
-      if (import.meta.env.MODE === 'development') {
-        monthly = 'price_1L046SDFIr5ywhwoMfsIW1W5'
-        yearly = 'price_1L046iDFIr5ywhwoeRIDE5rN'
-      } else {
-        monthly = 'price_1L2GvBDFIr5ywhwobbE35dhA'
-        yearly = 'price_1L2ErWDFIr5ywhwodsKxEEAq'
-      }
-      if (this.priceIsMonthly) {
-        return monthly
-      } else {
-        return yearly
-      }
-    },
-    current () {
-      if (this.priceIsMonthly) {
-        return {
-          amount: '$6',
-          period: 'month'
-        }
-      } else {
-        return {
-          amount: '$60',
-          period: 'year'
-        }
-      }
-    }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
     shouldHideFooter (event) {
@@ -228,7 +200,7 @@ export default {
       const result = await this.$store.dispatch('api/createSubscription', {
         customerId: customer.id,
         paymentMethodId: paymentMethod.id,
-        priceId: this.priceId
+        priceId: this.price.id
       })
       console.log('🎡 stripe subscription', result)
       if (result.error) {

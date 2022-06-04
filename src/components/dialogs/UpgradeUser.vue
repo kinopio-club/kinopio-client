@@ -12,7 +12,7 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
-    Checkout(:visible="currentUserIsSignedIn" :isAccountUpgrade="true" :priceIsMonthly="priceIsMonthly")
+    Checkout(:visible="currentUserIsSignedIn" :isAccountUpgrade="true" :priceIsMonthly="priceIsMonthly" :price="price")
 
   section(v-if="currentUserIsSignedIn")
     img.icon(src="@/assets/lock.svg")
@@ -49,7 +49,30 @@ export default {
     }
   },
   computed: {
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    price () {
+      let monthId, yearId
+      if (import.meta.env.MODE === 'development') {
+        monthId = 'price_1L046SDFIr5ywhwoMfsIW1W5'
+        yearId = 'price_1L046iDFIr5ywhwoeRIDE5rN'
+      } else {
+        monthId = 'price_1L2GvBDFIr5ywhwobbE35dhA'
+        yearId = 'price_1L2ErWDFIr5ywhwodsKxEEAq'
+      }
+      if (this.priceIsMonthly) {
+        return {
+          amount: '$6',
+          period: 'month',
+          id: monthId
+        }
+      } else {
+        return {
+          amount: '$60',
+          period: 'year',
+          id: yearId
+        }
+      }
+    }
   },
   methods: {
     triggerSignUpOrInIsVisible () {
