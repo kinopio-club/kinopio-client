@@ -1675,7 +1675,7 @@ export default {
 
     async updateUrlPreview () {
       if (this.preventUpdatePrevPreview) { return }
-      if (!this.cnEditCard) { return }
+      if (!this.canEditCard) { return }
       this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
       const cardId = this.card.id
       let url = this.webUrl
