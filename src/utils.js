@@ -1481,7 +1481,8 @@ export default {
       isCollaborator,
       isUpgraded: user.isUpgraded,
       isModerator: user.isModerator,
-      isGuideMaker: user.isGuideMaker
+      isGuideMaker: user.isGuideMaker,
+      isDonor: user.isDonor
     }
   },
   spaceMeta (space) {
