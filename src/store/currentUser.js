@@ -20,6 +20,7 @@ export default {
     arenaAccessToken: '',
     favoriteUsers: [],
     favoriteSpaces: [],
+    favoriteColors: [],
     cardsCreatedCount: 0,
     isUpgraded: false,
     isModerator: false,
@@ -106,6 +107,11 @@ export default {
       utils.typeCheck({ value: spaces, type: 'array', origin: 'favoriteSpaces' })
       state.favoriteSpaces = spaces
       cache.updateUser('favoriteSpaces', spaces)
+    },
+    favoriteColors: (state, spaces) => {
+      utils.typeCheck({ value: spaces, type: 'array', origin: 'favoriteColors' })
+      state.favoriteColors = spaces
+      cache.updateUser('favoriteColors', spaces)
     },
     updateFavoriteSpaceIsEdited: (state, spaceId) => {
       utils.typeCheck({ value: spaceId, type: 'string', origin: 'updateFavoriteSpaceIsEdited' })
@@ -398,6 +404,7 @@ export default {
       context.commit('hasRestoredFavorites', true, { root: true })
     },
     addFavorite: (context, { type, item }) => {
+      let color
       if (type === 'user') {
         let favorites = utils.clone(context.state.favoriteUsers)
         let favorite = {
@@ -418,12 +425,23 @@ export default {
         }
         favorites.push(favorite)
         context.commit('favoriteSpaces', favorites)
+      } else if (type === 'color') {
+        color = item.color
+        let favorites = utils.clone(context.state.favoriteColors)
+        let favorite = color
+        favorites.push(favorite)
+        context.commit('favoriteColors', favorites)
+      }
+      let body = { type, id: item.id }
+      if (color) {
+        body.color = color
       }
       context.dispatch('api/addToQueue', { name: 'addOrRemoveFavorite',
-        body: { type, id: item.id }
+        body
       }, { root: true })
     },
     removeFavorite: (context, { type, item }) => {
+      let color
       if (type === 'user') {
         let favorites = utils.clone(context.state.favoriteUsers)
         favorites = favorites.filter(favorite => {
@@ -436,9 +454,20 @@ export default {
           return favorite.id !== item.id
         })
         context.commit('favoriteSpaces', favorites)
+      } else if (type === 'color') {
+        color = item.color
+        let favorites = utils.clone(context.state.favoriteColors)
+        favorites = favorites.filter(favoriteColor => {
+          return favoriteColor !== color
+        })
+        context.commit('favoriteColors', favorites)
+      }
+      let body = { type, id: item.id }
+      if (color) {
+        body.color = color
       }
       context.dispatch('api/addToQueue', { name: 'addOrRemoveFavorite',
-        body: { type, id: item.id }
+        body
       }, { root: true })
     },
     confirmEmail: (context) => {
