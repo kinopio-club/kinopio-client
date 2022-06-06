@@ -648,6 +648,12 @@ export default {
     })
     return cardElement
   },
+  cardPositionFromElement (cardId) {
+    const element = document.querySelector(`article[data-card-id="${cardId}"]`)
+    const x = parseInt(element.style.left)
+    const y = parseInt(element.style.top)
+    return { x, y }
+  },
   isPointInsideCard (point, card) {
     const xIsInside = this.isBetween({
       value: point.x,

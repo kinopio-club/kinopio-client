@@ -130,6 +130,13 @@ const currentCards = {
 
     // broadcast
 
+    moveWhileDraggingBroadcast: (state, { cards }) => {
+      cards.forEach(card => {
+        const element = document.querySelector(`article[data-card-id="${card.id}"]`)
+        element.style.left = card.x + 'px'
+        element.style.top = card.y + 'px'
+      })
+    },
     moveBroadcast: (state, { cards }) => {
       cards.forEach(updated => {
         const card = state.cards[updated.id]
@@ -395,8 +402,15 @@ const currentCards = {
 
     // move
 
+    moveWhileDragging: (state, cards) => {
+      cards.forEach(card => {
+        const element = document.querySelector(`article[data-card-id="${card.id}"]`)
+        element.style.left = card.x + 'px'
+        element.style.top = card.y + 'px'
+      })
+    },
+
     move: (context, { endCursor, prevCursor, delta }) => {
-      const spaceId = context.rootState.currentSpace.id
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const zoom = context.rootGetters.spaceCounterZoomDecimal
@@ -428,6 +442,9 @@ const currentCards = {
       // prevent cards with null or negative positions
       cards = utils.clone(cards)
       cards = cards.map(card => {
+        const position = utils.cardPositionFromElement(card.id)
+        card.x = position.x
+        card.y = position.y
         // x
         if (card.x === undefined || card.x === null) {
           delete card.x
@@ -442,14 +459,20 @@ const currentCards = {
           card.y = Math.max(0, card.y + delta.y)
           card.y = Math.round(card.y)
         }
+        card = {
+          x: card.x,
+          y: card.y,
+          z: card.z,
+          id: card.id
+        }
         return card
       })
       // update
-      context.commit('move', { cards, spaceId })
+      context.dispatch('moveWhileDragging', cards)
       connections = uniqBy(connections, 'id')
       context.commit('cardsWereDragged', true, { root: true })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections, cards }, { root: true })
-      context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveWhileDraggingBroadcast' }, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsWhileDraggingBroadcast' }, { root: true })
       connections.forEach(connection => {
         context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
@@ -457,7 +480,7 @@ const currentCards = {
       context.dispatch('updateCardMap')
     },
     afterMove: (context) => {
-      context.dispatch('updateCardMap')
+      const spaceId = context.rootState.currentSpace.id
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       let cards
@@ -469,10 +492,15 @@ const currentCards = {
       }
       cards = cards.map(id => {
         let card = context.getters.byId(id)
+        card = utils.clone(card)
         if (!card) { return }
+        const position = utils.cardPositionFromElement(id)
+        card.x = position.x
+        card.y = position.y
         const { x, y, z, commentIsVisible } = card
         return { id, x, y, z, commentIsVisible }
       })
+      context.commit('move', { cards, spaceId })
       cards = cards.filter(card => card)
       cards.forEach(card => {
         context.dispatch('api/addToQueue', {
@@ -481,12 +509,14 @@ const currentCards = {
         }, { root: true })
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
       })
+      context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
       connections = uniqBy(connections, 'id')
       context.commit('currentConnections/updatePaths', connections, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('checkIfShouldIncreasePageSize', { cardId: currentDraggingCardId })
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
+      context.dispatch('updateCardMap')
     },
     checkIfShouldIncreasePageSize: (context, { cardId }) => {
       const card = context.getters.byId(cardId)
