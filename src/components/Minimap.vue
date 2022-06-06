@@ -233,6 +233,7 @@ export default {
     },
     initConnectionCanvas () {
       canvas = document.getElementById('connections')
+      if (!canvas) { return }
       context = canvas.getContext('2d')
       const viewportWidth = this.$store.state.viewportWidth
       const viewportHeight = this.$store.state.viewportHeight
