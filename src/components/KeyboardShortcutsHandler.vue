@@ -19,7 +19,7 @@ let prevCursorPosition, currentCursorPosition
 const checkIsSpaceScope = (event) => {
   const isBody = event.target.tagName === 'BODY'
   const isFocusedCard = event.target.className === 'card'
-  return (isBody || isFocusedCard) && utils.unpinnedDialogIsVisible()
+  return (isBody || isFocusedCard) && !utils.unpinnedDialogIsVisible()
 }
 
 export default {
