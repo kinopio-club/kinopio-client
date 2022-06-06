@@ -48,12 +48,12 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
 
   //- Favorite Colors
 
-  section.user-colors
-    button.toggle-user-color
+  section.favorite-colors
+    button.toggle-favorite-color(@click="toggleFavoriteColor")
       img.icon(v-if="!currentColorIsUserColor" src="@/assets/heart-empty.svg")
       img.icon(v-if="currentColorIsUserColor" src="@/assets/heart.svg")
       span.current-color(:style="{ background: currentColor }")
-    template(v-for="color in userColors")
+    template(v-for="color in favoriteColors")
       button.color(:style="{backgroundColor: color}" @click.left="select(color)")
 
 </template>
@@ -105,12 +105,18 @@ export default {
     hueIsRed () { return this.currentHue === 'red' },
     hueIsGreen () { return this.currentHue === 'green' },
     hueIsBlue () { return this.currentHue === 'blue' },
-    userColors () { return this.$store.state.currentUser.colors },
-    currentColorIsUserColor () {
-      return this.userColors.includes(this.currentColor)
-    }
+    favoriteColors () { return this.$store.state.currentUser.favoriteColors },
+    currentColorIsUserColor () { return this.favoriteColors.includes(this.currentColor) }
   },
   methods: {
+    toggleFavoriteColor () {
+      const color = { color: this.currentColor }
+      if (this.currentColorIsUserColor) {
+        this.$store.dispatch('currentUser/removeFavorite', { type: 'color', item: color })
+      } else {
+        this.$store.dispatch('currentUser/addFavorite', { type: 'color', item: color })
+      }
+    },
     updateLuminosity (value) {
       if (this.luminosity === value) { return }
       this.luminosity = value
@@ -218,12 +224,12 @@ export default {
     width 13px
     height 13px
     pointer-events none
-  section.user-colors
+  section.favorite-colors
     display flex
     flex-wrap wrap
     align-items center
     margin-bottom -5px
-    button.toggle-user-color
+    button.toggle-favorite-color
       display flex
       align-items center
       margin-right 5px
