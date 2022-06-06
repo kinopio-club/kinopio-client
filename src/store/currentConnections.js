@@ -237,6 +237,7 @@ export default {
       connections.forEach(connection => {
         const path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
         const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
+        context.commit('triggerUpdateConnectionPathWhileDragging', { connectionId: connection.id, path }, { root: true })
         element.setAttribute('d', path)
       })
     },
