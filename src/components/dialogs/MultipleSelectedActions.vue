@@ -587,7 +587,12 @@ export default {
     .change-color
       height 24px
       padding-top 3px
+      display flex
+      img
+        margin-top 3px
       .segmented-colors
         margin-left 5px
+        max-width 56px
+        margin-top 1px
 
 </style>
