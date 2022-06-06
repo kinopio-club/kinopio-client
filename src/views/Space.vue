@@ -468,7 +468,7 @@ export default {
   position relative // used by svg connections
   transform-origin top left
   &.hidden-by-mindmap
-    opacity 0.2
+    opacity 0.4
   .card-overlap-indicator
     position absolute
     z-index calc(var(--max-z) - 70)
