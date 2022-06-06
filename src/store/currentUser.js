@@ -51,7 +51,8 @@ export default {
     defaultSpaceBackground: undefined,
     defaultSpaceBackgroundTint: undefined,
     defaultAddSpaceId: undefined,
-    downgradeAt: null
+    downgradeAt: null,
+    colors: ['#ffc3ec', '#9fa9ef', '#a5ffff', '#c7d2fd', '#c770fc', '#effc99'] // temp
   },
   mutations: {
     color: (state, value) => {

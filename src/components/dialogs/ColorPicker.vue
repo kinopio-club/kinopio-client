@@ -9,14 +9,16 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
   section(v-if="!removeIsVisible")
     .badge(:style="{backgroundColor: currentColor}")
       input(v-model="hexColor" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace)
-
   section
+    //- Colors
     .other-colors(v-if="otherColors")
       template(v-for="color in otherColors")
         button.color(:style="{backgroundColor: color}" @click.left="select(color)")
     .colors
       template(v-for="color in colors")
         button.color(:style="{backgroundColor: color}" @click.left="select(color)")
+
+    //- Current Color Modifiers
 
     .row
       // shuffle
@@ -43,6 +45,16 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
       .button-wrap
         input(type="color" v-model="hexColor")
         img.spectrum.icon(src="@/assets/spectrum.png")
+
+  //- Favorite Colors
+
+  section.user-colors
+    button.toggle-user-color
+      img.icon(v-if="!currentColorIsUserColor" src="@/assets/heart-empty.svg")
+      img.icon(v-if="currentColorIsUserColor" src="@/assets/heart.svg")
+      span.current-color(:style="{ background: currentColor }")
+    template(v-for="color in userColors")
+      button.color(:style="{backgroundColor: color}" @click.left="select(color)")
 
 </template>
 
@@ -92,7 +104,11 @@ export default {
     hueIsAll () { return this.currentHue === null },
     hueIsRed () { return this.currentHue === 'red' },
     hueIsGreen () { return this.currentHue === 'green' },
-    hueIsBlue () { return this.currentHue === 'blue' }
+    hueIsBlue () { return this.currentHue === 'blue' },
+    userColors () { return this.$store.state.currentUser.colors },
+    currentColorIsUserColor () {
+      return this.userColors.includes(this.currentColor)
+    }
   },
   methods: {
     updateLuminosity (value) {
@@ -202,4 +218,21 @@ export default {
     width 13px
     height 13px
     pointer-events none
+  section.user-colors
+    display flex
+    flex-wrap wrap
+    align-items center
+    margin-bottom -5px
+    button.toggle-user-color
+      display flex
+      align-items center
+      margin-right 5px
+      margin-bottom 5px
+    .current-color
+      height 14px
+      width 14px
+      border-radius 3px
+      display inline-block
+    .color
+      width 26px
 </style>
