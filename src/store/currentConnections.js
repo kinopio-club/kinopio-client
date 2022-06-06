@@ -82,6 +82,18 @@ export default {
       })
       cache.updateSpaceConnectionsDebounced(state.connections, currentSpaceId)
     },
+    updatePath: (state, { connection, path }) => {
+      state.connections[connection.id].path = path
+      state.connections[connection.id].spaceId = currentSpaceId
+      cache.updateSpaceConnectionsDebounced(state.connections, currentSpaceId)
+    },
+    updatePathsWhileDraggingBroadcast: (state, { connections }) => {
+      connections.forEach(connection => {
+        const path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
+        element.setAttribute('d', path)
+      })
+    },
     updatePathsBroadcast: (state, { connections }) => {
       connections.forEach(connection => {
         state.connections[connection.id].path = connection.path
@@ -219,6 +231,13 @@ export default {
         } else {
           context.commit('updateReadOnly', connection)
         }
+      })
+    },
+    updatePathsWhileDragging: (context, { connections, cards }) => {
+      connections.forEach(connection => {
+        const path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
+        element.setAttribute('d', path)
       })
     },
     correctPaths: (context, { shouldUpdateApi }) => {

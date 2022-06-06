@@ -448,9 +448,9 @@ const currentCards = {
       context.commit('move', { cards, spaceId })
       connections = uniqBy(connections, 'id')
       context.commit('cardsWereDragged', true, { root: true })
-      context.commit('currentConnections/updatePaths', connections, { root: true })
+      context.dispatch('currentConnections/updatePathsWhileDragging', { connections, cards }, { root: true })
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
-      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsWhileDraggingBroadcast' }, { root: true })
       connections.forEach(connection => {
         context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       })
