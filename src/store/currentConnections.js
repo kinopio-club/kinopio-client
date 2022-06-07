@@ -244,18 +244,8 @@ export default {
     correctPaths: (context, { shouldUpdateApi }) => {
       if (!context.rootState.webfontIsLoaded) { return }
       if (!context.getters.all.length) { return }
-      const cardIds = context.rootState.currentCards.ids
       let connections = []
       context.getters.all.forEach(connection => {
-        const startCard = cardIds.includes(connection.startCardId)
-        const endCard = cardIds.includes(connection.endCardId)
-        const shouldRemove = !startCard || !endCard
-        if (shouldRemove && shouldUpdateApi) {
-          context.dispatch('remove', connection)
-          return
-        } else if (shouldRemove) {
-          context.commit('remove', connection)
-        }
         const path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
         if (!path) { return }
         if (path === connection.path) { return }
