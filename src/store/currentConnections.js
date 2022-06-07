@@ -87,6 +87,20 @@ export default {
       state.connections[connection.id].spaceId = currentSpaceId
       cache.updateSpaceConnectionsDebounced(state.connections, currentSpaceId)
     },
+    updateType: (state, type) => {
+      const keys = Object.keys(type)
+      keys.forEach(key => {
+        state.types[type.id][key] = type[key]
+      })
+      cache.updateSpace('connectionTypes', state.types, currentSpaceId)
+    },
+    reorderTypeToEnd: (state, type) => {
+      state.typeIds.filter(id => id !== type.id)
+      state.typeIds.push(type.id)
+    },
+
+    // broadcast
+
     updatePathsWhileDraggingBroadcast: (state, { connections }) => {
       connections.forEach(connection => {
         const path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
@@ -99,17 +113,6 @@ export default {
         state.connections[connection.id].path = connection.path
       })
       cache.updateSpaceConnectionsDebounced(state.connections, currentSpaceId)
-    },
-    updateType: (state, type) => {
-      const keys = Object.keys(type)
-      keys.forEach(key => {
-        state.types[type.id][key] = type[key]
-      })
-      cache.updateSpace('connectionTypes', state.types, currentSpaceId)
-    },
-    reorderTypeToEnd: (state, type) => {
-      state.typeIds.filter(id => id !== type.id)
-      state.typeIds.push(type.id)
     },
 
     // remove
