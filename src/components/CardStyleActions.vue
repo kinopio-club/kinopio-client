@@ -285,6 +285,7 @@ export default {
 <style lang="stylus" scoped>
 .card-style-actions
   padding 0
+  max-width 203px
   .row
     display block
   .button-wrap
