@@ -588,6 +588,7 @@ export default {
       height 24px
       padding-top 3px
       display flex
+      overflow hidden
       img
         margin-top 3px
       .segmented-colors
