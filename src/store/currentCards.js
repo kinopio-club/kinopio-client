@@ -477,7 +477,6 @@ const currentCards = {
       connections.forEach(connection => {
         context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       })
-      context.dispatch('updateCardMap')
     },
     afterMove: (context) => {
       const spaceId = context.rootState.currentSpace.id
