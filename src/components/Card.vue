@@ -1399,6 +1399,7 @@ export default {
       this.$store.dispatch('currentCards/incrementSelectedZs')
     },
     showCardDetails (event) {
+      this.$store.dispatch('currentCards/afterMove')
       if (this.isLocked) { return }
       if (this.$store.state.currentUserIsPainting) { return }
       if (isMultiTouch) { return }

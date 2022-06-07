@@ -448,7 +448,6 @@ export default {
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
       if (this.isDraggingCard) {
-        this.$store.dispatch('currentCards/afterMove')
         this.showMultipleSelectedActions(event)
       }
       this.$store.commit('currentUserIsDraggingCard', false)
