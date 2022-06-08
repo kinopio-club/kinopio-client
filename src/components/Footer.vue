@@ -398,6 +398,13 @@ export default {
   &.is-mobile-standalone
     margin-bottom 20px
 
+  .left,
+  .right
+    pointer-events none
+    button,
+    .space-zoom
+      pointer-events auto
+
 footer
   .is-mobile-icon
     vertical-align 2px !important
