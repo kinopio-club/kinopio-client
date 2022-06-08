@@ -1,11 +1,11 @@
 <template lang="pug">
-.overlay.minimap(v-if="isVisible" @pointerup="endPanningViewport" @pointermove="panViewport" :style="overlayStyle" @touchmove.stop.prevent)
+.overlay.minimap(v-if="isVisible" @pointerup="endPanningViewport" @mousemove="panViewport" :style="overlayStyle" @touchmove.stop.prevent)
   .overlay-background(:style="overlayBackgroundStyle")
   //- viewport box
   .viewport-wrap(:style="viewportWrapStyle")
-    .viewport.blink(:style="viewportStyle" @pointerdown="startPanningViewport")
-    .viewport-top(:style="viewportChildStyle" @pointerdown="startPanningViewport")
-      .button-wrap(@pointerdown.stop @pointerup.stop="hideMinimap")
+    .viewport.blink(:style="viewportStyle" @mousedown="startPanningViewport")
+    .viewport-top(:style="viewportChildStyle" @mousedown="startPanningViewport")
+      .button-wrap(@mousedown.stop @pointerup.stop="hideMinimap")
         button.small-button.active
           img.icon(src="@/assets/minimap.svg")
   //- connections
@@ -258,6 +258,7 @@ export default {
       this.connections = connections
     },
     drawConnections () {
+      if (!context) { return }
       context.clearRect(0, 0, canvas.width, canvas.height)
       context.lineWidth = 4
       context.lineCap = 'round'

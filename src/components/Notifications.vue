@@ -304,6 +304,7 @@ export default {
       } else {
         remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
       }
+      if (!remoteSpace) { return }
       const spaceUpdatedAt = dayjs(space.updatedAt)
       const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
       const hoursDelta = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'hour') // hourDelta
