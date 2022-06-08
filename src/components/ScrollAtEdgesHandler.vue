@@ -226,6 +226,7 @@ export default {
     },
     stopInteractions () {
       window.cancelAnimationFrame(scrollTimer)
+      this.$store.dispatch('currentCards/afterMove')
       scrollTimer = undefined
       prevCursor = undefined
       movementDirection = {}
