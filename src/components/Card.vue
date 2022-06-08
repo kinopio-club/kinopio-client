@@ -916,8 +916,9 @@ export default {
       if (!stickyTimerComplete) { return }
       const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap']
       const elements = ['button', 'progress']
-      const isOverButton = classes.includes(event.target.className) || elements.includes(event.type)
-      if (this.shouldNotStick || isOverButton) {
+      const isOverAction = classes.includes(event.target.className) || elements.includes(event.type)
+      const isOverTag = event.target.className.includes('button-badge')
+      if (this.shouldNotStick || isOverAction || isOverTag) {
         this.clearPositionOffsets()
         preventSticking = true
         return
