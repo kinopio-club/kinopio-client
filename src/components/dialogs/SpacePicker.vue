@@ -251,7 +251,7 @@ export default {
         return
       }
       const currentUser = this.$store.state.currentUser
-      const space = utils.journalSpace(null, currentUser)
+      const space = utils.journalSpace(currentUser)
       console.log('🚚 create new journal space', space)
       if (this.currentUserIsSignedIn) {
         await this.$store.dispatch('api/createSpace', space)
