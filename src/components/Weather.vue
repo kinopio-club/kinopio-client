@@ -20,9 +20,6 @@ export default {
   name: 'Weather',
   components: {
   },
-  // props: {
-  //   visible: Boolean
-  // },
   data () {
     return {
       error: {
