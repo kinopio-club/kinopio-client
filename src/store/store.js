@@ -46,6 +46,7 @@ const store = createStore({
     isEmbed: false,
     isAddPage: false,
     isAppStoreView: false,
+    weather: undefined,
 
     // search
     searchIsVisible: false,
@@ -328,6 +329,10 @@ const store = createStore({
     isAppStoreView: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isAppStoreView' })
       state.isAppStoreView = value
+    },
+    weather: (state, value) => {
+      utils.typeCheck({ value, type: 'object', origin: 'weather', allowUndefined: true })
+      state.weather = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })

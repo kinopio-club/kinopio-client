@@ -24,18 +24,30 @@ dialog.add-space.narrow(
         span New Spaces Are Blank
     .row
       .segmented-buttons
-        button(@click="addJournalSpace")
+        button(@click="addJournalSpace" :class="{ active: loading.weather }")
           img.icon(src="@/assets/add.svg")
           MoonPhase(:moonPhase="moonPhase.name")
           span Daily Journal
+          Loader(:visible="loading.weather")
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           img.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
     //- Edit Journal
-    .row(v-if="editPromptsIsVisible")
-      .button-wrap
-        button(@click.left="addCustomPrompt")
-          img.icon(src="@/assets/add.svg")
-          span Add Daily Prompt
+    template(v-if="editPromptsIsVisible")
+      .row.weather-row
+        .button-wrap(@click="toggleShowWeather")
+          button(:class="{ active: showWeather }")
+            span Weather
+        .segmented-buttons.weather-units(v-if="showWeather")
+          button(@click="toggleWeatherUnitIsCelcius(false)" :class="{ active: !weatherUnitIsCelcius }") F°
+          button(@click="toggleWeatherUnitIsCelcius(true)" :class="{ active: weatherUnitIsCelcius }") C°
+        p(v-if="!weatherLocation") Requires location access
+      .row(v-if="error.location")
+        .badge.danger Could not get your location
+      .row
+        .button-wrap
+          button(@click.left="addCustomPrompt")
+            img.icon(src="@/assets/add.svg")
+            span Add Daily Prompt
     template(v-if="editPromptsIsVisible" )
       Prompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
     PromptPackPicker(v-if="editPromptsIsVisible" :visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack")
@@ -55,6 +67,7 @@ import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import Loader from '@/components/Loader.vue'
 
 import last from 'lodash-es/last'
 import { nanoid } from 'nanoid'
@@ -64,7 +77,8 @@ export default {
   components: {
     Prompt,
     PromptPackPicker,
-    MoonPhase
+    MoonPhase,
+    Loader
   },
   props: {
     visible: Boolean,
@@ -91,15 +105,64 @@ export default {
         top: 5
       },
       screenIsShort: false,
-      dialogHeight: null
+      dialogHeight: null,
+      loading: {
+        weather: false
+      },
+      error: {
+        location: false
+      }
     }
   },
   computed: {
     userPrompts () { return this.$store.state.currentUser.journalPrompts },
     currentUserId () { return this.$store.state.currentUser.id },
-    newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank }
+    newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank },
+    showWeather () { return this.$store.state.currentUser.showWeather },
+    weatherLocation () { return this.$store.state.currentUser.weatherLocation },
+    weatherUnitIsCelcius () { return this.$store.state.currentUser.weatherUnitIsCelcius }
   },
   methods: {
+    toggleShowWeather () {
+      this.error.location = false
+      const value = !this.showWeather
+      if (value) {
+        this.location()
+      } else {
+        this.removeWeather()
+      }
+    },
+    removeWeather () {
+      this.$store.dispatch('currentUser/update', { showWeather: false, weatherLocation: null })
+    },
+    location () {
+      if (import.meta.env.MODE === 'development') {
+        const position = {
+          coords: {
+            latitude: '14.48456',
+            longitude: '-13.80035'
+          }
+        }
+        this.locationSuccess(position)
+      } else {
+        navigator.geolocation.getCurrentPosition(this.locationSuccess, this.locationError, {})
+      }
+    },
+    locationSuccess (position) {
+      let { latitude, longitude } = position.coords
+      latitude = utils.roundFloat(latitude)
+      longitude = utils.roundFloat(longitude)
+      const location = `${latitude},${longitude}`
+      this.$store.dispatch('currentUser/update', { showWeather: true, weatherLocation: location })
+    },
+    locationError (error) {
+      console.error('🚑 locationError', error)
+      this.removeWeather()
+      this.error.location = true
+    },
+    toggleWeatherUnitIsCelcius (value) {
+      this.$store.dispatch('currentUser/update', { weatherUnitIsCelcius: value })
+    },
     showScreenIsShort (value) {
       this.screenIsShort = true
       this.shouldHideFooter(true)
@@ -108,7 +171,32 @@ export default {
     shouldHideFooter (value) {
       this.$store.commit('shouldExplicitlyHideFooter', value)
     },
-    addJournalSpace () {
+    async weather () {
+      if (!this.showWeather) {
+        this.store.commit('weather', undefined)
+        return
+      }
+      try {
+        this.loading.weather = true
+        const apiKey = 'qM8rme33sr7AtpNB8l0xLa8itqjRk5Bi9HeQcecH'
+        let url = `https://api.pirateweather.net/forecast/${apiKey}/${this.weatherLocation}`
+        if (this.weatherUnitIsCelcius) {
+          url = url + '?units=ca'
+        }
+        const response = await fetch(url)
+        const data = await response.json()
+
+        console.log('🐸', data, this.weatherUnitIsCelcius)
+        console.log(data.currently.apparentTemperature, data.currently.icon)
+      } catch (error) {
+        console.error('🚒 weather', error)
+        this.store.commit('weather', undefined)
+      }
+      this.loading.weather = false
+    },
+    async addJournalSpace () {
+      if (this.loading.weather) { return }
+      await this.weather()
       this.$emit('closeDialogs')
       this.$emit('addJournalSpace')
       if (this.shouldAddSpaceDirectly) {
@@ -220,4 +308,13 @@ export default {
     padding 4px
   .button-down-arrow
     padding 0
+  .weather-row
+    align-items center
+    p
+      margin 0
+      margin-left 6px
+  .weather-units
+    button
+      width 27px
+      text-overflow initial
 </style>
