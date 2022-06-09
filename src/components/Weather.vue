@@ -47,6 +47,7 @@ export default {
     },
     location () {
       if (import.meta.env.MODE === 'development') {
+        // 🐪 somewhere in the Sahara
         const position = {
           coords: {
             latitude: '14.48456',
