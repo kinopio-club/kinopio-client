@@ -23,11 +23,10 @@ dialog.add-space.narrow(
         span New Spaces Are Blank
     .row
       .segmented-buttons
-        button(@click="addJournalSpace" :class="{ active: loading.weather }")
+        button(@click="addJournalSpace")
           img.icon(src="@/assets/add.svg")
           MoonPhase(:moonPhase="moonPhase.name")
           span Daily Journal
-          Loader(:visible="loading.weather")
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           img.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
     //- Journal Settings
@@ -50,7 +49,6 @@ import PromptPicker from '@/components/dialogs/PromptPicker.vue'
 import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
 import Weather from '@/components/Weather.vue'
-import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -63,7 +61,6 @@ export default {
     Prompt,
     PromptPicker,
     MoonPhase,
-    Loader,
     Weather
   },
   props: {
@@ -91,19 +88,13 @@ export default {
         top: 5
       },
       screenIsShort: false,
-      dialogHeight: null,
-      loading: {
-        weather: false
-      }
+      dialogHeight: null
     }
   },
   computed: {
     userPrompts () { return this.$store.state.currentUser.journalPrompts },
     currentUserId () { return this.$store.state.currentUser.id },
-    newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank },
-    showWeather () { return this.$store.state.currentUser.showWeather },
-    weatherLocation () { return this.$store.state.currentUser.weatherLocation },
-    weatherUnitIsCelcius () { return this.$store.state.currentUser.weatherUnitIsCelcius }
+    newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank }
   },
   methods: {
     showScreenIsShort (value) {
@@ -114,31 +105,7 @@ export default {
     shouldHideFooter (value) {
       this.$store.commit('shouldExplicitlyHideFooter', value)
     },
-    async weather () {
-      if (!this.showWeather) {
-        this.$store.commit('weather', undefined)
-        return
-      }
-      try {
-        this.loading.weather = true
-        const apiKey = 'qM8rme33sr7AtpNB8l0xLa8itqjRk5Bi9HeQcecH'
-        let url = `https://api.pirateweather.net/forecast/${apiKey}/${this.weatherLocation}`
-        if (this.weatherUnitIsCelcius) {
-          url = url + '?units=ca'
-        }
-        const response = await fetch(url)
-        const data = await response.json()
-        console.log('🐸', data, this.weatherUnitIsCelcius) // temp
-        console.log(data.currently.apparentTemperature, data.currently.icon)
-      } catch (error) {
-        console.error('🚒 weather', error)
-        this.$store.commit('weather', undefined)
-      }
-      this.loading.weather = false
-    },
     async addJournalSpace () {
-      if (this.loading.weather) { return }
-      await this.weather()
       this.$emit('closeDialogs')
       this.$emit('addJournalSpace')
       if (this.shouldAddSpaceDirectly) {

@@ -319,9 +319,13 @@ const currentSpace = {
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
       context.dispatch('loadBackground')
     },
-    createNewJournalSpace: (context) => {
+    createNewJournalSpace: async (context) => {
       const isTomorrow = context.rootState.loadJournalSpaceTomorrow
       const currentUser = utils.clone(context.rootState.currentUser)
+      context.commit('isLoadingSpace', true, { root: true })
+      // const weather =
+      await context.dispatch('api/getWeather', null, { root: true })
+      // TODO add weather to journalSpace util..
       const space = utils.journalSpace(isTomorrow, currentUser)
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
