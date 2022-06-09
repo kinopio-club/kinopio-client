@@ -16,8 +16,7 @@ dialog.add-space.narrow(
           span New Space
         button(@click.left.stop="toggleEditNewSpaceIsVisible" :class="{ active: editNewSpaceIsVisible }")
           img.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
-
-    //- Edit Space
+    //- Space Settings
     .row(v-if="editNewSpaceIsVisible")
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
         input(type="checkbox" v-model="newSpacesAreBlank")
@@ -31,27 +30,12 @@ dialog.add-space.narrow(
           Loader(:visible="loading.weather")
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           img.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
-    //- Edit Journal
+    //- Journal Settings
     template(v-if="editPromptsIsVisible")
-      .row.weather-row
-        .button-wrap(@click="toggleShowWeather")
-          button(:class="{ active: showWeather }")
-            span Weather
-        .segmented-buttons.weather-units(v-if="showWeather")
-          button(@click="toggleWeatherUnitIsCelcius(false)" :class="{ active: !weatherUnitIsCelcius }") F°
-          button(@click="toggleWeatherUnitIsCelcius(true)" :class="{ active: weatherUnitIsCelcius }") C°
-        p(v-if="!weatherLocation") Requires location access
-      .row(v-if="error.location")
-        .badge.danger Could not get your location
-      .row
-        .button-wrap
-          button(@click.left="addCustomPrompt")
-            img.icon(src="@/assets/add.svg")
-            span Add Daily Prompt
+      Weather
     template(v-if="editPromptsIsVisible" )
       Prompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
-    PromptPackPicker(v-if="editPromptsIsVisible" :visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack")
-
+    PromptPicker(v-if="editPromptsIsVisible" :visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack" @addCustomPrompt="addCustomPrompt")
   //- Templates
   section
     button(@click="triggerTemplatesIsVisible")
@@ -62,12 +46,13 @@ dialog.add-space.narrow(
 
 <script>
 import Prompt from '@/components/Prompt.vue'
-import PromptPackPicker from '@/components/dialogs/PromptPackPicker.vue'
+import PromptPicker from '@/components/dialogs/PromptPicker.vue'
 import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
+import Weather from '@/components/Weather.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
-import Loader from '@/components/Loader.vue'
 
 import last from 'lodash-es/last'
 import { nanoid } from 'nanoid'
@@ -76,9 +61,10 @@ export default {
   name: 'AddSpace',
   components: {
     Prompt,
-    PromptPackPicker,
+    PromptPicker,
     MoonPhase,
-    Loader
+    Loader,
+    Weather
   },
   props: {
     visible: Boolean,
@@ -108,9 +94,6 @@ export default {
       dialogHeight: null,
       loading: {
         weather: false
-      },
-      error: {
-        location: false
       }
     }
   },
@@ -123,46 +106,6 @@ export default {
     weatherUnitIsCelcius () { return this.$store.state.currentUser.weatherUnitIsCelcius }
   },
   methods: {
-    toggleShowWeather () {
-      this.error.location = false
-      const value = !this.showWeather
-      if (value) {
-        this.location()
-      } else {
-        this.removeWeather()
-      }
-    },
-    removeWeather () {
-      this.$store.dispatch('currentUser/update', { showWeather: false, weatherLocation: null })
-    },
-    location () {
-      if (import.meta.env.MODE === 'development') {
-        const position = {
-          coords: {
-            latitude: '14.48456',
-            longitude: '-13.80035'
-          }
-        }
-        this.locationSuccess(position)
-      } else {
-        navigator.geolocation.getCurrentPosition(this.locationSuccess, this.locationError, {})
-      }
-    },
-    locationSuccess (position) {
-      let { latitude, longitude } = position.coords
-      latitude = utils.roundFloat(latitude)
-      longitude = utils.roundFloat(longitude)
-      const location = `${latitude},${longitude}`
-      this.$store.dispatch('currentUser/update', { showWeather: true, weatherLocation: location })
-    },
-    locationError (error) {
-      console.error('🚑 locationError', error)
-      this.removeWeather()
-      this.error.location = true
-    },
-    toggleWeatherUnitIsCelcius (value) {
-      this.$store.dispatch('currentUser/update', { weatherUnitIsCelcius: value })
-    },
     showScreenIsShort (value) {
       this.screenIsShort = true
       this.shouldHideFooter(true)
@@ -173,7 +116,7 @@ export default {
     },
     async weather () {
       if (!this.showWeather) {
-        this.store.commit('weather', undefined)
+        this.$store.commit('weather', undefined)
         return
       }
       try {
@@ -185,12 +128,11 @@ export default {
         }
         const response = await fetch(url)
         const data = await response.json()
-
-        console.log('🐸', data, this.weatherUnitIsCelcius)
+        console.log('🐸', data, this.weatherUnitIsCelcius) // temp
         console.log(data.currently.apparentTemperature, data.currently.icon)
       } catch (error) {
         console.error('🚒 weather', error)
-        this.store.commit('weather', undefined)
+        this.$store.commit('weather', undefined)
       }
       this.loading.weather = false
     },
@@ -308,13 +250,4 @@ export default {
     padding 4px
   .button-down-arrow
     padding 0
-  .weather-row
-    align-items center
-    p
-      margin 0
-      margin-left 6px
-  .weather-units
-    button
-      width 27px
-      text-overflow initial
 </style>
