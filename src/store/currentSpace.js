@@ -393,10 +393,10 @@ const currentSpace = {
       context.commit('notifySignUpToEditSpace', false, { root: true })
       context.commit('triggerUpdateWindowHistory', {}, { root: true })
     },
-    addJournalSpace: (context) => {
+    addJournalSpace: async (context) => {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
-      context.dispatch('createNewJournalSpace')
+      await context.dispatch('createNewJournalSpace')
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
@@ -488,7 +488,7 @@ const currentSpace = {
         const space = { id: journalSpace.id }
         context.dispatch('changeSpace', { space })
       } else {
-        context.dispatch('addJournalSpace')
+        await context.dispatch('addJournalSpace')
       }
       context.commit('loadJournalSpace', false, { root: true })
       context.commit('loadJournalSpaceTomorrow', false, { root: true })
