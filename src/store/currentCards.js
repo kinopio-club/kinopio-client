@@ -489,6 +489,8 @@ const currentCards = {
       } else {
         cards = [currentDraggingCardId]
       }
+      cards = cards.filter(card => card)
+      if (!cards.length) { return }
       cards = cards.map(id => {
         let card = context.getters.byId(id)
         card = utils.clone(card)
