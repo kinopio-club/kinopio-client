@@ -52,7 +52,10 @@ export default {
     defaultSpaceBackground: undefined,
     defaultSpaceBackgroundTint: undefined,
     defaultAddSpaceId: undefined,
-    downgradeAt: null
+    downgradeAt: null,
+    showWeather: false,
+    weatherLocation: undefined,
+    weatherUnitIsCelcius: false
   },
   mutations: {
     color: (state, value) => {
@@ -295,6 +298,18 @@ export default {
     defaultAddSpaceId: (state, value) => {
       state.defaultAddSpaceId = value
       cache.updateUser('defaultAddSpaceId', value)
+    },
+    showWeather: (state, value) => {
+      state.showWeather = value
+      cache.updateUser('showWeather', value)
+    },
+    weatherLocation: (state, value) => {
+      state.weatherLocation = value
+      cache.updateUser('weatherLocation', value)
+    },
+    weatherUnitIsCelcius: (state, value) => {
+      state.weatherUnitIsCelcius = value
+      cache.updateUser('weatherUnitIsCelcius', value)
     }
   },
   actions: {
