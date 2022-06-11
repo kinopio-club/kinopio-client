@@ -23,7 +23,7 @@ aside.notifications(@click.left="closeAllDialogs")
     img.icon(src="@/assets/brush.svg")
     span Hold and drag to paint
 
-  .persistent-item(v-if="currentUserIsPanning" :style="{ background: currentUserColor}")
+  .persistent-item(v-if="currentUserIsPanningReady || currentUserIsPanning" :style="{ background: currentUserColor}")
     img.icon(src="@/assets/hand.svg")
     span Hold and drag to pan
 
@@ -190,6 +190,7 @@ export default {
     notifyCurrentSpaceIsNowRemoved () { return this.$store.state.notifyCurrentSpaceIsNowRemoved },
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
+    currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
