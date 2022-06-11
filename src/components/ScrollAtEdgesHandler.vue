@@ -202,24 +202,41 @@ export default {
       window.scrollBy(delta)
     },
     speed (cursor, direction) {
-      let multiplier
-      const base = 10
+      const minSpeed = 1
       const maxSpeed = 30
+      const maxSpeedOutsideWindow = 60
+      const multiplier = 0.15
       const viewportHeight = this.viewportHeight
       const viewportWidth = this.viewportWidth
-      if (direction === 'up') {
-        multiplier = (scrollAreaHeight - cursor.y) / scrollAreaHeight
+      const directionY = direction === 'up' || direction === 'down'
+      const directionX = direction === 'left' || direction === 'right'
+      let scrollAreaSize, viewportSize, percent
+      if (directionX) {
+        scrollAreaSize = scrollAreaWidth
+        cursor = cursor.x
+        viewportSize = viewportWidth
+      } else if (directionY) {
+        scrollAreaSize = scrollAreaHeight
+        cursor = cursor.y
+        viewportSize = viewportHeight
       }
-      if (direction === 'down') {
-        multiplier = (cursor.y - (viewportHeight - scrollAreaHeight) / scrollAreaHeight) / viewportHeight
+      if (direction === 'up' || direction === 'left') {
+        const amount = Math.abs(cursor - scrollAreaSize)
+        percent = amount / scrollAreaSize
       }
-      if (direction === 'left') {
-        multiplier = (scrollAreaWidth - cursor.x) / scrollAreaWidth
+      if (direction === 'down' || direction === 'right') {
+        const amount = Math.abs(cursor - (viewportSize - scrollAreaSize))
+        percent = amount / scrollAreaSize
       }
-      if (direction === 'right') {
-        multiplier = (cursor.x - (viewportWidth - scrollAreaWidth) / scrollAreaWidth) / viewportWidth
+      let amount = percent * scrollAreaSize
+      amount = Math.round(amount * multiplier)
+      amount = Math.max(amount, minSpeed)
+      if (percent > 1) {
+        amount = Math.min(amount, maxSpeedOutsideWindow)
+      } else {
+        amount = Math.min(amount, maxSpeed)
       }
-      return Math.min(base * (multiplier + (multiplier * 0.5)), maxSpeed)
+      return amount
     },
     updatePageSizes () {
       this.$store.dispatch('updatePageSizes')

@@ -416,6 +416,7 @@ export default {
       favorites = await context.dispatch('api/getUserFavorites', null, { root: true }) || favorites
       context.commit('favoriteUsers', favorites.favoriteUsers)
       context.commit('favoriteSpaces', favorites.favoriteSpaces)
+      context.commit('favoriteColors', favorites.favoriteColors)
       context.commit('hasRestoredFavorites', true, { root: true })
     },
     addFavorite: (context, { type, item }) => {
