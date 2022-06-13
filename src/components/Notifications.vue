@@ -1,6 +1,6 @@
 <template lang="pug">
 aside.notifications(@click.left="closeAllDialogs")
-  .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type")
+  .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type" :style="notificationStyle(item.type)")
     p
       span.label-badge(v-if="item.label") {{item.label}}
       template(v-if="item.icon")
@@ -11,6 +11,7 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'undo'" src="@/assets/undo.svg" class="undo")
         img.icon(v-else-if="item.icon === 'redo'" src="@/assets/undo.svg" class="redo")
         img.icon(v-else-if="item.icon === 'brush-y'" src="@/assets/brush-y.svg" class="brush-y")
+        img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
       span {{item.message}}
 
   .persistent-item.danger.hidden#notify-local-storage-is-full
@@ -214,6 +215,13 @@ export default {
     }
   },
   methods: {
+    notificationStyle (type) {
+      if (type === 'currentUser') {
+        return {
+          'background-color': this.currentUserColor
+        }
+      }
+    },
     localStorageErrorIsVisible () {
       const element = document.getElementById('notify-local-storage-is-full')
       const isHidden = element.className.includes('hidden')
