@@ -20,13 +20,14 @@
           //- Favorites
           .button-wrap
             .segmented-buttons
-              button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+              button(:class="{active: favoritesActionsIsVisible}" @click.left.prevent="toggleFavoritesActionsIsVisible" @keydown.stop.enter="toggleFavoritesActionsIsVisible")
                 img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
                 img.icon(v-else src="@/assets/heart-empty.svg")
               button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
                 img.icon.down-arrow(src="@/assets/down-arrow.svg" :class="{ 'is-mobile-icon': isMobile }")
                 span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
             Favorites(:visible="favoritesIsVisible")
+            FavoritesActions(:visible="favoritesActionsIsVisible")
           //- Mobile Tips
           .button-wrap(v-if="isMobileOrTouch")
             button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
@@ -45,6 +46,7 @@
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
+import FavoritesActions from '@/components/dialogs/FavoritesActions.vue'
 import MobileTips from '@/components/dialogs/MobileTips.vue'
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
@@ -67,12 +69,14 @@ export default {
     Live,
     Notifications,
     Favorites,
+    FavoritesActions,
     MobileTips,
     Loader,
     SpaceZoom
   },
   data () {
     return {
+      favoritesActionsIsVisible: false,
       favoritesIsVisible: false,
       exploreIsVisible: false,
       liveIsVisible: false,
@@ -187,18 +191,16 @@ export default {
       this.$store.commit('minimapIsVisible', !this.minimapIsVisible)
     },
     closeDialogs (exclude) {
+      this.favoritesActionsIsVisible = false
       this.favoritesIsVisible = false
       this.exploreIsVisible = false
       this.liveIsVisible = false
       this.mobileTipsIsVisible = false
     },
-    toggleIsFavoriteSpace () {
-      const currentSpace = this.$store.state.currentSpace
-      if (this.isFavoriteSpace) {
-        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
-      } else {
-        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
-      }
+    toggleFavoritesActionsIsVisible () {
+      const isVisible = this.favoritesActionsIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleFavoritesActionsIsVisible')
+      this.favoritesActionsIsVisible = !isVisible
     },
     toggleFavoritesIsVisible () {
       const isVisible = this.favoritesIsVisible
