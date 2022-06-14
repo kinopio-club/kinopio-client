@@ -10,7 +10,10 @@
       span C°
   p(v-if="!weatherLocation") Requires location access
 .row(v-if="error.location")
-  .badge.danger Could not get your location
+  .badge.danger Could not get your location.
+    br
+    br
+    span You might need to add a new space, refresh, and try again
 </template>
 
 <script>
