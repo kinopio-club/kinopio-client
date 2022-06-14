@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     p blank dialog, please duplicate
 </template>
