@@ -1,33 +1,34 @@
 <template lang="pug">
 dialog.favorities-actions.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
-    p(v-if="isSpaceMember")
-     span
-        img.icon(src="@/assets/heart.svg")
-        span your own spaces to pin them to the top of your spaces list
-    p(v-else)
-      span
-        img.icon(src="@/assets/heart.svg")
-        span spaces to read them later and keep up with updates
+    p(v-if="isSpaceMember") Pin this to the top of your spaces list
+    p(v-else) Keep up with updates to this space
 
     button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
       img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
       img.icon(v-else src="@/assets/heart-empty.svg")
       span {{spaceName}}
-  section(v-if="spaceMembers.length")
-    p
-      img.icon(src="@/assets/heart.svg")
-      span people to see their other spaces
+  section.favorite-users(v-if="spaceMembers.length")
+    .row
+      p Save people to see their other spaces
 
     template(v-for="user in spaceMembers")
-      p {{user.name}}
-      //- UserList(:users="spaceMembers" @selectUser="toggleFavoriteUser" :isClickable="true")
+      .row
+        button
+          img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+          img.icon(v-else src="@/assets/heart-empty.svg")
+          UserLabel(:user="user" :isInline="true")
 
 </template>
 
 <script>
+import UserLabel from '@/components/UserLabel.vue'
+
 export default {
   name: 'FavoritesActions',
+  components: {
+    UserLabel
+  },
   props: {
     visible: Boolean
   },
@@ -55,7 +56,7 @@ export default {
         this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
       }
     }
-    // toggleFavoriteUser (user)' {
+    // toggleFavoriteUser (user) {
 
     // }'
   }
@@ -63,5 +64,14 @@ export default {
 </script>
 
 <style lang="stylus">
-// .favorities-actions
+.favorities-actions
+  .favorite-users
+    button
+      height 24px
+      display flex
+      align-items center
+      .user-label
+        margin 0
+        margin-left 6px
+
 </style>
