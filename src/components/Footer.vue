@@ -60,6 +60,7 @@ let updateFavoritesIntervalTimer, updateLiveSpacesIntervalTimer
 const fadeOutDuration = 10
 const hiddenDuration = 10
 const updatePositionDuration = 60
+let shouldNotifyMinimapKeyboardShortcut = true
 let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
 
 export default {
@@ -186,9 +187,15 @@ export default {
     }
   },
   methods: {
-    toggleMinimapIsVislble () {
+    toggleMinimapIsVislble (event) {
       this.closeDialogs()
-      this.$store.commit('minimapIsVisible', !this.minimapIsVisible)
+      const value = !this.minimapIsVisible
+      this.$store.commit('minimapIsVisible', value)
+      const isMouseClick = event.pointerType === 'mouse'
+      if (value && isMouseClick && shouldNotifyMinimapKeyboardShortcut) {
+        this.$store.commit('addNotification', { message: 'Hold z for minimap', type: 'currentUser', icon: 'minimap' })
+        shouldNotifyMinimapKeyboardShortcut = false
+      }
     },
     closeDialogs (exclude) {
       this.favoritesActionsIsVisible = false

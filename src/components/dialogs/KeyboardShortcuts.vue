@@ -34,13 +34,13 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.title
             img.icon.minimap(src="@/assets/minimap.svg")
             span Minimap
-          .badge.keyboard-shortcut Hold Space
+          .badge.keyboard-shortcut Hold Z
       article
         .row
           .badge.title
             img.icon.hand(src="@/assets/hand.svg")
             span Drag to Pan
-          .badge.keyboard-shortcut Right-Click Drag
+          .badge.keyboard-shortcut Space/Right-Click Drag
       article
         .row
           .badge.title
