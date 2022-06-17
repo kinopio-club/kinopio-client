@@ -25,7 +25,6 @@ export default {
         this.left = cursor.x + 10
         this.top = cursor.y - 10
         this.color = this.user.color
-        console.log('💖', this.user)
         currentIteration = 0
         this.updatePositionWithZoom(cursor)
         this.userLabelVisibleTimer()
