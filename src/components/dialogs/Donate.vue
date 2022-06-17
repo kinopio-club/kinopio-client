@@ -6,7 +6,7 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
     p As you may know, Kinopio is built by me, Pirijan.
     p Donations help support me. I'm grateful and flattered that you're even here.
     p
-      span You'll also get a {{' '}}
+      span You'll also get the {{' '}}
       span.badge.donor
         span Donor
       span badge on your user profile
@@ -35,7 +35,7 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
       button
         span Donate
         //- Loader(:visible="isLoading")
-      p You'll be billed ${{currentAmount}}, using the payment method you used to upgrade
+      p You'll be billed ${{currentAmount}}, using the same payment method you used to upgrade
 
 </template>
 
