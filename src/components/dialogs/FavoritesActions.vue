@@ -9,7 +9,7 @@ dialog.favorities-actions.narrow(v-if="visible" :open="visible" @click.left.stop
       span {{spaceName}}
   section.favorite-users(v-if="spaceMembers.length")
     .row
-      p Save people to see their other public spaces
+      p Follow people to see their other public spaces
     template(v-for="user in spaceMembers")
       .row
         button(:class="{active: isFavoriteUser(user)}" @click.left.prevent="toggleIsFavoriteUser(user)" @keydown.stop.enter="toggleIsFavoriteUser(user)")
