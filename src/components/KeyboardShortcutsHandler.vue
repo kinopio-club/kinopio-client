@@ -68,7 +68,7 @@ export default {
       } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
         this.remove()
       // Escape
-      } else if (key === 'Escape' || key === 'z') {
+      } else if (key === 'Escape') {
         this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
         this.$store.commit('minimapIsVisible', false)
       // → Left
@@ -98,10 +98,12 @@ export default {
         let value = this.$store.state.currentUser.filterUnchecked
         value = !value
         this.$store.dispatch('currentUser/toggleFilterUnchecked', value)
+      // 4
       } else if (key === '4' && isSpaceScope) {
         let value = this.$store.state.currentUser.filterComments
         value = !value
         this.$store.dispatch('currentUser/toggleFilterComments', value)
+      // Minimap
       } else if (key === ' ' && isSpaceScope) {
         this.$store.commit('currentUserIsPanning', false)
         this.$store.commit('currentUserIsPanningReady', false)
@@ -118,7 +120,6 @@ export default {
       const isCardScope = isFromCard || isFromCardName
       const isSpaceScope = event.target.tagName === 'BODY' || event.target.className === 'card'
       const isFromInput = event.target.closest('input') || event.target.closest('textarea')
-      const isMinimapShortcut = (key === ' ' && event.shiftKey) || key === 'z'
       // Add Child Card
       if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addChildCard()
@@ -195,13 +196,17 @@ export default {
         }
         event.preventDefault()
         this.$store.commit('triggerSpaceZoomIn')
-        // Minimap
-      } else if (isMinimapShortcut && isSpaceScope) {
+      // Minimap
+      } else if (key === ' ' && event.shiftKey && isSpaceScope) {
         event.preventDefault()
         if (this.$store.state.minimapIsVisible) { return }
         this.$store.commit('minimapIsVisible', true)
         this.$store.commit('currentUserIsPanningReady', false)
         this.$store.commit('currentUserIsPanning', false)
+      } else if (key === 'z' && isSpaceScope) {
+        event.preventDefault()
+        const value = !this.$store.state.minimapIsVisible
+        this.$store.commit('minimapIsVisible', value)
       // Pan
       } else if (key === ' ' && isSpaceScope) {
         event.preventDefault()
