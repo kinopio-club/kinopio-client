@@ -75,8 +75,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
         Loader(:visible="loadingUserspaces")
       SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :user="user" :userSpaces="userSpaces" @selectSpace="changeSpace")
     .button-wrap
-      label(:class="{active: isFavoriteUser}" @click.left.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
-        input(type="checkbox" v-model="isFavoriteUser")
+      button(:class="{active: isFavoriteUser}" @click.left.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
         img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
         img.icon(v-else src="@/assets/heart-empty.svg")
         Loader(:visible="!hasRestoredFavorites")

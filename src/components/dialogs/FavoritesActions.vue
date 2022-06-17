@@ -1,21 +1,19 @@
 <template lang="pug">
 dialog.favorities-actions.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
-    p(v-if="isSpaceMember") Pin this to the top of your spaces list
-    p(v-else) Keep up with updates to this space
-
+    p(v-if="isSpaceMember") Pin to the top of your spaces
+    p(v-else) Follow updates to this space
     button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
       img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
       img.icon(v-else src="@/assets/heart-empty.svg")
       span {{spaceName}}
   section.favorite-users(v-if="spaceMembers.length")
     .row
-      p Save people to see their other spaces
-
+      p Save people to see their other public spaces
     template(v-for="user in spaceMembers")
       .row
-        button
-          img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+        button(:class="{active: isFavoriteUser(user)}" @click.left.prevent="toggleIsFavoriteUser(user)" @keydown.stop.enter="toggleIsFavoriteUser(user)")
+          img.icon(v-if="isFavoriteUser(user)" src="@/assets/heart.svg")
           img.icon(v-else src="@/assets/heart-empty.svg")
           UserLabel(:user="user" :isInline="true")
 
@@ -45,7 +43,8 @@ export default {
     spaceMembers () {
       const excludeCurrentUser = true
       return this.$store.getters['currentSpace/members'](excludeCurrentUser)
-    }
+    },
+    hasRestoredFavorites () { return this.$store.state.hasRestoredFavorites }
   },
   methods: {
     toggleIsFavoriteSpace () {
@@ -55,10 +54,21 @@ export default {
       } else {
         this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
       }
+    },
+    isFavoriteUser (user) {
+      const favoriteUsers = this.$store.state.currentUser.favoriteUsers
+      const isFavoriteUser = Boolean(favoriteUsers.find(favoriteUser => {
+        return favoriteUser.id === user.id
+      }))
+      return isFavoriteUser
+    },
+    toggleIsFavoriteUser (user) {
+      if (this.isFavoriteUser(user)) {
+        this.$store.dispatch('currentUser/removeFavorite', { type: 'user', item: user })
+      } else {
+        this.$store.dispatch('currentUser/addFavorite', { type: 'user', item: user })
+      }
     }
-    // toggleFavoriteUser (user) {
-
-    // }'
   }
 }
 </script>
