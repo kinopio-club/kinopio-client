@@ -68,7 +68,7 @@ export default {
       } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
         this.remove()
       // Escape
-      } else if (key === 'Escape') {
+      } else if (key === 'Escape' || key === 'z') {
         this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
         this.$store.commit('minimapIsVisible', false)
       // → Left
@@ -118,6 +118,7 @@ export default {
       const isCardScope = isFromCard || isFromCardName
       const isSpaceScope = event.target.tagName === 'BODY' || event.target.className === 'card'
       const isFromInput = event.target.closest('input') || event.target.closest('textarea')
+      const isMinimapShortcut = (key === ' ' && event.shiftKey) || key === 'z'
       // Add Child Card
       if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addChildCard()
@@ -195,7 +196,7 @@ export default {
         event.preventDefault()
         this.$store.commit('triggerSpaceZoomIn')
         // Minimap
-      } else if (key === ' ' && event.shiftKey && isSpaceScope) {
+      } else if (isMinimapShortcut && isSpaceScope) {
         event.preventDefault()
         if (this.$store.state.minimapIsVisible) { return }
         this.$store.commit('minimapIsVisible', true)

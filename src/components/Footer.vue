@@ -189,7 +189,7 @@ export default {
       this.$store.commit('minimapIsVisible', value)
       const isMouseClick = event.pointerType === 'mouse'
       if (value && isMouseClick && shouldNotifyMinimapKeyboardShortcut) {
-        this.$store.commit('addNotification', { message: 'Hold space and shift for minimap', type: 'currentUser', icon: 'minimap' })
+        this.$store.commit('addNotification', { message: 'Hold z for minimap', type: 'currentUser', icon: 'minimap' })
         shouldNotifyMinimapKeyboardShortcut = false
       }
     },
