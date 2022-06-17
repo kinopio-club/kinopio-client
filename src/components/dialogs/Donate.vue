@@ -31,21 +31,34 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
         .row
           User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
           .badge.info
-            span ${{currentAmount}}/once
-      button
+            span ${{currentAmount}}
+            span /once
+
+      button(@click="donate" :class="{ active: isLoading }")
         span Donate
-        //- Loader(:visible="isLoading")
+        Loader(:visible="isLoading")
       p You'll be billed ${{currentAmount}}, using the same payment method you used to upgrade
+
+      p(v-if="error.unknownServerError")
+        .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
 </template>
 
 <script>
 import User from '@/components/User.vue'
+import Loader from '@/components/Loader.vue'
 
+let priceId
+if (import.meta.env.MODE === 'development') {
+  priceId = 'price_1LBkQJDFIr5ywhwo6hgOWD1C'
+} else {
+  priceId = 'abc'
+}
 export default {
   name: 'Donate',
   components: {
-    User
+    User,
+    Loader
   },
   props: {
     visible: Boolean
@@ -54,7 +67,10 @@ export default {
     return {
       customAmountIsVisible: false,
       currentAmount: 0,
-      isLoading: false
+      isLoading: false,
+      error: {
+        unknownServerError: false
+      }
     }
   },
   computed: {
@@ -85,16 +101,22 @@ export default {
       this.currentAmount = value
       this.customAmountIsVisible = false
     },
-    donate () {
+    async donate () {
+      if (this.isLoading) { return }
+      this.error.unknownServerError = false
       this.isLoading = true
+      const value = parseInt(this.currentAmount)
+      console.log('🍅', value, priceId)
       try {
-        // const result = await this.$store.dispatch('api/donate', {
-        //   value: parseInt(this.currentAmount)
-        // })
-        // console.log('🚛', result)
+        if (!value) { throw `invalid value, ${value}` }
+        const result = await this.$store.dispatch('api/donate', {
+          value: parseInt(this.currentAmount),
+          priceId
+        })
+        console.log('🚛', result)
       } catch (error) {
         console.error('🚒', error)
-        // this.error =
+        this.error.unknownServerError = true
       }
       this.isLoading = false
     }

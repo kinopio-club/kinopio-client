@@ -683,6 +683,15 @@ const self = {
         console.error('🚒 subscriptionInfo', error)
       }
     },
+    donate: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/billing/donate`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 subscriptionInfo', error)
+      }
+    },
 
     // Upload
 

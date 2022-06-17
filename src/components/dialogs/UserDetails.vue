@@ -35,7 +35,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
       template(v-if="currentUserIsUpgraded")
         .button-wrap
           button(@click.left.stop="triggerDonateIsVisible")
-            img.icon(src="@/assets/donate.svg")
+            //- img.icon(src="@/assets/donate.svg")
             span Donate
 
     //- Unlimited cards from member
