@@ -1,5 +1,5 @@
 <template lang="pug">
-.user-label.badge(v-if="visible" :data-id="user.id" :style="{ background: color, left: left + 'px', top: top + 'px' }")
+.user-label.badge(v-if="visible || isInline" :data-id="user.id" :style="{ background: user.color, left: left + 'px', top: top + 'px' }" :class="{ 'inline-block': isInline }")
   .user-avatar.anon-avatar
   span.user-name(v-if="isOnscreen && userHasName") {{ user.name }}
 </template>
@@ -14,7 +14,8 @@ export default {
   name: 'UserLabel',
   props: {
     user: Object,
-    scale: Number
+    scale: Number,
+    isInline: Boolean
   },
   mounted () {
     this.$store.subscribe((mutation, state) => {
@@ -60,6 +61,7 @@ export default {
       this.top = this.top * scale
     },
     checkIsOnscreen () {
+      if (this.isInline) { return true }
       if (this.minimapIsVisible) { return }
       const isBetweenX = utils.isBetween({
         value: this.left,
@@ -123,6 +125,10 @@ export default {
   position absolute
   z-index calc(var(--max-z) - 50)
   display inline-block
+  &.inline-block
+    position static
+    min-height initial
+    padding 0 2px
   .anon-avatar
     width 15px
     height 15px

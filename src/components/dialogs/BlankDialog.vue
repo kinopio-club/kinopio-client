@@ -1,11 +1,12 @@
 <template lang="pug">
-.component-name(v-if="visible")
-  p blank template, please duplicate
+dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+  section
+    p blank dialog, please duplicate
 </template>
 
 <script>
 export default {
-  name: 'ComponentName',
+  name: 'DialogName',
   components: {
   },
   props: {
@@ -35,5 +36,5 @@ export default {
 </script>
 
 <style lang="stylus">
-// .component-name
+// .dialog-name
 </style>
