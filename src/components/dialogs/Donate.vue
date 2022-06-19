@@ -134,8 +134,8 @@ export default {
       } catch (error) {
         console.error('🚒', error)
         this.error.unknownServerError = true
+        this.isLoading = false
       }
-      this.isLoading = false
     }
   },
   watch: {

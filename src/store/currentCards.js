@@ -192,7 +192,6 @@ const currentCards = {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
       }
-      console.log('💖', name)
       let cards = context.getters.all
       const highestCardZ = utils.highestCardZ(cards)
       let card = {
