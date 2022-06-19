@@ -58,7 +58,7 @@ let productId
 if (import.meta.env.MODE === 'development') {
   productId = 'prod_LtXVNnexfHyKZA'
 } else {
-  productId = 'abc'
+  productId = 'prod_LuJoVy0tM7PiBI'
 }
 export default {
   name: 'Donate',
