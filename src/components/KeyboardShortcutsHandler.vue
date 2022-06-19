@@ -16,6 +16,12 @@ let spaceKeyIsDown = false
 
 let prevCursorPosition, currentCursorPosition
 
+const checkIsSpaceScope = (event) => {
+  const isBody = event.target.tagName === 'BODY'
+  const isFocusedCard = event.target.className === 'card'
+  return isBody || isFocusedCard
+}
+
 export default {
   name: 'KeyboardShortcutsHandler',
   created () {
@@ -56,7 +62,7 @@ export default {
       const key = event.key
       // console.warn('🎹', key)
       const isFromCard = event.target.classList[0] === 'card'
-      const isSpaceScope = event.target.tagName === 'BODY' || event.target.className === 'card'
+      const isSpaceScope = checkIsSpaceScope(event)
       // ?
       if (key === '?' && isSpaceScope) {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
@@ -116,7 +122,7 @@ export default {
       const isFromCardName = event.target.closest('dialog.card-details')
       const isFromCard = event.target.classList[0] === 'card'
       const isCardScope = isFromCard || isFromCardName
-      const isSpaceScope = event.target.tagName === 'BODY' || event.target.className === 'card'
+      const isSpaceScope = checkIsSpaceScope(event)
       const isFromInput = event.target.closest('input') || event.target.closest('textarea')
       const isMinimapShortcut = (key === ' ' && event.shiftKey) || key === 'z'
       // Add Child Card

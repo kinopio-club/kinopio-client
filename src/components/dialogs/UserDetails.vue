@@ -17,7 +17,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
 
   //- Current User
   template(v-if="isCurrentUser")
-    section
+    section.current-user
       .row
         .button-wrap
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
@@ -32,15 +32,18 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
           button.inline-button
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       UserBadges(:user="user")
+      template(v-if="currentUserIsUpgraded")
+        .button-wrap
+          button(@click.left.stop="triggerDonateIsVisible")
+            span Donate
 
     //- Unlimited cards from member
     section.upgrade(v-if="!currentUserIsUpgraded")
       p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
       progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
       .button-wrap(v-if="!isAddPage")
-        button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
+        button(@click.left.stop="triggerUpgradeUserIsVisible")
           span Upgrade for Unlimited
-        UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeDialogs")
       .row(v-if="!isAppStoreView")
         p
           .badge.info $6/mo, $60/yr
@@ -97,7 +100,6 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
-import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Loader from '@/components/Loader.vue'
 import UserBadges from '@/components/UserBadges.vue'
 import cache from '@/cache.js'
@@ -115,8 +117,7 @@ export default {
     User,
     Loader,
     UserBadges,
-    SpacePicker,
-    UpgradeUser
+    SpacePicker
   },
   props: {
     user: Object,
@@ -129,7 +130,6 @@ export default {
     return {
       colorPickerIsVisible: false,
       userSettingsIsVisible: false,
-      upgradeUserIsVisible: false,
       loadingUserspaces: false,
       spacePickerIsVisible: false,
       userSpaces: [],
@@ -227,15 +227,13 @@ export default {
       this.closeDialogs()
       this.userSettingsIsVisible = !isVisible
     },
-    toggleUpgradeUserIsVisible () {
-      if (utils.isMobile()) {
-        this.$store.commit('closeAllDialogs', 'UserDetails.toggleUpgradeUserIsVisible')
-        this.$store.commit('triggerUpgradeUserIsVisible')
-      } else {
-        const isVisible = this.upgradeUserIsVisible
-        this.closeDialogs()
-        this.upgradeUserIsVisible = !isVisible
-      }
+    triggerUpgradeUserIsVisible () {
+      this.$store.commit('closeAllDialogs', 'UserDetails.triggerUpgradeUserIsVisible')
+      this.$store.commit('triggerUpgradeUserIsVisible')
+    },
+    triggerDonateIsVisible () {
+      this.$store.commit('closeAllDialogs', 'UserDetails.triggerDonateIsVisible')
+      this.$store.commit('triggerDonateIsVisible')
     },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
@@ -246,7 +244,6 @@ export default {
       this.colorPickerIsVisible = false
       this.userSettingsIsVisible = false
       this.spacePickerIsVisible = false
-      this.upgradeUserIsVisible = false
     },
     updateUserColor (newValue) {
       this.updateUser({ color: newValue })
@@ -331,13 +328,15 @@ export default {
   &.right-side
     left initial
     right 8px
+  .current-user
+    .user-badges
+      margin-top -10px
   .user-details-name
     margin-left 6px
   .error-message
     margin-top 10px
   .moon
     vertical-align -2px
-
   .upgrade
     progress
       margin-top 2px

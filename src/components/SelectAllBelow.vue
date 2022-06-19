@@ -39,7 +39,9 @@ export default {
     handleMouseMove (event) {
       if (!this.canEditSpace) { return }
       if (this.$store.state.minimapIsVisible) { return }
-      const edgeThreshold = 45
+      if (this.$store.state.currentUserIsPainting) { return }
+      if (this.$store.state.currentUserIsDraggingCard) { return }
+      const edgeThreshold = 30
       const header = document.querySelector('header').getBoundingClientRect().height + 10
       const footer = document.querySelector('.footer-wrap').getBoundingClientRect().height + 10
       const position = utils.cursorPositionInViewport(event)

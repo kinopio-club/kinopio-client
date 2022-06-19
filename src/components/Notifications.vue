@@ -28,6 +28,16 @@ aside.notifications(@click.left="closeAllDialogs")
     img.icon(src="@/assets/hand.svg")
     span Hold and drag to pan
 
+  .persistent-item.success(v-if="notifyThanksForDonating")
+    p Thank you for being a
+      span
+        .badge.is-donor Donor
+      span , I appreciate it!
+    .row
+      button(@click="removeNotifyThanksForDonating")
+        img.icon.cancel(src="@/assets/add.svg")
+        span Feels Good
+
   .item.info(v-if="notifySpaceIsHidden" @animationend="resetNotifySpaceIsHidden")
     p Hidden spaces revealed through
       img.icon.filter-icon(src="@/assets/filter.svg")
@@ -189,6 +199,7 @@ export default {
     notifyMoveOrCopyToSpaceDetails () { return this.$store.state.notifyMoveOrCopyToSpaceDetails },
     notifySpaceIsHidden () { return this.$store.state.notifySpaceIsHidden },
     notifyCurrentSpaceIsNowRemoved () { return this.$store.state.notifyCurrentSpaceIsNowRemoved },
+    notifyThanksForDonating () { return this.$store.state.notifyThanksForDonating },
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
@@ -215,6 +226,9 @@ export default {
     }
   },
   methods: {
+    removeNotifyThanksForDonating () {
+      this.$store.commit('notifyThanksForDonating', false)
+    },
     notificationStyle (type) {
       if (type === 'currentUser') {
         return {
@@ -416,6 +430,13 @@ export default {
   .filter-icon
     margin 0
     margin-left 4px
+
+  .badge
+    &.is-donor
+      background-color var(--user-badge-donor)
+      margin 0
+      margin-left 6px
+      vertical-align 0
 
 @keyframes notificationJiggle
   0%

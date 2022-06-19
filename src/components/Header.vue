@@ -103,7 +103,8 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidde
       .controls(v-if="isSpace")
         .top-controls
           SpaceUsers
-          UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs" :dialogOnRight="true")
+          UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
+          Donate(:visible="donateIsVisible")
           //- Share
           .button-wrap
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
@@ -159,6 +160,7 @@ import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 import SelectAllBelow from '@/components/SelectAllBelow.vue'
 import SpaceUsers from '@/components/SpaceUsers.vue'
+import Donate from '@/components/dialogs/Donate.vue'
 
 let updateNotificationsIntervalTimer
 
@@ -191,7 +193,8 @@ export default {
     PrivacyIcon,
     SelectAllBelow,
     Sidebar,
-    SpaceUsers
+    SpaceUsers,
+    Donate
   },
   data () {
     return {
@@ -214,7 +217,8 @@ export default {
       isFadeOut: false,
       isHidden: false,
       templatesIsVisible: false,
-      sidebarIsVisible: false
+      sidebarIsVisible: false,
+      donateIsVisible: false
     }
   },
   created () {
@@ -233,6 +237,8 @@ export default {
         this.keyboardShortcutsIsVisible = true
       } else if (mutation.type === 'triggerUpgradeUserIsVisible') {
         this.upgradeUserIsVisible = true
+      } else if (mutation.type === 'triggerDonateIsVisible') {
+        this.donateIsVisible = true
       } else if (mutation.type === 'currentUserIsPainting') {
         if (state.currentUserIsPainting) {
           this.addReadOnlyJiggle()
@@ -429,6 +435,7 @@ export default {
       this.shareIsVisible = false
       this.keyboardShortcutsIsVisible = false
       this.upgradeUserIsVisible = false
+      this.donateIsVisible = false
       this.spaceStatusIsVisible = false
       this.offlineIsVisible = false
       this.notificationsIsVisible = false

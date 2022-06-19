@@ -14,5 +14,9 @@
   {
     "name": "GuideMaker",
     "description": "Guide Makers have written helpful <a href='https://help.kinopio.club/guides/'>guides</a> about their spaces"
+  },
+  {
+    "name": "Donor",
+    "description": "Donors have supported the sustainable development of Kinopio through a generous donation"
   }
 ]
