@@ -1,5 +1,5 @@
 <template lang="pug">
-.component-name(v-if="isVisible")
+.component-name(v-if="visible")
   p blank template, please duplicate
 </template>
 
