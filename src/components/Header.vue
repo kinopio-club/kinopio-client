@@ -774,6 +774,14 @@ header
             border-bottom-right-radius 3px
             border-right 1px solid var(--primary)
 
+  .left,
+  .right
+    pointer-events none
+    button,
+    .logo-about,
+    .user
+      pointer-events auto
+
   .space-functions-row
     margin-top 5px
     position relative

@@ -392,7 +392,12 @@ export default {
         return this.card.name || ''
       },
       set (newName) {
-        this.updateCardName(newName)
+        if (this.$store.state.shouldPreventNextEnterKey) {
+          this.$store.commit('shouldPreventNextEnterKey', false)
+          this.updateCardName(newName.trim())
+        } else {
+          this.updateCardName(newName)
+        }
         if (this.wasPasted) {
           this.wasPasted = false
         } else {

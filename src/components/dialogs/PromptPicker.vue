@@ -1,9 +1,16 @@
 <template lang="pug">
-.prompt-pack-picker(v-if="visible" @click.left.stop ref="dialog")
+.prompt-picker(v-if="visible" @click.left.stop ref="dialog")
+  //- Add Daily Prompt
+  .row
+    button(@click.left="addCustomPrompt")
+      img.icon(src="@/assets/add.svg")
+      span Add Daily Prompt
+  //- More Prompts
   button(@click="toggleRandomPromptsIsVisible" :class="{active: randomPromptsIsVisible}")
     img.icon(v-if="!randomPromptsIsVisible" src="@/assets/view.svg")
     img.icon(v-if="randomPromptsIsVisible" src="@/assets/view-hidden.svg")
     span More Prompts
+  //- Prompt Packs
   .results-section(v-if="randomPromptsIsVisible")
     ul.results-list
       template(v-for="pack in packs")
@@ -16,7 +23,7 @@ import PromptPack from '@/components/PromptPack.vue'
 import utils from '@/utils.js'
 
 export default {
-  name: 'PromptPackPicker',
+  name: 'PromptPicker',
   components: {
     PromptPack
   },
@@ -42,6 +49,9 @@ export default {
     userJournalQuestions () { return this.$store.state.currentUser.journalQuestions }
   },
   methods: {
+    addCustomPrompt () {
+      this.$emit('addCustomPrompt')
+    },
     toggleRandomPromptsIsVisible () {
       this.randomPromptsIsVisible = !this.randomPromptsIsVisible
     },
@@ -67,7 +77,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.prompt-pack-picker
+.prompt-picker
   margin-top 10px
   button
     .badge

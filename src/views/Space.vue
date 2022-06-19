@@ -448,7 +448,6 @@ export default {
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
       if (this.isDraggingCard) {
-        this.$store.dispatch('currentCards/afterMove')
         this.showMultipleSelectedActions(event)
       }
       this.$store.commit('currentUserIsDraggingCard', false)
@@ -468,7 +467,7 @@ export default {
   position relative // used by svg connections
   transform-origin top left
   &.hidden-by-mindmap
-    opacity 0.2
+    opacity 0.4
   .card-overlap-indicator
     position absolute
     z-index calc(var(--max-z) - 70)

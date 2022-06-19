@@ -74,7 +74,7 @@ export default {
       } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
         this.remove()
       // Escape
-      } else if (key === 'Escape') {
+      } else if (key === 'Escape' || key === 'z') {
         this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
         this.$store.commit('minimapIsVisible', false)
       // → Left
@@ -109,6 +109,8 @@ export default {
         value = !value
         this.$store.dispatch('currentUser/toggleFilterComments', value)
       } else if (key === ' ' && isSpaceScope) {
+        this.$store.commit('currentUserIsPanning', false)
+        this.$store.commit('currentUserIsPanningReady', false)
         this.$store.commit('minimapIsVisible', false)
         spaceKeyIsDown = false
       }
@@ -122,6 +124,7 @@ export default {
       const isCardScope = isFromCard || isFromCardName
       const isSpaceScope = checkIsSpaceScope(event)
       const isFromInput = event.target.closest('input') || event.target.closest('textarea')
+      const isMinimapShortcut = (key === ' ' && event.shiftKey) || key === 'z'
       // Add Child Card
       if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addChildCard()
@@ -198,14 +201,19 @@ export default {
         }
         event.preventDefault()
         this.$store.commit('triggerSpaceZoomIn')
-      // Minimap
+        // Minimap
+      } else if (isMinimapShortcut && isSpaceScope) {
+        event.preventDefault()
+        if (this.$store.state.minimapIsVisible) { return }
+        this.$store.commit('minimapIsVisible', true)
+        this.$store.commit('currentUserIsPanningReady', false)
+        this.$store.commit('currentUserIsPanning', false)
+      // Pan
       } else if (key === ' ' && isSpaceScope) {
         event.preventDefault()
         if (spaceKeyIsDown) { return }
         spaceKeyIsDown = true
-        if (!this.$store.state.minimapIsVisible) {
-          this.$store.commit('minimapIsVisible', true)
-        }
+        this.$store.commit('currentUserIsPanningReady', true)
       // Lock Cards
       } else if (event.shiftKey && isMeta && key === 'l') {
         event.preventDefault()
@@ -355,6 +363,7 @@ export default {
       if (parentCard) {
         backgroundColor = parentCard.backgroundColor
       }
+      this.$store.commit('shouldPreventNextEnterKey', true)
       this.$store.dispatch('currentCards/add', { position, isParentCard, backgroundColor })
       if (childCard) {
         this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)

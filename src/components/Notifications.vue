@@ -1,6 +1,6 @@
 <template lang="pug">
 aside.notifications(@click.left="closeAllDialogs")
-  .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type")
+  .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type" :style="notificationStyle(item.type)")
     p
       span.label-badge(v-if="item.label") {{item.label}}
       template(v-if="item.icon")
@@ -11,6 +11,7 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'undo'" src="@/assets/undo.svg" class="undo")
         img.icon(v-else-if="item.icon === 'redo'" src="@/assets/undo.svg" class="redo")
         img.icon(v-else-if="item.icon === 'brush-y'" src="@/assets/brush-y.svg" class="brush-y")
+        img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
       span {{item.message}}
 
   .persistent-item.danger.hidden#notify-local-storage-is-full
@@ -23,7 +24,7 @@ aside.notifications(@click.left="closeAllDialogs")
     img.icon(src="@/assets/brush.svg")
     span Hold and drag to paint
 
-  .persistent-item(v-if="currentUserIsPanning" :style="{ background: currentUserColor}")
+  .persistent-item(v-if="currentUserIsPanningReady || currentUserIsPanning" :style="{ background: currentUserColor}")
     img.icon(src="@/assets/hand.svg")
     span Hold and drag to pan
 
@@ -201,6 +202,7 @@ export default {
     notifyThanksForDonating () { return this.$store.state.notifyThanksForDonating },
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
+    currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
@@ -226,6 +228,13 @@ export default {
   methods: {
     removeNotifyThanksForDonating () {
       this.$store.commit('notifyThanksForDonating', false)
+    },
+    notificationStyle (type) {
+      if (type === 'currentUser') {
+        return {
+          'background-color': this.currentUserColor
+        }
+      }
     },
     localStorageErrorIsVisible () {
       const element = document.getElementById('notify-local-storage-is-full')
@@ -318,6 +327,7 @@ export default {
       } else {
         remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
       }
+      if (!remoteSpace) { return }
       const spaceUpdatedAt = dayjs(space.updatedAt)
       const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
       const hoursDelta = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'hour') // hourDelta

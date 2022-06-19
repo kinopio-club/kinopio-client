@@ -16,8 +16,7 @@ dialog.add-space.narrow(
           span New Space
         button(@click.left.stop="toggleEditNewSpaceIsVisible" :class="{ active: editNewSpaceIsVisible }")
           img.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
-
-    //- Edit Space
+    //- Space Settings
     .row(v-if="editNewSpaceIsVisible")
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
         input(type="checkbox" v-model="newSpacesAreBlank")
@@ -30,16 +29,12 @@ dialog.add-space.narrow(
           span Daily Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           img.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
-    //- Edit Journal
-    .row(v-if="editPromptsIsVisible")
-      .button-wrap
-        button(@click.left="addCustomPrompt")
-          img.icon(src="@/assets/add.svg")
-          span Add Daily Prompt
+    //- Journal Settings
+    template(v-if="editPromptsIsVisible")
+      Weather
     template(v-if="editPromptsIsVisible" )
       Prompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
-    PromptPackPicker(v-if="editPromptsIsVisible" :visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack")
-
+    PromptPicker(v-if="editPromptsIsVisible" :visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack" @addCustomPrompt="addCustomPrompt")
   //- Templates
   section
     button(@click="triggerTemplatesIsVisible")
@@ -50,9 +45,10 @@ dialog.add-space.narrow(
 
 <script>
 import Prompt from '@/components/Prompt.vue'
-import PromptPackPicker from '@/components/dialogs/PromptPackPicker.vue'
+import PromptPicker from '@/components/dialogs/PromptPicker.vue'
 import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
+import Weather from '@/components/Weather.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -63,8 +59,9 @@ export default {
   name: 'AddSpace',
   components: {
     Prompt,
-    PromptPackPicker,
-    MoonPhase
+    PromptPicker,
+    MoonPhase,
+    Weather
   },
   props: {
     visible: Boolean,
@@ -108,7 +105,7 @@ export default {
     shouldHideFooter (value) {
       this.$store.commit('shouldExplicitlyHideFooter', value)
     },
-    addJournalSpace () {
+    async addJournalSpace () {
       this.$emit('closeDialogs')
       this.$emit('addJournalSpace')
       if (this.shouldAddSpaceDirectly) {

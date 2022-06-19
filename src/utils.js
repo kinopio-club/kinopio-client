@@ -648,6 +648,12 @@ export default {
     })
     return cardElement
   },
+  cardPositionFromElement (cardId) {
+    const element = document.querySelector(`article[data-card-id="${cardId}"]`)
+    const x = parseInt(element.style.left)
+    const y = parseInt(element.style.top)
+    return { x, y }
+  },
   isPointInsideCard (point, card) {
     const xIsInside = this.isBetween({
       value: point.x,
@@ -1032,14 +1038,17 @@ export default {
     packId = packId.toString()
     return promptPacks.find(pack => pack.packId === packId)
   },
-  journalSpace (isTomorrow, currentUser) {
+  journalSpace (currentUser, isTomorrow, weather) {
     // name
     let date = dayjs(new Date())
     if (isTomorrow) {
       date = date.add(1, 'day')
     }
     const moonPhase = moonphase(date)
-    const day = `${moonPhase.emoji} ${date.format('dddd')}` // 🌘 Tuesday
+    let summary = `${moonPhase.emoji} ${date.format('dddd')}` // 🌘 Tuesday
+    if (weather) {
+      summary = summary + weather
+    }
     // meta
     const spaceId = nanoid()
     let space = this.emptySpace(spaceId)
@@ -1054,7 +1063,7 @@ export default {
     space.isHidden = false
     space = this.spaceDefaultBackground(space, currentUser)
     // cards
-    space.cards.push({ id: nanoid(), name: day, x: 60, y: 100, frameId: 0 })
+    space.cards.push({ id: nanoid(), name: summary, x: 60, y: 100, frameId: 0 })
     const userPrompts = currentUser.journalPrompts
     userPrompts.forEach(prompt => {
       if (!prompt.name) { return }

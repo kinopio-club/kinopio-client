@@ -102,10 +102,12 @@ export default {
     const spaces = spaceKeys.map(key => {
       return this.getLocal(key)
     })
-    const spacesWithNames = spaces.map(space => {
+    let spacesWithNames = spaces.map(space => {
+      if (!space) { return }
       space.name = space.name || `space-${space.id}`
       return space
     })
+    spacesWithNames = spacesWithNames.filter(space => Boolean(space))
     const sortedSpaces = spacesWithNames.sort((a, b) => {
       return b.cacheDate - a.cacheDate
     })
