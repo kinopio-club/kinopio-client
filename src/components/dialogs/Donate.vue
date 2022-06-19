@@ -123,7 +123,6 @@ export default {
         this.error.amountIsTooLow = true
         return
       }
-      console.log('🍅', amount, productId)
       try {
         if (!amount) { throw `invalid amount, ${amount}` }
         amount = amount * 100
@@ -131,8 +130,7 @@ export default {
           amount,
           productId
         })
-        console.log('🚛', result)
-        // TODO result should be stripe checkout link
+        window.location = result.url
       } catch (error) {
         console.error('🚒', error)
         this.error.unknownServerError = true
