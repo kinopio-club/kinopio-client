@@ -68,7 +68,7 @@ export default {
       } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
         this.remove()
       // Escape
-      } else if (key === 'Escape' || key === 'z') {
+      } else if (key === 'Escape' || (key === 'z' && isSpaceScope)) {
         this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
         this.$store.commit('minimapIsVisible', false)
       // → Left
