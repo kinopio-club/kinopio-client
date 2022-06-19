@@ -162,6 +162,14 @@ const router = createRouter({
         store.commit('isEmbed', true)
         next()
       }
+    }, {
+      path: '/notify-donation-success',
+      name: 'notify-donation-success',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        store.commit('notifyThanksForDonating', true)
+        next()
+      }
     }
   ]
 })
