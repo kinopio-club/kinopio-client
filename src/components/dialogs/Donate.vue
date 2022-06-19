@@ -24,7 +24,7 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
     p(v-if="customAmountIsVisible")
       .row
         span $
-        input.name.user-details-name(placeholder="100" v-model="customAmount" ref="input" type="number")
+        input.name.user-details-name(placeholder="100" v-model="customAmount" ref="input" type="number" @keydown.enter="donate")
 
     template(v-if="currentAmount")
       p
@@ -35,12 +35,18 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
             span /once
 
       button(@click="donate" :class="{ active: isLoading }")
-        span Donate
+        span Donation Checkout →
         Loader(:visible="isLoading")
-      p You'll be billed ${{currentAmount}}, using the same payment method you used to upgrade
 
       p(v-if="error.unknownServerError")
         .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+      p(v-if="error.amountIsTooLow")
+        .badge.danger Because of Stripe fees, the minimum donation amount is $2
+
+  section
+    p
+      img.icon(src="@/assets/lock.svg")
+      span You'll be redirected to Stripe to complete checkout
 
 </template>
 
@@ -48,11 +54,11 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 
-let priceId
+let productId
 if (import.meta.env.MODE === 'development') {
-  priceId = 'price_1LBkQJDFIr5ywhwo6hgOWD1C'
+  productId = 'prod_LtXVNnexfHyKZA'
 } else {
-  priceId = 'abc'
+  productId = 'abc'
 }
 export default {
   name: 'Donate',
@@ -69,7 +75,8 @@ export default {
       currentAmount: 0,
       isLoading: false,
       error: {
-        unknownServerError: false
+        unknownServerError: false,
+        amountIsTooLow: false
       }
     }
   },
@@ -99,21 +106,33 @@ export default {
     },
     updateAmount (value) {
       this.currentAmount = value
-      this.customAmountIsVisible = false
+      this.clearErrors()
+    },
+    clearErrors () {
+      this.error.unknownServerError = false
+      this.error.amountIsTooLow = false
     },
     async donate () {
+      const minAmount = 2
       if (this.isLoading) { return }
-      this.error.unknownServerError = false
+      this.clearErrors()
       this.isLoading = true
-      const value = parseInt(this.currentAmount)
-      console.log('🍅', value, priceId)
+      let amount = parseInt(this.currentAmount)
+      if (amount < minAmount) {
+        this.isLoading = false
+        this.error.amountIsTooLow = true
+        return
+      }
+      console.log('🍅', amount, productId)
       try {
-        if (!value) { throw `invalid value, ${value}` }
-        const result = await this.$store.dispatch('api/donate', {
-          value: parseInt(this.currentAmount),
-          priceId
+        if (!amount) { throw `invalid amount, ${amount}` }
+        amount = amount * 100
+        const result = await this.$store.dispatch('api/donationUrl', {
+          amount,
+          productId
         })
         console.log('🚛', result)
+        // TODO result should be stripe checkout link
       } catch (error) {
         console.error('🚒', error)
         this.error.unknownServerError = true
