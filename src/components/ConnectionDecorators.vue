@@ -1,13 +1,13 @@
 <template lang="pug">
 .button-wrap.connection-decorators
   .segmented-buttons
-    button(@click="clearAll" :class="{ active: someConnectionsAreClear }")
+    button(@click="clearAll" :class="{ active: isSomeConnectionsClear }")
       span -
     button
       img.icon.left-arrow(src="@/assets/down-arrow.svg")
     button
       img.icon.right-arrow(src="@/assets/down-arrow.svg")
-    button(@click.left="toggleAllLabelsAreVisible" :class="{ active: someLabelsAreVisible }")
+    button(@click.left="labelsAreVisible" :class="{ active: isSomeLabelsVisible }")
       span Label
 </template>
 
@@ -20,7 +20,7 @@ export default {
     connections: Array
   },
   computed: {
-    someConnectionsAreClear () {
+    isSomeConnectionsClear () {
       const decoratedConnections = this.connections.filter(connection => {
         const { directionIsLeft, directionIsRight, labelIsVisible } = connection
         if (directionIsLeft || directionIsRight || labelIsVisible) {
@@ -29,7 +29,7 @@ export default {
       })
       return decoratedConnections.length < this.connections.length
     },
-    someLabelsAreVisible () {
+    isSomeLabelsVisible () {
       const labelled = this.connections.filter(connection => connection.labelIsVisible)
       return labelled.length
     }
@@ -43,12 +43,11 @@ export default {
         })
       })
     },
-    toggleAllLabelsAreVisible () {
-      const isVisible = !this.allLabelsAreVisible
+    labelsAreVisible () {
       this.connections.forEach(connection => {
         this.$store.dispatch('currentConnections/update', {
           id: connection.id,
-          labelIsVisible: isVisible
+          labelIsVisible: true
         })
       })
     }
