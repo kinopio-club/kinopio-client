@@ -3,11 +3,11 @@
   .segmented-buttons
     button(@click="clearAll" :class="{ active: isSomeConnectionsClear }")
       span -
-    button
+    button(@click.left="enableDirectionsIsLeft" :class="{ active: isSomeDirectionsIsLeft }")
       img.icon.left-arrow(src="@/assets/down-arrow.svg")
-    button
+    button(@click.left="enableDirectionsIsRight" :class="{ active: isSomeDirectionsIsRight }")
       img.icon.right-arrow(src="@/assets/down-arrow.svg")
-    button(@click.left="labelsAreVisible" :class="{ active: isSomeLabelsVisible }")
+    button(@click.left="enableLabels" :class="{ active: isSomeLabelsVisible }")
       span Label
 </template>
 
@@ -21,17 +21,25 @@ export default {
   },
   computed: {
     isSomeConnectionsClear () {
-      const decoratedConnections = this.connections.filter(connection => {
+      const connections = this.connections.filter(connection => {
         const { directionIsLeft, directionIsRight, labelIsVisible } = connection
         if (directionIsLeft || directionIsRight || labelIsVisible) {
           return true
         }
       })
-      return decoratedConnections.length < this.connections.length
+      return connections.length < this.connections.length
+    },
+    isSomeDirectionsIsLeft () {
+      const connections = this.connections.filter(connection => connection.directionIsLeft)
+      return connections.length
+    },
+    isSomeDirectionsIsRight () {
+      const connections = this.connections.filter(connection => connection.directionIsRight)
+      return connections.length
     },
     isSomeLabelsVisible () {
-      const labelled = this.connections.filter(connection => connection.labelIsVisible)
-      return labelled.length
+      const connections = this.connections.filter(connection => connection.labelIsVisible)
+      return connections.length
     }
   },
   methods: {
@@ -39,11 +47,32 @@ export default {
       this.connections.forEach(connection => {
         this.$store.dispatch('currentConnections/update', {
           id: connection.id,
+          directionIsLeft: false,
+          directionIsRight: false,
           labelIsVisible: false
         })
       })
     },
-    labelsAreVisible () {
+    enableDirectionsIsLeft () {
+      this.clearAll()
+      this.connections.forEach(connection => {
+        this.$store.dispatch('currentConnections/update', {
+          id: connection.id,
+          directionIsLeft: true
+        })
+      })
+    },
+    enableDirectionsIsRight () {
+      this.clearAll()
+      this.connections.forEach(connection => {
+        this.$store.dispatch('currentConnections/update', {
+          id: connection.id,
+          directionIsRight: true
+        })
+      })
+    },
+    enableLabels () {
+      this.clearAll()
       this.connections.forEach(connection => {
         this.$store.dispatch('currentConnections/update', {
           id: connection.id,
@@ -51,6 +80,7 @@ export default {
         })
       })
     }
+
   }
 }
 </script>
