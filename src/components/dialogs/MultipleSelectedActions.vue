@@ -37,11 +37,9 @@ dialog.narrow.multiple-selected-actions(
             template(v-for="type in connectionTypes")
               .current-color(:style="{ background: type.color }")
         MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible" :selectedConnections="editableConnections" :selectedConnectionTypes="editableConnectionTypes")
-      //- Labels
-      button(:disabled="!canEditSome.connections" :class="{active: allLabelsAreVisible}" @click.left="toggleAllLabelsAreVisible")
-        img.icon(v-if="allLabelsAreVisible" src="@/assets/view.svg")
-        img.icon(v-else src="@/assets/view-hidden.svg")
-        span {{ pluralLabels }}
+      //- Arrows or Label
+      ConnectionDecorators(:connections="editableConnections")
+
   section
     .row
       //- Remove
@@ -85,6 +83,7 @@ import MoveOrCopyCards from '@/components/dialogs/MoveOrCopyCards.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import CardStyleActions from '@/components/CardStyleActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
+import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
 
 import { nanoid } from 'nanoid'
 import last from 'lodash-es/last'
@@ -98,7 +97,8 @@ export default {
     MoveOrCopyCards,
     MultipleConnectionsPicker,
     CardStyleActions,
-    AlignAndDistribute
+    AlignAndDistribute,
+    ConnectionDecorators
   },
   data () {
     return {
@@ -125,7 +125,6 @@ export default {
       }
     },
     userColor () { return this.$store.state.currentUser.color },
-    pluralLabels () { return utils.pluralize('Label', this.multipleConnectionsSelectedIds.length > 1) },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
@@ -208,12 +207,6 @@ export default {
       return uniq(this.editableConnections.map(connection => {
         return this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       }))
-    },
-    allLabelsAreVisible () {
-      if (!this.editableConnections.length) { return }
-      const connections = this.editableConnections
-      const labelled = connections.filter(connection => connection.labelIsVisible)
-      return labelled.length === connections.length
     },
 
     // all
@@ -385,15 +378,6 @@ export default {
       this.$store.dispatch('currentCards/addMultiple', newCards)
       prevCards = newCards // for history
       this.positionNewCards(newCards)
-    },
-    toggleAllLabelsAreVisible () {
-      const isVisible = !this.allLabelsAreVisible
-      this.editableConnections.forEach(connection => {
-        this.$store.dispatch('currentConnections/update', {
-          id: connection.id,
-          labelIsVisible: isVisible
-        })
-      })
     },
     toggleCopyCardsIsVisible () {
       const isVisible = this.copyCardsIsVisible
@@ -583,7 +567,6 @@ export default {
   .align-and-distribute + .move-or-copy-wrap
     margin-left 6px
   .edit-connection-types
-    margin-right 6px
     .change-color
       height 24px
       padding-top 3px
