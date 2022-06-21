@@ -99,7 +99,6 @@ export default {
           position.transform = position.transform + ' scaleX(-1)'
         }
         this.position = position
-        console.log('💖', position)
       })
     },
 
