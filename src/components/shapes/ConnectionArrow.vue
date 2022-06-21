@@ -37,6 +37,10 @@ export default {
           this.draggingPath = mutation.payload.path
           this.setPosition()
         }
+      } else if (mutation.type === 'triggerUpdateConnectionArrowPositions') {
+        this.$nextTick(() => {
+          this.setPosition()
+        })
       }
     })
   },
@@ -59,7 +63,9 @@ export default {
     }
   },
   computed: {
-    isVisible () { return this.connection.directionIsLeft || this.connection.directionIsRight },
+    isVisible () { return this.directionIsLeft || this.directionIsRight },
+    directionIsLeft () { return this.connection.directionIsLeft },
+    directionIsRight () { return this.connection.directionIsRight },
     path () { return this.connection.path },
     color () {
       const connectionType = this.$store.getters['currentConnections/typeByConnection'](this.connection)
@@ -95,7 +101,7 @@ export default {
           top: position.y + 'px',
           transform: `rotate(${angle}deg)`
         }
-        if (this.connection.directionIsRight) {
+        if (this.directionIsRight) {
           position.transform = position.transform + ' scaleX(-1)'
         }
         this.position = position
@@ -174,7 +180,12 @@ export default {
     }
   },
   watch: {
-    isVisible () {
+    directionIsLeft (value) {
+      if (!value) { return }
+      this.setPosition()
+    },
+    directionIsRight (value) {
+      if (!value) { return }
       this.setPosition()
     },
     path (value) {
