@@ -790,9 +790,10 @@ export default {
       y: start.y + cp.y
     }
     // https://stackoverflow.com/questions/5634460/quadratic-bézier-curve-calculate-points
-    const x = (1 - pos) * (1 - pos) * start.x + 2 * (1 - pos) * pos * cp.x + pos * pos * end.x
-    const y = (1 - pos) * (1 - pos) * start.y + 2 * (1 - pos) * pos * cp.y + pos * pos * end.y
-    console.log('💖', pos, start, end, cp, x, y)
+    let x = (1 - pos) * (1 - pos) * start.x + 2 * (1 - pos) * pos * cp.x + pos * pos * end.x
+    let y = (1 - pos) * (1 - pos) * start.y + 2 * (1 - pos) * pos * cp.y + pos * pos * end.y
+    x = Math.round(x)
+    y = Math.round(y)
     return { x, y }
   },
 

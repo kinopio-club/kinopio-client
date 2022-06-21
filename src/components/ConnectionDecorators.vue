@@ -12,8 +12,6 @@
 </template>
 
 <script>
-import utils from '@/utils.js'
-
 export default {
   name: 'ConnectionDecorators',
   components: {
@@ -58,11 +56,6 @@ export default {
     enableDirectionsIsLeft () {
       this.clearAll()
       this.connections.forEach(connection => {
-        utils.pointOnCurve(1, connection.path)
-        utils.pointOnCurve(0, connection.path)
-        utils.pointOnCurve(0.5, connection.path)
-        utils.pointOnCurve(0.4, connection.path)
-
         this.$store.dispatch('currentConnections/update', {
           id: connection.id,
           directionIsLeft: true
@@ -87,7 +80,6 @@ export default {
         })
       })
     }
-
   }
 }
 </script>
