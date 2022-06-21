@@ -47,13 +47,15 @@ export default {
       const path = this.draggingPath || this.connection.path
       let point = utils.pointOnCurve(0.5, path)
       const anglePoint = utils.pointOnCurve(0.45, path)
-      const angle = utils.angleBetweenTwoPoints(point, anglePoint)
-      console.log('point', point)
+      let angle = utils.angleBetweenTwoPoints(point, anglePoint)
+      if (this.shouldReverseAngle()) {
+        console.log('🌈')
+        angle = -angle
+      }
       let position = {
         x: point.x - this.offset.width,
         y: point.y - this.offset.height
       }
-      console.log('position', position)
       position = {
         left: position.x + 'px',
         top: position.y + 'px',
@@ -62,7 +64,6 @@ export default {
       if (this.connection.directionIsRight) {
         position.transform = position.transform + ' scaleX(-1)'
       }
-      console.log('❤️', position, this.offset)
       return position
     },
     color () {
@@ -71,6 +72,14 @@ export default {
     }
   },
   methods: {
+    shouldReverseAngle () {
+      let element = document.querySelector(`article [data-card-id="${this.connection.startCardId}"]`)
+      if (!element) { return }
+      const start = element.getBoundingClientRect()
+      element = document.querySelector(`article [data-card-id="${this.connection.endCardId}"]`)
+      const end = element.getBoundingClientRect()
+      return end.y < start.y || end.x < start.x
+    },
     updateOffset () {
       if (!this.isVisible) { return }
       const element = this.$refs.arrow
