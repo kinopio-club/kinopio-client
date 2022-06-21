@@ -35,12 +35,13 @@ export default {
       if (mutation.type === 'triggerUpdateConnectionPathWhileDragging') {
         if (mutation.payload.connectionId === this.connection.id) {
           this.draggingPath = mutation.payload.path
+          this.setPosition()
         }
       }
     })
   },
   mounted () {
-    this.updateOffset()
+    this.setPosition()
   },
   data () {
     return {
@@ -53,49 +54,55 @@ export default {
         y: 0
       },
       draggingPath: undefined,
-      hover: false
+      hover: false,
+      position: {}
     }
   },
   computed: {
     isVisible () { return this.connection.directionIsLeft || this.connection.directionIsRight },
-    position () {
-      if (!this.isVisible) { return }
-      this.updateOffset()
-      this.updateRectMiddle()
-      const path = this.draggingPath || this.connection.path
-      let point = this.closestPointToRectMiddle(path)
-
-      let anglePercent = point.percent - 0.05
-      let anglePoint = utils.pointOnCurve(anglePercent, path)
-      let angle = utils.angleBetweenTwoPoints(point, anglePoint)
-      if (this.shouldReverseAngle()) {
-        angle = -angle
-      }
-      let position = {
-        x: point.x - this.offset.width,
-        y: point.y - this.offset.height
-      }
-      const strokeWidth = 5
-      position = {
-        x: position.x + strokeWidth + 2,
-        y: position.y + strokeWidth / 2
-      }
-      position = {
-        left: position.x + 'px',
-        top: position.y + 'px',
-        transform: `rotate(${angle}deg)`
-      }
-      if (this.connection.directionIsRight) {
-        position.transform = position.transform + ' scaleX(-1)'
-      }
-      return position
-    },
+    path () { return this.connection.path },
     color () {
       const connectionType = this.$store.getters['currentConnections/typeByConnection'](this.connection)
       return connectionType.color
     }
   },
   methods: {
+    setPosition () {
+      if (!this.isVisible) { return }
+      this.$nextTick(() => {
+        this.updateOffset()
+        this.updateRectMiddle()
+        const path = this.draggingPath || this.connection.path
+        let point = this.closestPointToRectMiddle(path)
+
+        let anglePercent = point.percent - 0.05
+        let anglePoint = utils.pointOnCurve(anglePercent, path)
+        let angle = utils.angleBetweenTwoPoints(point, anglePoint)
+        if (this.shouldReverseAngle()) {
+          angle = -angle
+        }
+        let position = {
+          x: point.x - this.offset.width,
+          y: point.y - this.offset.height
+        }
+        const strokeWidth = 5
+        position = {
+          x: position.x + strokeWidth + 2,
+          y: position.y + strokeWidth / 2
+        }
+        position = {
+          left: position.x + 'px',
+          top: position.y + 'px',
+          transform: `rotate(${angle}deg)`
+        }
+        if (this.connection.directionIsRight) {
+          position.transform = position.transform + ' scaleX(-1)'
+        }
+        this.position = position
+        console.log('💖', position)
+      })
+    },
+
     checkIsMultiTouch (event) {
       isMultiTouch = false
       if (utils.isMultiTouch(event)) {
@@ -168,6 +175,12 @@ export default {
     }
   },
   watch: {
+    isVisible () {
+      this.setPosition()
+    },
+    path (value) {
+      this.setPosition()
+    },
     hover (value) {
       if (value) {
         this.$store.commit('currentUserIsHoveringOverConnectionId', this.connection.id)
