@@ -1,5 +1,17 @@
 <template lang="pug">
-svg.connection-arrow(v-if="isVisible" :style="position" height="26" viewBox="0 0 16 26" width="16" ref="arrow")
+svg.connection-arrow(
+  v-if="isVisible"
+  :style="position"
+  height="26"
+  viewBox="0 0 16 26"
+  width="16"
+  ref="arrow"
+  @mouseover.left="hover = true"
+  @mouseleave.left="hover = false"
+  @click.left="showConnectionDetails"
+  @touchend.stop="showConnectionDetails"
+  @touchstart="checkIsMultiTouch"
+)
   g(stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round")
     g(transform="translate(3 3)" :stroke="color" stroke-width="5")
       path(d="m10 0-10 10")
@@ -8,6 +20,8 @@ svg.connection-arrow(v-if="isVisible" :style="position" height="26" viewBox="0 0
 
 <script>
 import utils from '@/utils.js'
+
+let isMultiTouch
 
 export default {
   name: 'ConnectionArrowLeft',
@@ -38,7 +52,8 @@ export default {
         x: 0,
         y: 0
       },
-      draggingPath: undefined
+      draggingPath: undefined,
+      hover: false
     }
   },
   computed: {
@@ -81,6 +96,19 @@ export default {
     }
   },
   methods: {
+    checkIsMultiTouch (event) {
+      isMultiTouch = false
+      if (utils.isMultiTouch(event)) {
+        isMultiTouch = true
+      }
+    },
+    showConnectionDetails (event) {
+      if (isMultiTouch) { return }
+      this.$store.commit('triggerShowConnectionDetails', {
+        connectionId: this.connection.id,
+        event
+      })
+    },
     closestPointToRectMiddle (path) {
       let percent // 0 to 1
       let point
@@ -140,8 +168,12 @@ export default {
     }
   },
   watch: {
-    isVisible (value) {
-      this.updateOffset()
+    hover (value) {
+      if (value) {
+        this.$store.commit('currentUserIsHoveringOverConnectionId', this.connection.id)
+      } else {
+        this.$store.commit('currentUserIsHoveringOverConnectionId', '')
+      }
     }
   }
 }
@@ -151,4 +183,5 @@ export default {
 .connection-arrow
   position absolute
   pointer-events all // temp?
+  cursor pointer
 </style>
