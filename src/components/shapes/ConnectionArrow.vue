@@ -63,9 +63,9 @@ export default {
     }
   },
   computed: {
-    isVisible () { return this.directionIsLeft || this.directionIsRight },
-    directionIsLeft () { return this.connection.directionIsLeft },
-    directionIsRight () { return this.connection.directionIsRight },
+    isVisible () { return this.directionIsStart || this.directionIsEnd },
+    directionIsStart () { return this.connection.directionIsStart },
+    directionIsEnd () { return this.connection.directionIsEnd },
     path () { return this.connection.path },
     color () {
       const connectionType = this.$store.getters['currentConnections/typeByConnection'](this.connection)
@@ -101,7 +101,7 @@ export default {
           top: position.y + 'px',
           transform: `rotate(${angle}deg)`
         }
-        if (this.directionIsRight) {
+        if (this.directionIsEnd) {
           position.transform = position.transform + ' scaleX(-1)'
         }
         this.position = position
@@ -180,11 +180,11 @@ export default {
     }
   },
   watch: {
-    directionIsLeft (value) {
+    directionIsStart (value) {
       if (!value) { return }
       this.setPosition()
     },
-    directionIsRight (value) {
+    directionIsEnd (value) {
       if (!value) { return }
       this.setPosition()
     },

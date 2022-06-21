@@ -3,9 +3,9 @@
   .segmented-buttons
     button(@click="clearAll" :class="{ active: isSomeConnectionsClear }")
       span -
-    button(@click.left="enableDirectionsIsLeft" :class="{ active: isSomeDirectionsIsLeft }")
+    button(@click.left="enableDirectionsIsStart" :class="{ active: isSomeDirectionsIsStart }")
       img.icon.left-arrow(src="@/assets/down-arrow.svg")
-    button(@click.left="enableDirectionsIsRight" :class="{ active: isSomeDirectionsIsRight }")
+    button(@click.left="enableDirectionsIsEnd" :class="{ active: isSomeDirectionsIsEnd }")
       img.icon.right-arrow(src="@/assets/down-arrow.svg")
     button(@click.left="enableLabels" :class="{ active: isSomeLabelsVisible }")
       span Label
@@ -22,19 +22,19 @@ export default {
   computed: {
     isSomeConnectionsClear () {
       const connections = this.connections.filter(connection => {
-        const { directionIsLeft, directionIsRight, labelIsVisible } = connection
-        if (directionIsLeft || directionIsRight || labelIsVisible) {
+        const { directionIsStart, directionIsEnd, labelIsVisible } = connection
+        if (directionIsStart || directionIsEnd || labelIsVisible) {
           return true
         }
       })
       return connections.length < this.connections.length
     },
-    isSomeDirectionsIsLeft () {
-      const connections = this.connections.filter(connection => connection.directionIsLeft)
+    isSomeDirectionsIsStart () {
+      const connections = this.connections.filter(connection => connection.directionIsStart)
       return connections.length
     },
-    isSomeDirectionsIsRight () {
-      const connections = this.connections.filter(connection => connection.directionIsRight)
+    isSomeDirectionsIsEnd () {
+      const connections = this.connections.filter(connection => connection.directionIsEnd)
       return connections.length
     },
     isSomeLabelsVisible () {
@@ -47,27 +47,27 @@ export default {
       this.connections.forEach(connection => {
         this.$store.dispatch('currentConnections/update', {
           id: connection.id,
-          directionIsLeft: false,
-          directionIsRight: false,
+          directionIsStart: false,
+          directionIsEnd: false,
           labelIsVisible: false
         })
       })
     },
-    enableDirectionsIsLeft () {
+    enableDirectionsIsStart () {
       this.clearAll()
       this.connections.forEach(connection => {
         this.$store.dispatch('currentConnections/update', {
           id: connection.id,
-          directionIsLeft: true
+          directionIsStart: true
         })
       })
     },
-    enableDirectionsIsRight () {
+    enableDirectionsIsEnd () {
       this.clearAll()
       this.connections.forEach(connection => {
         this.$store.dispatch('currentConnections/update', {
           id: connection.id,
-          directionIsRight: true
+          directionIsEnd: true
         })
       })
     },
