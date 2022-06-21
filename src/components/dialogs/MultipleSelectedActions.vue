@@ -53,7 +53,7 @@ dialog.narrow.multiple-selected-actions(
         img.icon(src="@/assets/merge.svg")
         span Merge
       //- Split
-      button(v-if="cardCanBySplit" @click="splitCard" :disabled="!canEditAll.cards")
+      button(v-if="cardCanBeSplit" @click="splitCard" :disabled="!canEditAll.cards")
         img.icon(src="@/assets/split.svg")
         span Split
 
@@ -133,8 +133,10 @@ export default {
     // cards
 
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
-    cardCanBySplit () {
+    cardCanBeSplit () {
       if (!this.oneCardIsSelected) { return }
+      if (!this.cards.length) { return }
+      if (!this.cards[0].name) { return }
       return this.cards[0].name.includes('\n')
     },
     oneCardIsSelected () { return this.multipleCardsSelectedIds.length === 1 },
