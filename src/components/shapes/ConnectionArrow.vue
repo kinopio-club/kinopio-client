@@ -28,13 +28,15 @@ export default {
   mounted () {
     this.updateOffset()
   },
-  // beforeUnmount () {
-  // },
   data () {
     return {
       offset: {
         width: 0,
         height: 0
+      },
+      rectMiddle: {
+        x: 0,
+        y: 0
       },
       draggingPath: undefined
     }
@@ -44,17 +46,24 @@ export default {
     position () {
       if (!this.isVisible) { return }
       this.updateOffset()
+      this.updateRectMiddle()
       const path = this.draggingPath || this.connection.path
-      let point = utils.pointOnCurve(0.5, path)
-      const anglePoint = utils.pointOnCurve(0.45, path)
+      let point = this.closestPointToRectMiddle(path)
+
+      let anglePercent = point.percent - 0.05
+      let anglePoint = utils.pointOnCurve(anglePercent, path)
       let angle = utils.angleBetweenTwoPoints(point, anglePoint)
       if (this.shouldReverseAngle()) {
-        console.log('🌈')
         angle = -angle
       }
       let position = {
         x: point.x - this.offset.width,
         y: point.y - this.offset.height
+      }
+      const strokeWidth = 5
+      position = {
+        x: position.x + strokeWidth + 2,
+        y: position.y + strokeWidth / 2
       }
       position = {
         left: position.x + 'px',
@@ -72,13 +81,42 @@ export default {
     }
   },
   methods: {
+    closestPointToRectMiddle (path) {
+      let percent // 0 to 1
+      let point
+      let distance
+      const pointPercents = [0.4, 0.5, 0.6, 0.7, 0.8]
+      pointPercents.forEach((currentPercent, index) => {
+        if (index === 0) {
+          percent = currentPercent
+          point = utils.pointOnCurve(currentPercent, path)
+          distance = utils.distanceBetweenTwoPoints(this.rectMiddle, point)
+        } else {
+          const currentPoint = utils.pointOnCurve(currentPercent, path)
+          const currentDistance = utils.distanceBetweenTwoPoints(this.rectMiddle, currentPoint)
+          if (currentDistance > distance) { return }
+          percent = currentPercent
+          point = currentPoint
+          distance = currentDistance
+        }
+      })
+      return {
+        x: point.x,
+        y: point.y,
+        percent
+      }
+    },
     shouldReverseAngle () {
       let element = document.querySelector(`article [data-card-id="${this.connection.startCardId}"]`)
       if (!element) { return }
       const start = element.getBoundingClientRect()
       element = document.querySelector(`article [data-card-id="${this.connection.endCardId}"]`)
       const end = element.getBoundingClientRect()
-      return end.y < start.y || end.x < start.x
+      const endIsLeftOf = end.x < start.x
+      const endIsAbove = end.y < start.y
+      const endIsAboveAndLeftOf = endIsLeftOf && endIsAbove
+      if (endIsAboveAndLeftOf) { return false }
+      return endIsLeftOf || endIsAbove
     },
     updateOffset () {
       if (!this.isVisible) { return }
@@ -88,6 +126,16 @@ export default {
       this.offset = {
         width: Math.round(rect.width / 2),
         height: Math.round(rect.height / 2)
+      }
+    },
+    updateRectMiddle () {
+      if (!this.isVisible) { return }
+      const element = document.querySelector(`svg .connection-path[data-id='${this.connection.id}']`)
+      if (!element) { return }
+      const rect = element.getBoundingClientRect()
+      this.rectMiddle = {
+        x: Math.round(rect.x + (rect.width / 2)),
+        y: Math.round(rect.y + (rect.height / 2))
       }
     }
   },
@@ -102,6 +150,5 @@ export default {
 <style lang="stylus">
 .connection-arrow
   position absolute
-  background cyan // temp
   pointer-events all // temp?
 </style>
