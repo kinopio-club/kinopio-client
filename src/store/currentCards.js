@@ -493,6 +493,7 @@ const currentCards = {
       if (!cards.length) { return }
       cards = cards.map(id => {
         let card = context.getters.byId(id)
+        if (!card) { return }
         card = utils.clone(card)
         if (!card) { return }
         const position = utils.cardPositionFromElement(id)
@@ -501,6 +502,7 @@ const currentCards = {
         const { x, y, z, commentIsVisible } = card
         return { id, x, y, z, commentIsVisible }
       })
+      cards = cards.filter(card => Boolean(card))
       context.commit('move', { cards, spaceId })
       cards = cards.filter(card => card)
       cards.forEach(card => {
