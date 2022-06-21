@@ -24,7 +24,7 @@ import utils from '@/utils.js'
 let isMultiTouch
 
 export default {
-  name: 'ConnectionArrowLeft',
+  name: 'ConnectionArrow',
   components: {
   },
   props: {
@@ -59,7 +59,8 @@ export default {
       },
       draggingPath: undefined,
       hover: false,
-      position: {}
+      position: {},
+      angle: 0
     }
   },
   computed: {
@@ -80,13 +81,7 @@ export default {
         this.updateRectMiddle()
         const path = this.draggingPath || this.connection.path
         let point = this.closestPointToRectMiddle(path)
-
-        let anglePercent = point.percent - 0.05
-        let anglePoint = utils.pointOnCurve(anglePercent, path)
-        let angle = utils.angleBetweenTwoPoints(point, anglePoint)
-        if (this.shouldReverseAngle()) {
-          angle = -angle
-        }
+        this.updateAngle(point, path)
         let position = {
           x: point.x - this.offset.width,
           y: point.y - this.offset.height
@@ -99,7 +94,7 @@ export default {
         position = {
           left: position.x + 'px',
           top: position.y + 'px',
-          transform: `rotate(${angle}deg)`
+          transform: `rotate(${this.angle}deg)`
         }
         if (this.directionIsEnd) {
           position.transform = position.transform + ' scaleX(-1)'
@@ -107,7 +102,6 @@ export default {
         this.position = position
       })
     },
-
     checkIsMultiTouch (event) {
       isMultiTouch = false
       if (utils.isMultiTouch(event)) {
@@ -146,17 +140,28 @@ export default {
         percent
       }
     },
-    shouldReverseAngle () {
+    updateAngle (point, path) {
+      let anglePercent = point.percent - 0.05
+      let anglePoint = utils.pointOnCurve(anglePercent, path)
+      this.angle = utils.angleBetweenTwoPoints(point, anglePoint)
+      // relative position between start and end
       let element = document.querySelector(`article [data-card-id="${this.connection.startCardId}"]`)
-      if (!element) { return }
       const start = element.getBoundingClientRect()
       element = document.querySelector(`article [data-card-id="${this.connection.endCardId}"]`)
       const end = element.getBoundingClientRect()
-      const endIsLeftOf = end.x < start.x
-      const endIsAbove = end.y < start.y
-      const endIsAboveAndLeftOf = endIsLeftOf && endIsAbove
-      if (endIsAboveAndLeftOf) { return false }
-      return endIsLeftOf || endIsAbove
+      const isLeft = end.x < start.x
+      const isAbove = end.y < start.y
+      const endIsTopLeft = isLeft && isAbove
+      const endIsTopRight = !isLeft && isAbove
+      // const endIsBottomRight = !isLeft && !isAbove
+      const endIsBottomLeft = isLeft && !isAbove
+      if (endIsTopLeft) {
+        this.angle = this.angle - 180
+      } else if (endIsTopRight) {
+        this.angle = -this.angle
+      } else if (endIsBottomLeft) {
+        this.angle = 180 - this.angle
+      }
     },
     updateOffset () {
       if (!this.isVisible) { return }
