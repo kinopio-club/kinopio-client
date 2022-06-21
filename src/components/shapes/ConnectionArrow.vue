@@ -182,6 +182,6 @@ export default {
 <style lang="stylus">
 .connection-arrow
   position absolute
-  pointer-events all // temp?
+  pointer-events all
   cursor pointer
 </style>
