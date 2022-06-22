@@ -5,10 +5,10 @@
       img.icon.clear(src="@/assets/connection-clear.svg")
     button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsIsVisible }")
       img.icon.arrow(src="@/assets/connection-arrow.svg")
-    button(@click.left="showLabelsIsVisible" :class="{ active: isSomeLabelsVisible }")
-      span Label
     button(@click.left="reverseConnections")
       img.icon.reverse(src="@/assets/connection-reverse.svg")
+    button(@click.left="showLabelsIsVisible" :class="{ active: isSomeLabelsVisible }")
+      span Label
 </template>
 
 <script>
