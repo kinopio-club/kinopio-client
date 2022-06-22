@@ -47,7 +47,9 @@ export default {
         }
         if (!shouldUpdate) { return }
         this.$nextTick(() => {
-          this.setPosition()
+          this.$nextTick(() => {
+            this.setPosition()
+          })
         })
       }
     })
