@@ -493,6 +493,7 @@ const currentCards = {
       if (!cards.length) { return }
       cards = cards.map(id => {
         let card = context.getters.byId(id)
+        if (!card) { return }
         card = utils.clone(card)
         if (!card) { return }
         const position = utils.cardPositionFromElement(id)
@@ -501,6 +502,7 @@ const currentCards = {
         const { x, y, z, commentIsVisible } = card
         return { id, x, y, z, commentIsVisible }
       })
+      cards = cards.filter(card => Boolean(card))
       context.commit('move', { cards, spaceId })
       cards = cards.filter(card => card)
       cards.forEach(card => {
@@ -513,6 +515,7 @@ const currentCards = {
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
       connections = uniqBy(connections, 'id')
       context.commit('currentConnections/updatePaths', connections, { root: true })
+      context.commit('triggerUpdateConnectionArrowPositions', { connections }, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('checkIfShouldIncreasePageSize', { cardId: currentDraggingCardId })
       context.dispatch('history/resume', null, { root: true })

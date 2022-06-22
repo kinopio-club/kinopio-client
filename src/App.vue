@@ -628,6 +628,14 @@ dialog
 .icon.minimap
   height 13px
 
+.icon.left-arrow
+  transform rotate(90deg)
+  vertical-align 2px
+
+.icon.right-arrow
+  transform rotate(-90deg)
+  vertical-align 2px
+
 label,
 li
   &:hover,

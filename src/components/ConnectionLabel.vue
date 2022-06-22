@@ -24,10 +24,18 @@ export default {
   props: {
     connection: Object
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerUpdateConnectionPathWhileDragging') {
+        if (mutation.payload.connectionId === this.connection.id) {
+          this.setPosition()
+        }
+      }
+    })
+  },
   mounted () {
     this.setPosition()
   },
-
   data () {
     return {
       position: {},

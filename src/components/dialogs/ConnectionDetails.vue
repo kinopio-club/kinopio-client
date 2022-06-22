@@ -10,14 +10,8 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="focus" @blur="blur")
 
     .row
-      //- Remove
-      button(:disabled="!canEditConnection" @click.left="removeConnection")
-        img.icon(src="@/assets/remove.svg")
-      //- Label
-      button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click.left="toggleLabelIsVisible")
-        img.icon(v-if="labelIsVisible" src="@/assets/view.svg")
-        img.icon(v-else src="@/assets/view-hidden.svg")
-        span Label
+      //- Arrows or Label
+      ConnectionDecorators(:connections="[currentConnection]")
       //- Filter
       button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
         img.icon(src="@/assets/filter.svg")
@@ -38,7 +32,11 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         span.badge.info
           img.icon(src="@/assets/unlock.svg")
           span To edit closed spaces, you'll need to be invited
-
+    .row
+      //- Remove
+      button(:disabled="!canEditConnection" @click.left="removeConnection")
+        img.icon(src="@/assets/remove.svg")
+        span Remove
   section.results-actions(ref="resultsActions")
     .row
       label(:class="{active: shouldUseLastConnectionType, disabled: !canEditConnection}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
@@ -63,6 +61,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
+import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
@@ -75,7 +74,8 @@ let prevConnectionType
 export default {
   components: {
     ColorPicker,
-    ResultsFilter
+    ResultsFilter,
+    ConnectionDecorators
   },
   name: 'ConnectionDetails',
   mounted () {
@@ -93,7 +93,6 @@ export default {
   },
   computed: {
     visible () { return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId) },
-    labelIsVisible () { return this.currentConnection.labelIsVisible },
     currentConnectionType () {
       const connectionType = this.$store.getters['currentConnections/typeByConnection'](this.currentConnection)
       prevConnectionType = connectionType
@@ -198,13 +197,6 @@ export default {
         connectionTypeId: type.id
       })
       this.$store.commit('currentConnections/reorderTypeToEnd', type)
-    },
-    toggleLabelIsVisible () {
-      const newValue = !this.labelIsVisible
-      this.$store.dispatch('currentConnections/update', {
-        id: this.currentConnection.id,
-        labelIsVisible: newValue
-      })
     },
     toggleColorPicker () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible

@@ -716,12 +716,6 @@ header
         width 17px
         height 15px
 
-  .left-arrow
-    transform rotate(90deg)
-    vertical-align 2px
-  .right-arrow
-    transform rotate(-90deg)
-    vertical-align 2px
   .search-button
     .badge
       margin-right 0

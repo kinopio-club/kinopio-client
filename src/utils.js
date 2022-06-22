@@ -776,6 +776,26 @@ export default {
       y: parseInt(coords.y)
     }
   },
+  pointOnCurve (pos, path) {
+    // pos is 0 to 1
+    const start = this.coordsFromConnectionPath(path)
+    let end = this.endCoordsFromConnectionPath(path)
+    end = {
+      x: start.x + end.x,
+      y: start.y + end.y
+    }
+    let cp = this.curveControlPointFromPath(path)
+    cp = {
+      x: start.x + cp.x,
+      y: start.y + cp.y
+    }
+    // https://stackoverflow.com/questions/5634460/quadratic-bézier-curve-calculate-points
+    let x = (1 - pos) * (1 - pos) * start.x + 2 * (1 - pos) * pos * cp.x + pos * pos * end.x
+    let y = (1 - pos) * (1 - pos) * start.y + 2 * (1 - pos) * pos * cp.y + pos * pos * end.y
+    x = Math.round(x)
+    y = Math.round(y)
+    return { x, y }
+  },
 
   // Painting 🖌
 
