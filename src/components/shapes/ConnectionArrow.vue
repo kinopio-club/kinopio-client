@@ -2,20 +2,20 @@
 svg.connection-arrow(
   v-if="isVisible"
   :style="position"
-  height="26"
-  viewBox="0 0 16 26"
-  width="16"
   ref="arrow"
   @mouseover.left="hover = true"
   @mouseleave.left="hover = false"
   @click.left="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
   @touchstart="checkIsMultiTouch"
+  width="13"
+  height="20"
+  viewBox="0 0 16 26"
 )
   g(stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round")
     g(transform="translate(3 3)" :stroke="color" stroke-width="5")
-      path(d="m10 0-10 10")
-      path(d="m10 10-10 10" transform="matrix(1 0 0 -1 0 30)")
+      path(d="m7 0-7 7")
+      path(d="m7 7-7 7" transform="matrix(1 0 0 -1 0 21)")
 </template>
 
 <script>
@@ -59,8 +59,7 @@ export default {
       },
       draggingPath: undefined,
       hover: false,
-      position: {},
-      angle: 0
+      position: {}
     }
   },
   computed: {
@@ -81,24 +80,31 @@ export default {
         this.updateRectMiddle()
         const path = this.draggingPath || this.connection.path
         let point = this.closestPointToRectMiddle(path)
-        this.updateAngle(point, path)
+        const relativePosition = this.relativePosition(point, path)
+        const angle = this.angle(point, path, relativePosition)
         let position = {
           x: point.x - this.offset.width,
           y: point.y - this.offset.height
         }
-        const strokeWidth = 5
-        position = {
-          x: position.x + strokeWidth + 2,
-          y: position.y + strokeWidth / 2
-        }
+
+        // position = this.positionWithStrokeOffset(relativePosition)
+        // const strokeWidth = 5
+        // position = {
+        //   x: position.x - (strokeWidth / 2),
+        //   y: position.y + (strokeWidth / 2)
+        // }
+
         position = {
           left: position.x + 'px',
           top: position.y + 'px',
-          transform: `rotate(${this.angle}deg)`
+          transform: `rotate(${angle}deg) scaleX(-1)`
         }
-        if (this.directionIsEnd) {
-          position.transform = position.transform + ' scaleX(-1)'
-        }
+
+        // towards replace this w reverse connection directionIsStart ==> directionIsVisible
+        // if (this.directionIsEnd) {
+        //   position.transform = position.transform + ''
+        // }
+
         this.position = position
       })
     },
@@ -140,28 +146,59 @@ export default {
         percent
       }
     },
-    updateAngle (point, path) {
+    relativePosition (point, path) {
+      // relative position between start and end points
+      //
+      //     TOP           │
+      //     L             │     R
+      //     Before X      │     Beyond X
+      //     Before Y      │     Before Y
+      //                   │
+      // ──────────────────┼───────────────────
+      //                   │
+      //     BOTTOM        │
+      //     Before X      │     Beyond X
+      //     Beyond Y      │     Beyond Y
+      //                   │
+
+      let element = document.querySelector(`article [data-card-id="${this.connection.startCardId}"]`)
+      let start = element.getBoundingClientRect()
+      element = document.querySelector(`article [data-card-id="${this.connection.endCardId}"]`)
+      let end = element.getBoundingClientRect()
+      start = {
+        x: start.x + start.width,
+        y: start.y + start.height
+      }
+      end = {
+        x: end.x + end.width,
+        y: end.y + end.height
+      }
+      let x = 'before'
+      if (end.x > start.x) {
+        x = 'beyond'
+      }
+      let y = 'before'
+      if (end.y > start.y) {
+        y = 'beyond'
+      }
+      return { x, y }
+    },
+    angle (point, path, relativePosition) {
       let anglePercent = point.percent - 0.05
       let anglePoint = utils.pointOnCurve(anglePercent, path)
-      this.angle = utils.angleBetweenTwoPoints(point, anglePoint)
-      // relative position between start and end
-      let element = document.querySelector(`article [data-card-id="${this.connection.startCardId}"]`)
-      const start = element.getBoundingClientRect()
-      element = document.querySelector(`article [data-card-id="${this.connection.endCardId}"]`)
-      const end = element.getBoundingClientRect()
-      const isLeft = end.x < start.x
-      const isAbove = end.y < start.y
-      const endIsTopLeft = isLeft && isAbove
-      const endIsTopRight = !isLeft && isAbove
-      // const endIsBottomRight = !isLeft && !isAbove
-      const endIsBottomLeft = isLeft && !isAbove
-      if (endIsTopLeft) {
-        this.angle = this.angle - 180
-      } else if (endIsTopRight) {
-        this.angle = -this.angle
-      } else if (endIsBottomLeft) {
-        this.angle = 180 - this.angle
+      let angle = utils.angleBetweenTwoPoints(point, anglePoint)
+      const { x, y } = relativePosition
+      const isTopLeft = x === 'before' && y === 'before'
+      const isBottomRight = x === 'beyond' && y === 'before'
+      const isBottomLeft = x === 'before' && y === 'beyond'
+      if (isTopLeft) {
+        angle = angle - 180
+      } else if (isBottomRight) {
+        angle = -angle
+      } else if (isBottomLeft) {
+        angle = 180 - angle
       }
+      return angle
     },
     updateOffset () {
       if (!this.isVisible) { return }
