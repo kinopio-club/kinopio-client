@@ -49,10 +49,6 @@ export default {
   },
   data () {
     return {
-      offset: {
-        width: 0,
-        height: 0
-      },
       rectMiddle: {
         x: 0,
         y: 0
@@ -76,24 +72,13 @@ export default {
     setPosition () {
       if (!this.isVisible) { return }
       this.$nextTick(() => {
-        this.updateOffset()
         this.updateRectMiddle()
         const path = this.draggingPath || this.connection.path
         let point = this.closestPointToRectMiddle(path)
         const relativePosition = this.relativePosition(point, path)
         const angle = this.angle(point, path, relativePosition)
-        let position = {
-          x: point.x - this.offset.width,
-          y: point.y - this.offset.height
-        }
-
-        // position = this.positionWithStrokeOffset(relativePosition)
-        // const strokeWidth = 5
-        // position = {
-        //   x: position.x - (strokeWidth / 2),
-        //   y: position.y + (strokeWidth / 2)
-        // }
-
+        const arrowRectOffset = this.arrowRectOffset(angle)
+        let position = this.positionWithArrowRectOffset(point, relativePosition, arrowRectOffset)
         position = {
           left: position.x + 'px',
           top: position.y + 'px',
@@ -151,14 +136,14 @@ export default {
       //
       //     TOP           │
       //     L             │     R
-      //     Before X      │     Beyond X
-      //     Before Y      │     Before Y
+      //     Less X        │     More X
+      //     Less Y        │     Less Y
       //                   │
       // ──────────────────┼───────────────────
       //                   │
       //     BOTTOM        │
-      //     Before X      │     Beyond X
-      //     Beyond Y      │     Beyond Y
+      //     Less X        │     More X
+      //     More Y        │     More Y
       //                   │
 
       let element = document.querySelector(`article [data-card-id="${this.connection.startCardId}"]`)
@@ -173,13 +158,13 @@ export default {
         x: end.x + end.width,
         y: end.y + end.height
       }
-      let x = 'before'
+      let x = 'less'
       if (end.x > start.x) {
-        x = 'beyond'
+        x = 'more'
       }
-      let y = 'before'
+      let y = 'less'
       if (end.y > start.y) {
-        y = 'beyond'
+        y = 'more'
       }
       return { x, y }
     },
@@ -188,26 +173,51 @@ export default {
       let anglePoint = utils.pointOnCurve(anglePercent, path)
       let angle = utils.angleBetweenTwoPoints(point, anglePoint)
       const { x, y } = relativePosition
-      const isTopLeft = x === 'before' && y === 'before'
-      const isBottomRight = x === 'beyond' && y === 'before'
-      const isBottomLeft = x === 'before' && y === 'beyond'
+      const isTopLeft = x === 'less' && y === 'less'
+      const isTopRight = x === 'more' && y === 'less'
+      const isBottomLeft = x === 'less' && y === 'more'
       if (isTopLeft) {
         angle = angle - 180
-      } else if (isBottomRight) {
+      } else if (isTopRight) {
         angle = -angle
       } else if (isBottomLeft) {
         angle = 180 - angle
       }
       return angle
     },
-    updateOffset () {
+    positionWithArrowRectOffset (point, relativePosition, arrowRectOffset) {
+      const { x, y } = relativePosition
+      const isTopLeft = x === 'less' && y === 'less'
+      // const isTopRight = x === 'more' && y === 'less'
+      // const isBottomRight = x === 'more' && y === 'more'
+      const isBottomLeft = x === 'less' && y === 'more'
+      let position = {
+        x: point.x - arrowRectOffset.width,
+        y: point.y - arrowRectOffset.height
+      }
+      if (isTopLeft) {
+        position = {
+          x: position.x,
+          y: position.y - arrowRectOffset.height
+        }
+      // } else if (isTopRight) {
+      // } else if (isBottomRight) {
+      } else if (isBottomLeft) {
+        position = {
+          x: position.x,
+          y: position.y - arrowRectOffset.height
+        }
+      }
+      return position
+    },
+    arrowRectOffset (angle) {
       if (!this.isVisible) { return }
       const element = this.$refs.arrow
       if (!element) { return }
       const rect = element.getBoundingClientRect()
-      this.offset = {
-        width: Math.round(rect.width / 2),
-        height: Math.round(rect.height / 2)
+      return {
+        width: Math.round(rect.width / 4),
+        height: Math.round(rect.height / 4)
       }
     },
     updateRectMiddle () {
