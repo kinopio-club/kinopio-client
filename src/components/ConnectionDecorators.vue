@@ -2,11 +2,13 @@
 .button-wrap.connection-decorators
   .segmented-buttons
     button(@click="clearAll" :class="{ active: isSomeConnectionsClear }")
-      span -
-    button(@click.left="enableDirectionsIsEnd" :class="{ active: isSomeDirectionsIsVisible }")
-      img.icon.right-arrow(src="@/assets/down-arrow.svg")
-    button(@click.left="enableLabels" :class="{ active: isSomeLabelsVisible }")
+      img.icon.clear(src="@/assets/connection-clear.svg")
+    button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsIsVisible }")
+      img.icon.arrow(src="@/assets/connection-arrow.svg")
+    button(@click.left="showLabelsIsVisible" :class="{ active: isSomeLabelsVisible }")
       span Label
+    button(@click.left="reverseConnections")
+      img.icon.reverse(src="@/assets/connection-reverse.svg")
 </template>
 
 <script>
@@ -46,7 +48,7 @@ export default {
         })
       })
     },
-    enableDirectionsIsEnd () {
+    showDirectionsIsVisible () {
       this.clearAll()
       this.connections.forEach(connection => {
         this.$store.dispatch('currentConnections/update', {
@@ -55,7 +57,7 @@ export default {
         })
       })
     },
-    enableLabels () {
+    showLabelsIsVisible () {
       this.clearAll()
       this.connections.forEach(connection => {
         this.$store.dispatch('currentConnections/update', {
@@ -63,11 +65,21 @@ export default {
           labelIsVisible: true
         })
       })
+    },
+    reverseConnections () {
+
     }
   }
 }
 </script>
 
 <style lang="stylus">
-// .connection-decorators
+.connection-decorators
+  .icon
+    &.clear
+      vertical-align 4px
+    &.arrow
+      vertical-align 0
+    &.reverse
+      vertical-align 0
 </style>

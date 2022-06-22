@@ -314,6 +314,8 @@ export default {
 .connection-details
   z-index var(--max-z)
   transform-origin top left
+  &.narrow
+    width 205px
   .type-name
     margin-left 6px
   .edit-message
