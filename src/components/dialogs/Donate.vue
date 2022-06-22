@@ -128,7 +128,8 @@ export default {
         amount = amount * 100
         const result = await this.$store.dispatch('api/donationUrl', {
           amount,
-          productId
+          productId,
+          userId: this.currentUser.id
         })
         window.location = result.url
       } catch (error) {
