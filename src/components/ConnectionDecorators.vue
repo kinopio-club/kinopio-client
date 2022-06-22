@@ -3,9 +3,7 @@
   .segmented-buttons
     button(@click="clearAll" :class="{ active: isSomeConnectionsClear }")
       span -
-    button(@click.left="enableDirectionsIsStart" :class="{ active: isSomeDirectionsIsStart }")
-      img.icon.left-arrow(src="@/assets/down-arrow.svg")
-    button(@click.left="enableDirectionsIsEnd" :class="{ active: isSomeDirectionsIsEnd }")
+    button(@click.left="enableDirectionsIsEnd" :class="{ active: isSomeDirectionsIsVisible }")
       img.icon.right-arrow(src="@/assets/down-arrow.svg")
     button(@click.left="enableLabels" :class="{ active: isSomeLabelsVisible }")
       span Label
@@ -22,19 +20,15 @@ export default {
   computed: {
     isSomeConnectionsClear () {
       const connections = this.connections.filter(connection => {
-        const { directionIsStart, directionIsEnd, labelIsVisible } = connection
-        if (directionIsStart || directionIsEnd || labelIsVisible) {
+        const { directionIsVisible, labelIsVisible } = connection
+        if (directionIsVisible || labelIsVisible) {
           return true
         }
       })
       return connections.length < this.connections.length
     },
-    isSomeDirectionsIsStart () {
-      const connections = this.connections.filter(connection => connection.directionIsStart)
-      return connections.length
-    },
-    isSomeDirectionsIsEnd () {
-      const connections = this.connections.filter(connection => connection.directionIsEnd)
+    isSomeDirectionsIsVisible () {
+      const connections = this.connections.filter(connection => connection.directionIsVisible)
       return connections.length
     },
     isSomeLabelsVisible () {
@@ -47,18 +41,8 @@ export default {
       this.connections.forEach(connection => {
         this.$store.dispatch('currentConnections/update', {
           id: connection.id,
-          directionIsStart: false,
-          directionIsEnd: false,
+          directionIsVisible: false,
           labelIsVisible: false
-        })
-      })
-    },
-    enableDirectionsIsStart () {
-      this.clearAll()
-      this.connections.forEach(connection => {
-        this.$store.dispatch('currentConnections/update', {
-          id: connection.id,
-          directionIsStart: true
         })
       })
     },
@@ -67,7 +51,7 @@ export default {
       this.connections.forEach(connection => {
         this.$store.dispatch('currentConnections/update', {
           id: connection.id,
-          directionIsEnd: true
+          directionIsVisible: true
         })
       })
     },

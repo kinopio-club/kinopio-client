@@ -67,9 +67,7 @@ export default {
     }
   },
   computed: {
-    isVisible () { return this.directionIsStart || this.directionIsEnd },
-    directionIsStart () { return this.connection.directionIsStart },
-    directionIsEnd () { return this.connection.directionIsEnd },
+    isVisible () { return this.connection.directionIsVisible },
     path () { return this.connection.path },
     color () {
       const connectionType = this.$store.getters['currentConnections/typeByConnection'](this.connection)
@@ -92,12 +90,6 @@ export default {
           top: position.y + 'px',
           transform: `rotate(${angle}deg) scaleX(-1)`
         }
-
-        // towards replace this w reverse connection directionIsStart ==> directionIsVisible
-        // if (this.directionIsEnd) {
-        //   position.transform = position.transform + ''
-        // }
-
         this.position = position
       })
     },
@@ -240,11 +232,7 @@ export default {
     }
   },
   watch: {
-    directionIsStart (value) {
-      if (!value) { return }
-      this.setPosition()
-    },
-    directionIsEnd (value) {
+    isVisible (value) {
       if (!value) { return }
       this.setPosition()
     },
