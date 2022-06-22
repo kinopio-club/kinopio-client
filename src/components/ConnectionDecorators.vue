@@ -7,12 +7,16 @@
     //- Arrow
     button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsIsVisible }")
       img.icon.arrow(src="@/assets/connection-arrow.svg")
-    //- Reverse
-    button(@click.left="reverseConnections")
-      img.icon.reverse(src="@/assets/connection-reverse.svg")
     //- Label
     button(@click.left="showLabelsIsVisible" :class="{ active: isSomeLabelsVisible }")
+      //- img.icon(v-if="isSomeLabelsVisible" src="@/assets/view.svg")
+      //- img.icon(v-else src="@/assets/view-hidden.svg")
       span Label
+//- Reverse
+.button-wrap.connection-decorators
+  button(@click.left="reverseConnections")
+    img.icon.reverse(src="@/assets/connection-reverse.svg")
+
 </template>
 
 <script>

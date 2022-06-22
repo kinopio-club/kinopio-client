@@ -10,9 +10,6 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="focus" @blur="blur")
 
     .row
-      //- Remove
-      button(:disabled="!canEditConnection" @click.left="removeConnection")
-        img.icon(src="@/assets/remove.svg")
       //- Arrows or Label
       ConnectionDecorators(:connections="[currentConnection]")
       //- Filter
@@ -35,7 +32,11 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         span.badge.info
           img.icon(src="@/assets/unlock.svg")
           span To edit closed spaces, you'll need to be invited
-
+    .row
+      //- Remove
+      button(:disabled="!canEditConnection" @click.left="removeConnection")
+        img.icon(src="@/assets/remove.svg")
+        span Remove
   section.results-actions(ref="resultsActions")
     .row
       label(:class="{active: shouldUseLastConnectionType, disabled: !canEditConnection}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
