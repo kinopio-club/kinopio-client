@@ -38,6 +38,14 @@ export default {
           this.setPosition()
         }
       } else if (mutation.type === 'triggerUpdateConnectionArrowPositions') {
+        const { connections, shouldUpdateAll } = mutation.payload
+        let shouldUpdate = false
+        if (shouldUpdateAll) {
+          shouldUpdate = true
+        } else if (connections) {
+          shouldUpdate = Boolean(connections.find(connection => connection.id === this.connection.id))
+        }
+        if (!shouldUpdate) { return }
         this.$nextTick(() => {
           this.setPosition()
         })

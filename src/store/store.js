@@ -413,7 +413,7 @@ const store = createStore({
     triggerSplitCard: (state, cardId) => {},
     triggerRemovedIsVisible: () => {},
     triggerUpdateConnectionPathWhileDragging: (state, { connection, path }) => {},
-    triggerUpdateConnectionArrowPositions: () => {},
+    triggerUpdateConnectionArrowPositions: (state, { connections, shouldUpdateAll }) => {},
 
     // Cards
 

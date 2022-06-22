@@ -621,7 +621,7 @@ const currentSpace = {
         context.commit('triggerUpdateCardOverlaps', null, { root: true })
         nextTick(() => {
           context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
-          context.commit('triggerUpdateConnectionArrowPositions', null, { root: true })
+          context.commit('triggerUpdateConnectionArrowPositions', { shouldUpdateAll: true }, { root: true })
         })
       })
     },
