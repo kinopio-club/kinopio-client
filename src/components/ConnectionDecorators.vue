@@ -77,9 +77,6 @@ export default {
         })
       })
       this.$store.dispatch('currentConnections/updatePaths', { connections: this.connections, shouldUpdateApi: true })
-      this.$nextTick(() => {
-        this.$store.commit('triggerUpdateConnectionArrowPositions', { connections: this.connections })
-      })
     }
   }
 }
