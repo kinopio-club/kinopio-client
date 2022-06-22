@@ -1,12 +1,16 @@
 <template lang="pug">
 .button-wrap.connection-decorators
   .segmented-buttons
+    //- Clear
     button(@click="clearAll" :class="{ active: isSomeConnectionsClear }")
       img.icon.clear(src="@/assets/connection-clear.svg")
+    //- Arrow
     button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsIsVisible }")
       img.icon.arrow(src="@/assets/connection-arrow.svg")
+    //- Reverse
     button(@click.left="reverseConnections")
       img.icon.reverse(src="@/assets/connection-reverse.svg")
+    //- Label
     button(@click.left="showLabelsIsVisible" :class="{ active: isSomeLabelsVisible }")
       span Label
 </template>
