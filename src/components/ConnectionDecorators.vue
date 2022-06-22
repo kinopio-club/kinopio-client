@@ -67,7 +67,19 @@ export default {
       })
     },
     reverseConnections () {
-
+      this.connections.forEach(connection => {
+        const startCardId = connection.endCardId
+        const endCardId = connection.startCardId
+        this.$store.dispatch('currentConnections/update', {
+          id: connection.id,
+          startCardId,
+          endCardId
+        })
+      })
+      this.$store.dispatch('currentConnections/updatePaths', { connections: this.connections, shouldUpdateApi: true })
+      this.$nextTick(() => {
+        this.$store.commit('triggerUpdateConnectionArrowPositions', { connections: this.connections })
+      })
     }
   }
 }
