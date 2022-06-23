@@ -48,6 +48,7 @@ export default {
         if (!shouldUpdate) { return }
         this.$nextTick(() => {
           this.$nextTick(() => {
+            this.draggingPath = undefined
             this.setPosition()
           })
         })
