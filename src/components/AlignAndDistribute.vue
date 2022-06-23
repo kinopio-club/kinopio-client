@@ -43,6 +43,8 @@
 <script>
 import utils from '@/utils.js'
 
+import uniqBy from 'lodash-es/uniqBy'
+
 const spaceBetweenCards = 12
 
 export default {
@@ -466,14 +468,18 @@ export default {
     },
     updateConnectionPaths () {
       this.$nextTick(() => {
+        let connections = []
         const multipleCardsSelectedIds = utils.clone(this.multipleCardsSelectedIds)
         const multipleConnectionsSelectedIds = utils.clone(this.multipleConnectionsSelectedIds)
         this.$store.commit('clearMultipleSelected')
         multipleCardsSelectedIds.forEach(cardId => {
-          this.$store.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true })
+          connections = connections.concat(this.$store.getters['currentConnections/byCardId'](cardId))
         })
         this.$store.commit('multipleCardsSelectedIds', multipleCardsSelectedIds)
         this.$store.commit('multipleConnectionsSelectedIds', multipleConnectionsSelectedIds)
+        // updates
+        connections = uniqBy(connections, 'id')
+        this.$store.dispatch('currentConnections/updatePaths', { connections, shouldUpdateApi: true })
       })
     }
   }
