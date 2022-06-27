@@ -341,6 +341,15 @@ export default {
     })
     return string.trim()
   },
+  isStringJSON (string) {
+    let isString = true
+    try {
+      JSON.parse(string)
+    } catch (error) {
+      isString = false
+    }
+    return isString
+  },
   updateObject (object, updates) {
     this.typeCheck({ value: updates, type: 'object', origin: 'updateObject' })
     const keys = Object.keys(updates)
@@ -667,6 +676,18 @@ export default {
     })
     return xIsInside && yIsInside
   },
+  cardsPositionsShifted (cards, position) {
+    const origin = this.topLeftCard(cards)
+    const delta = {
+      x: position.x - origin.x,
+      y: position.y - origin.y
+    }
+    return cards.map(card => {
+      card.x = card.x + delta.x
+      card.y = card.y + delta.y
+      return card
+    })
+  },
 
   // Connection Path Utils 🐙
 
@@ -973,6 +994,14 @@ export default {
       })
     }
     return items
+  },
+  updateConnectionsType ({ connections, prevTypeId, newTypeId }) {
+    return connections.map(connection => {
+      if (connection.connectionTypeId === prevTypeId) {
+        connection.connectionTypeId = newTypeId
+      }
+      return connection
+    })
   },
   normalizeSpace (space) {
     if (!this.objectHasKeys(space)) { return space }

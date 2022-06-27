@@ -365,6 +365,15 @@ export default {
       } else {
         return getters.typeForNewConnections
       }
+    },
+    existingTypeByData: (state, getters) => (type) => {
+      let connectionTypes = getters.allTypes
+      const existingType = connectionTypes.find(connectionType => {
+        const isColor = connectionType.color === type.color
+        const isName = connectionType.name === type.name
+        return isColor && isName
+      })
+      return existingType
     }
   }
 }
