@@ -51,8 +51,8 @@ export default {
         return this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
       })
       return connectionsCreatedByCurrentUser.length === this.connections.length
-    }
-
+    },
+    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() }
   },
   methods: {
     clearAll () {
