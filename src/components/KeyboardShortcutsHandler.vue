@@ -18,8 +18,9 @@ let prevCursorPosition, currentCursorPosition
 
 const checkIsSpaceScope = (event) => {
   const isBody = event.target.tagName === 'BODY'
+  const isMain = event.target.tagName === 'MAIN'
   const isFocusedCard = event.target.className === 'card'
-  return isBody || isFocusedCard
+  return isBody || isMain || isFocusedCard
 }
 
 export default {
