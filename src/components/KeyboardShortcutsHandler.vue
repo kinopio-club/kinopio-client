@@ -647,14 +647,13 @@ export default {
       this.$store.commit('closeAllDialogs')
       this.$store.commit('clearMultipleSelected')
       if (data.isKinopioData) {
+        this.$store.dispatch('history/pause')
         data = utils.uniqueSpaceItems(data)
         let { cards, connectionTypes, connections } = data
-        // TODO history pause
-        // this.$store.dispatch('history/pause')
-        // cards
+        // add cards
         cards = utils.cardsPositionsShifted(cards, position)
         this.$store.dispatch('currentCards/addMultiple', cards)
-        // types
+        // add new types
         connectionTypes = connectionTypes.map(type => {
           const existingType = this.$store.getters['currentConnections/existingTypeByData'](type)
           if (existingType) {
@@ -667,7 +666,7 @@ export default {
         connectionTypes.forEach(type => {
           this.$store.dispatch('currentConnections/addType', type)
         })
-        // connections
+        // add connections
         setTimeout(() => {
           connections.forEach(connection => {
             const type = { id: connection.connectionTypeId }
@@ -680,7 +679,9 @@ export default {
         const connectionIds = connections.map(connection => connection.id)
         this.$store.commit('multipleCardsSelectedIds', cardIds)
         this.$store.commit('multipleConnectionsSelectedIds', connectionIds)
-        // TODO history create
+        // record history
+        this.$store.dispatch('history/resume')
+        this.$store.dispatch('history/add', { cards, connectionTypes, connections, useSnapshot: true })
       } else {
         // TODO history pause and create needed?
         console.log('🔮🔮 paste as plain text', data.text)
