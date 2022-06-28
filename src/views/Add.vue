@@ -199,7 +199,7 @@ export default {
     kinopioDomain () { return utils.kinopioDomain() },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
-    maxCardLength () { return 300 },
+    maxCardLength () { return utils.maxCardLength() },
     currentUser () { return this.$store.state.currentUser },
     isTodayJournal () {
       if (this.currentSpace.moonPhase) {

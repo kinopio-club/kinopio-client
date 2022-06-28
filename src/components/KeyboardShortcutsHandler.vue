@@ -636,6 +636,7 @@ export default {
       const position = currentCursorPosition || prevCursorPosition
       this.$store.commit('closeAllDialogs')
       this.$store.commit('clearMultipleSelected')
+      // handle kinopio data
       if (data.isKinopioData) {
         this.$store.dispatch('history/pause')
         data = utils.uniqueSpaceItems(data)
@@ -672,9 +673,10 @@ export default {
         // ⏺ history
         this.$store.dispatch('history/resume')
         this.$store.dispatch('history/add', { cards, connectionTypes, connections, useSnapshot: true })
+      // handle plain text
       } else {
         // TODO history pause and create needed?
-        console.log('🔮🔮 paste as plain text', data.text)
+        console.log('🔮🔮 paste as plain text', data.text, position)
         // create new card as text(s)
       }
     },

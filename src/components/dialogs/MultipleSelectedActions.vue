@@ -112,7 +112,7 @@ export default {
     }
   },
   computed: {
-    maxCardLength () { return 300 },
+    maxCardLength () { return utils.maxCardLength() },
     cardStyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowMultiCardStyleActions && this.cardsIsSelected },
     visible () { return this.$store.state.multipleSelectedActionsIsVisible },
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },

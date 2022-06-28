@@ -449,6 +449,43 @@ export default {
       return 'Ctrl'
     }
   },
+  maxCardLength () { return 300 },
+  splitCardNameByParagraphAndSentence (prevName) {
+    const maxCardLength = this.maxCardLength()
+    const paragraphs = this.splitByParagraphs(prevName) || []
+    let cardNames = paragraphs.map(paragraph => {
+      let sentences
+      if (paragraph.length > maxCardLength) {
+        sentences = this.splitBySentences(paragraph)
+      }
+      return sentences || paragraph
+    })
+    cardNames = cardNames.flat()
+    // split names longer than max card length
+    cardNames = cardNames.map(name => {
+      // recursive
+      let results = []
+      let shouldSplit, nameToSplit
+      do {
+        shouldSplit = false
+        nameToSplit = nameToSplit || name
+        results.push(nameToSplit.substring(0, maxCardLength))
+        const otherSplit = nameToSplit.substring(maxCardLength)
+        if (otherSplit <= maxCardLength) {
+          results.push(otherSplit)
+        } else {
+          nameToSplit = otherSplit
+          shouldSplit = true
+        }
+      } while (shouldSplit)
+
+      if (results.length) { return results }
+      return name
+    })
+    cardNames = cardNames.flat()
+    cardNames = cardNames.filter(name => Boolean(name.length))
+    return cardNames
+  },
   splitBySentences (string) {
     if (!string) { return }
     let sentences = string.split('. ')
