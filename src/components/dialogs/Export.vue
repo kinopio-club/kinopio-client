@@ -55,8 +55,6 @@ import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import Pdf from '@/components/Pdf.vue'
 
-import join from 'lodash-es/join'
-
 export default {
   name: 'Export',
   components: {
@@ -97,8 +95,7 @@ export default {
       return fileName
     },
     text () {
-      const data = this.exportData.cards.map(card => { return card.name })
-      return join(data, '\n\n')
+      return utils.textFromCardNames(this.exportData.cards)
     },
     copyText () {
       const element = this.$refs.text

@@ -36,7 +36,6 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
-import join from 'lodash-es/join'
 
 export default {
   name: 'MoveOrCopyCards',
@@ -104,8 +103,7 @@ export default {
       return utils.pastTense(value)
     },
     text () {
-      const data = this.exportData.cards.map(card => { return card.name })
-      return join(data, '\n\n')
+      return utils.textFromCardNames(this.exportData.cards)
     },
     copyText () {
       const element = this.$refs.text

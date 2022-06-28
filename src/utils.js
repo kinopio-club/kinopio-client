@@ -9,6 +9,7 @@ import random from 'lodash-es/random'
 import last from 'lodash-es/last'
 import sortBy from 'lodash-es/sortBy'
 import times from 'lodash-es/times'
+import join from 'lodash-es/join'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
@@ -687,6 +688,10 @@ export default {
       card.y = card.y + delta.y
       return card
     })
+  },
+  textFromCardNames (cards) {
+    const data = cards.map(card => card.name)
+    return join(data, '\n\n')
   },
 
   // Connection Path Utils 🐙
