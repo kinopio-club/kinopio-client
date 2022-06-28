@@ -676,37 +676,55 @@ export default {
       // handle plain text
       } else {
         // TODO history pause and create needed?
-        console.log('🔮🔮 paste as plain text', data.text, position)
-        // create new card as text(s)
+
+        // ? create card
+        // ? trigger cardDetailsSplitCard (cardid)
+
+        const cardNames = utils.splitCardNameByParagraphAndSentence(data.text)
+        // let cards = cardNames.map(name => {
+        //   return {
+        //     id: nanoid(),
+        //     name,
+        //     x: position.x,
+        //     y: position.y
+        //   }
+        // })
+
+        console.log('🔮🔮 paste as plain text', position, cardNames)
+        // id, name, x, y (based on pos)
+
+        // create new card as text(s) : carddetails.addSplitCards
       }
     },
 
     async getClipboardData () {
       try {
         const clipboardItems = await navigator.clipboard.read()
-        let data
         for (const item of clipboardItems) {
           for (const type of item.types) {
             const blob = await item.getType(type)
             if (type === 'image/png') {
               // TODO handle img blob
               // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read
-              // data = { blob: }
+              // return { blob: }
             } else if (type === 'text/plain') {
               let text = await blob.text()
               text = utils.trim(text)
-              data = { text }
+              return { text }
             } else if (type === 'text/html') {
               let text = await blob.text()
               text = utils.innerHTMLText(text)
               const isJSON = utils.isStringJSON(text)
-              if (!isJSON) { return }
-              data = JSON.parse(text)
-              if (!data.isKinopioData) { return }
+              if (!isJSON) {
+                return { text }
+              }
+              const data = JSON.parse(text)
+              if (data.isKinopioData) {
+                return data
+              }
             }
           }
         }
-        return data
       } catch (error) {
         console.error('🚑 getClipboardData', error)
       }
