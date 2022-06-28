@@ -45,6 +45,9 @@ export default {
     window.addEventListener('mouseup', this.handleMouseUpEvents)
     window.addEventListener('scroll', this.handleScrollEvents)
     window.addEventListener('contextmenu', this.handleContextMenuEvents)
+    window.addEventListener('copy', this.handleCopyCutEvent)
+    // window.addEventListener('cut', this.handleCopyCutEvent)
+    window.addEventListener('paste', this.handlePasteEvent)
   },
   beforeUnmount () {
     window.removeEventListener('keyup', this.handleShortcuts)
@@ -54,6 +57,9 @@ export default {
     window.removeEventListener('mousemove', this.handleMouseMoveEvents)
     window.removeEventListener('mouseup', this.handleMouseUpEvents)
     window.removeEventListener('scroll', this.handleScrollEvents)
+    window.removeEventListener('copy', this.handleCopyCutEvent)
+    // window.removeEventListener('cut', this.handleCopyCutEvent)
+    window.removeEventListener('paste', this.handlePasteEvent)
   },
   computed: {
   },
@@ -140,24 +146,15 @@ export default {
       } else if (isMeta && key === 'z' && !isFromInput) {
         event.preventDefault()
         this.$store.dispatch('history/undo')
-      // Copy
-      } else if (isMeta && key === 'c' && (isSpaceScope || isFromCard)) {
-        if (this.focusedCardIds().length) {
-          event.preventDefault()
-          this.copyCards()
-          this.notifyCopyCut('copied')
-        }
-      // Cut
-      } else if (isMeta && key === 'x' && isSpaceScope) {
-        if (this.focusedCardIds().length) {
-          event.preventDefault()
-          this.cutCards()
-          this.notifyCopyCut('cut')
-        }
-      // Paste
-      } else if (isMeta && key === 'v' && isSpaceScope) {
-        event.preventDefault()
-        this.pasteCards()
+
+        // // Cut
+        // } else if (isMeta && key === 'x' && isSpaceScope) {
+        //   if (this.focusedCardIds().length) {
+        //     event.preventDefault()
+        //     this.cutCards()
+        //     this.notifyCopyCut('cut')
+        //   }
+
       // Select All Cards Below Cursor
       } else if (isMeta && event.shiftKey && key === 'a' && isSpaceScope) {
         event.preventDefault()
@@ -301,17 +298,103 @@ export default {
         return false
       }
     },
+    // copy
+    async handleCopyCutEvent (event) {
+      const isFromCard = event.target.classList[0] === 'card'
+      const isSpaceScope = checkIsSpaceScope(event)
+      const shouldHandle = isFromCard || isSpaceScope
+      if (!shouldHandle) { return }
+      event.preventDefault()
+      await this.writeSelectedToClipboard()
+      console.log(event.type)
+      // if (event.type === 'cut') {
+      // removeItems
+      // this.$store.commit('addNotification', { message: 'cut', type: 'success', icon: 'cut' })
+      // } else {}
+      this.$store.commit('addNotification', { message: 'copied', type: 'success', icon: 'cut' })
+    },
+    // paste
+    async handlePasteEvent (event) {
+      const isSpaceScope = checkIsSpaceScope(event)
+      console.log('🚛', isSpaceScope)
+      if (!isSpaceScope) { return }
+      event.preventDefault()
+      const text = await navigator.clipboard.readText()
+      const isJSON = utils.isStringJSON(text)
+      let data, isKinopioData
+      if (isJSON) {
+        data = JSON.parse(text)
+        isKinopioData = data.isKinopioData
+      }
+      console.log('🍅', text)
+      const position = currentCursorPosition || prevCursorPosition
+      this.$store.commit('closeAllDialogs')
+      this.$store.commit('clearMultipleSelected')
+      if (isKinopioData) {
+        data = utils.uniqueSpaceItems(data)
+        let { cards, connectionTypes, connections } = data
+        // TODO history pause
+        // this.$store.dispatch('history/pause')
+
+        // cards
+        cards = utils.cardsPositionsShifted(cards, position)
+        this.$store.dispatch('currentCards/addMultiple', cards)
+        // types
+        connectionTypes = connectionTypes.map(type => {
+          const existingType = this.$store.getters['currentConnections/existingTypeByData'](type)
+          if (existingType) {
+            connections = utils.updateConnectionsType({ connections, prevTypeId: type.id, newTypeId: existingType.id })
+            return existingType
+          } else {
+            return type
+          }
+        })
+        connectionTypes.forEach(type => {
+          this.$store.dispatch('currentConnections/addType', type)
+        })
+        // connections
+        setTimeout(() => {
+          connections.forEach(connection => {
+            const type = { id: connection.connectionTypeId }
+            this.$store.dispatch('currentConnections/add', { connection, type })
+            this.$store.dispatch('currentConnections/updatePaths', { connections, cards })
+          })
+        }, 20)
+        // select
+        const cardIds = cards.map(card => card.id)
+        const connectionIds = connections.map(connection => connection.id)
+        this.$store.commit('multipleCardsSelectedIds', cardIds)
+        this.$store.commit('multipleConnectionsSelectedIds', connectionIds)
+
+        // TODO history create
+      } else {
+        // TODO history pause and create needed?
+        console.log('🔮🔮 paste as plain text', text)
+        // create new card as text(s)
+      }
+    },
+
+    async writeSelectedToClipboard () {
+      const cardIds = this.focusedCardIds()
+      const cards = cardIds.map(cardId => {
+        return this.$store.getters['currentCards/byId'](cardId)
+      })
+      const connectionIds = this.$store.state.multipleConnectionsSelectedIds
+      const connections = connectionIds.map(connectionId => {
+        return this.$store.getters['currentConnections/byId'](connectionId)
+      })
+      const connectionTypes = connections.map(connection => {
+        return this.$store.getters['currentConnections/typeByConnection'](connection)
+      })
+      let data = { isKinopioData: true, cards, connections, connectionTypes }
+      data = JSON.stringify(data)
+      await navigator.clipboard.writeText(data)
+    },
 
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
-    },
-
-    notifyCopyCut (word) {
-      const cardIds = this.focusedCardIds()
-      const pluralizedCard = utils.pluralize('Card', cardIds.length > 1)
-      this.$store.commit('addNotification', { message: `${pluralizedCard} ${word}`, type: 'success', icon: 'cut' })
     },
 
     // Add Parent and Child Cards
