@@ -231,8 +231,8 @@ const currentCards = {
           z: card.z || context.state.ids.length + 1,
           name: card.name,
           frameId: card.frameId || 0,
-          width: utils.emptyCard().width,
-          height: utils.emptyCard().height,
+          width: card.width || utils.emptyCard().width,
+          height: card.height || utils.emptyCard().height,
           userId: context.rootState.currentUser.id,
           backgroundColor: card.backgroundColor
         }
