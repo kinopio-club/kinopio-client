@@ -143,15 +143,6 @@ export default {
       } else if (isMeta && key === 'z' && !isFromInput) {
         event.preventDefault()
         this.$store.dispatch('history/undo')
-
-        // // Cut
-        // } else if (isMeta && key === 'x' && isSpaceScope) {
-        //   if (this.focusedCardIds().length) {
-        //     event.preventDefault()
-        //     this.cutCards()
-        //     this.notifyCopyCut('cut')
-        //   }
-
       // Select All Cards Below Cursor
       } else if (isMeta && event.shiftKey && key === 'a' && isSpaceScope) {
         event.preventDefault()
