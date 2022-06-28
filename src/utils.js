@@ -587,6 +587,13 @@ export default {
     const angleDegrees = angleRadians * 180 / Math.PI
     return Math.round(angleDegrees)
   },
+  innerHTMLText (htmlString) {
+    // https://regexr.com/6olpg
+    // from https://stackoverflow.com/a/1736801
+    // matches open and close tags
+    const htmlTagPattern = new RegExp(/<(?:"[^"]*"['"]*|'[^']*'['"]*|[^'">])+>/gim)
+    return htmlString.replace(htmlTagPattern, '')
+  },
 
   // normalize items
 

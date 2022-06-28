@@ -316,21 +316,16 @@ export default {
     // paste
     async handlePasteEvent (event) {
       const isSpaceScope = checkIsSpaceScope(event)
-      console.log('🚛', isSpaceScope)
       if (!isSpaceScope) { return }
       event.preventDefault()
-      const text = await navigator.clipboard.readText()
-      const isJSON = utils.isStringJSON(text)
-      let data, isKinopioData
-      if (isJSON) {
-        data = JSON.parse(text)
-        isKinopioData = data.isKinopioData
-      }
-      console.log('🍅', text)
+      let data = await this.getClipboardData()
+      console.log('🍅', data, data.text)
+      if (!data) { return }
+
       const position = currentCursorPosition || prevCursorPosition
       this.$store.commit('closeAllDialogs')
       this.$store.commit('clearMultipleSelected')
-      if (isKinopioData) {
+      if (data.isKinopioData) {
         data = utils.uniqueSpaceItems(data)
         let { cards, connectionTypes, connections } = data
         // TODO history pause
@@ -369,8 +364,39 @@ export default {
         // TODO history create
       } else {
         // TODO history pause and create needed?
-        console.log('🔮🔮 paste as plain text', text)
+        console.log('🔮🔮 paste as plain text', data.text)
         // create new card as text(s)
+      }
+    },
+
+    async getClipboardData () {
+      try {
+        const clipboardItems = await navigator.clipboard.read()
+        let data
+        for (const item of clipboardItems) {
+          for (const type of item.types) {
+            const blob = await item.getType(type)
+            if (type === 'image/png') {
+              // TODO handle img blob
+              // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read
+              // data = { blob: }
+            } else if (type === 'text/plain') {
+              let text = await blob.text()
+              text = utils.trim(text)
+              data = { text }
+            } else if (type === 'text/html') {
+              let text = await blob.text()
+              text = utils.innerHTMLText(text)
+              const isJSON = utils.isStringJSON(text)
+              if (!isJSON) { return }
+              data = JSON.parse(text)
+              if (!data.isKinopioData) { return }
+            }
+          }
+        }
+        return data
+      } catch (error) {
+        console.error('🚑 getClipboardData', error)
       }
     },
 
@@ -388,7 +414,17 @@ export default {
       })
       let data = { isKinopioData: true, cards, connections, connectionTypes }
       data = JSON.stringify(data)
-      await navigator.clipboard.writeText(data)
+      data = `<kinopio>${data}</kinopio>`
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ // eslint-disable-line no-undef
+            'text/plain': utils.textFromCardNames(cards),
+            'text/html': data
+          })
+        ])
+      } catch (error) {
+        console.warn('🚑 writeSelectedToClipboard', error)
+      }
     },
 
     scrollIntoView (card) {
