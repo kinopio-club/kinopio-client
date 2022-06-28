@@ -482,6 +482,7 @@ export default {
     return string.replace(/\/$/g, '')
   },
   pastTense (string) {
+    if (string === 'cut') { return string }
     const lastLetter = string.charAt(string.length - 1)
     // add test cases ad hoc from https://github.com/boo1ean/tensify
     if (lastLetter === 'e') {

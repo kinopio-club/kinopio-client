@@ -5,9 +5,6 @@
 import utils from '@/utils.js'
 import scrollIntoView from '@/scroll-into-view.js'
 
-import last from 'lodash-es/last'
-import { nanoid } from 'nanoid'
-
 const incrementPosition = 12
 let useSiblingConnectionType
 let browserZoomLevel = 0
@@ -46,7 +43,7 @@ export default {
     window.addEventListener('scroll', this.handleScrollEvents)
     window.addEventListener('contextmenu', this.handleContextMenuEvents)
     window.addEventListener('copy', this.handleCopyCutEvent)
-    // window.addEventListener('cut', this.handleCopyCutEvent)
+    window.addEventListener('cut', this.handleCopyCutEvent)
     window.addEventListener('paste', this.handlePasteEvent)
   },
   beforeUnmount () {
@@ -58,7 +55,7 @@ export default {
     window.removeEventListener('mouseup', this.handleMouseUpEvents)
     window.removeEventListener('scroll', this.handleScrollEvents)
     window.removeEventListener('copy', this.handleCopyCutEvent)
-    // window.removeEventListener('cut', this.handleCopyCutEvent)
+    window.removeEventListener('cut', this.handleCopyCutEvent)
     window.removeEventListener('paste', this.handlePasteEvent)
   },
   computed: {
@@ -296,134 +293,6 @@ export default {
         disableContextMenu = false
         event.preventDefault()
         return false
-      }
-    },
-    // copy
-    async handleCopyCutEvent (event) {
-      const isFromCard = event.target.classList[0] === 'card'
-      const isSpaceScope = checkIsSpaceScope(event)
-      const shouldHandle = isFromCard || isSpaceScope
-      if (!shouldHandle) { return }
-      event.preventDefault()
-      await this.writeSelectedToClipboard()
-      console.log(event.type)
-      // if (event.type === 'cut') {
-      // removeItems
-      // this.$store.commit('addNotification', { message: 'cut', type: 'success', icon: 'cut' })
-      // } else {}
-      this.$store.commit('addNotification', { message: 'copied', type: 'success', icon: 'cut' })
-    },
-    // paste
-    async handlePasteEvent (event) {
-      const isSpaceScope = checkIsSpaceScope(event)
-      if (!isSpaceScope) { return }
-      event.preventDefault()
-      let data = await this.getClipboardData()
-      console.log('🍅', data, data.text)
-      if (!data) { return }
-
-      const position = currentCursorPosition || prevCursorPosition
-      this.$store.commit('closeAllDialogs')
-      this.$store.commit('clearMultipleSelected')
-      if (data.isKinopioData) {
-        data = utils.uniqueSpaceItems(data)
-        let { cards, connectionTypes, connections } = data
-        // TODO history pause
-        // this.$store.dispatch('history/pause')
-
-        // cards
-        cards = utils.cardsPositionsShifted(cards, position)
-        this.$store.dispatch('currentCards/addMultiple', cards)
-        // types
-        connectionTypes = connectionTypes.map(type => {
-          const existingType = this.$store.getters['currentConnections/existingTypeByData'](type)
-          if (existingType) {
-            connections = utils.updateConnectionsType({ connections, prevTypeId: type.id, newTypeId: existingType.id })
-            return existingType
-          } else {
-            return type
-          }
-        })
-        connectionTypes.forEach(type => {
-          this.$store.dispatch('currentConnections/addType', type)
-        })
-        // connections
-        setTimeout(() => {
-          connections.forEach(connection => {
-            const type = { id: connection.connectionTypeId }
-            this.$store.dispatch('currentConnections/add', { connection, type })
-            this.$store.dispatch('currentConnections/updatePaths', { connections, cards })
-          })
-        }, 20)
-        // select
-        const cardIds = cards.map(card => card.id)
-        const connectionIds = connections.map(connection => connection.id)
-        this.$store.commit('multipleCardsSelectedIds', cardIds)
-        this.$store.commit('multipleConnectionsSelectedIds', connectionIds)
-
-        // TODO history create
-      } else {
-        // TODO history pause and create needed?
-        console.log('🔮🔮 paste as plain text', data.text)
-        // create new card as text(s)
-      }
-    },
-
-    async getClipboardData () {
-      try {
-        const clipboardItems = await navigator.clipboard.read()
-        let data
-        for (const item of clipboardItems) {
-          for (const type of item.types) {
-            const blob = await item.getType(type)
-            if (type === 'image/png') {
-              // TODO handle img blob
-              // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read
-              // data = { blob: }
-            } else if (type === 'text/plain') {
-              let text = await blob.text()
-              text = utils.trim(text)
-              data = { text }
-            } else if (type === 'text/html') {
-              let text = await blob.text()
-              text = utils.innerHTMLText(text)
-              const isJSON = utils.isStringJSON(text)
-              if (!isJSON) { return }
-              data = JSON.parse(text)
-              if (!data.isKinopioData) { return }
-            }
-          }
-        }
-        return data
-      } catch (error) {
-        console.error('🚑 getClipboardData', error)
-      }
-    },
-
-    async writeSelectedToClipboard () {
-      const cardIds = this.focusedCardIds()
-      const cards = cardIds.map(cardId => {
-        return this.$store.getters['currentCards/byId'](cardId)
-      })
-      const connectionIds = this.$store.state.multipleConnectionsSelectedIds
-      const connections = connectionIds.map(connectionId => {
-        return this.$store.getters['currentConnections/byId'](connectionId)
-      })
-      const connectionTypes = connections.map(connection => {
-        return this.$store.getters['currentConnections/typeByConnection'](connection)
-      })
-      let data = { isKinopioData: true, cards, connections, connectionTypes }
-      data = JSON.stringify(data)
-      data = `<kinopio>${data}</kinopio>`
-      try {
-        await navigator.clipboard.write([
-          new ClipboardItem({ // eslint-disable-line no-undef
-            'text/plain': utils.textFromCardNames(cards),
-            'text/html': data
-          })
-        ])
-      } catch (error) {
-        console.warn('🚑 writeSelectedToClipboard', error)
       }
     },
 
@@ -748,46 +617,133 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.remove')
     },
 
-    // Copy
+    // Copy, Cut
 
-    copyCards () {
-      const cardIds = this.focusedCardIds()
-      const cards = cardIds.map(cardId => {
-        let card = this.$store.getters['currentCards/byId'](cardId)
-        return card
-      })
-      this.$store.commit('addToCopiedCards', cards)
-    },
-
-    // Cut
-
-    cutCards () {
-      this.copyCards()
-      this.remove()
+    async handleCopyCutEvent (event) {
+      const isFromCard = event.target.classList[0] === 'card'
+      const isSpaceScope = checkIsSpaceScope(event)
+      const shouldHandle = isFromCard || isSpaceScope
+      if (!shouldHandle) { return }
+      event.preventDefault()
+      await this.writeSelectedToClipboard()
+      console.log(event.type)
+      if (event.type === 'cut') {
+        this.remove()
+      }
+      this.$store.commit('addNotification', { message: utils.pastTense(event.type), type: 'success', icon: 'cut' })
     },
 
     // Paste
 
-    pasteCards () {
-      let cards = this.$store.state.copiedCards
-      cards = utils.clone(cards)
-      const isCardsCreatedIsOverLimit = this.$store.getters['currentUser/cardsCreatedWillBeOverLimit'](cards.length)
-      if (isCardsCreatedIsOverLimit) {
-        this.$store.commit('notifyCardsCreatedIsOverLimit', true)
-        return
-      }
-      if (!cards.length) { return }
+    async handlePasteEvent (event) {
+      const isSpaceScope = checkIsSpaceScope(event)
+      if (!isSpaceScope) { return }
+      event.preventDefault()
+      let data = await this.getClipboardData()
+      console.log('🍅', data, data.text)
+      if (!data) { return }
+
+      const position = currentCursorPosition || prevCursorPosition
+      this.$store.commit('closeAllDialogs')
       this.$store.commit('clearMultipleSelected')
-      this.$store.commit('multipleSelectedActionsIsVisible', false)
-      cards.forEach(card => {
-        const cardId = nanoid()
-        this.$store.dispatch('currentCards/paste', { card, cardId })
-        this.$store.commit('addToMultipleCardsSelected', cardId)
+      if (data.isKinopioData) {
+        data = utils.uniqueSpaceItems(data)
+        let { cards, connectionTypes, connections } = data
+        // TODO history pause
+        // this.$store.dispatch('history/pause')
+        // cards
+        cards = utils.cardsPositionsShifted(cards, position)
+        this.$store.dispatch('currentCards/addMultiple', cards)
+        // types
+        connectionTypes = connectionTypes.map(type => {
+          const existingType = this.$store.getters['currentConnections/existingTypeByData'](type)
+          if (existingType) {
+            connections = utils.updateConnectionsType({ connections, prevTypeId: type.id, newTypeId: existingType.id })
+            return existingType
+          } else {
+            return type
+          }
+        })
+        connectionTypes.forEach(type => {
+          this.$store.dispatch('currentConnections/addType', type)
+        })
+        // connections
+        setTimeout(() => {
+          connections.forEach(connection => {
+            const type = { id: connection.connectionTypeId }
+            this.$store.dispatch('currentConnections/add', { connection, type })
+            this.$store.dispatch('currentConnections/updatePaths', { connections, cards })
+          })
+        }, 20)
+        // select
+        const cardIds = cards.map(card => card.id)
+        const connectionIds = connections.map(connection => connection.id)
+        this.$store.commit('multipleCardsSelectedIds', cardIds)
+        this.$store.commit('multipleConnectionsSelectedIds', connectionIds)
+        // TODO history create
+      } else {
+        // TODO history pause and create needed?
+        console.log('🔮🔮 paste as plain text', data.text)
+        // create new card as text(s)
+      }
+    },
+
+    async getClipboardData () {
+      try {
+        const clipboardItems = await navigator.clipboard.read()
+        let data
+        for (const item of clipboardItems) {
+          for (const type of item.types) {
+            const blob = await item.getType(type)
+            if (type === 'image/png') {
+              // TODO handle img blob
+              // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read
+              // data = { blob: }
+            } else if (type === 'text/plain') {
+              let text = await blob.text()
+              text = utils.trim(text)
+              data = { text }
+            } else if (type === 'text/html') {
+              let text = await blob.text()
+              text = utils.innerHTMLText(text)
+              const isJSON = utils.isStringJSON(text)
+              if (!isJSON) { return }
+              data = JSON.parse(text)
+              if (!data.isKinopioData) { return }
+            }
+          }
+        }
+        return data
+      } catch (error) {
+        console.error('🚑 getClipboardData', error)
+      }
+    },
+
+    async writeSelectedToClipboard () {
+      const cardIds = this.focusedCardIds()
+      const cards = cardIds.map(cardId => {
+        return this.$store.getters['currentCards/byId'](cardId)
       })
-      this.$nextTick(() => {
-        const newCard = last(this.$store.getters['currentCards/all'])
-        this.scrollIntoView(newCard)
+      const connectionIds = this.$store.state.multipleConnectionsSelectedIds
+      const connections = connectionIds.map(connectionId => {
+        return this.$store.getters['currentConnections/byId'](connectionId)
       })
+      const connectionTypes = connections.map(connection => {
+        return this.$store.getters['currentConnections/typeByConnection'](connection)
+      })
+      let data = { isKinopioData: true, cards, connections, connectionTypes }
+      data = JSON.stringify(data)
+      data = `<kinopio>${data}</kinopio>`
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ // eslint-disable-line no-undef
+            'text/plain': utils.textFromCardNames(cards),
+            'text/html': data
+          })
+        ])
+      } catch (error) {
+        console.warn('🚑 writeSelectedToClipboard', error)
+      }
     },
 
     // Select All Cards Below Cursor
