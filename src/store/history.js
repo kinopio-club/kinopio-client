@@ -200,7 +200,7 @@ const self = {
       const patch = patches[index]
       context.commit('isPaused', true)
       patch.forEach(item => {
-        console.log('⏪', item)
+        console.log('⏪', item, { pointer, totalPatches: patches.length })
         const { action } = item
         let card, connection, type
         switch (action) {
@@ -258,7 +258,7 @@ const self = {
       const patch = patches[pointer]
       context.commit('isPaused', true)
       patch.forEach(item => {
-        console.log('⏩', item)
+        console.log('⏩', item, { pointer, totalPatches: patches.length })
         const { action } = item
         let card, connection, type
         switch (action) {

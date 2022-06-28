@@ -640,9 +640,8 @@ export default {
       if (!isSpaceScope) { return }
       event.preventDefault()
       let data = await this.getClipboardData()
-      console.log('🍅', data, data.text)
+      console.log('🎊 pasteData', data)
       if (!data) { return }
-
       const position = currentCursorPosition || prevCursorPosition
       this.$store.commit('closeAllDialogs')
       this.$store.commit('clearMultipleSelected')
@@ -670,7 +669,7 @@ export default {
         setTimeout(() => {
           connections.forEach(connection => {
             const type = { id: connection.connectionTypeId }
-            this.$store.dispatch('currentConnections/add', { connection, type })
+            this.$store.dispatch('currentConnections/add', { connection, type, shouldNotRecordHistory: true })
             this.$store.dispatch('currentConnections/updatePaths', { connections, cards })
           })
         }, 20)
@@ -679,7 +678,7 @@ export default {
         const connectionIds = connections.map(connection => connection.id)
         this.$store.commit('multipleCardsSelectedIds', cardIds)
         this.$store.commit('multipleConnectionsSelectedIds', connectionIds)
-        // record history
+        // ⏺ history
         this.$store.dispatch('history/resume')
         this.$store.dispatch('history/add', { cards, connectionTypes, connections, useSnapshot: true })
       } else {

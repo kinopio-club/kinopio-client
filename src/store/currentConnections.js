@@ -120,6 +120,7 @@ export default {
     remove: (state, connectionToRemove) => {
       if (!connectionToRemove) { return }
       const connection = state.connections[connectionToRemove.id]
+      if (!connection) { return }
       state.ids = state.ids.filter(id => id !== connection.id)
       delete state.connections[connection.id]
       cache.updateSpace('connections', state.connections, currentSpaceId)
@@ -177,7 +178,7 @@ export default {
 
     // create
 
-    add: (context, { connection, type }) => {
+    add: (context, { connection, type, shouldNotRecordHistory }) => {
       const isExistingPath = context.getters.isExistingPath({
         startCardId: connection.startCardId,
         endCardId: connection.endCardId
@@ -190,7 +191,9 @@ export default {
       connection.connectionTypeId = type.id
       context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
       context.dispatch('broadcast/update', { updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
-      context.dispatch('history/add', { connections: [connection] }, { root: true })
+      if (!shouldNotRecordHistory) {
+        context.dispatch('history/add', { connections: [connection] }, { root: true })
+      }
       context.commit('create', connection)
     },
     addType: (context, type) => {
