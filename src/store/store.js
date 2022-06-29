@@ -30,7 +30,6 @@ const store = createStore({
     isBeta: false,
     shouldHideConnectionOutline: false,
     newStuffIsUpdated: false,
-    copiedCards: [],
     stripeIsLoaded: false,
     shouldHideFooter: false,
     shouldExplicitlyHideFooter: false,
@@ -436,14 +435,6 @@ const store = createStore({
     childCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'childCardId' })
       state.childCardId = cardId
-    },
-    addToCopiedCards: (state, cards) => {
-      utils.typeCheck({ value: cards, type: 'array', origin: 'addToCopiedCards' })
-      cards = cards.map(card => {
-        card = utils.clone(card)
-        return card
-      })
-      state.copiedCards = cards
     },
     updateRemoteCardDetailsVisible: (state, update) => {
       utils.typeCheck({ value: update, type: 'object', origin: 'updateRemoteCardDetailsVisible' })
