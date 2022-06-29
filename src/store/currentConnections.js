@@ -184,6 +184,7 @@ export default {
         endCardId: connection.endCardId
       })
       if (isExistingPath) { return }
+      if (connection.startCardId === connection.endCardId) { return }
       type = type || context.getters.typeForNewConnections
       connection.id = connection.id || nanoid()
       connection.spaceId = currentSpaceId
