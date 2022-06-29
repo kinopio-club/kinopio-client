@@ -632,6 +632,13 @@ export default {
     const htmlTagPattern = new RegExp(/<(?:"[^"]*"['"]*|'[^']*'['"]*|[^'">])+>/gim)
     return htmlString.replace(htmlTagPattern, '')
   },
+  decodeEntitiesFromHTML (string) {
+    var element = document.createElement('textarea')
+    element.innerHTML = string
+    const value = element.value
+    element.remove()
+    return value
+  },
 
   // normalize items
 

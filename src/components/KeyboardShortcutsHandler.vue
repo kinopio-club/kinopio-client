@@ -761,8 +761,13 @@ export default {
       this.$store.commit('clearMultipleSelected')
       this.$store.dispatch('history/pause')
       if (data.isKinopioData) {
+        data.cards = data.cards.map(card => {
+          card.name = utils.decodeEntitiesFromHTML(card.name)
+          return card
+        })
         this.handlePasteKinopioData(data, position)
       } else {
+        data.text = utils.decodeEntitiesFromHTML(data.text)
         this.handlePastePlainText(data, position)
       }
     },
