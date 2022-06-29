@@ -631,24 +631,18 @@ export default {
       try {
         const clipboardItems = await navigator.clipboard.read()
         for (const item of clipboardItems) {
-          // for (const type of item.types) {
-          // console.log('🐙',type, blob, item.types)
-
-          const isImage = item.types.includes('image/png')
-          const isHTML = item.types.includes('text/html')
-          const isText = item.types.includes('text/plain')
-
-          if (isImage) {
-            // TODO handle img blob
+          const hasImage = item.types.includes('image/png')
+          const hasHTML = item.types.includes('text/html')
+          const hasText = item.types.includes('text/plain')
+          if (hasImage) {
+            // TODO return { blob }
             // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read
-          // kinopio data or html text
-          } else if (isHTML) {
+          // kinopio data, or html text
+          } else if (hasHTML) {
             const index = item.types.indexOf('text/html')
             const type = item.types[index]
             const blob = await item.getType(type)
-
             let text = await blob.text()
-            console.log('💖')
             text = utils.innerHTMLText(text)
             const isJSON = utils.isStringJSON(text)
             if (!isJSON) {
@@ -659,7 +653,7 @@ export default {
               return data
             }
           // plain text
-          } else if (isText) {
+          } else if (hasText) {
             const index = item.types.indexOf('text/plain')
             const type = item.types[index]
             const blob = await item.getType(type)
@@ -667,7 +661,6 @@ export default {
             text = utils.trim(text)
             return { text }
           }
-          // }
         }
       } catch (error) {
         console.error('🚑 getClipboardData', error)
@@ -678,7 +671,6 @@ export default {
       data = utils.uniqueSpaceItems(data)
       let { cards, connectionTypes, connections } = data
       // add cards
-      // TODO error here if pasted card is out of vp of origin?
       cards = utils.cardsPositionsShifted(cards, position)
       this.$store.dispatch('currentCards/addMultiple', cards)
       // add new types
@@ -713,7 +705,6 @@ export default {
     },
 
     handlePastePlainText (data, position) {
-      console.log('🦒', position)
       const cardNames = utils.splitCardNameByParagraphAndSentence(data.text)
       // add card(s)
       let cards = cardNames.map(name => {
@@ -724,7 +715,6 @@ export default {
           y: position.y
         }
       })
-      console.log(cards)
       this.$store.dispatch('currentCards/addMultiple', cards)
       // update y positions
       this.$nextTick(() => {
@@ -734,9 +724,6 @@ export default {
         cards.forEach((card, index) => {
           if (index === 0) {
             prevCard = card
-            const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
-            const rect = element.getBoundingClientRect()
-            card.y = rect.y
           } else {
             const prevCardElement = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
             const prevCardRect = prevCardElement.getBoundingClientRect()
