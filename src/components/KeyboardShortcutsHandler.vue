@@ -4,6 +4,7 @@
 <script>
 import utils from '@/utils.js'
 import scrollIntoView from '@/scroll-into-view.js'
+import { nanoid } from 'nanoid'
 
 const incrementPosition = 12
 let useSiblingConnectionType
@@ -297,8 +298,8 @@ export default {
 
     updateWithZoom (object) {
       const zoom = this.$store.getters.spaceCounterZoomDecimal
-      object.x = object.x * zoom
-      object.y = object.y * zoom
+      object.x = Math.round(object.x * zoom)
+      object.y = Math.round(object.y * zoom)
       return object
     },
 
@@ -626,107 +627,156 @@ export default {
 
     // Paste
 
+    async getClipboardData () {
+      try {
+        const clipboardItems = await navigator.clipboard.read()
+        for (const item of clipboardItems) {
+          // for (const type of item.types) {
+          // console.log('🐙',type, blob, item.types)
+
+          const isImage = item.types.includes('image/png')
+          const isHTML = item.types.includes('text/html')
+          const isText = item.types.includes('text/plain')
+
+          if (isImage) {
+            // TODO handle img blob
+            // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read
+          // kinopio data or html text
+          } else if (isHTML) {
+            const index = item.types.indexOf('text/html')
+            const type = item.types[index]
+            const blob = await item.getType(type)
+
+            let text = await blob.text()
+            console.log('💖')
+            text = utils.innerHTMLText(text)
+            const isJSON = utils.isStringJSON(text)
+            if (!isJSON) {
+              return { text }
+            }
+            const data = JSON.parse(text)
+            if (data.isKinopioData) {
+              return data
+            }
+          // plain text
+          } else if (isText) {
+            const index = item.types.indexOf('text/plain')
+            const type = item.types[index]
+            const blob = await item.getType(type)
+            let text = await blob.text()
+            text = utils.trim(text)
+            return { text }
+          }
+          // }
+        }
+      } catch (error) {
+        console.error('🚑 getClipboardData', error)
+      }
+    },
+
+    handlePasteKinopioData (data, position) {
+      data = utils.uniqueSpaceItems(data)
+      let { cards, connectionTypes, connections } = data
+      // add cards
+      // TODO error here if pasted card is out of vp of origin?
+      cards = utils.cardsPositionsShifted(cards, position)
+      this.$store.dispatch('currentCards/addMultiple', cards)
+      // add new types
+      connectionTypes = connectionTypes.map(type => {
+        const existingType = this.$store.getters['currentConnections/existingTypeByData'](type)
+        if (existingType) {
+          connections = utils.updateConnectionsType({ connections, prevTypeId: type.id, newTypeId: existingType.id })
+          return existingType
+        } else {
+          return type
+        }
+      })
+      connectionTypes.forEach(type => {
+        this.$store.dispatch('currentConnections/addType', type)
+      })
+      // add connections
+      setTimeout(() => {
+        connections.forEach(connection => {
+          const type = { id: connection.connectionTypeId }
+          this.$store.dispatch('currentConnections/add', { connection, type, shouldNotRecordHistory: true })
+          this.$store.dispatch('currentConnections/updatePaths', { connections, cards })
+        })
+      }, 20)
+      // select
+      const cardIds = cards.map(card => card.id)
+      const connectionIds = connections.map(connection => connection.id)
+      this.$store.commit('multipleCardsSelectedIds', cardIds)
+      this.$store.commit('multipleConnectionsSelectedIds', connectionIds)
+      // ⏺ history
+      this.$store.dispatch('history/resume')
+      this.$store.dispatch('history/add', { cards, connectionTypes, connections, useSnapshot: true })
+    },
+
+    handlePastePlainText (data, position) {
+      console.log('🦒', position)
+      const cardNames = utils.splitCardNameByParagraphAndSentence(data.text)
+      // add card(s)
+      let cards = cardNames.map(name => {
+        return {
+          id: nanoid(),
+          name,
+          x: position.x,
+          y: position.y
+        }
+      })
+      console.log(cards)
+      this.$store.dispatch('currentCards/addMultiple', cards)
+      // update y positions
+      this.$nextTick(() => {
+        const spaceBetweenCards = 12
+        const zoom = this.$store.getters.spaceCounterZoomDecimal
+        let prevCard
+        cards.forEach((card, index) => {
+          if (index === 0) {
+            prevCard = card
+            const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+            const rect = element.getBoundingClientRect()
+            card.y = rect.y
+          } else {
+            const prevCardElement = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+            const prevCardRect = prevCardElement.getBoundingClientRect()
+            card.y = prevCard.y + (prevCardRect.height * zoom) + spaceBetweenCards
+            prevCard = card
+          }
+          card = utils.updateCardDimensions(card)
+          this.$store.dispatch('currentCards/update', {
+            name: card.name,
+            id: card.id,
+            y: card.y,
+            width: card.width,
+            height: card.height
+          })
+        })
+      })
+      // select
+      const cardIds = cards.map(card => card.id)
+      this.$store.commit('multipleCardsSelectedIds', cardIds)
+      // ⏺ history
+      this.$store.dispatch('history/resume')
+      this.$store.dispatch('history/add', { cards, useSnapshot: true })
+    },
+
     async handlePasteEvent (event) {
       const isSpaceScope = checkIsSpaceScope(event)
       if (!isSpaceScope) { return }
       event.preventDefault()
       let data = await this.getClipboardData()
-      console.log('🎊 pasteData', data)
+      let position = currentCursorPosition || prevCursorPosition
+      position = this.updateWithZoom(position)
+      console.log('🎊 pasteData', data, position)
       if (!data) { return }
-      const position = currentCursorPosition || prevCursorPosition
       this.$store.commit('closeAllDialogs')
       this.$store.commit('clearMultipleSelected')
-      // handle kinopio data
+      this.$store.dispatch('history/pause')
       if (data.isKinopioData) {
-        this.$store.dispatch('history/pause')
-        data = utils.uniqueSpaceItems(data)
-        let { cards, connectionTypes, connections } = data
-        // add cards
-        cards = utils.cardsPositionsShifted(cards, position)
-        this.$store.dispatch('currentCards/addMultiple', cards)
-        // add new types
-        connectionTypes = connectionTypes.map(type => {
-          const existingType = this.$store.getters['currentConnections/existingTypeByData'](type)
-          if (existingType) {
-            connections = utils.updateConnectionsType({ connections, prevTypeId: type.id, newTypeId: existingType.id })
-            return existingType
-          } else {
-            return type
-          }
-        })
-        connectionTypes.forEach(type => {
-          this.$store.dispatch('currentConnections/addType', type)
-        })
-        // add connections
-        setTimeout(() => {
-          connections.forEach(connection => {
-            const type = { id: connection.connectionTypeId }
-            this.$store.dispatch('currentConnections/add', { connection, type, shouldNotRecordHistory: true })
-            this.$store.dispatch('currentConnections/updatePaths', { connections, cards })
-          })
-        }, 20)
-        // select
-        const cardIds = cards.map(card => card.id)
-        const connectionIds = connections.map(connection => connection.id)
-        this.$store.commit('multipleCardsSelectedIds', cardIds)
-        this.$store.commit('multipleConnectionsSelectedIds', connectionIds)
-        // ⏺ history
-        this.$store.dispatch('history/resume')
-        this.$store.dispatch('history/add', { cards, connectionTypes, connections, useSnapshot: true })
-      // handle plain text
+        this.handlePasteKinopioData(data, position)
       } else {
-        // TODO history pause and create needed?
-
-        // ? create card
-        // ? trigger cardDetailsSplitCard (cardid)
-
-        const cardNames = utils.splitCardNameByParagraphAndSentence(data.text)
-        // let cards = cardNames.map(name => {
-        //   return {
-        //     id: nanoid(),
-        //     name,
-        //     x: position.x,
-        //     y: position.y
-        //   }
-        // })
-
-        console.log('🔮🔮 paste as plain text', position, cardNames)
-        // id, name, x, y (based on pos)
-
-        // create new card as text(s) : carddetails.addSplitCards
-      }
-    },
-
-    async getClipboardData () {
-      try {
-        const clipboardItems = await navigator.clipboard.read()
-        for (const item of clipboardItems) {
-          for (const type of item.types) {
-            const blob = await item.getType(type)
-            if (type === 'image/png') {
-              // TODO handle img blob
-              // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read
-              // return { blob: }
-            } else if (type === 'text/plain') {
-              let text = await blob.text()
-              text = utils.trim(text)
-              return { text }
-            } else if (type === 'text/html') {
-              let text = await blob.text()
-              text = utils.innerHTMLText(text)
-              const isJSON = utils.isStringJSON(text)
-              if (!isJSON) {
-                return { text }
-              }
-              const data = JSON.parse(text)
-              if (data.isKinopioData) {
-                return data
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.error('🚑 getClipboardData', error)
+        this.handlePastePlainText(data, position)
       }
     },
 
