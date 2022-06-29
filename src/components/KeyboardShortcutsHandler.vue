@@ -694,12 +694,13 @@ export default {
       })
       // add connections
       setTimeout(() => {
+        connections = connections.filter(connection => this.shouldAddConnection(connection))
         connections.forEach(connection => {
           const type = { id: connection.connectionTypeId }
-          if (this.shouldAddConnection(connection)) {
-            this.$store.dispatch('currentConnections/add', { connection, type, shouldNotRecordHistory: true })
-            this.$store.dispatch('currentConnections/updatePaths', { connections, cards })
-          }
+          this.$store.dispatch('currentConnections/add', { connection, type, shouldNotRecordHistory: true })
+        })
+        connections.forEach(connection => {
+          this.$store.dispatch('currentConnections/updatePaths', { connections, cards })
         })
       }, 20)
       // select
