@@ -667,6 +667,12 @@ export default {
       }
     },
 
+    shouldAddConnection (connection) {
+      const startCard = this.$store.getters['currentCards/byId'](connection.startCardId)
+      const endCard = this.$store.getters['currentCards/byId'](connection.endCardId)
+      return Boolean(startCard && endCard)
+    },
+
     handlePasteKinopioData (data, position) {
       data = utils.uniqueSpaceItems(data)
       let { cards, connectionTypes, connections } = data
@@ -690,8 +696,10 @@ export default {
       setTimeout(() => {
         connections.forEach(connection => {
           const type = { id: connection.connectionTypeId }
-          this.$store.dispatch('currentConnections/add', { connection, type, shouldNotRecordHistory: true })
-          this.$store.dispatch('currentConnections/updatePaths', { connections, cards })
+          if (this.shouldAddConnection(connection)) {
+            this.$store.dispatch('currentConnections/add', { connection, type, shouldNotRecordHistory: true })
+            this.$store.dispatch('currentConnections/updatePaths', { connections, cards })
+          }
         })
       }, 20)
       // select
