@@ -679,8 +679,9 @@ export default {
     const element = document.querySelector(`article [data-card-id="${card.id}"]`)
     if (!element) { return }
     const rect = element.getBoundingClientRect()
-    card.width = Math.ceil(rect.width)
-    card.height = Math.ceil(rect.height)
+    const zoom = this.spaceCounterZoomDecimal()
+    card.width = Math.ceil(rect.width * zoom)
+    card.height = Math.ceil(rect.height * zoom)
     return card
   },
   topLeftCard (cards) {
