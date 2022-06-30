@@ -817,8 +817,8 @@ export default {
         if (navigator.clipboard.write) {
           await navigator.clipboard.write([
             new ClipboardItem({ // eslint-disable-line no-undef
-              'text/plain': utils.textFromCardNames(cards),
-              'text/html': data
+              'text/plain': new Blob([utils.textFromCardNames(cards)], { type: 'text/plain' }),
+              'text/html': new Blob([data], { type: 'text/html' })
             })
           ])
         } else {
