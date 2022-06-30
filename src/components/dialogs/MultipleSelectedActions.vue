@@ -43,7 +43,7 @@ dialog.narrow.multiple-selected-actions(
   section
     .row
       //- Remove
-      button(:disabled="!canEditAll.any" @click.left="remove")
+      button(:disabled="!canEditAll.all" @click.left="remove")
         img.icon(src="@/assets/remove.svg")
         span Remove All
       //- Merge
