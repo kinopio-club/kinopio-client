@@ -88,6 +88,7 @@ import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
 import { nanoid } from 'nanoid'
 import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
+import uniqBy from 'lodash-es/uniqBy'
 
 let prevCards
 
@@ -206,6 +207,8 @@ export default {
         return this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       })
       types = types.filter(type => Boolean(type))
+      types = uniqBy(types, 'id')
+      types = uniqBy(types, 'color')
       return types
     },
     editableConnectionTypes () {
