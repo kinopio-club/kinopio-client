@@ -771,6 +771,12 @@ export default {
       const isSpaceScope = checkIsSpaceScope(event)
       if (!isSpaceScope) { return }
       event.preventDefault()
+      // check card limits
+      if (this.$store.getters['currentSpace/shouldPreventAddCard']) {
+        this.$store.commit('notifyCardsCreatedIsOverLimit', true)
+        return
+      }
+      // get clipboard data
       let data = await this.getClipboardData()
       let position = currentCursorPosition || prevCursorPosition
       position = this.updateWithZoom(position)
@@ -778,6 +784,7 @@ export default {
       if (!data) { return }
       this.$store.commit('closeAllDialogs')
       this.$store.commit('clearMultipleSelected')
+      // add items
       this.$store.dispatch('history/pause')
       if (data.isKinopioData) {
         data.cards = data.cards.map(card => {
