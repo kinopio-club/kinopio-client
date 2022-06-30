@@ -629,7 +629,13 @@ export default {
 
     async getClipboardData () {
       try {
-        const clipboardItems = await navigator.clipboard.read()
+        let clipboardItems
+        if (!navigator.clipboard.read) {
+          const message = 'Pasting cards is not supported by this browser'
+          this.$store.commit('addNotification', { message, icon: 'cut', type: 'danger' })
+          return
+        }
+        clipboardItems = await navigator.clipboard.read()
         for (const item of clipboardItems) {
           const hasImage = item.types.includes('image/png')
           const hasHTML = item.types.includes('text/html')
@@ -797,12 +803,16 @@ export default {
       data = JSON.stringify(data)
       data = `<kinopio>${data}</kinopio>`
       try {
-        await navigator.clipboard.write([
-          new ClipboardItem({ // eslint-disable-line no-undef
-            'text/plain': utils.textFromCardNames(cards),
-            'text/html': data
-          })
-        ])
+        if (navigator.clipboard.write) {
+          await navigator.clipboard.write([
+            new ClipboardItem({ // eslint-disable-line no-undef
+              'text/plain': utils.textFromCardNames(cards),
+              'text/html': data
+            })
+          ])
+        } else {
+          await navigator.clipboard.writeText(utils.textFromCardNames(cards))
+        }
       } catch (error) {
         console.warn('🚑 writeSelectedToClipboard', error)
       }
