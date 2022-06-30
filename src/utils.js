@@ -743,6 +743,7 @@ export default {
     })
   },
   textFromCardNames (cards) {
+    cards = cards.filter(card => Boolean(card))
     const data = cards.map(card => card.name)
     return join(data, '\n\n')
   },
