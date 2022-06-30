@@ -68,6 +68,8 @@ export default {
   },
   computed: {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
+    cardIsCreatedByCurrentUser () { return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card) },
     canEditCard () {
       if (this.isSpaceMember) { return true }
       if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
