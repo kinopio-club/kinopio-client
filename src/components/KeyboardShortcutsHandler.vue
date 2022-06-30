@@ -834,8 +834,6 @@ export default {
     // Select All Cards Below Cursor
 
     selectAllCardsBelowCursor (position) {
-      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
-      if (!canEditSpace) { return }
       const preventMultipleSelectedActionsIsVisible = this.$store.state.preventMultipleSelectedActionsIsVisible
       position = position || currentCursorPosition
       const zoom = this.$store.getters.spaceZoomDecimal
@@ -857,8 +855,6 @@ export default {
     // Select All Cards
 
     selectAllCards () {
-      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
-      if (!canEditSpace) { return }
       let cards = utils.clone(this.$store.getters['currentCards/all'])
       cards = cards.map(card => card.id)
       const dialogOffset = {
