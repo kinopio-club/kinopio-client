@@ -717,6 +717,10 @@ export default {
       // ⏺ history
       this.$store.dispatch('history/resume')
       this.$store.dispatch('history/add', { cards, connectionTypes, connections, useSnapshot: true })
+      // update page size
+      cards.forEach(card => {
+        this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId: card.id })
+      })
     },
 
     handlePastePlainText (data, position) {
