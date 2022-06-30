@@ -199,11 +199,14 @@ export default {
       }
     },
     connectionTypes () {
-      const connectionTypes = uniq(this.multipleConnectionsSelectedIds.map(id => {
+      let types = uniq(this.multipleConnectionsSelectedIds)
+      types = types.map(id => {
         const connection = this.$store.getters['currentConnections/byId'](id)
+        if (!connection) { return }
         return this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
-      }))
-      return connectionTypes
+      })
+      types = types.filter(type => Boolean(type))
+      return types
     },
     editableConnectionTypes () {
       return uniq(this.editableConnections.map(connection => {
