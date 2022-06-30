@@ -9,6 +9,7 @@ import random from 'lodash-es/random'
 import last from 'lodash-es/last'
 import sortBy from 'lodash-es/sortBy'
 import times from 'lodash-es/times'
+import join from 'lodash-es/join'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
@@ -341,6 +342,15 @@ export default {
     })
     return string.trim()
   },
+  isStringJSON (string) {
+    let isString = true
+    try {
+      JSON.parse(string)
+    } catch (error) {
+      isString = false
+    }
+    return isString
+  },
   updateObject (object, updates) {
     this.typeCheck({ value: updates, type: 'object', origin: 'updateObject' })
     const keys = Object.keys(updates)
@@ -439,6 +449,43 @@ export default {
       return 'Ctrl'
     }
   },
+  maxCardLength () { return 300 },
+  splitCardNameByParagraphAndSentence (prevName) {
+    const maxCardLength = this.maxCardLength()
+    const paragraphs = this.splitByParagraphs(prevName) || []
+    let cardNames = paragraphs.map(paragraph => {
+      let sentences
+      if (paragraph.length > maxCardLength) {
+        sentences = this.splitBySentences(paragraph)
+      }
+      return sentences || paragraph
+    })
+    cardNames = cardNames.flat()
+    // split names longer than max card length
+    cardNames = cardNames.map(name => {
+      // recursive
+      let results = []
+      let shouldSplit, nameToSplit
+      do {
+        shouldSplit = false
+        nameToSplit = nameToSplit || name
+        results.push(nameToSplit.substring(0, maxCardLength))
+        const otherSplit = nameToSplit.substring(maxCardLength)
+        if (otherSplit <= maxCardLength) {
+          results.push(otherSplit)
+        } else {
+          nameToSplit = otherSplit
+          shouldSplit = true
+        }
+      } while (shouldSplit)
+
+      if (results.length) { return results }
+      return name
+    })
+    cardNames = cardNames.flat()
+    cardNames = cardNames.filter(name => Boolean(name.length))
+    return cardNames
+  },
   splitBySentences (string) {
     if (!string) { return }
     let sentences = string.split('. ')
@@ -472,6 +519,7 @@ export default {
     return string.replace(/\/$/g, '')
   },
   pastTense (string) {
+    if (string === 'cut') { return string }
     const lastLetter = string.charAt(string.length - 1)
     // add test cases ad hoc from https://github.com/boo1ean/tensify
     if (lastLetter === 'e') {
@@ -577,6 +625,20 @@ export default {
     const angleDegrees = angleRadians * 180 / Math.PI
     return Math.round(angleDegrees)
   },
+  innerHTMLText (htmlString) {
+    // https://regexr.com/6olpg
+    // from https://stackoverflow.com/a/1736801
+    // matches open and close tags
+    const htmlTagPattern = new RegExp(/<(?:"[^"]*"['"]*|'[^']*'['"]*|[^'">])+>/gim)
+    return htmlString.replace(htmlTagPattern, '')
+  },
+  decodeEntitiesFromHTML (string) {
+    var element = document.createElement('textarea')
+    element.innerHTML = string
+    const value = element.value
+    element.remove()
+    return value
+  },
 
   // normalize items
 
@@ -624,8 +686,9 @@ export default {
     const element = document.querySelector(`article [data-card-id="${card.id}"]`)
     if (!element) { return }
     const rect = element.getBoundingClientRect()
-    card.width = Math.ceil(rect.width)
-    card.height = Math.ceil(rect.height)
+    const zoom = this.spaceCounterZoomDecimal()
+    card.width = Math.ceil(rect.width * zoom)
+    card.height = Math.ceil(rect.height * zoom)
     return card
   },
   topLeftCard (cards) {
@@ -666,6 +729,23 @@ export default {
       max: card.y + card.height
     })
     return xIsInside && yIsInside
+  },
+  cardsPositionsShifted (cards, position) {
+    const origin = this.topLeftCard(cards)
+    const delta = {
+      x: position.x - origin.x,
+      y: position.y - origin.y
+    }
+    return cards.map(card => {
+      card.x = card.x + delta.x
+      card.y = card.y + delta.y
+      return card
+    })
+  },
+  textFromCardNames (cards) {
+    cards = cards.filter(card => Boolean(card))
+    const data = cards.map(card => card.name)
+    return join(data, '\n\n')
   },
 
   // Connection Path Utils 🐙
@@ -973,6 +1053,14 @@ export default {
       })
     }
     return items
+  },
+  updateConnectionsType ({ connections, prevTypeId, newTypeId }) {
+    return connections.map(connection => {
+      if (connection.connectionTypeId === prevTypeId) {
+        connection.connectionTypeId = newTypeId
+      }
+      return connection
+    })
   },
   normalizeSpace (space) {
     if (!this.objectHasKeys(space)) { return space }

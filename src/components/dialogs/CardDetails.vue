@@ -352,7 +352,7 @@ export default {
       }
     },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
-    maxCardLength () { return 300 },
+    maxCardLength () { return utils.maxCardLength() },
     currentCardLength () {
       if (!this.card.name) { return 0 }
       return this.card.name.length
@@ -700,40 +700,8 @@ export default {
       }
     },
     splitCards (event, isPreview) {
-      const originalName = (this.pastedName || this.name).trim()
-      // split names by paragraph and sentence
-      const paragraphs = utils.splitByParagraphs(originalName) || []
-      let cardNames = paragraphs.map(paragraph => {
-        let sentences
-        if (paragraph.length > this.maxCardLength) {
-          sentences = utils.splitBySentences(paragraph)
-        }
-        return sentences || paragraph
-      })
-      cardNames = cardNames.flat()
-      // split names longer than max card length
-      cardNames = cardNames.map(name => {
-        // recursive
-        let results = []
-        let shouldSplit, nameToSplit
-        do {
-          shouldSplit = false
-          nameToSplit = nameToSplit || name
-          results.push(nameToSplit.substring(0, this.maxCardLength))
-          const otherSplit = nameToSplit.substring(this.maxCardLength)
-          if (otherSplit <= this.maxCardLength) {
-            results.push(otherSplit)
-          } else {
-            nameToSplit = otherSplit
-            shouldSplit = true
-          }
-        } while (shouldSplit)
-
-        if (results.length) { return results }
-        return name
-      })
-      cardNames = cardNames.flat()
-      cardNames = cardNames.filter(name => Boolean(name.length))
+      const prevName = (this.pastedName || this.name).trim()
+      const cardNames = utils.splitCardNameByParagraphAndSentence(prevName)
       // create new split cards
       let newCards = cardNames.map((cardName, index) => {
         const indentAmount = 50

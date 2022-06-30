@@ -7,6 +7,7 @@ path.connection-path(
   :data-end-card="endCardId"
   :data-id="id"
   :data-type-name="typeName"
+  :data-type-id="connectionTypeId"
   :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
   :key="id"
   :d="path"

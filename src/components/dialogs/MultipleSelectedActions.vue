@@ -10,19 +10,19 @@ dialog.narrow.multiple-selected-actions(
     //- Edit Cards
     .row(v-if="cardsIsSelected")
       //- [·]
-      .button-wrap.cards-checkboxes
+      .button-wrap.cards-checkboxes(:class="{ disabled: !canEditAll.cards }")
         label(v-if="cardsHaveCheckboxes" :class="{active: cardsCheckboxIsChecked}" tabindex="0")
           input(type="checkbox" v-model="cardCheckboxes" tabindex="-1")
         label(v-if="!cardsHaveCheckboxes" @click.left.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
           input.add(type="checkbox" tabindex="-1")
       //- Connect
-      button(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
+      button(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards" :disabled="!canEditAll.cards")
         img.icon.connector-icon(v-if="cardsIsConnected" src="@/assets/connector-closed.svg")
         img.icon.connector-icon(v-else src="@/assets/connector-open.svg")
         span Connect
       //- Style
       .button-wrap
-        button(:disabled="!canEditSome.cards" @click.left.stop="toggleCardStyleActionsIsVisible" :class="{active : cardStyleActionsIsVisible}")
+        button(:disabled="!canEditAll.cards" @click.left.stop="toggleCardStyleActionsIsVisible" :class="{active : cardStyleActionsIsVisible}")
           span Style
 
     CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="cards" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }")
@@ -31,7 +31,7 @@ dialog.narrow.multiple-selected-actions(
     .row.edit-connection-types(v-if="connectionsIsSelected")
       //- Type Color
       .button-wrap
-        button.change-color(:disabled="!canEditSome.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible")
+        button.change-color(:disabled="!canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible")
           img.icon(src="@/assets/connection-path.svg")
           .segmented-colors.icon
             template(v-for="type in connectionTypes")
@@ -43,9 +43,9 @@ dialog.narrow.multiple-selected-actions(
   section
     .row
       //- Remove
-      button(:disabled="!canEditSome.any" @click.left="remove")
+      button(:disabled="!canEditAll.any" @click.left="remove")
         img.icon(src="@/assets/remove.svg")
-        span {{ removeLabel }}
+        span Remove All
       //- Merge
       button(v-if="multipleCardsIsSelected" @click="mergeSelectedCards" :disabled="!canEditAll.cards")
         img.icon(src="@/assets/merge.svg")
@@ -112,7 +112,7 @@ export default {
     }
   },
   computed: {
-    maxCardLength () { return 300 },
+    maxCardLength () { return utils.maxCardLength() },
     cardStyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowMultiCardStyleActions && this.cardsIsSelected },
     visible () { return this.$store.state.multipleSelectedActionsIsVisible },
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
@@ -199,11 +199,14 @@ export default {
       }
     },
     connectionTypes () {
-      const connectionTypes = uniq(this.multipleConnectionsSelectedIds.map(id => {
+      let types = uniq(this.multipleConnectionsSelectedIds)
+      types = types.map(id => {
         const connection = this.$store.getters['currentConnections/byId'](id)
+        if (!connection) { return }
         return this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
-      }))
-      return connectionTypes
+      })
+      types = types.filter(type => Boolean(type))
+      return types
     },
     editableConnectionTypes () {
       return uniq(this.editableConnections.map(connection => {
@@ -242,13 +245,6 @@ export default {
       }
     },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    canEditSome () {
-      if (this.isSpaceMember) { return { cards: true, connections: true, any: true } }
-      const cards = this.numberOfSelectedItemsCreatedByCurrentUser.cards > 0
-      const connections = this.numberOfSelectedItemsCreatedByCurrentUser.connections > 0
-      const any = cards || connections
-      return { cards, connections, any }
-    },
     canEditAll () {
       if (this.isSpaceMember) { return { cards: true, connections: true, all: true } }
       const cards = this.multipleCardsSelectedIds.length === this.numberOfSelectedItemsCreatedByCurrentUser.cards
@@ -265,17 +261,6 @@ export default {
         return this.$store.getters['currentCards/byId'](cardId)
       })
       return { 'cards': cards }
-    },
-    removeLabel () {
-      if (this.multipleItemsSelected && this.canEditAll.all) {
-        return 'Remove All'
-      } else if (this.multipleItemsSelected && this.canEditSome.any) {
-        return 'Remove Some'
-      } else if (this.multipleItemsSelected) {
-        return 'Remove All'
-      } else {
-        return 'Remove'
-      }
     },
     styles () {
       let zoom
@@ -581,5 +566,8 @@ export default {
         margin-left 5px
         max-width 56px
         margin-top 1px
+  .button-wrap.disabled
+    opacity 0.5
+    pointer-events none
 
 </style>

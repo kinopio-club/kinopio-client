@@ -85,7 +85,7 @@ const self = {
       // add patch to pointer
       state.patches.splice(state.pointer, 0, patch)
       state.pointer = state.pointer + 1
-      console.log('⏺ history', { newPatch: patch, patches: state.patches, pointer: state.pointer })
+      console.log('⏺ history', { newPatch: patch, pointer: state.pointer })
     },
     // trim: (state) => {
     // TODO trim history from pointer as seperate commit method
@@ -200,7 +200,7 @@ const self = {
       const patch = patches[index]
       context.commit('isPaused', true)
       patch.forEach(item => {
-        console.log('⏪', item)
+        console.log('⏪', item, { pointer, totalPatches: patches.length })
         const { action } = item
         let card, connection, type
         switch (action) {
@@ -258,7 +258,7 @@ const self = {
       const patch = patches[pointer]
       context.commit('isPaused', true)
       patch.forEach(item => {
-        console.log('⏩', item)
+        console.log('⏩', item, { pointer, totalPatches: patches.length })
         const { action } = item
         let card, connection, type
         switch (action) {

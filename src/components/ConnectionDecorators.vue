@@ -2,19 +2,19 @@
 .button-wrap.connection-decorators
   .segmented-buttons
     //- Clear
-    button(@click="clearAll" :class="{ active: isSomeConnectionsClear }" :disabled="!canEditSome")
+    button(@click="clearAll" :class="{ active: isSomeConnectionsClear }" :disabled="!canEditAll")
       img.icon.clear(src="@/assets/connection-clear.svg")
     //- Arrow
-    button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsIsVisible }" :disabled="!canEditSome")
+    button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsIsVisible }" :disabled="!canEditAll")
       img.icon.arrow(src="@/assets/connection-arrow.svg")
     //- Label
-    button(@click.left="showLabelsIsVisible" :class="{ active: isSomeLabelsVisible }" :disabled="!canEditSome")
+    button(@click.left="showLabelsIsVisible" :class="{ active: isSomeLabelsVisible }" :disabled="!canEditAll")
       //- img.icon(v-if="isSomeLabelsVisible" src="@/assets/view.svg")
       //- img.icon(v-else src="@/assets/view-hidden.svg")
       span Label
 //- Reverse
 .button-wrap.connection-decorators
-  button(@click.left="reverseConnections" :disabled="!canEditSome")
+  button(@click.left="reverseConnections" :disabled="!canEditAll")
     img.icon.reverse(src="@/assets/connection-reverse.svg")
 
 </template>
@@ -45,7 +45,7 @@ export default {
       const connections = this.connections.filter(connection => connection.labelIsVisible)
       return connections.length
     },
-    canEditSome () {
+    canEditAll () {
       if (this.isSpaceMember) { return true }
       const connectionsCreatedByCurrentUser = this.connections.filter(connection => {
         return this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)

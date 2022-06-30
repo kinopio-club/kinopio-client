@@ -3,25 +3,25 @@ section.card-style-actions(v-if="visible" @click.left.stop="closeDialogs")
   .row
     //- h1
     .button-wrap
-      button(:disabled="!canEditSome" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }")
+      button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }")
         span h1
     //- h2
     .button-wrap
-      button(:disabled="!canEditSome" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }")
+      button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }")
           span h2
     //- Tag
     .button-wrap
-      button(:disabled="!canEditSome" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: tagPickerIsVisible }")
+      button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: tagPickerIsVisible }")
         span Tag
       TagPickerStyleActions(:visible="tagPickerIsVisible" :cards="cards")
     //- Frame
     .button-wrap
-      button(:disabled="!canEditSome" @click.left.stop="toggleFramePickerIsVisible" :class="{ active : framePickerIsVisible || isFrames }")
+      button(:disabled="!canEditAll" @click.left.stop="toggleFramePickerIsVisible" :class="{ active : framePickerIsVisible || isFrames }")
         span Frame
       FramePicker(:visible="framePickerIsVisible" :cards="cards")
     //- Color
     .button-wrap(@click.left.stop="toggleColorPickerIsVisible")
-      button.change-color(:disabled="!canEditSome" :class="{active: colorPickerIsVisible}")
+      button.change-color(:disabled="!canEditAll" :class="{active: colorPickerIsVisible}")
         .current-color(:style="{ background: cardsBackgroundColor }")
       ColorPicker(
         :currentColor="cardsBackgroundColor"
@@ -33,11 +33,11 @@ section.card-style-actions(v-if="visible" @click.left.stop="closeDialogs")
       )
     //- Lock
     .button-wrap
-      button(:disabled="!canEditSome" @click="toggleIsLocked" :class="{active: isLocked}")
+      button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}")
         img.icon(src="@/assets/lock.svg")
     //- Comment
     .button-wrap
-      button(:disabled="!canEditSome" @click="toggleIsComment" :class="{active: isComment}")
+      button(:disabled="!canEditAll" @click="toggleIsComment" :class="{active: isComment}")
         img.icon(src="@/assets/comment.svg")
 
 </template>
@@ -99,9 +99,9 @@ export default {
       })
       return cardsCreatedByCurrentUser.length
     },
-    canEditSome () {
+    canEditAll () {
       if (this.isSpaceMember) { return true }
-      const cards = this.numberOfSelectedCardsCreatedByCurrentUser > 0
+      const cards = this.numberOfSelectedCardsCreatedByCurrentUser === this.cards.length
       return cards
     },
     isFrames () {
