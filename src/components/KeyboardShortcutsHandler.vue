@@ -813,11 +813,13 @@ export default {
       let data = { isKinopioData: true, cards, connections, connectionTypes }
       data = JSON.stringify(data)
       data = `<kinopio>${data}</kinopio>`
+      const text = utils.textFromCardNames(cards)
+      console.log('🎊 copyData', { cards, connections, connectionTypes }, text)
       try {
         if (navigator.clipboard.write) {
           await navigator.clipboard.write([
             new ClipboardItem({ // eslint-disable-line no-undef
-              'text/plain': new Blob([utils.textFromCardNames(cards)], { type: 'text/plain' }),
+              'text/plain': new Blob([text], { type: 'text/plain' }),
               'text/html': new Blob([data], { type: 'text/html' })
             })
           ])
