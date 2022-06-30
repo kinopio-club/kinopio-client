@@ -765,6 +765,12 @@ export default {
       // ⏺ history
       this.$store.dispatch('history/resume')
       this.$store.dispatch('history/add', { cards, useSnapshot: true })
+      // update page size
+      this.$nextTick(() => {
+        cards.forEach(card => {
+          this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId: card.id })
+        })
+      })
     },
 
     async handlePasteEvent (event) {
