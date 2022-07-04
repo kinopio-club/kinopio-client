@@ -182,8 +182,8 @@ export default {
     if (shouldScrollX || shouldScrollY) {
       element.scrollIntoView({
         behavior: 'smooth',
-        block: 'end',
-        inline: 'end'
+        block: 'center', // vertical
+        inline: 'end' // horizontal
       })
     }
   },
