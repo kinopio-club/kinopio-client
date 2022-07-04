@@ -206,7 +206,6 @@ import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
 import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
-import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 import qs from '@aguezz/qs-parse'
@@ -961,15 +960,14 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     scrollIntoView () {
-      if (!utils.isSignificantlyPinchZoomed() && utils.isMobile()) { return }
       const element = this.$refs.dialog
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      utils.scrollIntoView(element)
     },
     scrollIntoViewAndFocus () {
       this.scrollIntoView()
-      if (utils.isSignificantlyPinchZoomed()) { return }
-      this.focusName()
+      if (!utils.isMobile()) {
+        this.focusName()
+      }
       this.triggerUpdateMagicPaintPositionOffset()
       this.triggerUpdatePositionInVisualViewport()
     },

@@ -23,7 +23,6 @@
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
-import scrollIntoView from '@/scroll-into-view.js'
 
 let dateIsUpdated
 let updatedAbsoluteDate
@@ -129,14 +128,12 @@ export default {
     },
     scrollIntoView () {
       const element = document.querySelector('dialog.user-details')
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      utils.scrollIntoView(element)
     },
     scrollParentIntoView () {
       const element = this.parentElement
       if (!element) { return }
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      utils.scrollIntoView(element)
     }
   },
   watch: {

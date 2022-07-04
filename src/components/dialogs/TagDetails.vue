@@ -70,7 +70,6 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import User from '@/components/User.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
-import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -407,8 +406,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      utils.scrollIntoView(element)
     },
     updateResultsSectionHeight () {
       if (!this.visible) { return }

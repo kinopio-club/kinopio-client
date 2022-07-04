@@ -20,7 +20,6 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -168,8 +167,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      utils.scrollIntoView(element)
     },
 
     focusPreviousItem (tags, currentIndex) {

@@ -38,7 +38,6 @@ import User from '@/components/User.vue'
 import UserList from '@/components/UserList.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
-import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -179,8 +178,7 @@ export default {
     scrollIntoView () {
       this.$nextTick(() => {
         const element = this.$refs.dialog
-        const isTouchDevice = this.$store.state.isTouchDevice
-        scrollIntoView.scroll(element, isTouchDevice)
+        utils.scrollIntoView(element)
       })
     },
     toggleFilterShowAbsoluteDate () {

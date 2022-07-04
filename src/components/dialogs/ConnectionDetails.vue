@@ -66,7 +66,6 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
 import last from 'lodash-es/last'
-import scrollIntoView from '@/scroll-into-view.js'
 import randomColor from 'randomcolor'
 
 let prevConnectionType
@@ -235,9 +234,8 @@ export default {
       this.$nextTick(() => {
         const element = this.$refs.dialog
         this.updateResultsSectionMaxHeight()
-        const isTouchDevice = this.$store.state.isTouchDevice
         this.$nextTick(() => {
-          scrollIntoView.scroll(element, isTouchDevice)
+          utils.scrollIntoView(element)
         })
       })
     },

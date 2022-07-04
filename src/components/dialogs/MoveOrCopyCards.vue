@@ -31,7 +31,6 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
@@ -217,8 +216,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      utils.scrollIntoView(element)
     },
     closeDialogs () {
       this.spacePickerIsVisible = false

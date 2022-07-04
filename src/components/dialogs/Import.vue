@@ -28,7 +28,6 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialo
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
@@ -147,8 +146,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      utils.scrollIntoView(element)
     }
   },
   watch: {

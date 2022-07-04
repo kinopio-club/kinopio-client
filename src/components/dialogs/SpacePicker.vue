@@ -55,7 +55,6 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import words from '@/data/words.js'
 import newSpace from '@/data/new.json'
@@ -203,8 +202,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      utils.scrollIntoView(element)
     },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'SpacePicker.triggerSignUpOrInIsVisible')

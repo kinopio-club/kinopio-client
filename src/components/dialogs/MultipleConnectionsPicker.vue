@@ -15,7 +15,6 @@ dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="di
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 import last from 'lodash-es/last'
@@ -61,8 +60,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      utils.scrollIntoView(element)
     },
     updateNextConnectionColor () {
       this.nextConnectionTypeColor = randomColor({ luminosity: 'light' })

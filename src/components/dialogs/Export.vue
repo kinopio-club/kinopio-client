@@ -50,7 +50,6 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import Pdf from '@/components/Pdf.vue'
@@ -148,8 +147,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      utils.scrollIntoView(element)
     },
     duplicateSpace () {
       this.$store.dispatch('currentSpace/duplicateSpace')
