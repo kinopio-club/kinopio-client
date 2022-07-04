@@ -964,8 +964,14 @@ export default {
       utils.scrollIntoView(element)
     },
     scrollIntoViewAndFocus () {
-      this.scrollIntoView()
-      if (!utils.isMobile()) {
+      if (utils.isMobile()) {
+        if (this.card.name) {
+          this.scrollIntoView()
+        } else {
+          this.focusName()
+        }
+      } else {
+        this.scrollIntoView()
         this.focusName()
       }
       this.triggerUpdateMagicPaintPositionOffset()
