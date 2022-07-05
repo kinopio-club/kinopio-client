@@ -61,7 +61,6 @@
 <script>
 import merge from 'lodash-es/merge'
 
-import scrollIntoView from '@/scroll-into-view.js'
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
@@ -144,8 +143,7 @@ export default {
     },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      utils.scrollIntoView(element)
     },
     restore (item) {
       if (this.cardsVisible) {

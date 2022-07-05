@@ -5,7 +5,7 @@
 
 <script>
 import UserDetails from '@/components/dialogs/UserDetails.vue'
-import scrollIntoView from '@/scroll-into-view.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'CardUserDetails',
@@ -67,8 +67,7 @@ export default {
       if (!this.visible) { return }
       this.$nextTick(() => {
         const element = document.querySelector('dialog.user-details')
-        const isTouchDevice = this.$store.state.isTouchDevice
-        scrollIntoView.scroll(element, isTouchDevice)
+        utils.scrollIntoView(element)
       })
     }
   }

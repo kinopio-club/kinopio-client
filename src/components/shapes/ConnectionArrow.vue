@@ -258,4 +258,5 @@ export default {
   position absolute
   pointer-events all
   cursor pointer
+  filter saturate(3)
 </style>

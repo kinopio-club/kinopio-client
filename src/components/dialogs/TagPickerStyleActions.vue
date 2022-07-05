@@ -23,7 +23,6 @@ dialog.narrow.tag-picker-style-actions(v-if="visible" :open="visible" ref="dialo
 
 <script>
 import TagList from '@/components/TagList.vue'
-import scrollIntoView from '@/scroll-into-view.js'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
@@ -68,8 +67,7 @@ export default {
     scrollIntoView () {
       this.$nextTick(() => {
         const element = this.$refs.dialog
-        const isTouchDevice = this.$store.state.isTouchDevice
-        scrollIntoView.scroll(element, isTouchDevice)
+        utils.scrollIntoView(element)
       })
     },
     updateTagColor (tag) {

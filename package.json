@@ -20,7 +20,6 @@
     "overlap-area": "^1.0.0",
     "randomcolor": "^0.5.4",
     "shader": "^1.0.0",
-    "smooth-scroll-into-view-if-needed": "^1.1.23",
     "vue": "^3.2.6",
     "vue-router": "^4.0.11",
     "vuex": "^4.0.2"

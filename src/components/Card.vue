@@ -216,7 +216,6 @@ import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
 import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
-import scrollIntoView from '@/scroll-into-view.js'
 import User from '@/components/User.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
@@ -260,8 +259,7 @@ export default {
       } else if (mutation.type === 'triggerScrollCardIntoView') {
         if (mutation.payload === this.card.id) {
           const element = this.$refs.card
-          const isTouchDevice = this.$store.state.isTouchDevice
-          scrollIntoView.scroll(element, isTouchDevice)
+          utils.scrollIntoView(element)
         }
       } else if (mutation.type === 'triggerUploadComplete') {
         let { cardId, url } = mutation.payload

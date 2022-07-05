@@ -47,7 +47,6 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 export default {
@@ -68,8 +67,7 @@ export default {
       if (utils.isMobile()) { return }
       this.$nextTick(() => {
         const element = this.$refs.dialog
-        const isTouchDevice = this.$store.state.isTouchDevice
-        scrollIntoView.scroll(element, isTouchDevice)
+        utils.scrollIntoView(element)
       })
     },
     toggleMarkdownInfoIsVisible () {

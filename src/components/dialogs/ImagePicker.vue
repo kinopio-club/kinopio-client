@@ -106,7 +106,6 @@ dialog.image-picker(
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
@@ -439,8 +438,7 @@ export default {
       }
       const element = this.$refs.dialog
       if (!element) { return }
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      utils.scrollIntoView(element)
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     isCardUrl (image) {

@@ -3,7 +3,6 @@
 
 <script>
 import utils from '@/utils.js'
-import scrollIntoView from '@/scroll-into-view.js'
 import { nanoid } from 'nanoid'
 
 const incrementPosition = 12
@@ -290,8 +289,7 @@ export default {
 
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      utils.scrollIntoView(element)
     },
 
     // Add Parent and Child Cards

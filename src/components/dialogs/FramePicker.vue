@@ -9,9 +9,9 @@ dialog.narrow.frame-details(v-if="visible" :open="visible" ref="dialog" @click.l
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
 import frames from '@/data/frames.js'
 import FrameBadge from '@/components/FrameBadge.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'FramePicker',
@@ -44,8 +44,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      utils.scrollIntoView(element)
     }
   },
   watch: {

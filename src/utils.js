@@ -172,6 +172,21 @@ export default {
     const fromFooter = event.target.closest('footer')
     return fromDialog || fromHeader || fromFooter || dialogIsVisible
   },
+  scrollIntoView (element) {
+    if (!element) { return }
+    const rect = element.getBoundingClientRect()
+    const viewportWidth = this.visualViewport().width
+    const viewportHeight = this.visualViewport().height
+    const shouldScrollX = (rect.x + rect.width) > viewportWidth
+    const shouldScrollY = (rect.y + rect.height) > viewportHeight
+    if (shouldScrollX || shouldScrollY) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center', // vertical
+        inline: 'end' // horizontal
+      })
+    }
+  },
   cursorPositionInViewport (event) {
     let x, y
     if (event.touches) {

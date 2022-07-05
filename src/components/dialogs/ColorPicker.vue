@@ -59,7 +59,6 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
@@ -171,9 +170,7 @@ export default {
     scrollIntoView () {
       this.$nextTick(() => {
         const element = this.$refs.dialog
-        if (!element) { return }
-        const isTouchDevice = this.$store.state.isTouchDevice
-        scrollIntoView.scroll(element, isTouchDevice)
+        utils.scrollIntoView(element)
       })
     }
   },
