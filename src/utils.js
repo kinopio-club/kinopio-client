@@ -289,13 +289,6 @@ export default {
       return true
     }
   },
-  isValidHexColor (hex) {
-    // adapted from https://github.com/RobertJGabriel/valid-hex-color
-    if (typeof hex !== 'string') { return }
-    const hexPattern = /^#([A-Fa-f0-9]{3}([A-Fa-f0-9]{3})?)$/
-    let result = hexPattern.test(hex)
-    return result
-  },
   numberOfLeadingTabs (string) {
     // https://regexr.com/6dl8u
     // matches /t tab characters at start of string

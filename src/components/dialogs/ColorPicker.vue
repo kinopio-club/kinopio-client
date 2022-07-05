@@ -63,6 +63,7 @@ import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
 import shader from 'shader'
+import validateColor from 'validate-color'
 
 export default {
   name: 'ColorPicker',
@@ -93,9 +94,9 @@ export default {
       set (color) {
         if (color === 'transparent') {
           this.select(color)
-        } else if (utils.isValidHexColor(color)) {
+        } else if (validateColor(color)) {
           this.updateColorFromInput(color)
-        } else if (utils.isValidHexColor('#' + color)) {
+        } else if (validateColor('#' + color)) {
           this.updateColorFromInput('#' + color)
         }
       }
