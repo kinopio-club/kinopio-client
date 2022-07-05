@@ -28,11 +28,8 @@ export default {
     }
   },
   methods: {
-    copyUrl () {
-      const element = this.$refs.url
-      element.select()
-      element.setSelectionRange(0, 99999) // for mobile
-      document.execCommand('copy')
+    async copyUrl () {
+      await navigator.clipboard.writeText(this.url)
       this.urlIsCopied = true
     },
     updateUrl () {
@@ -52,8 +49,9 @@ export default {
 
 <style lang="stylus" scoped>
 .explore-rss-feed
-  bottom initial
-  top 8px
+  top calc(100% - 8px) !important
+  bottom initial !important
+
   @media(max-width 400px)
     left -40px
   @media(max-width 350px)

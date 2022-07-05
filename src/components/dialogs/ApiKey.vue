@@ -70,11 +70,8 @@ export default {
       console.log(this.key, cache.user().apiKey)
       this.keyIsRevealed = true
     },
-    copyKey () {
-      const element = this.$refs.key
-      element.select()
-      element.setSelectionRange(0, 99999) // for mobile
-      document.execCommand('copy')
+    async copyKey () {
+      await navigator.clipboard.writeText(this.key)
       this.keyIsCopied = true
     }
   },

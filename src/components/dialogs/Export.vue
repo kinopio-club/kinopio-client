@@ -96,11 +96,9 @@ export default {
     text () {
       return utils.textFromCardNames(this.exportData.cards)
     },
-    copyText () {
-      const element = this.$refs.text
-      element.select()
-      element.setSelectionRange(0, 99999) // for mobile
-      document.execCommand('copy')
+    async copyText () {
+      const value = this.text()
+      await navigator.clipboard.writeText(value)
       this.textIsCopied = true
     },
     downloadLocalJSON () {

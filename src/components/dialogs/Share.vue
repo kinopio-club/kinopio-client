@@ -176,11 +176,8 @@ export default {
       const name = state.friendlyName || state.name
       return utils.capitalizeFirstLetter(name)
     },
-    copyUrl () {
-      const element = this.$refs.url
-      element.select()
-      element.setSelectionRange(0, 99999) // for mobile
-      document.execCommand('copy')
+    async copyUrl () {
+      await navigator.clipboard.writeText(this.url)
       this.urlIsCopied = true
     },
     triggerSignUpOrInIsVisible () {

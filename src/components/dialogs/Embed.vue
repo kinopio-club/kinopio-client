@@ -58,16 +58,14 @@ export default {
       this.iframeIsVisible = false
       this.isCopied = false
     },
-    copy () {
-      let element
+    async copy () {
+      let value
       if (this.iframeIsVisible) {
-        element = this.$refs.iframe
+        value = this.iframe
       } else {
-        element = this.$refs.url
+        value = this.url
       }
-      element.select()
-      element.setSelectionRange(0, 99999) // for mobile
-      document.execCommand('copy')
+      await navigator.clipboard.writeText(value)
       this.isCopied = true
     }
   },

@@ -151,13 +151,6 @@ export default {
       this.editPromptsIsVisible = false
       this.urlIsCopied = false
     },
-    copyUrl () {
-      const element = this.$refs.url
-      element.select()
-      element.setSelectionRange(0, 99999) // for mobile
-      document.execCommand('copy')
-      this.urlIsCopied = true
-    },
     addCustomPrompt () {
       const emptyPrompt = { id: nanoid(), name: '', userId: this.currentUserId }
       this.$store.dispatch('currentUser/addJournalPrompt', emptyPrompt)
