@@ -77,7 +77,9 @@ export default {
       if (this.shouldCloseAllDialogs) {
         this.$store.dispatch('closeAllDialogs', 'User.toggleUserDetails')
       }
-      this.userDetailsIsVisible = !isVisible
+      this.$nextTick(() => {
+        this.userDetailsIsVisible = !isVisible
+      })
     }
   }
 }
