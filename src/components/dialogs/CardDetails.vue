@@ -778,42 +778,7 @@ export default {
       const text = event.clipboardData.getData('text')
       this.pastedName = text
       this.wasPasted = true
-      this.removeTrackingQueryStrings(text)
-    },
-    removeTrackingQueryStrings (text) {
-      setTimeout(() => {
-        const urls = utils.urlsFromString(text)
-        if (!urls) { return }
-        // https://www.bleepingcomputer.com/PoC/qs.html
-        // https://www.bleepingcomputer.com/news/security/new-firefox-privacy-feature-strips-urls-of-tracking-parameters
-        const trackingKeys = ['is_copy_url', 'is_from_webapp', 'utm_', 'oly_enc_id', 'oly_anon_id', '__s', 'vero_id', '_hsenc', 'mkt_tok', 'fbclid', 'mc_eid', 'pf_', 'pd_']
-        urls.forEach(url => {
-          url = url.trim()
-          url = utils.removeTrailingSlash(url)
-          const queryString = utils.queryString(url)
-          const domain = utils.urlWithoutQueryString(url)
-          if (!queryString) { return }
-          let queryObject = qs.decode(queryString)
-          let keys = Object.keys(queryObject)
-          let keysToRemove = []
-          trackingKeys.forEach(trackingKey => {
-            keys.forEach(key => {
-              if (key.startsWith(trackingKey)) {
-                keysToRemove.push(key)
-              }
-            })
-          })
-          if (!keysToRemove.length) { return }
-          console.log('🫧 trackingKeysToRemove', keysToRemove)
-          keysToRemove.forEach(key => delete queryObject[key])
-          const newUrl = qs.encode(domain, queryObject)
-          const newName = this.card.name.replace(url, newUrl)
-          this.$store.dispatch('currentCards/update', {
-            id: this.card.id,
-            name: newName
-          })
-        })
-      }, 100)
+      this.$store.dispatch('currentCards/removeTrackingQueryStrings', { cardId: this.card.id })
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
