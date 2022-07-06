@@ -933,18 +933,22 @@ export default {
       utils.scrollIntoView(element)
     },
     scrollIntoViewAndFocus () {
-      if (utils.isMobile()) {
-        if (this.card.name) {
-          this.scrollIntoView()
+      this.$nextTick(() => {
+        let connections = this.$store.getters['currentConnections/byCardId'](this.card.id)
+        connections = Boolean(connections.length)
+        if (utils.isMobile()) {
+          if (this.card.name) {
+            this.scrollIntoView()
+          } else if (!connections) {
+            this.focusName()
+          }
         } else {
+          this.scrollIntoView()
           this.focusName()
         }
-      } else {
-        this.scrollIntoView()
-        this.focusName()
-      }
-      this.triggerUpdateMagicPaintPositionOffset()
-      this.triggerUpdatePositionInVisualViewport()
+        this.triggerUpdateMagicPaintPositionOffset()
+        this.triggerUpdatePositionInVisualViewport()
+      })
     },
     triggerUpdateMagicPaintPositionOffset () {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
