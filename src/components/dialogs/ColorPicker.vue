@@ -92,6 +92,7 @@ export default {
         return this.currentColor
       },
       set (color) {
+        console.log('🫧 set color', color)
         if (color === 'transparent') {
           this.select(color)
         } else if (validateColor(color)) {
