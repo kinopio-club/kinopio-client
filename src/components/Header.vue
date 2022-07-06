@@ -75,7 +75,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           //- Search
           .segmented-buttons
             .button-wrap
-              button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
+              button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible || totalFiltersActive || searchResultsCount}")
                 template(v-if="!searchResultsCount")
                   img.icon.search(src="@/assets/search.svg")
                   img.icon.time(src="@/assets/time.svg")
