@@ -549,8 +549,17 @@ dialog
       user-select text
       &:first-child
         margin-top 0
+  section.sub-section
+    border 1px solid var(--primary)
+    padding 4px
+    padding-bottom 0
+    border-radius 3px
   section + section
     border-top 1px solid var(--primary)
+  section.sub-section + section,
+  section.sub-section + .row
+    margin-top 10px
+
   .change-color
     padding-top 4px
     .current-color

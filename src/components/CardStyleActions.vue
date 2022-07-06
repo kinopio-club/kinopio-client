@@ -1,5 +1,5 @@
 <template lang="pug">
-section.card-style-actions(v-if="visible" @click.left.stop="closeDialogs")
+section.sub-section.card-style-actions(v-if="visible" @click.left.stop="closeDialogs")
   .row
     //- h1
     .button-wrap
@@ -284,16 +284,16 @@ export default {
 
 <style lang="stylus" scoped>
 .card-style-actions
-  padding 0
-  max-width 203px
+  padding 4px
+  padding-bottom 0
   .row
+    max-width 203px
     display block
+    margin-bottom -6px
   .button-wrap
     margin-left 0
     margin-right 6px
     vertical-align middle
     margin-bottom 10px
-  &.last-row
-    margin-bottom -10px
 
 </style>
