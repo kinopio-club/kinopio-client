@@ -1,21 +1,15 @@
 <template lang="pug">
-.button-wrap.connection-decorators
-  .segmented-buttons
-    //- Clear
-    button(@click="clearAll" :class="{ active: isSomeConnectionsClear }" :disabled="!canEditAll")
-      img.icon.clear(src="@/assets/connection-clear.svg")
-    //- Arrow
-    button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsIsVisible }" :disabled="!canEditAll")
-      img.icon.arrow(src="@/assets/connection-arrow.svg")
-    //- Label
-    button(@click.left="showLabelsIsVisible" :class="{ active: isSomeLabelsVisible }" :disabled="!canEditAll")
-      //- img.icon(v-if="isSomeLabelsVisible" src="@/assets/view.svg")
-      //- img.icon(v-else src="@/assets/view-hidden.svg")
-      span Label
+//- Label
+button(@click.left="showLabelsIsVisible" :class="{ active: isSomeLabelsVisible }" :disabled="!canEditAll")
+  img.icon(v-if="isSomeLabelsVisible" src="@/assets/view.svg")
+  img.icon(v-else src="@/assets/view-hidden.svg")
+  span Label
+//- Arrow
+button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsIsVisible }" :disabled="!canEditAll")
+  img.icon.arrow(src="@/assets/connection-arrow.svg")
 //- Reverse
-.button-wrap.connection-decorators
-  button(@click.left="reverseConnections" :disabled="!canEditAll")
-    img.icon.reverse(src="@/assets/connection-reverse.svg")
+button(@click.left="reverseConnections" :disabled="!canEditAll")
+  img.icon.reverse(src="@/assets/connection-reverse.svg")
 
 </template>
 
@@ -65,20 +59,22 @@ export default {
       })
     },
     showDirectionsIsVisible () {
+      const value = !this.isSomeDirectionsIsVisible
       this.clearAll()
       this.connections.forEach(connection => {
         this.$store.dispatch('currentConnections/update', {
           id: connection.id,
-          directionIsVisible: true
+          directionIsVisible: value
         })
       })
     },
     showLabelsIsVisible () {
+      const value = !this.isSomeLabelsVisible
       this.clearAll()
       this.connections.forEach(connection => {
         this.$store.dispatch('currentConnections/update', {
           id: connection.id,
-          labelIsVisible: true
+          labelIsVisible: value
         })
       })
     },
@@ -98,8 +94,8 @@ export default {
 }
 </script>
 
-<style lang="stylus">
-.connection-decorators
+<style lang="stylus" scoped>
+button
   .icon
     &.clear
       vertical-align 4px
