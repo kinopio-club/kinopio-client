@@ -17,12 +17,6 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
       button(@click.left="duplicateSpace")
         img.icon(src="@/assets/add.svg")
         span Duplicate
-    //- Export
-    //- .button-wrap
-    //-   button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-    //-     img.icon(src="@/assets/export.svg")
-    //-     span Export
-    //-   Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData" @updateSpaces="updateLocalSpaces")
 
   section.results-actions
     .row
@@ -32,11 +26,6 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
           img.icon(src="@/assets/add.svg")
           span Space
         AddSpace(:visible="addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace" @addJournalSpace="addJournalSpace")
-      //- Import
-      //- .button-wrap
-      //-   button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
-      //-     span Import
-      //-   Import(:visible="importIsVisible" @updateSpaces="updateLocalSpaces" @closeDialog="closeDialogs")
       //- Filters
       .button-wrap.toggle-filters
         button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersIsActive }")
