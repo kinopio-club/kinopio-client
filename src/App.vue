@@ -12,8 +12,8 @@
   OffscreenMarkers
   //- router-view is Space or Add
   router-view
-  Header
-  Footer
+  Header(:isPinchZooming="isPinchZooming")
+  Footer(:isPinchZooming="isPinchZooming")
   TagDetails
   LinkDetails
   Minimap
@@ -77,16 +77,21 @@ export default {
     this.updateMetaDescription()
     this.$store.dispatch('currentSpace/updateBackgroundZoom')
     this.updateCardMap()
-    window.addEventListener('touchstart', this.touchUndoStart)
-    window.addEventListener('gesturechange', this.touchUndoCancel)
-    window.addEventListener('touchend', this.touchUndoEnd)
+    window.addEventListener('touchstart', this.touchStart)
+    window.addEventListener('touchmove', this.touchMove)
+    window.addEventListener('touchend', this.touchEnd)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateUserHasScrolled)
     window.removeEventListener('scroll', this.updateCardMap)
-    window.removeEventListener('touchstart', this.touchUndoStart)
-    window.removeEventListener('gesturechange', this.touchUndoCancel)
-    window.removeEventListener('touchend', this.touchUndoEnd)
+    window.removeEventListener('touchstart', this.touchStart)
+    window.removeEventListener('touchmove', this.touchMove)
+    window.removeEventListener('touchend', this.touchEnd)
+  },
+  data () {
+    return {
+      isPinchZooming: false
+    }
   },
   computed: {
     backgroundTint () {
@@ -135,23 +140,33 @@ export default {
     }
   },
   methods: {
-    touchUndoStart (event) {
+    toggleIsPinchZooming (event) {
+      if (utils.shouldIgnoreTouchInteraction(event)) { return }
+      this.isPinchZooming = true
+    },
+    touchStart (event) {
       shouldCancelUndo = false
       if (!utils.isMultiTouch(event)) {
         multiTouchAction = null
         return
       }
       this.$store.commit('shouldAddCard', false)
-      if (event.touches.length === 2) {
+      const touches = event.touches.length
+      if (touches >= 2) {
+        this.toggleIsPinchZooming(event)
+      }
+      // undo/redo
+      if (touches === 2) {
         multiTouchAction = 'undo'
-      } else if (event.touches.length === 3) {
+      } else if (touches === 3) {
         multiTouchAction = 'redo'
       }
     },
-    touchUndoCancel () {
+    touchMove () {
       shouldCancelUndo = true
     },
-    touchUndoEnd () {
+    touchEnd () {
+      this.isPinchZooming = false
       if (shouldCancelUndo) {
         shouldCancelUndo = false
         multiTouchAction = ''
