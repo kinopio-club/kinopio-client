@@ -64,7 +64,7 @@ article(
         @touchstart.stop="startResizing"
         @dblclick="removeResize"
       )
-        button.inline-button.resize-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
+        button.inline-button.resize-button(tabindex="-1" :style="{background: itemBackground}")
           img.resize-icon.icon(src="@/assets/resize.svg")
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
@@ -107,7 +107,7 @@ article(
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
           //- Name
-          p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor || remoteSelectedColor || card.backgroundColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
+          p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             Loader(:visible="isLoadingUrlPreview")
@@ -116,7 +116,7 @@ article(
       span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
         //- lock
         .lock-button-wrap.inline-button-wrap(v-if="isLocked" @mouseup.left="unlockCard" @touchend="unlockCard")
-          button.inline-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
+          button.inline-button(tabindex="-1" :style="{background: itemBackground}")
             img.icon.lock-icon(src="@/assets/lock.svg")
           //- maintain connections when card is locked
           .connector.invisible(:data-card-id="id")
@@ -126,7 +126,7 @@ article(
           //- Url →
           a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
             .url.inline-button-wrap
-              button.inline-button(:style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
+              button.inline-button(:style="{background: itemBackground}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
           //- Connector
           .connector.inline-button-wrap(
@@ -136,7 +136,7 @@ article(
             @touchstart="startConnecting"
           )
             .connector-glow(:style="connectorGlowStyle" tabindex="-1")
-            button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
+            button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: itemBackground }" tabindex="-1")
               .connected-colors
                 template(v-if="isConnectingTo || isConnectingFrom")
                   .color(:style="{ background: newConnectionColor}")
@@ -154,7 +154,7 @@ article(
         :visible="cardUrlPreviewIsVisible"
         :card="card"
         :user="createdByUser"
-        :isImageCard="Boolean(formats.image || formats.video)"
+        :isImageCard="isImageCard"
         :isSelected="isSelectedOrDragging"
       )
 
@@ -315,6 +315,14 @@ export default {
     }
   },
   computed: {
+    isImageCard () { return Boolean(this.formats.image || this.formats.video) },
+    itemBackground () {
+      let background = 'transparent'
+      if (this.isImageCard) {
+        background = this.card.backgroundColor
+      }
+      return this.selectedColor || this.remoteSelectedColor || background
+    },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     isResizing () { return this.$store.state.currentUserIsResizingCard },
     dataTags () {
