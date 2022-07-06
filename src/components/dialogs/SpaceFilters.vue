@@ -43,6 +43,13 @@ export default {
     visible: Boolean,
     spaces: Array
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerClearAllSpaceFilters') {
+        this.clearAllFilters()
+      }
+    })
+  },
   mounted () {
     this.moonPhase = moonphase()
   },

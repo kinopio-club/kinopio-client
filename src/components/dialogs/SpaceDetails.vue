@@ -27,10 +27,19 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
           span Space
         AddSpace(:visible="addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace" @addJournalSpace="addJournalSpace")
       //- Filters
-      .button-wrap.toggle-filters
-        button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersIsActive }")
-          img.icon(src="@/assets/filter.svg")
-          .badge.info.filter-is-active(v-if="spaceFiltersIsActive")
+      .button-wrap
+        // no filters
+        template(v-if="!spaceFiltersIsActive")
+          button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsActive }")
+            img.icon(src="@/assets/filter.svg")
+        // filters active
+        template(v-if="spaceFiltersIsActive")
+          .segmented-buttons
+            button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersIsActive }")
+              img.icon(src="@/assets/filter.svg")
+              .badge.info.filter-is-active
+            button(@click.left.stop="clearAllFilters")
+              img.icon.cancel(src="@/assets/add.svg")
         SpaceFilters(:visible="spaceFiltersIsVisible" :spaces="filteredSpaces")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
@@ -162,6 +171,10 @@ export default {
     dialogIsPinned () { return this.$store.state.spaceDetailsIsPinned }
   },
   methods: {
+    clearAllFilters () {
+      this.closeDialogs()
+      this.$store.commit('triggerClearAllSpaceFilters')
+    },
     toggleHideSpace () {
       const value = !this.currentSpaceIsHidden
       this.$store.dispatch('currentSpace/updateSpace', { isHidden: value })
