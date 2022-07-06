@@ -1,5 +1,5 @@
 <template lang="pug">
-header(v-if="isVisible" :style="position" :class="{'fade-out': isFadeOut, 'hidden': isHidden, 'hidden-by-mindmap': minimapIsVisible }")
+header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hidden': isHidden, 'hidden-by-mindmap': minimapIsVisible }")
   //- embed
   nav.embed-nav(v-if="isEmbed")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
@@ -167,7 +167,7 @@ let updateNotificationsIntervalTimer
 const fadeOutDuration = 10
 const hiddenDuration = 10
 const updatePositionDuration = 60
-let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
+let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
 
 export default {
   name: 'Header',
@@ -196,6 +196,9 @@ export default {
     SpaceUsers,
     Donate
   },
+  props: {
+    isPinchZooming: Boolean
+  },
   data () {
     return {
       aboutIsVisible: false,
@@ -214,7 +217,7 @@ export default {
       notifications: [],
       notificationsIsLoading: true,
       addSpaceIsVisible: false,
-      isFadeOut: false,
+      isFadingOut: false,
       isHidden: false,
       templatesIsVisible: false,
       sidebarIsVisible: false,
@@ -261,11 +264,7 @@ export default {
     })
   },
   mounted () {
-    window.addEventListener('scroll', this.handleTouchInteractions)
-    window.addEventListener('gesturestart', this.handleTouchInteractions)
-    window.addEventListener('gesturechange', this.handleTouchInteractions)
-    window.addEventListener('touchend', this.updatePosition)
-    visualViewport.addEventListener('resize', this.updatePosition)
+    window.addEventListener('scroll', this.updatePosition)
     this.updatePosition()
     this.updateNotifications()
     updateNotificationsIntervalTimer = setInterval(() => {
@@ -273,11 +272,7 @@ export default {
     }, 1000 * 60 * 10) // 10 minutes
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.handleTouchInteractions)
-    window.removeEventListener('gesturestart', this.handleTouchInteractions)
-    window.removeEventListener('gesturechange', this.handleTouchInteractions)
-    window.removeEventListener('touchend', this.updatePosition)
-    visualViewport.removeEventListener('resize', this.updatePosition)
+    window.removeEventListener('scroll', this.updatePosition)
     clearInterval(updateNotificationsIntervalTimer)
   },
   computed: {
@@ -285,8 +280,10 @@ export default {
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
     isVisible () {
       const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
+      const connectionDetailsIsVisible = this.$store.state.connectionDetailsIsVisibleForConnectionId
+      const contentDialogIsVisible = cardDetailsIsVisible || connectionDetailsIsVisible
       const isTouchDevice = this.$store.getters.isTouchDevice
-      if (cardDetailsIsVisible && isTouchDevice) {
+      if (contentDialogIsVisible && isTouchDevice) {
         return false
       } else {
         return true
@@ -540,31 +537,26 @@ export default {
 
     // fade out
 
-    handleTouchInteractions (event) {
-      if (!this.$store.getters.isTouchDevice) { return }
-      if (utils.shouldIgnoreTouchInteraction(event)) { return }
-      this.fadeOut()
-      this.updatePosition()
-    },
     fadeOut () {
       fadeOutIteration = 0
       if (fadeOutTimer) { return }
+      shouldCancelFadeOut = false
       fadeOutTimer = window.requestAnimationFrame(this.fadeOutFrame)
     },
     cancelFadeOut () {
       window.cancelAnimationFrame(fadeOutTimer)
       fadeOutTimer = undefined
-      this.isFadeOut = false
+      this.isFadingOut = false
       this.cancelUpdatePosition()
       this.updatePosition()
     },
     fadeOutFrame () {
       fadeOutIteration++
-      this.isFadeOut = true
-      if (fadeOutIteration < fadeOutDuration) {
-        window.requestAnimationFrame(this.fadeOutFrame)
-      } else {
+      this.isFadingOut = true
+      if (shouldCancelFadeOut) {
         this.cancelFadeOut()
+      } else if (fadeOutIteration < fadeOutDuration) {
+        window.requestAnimationFrame(this.fadeOutFrame)
       }
     },
 
@@ -647,6 +639,17 @@ export default {
         name: 'updateNotificationsIsRead',
         body: notificationIds
       })
+    }
+  },
+  watch: {
+    isPinchZooming (value) {
+      if (value) {
+        this.fadeOut()
+        this.updatePosition()
+      } else {
+        shouldCancelFadeOut = true
+        this.cancelFadeOut()
+      }
     }
   }
 }
