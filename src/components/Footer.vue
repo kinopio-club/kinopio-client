@@ -3,7 +3,7 @@
   .left(v-if="!isEmbed")
     footer
       Notifications
-      .controls(v-if="isVisible" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
+      .controls(v-if="isVisible" :class="{'fade-out': isFadingOut, 'hidden': isHidden}")
         section
           .button-wrap
             .segmented-buttons
@@ -35,7 +35,7 @@
               span Tips
             MobileTips(:visible="mobileTipsIsVisible")
 
-  .right(:class="{'is-embed': isEmbed, 'fade-out': isFadeOut, 'hidden': isHidden}")
+  .right(:class="{'is-embed': isEmbed, 'fade-out': isFadingOut, 'hidden': isHidden}")
     button(@pointerup="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
       img.icon.minimap(src="@/assets/minimap.svg")
     template(v-if="!isMobileOrTouch")
@@ -61,7 +61,7 @@ const fadeOutDuration = 10
 const hiddenDuration = 10
 const updatePositionDuration = 60
 let shouldNotifyMinimapKeyboardShortcut = true
-let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
+let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
 
 export default {
   name: 'Footer',
@@ -75,6 +75,9 @@ export default {
     Loader,
     SpaceZoom
   },
+  props: {
+    isPinchZooming: Boolean
+  },
   data () {
     return {
       favoritesActionsIsVisible: false,
@@ -85,7 +88,7 @@ export default {
       position: {},
       liveSpaces: [],
       isLoadingLiveSpaces: true,
-      isFadeOut: false,
+      isFadingOut: false,
       isHidden: false,
       exploreSpaces: []
     }
@@ -100,11 +103,7 @@ export default {
         this.hidden()
       }
     })
-    window.addEventListener('scroll', this.handleTouchInteractions)
-    window.addEventListener('gesturestart', this.handleTouchInteractions)
-    window.addEventListener('gesturechange', this.handleTouchInteractions)
-    window.addEventListener('touchend', this.updatePosition)
-    visualViewport.addEventListener('resize', this.updatePosition)
+    window.addEventListener('scroll', this.updatePosition)
     window.addEventListener('online', this.updateLiveSpaces)
     this.updatePosition()
     this.updateFavorites()
@@ -118,11 +117,7 @@ export default {
     this.updateExploreSpaces()
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.handleTouchInteractions)
-    window.removeEventListener('gesturestart', this.handleTouchInteractions)
-    window.removeEventListener('gesturechange', this.handleTouchInteractions)
-    window.removeEventListener('touchend', this.updatePosition)
-    visualViewport.removeEventListener('resize', this.updatePosition)
+    window.removeEventListener('scroll', this.updatePosition)
     window.removeEventListener('online', this.updateLiveSpaces)
     clearInterval(updateFavoritesIntervalTimer)
     clearInterval(updateLiveSpacesIntervalTimer)
@@ -149,20 +144,14 @@ export default {
     isVisible () {
       const isTouchDevice = this.$store.getters.isTouchDevice
       const shouldExplicitlyHideFooter = this.$store.state.shouldExplicitlyHideFooter
+      const contentDialogIsVisible = Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleSelectedActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
       // only hide footer on touch devices
-      if (!isTouchDevice) {
-        return true
-      }
-      if (shouldExplicitlyHideFooter) {
-        return false
-      }
+      if (!isTouchDevice) { return true }
+      if (shouldExplicitlyHideFooter) { return }
       let isVisible = true
-      if (this.dialogsVisible) { isVisible = false }
+      if (contentDialogIsVisible) { isVisible = false }
       if (this.shouldHideFooter) { isVisible = false }
       return isVisible
-    },
-    dialogsVisible () {
-      return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleSelectedActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
     },
     shouldHideFooter () {
       return this.$store.state.shouldHideFooter
@@ -301,31 +290,26 @@ export default {
 
     // fade out
 
-    handleTouchInteractions (event) {
-      if (!this.$store.getters.isTouchDevice) { return }
-      if (utils.shouldIgnoreTouchInteraction(event)) { return }
-      this.fadeOut()
-      this.updatePosition()
-    },
     fadeOut () {
       fadeOutIteration = 0
       if (fadeOutTimer) { return }
+      shouldCancelFadeOut = false
       fadeOutTimer = window.requestAnimationFrame(this.fadeOutFrame)
     },
     cancelFadeOut () {
       window.cancelAnimationFrame(fadeOutTimer)
       fadeOutTimer = undefined
-      this.isFadeOut = false
+      this.isFadingOut = false
       this.cancelUpdatePosition()
       this.updatePosition()
     },
     fadeOutFrame () {
       fadeOutIteration++
-      this.isFadeOut = true
-      if (fadeOutIteration < fadeOutDuration) {
-        window.requestAnimationFrame(this.fadeOutFrame)
-      } else {
+      this.isFadingOut = true
+      if (shouldCancelFadeOut) {
         this.cancelFadeOut()
+      } else if (fadeOutIteration < fadeOutDuration) {
+        window.requestAnimationFrame(this.fadeOutFrame)
       }
     },
 
@@ -377,6 +361,17 @@ export default {
         }
       }
       this.position = style
+    }
+  },
+  watch: {
+    isPinchZooming (value) {
+      if (value) {
+        this.fadeOut()
+        this.updatePosition()
+      } else {
+        shouldCancelFadeOut = true
+        this.cancelFadeOut()
+      }
     }
   }
 }
