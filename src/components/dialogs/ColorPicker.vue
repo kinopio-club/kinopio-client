@@ -92,9 +92,8 @@ export default {
         return this.currentColor
       },
       set (color) {
-        let isColor = validateColor(color)
-        console.log('🫧 set color', color, isColor)
-        if (isColor) {
+        console.log('🫧 set color', color, validateColor, typeof validateColor)
+        if (validateColor(color)) {
           this.updateColorFromInput(color)
         } else if (validateColor('#' + color)) {
           this.updateColorFromInput('#' + color)
