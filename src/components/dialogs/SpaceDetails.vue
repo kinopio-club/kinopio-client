@@ -18,11 +18,11 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
         img.icon(src="@/assets/add.svg")
         span Duplicate
     //- Export
-    .button-wrap
-      button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-        img.icon.visit(src="@/assets/export.svg")
-        span Export
-      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData" @updateSpaces="updateLocalSpaces")
+    //- .button-wrap
+    //-   button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+    //-     img.icon(src="@/assets/export.svg")
+    //-     span Export
+    //-   Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData" @updateSpaces="updateLocalSpaces")
 
   section.results-actions
     .row
@@ -33,10 +33,10 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
           span Space
         AddSpace(:visible="addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace" @addJournalSpace="addJournalSpace")
       //- Import
-      .button-wrap
-        button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
-          span Import
-        Import(:visible="importIsVisible" @updateSpaces="updateLocalSpaces" @closeDialog="closeDialogs")
+      //- .button-wrap
+      //-   button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+      //-     span Import
+      //-   Import(:visible="importIsVisible" @updateSpaces="updateLocalSpaces" @closeDialog="closeDialogs")
       //- Filters
       .button-wrap.toggle-filters
         button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersIsActive }")
@@ -51,8 +51,6 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
 <script>
 import cache from '@/cache.js'
 import SpaceDetailsInfo from '@/components/SpaceDetailsInfo.vue'
-import Export from '@/components/dialogs/Export.vue'
-import Import from '@/components/dialogs/Import.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
 import SpaceFilters from '@/components/dialogs/SpaceFilters.vue'
 import SpaceList from '@/components/SpaceList.vue'
@@ -71,8 +69,6 @@ export default {
   name: 'SpaceDetails',
   components: {
     SpaceDetailsInfo,
-    Export,
-    Import,
     AddSpace,
     SpaceFilters,
     SpaceList
@@ -106,8 +102,6 @@ export default {
       spaces: [],
       favoriteSpaces: [],
       favoriteUsers: [],
-      exportIsVisible: false,
-      importIsVisible: false,
       addSpaceIsVisible: false,
       isLoadingRemoteSpaces: false,
       remoteSpaces: [],
@@ -153,7 +147,6 @@ export default {
       return spaces
     },
     currentSpace () { return this.$store.state.currentSpace },
-    exportData () { return this.$store.getters['currentSpace/all'] },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     shouldShowInExplore () {
       const privacy = this.$store.state.currentSpace.privacy
@@ -203,24 +196,12 @@ export default {
       this.updateLocalSpaces()
       this.$store.commit('triggerFocusSpaceDetailsName')
     },
-    toggleExportIsVisible () {
-      const isVisible = this.exportIsVisible
-      this.closeDialogs()
-      this.exportIsVisible = !isVisible
-    },
-    toggleImportIsVisible () {
-      const isVisible = this.importIsVisible
-      this.closeDialogs()
-      this.importIsVisible = !isVisible
-    },
     toggleAddSpaceIsVisible () {
       const isVisible = this.addSpaceIsVisible
       this.closeDialogs()
       this.addSpaceIsVisible = !isVisible
     },
     closeDialogs () {
-      this.exportIsVisible = false
-      this.importIsVisible = false
       this.addSpaceIsVisible = false
       this.spaceFiltersIsVisible = false
       this.$store.commit('triggerSpaceDetailsCloseDialogs')

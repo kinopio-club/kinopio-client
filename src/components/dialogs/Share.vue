@@ -60,11 +60,13 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   // Export, Import
   section
     .button-wrap
-      button
+      button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
+      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
     .button-wrap
-      button
+      button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
         span Import
+      Import(:visible="importIsVisible" @closeDialog="closeDialogs")
 
   section(v-if="spaceHasUrl && isSpaceMember")
     .button-wrap
@@ -102,6 +104,8 @@ import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
 import { defineAsyncComponent } from 'vue'
 import User from '@/components/User.vue'
+import Export from '@/components/dialogs/Export.vue'
+import Import from '@/components/dialogs/Import.vue'
 const UserDetails = defineAsyncComponent({
   loader: () => import('@/components/dialogs/UserDetails.vue')
 })
@@ -116,7 +120,9 @@ export default {
     DialogWrap,
     UserList,
     UserDetails,
-    User
+    User,
+    Export,
+    Import
   },
   props: {
     visible: Boolean
@@ -140,7 +146,9 @@ export default {
       dialogHeight: null,
       spaceRssFeedIsVisible: false,
       embedIsVisible: false,
-      pdfIsVisible: false
+      pdfIsVisible: false,
+      exportIsVisible: false,
+      importIsVisible: false
     }
   },
   computed: {
@@ -183,7 +191,8 @@ export default {
       })
       return users
     },
-    spaceHasOtherCardUsers () { return Boolean(this.spaceOtherCardUsers.length) }
+    spaceHasOtherCardUsers () { return Boolean(this.spaceOtherCardUsers.length) },
+    exportData () { return this.$store.getters['currentSpace/all'] }
   },
   methods: {
     privacyName (number) {
@@ -232,12 +241,24 @@ export default {
       this.closeDialogs()
       this.embedIsVisible = !isVisible
     },
+    toggleExportIsVisible () {
+      const isVisible = this.exportIsVisible
+      this.closeDialogs()
+      this.exportIsVisible = !isVisible
+    },
+    toggleImportIsVisible () {
+      const isVisible = this.importIsVisible
+      this.closeDialogs()
+      this.importIsVisible = !isVisible
+    },
     closeDialogs () {
       this.privacyPickerIsVisible = false
       this.inviteCollaboratorsIsVisible = false
       this.spaceRssFeedIsVisible = false
       this.embedIsVisible = false
       this.pdfIsVisible = false
+      this.exportIsVisible = false
+      this.importIsVisible = false
       this.userDetailsIsNotVisible()
     },
     showUserDetails (event, user) {
@@ -328,5 +349,5 @@ export default {
     padding-right 6px
     margin-left 6px
   .user
-    vertical-align -2px
+    vertical-align -3px
 </style>

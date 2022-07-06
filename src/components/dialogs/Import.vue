@@ -164,9 +164,12 @@ export default {
 
 <style lang="stylus">
 .import
+  top calc(100% - 8px)
+  left initial
+  right 8px
   max-height calc(100vh - 140px)
-  @media(max-width 360px)
-    left -40px
+  @media(max-width 350px)
+    right -50px
   .hidden
     display none
   .loader
