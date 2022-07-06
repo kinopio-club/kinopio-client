@@ -5,6 +5,7 @@ main.space(
   @touchstart="initInteractions"
   :style="styles"
 )
+  //- Connections
   svg.connections
     template(v-for="startCardId in currentConnectionStartCardIds")
       CurrentConnection(:startCardId="startCardId" :startCursor="startCursor")
@@ -16,8 +17,10 @@ main.space(
     //- Connection Decorators
     ConnectionLabel(:connection="connection")
     ConnectionArrow(:connection="connection")
+  //- Presence
   template(v-for="user in spaceMembers")
     UserLabel(:user="user")
+  //- Cards
   .cards
     template(v-for="overlap in cardOverlaps")
       .badge.label-badge.card-overlap-indicator(v-if="canEditSpace" :style="{ left: overlap.x + 'px', top: overlap.y + 'px' }" @click.left="selectOverlap(overlap)")
