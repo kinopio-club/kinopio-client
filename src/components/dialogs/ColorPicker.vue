@@ -61,9 +61,9 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
 <script>
 import utils from '@/utils.js'
 
+import validateColor from 'validate-color'
 import randomColor from 'randomcolor'
 import shader from 'shader'
-import validateColor from 'validate-color'
 
 export default {
   name: 'ColorPicker',
@@ -92,10 +92,9 @@ export default {
         return this.currentColor
       },
       set (color) {
-        console.log('🫧 set color', color)
-        if (color === 'transparent') {
-          this.select(color)
-        } else if (validateColor(color)) {
+        let isColor = validateColor(color)
+        console.log('🫧 set color', color, isColor)
+        if (isColor) {
           this.updateColorFromInput(color)
         } else if (validateColor('#' + color)) {
           this.updateColorFromInput('#' + color)
