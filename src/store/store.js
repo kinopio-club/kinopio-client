@@ -413,6 +413,7 @@ const store = createStore({
     triggerRemovedIsVisible: () => {},
     triggerUpdateConnectionPathWhileDragging: (state, { connection, path }) => {},
     triggerUpdateConnectionArrowPositions: (state, { connections, shouldUpdateAll }) => {},
+    triggerClearAllSpaceFilters: () => {},
 
     // Cards
 

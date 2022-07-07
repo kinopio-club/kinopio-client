@@ -37,7 +37,9 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
             span PDF
           DialogWrap(:visible="pdfIsVisible" :title="'PDF'" :childName="'pdf'")
 
+      //- Url Copied
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
+
     template(v-if="spaceIsPrivate")
       p.share-private
         span To share this space publically, set the privacy to
@@ -55,9 +57,21 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
             span PDF
           DialogWrap(:visible="pdfIsVisible" :title="'PDF'" :childName="'pdf'")
 
+  // Export, Import
+  section
+    .button-wrap
+      button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+        span Export
+      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
+    .button-wrap
+      button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+        span Import
+      Import(:visible="importIsVisible" @closeDialog="closeDialogs")
+
   section(v-if="spaceHasUrl && isSpaceMember")
     .button-wrap
       button(@click.left.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
+        User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true")
         span Invite Collaborators
       InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
 
@@ -89,6 +103,9 @@ import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
 import { defineAsyncComponent } from 'vue'
+import User from '@/components/User.vue'
+import Export from '@/components/dialogs/Export.vue'
+import Import from '@/components/dialogs/Import.vue'
 const UserDetails = defineAsyncComponent({
   loader: () => import('@/components/dialogs/UserDetails.vue')
 })
@@ -102,7 +119,10 @@ export default {
     Embed,
     DialogWrap,
     UserList,
-    UserDetails
+    UserDetails,
+    User,
+    Export,
+    Import
   },
   props: {
     visible: Boolean
@@ -126,13 +146,16 @@ export default {
       dialogHeight: null,
       spaceRssFeedIsVisible: false,
       embedIsVisible: false,
-      pdfIsVisible: false
+      pdfIsVisible: false,
+      exportIsVisible: false,
+      importIsVisible: false
     }
   },
   computed: {
     url () { return this.$store.getters['currentSpace/url'] },
     spaceName () { return this.$store.state.currentSpace.name },
     spacePrivacy () { return this.$store.state.currentSpace.privacy },
+    currentUser () { return this.$store.state.currentUser },
     canEditSpace () {
       const canEdit = this.$store.getters['currentUser/canEditSpace']()
       return canEdit
@@ -168,7 +191,8 @@ export default {
       })
       return users
     },
-    spaceHasOtherCardUsers () { return Boolean(this.spaceOtherCardUsers.length) }
+    spaceHasOtherCardUsers () { return Boolean(this.spaceOtherCardUsers.length) },
+    exportData () { return this.$store.getters['currentSpace/all'] }
   },
   methods: {
     privacyName (number) {
@@ -217,12 +241,24 @@ export default {
       this.closeDialogs()
       this.embedIsVisible = !isVisible
     },
+    toggleExportIsVisible () {
+      const isVisible = this.exportIsVisible
+      this.closeDialogs()
+      this.exportIsVisible = !isVisible
+    },
+    toggleImportIsVisible () {
+      const isVisible = this.importIsVisible
+      this.closeDialogs()
+      this.importIsVisible = !isVisible
+    },
     closeDialogs () {
       this.privacyPickerIsVisible = false
       this.inviteCollaboratorsIsVisible = false
       this.spaceRssFeedIsVisible = false
       this.embedIsVisible = false
       this.pdfIsVisible = false
+      this.exportIsVisible = false
+      this.importIsVisible = false
       this.userDetailsIsNotVisible()
     },
     showUserDetails (event, user) {
@@ -312,4 +348,6 @@ export default {
     padding-left 6px
     padding-right 6px
     margin-left 6px
+  .user
+    vertical-align -3px
 </style>
