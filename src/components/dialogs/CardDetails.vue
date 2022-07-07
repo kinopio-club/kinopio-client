@@ -168,14 +168,16 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 
     //- Info
     template(v-if="showCurrentCardLength")
-      span.badge.secondary
-        span {{currentCardLength}} / {{maxCardLength}}
+      .row
+        span.badge.secondary
+          span {{currentCardLength}} / {{maxCardLength}}
 
     //- Errors
     template(v-if="errorMaxCardLength")
-      span.badge.danger
-        img.icon.cancel(src="@/assets/add.svg")
-        span Max Length
+      .row
+        span.badge.danger
+          img.icon.cancel(src="@/assets/add.svg")
+          span Max Length
       p To fit small screens, cards can't be longer than {{maxCardLength}} characters
     template(v-if="error.signUpToUpload")
       p
