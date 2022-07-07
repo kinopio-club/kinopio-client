@@ -14,6 +14,17 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
       span {{item.message}}
 
+  .persistent-item.success(v-if="notifyUnlockedStickyCards")
+    video(autoplay loop muted playsinline width="244" height="94")
+      source(src="@/assets/sticky-cards-demo.mp4")
+    p Nice! You've unlocked sticky cards. Set this later in User → Settings → Controls
+    .row
+      label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
+        input(type="checkbox" v-model="shouldUseStickyCards")
+        span Use Sticky Cards
+      button(@click.left="removeNotifyUnlockedStickyCards")
+        img.icon.cancel(src="@/assets/add.svg")
+
   .persistent-item.danger.hidden#notify-local-storage-is-full
     p Local storage error has occured, please refresh
     .row
@@ -140,7 +151,8 @@ export default {
     return {
       readOnlyJiggle: false,
       notifyCardsCreatedIsOverLimitJiggle: false,
-      notifySpaceOutOfSync: false
+      notifySpaceOutOfSync: false,
+      notifyUnlockedStickyCards: false
     }
   },
   created () {
@@ -148,19 +160,15 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'addNotification') {
         this.update()
-      }
-      if (mutation.type === 'currentUserIsPainting') {
+      } else if (mutation.type === 'currentUserIsPainting') {
         if (state.currentUserIsPainting) {
           this.addReadOnlyJiggle()
         }
-      }
-      if (mutation.type === 'triggerReadOnlyJiggle') {
+      } else if (mutation.type === 'triggerReadOnlyJiggle') {
         this.addReadOnlyJiggle()
-      }
-      if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
+      } else if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
         this.notifyCardsCreatedIsOverLimitJiggle = true
-      }
-      if (mutation.type === 'isOnline') {
+      } else if (mutation.type === 'isOnline') {
         const isOnline = Boolean(mutation.payload)
         if (!isOnline) {
           console.log('☎️ is offline', !isOnline)
@@ -169,9 +177,10 @@ export default {
           this.checkIfShouldNotifySpaceOutOfSync()
           pageWasOffline = false
         }
-      }
-      if (mutation.type === 'currentSpace/restoreSpace') {
+      } else if (mutation.type === 'currentSpace/restoreSpace') {
         this.notifySpaceOutOfSync = false
+      } else if (mutation.type === 'triggerNotifyUnlockedStickyCards') {
+        this.notifyUnlockedStickyCards = true
       }
     })
   },
@@ -223,9 +232,14 @@ export default {
       if (currentSpace.isTemplate) { return true }
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(currentSpace.id)
-    }
+    },
+    shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards }
   },
   methods: {
+    toggleShouldUseStickyCards () {
+      const value = !this.shouldUseStickyCards
+      this.$store.dispatch('currentUser/update', { shouldUseStickyCards: value })
+    },
     removeNotifyThanksForDonating () {
       this.$store.commit('notifyThanksForDonating', false)
     },
@@ -352,6 +366,9 @@ export default {
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', { space })
       this.$store.dispatch('closeAllDialogs', 'notifications.changeSpace')
+    },
+    removeNotifyUnlockedStickyCards () {
+      this.notifyUnlockedStickyCards = false
     }
   }
 }
@@ -389,6 +406,10 @@ export default {
     p
       margin 0
       user-select text
+    video
+      border-radius 3px
+      margin-bottom 5px
+      background-color var(--primary-background)
   .persistent-item
     animation none
   .row

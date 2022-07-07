@@ -458,6 +458,8 @@ export default {
       return this.id === this.$store.state.cardDetailsIsVisibleForCardId
     },
     shouldNotStick () {
+      const shouldUseStickyCards = this.$store.state.currentUser.shouldUseStickyCards
+      if (!shouldUseStickyCards) { return true }
       const userIsConnecting = this.$store.state.currentConnectionStartCardIds.length
       return userIsConnecting || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked
     },

@@ -55,7 +55,9 @@ export default {
     downgradeAt: null,
     showWeather: false,
     weatherLocation: undefined,
-    weatherUnitIsCelcius: false
+    weatherUnitIsCelcius: false,
+    shouldNotifyUnlockedStickyCards: true,
+    shouldUseStickyCards: false
   },
   mutations: {
     color: (state, value) => {
@@ -310,6 +312,14 @@ export default {
     weatherUnitIsCelcius: (state, value) => {
       state.weatherUnitIsCelcius = value
       cache.updateUser('weatherUnitIsCelcius', value)
+    },
+    shouldNotifyUnlockedStickyCards: (state, value) => {
+      state.shouldNotifyUnlockedStickyCards = value
+      cache.updateUser('shouldNotifyUnlockedStickyCards', value)
+    },
+    shouldUseStickyCards: (state, value) => {
+      state.shouldUseStickyCards = value
+      cache.updateUser('shouldUseStickyCards', value)
     }
   },
   actions: {
@@ -670,6 +680,16 @@ export default {
         body: {
           shouldUseLastConnectionType: value
         } }, { root: true })
+    },
+    checkIfShouldUnlockStickyCards: (context, value) => {
+      const count = 20
+      const shouldUnlock = context.state.cardsCreatedCount >= count
+      const shouldNotify = context.state.shouldNotifyUnlockedStickyCards
+      if (shouldUnlock && shouldNotify) {
+        const updates = { shouldUseStickyCards: true, shouldNotifyUnlockedStickyCards: false }
+        context.dispatch('update', updates)
+        context.commit('triggerNotifyUnlockedStickyCards', null, { root: true })
+      }
     }
   },
   getters: {

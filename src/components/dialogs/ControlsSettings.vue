@@ -11,6 +11,10 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
       label(:class="{active: shouldOpenLinksInNewTab}" @click.left.prevent="toggleShouldOpenLinksInNewTab" @keydown.stop.enter="toggleShouldOpenLinksInNewTab")
         input(type="checkbox" v-model="shouldOpenLinksInNewTab")
         span Open Card URLs in New Tabs
+    .row
+      label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
+        input(type="checkbox" v-model="shouldUseStickyCards")
+        span Use Sticky Cards
 
 </template>
 
@@ -37,7 +41,8 @@ export default {
   computed: {
     isMobile () { return utils.isMobile() },
     shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection },
-    shouldOpenLinksInNewTab () { return this.$store.state.currentUser.shouldOpenLinksInNewTab }
+    shouldOpenLinksInNewTab () { return this.$store.state.currentUser.shouldOpenLinksInNewTab },
+    shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards }
   },
   methods: {
     toggleShouldInvertZoomDirection () {
@@ -47,6 +52,10 @@ export default {
     toggleShouldOpenLinksInNewTab () {
       const value = !this.shouldOpenLinksInNewTab
       this.$store.dispatch('currentUser/shouldOpenLinksInNewTab', value)
+    },
+    toggleShouldUseStickyCards () {
+      const value = !this.shouldUseStickyCards
+      this.$store.dispatch('currentUser/update', { shouldUseStickyCards: value })
     },
     updateDialogHeight () {
       if (!this.visible) { return }

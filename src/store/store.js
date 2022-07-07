@@ -414,6 +414,7 @@ const store = createStore({
     triggerUpdateConnectionPathWhileDragging: (state, { connection, path }) => {},
     triggerUpdateConnectionArrowPositions: (state, { connections, shouldUpdateAll }) => {},
     triggerClearAllSpaceFilters: () => {},
+    triggerNotifyUnlockedStickyCards: () => {},
 
     // Cards
 
