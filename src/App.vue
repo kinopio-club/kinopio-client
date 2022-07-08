@@ -1,7 +1,6 @@
 <template lang='pug'>
 .app(
-  @mousemove="broadcastCursor"
-  @touchmove="broadcastCursor"
+  @pointermove="broadcastCursor"
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
   :class="{ 'no-background': isAddPage }"
