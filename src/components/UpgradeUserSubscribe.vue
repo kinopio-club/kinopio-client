@@ -8,6 +8,25 @@
   //- card cvc:       123 any three digits
   input(type="text" placeholder="Name on Card" required v-model="name" @input="clearErrors")
   input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
+  //- countries
+  .row
+    .country-emoji
+      span {{ currentCountryEmoji }}
+    select(name="countries" v-model="currentCountryName")
+      option(value="United States") United States
+      template(v-for="name in countryNames")
+        option(:value="name") {{name}}
+
+  //- address
+  section.sub-section(v-if="countryRequiresAddress")
+    .row
+      p Address is required for payments from {{currentCountryName}}
+    input(type="text" name="address-line-1" placeholder="Address" required @input="clearErrors")
+    input(type="text" name="address-line-2" placeholder="Address Line 2 (optional)" @input="clearErrors")
+    input(type="text" name="city" placeholder="City" @input="clearErrors")
+    input(type="text" name="state" placeholder="State" @input="clearErrors")
+    input(type="text" name="zip" placeholder="Zip Code" @input="clearErrors")
+
   //- Stripe Elements
   .loading-stripe(v-if="!loading.stripeElementsIsMounted")
     Loader(:visible="true")
@@ -67,6 +86,7 @@ export default {
   },
   mounted () {
     this.loadStripe()
+    this.updateCountries()
   },
   data () {
     return {
@@ -82,7 +102,10 @@ export default {
         allFieldsAreRequired: false,
         stripeError: false,
         stripeErrorMessage: ''
-      }
+      },
+      countries: [],
+      countryNames: [],
+      currentCountryName: 'United States'
     }
   },
   computed: {
@@ -93,9 +116,26 @@ export default {
       return 'Donate'
     },
     user () { return this.$store.state.currentUser },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentCountryEmoji () {
+      const name = this.currentCountryName
+      if (this.countries.length) {
+        const country = this.countries.find(country => country.name === name)
+        return country.emoji
+      } else {
+        return '🇺🇸'
+      }
+    },
+    countryRequiresAddress () {
+      if (!this.countries.length) { return }
+      return this.currentCountryName === 'India'
+    }
   },
   methods: {
+    async updateCountries () {
+      this.countries = await this.$store.dispatch('api/getCountries')
+      this.countryNames = this.countries.map(country => country.name)
+    },
     shouldHideFooter (event) {
       const isTouchDevice = this.$store.state.isTouchDevice
       if (!isTouchDevice) { return }
@@ -297,5 +337,10 @@ export default {
     display inline-block
   .loading-stripe,
   .badge.danger
+    margin-bottom 10px
+  select
+    width 100%
+    margin-left 6px
+  .sub-section
     margin-bottom 10px
 </style>
