@@ -32,10 +32,6 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
           button.inline-button
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       UserBadges(:user="user")
-      template(v-if="currentUserIsUpgraded")
-        .button-wrap
-          button(@click.left.stop="triggerDonateIsVisible")
-            span Donate
 
     //- Unlimited cards from member
     section.upgrade(v-if="!currentUserIsUpgraded")
@@ -59,15 +55,21 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
             span is upgraded, so cards you create in this space won't change your card count
 
     section(v-if="!isAddPage")
-      .button-wrap
-        button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
-          span Settings
-        UserSettings(:user="user" :visible="userSettingsIsVisible" @removeUser="signOut")
-      button(v-if="currentUserIsSignedIn" @click.left="signOut")
-        img.icon.moon(src="@/assets/moon.svg")
-        span Sign Out
-      button(v-else @click.left="triggerSignUpOrInIsVisible")
-        span Sign Up or In
+      .row
+        .button-wrap
+          button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
+            span Settings
+          UserSettings(:user="user" :visible="userSettingsIsVisible" @removeUser="signOut")
+        button(v-if="currentUserIsSignedIn" @click.left="signOut")
+          img.icon.moon(src="@/assets/moon.svg")
+          span Sign Out
+        button(v-else @click.left="triggerSignUpOrInIsVisible")
+          span Sign Up or In
+      template(v-if="currentUserIsUpgraded")
+        .row
+          .button-wrap
+            button(@click.left.stop="triggerDonateIsVisible")
+              span Donate
 
   //- Other User
   section(v-if="!isCurrentUser && userIsSignedIn && user.id")

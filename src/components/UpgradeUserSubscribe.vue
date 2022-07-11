@@ -14,6 +14,7 @@
       span {{ currentCountryEmoji }}
     select(name="countries" v-model="currentCountryName")
       option(value="United States") United States
+      option(value="Other") Other
       template(v-for="name in countryNames")
         option(:value="name") {{name}}
 
@@ -21,11 +22,11 @@
   section.sub-section(v-if="countryRequiresAddress")
     .row
       p Address is required for payments from {{currentCountryName}}
-    input(type="text" name="address-line-1" placeholder="Address" required @input="clearErrors")
-    input(type="text" name="address-line-2" placeholder="Address Line 2 (optional)" @input="clearErrors")
-    input(type="text" name="city" placeholder="City" @input="clearErrors")
-    input(type="text" name="state" placeholder="State" @input="clearErrors")
-    input(type="text" name="zip" placeholder="Zip Code" @input="clearErrors")
+    input(type="text" name="address-line-1" placeholder="Address" v-model="addressLine1" @input="clearErrors")
+    input(type="text" name="address-line-2" placeholder="Address Line 2 (optional)" v-model="addressLine2" @input="clearErrors")
+    input(type="text" name="city" placeholder="City" v-model="addressCity" @input="clearErrors")
+    input(type="text" name="state" placeholder="State" v-model="addressState" @input="clearErrors")
+    input(type="text" name="zip" placeholder="Zip Code" v-model="addressZip" @input="clearErrors")
 
   //- Stripe Elements
   .loading-stripe(v-if="!loading.stripeElementsIsMounted")
@@ -105,7 +106,13 @@ export default {
       },
       countries: [],
       countryNames: [],
-      currentCountryName: 'United States'
+      currentCountryName: 'United States',
+      // if countryRequiresAddress
+      addressLine1: '',
+      addressLine2: '',
+      addressCity: '',
+      addressState: '',
+      addressZip: ''
     }
   },
   computed: {
@@ -119,16 +126,33 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentCountryEmoji () {
       const name = this.currentCountryName
-      if (this.countries.length) {
-        const country = this.countries.find(country => country.name === name)
-        return country.emoji
-      } else {
-        return '🇺🇸'
-      }
+      const localCountries = [
+        {
+          name: 'United States',
+          emoji: '🇺🇸'
+        }, {
+          name: 'Other',
+          emoji: '🌍󠁧󠁢󠁷󠁬󠁳󠁿'
+        }
+      ]
+      const countries = this.countries.concat(localCountries)
+      const country = countries.find(country => country.name === name)
+      return country.emoji
     },
     countryRequiresAddress () {
       if (!this.countries.length) { return }
       return this.currentCountryName === 'India'
+    },
+    countryCode () {
+      // https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
+      const codes = [
+        {
+          name: 'India',
+          code: 'IN'
+        }
+      ]
+      const country = codes.find(code => code.name === this.currentCountryName)
+      return country.code
     }
   },
   methods: {
@@ -218,15 +242,28 @@ export default {
       return result
     },
     async createPaymentMethod () {
-      const result = await stripe.createPaymentMethod({
+      let paymentInfo = {
         type: 'card',
         card: cardNumber,
         billing_details: {
           name: this.name,
           email: this.email
         }
-      })
-      console.log('🎡 stripe payment method', result)
+      }
+      // https://stripe.com/docs/api/payment_methods/create#create_payment_method-billing_details
+      if (this.countryRequiresAddress) {
+        const address = {
+          city: this.addressCity,
+          country: this.countryCode,
+          line1: this.addressLine1,
+          line2: this.addressLine2,
+          postal_code: this.addressZip,
+          state: this.addressState
+        }
+        paymentInfo.billing_details.address = address
+      }
+      const result = await stripe.createPaymentMethod(paymentInfo)
+      console.log('🎡 stripe payment method', paymentInfo, result)
       if (result.error) {
         this.error.stripeError = true
         this.error.stripeErrorMessage = utils.removeTrailingPeriod(result.error.message)
@@ -294,12 +331,21 @@ export default {
         this.error.stripeErrorMessage = 'Your credit card was declined. Please try again with a different card'
       }
     },
+    showErrorAllFieldsAreRequired () {
+      this.error.allFieldsAreRequired = true
+      this.loading.subscriptionIsBeingCreated = false
+    },
     async subscribe () {
       this.clearErrors()
       if (!this.name || !this.email) {
-        this.error.allFieldsAreRequired = true
-        this.loading.subscriptionIsBeingCreated = false
+        this.showErrorAllFieldsAreRequired()
         return
+      }
+      if (this.countryRequiresAddress) {
+        if (!this.addressLine1 || !this.addressCity || !this.addressState || !this.addressZip) {
+          this.showErrorAllFieldsAreRequired()
+          return
+        }
       }
       this.loading.subscriptionIsBeingCreated = true
       try {
