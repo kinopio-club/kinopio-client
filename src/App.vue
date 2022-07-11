@@ -347,6 +347,7 @@ textarea,
 
 button,
 input[type="color"],
+select,
 label // used for checkbox buttons
   touch-action manipulation
   text-align left
@@ -412,6 +413,15 @@ label // used for checkbox buttons
     //   &:active
     //     box-shadow var(--button-active-inset-shadow)
     //     background var(--secondary-active-background)
+
+select
+  max-width 100%
+  -webkit-appearance none
+  background-image url('assets/down-arrow.svg')
+  background-repeat no-repeat
+  background-position center
+  background-position-x calc(100% - 6px)
+  background-position-y center
 
 textarea
   &[disabled],
