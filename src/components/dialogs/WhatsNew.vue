@@ -22,7 +22,7 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
 
   section
     .button-wrap
-      a(href="https://www.are.na/kinopio/kinopio-what-s-new")
+      a(href="https://blog.kinopio.club")
         button Read All →
 </template>
 
