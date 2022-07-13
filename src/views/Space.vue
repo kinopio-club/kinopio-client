@@ -25,8 +25,14 @@ main.space(
     template(v-for="overlap in cardOverlaps")
       .badge.label-badge.card-overlap-indicator(v-if="canEditSpace" :style="{ left: overlap.x + 'px', top: overlap.y + 'px' }" @click.left="selectOverlap(overlap)")
         span {{overlap.length}}
-    template(v-for="card in cards")
+    template(v-for="card in unlockedCards")
       Card(:card="card")
+    template(v-for="card in lockedCards")
+      //- to component? : CardUnlockButton(card)
+      //- .lock-button-wrap.inline-button-wrap(@mouseup.left="unlockCard(card)" @touchend="unlockCard(card)" :style="unlockButtonPosition(card)")
+      //-   button.inline-button(tabindex="-1" :style="{background: itemBackground}")
+      //-     img.icon.lock-icon(src="@/assets/lock.svg")
+
   CardDetails
   CardUserDetails
   ConnectionDetails
@@ -163,7 +169,8 @@ export default {
       }
     },
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
-    cards () { return this.$store.getters['currentCards/all'] },
+    unlockedCards () { return this.$store.getters['currentCards/isNotLocked'] },
+    lockedCards () { return this.$store.getters['currentCards/isLocked'] },
     currentConnectionStartCardIds () { return this.$store.state.currentConnectionStartCardIds },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
@@ -338,7 +345,7 @@ export default {
       }
     },
     normalizeSpaceCardsZ () {
-      const sorted = sortBy(this.cards, ['z'])
+      const sorted = sortBy(this.unlockedCards, ['z'])
       const zList = sorted.map(card => card.z)
       const isNormalized = uniq(zList).length === zList.length
       if (isNormalized) { return }

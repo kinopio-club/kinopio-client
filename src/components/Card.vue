@@ -596,7 +596,7 @@ export default {
       if (this.currentCardDetailsIsVisible) {
         z = 2147483646 // max z
       } else if (this.isLocked) {
-        z = -1
+        z = 0
         pointerEvents = 'none'
       }
       return {

@@ -5,8 +5,14 @@
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
   :class="{ 'no-background': isAddPage }"
 )
+
   base(v-if="isAddPage" target="_blank")
+
   #layout-viewport(:style="{ background: backgroundTint }")
+
+  template(v-for="card in lockedCards")
+    Card(:card="card")
+
   MagicPaint
   OffscreenMarkers
   //- router-view is Space or Add
@@ -39,6 +45,7 @@ import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import Minimap from '@/components/Minimap.vue'
+import Card from '@/components/Card.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -53,7 +60,8 @@ export default {
     TagDetails,
     LinkDetails,
     OffscreenMarkers,
-    Minimap
+    Minimap,
+    Card
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
@@ -93,6 +101,7 @@ export default {
     }
   },
   computed: {
+    lockedCards () { return this.$store.getters['currentCards/isLocked'] },
     backgroundTint () {
       const color = this.$store.state.currentSpace.backgroundTint
       const metaThemeColor = document.querySelector('meta[name=theme-color]')
