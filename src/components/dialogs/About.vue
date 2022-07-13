@@ -9,6 +9,11 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
       .button-wrap
         a(href="https://help.kinopio.club/about/")
           button About Kinopio →
+      .button-wrap
+        button(@click.left.stop="toggleBlogsIsVisible" :class="{active: blogsIsVisible}")
+          span Blogs
+        Blogs(:visible="blogsIsVisible")
+
     .row
       .button-wrap
         button(@click.left.stop="toggleHelpIsVisible" :class="{active: helpIsVisible}")
@@ -19,11 +24,11 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
           span What's New
           img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
         WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
-    .row
-      a(href="https://kinopio.club/pop-up-shop-u9XxpuIzz2_LvQUAayl65")
-        button
-          img.icon(src="@/assets/sticker.svg")
-          span Pop Up Shop →
+    //- .row
+    //-   a(href="https://kinopio.club/pop-up-shop-u9XxpuIzz2_LvQUAayl65")
+    //-     button
+    //-       img.icon(src="@/assets/sticker.svg")
+    //-       span Pop Up Shop →
   section(v-if="!isAddPage")
     .row
       .button-wrap
@@ -53,8 +58,8 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             span Forum →
     .row
       .button-wrap
-        a(href="https://pketh.org")
-          button Blog →
+        a(href="https://twitter.com/kinopioclub")
+          button Twitter →
       .button-wrap
         a(href="https://help.kinopio.club/api/")
           button API →
@@ -66,6 +71,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
 <script>
 import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 import Help from '@/components/dialogs/Help.vue'
+import Blogs from '@/components/dialogs/Blogs.vue'
 import Apps from '@/components/dialogs/Apps.vue'
 import utils from '@/utils.js'
 
@@ -79,7 +85,8 @@ export default {
   components: {
     WhatsNew,
     Help,
-    Apps
+    Apps,
+    Blogs
   },
   props: {
     visible: Boolean
@@ -103,7 +110,8 @@ export default {
       isIPhone: false,
       isAndroid: false,
       isMobile: false,
-      dialogHeight: null
+      dialogHeight: null,
+      blogsIsVisible: false
     }
   },
   async mounted () {
@@ -128,6 +136,11 @@ export default {
     isAddPage () { return this.$store.state.isAddPage }
   },
   methods: {
+    toggleBlogsIsVisible () {
+      const isVisible = this.blogsIsVisible
+      this.closeDialogs()
+      this.blogsIsVisible = !isVisible
+    },
     toggleHelpIsVisible () {
       const isVisible = this.helpIsVisible
       this.closeDialogs()
@@ -170,6 +183,7 @@ export default {
       this.helpIsVisible = false
       this.whatsNewIsVisible = false
       this.appsIsVisible = false
+      this.blogsIsVisible = false
     },
     updateDialogHeight () {
       if (!this.visible) { return }

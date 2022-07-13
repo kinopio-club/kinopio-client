@@ -10,10 +10,6 @@ dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="cl
       .button-wrap
         a(href="mailto:hi@kinopio.club")
           button hi@kinopio.club
-    .row
-      .button-wrap
-        a(href="https://twitter.com/kinopioclub")
-          button Twitter →
   section
     .row
       p Guides, topics, and policies
