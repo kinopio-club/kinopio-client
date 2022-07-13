@@ -1,17 +1,15 @@
 <template lang="pug">
 a#pdf-downlaod-anchor.hidden
-.pdf(v-if="visible")
+section.sub-section.pdf(v-if="visible")
   template(v-if="isLoading")
     .row
       Loader(:visible="true")
       span Creating space PDF…
   template(v-if="unknownServerError")
-    p
-      .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+    .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
   template(v-if="!isLoading && !unknownServerError")
     p {{fileName()}}.pdf
-    p
-      .badge.success Downloaded
+    .badge.success Downloaded
 </template>
 
 <script>
@@ -82,8 +80,11 @@ export default {
 }
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 .pdf
+  margin-top 10px
+  margin-bottom 10px
+  padding-bottom 4px
   .loader
     height 14px
     width 14px

@@ -9,6 +9,14 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
       span Copy Content
     .row
       .badge.success(v-if="textIsCopied") Card Content Copied
+
+    //- PDF
+    .row
+      .button-wrap(v-if="currentUserIsSignedIn")
+        button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
+          span PDF
+    Pdf(:visible="pdfIsVisible")
+
     button(@click.left="duplicateSpace")
       img.icon(src="@/assets/add.svg")
       span Duplicate Space
@@ -39,13 +47,6 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
       .badge.info This will take a minute or so…
     .info-container(v-if="unknownServerError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-
-  section(v-if="currentUserIsSignedIn")
-    //- PDF
-    .button-wrap
-      button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
-        span PDF
-    Pdf(:visible="pdfIsVisible")
 
 </template>
 
@@ -184,10 +185,12 @@ export default {
 }
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 .export
   overflow scroll
   max-height calc(100vh - 100px)
+  @media(max-height 570px)
+    top -100px
   textarea
     background-color var(--secondary-background)
     border 0
@@ -205,7 +208,5 @@ export default {
   .hidden
     display none
   .info-container
-    margin-top 10px
-  .pdf
     margin-top 10px
 </style>

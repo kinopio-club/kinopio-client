@@ -31,11 +31,6 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
             span Embed
           Embed(:visible="embedIsVisible")
-        //- PDF
-        .button-wrap
-          button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
-            span PDF
-          DialogWrap(:visible="pdfIsVisible" :title="'PDF'" :childName="'pdf'")
 
       //- Url Copied
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
@@ -50,12 +45,6 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         span.badge.success.last-child
           img.icon.open(src="@/assets/open.svg")
           span {{privacyName(0)}}
-      //- PDF
-      p
-        .button-wrap
-          button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
-            span PDF
-          DialogWrap(:visible="pdfIsVisible" :title="'PDF'" :childName="'pdf'")
 
   // Export, Import
   section
@@ -98,7 +87,6 @@ import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
 import SpaceRssFeed from '@/components/dialogs/SpaceRssFeed.vue'
 import Embed from '@/components/dialogs/Embed.vue'
-import DialogWrap from '@/components/dialogs/DialogWrap.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
@@ -117,7 +105,6 @@ export default {
     InviteCollaborators,
     SpaceRssFeed,
     Embed,
-    DialogWrap,
     UserList,
     UserDetails,
     User,
@@ -146,7 +133,6 @@ export default {
       dialogHeight: null,
       spaceRssFeedIsVisible: false,
       embedIsVisible: false,
-      pdfIsVisible: false,
       exportIsVisible: false,
       importIsVisible: false
     }
@@ -216,11 +202,6 @@ export default {
       }
       navigator.share(data)
     },
-    togglePdfIsVisible () {
-      const isVisible = this.pdfIsVisible
-      this.closeDialogs()
-      this.pdfIsVisible = !isVisible
-    },
     togglePrivacyPickerIsVisible () {
       const isVisible = this.privacyPickerIsVisible
       this.closeDialogs()
@@ -256,7 +237,6 @@ export default {
       this.inviteCollaboratorsIsVisible = false
       this.spaceRssFeedIsVisible = false
       this.embedIsVisible = false
-      this.pdfIsVisible = false
       this.exportIsVisible = false
       this.importIsVisible = false
       this.userDetailsIsNotVisible()
