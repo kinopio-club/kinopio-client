@@ -184,6 +184,14 @@ const self = {
         console.error('🚒 getDate', error)
       }
     },
+    getCountries: async (context) => {
+      try {
+        const response = await fetch(`${host}/meta/countries`)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 getDate', error)
+      }
+    },
     getNewStuff: async (context) => {
       try {
         const response = await fetch(`${host}/meta/new-stuff`)

@@ -197,7 +197,7 @@ export default {
       return selectableItems
     },
     updateSelectableCards () {
-      const cards = this.$store.getters['currentCards/all']
+      const cards = this.$store.getters['currentCards/withIsNotLocked']
       selectableCards = this.selectableItems(cards)
     },
     updateSelectableConnections () {

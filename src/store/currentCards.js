@@ -698,6 +698,10 @@ const currentCards = {
     all: (state) => {
       return state.ids.map(id => state.cards[id])
     },
+    withIsNotLocked: (state, getters) => {
+      let cards = getters.all
+      return cards.filter(card => !card.isLocked)
+    },
     withSpaceLinks: (state, getters) => {
       let cards = getters.all
       return cards.filter(card => utils.idIsValid(card.linkToSpaceId))
