@@ -114,14 +114,13 @@ article(
 
       //- Right buttons
       span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
-        //- lock
-        .lock-button-wrap.inline-button-wrap(v-if="isLocked" @mouseup.left="unlockCard" @touchend="unlockCard")
-          button.inline-button(tabindex="-1" :style="{background: itemBackground}")
-            img.icon.lock-icon(src="@/assets/lock.svg")
-          //- maintain connections when card is locked
-          .connector.invisible(:data-card-id="id")
-            button
-
+        //- Lock
+        template(v-if="isLocked")
+          // based on CardUnlockButton.vue
+          //- .connector maintains connection paths when card is locked
+          .lock-button-wrap.inline-button-wrap.connector(@mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="id")
+            button.inline-button(tabindex="-1" :style="{background: itemBackground}")
+              img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
           //- Url →
           a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
@@ -596,7 +595,7 @@ export default {
       if (this.currentCardDetailsIsVisible) {
         z = 2147483646 // max z
       } else if (this.isLocked) {
-        z = -1
+        z = 0
         pointerEvents = 'none'
       }
       return {
@@ -700,11 +699,15 @@ export default {
         maxWidth = 132
       }
       if (!this.normalizedName) { return 0 }
-      const width = this.longestNameLineLength() * averageCharacterWidth
+      let width = this.longestNameLineLength() * averageCharacterWidth
       if (this.card.linkToSpaceId && width <= maxWidth) {
         this.checkIfShouldUpdateCardConnectionPaths(width)
       }
-      return Math.min(width, maxWidth)
+      width = Math.min(width, maxWidth)
+      if (this.card.isLocked) {
+        width = width + 4
+      }
+      return Math.ceil(width)
     },
     isConnectingTo () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess

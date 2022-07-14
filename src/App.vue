@@ -7,6 +7,9 @@
 )
   base(v-if="isAddPage" target="_blank")
   #layout-viewport(:style="{ background: backgroundTint }")
+  .locked-cards(:style="zoomScale")
+    template(v-for="card in lockedCards")
+      Card(:card="card")
   MagicPaint
   OffscreenMarkers
   //- router-view is Space or Add
@@ -39,6 +42,7 @@ import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import Minimap from '@/components/Minimap.vue'
+import Card from '@/components/Card.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -53,7 +57,8 @@ export default {
     TagDetails,
     LinkDetails,
     OffscreenMarkers,
-    Minimap
+    Minimap,
+    Card
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
@@ -93,6 +98,7 @@ export default {
     }
   },
   computed: {
+    lockedCards () { return this.$store.getters['currentCards/isLocked'] },
     backgroundTint () {
       const color = this.$store.state.currentSpace.backgroundTint
       const metaThemeColor = document.querySelector('meta[name=theme-color]')
@@ -136,6 +142,12 @@ export default {
         return 'grab'
       }
       return undefined
+    },
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
+    zoomScale () {
+      return {
+        transform: `scale(${this.spaceZoomDecimal})`
+      }
     }
   },
   methods: {
@@ -189,7 +201,7 @@ export default {
       if (!canEditSpace) { return }
       let updates = utils.cursorPositionInPage(event)
       updates.userId = this.$store.state.currentUser.id
-      updates.zoom = this.$store.getters.spaceZoomDecimal
+      updates.zoom = this.spaceZoomDecimal
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
     },
     isTouchDevice () {
@@ -963,5 +975,9 @@ progress::-webkit-progress-value
 progress::-moz-progress-bar
   background-color var(--primary)
   border-radius 2px
+
+.locked-cards
+  position absolute
+  top 0
 
 </style>

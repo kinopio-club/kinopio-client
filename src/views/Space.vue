@@ -25,8 +25,11 @@ main.space(
     template(v-for="overlap in cardOverlaps")
       .badge.label-badge.card-overlap-indicator(v-if="canEditSpace" :style="{ left: overlap.x + 'px', top: overlap.y + 'px' }" @click.left="selectOverlap(overlap)")
         span {{overlap.length}}
-    template(v-for="card in cards")
+    template(v-for="card in unlockedCards")
       Card(:card="card")
+    template(v-for="card in lockedCards")
+      CardUnlockButton(:card="card" :position="unlockButtonPosition(card)")
+
   CardDetails
   CardUserDetails
   ConnectionDetails
@@ -50,6 +53,7 @@ import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedAction
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import BoxSelecting from '@/components/BoxSelecting.vue'
+import CardUnlockButton from '@/components/CardUnlockButton.vue'
 import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -75,7 +79,8 @@ export default {
     MultipleSelectedActions,
     ScrollAtEdgesHandler,
     NotificationsWithPosition,
-    BoxSelecting
+    BoxSelecting,
+    CardUnlockButton
   },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')
@@ -163,7 +168,8 @@ export default {
       }
     },
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
-    cards () { return this.$store.getters['currentCards/all'] },
+    unlockedCards () { return this.$store.getters['currentCards/isNotLocked'] },
+    lockedCards () { return this.$store.getters['currentCards/isLocked'] },
     currentConnectionStartCardIds () { return this.$store.state.currentConnectionStartCardIds },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
@@ -191,6 +197,11 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
+    unlockButtonPosition (card) {
+      const element = document.querySelector(`article[data-card-id="${card.id}"] .lock-button-wrap`)
+      const rect = element.getBoundingClientRect()
+      return rect
+    },
     updateCardOverlaps () {
       let cards = this.$store.getters['currentCards/all']
       cards = utils.clone(cards)
@@ -338,7 +349,7 @@ export default {
       }
     },
     normalizeSpaceCardsZ () {
-      const sorted = sortBy(this.cards, ['z'])
+      const sorted = sortBy(this.unlockedCards, ['z'])
       const zList = sorted.map(card => card.z)
       const isNormalized = uniq(zList).length === zList.length
       if (isNormalized) { return }
