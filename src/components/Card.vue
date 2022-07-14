@@ -705,7 +705,7 @@ export default {
       }
       width = Math.min(width, maxWidth)
       if (this.card.isLocked) {
-        width = width + 2
+        width = width + 4
       }
       return Math.ceil(width)
     },
