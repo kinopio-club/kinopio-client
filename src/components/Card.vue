@@ -115,6 +115,7 @@ article(
       //- Right buttons
       span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
         //- lock
+        // same as CardUnlockButton.vue
         .lock-button-wrap.inline-button-wrap(v-if="isLocked" @mouseup.left="unlockCard" @touchend="unlockCard")
           button.inline-button(tabindex="-1" :style="{background: itemBackground}")
             img.icon.lock-icon(src="@/assets/lock.svg")
@@ -700,11 +701,12 @@ export default {
         maxWidth = 132
       }
       if (!this.normalizedName) { return 0 }
-      const width = this.longestNameLineLength() * averageCharacterWidth
+      let width = this.longestNameLineLength() * averageCharacterWidth
       if (this.card.linkToSpaceId && width <= maxWidth) {
         this.checkIfShouldUpdateCardConnectionPaths(width)
       }
-      return Math.min(width, maxWidth)
+      width = Math.min(width, maxWidth)
+      return Math.ceil(width)
     },
     isConnectingTo () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess

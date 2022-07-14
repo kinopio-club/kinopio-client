@@ -28,10 +28,7 @@ main.space(
     template(v-for="card in unlockedCards")
       Card(:card="card")
     template(v-for="card in lockedCards")
-      //- to component? : CardUnlockButton(card)
-      //- .lock-button-wrap.inline-button-wrap(@mouseup.left="unlockCard(card)" @touchend="unlockCard(card)" :style="unlockButtonPosition(card)")
-      //-   button.inline-button(tabindex="-1" :style="{background: itemBackground}")
-      //-     img.icon.lock-icon(src="@/assets/lock.svg")
+      CardUnlockButton(:card="card" :position="unlockButtonPosition(card)")
 
   CardDetails
   CardUserDetails
@@ -56,6 +53,7 @@ import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedAction
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import BoxSelecting from '@/components/BoxSelecting.vue'
+import CardUnlockButton from '@/components/CardUnlockButton.vue'
 import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -81,7 +79,8 @@ export default {
     MultipleSelectedActions,
     ScrollAtEdgesHandler,
     NotificationsWithPosition,
-    BoxSelecting
+    BoxSelecting,
+    CardUnlockButton
   },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')
@@ -198,6 +197,11 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
+    unlockButtonPosition (card) {
+      const element = document.querySelector(`article[data-card-id="${card.id}"] .lock-button-wrap`)
+      const rect = element.getBoundingClientRect()
+      return rect
+    },
     updateCardOverlaps () {
       let cards = this.$store.getters['currentCards/all']
       cards = utils.clone(cards)

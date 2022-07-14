@@ -5,14 +5,11 @@
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
   :class="{ 'no-background': isAddPage }"
 )
-
   base(v-if="isAddPage" target="_blank")
-
   #layout-viewport(:style="{ background: backgroundTint }")
-
-  template(v-for="card in lockedCards")
-    Card(:card="card")
-
+  .locked-cards(:style="zoomScale")
+    template(v-for="card in lockedCards")
+      Card(:card="card")
   MagicPaint
   OffscreenMarkers
   //- router-view is Space or Add
@@ -145,6 +142,12 @@ export default {
         return 'grab'
       }
       return undefined
+    },
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
+    zoomScale () {
+      return {
+        transform: `scale(${this.spaceZoomDecimal})`
+      }
     }
   },
   methods: {
@@ -198,7 +201,7 @@ export default {
       if (!canEditSpace) { return }
       let updates = utils.cursorPositionInPage(event)
       updates.userId = this.$store.state.currentUser.id
-      updates.zoom = this.$store.getters.spaceZoomDecimal
+      updates.zoom = this.spaceZoomDecimal
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
     },
     isTouchDevice () {
@@ -972,5 +975,9 @@ progress::-webkit-progress-value
 progress::-moz-progress-bar
   background-color var(--primary)
   border-radius 2px
+
+.locked-cards
+  position absolute
+  top 0
 
 </style>
