@@ -34,7 +34,7 @@ export default {
       }
     },
     backgroundStyles () {
-      return { backgroundColor: 'transparent' } // to css
+      return { backgroundColor: 'transparent' }
     },
     canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) }
   },

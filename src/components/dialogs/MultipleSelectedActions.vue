@@ -557,7 +557,7 @@ export default {
   .edit-connection-types
     .change-color
       height 24px
-      max-width 50px
+      max-width 48px
       padding-top 3px
       display flex
       overflow hidden

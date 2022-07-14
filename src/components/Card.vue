@@ -114,15 +114,13 @@ article(
 
       //- Right buttons
       span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
-        //- lock
-        // same as CardUnlockButton.vue
-        .lock-button-wrap.inline-button-wrap(v-if="isLocked" @mouseup.left="unlockCard" @touchend="unlockCard")
-          button.inline-button(tabindex="-1" :style="{background: itemBackground}")
-            img.icon.lock-icon(src="@/assets/lock.svg")
-          //- maintain connections when card is locked
-          .connector.invisible(:data-card-id="id")
-            button
-
+        //- Lock
+        template(v-if="isLocked")
+          // based on CardUnlockButton.vue
+          //- .connector maintains connection paths when card is locked
+          .lock-button-wrap.inline-button-wrap.connector(@mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="id")
+            button.inline-button(tabindex="-1" :style="{background: itemBackground}")
+              img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
           //- Url →
           a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
@@ -706,6 +704,9 @@ export default {
         this.checkIfShouldUpdateCardConnectionPaths(width)
       }
       width = Math.min(width, maxWidth)
+      if (this.card.isLocked) {
+        width = width + 2
+      }
       return Math.ceil(width)
     },
     isConnectingTo () {
