@@ -2095,6 +2095,8 @@ article
     display initial
     cursor pointer
     padding-right 6px
+    padding-bottom 6px
+    padding-top 6px
     button
       cursor pointer
     .icon
