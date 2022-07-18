@@ -936,8 +936,17 @@ export default {
     },
     scrollIntoViewAndFocus () {
       this.$nextTick(() => {
-        this.scrollIntoView()
-        this.focusName()
+        // only mobile focus, if card is new (e.g. name is blank)
+        if (utils.isMobile()) {
+          if (this.card.name) {
+            this.scrollIntoView()
+          } else {
+            this.focusName()
+          }
+        } else {
+          this.scrollIntoView()
+          this.focusName()
+        }
         this.triggerUpdateMagicPaintPositionOffset()
         this.triggerUpdatePositionInVisualViewport()
       })
