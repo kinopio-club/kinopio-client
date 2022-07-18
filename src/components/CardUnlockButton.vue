@@ -1,6 +1,9 @@
 <template lang="pug">
 .card-unlock-button.inline-button-wrap(:style="positionStyles" @mouseup.left="unlockCard" @touchend="unlockCard")
   button.inline-button(tabindex="-1" :style="backgroundStyles")
+    .connected-colors
+      template(v-for="type in connectionTypes")
+        .color(:style="{ background: type.color}")
     img.icon.lock-icon(src="@/assets/lock.svg")
 </template>
 
@@ -36,7 +39,8 @@ export default {
     backgroundStyles () {
       return { backgroundColor: 'transparent' }
     },
-    canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) }
+    canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) },
+    connectionTypes () { return this.$store.getters['currentConnections/typesByCardId'](this.card.id) }
   },
   methods: {
     unlockCard (event) {
@@ -72,5 +76,17 @@ export default {
     left 5.5px
     top 2px
     height 10px
+  // from Card.vue
+  .connected-colors
+    position absolute
+    left 0
+    top 0
+    display flex
+    height 100%
+    width 100%
+    border-radius 2px
+    overflow hidden
+    .color
+      width 100%
 
 </style>
