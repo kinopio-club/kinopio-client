@@ -936,18 +936,8 @@ export default {
     },
     scrollIntoViewAndFocus () {
       this.$nextTick(() => {
-        let connections = this.$store.getters['currentConnections/byCardId'](this.card.id)
-        connections = Boolean(connections.length)
-        if (utils.isMobile()) {
-          if (this.card.name) {
-            this.scrollIntoView()
-          } else if (!connections) {
-            this.focusName()
-          }
-        } else {
-          this.scrollIntoView()
-          this.focusName()
-        }
+        this.scrollIntoView()
+        this.focusName()
         this.triggerUpdateMagicPaintPositionOffset()
         this.triggerUpdatePositionInVisualViewport()
       })
