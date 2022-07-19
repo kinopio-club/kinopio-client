@@ -212,7 +212,7 @@ export default {
       this.$store.commit('userHasScrolled', true)
     },
     updateMetaDescription () {
-      let description = 'Kinopio is your spatial thinking tool for new ideas and hard problems.'
+      let description = 'Kinopio is the thinking tool for building new ideas and solving hard problems. Create spaces to brainstorm, research, plan and take notes.'
       const metaDescription = document.querySelector('meta[name=description]')
       const cards = this.$store.getters['currentCards/all']
       const topLeftCard = utils.topLeftCard(cards)
