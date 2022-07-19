@@ -658,7 +658,8 @@
       "updatedAt": "2022-07-18T18:22:49.405Z",
       "spaceId": "nMuIUZOoWon7--qudbvGY",
       "userId": "euGhpBrR9eBcjKnK16C_g",
-      "connectionTypeId": "gbEN7pXF35789hDQmW4RZ"
+      "connectionTypeId": "gbEN7pXF35789hDQmW4RZ",
+      "directionIsVisible": true
     },
     {
       "id": "P6KMxBPM3k1RoQwad8H6C",
@@ -736,7 +737,8 @@
       "updatedAt": "2022-07-18T18:26:06.662Z",
       "spaceId": "nMuIUZOoWon7--qudbvGY",
       "userId": "euGhpBrR9eBcjKnK16C_g",
-      "connectionTypeId": "gbEN7pXF35789hDQmW4RZ"
+      "connectionTypeId": "gbEN7pXF35789hDQmW4RZ",
+      "directionIsVisible": true
     }
   ],
   "connectionTypes": [
