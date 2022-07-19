@@ -23,6 +23,8 @@ path.connection-path(
   @dragover.prevent
   @drop.prevent.stop="addCardsAndUploadFiles"
 )
+circle(v-if="directionIsVisible && !isUpdatingPath" r="6" :fill="typeColor" :class="{filtered: isFiltered}")
+  animateMotion(dur="3s" repeatCount="indefinite" :path="path")
 </template>
 
 <script>
@@ -166,6 +168,42 @@ export default {
           return true
         }
       } else { return false }
+    },
+    directionIsVisible () { return this.connection.directionIsVisible },
+    isUpdatingPath () {
+      let shouldHide
+      const currentUserIsDragging = this.$store.state.currentUserIsDraggingCard
+      let cards = []
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      const currentCardId = this.$store.state.currentDraggingCardId
+      const remoteCardsDragging = utils.clone(this.$store.state.remoteCardsDragging)
+      const remoteCardsSelected = utils.clone(this.$store.state.remoteCardsSelected)
+      // local multiple
+      if (multipleCardsSelectedIds.length && currentUserIsDragging) {
+        cards = multipleCardsSelectedIds.map(id => this.$store.getters['currentCards/byId'](id))
+      // local single
+      } else if (currentCardId && currentUserIsDragging) {
+        const currentCard = this.$store.getters['currentCards/byId'](currentCardId)
+        cards = [currentCard]
+      // remote multiple
+      } else if (remoteCardsDragging.length && remoteCardsSelected.length) {
+        cards = remoteCardsSelected.map(card => {
+          card.id = card.cardId
+          return card
+        })
+      // remote single
+      } else if (remoteCardsDragging.length) {
+        cards = remoteCardsDragging.map(card => {
+          card.id = card.cardId
+          return card
+        })
+      }
+      cards.forEach(card => {
+        if (card.id === this.startCardId || card.id === this.endCardId) {
+          shouldHide = true
+        }
+      })
+      return shouldHide
     }
   },
   methods: {
