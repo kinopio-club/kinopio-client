@@ -23,6 +23,8 @@ path.connection-path(
   @dragover.prevent
   @drop.prevent.stop="addCardsAndUploadFiles"
 )
+circle(v-if="directionIsVisible && !shouldHideDirection" r="6" :fill="typeColor" :class="{filtered: isFiltered}")
+  animateMotion(dur="3s" repeatCount="indefinite" :path="path")
 </template>
 
 <script>
@@ -166,6 +168,34 @@ export default {
           return true
         }
       } else { return false }
+    },
+    directionIsVisible () { return this.connection.directionIsVisible },
+    shouldHideDirection () {
+      let shouldHide
+      if (this.$store.state.currentUserIsDraggingCard) {
+        let cards = []
+        // check if connection is connected to selected/dragging cards
+        const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+        const currentCardId = this.$store.state.currentDraggingCardId
+        const remoteCardsDragging = this.$store.state.remoteCardsDragging
+        if (multipleCardsSelectedIds.length) {
+          cards = multipleCardsSelectedIds.map(id => this.$store.getters['currentCards/byId'](id))
+        } else if (currentCardId) {
+          const currentCard = this.$store.getters['currentCards/byId'](currentCardId)
+          cards = [currentCard]
+        } else if (remoteCardsDragging.length) {
+          cards = remoteCardsDragging.map(card => {
+            card.id = card.cardId
+            return card
+          })
+        }
+        cards.forEach(card => {
+          if (card.id === this.startCardId || card.id === this.endCardId) {
+            shouldHide = true
+          }
+        })
+      }
+      return shouldHide
     }
   },
   methods: {

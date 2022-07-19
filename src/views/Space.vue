@@ -16,7 +16,6 @@ main.space(
   template(v-for="connection in connections")
     //- Connection Decorators
     ConnectionLabel(:connection="connection")
-    ConnectionArrow(:connection="connection")
   //- Presence
   template(v-for="user in spaceMembers")
     UserLabel(:user="user")
@@ -46,7 +45,6 @@ import CardUserDetails from '@/components/dialogs/CardUserDetails.vue'
 import CurrentConnection from '@/components/CurrentConnection.vue'
 import Connection from '@/components/Connection.vue'
 import ConnectionLabel from '@/components/ConnectionLabel.vue'
-import ConnectionArrow from '@/components/shapes/ConnectionArrow.vue'
 import UserLabel from '@/components/UserLabel.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
@@ -73,7 +71,6 @@ export default {
     CurrentConnection,
     Connection,
     ConnectionLabel,
-    ConnectionArrow,
     UserLabel,
     ConnectionDetails,
     MultipleSelectedActions,
