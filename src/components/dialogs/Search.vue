@@ -30,7 +30,7 @@ dialog.search(@click="closeDialogs" v-if="visible" :open="visible" ref="dialog" 
           span.card-info
             template(v-for="segment in card.nameSegments")
               img.card-image(v-if="segment.isImage" :src="segment.url")
-              NameSegment(:segment="segment" :search="search")
+              NameSegment(:segment="segment" :search="search" :isStrikeThrough="isStrikeThrough(card)")
 
 </template>
 
@@ -120,6 +120,9 @@ export default {
     currentUser () { return this.$store.state.currentUser }
   },
   methods: {
+    isStrikeThrough (card) {
+      return card.name.startsWith('[x]')
+    },
     cardDetailsIsVisibleForCardId (card) {
       return this.$store.state.cardDetailsIsVisibleForCardId === card.id
     },

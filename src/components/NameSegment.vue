@@ -28,7 +28,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     template(v-if="!segment.markdown")
       span(v-if="search")
         NameMatch(:name="segment.content" :indexes="matchIndexes(segment.content)")
-      span(v-else) {{segment.content}}
+      span(v-else :class="{ strikethrough: isStrikeThrough }") {{segment.content}}
   //- Tags
   span.badge.button-badge(
     v-if="segment.isTag"
@@ -77,7 +77,8 @@ export default {
   },
   props: {
     segment: Object,
-    search: String
+    search: String,
+    isStrikeThrough: Boolean
   },
   computed: {
     currentSelectedTag () { return this.$store.state.currentSelectedTag },
@@ -209,4 +210,6 @@ export default {
   .link-badge-url
     color var(--primary)
     text-decoration none
+  .strikethrough
+    text-decoration line-through
 </style>
