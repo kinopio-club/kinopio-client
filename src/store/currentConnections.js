@@ -239,7 +239,6 @@ export default {
           context.commit('updateReadOnly', connection)
         }
       })
-      context.commit('triggerUpdateConnectionArrowPositions', { connections }, { root: true })
     },
     updatePathsWhileDragging: (context, { connections, cards }) => {
       connections.forEach(connection => {
