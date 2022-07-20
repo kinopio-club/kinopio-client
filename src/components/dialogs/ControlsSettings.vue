@@ -15,6 +15,10 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
       label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
         input(type="checkbox" v-model="shouldUseStickyCards")
         span Use Sticky Cards
+    .row
+      label(:class="{ active: shouldPauseConnectionDirections }" @click.left.prevent="toggleShouldPauseConnectionDirections" @keydown.stop.enter="toggleShouldPauseConnectionDirections")
+        input(type="checkbox" v-model="shouldPauseConnectionDirections")
+        span Pause Connection Directions
 
 </template>
 
@@ -42,7 +46,8 @@ export default {
     isMobile () { return utils.isMobile() },
     shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection },
     shouldOpenLinksInNewTab () { return this.$store.state.currentUser.shouldOpenLinksInNewTab },
-    shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards }
+    shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
+    shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections }
   },
   methods: {
     toggleShouldInvertZoomDirection () {
@@ -56,6 +61,11 @@ export default {
     toggleShouldUseStickyCards () {
       const value = !this.shouldUseStickyCards
       this.$store.dispatch('currentUser/update', { shouldUseStickyCards: value })
+    },
+    toggleShouldPauseConnectionDirections () {
+      const value = !this.shouldPauseConnectionDirections
+      this.$store.dispatch('currentUser/update', { shouldPauseConnectionDirections: value })
+      this.$store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
     },
     updateDialogHeight () {
       if (!this.visible) { return }

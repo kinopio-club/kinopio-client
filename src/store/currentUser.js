@@ -57,7 +57,8 @@ export default {
     weatherLocation: undefined,
     weatherUnitIsCelcius: false,
     shouldNotifyUnlockedStickyCards: true,
-    shouldUseStickyCards: false
+    shouldUseStickyCards: false,
+    shouldPauseConnectionDirections: false
   },
   mutations: {
     color: (state, value) => {
@@ -320,6 +321,10 @@ export default {
     shouldUseStickyCards: (state, value) => {
       state.shouldUseStickyCards = value
       cache.updateUser('shouldUseStickyCards', value)
+    },
+    shouldPauseConnectionDirections: (state, value) => {
+      state.shouldPauseConnectionDirections = value
+      cache.updateUser('shouldPauseConnectionDirections', value)
     }
   },
   actions: {

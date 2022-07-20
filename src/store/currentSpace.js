@@ -621,6 +621,7 @@ const currentSpace = {
         context.commit('triggerUpdateCardOverlaps', null, { root: true })
         nextTick(() => {
           context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
+          context.dispatch('checkIfShouldPauseConnectionDirections')
         })
       })
     },
@@ -776,6 +777,25 @@ const currentSpace = {
       } else {
         context.commit('notifySpaceIsRemoved', false, { root: true })
       }
+    },
+    checkIfShouldPauseConnectionDirections: (context) => {
+      const prefersReducedMotion = utils.userPrefersReducedMotion()
+      const userSetting = context.rootState.currentUser.shouldPauseConnectionDirections
+      const shouldPause = prefersReducedMotion || userSetting
+      if (shouldPause) {
+        context.dispatch('pauseConnectionDirections')
+      } else {
+        context.dispatch('unpauseConnectionDirections')
+      }
+    },
+    pauseConnectionDirections: (context, space) => {
+      const svg = document.querySelector('svg.connections')
+      svg.pauseAnimations()
+      svg.setCurrentTime(1.5)
+    },
+    unpauseConnectionDirections: (context, space) => {
+      const svg = document.querySelector('svg.connections')
+      svg.unpauseAnimations()
     },
     checkIfShouldNotifySignUpToEditSpace: (context, space) => {
       const spaceIsOpen = space.privacy === 'open'
