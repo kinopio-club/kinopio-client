@@ -23,8 +23,14 @@ path.connection-path(
   @dragover.prevent
   @drop.prevent.stop="addCardsAndUploadFiles"
 )
-circle(v-if="directionIsVisible && !isUpdatingPath" r="6" :fill="typeColor" :class="{filtered: isFiltered}")
-  animateMotion(dur="3s" repeatCount="indefinite" :path="path")
+
+defs
+  linearGradient(:id="gradientId")
+    stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
+    stop(offset="90%" :stop-color="typeColor")
+
+circle(v-if="directionIsVisible && !isUpdatingPath" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}")
+  animateMotion(dur="3s" repeatCount="indefinite" :path="path" rotate="auto")
 </template>
 
 <script>
@@ -88,6 +94,8 @@ export default {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.connection.id },
+    gradientId () { return `gradient-${this.id}` },
+    gradientIdReference () { return `url('#${this.gradientId}')` },
     connectionType () { return this.$store.getters['currentConnections/typeByTypeId'](this.connectionTypeId) },
     connectionTypeId () { return this.connection.connectionTypeId },
     startCardId () { return this.connection.startCardId },
