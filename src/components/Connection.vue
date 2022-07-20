@@ -177,7 +177,10 @@ export default {
         }
       } else { return false }
     },
-    directionIsVisible () { return this.connection.directionIsVisible },
+    directionIsVisible () {
+      this.checkIfShouldPauseConnectionDirections()
+      return this.connection.directionIsVisible
+    },
     isUpdatingPath () {
       let shouldHide
       const currentUserIsDragging = this.$store.state.currentUserIsDraggingCard
@@ -211,10 +214,17 @@ export default {
           shouldHide = true
         }
       })
+      this.checkIfShouldPauseConnectionDirections()
       return shouldHide
     }
   },
   methods: {
+    checkIfShouldPauseConnectionDirections () {
+      this.$store.dispatch('currentSpace/unpauseConnectionDirections')
+      this.$nextTick(() => {
+        this.$store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
+      })
+    },
     removeConnection () {
       if (!this.isSpaceMember) { return }
       this.$store.dispatch('currentConnections/remove', this.connection)
