@@ -32,6 +32,16 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 
 	./node_modules/.bin/vue-devtools
 
+### Setup Ngrok
+
+[login](http://ngrok.com) and download ngrok, then connect ngrok to the kinopio ngrok account
+
+    $ ./ngrok authtoken 1e2pCpJsJMwkEkqbDKF0p5eMArQ_5Ztb7NE8fqyftCnuizdab
+
+### Using Ngrok
+
+    $ ./ngrok http 8080
+
 ## Primary Files
 
 | File | Description |
