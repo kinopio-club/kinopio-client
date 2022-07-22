@@ -121,6 +121,7 @@ export default {
     this.isIPhone = utils.isIPhone()
     this.isAndroid = utils.isAndroid()
     const data = await this.getNewStuff()
+    if (!data) { return }
     const newStuff = data.contents
     this.newStuff = newStuff.slice(0, 5)
     this.checkNewStuffIsUpdated(newStuff[0].id)

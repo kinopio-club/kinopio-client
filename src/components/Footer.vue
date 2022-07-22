@@ -373,13 +373,12 @@ export default {
   --footer-max-z 2147483644 // var(--max-z) - 2, hardcoded because firefox vars in calc is buggy
   z-index var(--footer-max-z)
   position fixed
-  left 8px
-  bottom 8px
-  right 8px
   width 100vw
   width 100dvw // dynamic viewport units
   pointer-events none
   transform-origin left bottom
+  padding 8px
+  bottom 0
   .right
     pointer-events all
     text-align right
