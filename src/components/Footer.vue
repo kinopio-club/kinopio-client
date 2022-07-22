@@ -338,27 +338,15 @@ export default {
       const viewport = utils.visualViewport()
       const layoutViewport = document.getElementById('layout-viewport')
       const scale = utils.roundFloat(viewport.scale)
-      const counterScale = utils.roundFloat(1 / viewport.scale)
+      const counterScale = utils.roundFloat(1 / scale)
       const left = Math.round(viewport.offsetLeft)
       let offsetTop = 0
-      if (navigator.standalone) {
+      if (navigator.standalone || utils.isAndroid()) {
         offsetTop = 10
       }
       const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height - (offsetTop))
-      let style
-      if (scale > 1) {
-        style = {
-          transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
-          'transform-origin': 'left bottom'
-        }
-      } else {
-        if (offsetTop) { offsetTop = offsetTop + 5 }
-        style = {
-          transform: `translate(${left}px, ${-offsetTop}px)`,
-          zoom: counterScale,
-          'transform-origin': 'left bottom',
-          'margin-left': `-${left}px`
-        }
+      const style = {
+        transform: `translate(${left}px, ${top}px) scale(${counterScale})`
       }
       this.position = style
     }
@@ -390,6 +378,7 @@ export default {
   right 8px
   max-width 100%
   pointer-events none
+  transform-origin left bottom
   .right
     pointer-events all
     text-align right
