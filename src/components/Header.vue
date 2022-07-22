@@ -588,7 +588,8 @@ export default {
       const left = Math.round(viewport.offsetLeft)
       const top = Math.round(viewport.offsetTop)
       const style = {
-        transform: `translate(${left}px, ${top}px) scale(${counterScale})`
+        transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
+        maxWidth: (viewport.width * scale) + 'px'
       }
       this.position = style
     },
