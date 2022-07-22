@@ -662,7 +662,8 @@ header
   top 0
   user-select none
   z-index var(--max-z - 1)
-  width 100%
+  width 100vw
+  width 100dvw // dynamic viewport units
   padding 8px
   display flex
   justify-content space-between
