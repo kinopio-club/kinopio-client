@@ -153,6 +153,7 @@ export default {
     },
     updatePositionOffsetByPinchZoom () {
       if (!window.visualViewport) { return }
+      // used on mobile to offset fixed canvas position when both pinch zoomed and scrolled
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
     },
@@ -256,6 +257,7 @@ export default {
         event.preventDefault()
       }
       this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.scroll() // for android
     },
 
     // Painting
