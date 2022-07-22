@@ -341,7 +341,7 @@ export default {
       const counterScale = utils.roundFloat(1 / scale)
       const left = Math.round(viewport.offsetLeft)
       let offsetTop = 0
-      if (navigator.standalone || utils.isAndroid()) {
+      if (navigator.standalone) {
         offsetTop = 10
       }
       const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height - (offsetTop))
@@ -376,7 +376,8 @@ export default {
   left 8px
   bottom 8px
   right 8px
-  max-width 100%
+  width 100vw
+  width 100dvw // dynamic viewport units
   pointer-events none
   transform-origin left bottom
   .right
