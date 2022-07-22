@@ -110,17 +110,13 @@ export default {
     window.addEventListener('touchend', this.stopPainting)
     // shift circle positions with scroll to simulate full size canvas
     this.updatePrevScrollPosition()
-    window.addEventListener('scroll', this.updateCirclesWithScroll)
-    window.addEventListener('scroll', this.updatePositionOffsetByPinchZoom)
-    window.addEventListener('scroll', this.cancelLocking)
+    window.addEventListener('scroll', this.scroll)
     window.addEventListener('load', this.clearCircles)
   },
   beforeUnmount () {
     window.removeEventListener('mouseup', this.stopPainting)
     window.removeEventListener('touchend', this.stopPainting)
-    window.removeEventListener('scroll', this.updateCirclesWithScroll)
-    window.removeEventListener('scroll', this.updatePositionOffsetByPinchZoom)
-    window.removeEventListener('scroll', this.cancelLocking)
+    window.removeEventListener('scroll', this.scroll)
     window.removeEventListener('load', this.clearCircles)
   },
   data () {
@@ -145,6 +141,11 @@ export default {
     isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting }
   },
   methods: {
+    scroll () {
+      this.updateCirclesWithScroll()
+      this.updatePositionOffsetByPinchZoom()
+      this.cancelLocking()
+    },
     clearCircles () {
       initialCircles = []
       paintingCircles = []
