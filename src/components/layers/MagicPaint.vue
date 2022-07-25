@@ -112,6 +112,7 @@ export default {
     this.updatePrevScrollPosition()
     window.addEventListener('scroll', this.scroll)
     window.addEventListener('load', this.clearCircles)
+    this.timedScrollUpdates()
   },
   beforeUnmount () {
     window.removeEventListener('mouseup', this.stopPainting)
@@ -141,6 +142,19 @@ export default {
     isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting }
   },
   methods: {
+    timedScrollUpdates () {
+      // for android
+      this.scroll()
+      setTimeout(() => {
+        this.scroll()
+      }, 100)
+      setTimeout(() => {
+        this.scroll()
+      }, 200)
+      setTimeout(() => {
+        this.scroll()
+      }, 400)
+    },
     scroll () {
       this.updateCirclesWithScroll()
       this.updatePositionOffsetByPinchZoom()
@@ -256,7 +270,7 @@ export default {
         event.preventDefault()
       }
       this.$store.commit('triggerUpdatePositionInVisualViewport')
-      this.scroll() // for android
+      this.timedScrollUpdates()
     },
 
     // Painting
