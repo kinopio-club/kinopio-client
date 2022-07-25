@@ -197,7 +197,8 @@ export default {
       x = event.clientX
       y = event.clientY
     }
-    return { x, y }
+    const position = { x: Math.round(x), y: Math.round(y) }
+    return position
   },
   cursorPositionInPage (event) {
     let x, y
@@ -213,7 +214,8 @@ export default {
       x = event.pageX
       y = event.pageY
     }
-    return { x, y }
+    const position = { x: Math.round(x), y: Math.round(y) }
+    return position
   },
   visualViewport () {
     const visualViewport = window.visualViewport
