@@ -158,10 +158,8 @@ export default {
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
     },
     updatePrevScrollPosition () {
-      prevScroll = {
-        x: window.scrollX,
-        y: window.scrollY
-      }
+      prevScroll = utils.currentScroll()
+      console.log('🍅', prevScroll)
     },
     updateCirclePositions (circles, scrollDelta) {
       return circles.map(circle => {
@@ -171,9 +169,10 @@ export default {
       })
     },
     updateCirclesWithScroll () {
+      const currentScroll = utils.currentScroll()
       const scrollDelta = {
-        x: window.scrollX - prevScroll.x,
-        y: window.scrollY - prevScroll.y
+        x: currentScroll.x - prevScroll.x,
+        y: currentScroll.y - prevScroll.y
       }
       if (initialCircles.length) {
         initialCircles = this.updateCirclePositions(initialCircles, scrollDelta) // covers locking circles of varialbe radius/
@@ -641,6 +640,7 @@ export default {
 canvas
   position fixed
   top 0
+  background rgba(255,182,193, 0.2) // temp
 .locking,
 .initial-circle,
 .remote-painting

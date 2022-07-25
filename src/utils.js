@@ -82,6 +82,12 @@ export default {
       y: touch[`${type}Y`]
     }
   },
+  currentScroll () {
+    return {
+      x: window.scrollX || window.visualViewport.offsetLeft,
+      y: window.scrollY || window.visualViewport.offsetTop
+    }
+  },
   elementShouldBeOnRightSide (element) {
     if (!element) { return }
     element = element.getBoundingClientRect()
