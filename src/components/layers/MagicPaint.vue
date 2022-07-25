@@ -284,7 +284,12 @@ export default {
       if (event.touches && !currentUserIsPaintingLocked) { return }
       let color = this.$store.state.currentUser.color
       this.currentCursor = utils.cursorPositionInViewport(event)
-      let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
+      let circle = {
+        x: this.currentCursor.x - this.pinchZoomOffsetLeft,
+        y: this.currentCursor.y - this.pinchZoomOffsetTop,
+        color,
+        iteration: 0
+      }
       this.selectCards(circle)
       this.selectConnections(circle)
       this.selectCardsAndConnectionsBetweenCircles(circle)
@@ -410,8 +415,8 @@ export default {
         if (filterComments && card.isComment) { return }
         const cardX = card.x
         const cardY = card.y
-        const pointX = (point.x + window.scrollX) * zoom
-        const pointY = (point.y + window.scrollY) * zoom
+        const pointX = (point.x + window.scrollX + this.pinchZoomOffsetLeft) * zoom
+        const pointY = (point.y + window.scrollY + this.pinchZoomOffsetTop) * zoom
         const x = {
           value: pointX,
           min: cardX - circleSelectionRadius,
@@ -432,8 +437,8 @@ export default {
     selectConnectionPaths (point) {
       const zoom = this.spaceCounterZoomDecimal
       const paths = document.querySelectorAll('svg .connection-path')
-      const pointX = (point.x + window.scrollX) * zoom
-      const pointY = (point.y + window.scrollY) * zoom
+      const pointX = (point.x + window.scrollX + this.pinchZoomOffsetLeft) * zoom
+      const pointY = (point.y + window.scrollY + this.pinchZoomOffsetTop) * zoom
       paths.forEach(path => {
         if (path.dataset['is-hidden-by-comment-filter'] === 'true') { return }
         const pathId = path.dataset.id
@@ -546,8 +551,8 @@ export default {
         const radius = (circleRadiusDelta * percentRemaining) + minSize
         const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
         const circle = {
-          x: startCursor.x,
-          y: startCursor.y,
+          x: startCursor.x - this.pinchZoomOffsetLeft,
+          y: startCursor.y - this.pinchZoomOffsetTop,
           color: this.currentUserColor,
           radius,
           alpha: alpha || 0.01, // to ensure truthyness
