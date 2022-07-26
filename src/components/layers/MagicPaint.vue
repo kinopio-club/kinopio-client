@@ -687,7 +687,6 @@ export default {
 canvas
   position fixed
   top 0
-  background rgba(255,182,193, 0.2) // temp
 .locking,
 .initial-circle,
 .remote-painting
