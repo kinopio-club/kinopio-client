@@ -327,7 +327,7 @@ export default {
       let color = this.$store.state.currentUser.color
       this.currentCursor = utils.cursorPositionInViewport(event)
       let circle = {
-        x: this.currentCursor.x - this.pinchZoomOffsetLeft,
+        x: this.currentCursor.x - this.pinchZoomOffsetLeft, // compensates for position offsets on canvas
         y: this.currentCursor.y - this.pinchZoomOffsetTop,
         color,
         iteration: 0
@@ -593,7 +593,7 @@ export default {
         const radius = (circleRadiusDelta * percentRemaining) + minSize
         const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
         const circle = {
-          x: startCursor.x - this.pinchZoomOffsetLeft,
+          x: startCursor.x - this.pinchZoomOffsetLeft, // compensates for position offsets on canvas
           y: startCursor.y - this.pinchZoomOffsetTop,
           color: this.currentUserColor,
           radius,
