@@ -586,18 +586,18 @@ export default {
       const scale = utils.roundFloat(viewport.scale)
       const counterScale = utils.roundFloat(1 / viewport.scale)
       const left = Math.round(viewport.offsetLeft)
-      const top = Math.round(viewport.offsetTop)
+      let top = Math.round(viewport.offsetTop)
       let style
       if (scale > 1) {
         style = {
-          transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
-          'transform-origin': 'left top'
+          transform: `translate(${left}px, ${top}px) scale(${counterScale})`
         }
       } else {
+        if (!utils.isAndroid()) { top = 0 }
         style = {
-          transform: `translate(${left}px, 0px)`,
+          transform: `translate(${left}px, ${top}px)`,
           zoom: counterScale,
-          'transform-origin': 'left top'
+          maxWidth: viewport.width + 'px'
         }
       }
       this.position = style
@@ -667,6 +667,7 @@ header
   display flex
   justify-content space-between
   transition 0.2s opacity
+  transform-origin left top
   &.hidden-by-mindmap
     opacity 0.2
   nav,
