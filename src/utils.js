@@ -434,7 +434,7 @@ export default {
     return navigator.platform && /iPhone|iPod/.test(navigator.platform)
   },
   isAndroid () {
-    return navigator.platform && /Android/.test(navigator.platform)
+    return navigator.platform && (/Android/.test(navigator.platform) || /Android/.test(navigator.userAgent))
   },
   isApple () {
     return /Safari/.test(navigator.userAgent)
