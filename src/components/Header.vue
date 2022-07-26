@@ -586,19 +586,10 @@ export default {
       const scale = utils.roundFloat(viewport.scale)
       const counterScale = utils.roundFloat(1 / viewport.scale)
       const left = Math.round(viewport.offsetLeft)
-      let top = Math.round(viewport.offsetTop)
-      let style
-      if (scale > 1) {
-        style = {
-          transform: `translate(${left}px, ${top}px) scale(${counterScale})`
-        }
-      } else {
-        if (!utils.isAndroid()) { top = 0 }
-        style = {
-          transform: `translate(${left}px, ${top}px)`,
-          zoom: counterScale,
-          maxWidth: viewport.width + 'px'
-        }
+      const top = Math.round(viewport.offsetTop)
+      const style = {
+        transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
+        maxWidth: Math.round(viewport.width * scale) + 'px'
       }
       this.position = style
     },
