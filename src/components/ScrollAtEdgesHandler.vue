@@ -62,7 +62,7 @@ export default {
   methods: {
     initInteractions (event) {
       const position = utils.cursorPositionInViewport(event)
-      const zoom = this.spaceZoomDecimal
+      const zoom = this.spaceCounterZoomDecimal
       startCursor = position
       endCursor = position
       scrollAreaHeight = (this.viewportHeight / 8) * zoom
