@@ -1,5 +1,11 @@
 <template lang="pug">
-.overlay.minimap(v-if="isVisible" @pointerup="endPanningViewport" @mousemove="panViewport" :style="overlayStyle" @touchmove.stop.prevent)
+.overlay.minimap(
+  v-if="isVisible"
+  @pointerup="endPanningViewport"
+  @mousemove="panViewport"
+  :style="overlayStyle"
+  @touchmove.stop.prevent
+)
   .overlay-background(:style="overlayBackgroundStyle")
   //- viewport box
   .viewport-wrap(:style="viewportWrapStyle")
@@ -69,7 +75,12 @@ export default {
     },
     isVisible () { return this.$store.state.minimapIsVisible },
     overlayStyle () {
-      return { cursor: this.cursor }
+      const currentScroll = utils.currentScroll()
+      return {
+        cursor: this.cursor,
+        top: currentScroll.y + 'px',
+        left: currentScroll.x + 'px'
+      }
     },
     overlayBackgroundStyle () {
       const backgroundColor = this.$store.state.currentSpace.backgroundTint
@@ -168,8 +179,9 @@ export default {
       const color = this.$store.state.currentUser.color
       let width = this.$store.state.viewportWidth * zoom
       let height = this.$store.state.viewportHeight * zoom
-      let x = window.scrollX * zoom
-      let y = window.scrollY * zoom
+      const currentScroll = utils.currentScroll()
+      let x = currentScroll.x * zoom
+      let y = currentScroll.y * zoom
       this.viewport = {
         color,
         width: width,
@@ -346,7 +358,9 @@ export default {
   position fixed
   top 0
   left 0
+  width 100dvw
   width 100vw
+  height 100dvh
   height 100vh
   cursor pointer
   .overlay-background
