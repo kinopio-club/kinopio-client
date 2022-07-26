@@ -90,18 +90,21 @@ export default {
       const viewportHeight = this.viewportHeight
       const viewportWidth = this.viewportWidth
       const cursor = this.cursor()
+      const currentScroll = utils.currentScroll()
       const cursorIsTopSide = cursor.y <= scrollAreaHeight
       const cursorIsBottomSide = cursor.y >= (viewportHeight - scrollAreaHeight)
-      const cursorIsLeftSide = cursor.x <= scrollAreaWidth
+      const cursorIsLeftSide = (cursor.x - currentScroll.x) <= scrollAreaWidth
       const cursorIsRightSide = cursor.x >= (viewportWidth - scrollAreaWidth)
       // Y movement
-      if (movementDirection.y === 'up' && cursorIsTopSide && window.scrollY) {
+      // Up
+      if (movementDirection.y === 'up' && cursorIsTopSide && currentScroll.y) {
         speed = this.speed(cursor, 'up')
         delta = {
           x: 0,
           y: -speed
         }
         this.scrollBy(delta)
+      // Down
       } else if (movementDirection.y === 'down' && cursorIsBottomSide && this.shouldScrollDown()) {
         speed = this.speed(cursor, 'down')
         delta = {
@@ -112,13 +115,15 @@ export default {
         this.scrollBy(delta)
       }
       // X movement
-      if (movementDirection.x === 'left' && cursorIsLeftSide && window.scrollX) {
+      // Left
+      if (movementDirection.x === 'left' && cursorIsLeftSide && currentScroll.x) {
         speed = this.speed(cursor, 'left')
         delta = {
           x: -speed,
           y: 0
         }
         this.scrollBy(delta)
+      // Right
       } else if (movementDirection.x === 'right' && cursorIsRightSide && this.shouldScrollRight()) {
         speed = this.speed(cursor, 'right')
         delta = {
@@ -174,12 +179,14 @@ export default {
     },
     shouldScrollRight () {
       this.updatePageSizes()
-      const scrolledTooFarRight = (window.scrollX + this.viewportWidth) > maxWidth
+      const currentScroll = utils.currentScroll()
+      const scrolledTooFarRight = (currentScroll.x + this.viewportWidth) > maxWidth
       return !scrolledTooFarRight
     },
     shouldScrollDown () {
       this.updatePageSizes()
-      const scrolledTooFarDown = (window.scrollY + this.viewportHeight) > maxHeight
+      const currentScroll = utils.currentScroll()
+      const scrolledTooFarDown = (currentScroll.y + this.viewportHeight) > maxHeight
       return !scrolledTooFarDown
     },
     scrollBy (delta) {
