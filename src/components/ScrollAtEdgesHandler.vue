@@ -90,10 +90,11 @@ export default {
       const viewportHeight = this.viewportHeight
       const viewportWidth = this.viewportWidth
       const cursor = this.cursor()
+      if (!cursor.x) { return }
       const currentScroll = utils.currentScroll()
       const cursorIsTopSide = cursor.y <= scrollAreaHeight
       const cursorIsBottomSide = cursor.y >= (viewportHeight - scrollAreaHeight)
-      const cursorIsLeftSide = (cursor.x - currentScroll.x) <= scrollAreaWidth
+      const cursorIsLeftSide = cursor.x <= scrollAreaWidth
       const cursorIsRightSide = cursor.x >= (viewportWidth - scrollAreaWidth)
       // Y movement
       // Up
