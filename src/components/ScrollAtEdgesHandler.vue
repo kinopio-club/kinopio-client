@@ -185,18 +185,17 @@ export default {
       return !scrolledTooFarDown
     },
     scrollBy (delta) {
+      if (utils.isAndroid()) { return }
       let zoom = this.spaceZoomDecimal
       if (zoom === 1) {
         const viewport = utils.visualViewport()
         zoom = viewport.scale
       }
       const currentUserIsBoxSelecting = this.$store.state.currentUserIsBoxSelecting
-      console.log('🍅', delta, zoom)
       delta = {
         left: Math.round(delta.x * zoom),
         top: Math.round(delta.y * zoom)
       }
-      console.log('🍅🍅', delta)
       const cursor = this.cursor()
       if (this.isDraggingCard) {
         const slowMultiplier = 0.9
@@ -251,7 +250,6 @@ export default {
       } else {
         speed = Math.min(speed, maxSpeed)
       }
-      console.log('🏎', direction, viewportSize, scrollAreaSize, cursor, amount, percent, speed)
       return speed
     },
     updatePageSizes () {

@@ -36,7 +36,7 @@
             MobileTips(:visible="mobileTipsIsVisible")
 
   .right(:class="{'is-embed': isEmbed, 'fade-out': isFadingOut, 'hidden': isHidden}")
-    button(@pointerup="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
+    button(v-if="isNotSupportedByDevice" @pointerup="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
       img.icon.minimap(src="@/assets/minimap.svg")
     template(v-if="!isMobileOrTouch")
       SpaceZoom
@@ -123,6 +123,7 @@ export default {
     clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
+    isNotSupportedByDevice () { return !utils.isAndroid() },
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
     isAddPage () { return this.$store.state.isAddPage },
     isEmbed () { return this.$store.state.isEmbed },
