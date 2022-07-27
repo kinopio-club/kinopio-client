@@ -126,6 +126,7 @@ export default {
       this.init()
     }, { leading: true }, 350),
     init () {
+      if (!this.isVisible) { return }
       this.initBoundary()
       this.initScale()
       this.updateViewport()
