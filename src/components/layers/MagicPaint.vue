@@ -197,19 +197,27 @@ export default {
       }
       this.updatePrevScrollPosition()
     },
+    updateCircleForAndroid (circle) {
+      if (!utils.isAndroid()) { return circle }
+      circle.x = circle.x - window.visualViewport.offsetLeft
+      circle.y = circle.y - window.visualViewport.offsetTop
+      return circle
+    },
     isCircleVisible (circle) {
       let { x, y, radius } = circle
       radius = radius || circleRadius
-      const isCircleVisibleX = utils.isBetween({
+      let isBetween = {
         value: x + radius,
         min: 0,
         max: this.viewportWidth
-      })
-      const isCircleVisibleY = utils.isBetween({
+      }
+      const isCircleVisibleX = utils.isBetween(isBetween)
+      isBetween = {
         value: y + radius,
         min: 0,
         max: this.viewportHeight
-      })
+      }
+      const isCircleVisibleY = utils.isBetween(isBetween)
       return Boolean(isCircleVisibleX && isCircleVisibleY)
     },
     offscreenCircle (circle) {
@@ -226,6 +234,7 @@ export default {
       return circle
     },
     drawCircle (circle, context, shouldDrawOffscreen) {
+      circle = this.updateCircleForAndroid(circle)
       const isCircleVisible = this.isCircleVisible(circle)
       if (!isCircleVisible && !shouldDrawOffscreen) { return }
       if (!isCircleVisible && shouldDrawOffscreen) { circle = this.offscreenCircle(circle) }
@@ -551,16 +560,7 @@ export default {
     cancelLocking () {
       shouldCancelLocking = true
     },
-    shouldPreventLocking () {
-      const maxDelta = 50
-      const delta = this.viewportHeight - startCursor.y
-      const isBottomOfViewport = delta < maxDelta
-      if (isBottomOfViewport && utils.isMobile()) {
-        return true
-      }
-    },
     startLocking () {
-      if (this.shouldPreventLocking()) { return }
       currentUserIsLocking = true
       shouldCancelLocking = false
       setTimeout(() => {
