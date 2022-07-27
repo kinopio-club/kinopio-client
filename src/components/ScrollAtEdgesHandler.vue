@@ -62,7 +62,7 @@ export default {
   methods: {
     initInteractions (event) {
       const position = utils.cursorPositionInViewport(event)
-      const zoom = this.spaceCounterZoomDecimal
+      const zoom = this.spaceZoomDecimal
       startCursor = position
       endCursor = position
       scrollAreaHeight = (this.viewportHeight / 8) * zoom
@@ -183,15 +183,26 @@ export default {
       return !scrolledTooFarDown
     },
     scrollBy (delta) {
-      const zoom = this.spaceCounterZoomDecimal
+      let zoom = this.spaceZoomDecimal
+      if (zoom === 1) {
+        const viewport = utils.visualViewport()
+        zoom = viewport.scale
+      }
       const currentUserIsBoxSelecting = this.$store.state.currentUserIsBoxSelecting
-      delta.left = delta.x * 1.1
-      delta.top = delta.y
-      delta.x = delta.x * zoom
-      delta.y = delta.y * zoom
+      console.log('🍅', delta, zoom)
+      delta = {
+        left: Math.round(delta.x * zoom),
+        top: Math.round(delta.y * zoom)
+      }
+      console.log('🍅🍅', delta)
       const cursor = this.cursor()
       if (this.isDraggingCard) {
-        this.$store.dispatch('currentCards/move', { endCursor, prevCursor, delta })
+        const slowMultiplier = 0.9
+        const cardDelta = {
+          x: delta.left * slowMultiplier,
+          y: delta.top * slowMultiplier
+        }
+        this.$store.dispatch('currentCards/move', { endCursor, prevCursor, delta: cardDelta })
       }
       if (this.isDrawingConnection) {
         this.$store.commit('triggeredDrawConnectionFrame', cursor)
@@ -202,41 +213,43 @@ export default {
       window.scrollBy(delta)
     },
     speed (cursor, direction) {
-      const minSpeed = 1
+      const minSpeed = 20
       const maxSpeed = 30
       const maxSpeedOutsideWindow = 60
-      const multiplier = 0.15
       const viewportHeight = this.viewportHeight
       const viewportWidth = this.viewportWidth
-      const directionY = direction === 'up' || direction === 'down'
-      const directionX = direction === 'left' || direction === 'right'
-      let scrollAreaSize, viewportSize, percent
-      if (directionX) {
+      // viewportSize based on direction
+      const directionIsY = direction === 'up' || direction === 'down'
+      const directionIsX = direction === 'left' || direction === 'right'
+      let scrollAreaSize, viewportSize
+      if (directionIsX) {
         scrollAreaSize = scrollAreaWidth
         cursor = cursor.x
         viewportSize = viewportWidth
-      } else if (directionY) {
+      } else if (directionIsY) {
         scrollAreaSize = scrollAreaHeight
         cursor = cursor.y
         viewportSize = viewportHeight
       }
+      // calc percent over scrollArea
+      let amount
       if (direction === 'up' || direction === 'left') {
-        const amount = Math.abs(cursor - scrollAreaSize)
-        percent = amount / scrollAreaSize
+        amount = Math.abs(cursor - scrollAreaSize)
       }
       if (direction === 'down' || direction === 'right') {
-        const amount = Math.abs(cursor - (viewportSize - scrollAreaSize))
-        percent = amount / scrollAreaSize
+        amount = Math.abs(cursor - (viewportSize - scrollAreaSize))
       }
-      let amount = percent * scrollAreaSize
-      amount = Math.round(amount * multiplier)
-      amount = Math.max(amount, minSpeed)
+      let percent = utils.roundFloat(amount / scrollAreaSize)
+      // speed
+      let speed = percent * scrollAreaSize
+      speed = Math.max(speed, minSpeed)
       if (percent > 1) {
-        amount = Math.min(amount, maxSpeedOutsideWindow)
+        speed = Math.min(speed, maxSpeedOutsideWindow)
       } else {
-        amount = Math.min(amount, maxSpeed)
+        speed = Math.min(speed, maxSpeed)
       }
-      return amount
+      console.log('🏎', direction, viewportSize, scrollAreaSize, cursor, amount, percent, speed)
+      return speed
     },
     updatePageSizes () {
       this.$store.dispatch('updatePageSizes')
