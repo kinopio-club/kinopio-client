@@ -244,14 +244,14 @@ export default {
       lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       this.$store.commit('currentUserIsPaintingLocked', false)
       this.$store.commit('currentUserIsPainting', false)
-      if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddCard) {
+      if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddCard && event.cancelable) {
         this.$store.commit('shouldAddCard', true)
         event.preventDefault()
       } else {
         this.$store.commit('shouldAddCard', false)
       }
       // prevent mouse events from firing after touch events on touch device
-      event.preventDefault()
+      if (event.cancelable) { event.preventDefault() }
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
 
@@ -261,7 +261,7 @@ export default {
       if (this.isPanning) { return }
       if (this.isBoxSelecting) { return }
       if (!this.$store.state.currentUserIsPainting) { return }
-      if (this.$store.getters.shouldScrollAtEdges(event)) {
+      if (this.$store.getters.shouldScrollAtEdges(event) && event.cancelable) {
         event.preventDefault() // prevents touch swipe viewport scrolling
       }
       if (!paintingCirclesTimer) {

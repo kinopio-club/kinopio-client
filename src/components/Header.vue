@@ -17,7 +17,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
       //- About
       .logo-about
         .button-wrap
-          .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active : aboutIsVisible}" tabindex="0")
+          .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active: aboutIsVisible}" tabindex="0")
             .logo-image
               .label-badge(v-if="shouldShowNewStuffIsUpdated")
                 span NEW
@@ -32,7 +32,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
         .space-details-row.segmented-buttons
           //- Current Space
           .button-wrap
-            button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+            button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active: spaceDetailsIsVisible}")
               span(v-show="currentSpaceIsTemplate")
                 img.icon.templates(src="@/assets/templates.svg")
               MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
