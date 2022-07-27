@@ -11,12 +11,13 @@ export default {
   name: 'ScrollAtEdgesHandler',
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'currentUserIsPaintingLocked') {
+      if (mutation.type === 'currentUserIsPaintingLocked' && mutation.payload) {
         const position = this.$store.state.triggeredPaintFramePosition
         const event = {
           clientX: position.x,
           clientY: position.y
         }
+        this.stopScrollTimer()
         this.initInteractions(event)
       }
       if (mutation.type === 'triggeredTouchCardDragPosition') {
@@ -25,6 +26,7 @@ export default {
           clientX: position.x,
           clientY: position.y
         }
+        this.stopScrollTimer()
         this.initInteractions(event)
       }
     })
@@ -255,12 +257,15 @@ export default {
     updatePageSizes () {
       this.$store.dispatch('updatePageSizes')
     },
-    stopInteractions () {
+    stopScrollTimer () {
       window.cancelAnimationFrame(scrollTimer)
-      this.$store.dispatch('currentCards/afterMove')
       scrollTimer = undefined
       prevCursor = undefined
       movementDirection = {}
+    },
+    stopInteractions () {
+      this.stopScrollTimer()
+      this.$store.dispatch('currentCards/afterMove')
     }
   }
 }
