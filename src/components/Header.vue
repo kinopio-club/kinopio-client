@@ -587,9 +587,13 @@ export default {
       const counterScale = utils.roundFloat(1 / viewport.scale)
       const left = Math.round(viewport.offsetLeft)
       const top = Math.round(viewport.offsetTop)
-      const style = {
+      let style = {
         transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
         maxWidth: Math.round(viewport.width * scale) + 'px'
+      }
+      if (utils.isIPhone() && scale < 1) {
+        style.transform = 'none'
+        style.zoom = counterScale
       }
       this.position = style
     },
