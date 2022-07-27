@@ -56,6 +56,7 @@ import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
+import debounce from 'lodash-es/debounce'
 
 const cardOverlaps = new Worker('/web-workers/card-overlaps.js')
 
@@ -102,7 +103,7 @@ export default {
     window.addEventListener('touchend', this.stopInteractions)
     // keep space element updated to viewport size so connections show up
     this.updatePageSizes()
-    window.addEventListener('resize', this.updatePageSizes)
+    window.addEventListener('resize', this.updatePageSizesDebounced)
 
     this.updateIsOnline()
     window.addEventListener('online', this.updateIsOnline)
@@ -119,8 +120,8 @@ export default {
     })
 
     this.$store.dispatch('currentUser/restoreUserFavorites')
-    window.addEventListener('scroll', this.updateCardOverlaps)
-    window.addEventListener('resize', this.updateCardOverlaps)
+    window.addEventListener('scroll', this.updateCardOverlapsDebounced)
+    window.addEventListener('resize', this.updateCardOverlapsDebounced)
     this.updateCardOverlaps()
 
     // retry failed sync operations every 5 seconds
@@ -137,13 +138,13 @@ export default {
     window.removeEventListener('touchmove', this.interact)
     window.removeEventListener('mouseup', this.stopInteractions)
     window.removeEventListener('touchend', this.stopInteractions)
-    window.removeEventListener('resize', this.updatePageSizes)
+    window.removeEventListener('resize', this.updatePageSizesDebounced)
     window.removeEventListener('online', this.updateIsOnline)
     window.removeEventListener('offline', this.updateIsOnline)
     window.removeEventListener('unload', this.unloadPage)
     window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
-    window.removeEventListener('scroll', this.updateCardOverlaps)
-    window.removeEventListener('resize', this.updateCardOverlaps)
+    window.removeEventListener('scroll', this.updateCardOverlapsDebounced)
+    window.removeEventListener('resize', this.updateCardOverlapsDebounced)
     clearInterval(processQueueIntervalTimer)
   },
   data () {
@@ -196,6 +197,9 @@ export default {
       const rect = element.getBoundingClientRect()
       return rect
     },
+    updateCardOverlapsDebounced: debounce(function () {
+      this.updateCardOverlaps()
+    }, 500),
     updateCardOverlaps () {
       let cards = this.$store.getters['currentCards/all']
       cards = utils.clone(cards)
@@ -232,6 +236,9 @@ export default {
       this.$store.dispatch('currentSpace/removeEmptyCards')
       this.$store.commit('triggerUnloadPage')
     },
+    updatePageSizesDebounced: debounce(function () {
+      this.updatePageSizes()
+    }, 500),
     updatePageSizes () {
       this.$nextTick(() => {
         this.$store.dispatch('updatePageSizes')
@@ -439,6 +446,7 @@ export default {
       //   isDraggingCard: this.isDraggingCard,
       // }
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
+      this.updateCardOverlaps()
       this.addInteractionBlur()
       if (event.touches) {
         this.$store.commit('triggerUpdatePositionInVisualViewport')
