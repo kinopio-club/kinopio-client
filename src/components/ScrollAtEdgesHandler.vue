@@ -202,6 +202,7 @@ export default {
           x: delta.left * slowMultiplier,
           y: delta.top * slowMultiplier
         }
+        this.$store.dispatch('history/pause')
         this.$store.dispatch('currentCards/move', { endCursor, prevCursor, delta: cardDelta })
       }
       if (this.isDrawingConnection) {
