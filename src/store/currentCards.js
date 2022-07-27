@@ -447,8 +447,6 @@ const currentCards = {
     },
 
     move: (context, { endCursor, prevCursor, delta }) => {
-      const currentDraggingCardId = context.rootState.currentDraggingCardId
-      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
       endCursor = {
@@ -459,14 +457,8 @@ const currentCards = {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
-      let cardIds
       let connections = []
-      if (multipleCardsSelectedIds.length) {
-        cardIds = multipleCardsSelectedIds
-      } else {
-        cardIds = [currentDraggingCardId]
-      }
-      let cards = cardIds.map(id => context.getters.byId(id))
+      let cards = context.getters.isSelected
       // prevent cards bunching up at 0
       cards.forEach(card => {
         if (!card) { return }
@@ -515,6 +507,7 @@ const currentCards = {
       })
     },
     afterMove: (context) => {
+      console.log('🦚 afterMove')
       const spaceId = context.rootState.currentSpace.id
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
@@ -704,6 +697,18 @@ const currentCards = {
     isLocked: (state, getters) => {
       let cards = getters.all
       return cards.filter(card => card.isLocked)
+    },
+    isSelected: (state, getters, rootState, rootGetters) => {
+      const currentDraggingCardId = rootState.currentDraggingCardId
+      const multipleCardsSelectedIds = rootState.multipleCardsSelectedIds
+      let cardIds
+      if (multipleCardsSelectedIds.length) {
+        cardIds = multipleCardsSelectedIds
+      } else {
+        cardIds = [currentDraggingCardId]
+      }
+      const cards = cardIds.map(id => getters.byId(id))
+      return cards
     },
     withSpaceLinks: (state, getters) => {
       let cards = getters.all
