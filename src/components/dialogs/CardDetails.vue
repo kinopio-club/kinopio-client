@@ -918,17 +918,20 @@ export default {
       })
     },
     focusName (position) {
-      const element = this.$refs.name
-      const length = this.name.length
-      if (!element) { return }
-      element.focus()
-      if (position) {
-        element.setSelectionRange(position, position)
-      }
-      if (length) {
-        element.setSelectionRange(length, length)
-      }
-      this.triggerUpdatePositionInVisualViewport()
+      utils.disablePinchZoom()
+      this.$nextTick(() => {
+        const element = this.$refs.name
+        const length = this.name.length
+        if (!element) { return }
+        element.focus()
+        if (position) {
+          element.setSelectionRange(position, position)
+        }
+        if (length) {
+          element.setSelectionRange(length, length)
+        }
+        this.triggerUpdatePositionInVisualViewport()
+      })
     },
     scrollIntoView () {
       const element = this.$refs.dialog
@@ -936,17 +939,8 @@ export default {
     },
     scrollIntoViewAndFocus () {
       this.$nextTick(() => {
-        // only mobile focus, if card is new (e.g. name is blank)
-        if (utils.isMobile()) {
-          if (this.card.name) {
-            this.scrollIntoView()
-          } else {
-            this.focusName()
-          }
-        } else {
-          this.scrollIntoView()
-          this.focusName()
-        }
+        this.scrollIntoView()
+        this.focusName()
         this.triggerUpdateMagicPaintPositionOffset()
         this.triggerUpdatePositionInVisualViewport()
       })
@@ -1435,6 +1429,7 @@ export default {
     visible (visible) {
       if (!visible) {
         this.closeCard()
+        utils.enablePinchZoom()
       }
     }
   }

@@ -172,6 +172,18 @@ export default {
     const fromFooter = event.target.closest('footer')
     return fromDialog || fromHeader || fromFooter || dialogIsVisible
   },
+  disablePinchZoom () {
+    if (this.isIPhone()) {
+      const viewport = document.querySelector('head meta[name=viewport]')
+      viewport.setAttribute('content', 'user-scalable=0')
+    }
+  },
+  enablePinchZoom () {
+    if (this.isIPhone()) {
+      const viewport = document.querySelector('head meta[name=viewport]')
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1') // index.html default
+    }
+  },
   scrollIntoView (element) {
     if (!element) { return }
     const rect = element.getBoundingClientRect()
