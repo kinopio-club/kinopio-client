@@ -67,6 +67,11 @@ let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, 
 let initialCircles = []
 let initialCircleCanvas, initialCircleContext, initialCirclesTimer
 
+// post scroll timer
+// runs scroll events after scrollend to compensate for android inertia scrolling
+const postScrollDuration = 300 // ms
+let postScrollAnimationTimer, postScrollStartTime, shouldCancelPostScroll
+
 export default {
   name: 'MagicPaint',
   components: {
@@ -110,17 +115,14 @@ export default {
     window.addEventListener('touchend', this.stopPainting)
     // shift circle positions with scroll to simulate full size canvas
     this.updatePrevScrollPosition()
-    window.addEventListener('scroll', this.updateCirclesWithScroll)
-    window.addEventListener('scroll', this.updatePositionOffsetByPinchZoom)
-    window.addEventListener('scroll', this.cancelLocking)
+    window.addEventListener('scroll', this.userScroll)
     window.addEventListener('load', this.clearCircles)
+    this.startPostScroll()
   },
   beforeUnmount () {
     window.removeEventListener('mouseup', this.stopPainting)
     window.removeEventListener('touchend', this.stopPainting)
-    window.removeEventListener('scroll', this.updateCirclesWithScroll)
-    window.removeEventListener('scroll', this.updatePositionOffsetByPinchZoom)
-    window.removeEventListener('scroll', this.cancelLocking)
+    window.removeEventListener('scroll', this.userScroll)
     window.removeEventListener('load', this.clearCircles)
   },
   data () {
@@ -148,6 +150,17 @@ export default {
     }
   },
   methods: {
+    userScroll () {
+      if (postScrollAnimationTimer) {
+        shouldCancelPostScroll = true
+      }
+      this.scroll()
+    },
+    scroll () {
+      this.updateCirclesWithScroll()
+      this.updatePositionOffsetByPinchZoom()
+      this.cancelLocking()
+    },
     clearCircles () {
       initialCircles = []
       paintingCircles = []
@@ -256,6 +269,37 @@ export default {
       // prevent mouse events from firing after touch events on touch device
       if (event.cancelable) { event.preventDefault() }
       this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.startPostScroll()
+    },
+
+    // Post Scrolling (for android)
+
+    startPostScroll () {
+      shouldCancelPostScroll = false
+      if (!postScrollAnimationTimer) {
+        postScrollAnimationTimer = window.requestAnimationFrame(this.postScrollFrame)
+      }
+    },
+    postScrollFrame (timestamp) {
+      if (!postScrollStartTime) {
+        postScrollStartTime = timestamp
+      }
+      const elaspedTime = timestamp - postScrollStartTime
+      const percentComplete = (elaspedTime / postScrollDuration) // between 0 and 1
+      if (shouldCancelPostScroll) {
+        this.endPostScroll()
+      } else if (percentComplete <= 1) {
+        this.scroll()
+        window.requestAnimationFrame(this.postScrollFrame)
+      } else {
+        this.endPostScroll()
+      }
+    },
+    endPostScroll () {
+      shouldCancelPostScroll = false
+      window.cancelAnimationFrame(postScrollAnimationTimer)
+      postScrollAnimationTimer = undefined
+      postScrollStartTime = undefined
     },
 
     // Painting
