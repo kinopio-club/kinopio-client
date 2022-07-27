@@ -8,7 +8,7 @@ aside
     @touchmove="painting"
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
+    :style="canvasStyles"
     @dragenter="checkIfUploadIsDraggedOver"
     @dragover.prevent="checkIfUploadIsDraggedOver"
     @dragleave="removeUploadIsDraggedOver"
@@ -18,17 +18,17 @@ aside
   canvas#remote-painting.remote-painting(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
+    :style="canvasStyles"
   )
   canvas#locking.locking(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
+    :style="canvasStyles"
   )
   canvas#initial-circle.initial-circle(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
+    :style="canvasStyles"
   )
   DropGuideLine(
     :currentCursor="currentCursor"
@@ -142,7 +142,10 @@ export default {
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     isPanning () { return this.$store.state.currentUserIsPanningReady },
-    isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting }
+    isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
+    canvasStyles () {
+      return { top: this.pinchZoomOffsetTop + 'px', left: this.pinchZoomOffsetLeft + 'px' }
+    }
   },
   methods: {
     clearCircles () {
