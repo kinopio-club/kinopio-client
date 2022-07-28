@@ -591,7 +591,7 @@ export default {
         transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
         maxWidth: Math.round(viewport.width * scale) + 'px'
       }
-      if (utils.isIPhone() && scale < 1) {
+      if (utils.isIPhone() && scale <= 1) {
         style.transform = 'none'
         style.zoom = counterScale
       }
