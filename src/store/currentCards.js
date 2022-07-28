@@ -507,7 +507,6 @@ const currentCards = {
       })
     },
     afterMove: (context) => {
-      console.log('🦚 afterMove')
       const spaceId = context.rootState.currentSpace.id
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
