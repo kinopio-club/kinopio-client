@@ -641,21 +641,21 @@ export default {
     isPinchZooming (value) {
       if (value) {
         this.fadeOut()
-        this.updatePosition()
-      } else {
+      } else if (!this.isTouchScrolling) {
         shouldCancelFadeOut = true
         this.cancelFadeOut()
       }
+      this.updatePosition()
     },
     isTouchScrolling (value) {
-      if (!utils.isAndroid()) { return }
+      if (!utils.isMobile()) { return }
       if (value) {
         this.fadeOut()
-        this.updatePosition()
-      } else {
+      } else if (!this.isPinchZooming) {
         shouldCancelFadeOut = true
         this.cancelFadeOut()
       }
+      this.updatePosition()
     }
   }
 }

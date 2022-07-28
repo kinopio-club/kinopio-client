@@ -181,14 +181,20 @@ export default {
       this.isTouchScrolling = true
     },
     checkIfInertiaScrollEnd () {
-      if (!utils.isAndroid) { return }
+      if (!utils.isMobile) { return }
       if (inertiaScrollEndIntervalTimer) { return }
       prevPosition = null
       inertiaScrollEndIntervalTimer = setInterval(() => {
         const viewport = utils.visualViewport()
-        const current = {
-          left: viewport.offsetLeft,
-          top: viewport.offsetTop
+        let current = {
+          left: window.scrollX,
+          top: window.scrollY
+        }
+        if (utils.isAndroid()) {
+          current = {
+            left: viewport.offsetLeft,
+            top: viewport.offsetTop
+          }
         }
         if (!prevPosition) {
           prevPosition = current
