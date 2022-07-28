@@ -165,7 +165,7 @@ import Donate from '@/components/dialogs/Donate.vue'
 let updateNotificationsIntervalTimer
 
 const fadeOutDuration = 10
-const hiddenDuration = 10
+const hiddenDuration = 20
 const updatePositionDuration = 60
 let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
 

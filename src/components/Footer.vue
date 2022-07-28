@@ -58,7 +58,7 @@ import dayjs from 'dayjs'
 let updateFavoritesIntervalTimer, updateLiveSpacesIntervalTimer
 
 const fadeOutDuration = 10
-const hiddenDuration = 10
+const hiddenDuration = 20
 const updatePositionDuration = 60
 let shouldNotifyMinimapKeyboardShortcut = true
 let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
