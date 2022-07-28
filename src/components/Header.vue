@@ -197,7 +197,8 @@ export default {
     Donate
   },
   props: {
-    isPinchZooming: Boolean
+    isPinchZooming: Boolean,
+    isTouchScrolling: Boolean
   },
   data () {
     return {
@@ -638,6 +639,16 @@ export default {
   },
   watch: {
     isPinchZooming (value) {
+      if (value) {
+        this.fadeOut()
+        this.updatePosition()
+      } else {
+        shouldCancelFadeOut = true
+        this.cancelFadeOut()
+      }
+    },
+    isTouchScrolling (value) {
+      if (!utils.isAndroid()) { return }
       if (value) {
         this.fadeOut()
         this.updatePosition()

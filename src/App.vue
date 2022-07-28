@@ -14,8 +14,8 @@
   OffscreenMarkers
   //- router-view is Space or Add
   router-view
-  Header(:isPinchZooming="isPinchZooming")
-  Footer(:isPinchZooming="isPinchZooming")
+  Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
+  Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
   TagDetails
   LinkDetails
   Minimap
@@ -94,7 +94,8 @@ export default {
   },
   data () {
     return {
-      isPinchZooming: false
+      isPinchZooming: false,
+      isTouchScrolling: false
     }
   },
   computed: {
@@ -175,9 +176,11 @@ export default {
     },
     touchMove () {
       shouldCancelUndo = true
+      this.isTouchScrolling = true
     },
     touchEnd () {
       this.isPinchZooming = false
+      this.isTouchScrolling = false
       if (shouldCancelUndo) {
         shouldCancelUndo = false
         multiTouchAction = ''
