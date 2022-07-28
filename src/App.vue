@@ -194,7 +194,7 @@ export default {
       multiTouchAction = null
     },
     updateCardMap () {
-      this.$store.dispatch('currentCards/updateCardMap')
+      this.$store.dispatch('currentCards/updateCardMap') // debounced
     },
     broadcastCursor (event) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()

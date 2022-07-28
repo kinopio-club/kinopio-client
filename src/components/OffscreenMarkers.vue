@@ -35,7 +35,7 @@ export default {
         this.hidden()
       }
     })
-    window.addEventListener('scroll', this.updateOffscreenMarkers)
+    window.addEventListener('scroll', this.debouncedUpdateOffscreenMarkers)
     offscreenMarkers.addEventListener('message', event => {
       this.offscreenCardsByDirection = event.data
     })
