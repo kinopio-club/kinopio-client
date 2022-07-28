@@ -626,6 +626,7 @@ const currentSpace = {
       })
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
+      window.scrollTo(0, 0)
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('isAddPage', false, { root: true })
       const emptySpace = utils.emptySpace(space.id)
