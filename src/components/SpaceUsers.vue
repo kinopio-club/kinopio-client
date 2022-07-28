@@ -20,10 +20,14 @@
 </template>
 
 <script>
-import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
+import { defineAsyncComponent } from 'vue'
+
 import uniqBy from 'lodash-es/uniqBy'
+const User = defineAsyncComponent({
+  loader: () => import('@/components/User.vue')
+})
 
 export default {
   name: 'TagList',
