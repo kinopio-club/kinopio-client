@@ -314,9 +314,13 @@ export default {
     // Painting
 
     painting (event) {
+      const isTouch = Boolean(event.touches)
+      const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
+      const isPainting = this.$store.state.currentUserIsPainting
       if (this.isPanning) { return }
       if (this.isBoxSelecting) { return }
-      if (!this.$store.state.currentUserIsPainting) { return }
+      if (!isPainting) { return }
+      if (isTouch && !isPaintingLocked) { return }
       if (this.$store.getters.shouldScrollAtEdges(event) && event.cancelable) {
         event.preventDefault() // prevents touch swipe viewport scrolling
       }
