@@ -1,9 +1,9 @@
 <template lang="pug">
-.footer-wrap(:style="position" v-if="!isAddPage")
+.footer-wrap(:style="position" v-if="!isAddPage" :class="{'fade-out': isFadingOut}")
   .left(v-if="!isEmbed")
     footer
       Notifications
-      .controls(v-if="isVisible" :class="{'fade-out': isFadingOut, 'hidden': isHidden}")
+      .controls(v-if="isVisible" :class="{'hidden': isHidden}")
         section
           .button-wrap
             .segmented-buttons
@@ -35,7 +35,7 @@
               span Tips
             MobileTips(:visible="mobileTipsIsVisible")
 
-  .right(:class="{'is-embed': isEmbed, 'fade-out': isFadingOut, 'hidden': isHidden}")
+  .right(:class="{'is-embed': isEmbed, 'hidden': isHidden}")
     button(v-if="isNotSupportedByDevice" @pointerup="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
       img.icon.minimap(src="@/assets/minimap.svg")
     template(v-if="!isMobileOrTouch")
