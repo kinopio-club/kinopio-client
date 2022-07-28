@@ -8,7 +8,7 @@ aside
     @touchmove="painting"
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
+    :style="canvasStyles"
     @dragenter="checkIfUploadIsDraggedOver"
     @dragover.prevent="checkIfUploadIsDraggedOver"
     @dragleave="removeUploadIsDraggedOver"
@@ -18,17 +18,17 @@ aside
   canvas#remote-painting.remote-painting(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
+    :style="canvasStyles"
   )
   canvas#locking.locking(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
+    :style="canvasStyles"
   )
   canvas#initial-circle.initial-circle(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
+    :style="canvasStyles"
   )
   DropGuideLine(
     :currentCursor="currentCursor"
@@ -66,6 +66,11 @@ let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, 
 // shows immediate feedback without having to move cursor
 let initialCircles = []
 let initialCircleCanvas, initialCircleContext, initialCirclesTimer
+
+// post scroll timer
+// runs scroll events after scrollend to compensate for android inertia scrolling
+const postScrollDuration = 300 // ms
+let postScrollAnimationTimer, postScrollStartTime, shouldCancelPostScroll
 
 export default {
   name: 'MagicPaint',
@@ -110,17 +115,14 @@ export default {
     window.addEventListener('touchend', this.stopPainting)
     // shift circle positions with scroll to simulate full size canvas
     this.updatePrevScrollPosition()
-    window.addEventListener('scroll', this.updateCirclesWithScroll)
-    window.addEventListener('scroll', this.updatePositionOffsetByPinchZoom)
-    window.addEventListener('scroll', this.cancelLocking)
+    window.addEventListener('scroll', this.userScroll)
     window.addEventListener('load', this.clearCircles)
+    this.startPostScroll()
   },
   beforeUnmount () {
     window.removeEventListener('mouseup', this.stopPainting)
     window.removeEventListener('touchend', this.stopPainting)
-    window.removeEventListener('scroll', this.updateCirclesWithScroll)
-    window.removeEventListener('scroll', this.updatePositionOffsetByPinchZoom)
-    window.removeEventListener('scroll', this.cancelLocking)
+    window.removeEventListener('scroll', this.userScroll)
     window.removeEventListener('load', this.clearCircles)
   },
   data () {
@@ -142,9 +144,23 @@ export default {
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     isPanning () { return this.$store.state.currentUserIsPanningReady },
-    isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting }
+    isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
+    canvasStyles () {
+      return { top: this.pinchZoomOffsetTop + 'px', left: this.pinchZoomOffsetLeft + 'px' }
+    }
   },
   methods: {
+    userScroll () {
+      if (postScrollAnimationTimer) {
+        shouldCancelPostScroll = true
+      }
+      this.scroll()
+    },
+    scroll () {
+      this.updateCirclesWithScroll()
+      this.updatePositionOffsetByPinchZoom()
+      this.cancelLocking()
+    },
     clearCircles () {
       initialCircles = []
       paintingCircles = []
@@ -181,19 +197,27 @@ export default {
       }
       this.updatePrevScrollPosition()
     },
+    updateCircleForAndroid (circle) {
+      if (!utils.isAndroid()) { return circle }
+      circle.x = circle.x - window.visualViewport.offsetLeft
+      circle.y = circle.y - window.visualViewport.offsetTop
+      return circle
+    },
     isCircleVisible (circle) {
       let { x, y, radius } = circle
       radius = radius || circleRadius
-      const isCircleVisibleX = utils.isBetween({
+      let isBetween = {
         value: x + radius,
         min: 0,
         max: this.viewportWidth
-      })
-      const isCircleVisibleY = utils.isBetween({
+      }
+      const isCircleVisibleX = utils.isBetween(isBetween)
+      isBetween = {
         value: y + radius,
         min: 0,
         max: this.viewportHeight
-      })
+      }
+      const isCircleVisibleY = utils.isBetween(isBetween)
       return Boolean(isCircleVisibleX && isCircleVisibleY)
     },
     offscreenCircle (circle) {
@@ -210,6 +234,7 @@ export default {
       return circle
     },
     drawCircle (circle, context, shouldDrawOffscreen) {
+      circle = this.updateCircleForAndroid(circle)
       const isCircleVisible = this.isCircleVisible(circle)
       if (!isCircleVisible && !shouldDrawOffscreen) { return }
       if (!isCircleVisible && shouldDrawOffscreen) { circle = this.offscreenCircle(circle) }
@@ -244,15 +269,46 @@ export default {
       lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       this.$store.commit('currentUserIsPaintingLocked', false)
       this.$store.commit('currentUserIsPainting', false)
-      if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddCard) {
+      if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddCard && event.cancelable) {
         this.$store.commit('shouldAddCard', true)
         event.preventDefault()
       } else {
         this.$store.commit('shouldAddCard', false)
       }
       // prevent mouse events from firing after touch events on touch device
-      event.preventDefault()
+      if (event.cancelable) { event.preventDefault() }
       this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.startPostScroll()
+    },
+
+    // Post Scrolling (for android)
+
+    startPostScroll () {
+      shouldCancelPostScroll = false
+      if (!postScrollAnimationTimer) {
+        postScrollAnimationTimer = window.requestAnimationFrame(this.postScrollFrame)
+      }
+    },
+    postScrollFrame (timestamp) {
+      if (!postScrollStartTime) {
+        postScrollStartTime = timestamp
+      }
+      const elaspedTime = timestamp - postScrollStartTime
+      const percentComplete = (elaspedTime / postScrollDuration) // between 0 and 1
+      if (shouldCancelPostScroll) {
+        this.endPostScroll()
+      } else if (percentComplete <= 1) {
+        this.scroll()
+        window.requestAnimationFrame(this.postScrollFrame)
+      } else {
+        this.endPostScroll()
+      }
+    },
+    endPostScroll () {
+      shouldCancelPostScroll = false
+      window.cancelAnimationFrame(postScrollAnimationTimer)
+      postScrollAnimationTimer = undefined
+      postScrollStartTime = undefined
     },
 
     // Painting
@@ -261,7 +317,7 @@ export default {
       if (this.isPanning) { return }
       if (this.isBoxSelecting) { return }
       if (!this.$store.state.currentUserIsPainting) { return }
-      if (this.$store.getters.shouldScrollAtEdges(event)) {
+      if (this.$store.getters.shouldScrollAtEdges(event) && event.cancelable) {
         event.preventDefault() // prevents touch swipe viewport scrolling
       }
       if (!paintingCirclesTimer) {
@@ -504,16 +560,7 @@ export default {
     cancelLocking () {
       shouldCancelLocking = true
     },
-    shouldPreventLocking () {
-      const maxDelta = 50
-      const delta = this.viewportHeight - startCursor.y
-      const isBottomOfViewport = delta < maxDelta
-      if (isBottomOfViewport && utils.isMobile()) {
-        return true
-      }
-    },
     startLocking () {
-      if (this.shouldPreventLocking()) { return }
       currentUserIsLocking = true
       shouldCancelLocking = false
       setTimeout(() => {

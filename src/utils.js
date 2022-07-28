@@ -172,7 +172,20 @@ export default {
     const fromFooter = event.target.closest('footer')
     return fromDialog || fromHeader || fromFooter || dialogIsVisible
   },
-  scrollIntoView (element) {
+  disablePinchZoom () {
+    if (this.isIPhone()) {
+      const viewport = document.querySelector('head meta[name=viewport]')
+      viewport.setAttribute('content', 'user-scalable=0')
+    }
+  },
+  enablePinchZoom () {
+    if (this.isIPhone()) {
+      const viewport = document.querySelector('head meta[name=viewport]')
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1') // index.html default
+    }
+  },
+  scrollIntoView (element, behavior) {
+    behavior = behavior || 'smooth'
     if (!element) { return }
     const rect = element.getBoundingClientRect()
     const viewportWidth = this.visualViewport().width
@@ -181,7 +194,7 @@ export default {
     const shouldScrollY = (rect.y + rect.height) > viewportHeight
     if (shouldScrollX || shouldScrollY) {
       element.scrollIntoView({
-        behavior: 'smooth',
+        behavior,
         block: 'center', // vertical
         inline: 'end' // horizontal
       })
@@ -434,7 +447,7 @@ export default {
     return navigator.platform && /iPhone|iPod/.test(navigator.platform)
   },
   isAndroid () {
-    return navigator.platform && /Android/.test(navigator.platform)
+    return navigator.platform && (/Android/.test(navigator.platform) || /Android/.test(navigator.userAgent))
   },
   isApple () {
     return /Safari/.test(navigator.userAgent)

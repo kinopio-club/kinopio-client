@@ -17,7 +17,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
       //- About
       .logo-about
         .button-wrap
-          .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active : aboutIsVisible}" tabindex="0")
+          .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active: aboutIsVisible}" tabindex="0")
             .logo-image
               .label-badge(v-if="shouldShowNewStuffIsUpdated")
                 span NEW
@@ -32,7 +32,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
         .space-details-row.segmented-buttons
           //- Current Space
           .button-wrap
-            button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+            button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active: spaceDetailsIsVisible}")
               span(v-show="currentSpaceIsTemplate")
                 img.icon.templates(src="@/assets/templates.svg")
               MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
@@ -587,18 +587,13 @@ export default {
       const counterScale = utils.roundFloat(1 / viewport.scale)
       const left = Math.round(viewport.offsetLeft)
       const top = Math.round(viewport.offsetTop)
-      let style
-      if (scale > 1) {
-        style = {
-          transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
-          'transform-origin': 'left top'
-        }
-      } else {
-        style = {
-          transform: `translate(${left}px, 0px)`,
-          zoom: counterScale,
-          'transform-origin': 'left top'
-        }
+      let style = {
+        transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
+        maxWidth: Math.round(viewport.width * scale) + 'px'
+      }
+      if (utils.isIPhone() && scale < 1) {
+        style.transform = 'none'
+        style.zoom = counterScale
       }
       this.position = style
     },
@@ -667,6 +662,7 @@ header
   display flex
   justify-content space-between
   transition 0.2s opacity
+  transform-origin left top
   &.hidden-by-mindmap
     opacity 0.2
   nav,

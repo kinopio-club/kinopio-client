@@ -35,7 +35,7 @@ export default {
         this.hidden()
       }
     })
-    window.addEventListener('scroll', this.updateOffscreenMarkers)
+    window.addEventListener('scroll', this.debouncedUpdateOffscreenMarkers)
     offscreenMarkers.addEventListener('message', event => {
       this.offscreenCardsByDirection = event.data
     })
@@ -43,14 +43,14 @@ export default {
     window.addEventListener('gesturestart', this.handleTouchInteractions)
     window.addEventListener('gesturechange', this.handleTouchInteractions)
     window.addEventListener('touchend', this.updatePosition)
-    visualViewport.addEventListener('resize', this.updatePosition)
+    visualViewport.addEventListener('resize', this.debouncedUpdateOffscreenMarkers)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.handleTouchInteractions)
     window.removeEventListener('gesturestart', this.handleTouchInteractions)
     window.removeEventListener('gesturechange', this.handleTouchInteractions)
     window.removeEventListener('touchend', this.updatePosition)
-    visualViewport.removeEventListener('resize', this.updatePosition)
+    visualViewport.removeEventListener('resize', this.debouncedUpdateOffscreenMarkers)
   },
   data () {
     return {

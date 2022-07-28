@@ -502,11 +502,11 @@ export default {
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
-      let zoom
-      if (this.pinchCounterZoomDecimal !== 1) {
-        zoom = this.pinchCounterZoomDecimal
-      } else {
-        zoom = this.spaceCounterZoomDecimal
+      let zoom = this.spaceCounterZoomDecimal
+      const viewport = utils.visualViewport()
+      const pinchCounterScale = utils.roundFloat(1 / viewport.scale)
+      if (zoom === 1) {
+        zoom = pinchCounterScale
       }
       const left = `${this.card.x + 8}px`
       const top = `${this.card.y + 8}px`
@@ -918,35 +918,34 @@ export default {
       })
     },
     focusName (position) {
-      const element = this.$refs.name
-      const length = this.name.length
-      if (!element) { return }
-      element.focus()
-      if (position) {
-        element.setSelectionRange(position, position)
-      }
-      if (length) {
-        element.setSelectionRange(length, length)
-      }
-      this.triggerUpdatePositionInVisualViewport()
+      utils.disablePinchZoom()
+      this.$nextTick(() => {
+        const element = this.$refs.name
+        const length = this.name.length
+        if (!element) { return }
+        element.focus()
+        if (position) {
+          element.setSelectionRange(position, position)
+        }
+        if (length) {
+          element.setSelectionRange(length, length)
+        }
+        this.triggerUpdatePositionInVisualViewport()
+      })
     },
-    scrollIntoView () {
+    scrollIntoView (behavior) {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      utils.scrollIntoView(element, behavior)
     },
     scrollIntoViewAndFocus () {
+      let behavior
+      if (utils.isIPhone()) {
+        behavior = 'auto'
+      }
+      utils.disablePinchZoom()
       this.$nextTick(() => {
-        // only mobile focus, if card is new (e.g. name is blank)
-        if (utils.isMobile()) {
-          if (this.card.name) {
-            this.scrollIntoView()
-          } else {
-            this.focusName()
-          }
-        } else {
-          this.scrollIntoView()
-          this.focusName()
-        }
+        this.scrollIntoView(behavior)
+        this.focusName()
         this.triggerUpdateMagicPaintPositionOffset()
         this.triggerUpdatePositionInVisualViewport()
       })
@@ -1435,6 +1434,7 @@ export default {
     visible (visible) {
       if (!visible) {
         this.closeCard()
+        utils.enablePinchZoom()
       }
     }
   }

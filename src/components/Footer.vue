@@ -36,7 +36,7 @@
             MobileTips(:visible="mobileTipsIsVisible")
 
   .right(:class="{'is-embed': isEmbed, 'fade-out': isFadingOut, 'hidden': isHidden}")
-    button(@pointerup="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
+    button(v-if="isNotSupportedByDevice" @pointerup="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
       img.icon.minimap(src="@/assets/minimap.svg")
     template(v-if="!isMobileOrTouch")
       SpaceZoom
@@ -123,6 +123,7 @@ export default {
     clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
+    isNotSupportedByDevice () { return !utils.isAndroid() },
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
     isAddPage () { return this.$store.state.isAddPage },
     isEmbed () { return this.$store.state.isEmbed },
@@ -345,20 +346,13 @@ export default {
         offsetTop = 10
       }
       const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height - (offsetTop))
-      let style
-      if (scale > 1) {
-        style = {
-          transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
-          'transform-origin': 'left bottom'
-        }
-      } else {
-        if (offsetTop) { offsetTop = offsetTop + 5 }
-        style = {
-          transform: `translate(${left}px, ${-offsetTop}px)`,
-          zoom: counterScale,
-          'transform-origin': 'left bottom',
-          'margin-left': `-${left}px`
-        }
+      let style = {
+        transform: `translate(${left}px, ${top + offsetTop}px) scale(${counterScale})`,
+        maxWidth: Math.round(viewport.width * scale) + 'px'
+      }
+      if (utils.isIPhone() && scale < 1) {
+        style.transform = 'none'
+        style.zoom = counterScale
       }
       this.position = style
     }
@@ -385,11 +379,13 @@ export default {
   --footer-max-z 2147483644 // var(--max-z) - 2, hardcoded because firefox vars in calc is buggy
   z-index var(--footer-max-z)
   position fixed
-  left 8px
-  bottom 8px
-  right 8px
+  left 0
+  bottom 0
+  right 0
+  padding 8px
   max-width 100%
   pointer-events none
+  transform-origin left bottom
   .right
     pointer-events all
     text-align right
