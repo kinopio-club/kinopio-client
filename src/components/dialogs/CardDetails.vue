@@ -942,6 +942,7 @@ export default {
       if (utils.isIPhone()) {
         behavior = 'auto'
       }
+      utils.disablePinchZoom()
       this.$nextTick(() => {
         this.scrollIntoView(behavior)
         this.focusName()
