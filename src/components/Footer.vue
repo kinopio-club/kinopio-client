@@ -29,10 +29,10 @@
             Favorites(:visible="favoritesIsVisible")
             FavoritesActions(:visible="favoritesActionsIsVisible")
           //- Mobile Tips
-          .button-wrap(v-if="isMobileOrTouch")
+          .button-wrap(v-if="isMobileOrTouch && shouldShowMobileTips")
             button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
               img.icon(src="@/assets/press-and-hold.svg")
-              span Tips
+              span Mobile Tips
             MobileTips(:visible="mobileTipsIsVisible")
 
   .right(:class="{'is-embed': isEmbed, 'hidden': isHidden}")
@@ -124,6 +124,7 @@ export default {
     clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
+    shouldShowMobileTips () { return !this.$store.state.currentUser.shouldHideMobileTips },
     isNotSupportedByDevice () { return !utils.isAndroid() },
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
     isAddPage () { return this.$store.state.isAddPage },

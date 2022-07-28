@@ -9,6 +9,11 @@ dialog.narrow.mobile-tips(v-if="visible" :open="visible" @click.stop="closeDialo
           span Get Apps
         Apps(:visible="appsIsVisible")
 
+    .button-wrap(@click.left.prevent="shouldHideMobileTips" @keydown.stop.enter="shouldHideMobileTips")
+      button
+        img.icon.cancel(src="@/assets/add.svg")
+        span Hide Tips
+
   section(
     @mouseup.stop
     @touchend.stop
@@ -74,6 +79,11 @@ export default {
           this.dialogHeight = utils.elementHeightFromHeader(element)
         })
       })
+    },
+    shouldHideMobileTips () {
+      this.$store.dispatch('closeAllDialogs', 'MobileTips')
+      this.$store.dispatch('currentUser/update', { shouldHideMobileTips: true })
+      this.$store.commit('addNotification', { message: 'Tips hidden. Toggle in User → Settings → Controls', type: 'info' })
     }
   },
   watch: {
