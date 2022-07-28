@@ -209,6 +209,7 @@ export default {
           return card
         })
       }
+      cards = cards.filter(card => Boolean(card))
       cards.forEach(card => {
         if (card.id === this.startCardId || card.id === this.endCardId) {
           shouldHide = true
