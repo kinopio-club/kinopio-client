@@ -933,13 +933,17 @@ export default {
         this.triggerUpdatePositionInVisualViewport()
       })
     },
-    scrollIntoView () {
+    scrollIntoView (behavior) {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      utils.scrollIntoView(element, behavior)
     },
     scrollIntoViewAndFocus () {
+      let behavior
+      if (utils.isIPhone()) {
+        behavior = 'auto'
+      }
       this.$nextTick(() => {
-        this.scrollIntoView()
+        this.scrollIntoView(behavior)
         this.focusName()
         this.triggerUpdateMagicPaintPositionOffset()
         this.triggerUpdatePositionInVisualViewport()

@@ -184,7 +184,8 @@ export default {
       viewport.setAttribute('content', 'width=device-width, initial-scale=1') // index.html default
     }
   },
-  scrollIntoView (element) {
+  scrollIntoView (element, behavior) {
+    behavior = behavior || 'smooth'
     if (!element) { return }
     const rect = element.getBoundingClientRect()
     const viewportWidth = this.visualViewport().width
@@ -193,7 +194,7 @@ export default {
     const shouldScrollY = (rect.y + rect.height) > viewportHeight
     if (shouldScrollX || shouldScrollY) {
       element.scrollIntoView({
-        behavior: 'smooth',
+        behavior,
         block: 'center', // vertical
         inline: 'end' // horizontal
       })
