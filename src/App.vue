@@ -47,6 +47,8 @@ import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
 
+let inertiaScrollEndIntervalTimer, prevPosition
+
 export default {
   components: {
     Header,
@@ -178,9 +180,30 @@ export default {
       shouldCancelUndo = true
       this.isTouchScrolling = true
     },
+    checkIfInertiaScrollEnd () {
+      if (!utils.isAndroid) { return }
+      if (inertiaScrollEndIntervalTimer) { return }
+      prevPosition = null
+      inertiaScrollEndIntervalTimer = setInterval(() => {
+        const viewport = utils.visualViewport()
+        const current = {
+          left: viewport.offsetLeft,
+          top: viewport.offsetTop
+        }
+        if (!prevPosition) {
+          prevPosition = current
+        } else if (prevPosition.left === current.left && prevPosition.top === current.top) {
+          clearInterval(inertiaScrollEndIntervalTimer)
+          inertiaScrollEndIntervalTimer = null
+          this.isTouchScrolling = false
+        } else {
+          prevPosition = current
+        }
+      }, 60)
+    },
     touchEnd () {
       this.isPinchZooming = false
-      this.isTouchScrolling = false
+      this.checkIfInertiaScrollEnd()
       if (shouldCancelUndo) {
         shouldCancelUndo = false
         multiTouchAction = ''
