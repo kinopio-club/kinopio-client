@@ -6,11 +6,13 @@ nav.toolbar(v-if="visible")
       button(:class="{ active: currentUserToolbarIsCard }" @click="toggleToolbar('card')")
         img.icon(src="@/assets/card.svg")
       .badge.info.item(:class="{ active: notifyItemIsCard }") Card Mode
+        span(v-if="!isTouchDevice") {{' '}} (C)
     //- Box
     .button-wrap
       button(:class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')")
         img.icon(src="@/assets/box.svg")
       .badge.info.item(:class="{ active: notifyItemIsBox }") Box Mode
+        span(v-if="!isTouchDevice") {{' '}} (B)
 
 </template>
 
@@ -26,6 +28,7 @@ export default {
     }
   },
   computed: {
+    isTouchDevice () { return this.$store.state.isTouchDevice },
     currentUserToolbar () { return this.$store.state.currentUserToolbar },
     currentUserToolbarIsCard () { return this.$store.state.currentUserToolbar === 'card' },
     notifyItemIsCard () { return this.notifyItem === 'card' },
