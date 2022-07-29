@@ -131,10 +131,13 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
               img.icon.right-arrow(src="@/assets/down-arrow.svg")
             Sidebar(:visible="sidebarIsVisible")
-  nav.toolbar(v-if="!isEmbed")
+
+  nav.toolbar(v-if="isSpace")
     .segmented-buttons.vertical
-      button C
-      button B
+      button(:class="{ active: currentUserToolbarIsCard }" @click="toggleToolbar('card')")
+        span C
+      button(:class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')")
+        span B
 
   SelectAllBelow
 </template>
@@ -370,9 +373,14 @@ export default {
       } else {
         return false
       }
-    }
+    },
+    currentUserToolbarIsCard () { return this.$store.state.currentUserToolbar === 'card' },
+    currentUserToolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' }
   },
   methods: {
+    toggleToolbar (value) {
+      this.$store.commit('currentUserToolbar', value)
+    },
     openKinopio () {
       const url = this.currentSpaceUrl
       const title = `${this.currentSpaceName} – Kinopio`

@@ -69,6 +69,7 @@ const store = createStore({
     currentUserIsHoveringOverConnectionId: '',
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
+    currentUserToolbar: 'card', // card, box
 
     // minimap
     minimapIsVisible: false,
@@ -571,6 +572,13 @@ const store = createStore({
     minimapIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'minimapIsVisible' })
       state.minimapIsVisible = value
+    },
+
+    // Toolbar Mode
+
+    currentUserToolbar: (state, value) => {
+      utils.typeCheck({ value, type: 'string', origin: 'currentUserToolbar' })
+      state.currentUserToolbar = value
     },
 
     // Dragging
