@@ -345,7 +345,7 @@ export default {
       const left = Math.round(viewport.offsetLeft)
       let offsetTop = 0
       if (navigator.standalone) {
-        offsetTop = 10
+        offsetTop = 15
       }
       const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height)
       let style = {
@@ -355,6 +355,7 @@ export default {
       if (utils.isIPhone() && scale <= 1) {
         style.transform = 'none'
         style.zoom = counterScale
+        style.marginBottom = offsetTop + 'px'
       }
       this.position = style
     }
