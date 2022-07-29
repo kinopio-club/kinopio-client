@@ -12,7 +12,7 @@ dialog.narrow.mobile-tips(v-if="visible" :open="visible" @click.stop="closeDialo
     .button-wrap(@click.left.prevent="shouldHideMobileTips" @keydown.stop.enter="shouldHideMobileTips")
       button
         img.icon.cancel(src="@/assets/add.svg")
-        span Hide This
+        span Hide Tips
 
   section(
     @mouseup.stop
