@@ -15,15 +15,15 @@
   "cards": [
     {
       "id": "1",
-      "x": 80,
+      "x": 70,
       "y": 100,
       "z": 0,
       "name": "Get your thoughts, ideas and feelings out"
     },
     {
       "id": "wQ9-NzxQyWoIGGKEgHRMF",
-      "x": 131,
-      "y": 194,
+      "x": 81,
+      "y": 164,
       "name": "Connect them together\n\n[More Help](https://help.kinopio.club)",
       "z": 3
     }
