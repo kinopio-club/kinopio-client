@@ -347,7 +347,7 @@ export default {
       if (navigator.standalone) {
         offsetTop = 10
       }
-      const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height - (offsetTop))
+      const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height)
       let style = {
         transform: `translate(${left}px, ${top + offsetTop}px) scale(${counterScale})`,
         maxWidth: Math.round(viewport.width * scale) + 'px'
