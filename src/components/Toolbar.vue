@@ -4,12 +4,12 @@ nav.toolbar(v-if="visible")
     //- Card
     .button-wrap
       button(:class="{ active: currentUserToolbarIsCard }" @click="toggleToolbar('card')")
-        span C
+        img.icon(src="@/assets/card.svg")
       .badge.info.item(:class="{ active: notifyItemIsCard }") Card Mode
     //- Box
     .button-wrap
       button(:class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')")
-        span B
+        img.icon(src="@/assets/box.svg")
       .badge.info.item(:class="{ active: notifyItemIsBox }") Box Mode
 
 </template>
@@ -51,7 +51,7 @@ export default {
   top 65px
   .item
     top 3px
-    left 28px
+    left 30px
     position absolute
     pointer-events none
     min-width max-content
