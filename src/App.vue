@@ -7,6 +7,7 @@
 )
   base(v-if="isAddPage" target="_blank")
   #layout-viewport(:style="{ background: backgroundTint }")
+  Boxes
   LockedCards
   MagicPaint
   OffscreenMarkers
@@ -41,6 +42,7 @@ import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import Minimap from '@/components/Minimap.vue'
 import LockedCards from '@/components/LockedCards.vue'
+import Boxes from '@/components/Boxes.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -58,7 +60,8 @@ export default {
     LinkDetails,
     OffscreenMarkers,
     Minimap,
-    LockedCards
+    LockedCards,
+    Boxes
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)

@@ -1,20 +1,15 @@
 <template lang="pug">
-.locked-cards(:style="zoomScale")
-  template(v-for="card in lockedCards")
-    Card(:card="card")
+.boxes(:style="zoomScale")
+  //- template(v-for="box in boxes")
+  p BOX NAME
 </template>
 
 <script>
-import Card from '@/components/Card.vue'
-
 export default {
-  name: 'LockedCards',
-  components: {
-    Card
-  },
+  name: 'Boxes',
   computed: {
+    boxes () { return this.$store.getters['currentBoxes/all'] },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
-    lockedCards () { return this.$store.getters['currentCards/isLocked'] },
     zoomScale () {
       return {
         transform: `scale(${this.spaceZoomDecimal})`
@@ -25,7 +20,13 @@ export default {
 </script>
 
 <style lang="stylus">
-.locked-cards
+.boxes
   position absolute
   top 0
+  // temp
+  p
+    position absolute
+    background-color pink
+    left 300px
+    top 300px
 </style>
