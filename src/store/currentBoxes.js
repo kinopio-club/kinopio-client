@@ -153,7 +153,18 @@ export default {
       return state.boxes[id]
     },
     all: (state) => {
-      return state.ids.map(id => state.boxes[id])
+      // return state.ids.map(id => state.boxes[id])
+      return [
+        {
+          id: '123',
+          name: 'blah',
+          x: 200,
+          y: 200,
+          width: 200,
+          height: 200,
+          color: 'teal'
+        }
+      ]
     }
   }
 }

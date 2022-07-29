@@ -1,12 +1,17 @@
 <template lang="pug">
 .boxes(:style="zoomScale")
-  //- template(v-for="box in boxes")
-  p BOX NAME
+  template(v-for="box in boxes")
+    Box(:box="box")
 </template>
 
 <script>
+import Box from '@/components/Box.vue'
+
 export default {
   name: 'Boxes',
+  components: {
+    Box
+  },
   computed: {
     boxes () { return this.$store.getters['currentBoxes/all'] },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
@@ -23,10 +28,4 @@ export default {
 .boxes
   position absolute
   top 0
-  // temp
-  p
-    position absolute
-    background-color pink
-    left 300px
-    top 300px
 </style>
