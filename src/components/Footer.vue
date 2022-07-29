@@ -265,7 +265,11 @@ export default {
     // preload explore spaces
 
     async updateExploreSpaces () {
-      this.exploreSpaces = await this.$store.dispatch('api/getExploreSpaces')
+      try {
+        this.exploreSpaces = await this.$store.dispatch('api/getExploreSpaces')
+      } catch (error) {
+        console.warn('🚑 updateExploreSpaces', error)
+      }
     },
 
     // hide

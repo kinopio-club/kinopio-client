@@ -221,10 +221,14 @@ const currentSpace = {
       })
       otherUserIds = uniq(otherUserIds)
       if (!otherUserIds.length) { return }
-      const users = await context.dispatch('api/getPublicUsers', otherUserIds, { root: true })
-      users.forEach(user => {
-        context.commit('updateOtherUsers', user, { root: true })
-      })
+      try {
+        const users = await context.dispatch('api/getPublicUsers', otherUserIds, { root: true })
+        users.forEach(user => {
+          context.commit('updateOtherUsers', user, { root: true })
+        })
+      } catch (error) {
+        console.warn('🚑 updateOtherUsers', error)
+      }
     },
     updateOtherSpaces: async (context, spaceId) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
@@ -418,7 +422,7 @@ const currentSpace = {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
       } catch (error) {
-        console.warn('🚑', error.status, error)
+        console.warn('🚑 getRemoteSpace', error.status, error)
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
           context.dispatch('loadLastSpace')
