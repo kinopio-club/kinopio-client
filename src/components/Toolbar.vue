@@ -5,12 +5,12 @@ nav.toolbar(v-if="visible")
     .button-wrap
       button(:class="{ active: currentUserToolbarIsCard }" @click="toggleToolbar('card')")
         span C
-      .badge.info.item(:class="{ active: currentUserToolbarIsCard }") Card Mode
+      .badge.info.item(:class="{ active: notifyItemIsCard }") Card Mode
     //- Box
     .button-wrap
       button(:class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')")
         span B
-      .badge.info.item(:class="{ active: currentUserToolbarIsBox }") Box Mode
+      .badge.info.item(:class="{ active: notifyItemIsBox }") Box Mode
 
 </template>
 
@@ -20,13 +20,26 @@ export default {
   props: {
     visible: Boolean
   },
+  data () {
+    return {
+      notifyItem: ''
+    }
+  },
   computed: {
+    currentUserToolbar () { return this.$store.state.currentUserToolbar },
     currentUserToolbarIsCard () { return this.$store.state.currentUserToolbar === 'card' },
-    currentUserToolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' }
+    notifyItemIsCard () { return this.notifyItem === 'card' },
+    currentUserToolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' },
+    notifyItemIsBox () { return this.notifyItem === 'box' }
   },
   methods: {
     toggleToolbar (value) {
       this.$store.commit('currentUserToolbar', value)
+    }
+  },
+  watch: {
+    currentUserToolbar (value) {
+      this.notifyItem = value
     }
   }
 }
