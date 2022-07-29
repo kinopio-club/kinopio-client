@@ -147,7 +147,8 @@ export default {
     isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
     canvasStyles () {
       return { top: this.pinchZoomOffsetTop + 'px', left: this.pinchZoomOffsetLeft + 'px' }
-    }
+    },
+    toolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' }
   },
   methods: {
     userScroll () {
@@ -349,6 +350,7 @@ export default {
       this.broadcastCircle(circle)
     },
     startPainting (event) {
+      if (this.toolbarIsBox) { return }
       if (this.isPanning) { return }
       if (this.isBoxSelecting) { return }
       startCursor = utils.cursorPositionInViewport(event)

@@ -231,7 +231,8 @@ export default {
       const rightMouseButton = 2
       const isRightClick = rightMouseButton === event.button
       const isSpaceScope = event.target.id === 'magic-painting'
-      const shouldBoxSelect = event.shiftKey && isSpaceScope
+      const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
+      const shouldBoxSelect = event.shiftKey && isSpaceScope && !toolbarIsBox
       const shouldPan = isRightClick && isSpaceScope
       const position = utils.cursorPositionInPage(event)
       if (shouldBoxSelect) {
