@@ -654,7 +654,6 @@ dialog
       border-top-left-radius 0
     button:last-child
       border-top-right-radius 0
-
   > .button-wrap > button,
   > button,
   > label
@@ -666,6 +665,21 @@ dialog
     &:last-child
       border-top-right-radius 3px
       border-bottom-right-radius 3px
+  &.vertical
+    display flex
+    flex-direction column
+    button
+      min-width 24px
+      border-radius 0
+      margin-bottom -1px
+      &:first-child
+        border-top-left-radius 3px
+        border-top-right-radius 3px
+        margin-left -1px
+      &:last-child
+        border-bottom-left-radius 3px
+        border-bottom-right-radius 3px
+
   button + button,
   label + button
     margin-left -1px

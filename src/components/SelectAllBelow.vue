@@ -42,8 +42,10 @@ export default {
       if (this.$store.state.currentUserIsPainting) { return }
       if (this.$store.state.currentUserIsDraggingCard) { return }
       const edgeThreshold = 30
-      const header = document.querySelector('header').getBoundingClientRect().height + 10
-      const footer = document.querySelector('.footer-wrap').getBoundingClientRect().height + 10
+      let header = document.querySelector('header').getBoundingClientRect().height
+      const toolbar = document.querySelector('nav.toolbar').getBoundingClientRect().height
+      header = header + toolbar
+      const footer = document.querySelector('.footer-wrap footer').getBoundingClientRect().height + 20
       const position = utils.cursorPositionInViewport(event)
       const viewport = utils.visualViewport()
       const isInThreshold = position.x <= edgeThreshold
