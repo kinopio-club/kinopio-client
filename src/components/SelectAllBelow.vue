@@ -53,7 +53,9 @@ export default {
         max: viewport.height - footer
       })
       const isInPosition = isInThreshold && isBetweenControls
-      if (isInPosition || this.isSelecting) {
+      const isCancelledByHover = Boolean(event.target.closest('button') || event.target.closest('article'))
+      const shouldShow = isInPosition && !isCancelledByHover
+      if (shouldShow || this.isSelecting) {
         this.positionY = position.y
         this.isVisible = true
       } else {
