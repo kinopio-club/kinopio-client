@@ -132,13 +132,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               img.icon.right-arrow(src="@/assets/down-arrow.svg")
             Sidebar(:visible="sidebarIsVisible")
 
-  nav.toolbar(v-if="isSpace")
-    .segmented-buttons.vertical
-      button(:class="{ active: currentUserToolbarIsCard }" @click="toggleToolbar('card')")
-        span C
-      button(:class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')")
-        span B
-
+  Toolbar(:visible="isSpace")
   SelectAllBelow
 </template>
 
@@ -168,6 +162,7 @@ import utils from '@/utils.js'
 import SelectAllBelow from '@/components/SelectAllBelow.vue'
 import SpaceUsers from '@/components/SpaceUsers.vue'
 import Donate from '@/components/dialogs/Donate.vue'
+import Toolbar from '@/components/Toolbar.vue'
 
 let updateNotificationsIntervalTimer
 
@@ -201,7 +196,8 @@ export default {
     SelectAllBelow,
     Sidebar,
     SpaceUsers,
-    Donate
+    Donate,
+    Toolbar
   },
   props: {
     isPinchZooming: Boolean,
@@ -373,14 +369,9 @@ export default {
       } else {
         return false
       }
-    },
-    currentUserToolbarIsCard () { return this.$store.state.currentUserToolbar === 'card' },
-    currentUserToolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' }
+    }
   },
   methods: {
-    toggleToolbar (value) {
-      this.$store.commit('currentUserToolbar', value)
-    },
     openKinopio () {
       const url = this.currentSpaceUrl
       const title = `${this.currentSpaceName} – Kinopio`
@@ -707,11 +698,6 @@ header
       > .keyboard-shortcuts
         max-height calc(100vh - 120px)
         top calc(100% - 6px)
-
-  .toolbar
-    position absolute
-    top 60px
-
   .logo
     cursor pointer
     display flex
