@@ -38,11 +38,17 @@ export default {
   methods: {
     toggleToolbar (value) {
       this.$store.commit('currentUserToolbar', value)
+    },
+    clearAllSelectedCards () {
+      this.$store.dispatch('clearMultipleSelected')
+      this.$store.commit('cardDetailsIsVisibleForCardId', '')
     }
   },
   watch: {
     currentUserToolbar (value) {
       this.notifyItem = value
+      this.$store.dispatch('closeAllDialogs', 'Toolbar')
+      this.clearAllSelectedCards()
     }
   }
 }
