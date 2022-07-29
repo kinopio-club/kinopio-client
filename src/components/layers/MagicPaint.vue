@@ -409,11 +409,18 @@ export default {
       }
       return movementDirection
     },
+    shouldPreventSelectionOnMobile () {
+      const isMobile = utils.isMobile()
+      const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
+      return isMobile && !isPaintingLocked
+    },
     selectConnections (circle) {
+      if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
       this.selectConnectionPaths(circle)
     },
     selectCardsAndConnectionsBetweenCircles (circle) {
+      if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
       const prevCircle = paintingCircles[paintingCircles.length - 1] || circle
       const delta = {
@@ -459,6 +466,7 @@ export default {
       }
     },
     selectCards (point) {
+      if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
       const zoom = this.spaceCounterZoomDecimal
       const cardMap = this.$store.state.currentCards.cardMap
