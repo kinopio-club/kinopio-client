@@ -17,8 +17,6 @@ nav.toolbar(v-if="visible")
 <script>
 export default {
   name: 'Toolbar',
-  components: {
-  },
   props: {
     visible: Boolean
   },
@@ -37,7 +35,7 @@ export default {
 <style lang="stylus">
 .toolbar
   position absolute
-  top 60px
+  top 65px
   .item
     top 3px
     left 28px

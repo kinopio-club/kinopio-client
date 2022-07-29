@@ -139,10 +139,15 @@ export default {
       return hash.replace('index.', '') // xyzabc123
     },
     pageCursor () {
-      if (this.$store.state.currentUserIsPanning) {
+      const isPanning = this.$store.state.currentUserIsPanning
+      const isPanningReady = this.$store.state.currentUserIsPanningReady
+      const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
+      if (isPanning) {
         return 'grabbing'
-      } else if (this.$store.state.currentUserIsPanningReady) {
+      } else if (isPanningReady) {
         return 'grab'
+      } else if (toolbarIsBox) {
+        return 'crosshair'
       }
       return undefined
     },

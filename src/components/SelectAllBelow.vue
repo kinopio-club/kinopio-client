@@ -44,7 +44,7 @@ export default {
       const edgeThreshold = 30
       let header = document.querySelector('header').getBoundingClientRect().height
       const toolbar = document.querySelector('nav.toolbar').getBoundingClientRect().height
-      header = header + toolbar
+      header = header + toolbar + 5
       const footer = document.querySelector('.footer-wrap footer').getBoundingClientRect().height + 20
       const position = utils.cursorPositionInViewport(event)
       const viewport = utils.visualViewport()
