@@ -732,6 +732,9 @@ dialog
   transform rotate(-90deg)
   vertical-align 2px
 
+.icon.box-icon
+  vertical-align 0
+
 label,
 li
   &:hover,

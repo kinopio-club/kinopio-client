@@ -27,9 +27,9 @@ export default {
         width: 200,
         height: 200,
         color: 'pink',
+        fill: 'empty',
         spaceId: 'WwqDhJVhJZQ4Dtmlx3S_c'
       }
-
     }
   },
   mutations: {

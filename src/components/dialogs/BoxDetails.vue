@@ -10,8 +10,10 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
       input.name(:disabled="!canEditSpace" placeholder="Box Name" v-model="name" ref="name" @focus="focus" @blur="blur")
     .row
       .segmented-buttons
-        button F
-        button O
+        button(:class="{active: fillIsEmpty}" @click="updateBoxFill('empty')")
+          img.icon.box-icon(src="@/assets/box-empty.svg")
+        button(:class="{active: fillIsFilled}" @click="updateBoxFill('filled')")
+          img.icon.box-icon(src="@/assets/box.svg")
 </template>
 
 <script>
@@ -34,6 +36,8 @@ export default {
       const id = this.$store.state.boxDetailsIsVisibleForBoxId
       return this.$store.getters['currentBoxes/byId'](id) || {}
     },
+    fillIsEmpty () { return this.box.fill === 'empty' },
+    fillIsFilled () { return this.box.fill === 'filled' },
     visible () { return utils.objectHasKeys(this.box) },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     styles () {
@@ -77,6 +81,10 @@ export default {
     updateBoxColor (color) {
       console.log('🌈', color)
       // this.updateBox({color})
+    },
+    updateBoxFill (fill) {
+      console.log('🔮', fill)
+      // this.updateBox({fill})
     },
     closeDialogs () {
       this.colorPickerIsVisible = false
