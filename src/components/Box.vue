@@ -5,11 +5,12 @@
     @mouseleave="toggleIsHover(false)"
     @mousedown="toggleIsDragging(true)"
     :style="labelStyles"
+    :class="{unselectable: isPainting}"
   )
     //- name
     span {{box.name}}
   //- resize
-  .bottom-button-wrap
+  .bottom-button-wrap(:class="{unselectable: isPainting}")
     .resize-button-wrap.inline-button-wrap
       //- @mousedown.left.stop="startResizing"
       //- @touchstart.stop="startResizing"
@@ -60,7 +61,8 @@ export default {
       return {
         backgroundColor: this.color
       }
-    }
+    },
+    isPainting () { return this.$store.state.currentUserIsPainting }
   },
   methods: {
     clearIsDragging () {
@@ -70,6 +72,7 @@ export default {
       this.isDragging = value
     },
     toggleIsHover (value) {
+      if (this.isPainting) { return }
       this.isHover = value
     }
     // toggleBoxDetails, set boxdetailsposition, boxDetailsIsVisible (like carddetails)

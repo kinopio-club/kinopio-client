@@ -29,6 +29,4 @@ export default {
 .boxes
   position absolute
   top 0
-  &.unselectable
-    pointer-events none
 </style>

@@ -458,6 +458,9 @@ label // used for checkbox buttons
     //     box-shadow var(--button-active-inset-shadow)
     //     background var(--secondary-active-background)
 
+.unselectable
+  pointer-events none !important
+
 select
   max-width 100%
   -webkit-appearance none
