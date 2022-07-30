@@ -1,5 +1,5 @@
 <template lang="pug">
-.boxes(:style="zoomScale")
+.boxes(:style="zoomScale" :class="{unselectable: isPainting}")
   template(v-for="box in boxes")
     Box(:box="box")
 </template>
@@ -13,6 +13,7 @@ export default {
     Box
   },
   computed: {
+    isPainting () { return this.$store.state.currentUserIsPainting },
     boxes () { return this.$store.getters['currentBoxes/all'] },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     zoomScale () {
@@ -28,4 +29,6 @@ export default {
 .boxes
   position absolute
   top 0
+  &.unselectable
+    pointer-events none
 </style>

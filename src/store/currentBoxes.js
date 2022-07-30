@@ -162,7 +162,7 @@ export default {
           y: 200,
           width: 200,
           height: 200,
-          color: 'teal'
+          color: 'pink'
         }
       ]
     }

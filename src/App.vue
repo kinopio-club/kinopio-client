@@ -7,10 +7,10 @@
 )
   base(v-if="isAddPage" target="_blank")
   #layout-viewport(:style="{ background: backgroundTint }")
-  Boxes
   LockedCards
   MagicPaint
   OffscreenMarkers
+  Boxes
   //- router-view is Space or Add
   router-view
   Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
