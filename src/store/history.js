@@ -73,7 +73,7 @@ const self = {
     patches: [],
     pointer: 0,
     isPaused: false,
-    snapshots: { cards: {}, connections: {}, connectionTypes: {} }
+    snapshots: { cards: {}, connections: {}, connectionTypes: {}, boxes: {} }
   },
   mutations: {
     add: (state, patch) => {

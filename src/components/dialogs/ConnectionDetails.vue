@@ -272,7 +272,7 @@ export default {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
       this.$store.dispatch('history/resume')
       const connectionType = utils.clone(this.currentConnectionType)
-      this.$store.dispatch('history/add', { connectionTypes: [connectionType], useSnapshot: true }, { root: true })
+      this.$store.dispatch('history/add', { connectionTypes: [connectionType], useSnapshot: true })
       this.inputIsFocused = false
     },
     updateNextConnectionColor () {
@@ -300,7 +300,7 @@ export default {
         this.$store.dispatch('history/resume')
         this.resultsSectionMaxHeight = undefined
         if (this.inputIsFocused) {
-          this.$store.dispatch('history/add', { connectionTypes: [prevConnectionType], useSnapshot: true }, { root: true })
+          this.$store.dispatch('history/add', { connectionTypes: [prevConnectionType], useSnapshot: true })
           this.inputIsFocused = false
         }
       }
