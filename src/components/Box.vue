@@ -90,7 +90,7 @@ export default {
   &.hover
     box-shadow var(--hover-shadow)
   &.active
-    box-shadow var(--button-hover-shadow)
+    box-shadow var(--active-shadow)
   &.resize
     box-shadow var(--active-shadow)
 
@@ -104,7 +104,7 @@ export default {
     &:hover
       box-shadow var(--hover-shadow)
     &:active
-      box-shadow var(--button-hover-shadow)
+      box-shadow var(--active-shadow)
 
   .bottom-button-wrap
     pointer-events all
