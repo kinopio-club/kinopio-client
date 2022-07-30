@@ -14,8 +14,22 @@ let currentSpaceId
 export default {
   namespaced: true,
   state: {
-    ids: [],
-    boxes: {}
+    // ids: [],
+    // boxes: {}
+    ids: ['123abc'],
+    boxes: {
+
+      '123abc': {
+        id: '123abc',
+        name: 'blah',
+        x: 200,
+        y: 200,
+        width: 200,
+        height: 200,
+        color: 'pink'
+      }
+
+    }
   },
   mutations: {
 
@@ -153,18 +167,7 @@ export default {
       return state.boxes[id]
     },
     all: (state) => {
-      // return state.ids.map(id => state.boxes[id])
-      return [
-        {
-          id: '123',
-          name: 'blah',
-          x: 200,
-          y: 200,
-          width: 200,
-          height: 200,
-          color: 'pink'
-        }
-      ]
+      return state.ids.map(id => state.boxes[id])
     }
   }
 }
