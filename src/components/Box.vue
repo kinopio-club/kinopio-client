@@ -6,7 +6,14 @@
     @mousedown="toggleIsDragging(true)"
     :style="labelStyles"
     :class="{unselectable: isPainting}"
+
+    @mouseup.left="showBoxDetails"
+    @keyup.stop.enter="showBoxDetails"
   )
+    //- @touchstart="startLocking"
+    //- @touchmove="updateCurrentTouchPosition"
+    //- @touchend="showCardDetailsTouch"
+
     //- name
     span {{box.name}}
   //- resize
@@ -63,6 +70,7 @@ export default {
       }
     },
     isPainting () { return this.$store.state.currentUserIsPainting }
+    // canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
   },
   methods: {
     clearIsDragging () {
@@ -74,7 +82,32 @@ export default {
     toggleIsHover (value) {
       if (this.isPainting) { return }
       this.isHover = value
+    },
+    // clearBoxInteractions () {}
+    showBoxDetails (event) {
+      // this.$store.dispatch('currentBoxes/afterMove')
+      if (this.$store.state.currentUserIsPainting) { return }
+      // if (isMultiTouch) { return }
+      if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
+      this.clearIsDragging()
+      // if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') } // caneditspace?
+      // const userId = this.$store.state.currentUser.id
+      // const cardsWereDragged = this.$store.state.cardsWereDragged // boxesWereDragged
+
+      // this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+      // this.preventDraggedButtonBadgeFromShowingDetails = this.$store.state.preventDraggedCardFromShowingDetails
+      // if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
+
+      this.$store.dispatch('closeAllDialogs', 'Box.showBoxDetails')
+      this.$store.dispatch('clearMultipleSelected')
+
+      this.$store.commit('boxDetailsIsVisibleForBoxId', this.box.id)
+      // this.$store.commit('preventCardDetailsOpeningAnimation', true)
+
+      event.stopPropagation() // only stop propagation if cardDetailsIsVisible
+      // this.$store.commit('currentUserIsDraggingCard', false)
     }
+
     // toggleBoxDetails, set boxdetailsposition, boxDetailsIsVisible (like carddetails)
   }
 }

@@ -86,6 +86,9 @@ const store = createStore({
     currentUserIsResizingCardIds: [],
     remoteUserResizingCards: [],
 
+    // boxes
+    boxDetailsIsVisibleForBoxId: '',
+
     // cards
     shouldAddCard: false,
     cardDetailsIsVisibleForCardId: '',
@@ -226,6 +229,7 @@ const store = createStore({
       state.multipleSelectedActionsIsVisible = false
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
+      state.boxDetailsIsVisibleForBoxId = ''
       state.tagDetailsIsVisible = false
       state.tagDetailsIsVisibleFromTagList = false
       state.currentSelectedTag = {}
@@ -547,6 +551,13 @@ const store = createStore({
     },
     removeRemotePreviousBoxSelectStyle: (state) => {
       state.remotePreviousUserBoxSelectStyles.shift()
+    },
+
+    // Boxes
+
+    boxDetailsIsVisibleForBoxId: (state, value) => {
+      utils.typeCheck({ value, type: 'string', origin: 'boxDetailsIsVisibleForBoxId' })
+      state.boxDetailsIsVisibleForBoxId = value
     },
 
     // Resizing

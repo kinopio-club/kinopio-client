@@ -26,7 +26,8 @@ export default {
         y: 200,
         width: 200,
         height: 200,
-        color: 'pink'
+        color: 'pink',
+        spaceId: 'WwqDhJVhJZQ4Dtmlx3S_c'
       }
 
     }
