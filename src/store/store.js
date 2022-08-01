@@ -90,7 +90,7 @@ const store = createStore({
     boxDetailsIsVisibleForBoxId: '',
     currentUserIsResizingBox: false,
     currentUserIsDraggingBox: false,
-    currentUserIsResizingBoxIds: [],
+    // currentUserIsResizingBoxIds: [],
     remoteUserResizingBoxs: [],
 
     // cards
@@ -589,12 +589,13 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsDraggingBox' })
       state.currentUserIsDraggingBox = value
     },
-    currentUserIsResizingBoxIds: (state, boxIds) => {
-      utils.typeCheck({ value: boxIds, type: 'array', origin: 'currentUserIsResizingBoxIds' })
-      state.currentUserIsResizingBoxIds = boxIds
-    },
+    // currentUserIsResizingBoxIds: (state, boxIds) => {
+    //   utils.typeCheck({ value: boxIds, type: 'array', origin: 'currentUserIsResizingBoxIds' })
+    //   state.currentUserIsResizingBoxIds = boxIds
+    // },
 
     // removeRemoteUserResizingBoxes: (state, update) => {
+    // removeRemoteUserResizingBoxIds??
     //   state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
     // },
     updateRemoteUserResizingBoxes: (state, update) => {

@@ -461,7 +461,8 @@ export default {
       if (!shouldUseStickyCards) { return true }
       const userIsConnecting = this.$store.state.currentConnectionStartCardIds.length
       const currentUserIsDraggingBox = this.$store.state.currentUserIsDraggingBox
-      return userIsConnecting || currentUserIsDraggingBox || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked
+      const currentUserIsResizingBox = this.$store.state.currentUserIsResizingBox
+      return userIsConnecting || currentUserIsDraggingBox || currentUserIsResizingBox || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked
     },
     cardStyle () {
       let backgroundColor
@@ -1417,6 +1418,7 @@ export default {
       if (this.$store.state.currentUserIsPainting) { return }
       if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
+      if (this.$store.state.currentUserIsResizingBox || this.$store.state.currentUserIsDraggingBox) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const userId = this.$store.state.currentUser.id
       const cardsWereDragged = this.$store.state.cardsWereDragged

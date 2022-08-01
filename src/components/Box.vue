@@ -1,13 +1,13 @@
 <template lang="pug">
 .box(:key="box.id" :style="styles" :class="{hover: isHover, active: isDragging, 'box-jiggle': isDragging, 'is-resizing': isResizing}")
   .box-info(
-    @mouseover="updateIsHover(true)"
-    @mouseleave="updateIsHover(false)"
-    @mousedown="updateIsDragging(true)"
+    @pointerover="updateIsHover(true)"
+    @pointerleave="updateIsHover(false)"
+    @pointerdown="startBoxInfoInteraction"
     :style="labelStyles"
     :class="{unselectable: isPainting}"
 
-    @mouseup.left="showBoxDetails"
+    @pointerup.left="showBoxDetails"
     @keyup.stop.enter="showBoxDetails"
   )
     //- @touchstart="startLocking"
@@ -19,9 +19,9 @@
   //- resize
   .bottom-button-wrap(:class="{unselectable: isPainting}")
     .resize-button-wrap.inline-button-wrap(
-        @mouseover="updateIsHover(true)"
-        @mouseleave="updateIsHover(false)"
-        @mousedown.left.stop="startResizing"
+        @pointerover="updateIsHover(true)"
+        @pointerleave="updateIsHover(false)"
+        @pointerdown.left.stop="startResizing"
         @touchstart.stop="startResizing"
       )
       button.inline-button.resize-button(
@@ -36,14 +36,17 @@
 import utils from '@/utils.js'
 
 const borderWidth = 2
+let prevCursor
 
 export default {
   name: 'Box',
   mounted () {
-    window.addEventListener('mouseup', this.clearInteraction)
+    window.addEventListener('pointermove', this.moveOrResizeBox)
+    window.addEventListener('pointerup', this.endInteraction)
   },
   beforeUnmount () {
-    window.removeEventListener('mouseup', this.clearInteraction)
+    window.removeEventListener('pointermove', this.moveOrResizeBox)
+    window.removeEventListener('pointerup', this.endInteraction)
   },
   props: {
     box: Object
@@ -51,12 +54,19 @@ export default {
   data () {
     return {
       isHover: false,
-      isResizing: false
+      newX: 0,
+      newY: 0,
+      newWidth: 0,
+      newHeight: 0
     }
   },
   computed: {
     styles () {
-      const { x, y, width, height, color } = this.box
+      let { x, y, width, height, color } = this.box
+      x = this.newX || x
+      y = this.newY || y
+      width = this.newWidth || width
+      height = this.newHeight || height
       return {
         left: x + 'px',
         top: y + 'px',
@@ -73,13 +83,36 @@ export default {
     },
     isPainting () { return this.$store.state.currentUserIsPainting },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
-    isDragging () { return this.$store.state.currentUserIsDraggingBox }
+    isDragging () { return this.$store.state.currentUserIsDraggingBox },
+    isResizing () { return this.$store.state.currentUserIsResizingBox }
   },
   methods: {
-    clearInteraction () {
-      // if (isResizing or dragging, update history, like afterdrag)
+    clearState () {
       this.updateIsDragging(false)
-      this.isResizing = false
+      this.updateIsResizing(false)
+      this.newWidth = 0
+      this.newHeight = 0
+      this.newX = 0
+      this.newY = 0
+    },
+    moveOrResizeBox (event) {
+      if (!this.isDragging && !this.isResizing) { return }
+      const currentCursor = utils.cursorPositionInPage(event)
+      const cursorDelta = {
+        x: currentCursor.x - prevCursor.x,
+        y: currentCursor.y - prevCursor.y
+      }
+      // update newx , etc.
+      console.log('🌈 during move or resize', cursorDelta)
+    },
+    endInteraction (event) {
+      console.log('🔵 endInteraction afterboxinteraction')
+
+      // if (isResizing or dragging, update history, like afterdrag)
+
+      // update dimensions and reset local newwidth/height
+
+      this.clearState()
     },
     startResizing (event) {
       if (!this.canEditSpace) { return }
@@ -87,18 +120,27 @@ export default {
       // this.$store.dispatch('history/pause')
       this.$store.dispatch('closeAllDialogs', 'Box.startResizing')
       this.$store.dispatch('clearMultipleSelected')
-      this.isResizing = true
-      console.log('🚛🚛🚛')
+      this.updateIsResizing(true)
+      prevCursor = utils.cursorPositionInPage(event)
+      console.log('🚛🚛🚛 isresizing', prevCursor)
       // this.$store.commit('preventDraggedCardFromShowingDetails', true)
       // this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.commit('currentUserIsResizingBox', true)
-      let boxIds = [this.id]
-      this.$store.commit('currentUserIsResizingBoxIds', boxIds)
+      // let boxIds = [this.id]
+      // this.$store.commit('currentUserIsResizingBoxIds', boxIds)
       // const updates = {
       //   userId: this.$store.state.currentUser.id,
       //   cardIds: cardIds
       // }
-      // this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBox' })
+      // this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBox' }) boxids?
+    },
+    startBoxInfoInteraction (event) {
+      prevCursor = utils.cursorPositionInPage(event)
+      this.updateIsDragging(true)
+    },
+
+    updateIsResizing (value) {
+      this.$store.commit('currentUserIsResizingBox', value)
     },
     updateIsDragging (value) {
       this.$store.commit('currentUserIsDraggingBox', value)
@@ -109,11 +151,12 @@ export default {
     },
     // clearBoxInteractions () {}
     showBoxDetails (event) {
+      // if dragging (and has dragged) then { return }
       // this.$store.dispatch('currentBoxes/afterMove')
       if (this.$store.state.currentUserIsPainting) { return }
       // if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
-      this.clearInteraction()
+      this.clearState()
       // if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') } // caneditspace?
       // const userId = this.$store.state.currentUser.id
       // const cardsWereDragged = this.$store.state.cardsWereDragged // boxesWereDragged
