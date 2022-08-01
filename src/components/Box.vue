@@ -103,7 +103,6 @@ export default {
         this.newY = this.box.y + cursorDelta.y
       }
       this.boxWasDragged = true
-      console.log('🌈 during move or resize', cursorDelta)
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('closeAllDialogs', 'Box.startResizing')
       this.$store.dispatch('clearMultipleSelected')
@@ -172,18 +171,22 @@ export default {
       // this.$store.commit('currentUserIsDraggingCard', false)
     },
     endInteraction (event) {
-      let box = {
-        id: this.box.id
-      }
+      let box
       if (this.isResizing) {
-        box.resizeWidth = this.newWidth
-        box.resizeHeight = this.newHeight
+        box = {
+          resizeWidth: this.newWidth,
+          resizeHeight: this.newHeight
+        }
       }
       if (this.isDragging) {
-        box.x = this.newX
-        box.y = this.newY
+        box = {
+          x: this.newX,
+          y: this.newY
+        }
       }
-      console.log('🔵 endInteraction', box)
+      if (!box) { return }
+      box.id = this.box.id
+      console.log('🔵 end box Interaction', box)
       this.$store.dispatch('currentBoxes/update', box)
       this.clearState()
     },
