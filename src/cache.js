@@ -119,7 +119,7 @@ export default {
       console.warn(updateErrorMessage)
       return
     }
-    const normalizeKeys = ['cards', 'connections', 'connectionTypes']
+    const normalizeKeys = ['cards', 'connections', 'connectionTypes', 'boxes']
     if (normalizeKeys.includes(key)) {
       value = utils.denormalizeItems(value)
     }

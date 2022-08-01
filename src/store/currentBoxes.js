@@ -18,14 +18,13 @@ export default {
     // boxes: {}
     ids: ['123abc'],
     boxes: {
-
       '123abc': {
         id: '123abc',
         name: 'blah',
         x: 200,
         y: 200,
-        width: 200,
-        height: 200,
+        resizeWidth: 200,
+        resizeHeight: 200,
         color: 'pink',
         fill: 'empty',
         spaceId: 'WwqDhJVhJZQ4Dtmlx3S_c'
@@ -55,11 +54,6 @@ export default {
       state.ids.push(box.id)
       state.boxes[box.id] = box
       cache.updateSpace('boxes', state.boxes, currentSpaceId)
-    },
-    createType: (state, type) => {
-      state.typeIds.push(type.id)
-      state.types[type.id] = type
-      cache.updateSpace('boxTypes', state.types, currentSpaceId)
     },
 
     // update
@@ -132,9 +126,10 @@ export default {
 
     update: (context, box) => {
       context.dispatch('history/add', { boxes: [box] }, { root: true })
+      console.log('🍅', box)
       context.commit('update', box)
-      context.dispatch('api/addToQueue', { name: 'updatebox', body: box }, { root: true })
-      context.dispatch('broadcast/update', { updates: box, type: 'updateboxTypeForbox', handler: 'currentboxes/update' }, { root: true })
+      // context.dispatch('api/addToQueue', { name: 'updatebox', body: box }, { root: true })
+      // context.dispatch('broadcast/update', { updates: box, type: 'updateboxTypeForbox', handler: 'currentboxes/update' }, { root: true })
     },
     // updatePathsWhileDragging: (context, { boxes, cards }) => {
     //   boxes.forEach(box => {

@@ -500,6 +500,7 @@ const currentSpace = {
       console.log('💕 update modules space id', space.id)
       context.dispatch('currentCards/updateSpaceId', space.id, { root: true })
       context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
+      context.dispatch('currentBoxes/updateSpaceId', space.id, { root: true })
     },
     restoreSpaceInChunks: (context, { space, isRemote, addCards, addConnections, addConnectionTypes }) => {
       if (!utils.objectHasKeys(space)) { return }

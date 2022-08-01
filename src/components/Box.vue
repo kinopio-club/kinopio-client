@@ -63,11 +63,11 @@ export default {
   },
   computed: {
     styles () {
-      let { x, y, width, height, color } = this.box
+      let { x, y, resizeWidth, resizeHeight, color } = this.box
       x = this.newX || x
       y = this.newY || y
-      width = this.newWidth || width
-      height = this.newHeight || height
+      const width = this.newWidth || resizeWidth
+      const height = this.newHeight || resizeHeight
       return {
         left: x + 'px',
         top: y + 'px',
@@ -96,8 +96,8 @@ export default {
         y: currentCursor.y - prevCursor.y
       }
       if (this.isResizing) {
-        this.newWidth = this.box.width + cursorDelta.x
-        this.newHeight = this.box.height + cursorDelta.y
+        this.newWidth = this.box.resizeWidth + cursorDelta.x
+        this.newHeight = this.box.resizeHeight + cursorDelta.y
       } else if (this.isDragging) {
         this.newX = this.box.x + cursorDelta.x
         this.newY = this.box.y + cursorDelta.y
@@ -172,9 +172,19 @@ export default {
       // this.$store.commit('currentUserIsDraggingCard', false)
     },
     endInteraction (event) {
-      console.log('🔵 endInteraction')
-      // if (isResizing or dragging, update history, like afterdrag)
-      // update dimensions and reset local newwidth/height
+      let box = {
+        id: this.box.id
+      }
+      if (this.isResizing) {
+        box.resizeWidth = this.newWidth
+        box.resizeHeight = this.newHeight
+      }
+      if (this.isDragging) {
+        box.x = this.newX
+        box.y = this.newY
+      }
+      console.log('🔵 endInteraction', box)
+      this.$store.dispatch('currentBoxes/update', box)
       this.clearState()
     },
     clearState () {
@@ -186,7 +196,6 @@ export default {
       this.newY = 0
       this.boxWasDragged = false
     }
-
   }
 }
 </script>

@@ -147,7 +147,7 @@ const self = {
 
     // Add Patch
 
-    add: (context, { cards, connections, connectionTypes, useSnapshot, isRemoved }) => {
+    add: (context, { cards, connections, connectionTypes, boxes, useSnapshot, isRemoved }) => {
       if (context.state.isPaused) { return }
       let patch = []
       // cards
@@ -182,6 +182,16 @@ const self = {
           return normalizeUpdates({ item: type, itemType: 'connectionType', previous, isRemoved })
         })
         patch = patch.concat(connectionTypes)
+      }
+      if (boxes) {
+        boxes = boxes.map(box => {
+          let previous = context.rootGetters['currentBoxes/byId'](box.id)
+          if (useSnapshot) {
+            previous = context.state.snapshots['boxes'][box.id]
+          }
+          return normalizeUpdates({ item: box, itemType: 'box', previous, isRemoved })
+        })
+        patch = patch.concat(boxes)
       }
       context.commit('add', patch)
       // context.commit('trim')
