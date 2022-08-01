@@ -80,13 +80,6 @@ export default {
 
     // broadcast
 
-    // updatePathsWhileDraggingBroadcast: (state, { boxes }) => {
-    //   boxes.forEach(box => {
-    //     const path = utils.boxBetweenCards(box.startCardId, box.endCardId)
-    //     const element = document.querySelector(`svg .box-path[data-id='${box.id}']`)
-    //     element.setAttribute('d', path)
-    //   })
-    // },
     // updatePathsBroadcast: (state, { boxes }) => {
     //   boxes.forEach(box => {
     //     state.boxes[box.id].path = box.path

@@ -1,9 +1,9 @@
 <template lang="pug">
-.box(:key="box.id" :style="styles" :class="{hover: isHover, active: isDragging, 'box-jiggle': isDragging, resize: isResizing}")
+.box(:key="box.id" :style="styles" :class="{hover: isHover, active: isDragging, 'box-jiggle': isDragging, 'is-resizing': isResizing}")
   .box-info(
-    @mouseover="toggleIsHover(true)"
-    @mouseleave="toggleIsHover(false)"
-    @mousedown="toggleIsDragging(true)"
+    @mouseover="updateIsHover(true)"
+    @mouseleave="updateIsHover(false)"
+    @mousedown="updateIsDragging(true)"
     :style="labelStyles"
     :class="{unselectable: isPainting}"
 
@@ -18,29 +18,32 @@
     span {{box.name}}
   //- resize
   .bottom-button-wrap(:class="{unselectable: isPainting}")
-    .resize-button-wrap.inline-button-wrap
-      //- @mousedown.left.stop="startResizing"
-      //- @touchstart.stop="startResizing"
+    .resize-button-wrap.inline-button-wrap(
+        @mouseover="updateIsHover(true)"
+        @mouseleave="updateIsHover(false)"
+        @mousedown.left.stop="startResizing"
+        @touchstart.stop="startResizing"
+      )
       button.inline-button.resize-button(
         tabindex="-1"
         :style="{background: color}"
-        @mouseover="toggleIsHover(true)"
-        @mouseleave="toggleIsHover(false)"
       )
         img.resize-icon.icon(src="@/assets/resize.svg")
 
 </template>
 
 <script>
+import utils from '@/utils.js'
+
 const borderWidth = 2
 
 export default {
   name: 'Box',
   mounted () {
-    window.addEventListener('mouseup', this.clearIsDragging)
+    window.addEventListener('mouseup', this.clearInteraction)
   },
   beforeUnmount () {
-    window.removeEventListener('mouseup', this.clearIsDragging)
+    window.removeEventListener('mouseup', this.clearInteraction)
   },
   props: {
     box: Object
@@ -48,7 +51,6 @@ export default {
   data () {
     return {
       isHover: false,
-      isDragging: false,
       isResizing: false
     }
   },
@@ -69,17 +71,39 @@ export default {
         backgroundColor: this.color
       }
     },
-    isPainting () { return this.$store.state.currentUserIsPainting }
-    // canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
+    isPainting () { return this.$store.state.currentUserIsPainting },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
+    isDragging () { return this.$store.state.currentUserIsDraggingBox }
   },
   methods: {
-    clearIsDragging () {
-      this.isDragging = false
+    clearInteraction () {
+      // if (isResizing or dragging, update history, like afterdrag)
+      this.updateIsDragging(false)
+      this.isResizing = false
     },
-    toggleIsDragging (value) {
-      this.isDragging = value
+    startResizing (event) {
+      if (!this.canEditSpace) { return }
+      if (utils.isMultiTouch(event)) { return }
+      // this.$store.dispatch('history/pause')
+      this.$store.dispatch('closeAllDialogs', 'Box.startResizing')
+      this.$store.dispatch('clearMultipleSelected')
+      this.isResizing = true
+      console.log('🚛🚛🚛')
+      // this.$store.commit('preventDraggedCardFromShowingDetails', true)
+      // this.$store.dispatch('currentCards/incrementZ', this.id)
+      this.$store.commit('currentUserIsResizingBox', true)
+      let boxIds = [this.id]
+      this.$store.commit('currentUserIsResizingBoxIds', boxIds)
+      // const updates = {
+      //   userId: this.$store.state.currentUser.id,
+      //   cardIds: cardIds
+      // }
+      // this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBox' })
     },
-    toggleIsHover (value) {
+    updateIsDragging (value) {
+      this.$store.commit('currentUserIsDraggingBox', value)
+    },
+    updateIsHover (value) {
       if (this.isPainting) { return }
       this.isHover = value
     },
@@ -89,7 +113,7 @@ export default {
       if (this.$store.state.currentUserIsPainting) { return }
       // if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
-      this.clearIsDragging()
+      this.clearInteraction()
       // if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') } // caneditspace?
       // const userId = this.$store.state.currentUser.id
       // const cardsWereDragged = this.$store.state.cardsWereDragged // boxesWereDragged
@@ -100,7 +124,6 @@ export default {
 
       this.$store.dispatch('closeAllDialogs', 'Box.showBoxDetails')
       this.$store.dispatch('clearMultipleSelected')
-
       this.$store.commit('boxDetailsIsVisibleForBoxId', this.box.id)
       // this.$store.commit('preventCardDetailsOpeningAnimation', true)
 
@@ -124,7 +147,7 @@ export default {
     box-shadow var(--hover-shadow)
   &.active
     box-shadow var(--active-shadow)
-  &.resize
+  &.is-resizing
     box-shadow var(--active-shadow)
 
   .box-info
@@ -160,6 +183,7 @@ export default {
 
 .box-jiggle
   animation boxJiggle 0.5s infinite ease-out forwards
+
 @media (prefers-reduced-motion)
   .box-jiggle
     animation none

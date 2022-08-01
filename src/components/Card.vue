@@ -460,7 +460,8 @@ export default {
       const shouldUseStickyCards = this.$store.state.currentUser.shouldUseStickyCards
       if (!shouldUseStickyCards) { return true }
       const userIsConnecting = this.$store.state.currentConnectionStartCardIds.length
-      return userIsConnecting || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked
+      const currentUserIsDraggingBox = this.$store.state.currentUserIsDraggingBox
+      return userIsConnecting || currentUserIsDraggingBox || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked
     },
     cardStyle () {
       let backgroundColor

@@ -81,13 +81,17 @@ const store = createStore({
     remoteUserBoxSelectStyles: [],
     remotePreviousUserBoxSelectStyles: [],
 
-    // resizing
+    // resizing card
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
     remoteUserResizingCards: [],
 
     // boxes
     boxDetailsIsVisibleForBoxId: '',
+    currentUserIsResizingBox: false,
+    currentUserIsDraggingBox: false,
+    currentUserIsResizingBoxIds: [],
+    remoteUserResizingBoxs: [],
 
     // cards
     shouldAddCard: false,
@@ -553,14 +557,7 @@ const store = createStore({
       state.remotePreviousUserBoxSelectStyles.shift()
     },
 
-    // Boxes
-
-    boxDetailsIsVisibleForBoxId: (state, value) => {
-      utils.typeCheck({ value, type: 'string', origin: 'boxDetailsIsVisibleForBoxId' })
-      state.boxDetailsIsVisibleForBoxId = value
-    },
-
-    // Resizing
+    // Resizing Cards
 
     currentUserIsResizingCard: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsResizingCard' })
@@ -576,6 +573,33 @@ const store = createStore({
     updateRemoteUserResizingCards: (state, update) => {
       state.remoteUserResizingCards = state.remoteUserResizingCards.filter(remoteUser => remoteUser.userId !== update.userId)
       state.remoteUserResizingCards = state.remoteUserResizingCards.concat(update)
+    },
+
+    // Boxes
+
+    boxDetailsIsVisibleForBoxId: (state, value) => {
+      utils.typeCheck({ value, type: 'string', origin: 'boxDetailsIsVisibleForBoxId' })
+      state.boxDetailsIsVisibleForBoxId = value
+    },
+    currentUserIsResizingBox: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsResizingBox' })
+      state.currentUserIsResizingBox = value
+    },
+    currentUserIsDraggingBox: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsDraggingBox' })
+      state.currentUserIsDraggingBox = value
+    },
+    currentUserIsResizingBoxIds: (state, boxIds) => {
+      utils.typeCheck({ value: boxIds, type: 'array', origin: 'currentUserIsResizingBoxIds' })
+      state.currentUserIsResizingBoxIds = boxIds
+    },
+
+    // removeRemoteUserResizingBoxes: (state, update) => {
+    //   state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
+    // },
+    updateRemoteUserResizingBoxes: (state, update) => {
+      state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
+      state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.concat(update)
     },
 
     // Minimap

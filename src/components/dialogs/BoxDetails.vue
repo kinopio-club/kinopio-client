@@ -9,6 +9,10 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         ColorPicker(:currentColor="box.color" :visible="colorPickerIsVisible" @selectedColor="updateBoxColor")
       input.name(:disabled="!canEditSpace" placeholder="Box Name" v-model="name" ref="name" @focus="focus" @blur="blur")
     .row
+      .button-wrap
+        button(:disabled="!canEditSpace" @click.left="removeBox")
+          img.icon(src="@/assets/remove.svg")
+          span Remove
       .segmented-buttons
         button(:class="{active: fillIsEmpty}" @click="updateBoxFill('empty')")
           img.icon.box-icon(src="@/assets/box-empty.svg")
@@ -67,6 +71,9 @@ export default {
     }
   },
   methods: {
+    removeBox () {
+      console.log('🐙')
+    },
     toggleColorPicker () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible
     },
