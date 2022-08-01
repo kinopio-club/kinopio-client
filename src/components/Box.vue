@@ -216,10 +216,11 @@ export default {
 
 <style lang="stylus">
 .box
+  --min-box-size 70px
   position absolute
   border-radius 5px
-  min-height 50px
-  min-width 50px
+  min-height var(--min-box-size)
+  min-width var(--min-box-size)
   pointer-events none
   &.hover
     box-shadow var(--hover-shadow)

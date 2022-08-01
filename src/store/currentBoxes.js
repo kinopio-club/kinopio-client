@@ -103,16 +103,19 @@ export default {
     // create
 
     add: (context, { box, shouldResize }) => {
+      const count = context.state.ids.length
+      const minBoxSize = 70
       box = {
         id: box.id || nanoid(),
         spaceId: currentSpaceId,
         userId: context.rootState.currentUser.id,
         x: box.x,
         y: box.y,
-        resizeWidth: box.resizeWidth || 50,
-        resizeHeight: box.resizeHeight || 50,
+        resizeWidth: box.resizeWidth || minBoxSize,
+        resizeHeight: box.resizeHeight || minBoxSize,
         color: randomColor({ luminosity: 'light' }),
-        fill: 'empty'
+        fill: 'empty',
+        name: box.name || `Box ${count}`
       }
       context.commit('create', box)
       // context.dispatch('api/addToQueue', { name: 'createbox', body: box }, { root: true })
