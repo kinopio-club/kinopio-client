@@ -84,56 +84,66 @@ export default {
     },
     isPainting () { return this.$store.state.currentUserIsPainting },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
-    isDragging () { return this.$store.state.currentUserIsDraggingBox },
-    isResizing () { return this.$store.state.currentUserIsResizingBox }
+    isDragging () {
+      const isDragging = this.$store.state.currentUserIsDraggingBox
+      const isCurrent = this.$store.state.currentUserIsInteractingBoxId === this.box.id
+      return isDragging && isCurrent
+    },
+    isResizing () {
+      const isResizing = this.$store.state.currentUserIsResizingBox
+      const isCurrent = this.$store.state.currentUserIsInteractingBoxId === this.box.id
+      return isResizing && isCurrent
+    }
   },
   methods: {
     moveOrResizeBox (event) {
       if (!this.isDragging && !this.isResizing) { return }
       currentCursor = utils.cursorPositionInPage(event)
-      const cursorDelta = {
-        x: currentCursor.x - prevCursor.x,
-        y: currentCursor.y - prevCursor.y
+      let delta
+      if (prevCursor) {
+        delta = {
+          x: currentCursor.x - prevCursor.x,
+          y: currentCursor.y - prevCursor.y
+        }
+      } else {
+        delta = { x: 0, y: 0 }
+        prevCursor = currentCursor
       }
       if (this.isResizing) {
-        this.newWidth = this.box.resizeWidth + cursorDelta.x
-        this.newHeight = this.box.resizeHeight + cursorDelta.y
+        this.newWidth = this.box.resizeWidth + delta.x
+        this.newHeight = this.box.resizeHeight + delta.y
       } else if (this.isDragging) {
-        this.newX = this.box.x + cursorDelta.x
-        this.newY = this.box.y + cursorDelta.y
+        this.newX = this.box.x + delta.x
+        this.newY = this.box.y + delta.y
       }
       this.boxWasDragged = true
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      this.$store.dispatch('closeAllDialogs', 'Box.startResizing')
+      this.$store.dispatch('closeAllDialogs', 'Box.moveOrResizeBox')
       this.$store.dispatch('clearMultipleSelected')
     },
     startResizing (event) {
       if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
-      // this.$store.dispatch('history/pause')
+      this.$store.dispatch('history/pause')
       this.updateIsResizing(true)
       prevCursor = utils.cursorPositionInPage(event)
       console.log('🚛🚛🚛 isresizing', prevCursor)
-      // this.$store.dispatch('currentCards/incrementZ', this.id)
-      this.$store.commit('currentUserIsResizingBox', true)
-      // let boxIds = [this.id]
-      // this.$store.commit('currentUserIsResizingBoxIds', boxIds)
-      // const updates = {
-      //   userId: this.$store.state.currentUser.id,
-      //   cardIds: cardIds
-      // }
-      // this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBox' }) boxids?
     },
     startBoxInfoInteraction (event) {
       prevCursor = utils.cursorPositionInPage(event)
       this.updateIsDragging(true)
     },
-
     updateIsResizing (value) {
       this.$store.commit('currentUserIsResizingBox', value)
+      if (value) {
+        this.$store.commit('currentUserIsInteractingBoxId', this.box.id)
+      }
     },
     updateIsDragging (value) {
       this.$store.commit('currentUserIsDraggingBox', value)
+      if (value) {
+        this.$store.commit('currentUserIsInteractingBoxId', this.box.id)
+      }
     },
     updateIsHover (value) {
       if (this.isPainting) { return }
@@ -198,6 +208,7 @@ export default {
       this.newX = 0
       this.newY = 0
       this.boxWasDragged = false
+      prevCursor = null
     }
   }
 }
@@ -207,8 +218,8 @@ export default {
 .box
   position absolute
   border-radius 5px
-  min-height 100px
-  min-width 100px
+  min-height 50px
+  min-width 50px
   pointer-events none
   &.hover
     box-shadow var(--hover-shadow)

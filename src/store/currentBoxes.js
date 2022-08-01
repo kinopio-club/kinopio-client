@@ -2,7 +2,7 @@
 import cache from '@/cache.js'
 
 import { nanoid } from 'nanoid'
-// import randomColor from 'randomcolor'
+import randomColor from 'randomcolor'
 // import last from 'lodash-es/last'
 // import uniq from 'lodash-es/uniq'
 
@@ -102,14 +102,26 @@ export default {
 
     // create
 
-    add: (context, { box }) => {
-      box.id = box.id || nanoid()
-      box.spaceId = currentSpaceId
-      box.userId = context.rootState.currentUser.id
+    add: (context, { box, shouldResize }) => {
+      box = {
+        id: box.id || nanoid(),
+        spaceId: currentSpaceId,
+        userId: context.rootState.currentUser.id,
+        x: box.x,
+        y: box.y,
+        resizeWidth: box.resizeWidth || 50,
+        resizeHeight: box.resizeHeight || 50,
+        color: randomColor({ luminosity: 'light' }),
+        fill: 'empty'
+      }
       context.commit('create', box)
       // context.dispatch('api/addToQueue', { name: 'createbox', body: box }, { root: true })
       // context.dispatch('broadcast/update', { updates: box, type: 'addbox', handler: 'currentboxes/create' }, { root: true })
       context.dispatch('history/add', { boxes: [box] }, { root: true })
+      if (shouldResize) {
+        context.commit('currentUserIsResizingBox', true, { root: true })
+        context.commit('currentUserIsInteractingBoxId', box.id, { root: true })
+      }
     },
 
     // update

@@ -148,6 +148,7 @@ export default {
     canvasStyles () {
       return { top: this.pinchZoomOffsetTop + 'px', left: this.pinchZoomOffsetLeft + 'px' }
     },
+    toolbarIsCard () { return this.$store.state.currentUserToolbar === 'card' },
     toolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' }
   },
   methods: {
@@ -318,8 +319,8 @@ export default {
       const isPainting = this.$store.state.currentUserIsPainting
       if (this.isPanning) { return }
       if (this.isBoxSelecting) { return }
+      if (!this.toolbarIsCard) { return }
       if (!isPainting) { return }
-
       if (this.$store.getters.shouldScrollAtEdges(event) && event.cancelable) {
         event.preventDefault() // prevents touch swipe viewport scrolling
       }
@@ -350,7 +351,6 @@ export default {
       this.broadcastCircle(circle)
     },
     startPainting (event) {
-      if (this.toolbarIsBox) { return }
       if (this.isPanning) { return }
       if (this.isBoxSelecting) { return }
       startCursor = utils.cursorPositionInViewport(event)
@@ -364,9 +364,16 @@ export default {
         this.$store.commit('currentUserIsPainting', true)
         this.createInitialCircle()
       }
-      if (!multipleCardsIsSelected && !utils.unpinnedDialogIsVisible()) {
+      const shouldAdd = !multipleCardsIsSelected && !utils.unpinnedDialogIsVisible()
+      // add card
+      if (shouldAdd && this.toolbarIsCard) {
         this.$store.commit('shouldAddCard', true)
+      // add box
+      } else if (shouldAdd && this.toolbarIsBox) {
+        this.addBox(event)
+        return
       }
+      // clear selected
       if (!event.shiftKey) {
         this.$store.dispatch('clearMultipleSelected')
       }
@@ -390,6 +397,18 @@ export default {
           paintingCirclesTimer = undefined
         }, 0)
       }
+    },
+
+    // Boxes
+
+    addBox (event) {
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
+      const position = utils.cursorPositionInPage(event)
+      const box = {
+        x: position.x * zoom,
+        y: position.y * zoom
+      }
+      this.$store.dispatch('currentBoxes/add', { box, shouldResize: true })
     },
 
     // Selecting
