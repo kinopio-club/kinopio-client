@@ -28,7 +28,6 @@ main.space(
       Card(:card="card")
     template(v-for="card in lockedCards")
       CardUnlockButton(:card="card" :position="unlockButtonPosition(card)")
-
   BoxDetails
   CardDetails
   CardUserDetails

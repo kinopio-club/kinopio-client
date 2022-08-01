@@ -102,24 +102,14 @@ export default {
 
     // create
 
-    add: (context, { box, type, shouldNotRecordHistory }) => {
-      const isExistingPath = context.getters.isExistingPath({
-        startCardId: box.startCardId,
-        endCardId: box.endCardId
-      })
-      if (isExistingPath) { return }
-      if (box.startCardId === box.endCardId) { return }
-      type = type || context.getters.typeForNewboxes
+    add: (context, { box }) => {
       box.id = box.id || nanoid()
       box.spaceId = currentSpaceId
       box.userId = context.rootState.currentUser.id
-      box.boxTypeId = type.id
-      context.dispatch('api/addToQueue', { name: 'createbox', body: box }, { root: true })
-      context.dispatch('broadcast/update', { updates: box, type: 'addbox', handler: 'currentboxes/create' }, { root: true })
-      if (!shouldNotRecordHistory) {
-        context.dispatch('history/add', { boxes: [box] }, { root: true })
-      }
       context.commit('create', box)
+      // context.dispatch('api/addToQueue', { name: 'createbox', body: box }, { root: true })
+      // context.dispatch('broadcast/update', { updates: box, type: 'addbox', handler: 'currentboxes/create' }, { root: true })
+      context.dispatch('history/add', { boxes: [box] }, { root: true })
     },
 
     // update
