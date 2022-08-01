@@ -36,7 +36,7 @@
 import utils from '@/utils.js'
 
 const borderWidth = 2
-let prevCursor
+let prevCursor, currentCursor
 
 export default {
   name: 'Box',
@@ -57,7 +57,8 @@ export default {
       newX: 0,
       newY: 0,
       newWidth: 0,
-      newHeight: 0
+      newHeight: 0,
+      boxWasDragged: false
     }
   },
   computed: {
@@ -87,43 +88,33 @@ export default {
     isResizing () { return this.$store.state.currentUserIsResizingBox }
   },
   methods: {
-    clearState () {
-      this.updateIsDragging(false)
-      this.updateIsResizing(false)
-      this.newWidth = 0
-      this.newHeight = 0
-      this.newX = 0
-      this.newY = 0
-    },
     moveOrResizeBox (event) {
       if (!this.isDragging && !this.isResizing) { return }
-      const currentCursor = utils.cursorPositionInPage(event)
+      currentCursor = utils.cursorPositionInPage(event)
       const cursorDelta = {
         x: currentCursor.x - prevCursor.x,
         y: currentCursor.y - prevCursor.y
       }
-      // update newx , etc.
+      if (this.isResizing) {
+        this.newWidth = this.box.width + cursorDelta.x
+        this.newHeight = this.box.height + cursorDelta.y
+      } else if (this.isDragging) {
+        this.newX = this.box.x + cursorDelta.x
+        this.newY = this.box.y + cursorDelta.y
+      }
+      this.boxWasDragged = true
       console.log('🌈 during move or resize', cursorDelta)
-    },
-    endInteraction (event) {
-      console.log('🔵 endInteraction afterboxinteraction')
-
-      // if (isResizing or dragging, update history, like afterdrag)
-
-      // update dimensions and reset local newwidth/height
-
-      this.clearState()
+      this.$store.commit('preventDraggedCardFromShowingDetails', true)
+      this.$store.dispatch('closeAllDialogs', 'Box.startResizing')
+      this.$store.dispatch('clearMultipleSelected')
     },
     startResizing (event) {
       if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
       // this.$store.dispatch('history/pause')
-      this.$store.dispatch('closeAllDialogs', 'Box.startResizing')
-      this.$store.dispatch('clearMultipleSelected')
       this.updateIsResizing(true)
       prevCursor = utils.cursorPositionInPage(event)
       console.log('🚛🚛🚛 isresizing', prevCursor)
-      // this.$store.commit('preventDraggedCardFromShowingDetails', true)
       // this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.commit('currentUserIsResizingBox', true)
       // let boxIds = [this.id]
@@ -151,11 +142,18 @@ export default {
     },
     // clearBoxInteractions () {}
     showBoxDetails (event) {
+      if (this.boxWasDragged) { return }
+      // console.log(prevCursor, currentCursor)
+      // const cursorsAreClose = utils.cursorsAreClose(prevCursor, currentCursor)
+      // console.log('🌍 showBoxDetails', cursorsAreClose)
+      // if (!cursorsAreClose) { return }
+
       // if dragging (and has dragged) then { return }
       // this.$store.dispatch('currentBoxes/afterMove')
       if (this.$store.state.currentUserIsPainting) { return }
       // if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
+
       this.clearState()
       // if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') } // caneditspace?
       // const userId = this.$store.state.currentUser.id
@@ -172,9 +170,23 @@ export default {
 
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       // this.$store.commit('currentUserIsDraggingCard', false)
+    },
+    endInteraction (event) {
+      console.log('🔵 endInteraction')
+      // if (isResizing or dragging, update history, like afterdrag)
+      // update dimensions and reset local newwidth/height
+      this.clearState()
+    },
+    clearState () {
+      this.updateIsDragging(false)
+      this.updateIsResizing(false)
+      this.newWidth = 0
+      this.newHeight = 0
+      this.newX = 0
+      this.newY = 0
+      this.boxWasDragged = false
     }
 
-    // toggleBoxDetails, set boxdetailsposition, boxDetailsIsVisible (like carddetails)
   }
 }
 </script>
