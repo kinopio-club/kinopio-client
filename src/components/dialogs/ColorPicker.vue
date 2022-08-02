@@ -13,10 +13,10 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
     //- Colors
     .other-colors(v-if="otherColors")
       template(v-for="color in otherColors")
-        button.color(:style="{backgroundColor: color}" @click.left="select(color)")
+        button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)")
     .colors
       template(v-for="color in colors")
-        button.color(:style="{backgroundColor: color}" @click.left="select(color)")
+        button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)")
 
     //- Current Color Modifiers
 
@@ -54,7 +54,7 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
       img.icon(v-if="currentColorIsUserColor" src="@/assets/heart.svg")
       span.current-color(:style="{ background: currentColor }")
     template(v-for="color in favoriteColors")
-      button.color(:style="{backgroundColor: color}" @click.left="select(color)")
+      button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)")
 
 </template>
 
@@ -113,6 +113,9 @@ export default {
     currentColorIsUserColor () { return this.favoriteColors.includes(this.currentColor) }
   },
   methods: {
+    colorIsCurrent (color) {
+      return color === this.currentColor
+    },
     toggleFavoriteColor () {
       const color = { color: this.currentColor }
       if (this.currentColorIsUserColor) {

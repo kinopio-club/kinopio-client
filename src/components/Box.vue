@@ -77,6 +77,7 @@ export default {
       }
     },
     color () { return this.box.color },
+    fill () { return this.box.fill || 'empty' },
     labelStyles () {
       return {
         backgroundColor: this.color
