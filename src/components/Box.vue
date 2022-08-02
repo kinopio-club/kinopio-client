@@ -35,6 +35,8 @@
 <script>
 import utils from '@/utils.js'
 
+import randomColor from 'randomcolor'
+
 const borderWidth = 2
 let prevCursor, currentCursor
 
@@ -62,8 +64,19 @@ export default {
     }
   },
   computed: {
+    normalizedBox () {
+      const init = 200
+      let box = this.box
+      box.x = box.x || init
+      box.y = box.y || init
+      box.resizeWidth = box.resizeWidth || init
+      box.resizeHeight = box.resizeHeight || init
+      box.color = box.color || randomColor({ luminosity: 'light' })
+      box.fill = box.fill || 'empty'
+      return box
+    },
     styles () {
-      let { x, y, resizeWidth, resizeHeight, color } = this.box
+      let { x, y, resizeWidth, resizeHeight, color } = this.normalizedBox
       x = this.newX || x
       y = this.newY || y
       const width = this.newWidth || resizeWidth
@@ -76,8 +89,8 @@ export default {
         border: `${borderWidth}px solid ${color}`
       }
     },
-    color () { return this.box.color },
-    fill () { return this.box.fill || 'empty' },
+    color () { return this.normalizedBox.color },
+    fill () { return this.normalizedBox.fill },
     labelStyles () {
       return {
         backgroundColor: this.color
