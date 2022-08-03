@@ -72,7 +72,7 @@ export default {
   },
   methods: {
     removeBox () {
-      console.log('🐙')
+      this.$store.dispatch('currentBoxes/remove', this.box)
     },
     toggleColorPicker () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible
