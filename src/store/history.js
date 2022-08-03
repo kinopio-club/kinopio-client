@@ -134,7 +134,8 @@ const self = {
       const cards = utils.clone(context.rootState.currentCards.cards)
       const connections = utils.clone(context.rootState.currentConnections.connections)
       const connectionTypes = utils.clone(context.rootState.currentConnections.types)
-      context.commit('snapshots', { cards, connections, connectionTypes })
+      const boxes = utils.clone(context.rootState.currentBoxes.boxes)
+      context.commit('snapshots', { cards, connections, connectionTypes, boxes })
     },
     pause: (context) => {
       if (context.state.isPaused) { return }
