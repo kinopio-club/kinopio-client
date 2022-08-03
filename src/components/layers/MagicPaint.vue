@@ -595,6 +595,7 @@ export default {
       shouldCancelLocking = true
     },
     startLocking () {
+      if (this.toolbarIsBox) { return }
       currentUserIsLocking = true
       shouldCancelLocking = false
       setTimeout(() => {
@@ -659,6 +660,7 @@ export default {
       }
     },
     createInitialCircle () {
+      if (this.toolbarIsBox) { return }
       const initialCircle = {
         x: startCursor.x,
         y: startCursor.y,
