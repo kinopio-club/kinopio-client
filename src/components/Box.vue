@@ -69,7 +69,7 @@ export default {
   computed: {
     normalizedBox () {
       const init = 200
-      let box = this.box
+      let box = utils.clone(this.box)
       box.x = box.x || init
       box.y = box.y || init
       box.resizeWidth = box.resizeWidth || init
@@ -214,7 +214,7 @@ export default {
       }
       if (!box) { return }
       box.id = this.box.id
-      console.log('🔵 end box Interaction', box)
+      console.log('🔵 end/update box Interaction', box)
       this.$store.dispatch('currentBoxes/update', box)
       this.clearState()
     },

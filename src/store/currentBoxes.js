@@ -14,22 +14,8 @@ let currentSpaceId
 export default {
   namespaced: true,
   state: {
-    // ids: [],
-    // boxes: {}
-    ids: ['123abc'],
-    boxes: {
-      '123abc': {
-        id: '123abc',
-        name: 'blah',
-        x: 200,
-        y: 200,
-        resizeWidth: 200,
-        resizeHeight: 200,
-        color: 'pink',
-        fill: 'filled',
-        spaceId: 'WwqDhJVhJZQ4Dtmlx3S_c'
-      }
-    }
+    ids: [],
+    boxes: {}
   },
   mutations: {
 
@@ -40,6 +26,7 @@ export default {
       state.boxes = {}
     },
     restore: (state, boxes) => {
+      console.log(boxes)
       let ids = []
       boxes.forEach(box => {
         ids.push(box.id)
@@ -65,12 +52,6 @@ export default {
       })
       cache.updateSpace('boxes', state.boxes, currentSpaceId)
     },
-    // updateReadOnly: (state, box) => {
-    //   const keys = Object.keys(box)
-    //   keys.forEach(key => {
-    //     state.boxes[box.id][key] = box[key]
-    //   })
-    // },
 
     // broadcast
 
@@ -99,6 +80,28 @@ export default {
     updateSpaceId: (context, spaceId) => {
       currentSpaceId = spaceId
     },
+    mergeUnique: (context, newBoxes) => {
+      newBoxes.forEach(newBox => {
+        let shouldUpdate
+        let prevBox = context.getters.byId(newBox.id)
+        let box = { id: newBox.id }
+        let keys = Object.keys(newBox)
+        keys = keys.filter(key => key !== 'id')
+        keys.forEach(key => {
+          if (prevBox[key] !== newBox[key]) {
+            box[key] = newBox[key]
+            shouldUpdate = true
+          }
+        })
+        if (!shouldUpdate) { return }
+        context.commit('update', box)
+      })
+    },
+    mergeRemove: (context, removeBoxes) => {
+      removeBoxes.forEach(box => {
+        context.commit('remove', box)
+      })
+    },
 
     // create
 
@@ -118,8 +121,8 @@ export default {
         name: box.name || `Box ${count}`
       }
       context.commit('create', box)
-      // context.dispatch('api/addToQueue', { name: 'createbox', body: box }, { root: true })
-      // context.dispatch('broadcast/update', { updates: box, type: 'addbox', handler: 'currentboxes/create' }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'createBox', body: box }, { root: true })
+      // context.dispatch('broadcast/update', { updates: box, type: 'addBox', handler: 'currentboxes/create' }, { root: true })
       context.dispatch('history/add', { boxes: [box] }, { root: true })
       if (shouldResize) {
         context.commit('currentUserIsResizingBox', true, { root: true })
@@ -131,27 +134,16 @@ export default {
 
     update: (context, box) => {
       context.dispatch('history/add', { boxes: [box] }, { root: true })
-      console.log('🍅', box)
       context.commit('update', box)
-      // context.dispatch('api/addToQueue', { name: 'updatebox', body: box }, { root: true })
-      // context.dispatch('broadcast/update', { updates: box, type: 'updateboxTypeForbox', handler: 'currentboxes/update' }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'updateBox', body: box }, { root: true })
+      // context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentboxes/update' }, { root: true })
     },
-    // updatePathsWhileDragging: (context, { boxes, cards }) => {
-    //   boxes.forEach(box => {
-    //     const path = utils.boxBetweenCards(box.startCardId, box.endCardId)
-    //     const element = document.querySelector(`svg .box-path[data-id='${box.id}']`)
-    //     const updates = { boxId: box.id, path }
-    //     context.commit('triggerUpdateboxPathWhileDragging', updates, { root: true })
-    //     context.dispatch('broadcast/update', { updates, type: 'updatebox', handler: 'triggerUpdateboxPathWhileDragging' }, { root: true })
-    //     element.setAttribute('d', path)
-    //   })
-    // },
 
     // remove
 
     remove: (context, box) => {
-      context.dispatch('api/addToQueue', { name: 'removebox', body: box }, { root: true })
-      context.dispatch('broadcast/update', { updates: box, type: 'removebox', handler: 'currentboxes/remove' }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'removeBox', body: box }, { root: true })
+      // context.dispatch('broadcast/update', { updates: box, type: 'removeBox', handler: 'currentboxes/remove' }, { root: true })
       context.commit('remove', box)
       context.dispatch('history/add', { boxes: [box], isRemoved: true }, { root: true })
     }
