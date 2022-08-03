@@ -3,13 +3,13 @@ nav.toolbar(v-if="visible")
   .segmented-buttons.vertical
     //- Card
     .button-wrap
-      button(:class="{ active: currentUserToolbarIsCard }" @click="toggleToolbar('card')")
+      button(:class="{ active: currentUserToolbarIsCard }" @pointerdown="toggleToolbar('card')")
         img.icon.card(src="@/assets/card.svg")
       .badge.info.item(:class="{ active: notifyItemIsCard }") Card Mode
         span(v-if="!isTouchDevice") {{' '}} (C)
     //- Box
     .button-wrap
-      button(:class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')")
+      button(:class="{ active: currentUserToolbarIsBox }" @pointerdown="toggleToolbar('box')")
         img.icon.box-icon(src="@/assets/box.svg")
       .badge.info.item(:class="{ active: notifyItemIsBox }") Box Mode
         span(v-if="!isTouchDevice") {{' '}} (B)
@@ -69,16 +69,13 @@ export default {
     &.active
       display initial
       animation-name horizontalHideme
-      animation-duration 1s
+      animation-duration 0.8s
       animation-iteration-count 1
       animation-direction forward
       animation-fill-mode forwards
       animation-timing-function ease-out
 @keyframes horizontalHideme
   0%
-    transform translateX(-6px)
-    opacity 1
-  20%
     transform translateX(0)
     opacity 1
   80%
