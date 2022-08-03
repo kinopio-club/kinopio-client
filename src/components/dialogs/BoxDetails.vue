@@ -6,7 +6,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
       .button-wrap
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: box.color}")
-        ColorPicker(:currentColor="box.color" :visible="colorPickerIsVisible" @selectedColor="updateBoxColor")
+        ColorPicker(:currentColor="box.color" :visible="colorPickerIsVisible" @selectedColor="updateColor")
       input.name(:disabled="!canEditSpace" placeholder="Box Name" v-model="name" ref="name" @focus="focus" @blur="blur")
     .row
       .button-wrap
@@ -14,9 +14,9 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           img.icon(src="@/assets/remove.svg")
           span Remove
       .segmented-buttons
-        button(:class="{active: fillIsFilled}" @click="updateBoxFill('filled')")
+        button(:class="{active: fillIsFilled}" @click="updateFill('filled')")
           img.icon.box-icon(src="@/assets/box.svg")
-        button(:class="{active: fillIsEmpty}" @click="updateBoxFill('empty')")
+        button(:class="{active: fillIsEmpty}" @click="updateFill('empty')")
           img.icon.box-icon(src="@/assets/box-empty.svg")
 
 </template>
@@ -66,8 +66,7 @@ export default {
         return this.box.name
       },
       set (name) {
-        console.log('🍅', name)
-        // this.updateBox({name})
+        this.update({ name })
       }
     }
   },
@@ -78,21 +77,19 @@ export default {
     toggleColorPicker () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible
     },
-    updateBox (updates) {
-      const keys = Object.keys
+    update (updates) {
+      const keys = Object.keys(updates)
       let box = { id: this.box.id }
       keys.forEach(key => {
         box[key] = updates[key]
       })
       this.$store.dispatch('currentBoxes/update', box)
     },
-    updateBoxColor (color) {
-      console.log('🌈', color)
-      // this.updateBox({color})
+    updateColor (color) {
+      this.update({ color })
     },
-    updateBoxFill (fill) {
-      const box = { id: this.box.id, fill }
-      this.$store.dispatch('currentBoxes/update', box)
+    updateFill (fill) {
+      this.update({ fill })
     },
     closeDialogs () {
       this.colorPickerIsVisible = false
