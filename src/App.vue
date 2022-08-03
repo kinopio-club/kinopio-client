@@ -176,7 +176,9 @@ export default {
         multiTouchAction = 'redo'
       }
     },
-    touchMove () {
+    touchMove (event) {
+      const isFromDialog = event.target.closest('dialog')
+      if (isFromDialog) { return }
       shouldCancelUndo = true
       this.isTouchScrolling = true
     },
