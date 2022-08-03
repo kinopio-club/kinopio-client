@@ -26,7 +26,7 @@ export default {
         resizeWidth: 200,
         resizeHeight: 200,
         color: 'pink',
-        fill: 'empty',
+        fill: 'filled',
         spaceId: 'WwqDhJVhJZQ4Dtmlx3S_c'
       }
     }

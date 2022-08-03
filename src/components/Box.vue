@@ -30,6 +30,9 @@
       )
         img.resize-icon.icon(src="@/assets/resize.svg")
 
+  // background
+  .background.filled(v-if="hasFill" :style="{background: color}")
+
 </template>
 
 <script>
@@ -91,6 +94,7 @@ export default {
     },
     color () { return this.normalizedBox.color },
     fill () { return this.normalizedBox.fill },
+    hasFill () { return this.fill !== 'empty' },
     labelStyles () {
       return {
         backgroundColor: this.color
@@ -273,6 +277,16 @@ export default {
     position absolute
     left 4px
     top 4.5px
+
+  .background
+    position absolute
+    left 0px
+    top 0px
+    width 100%
+    height 100%
+    z-index -1
+    &.filled
+      opacity 0.5
 
 .box-jiggle
   animation boxJiggle 0.5s infinite ease-out forwards
