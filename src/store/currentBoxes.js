@@ -117,7 +117,7 @@ export default {
         resizeWidth: box.resizeWidth || minBoxSize,
         resizeHeight: box.resizeHeight || minBoxSize,
         color: randomColor({ luminosity: 'light' }),
-        fill: 'empty',
+        fill: 'filled', // empty, filled
         name: box.name || `Box ${count}`
       }
       context.commit('create', box)

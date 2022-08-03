@@ -75,7 +75,7 @@ export default {
       box.resizeWidth = box.resizeWidth || init
       box.resizeHeight = box.resizeHeight || init
       box.color = box.color || randomColor({ luminosity: 'light' })
-      box.fill = box.fill || 'empty'
+      box.fill = box.fill || 'filled'
       return box
     },
     styles () {

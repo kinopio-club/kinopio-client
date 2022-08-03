@@ -14,10 +14,11 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           img.icon(src="@/assets/remove.svg")
           span Remove
       .segmented-buttons
-        button(:class="{active: fillIsEmpty}" @click="updateBoxFill('empty')")
-          img.icon.box-icon(src="@/assets/box-empty.svg")
         button(:class="{active: fillIsFilled}" @click="updateBoxFill('filled')")
           img.icon.box-icon(src="@/assets/box.svg")
+        button(:class="{active: fillIsEmpty}" @click="updateBoxFill('empty')")
+          img.icon.box-icon(src="@/assets/box-empty.svg")
+
 </template>
 
 <script>
@@ -90,8 +91,8 @@ export default {
       // this.updateBox({color})
     },
     updateBoxFill (fill) {
-      console.log('🔮', fill)
-      // this.updateBox({fill})
+      const box = { id: this.box.id, fill }
+      this.$store.dispatch('currentBoxes/update', box)
     },
     closeDialogs () {
       this.colorPickerIsVisible = false
