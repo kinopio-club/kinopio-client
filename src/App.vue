@@ -542,6 +542,7 @@ dialog
   box-shadow var(--hover-shadow)
   border-radius 3px
   overscroll-behavior-y contain
+  cursor auto
   &.is-pinnable
     transition left 0.1s, top 0.1s
   &.narrow
