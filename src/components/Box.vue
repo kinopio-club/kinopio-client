@@ -3,7 +3,7 @@
   .box-info(
     @pointerover="updateIsHover(true)"
     @pointerleave="updateIsHover(false)"
-    @pointerdown="startBoxInfoInteraction"
+    @pointerdown.left="startBoxInfoInteraction"
     :style="labelStyles"
     :class="{unselectable: isPainting}"
 
@@ -135,9 +135,6 @@ export default {
         this.newY = this.box.y + delta.y
       }
       this.boxWasDragged = true
-      this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      this.$store.dispatch('closeAllDialogs', 'Box.moveOrResizeBox')
-      this.$store.dispatch('clearMultipleSelected')
     },
     startResizing (event) {
       if (!this.canEditSpace) { return }
@@ -145,10 +142,12 @@ export default {
       this.$store.dispatch('history/pause')
       this.updateIsResizing(true)
       prevCursor = utils.cursorPositionInPage(event)
-      console.log('🚛🚛🚛 isresizing', prevCursor)
     },
     startBoxInfoInteraction (event) {
       prevCursor = utils.cursorPositionInPage(event)
+      this.$store.commit('preventDraggedCardFromShowingDetails', true)
+      this.$store.dispatch('closeAllDialogs', 'Box.startBoxInfoInteraction')
+      this.$store.dispatch('clearMultipleSelected')
       this.updateIsDragging(true)
     },
     updateIsResizing (value) {
@@ -161,8 +160,67 @@ export default {
       this.$store.commit('currentUserIsDraggingBox', value)
       if (value) {
         this.$store.commit('currentUserIsInteractingBoxId', this.box.id)
+        this.selectContainedCards()
       }
     },
+    selectContainedCards () {
+      const cardMap = this.$store.state.currentCards.cardMap
+      cardMap.forEach(card => {
+        if (this.isCardInBox(card)) {
+          this.$store.dispatch('addToMultipleCardsSelected', card.id)
+          this.$store.commit('currentUserIsDraggingCard', true)
+          this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
+        }
+      })
+    },
+    isCardInBox (card) {
+      if (card.isLocked) { return }
+      const box = this.normalizedBox
+      const { x, y } = box
+      const width = box.resizeWidth
+      const height = box.resizeHeight
+      // ┌─────────────────────────────────────┐
+      // │ Box                                 │
+      // │                                     │
+      // │                                     │
+      // │                                     │
+      // │      x1 = x          x2 = x + w     │
+      // │         ██───────────────██         │
+      // │         │                 │         │
+      // │         │      Card       │         │
+      // │         │                 │         │
+      // │         ██───────────────██         │
+      // │      y1 = y          y2 = y + h     │
+      // │                                     │
+      // │                                     │
+      // │                                     │
+      // │                                     │
+      // └─────────────────────────────────────┘
+      const x1 = utils.isBetween({
+        value: card.x,
+        min: x,
+        max: x + width
+      })
+      const x2 = utils.isBetween({
+        value: card.x + card.width,
+        min: x,
+        max: x + width
+      })
+      const xIsInside = x1 || x2
+      const y1 = utils.isBetween({
+        value: card.y,
+        min: y,
+        max: y + height
+      })
+      const y2 = utils.isBetween({
+        value: card.y + card.height,
+        min: y,
+        max: y + height
+      })
+      const yIsInside = y1 || y2
+      return xIsInside && yIsInside
+    },
+
     updateIsHover (value) {
       if (this.isPainting) { return }
       this.isHover = value
@@ -227,6 +285,9 @@ export default {
       this.newY = 0
       this.boxWasDragged = false
       prevCursor = null
+      setTimeout(() => {
+        this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
+      }, 100)
     }
   }
 }
