@@ -7,7 +7,15 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: box.color}")
         ColorPicker(:currentColor="box.color" :visible="colorPickerIsVisible" @selectedColor="updateColor")
-      input.name(:disabled="!canEditSpace" placeholder="Box Name" v-model="name" ref="name" @focus="focus" @blur="blur")
+      input.name(
+        :disabled="!canEditSpace"
+        placeholder="Box Name"
+        v-model="name"
+        ref="name"
+        @focus="focus"
+        @blur="blur"
+        @keydown.enter.stop.prevent="closeAllDialogs"
+      )
     .row
       .button-wrap
         button(:disabled="!canEditSpace" @click.left="removeBox")
@@ -93,6 +101,9 @@ export default {
     },
     closeDialogs () {
       this.colorPickerIsVisible = false
+    },
+    closeAllDialogs () {
+      this.$store.dispatch('closeAllDialogs', 'boxDetails')
     },
     focusName () {
       this.$nextTick(() => {
