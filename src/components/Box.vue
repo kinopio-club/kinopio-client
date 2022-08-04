@@ -331,6 +331,7 @@ export default {
     padding 8px
     padding-right 10px
     border-bottom-right-radius 5px
+    word-break break-word
     &:hover
       box-shadow var(--hover-shadow)
     &:active
