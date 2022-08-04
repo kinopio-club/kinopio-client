@@ -156,7 +156,8 @@ export default {
       this.$store.commit('currentDraggingCardId', '')
       this.$store.dispatch('closeAllDialogs', 'Box.startBoxInfoInteraction')
       this.$store.dispatch('clearMultipleSelected')
-      this.updateIsDragging(true)
+      const preventSelect = event.shiftKey
+      this.updateIsDragging(true, preventSelect)
     },
     updatePrevCursor () {
       prevCursor = utils.cursorPositionInPage(event)
@@ -171,9 +172,9 @@ export default {
         this.$store.commit('currentUserIsInteractingBoxId', this.box.id)
       }
     },
-    updateIsDragging (value) {
+    updateIsDragging (value, preventSelect) {
       this.$store.commit('currentUserIsDraggingBox', value)
-      if (value) {
+      if (value && !preventSelect) {
         this.$store.commit('currentUserIsInteractingBoxId', this.box.id)
         this.selectContainedCards()
       }
