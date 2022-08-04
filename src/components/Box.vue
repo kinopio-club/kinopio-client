@@ -301,6 +301,7 @@ export default {
       prevCursor = null
       setTimeout(() => {
         this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
+        this.$store.dispatch('clearMultipleSelected')
       }, 100)
     }
   }
