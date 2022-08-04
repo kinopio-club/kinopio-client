@@ -140,6 +140,8 @@ export default {
         this.newY = this.box.y + delta.y
       }
       this.boxWasDragged = true
+      this.$store.commit('currentUserIsDraggingCard', true)
+      this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
     },
     startResizing (event) {
       if (!this.canEditSpace) { return }
@@ -180,8 +182,6 @@ export default {
       cardMap.forEach(card => {
         if (this.isCardInBox(card)) {
           this.$store.dispatch('addToMultipleCardsSelected', card.id)
-          this.$store.commit('currentUserIsDraggingCard', true)
-          this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
         }
       })
     },
