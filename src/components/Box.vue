@@ -111,12 +111,17 @@ export default {
       const isResizing = this.$store.state.currentUserIsResizingBox
       const isCurrent = this.$store.state.currentUserIsInteractingBoxId === this.box.id
       return isResizing && isCurrent
-    }
+    },
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
   },
   methods: {
     moveOrResizeBox (event) {
       if (!this.isDragging && !this.isResizing) { return }
       currentCursor = utils.cursorPositionInPage(event)
+      currentCursor = {
+        x: currentCursor.x * this.spaceCounterZoomDecimal,
+        y: currentCursor.y * this.spaceCounterZoomDecimal
+      }
       let delta
       if (prevCursor) {
         delta = {
@@ -141,14 +146,21 @@ export default {
       if (utils.isMultiTouch(event)) { return }
       this.$store.dispatch('history/pause')
       this.updateIsResizing(true)
-      prevCursor = utils.cursorPositionInPage(event)
+      this.updatePrevCursor()
     },
     startBoxInfoInteraction (event) {
-      prevCursor = utils.cursorPositionInPage(event)
+      this.updatePrevCursor()
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('closeAllDialogs', 'Box.startBoxInfoInteraction')
       this.$store.dispatch('clearMultipleSelected')
       this.updateIsDragging(true)
+    },
+    updatePrevCursor () {
+      prevCursor = utils.cursorPositionInPage(event)
+      prevCursor = {
+        x: prevCursor.x * this.spaceCounterZoomDecimal,
+        y: prevCursor.y * this.spaceCounterZoomDecimal
+      }
     },
     updateIsResizing (value) {
       this.$store.commit('currentUserIsResizingBox', value)
