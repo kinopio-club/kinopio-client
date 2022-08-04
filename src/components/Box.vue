@@ -138,10 +138,10 @@ export default {
       } else if (this.isDragging) {
         this.newX = this.box.x + delta.x
         this.newY = this.box.y + delta.y
+        this.$store.commit('currentUserIsDraggingCard', true)
+        this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
       }
       this.boxWasDragged = true
-      this.$store.commit('currentUserIsDraggingCard', true)
-      this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
     },
     startResizing (event) {
       if (!this.canEditSpace) { return }
