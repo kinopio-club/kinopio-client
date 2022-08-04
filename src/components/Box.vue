@@ -80,8 +80,8 @@ export default {
     },
     styles () {
       let { x, y, resizeWidth, resizeHeight, color } = this.normalizedBox
-      x = this.newX || x
-      y = this.newY || y
+      x = Math.max(this.newX || x, 50)
+      y = Math.max(this.newY || y, 50)
       const width = this.newWidth || resizeWidth
       const height = this.newHeight || resizeHeight
       return {
