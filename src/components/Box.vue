@@ -266,8 +266,8 @@ export default {
       }
       if (this.isDragging) {
         box = {
-          x: this.newX,
-          y: this.newY
+          x: this.newX || this.box.x,
+          y: this.newY || this.box.y
         }
       }
       if (!box) { return }
