@@ -25,6 +25,23 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
             span Close Dialogs
           .badge.keyboard-shortcut Escape
 
+    //- General
+    template(v-if="categoryIsVisible('toolbar')")
+      .section-title
+        .badge.info(:style="{ 'background-color': categoryColor('toolbar') }") Toolbar
+      article
+        .row
+          .badge.title
+            img.icon.card-icon(src="@/assets/card.svg")
+            span Card Mode
+          .badge.keyboard-shortcut C
+      article
+        .row
+          .badge.title
+            img.icon.box-icon(src="@/assets/box.svg")
+            span Box Mode
+          .badge.keyboard-shortcut B
+
     //- Navigate
     template(v-if="categoryIsVisible('navigate')")
       .section-title
@@ -128,6 +145,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
             img.icon(src="@/assets/brush.svg")
             span Select All Connected Cards
           .badge.keyboard-shortcut {{meta}}-Click Card
+      article
+        .row
+          .badge.title
+            img.icon.box-icon(src="@/assets/box.svg")
+            span Move Box Without Moving Cards
+          .badge.keyboard-shortcut Shift-Drag on Box
       article
         .row
           .badge.title

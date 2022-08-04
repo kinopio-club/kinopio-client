@@ -10,6 +10,10 @@ const categories = [
     color: '#b9a7ff'
   },
   {
+    name: 'Toolbar',
+    color: '#88cefa'
+  },
+  {
     name: 'Navigate',
     color: '#ffbfcb'
   },
