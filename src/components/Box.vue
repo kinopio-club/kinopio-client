@@ -153,6 +153,7 @@ export default {
     startBoxInfoInteraction (event) {
       this.updatePrevCursor()
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
+      this.$store.commit('currentDraggingCardId', '')
       this.$store.dispatch('closeAllDialogs', 'Box.startBoxInfoInteraction')
       this.$store.dispatch('clearMultipleSelected')
       this.updateIsDragging(true)
@@ -286,6 +287,7 @@ export default {
       box.id = this.box.id
       console.log('🔵 end/update box Interaction', box)
       this.$store.dispatch('currentBoxes/update', box)
+      this.$store.dispatch('currentCards/updateCardMap')
       this.clearState()
     },
     clearState () {
