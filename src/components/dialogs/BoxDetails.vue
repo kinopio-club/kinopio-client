@@ -14,6 +14,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         ref="name"
         @blur="blur"
         @keydown.enter.stop.prevent="closeAllDialogs"
+        maxLength="600"
       )
     .row
       .button-wrap
