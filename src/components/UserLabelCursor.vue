@@ -1,7 +1,12 @@
 <template lang="pug">
-.user-label.badge(v-if="visible" :data-id="user.id" :style="{ background: user.color, left: left + 'px', top: top + 'px' }")
-  .user-avatar.anon-avatar
-  span.user-name(v-if="isOnscreen && userHasName") {{ user.name }}
+.user-label(v-if="visible" :data-id="user.id" :style="position")
+  .pointer
+    svg(width="13px" height="14px" viewBox="0 0 13 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink")
+      g(stroke="none" stroke-width="1" fill="none" fill-rule="evenodd")
+        path(:fill="color" d="M4.3472708,-1.34216658 L10.8472708,10.3578334 C7.96172333,8.79783342 5.79505666,8.01783342 4.3472708,8.01783342 C2.89948494,8.01783342 0.732818273,8.79783342 -2.1527292,10.3578334 L4.3472708,-1.34216658 Z" transform="translate(4.347271, 4.507833) rotate(-42.000000) translate(-4.347271, -4.507833) ")
+  .badge(:style="backgroundColor")
+    .user-avatar.anon-avatar
+    span.user-name(v-if="isOnscreen && userHasName") {{ user.name }}
 </template>
 
 <script>
@@ -21,8 +26,8 @@ export default {
       if (mutation.type === 'triggerUpdateRemoteUserCursor') {
         const cursor = mutation.payload
         if (cursor.userId !== this.user.id) { return }
-        this.left = cursor.x + 10
-        this.top = cursor.y - 10
+        this.left = cursor.x
+        this.top = cursor.y
         this.color = this.user.color
         currentIteration = 0
         this.updatePositionWithZoom(cursor)
@@ -45,7 +50,18 @@ export default {
   },
   computed: {
     userHasName () { return Boolean(this.user.name) },
-    minimapIsVisible () { return this.$store.state.minimapIsVisible }
+    minimapIsVisible () { return this.$store.state.minimapIsVisible },
+    position () {
+      return {
+        left: this.left + 'px',
+        top: this.top + 'px'
+      }
+    },
+    backgroundColor () {
+      return {
+        background: this.user.color
+      }
+    }
   },
   methods: {
     updatePositionWithZoom (cursor) {
@@ -123,6 +139,14 @@ export default {
   position absolute
   z-index calc(var(--max-z) - 50)
   display inline-block
+  border-radius 3px
+  .pointer
+    width 15px
+    height 15px
+  .badge
+    margin 0
+    margin-left 10px
+    margin-top -5px
   .anon-avatar
     width 15px
     height 15px
