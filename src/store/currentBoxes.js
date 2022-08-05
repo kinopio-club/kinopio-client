@@ -81,6 +81,7 @@ export default {
       currentSpaceId = spaceId
     },
     mergeUnique: (context, newBoxes) => {
+      if (!newBoxes) { return }
       newBoxes.forEach(newBox => {
         let shouldUpdate
         let prevBox = context.getters.byId(newBox.id)
