@@ -403,12 +403,23 @@ export default {
 
     addBox (event) {
       const zoom = this.$store.getters.spaceCounterZoomDecimal
-      const position = utils.cursorPositionInPage(event)
-      const box = {
+      let position = utils.cursorPositionInPage(event)
+      position = {
         x: position.x * zoom,
         y: position.y * zoom
       }
-      this.$store.dispatch('currentBoxes/add', { box, shouldResize: true })
+      const shouldPrevent = this.checkIfShouldPreventInteraction(position)
+      if (shouldPrevent) { return }
+      this.$store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
+    },
+    checkIfShouldPreventInteraction (position) {
+      const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()
+      if (currentUserCanEdit) { return }
+      const notificationWithPosition = document.querySelector('.notifications-with-position .item')
+      if (!notificationWithPosition) {
+        this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info' })
+      }
+      return true
     },
 
     // Selecting
