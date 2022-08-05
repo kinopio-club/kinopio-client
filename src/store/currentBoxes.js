@@ -80,9 +80,8 @@ export default {
     updateSpaceId: (context, spaceId) => {
       currentSpaceId = spaceId
     },
-    mergeUnique: (context, newBoxes) => {
-      if (!newBoxes) { return }
-      newBoxes.forEach(newBox => {
+    mergeUnique: (context, { newItems, itemType }) => {
+      newItems.forEach(newBox => {
         let shouldUpdate
         let prevBox = context.getters.byId(newBox.id)
         let box = { id: newBox.id }
@@ -98,8 +97,8 @@ export default {
         context.commit('update', box)
       })
     },
-    mergeRemove: (context, removeBoxes) => {
-      removeBoxes.forEach(box => {
+    mergeRemove: (context, { removeItems, itemType }) => {
+      removeItems.forEach(box => {
         context.commit('remove', box)
       })
     },
