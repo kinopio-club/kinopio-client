@@ -18,7 +18,7 @@ main.space(
     ConnectionLabel(:connection="connection")
   //- Presence
   template(v-for="user in spaceMembers")
-    UserLabel(:user="user")
+    UserLabelCursor(:user="user")
   //- Cards
   .cards
     template(v-for="overlap in cardOverlaps")
@@ -46,7 +46,7 @@ import CurrentConnection from '@/components/CurrentConnection.vue'
 import Connection from '@/components/Connection.vue'
 import ConnectionLabel from '@/components/ConnectionLabel.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
-import UserLabel from '@/components/UserLabel.vue'
+import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
@@ -74,7 +74,7 @@ export default {
     Connection,
     ConnectionLabel,
     BoxDetails,
-    UserLabel,
+    UserLabelCursor,
     ConnectionDetails,
     MultipleSelectedActions,
     ScrollAtEdgesHandler,

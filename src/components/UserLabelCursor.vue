@@ -11,7 +11,7 @@ const maxIterations = 200 // 👀 MagicPaint maxIterations
 let visibleTimer, currentIteration
 
 export default {
-  name: 'UserLabel',
+  name: 'UserLabelCursor',
   props: {
     user: Object,
     scale: Number,

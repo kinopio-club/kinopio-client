@@ -22,11 +22,11 @@
 
   //- remote users
   template(v-for="user in spaceMembers")
-    UserLabel(:user="user" :scale="scale")
+    UserLabelCursor(:user="user" :scale="scale")
 </template>
 
 <script>
-import UserLabel from '@/components/UserLabel.vue'
+import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
@@ -37,7 +37,7 @@ let canvas, context
 export default {
   name: 'ComponentName',
   components: {
-    UserLabel
+    UserLabelCursor
   },
   created () {
     this.$store.subscribe((mutation, state) => {
