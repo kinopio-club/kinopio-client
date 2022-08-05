@@ -1,5 +1,10 @@
 <template lang="pug">
-.box(:key="box.id" :style="styles" :class="{hover: isHover, active: isDragging, 'box-jiggle': isDragging, 'is-resizing': isResizing}")
+.box(
+  :key="box.id"
+  :data-box-id="box.id"
+  :style="styles"
+  :class="{hover: isHover, active: isDragging, 'box-jiggle': isDragging, 'is-resizing': isResizing}"
+)
   .box-info(
     @pointerover="updateIsHover(true)"
     @pointerleave="updateIsHover(false)"
@@ -135,11 +140,13 @@ export default {
       if (this.isResizing) {
         this.newWidth = this.box.resizeWidth + delta.x
         this.newHeight = this.box.resizeHeight + delta.y
+        this.broadcastResize()
       } else if (this.isDragging) {
         this.newX = this.box.x + delta.x
         this.newY = this.box.y + delta.y
         this.$store.commit('currentUserIsDraggingCard', true)
         this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
+        this.broadcastMove()
       }
       this.boxWasDragged = true
     },
@@ -285,7 +292,6 @@ export default {
       }
       if (!box) { return }
       box.id = this.box.id
-      console.log('🔵 end/update box Interaction', box)
       this.$store.dispatch('history/resume')
       this.$store.dispatch('currentBoxes/update', box)
       this.$store.dispatch('currentCards/updateCardMap')
@@ -304,6 +310,25 @@ export default {
         this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
         this.$store.dispatch('clearMultipleSelected')
       }, 100)
+    },
+
+    // broadcast
+
+    broadcastResize () {
+      const box = {
+        id: this.box.id,
+        resizeWidth: this.newWidth,
+        resizeHeight: this.newHeight
+      }
+      this.$store.dispatch('broadcast/update', { updates: { box }, type: 'resizeBox', handler: 'currentBoxes/resizeBroadcast' })
+    },
+    broadcastMove () {
+      const box = {
+        id: this.box.id,
+        x: this.newX,
+        y: this.newY
+      }
+      this.$store.dispatch('broadcast/update', { updates: { box }, type: 'moveBox', handler: 'currentBoxes/moveBroadcast' })
     }
   }
 }

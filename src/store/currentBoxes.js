@@ -55,12 +55,16 @@ export default {
 
     // broadcast
 
-    // updatePathsBroadcast: (state, { boxes }) => {
-    //   boxes.forEach(box => {
-    //     state.boxes[box.id].path = box.path
-    //   })
-    //   cache.updateSpaceboxesDebounced(state.boxes, currentSpaceId)
-    // },
+    resizeBroadcast: (state, { box }) => {
+      const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
+      element.style.width = box.resizeWidth + 'px'
+      element.style.height = box.resizeHeight + 'px'
+    },
+    moveBroadcast: (state, { box }) => {
+      const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
+      element.style.left = box.x + 'px'
+      element.style.top = box.y + 'px'
+    },
 
     // remove
 
@@ -122,7 +126,7 @@ export default {
       }
       context.commit('create', box)
       context.dispatch('api/addToQueue', { name: 'createBox', body: box }, { root: true })
-      // context.dispatch('broadcast/update', { updates: box, type: 'addBox', handler: 'currentboxes/create' }, { root: true })
+      context.dispatch('broadcast/update', { updates: box, type: 'createBox', handler: 'currentBoxes/create' }, { root: true })
       context.dispatch('history/add', { boxes: [box] }, { root: true })
       if (shouldResize) {
         context.commit('currentUserIsResizingBox', true, { root: true })
@@ -136,14 +140,14 @@ export default {
       context.dispatch('history/add', { boxes: [box] }, { root: true })
       context.commit('update', box)
       context.dispatch('api/addToQueue', { name: 'updateBox', body: box }, { root: true })
-      // context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentboxes/update' }, { root: true })
+      context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
     },
 
     // remove
 
     remove: (context, box) => {
       context.dispatch('api/addToQueue', { name: 'removeBox', body: box }, { root: true })
-      // context.dispatch('broadcast/update', { updates: box, type: 'removeBox', handler: 'currentboxes/remove' }, { root: true })
+      context.dispatch('broadcast/update', { updates: box, type: 'removeBox', handler: 'currentBoxes/remove' }, { root: true })
       context.commit('remove', box)
       context.dispatch('history/add', { boxes: [box], isRemoved: true }, { root: true })
     }
