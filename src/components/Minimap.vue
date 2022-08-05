@@ -376,6 +376,7 @@ export default {
   width 100vw
   height 100vh
   cursor pointer
+  backdrop-filter blur(8px)
   .overlay-background
     background-color var(--primary-background)
     opacity 0.5
