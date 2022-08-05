@@ -15,17 +15,17 @@ dialog.favorities-actions.narrow(v-if="visible" :open="visible" @click.left.stop
         button(:class="{active: isFavoriteUser(user)}" @click.left.prevent="toggleIsFavoriteUser(user)" @keydown.stop.enter="toggleIsFavoriteUser(user)")
           img.icon(v-if="isFavoriteUser(user)" src="@/assets/heart.svg")
           img.icon(v-else src="@/assets/heart-empty.svg")
-          UserLabel(:user="user" :isInline="true")
+          UserLabelInline(:user="user" :isInline="true")
 
 </template>
 
 <script>
-import UserLabel from '@/components/UserLabel.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 
 export default {
   name: 'FavoritesActions',
   components: {
-    UserLabel
+    UserLabelInline
   },
   props: {
     visible: Boolean
