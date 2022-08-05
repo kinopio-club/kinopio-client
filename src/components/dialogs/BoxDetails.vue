@@ -12,7 +12,6 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         placeholder="Box Name"
         v-model="name"
         ref="name"
-        @focus="focus"
         @blur="blur"
         @keydown.enter.stop.prevent="closeAllDialogs"
       )
@@ -33,6 +32,8 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
+let prevBoxId
+
 export default {
   name: 'BoxDetails',
   components: {
@@ -41,7 +42,7 @@ export default {
   data () {
     return {
       colorPickerIsVisible: false,
-      inputIsFocused: false
+      isUpdated: false
     }
   },
   computed: {
@@ -80,6 +81,7 @@ export default {
   },
   methods: {
     removeBox () {
+      this.$store.dispatch('history/resume')
       this.$store.dispatch('currentBoxes/remove', this.box)
     },
     toggleColorPicker () {
@@ -92,6 +94,7 @@ export default {
         box[key] = updates[key]
       })
       this.$store.dispatch('currentBoxes/update', box)
+      this.isUpdated = true
     },
     updateColor (color) {
       this.update({ color })
@@ -111,19 +114,9 @@ export default {
         if (!element) { return }
         element.focus()
       })
-      this.inputIsFocused = true
-    },
-    focus () {
-      this.$store.commit('pinchCounterZoomDecimal', 1)
-      this.$store.dispatch('history/pause')
-      this.inputIsFocused = true
     },
     blur () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
-      this.$store.dispatch('history/resume')
-      const box = utils.clone(this.box)
-      this.$store.dispatch('history/add', { boxes: [box], useSnapshot: true })
-      this.inputIsFocused = false
     },
     scrollIntoView () {
       this.$nextTick(() => {
@@ -149,9 +142,20 @@ export default {
   watch: {
     box (current) {
       this.$nextTick(() => {
+        // open
         if (this.visible) {
+          this.$store.dispatch('history/pause')
+          prevBoxId = current.id
           this.closeDialogs()
           this.scrollIntoViewAndFocus()
+        // close
+        } else {
+          this.$store.dispatch('history/resume')
+          if (!this.isUpdated) { return }
+          this.isUpdated = false
+          const box = this.$store.getters['currentBoxes/byId'](prevBoxId)
+          if (!box) { return }
+          this.$store.dispatch('history/add', { boxes: [box], useSnapshot: true })
         }
       })
     }

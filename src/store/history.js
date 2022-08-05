@@ -184,6 +184,7 @@ const self = {
         })
         patch = patch.concat(connectionTypes)
       }
+      // boxes
       if (boxes) {
         boxes = boxes.map(box => {
           let previous = context.rootGetters['currentBoxes/byId'](box.id)
@@ -213,7 +214,7 @@ const self = {
       patch.forEach(item => {
         console.log('⏪', item, { pointer, totalPatches: patches.length })
         const { action } = item
-        let card, connection, type
+        let card, connection, type, box
         switch (action) {
           case 'cardUpdated':
             card = item.prev
@@ -253,6 +254,18 @@ const self = {
             type = item.prev
             context.dispatch('currentConnections/updateType', type, { root: true })
             break
+          case 'boxCreated':
+            box = item.new
+            context.dispatch('currentBoxes/remove', box, { root: true })
+            break
+          case 'boxRemoved':
+            box = item.new
+            context.dispatch('currentBoxes/add', { box }, { root: true })
+            break
+          case 'boxUpdated':
+            box = item.prev
+            context.dispatch('currentBoxes/update', box, { root: true })
+            break
         }
       })
       context.dispatch('resume')
@@ -271,7 +284,7 @@ const self = {
       patch.forEach(item => {
         console.log('⏩', item, { pointer, totalPatches: patches.length })
         const { action } = item
-        let card, connection, type
+        let card, connection, type, box
         switch (action) {
           case 'cardUpdated':
             card = item.new
@@ -305,6 +318,18 @@ const self = {
           case 'connectionTypeUpdated':
             type = item.new
             context.dispatch('currentConnections/updateType', type, { root: true })
+            break
+          case 'boxCreated':
+            box = item.new
+            context.dispatch('currentBoxes/add', { box }, { root: true })
+            break
+          case 'boxRemoved':
+            box = item.new
+            context.dispatch('currentBoxes/remove', box, { root: true })
+            break
+          case 'boxUpdated':
+            box = item.new
+            context.dispatch('currentBoxes/update', box, { root: true })
             break
         }
       })

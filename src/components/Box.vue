@@ -146,7 +146,6 @@ export default {
     startResizing (event) {
       if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
-      this.$store.dispatch('history/pause')
       this.updateIsResizing(true)
       this.updatePrevCursor()
     },
@@ -287,6 +286,7 @@ export default {
       if (!box) { return }
       box.id = this.box.id
       console.log('🔵 end/update box Interaction', box)
+      this.$store.dispatch('history/resume')
       this.$store.dispatch('currentBoxes/update', box)
       this.$store.dispatch('currentCards/updateCardMap')
       this.clearState()
