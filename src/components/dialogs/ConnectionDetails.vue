@@ -51,7 +51,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         span Type
 
   section.results-section(ref="resultsSection" :style="{'max-height': resultsSectionMaxHeight}")
-    ResultsFilter(:items="connectionTypes" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
+    ResultsFilter(:items="connectionTypesByUpdatedAt" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
     ul.results-list
       template(v-for="type in connectionTypesFiltered" :key="type.id")
         li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click.left="changeConnectionType(type)")
@@ -66,7 +66,9 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
 import last from 'lodash-es/last'
+import sortBy from 'lodash-es/sortBy'
 import randomColor from 'randomcolor'
+import dayjs from 'dayjs'
 
 let prevConnectionType
 
@@ -98,6 +100,12 @@ export default {
       return connectionType
     },
     connectionTypes () { return this.$store.getters['currentConnections/allTypes'] },
+    connectionTypesByUpdatedAt () {
+      let types = this.connectionTypes
+      types = sortBy(types, type => dayjs(type.updatedAt).valueOf())
+      types.reverse()
+      return types
+    },
     typeColor () { return this.currentConnectionType.color },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
@@ -138,7 +146,8 @@ export default {
       set (newName) {
         const connectionType = {
           id: this.currentConnectionType.id,
-          name: newName
+          name: newName,
+          updatedAt: new Date()
         }
         this.$store.dispatch('currentConnections/updateType', connectionType)
       }
@@ -147,7 +156,7 @@ export default {
       if (this.filter) {
         return this.filteredConnectionTypes
       } else {
-        return this.connectionTypes
+        return this.connectionTypesByUpdatedAt
       }
     },
     shouldUseLastConnectionType () { return this.$store.state.currentUser.shouldUseLastConnectionType },
