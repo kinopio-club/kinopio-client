@@ -735,12 +735,25 @@ export default {
       const isNoUser = !card.userId && !card.nameUpdatedByUserId
       return isCreatedByUser || isUpdatedByUser || isNoUser
     },
+    boxIsCreatedByCurrentUser: (state, getters, rootState) => (box) => {
+      const isCreatedByUser = state.id === box.userId
+      const isNoUser = !box.userId
+      return isCreatedByUser || isNoUser
+    },
     canEditCard: (state, getters, rootState, rootGetters) => (card) => {
       const isSpaceMember = getters.isSpaceMember()
       if (isSpaceMember) { return true }
       const canEditSpace = getters.canEditSpace
       const cardIsCreatedByCurrentUser = getters.cardIsCreatedByCurrentUser(card)
       if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
+      return false
+    },
+    canEditBox: (state, getters, rootState, rootGetters) => (box) => {
+      const isSpaceMember = getters.isSpaceMember()
+      if (isSpaceMember) { return true }
+      const canEditSpace = getters.canEditSpace
+      const boxIsCreatedByCurrentUser = getters.boxIsCreatedByCurrentUser(box)
+      if (canEditSpace && boxIsCreatedByCurrentUser) { return true }
       return false
     },
     connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {

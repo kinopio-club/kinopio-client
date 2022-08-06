@@ -3,12 +3,14 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
   //- .opening-frame(v-if="isOpening" :style="openingFrameStyle")
   section
     .row
+      //- color
       .button-wrap
-        button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+        button.change-color(:disabled="!canEditBox" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: box.color}")
         ColorPicker(:currentColor="box.color" :visible="colorPickerIsVisible" @selectedColor="updateColor")
+      //- name
       input.name(
-        :disabled="!canEditSpace"
+        :disabled="!canEditBox"
         placeholder="Box Name"
         v-model="name"
         ref="name"
@@ -17,15 +19,26 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         maxLength="600"
       )
     .row
+      //- h1
       .button-wrap
-        button(:disabled="!canEditSpace" @click.left="removeBox")
-          img.icon(src="@/assets/remove.svg")
-          span Remove
+        button(:disabled="!canEditBox" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }")
+          span h1
+      //- h2
+      .button-wrap
+        button(:disabled="!canEditBox" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }")
+          span h2
+      //- fill
       .segmented-buttons
         button(:class="{active: fillIsFilled}" @click="updateFill('filled')")
           img.icon.box-icon(src="@/assets/box.svg")
         button(:class="{active: fillIsEmpty}" @click="updateFill('empty')")
           img.icon.box-icon(src="@/assets/box-empty.svg")
+    .row
+      //- remove
+      .button-wrap
+        button(:disabled="!canEditBox" @click.left="removeBox")
+          img.icon(src="@/assets/remove.svg")
+          span Remove
 
 </template>
 
@@ -70,7 +83,6 @@ export default {
       }
       return styles
     },
-    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     name: {
       get () {
         return this.box.name
@@ -78,7 +90,16 @@ export default {
       set (name) {
         this.update({ name })
       }
-    }
+    },
+    isH1 () {
+      const pattern = 'h1Pattern'
+      return this.nameHasPattern(pattern)
+    },
+    isH2 () {
+      const pattern = 'h2Pattern'
+      return this.nameHasPattern(pattern)
+    },
+    canEditBox () { return this.$store.getters['currentUser/canEditBox']() }
   },
   methods: {
     removeBox () {
@@ -138,6 +159,53 @@ export default {
           element.setSelectionRange(length, length)
         }
       })
+    },
+
+    // h1, h2
+
+    nameHasPattern (pattern) {
+      const result = utils.markdown()[pattern].exec(this.name)
+      return Boolean(result)
+    },
+    toRemovePattern (pattern) {
+      if (pattern === 'h1Pattern') {
+        return 'h2Pattern'
+      } else if (pattern === 'h2Pattern') {
+        return 'h1Pattern'
+      }
+    },
+    toggleHeader (pattern) {
+      let hasPattern
+      if (pattern === 'h1Pattern') {
+        hasPattern = this.isH1
+      } else if (pattern === 'h2Pattern') {
+        hasPattern = this.isH2
+      }
+      const toRemovePattern = this.toRemovePattern(pattern)
+      if (hasPattern) {
+        this.removeFromName(pattern)
+      } else {
+        this.removeFromName(toRemovePattern)
+        this.prependToName(pattern)
+      }
+    },
+    markdown (pattern) {
+      if (pattern === 'h1Pattern') {
+        return '# '
+      } else if (pattern === 'h2Pattern') {
+        return '## '
+      }
+    },
+    removeFromName (pattern) {
+      const markdown = this.markdown(pattern)
+      const newName = this.name.replace(markdown, '')
+      if (newName === this.name) { return }
+      this.update({ name: newName })
+    },
+    prependToName (pattern) {
+      const markdown = this.markdown(pattern)
+      const newName = markdown + this.name
+      this.update({ name: newName })
     }
   },
   watch: {

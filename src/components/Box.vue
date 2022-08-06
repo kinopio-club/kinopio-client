@@ -20,7 +20,12 @@
     //- @touchend="showCardDetailsTouch"
 
     //- name
-    span {{box.name}}
+    template(v-if="isH1")
+      h1 {{h1Name}}
+    template(v-else-if="isH2")
+      h2 {{h2Name}}
+    template(v-else)
+      span {{box.name}}
   //- resize
   .bottom-button-wrap(:class="{unselectable: isPainting}")
     .resize-button-wrap.inline-button-wrap(
@@ -117,7 +122,21 @@ export default {
       const isCurrent = this.$store.state.currentUserIsInteractingBoxId === this.box.id
       return isResizing && isCurrent
     },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    isH1 () {
+      const pattern = 'h1Pattern'
+      return this.nameHasPattern(pattern)
+    },
+    isH2 () {
+      const pattern = 'h2Pattern'
+      return this.nameHasPattern(pattern)
+    },
+    h1Name () {
+      return this.box.name.replace('# ', '')
+    },
+    h2Name () {
+      return this.box.name.replace('## ', '')
+    }
   },
   methods: {
     moveOrResizeBox (event) {
@@ -329,6 +348,13 @@ export default {
         y: this.newY
       }
       this.$store.dispatch('broadcast/update', { updates: { box }, type: 'moveBox', handler: 'currentBoxes/moveBroadcast' })
+    },
+
+    // h1, h2
+
+    nameHasPattern (pattern) {
+      const result = utils.markdown()[pattern].exec(this.box.name)
+      return Boolean(result)
     }
   }
 }
@@ -348,6 +374,19 @@ export default {
     box-shadow var(--active-shadow)
   &.is-resizing
     box-shadow var(--active-shadow)
+
+  h1
+    font-family var(--serif-font)
+    font-size 22px
+    font-weight bold
+    margin 0
+    display inline-block
+  h2
+    font-family var(--serif-font)
+    font-weight normal
+    font-size 20px
+    margin 0
+    display inline-block
 
   .box-info
     pointer-events all
