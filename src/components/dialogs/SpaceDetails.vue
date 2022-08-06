@@ -12,6 +12,7 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
         button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
           img.icon(v-if="!currentSpaceIsHidden" src="@/assets/view.svg")
           img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
+          span Hide
     //-  Duplicate
     .button-wrap(v-if="!isSpaceMember")
       button(@click.left="duplicateSpace")

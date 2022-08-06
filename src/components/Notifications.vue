@@ -50,7 +50,7 @@ aside.notifications(@click.left="closeAllDialogs")
         span Feels Good
 
   .item.info(v-if="notifySpaceIsHidden" @animationend="resetNotifySpaceIsHidden")
-    p Hidden spaces revealed through
+    p Hidden spaces are revealed through
       img.icon.filter-icon(src="@/assets/filter.svg")
 
   .item.info(v-if="notifyCurrentSpaceIsNowRemoved" @animationend="resetNotifyCurrentSpaceIsNowRemoved")
