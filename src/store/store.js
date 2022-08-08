@@ -598,10 +598,10 @@ const store = createStore({
     // removeRemoteUserResizingBoxIds??
     //   state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
     // },
-    updateRemoteUserResizingBoxes: (state, update) => {
-      state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
-      state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.concat(update)
-    },
+    // updateRemoteUserResizingBoxes: (state, update) => {
+    //   state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
+    //   state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.concat(update)
+    // },
 
     // Minimap
 
