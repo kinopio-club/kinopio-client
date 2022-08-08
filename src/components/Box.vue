@@ -21,6 +21,7 @@
     @touchmove="updateCurrentTouchPosition"
     @touchend="showBoxDetailsTouch"
   )
+    .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
     template(v-if="isH1")
       h1 {{h1Name}}
     template(v-else-if="isH2")
@@ -152,7 +153,25 @@ export default {
     h2Name () {
       return this.box.name.replace('## ', '')
     },
-    canEditBox () { return this.$store.getters['currentUser/canEditBox']() }
+    canEditBox () { return this.$store.getters['currentUser/canEditBox']() },
+    lockingFrameStyle () {
+      const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
+      const initialBorderRadius = 50
+      const padding = initialPadding * this.lockingPercent
+      const userColor = this.$store.state.currentUser.color
+      const borderRadius = Math.max((this.lockingPercent * initialBorderRadius), 5) + 'px'
+      const size = `calc(100% + ${padding}px)`
+      const position = -(padding / 2) + 'px'
+      return {
+        width: size,
+        height: size,
+        left: position,
+        top: position,
+        background: userColor,
+        opacity: this.lockingAlpha,
+        borderRadius: borderRadius
+      }
+    }
   },
   methods: {
     moveOrResizeBox (event) {
@@ -461,7 +480,7 @@ export default {
       // if (isDrawingConnection) { return }
       const hasNotified = this.$store.state.hasNotifiedPressAndHoldToDrag
       if (!hasNotified) {
-        this.$store.commit('addNotification', { message: 'Press and hold to drag cards', icon: 'press-and-hold' })
+        this.$store.commit('addNotification', { message: 'Press and hold to drag boxes', icon: 'press-and-hold' })
       }
       this.$store.commit('hasNotifiedPressAndHoldToDrag', true)
     },
@@ -585,6 +604,11 @@ export default {
     z-index -1
     &.filled
       opacity 0.5
+
+  .locking-frame
+    position absolute
+    z-index -1
+    pointer-events none
 
 .box-jiggle
   animation boxJiggle 0.5s infinite ease-out forwards

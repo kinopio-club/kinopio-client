@@ -1,6 +1,5 @@
 <template lang="pug">
 dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="styles" :data-box-id="box.id")
-  //- .opening-frame(v-if="isOpening" :style="openingFrameStyle")
   section
     .row
       //- color
