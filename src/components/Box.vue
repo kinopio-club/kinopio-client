@@ -143,7 +143,7 @@ export default {
     isDragging () {
       const isDragging = this.$store.state.currentUserIsDraggingBox
       const isCurrent = this.$store.state.currentUserIsInteractingBoxId === this.box.id
-      return isDragging && isCurrent
+      return isDragging && (isCurrent || this.isSelected)
     },
     isResizing () {
       const isResizing = this.$store.state.currentUserIsResizingBox
@@ -182,6 +182,11 @@ export default {
         opacity: this.lockingAlpha,
         borderRadius: borderRadius
       }
+    },
+    multipleBoxesIsSelected () { return Boolean(this.$store.state.multipleBoxesSelectedIds.length) },
+    currentBoxIsSelected () {
+      const selected = this.$store.state.multipleBoxesSelectedIds
+      return selected.find(id => this.box.id === id)
     }
   },
   methods: {
@@ -210,7 +215,9 @@ export default {
         this.newX = this.box.x + delta.x
         this.newY = this.box.y + delta.y
         this.$store.commit('currentUserIsDraggingCard', true)
-        this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
+        if (!this.multipleBoxesIsSelected) {
+          this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
+        }
         this.broadcastMove()
       }
       this.boxWasDragged = true
@@ -224,10 +231,12 @@ export default {
     },
     startBoxInfoInteraction (event) {
       this.updatePrevCursor(event)
+      if (!this.currentBoxIsSelected) {
+        this.$store.dispatch('clearMultipleSelected')
+      }
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.commit('currentDraggingCardId', '')
       this.$store.dispatch('closeAllDialogs', 'Box.startBoxInfoInteraction')
-      this.$store.dispatch('clearMultipleSelected')
       const preventSelect = event.shiftKey
       this.updateIsDragging(true, preventSelect)
     },
@@ -306,41 +315,19 @@ export default {
       const yIsInside = y1 || y2
       return xIsInside && yIsInside
     },
-
     updateIsHover (value) {
       if (this.isPainting) { return }
       this.isHover = value
     },
-    // clearBoxInteractions () {}
     showBoxDetails (event) {
       if (this.boxWasDragged) { return }
-      // console.log(prevCursor, currentCursor)
-      // const cursorsAreClose = utils.cursorsAreClose(prevCursor, currentCursor)
-      // console.log('🌍 showBoxDetails', cursorsAreClose)
-      // if (!cursorsAreClose) { return }
-
-      // if dragging (and has dragged) then { return }
-      // this.$store.dispatch('currentBoxes/afterMove')
       if (this.$store.state.currentUserIsPainting) { return }
-      // if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
-
       this.clearState()
-      // if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') } // caneditspace?
-      // const userId = this.$store.state.currentUser.id
-      // const cardsWereDragged = this.$store.state.cardsWereDragged // boxesWereDragged
-
-      // this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
-      // this.preventDraggedButtonBadgeFromShowingDetails = this.$store.state.preventDraggedCardFromShowingDetails
-      // if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
-
       this.$store.dispatch('closeAllDialogs', 'Box.showBoxDetails')
       this.$store.dispatch('clearMultipleSelected')
       this.$store.commit('boxDetailsIsVisibleForBoxId', this.box.id)
-      // this.$store.commit('preventCardDetailsOpeningAnimation', true)
-
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
-      // this.$store.commit('currentUserIsDraggingCard', false)
     },
     endInteraction (event) {
       let box
@@ -372,10 +359,13 @@ export default {
       this.newY = 0
       this.boxWasDragged = false
       prevCursor = null
-      setTimeout(() => {
-        this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
-        this.$store.dispatch('clearMultipleSelected')
-      }, 100)
+      if (!this.multipleBoxesIsSelected) {
+        setTimeout(() => {
+          this.$store.dispatch('clearMultipleSelected')
+          this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
+          // }
+        }, 100)
+      }
     },
 
     // broadcast
@@ -405,10 +395,6 @@ export default {
     },
 
     // touch locking
-
-    // @touchstart="startLocking"
-    // @touchmove="updateCurrentTouchPosition"
-    // @touchend="showCardDetailsTouch"
 
     cancelLocking () {
       shouldCancelLocking = true
@@ -469,23 +455,6 @@ export default {
         this.cancelLockingAnimationFrame()
       }
     },
-
-    // startDraggingBox (event) {
-    //   isMultiTouch = false
-    //   if (this.isLocked) { return }
-    //   if (this.$store.state.currentUserIsPanningReady) { return }
-    //   if (!this.canEditBox) { return }
-    //   if (utils.isMultiTouch(event)) {
-    //     isMultiTouch = true
-    //     return
-    //   }
-    //   event.preventDefault()
-    //   // if (this.$store.state.currentUserIsDrawingConnection) { return }
-    //   this.$store.dispatch('closeAllDialogs', 'Card.startDraggingBox')
-    //   this.$store.commit('currentUserIsDraggingBox', true)
-    //   this.$store.commit('currentUserIsInteractingBoxId', this.id)
-    //   // this.$store.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsDragging' })
-    // },
 
     notifyPressAndHoldToDrag () {
       // const isDrawingConnection = this.$store.state.currentUserIsDrawingConnection
