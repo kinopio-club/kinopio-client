@@ -225,13 +225,13 @@ let isMultiTouch
 let initialTouchEvent = {}
 let touchPosition = {}
 let currentTouchPosition = {}
+const defaultCardPosition = 100
 
 // locking
 // long press to touch drag card
 const lockingPreDuration = 100 // ms
 const lockingDuration = 100 // ms
 let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
-const defaultCardPosition = 100
 
 // sticky
 const stickyTimerDuration = 250
