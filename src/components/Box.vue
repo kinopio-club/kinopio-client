@@ -8,6 +8,7 @@
 
   //- name
   .box-info(
+    :data-box-id="box.id"
     @mouseover="updateIsHover(true)"
     @mouseleave="updateIsHover(false)"
     @mousedown.left="startBoxInfoInteraction"
@@ -105,7 +106,7 @@ export default {
       return box
     },
     styles () {
-      let { x, y, resizeWidth, resizeHeight, color } = this.normalizedBox
+      let { x, y, resizeWidth, resizeHeight } = this.normalizedBox
       x = Math.max(this.newX || x, 50)
       y = Math.max(this.newY || y, 50)
       const width = this.newWidth || resizeWidth
@@ -115,10 +116,21 @@ export default {
         top: y + 'px',
         width: width + 'px',
         height: height + 'px',
-        border: `${borderWidth}px solid ${color}`
+        border: `${borderWidth}px solid ${this.color}`
       }
     },
-    color () { return this.normalizedBox.color },
+    isSelected () {
+      const selectedIds = this.$store.state.multipleBoxesSelectedIds
+      return selectedIds.includes(this.box.id)
+    },
+    userColor () { return this.$store.state.currentUser.color },
+    color () {
+      if (this.isSelected) {
+        return this.userColor
+      } else {
+        return this.normalizedBox.color
+      }
+    },
     fill () { return this.normalizedBox.fill },
     hasFill () { return this.fill !== 'empty' },
     labelStyles () {
@@ -158,7 +170,6 @@ export default {
       const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
       const initialBorderRadius = 50
       const padding = initialPadding * this.lockingPercent
-      const userColor = this.$store.state.currentUser.color
       const borderRadius = Math.max((this.lockingPercent * initialBorderRadius), 5) + 'px'
       const size = `calc(100% + ${padding}px)`
       const position = -(padding / 2) + 'px'
@@ -167,7 +178,7 @@ export default {
         height: size,
         left: position,
         top: position,
-        background: userColor,
+        background: this.userColor,
         opacity: this.lockingAlpha,
         borderRadius: borderRadius
       }
