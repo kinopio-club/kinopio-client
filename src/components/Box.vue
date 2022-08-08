@@ -5,27 +5,29 @@
   :style="styles"
   :class="{hover: isHover, active: isDragging, 'box-jiggle': isDragging, 'is-resizing': isResizing}"
 )
+
+  //- name
   .box-info(
-    @pointerover="updateIsHover(true)"
-    @pointerleave="updateIsHover(false)"
-    @pointerdown.left="startBoxInfoInteraction"
+    @mouseover="updateIsHover(true)"
+    @mouseleave="updateIsHover(false)"
+    @mousedown.left="startBoxInfoInteraction"
     :style="labelStyles"
     :class="{unselectable: isPainting}"
 
-    @pointerup.left="showBoxDetails"
+    @mouseup.left="showBoxDetails"
     @keyup.stop.enter="showBoxDetails"
-  )
-    //- @touchstart="startLocking"
-    //- @touchmove="updateCurrentTouchPosition"
-    //- @touchend="showCardDetailsTouch"
 
-    //- name
+    @touchstart="startLocking"
+    @touchmove="updateCurrentTouchPosition"
+    @touchend="showBoxDetailsTouch"
+  )
     template(v-if="isH1")
       h1 {{h1Name}}
     template(v-else-if="isH2")
       h2 {{h2Name}}
     template(v-else)
       span {{box.name}}
+
   //- resize
   .bottom-button-wrap(:class="{unselectable: isPainting}")
     .resize-button-wrap.inline-button-wrap(
@@ -40,7 +42,7 @@
       )
         img.resize-icon.icon(src="@/assets/resize.svg")
 
-  // background
+  //- fill
   .background.filled(v-if="hasFill" :style="{background: color}")
 
 </template>
@@ -52,6 +54,16 @@ import randomColor from 'randomcolor'
 
 const borderWidth = 2
 let prevCursor, currentCursor
+
+// locking
+// long press to touch drag card
+const lockingPreDuration = 100 // ms
+const lockingDuration = 100 // ms
+let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
+// let isMultiTouch
+let initialTouchEvent = {}
+let touchPosition = {}
+let currentTouchPosition = {}
 
 export default {
   name: 'Box',
@@ -73,7 +85,10 @@ export default {
       newY: 0,
       newWidth: 0,
       newHeight: 0,
-      boxWasDragged: false
+      boxWasDragged: false,
+      isLocking: false,
+      lockingPercent: 0,
+      lockingAlpha: 0
     }
   },
   computed: {
@@ -136,7 +151,8 @@ export default {
     },
     h2Name () {
       return this.box.name.replace('## ', '')
-    }
+    },
+    canEditBox () { return this.$store.getters['currentUser/canEditBox']() }
   },
   methods: {
     moveOrResizeBox (event) {
@@ -173,10 +189,10 @@ export default {
       if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
       this.updateIsResizing(true)
-      this.updatePrevCursor()
+      this.updatePrevCursor(event)
     },
     startBoxInfoInteraction (event) {
-      this.updatePrevCursor()
+      this.updatePrevCursor(event)
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.commit('currentDraggingCardId', '')
       this.$store.dispatch('closeAllDialogs', 'Box.startBoxInfoInteraction')
@@ -184,7 +200,7 @@ export default {
       const preventSelect = event.shiftKey
       this.updateIsDragging(true, preventSelect)
     },
-    updatePrevCursor () {
+    updatePrevCursor (event) {
       prevCursor = utils.cursorPositionInPage(event)
       prevCursor = {
         x: prevCursor.x * this.spaceCounterZoomDecimal,
@@ -355,7 +371,147 @@ export default {
     nameHasPattern (pattern) {
       const result = utils.markdown()[pattern].exec(this.box.name)
       return Boolean(result)
+    },
+
+    // touch locking
+
+    // @touchstart="startLocking"
+    // @touchmove="updateCurrentTouchPosition"
+    // @touchend="showCardDetailsTouch"
+
+    cancelLocking () {
+      shouldCancelLocking = true
+    },
+
+    cancelLockingAnimationFrame () {
+      this.isLocking = false
+      this.lockingPercent = 0
+      this.lockingAlpha = 0
+      shouldCancelLocking = false
+    },
+
+    startLocking (event) {
+      console.log('startLocking', event)
+      this.updateTouchPosition(event)
+      this.updateCurrentTouchPosition(event)
+      this.isLocking = true
+      shouldCancelLocking = false
+      setTimeout(() => {
+        if (!lockingAnimationTimer) {
+          lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
+        }
+      }, lockingPreDuration)
+    },
+    lockingAnimationFrame (timestamp) {
+      if (!lockingStartTime) {
+        lockingStartTime = timestamp
+      }
+      const elaspedTime = timestamp - lockingStartTime
+      const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
+      if (!utils.cursorsAreClose(touchPosition, currentTouchPosition)) {
+        this.notifyPressAndHoldToDrag()
+        this.cancelLockingAnimationFrame()
+      }
+      if (shouldCancelLocking) {
+        this.cancelLockingAnimationFrame()
+      }
+      if (this.isLocking && percentComplete <= 1) {
+        // const minSize = circleRadius
+        const percentRemaining = Math.abs(percentComplete - 1)
+        this.lockingPercent = percentRemaining
+        const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
+        this.lockingAlpha = alpha
+        window.requestAnimationFrame(this.lockingAnimationFrame)
+      } else if (this.isLocking && percentComplete > 1) {
+        console.log('🔒🐢 box lockingAnimationFrame locked')
+        lockingAnimationTimer = undefined
+        lockingStartTime = undefined
+        this.isLocking = false
+        console.log('locked', initialTouchEvent.touches)
+
+        this.startBoxInfoInteraction(initialTouchEvent)
+        // this.$store.commit('triggeredTouchCardDragPosition', touchPosition)
+      } else {
+        window.cancelAnimationFrame(lockingAnimationTimer)
+        lockingAnimationTimer = undefined
+        lockingStartTime = undefined
+        this.cancelLockingAnimationFrame()
+      }
+    },
+
+    // startDraggingBox (event) {
+    //   isMultiTouch = false
+    //   if (this.isLocked) { return }
+    //   if (this.$store.state.currentUserIsPanningReady) { return }
+    //   if (!this.canEditBox) { return }
+    //   if (utils.isMultiTouch(event)) {
+    //     isMultiTouch = true
+    //     return
+    //   }
+    //   event.preventDefault()
+    //   // if (this.$store.state.currentUserIsDrawingConnection) { return }
+    //   this.$store.dispatch('closeAllDialogs', 'Card.startDraggingBox')
+    //   this.$store.commit('currentUserIsDraggingBox', true)
+    //   this.$store.commit('currentUserIsInteractingBoxId', this.id)
+    //   // this.$store.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsDragging' })
+    // },
+
+    notifyPressAndHoldToDrag () {
+      // const isDrawingConnection = this.$store.state.currentUserIsDrawingConnection
+      // if (isDrawingConnection) { return }
+      const hasNotified = this.$store.state.hasNotifiedPressAndHoldToDrag
+      if (!hasNotified) {
+        this.$store.commit('addNotification', { message: 'Press and hold to drag cards', icon: 'press-and-hold' })
+      }
+      this.$store.commit('hasNotifiedPressAndHoldToDrag', true)
+    },
+
+    updateTouchPosition (event) {
+      initialTouchEvent = event
+      // isMultiTouch = false
+      // if (utils.isMultiTouch(event)) {
+      //   isMultiTouch = true
+      //   return
+      // }
+      touchPosition = utils.cursorPositionInViewport(event)
+      // const isDrawingConnection = this.$store.state.currentUserIsDrawingConnection
+      // if (isDrawingConnection) {
+      //   event.preventDefault() // allows swipe to scroll, before card locked
+      // }
+    },
+    updateCurrentTouchPosition (event) {
+      currentTouchPosition = utils.cursorPositionInViewport(event)
+      if (this.isDragging || this.isResizing) {
+        event.preventDefault() // allows dragging cards without scrolling
+      }
+    },
+
+    touchIsNearTouchPosition (event) {
+      const currentPosition = utils.cursorPositionInViewport(event)
+      const touchBlur = 12
+      const isTouchX = utils.isBetween({
+        value: currentPosition.x,
+        min: touchPosition.x - touchBlur,
+        max: touchPosition.x + touchBlur
+      })
+      const isTouchY = utils.isBetween({
+        value: currentPosition.y,
+        min: touchPosition.y - touchBlur,
+        max: touchPosition.y + touchBlur
+      })
+      if (isTouchX && isTouchY) {
+        return true
+      }
+    },
+    showBoxDetailsTouch (event) {
+      this.cancelLocking()
+      if (this.touchIsNearTouchPosition(event)) {
+        this.showBoxDetails(event)
+      }
+      // const userId = this.$store.state.currentUser.id
+      // this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
     }
+
   }
 }
 </script>
