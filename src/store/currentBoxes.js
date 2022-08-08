@@ -124,10 +124,10 @@ export default {
         fill: box.fill || 'filled', // empty, filled
         name: box.name || `Box ${count}`
       }
+      context.dispatch('history/add', { boxes: [box] }, { root: true })
       context.commit('create', box)
       context.dispatch('api/addToQueue', { name: 'createBox', body: box }, { root: true })
       context.dispatch('broadcast/update', { updates: box, type: 'createBox', handler: 'currentBoxes/create' }, { root: true })
-      context.dispatch('history/add', { boxes: [box] }, { root: true })
       if (shouldResize) {
         context.commit('currentUserIsResizingBox', true, { root: true })
         context.commit('currentUserIsInteractingBoxId', box.id, { root: true })
