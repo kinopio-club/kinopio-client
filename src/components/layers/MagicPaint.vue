@@ -411,6 +411,7 @@ export default {
       const shouldPrevent = this.checkIfShouldPreventInteraction(position)
       if (shouldPrevent) { return }
       this.$store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
+      event.preventDefault() // allows dragging boxes without scrolling
     },
     checkIfShouldPreventInteraction (position) {
       const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()

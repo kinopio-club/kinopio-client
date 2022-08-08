@@ -502,7 +502,7 @@ export default {
     updateCurrentTouchPosition (event) {
       currentTouchPosition = utils.cursorPositionInViewport(event)
       if (this.isDragging || this.isResizing) {
-        event.preventDefault() // allows dragging cards without scrolling
+        event.preventDefault() // allows dragging boxes without scrolling
       }
     },
 
