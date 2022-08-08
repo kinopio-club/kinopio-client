@@ -346,6 +346,7 @@ export default {
       let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
       this.selectCards(circle)
       this.selectConnections(circle)
+      this.selectBoxes(circle)
       this.selectCardsAndConnectionsBetweenCircles(circle)
       paintingCircles.push(circle)
       this.broadcastCircle(circle)
@@ -542,6 +543,40 @@ export default {
         const isSelected = path.isPointInStroke(svgPoint)
         if (isSelected) {
           this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
+        }
+      })
+    },
+    selectBoxes (point) {
+      if (this.shouldPreventSelectionOnMobile()) { return }
+      if (this.userCantEditSpace) { return }
+      const zoom = this.spaceCounterZoomDecimal
+      const boxes = this.$store.getters['currentBoxes/all']
+      boxes.forEach(box => {
+        const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
+        const rect = element.getBoundingClientRect()
+        box = {
+          id: box.id,
+          x: rect.x,
+          y: rect.y,
+          width: rect.width,
+          height: rect.height
+        }
+        const pointX = (point.x + window.scrollX) * zoom
+        const pointY = (point.y + window.scrollY) * zoom
+        const x = {
+          value: pointX,
+          min: box.x - circleSelectionRadius,
+          max: box.x + box.width + circleSelectionRadius
+        }
+        const y = {
+          value: pointY,
+          min: box.y - circleSelectionRadius,
+          max: box.y + box.height + circleSelectionRadius
+        }
+        const isBetweenX = utils.isBetween(x)
+        const isBetweenY = utils.isBetween(y)
+        if (isBetweenX && isBetweenY) {
+          this.$store.dispatch('addToMultipleBoxesSelected', box.id)
         }
       })
     },
