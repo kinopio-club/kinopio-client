@@ -34,13 +34,13 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.title
             img.icon.card-icon(src="@/assets/card.svg")
             span Card Mode
-          .badge.keyboard-shortcut V
+          .badge.keyboard-shortcut C
       article
         .row
           .badge.title
             img.icon.box-icon(src="@/assets/box.svg")
             span Box Mode
-          .badge.keyboard-shortcut R
+          .badge.keyboard-shortcut B
 
     //- Navigate
     template(v-if="categoryIsVisible('navigate')")

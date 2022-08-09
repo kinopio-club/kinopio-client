@@ -6,13 +6,13 @@ nav.toolbar(v-if="visible")
       button(:class="{ active: currentUserToolbarIsCard }" @pointerdown="toggleToolbar('card')")
         img.icon.card(src="@/assets/card.svg")
       .badge.info.item(:class="{ active: notifyItemIsCard }") Card Mode
-        span(v-if="!isTouchDevice") {{' '}} (V)
+        span(v-if="!isTouchDevice") {{' '}} (C)
     //- Box
     .button-wrap
       button(:class="{ active: currentUserToolbarIsBox }" @pointerdown="toggleToolbar('box')")
         img.icon.box-icon(src="@/assets/box.svg")
       .badge.info.item(:class="{ active: notifyItemIsBox }") Box Mode
-        span(v-if="!isTouchDevice") {{' '}} (R)
+        span(v-if="!isTouchDevice") {{' '}} (B)
 
 </template>
 

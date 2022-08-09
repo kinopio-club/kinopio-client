@@ -117,9 +117,9 @@ export default {
         this.$store.commit('currentUserIsPanningReady', false)
         this.$store.commit('minimapIsVisible', false)
         spaceKeyIsDown = false
-      } else if (key === 'r' && isSpaceScope) {
+      } else if (key === 'b' && isSpaceScope) {
         this.$store.commit('currentUserToolbar', 'box')
-      } else if (key === 'v' && isSpaceScope) {
+      } else if (key === 'c' && isSpaceScope) {
         this.$store.commit('currentUserToolbar', 'card')
       }
     },
