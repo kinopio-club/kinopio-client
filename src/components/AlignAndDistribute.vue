@@ -45,7 +45,7 @@ import utils from '@/utils.js'
 
 import uniqBy from 'lodash-es/uniqBy'
 
-const spaceBetweenCards = 12
+const spaceBetween = 12
 
 export default {
   name: 'AlignAndDistribute',
@@ -97,8 +97,8 @@ export default {
             const cardYDelta = card.y - previousBottomSide
             const isNotEquallyDistributed = !utils.isBetween({
               value: Math.abs(cardYDelta),
-              min: spaceBetweenCards - 1,
-              max: spaceBetweenCards + 1
+              min: spaceBetween - 1,
+              max: spaceBetween + 1
             })
             if (isNotEquallyDistributed) {
               yIsDistributed = false
@@ -121,8 +121,8 @@ export default {
             const cardXDelta = card.x - previousRightSide
             const isNotEquallyDistributed = !utils.isBetween({
               value: Math.abs(cardXDelta),
-              min: spaceBetweenCards - 1,
-              max: spaceBetweenCards + 1
+              min: spaceBetween - 1,
+              max: spaceBetween + 1
             })
             if (isNotEquallyDistributed) {
               xIsDistributed = false
@@ -307,6 +307,10 @@ export default {
       const value = !this.moreOptionsIsVisible
       this.$store.dispatch('currentUser/shouldShowMoreAlignOptions', value)
     },
+    updateItem (item, type) {
+      if (type === 'cards') { this.$store.dispatch('currentCards/update', item) }
+      if (type === 'boxes') { this.$store.dispatch('currentBoxes/update', item) }
+    },
 
     // ⎺o
     alignTop () {
@@ -321,7 +325,7 @@ export default {
           card = utils.clone(card)
           card.y = origin.y
           if (this.shouldAutoDistribute) {
-            card.x = previousRightSide + spaceBetweenCards
+            card.x = previousRightSide + spaceBetween
           }
           this.$store.dispatch('currentCards/update', card)
         }
@@ -340,7 +344,7 @@ export default {
           card = utils.clone(card)
           card.x = origin.x + (origin.width / 2) - (card.width / 2)
           if (this.shouldAutoDistribute) {
-            card.y = previousBottomSide + spaceBetweenCards
+            card.y = previousBottomSide + spaceBetween
           }
           this.$store.dispatch('currentCards/update', card)
         }
@@ -359,7 +363,7 @@ export default {
           card = utils.clone(card)
           card.x = origin.x + (origin.width * zoom) - (card.width * zoom)
           if (this.shouldAutoDistribute) {
-            card.y = previousBottomSide + spaceBetweenCards
+            card.y = previousBottomSide + spaceBetween
           }
           this.$store.dispatch('currentCards/update', card)
         }
@@ -384,23 +388,28 @@ export default {
     // |o
     alignLeft () {
       const cards = this.sortedByY.cards
-      let newCards = []
-      const origin = cards[0]
+      const boxes = this.sortedByY.boxes
+      this.alignLeftItems(cards, 'cards')
+      this.alignLeftItems(boxes, 'boxes')
+    },
+    alignLeftItems (items, type) {
+      let newItems = []
+      const origin = items[0]
       const zoom = this.spaceCounterZoomDecimal
-      cards.forEach((card, index) => {
+      items.forEach((item, index) => {
         if (index > 0) {
-          const previousCard = newCards[index - 1]
-          const previousBottomSide = previousCard.y + (previousCard.height * zoom)
-          card = utils.clone(card)
-          card.x = origin.x
+          const previousItem = newItems[index - 1]
+          const previousBottomSide = previousItem.y + (previousItem.height * zoom)
+          item = utils.clone(item)
+          item.x = origin.x
           if (this.shouldAutoDistribute) {
-            card.y = previousBottomSide + spaceBetweenCards
+            item.y = previousBottomSide + spaceBetween
           }
-          this.$store.dispatch('currentCards/update', card)
+          this.updateItem(item, type)
         }
-        newCards.push(card)
+        newItems.push(item)
       })
-      this.updateConnectionPaths()
+      if (type === 'cards') { this.updateConnectionPaths() }
     },
     // o-o
     centerVertically () {
@@ -412,7 +421,7 @@ export default {
           const previousRightSide = previousCard.x + previousCard.width
           card = utils.clone(card)
           if (this.shouldAutoDistribute) {
-            card.x = previousRightSide + spaceBetweenCards
+            card.x = previousRightSide + spaceBetween
           }
           card.y = origin.y + (origin.height / 2) - (card.height / 2)
           this.$store.dispatch('currentCards/update', card)
@@ -431,7 +440,7 @@ export default {
           card = utils.clone(card)
           card.y = origin.y + origin.height - card.height
           if (this.shouldAutoDistribute) {
-            card.x = previousRightSide + spaceBetweenCards
+            card.x = previousRightSide + spaceBetween
           }
           this.$store.dispatch('currentCards/update', card)
         }
@@ -483,7 +492,7 @@ export default {
         let connections = []
         const multipleCardsSelectedIds = utils.clone(this.multipleCardsSelectedIds)
         const multipleConnectionsSelectedIds = utils.clone(this.multipleConnectionsSelectedIds)
-        this.$store.commit('clearMultipleSelected')
+        // this.$store.commit('clearMultipleSelected')
         if (!multipleCardsSelectedIds.length) { return }
         multipleCardsSelectedIds.forEach(cardId => {
           connections = connections.concat(this.$store.getters['currentConnections/byCardId'](cardId))
