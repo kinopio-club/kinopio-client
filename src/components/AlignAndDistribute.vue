@@ -23,7 +23,7 @@
       button(title="Align Right" :disabled="!canEditAll.cards" @click.left="alignRight" :class="{active: isRightAligned}")
         img.icon.align-right(src="@/assets/align-left.svg")
       //- | o |
-      button(title="Distribute Horizontally" :disabled="!canDistributeCards" @click.left="distributeHorizontally" :class="{active: isDistributedHorizontally}")
+      button(title="Distribute Horizontally" :disabled="!canDistribute" @click.left="distributeHorizontally" :class="{active: isDistributedHorizontally}")
         img.icon(src="@/assets/distribute-horizontally.svg")
     .segmented-buttons.last-row
       //- ⎺o
@@ -36,7 +36,7 @@
       button(title="Align Bottom" :disabled="!canEditAll.cards" @click.left="alignBottom" :class="{active: isBottomAligned}")
         img.icon.align-bottom(src="@/assets/align-left.svg")
       //- ⎺ o _
-      button(title="Distribute Vertically" :disabled="!canDistributeCards" @click.left="distributeVertically" :class="{active: isDistributedVertically}")
+      button(title="Distribute Vertically" :disabled="!canDistribute" @click.left="distributeVertically" :class="{active: isDistributedVertically}")
         img.icon.distribute-vertically(src="@/assets/distribute-horizontally.svg")
 </template>
 
@@ -65,17 +65,19 @@ export default {
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
     multipleConnectionsSelectedIds () { return this.$store.state.multipleConnectionsSelectedIds },
+    multipleBoxesSelectedIds () { return this.$store.state.multipleBoxesSelectedIds },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    canDistributeCards () {
-      if (!this.canEditAll.cards) { return }
+    canDistribute () {
       const minimumRequiredToDistribute = 3
-      let cards
+      let cards, boxes
       if (this.isSpaceMember) {
         cards = this.multipleCardsSelectedIds.length >= minimumRequiredToDistribute
+        boxes = this.multipleBoxesSelectedIds.length >= minimumRequiredToDistribute
       } else {
         cards = this.numberOfSelectedItemsCreatedByCurrentUser.cards >= minimumRequiredToDistribute
+        boxes = this.numberOfSelectedItemsCreatedByCurrentUser.boxes >= minimumRequiredToDistribute
       }
-      return Boolean(cards)
+      return Boolean(cards) || Boolean(boxes)
     },
     items () {
       const boxes = this.normalizeBoxes(this.boxes)
