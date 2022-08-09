@@ -364,36 +364,46 @@ export default {
     // o|
     alignRight () {
       const cards = this.sortedByXWidth.cards
-      const origin = cards[0]
+      const boxes = this.sortedByXWidth.boxes
+      this.alignRightItems(cards, 'cards')
+      this.alignRightItems(boxes, 'boxes')
+    },
+    alignRightItems (items, type) {
+      const origin = items[0]
       const zoom = this.spaceCounterZoomDecimal
-      cards.forEach((card, index) => {
+      items.forEach((item, index) => {
         if (index > 0) {
-          const previousItem = cards[index - 1]
+          const previousItem = items[index - 1]
           const previousBottomSide = previousItem.y + (previousItem.height * zoom)
-          card = utils.clone(card)
-          card.x = origin.x + (origin.width * zoom) - (card.width * zoom)
+          item = utils.clone(item)
+          item.x = origin.x + (origin.width * zoom) - (item.width * zoom)
           if (this.shouldAutoDistribute) {
-            card.y = previousBottomSide + spaceBetween
+            item.y = previousBottomSide + spaceBetween
           }
-          this.$store.dispatch('currentCards/update', card)
+          this.updateItem(item, type)
         }
       })
-      this.updateConnectionPaths()
+      if (type === 'cards') { this.updateConnectionPaths() }
     },
     // | o |
     distributeHorizontally () {
       const cards = this.sortedByX.cards
-      const xDistancesBetween = this.xDistancesBetween(cards)
+      const boxes = this.sortedByX.boxes
+      this.distributeHorizontallyItems(cards, 'cards')
+      this.distributeHorizontallyItems(boxes, 'boxes')
+    },
+    distributeHorizontallyItems (items, type) {
+      const xDistancesBetween = this.xDistancesBetween(items)
       const averageDistance = utils.averageOfNumbers(xDistancesBetween)
-      cards.forEach((card, index) => {
+      items.forEach((item, index) => {
         if (index > 0) {
-          const previousItem = cards[index - 1]
-          card = utils.clone(card)
-          card.x = previousItem.x + previousItem.width + averageDistance
-          this.$store.dispatch('currentCards/update', card)
+          const previousItem = items[index - 1]
+          item = utils.clone(item)
+          item.x = previousItem.x + previousItem.width + averageDistance
+          this.updateItem(item, type)
         }
       })
-      this.updateConnectionPaths()
+      if (type === 'cards') { this.updateConnectionPaths() }
     },
     // |o
     alignLeft () {
