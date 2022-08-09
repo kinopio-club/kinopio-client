@@ -53,6 +53,7 @@
 import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
+import uniq from 'lodash-es/uniq'
 
 const borderWidth = 2
 let prevCursor, currentCursor
@@ -95,15 +96,7 @@ export default {
   },
   computed: {
     normalizedBox () {
-      const init = 200
-      let box = utils.clone(this.box)
-      box.x = box.x || init
-      box.y = box.y || init
-      box.resizeWidth = box.resizeWidth || init
-      box.resizeHeight = box.resizeHeight || init
-      box.color = box.color || randomColor({ luminosity: 'light' })
-      box.fill = box.fill || 'filled'
-      return box
+      return this.normalizeBox(this.box)
     },
     styles () {
       let { x, y, resizeWidth, resizeHeight } = this.normalizedBox
@@ -187,9 +180,28 @@ export default {
     currentBoxIsSelected () {
       const selected = this.$store.state.multipleBoxesSelectedIds
       return selected.find(id => this.box.id === id)
+    },
+    selectedBoxes () {
+      let boxIds = this.$store.state.multipleBoxesSelectedIds
+      if (this.isDragging) {
+        boxIds = boxIds.concat(this.box.id)
+      }
+      boxIds = uniq(boxIds)
+      return boxIds.map(id => this.$store.getters['currentBoxes/byId'](id))
     }
   },
   methods: {
+    normalizeBox (box) {
+      const init = 200
+      box = utils.clone(box)
+      box.x = box.x || init
+      box.y = box.y || init
+      box.resizeWidth = box.resizeWidth || init
+      box.resizeHeight = box.resizeHeight || init
+      box.color = box.color || randomColor({ luminosity: 'light' })
+      box.fill = box.fill || 'filled'
+      return box
+    },
     moveOrResizeBox (event) {
       if (!this.isDragging && !this.isResizing) { return }
       currentCursor = utils.cursorPositionInPage(event)
@@ -263,57 +275,61 @@ export default {
     selectContainedCards () {
       const cardMap = this.$store.state.currentCards.cardMap
       cardMap.forEach(card => {
-        if (this.isCardInBox(card)) {
+        if (this.isCardInSelectedBoxes(card)) {
           this.$store.dispatch('addToMultipleCardsSelected', card.id)
         }
       })
     },
-    isCardInBox (card) {
+    isCardInSelectedBoxes (card) {
       if (card.isLocked) { return }
-      const box = this.normalizedBox
-      const { x, y } = box
-      const width = box.resizeWidth
-      const height = box.resizeHeight
-      // ┌─────────────────────────────────────┐
-      // │ Box                                 │
-      // │                                     │
-      // │                                     │
-      // │                                     │
-      // │      x1 = x          x2 = x + w     │
-      // │         ██───────────────██         │
-      // │         │                 │         │
-      // │         │      Card       │         │
-      // │         │                 │         │
-      // │         ██───────────────██         │
-      // │      y1 = y          y2 = y + h     │
-      // │                                     │
-      // │                                     │
-      // │                                     │
-      // │                                     │
-      // └─────────────────────────────────────┘
-      const x1 = utils.isBetween({
-        value: card.x,
-        min: x,
-        max: x + width
+      const boxes = this.selectedBoxes
+      const isInside = boxes.find(box => {
+        box = this.normalizeBox(box)
+        const { x, y } = box
+        const width = box.resizeWidth
+        const height = box.resizeHeight
+        // ┌─────────────────────────────────────┐
+        // │ Box                                 │
+        // │                                     │
+        // │                                     │
+        // │                                     │
+        // │      x1 = x          x2 = x + w     │
+        // │         ██───────────────██         │
+        // │         │                 │         │
+        // │         │      Card       │         │
+        // │         │                 │         │
+        // │         ██───────────────██         │
+        // │      y1 = y          y2 = y + h     │
+        // │                                     │
+        // │                                     │
+        // │                                     │
+        // │                                     │
+        // └─────────────────────────────────────┘
+        const x1 = utils.isBetween({
+          value: card.x,
+          min: x,
+          max: x + width
+        })
+        const x2 = utils.isBetween({
+          value: card.x + card.width,
+          min: x,
+          max: x + width
+        })
+        const xIsInside = x1 || x2
+        const y1 = utils.isBetween({
+          value: card.y,
+          min: y,
+          max: y + height
+        })
+        const y2 = utils.isBetween({
+          value: card.y + card.height,
+          min: y,
+          max: y + height
+        })
+        const yIsInside = y1 || y2
+        return xIsInside && yIsInside
       })
-      const x2 = utils.isBetween({
-        value: card.x + card.width,
-        min: x,
-        max: x + width
-      })
-      const xIsInside = x1 || x2
-      const y1 = utils.isBetween({
-        value: card.y,
-        min: y,
-        max: y + height
-      })
-      const y2 = utils.isBetween({
-        value: card.y + card.height,
-        min: y,
-        max: y + height
-      })
-      const yIsInside = y1 || y2
-      return xIsInside && yIsInside
+      return isInside
     },
     updateIsHover (value) {
       if (this.isPainting) { return }
