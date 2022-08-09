@@ -89,7 +89,7 @@ import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
 import uniqBy from 'lodash-es/uniqBy'
 
-let prevCards
+let prevCards, prevBoxes
 
 export default {
   name: 'MultipleSelectedActions',
@@ -216,6 +216,27 @@ export default {
       }))
     },
 
+    // boxes
+
+    multipleBoxesSelectedIds () { return this.$store.state.multipleBoxesSelectedIds },
+    boxes () {
+      let boxes = this.multipleBoxesSelectedIds.map(boxId => {
+        return this.$store.getters['currentBoxes/byId'](boxId)
+      })
+      boxes = boxes.filter(box => Boolean(box))
+      prevBoxes = boxes
+      return boxes
+    },
+    editableBoxes () {
+      if (this.isSpaceMember) {
+        return this.boxes
+      } else {
+        return this.boxes.filter(box => {
+          return this.$store.getters['currentUser/boxIsCreatedByCurrentUser'](box)
+        })
+      }
+    },
+
     // all
 
     canEditAsNonMember () {
@@ -235,15 +256,20 @@ export default {
     numberOfSelectedItemsCreatedByCurrentUser () {
       const connections = this.connections.filter(Boolean)
       const cards = this.cards.filter(Boolean)
+      const boxes = this.boxes.filter(Boolean)
       const connectionsCreatedByCurrentUser = connections.filter(connection => {
         return this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
       })
       const cardsCreatedByCurrentUser = cards.filter(card => {
         return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
       })
+      const boxesCreatedByCurrentUser = boxes.filter(box => {
+        return this.$store.getters['currentUser/boxIsCreatedByCurrentUser'](box)
+      })
       return {
         connections: connectionsCreatedByCurrentUser.length,
-        cards: cardsCreatedByCurrentUser.length
+        cards: cardsCreatedByCurrentUser.length,
+        boxes: boxesCreatedByCurrentUser.length
       }
     },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
@@ -251,8 +277,9 @@ export default {
       if (this.isSpaceMember) { return { cards: true, connections: true, all: true } }
       const cards = this.multipleCardsSelectedIds.length === this.numberOfSelectedItemsCreatedByCurrentUser.cards
       const connections = this.multipleConnectionsSelectedIds.length === this.numberOfSelectedItemsCreatedByCurrentUser.connections
-      const all = cards && connections
-      return { cards, connections, all }
+      const boxes = this.multipleBoxesSelectedIds.length === this.numberOfSelectedItemsCreatedByCurrentUser.boxes
+      const all = cards && connections && boxes
+      return { cards, connections, boxes, all }
     },
     multipleItemsSelected () {
       const total = this.multipleConnectionsSelectedIds.length + this.multipleCardsSelectedIds.length
@@ -497,6 +524,7 @@ export default {
       this.$store.dispatch('history/resume')
       this.editableConnections.forEach(connection => this.$store.dispatch('currentConnections/remove', connection))
       this.editableCards.forEach(card => this.$store.dispatch('currentCards/remove', card))
+      this.editableBoxes.forEach(box => this.$store.dispatch('currentBoxes/remove', box))
       this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.remove')
       this.$store.dispatch('clearMultipleSelected')
     },
@@ -523,7 +551,7 @@ export default {
         this.$store.dispatch('history/snapshots')
       } else {
         this.$store.dispatch('history/resume')
-        this.$store.dispatch('history/add', { cards: prevCards, useSnapshot: true })
+        this.$store.dispatch('history/add', { cards: prevCards, boxes: prevBoxes, useSnapshot: true })
       }
     }
   }
