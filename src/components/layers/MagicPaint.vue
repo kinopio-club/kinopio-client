@@ -556,8 +556,9 @@ export default {
         const rect = element.getBoundingClientRect()
         box = {
           id: box.id,
-          x: rect.x,
-          y: rect.y,
+          name: box.name,
+          x: (rect.x + window.scrollX) * zoom,
+          y: (rect.y + window.scrollY) * zoom,
           width: rect.width,
           height: rect.height
         }
