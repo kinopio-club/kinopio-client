@@ -81,7 +81,7 @@ export default {
     // verify positioning
 
     yIsDistributed () {
-      const cards = this.cardsSortedByY()
+      const cards = this.sortedByY.cards
       const zoom = this.spaceCounterZoomDecimal
       let yIsDistributed = true
       if (this.shouldAutoDistribute) {
@@ -105,7 +105,7 @@ export default {
       return yIsDistributed
     },
     xIsDistributed () {
-      const cards = this.cardsSortedByX()
+      const cards = this.sortedByX.cards
       const zoom = this.spaceCounterZoomDecimal
       let xIsDistributed = true
       if (this.shouldAutoDistribute) {
@@ -135,7 +135,7 @@ export default {
       return xIsAligned && yIsDistributed
     },
     isCenteredHorizontally () {
-      const cards = this.cardsSortedByX()
+      const cards = this.sortedByX.cards
       if (!cards.length) { return }
       const origin = cards[0]
       const cardsCenterX = origin.x + (origin.width / 2)
@@ -167,7 +167,7 @@ export default {
     },
     isDistributedHorizontally () {
       if (this.cards.length < 3) { return }
-      const cards = this.cardsSortedByX()
+      const cards = this.sortedByX.cards
       const xDistancesBetweenCards = this.xDistancesBetweenCards(cards)
       const distanceBetweenCards = Math.abs(xDistancesBetweenCards[0])
       let distanceIsEqual = true
@@ -191,7 +191,7 @@ export default {
       return yIsAligned && xIsDistributed
     },
     isCenteredVertically () {
-      const cards = this.cardsSortedByY()
+      const cards = this.sortedByY.cards
       if (!cards.length) { return }
       const origin = cards[0]
       const cardsCenterY = origin.y + (origin.height / 2)
@@ -216,7 +216,7 @@ export default {
     },
     isDistributedVertically () {
       if (this.cards.length < 3) { return }
-      const cards = this.cardsSortedByY()
+      const cards = this.sortedByY.cards
       const yDistancesBetweenCards = this.yDistancesBetweenCards(cards)
       const distanceBetweenCards = yDistancesBetweenCards[0]
       let distanceIsEqual = true
@@ -234,40 +234,62 @@ export default {
       return distanceIsEqual
     },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
+    sortedByX () {
+      const editableCards = utils.clone(this.editableCards)
+      const cards = editableCards.sort((a, b) => {
+        return a.x - b.x
+      })
+      const editableBoxes = utils.clone(this.editableBoxes)
+      const boxes = editableBoxes.sort((a, b) => {
+        return a.x - b.x
+      })
+      return { cards, boxes }
+    },
+    sortedByY () {
+      const editableCards = utils.clone(this.editableCards)
+      const cards = editableCards.sort((a, b) => {
+        return a.y - b.y
+      })
+      const editableBoxes = utils.clone(this.editableBoxes)
+      const boxes = editableBoxes.sort((a, b) => {
+        return a.y - b.y
+      })
+      return { cards, boxes }
+    },
+    sortedByXWidth () {
+      const editableCards = utils.clone(this.editableCards)
+      const cards = editableCards.sort((a, b) => {
+        return (b.x + b.width) - (a.x + a.width)
+      })
+      const editableBoxes = utils.clone(this.editableBoxes)
+      const boxes = editableBoxes.sort((a, b) => {
+        return (b.x + b.width) - (a.x + a.width)
+      })
+      return { cards, boxes }
+    },
+    sortedByYHeight () {
+      const editableCards = utils.clone(this.editableCards)
+      const cards = editableCards.sort((a, b) => {
+        return (b.y + b.height) - (a.y + a.height)
+      })
+      const editableBoxes = utils.clone(this.editableBoxes)
+      const boxes = editableBoxes.sort((a, b) => {
+        return (b.y + b.height) - (a.y + a.height)
+      })
+      return { cards, boxes }
+    }
+
   },
   methods: {
     toggleMoreOptionsIsVisible () {
       const value = !this.moreOptionsIsVisible
       this.$store.dispatch('currentUser/shouldShowMoreAlignOptions', value)
     },
-    cardsSortedByX () {
-      const editableCards = utils.clone(this.editableCards)
-      return editableCards.sort((a, b) => {
-        return a.x - b.x
-      })
-    },
-    cardsSortedByY () {
-      const editableCards = utils.clone(this.editableCards)
-      return editableCards.sort((a, b) => {
-        return a.y - b.y
-      })
-    },
-    cardsSortedByXWidth () {
-      const editableCards = utils.clone(this.editableCards)
-      return editableCards.sort((a, b) => {
-        return (b.x + b.width) - (a.x + a.width)
-      })
-    },
-    cardsSortedByYHeight () {
-      const editableCards = utils.clone(this.editableCards)
-      return editableCards.sort((a, b) => {
-        return (b.y + b.height) - (a.y + a.height)
-      })
-    },
+
     // ⎺o
     alignTop () {
-      const cards = this.cardsSortedByX()
+      const cards = this.sortedByX.cards
       let newCards = []
       const origin = cards[0]
       const zoom = this.spaceCounterZoomDecimal
@@ -288,7 +310,7 @@ export default {
     },
     // o|o
     centerHorizontally () {
-      const cards = this.cardsSortedByX()
+      const cards = this.sortedByX.cards
       const origin = cards[0]
       cards.forEach((card, index) => {
         if (index > 0) {
@@ -306,7 +328,7 @@ export default {
     },
     // o|
     alignRight () {
-      const cards = this.cardsSortedByXWidth()
+      const cards = this.sortedByXWidth.cards
       const origin = cards[0]
       const zoom = this.spaceCounterZoomDecimal
       cards.forEach((card, index) => {
@@ -325,7 +347,7 @@ export default {
     },
     // | o |
     distributeHorizontally () {
-      const cards = this.cardsSortedByX()
+      const cards = this.sortedByX.cards
       const xDistancesBetweenCards = this.xDistancesBetweenCards(cards)
       const averageDistance = utils.averageOfNumbers(xDistancesBetweenCards)
       cards.forEach((card, index) => {
@@ -340,7 +362,7 @@ export default {
     },
     // |o
     alignLeft () {
-      const cards = this.cardsSortedByY()
+      const cards = this.sortedByY.cards
       let newCards = []
       const origin = cards[0]
       const zoom = this.spaceCounterZoomDecimal
@@ -361,7 +383,7 @@ export default {
     },
     // o-o
     centerVertically () {
-      const cards = this.cardsSortedByX()
+      const cards = this.sortedByX.cards
       const origin = cards[0]
       cards.forEach((card, index) => {
         if (index > 0) {
@@ -379,7 +401,7 @@ export default {
     },
     // _o
     alignBottom () {
-      const cards = this.cardsSortedByYHeight()
+      const cards = this.sortedByYHeight.cards
       const origin = cards[0]
       cards.forEach((card, index) => {
         if (index > 0) {
@@ -397,7 +419,7 @@ export default {
     },
     // ⎺ o _
     distributeVertically () {
-      const cards = this.cardsSortedByY()
+      const cards = this.sortedByY.cards
       const yDistancesBetweenCards = this.yDistancesBetweenCards(cards)
       const averageDistance = utils.averageOfNumbers(yDistancesBetweenCards)
       cards.forEach((card, index) => {
