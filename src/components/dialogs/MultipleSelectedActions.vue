@@ -55,12 +55,12 @@ dialog.narrow.multiple-selected-actions(
         img.icon(src="@/assets/split.svg")
         span Split
 
-    template(v-if="multipleCardsSelectedIds.length")
+    template(v-if="multipleCardOrBoxesIsSelected")
       .row
         //- Align And Distribute
-        AlignAndDistribute(:visible="multipleCardsIsSelected" :shouldHideMoreOptions="true" :shouldAutoDistribute="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
+        AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldAutoDistribute="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
         //- Move/Copy
-        .segmented-buttons.move-or-copy-wrap
+        .segmented-buttons.move-or-copy-wrap(v-if="multipleCardsIsSelected")
           button(@click.left.stop="toggleCopyCardsIsVisible" :class="{ active: copyCardsIsVisible }")
             span Copy
             MoveOrCopyCards(:visible="copyCardsIsVisible" :actionIsMove="false" :exportData="exportData")
@@ -68,7 +68,7 @@ dialog.narrow.multiple-selected-actions(
             span Move
             MoveOrCopyCards(:visible="moveCardsIsVisible" :actionIsMove="true" :exportData="exportData")
       //- More Options
-      AlignAndDistribute(:visible="multipleCardsIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
+      AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
 
     p(v-if="canEditAsNonMember && !selectedItemsIsCreatedByCurrentUser")
       span.badge.info
@@ -239,15 +239,22 @@ export default {
 
     // all
 
+    multipleCardOrBoxesIsSelected () {
+      const cards = this.multipleCardsIsSelected
+      const boxes = this.multipleBoxesSelectedIds.length > 1
+      return cards || boxes
+    },
     canEditAsNonMember () {
       const spaceIsOpen = this.$store.state.currentSpace.privacy === 'open'
       const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
       return spaceIsOpen && !isSpaceMember
     },
     selectedItemsIsCreatedByCurrentUser () {
-      const cardsByCurrentUser = this.numberOfSelectedItemsCreatedByCurrentUser.cards === this.cards.length
-      const connectionsByCurrentUser = this.numberOfSelectedItemsCreatedByCurrentUser.connections === this.connections.length
-      if (cardsByCurrentUser && connectionsByCurrentUser) {
+      const { cards, connections, boxes } = this.numberOfSelectedItemsCreatedByCurrentUser
+      const cardsByCurrentUser = cards === this.cards.length
+      const connectionsByCurrentUser = connections === this.connections.length
+      const boxesByCurrentUser = boxes === this.boxes.length
+      if (cardsByCurrentUser && connectionsByCurrentUser && boxesByCurrentUser) {
         return true
       } else {
         return false
