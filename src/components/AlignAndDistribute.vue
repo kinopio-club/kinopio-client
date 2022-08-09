@@ -395,13 +395,15 @@ export default {
       this.distributeHorizontallyItems(boxes, 'boxes')
     },
     distributeHorizontallyItems (items, type) {
+      if (!items.length) { return }
       const xDistancesBetween = this.xDistancesBetween(items)
-      const averageDistance = utils.averageOfNumbers(xDistancesBetween)
+      const distance = utils.averageOfNumbers(xDistancesBetween)
+      let previousItem = items[0]
       items.forEach((item, index) => {
         if (index > 0) {
-          const previousItem = items[index - 1]
           item = utils.clone(item)
-          item.x = previousItem.x + previousItem.width + averageDistance
+          item.x = previousItem.x + previousItem.width + distance
+          previousItem = item
           this.updateItem(item, type)
         }
       })
@@ -487,26 +489,30 @@ export default {
       this.distributeVerticallyItems(boxes, 'boxes')
     },
     distributeVerticallyItems (items, type) {
+      if (!items.length) { return }
       const yDistancesBetween = this.yDistancesBetween(items)
-      const averageDistance = utils.averageOfNumbers(yDistancesBetween)
+      const distance = Math.round(utils.averageOfNumbers(yDistancesBetween))
+      let previousItem = items[0]
       items.forEach((item, index) => {
         if (index > 0) {
-          const previousItem = items[index - 1]
           item = utils.clone(item)
-          item.y = previousItem.y + previousItem.height + averageDistance
+          item.y = previousItem.y + previousItem.height + distance
+          previousItem = item
           this.updateItem(item, type)
         }
       })
       if (type === 'cards') { this.updateConnectionPaths() }
     },
 
+    // utils
+
     xDistancesBetween (items) {
       let xDistances = []
       items.forEach((item, index) => {
         if (index > 0) {
           const previousItem = items[index - 1]
-          const previousRightSide = previousItem.x + previousItem.width + window.scrollX
-          const leftSide = item.x + window.scrollX
+          const previousRightSide = previousItem.x + previousItem.width
+          const leftSide = item.x
           xDistances.push(leftSide - previousRightSide)
         }
       })
@@ -517,8 +523,8 @@ export default {
       items.forEach((item, index) => {
         if (index > 0) {
           const previousItem = items[index - 1]
-          const previousBottomSide = previousItem.y + previousItem.height + window.scrollY
-          const topSide = item.y + window.scrollY
+          const previousBottomSide = previousItem.y + previousItem.height
+          const topSide = item.y
           yDistances.push(topSide - previousBottomSide)
         }
       })
