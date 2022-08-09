@@ -77,6 +77,10 @@ export default {
       }
       return Boolean(cards)
     },
+    items () {
+      const boxes = this.normalizeBoxes(this.boxes)
+      return this.cards.concat(boxes)
+    },
 
     // verify positioning
 
@@ -129,7 +133,7 @@ export default {
       return xIsDistributed
     },
     isLeftAligned () {
-      const xValues = this.cards.map(card => card.x)
+      const xValues = this.items.map(item => item.x)
       const xIsAligned = xValues.every(x => x === xValues[0])
       const yIsDistributed = this.yIsDistributed
       return xIsAligned && yIsDistributed
@@ -154,24 +158,24 @@ export default {
     },
     isRightAligned () {
       const zoom = this.spaceCounterZoomDecimal
-      const origin = this.cards[0]
-      const cardRight = origin.x + (origin.width * zoom)
-      const xIsAligned = this.cards.every(card => {
+      const origin = this.items[0]
+      const xRight = origin.x + (origin.width * zoom)
+      const xIsAligned = this.items.every(item => {
         return utils.isBetween({
-          value: card.x + (card.width * zoom),
-          min: cardRight - 1,
-          max: cardRight + 1
+          value: item.x + (item.width * zoom),
+          min: xRight - 1,
+          max: xRight + 1
         })
       })
       return xIsAligned
     },
     isDistributedHorizontally () {
-      if (this.cards.length < 3) { return }
-      const cards = this.sortedByX.cards
-      const xDistancesBetweenCards = this.xDistancesBetweenCards(cards)
-      const distanceBetweenCards = Math.abs(xDistancesBetweenCards[0])
+      if (this.items.length < 3) { return }
+      const items = this.sortedByX.all
+      const xDistancesBetween = this.xDistancesBetween(items)
+      const distanceBetweenCards = Math.abs(xDistancesBetween[0])
       let distanceIsEqual = true
-      xDistancesBetweenCards.forEach((distance, index) => {
+      xDistancesBetween.forEach((distance, index) => {
         distance = Math.abs(distance)
         const roundedDistanceIsEqual = utils.isBetween({
           value: distance,
@@ -185,7 +189,7 @@ export default {
       return distanceIsEqual
     },
     isTopAligned () {
-      const yValues = this.cards.map(card => card.y)
+      const yValues = this.items.map(item => item.y)
       const yIsAligned = yValues.every(y => y === yValues[0])
       const xIsDistributed = this.xIsDistributed
       return yIsAligned && xIsDistributed
@@ -209,18 +213,18 @@ export default {
       return centerIsEqual
     },
     isBottomAligned () {
-      const origin = this.cards[0]
-      const cardBottom = origin.y + origin.height
-      const yIsAligned = this.cards.every(card => card.y + card.height === cardBottom)
+      const origin = this.items[0]
+      const yBottom = origin.y + origin.height
+      const yIsAligned = this.items.every(item => item.y + item.height === yBottom)
       return yIsAligned
     },
     isDistributedVertically () {
       if (this.cards.length < 3) { return }
       const cards = this.sortedByY.cards
-      const yDistancesBetweenCards = this.yDistancesBetweenCards(cards)
-      const distanceBetweenCards = yDistancesBetweenCards[0]
+      const yDistancesBetween = this.yDistancesBetween(cards)
+      const distanceBetweenCards = yDistancesBetween[0]
       let distanceIsEqual = true
-      yDistancesBetweenCards.forEach((distance, index) => {
+      yDistancesBetween.forEach((distance, index) => {
         distance = Math.abs(distance)
         const roundedDistanceIsEqual = utils.isBetween({
           value: distance,
@@ -241,10 +245,12 @@ export default {
         return a.x - b.x
       })
       const editableBoxes = utils.clone(this.editableBoxes)
-      const boxes = editableBoxes.sort((a, b) => {
+      let boxes = this.normalizeBoxes(editableBoxes)
+      boxes = boxes.sort((a, b) => {
         return a.x - b.x
       })
-      return { cards, boxes }
+      const all = cards.concat(boxes)
+      return { cards, boxes, all }
     },
     sortedByY () {
       const editableCards = utils.clone(this.editableCards)
@@ -252,10 +258,12 @@ export default {
         return a.y - b.y
       })
       const editableBoxes = utils.clone(this.editableBoxes)
-      const boxes = editableBoxes.sort((a, b) => {
+      let boxes = this.normalizeBoxes(editableBoxes)
+      boxes = boxes.sort((a, b) => {
         return a.y - b.y
       })
-      return { cards, boxes }
+      const all = cards.concat(boxes)
+      return { cards, boxes, all }
     },
     sortedByXWidth () {
       const editableCards = utils.clone(this.editableCards)
@@ -263,10 +271,12 @@ export default {
         return (b.x + b.width) - (a.x + a.width)
       })
       const editableBoxes = utils.clone(this.editableBoxes)
-      const boxes = editableBoxes.sort((a, b) => {
+      let boxes = this.normalizeBoxes(editableBoxes)
+      boxes = boxes.sort((a, b) => {
         return (b.x + b.width) - (a.x + a.width)
       })
-      return { cards, boxes }
+      const all = cards.concat(boxes)
+      return { cards, boxes, all }
     },
     sortedByYHeight () {
       const editableCards = utils.clone(this.editableCards)
@@ -274,14 +284,25 @@ export default {
         return (b.y + b.height) - (a.y + a.height)
       })
       const editableBoxes = utils.clone(this.editableBoxes)
-      const boxes = editableBoxes.sort((a, b) => {
+      let boxes = this.normalizeBoxes(editableBoxes)
+      boxes = boxes.sort((a, b) => {
         return (b.y + b.height) - (a.y + a.height)
       })
-      return { cards, boxes }
+      const all = cards.concat(boxes)
+      return { cards, boxes, all }
     }
 
   },
   methods: {
+    normalizeBoxes (boxes) {
+      boxes = utils.clone(boxes)
+      boxes = boxes.map(box => {
+        box.width = box.resizeWidth
+        box.height = box.resizeHeight
+        return box
+      })
+      return boxes
+    },
     toggleMoreOptionsIsVisible () {
       const value = !this.moreOptionsIsVisible
       this.$store.dispatch('currentUser/shouldShowMoreAlignOptions', value)
@@ -348,8 +369,8 @@ export default {
     // | o |
     distributeHorizontally () {
       const cards = this.sortedByX.cards
-      const xDistancesBetweenCards = this.xDistancesBetweenCards(cards)
-      const averageDistance = utils.averageOfNumbers(xDistancesBetweenCards)
+      const xDistancesBetween = this.xDistancesBetween(cards)
+      const averageDistance = utils.averageOfNumbers(xDistancesBetween)
       cards.forEach((card, index) => {
         if (index > 0) {
           const previousCard = cards[index - 1]
@@ -419,46 +440,40 @@ export default {
     },
     // ⎺ o _
     distributeVertically () {
-      const cards = this.sortedByY.cards
-      const yDistancesBetweenCards = this.yDistancesBetweenCards(cards)
-      const averageDistance = utils.averageOfNumbers(yDistancesBetweenCards)
-      cards.forEach((card, index) => {
+      const items = this.sortedByY.all
+      const yDistancesBetween = this.yDistancesBetween(items)
+      const averageDistance = utils.averageOfNumbers(yDistancesBetween)
+      items.forEach((item, index) => {
         if (index > 0) {
-          const previousCard = cards[index - 1]
-          card = utils.clone(card)
-          card.y = previousCard.y + previousCard.height + averageDistance
-          this.$store.dispatch('currentCards/update', card)
+          const previousItem = items[index - 1]
+          item = utils.clone(item)
+          item.y = previousItem.y + previousItem.height + averageDistance
+          this.$store.dispatch('currentCards/update', item)
         }
       })
       this.updateConnectionPaths()
     },
 
-    xDistancesBetweenCards (cards) {
+    xDistancesBetween (items) {
       let xDistances = []
-      cards.forEach((card, index) => {
+      items.forEach((item, index) => {
         if (index > 0) {
-          const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-          const rect = element.getBoundingClientRect()
-          const previousElement = document.querySelector(`article [data-card-id="${cards[index - 1].id}"]`)
-          const previousRect = previousElement.getBoundingClientRect()
-          const previousRectRightSide = previousRect.x + previousRect.width + window.scrollX
-          const rectLeftSide = rect.x + window.scrollX
-          xDistances.push(rectLeftSide - previousRectRightSide)
+          const previousItem = items[index - 1]
+          const previousRightSide = previousItem.x + previousItem.width + window.scrollX
+          const leftSide = item.x + window.scrollX
+          xDistances.push(leftSide - previousRightSide)
         }
       })
       return xDistances
     },
-    yDistancesBetweenCards (cards) {
+    yDistancesBetween (items) {
       let yDistances = []
-      cards.forEach((card, index) => {
+      items.forEach((item, index) => {
         if (index > 0) {
-          const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-          const rect = element.getBoundingClientRect()
-          const previousElement = document.querySelector(`article [data-card-id="${cards[index - 1].id}"]`)
-          const previousRect = previousElement.getBoundingClientRect()
-          const previousRectBottomSide = previousRect.y + previousRect.height + window.scrollY
-          const rectTopSide = rect.y + window.scrollY
-          yDistances.push(rectTopSide - previousRectBottomSide)
+          const previousItem = items[index - 1]
+          const previousBottomSide = previousItem.y + previousItem.height + window.scrollY
+          const topSide = item.y + window.scrollY
+          yDistances.push(topSide - previousBottomSide)
         }
       })
       return yDistances
@@ -469,6 +484,7 @@ export default {
         const multipleCardsSelectedIds = utils.clone(this.multipleCardsSelectedIds)
         const multipleConnectionsSelectedIds = utils.clone(this.multipleConnectionsSelectedIds)
         this.$store.commit('clearMultipleSelected')
+        if (!multipleCardsSelectedIds.length) { return }
         multipleCardsSelectedIds.forEach(cardId => {
           connections = connections.concat(this.$store.getters['currentConnections/byCardId'](cardId))
         })
