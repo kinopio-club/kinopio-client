@@ -26,7 +26,6 @@ export default {
       state.boxes = {}
     },
     restore: (state, boxes) => {
-      console.log(boxes)
       let ids = []
       boxes.forEach(box => {
         ids.push(box.id)
