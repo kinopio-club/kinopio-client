@@ -459,20 +459,25 @@ export default {
     // _o
     alignBottom () {
       const cards = this.sortedByYHeight.cards
-      const origin = cards[0]
-      cards.forEach((card, index) => {
+      const boxes = this.sortedByYHeight.boxes
+      this.alignBottomItems(cards, 'cards')
+      this.alignBottomItems(boxes, 'boxes')
+    },
+    alignBottomItems (items, type) {
+      const origin = items[0]
+      items.forEach((item, index) => {
         if (index > 0) {
-          const previousItem = cards[index - 1]
+          const previousItem = items[index - 1]
           const previousRightSide = previousItem.x + previousItem.width
-          card = utils.clone(card)
-          card.y = origin.y + origin.height - card.height
+          item = utils.clone(item)
+          item.y = origin.y + origin.height - item.height
           if (this.shouldAutoDistribute) {
-            card.x = previousRightSide + spaceBetween
+            item.x = previousRightSide + spaceBetween
           }
-          this.$store.dispatch('currentCards/update', card)
+          this.updateItem(item, type)
         }
       })
-      this.updateConnectionPaths()
+      if (type === 'cards') { this.updateConnectionPaths() }
     },
     // ⎺ o _
     distributeVertically () {
