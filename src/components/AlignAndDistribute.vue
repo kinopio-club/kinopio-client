@@ -481,7 +481,12 @@ export default {
     },
     // ⎺ o _
     distributeVertically () {
-      const items = this.sortedByY.all
+      const cards = this.sortedByY.cards
+      const boxes = this.sortedByY.boxes
+      this.distributeVerticallyItems(cards, 'cards')
+      this.distributeVerticallyItems(boxes, 'boxes')
+    },
+    distributeVerticallyItems (items, type) {
       const yDistancesBetween = this.yDistancesBetween(items)
       const averageDistance = utils.averageOfNumbers(yDistancesBetween)
       items.forEach((item, index) => {
@@ -489,10 +494,10 @@ export default {
           const previousItem = items[index - 1]
           item = utils.clone(item)
           item.y = previousItem.y + previousItem.height + averageDistance
-          this.$store.dispatch('currentCards/update', item)
+          this.updateItem(item, type)
         }
       })
-      this.updateConnectionPaths()
+      if (type === 'cards') { this.updateConnectionPaths() }
     },
 
     xDistancesBetween (items) {
