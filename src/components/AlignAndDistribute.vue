@@ -91,12 +91,12 @@ export default {
       if (this.shouldAutoDistribute) {
         cards.forEach((card, index) => {
           if (index > 0) {
-            const previousCard = cards[index - 1]
-            const previousCardHeight = Math.round(previousCard.height * zoom)
-            const previousBottomSide = previousCard.y + previousCardHeight
-            const cardYDelta = card.y - previousBottomSide
+            const previousItem = cards[index - 1]
+            const previousItemHeight = Math.round(previousItem.height * zoom)
+            const previousBottomSide = previousItem.y + previousItemHeight
+            const yDelta = card.y - previousBottomSide
             const isNotEquallyDistributed = !utils.isBetween({
-              value: Math.abs(cardYDelta),
+              value: Math.abs(yDelta),
               min: spaceBetween - 1,
               max: spaceBetween + 1
             })
@@ -115,12 +115,12 @@ export default {
       if (this.shouldAutoDistribute) {
         cards.forEach((card, index) => {
           if (index > 0) {
-            const previousCard = cards[index - 1]
-            const previousCardWidth = Math.round(previousCard.width * zoom)
-            const previousRightSide = previousCard.x + previousCardWidth
-            const cardXDelta = card.x - previousRightSide
+            const previousItem = cards[index - 1]
+            const previousItemWidth = Math.round(previousItem.width * zoom)
+            const previousRightSide = previousItem.x + previousItemWidth
+            const xDelta = card.x - previousRightSide
             const isNotEquallyDistributed = !utils.isBetween({
-              value: Math.abs(cardXDelta),
+              value: Math.abs(xDelta),
               min: spaceBetween - 1,
               max: spaceBetween + 1
             })
@@ -315,23 +315,28 @@ export default {
     // ⎺o
     alignTop () {
       const cards = this.sortedByX.cards
-      let newCards = []
-      const origin = cards[0]
+      const boxes = this.sortedByX.boxes
+      this.alignTopItems(cards, 'cards')
+      this.alignTopItems(boxes, 'boxes')
+    },
+    alignTopItems (items, type) {
+      let newItems = []
+      const origin = items[0]
       const zoom = this.spaceCounterZoomDecimal
-      cards.forEach((card, index) => {
+      items.forEach((item, index) => {
         if (index > 0) {
-          const previousCard = newCards[index - 1]
-          const previousRightSide = previousCard.x + (previousCard.width * zoom)
-          card = utils.clone(card)
-          card.y = origin.y
+          const previousItem = newItems[index - 1]
+          const previousRightSide = previousItem.x + (previousItem.width * zoom)
+          item = utils.clone(item)
+          item.y = origin.y
           if (this.shouldAutoDistribute) {
-            card.x = previousRightSide + spaceBetween
+            item.x = previousRightSide + spaceBetween
           }
-          this.$store.dispatch('currentCards/update', card)
+          this.updateItem(item, type)
         }
-        newCards.push(card)
+        newItems.push(item)
       })
-      this.updateConnectionPaths()
+      if (type === 'cards') { this.updateConnectionPaths() }
     },
     // o|o
     centerHorizontally () {
@@ -339,8 +344,8 @@ export default {
       const origin = cards[0]
       cards.forEach((card, index) => {
         if (index > 0) {
-          const previousCard = cards[index - 1]
-          const previousBottomSide = previousCard.y + previousCard.height
+          const previousItem = cards[index - 1]
+          const previousBottomSide = previousItem.y + previousItem.height
           card = utils.clone(card)
           card.x = origin.x + (origin.width / 2) - (card.width / 2)
           if (this.shouldAutoDistribute) {
@@ -358,8 +363,8 @@ export default {
       const zoom = this.spaceCounterZoomDecimal
       cards.forEach((card, index) => {
         if (index > 0) {
-          const previousCard = cards[index - 1]
-          const previousBottomSide = previousCard.y + (previousCard.height * zoom)
+          const previousItem = cards[index - 1]
+          const previousBottomSide = previousItem.y + (previousItem.height * zoom)
           card = utils.clone(card)
           card.x = origin.x + (origin.width * zoom) - (card.width * zoom)
           if (this.shouldAutoDistribute) {
@@ -377,9 +382,9 @@ export default {
       const averageDistance = utils.averageOfNumbers(xDistancesBetween)
       cards.forEach((card, index) => {
         if (index > 0) {
-          const previousCard = cards[index - 1]
+          const previousItem = cards[index - 1]
           card = utils.clone(card)
-          card.x = previousCard.x + previousCard.width + averageDistance
+          card.x = previousItem.x + previousItem.width + averageDistance
           this.$store.dispatch('currentCards/update', card)
         }
       })
@@ -417,8 +422,8 @@ export default {
       const origin = cards[0]
       cards.forEach((card, index) => {
         if (index > 0) {
-          const previousCard = cards[index - 1]
-          const previousRightSide = previousCard.x + previousCard.width
+          const previousItem = cards[index - 1]
+          const previousRightSide = previousItem.x + previousItem.width
           card = utils.clone(card)
           if (this.shouldAutoDistribute) {
             card.x = previousRightSide + spaceBetween
@@ -435,8 +440,8 @@ export default {
       const origin = cards[0]
       cards.forEach((card, index) => {
         if (index > 0) {
-          const previousCard = cards[index - 1]
-          const previousRightSide = previousCard.x + previousCard.width
+          const previousItem = cards[index - 1]
+          const previousRightSide = previousItem.x + previousItem.width
           card = utils.clone(card)
           card.y = origin.y + origin.height - card.height
           if (this.shouldAutoDistribute) {
