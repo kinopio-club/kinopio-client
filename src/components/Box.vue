@@ -183,12 +183,14 @@ export default {
     },
     selectedBoxes () {
       let boxIds = this.$store.state.multipleBoxesSelectedIds
-      if (this.isDragging) {
+      const isCurrent = this.$store.state.currentUserIsInteractingBoxId === this.box.id
+      if (isCurrent) {
         boxIds = boxIds.concat(this.box.id)
       }
       boxIds = uniq(boxIds)
       return boxIds.map(id => this.$store.getters['currentBoxes/byId'](id))
     }
+
   },
   methods: {
     normalizeBox (box) {
@@ -263,6 +265,8 @@ export default {
       this.$store.commit('currentUserIsResizingBox', value)
       if (value) {
         this.$store.commit('currentUserIsInteractingBoxId', this.box.id)
+        this.$store.dispatch('clearMultipleSelected')
+        this.$store.commit('multipleSelectedActionsIsVisible', false)
       }
     },
     updateIsDragging (value, preventSelect) {
@@ -346,23 +350,21 @@ export default {
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
     },
     endInteraction (event) {
-      let box
-      if (this.isResizing) {
-        box = {
-          resizeWidth: this.newWidth,
-          resizeHeight: this.newHeight
-        }
-      }
-      if (this.isDragging) {
-        box = {
-          x: this.newX || this.box.x,
-          y: this.newY || this.box.y
-        }
-      }
-      if (!box) { return }
-      box.id = this.box.id
+      if (!this.isResizing && !this.isDragging) { return }
       this.$store.dispatch('history/resume')
-      this.$store.dispatch('currentBoxes/update', box)
+      // update all selected boxes
+      this.selectedBoxes.forEach(box => {
+        const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
+        const style = element.style
+        box = {
+          id: box.id,
+          resizeWidth: parseInt(style.width),
+          resizeHeight: parseInt(style.height),
+          x: parseInt(style.left),
+          y: parseInt(style.top)
+        }
+        this.$store.dispatch('currentBoxes/update', box)
+      })
       this.$store.dispatch('currentCards/updateCardMap')
       this.clearState()
     },
@@ -379,7 +381,6 @@ export default {
         setTimeout(() => {
           this.$store.dispatch('clearMultipleSelected')
           this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
-          // }
         }, 100)
       }
     },
