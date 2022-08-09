@@ -150,8 +150,13 @@ const store = createStore({
     previousMultipleConnectionsSelectedIds: [],
     remoteCardsSelected: [], // [{ cardId, userId }, …]
     remoteConnectionsSelected: [], // [{ connectionId, userId }, …]
+    remoteBoxesSelected: [], // [{ boxId, userId }, …]
     multipleConnectionsSelectedIds: [],
     triggeredPaintFramePosition: {},
+
+    multipleBoxesSelectedIds: [],
+
+    previousMultipleBoxesSelectedIds: [],
 
     // loading
     isLoadingSpace: false,
@@ -772,13 +777,17 @@ const store = createStore({
       utils.typeCheck({ value: position, type: 'object', origin: 'multipleSelectedActionsPosition' })
       state.multipleSelectedActionsPosition = position
     },
-    previousMultipleCardsSelectedIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array', origin: 'previousMultipleCardsSelectedIds' })
-      state.previousMultipleCardsSelectedIds = cardIds
+    clearMultipleSelected: (state) => {
+      state.multipleCardsSelectedIds = []
+      state.multipleConnectionsSelectedIds = []
+      state.multipleBoxesSelectedIds = []
     },
-    previousMultipleConnectionsSelectedIds: (state, connectionIds) => {
-      utils.typeCheck({ value: connectionIds, type: 'array', origin: 'previousMultipleConnectionsSelectedIds' })
-      state.previousMultipleConnectionsSelectedIds = connectionIds
+
+    // multiple cards
+
+    multipleCardsSelectedIds: (state, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array', origin: 'multipleCardsSelectedIds' })
+      state.multipleCardsSelectedIds = cardIds
     },
     addToMultipleCardsSelected: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'addToMultipleCardsSelected' })
@@ -789,23 +798,6 @@ const store = createStore({
       state.multipleCardsSelectedIds = state.multipleCardsSelectedIds.filter(id => {
         return id !== cardId
       })
-    },
-    addToMultipleConnectionsSelected: (state, connectionId) => {
-      state.multipleConnectionsSelectedIds.push(connectionId)
-    },
-    removeFromMultipleConnectionsSelected: (state, connectionId) => {
-      utils.typeCheck({ value: connectionId, type: 'string', origin: 'removeFromMultipleConnectionsSelected' })
-      state.multipleConnectionsSelectedIds = state.multipleConnectionsSelectedIds.filter(id => {
-        return id !== connectionId
-      })
-    },
-    clearMultipleSelected: (state) => {
-      state.multipleCardsSelectedIds = []
-      state.multipleConnectionsSelectedIds = []
-    },
-    multipleCardsSelectedIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array', origin: 'multipleCardsSelectedIds' })
-      state.multipleCardsSelectedIds = cardIds
     },
     multipleConnectionsSelectedIds: (state, connectionIds) => {
       utils.typeCheck({ value: connectionIds, type: 'array', origin: 'multipleConnectionsSelectedIds' })
@@ -842,6 +834,13 @@ const store = createStore({
       })
       state.remoteCardsSelected = state.remoteCardsSelected.concat(updates)
     },
+    previousMultipleCardsSelectedIds: (state, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array', origin: 'previousMultipleCardsSelectedIds' })
+      state.previousMultipleCardsSelectedIds = cardIds
+    },
+
+    // muiltiple connections
+
     updateRemoteConnectionsSelected: (state, update) => {
       state.remoteConnectionsSelected = state.remoteConnectionsSelected.filter(connection => connection.userId !== update.userId)
       const updates = update.connectionIds.map(connectionId => {
@@ -851,6 +850,15 @@ const store = createStore({
         }
       })
       state.remoteConnectionsSelected = state.remoteConnectionsSelected.concat(updates)
+    },
+    addToMultipleConnectionsSelected: (state, connectionId) => {
+      state.multipleConnectionsSelectedIds.push(connectionId)
+    },
+    removeFromMultipleConnectionsSelected: (state, connectionId) => {
+      utils.typeCheck({ value: connectionId, type: 'string', origin: 'removeFromMultipleConnectionsSelected' })
+      state.multipleConnectionsSelectedIds = state.multipleConnectionsSelectedIds.filter(id => {
+        return id !== connectionId
+      })
     },
     addToRemoteConnectionsSelected: (state, update) => {
       utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteConnectionsSelected' })
@@ -878,6 +886,63 @@ const store = createStore({
       const user = update.user || update.updates.user
       state.remoteCardsSelected = state.remoteCardsSelected.filter(card => card.userId !== user.id)
       state.remoteConnectionsSelected = state.remoteConnectionsSelected.filter(connection => connection.userId !== user.id)
+    },
+    previousMultipleConnectionsSelectedIds: (state, connectionIds) => {
+      utils.typeCheck({ value: connectionIds, type: 'array', origin: 'previousMultipleConnectionsSelectedIds' })
+      state.previousMultipleConnectionsSelectedIds = connectionIds
+    },
+
+    // multiple boxes
+
+    multipleBoxesSelectedIds: (state, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array', origin: 'multipleBoxesSelectedIds' })
+      state.multipleBoxesSelectedIds = cardIds
+    },
+    addToMultipleBoxesSelected: (state, boxId) => {
+      console.log('🎪', boxId)
+      utils.typeCheck({ value: boxId, type: 'string', origin: 'addToMultipleBoxesSelected' })
+      state.multipleBoxesSelectedIds.push(boxId)
+    },
+    removeFromMultipleBoxesSelected: (state, boxId) => {
+      utils.typeCheck({ value: boxId, type: 'string', origin: 'removeFromMultipleBoxesSelected' })
+      state.multipleBoxesSelectedIds = state.multipleBoxesSelectedIds.filter(id => {
+        return id !== boxId
+      })
+    },
+    previousMultipleBoxesSelectedIds: (state, boxIds) => {
+      utils.typeCheck({ value: boxIds, type: 'array', origin: 'previousMultipleBoxesSelectedIds' })
+      state.previousMultipleBoxesSelectedIds = boxIds
+    },
+    addToRemoteBoxesSelected: (state, update) => {
+      utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteBoxesSelected' })
+      delete update.type
+      const isSelected = state.remoteBoxesSelected.find(box => {
+        const boxIsSelected = box.boxId === update.boxId
+        const selectedByUser = box.userId === update.userId
+        return boxIsSelected && selectedByUser
+      })
+      if (isSelected) { return }
+      state.remoteBoxesSelected.push(update)
+    },
+    removeFromRemoteBoxesSelected: (state, update) => {
+      utils.typeCheck({ value: update, type: 'object', origin: 'removeFromRemoteBoxesSelected' })
+      delete update.type
+      state.remoteBoxesSelected = state.remoteBoxesSelected.filter(box => {
+        const boxIsSelected = box.boxId === update.boxId
+        const selectedByUser = box.userId === update.userId
+        const boxIsUpdate = boxIsSelected && selectedByUser
+        return !boxIsUpdate
+      })
+    },
+    updateRemoteBoxesSelected: (state, update) => {
+      state.remoteBoxesSelected = state.remoteBoxesSelected.filter(box => box.userId !== update.userId)
+      const updates = update.boxIds.map(boxId => {
+        return {
+          userId: update.userId,
+          boxId
+        }
+      })
+      state.remoteBoxesSelected = state.remoteBoxesSelected.concat(updates)
     },
 
     // Loading
@@ -1160,7 +1225,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' }, { root: true })
     },
     clearMultipleSelected: (context) => {
-      if (context.state.multipleCardsSelectedIds.length || context.state.multipleConnectionsSelectedIds.length) {
+      if (context.state.multipleCardsSelectedIds.length || context.state.multipleConnectionsSelectedIds.length || context.state.multipleBoxesSelectedIds.length) {
         context.commit('clearMultipleSelected')
       }
       const space = context.rootState.currentSpace
@@ -1213,6 +1278,27 @@ const store = createStore({
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionDetailsVisible' }, { root: true })
+    },
+    addToMultipleBoxesSelected: (context, boxId) => {
+      console.log(boxId)
+      utils.typeCheck({ value: boxId, type: 'string', origin: 'addToMultipleBoxesSelected' })
+      if (context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
+      context.commit('addToMultipleBoxesSelected', boxId)
+      const updates = {
+        userId: context.rootState.currentUser.id,
+        boxId
+      }
+      context.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesSelected' }, { root: true })
+    },
+    removeFromMultipleBoxesSelected: (context, boxId) => {
+      utils.typeCheck({ value: boxId, type: 'string', origin: 'removeFromMultipleBoxesSelected' })
+      if (!context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
+      context.commit('removeFromMultipleBoxesSelected', boxId)
+      const updates = {
+        userId: context.rootState.currentUser.id,
+        boxId
+      }
+      context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteBoxesSelected' }, { root: true })
     },
 
     // Pinned Dialogs
