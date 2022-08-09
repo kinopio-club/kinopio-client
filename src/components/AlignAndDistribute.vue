@@ -341,20 +341,25 @@ export default {
     // o|o
     centerHorizontally () {
       const cards = this.sortedByX.cards
-      const origin = cards[0]
-      cards.forEach((card, index) => {
+      const boxes = this.sortedByX.boxes
+      this.centerHorizontallyItems(cards, 'cards')
+      this.centerHorizontallyItems(boxes, 'boxes')
+    },
+    centerHorizontallyItems (items, type) {
+      const origin = items[0]
+      items.forEach((item, index) => {
         if (index > 0) {
-          const previousItem = cards[index - 1]
+          const previousItem = items[index - 1]
           const previousBottomSide = previousItem.y + previousItem.height
-          card = utils.clone(card)
-          card.x = origin.x + (origin.width / 2) - (card.width / 2)
+          item = utils.clone(item)
+          item.x = origin.x + (origin.width / 2) - (item.width / 2)
           if (this.shouldAutoDistribute) {
-            card.y = previousBottomSide + spaceBetween
+            item.y = previousBottomSide + spaceBetween
           }
-          this.$store.dispatch('currentCards/update', card)
+          this.updateItem(item, type)
         }
       })
-      this.updateConnectionPaths()
+      if (type === 'cards') { this.updateConnectionPaths() }
     },
     // o|
     alignRight () {
