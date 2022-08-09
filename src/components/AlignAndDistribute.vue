@@ -54,41 +54,18 @@ export default {
     numberOfSelectedItemsCreatedByCurrentUser: Object,
     shouldHideMoreOptions: Boolean,
     shouldAutoDistribute: Boolean,
-    canEditAll: Object
+    canEditAll: Object,
+    cards: Object,
+    editableCards: Object,
+    connections: Object,
+    boxes: Object,
+    editableBoxes: Object
   },
   computed: {
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
     multipleConnectionsSelectedIds () { return this.$store.state.multipleConnectionsSelectedIds },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    cards () {
-      let cards = this.multipleCardsSelectedIds.map(cardId => {
-        let card = this.$store.getters['currentCards/byId'](cardId)
-        if (!card) { return }
-        card = utils.clone(card)
-        const element = document.querySelector(`article [data-card-id="${cardId}"]`)
-        const rect = element.getBoundingClientRect()
-        card.width = rect.width
-        card.height = rect.height
-        return card
-      })
-      cards = cards.filter(card => Boolean(card))
-      return cards || []
-    },
-    editableCards () {
-      if (this.isSpaceMember) {
-        return this.cards
-      } else {
-        return this.cards.filter(card => {
-          return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
-        })
-      }
-    },
-    connections () {
-      return this.multipleConnectionsSelectedIds.map(id => {
-        return this.$store.getters['currentConnections/byId'](id)
-      })
-    },
     canDistributeCards () {
       if (!this.canEditAll.cards) { return }
       const minimumRequiredToDistribute = 3
@@ -265,22 +242,26 @@ export default {
       this.$store.dispatch('currentUser/shouldShowMoreAlignOptions', value)
     },
     cardsSortedByX () {
-      return this.editableCards.sort((a, b) => {
+      const editableCards = utils.clone(this.editableCards)
+      return editableCards.sort((a, b) => {
         return a.x - b.x
       })
     },
     cardsSortedByY () {
-      return this.editableCards.sort((a, b) => {
+      const editableCards = utils.clone(this.editableCards)
+      return editableCards.sort((a, b) => {
         return a.y - b.y
       })
     },
     cardsSortedByXWidth () {
-      return this.editableCards.sort((a, b) => {
+      const editableCards = utils.clone(this.editableCards)
+      return editableCards.sort((a, b) => {
         return (b.x + b.width) - (a.x + a.width)
       })
     },
     cardsSortedByYHeight () {
-      return this.editableCards.sort((a, b) => {
+      const editableCards = utils.clone(this.editableCards)
+      return editableCards.sort((a, b) => {
         return (b.y + b.height) - (a.y + a.height)
       })
     },
