@@ -53,7 +53,8 @@ export default {
     visible: Boolean,
     numberOfSelectedItemsCreatedByCurrentUser: Object,
     shouldHideMoreOptions: Boolean,
-    shouldAutoDistribute: Boolean
+    shouldAutoDistribute: Boolean,
+    canEditAll: Object
   },
   computed: {
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
@@ -87,13 +88,6 @@ export default {
       return this.multipleConnectionsSelectedIds.map(id => {
         return this.$store.getters['currentConnections/byId'](id)
       })
-    },
-    canEditAll () {
-      if (this.isSpaceMember) { return { cards: true, connections: true, all: true } }
-      const cards = this.multipleCardsSelectedIds.length === this.numberOfSelectedItemsCreatedByCurrentUser.cards
-      const connections = this.multipleConnectionsSelectedIds.length === this.numberOfSelectedItemsCreatedByCurrentUser.connections
-      const all = cards && connections
-      return { cards, connections, all }
     },
     canDistributeCards () {
       if (!this.canEditAll.cards) { return }
