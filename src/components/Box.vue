@@ -319,7 +319,6 @@ export default {
           min: x,
           max: x + width
         })
-        const xIsInside = x1 || x2
         const y1 = utils.isBetween({
           value: card.y,
           min: y,
@@ -330,8 +329,7 @@ export default {
           min: y,
           max: y + height
         })
-        const yIsInside = y1 || y2
-        return xIsInside && yIsInside
+        return x1 && x2 && y1 && y2
       })
       return isInside
     },
