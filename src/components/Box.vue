@@ -35,8 +35,8 @@
     .resize-button-wrap.inline-button-wrap(
         @pointerover="updateIsHover(true)"
         @pointerleave="updateIsHover(false)"
-        @pointerdown.left.stop="startResizing"
-        @touchstart.stop="startResizing"
+        @mousedown.left="startResizing"
+        @touchstart="startResizing"
       )
       button.inline-button.resize-button(
         tabindex="-1"
@@ -53,42 +53,36 @@
 import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
-import uniq from 'lodash-es/uniq'
 
 const borderWidth = 2
-let prevCursor, currentCursor
+// let prevCursor
 
 // locking
 // long press to touch drag card
 const lockingPreDuration = 100 // ms
 const lockingDuration = 100 // ms
 let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
-// let isMultiTouch
+let isMultiTouch
 let initialTouchEvent = {}
 let touchPosition = {}
 let currentTouchPosition = {}
 
 export default {
   name: 'Box',
-  mounted () {
-    window.addEventListener('pointermove', this.moveOrResizeBox)
-    window.addEventListener('pointerup', this.endInteraction)
-  },
-  beforeUnmount () {
-    window.removeEventListener('pointermove', this.moveOrResizeBox)
-    window.removeEventListener('pointerup', this.endInteraction)
-  },
+  // mounted () {
+  //   window.addEventListener('pointermove', this.moveOrResizeBox)
+  // window.addEventListener('pointerup', this.endInteraction)
+  // },
+  // beforeUnmount () {
+  //   window.removeEventListener('pointermove', this.moveOrResizeBox)
+  // window.removeEventListener('pointerup', this.endInteraction)
+  // },
   props: {
     box: Object
   },
   data () {
     return {
       isHover: false,
-      newX: 0,
-      newY: 0,
-      newWidth: 0,
-      newHeight: 0,
-      boxWasDragged: false,
       isLocking: false,
       lockingPercent: 0,
       lockingAlpha: 0
@@ -100,10 +94,10 @@ export default {
     },
     styles () {
       let { x, y, resizeWidth, resizeHeight } = this.normalizedBox
-      x = Math.max(this.newX || x, 50)
-      y = Math.max(this.newY || y, 50)
-      const width = this.newWidth || resizeWidth
-      const height = this.newHeight || resizeHeight
+      x = Math.max(x, 50)
+      y = Math.max(y, 50)
+      const width = resizeWidth
+      const height = resizeHeight
       return {
         left: x + 'px',
         top: y + 'px',
@@ -135,13 +129,13 @@ export default {
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isDragging () {
       const isDragging = this.$store.state.currentUserIsDraggingBox
-      const isCurrent = this.$store.state.currentUserIsInteractingBoxId === this.box.id
+      const isCurrent = this.$store.state.currentDraggingBoxId === this.box.id
       return isDragging && (isCurrent || this.isSelected)
     },
     isResizing () {
-      const isResizing = this.$store.state.currentUserIsResizingBox
-      const isCurrent = this.$store.state.currentUserIsInteractingBoxId === this.box.id
-      return isResizing && isCurrent
+      return this.$store.state.currentUserIsResizingBox
+      // const isCurrent = this.$store.state.currentUserIsResizingBoxIds.includes(this.box.id)
+      // return isResizing && isCurrent
     },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     isH1 () {
@@ -182,13 +176,7 @@ export default {
       return selected.find(id => this.box.id === id)
     },
     selectedBoxes () {
-      let boxIds = this.$store.state.multipleBoxesSelectedIds
-      const isCurrent = this.$store.state.currentUserIsInteractingBoxId === this.box.id
-      if (isCurrent) {
-        boxIds = boxIds.concat(this.box.id)
-      }
-      boxIds = uniq(boxIds)
-      return boxIds.map(id => this.$store.getters['currentBoxes/byId'](id))
+      return this.$store.getters['currentBoxes/isSelected']
     }
 
   },
@@ -204,75 +192,97 @@ export default {
       box.fill = box.fill || 'filled'
       return box
     },
-    moveOrResizeBox (event) {
-      if (!this.isDragging && !this.isResizing) { return }
-      currentCursor = utils.cursorPositionInPage(event)
-      currentCursor = {
-        x: currentCursor.x * this.spaceCounterZoomDecimal,
-        y: currentCursor.y * this.spaceCounterZoomDecimal
-      }
-      let delta
-      if (prevCursor) {
-        delta = {
-          x: currentCursor.x - prevCursor.x,
-          y: currentCursor.y - prevCursor.y
-        }
-      } else {
-        delta = { x: 0, y: 0 }
-        prevCursor = currentCursor
-      }
-      if (this.isResizing) {
-        this.newWidth = this.box.resizeWidth + delta.x
-        this.newHeight = this.box.resizeHeight + delta.y
-        this.broadcastResize()
-      } else if (this.isDragging) {
-        this.newX = this.box.x + delta.x
-        this.newY = this.box.y + delta.y
-        this.$store.commit('currentUserIsDraggingCard', true)
-        if (!this.multipleBoxesIsSelected) {
-          this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
-        }
-        this.broadcastMove()
-      }
-      this.boxWasDragged = true
-    },
+    // moveOrResizeBox (event) {
+    //   if (!this.isDragging && !this.isResizing) { return }
+    //   currentCursor = utils.cursorPositionInPage(event)
+    //   currentCursor = {
+    //     x: currentCursor.x * this.spaceCounterZoomDecimal,
+    //     y: currentCursor.y * this.spaceCounterZoomDecimal
+    //   }
+    //   let delta
+    //   if (prevCursor) {
+    //     delta = {
+    //       x: currentCursor.x - prevCursor.x,
+    //       y: currentCursor.y - prevCursor.y
+    //     }
+    //   } else {
+    //     delta= { x: 0, y: 0 }
+    //     prevCursor = currentCursor
+    //   }
+    //   if (this.isResizing) {
+    //     this.newWidth = this.box.resizeWidth + delta.x
+    //     this.newHeight = this.box.resizeHeight + delta.y
+    //     this.broadcastResize()
+    //   } else if (this.isDragging) {
+    //     this.newX = this.box.x + delta.x
+    //     this.newY = this.box.y + delta.y
+    //     this.$store.commit('currentUserIsDraggingCard', true)
+    //     if (!this.multipleBoxesIsSelected) {
+    //       this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
+    //     }
+    //     this.broadcastMove()
+    //   }
+    //   this.boxWasDragged = true
+    // },
     startResizing (event) {
       if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
-      this.updateIsResizing(true)
-      this.updatePrevCursor(event)
-      event.preventDefault() // allows resizing box without scrolling on mobile
+      this.$store.dispatch('history/pause')
+      this.$store.dispatch('closeAllDialogs', 'Card.startResizing')
+      this.$store.commit('preventDraggedBoxFromShowingDetails', true)
+      // this.$store.dispatch('currentCards/incrementZ', this.id)
+      this.$store.commit('currentUserIsResizingBox', true)
+      let boxIds = [this.box.id]
+      const multipleBoxesSelectedIds = this.$store.state.multipleBoxesSelectedIds
+      if (multipleBoxesSelectedIds.length) {
+        boxIds = multipleBoxesSelectedIds
+      }
+      this.$store.commit('currentUserIsResizingBoxIds', boxIds)
+      const updates = {
+        userId: this.$store.state.currentUser.id,
+        boxIds: boxIds
+      }
+      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBoxes' })
+
+      // if (!this.canEditSpace) { return }
+      // if (utils.isMultiTouch(event)) { return }
+      // this.updateIsResizing(true)
+      // this.updatePrevCursor(event)
+      // event.preventDefault() // allows resizing box without scrolling on mobile
     },
     startBoxInfoInteraction (event) {
-      this.updatePrevCursor(event)
+      // this.updatePrevCursor(event)
       if (!this.currentBoxIsSelected) {
         this.$store.dispatch('clearMultipleSelected')
       }
-      this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      this.$store.commit('currentDraggingCardId', '')
+      this.$store.commit('preventDraggedBoxFromShowingDetails', true)
+      this.$store.commit('currentDraggingBoxId', '')
       this.$store.dispatch('closeAllDialogs', 'Box.startBoxInfoInteraction')
       const preventSelect = event.shiftKey
       this.updateIsDragging(true, preventSelect)
     },
-    updatePrevCursor (event) {
-      prevCursor = utils.cursorPositionInPage(event)
-      prevCursor = {
-        x: prevCursor.x * this.spaceCounterZoomDecimal,
-        y: prevCursor.y * this.spaceCounterZoomDecimal
-      }
-    },
-    updateIsResizing (value) {
-      this.$store.commit('currentUserIsResizingBox', value)
-      if (value) {
-        this.$store.commit('currentUserIsInteractingBoxId', this.box.id)
-        this.$store.dispatch('clearMultipleSelected')
-        this.$store.commit('multipleSelectedActionsIsVisible', false)
-      }
-    },
+    // updatePrevCursor (event) {
+    //   prevCursor = utils.cursorPositionInPage(event)
+    //   prevCursor = {
+    //     x: prevCursor.x * this.spaceCounterZoomDecimal,
+    //     y: prevCursor.y * this.spaceCounterZoomDecimal
+    //   }
+    // },
+    // updateIsResizing (value) {
+    //   console.log('🚛updateIsResizing',value)
+    //   this.$store.commit('currentUserIsResizingBox', value)
+    //   if (value) {
+    //     const ids = this.$store.getters['currentBoxes/isSelectedIds']
+    //     this.$store.commit('currentUserIsResizingBoxIds', ids)
+
+    //     // this.$store.dispatch('clearMultipleSelected')
+    //     this.$store.commit('multipleSelectedActionsIsVisible', false)
+    //   }
+    // },
     updateIsDragging (value, preventSelect) {
       this.$store.commit('currentUserIsDraggingBox', value)
       if (value && !preventSelect) {
-        this.$store.commit('currentUserIsInteractingBoxId', this.box.id)
+        this.$store.commit('currentDraggingBoxId', this.box.id)
         this.selectContainedCards()
       }
     },
@@ -337,74 +347,114 @@ export default {
       if (this.isPainting) { return }
       this.isHover = value
     },
+    // showBoxDetails (event) {
+    //   this.$store.dispatch('currentBoxes/afterMove')
+    //   // if (this.isLocked) { return }
+
+    //   if (this.$store.state.currentUserIsPainting) { return }
+    //   if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
+    //   this.clearState()
+    //   this.$store.dispatch('closeAllDialogs', 'Box.showBoxDetails')
+    //   this.$store.dispatch('clearMultipleSelected')
+    //   this.$store.commit('boxDetailsIsVisibleForBoxId', this.box.id)
+    //   event.stopPropagation() // only stop propagation if cardDetailsIsVisible
+    // },
+
     showBoxDetails (event) {
-      if (this.boxWasDragged) { return }
+      this.$store.dispatch('currentBoxes/afterMove')
+      // if (this.isLocked) { return }
       if (this.$store.state.currentUserIsPainting) { return }
+      if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
-      this.clearState()
+      if (this.$store.state.currentUserIsResizingBox || this.$store.state.currentUserIsDraggingBox) { return }
+      if (!this.canEditBox) { this.$store.commit('triggerReadOnlyJiggle') }
+      const userId = this.$store.state.currentUser.id
+      // const boxesWereDragged = this.$store.state.boxesWereDragged
+      // const shouldToggleSelected = event.shiftKey && !boxesWereDragged && !this.isConnectingTo
+      // if (shouldToggleSelected) {
+      //   this.$store.dispatch('toggleCardSelected', this.id)
+      //   event.stopPropagation()
+      //   this.$store.commit('currentUserIsDraggingCard', false)
+      //   return
+      // }
+      this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
+      // this.preventDraggedButtonBadgeFromShowingDetails = this.$store.state.preventDraggedCardFromShowingDetails
+      if (this.$store.state.preventDraggedBoxFromShowingDetails) { return }
       this.$store.dispatch('closeAllDialogs', 'Box.showBoxDetails')
       this.$store.dispatch('clearMultipleSelected')
-      this.$store.commit('boxDetailsIsVisibleForBoxId', this.box.id)
+      // const nodeName = event.target.nodeName
+      // if (nodeName === 'LABEL') { return } // checkbox
+      // if (nodeName === 'A' && event.touches) {
+      //   window.location = event.target.href
+      //   return
+      // }
+      this.$store.commit('boxDetailsIsVisibleForBoxId', this.id)
+      // this.$store.commit('preventCardDetailsOpeningAnimation', true)
+      // this.$store.commit('parentCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
+      this.$store.commit('currentUserIsDraggingBox', false)
+      // this.updatePreviousResultCardId()
+      // this.clearPositionOffsets()
     },
-    endInteraction (event) {
-      if (!this.isResizing && !this.isDragging) { return }
-      this.$store.dispatch('history/resume')
-      // reset toolbar state after new box created and sized
-      if (this.isResizing) {
-        this.$store.commit('currentUserToolbar', 'card')
-      }
-      // update all selected boxes
-      this.selectedBoxes.forEach(box => {
-        const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-        const style = element.style
-        box = {
-          id: box.id,
-          resizeWidth: parseInt(style.width),
-          resizeHeight: parseInt(style.height),
-          x: parseInt(style.left),
-          y: parseInt(style.top)
-        }
-        this.$store.dispatch('currentBoxes/update', box)
-      })
-      this.$store.dispatch('currentCards/updateCardMap')
-      this.clearState()
-    },
-    clearState () {
-      this.updateIsDragging(false)
-      this.updateIsResizing(false)
-      this.newWidth = 0
-      this.newHeight = 0
-      this.newX = 0
-      this.newY = 0
-      this.boxWasDragged = false
-      prevCursor = null
-      if (!this.multipleBoxesIsSelected) {
-        setTimeout(() => {
-          this.$store.dispatch('clearMultipleSelected')
-          this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
-        }, 100)
-      }
-    },
+
+    // endInteraction (event) { // unused
+    //   if (!this.isResizing && !this.isDragging) { return }
+    //   // this.$store.dispatch('history/resume')
+    //   // reset toolbar state after new box created and sized
+    //   if (this.isResizing) {
+    //     this.$store.commit('currentUserToolbar', 'card')
+    //   }
+    //   // update all selected boxes
+
+    //   // this.selectedBoxes.forEach(box => {
+    //   //   const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
+    //   //   const style = element.style
+    //   //   box = {
+    //   //     id: box.id,
+    //   //     resizeWidth: parseInt(style.width),
+    //   //     resizeHeight: parseInt(style.height),
+    //   //     x: parseInt(style.left),
+    //   //     y: parseInt(style.top)
+    //   //   }
+    //   //   this.$store.dispatch('currentBoxes/update', box)
+    //   // })
+    //   // this.$store.dispatch('currentCards/updateCardMap')
+    //   this.clearState()
+    // },
+    // clearState () {
+    //   this.updateIsDragging(false)
+    //   this.updateIsResizing(false)
+    //   // this.newWidth = 0
+    //   // this.newHeight = 0
+    //   // this.newX = 0
+    //   // this.newY = 0
+    //   prevCursor = null
+    //   if (!this.multipleBoxesIsSelected) {
+    //     setTimeout(() => {
+    //       this.$store.dispatch('clearMultipleSelected')
+    //       this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
+    //     }, 100)
+    //   }
+    // },
 
     // broadcast
 
-    broadcastResize () {
-      const box = {
-        id: this.box.id,
-        resizeWidth: this.newWidth,
-        resizeHeight: this.newHeight
-      }
-      this.$store.dispatch('broadcast/update', { updates: { box }, type: 'resizeBox', handler: 'currentBoxes/resizeBroadcast' })
-    },
-    broadcastMove () {
-      const box = {
-        id: this.box.id,
-        x: this.newX,
-        y: this.newY
-      }
-      this.$store.dispatch('broadcast/update', { updates: { box }, type: 'moveBox', handler: 'currentBoxes/moveBroadcast' })
-    },
+    // broadcastResize () {
+    //   const box = {
+    //     id: this.box.id,
+    //     resizeWidth: this.newWidth,
+    //     resizeHeight: this.newHeight
+    //   }
+    //   this.$store.dispatch('broadcast/update', { updates: { box }, type: 'resizeBox', handler: 'currentBoxes/resizeBroadcast' })
+    // },
+    // broadcastMove () {
+    //   const box = {
+    //     id: this.box.id,
+    //     x: this.newX,
+    //     y: this.newY
+    //   }
+    //   this.$store.dispatch('broadcast/update', { updates: { box }, type: 'moveBox', handler: 'currentBoxes/moveBroadcast' })
+    // },
 
     // h1, h2
 
@@ -463,8 +513,6 @@ export default {
         lockingAnimationTimer = undefined
         lockingStartTime = undefined
         this.isLocking = false
-        console.log('locked', initialTouchEvent.touches)
-
         this.startBoxInfoInteraction(initialTouchEvent)
         // this.$store.commit('triggeredTouchCardDragPosition', touchPosition)
       } else {
@@ -487,11 +535,11 @@ export default {
 
     updateTouchPosition (event) {
       initialTouchEvent = event
-      // isMultiTouch = false
-      // if (utils.isMultiTouch(event)) {
-      //   isMultiTouch = true
-      //   return
-      // }
+      isMultiTouch = false
+      if (utils.isMultiTouch(event)) {
+        isMultiTouch = true
+        return
+      }
       touchPosition = utils.cursorPositionInViewport(event)
       // const isDrawingConnection = this.$store.state.currentUserIsDrawingConnection
       // if (isDrawingConnection) {

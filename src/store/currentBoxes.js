@@ -1,10 +1,11 @@
 // import utils from '@/utils.js'
 import cache from '@/cache.js'
+import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
 // import last from 'lodash-es/last'
-// import uniq from 'lodash-es/uniq'
+import uniq from 'lodash-es/uniq'
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
@@ -51,6 +52,13 @@ export default {
       })
       cache.updateSpace('boxes', state.boxes, currentSpaceId)
     },
+    move: (state, { boxes, spaceId }) => {
+      boxes.forEach(box => {
+        state.boxes[box.id].x = box.x
+        state.boxes[box.id].y = box.y
+      })
+      cache.updateSpaceBoxesDebounced(state.boxes, currentSpaceId)
+    },
 
     // broadcast
 
@@ -59,10 +67,21 @@ export default {
       element.style.width = box.resizeWidth + 'px'
       element.style.height = box.resizeHeight + 'px'
     },
-    moveBroadcast: (state, { box }) => {
-      const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-      element.style.left = box.x + 'px'
-      element.style.top = box.y + 'px'
+    moveWhileDraggingBroadcast: (state, { boxes }) => {
+      boxes.forEach(box => {
+        const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
+        element.style.left = box.x + 'px'
+        element.style.top = box.y + 'px'
+      })
+    },
+    moveBroadcast: (state, { boxes }) => {
+      boxes.forEach(updated => {
+        const box = state.boxes[updated.id]
+        if (!box) { return }
+        box.x = updated.x
+        box.y = updated.y
+      })
+      cache.updateSpaceCardsDebounced(state.boxes, currentSpaceId)
     },
 
     // remove
@@ -129,7 +148,7 @@ export default {
       context.dispatch('broadcast/update', { updates: box, type: 'createBox', handler: 'currentBoxes/create' }, { root: true })
       if (shouldResize) {
         context.commit('currentUserIsResizingBox', true, { root: true })
-        context.commit('currentUserIsInteractingBoxId', box.id, { root: true })
+        context.commit('currentUserIsResizingBoxId', box.id, { root: true })
       }
     },
 
@@ -140,6 +159,113 @@ export default {
       context.commit('update', box)
       context.dispatch('api/addToQueue', { name: 'updateBox', body: box }, { root: true })
       context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
+    },
+
+    // resize
+
+    resize: (context, { boxIds, delta }) => {
+      boxIds.forEach(boxId => {
+        const box = context.getters.byId(boxId)
+        let width = box.resizeWidth
+        let height = box.resizeHeight
+        width = width + delta.x
+        height = height + delta.y
+        const updates = { id: boxId, resizeWidth: width, resizeHeight: height }
+        context.dispatch('update', updates)
+        context.dispatch('broadcast/update', { updates, type: 'resizeBox', handler: 'currentBoxes/update' }, { root: true })
+      })
+    },
+
+    // move
+
+    moveWhileDragging: (state, boxes) => {
+      boxes.forEach(box => {
+        const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
+        element.style.left = box.x + 'px'
+        element.style.top = box.y + 'px'
+      })
+    },
+    move: (context, { endCursor, prevCursor, delta }) => {
+      const zoom = context.rootGetters.spaceCounterZoomDecimal
+      if (!endCursor || !prevCursor) { return }
+      endCursor = {
+        x: endCursor.x * zoom,
+        y: endCursor.y * zoom
+      }
+      delta = delta || {
+        x: endCursor.x - prevCursor.x,
+        y: endCursor.y - prevCursor.y
+      }
+      let boxes = context.getters.isSelected
+      // prevent boxes bunching up at 0
+      boxes.forEach(box => {
+        if (!box) { return }
+        if (box.x === 0) { delta.x = Math.max(0, delta.x) }
+        if (box.y === 0) { delta.y = Math.max(0, delta.y) }
+      })
+      boxes = boxes.filter(box => Boolean(box))
+      // prevent boxes with null or negative positions
+      boxes = utils.clone(boxes)
+      boxes = boxes.map(box => {
+        const position = utils.boxPositionFromElement(box.id)
+        box.x = position.x
+        box.y = position.y
+        // x
+        if (box.x === undefined || box.x === null) {
+          delete box.x
+        } else {
+          box.x = Math.max(0, box.x + delta.x)
+          box.x = Math.round(box.x)
+        }
+        // y
+        if (box.y === undefined || box.y === null) {
+          delete box.y
+        } else {
+          box.y = Math.max(0, box.y + delta.y)
+          box.y = Math.round(box.y)
+        }
+        box = {
+          x: box.x,
+          y: box.y,
+          id: box.id
+        }
+        return box
+      })
+      // update
+      context.dispatch('moveWhileDragging', boxes)
+      context.commit('boxesWereDragged', true, { root: true })
+      context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDraggingBroadcast' }, { root: true })
+    },
+    afterMove: (context) => {
+      const spaceId = context.rootState.currentSpace.id
+      let boxIds = context.getters.isSelectedIds
+      boxIds = boxIds.filter(box => Boolean(box))
+      if (!boxIds.length) { return }
+      let boxes = boxIds.map(id => {
+        let box = context.getters.byId(id)
+        if (!box) { return }
+        box = utils.clone(box)
+        if (!box) { return }
+        const position = utils.boxPositionFromElement(id)
+        box.x = position.x
+        box.y = position.y
+        const { x, y } = box
+        return { id, x, y }
+      })
+      boxes = boxes.filter(box => Boolean(box))
+      context.commit('move', { boxes, spaceId })
+      boxes = boxes.filter(box => box)
+      boxes.forEach(box => {
+        context.dispatch('api/addToQueue', {
+          name: 'updateBox',
+          body: box
+        }, { root: true })
+      })
+      context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveBroadcast' }, { root: true })
+      // context.dispatch('checkIfShouldIncreasePageSize', { boxId: currentDraggingBoxId })
+      context.dispatch('history/resume', null, { root: true })
+      context.dispatch('history/add', { boxes, useSnapshot: true }, { root: true })
+      context.dispatch('currentCards/updateCardMap', null, { root: true })
     },
 
     // remove
@@ -157,6 +283,18 @@ export default {
     },
     all: (state) => {
       return state.ids.map(id => state.boxes[id])
+    },
+    isSelectedIds: (state, getters, rootState, rootGetters) => {
+      const currentDraggingId = rootState.currentDraggingBoxId
+      const multipleSelectedIds = rootState.multipleBoxesSelectedIds
+      let boxIds = multipleSelectedIds.concat(currentDraggingId)
+      boxIds = uniq(boxIds)
+      return boxIds
+    },
+    isSelected: (state, getters) => {
+      const boxIds = getters.isSelectedIds
+      const boxes = boxIds.map(id => getters.byId(id))
+      return boxes
     }
   }
 }

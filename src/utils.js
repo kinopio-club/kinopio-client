@@ -738,6 +738,12 @@ export default {
     const y = parseInt(element.style.top)
     return { x, y }
   },
+  boxPositionFromElement (boxId) {
+    const element = document.querySelector(`.box[data-box-id="${boxId}"]`)
+    const x = parseInt(element.style.left)
+    const y = parseInt(element.style.top)
+    return { x, y }
+  },
   isPointInsideCard (point, card) {
     const xIsInside = this.isBetween({
       value: point.x,

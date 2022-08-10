@@ -264,6 +264,7 @@ export default {
     stopInteractions () {
       this.stopScrollTimer()
       this.$store.dispatch('currentCards/afterMove')
+      this.$store.dispatch('currentBoxes/afterMove')
     }
   }
 }

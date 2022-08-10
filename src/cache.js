@@ -150,6 +150,18 @@ export default {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${spaceId}`, space)
   }, 200),
+  updateSpaceBoxesDebounced: debounce(function (boxes, spaceId) {
+    boxes = utils.denormalizeItems(boxes)
+    let space = this.space(spaceId)
+    if (!utils.objectHasKeys(space)) {
+      console.warn(updateErrorMessage)
+      return
+    }
+    boxes = utils.denormalizeItems(boxes)
+    space.boxes = boxes
+    space.cacheDate = Date.now()
+    this.storeLocal(`space-${spaceId}`, space)
+  }, 200),
   addToSpace ({ cards, connections, connectionTypes }, spaceId) {
     let space = this.space(spaceId)
     space.cards = space.cards || []

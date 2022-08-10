@@ -74,24 +74,29 @@ const store = createStore({
     // minimap
     minimapIsVisible: false,
 
-    // box selecting
+    // box-shape selecting
     currentUserIsBoxSelecting: false,
     currentUserBoxSelectStart: {},
     currentUserBoxSelectEnd: {},
     remoteUserBoxSelectStyles: [],
     remotePreviousUserBoxSelectStyles: [],
 
-    // resizing card
-    currentUserIsResizingCard: false,
-    currentUserIsResizingCardIds: [],
-    remoteUserResizingCards: [],
-
     // boxes
     boxDetailsIsVisibleForBoxId: '',
-    currentUserIsResizingBox: false,
-    currentUserIsDraggingBox: false,
-    currentUserIsInteractingBoxId: '',
     remoteUserResizingBoxs: [],
+
+    // resizing boxes
+    currentUserIsResizingBox: false,
+    currentUserIsResizingBoxIds: [],
+    remoteUserResizingBoxes: [],
+
+    // dragging boxes
+    currentDraggingBoxId: '',
+    boxesWereDragged: false,
+    currentUserIsDraggingBox: false,
+    currentUserIsDraggingBoxIds: [],
+    remoteBoxesDragging: [],
+    preventDraggedBoxFromShowingDetails: false,
 
     // cards
     shouldAddCard: false,
@@ -102,6 +107,19 @@ const store = createStore({
     preventCardDetailsOpeningAnimation: true,
     cardUserDetailsIsVisibleForCardId: '',
     hasEditedCurrentSpace: false,
+
+    // resizing card
+    currentUserIsResizingCard: false,
+    currentUserIsResizingCardIds: [],
+    remoteUserResizingCards: [],
+
+    // dragging cards
+    currentDraggingCardId: '',
+    remoteCardsDragging: [],
+    remoteUploadDraggedOverCards: [],
+    preventDraggedCardFromShowingDetails: false,
+    triggeredTouchCardDragPosition: {},
+    cardsWereDragged: false,
 
     // connecting
     currentConnectionStartCardIds: [],
@@ -133,14 +151,6 @@ const store = createStore({
     spaceDetailsIsPinned: false,
     sidebarIsPinned: false,
 
-    // dragging
-    currentDraggingCardId: '',
-    remoteCardsDragging: [],
-    remoteUploadDraggedOverCards: [],
-    preventDraggedCardFromShowingDetails: false,
-    triggeredTouchCardDragPosition: {},
-    cardsWereDragged: false,
-
     // multiple selection
     multipleSelectedActionsIsVisible: false,
     preventMultipleSelectedActionsIsVisible: false,
@@ -153,7 +163,6 @@ const store = createStore({
     remoteBoxesSelected: [], // [{ boxId, userId }, …]
     multipleConnectionsSelectedIds: [],
     triggeredPaintFramePosition: {},
-
     multipleBoxesSelectedIds: [],
 
     previousMultipleBoxesSelectedIds: [],
@@ -246,6 +255,7 @@ const store = createStore({
       state.currentSelectedLink = {}
       state.searchIsVisible = false
       state.cardsWereDragged = false
+      state.boxesWereDragged = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isOnline' })
@@ -590,23 +600,23 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsResizingBox' })
       state.currentUserIsResizingBox = value
     },
+    currentUserIsResizingBoxIds: (state, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array', origin: 'currentUserIsResizingBoxIds' })
+      state.currentUserIsResizingBoxIds = cardIds
+    },
     currentUserIsDraggingBox: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsDraggingBox' })
       state.currentUserIsDraggingBox = value
-    },
-    currentUserIsInteractingBoxId: (state, boxId) => {
-      utils.typeCheck({ value: boxId, type: 'string', origin: 'currentUserIsInteractingBoxId' })
-      state.currentUserIsInteractingBoxId = boxId
     },
 
     // removeRemoteUserResizingBoxes: (state, update) => {
     // removeRemoteUserResizingBoxIds??
     //   state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
     // },
-    // updateRemoteUserResizingBoxes: (state, update) => {
-    //   state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
-    //   state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.concat(update)
-    // },
+    updateRemoteUserResizingBoxes: (state, update) => {
+      state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
+      state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.concat(update)
+    },
 
     // Minimap
 
@@ -632,6 +642,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsPanning' })
       state.currentUserIsPanning = value
     },
+
+    // Dragging Cards
+
     currentUserIsDraggingCard: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsDraggingCard' })
       state.currentUserIsDraggingCard = value
@@ -674,6 +687,33 @@ const store = createStore({
     clearRemoteUploadDraggedOverCards: (state, update) => {
       utils.typeCheck({ value: update, type: 'object', origin: 'clearRemoteUploadDraggedOverCards' })
       state.remoteUploadDraggedOverCards = state.remoteUploadDraggedOverCards.filter(card => card.userId !== update.userId)
+    },
+
+    // Dragging Boxes
+
+    currentDraggingBoxId: (state, boxId) => {
+      utils.typeCheck({ value: boxId, type: 'string', origin: 'currentDraggingBoxId' })
+      state.currentDraggingBoxId = boxId
+    },
+    boxesWereDragged: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'boxesWereDragged' })
+      state.boxesWereDragged = value
+    },
+    // addToRemoteCardsDragging: (state, update) => {
+    //   utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteCardsDragging' })
+    //   delete update.type
+    //   let cards = utils.clone(state.remoteCardsDragging)
+    //   cards = cards.filter(card => card.userId !== update.userId) || []
+    //   cards.push(update)
+    //   state.remoteCardsDragging = cards
+    // },
+    clearRemoteBoxesDragging: (state, update) => {
+      utils.typeCheck({ value: update, type: 'object', origin: 'clearRemoteBoxesDragging' })
+      state.remoteBoxesDragging = state.remoteBoxesDragging.filter(card => card.userId !== update.userId)
+    },
+    preventDraggedBoxFromShowingDetails: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'preventDraggedBoxFromShowingDetails' })
+      state.preventDraggedBoxFromShowingDetails = value
     },
 
     // Tag Details
@@ -781,6 +821,10 @@ const store = createStore({
       state.multipleCardsSelectedIds = []
       state.multipleConnectionsSelectedIds = []
       state.multipleBoxesSelectedIds = []
+    },
+    clearDraggingItems: (state) => {
+      state.currentDraggingCardId = ''
+      state.currentDraggingBoxId = ''
     },
 
     // multiple cards
