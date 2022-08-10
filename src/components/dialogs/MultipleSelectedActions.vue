@@ -6,11 +6,11 @@ dialog.narrow.multiple-selected-actions(
   @click.left="closeDialogs"
   :style="styles"
 )
-  section(v-if="cardsIsSelected || connectionsIsSelected")
+  section(v-if="cardsIsSelected || connectionsIsSelected || boxesIsSelected")
     //- Edit Cards
-    .row(v-if="cardsIsSelected")
+    .row(v-if="cardsIsSelected || boxesIsSelected")
       //- [·]
-      .button-wrap.cards-checkboxes(:class="{ disabled: !canEditAll.cards }")
+      .button-wrap.cards-checkboxes(v-if="cardsIsSelected" :class="{ disabled: !canEditAll.cards }")
         label(v-if="cardsHaveCheckboxes" :class="{active: cardsCheckboxIsChecked}" tabindex="0")
           input(type="checkbox" v-model="cardCheckboxes" tabindex="-1")
         label(v-if="!cardsHaveCheckboxes" @click.left.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
@@ -22,10 +22,10 @@ dialog.narrow.multiple-selected-actions(
         span Connect
       //- Style
       .button-wrap
-        button(:disabled="!canEditAll.cards" @click.left.stop="toggleCardStyleActionsIsVisible" :class="{active : cardStyleActionsIsVisible}")
+        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleStyleActionsIsVisible" :class="{active : styleActionsIsVisible}")
           span Style
 
-    CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="cards" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }")
+    StyleActions(:visible="styleActionsIsVisible" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }")
 
     //- Edit Connections
     .row.edit-connection-types(v-if="connectionsIsSelected")
@@ -80,7 +80,7 @@ dialog.narrow.multiple-selected-actions(
 import utils from '@/utils.js'
 import MoveOrCopyCards from '@/components/dialogs/MoveOrCopyCards.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
-import CardStyleActions from '@/components/CardStyleActions.vue'
+import StyleActions from '@/components/StyleActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
 
@@ -96,7 +96,7 @@ export default {
   components: {
     MoveOrCopyCards,
     MultipleConnectionsPicker,
-    CardStyleActions,
+    StyleActions,
     AlignAndDistribute,
     ConnectionDecorators
   },
@@ -113,7 +113,7 @@ export default {
   },
   computed: {
     maxCardLength () { return utils.maxCardLength() },
-    cardStyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowMultiCardStyleActions && this.cardsIsSelected },
+    styleActionsIsVisible () { return this.$store.state.currentUser.shouldShowMultiStyleActions && (this.cardsIsSelected || this.boxesIsSelected) },
     visible () { return this.$store.state.multipleSelectedActionsIsVisible },
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     position () {
@@ -218,6 +218,7 @@ export default {
 
     // boxes
 
+    boxesIsSelected () { return this.multipleBoxesSelectedIds.length > 0 },
     multipleBoxesSelectedIds () { return this.$store.state.multipleBoxesSelectedIds },
     boxes () {
       let boxes = this.multipleBoxesSelectedIds.map(boxId => {
@@ -417,10 +418,10 @@ export default {
       this.closeDialogs()
       this.multipleConnectionsPickerVisible = !isVisible
     },
-    toggleCardStyleActionsIsVisible () {
+    toggleStyleActionsIsVisible () {
       this.closeDialogs()
-      const isVisible = !this.$store.state.currentUser.shouldShowMultiCardStyleActions
-      this.$store.dispatch('currentUser/shouldShowMultiCardStyleActions', isVisible)
+      const isVisible = !this.$store.state.currentUser.shouldShowMultiStyleActions
+      this.$store.dispatch('currentUser/shouldShowMultiStyleActions', isVisible)
       this.$nextTick(() => {
         this.scrollIntoView()
       })

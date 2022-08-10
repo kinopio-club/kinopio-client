@@ -94,13 +94,13 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addFile")
       //- Toggle Style Actions
       .button-wrap
-        button(:disabled="!canEditCard" @click.left.stop="toggleCardStyleActionsIsVisible" :class="{active : cardStyleActionsIsVisible}")
+        button(:disabled="!canEditCard" @click.left.stop="toggleStyleActionsIsVisible" :class="{active : StyleActionsIsVisible}")
           span Style
       //- Toggle Collaboration Info
       .button-wrap
         button.toggle-collaboration-info(@click.left.stop="toggleCollaborationInfoIsVisible" :class="{active : collaborationInfoIsVisible}")
           img.icon.time(src="@/assets/time.svg")
-    CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowCardStyleActions }")
+    StyleActions(:visible="StyleActionsIsVisible" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowStyleActions }")
     CardCollaborationInfo(:visible="collaborationInfoIsVisible" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
     .row(v-if="nameMetaRowIsVisible")
@@ -198,7 +198,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 </template>
 
 <script>
-import CardStyleActions from '@/components/CardStyleActions.vue'
+import StyleActions from '@/components/StyleActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
@@ -224,7 +224,7 @@ let openingAnimationTimer, openingStartTime, shouldCancelOpening
 export default {
   name: 'CardDetails',
   components: {
-    CardStyleActions,
+    StyleActions,
     ImagePicker,
     CardTips,
     TagPicker,
@@ -305,7 +305,7 @@ export default {
     })
   },
   computed: {
-    rowIsBelowCardStyleActions () { return this.nameMetaRowIsVisible || this.badgesRowIsVisible || this.collaborationInfoIsVisible || this.cardHasMedia || this.cardUrlPreviewIsVisible },
+    rowIsBelowStyleActions () { return this.nameMetaRowIsVisible || this.badgesRowIsVisible || this.collaborationInfoIsVisible || this.cardHasMedia || this.cardUrlPreviewIsVisible },
     nameMetaRowIsVisible () { return this.nameSplitIntoCardsCount || this.hasUrls },
     badgesRowIsVisible () { return this.tagsInCard.length || this.card.linkToSpaceId || this.nameIsComment || this.isInSearchResultsCards },
     parentElement () { return this.$refs.dialog },
@@ -542,7 +542,7 @@ export default {
       }
     },
     collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo },
-    cardStyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowCardStyleActions }
+    StyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowStyleActions }
   },
   methods: {
     broadcastShowCardDetails () {
@@ -901,10 +901,10 @@ export default {
       this.imagePickerIsVisible = !isVisible
       this.initialSearch = this.normalizedName
     },
-    toggleCardStyleActionsIsVisible () {
+    toggleStyleActionsIsVisible () {
       this.closeDialogs()
-      const isVisible = !this.$store.state.currentUser.shouldShowCardStyleActions
-      this.$store.dispatch('currentUser/shouldShowCardStyleActions', isVisible)
+      const isVisible = !this.$store.state.currentUser.shouldShowStyleActions
+      this.$store.dispatch('currentUser/shouldShowStyleActions', isVisible)
       this.$nextTick(() => {
         this.scrollIntoView()
       })

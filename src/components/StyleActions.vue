@@ -1,5 +1,5 @@
 <template lang="pug">
-section.sub-section.card-style-actions(v-if="visible" @click.left.stop="closeDialogs")
+section.sub-section.style-actions(v-if="visible" @click.left.stop="closeDialogs")
   .row
     //- h1
     .button-wrap
@@ -53,7 +53,7 @@ import uniq from 'lodash-es/uniq'
 const defaultCardBackgroundColor = '#c9c9c9'
 
 export default {
-  name: 'CardStyleActions',
+  name: 'StyleActions',
   components: {
     FramePicker,
     TagPickerStyleActions,
@@ -61,7 +61,8 @@ export default {
   },
   props: {
     visible: Boolean,
-    cards: Array
+    cards: Array,
+    boxes: Array
   },
   data () {
     return {
@@ -78,7 +79,10 @@ export default {
     })
   },
   computed: {
+    isCards () { return Boolean(this.cards.length) },
+    isBoxes () { return Boolean(this.boxes.length) },
     cardsBackgroundColor () {
+      console.log('💖', this.cards, this.boxes) // temp
       let colors = this.cards.map(card => card.backgroundColor)
       colors = colors.filter(color => Boolean(color))
       const cardsHaveColors = colors.length === this.cards.length
@@ -283,7 +287,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.card-style-actions
+.style-actions
   padding 4px
   padding-bottom 0
   .row

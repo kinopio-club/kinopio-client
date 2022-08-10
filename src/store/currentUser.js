@@ -37,8 +37,8 @@ export default {
     shouldEmailWeeklyReview: true,
     shouldShowMoreAlignOptions: false,
     shouldShowCardCollaborationInfo: false,
-    shouldShowCardStyleActions: false,
-    shouldShowMultiCardStyleActions: false,
+    shouldShowStyleActions: false,
+    shouldShowMultiStyleActions: false,
     shouldInvertZoomDirection: false,
     shouldUseLastConnectionType: false,
     shouldOpenLinksInNewTab: false,
@@ -243,13 +243,13 @@ export default {
       state.shouldShowCardCollaborationInfo = value
       cache.updateUser('shouldShowCardCollaborationInfo', value)
     },
-    shouldShowCardStyleActions: (state, value) => {
-      state.shouldShowCardStyleActions = value
-      cache.updateUser('shouldShowCardStyleActions', value)
+    shouldShowStyleActions: (state, value) => {
+      state.shouldShowStyleActions = value
+      cache.updateUser('shouldShowStyleActions', value)
     },
-    shouldShowMultiCardStyleActions: (state, value) => {
-      state.shouldShowMultiCardStyleActions = value
-      cache.updateUser('shouldShowMultiCardStyleActions', value)
+    shouldShowMultiStyleActions: (state, value) => {
+      state.shouldShowMultiStyleActions = value
+      cache.updateUser('shouldShowMultiStyleActions', value)
     },
     showInExploreUpdatedAt: (state, value) => {
       state.showInExploreUpdatedAt = value
@@ -635,20 +635,20 @@ export default {
           shouldShowCardCollaborationInfo: value
         } }, { root: true })
     },
-    shouldShowCardStyleActions: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowCardStyleActions' })
-      context.commit('shouldShowCardStyleActions', value)
+    shouldShowStyleActions: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowStyleActions' })
+      context.commit('shouldShowStyleActions', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
-          shouldShowCardStyleActions: value
+          shouldShowStyleActions: value
         } }, { root: true })
     },
-    shouldShowMultiCardStyleActions: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowMultiCardStyleActions' })
-      context.commit('shouldShowMultiCardStyleActions', value)
+    shouldShowMultiStyleActions: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowMultiStyleActions' })
+      context.commit('shouldShowMultiStyleActions', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
-          shouldShowMultiCardStyleActions: value
+          shouldShowMultiStyleActions: value
         } }, { root: true })
     },
     showInExploreUpdatedAt: (context, value) => {
