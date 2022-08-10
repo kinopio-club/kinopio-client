@@ -476,6 +476,8 @@ export default {
 
     stopInteractions (event) {
       console.log('💣 stopInteractions')
+      this.$store.dispatch('currentCards/afterMove')
+      this.$store.dispatch('currentBoxes/afterMove')
       this.updateCardOverlaps()
       this.addInteractionBlur()
       if (event.touches) {
