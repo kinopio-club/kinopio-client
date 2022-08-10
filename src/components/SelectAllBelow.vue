@@ -82,7 +82,7 @@ export default {
     selectAllBelow (event) {
       let position = utils.cursorPositionInPage(event)
       this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
-      this.$store.commit('triggerSelectAllCardsBelowCursor', position)
+      this.$store.commit('triggerSelectAllItemsBelowCursor', position)
     }
   }
 }

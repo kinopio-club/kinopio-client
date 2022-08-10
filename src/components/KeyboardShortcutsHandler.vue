@@ -26,9 +26,9 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerAddCard') {
         this.addCard()
-      } else if (mutation.type === 'triggerSelectAllCardsBelowCursor') {
+      } else if (mutation.type === 'triggerSelectAllItemsBelowCursor') {
         const position = mutation.payload
-        this.selectAllCardsBelowCursor(position)
+        this.selectAllItemsBelowCursor(position)
       }
     })
   },
@@ -151,7 +151,7 @@ export default {
       // Select All Cards Below Cursor
       } else if (isMeta && event.shiftKey && key === 'a' && isSpaceScope) {
         event.preventDefault()
-        this.selectAllCardsBelowCursor()
+        this.selectAllItemsBelowCursor()
       // Select All Cards and Connections
       } else if (isMeta && key === 'a' && isSpaceScope) {
         event.preventDefault()
@@ -845,22 +845,31 @@ export default {
 
     // Select All Cards Below Cursor
 
-    selectAllCardsBelowCursor (position) {
+    selectAllItemsBelowCursor (position) {
       const preventMultipleSelectedActionsIsVisible = this.$store.state.preventMultipleSelectedActionsIsVisible
       position = position || currentCursorPosition
       const zoom = this.$store.getters.spaceZoomDecimal
+      // cards
       let cards = utils.clone(this.$store.getters['currentCards/all'])
       cards = cards.filter(card => (card.y * zoom) > position.y)
-      cards = cards.map(card => card.id)
-      if (cards.length && preventMultipleSelectedActionsIsVisible) {
-        this.$store.commit('multipleCardsSelectedIds', cards)
-      } else if (cards.length) {
+      const cardIds = cards.map(card => card.id)
+      // boxes
+      let boxes = utils.clone(this.$store.getters['currentBoxes/all'])
+      boxes = boxes.filter(boxes => (boxes.y * zoom) > position.y)
+      const boxIds = boxes.map(boxes => boxes.id)
+      // select
+      if (cardIds.length && preventMultipleSelectedActionsIsVisible) {
+        this.$store.commit('multipleCardsSelectedIds', cardIds)
+        this.$store.commit('multipleBoxesSelectedIds', boxIds)
+      } else if (cardIds.length) {
         this.$store.commit('multipleSelectedActionsPosition', position)
         this.$store.commit('multipleSelectedActionsIsVisible', true)
-        this.$store.commit('multipleCardsSelectedIds', cards)
+        this.$store.commit('multipleCardsSelectedIds', cardIds)
+        this.$store.commit('multipleBoxesSelectedIds', boxIds)
       } else {
         this.$store.commit('multipleSelectedActionsIsVisible', false)
         this.$store.commit('multipleCardsSelectedIds', [])
+        this.$store.commit('multipleBoxesSelectedIds', [])
       }
     },
 
