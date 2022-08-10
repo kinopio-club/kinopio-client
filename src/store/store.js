@@ -1280,7 +1280,6 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionDetailsVisible' }, { root: true })
     },
     addToMultipleBoxesSelected: (context, boxId) => {
-      console.log(boxId)
       utils.typeCheck({ value: boxId, type: 'string', origin: 'addToMultipleBoxesSelected' })
       if (context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
       context.commit('addToMultipleBoxesSelected', boxId)

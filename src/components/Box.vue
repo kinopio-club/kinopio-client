@@ -352,6 +352,10 @@ export default {
     endInteraction (event) {
       if (!this.isResizing && !this.isDragging) { return }
       this.$store.dispatch('history/resume')
+      // reset toolbar state after new box created and sized
+      if (this.isResizing) {
+        this.$store.commit('currentUserToolbar', 'card')
+      }
       // update all selected boxes
       this.selectedBoxes.forEach(box => {
         const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
