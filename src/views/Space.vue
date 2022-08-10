@@ -5,7 +5,6 @@ main.space(
   @touchstart="initInteractions"
   :style="styles"
 )
-  Boxes
   //- Connections
   svg.connections
     template(v-for="startCardId in currentConnectionStartCardIds")
@@ -17,6 +16,7 @@ main.space(
   template(v-for="connection in connections")
     //- Connection Decorators
     ConnectionLabel(:connection="connection")
+  Boxes
   //- Presence
   template(v-for="user in spaceMembers")
     UserLabelCursor(:user="user")
@@ -453,8 +453,6 @@ export default {
     },
     showMultipleSelectedActions (event) {
       if (this.spaceIsReadOnly) { return }
-      if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
-      if (this.$store.state.preventDraggedBoxFromShowingDetails) { return }
       if (this.$store.state.preventMultipleSelectedActionsIsVisible) { return }
       const isMultipleSelected = this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length || this.$store.state.multipleBoxesSelectedIds.length
       if (isMultipleSelected) {
@@ -496,6 +494,7 @@ export default {
         this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
       }
       this.showMultipleSelectedActions(event)
+      this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
       this.$store.commit('importArenaChannelIsVisible', false)
       this.$store.commit('shouldAddCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
@@ -504,11 +503,9 @@ export default {
       this.stopResizingBoxes()
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
-      if (this.isDraggingCard || this.isDraggingBox) {
-        this.showMultipleSelectedActions(event)
-      }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('currentUserIsDraggingBox', false)
+      this.$store.commit('boxesWereDragged', false)
       this.updatePageSizes()
       this.$store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
       prevCursor = undefined

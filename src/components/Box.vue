@@ -125,9 +125,9 @@ export default {
       return isDragging && (isCurrent || this.isSelected)
     },
     isResizing () {
-      return this.$store.state.currentUserIsResizingBox
-      // const isCurrent = this.$store.state.currentUserIsResizingBoxIds.includes(this.box.id)
-      // return isResizing && isCurrent
+      const isResizing = this.$store.state.currentUserIsResizingBox
+      const isCurrent = this.$store.state.currentUserIsResizingBoxIds.includes(this.box.id)
+      return isResizing && isCurrent
     },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     isH1 () {
@@ -224,6 +224,7 @@ export default {
       // this.$store.commit('preventDraggedBoxFromShowingDetails', true)
       // this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.commit('currentUserIsResizingBox', true)
+      this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
       let boxIds = [this.box.id]
       const multipleBoxesSelectedIds = this.$store.state.multipleBoxesSelectedIds
       if (multipleBoxesSelectedIds.length) {
@@ -285,6 +286,9 @@ export default {
           this.$store.dispatch('addToMultipleCardsSelected', card.id)
         }
       })
+      if (!this.multipleBoxesIsSelected) {
+        this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
+      }
     },
     isCardInSelectedBoxes (card) {
       if (card.isLocked) { return }
@@ -353,7 +357,7 @@ export default {
     // },
 
     showBoxDetails (event) {
-      // this.$store.dispatch('currentBoxes/afterMove')
+      this.$store.dispatch('currentBoxes/afterMove')
       // if (this.isLocked) { return }
       if (this.$store.state.currentUserIsPainting) { return }
       if (isMultiTouch) { return }
@@ -361,8 +365,6 @@ export default {
       // if (this.$store.state.currentUserIsResizingBox || this.$store.state.currentUserIsDraggingBox) { return }
       if (this.$store.state.boxesWereDragged) { return }
       if (!this.canEditBox) { this.$store.commit('triggerReadOnlyJiggle') }
-
-      console.log('🍅')
 
       const userId = this.$store.state.currentUser.id
       // const boxesWereDragged = this.$store.state.boxesWereDragged
@@ -384,10 +386,13 @@ export default {
       //   window.location = event.target.href
       //   return
       // }
+
       this.$store.commit('boxDetailsIsVisibleForBoxId', this.box.id)
+      console.log('🍅🍅🍅🍅', this.$store.state.boxDetailsIsVisibleForBoxId)
+
       // this.$store.commit('preventCardDetailsOpeningAnimation', true)
       // this.$store.commit('parentCardId', this.id)
-      // event.stopPropagation() // only stop propagation if cardDetailsIsVisible
+      event.stopPropagation() // only stop propagation if cardDetailsIsVisible, to prevent stopInteractions()
       this.$store.commit('currentUserIsDraggingBox', false)
       // this.updatePreviousResultCardId()
       // this.clearPositionOffsets()
@@ -424,6 +429,7 @@ export default {
     //   // this.newX = 0
     //   // this.newY = 0
     //   prevCursor = null
+
     //   if (!this.multipleBoxesIsSelected) {
     //     setTimeout(() => {
     //       this.$store.dispatch('clearMultipleSelected')
