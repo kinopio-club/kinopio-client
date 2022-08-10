@@ -321,6 +321,7 @@ export default {
       const boxes = boxIds.map(id => this.$store.getters['currentBoxes/byId'](id))
       this.$store.dispatch('history/add', { boxes, useSnapshot: true })
       this.$store.commit('currentUserIsResizingBox', false)
+      this.$store.commit('currentUserToolbar', 'card')
       this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserResizingBoxes' })
     },
 

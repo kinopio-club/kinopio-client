@@ -148,7 +148,7 @@ export default {
       context.dispatch('broadcast/update', { updates: box, type: 'createBox', handler: 'currentBoxes/create' }, { root: true })
       if (shouldResize) {
         context.commit('currentUserIsResizingBox', true, { root: true })
-        context.commit('currentUserIsResizingBoxId', box.id, { root: true })
+        context.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
       }
     },
 
