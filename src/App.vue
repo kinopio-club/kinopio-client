@@ -10,7 +10,6 @@
   LockedCards
   MagicPaint
   OffscreenMarkers
-  Boxes
   //- router-view is Space or Add
   router-view
   Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
@@ -42,7 +41,6 @@ import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import Minimap from '@/components/Minimap.vue'
 import LockedCards from '@/components/LockedCards.vue'
-import Boxes from '@/components/Boxes.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -60,8 +58,7 @@ export default {
     LinkDetails,
     OffscreenMarkers,
     Minimap,
-    LockedCards,
-    Boxes
+    LockedCards
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)

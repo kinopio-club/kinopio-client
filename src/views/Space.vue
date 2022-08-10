@@ -5,6 +5,7 @@ main.space(
   @touchstart="initInteractions"
   :style="styles"
 )
+  Boxes
   //- Connections
   svg.connections
     template(v-for="startCardId in currentConnectionStartCardIds")
@@ -53,6 +54,7 @@ import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import BoxSelecting from '@/components/BoxSelecting.vue'
 import CardUnlockButton from '@/components/CardUnlockButton.vue'
+import Boxes from '@/components/Boxes.vue'
 import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -80,7 +82,8 @@ export default {
     ScrollAtEdgesHandler,
     NotificationsWithPosition,
     BoxSelecting,
-    CardUnlockButton
+    CardUnlockButton,
+    Boxes
   },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')

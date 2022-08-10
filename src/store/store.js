@@ -96,10 +96,10 @@ const store = createStore({
     currentUserIsDraggingBox: false,
     currentUserIsDraggingBoxIds: [],
     remoteBoxesDragging: [],
-    preventDraggedBoxFromShowingDetails: false,
+    // // preventDraggedBoxFromShowingDetails: false,
 
-    // cards
-    shouldAddCard: false,
+    // // cards
+    // shouldAddCard: false,
     cardDetailsIsVisibleForCardId: '',
     parentCardId: '',
     childCardId: '',
@@ -711,10 +711,10 @@ const store = createStore({
       utils.typeCheck({ value: update, type: 'object', origin: 'clearRemoteBoxesDragging' })
       state.remoteBoxesDragging = state.remoteBoxesDragging.filter(card => card.userId !== update.userId)
     },
-    preventDraggedBoxFromShowingDetails: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'preventDraggedBoxFromShowingDetails' })
-      state.preventDraggedBoxFromShowingDetails = value
-    },
+    // preventDraggedBoxFromShowingDetails: (state, value) => {
+    //   utils.typeCheck({ value, type: 'boolean', origin: 'preventDraggedBoxFromShowingDetails' })
+    //   state.preventDraggedBoxFromShowingDetails = value
+    // },
 
     // Tag Details
 

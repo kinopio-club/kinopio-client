@@ -69,14 +69,6 @@ let currentTouchPosition = {}
 
 export default {
   name: 'Box',
-  // mounted () {
-  //   window.addEventListener('pointermove', this.moveOrResizeBox)
-  // window.addEventListener('pointerup', this.endInteraction)
-  // },
-  // beforeUnmount () {
-  //   window.removeEventListener('pointermove', this.moveOrResizeBox)
-  // window.removeEventListener('pointerup', this.endInteraction)
-  // },
   props: {
     box: Object
   },
@@ -229,7 +221,7 @@ export default {
       if (utils.isMultiTouch(event)) { return }
       this.$store.dispatch('history/pause')
       this.$store.dispatch('closeAllDialogs', 'Card.startResizing')
-      this.$store.commit('preventDraggedBoxFromShowingDetails', true)
+      // this.$store.commit('preventDraggedBoxFromShowingDetails', true)
       // this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.commit('currentUserIsResizingBox', true)
       let boxIds = [this.box.id]
@@ -255,7 +247,7 @@ export default {
       if (!this.currentBoxIsSelected) {
         this.$store.dispatch('clearMultipleSelected')
       }
-      this.$store.commit('preventDraggedBoxFromShowingDetails', true)
+      // this.$store.commit('preventDraggedBoxFromShowingDetails', true)
       this.$store.commit('currentDraggingBoxId', '')
       this.$store.dispatch('closeAllDialogs', 'Box.startBoxInfoInteraction')
       const preventSelect = event.shiftKey
@@ -361,13 +353,17 @@ export default {
     // },
 
     showBoxDetails (event) {
-      this.$store.dispatch('currentBoxes/afterMove')
+      // this.$store.dispatch('currentBoxes/afterMove')
       // if (this.isLocked) { return }
       if (this.$store.state.currentUserIsPainting) { return }
       if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
-      if (this.$store.state.currentUserIsResizingBox || this.$store.state.currentUserIsDraggingBox) { return }
+      // if (this.$store.state.currentUserIsResizingBox || this.$store.state.currentUserIsDraggingBox) { return }
+      if (this.$store.state.boxesWereDragged) { return }
       if (!this.canEditBox) { this.$store.commit('triggerReadOnlyJiggle') }
+
+      console.log('🍅')
+
       const userId = this.$store.state.currentUser.id
       // const boxesWereDragged = this.$store.state.boxesWereDragged
       // const shouldToggleSelected = event.shiftKey && !boxesWereDragged && !this.isConnectingTo
@@ -379,7 +375,7 @@ export default {
       // }
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
       // this.preventDraggedButtonBadgeFromShowingDetails = this.$store.state.preventDraggedCardFromShowingDetails
-      if (this.$store.state.preventDraggedBoxFromShowingDetails) { return }
+      // if (this.$store.state.preventDraggedBoxFromShowingDetails) { return }
       this.$store.dispatch('closeAllDialogs', 'Box.showBoxDetails')
       this.$store.dispatch('clearMultipleSelected')
       // const nodeName = event.target.nodeName
@@ -388,16 +384,15 @@ export default {
       //   window.location = event.target.href
       //   return
       // }
-      this.$store.commit('boxDetailsIsVisibleForBoxId', this.id)
+      this.$store.commit('boxDetailsIsVisibleForBoxId', this.box.id)
       // this.$store.commit('preventCardDetailsOpeningAnimation', true)
       // this.$store.commit('parentCardId', this.id)
-      event.stopPropagation() // only stop propagation if cardDetailsIsVisible
+      // event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingBox', false)
       // this.updatePreviousResultCardId()
       // this.clearPositionOffsets()
     },
 
-    // endInteraction (event) { // unused
     //   if (!this.isResizing && !this.isDragging) { return }
     //   // this.$store.dispatch('history/resume')
     //   // reset toolbar state after new box created and sized
