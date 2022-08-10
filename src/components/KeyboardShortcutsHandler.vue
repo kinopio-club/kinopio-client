@@ -155,7 +155,7 @@ export default {
       // Select All Cards and Connections
       } else if (isMeta && key === 'a' && isSpaceScope) {
         event.preventDefault()
-        this.selectAllCardsAndConnections()
+        this.selectAllItems()
       // Search/Jump-to Space
       } else if (isMeta && key === 'k') {
         event.preventDefault()
@@ -864,13 +864,12 @@ export default {
       }
     },
 
-    // Select All Cards
+    // Select All Cards, Connections, and Boxes
 
-    selectAllCardsAndConnections () {
-      let cards = utils.clone(this.$store.getters['currentCards/all'])
-      cards = cards.map(card => card.id)
-      let connections = utils.clone(this.$store.getters['currentConnections/all'])
-      connections = connections.map(connection => connection.id)
+    selectAllItems () {
+      const cardIds = utils.clone(this.$store.state.currentCards.ids)
+      const connectionIds = utils.clone(this.$store.state.currentConnections.ids)
+      const boxIds = utils.clone(this.$store.state.currentBoxes.ids)
       const dialogOffset = {
         width: 200 / 2,
         height: 150 / 2
@@ -881,8 +880,9 @@ export default {
       }
       this.$store.commit('multipleSelectedActionsPosition', viewportCenter)
       this.$store.commit('multipleSelectedActionsIsVisible', true)
-      this.$store.commit('multipleConnectionsSelectedIds', connections)
-      this.$store.commit('multipleCardsSelectedIds', cards)
+      this.$store.commit('multipleConnectionsSelectedIds', connectionIds)
+      this.$store.commit('multipleCardsSelectedIds', cardIds)
+      this.$store.commit('multipleBoxesSelectedIds', boxIds)
     },
 
     // Search/Jump-to
