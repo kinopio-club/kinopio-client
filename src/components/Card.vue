@@ -706,9 +706,6 @@ export default {
         this.checkIfShouldUpdateCardConnectionPaths(width)
       }
       width = Math.min(width, maxWidth)
-      if (this.card.isLocked) {
-        width = width + 4
-      }
       return Math.ceil(width)
     },
     isConnectingTo () {

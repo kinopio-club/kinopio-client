@@ -25,7 +25,4 @@ export default {
 </script>
 
 <style lang="stylus">
-.locked-cards
-  position absolute
-  top 0
 </style>
