@@ -471,22 +471,11 @@ export default {
       this.$store.commit('multipleSelectedActionsPosition', position)
       this.$store.commit('multipleSelectedActionsIsVisible', true)
     },
+
+    // 💣 stopInteractions and Space/stopPainting are run on all mouse and touch end events
+
     stopInteractions (event) {
-      // const temporaryDebugState = {
-      //   event: event,
-      //   shouldCancel: shouldCancel,
-      //   eventIsFromTextarea: this.eventIsFromTextarea(event),
-      //   currentUserIsDraggingCard: this.$store.state.currentUserIsDraggingCard,
-      //   shouldAddCard: this.$store.state.shouldAddCard,
-      //   cardDetailsIsVisibleForCardId: this.$store.state.cardDetailsIsVisibleForCardId,
-      //   multipleCardsSelectedIds: this.$store.state.multipleCardsSelectedIds,
-      //   preventDraggedCardFromShowingDetails: this.$store.state.preventDraggedCardFromShowingDetails,
-      //   currentDraggingCardId: this.$store.state.currentDraggingCardId,
-      //   currentUserIsPainting: this.$store.state.currentUserIsPainting,
-      //   currentUserIsPaintingLocked: this.$store.state.currentUserIsPainting,
-      //   isDraggingCard: this.isDraggingCard,
-      // }
-      console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
+      console.log('💣 stopInteractions')
       this.updateCardOverlaps()
       this.addInteractionBlur()
       if (event.touches) {
