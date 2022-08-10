@@ -665,22 +665,22 @@ dialog
     &:last-child
       border-top-right-radius 3px
       border-bottom-right-radius 3px
-  &.vertical
-    display flex
-    flex-direction column
-    .button-wrap
-      button
-        min-width 24px
-        border-radius 0
-        margin-bottom -1px
-      &:first-child
-        button
-          border-top-left-radius 3px
-          border-top-right-radius 3px
-      &:last-child
-        button
-          border-bottom-left-radius 3px
-          border-bottom-right-radius 3px
+  // &.vertical
+  //   display flex
+  //   flex-direction column
+  //   .button-wrap
+  //     button
+  //       min-width 24px
+  //       border-radius 0
+  //       margin-bottom -1px
+  //     &:first-child
+  //       button
+  //         border-top-left-radius 3px
+  //         border-top-right-radius 3px
+  //     &:last-child
+  //       button
+  //         border-bottom-left-radius 3px
+  //         border-bottom-right-radius 3px
 
   button + button,
   label + button

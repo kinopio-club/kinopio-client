@@ -81,6 +81,7 @@ export default {
       } else if (key === 'Escape' || (key === 'z' && isSpaceScope)) {
         this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
         this.$store.commit('minimapIsVisible', false)
+        this.$store.commit('currentUserToolbar', 'card')
       // → Left
       } else if (key === 'ArrowLeft' && (isSpaceScope || isFromCard)) {
         this.focusNearestCardLeft()
