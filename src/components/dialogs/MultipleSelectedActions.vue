@@ -41,12 +41,12 @@ dialog.narrow.multiple-selected-actions(
       ConnectionDecorators(:connections="editableConnections")
 
   section
-    template(v-if="multipleCardOrBoxesIsSelected")
+    template(v-if="oneCardOrMultipleBoxesIsSelected")
       .row
         //- Align And Distribute
         AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldAutoDistribute="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
         //- Move/Copy
-        .segmented-buttons.move-or-copy-wrap(v-if="multipleCardsIsSelected")
+        .segmented-buttons.move-or-copy-wrap(v-if="cardsIsSelected")
           button(@click.left.stop="toggleCopyCardsIsVisible" :class="{ active: copyCardsIsVisible }")
             span Copy
             MoveOrCopyCards(:visible="copyCardsIsVisible" :actionIsMove="false" :exportData="exportData")
@@ -128,6 +128,7 @@ export default {
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
+    oneCardOrMultipleBoxesIsSelected () { return this.cards.length || this.boxes.length > 1 },
 
     // cards
 
