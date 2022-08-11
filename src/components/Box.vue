@@ -241,7 +241,7 @@ export default {
       // if (utils.isMultiTouch(event)) { return }
       // this.updateIsResizing(true)
       // this.updatePrevCursor(event)
-      // event.preventDefault() // allows resizing box without scrolling on mobile
+      event.preventDefault() // allows resizing box without scrolling on mobile
     },
     startBoxInfoInteraction (event) {
       // this.updatePrevCursor(event)
