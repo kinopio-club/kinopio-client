@@ -86,6 +86,7 @@ const store = createStore({
     boxDetailsIsVisibleForBoxId: '',
     remoteUserResizingBoxs: [],
     multipleBoxesSelectedIds: [],
+    currentBoxIsNew: false,
     // resizing boxes
     currentUserIsResizingBox: false,
     currentUserIsResizingBoxIds: [],
@@ -540,6 +541,10 @@ const store = createStore({
 
     // box selecting
 
+    currentBoxIsNew: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'currentBoxIsNew' })
+      state.currentBoxIsNew = value
+    },
     currentUserIsBoxSelecting: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsBoxSelecting' })
       state.currentUserIsBoxSelecting = value

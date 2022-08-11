@@ -486,6 +486,16 @@ export default {
       if (this.$store.state.multipleBoxesSelectedIds.length) { return }
       this.$store.dispatch('clearMultipleSelected')
     },
+    showBoxDetails (event) {
+      if (!this.$store.state.currentBoxIsNew) { return }
+      const boxId = this.$store.state.currentUserIsResizingBoxIds[0]
+      this.$store.commit('currentBoxIsNew', false)
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.$store.commit('boxDetailsIsVisibleForBoxId', boxId)
+        })
+      })
+    },
 
     // 💣 stopInteractions and Space/stopPainting are run on all mouse and touch end events
 
@@ -503,6 +513,7 @@ export default {
       this.addOrCloseCard(event)
       this.unselectCardsInDraggedBox()
       this.showMultipleSelectedActions(event)
+      this.showBoxDetails(event)
       this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
       this.$store.commit('importArenaChannelIsVisible', false)
       this.$store.commit('shouldAddCard', false)
