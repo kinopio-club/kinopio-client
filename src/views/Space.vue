@@ -481,6 +481,11 @@ export default {
         this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
       }
     },
+    unselectCardsInDraggedBox () {
+      if (!this.$store.state.currentDraggingBoxId) { return }
+      if (this.$store.state.multipleBoxesSelectedIds.length) { return }
+      this.$store.dispatch('clearMultipleSelected')
+    },
 
     // 💣 stopInteractions and Space/stopPainting are run on all mouse and touch end events
 
@@ -496,6 +501,7 @@ export default {
       this.checkIfShouldHideFooter(event)
       if (this.shouldCancel(event)) { return }
       this.addOrCloseCard(event)
+      this.unselectCardsInDraggedBox()
       this.showMultipleSelectedActions(event)
       this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
       this.$store.commit('importArenaChannelIsVisible', false)

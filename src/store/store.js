@@ -46,6 +46,7 @@ const store = createStore({
     isEmbed: false,
     isAddPage: false,
     isAppStoreView: false,
+    hasEditedCurrentSpace: false,
 
     // search
     searchIsVisible: false,
@@ -84,12 +85,11 @@ const store = createStore({
     // boxes
     boxDetailsIsVisibleForBoxId: '',
     remoteUserResizingBoxs: [],
-
+    multipleBoxesSelectedIds: [],
     // resizing boxes
     currentUserIsResizingBox: false,
     currentUserIsResizingBoxIds: [],
     remoteUserResizingBoxes: [],
-
     // dragging boxes
     currentDraggingBoxId: '',
     boxesWereDragged: false,
@@ -106,13 +106,11 @@ const store = createStore({
     remoteCardDetailsVisible: [],
     preventCardDetailsOpeningAnimation: true,
     cardUserDetailsIsVisibleForCardId: '',
-    hasEditedCurrentSpace: false,
-
+    multipleCardsSelectedIds: [],
     // resizing card
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
     remoteUserResizingCards: [],
-
     // dragging cards
     currentDraggingCardId: '',
     remoteCardsDragging: [],
@@ -120,6 +118,19 @@ const store = createStore({
     preventDraggedCardFromShowingDetails: false,
     triggeredTouchCardDragPosition: {},
     cardsWereDragged: false,
+
+    // multiple selection
+    multipleSelectedActionsIsVisible: false,
+    preventMultipleSelectedActionsIsVisible: false,
+    multipleSelectedActionsPosition: {},
+    previousMultipleCardsSelectedIds: [],
+    previousMultipleConnectionsSelectedIds: [],
+    remoteCardsSelected: [], // [{ cardId, userId }, …]
+    remoteConnectionsSelected: [], // [{ connectionId, userId }, …]
+    remoteBoxesSelected: [], // [{ boxId, userId }, …]
+    multipleConnectionsSelectedIds: [],
+    triggeredPaintFramePosition: {},
+    previousMultipleBoxesSelectedIds: [],
 
     // connecting
     currentConnectionStartCardIds: [],
@@ -150,22 +161,6 @@ const store = createStore({
     // pinned dialogs
     spaceDetailsIsPinned: false,
     sidebarIsPinned: false,
-
-    // multiple selection
-    multipleSelectedActionsIsVisible: false,
-    preventMultipleSelectedActionsIsVisible: false,
-    multipleSelectedActionsPosition: {},
-    multipleCardsSelectedIds: [],
-    previousMultipleCardsSelectedIds: [],
-    previousMultipleConnectionsSelectedIds: [],
-    remoteCardsSelected: [], // [{ cardId, userId }, …]
-    remoteConnectionsSelected: [], // [{ connectionId, userId }, …]
-    remoteBoxesSelected: [], // [{ boxId, userId }, …]
-    multipleConnectionsSelectedIds: [],
-    triggeredPaintFramePosition: {},
-    multipleBoxesSelectedIds: [],
-
-    previousMultipleBoxesSelectedIds: [],
 
     // loading
     isLoadingSpace: false,
