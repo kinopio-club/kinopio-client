@@ -251,8 +251,10 @@ export default {
       // this.$store.commit('preventDraggedBoxFromShowingDetails', true)
       this.$store.commit('currentDraggingBoxId', '')
       this.$store.dispatch('closeAllDialogs', 'Box.startBoxInfoInteraction')
-      const preventSelect = event.shiftKey
-      this.updateIsDragging(true, preventSelect)
+      this.$store.commit('currentUserIsDraggingBox', true)
+      this.$store.commit('currentDraggingBoxId', this.box.id)
+      if (event.shiftKey) { return } // should not select contained cards if shift key
+      this.selectContainedCards()
     },
     // updatePrevCursor (event) {
     //   prevCursor = utils.cursorPositionInPage(event)
@@ -272,13 +274,13 @@ export default {
     //     this.$store.commit('multipleSelectedActionsIsVisible', false)
     //   }
     // },
-    updateIsDragging (value, preventSelect) {
-      this.$store.commit('currentUserIsDraggingBox', value)
-      if (value && !preventSelect) {
-        this.$store.commit('currentDraggingBoxId', this.box.id)
-        this.selectContainedCards()
-      }
-    },
+    // updateIsDragging (value, shouldNotSelectContainedCards) {
+    //   this.$store.commit('currentUserIsDraggingBox', value)
+    //   if (value && !shouldNotSelectContainedCards) {
+    //     this.$store.commit('currentDraggingBoxId', this.box.id)
+    //     this.selectContainedCards()
+    //   }
+    // },
     selectContainedCards () {
       const cardMap = this.$store.state.currentCards.cardMap
       cardMap.forEach(card => {

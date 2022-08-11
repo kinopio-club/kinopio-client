@@ -276,6 +276,7 @@ export default {
       this.startCursor = utils.cursorPositionInViewport(event)
     },
     constrainCursorToAxis (event) {
+      if (this.$store.state.currentUserIsDraggingBox) { return }
       if (!event.shiftKey) { return }
       const delta = {
         x: Math.abs(endCursor.x - this.startCursor.x),
