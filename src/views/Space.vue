@@ -473,6 +473,14 @@ export default {
       this.$store.commit('multipleSelectedActionsPosition', position)
       this.$store.commit('multipleSelectedActionsIsVisible', true)
     },
+    addOrCloseCard (event) {
+      if (this.$store.state.shouldAddCard) {
+        const position = utils.cursorPositionInPage(event)
+        this.addCard(position)
+      } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
+        this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
+      }
+    },
 
     // 💣 stopInteractions and Space/stopPainting are run on all mouse and touch end events
 
@@ -487,13 +495,7 @@ export default {
       }
       this.checkIfShouldHideFooter(event)
       if (this.shouldCancel(event)) { return }
-      // add or close card
-      if (this.$store.state.shouldAddCard) {
-        const position = utils.cursorPositionInPage(event)
-        this.addCard(position)
-      } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
-        this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
-      }
+      this.addOrCloseCard(event)
       this.showMultipleSelectedActions(event)
       this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
       this.$store.commit('importArenaChannelIsVisible', false)
