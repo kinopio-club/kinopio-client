@@ -148,6 +148,7 @@ export default {
       context.dispatch('api/addToQueue', { name: 'createBox', body: box }, { root: true })
       context.dispatch('broadcast/update', { updates: box, type: 'createBox', handler: 'currentBoxes/create' }, { root: true })
       if (shouldResize) {
+        context.dispatch('history/pause', null, { root: true })
         context.commit('currentUserIsResizingBox', true, { root: true })
         context.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
       }
