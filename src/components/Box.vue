@@ -294,6 +294,8 @@ export default {
     },
     isCardInSelectedBoxes (card) {
       if (card.isLocked) { return }
+      const canEditCard = this.$store.getters['currentUser/canEditCard'](card)
+      if (!canEditCard) { return }
       const boxes = this.selectedBoxes
       const isInside = boxes.find(box => {
         box = this.normalizeBox(box)
