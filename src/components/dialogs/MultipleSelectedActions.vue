@@ -31,7 +31,7 @@ dialog.narrow.multiple-selected-actions(
     .row.edit-connection-types(v-if="connectionsIsSelected")
       //- Type Color
       .button-wrap
-        button.change-color(:disabled="!canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible")
+        button.change-color(:disabled="!canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: multipleConnectionsPickerVisible}")
           img.icon(src="@/assets/connection-path.svg")
           .segmented-colors.icon
             template(v-for="type in connectionTypes")
@@ -41,20 +41,6 @@ dialog.narrow.multiple-selected-actions(
       ConnectionDecorators(:connections="editableConnections")
 
   section
-    .row
-      //- Remove
-      button(:disabled="!canEditAll.all" @click.left="remove")
-        img.icon(src="@/assets/remove.svg")
-        span Remove
-      //- Merge
-      button(v-if="multipleCardsIsSelected" @click="mergeSelectedCards" :disabled="!canEditAll.cards")
-        img.icon(src="@/assets/merge.svg")
-        span Merge
-      //- Split
-      button(v-if="cardCanBeSplit" @click="splitCard" :disabled="!canEditAll.cards")
-        img.icon(src="@/assets/split.svg")
-        span Split
-
     template(v-if="multipleCardOrBoxesIsSelected")
       .row
         //- Align And Distribute
@@ -69,6 +55,20 @@ dialog.narrow.multiple-selected-actions(
             MoveOrCopyCards(:visible="moveCardsIsVisible" :actionIsMove="true" :exportData="exportData")
       //- More Options
       AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
+
+    .row
+      //- Remove
+      button(:disabled="!canEditAll.all" @click.left="remove")
+        img.icon(src="@/assets/remove.svg")
+        span Remove
+      //- Merge
+      button(v-if="multipleCardsIsSelected" @click="mergeSelectedCards" :disabled="!canEditAll.cards")
+        img.icon(src="@/assets/merge.svg")
+        span Merge
+      //- Split
+      button(v-if="cardCanBeSplit" @click="splitCard" :disabled="!canEditAll.cards")
+        img.icon(src="@/assets/split.svg")
+        span Split
 
     p(v-if="canEditAsNonMember && !selectedItemsIsCreatedByCurrentUser")
       span.badge.info
@@ -590,6 +590,8 @@ export default {
     width 11px
   .align-and-distribute + .move-or-copy-wrap
     margin-left 6px
+  .more-options
+    margin-bottom 10px
   .edit-connection-types
     .change-color
       height 24px

@@ -4,7 +4,6 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
     .row
       .button-wrap
         button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-          img.icon(src="@/assets/connection-path.svg")
           .current-color(:style="{backgroundColor: typeColor}")
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
       input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="focus" @blur="blur")
@@ -333,10 +332,4 @@ export default {
     label
       .badge-in-button
         margin-left 0
-  .change-color
-    width 45px
-    display flex
-    > .icon
-      margin-right 5px
-      margin-top 1px
 </style>

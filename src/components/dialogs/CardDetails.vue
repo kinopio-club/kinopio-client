@@ -113,7 +113,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Split by Line Breaks
       .button-wrap(v-if="nameSplitIntoCardsCount")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
-          img.icon(src="@/assets/split-vertically.svg")
+          img.icon(src="@/assets/split.svg")
           span Split Card ({{nameSplitIntoCardsCount}})
 
     .row.badges-row(v-if="badgesRowIsVisible")
