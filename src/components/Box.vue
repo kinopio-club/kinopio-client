@@ -9,11 +9,12 @@
   //- name
   .box-info(
     :data-box-id="box.id"
+    :style="labelStyles"
+    :class="{unselectable: isPainting}"
+
     @mouseover="updateIsHover(true)"
     @mouseleave="updateIsHover(false)"
     @mousedown.left="startBoxInfoInteraction"
-    :style="labelStyles"
-    :class="{unselectable: isPainting}"
 
     @mouseup.left="showBoxDetails"
     @keyup.stop.enter="showBoxDetails"

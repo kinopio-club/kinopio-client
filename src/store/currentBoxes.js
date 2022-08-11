@@ -297,6 +297,7 @@ export default {
       const multipleSelectedIds = rootState.multipleBoxesSelectedIds
       let boxIds = multipleSelectedIds.concat(currentDraggingId)
       boxIds = uniq(boxIds)
+      boxIds = boxIds.filter(id => Boolean(id))
       return boxIds
     },
     isSelected: (state, getters) => {

@@ -556,7 +556,7 @@ export default {
       document.querySelector(`.card[data-card-id="${closestCard.id}"]`).focus()
     },
 
-    focusedCardIds () {
+    selectedCardIds () {
       return this.$store.state.multipleCardsSelectedIds || []
     },
 
@@ -596,7 +596,8 @@ export default {
     remove () {
       this.$store.dispatch('history/resume')
       const selectedConnectionIds = this.$store.state.multipleConnectionsSelectedIds
-      const cardIds = this.focusedCardIds()
+      const cardIds = this.selectedCardIds()
+      const boxes = this.$store.getters['currentBoxes/isSelected']
       selectedConnectionIds.forEach(connectionId => {
         if (this.canEditConnectionById(connectionId)) {
           const connection = this.$store.getters['currentConnections/byId'](connectionId)
@@ -606,6 +607,12 @@ export default {
       cardIds.forEach(cardId => {
         if (this.canEditCardById(cardId)) {
           this.removeCardById(cardId)
+        }
+      })
+      boxes.forEach(box => {
+        const canEditBox = this.$store.getters['currentUser/canEditBox'](box)
+        if (canEditBox) {
+          this.$store.dispatch('currentBoxes/remove', box)
         }
       })
       this.$store.dispatch('currentConnections/removeUnusedTypes')
@@ -811,7 +818,7 @@ export default {
     },
 
     async writeSelectedToClipboard () {
-      const cardIds = this.focusedCardIds()
+      const cardIds = this.selectedCardIds()
       const cards = cardIds.map(cardId => {
         return this.$store.getters['currentCards/byId'](cardId)
       })
