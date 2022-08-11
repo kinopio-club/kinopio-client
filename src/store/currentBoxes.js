@@ -11,6 +11,7 @@ import uniq from 'lodash-es/uniq'
 // https://github.com/vuejs/vuejs.org/issues/1636
 
 let currentSpaceId
+let prevMovePositions = {}
 
 export default {
   namespaced: true,
@@ -207,7 +208,12 @@ export default {
       // prevent boxes with null or negative positions
       boxes = utils.clone(boxes)
       boxes = boxes.map(box => {
-        const position = utils.boxPositionFromElement(box.id)
+        let position
+        if (prevMovePositions[box.id]) {
+          position = prevMovePositions[box.id]
+        } else {
+          position = utils.boxPositionFromElement(box.id)
+        }
         box.x = position.x
         box.y = position.y
         // x
@@ -229,6 +235,7 @@ export default {
           y: box.y,
           id: box.id
         }
+        prevMovePositions[box.id] = box
         return box
       })
       // update
@@ -237,6 +244,7 @@ export default {
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDraggingBroadcast' }, { root: true })
     },
     afterMove: (context) => {
+      prevMovePositions = {}
       const spaceId = context.rootState.currentSpace.id
       let boxIds = context.getters.isSelectedIds
       boxIds = boxIds.filter(box => Boolean(box))

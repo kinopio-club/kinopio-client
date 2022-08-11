@@ -236,7 +236,6 @@ export default {
         boxIds: boxIds
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBoxes' })
-
       // if (!this.canEditSpace) { return }
       // if (utils.isMultiTouch(event)) { return }
       // this.updateIsResizing(true)
@@ -390,7 +389,7 @@ export default {
       // }
 
       this.$store.commit('boxDetailsIsVisibleForBoxId', this.box.id)
-      console.log('🍅🍅🍅🍅', this.$store.state.boxDetailsIsVisibleForBoxId)
+      // console.log('🍅🍅🍅🍅', this.$store.state.boxDetailsIsVisibleForBoxId)
 
       // this.$store.commit('preventCardDetailsOpeningAnimation', true)
       // this.$store.commit('parentCardId', this.id)

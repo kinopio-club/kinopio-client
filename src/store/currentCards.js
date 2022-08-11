@@ -10,7 +10,9 @@ import qs from '@aguezz/qs-parse'
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
+
 let currentSpaceId
+let prevMovePositions = {}
 
 const cardMap = new Worker('/web-workers/card-map.js')
 // receive
@@ -470,7 +472,12 @@ const currentCards = {
       // prevent cards with null or negative positions
       cards = utils.clone(cards)
       cards = cards.map(card => {
-        const position = utils.cardPositionFromElement(card.id)
+        let position
+        if (prevMovePositions[card.id]) {
+          position = prevMovePositions[card.id]
+        } else {
+          position = utils.cardPositionFromElement(card.id)
+        }
         card.x = position.x
         card.y = position.y
         // x
@@ -493,6 +500,7 @@ const currentCards = {
           z: card.z,
           id: card.id
         }
+        prevMovePositions[card.id] = card
         return card
       })
       // update
@@ -507,6 +515,7 @@ const currentCards = {
       })
     },
     afterMove: (context) => {
+      prevMovePositions = {}
       const spaceId = context.rootState.currentSpace.id
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
