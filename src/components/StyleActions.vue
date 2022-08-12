@@ -10,33 +10,40 @@ section.sub-section.style-actions(v-if="visible" @click.left.stop="closeDialogs"
       button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }")
           span h2
     //- Tag
-    .button-wrap
+    .button-wrap(v-if="isCards")
       button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: tagPickerIsVisible }")
         span Tag
       TagPickerStyleActions(:visible="tagPickerIsVisible" :cards="cards")
     //- Frame
-    .button-wrap
+    .button-wrap(v-if="isCards")
       button(:disabled="!canEditAll" @click.left.stop="toggleFramePickerIsVisible" :class="{ active : framePickerIsVisible || isFrames }")
         span Frame
       FramePicker(:visible="framePickerIsVisible" :cards="cards")
     //- Color
-    .button-wrap(@click.left.stop="toggleColorPickerIsVisible")
+    .button-wrap(v-if="!colorIsHidden" @click.left.stop="toggleColorPickerIsVisible")
       button.change-color(:disabled="!canEditAll" :class="{active: colorPickerIsVisible}")
-        .current-color(:style="{ background: cardsBackgroundColor }")
+        .current-color(:style="{ background: color }")
       ColorPicker(
-        :currentColor="cardsBackgroundColor"
+        :currentColor="color"
         :visible="colorPickerIsVisible"
         :removeIsVisible="true"
-        :otherColors="spaceCardBackgroundColors"
-        @selectedColor="updateCardsBackgroundColor"
-        @removeColor="removeCardsBackgroundColor"
+        :otherColors="previousCardColors"
+        @selectedColor="updateColor"
+        @removeColor="removeColor"
       )
+    //- Box Fill
+    .segmented-buttons(v-if="isBoxes")
+      button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')")
+        img.icon.box-icon(src="@/assets/box.svg")
+      button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')")
+        img.icon.box-icon(src="@/assets/box-empty.svg")
+
     //- Lock
     .button-wrap
       button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}")
         img.icon(src="@/assets/lock.svg")
     //- Comment
-    .button-wrap
+    .button-wrap(v-if="isCards")
       button(:disabled="!canEditAll" @click="toggleIsComment" :class="{active: isComment}")
         img.icon(src="@/assets/comment.svg")
 
@@ -50,7 +57,7 @@ import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
 
-const defaultCardBackgroundColor = '#c9c9c9'
+const defaultCardColor = '#c9c9c9'
 
 export default {
   name: 'StyleActions',
@@ -61,8 +68,20 @@ export default {
   },
   props: {
     visible: Boolean,
-    cards: Array,
-    boxes: Array
+    colorIsHidden: Boolean,
+    cards: {
+      type: Array,
+      default (value) {
+        return []
+      }
+    },
+    boxes: {
+      type: Array,
+      default (value) {
+        return []
+      }
+    }
+
   },
   data () {
     return {
@@ -81,32 +100,50 @@ export default {
   computed: {
     isCards () { return Boolean(this.cards.length) },
     isBoxes () { return Boolean(this.boxes.length) },
-    cardsBackgroundColor () {
-      console.log('💖', this.cards, this.boxes) // temp
-      let colors = this.cards.map(card => card.backgroundColor)
+    items () {
+      let cards = utils.clone(this.cards)
+      let boxes = utils.clone(this.boxes)
+      cards = cards.map(card => {
+        card.isCard = true
+        return card
+      })
+      boxes = boxes.map(box => {
+        box.isBox = true
+        return box
+      })
+      return cards.concat(boxes)
+    },
+    boxFillIsEmpty () {
+      const numberOfBoxes = this.boxes.length
+      const boxes = this.boxes.filter(box => box.fill === 'empty')
+      return boxes.length === numberOfBoxes
+    },
+    boxFillIsFilled () {
+      const numberOfBoxes = this.boxes.length
+      const boxes = this.boxes.filter(box => box.fill === 'filled')
+      return boxes.length === numberOfBoxes
+    },
+    color () {
+      let colors = this.items.map(item => item.backgroundColor || item.color)
       colors = colors.filter(color => Boolean(color))
-      const cardsHaveColors = colors.length === this.cards.length
+      const itemsHaveColors = colors.length === this.items.length
       const colorsAreEqual = uniq(colors).length === 1
-      if (cardsHaveColors && colorsAreEqual) {
+      if (itemsHaveColors && colorsAreEqual) {
         return colors[0]
       } else {
-        return defaultCardBackgroundColor
+        return defaultCardColor
       }
     },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    spaceCardBackgroundColors () { return this.$store.getters['currentCards/backgroundColors'] },
-    numberOfSelectedCardsCreatedByCurrentUser () {
-      const cards = this.cards.filter(Boolean)
-      const cardsCreatedByCurrentUser = cards.filter(card => {
-        return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
-      })
-      return cardsCreatedByCurrentUser.length
-    },
+    previousCardColors () { return this.$store.getters['currentCards/previousColors'] },
     canEditAll () {
       if (this.isSpaceMember) { return true }
-      const cards = this.numberOfSelectedCardsCreatedByCurrentUser === this.cards.length
-      return cards
+      const editableCards = this.cards.filter(card => this.$store.getters['currentUser/canEditCard'](card))
+      const canEditCards = editableCards.length === this.cards.length
+      const editableBoxes = this.boxes.filter(box => this.$store.getters['currentUser/canEditBox'](box))
+      const canEditBoxes = editableBoxes.length === this.boxes.length
+      return canEditCards && canEditBoxes
     },
     isFrames () {
       const cards = this.cards.filter(card => card.frameId)
@@ -114,17 +151,17 @@ export default {
     },
     isH1 () {
       const pattern = 'h1Pattern'
-      const cards = this.cardsWithPattern(pattern)
-      return Boolean(cards.length === this.cards.length)
+      const items = this.itemsWithPattern(pattern)
+      return Boolean(items.length === this.items.length)
     },
     isH2 () {
       const pattern = 'h2Pattern'
-      const cards = this.cardsWithPattern(pattern)
-      return Boolean(cards.length === this.cards.length)
+      const items = this.itemsWithPattern(pattern)
+      return Boolean(items.length === this.items.length)
     },
     isLocked () {
-      const cards = this.cards.filter(card => card.isLocked)
-      return Boolean(cards.length === this.cards.length)
+      const items = this.items.filter(item => item.isLocked)
+      return Boolean(items.length === this.items.length)
     },
     isComment () {
       const cards = this.cards.filter(card => card.isComment)
@@ -132,33 +169,34 @@ export default {
     }
   },
   methods: {
-    updateCardsBackgroundColor (color) {
-      this.cards.forEach(card => {
-        if (card.backgroundColor === color) { return }
-        card = {
-          id: card.id,
-          backgroundColor: color
+
+    // items
+
+    updateColor (color) {
+      this.items.forEach(item => {
+        const currentColor = item.backgroundColor || item.color
+        if (currentColor === color) { return }
+        if (item.isCard) {
+          this.updateCard(item, { backgroundColor: color })
+        } else if (item.isBox) {
+          this.updateBox(item, { color })
         }
-        this.$store.dispatch('currentCards/update', card)
       })
     },
-    removeCardsBackgroundColor () {
-      this.cards.forEach(card => {
-        if (!card.backgroundColor) { return }
-        card = {
-          id: card.id,
-          backgroundColor: ''
+    removeColor () {
+      this.items.forEach(item => {
+        if (item.isCard) {
+          this.updateCard(item, { backgroundColor: null })
         }
-        this.$store.dispatch('currentCards/update', card)
       })
     },
-    cardsWithPattern (pattern) {
-      const cards = this.cards.filter(card => {
-        const name = this.normalizedName(card.name)
+    itemsWithPattern (pattern) {
+      const items = this.items.filter(item => {
+        const name = this.normalizedName(item.name)
         const result = utils.markdown()[pattern].exec(name)
         return Boolean(result)
       })
-      return cards
+      return items
     },
     normalizedName (name) {
       name = utils.removeMarkdownCodeblocksFromString(name) || ''
@@ -190,17 +228,17 @@ export default {
       }
     },
     toggleHeader (pattern) {
-      let cards = this.cardsWithPattern(pattern)
-      const shouldPrepend = cards.length < this.cards.length
+      let items = this.itemsWithPattern(pattern)
+      const shouldPrepend = items.length < this.items.length
       if (shouldPrepend) {
         const removePattern = this.removePattern(pattern)
-        this.removeFromCards(removePattern)
-        this.prependToCards(pattern)
+        this.removeFromItemNames(removePattern)
+        this.prependToItemNames(pattern)
       } else {
-        this.removeFromCards(pattern)
+        this.removeFromItemNames(pattern)
       }
     },
-    toggleIsLocked () {
+    toggleIsLocked () { // TODO for items
       let isLocked = true
       if (this.isLocked) {
         isLocked = false
@@ -213,6 +251,72 @@ export default {
         this.$store.dispatch('currentCards/update', card)
       })
       this.$store.dispatch('currentCards/updateCardMap')
+    },
+    prependToName ({ pattern, item, nameSegment }) {
+      const markdown = this.markdown(pattern)
+      let index = item.name.indexOf(nameSegment)
+      if (index < 0) { index = 0 }
+      const newName = utils.insertStringAtIndex(item.name, markdown, index)
+      this.updateName(item, newName)
+    },
+    prependToItemNames (pattern) {
+      this.items.forEach(item => {
+        const name = this.normalizedName(item.name) || ''
+        let patternExists = utils.markdown()[pattern].exec(name)
+        if (patternExists) {
+          return // skip
+        }
+        this.prependToName({ pattern, item, nameSegment: name })
+      })
+    },
+    updateName (item, newName) {
+      if (item.isCard) {
+        const card = this.$store.getters['currentCards/byId'](item.id)
+        this.$store.dispatch('currentCards/updateName', { card, newName })
+      }
+      if (item.isBox) {
+        const box = this.$store.getters['currentBoxes/byId'](item.id)
+        this.$store.dispatch('currentBoxes/updateName', { box, newName })
+      }
+    },
+    removeFromItemNames (pattern) {
+      const markdown = this.markdown(pattern)
+      this.items.forEach(item => {
+        const newName = item.name.replace(markdown, '')
+        if (newName === item.name) { return }
+        this.updateName(item, newName)
+      })
+    },
+    toggleColorPickerIsVisible () {
+      const isVisible = this.colorPickerIsVisible
+      this.closeDialogs()
+      this.colorPickerIsVisible = !isVisible
+    },
+    closeDialogs () {
+      this.framePickerIsVisible = false
+      this.tagPickerIsVisible = false
+      this.colorPickerIsVisible = false
+    },
+
+    // cards only
+
+    updateCard (card, updates) {
+      const keys = Object.keys(updates)
+      card = { id: card.id }
+      keys.forEach(key => {
+        card[key] = updates[key]
+      })
+      this.$store.dispatch('currentCards/update', card)
+    },
+    toggleFramePickerIsVisible () {
+      const isVisible = this.framePickerIsVisible
+      this.closeDialogs()
+      this.framePickerIsVisible = !isVisible
+    },
+    toggleTagPickerIsVisible () {
+      const isVisible = this.tagPickerIsVisible
+      this.closeDialogs()
+      this.tagPickerIsVisible = !isVisible
     },
     toggleIsComment () {
       let isComment = true
@@ -233,54 +337,21 @@ export default {
       })
       this.$store.dispatch('currentCards/updateCardMap')
     },
-    prependToCards (pattern) {
-      this.cards.forEach(card => {
-        const name = this.normalizedName(card.name) || ''
-        let patternExists = utils.markdown()[pattern].exec(name)
-        if (patternExists) {
-          return // skip
-        }
-        this.prependToNameSegment({ pattern, card, nameSegment: name })
+
+    // boxes only
+
+    updateBox (box, updates) {
+      const keys = Object.keys(updates)
+      box = { id: box.id }
+      keys.forEach(key => {
+        box[key] = updates[key]
       })
+      this.$store.dispatch('currentBoxes/update', box)
     },
-    updateCardName (cardId, newName) {
-      const card = this.$store.getters['currentCards/byId'](cardId)
-      this.$store.dispatch('currentCards/updateCardName', { card, newName })
-    },
-    prependToNameSegment ({ pattern, card, nameSegment }) {
-      const markdown = this.markdown(pattern)
-      let index = card.name.indexOf(nameSegment)
-      if (index < 0) { index = 0 }
-      const newName = utils.insertStringAtIndex(card.name, markdown, index)
-      this.updateCardName(card.id, newName)
-    },
-    removeFromCards (pattern) {
-      const markdown = this.markdown(pattern)
-      this.cards.forEach(card => {
-        const newName = card.name.replace(markdown, '')
-        if (newName === card.name) { return }
-        this.updateCardName(card.id, newName)
+    updateBoxFill (fill) {
+      this.boxes.forEach(box => {
+        this.updateBox(box, { fill })
       })
-    },
-    toggleFramePickerIsVisible () {
-      const isVisible = this.framePickerIsVisible
-      this.closeDialogs()
-      this.framePickerIsVisible = !isVisible
-    },
-    toggleTagPickerIsVisible () {
-      const isVisible = this.tagPickerIsVisible
-      this.closeDialogs()
-      this.tagPickerIsVisible = !isVisible
-    },
-    toggleColorPickerIsVisible () {
-      const isVisible = this.colorPickerIsVisible
-      this.closeDialogs()
-      this.colorPickerIsVisible = !isVisible
-    },
-    closeDialogs () {
-      this.framePickerIsVisible = false
-      this.tagPickerIsVisible = false
-      this.colorPickerIsVisible = false
     }
   }
 }
@@ -294,10 +365,12 @@ export default {
     max-width 203px
     display block
     margin-bottom -6px
-  .button-wrap
+  .button-wrap,
+  .segmented-buttons
     margin-left 0
     margin-right 6px
     vertical-align middle
     margin-bottom 10px
-
+  .segmented-buttons
+    display inline-flex
 </style>

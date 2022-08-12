@@ -943,7 +943,6 @@ const store = createStore({
       state.multipleBoxesSelectedIds = cardIds
     },
     addToMultipleBoxesSelected: (state, boxId) => {
-      console.log('🎪', boxId)
       utils.typeCheck({ value: boxId, type: 'string', origin: 'addToMultipleBoxesSelected' })
       state.multipleBoxesSelectedIds.push(boxId)
     },

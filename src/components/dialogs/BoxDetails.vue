@@ -17,21 +17,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         @keydown.enter.stop.prevent="closeAllDialogs"
         maxLength="600"
       )
-    .row
-      //- h1
-      .button-wrap
-        button(:disabled="!canEditBox" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }")
-          span h1
-      //- h2
-      .button-wrap
-        button(:disabled="!canEditBox" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }")
-          span h2
-      //- fill
-      .segmented-buttons
-        button(:class="{active: fillIsFilled}" @click="updateFill('filled')")
-          img.icon.box-icon(src="@/assets/box.svg")
-        button(:class="{active: fillIsEmpty}" @click="updateFill('empty')")
-          img.icon.box-icon(src="@/assets/box-empty.svg")
+    StyleActions(:visible="true" :boxes="[box]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row
       //- remove
       .button-wrap
@@ -43,6 +29,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
 
 <script>
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import StyleActions from '@/components/StyleActions.vue'
 import utils from '@/utils.js'
 
 let prevBoxId
@@ -50,7 +37,8 @@ let prevBoxId
 export default {
   name: 'BoxDetails',
   components: {
-    ColorPicker
+    ColorPicker,
+    StyleActions
   },
   data () {
     return {
@@ -63,8 +51,6 @@ export default {
       const id = this.$store.state.boxDetailsIsVisibleForBoxId
       return this.$store.getters['currentBoxes/byId'](id) || {}
     },
-    fillIsEmpty () { return this.box.fill === 'empty' },
-    fillIsFilled () { return this.box.fill === 'filled' },
     visible () { return utils.objectHasKeys(this.box) },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     styles () {
@@ -90,14 +76,6 @@ export default {
         this.update({ name })
       }
     },
-    isH1 () {
-      const pattern = 'h1Pattern'
-      return this.nameHasPattern(pattern)
-    },
-    isH2 () {
-      const pattern = 'h2Pattern'
-      return this.nameHasPattern(pattern)
-    },
     canEditBox () { return this.$store.getters['currentUser/canEditBox']() }
   },
   methods: {
@@ -119,9 +97,6 @@ export default {
     },
     updateColor (color) {
       this.update({ color })
-    },
-    updateFill (fill) {
-      this.update({ fill })
     },
     closeDialogs () {
       this.colorPickerIsVisible = false
@@ -158,53 +133,6 @@ export default {
           element.setSelectionRange(length, length)
         }
       })
-    },
-
-    // h1, h2
-
-    nameHasPattern (pattern) {
-      const result = utils.markdown()[pattern].exec(this.name)
-      return Boolean(result)
-    },
-    toRemovePattern (pattern) {
-      if (pattern === 'h1Pattern') {
-        return 'h2Pattern'
-      } else if (pattern === 'h2Pattern') {
-        return 'h1Pattern'
-      }
-    },
-    toggleHeader (pattern) {
-      let hasPattern
-      if (pattern === 'h1Pattern') {
-        hasPattern = this.isH1
-      } else if (pattern === 'h2Pattern') {
-        hasPattern = this.isH2
-      }
-      const toRemovePattern = this.toRemovePattern(pattern)
-      if (hasPattern) {
-        this.removeFromName(pattern)
-      } else {
-        this.removeFromName(toRemovePattern)
-        this.prependToName(pattern)
-      }
-    },
-    markdown (pattern) {
-      if (pattern === 'h1Pattern') {
-        return '# '
-      } else if (pattern === 'h2Pattern') {
-        return '## '
-      }
-    },
-    removeFromName (pattern) {
-      const markdown = this.markdown(pattern)
-      const newName = this.name.replace(markdown, '')
-      if (newName === this.name) { return }
-      this.update({ name: newName })
-    },
-    prependToName (pattern) {
-      const markdown = this.markdown(pattern)
-      const newName = markdown + this.name
-      this.update({ name: newName })
     }
   },
   watch: {

@@ -299,7 +299,7 @@ const currentCards = {
         context.dispatch('updateDimensionsAndMap', card.id)
       }
     },
-    updateCardName (context, { card, newName }) {
+    updateName (context, { card, newName }) {
       const canEditCard = context.rootGetters['currentUser/canEditCard'](card)
       if (!canEditCard) { return }
       context.dispatch('update', {
@@ -745,7 +745,7 @@ const currentCards = {
     users: (state, getters, rootState, rootGetters) => {
       return getters.userIds.map(id => rootGetters['currentSpace/userById'](id))
     },
-    backgroundColors: (state, getters) => {
+    previousColors: (state, getters) => {
       const cards = getters.all
       let colors = cards.map(card => card.backgroundColor)
       colors = colors.filter(color => Boolean(color))

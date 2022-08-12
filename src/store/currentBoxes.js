@@ -162,6 +162,14 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateBox', body: box }, { root: true })
       context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
     },
+    updateName (context, { box, newName }) {
+      const canEditBox = context.rootGetters['currentUser/canEditBox'](box)
+      if (!canEditBox) { return }
+      context.dispatch('update', {
+        id: box.id,
+        name: newName
+      })
+    },
 
     // resize
 

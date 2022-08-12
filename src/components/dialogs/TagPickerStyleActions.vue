@@ -92,14 +92,14 @@ export default {
       this.cards.forEach(card => {
         const newName = card.name.replace(tagString, '').trim()
         if (newName === card.name) { return }
-        this.$store.dispatch('currentCards/updateCardName', { card, newName })
+        this.$store.dispatch('currentCards/updateName', { card, newName })
       })
     },
     addToCards (tagString) {
       this.cards.forEach(card => {
         const newName = card.name + ' ' + tagString
         if (newName === card.name) { return }
-        this.$store.dispatch('currentCards/updateCardName', { card, newName })
+        this.$store.dispatch('currentCards/updateName', { card, newName })
       })
     },
     createNewTag () {
