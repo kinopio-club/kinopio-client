@@ -489,7 +489,6 @@ export default {
     showBoxDetails (event) {
       if (!this.$store.state.currentBoxIsNew) { return }
       const boxId = this.$store.state.currentUserIsResizingBoxIds[0]
-      this.$store.commit('currentBoxIsNew', false)
       this.$nextTick(() => {
         this.$nextTick(() => {
           this.$store.commit('boxDetailsIsVisibleForBoxId', boxId)

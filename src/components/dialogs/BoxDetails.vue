@@ -111,6 +111,20 @@ export default {
         element.focus()
       })
     },
+    selectName () {
+      // select all in new boxes, else put cursor at end (like cards)
+      const currentBoxIsNew = this.$store.state.currentBoxIsNew
+      const element = this.$refs.name
+      const length = this.name.length
+      let start = length
+      if (currentBoxIsNew) {
+        start = 0
+      }
+      if (length && element) {
+        element.setSelectionRange(start, length)
+      }
+      this.$store.commit('currentBoxIsNew', false)
+    },
     blur () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
@@ -125,13 +139,9 @@ export default {
     scrollIntoViewAndFocus () {
       this.scrollIntoView()
       if (utils.isMobile()) { return }
-      const element = this.$refs.name
-      const length = this.name.length
       this.$nextTick(() => {
         this.focusName()
-        if (length && element) {
-          element.setSelectionRange(length, length)
-        }
+        this.selectName()
       })
     }
   },

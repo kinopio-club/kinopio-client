@@ -81,7 +81,6 @@ export default {
         return []
       }
     }
-
   },
   data () {
     return {
