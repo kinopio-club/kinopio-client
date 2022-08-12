@@ -237,17 +237,18 @@ export default {
         this.removeFromItemNames(pattern)
       }
     },
-    toggleIsLocked () { // TODO for items
+    toggleIsLocked () {
       let isLocked = true
       if (this.isLocked) {
         isLocked = false
       }
-      this.cards.forEach(card => {
-        card = {
-          id: card.id,
-          isLocked
+      this.items.forEach(item => {
+        if (item.isCard) {
+          this.updateCard(item, { isLocked })
         }
-        this.$store.dispatch('currentCards/update', card)
+        if (item.isBox) {
+          this.updateBox(item, { isLocked })
+        }
       })
       this.$store.dispatch('currentCards/updateCardMap')
     },
