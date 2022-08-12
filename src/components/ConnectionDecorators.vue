@@ -1,12 +1,19 @@
 <template lang="pug">
 //- Label
 button(@click.left="showLabelsIsVisible" :class="{ active: isSomeLabelsVisible }" :disabled="!canEditAll")
-  img.icon(v-if="isSomeLabelsVisible" src="@/assets/view.svg")
-  img.icon(v-else src="@/assets/view-hidden.svg")
   span Label
 //- Arrow
 button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsIsVisible }" :disabled="!canEditAll")
-  img.icon.arrow(src="@/assets/connection-arrow.svg")
+  svg.icon.arrow(width="20px" height="12px" viewBox="0 0 20 2")
+    g(stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round")
+      path(:d="path" stroke="#000000")
+      defs
+        linearGradient(id="gradient")
+          stop(offset="0%" stop-color="#000000" stop-opacity="0" fill-opacity="0")
+          stop(offset="90%" stop-color="#000000")
+    circle(r="5" :fill="gradientIdReference")
+      animateMotion(dur="3s" repeatCount="indefinite" :path="path" rotate="auto")
+
 //- Reverse
 button(@click.left="reverseConnections" :disabled="!canEditAll")
   img.icon.reverse(src="@/assets/connection-reverse.svg")
@@ -22,6 +29,8 @@ export default {
     connections: Array
   },
   computed: {
+    path () { return 'M0 0 L20 0' },
+    gradientIdReference () { return `url('#gradient')` },
     isSomeConnectionsClear () {
       const connections = this.connections.filter(connection => {
         const { directionIsVisible, labelIsVisible } = connection
@@ -100,7 +109,7 @@ button
     &.clear
       vertical-align 4px
     &.arrow
-      vertical-align 0
+      vertical-align -3px
     &.reverse
       vertical-align 0
 </style>
