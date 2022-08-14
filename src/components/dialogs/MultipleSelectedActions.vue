@@ -113,7 +113,12 @@ export default {
   },
   computed: {
     maxCardLength () { return utils.maxCardLength() },
-    styleActionsIsVisible () { return this.$store.state.currentUser.shouldShowMultiStyleActions && (this.cardsIsSelected || this.boxesIsSelected) },
+    shouldShowStyleActions () { return this.$store.state.currentUser.shouldShowStyleActions },
+    styleActionsIsVisible () {
+      const noStyleItemsSelected = !this.cardsIsSelected && !this.boxesIsSelected
+      if (noStyleItemsSelected) { return }
+      return this.shouldShowStyleActions
+    },
     visible () { return this.$store.state.multipleSelectedActionsIsVisible },
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     position () {
@@ -421,8 +426,8 @@ export default {
     },
     toggleStyleActionsIsVisible () {
       this.closeDialogs()
-      const isVisible = !this.$store.state.currentUser.shouldShowMultiStyleActions
-      this.$store.dispatch('currentUser/shouldShowMultiStyleActions', isVisible)
+      const isVisible = !this.shouldShowStyleActions
+      this.$store.dispatch('currentUser/shouldShowStyleActions', isVisible)
       this.$nextTick(() => {
         this.scrollIntoView()
       })

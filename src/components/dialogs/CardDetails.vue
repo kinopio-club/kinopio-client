@@ -542,7 +542,9 @@ export default {
       }
     },
     collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo },
-    StyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowStyleActions }
+    StyleActionsIsVisible () {
+      return this.$store.state.currentUser.shouldShowStyleActions
+    }
   },
   methods: {
     broadcastShowCardDetails () {

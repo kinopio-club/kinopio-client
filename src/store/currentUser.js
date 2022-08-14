@@ -38,7 +38,6 @@ export default {
     shouldShowMoreAlignOptions: false,
     shouldShowCardCollaborationInfo: false,
     shouldShowStyleActions: false,
-    shouldShowMultiStyleActions: false,
     shouldInvertZoomDirection: false,
     shouldUseLastConnectionType: false,
     shouldOpenLinksInNewTab: false,
@@ -246,10 +245,6 @@ export default {
     shouldShowStyleActions: (state, value) => {
       state.shouldShowStyleActions = value
       cache.updateUser('shouldShowStyleActions', value)
-    },
-    shouldShowMultiStyleActions: (state, value) => {
-      state.shouldShowMultiStyleActions = value
-      cache.updateUser('shouldShowMultiStyleActions', value)
     },
     showInExploreUpdatedAt: (state, value) => {
       state.showInExploreUpdatedAt = value
@@ -641,14 +636,6 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowStyleActions: value
-        } }, { root: true })
-    },
-    shouldShowMultiStyleActions: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowMultiStyleActions' })
-      context.commit('shouldShowMultiStyleActions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          shouldShowMultiStyleActions: value
         } }, { root: true })
     },
     showInExploreUpdatedAt: (context, value) => {
