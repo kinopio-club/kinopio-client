@@ -1,9 +1,9 @@
 <template lang="pug">
-//- cards
+//- boxes
 .locked-boxes(:style="zoomScale")
   template(v-for="box in lockedBoxes")
     Box(:box="box")
-//- boxes
+//- cards
 .locked-cards(:style="zoomScale")
   template(v-for="card in lockedCards")
     Card(:card="card")

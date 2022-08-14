@@ -16,19 +16,12 @@ main.space(
   template(v-for="connection in connections")
     //- Connection Decorators
     ConnectionLabel(:connection="connection")
-  Boxes
   //- Presence
   template(v-for="user in spaceMembers")
     UserLabelCursor(:user="user")
-  //- Cards
-  .cards
-    template(v-for="overlap in cardOverlaps")
-      .badge.label-badge.card-overlap-indicator(v-if="canEditSpace" :style="{ left: overlap.x + 'px', top: overlap.y + 'px' }" @click.left="selectOverlap(overlap)")
-        span {{overlap.length}}
-    template(v-for="card in unlockedCards")
-      Card(:card="card")
-    template(v-for="card in lockedCards")
-      CardUnlockButton(:card="card" :position="unlockButtonPosition(card)")
+  Boxes
+  Cards
+  LockedItemButtons
   BoxDetails
   CardDetails
   CardUserDetails
@@ -53,15 +46,14 @@ import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedAction
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import BoxSelecting from '@/components/BoxSelecting.vue'
-import CardUnlockButton from '@/components/CardUnlockButton.vue'
 import Boxes from '@/components/Boxes.vue'
+import Cards from '@/components/Cards.vue'
+import LockedItemButtons from '@/components/LockedItemButtons.vue'
 import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
-
-const cardOverlaps = new Worker('/web-workers/card-overlaps.js')
 
 let prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer
@@ -82,8 +74,9 @@ export default {
     ScrollAtEdgesHandler,
     NotificationsWithPosition,
     BoxSelecting,
-    CardUnlockButton,
-    Boxes
+    Boxes,
+    Cards,
+    LockedItemButtons
   },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')
@@ -92,13 +85,6 @@ export default {
     if (currentUserIsSignedIn) {
       this.$store.commit('broadcast/connect')
     }
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerUpdateCardOverlaps') {
-        this.updateCardOverlaps()
-      }
-    })
   },
   mounted () {
     // bind events to window to receive events when mouse is outside window
@@ -125,18 +111,11 @@ export default {
     })
 
     this.$store.dispatch('currentUser/restoreUserFavorites')
-    window.addEventListener('scroll', this.updateCardOverlapsDebounced)
-    window.addEventListener('resize', this.updateCardOverlapsDebounced)
-    this.updateCardOverlaps()
 
     // retry failed sync operations every 5 seconds
     processQueueIntervalTimer = setInterval(() => {
       this.$store.dispatch('api/processQueueOperations')
     }, 5000)
-
-    cardOverlaps.addEventListener('message', event => {
-      this.cardOverlaps = event.data
-    })
   },
   beforeUnmount () {
     window.removeEventListener('mousemove', this.interact)
@@ -148,14 +127,11 @@ export default {
     window.removeEventListener('offline', this.updateIsOnline)
     window.removeEventListener('unload', this.unloadPage)
     window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
-    window.removeEventListener('scroll', this.updateCardOverlapsDebounced)
-    window.removeEventListener('resize', this.updateCardOverlapsDebounced)
     clearInterval(processQueueIntervalTimer)
   },
   data () {
     return {
-      startCursor: {},
-      cardOverlaps: []
+      startCursor: {}
     }
   },
   computed: {
@@ -169,7 +145,6 @@ export default {
     },
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
     unlockedCards () { return this.$store.getters['currentCards/isNotLocked'] },
-    lockedCards () { return this.$store.getters['currentCards/isLocked'] },
     currentConnectionStartCardIds () { return this.$store.state.currentConnectionStartCardIds },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
@@ -199,32 +174,6 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
-    unlockButtonPosition (card) {
-      const element = document.querySelector(`article[data-card-id="${card.id}"] .lock-button-wrap`)
-      const rect = element.getBoundingClientRect()
-      return rect
-    },
-    updateCardOverlapsDebounced: debounce(function () {
-      this.updateCardOverlaps()
-    }, 500),
-    updateCardOverlaps () {
-      let cards = this.$store.getters['currentCards/all']
-      cards = utils.clone(cards)
-      const viewport = utils.visualViewport()
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
-      cardOverlaps.postMessage({ cards, viewport, zoom })
-    },
-    mergeOverlapGroup (previousValue, currentValue) {
-      let x = previousValue.x || 0
-      if (currentValue.x > x) {
-        x = currentValue.x
-      }
-      let y = previousValue.y || 0
-      if (currentValue.y > y) {
-        y = currentValue.y
-      }
-      return { x, y }
-    },
     correctCardConnectionPaths () {
       const space = utils.clone(this.$store.state.currentSpace)
       const user = utils.clone(this.$store.state.currentUser)
@@ -349,11 +298,9 @@ export default {
       if (this.isDraggingCard || this.isDraggingBox) {
         this.constrainCursorToAxis(event)
         this.dragItems()
-        this.updateCardOverlaps()
       }
       if (this.isResizingCard) {
         this.resizeCards()
-        this.updateCardOverlaps()
       }
       if (this.isResizingBox) {
         this.resizeBoxes()
@@ -462,17 +409,6 @@ export default {
         this.$store.commit('multipleSelectedActionsIsVisible', true)
       }
     },
-    selectOverlap (overlap) {
-      this.$store.dispatch('closeAllDialogs', 'Space.selectOverlap')
-      const threshold = 20
-      const position = {
-        x: overlap.x + threshold,
-        y: overlap.y + threshold
-      }
-      this.$store.commit('multipleCardsSelectedIds', overlap.ids)
-      this.$store.commit('multipleSelectedActionsPosition', position)
-      this.$store.commit('multipleSelectedActionsIsVisible', true)
-    },
     addOrCloseCard (event) {
       if (this.$store.state.shouldAddCard) {
         const position = utils.cursorPositionInPage(event)
@@ -502,7 +438,6 @@ export default {
       console.log('💣 stopInteractions')
       this.$store.dispatch('currentCards/afterMove')
       this.$store.dispatch('currentBoxes/afterMove')
-      this.updateCardOverlaps()
       this.addInteractionBlur()
       if (event.touches) {
         this.$store.commit('triggerUpdatePositionInVisualViewport')

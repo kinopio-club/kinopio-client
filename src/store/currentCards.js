@@ -427,6 +427,7 @@ const currentCards = {
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
         context.dispatch('updateDimensionsAndMap', cardId)
+        context.commit('triggerUpdateCardOverlaps', null, { root: true })
       })
     },
     removeResize: (context, { cardIds }) => {
@@ -436,6 +437,7 @@ const currentCards = {
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
         context.dispatch('updateDimensionsAndMap', cardId)
       })
+      context.commit('triggerUpdateCardOverlaps', null, { root: true })
     },
 
     // move
@@ -557,6 +559,7 @@ const currentCards = {
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
       context.dispatch('updateCardMap')
+      context.commit('triggerUpdateCardOverlaps', null, { root: true })
     },
     checkIfShouldIncreasePageSize: (context, { cardId }) => {
       const card = context.getters.byId(cardId)
