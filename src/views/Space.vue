@@ -5,7 +5,7 @@ main.space(
   @touchstart="initInteractions"
   :style="styles"
 )
-  Connections
+  Connections(:startCursor="startCursor")
   Boxes
   Cards
   LockedItemButtons

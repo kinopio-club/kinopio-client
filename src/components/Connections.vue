@@ -22,6 +22,9 @@ export default {
     ConnectionLabel,
     CurrentConnection
   },
+  props: {
+    startCursor: Object
+  },
   computed: {
     currentConnectionStartCardIds () { return this.$store.state.currentConnectionStartCardIds },
     remoteCurrentConnections () { return this.$store.state.remoteCurrentConnections },
