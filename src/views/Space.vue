@@ -5,23 +5,13 @@ main.space(
   @touchstart="initInteractions"
   :style="styles"
 )
-  //- Connections
-  svg.connections
-    template(v-for="startCardId in currentConnectionStartCardIds")
-      CurrentConnection(:startCardId="startCardId" :startCursor="startCursor")
-    template(v-for="connection in remoteCurrentConnections")
-      Connection(:connection="connection")
-    template(v-for="connection in connections")
-      Connection(:connection="connection")
-  template(v-for="connection in connections")
-    //- Connection Decorators
-    ConnectionLabel(:connection="connection")
-  //- Presence
-  template(v-for="user in spaceMembers")
-    UserLabelCursor(:user="user")
+  Connections
   Boxes
   Cards
   LockedItemButtons
+  //- Presence
+  template(v-for="user in spaceMembers")
+    UserLabelCursor(:user="user")
   BoxDetails
   CardDetails
   CardUserDetails
@@ -36,9 +26,6 @@ main.space(
 import Card from '@/components/Card.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import CardUserDetails from '@/components/dialogs/CardUserDetails.vue'
-import CurrentConnection from '@/components/CurrentConnection.vue'
-import Connection from '@/components/Connection.vue'
-import ConnectionLabel from '@/components/ConnectionLabel.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
@@ -48,6 +35,7 @@ import NotificationsWithPosition from '@/components/NotificationsWithPosition.vu
 import BoxSelecting from '@/components/BoxSelecting.vue'
 import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
+import Connections from '@/components/Connections.vue'
 import LockedItemButtons from '@/components/LockedItemButtons.vue'
 import utils from '@/utils.js'
 
@@ -64,9 +52,6 @@ export default {
     Card,
     CardDetails,
     CardUserDetails,
-    CurrentConnection,
-    Connection,
-    ConnectionLabel,
     BoxDetails,
     UserLabelCursor,
     ConnectionDetails,
@@ -76,7 +61,8 @@ export default {
     BoxSelecting,
     Boxes,
     Cards,
-    LockedItemButtons
+    LockedItemButtons,
+    Connections
   },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')
@@ -145,7 +131,6 @@ export default {
     },
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
     unlockedCards () { return this.$store.getters['currentCards/isNotLocked'] },
-    currentConnectionStartCardIds () { return this.$store.state.currentConnectionStartCardIds },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
@@ -155,7 +140,6 @@ export default {
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     isResizingBox () { return this.$store.state.currentUserIsResizingBox },
     isDraggingBox () { return this.$store.state.currentUserIsDraggingBox },
-    connections () { return this.$store.getters['currentConnections/all'] },
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth },
     pageHeight () { return this.$store.state.pageHeight },
@@ -166,7 +150,6 @@ export default {
         return true
       } else { return false }
     },
-    remoteCurrentConnections () { return this.$store.state.remoteCurrentConnections },
     spaceMembers () {
       const excludeCurrentUser = true
       return this.$store.getters['currentSpace/members'](excludeCurrentUser)
@@ -492,16 +475,5 @@ export default {
   *
     pointer-events none !important
     cursor default
-
-svg.connections,
-.connection-labels
-  position absolute
-  top 0
-  left 0
-  width 100%
-  height 100%
-  path
-    pointer-events all
-    cursor pointer
 
 </style>
