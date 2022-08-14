@@ -1,5 +1,6 @@
 <template lang="pug">
 .boxes(:style="zoomScale" :class="{unselectable: isPainting}")
+  //- locked boxes rendered in LockedItems
   template(v-for="box in unlockedBoxes")
     Box(:box="box")
 </template>

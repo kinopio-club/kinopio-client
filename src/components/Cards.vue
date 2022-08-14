@@ -3,6 +3,7 @@
   template(v-for="overlap in cardOverlaps")
     .badge.label-badge.card-overlap-indicator(v-if="canEditSpace" :style="{ left: overlap.x + 'px', top: overlap.y + 'px' }" @click.left="selectOverlap(overlap)")
       span {{overlap.length}}
+  //- locked cards rendered in LockedItems
   template(v-for="card in unlockedCards")
     Card(:card="card")
 </template>
