@@ -7,7 +7,7 @@
 )
   base(v-if="isAddPage" target="_blank")
   #layout-viewport(:style="{ background: backgroundTint }")
-  LockedCards
+  LockedItems
   MagicPaint
   OffscreenMarkers
   //- router-view is Space or Add
@@ -40,7 +40,7 @@ import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import Minimap from '@/components/Minimap.vue'
-import LockedCards from '@/components/LockedCards.vue'
+import LockedItems from '@/components/LockedItems.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -58,7 +58,7 @@ export default {
     LinkDetails,
     OffscreenMarkers,
     Minimap,
-    LockedCards
+    LockedItems
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)

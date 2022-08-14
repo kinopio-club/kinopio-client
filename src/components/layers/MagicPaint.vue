@@ -551,7 +551,7 @@ export default {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
       const zoom = this.spaceCounterZoomDecimal
-      const boxes = this.$store.getters['currentBoxes/all']
+      const boxes = this.$store.getters['currentBoxes/isNotLocked']
       boxes.forEach(box => {
         const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
         const rect = element.getBoundingClientRect()

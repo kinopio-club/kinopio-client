@@ -2,6 +2,7 @@
 .box(
   :key="box.id"
   :data-box-id="box.id"
+  :data-is-locked="isLocked"
   :style="styles"
   :class="{hover: isHover, active: isDragging, 'box-jiggle': isDragging, 'is-resizing': isResizing}"
 )
@@ -31,8 +32,12 @@
     template(v-else)
       span {{box.name}}
 
+  .lock-button-wrap.inline-button-wrap(v-if="isLocked")
+    button.inline-button(tabindex="-1" :style="{background: color}")
+      img.icon.lock-icon(src="@/assets/lock.svg")
+
   //- resize
-  .bottom-button-wrap(:class="{unselectable: isPainting}")
+  .bottom-button-wrap(v-if="!isLocked" :class="{unselectable: isPainting}")
     .resize-button-wrap.inline-button-wrap(
         @pointerover="updateIsHover(true)"
         @pointerleave="updateIsHover(false)"
@@ -103,6 +108,7 @@ export default {
       const selectedIds = this.$store.state.multipleBoxesSelectedIds
       return selectedIds.includes(this.box.id)
     },
+    isLocked () { return this.box.isLocked },
     userColor () { return this.$store.state.currentUser.color },
     color () {
       if (this.isSelected) {
@@ -628,6 +634,20 @@ export default {
       box-shadow var(--hover-shadow)
     &:active
       box-shadow var(--active-shadow)
+
+  .lock-button-wrap
+    pointer-events all
+    position absolute
+    right 0px
+    top 0px
+    cursor pointer
+    button
+      cursor pointer
+    .lock-icon
+      position absolute
+      left 5.5px
+      top 2px
+      height 10px
 
   .bottom-button-wrap
     pointer-events all

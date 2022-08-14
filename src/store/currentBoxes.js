@@ -313,6 +313,14 @@ export default {
       const boxIds = getters.isSelectedIds
       const boxes = boxIds.map(id => getters.byId(id))
       return boxes
+    },
+    isNotLocked: (state, getters) => {
+      let boxes = getters.all
+      return boxes.filter(box => !box.isLocked)
+    },
+    isLocked: (state, getters) => {
+      let boxes = getters.all
+      return boxes.filter(box => box.isLocked)
     }
   }
 }
