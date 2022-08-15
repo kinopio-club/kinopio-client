@@ -259,7 +259,7 @@ export default {
       this.$store.commit('currentUserIsResizingBox', false)
       this.$store.commit('currentUserToolbar', 'card')
       this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserResizingBoxes' })
-      this.$store.dispatch('currentBoxes/checkIfShouldIncreasePageSize', { boxId: boxIds[0] })
+      this.$store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
     },
 
     dragItems () {

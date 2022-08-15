@@ -747,11 +747,7 @@ export default {
       // ⏺ history
       this.$store.dispatch('history/resume')
       this.$store.dispatch('history/add', { cards, connectionTypes, connections, boxes, useSnapshot: true })
-      // after-creation updates
-      cards.forEach(card => {
-        this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId: card.id })
-        this.$store.dispatch('currentCards/removeTrackingQueryStrings', { cardId: card.id })
-      })
+      this.this.afterPaste(cards)
     },
 
     handlePastePlainText (data, position) {
@@ -798,10 +794,14 @@ export default {
       this.$store.dispatch('history/add', { cards, useSnapshot: true })
       // update page size
       this.$nextTick(() => {
-        cards.forEach(card => {
-          this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId: card.id })
-          this.$store.dispatch('currentCards/removeTrackingQueryStrings', { cardId: card.id })
-        })
+        this.afterPaste(cards)
+      })
+    },
+
+    afterPaste (cards) {
+      cards.forEach(card => {
+        this.$store.dispatch('checkIfItemShouldIncreasePageSize', card)
+        this.$store.dispatch('currentCards/removeTrackingQueryStrings', { cardId: card.id })
       })
     },
 

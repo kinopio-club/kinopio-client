@@ -94,8 +94,6 @@ export default {
     },
     styles () {
       let { x, y, resizeWidth, resizeHeight } = this.normalizedBox
-      x = Math.max(x, 50)
-      y = Math.max(y, 50)
       const width = resizeWidth
       const height = resizeHeight
       return {
@@ -185,53 +183,17 @@ export default {
     normalizeBox (box) {
       const init = 200
       box = utils.clone(box)
-      box.x = box.x || init
-      box.y = box.y || init
       box.resizeWidth = box.resizeWidth || init
       box.resizeHeight = box.resizeHeight || init
       box.color = box.color || randomColor({ luminosity: 'light' })
       box.fill = box.fill || 'filled'
       return box
     },
-    // moveOrResizeBox (event) {
-    //   if (!this.isDragging && !this.isResizing) { return }
-    //   currentCursor = utils.cursorPositionInPage(event)
-    //   currentCursor = {
-    //     x: currentCursor.x * this.spaceCounterZoomDecimal,
-    //     y: currentCursor.y * this.spaceCounterZoomDecimal
-    //   }
-    //   let delta
-    //   if (prevCursor) {
-    //     delta = {
-    //       x: currentCursor.x - prevCursor.x,
-    //       y: currentCursor.y - prevCursor.y
-    //     }
-    //   } else {
-    //     delta= { x: 0, y: 0 }
-    //     prevCursor = currentCursor
-    //   }
-    //   if (this.isResizing) {
-    //     this.newWidth = this.box.resizeWidth + delta.x
-    //     this.newHeight = this.box.resizeHeight + delta.y
-    //     this.broadcastResize()
-    //   } else if (this.isDragging) {
-    //     this.newX = this.box.x + delta.x
-    //     this.newY = this.box.y + delta.y
-    //     this.$store.commit('currentUserIsDraggingCard', true)
-    //     if (!this.multipleBoxesIsSelected) {
-    //       this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
-    //     }
-    //     this.broadcastMove()
-    //   }
-    //   this.boxWasDragged = true
-    // },
     startResizing (event) {
       if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
       this.$store.dispatch('history/pause')
       this.$store.dispatch('closeAllDialogs', 'Card.startResizing')
-      // this.$store.commit('preventDraggedBoxFromShowingDetails', true)
-      // this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.commit('currentUserIsResizingBox', true)
       this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
       let boxIds = [this.box.id]
@@ -245,18 +207,12 @@ export default {
         boxIds: boxIds
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBoxes' })
-      // if (!this.canEditSpace) { return }
-      // if (utils.isMultiTouch(event)) { return }
-      // this.updateIsResizing(true)
-      // this.updatePrevCursor(event)
       event.preventDefault() // allows resizing box without scrolling on mobile
     },
     startBoxInfoInteraction (event) {
-      // this.updatePrevCursor(event)
       if (!this.currentBoxIsSelected) {
         this.$store.dispatch('clearMultipleSelected')
       }
-      // this.$store.commit('preventDraggedBoxFromShowingDetails', true)
       this.$store.commit('currentDraggingBoxId', '')
       this.$store.dispatch('closeAllDialogs', 'Box.startBoxInfoInteraction')
       this.$store.commit('currentUserIsDraggingBox', true)
@@ -271,31 +227,6 @@ export default {
       this.selectContainedCards()
       this.$store.dispatch('closeAllDialogs', 'Box.selectAllContainedCards')
     },
-    // updatePrevCursor (event) {
-    //   prevCursor = utils.cursorPositionInPage(event)
-    //   prevCursor = {
-    //     x: prevCursor.x * this.spaceCounterZoomDecimal,
-    //     y: prevCursor.y * this.spaceCounterZoomDecimal
-    //   }
-    // },
-    // updateIsResizing (value) {
-    //   console.log('🚛updateIsResizing',value)
-    //   this.$store.commit('currentUserIsResizingBox', value)
-    //   if (value) {
-    //     const ids = this.$store.getters['currentBoxes/isSelectedIds']
-    //     this.$store.commit('currentUserIsResizingBoxIds', ids)
-
-    //     // this.$store.dispatch('clearMultipleSelected')
-    //     this.$store.commit('multipleSelectedActionsIsVisible', false)
-    //   }
-    // },
-    // updateIsDragging (value, shouldNotSelectContainedCards) {
-    //   this.$store.commit('currentUserIsDraggingBox', value)
-    //   if (value && !shouldNotSelectContainedCards) {
-    //     this.$store.commit('currentDraggingBoxId', this.box.id)
-    //     this.selectContainedCards()
-    //   }
-    // },
     selectContainedCards () {
       const cardMap = this.$store.state.currentCards.cardMap
       cardMap.forEach(card => {
@@ -363,119 +294,21 @@ export default {
       if (this.isPainting) { return }
       this.isHover = value
     },
-    // showBoxDetails (event) {
-    //   this.$store.dispatch('currentBoxes/afterMove')
-    //   // if (this.isLocked) { return }
-
-    //   if (this.$store.state.currentUserIsPainting) { return }
-    //   if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
-    //   this.clearState()
-    //   this.$store.dispatch('closeAllDialogs', 'Box.showBoxDetails')
-    //   this.$store.dispatch('clearMultipleSelected')
-    //   this.$store.commit('boxDetailsIsVisibleForBoxId', this.box.id)
-    //   event.stopPropagation() // only stop propagation if cardDetailsIsVisible
-    // },
-
     showBoxDetails (event) {
       this.$store.dispatch('currentBoxes/afterMove')
-      // if (this.isLocked) { return }
       if (this.$store.state.currentUserIsPainting) { return }
       if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
-      // if (this.$store.state.currentUserIsResizingBox || this.$store.state.currentUserIsDraggingBox) { return }
       if (this.$store.state.boxesWereDragged) { return }
       if (!this.canEditBox) { this.$store.commit('triggerReadOnlyJiggle') }
-
       const userId = this.$store.state.currentUser.id
-      // const boxesWereDragged = this.$store.state.boxesWereDragged
-      // const shouldToggleSelected = event.shiftKey && !boxesWereDragged && !this.isConnectingTo
-      // if (shouldToggleSelected) {
-      //   this.$store.dispatch('toggleCardSelected', this.id)
-      //   event.stopPropagation()
-      //   this.$store.commit('currentUserIsDraggingCard', false)
-      //   return
-      // }
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
-      // this.preventDraggedButtonBadgeFromShowingDetails = this.$store.state.preventDraggedCardFromShowingDetails
-      // if (this.$store.state.preventDraggedBoxFromShowingDetails) { return }
       this.$store.dispatch('closeAllDialogs', 'Box.showBoxDetails')
       this.$store.dispatch('clearMultipleSelected')
-      // const nodeName = event.target.nodeName
-      // if (nodeName === 'LABEL') { return } // checkbox
-      // if (nodeName === 'A' && event.touches) {
-      //   window.location = event.target.href
-      //   return
-      // }
-
       this.$store.commit('boxDetailsIsVisibleForBoxId', this.box.id)
-      // console.log('🍅🍅🍅🍅', this.$store.state.boxDetailsIsVisibleForBoxId)
-
-      // this.$store.commit('preventCardDetailsOpeningAnimation', true)
-      // this.$store.commit('parentCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible, to prevent stopInteractions()
       this.$store.commit('currentUserIsDraggingBox', false)
-      // this.updatePreviousResultCardId()
-      // this.clearPositionOffsets()
     },
-
-    //   if (!this.isResizing && !this.isDragging) { return }
-    //   // this.$store.dispatch('history/resume')
-    //   // reset toolbar state after new box created and sized
-    //   if (this.isResizing) {
-    //     this.$store.commit('currentUserToolbar', 'card')
-    //   }
-    //   // update all selected boxes
-
-    //   // this.selectedBoxes.forEach(box => {
-    //   //   const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-    //   //   const style = element.style
-    //   //   box = {
-    //   //     id: box.id,
-    //   //     resizeWidth: parseInt(style.width),
-    //   //     resizeHeight: parseInt(style.height),
-    //   //     x: parseInt(style.left),
-    //   //     y: parseInt(style.top)
-    //   //   }
-    //   //   this.$store.dispatch('currentBoxes/update', box)
-    //   // })
-    //   // this.$store.dispatch('currentCards/updateCardMap')
-    //   this.clearState()
-    // },
-    // clearState () {
-    //   this.updateIsDragging(false)
-    //   this.updateIsResizing(false)
-    //   // this.newWidth = 0
-    //   // this.newHeight = 0
-    //   // this.newX = 0
-    //   // this.newY = 0
-    //   prevCursor = null
-
-    //   if (!this.multipleBoxesIsSelected) {
-    //     setTimeout(() => {
-    //       this.$store.dispatch('clearMultipleSelected')
-    //       this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
-    //     }, 100)
-    //   }
-    // },
-
-    // broadcast
-
-    // broadcastResize () {
-    //   const box = {
-    //     id: this.box.id,
-    //     resizeWidth: this.newWidth,
-    //     resizeHeight: this.newHeight
-    //   }
-    //   this.$store.dispatch('broadcast/update', { updates: { box }, type: 'resizeBox', handler: 'currentBoxes/resizeBroadcast' })
-    // },
-    // broadcastMove () {
-    //   const box = {
-    //     id: this.box.id,
-    //     x: this.newX,
-    //     y: this.newY
-    //   }
-    //   this.$store.dispatch('broadcast/update', { updates: { box }, type: 'moveBox', handler: 'currentBoxes/moveBroadcast' })
-    // },
 
     // h1, h2
 
@@ -489,14 +322,12 @@ export default {
     cancelLocking () {
       shouldCancelLocking = true
     },
-
     cancelLockingAnimationFrame () {
       this.isLocking = false
       this.lockingPercent = 0
       this.lockingAlpha = 0
       shouldCancelLocking = false
     },
-
     startLocking (event) {
       console.log('startLocking', event)
       this.updateTouchPosition(event)
@@ -523,7 +354,6 @@ export default {
         this.cancelLockingAnimationFrame()
       }
       if (this.isLocking && percentComplete <= 1) {
-        // const minSize = circleRadius
         const percentRemaining = Math.abs(percentComplete - 1)
         this.lockingPercent = percentRemaining
         const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
@@ -535,7 +365,6 @@ export default {
         lockingStartTime = undefined
         this.isLocking = false
         this.startBoxInfoInteraction(initialTouchEvent)
-        // this.$store.commit('triggeredTouchCardDragPosition', touchPosition)
       } else {
         window.cancelAnimationFrame(lockingAnimationTimer)
         lockingAnimationTimer = undefined
@@ -543,17 +372,13 @@ export default {
         this.cancelLockingAnimationFrame()
       }
     },
-
     notifyPressAndHoldToDrag () {
-      // const isDrawingConnection = this.$store.state.currentUserIsDrawingConnection
-      // if (isDrawingConnection) { return }
       const hasNotified = this.$store.state.hasNotifiedPressAndHoldToDrag
       if (!hasNotified) {
         this.$store.commit('addNotification', { message: 'Press and hold to drag boxes', icon: 'press-and-hold' })
       }
       this.$store.commit('hasNotifiedPressAndHoldToDrag', true)
     },
-
     updateTouchPosition (event) {
       initialTouchEvent = event
       isMultiTouch = false
@@ -562,10 +387,6 @@ export default {
         return
       }
       touchPosition = utils.cursorPositionInViewport(event)
-      // const isDrawingConnection = this.$store.state.currentUserIsDrawingConnection
-      // if (isDrawingConnection) {
-      //   event.preventDefault() // allows swipe to scroll, before card locked
-      // }
     },
     updateCurrentTouchPosition (event) {
       currentTouchPosition = utils.cursorPositionInViewport(event)
@@ -573,7 +394,6 @@ export default {
         event.preventDefault() // allows dragging boxes without scrolling
       }
     },
-
     touchIsNearTouchPosition (event) {
       const currentPosition = utils.cursorPositionInViewport(event)
       const touchBlur = 12
@@ -596,10 +416,7 @@ export default {
       if (this.touchIsNearTouchPosition(event)) {
         this.showBoxDetails(event)
       }
-      // const userId = this.$store.state.currentUser.id
-      // this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
     }
-
   }
 }
 </script>

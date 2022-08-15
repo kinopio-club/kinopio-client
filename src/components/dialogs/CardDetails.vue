@@ -1396,7 +1396,8 @@ export default {
         this.resetTextareaHeight()
         this.$nextTick(() => {
           this.startOpening()
-          this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
+          const card = this.$store.getters['currentCards/byId'](cardId)
+          this.$store.dispatch('checkIfItemShouldIncreasePageSize', card)
         })
       })
       this.previousSelectedTag = {}
@@ -1424,7 +1425,7 @@ export default {
       this.$store.dispatch('updatePageSizes')
       this.$nextTick(() => {
         this.updateCardMap(cardId)
-        this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
+        this.$store.dispatch('checkIfItemShouldIncreasePageSize', card)
       })
       this.$store.dispatch('history/resume')
       if (card.name || prevCardName) {

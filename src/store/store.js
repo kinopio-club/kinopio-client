@@ -1213,6 +1213,27 @@ const store = createStore({
       }
       context.commit('updatePageSizes')
     },
+    checkIfItemShouldIncreasePageSize: (context, item) => {
+      if (!item) { return }
+      item = utils.clone(item)
+      item.width = item.width || item.resizeWidth
+      item.height = item.height || item.resizeHeight
+      const zoom = context.getters.spaceZoomDecimal
+      let thresholdHeight = (context.state.viewportHeight * zoom) / 4
+      let thresholdWidth = (context.state.viewportWidth * zoom) / 4
+      const pageWidth = context.state.pageWidth
+      const pageHeight = context.state.pageHeight
+      const shouldIncreasePageWidth = (item.x + item.width + thresholdWidth) > pageWidth
+      const shouldIncreasePageHeight = (item.y + item.height + thresholdHeight) > pageHeight
+      if (shouldIncreasePageWidth) {
+        const width = pageWidth + thresholdWidth
+        context.commit('pageWidth', width)
+      }
+      if (shouldIncreasePageHeight) {
+        const height = pageHeight + thresholdHeight
+        context.commit('pageHeight', height)
+      }
+    },
     clearAllFilters: (context) => {
       context.commit('clearSpaceFilters')
       context.dispatch('currentUser/clearUserFilters')

@@ -520,6 +520,7 @@ const currentCards = {
       prevMovePositions = {}
       const spaceId = context.rootState.currentSpace.id
       const currentDraggingCardId = context.rootState.currentDraggingCardId
+      const currentDraggingCard = context.getters.byId(currentDraggingCardId)
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       let cards
       let connections = []
@@ -555,30 +556,11 @@ const currentCards = {
       connections = uniqBy(connections, 'id')
       context.commit('currentConnections/updatePaths', connections, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
-      context.dispatch('checkIfShouldIncreasePageSize', { cardId: currentDraggingCardId })
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
       context.dispatch('updateCardMap')
       context.commit('triggerUpdateCardOverlaps', null, { root: true })
-    },
-    checkIfShouldIncreasePageSize: (context, { cardId }) => {
-      const card = context.getters.byId(cardId)
-      if (!card) { return }
-      const zoom = context.rootGetters.spaceZoomDecimal
-      let thresholdHeight = (context.rootState.viewportHeight * zoom) / 4
-      let thresholdWidth = (context.rootState.viewportWidth * zoom) / 4
-      const pageWidth = context.rootState.pageWidth
-      const pageHeight = context.rootState.pageHeight
-      const shouldIncreasePageWidth = (card.x + card.width + thresholdWidth) > pageWidth
-      const shouldIncreasePageHeight = (card.y + card.height + thresholdHeight) > pageHeight
-      if (shouldIncreasePageWidth) {
-        const width = pageWidth + thresholdWidth
-        context.commit('pageWidth', width, { root: true })
-      }
-      if (shouldIncreasePageHeight) {
-        const height = pageHeight + thresholdHeight
-        context.commit('pageHeight', height, { root: true })
-      }
+      context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })
     },
 
     // z-index
