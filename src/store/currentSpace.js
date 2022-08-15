@@ -307,6 +307,7 @@ const currentSpace = {
         space.connectionTypes = []
         space.connections = []
         space.cards = []
+        space.boxes = []
       } else {
         space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
         space.cards[1].x = random(180, 200)
