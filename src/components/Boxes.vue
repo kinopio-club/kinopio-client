@@ -1,5 +1,5 @@
 <template lang="pug">
-.boxes(:style="zoomScale" :class="{unselectable: isPainting}")
+.boxes(:class="{unselectable: isPainting}")
   //- locked boxes rendered in LockedItems
   template(v-for="box in unlockedBoxes")
     Box(:box="box")
@@ -16,12 +16,7 @@ export default {
   computed: {
     isPainting () { return this.$store.state.currentUserIsPainting },
     unlockedBoxes () { return this.$store.getters['currentBoxes/isNotLocked'] },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
-    zoomScale () {
-      return {
-        transform: `scale(${this.spaceZoomDecimal})`
-      }
-    }
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   }
 }
 </script>

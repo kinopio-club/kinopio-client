@@ -33,4 +33,7 @@ export default {
 </script>
 
 <style lang="stylus">
+.locked-boxes,
+.locked-cards
+  transform-origin top left
 </style>

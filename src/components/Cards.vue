@@ -47,12 +47,6 @@ export default {
   },
   computed: {
     isPainting () { return this.$store.state.currentUserIsPainting },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
-    zoomScale () {
-      return {
-        transform: `scale(${this.spaceZoomDecimal})`
-      }
-    },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     unlockedCards () { return this.$store.getters['currentCards/isNotLocked'] }
   },
