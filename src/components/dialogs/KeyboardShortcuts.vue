@@ -29,12 +29,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
     template(v-if="categoryIsVisible('toolbar')")
       .section-title
         .badge.info(:style="{ 'background-color': categoryColor('toolbar') }") Toolbar
-      article
-        .row
-          .badge.title
-            img.icon.card-icon(src="@/assets/card.svg")
-            span Card Mode
-          .badge.keyboard-shortcut C
+      //- article
+      //-   .row
+      //-     .badge.title
+      //-       img.icon.card-icon(src="@/assets/card.svg")
+      //-       span Card Mode
+      //-     .badge.keyboard-shortcut C
       article
         .row
           .badge.title
