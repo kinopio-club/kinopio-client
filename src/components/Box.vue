@@ -218,10 +218,7 @@ export default {
       this.$store.commit('currentUserIsDraggingBox', true)
       this.$store.commit('currentDraggingBoxId', this.box.id)
       if (event.shiftKey) { return } // should not select contained cards if shift key
-      const cardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
-      if (!cardsIsSelected) {
-        this.selectContainedCards()
-      }
+      this.selectContainedCards()
     },
     selectAllContainedCards (event) {
       const isMeta = event.metaKey || event.ctrlKey
