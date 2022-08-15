@@ -359,6 +359,7 @@ export default {
       return isInside
     },
     updateIsHover (value) {
+      if (this.isDragging) { return }
       if (this.isPainting) { return }
       this.isHover = value
     },
