@@ -41,6 +41,7 @@ export default {
       if (this.$store.state.minimapIsVisible) { return }
       if (this.$store.state.currentUserIsPainting) { return }
       if (this.$store.state.currentUserIsDraggingCard) { return }
+      if (this.$store.state.currentUserIsDraggingBox) { return }
       const edgeThreshold = 30
       let header = document.querySelector('header').getBoundingClientRect().height
       const toolbar = document.querySelector('nav.toolbar').getBoundingClientRect().height
