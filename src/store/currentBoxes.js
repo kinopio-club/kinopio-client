@@ -254,6 +254,7 @@ export default {
     },
     afterMove: (context) => {
       prevMovePositions = {}
+      const currentDraggingBoxId = context.rootState.currentDraggingBoxId
       const spaceId = context.rootState.currentSpace.id
       let boxIds = context.getters.isSelectedIds
       boxIds = boxIds.filter(box => Boolean(box))
@@ -279,10 +280,29 @@ export default {
         }, { root: true })
       })
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveBroadcast' }, { root: true })
-      // context.dispatch('checkIfShouldIncreasePageSize', { boxId: currentDraggingBoxId })
+      context.dispatch('checkIfShouldIncreasePageSize', { boxId: currentDraggingBoxId })
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/add', { boxes, useSnapshot: true }, { root: true })
       context.dispatch('currentCards/updateCardMap', null, { root: true })
+    },
+    checkIfShouldIncreasePageSize: (context, { boxId }) => {
+      const box = context.getters.byId(boxId)
+      if (!box) { return }
+      const zoom = context.rootGetters.spaceZoomDecimal
+      let thresholdHeight = (context.rootState.viewportHeight * zoom) / 4
+      let thresholdWidth = (context.rootState.viewportWidth * zoom) / 4
+      const pageWidth = context.rootState.pageWidth
+      const pageHeight = context.rootState.pageHeight
+      const shouldIncreasePageWidth = (box.x + box.resizeWidth + thresholdWidth) > pageWidth
+      const shouldIncreasePageHeight = (box.y + box.resizeHeight + thresholdHeight) > pageHeight
+      if (shouldIncreasePageWidth) {
+        const width = pageWidth + thresholdWidth
+        context.commit('pageWidth', width, { root: true })
+      }
+      if (shouldIncreasePageHeight) {
+        const height = pageHeight + thresholdHeight
+        context.commit('pageHeight', height, { root: true })
+      }
     },
 
     // remove
