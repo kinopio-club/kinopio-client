@@ -14,7 +14,7 @@ import Card from '@/components/Card.vue'
 import Box from '@/components/Box.vue'
 
 export default {
-  name: 'LockedItems',
+  name: 'ItemsLocked',
   components: {
     Card,
     Box
