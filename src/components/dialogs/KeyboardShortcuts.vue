@@ -148,6 +148,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
+            img.icon(src="@/assets/brush.svg")
+            span Select All Cards Inside Box
+          .badge.keyboard-shortcut {{meta}}-Click Box
+      article
+        .row
+          .badge.title
             img.icon.box-icon(src="@/assets/box.svg")
             span Move Box Without Moving Cards
           .badge.keyboard-shortcut Shift-Drag on Box

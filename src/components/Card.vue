@@ -1124,9 +1124,7 @@ export default {
           shouldSearch = false
         }
       }
-      const position = utils.cursorPositionInPage(event)
-      this.$store.commit('multipleSelectedActionsPosition', position)
-      this.$store.commit('multipleSelectedActionsIsVisible', true)
+      this.$store.commit('multipleSelectedActionsIsVisible', false)
       this.$store.commit('multipleCardsSelectedIds', selectedCards)
     },
     updateMediaUrls (urls) {

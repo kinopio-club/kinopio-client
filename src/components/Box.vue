@@ -23,6 +23,8 @@
     @touchstart="startLocking"
     @touchmove="updateCurrentTouchPosition"
     @touchend="showBoxDetailsTouch"
+
+    @click="selectAllContainedCards"
   )
     .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
     template(v-if="isH1")
@@ -261,6 +263,13 @@ export default {
       this.$store.commit('currentDraggingBoxId', this.box.id)
       if (event.shiftKey) { return } // should not select contained cards if shift key
       this.selectContainedCards()
+    },
+    selectAllContainedCards (event) {
+      const isMeta = event.metaKey || event.ctrlKey
+      if (!isMeta) { return }
+      if (!this.canEditSpace) { return }
+      this.selectContainedCards()
+      this.$store.dispatch('closeAllDialogs', 'Box.selectAllContainedCards')
     },
     // updatePrevCursor (event) {
     //   prevCursor = utils.cursorPositionInPage(event)

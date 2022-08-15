@@ -2,7 +2,7 @@
 nav.toolbar(v-if="visible")
   //- Box
   .segmented-buttons
-    button(:class="{ active: currentUserToolbarIsBox }" @pointerdown="toggleToolbar('box')")
+    button(:class="{ active: currentUserToolbarIsBox }" @pointerdown="toggleToolbar('box')" :title="boxBadgeLabel")
       img.icon.box-icon(src="@/assets/box.svg")
       .label-badge.toolbar-badge-wrap(v-if="currentUserToolbarIsBox")
         span {{boxBadgeLabel}}
