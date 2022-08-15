@@ -34,6 +34,7 @@ export default {
     },
     cardButtonPosition (card) {
       const element = document.querySelector(`article[data-card-id="${card.id}"] .lock-button-wrap`)
+      if (!element) { return }
       const rect = element.getBoundingClientRect()
       return rect
     }

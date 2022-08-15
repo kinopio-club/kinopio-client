@@ -19,11 +19,10 @@ export default {
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     positionStyles () {
       if (!this.position) { return }
-      const zoom = this.spaceCounterZoomDecimal
       let left = this.position.left
       let top = this.position.top
-      left = (left + window.scrollX) * zoom
-      top = (top + window.scrollY) * zoom
+      left = (left + window.scrollX)
+      top = (top + window.scrollY)
       return {
         left: left + 'px',
         top: top + 'px'
@@ -57,6 +56,7 @@ export default {
 
 <style lang="stylus">
 .box-unlock-button
+  transform-origin top left
   pointer-events all
   cursor pointer
   position absolute
