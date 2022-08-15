@@ -14,8 +14,11 @@ let spaceKeyIsDown = false
 let prevCursorPosition, currentCursorPosition
 
 const checkIsSpaceScope = (event) => {
-  const isBody = event.target.tagName === 'BODY'
-  const isMain = event.target.tagName === 'MAIN'
+  const tagName = event.target.tagName
+  const isFromInput = tagName === 'INPUT' || tagName === 'TEXTAREA'
+  if (isFromInput) { return }
+  const isBody = tagName === 'BODY'
+  const isMain = tagName === 'MAIN'
   const isFocusedCard = event.target.className === 'card'
   return isBody || isMain || isFocusedCard
 }
@@ -623,10 +626,8 @@ export default {
     // Copy, Cut
 
     async handleCopyCutEvent (event) {
-      const isFromCard = event.target.classList[0] === 'card'
       const isSpaceScope = checkIsSpaceScope(event)
-      const shouldHandle = isFromCard || isSpaceScope
-      if (!shouldHandle) { return }
+      if (!isSpaceScope) { return }
       event.preventDefault()
       await this.writeSelectedToClipboard()
       console.log(event.type)
@@ -692,9 +693,21 @@ export default {
 
     handlePasteKinopioData (data, position) {
       data = utils.uniqueSpaceItems(data)
-      let { cards, connectionTypes, connections } = data
+      let { cards, connectionTypes, connections, boxes } = data
+      // relative card and box positions
+      cards = cards.map(card => {
+        card.isCard = true
+        return card
+      })
+      boxes = boxes.map(box => {
+        box.isBox = true
+        return box
+      })
+      let items = cards.concat(boxes)
+      items = utils.itemsPositionsShifted(items, position)
+      cards = items.filter(item => item.isCard)
+      boxes = items.filter(item => item.isBox)
       // add cards
-      cards = utils.cardsPositionsShifted(cards, position)
       this.$store.dispatch('currentCards/addMultiple', cards)
       // add new types
       connectionTypes = connectionTypes.map(type => {
@@ -720,14 +733,20 @@ export default {
           this.$store.dispatch('currentConnections/updatePaths', { connections, cards })
         })
       }, 20)
+      // add boxes
+      boxes.forEach(box => {
+        this.$store.dispatch('currentBoxes/add', { box })
+      })
       // select
       const cardIds = cards.map(card => card.id)
       const connectionIds = connections.map(connection => connection.id)
+      const boxIds = boxes.map(box => box.id)
       this.$store.commit('multipleCardsSelectedIds', cardIds)
       this.$store.commit('multipleConnectionsSelectedIds', connectionIds)
+      this.$store.commit('multipleBoxesSelectedIds', boxIds)
       // ⏺ history
       this.$store.dispatch('history/resume')
-      this.$store.dispatch('history/add', { cards, connectionTypes, connections, useSnapshot: true })
+      this.$store.dispatch('history/add', { cards, connectionTypes, connections, boxes, useSnapshot: true })
       // after-creation updates
       cards.forEach(card => {
         this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId: card.id })
@@ -810,6 +829,10 @@ export default {
           card.name = utils.decodeEntitiesFromHTML(card.name)
           return card
         })
+        data.boxes = data.boxes.map(box => {
+          box.name = utils.decodeEntitiesFromHTML(box.name)
+          return box
+        })
         this.handlePasteKinopioData(data, position)
       } else {
         data.text = utils.decodeEntitiesFromHTML(data.text)
@@ -829,11 +852,12 @@ export default {
       const connectionTypes = connections.map(connection => {
         return this.$store.getters['currentConnections/typeByConnection'](connection)
       })
-      let data = { isKinopioData: true, cards, connections, connectionTypes }
+      const boxes = this.$store.getters['currentBoxes/isSelected']
+      let data = { isKinopioData: true, cards, connections, connectionTypes, boxes }
       data = JSON.stringify(data)
       data = `<kinopio>${data}</kinopio>`
       const text = utils.textFromCardNames(cards)
-      console.log('🎊 copyData', { cards, connections, connectionTypes }, text)
+      console.log('🎊 copyData', { cards, connections, connectionTypes, boxes }, text)
       try {
         if (navigator.clipboard.write) {
           await navigator.clipboard.write([

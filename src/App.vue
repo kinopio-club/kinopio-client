@@ -240,11 +240,11 @@ export default {
       let description = 'Kinopio is the thinking tool for building new ideas and solving hard problems. Create spaces to brainstorm, research, plan and take notes.'
       const metaDescription = document.querySelector('meta[name=description]')
       const cards = this.$store.getters['currentCards/all']
-      const topLeftCard = utils.topLeftCard(cards)
-      if (!topLeftCard.name) {
+      const topLeftItem = utils.topLeftItem(cards)
+      if (!topLeftItem.name) {
         metaDescription.setAttribute('content', description)
       } else {
-        metaDescription.setAttribute('content', topLeftCard.name)
+        metaDescription.setAttribute('content', topLeftItem.name)
       }
     },
     clearMetaRSSFeed () {

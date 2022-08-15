@@ -712,18 +712,18 @@ export default {
     card.height = Math.ceil(rect.height * zoom)
     return card
   },
-  topLeftCard (cards) {
-    cards = this.clone(cards)
-    let shortestDistanceCard = {}
-    cards.forEach(card => {
-      card.distance = Math.sqrt(Math.pow(card.x, 2) + Math.pow(card.y, 2))
-      if (!shortestDistanceCard.distance) {
-        shortestDistanceCard = card
-      } else if (card.distance < shortestDistanceCard.distance) {
-        shortestDistanceCard = card
+  topLeftItem (items) {
+    items = this.clone(items)
+    let shortestDistanceItem = {}
+    items.forEach(item => {
+      item.distance = Math.sqrt(Math.pow(item.x, 2) + Math.pow(item.y, 2))
+      if (!shortestDistanceItem.distance) {
+        shortestDistanceItem = item
+      } else if (item.distance < shortestDistanceItem.distance) {
+        shortestDistanceItem = item
       }
     })
-    return shortestDistanceCard
+    return shortestDistanceItem
   },
   cardElementFromPosition (x, y) {
     let elements = document.elementsFromPoint(x, y)
@@ -757,16 +757,16 @@ export default {
     })
     return xIsInside && yIsInside
   },
-  cardsPositionsShifted (cards, position) {
-    const origin = this.topLeftCard(cards)
+  itemsPositionsShifted (item, position) {
+    const origin = this.topLeftItem(item)
     const delta = {
       x: position.x - origin.x,
       y: position.y - origin.y
     }
-    return cards.map(card => {
-      card.x = card.x + delta.x
-      card.y = card.y + delta.y
-      return card
+    return item.map(item => {
+      item.x = item.x + delta.x
+      item.y = item.y + delta.y
+      return item
     })
   },
   textFromCardNames (cards) {
@@ -1028,21 +1028,21 @@ export default {
     console.log(space)
     return space
   },
-  itemUserId (user, item, nullCardUsers) {
+  itemUserId (user, item, nullItemUsers) {
     let userId
-    if (nullCardUsers) {
+    if (nullItemUsers) {
       userId = null
     } else {
       userId = item.userId || user.id
     }
     return userId
   },
-  uniqueSpaceItems (items, nullCardUsers) {
+  uniqueSpaceItems (items, nullItemUsers) {
     const cardIdDeltas = []
     const connectionTypeIdDeltas = []
     const user = cache.user()
     items.cards = items.cards.map(card => {
-      const userId = this.itemUserId(user, card, nullCardUsers)
+      const userId = this.itemUserId(user, card, nullItemUsers)
       const newId = nanoid()
       cardIdDeltas.push({
         prevId: card.id,
@@ -1053,7 +1053,7 @@ export default {
       return card
     })
     items.connectionTypes = items.connectionTypes.map(type => {
-      const userId = this.itemUserId(user, type, nullCardUsers)
+      const userId = this.itemUserId(user, type, nullItemUsers)
       const newId = nanoid()
       connectionTypeIdDeltas.push({
         prevId: type.id,
@@ -1064,13 +1064,19 @@ export default {
       return type
     })
     items.connections = items.connections.map(connection => {
-      const userId = this.itemUserId(user, connection, nullCardUsers)
+      const userId = this.itemUserId(user, connection, nullItemUsers)
       connection.id = nanoid()
       connection.connectionTypeId = this.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
       connection.startCardId = this.updateAllIds(connection, 'startCardId', cardIdDeltas)
       connection.endCardId = this.updateAllIds(connection, 'endCardId', cardIdDeltas)
       connection.userId = userId
       return connection
+    })
+    items.boxes = items.boxes.map(box => {
+      const userId = this.itemUserId(user, box, nullItemUsers)
+      box.id = nanoid()
+      box.userId = userId
+      return box
     })
     if (this.arrayHasItems(items.tags)) {
       items.tags = items.tags.map(tag => {
