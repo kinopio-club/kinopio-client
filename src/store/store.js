@@ -1290,6 +1290,15 @@ const store = createStore({
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' }, { root: true })
     },
+    multipleBoxesSelectedIds: (context, boxIds) => {
+      utils.typeCheck({ value: boxIds, type: 'array', origin: 'multipleBoxesSelectedIds' })
+      context.commit('multipleBoxesSelectedIds', boxIds)
+      const updates = {
+        userId: context.rootState.currentUser.id,
+        boxIds
+      }
+      context.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxesSelected' }, { root: true })
+    },
     clearMultipleSelected: (context) => {
       if (context.state.multipleCardsSelectedIds.length || context.state.multipleConnectionsSelectedIds.length || context.state.multipleBoxesSelectedIds.length) {
         context.commit('clearMultipleSelected')

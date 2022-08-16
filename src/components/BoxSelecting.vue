@@ -20,10 +20,11 @@ import hexToRgba from 'hex-to-rgba'
 import { nanoid } from 'nanoid'
 
 let shouldSelect, currentBoxSelectId
-let selectableCards = {}
+let selectableItems = {}
 let selectableConnections = {}
 let previouslySelectedCardIds = []
 let previouslySelectedConnectionIds = []
+let previouslySelectedBoxesIds = []
 
 export default {
   name: 'BoxSelecting',
@@ -45,14 +46,14 @@ export default {
         }
       // start selection
       } else if (mutation.type === 'currentUserBoxSelectStart') {
-        this.updateSelectableCards()
+        this.updateSelectableItems()
         this.updateSelectableConnections()
       // on move
       } else if (mutation.type === 'currentUserBoxSelectEnd') {
         const { start, end, relativePosition } = this.orderedPoints(this.start, this.end)
-        const box = this.box(start, end)
-        this.selectCards(box, relativePosition)
-        this.selectconnections(box, relativePosition)
+        const boxSelection = this.boxSelection(start, end)
+        this.selectItems(boxSelection, relativePosition)
+        this.selectconnections(boxSelection, relativePosition)
         this.$nextTick(() => {
           this.broadcast('updateRemoteUserBoxSelectStyles')
         })
@@ -72,7 +73,7 @@ export default {
     userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
     currentUserStyles () {
       const { start, end } = this.orderedPoints(this.start, this.end)
-      const { left, top, width, height } = this.box(start, end)
+      const { left, top, width, height } = this.boxSelection(start, end)
       const color = this.$store.state.currentUser.color
       const color1 = hexToRgba(color, 0.5)
       const color2 = hexToRgba(color, 1)
@@ -112,8 +113,9 @@ export default {
     updatePreviouslySelectedItems () {
       previouslySelectedCardIds = this.$store.state.multipleCardsSelectedIds
       previouslySelectedConnectionIds = this.$store.state.multipleConnectionsSelectedIds
+      previouslySelectedBoxesIds = this.$store.state.multipleBoxesSelectedIds
     },
-    box (start, end) {
+    boxSelection (start, end) {
       return {
         x: start.x,
         y: start.y,
@@ -183,7 +185,9 @@ export default {
       const origin = this.start
       let selectableItems = { topLeft: [], topRight: [], bottomLeft: [], bottomRight: [] }
       items.forEach(item => {
-        const { x, y, height, width } = item
+        const { x, y } = item
+        const width = item.width || item.resizeWidth
+        const height = item.height || item.resizeHeight
         const isTop = y <= origin.y
         const isBottom = (y >= origin.y || y + height >= origin.y)
         const isLeft = x <= origin.x
@@ -196,9 +200,23 @@ export default {
       })
       return selectableItems
     },
-    updateSelectableCards () {
-      const cards = this.$store.getters['currentCards/isNotLocked']
-      selectableCards = this.selectableItems(cards)
+    updateSelectableItems () {
+      let cards = utils.clone(this.$store.getters['currentCards/isNotLocked'])
+      let boxes = utils.clone(this.$store.getters['currentBoxes/isNotLocked'])
+      cards = cards.map(card => {
+        card.isCard = true
+        return card
+      })
+      boxes = boxes.map(box => {
+        box.isBox = true
+        const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
+        const rect = element.getBoundingClientRect()
+        box.width = rect.width
+        box.height = rect.height
+        return box
+      })
+      const items = cards.concat(boxes)
+      selectableItems = this.selectableItems(items)
     },
     updateSelectableConnections () {
       const paths = document.querySelectorAll('svg .connection-path')
@@ -234,8 +252,10 @@ export default {
       let previouslySelectedIds
       if (type === 'cards') {
         previouslySelectedIds = previouslySelectedCardIds
-      } else {
+      } else if (type === 'connections') {
         previouslySelectedIds = previouslySelectedConnectionIds
+      } else if (type === 'boxes') {
+        previouslySelectedIds = previouslySelectedBoxesIds
       }
       previouslySelectedIds.forEach(id => {
         const index = selectedIds.indexOf(id)
@@ -247,19 +267,29 @@ export default {
       })
       return selectedIds
     },
-    selectCards (box, relativePosition) {
+    selectItems (boxSelection, relativePosition) {
       if (this.userCantEditSpace) { return }
-      const boxPoints = this.points(box)
-      let cards = selectableCards[relativePosition]
-      if (!cards) { return }
-      let selectedCards = cards.filter(card => {
-        const cardPoints = this.points(card)
-        return Boolean(getOverlapSize(boxPoints, cardPoints))
+      const boxSelectionPoints = this.points(boxSelection)
+      let items = selectableItems[relativePosition]
+      if (!items) { return }
+      let selectedItems = items.filter(item => {
+        const itemPoints = this.points(item)
+        return Boolean(getOverlapSize(boxSelectionPoints, itemPoints))
       })
-      selectedCards = uniqBy(selectedCards, 'id')
-      let selectedIds = selectedCards.map(card => card.id)
-      selectedIds = this.mergePreviouslySelected(selectedIds, 'cards')
-      this.$store.dispatch('multipleCardsSelectedIds', selectedIds)
+      selectedItems = uniqBy(selectedItems, 'id')
+      const cards = selectedItems.filter(item => item.isCard)
+      const boxes = selectedItems.filter(item => item.isBox)
+      this.selectItemsByType(cards, 'cards')
+      this.selectItemsByType(boxes, 'boxes')
+    },
+    selectItemsByType (items, type) {
+      let selectedItemIds = items.map(item => item.id)
+      selectedItemIds = this.mergePreviouslySelected(selectedItemIds, type)
+      if (type === 'cards') {
+        this.$store.dispatch('multipleCardsSelectedIds', selectedItemIds)
+      } else if (type === 'boxes') {
+        this.$store.dispatch('multipleBoxesSelectedIds', selectedItemIds)
+      }
     },
     pointsAlongPath (connection) {
       const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
@@ -281,7 +311,7 @@ export default {
       const scale = 2
       return quadratic(start, c1, end, scale) // [[x1,x2], [x2,x2], …]
     },
-    selectconnections (box, relativePosition) {
+    selectconnections (boxSelection, relativePosition) {
       if (this.userCantEditSpace) { return }
       let connections = selectableConnections[relativePosition]
       if (!connections) { return }
@@ -292,8 +322,8 @@ export default {
         const isSelected = pointsAlongPath.find(point => {
           const x = Math.round(point[0])
           const y = Math.round(point[1])
-          const xIsInBox = utils.isBetween({ value: x, min: box.x, max: box.x + box.width })
-          const yIsInBox = utils.isBetween({ value: y, min: box.y, max: box.y + box.height })
+          const xIsInBox = utils.isBetween({ value: x, min: boxSelection.x, max: boxSelection.x + boxSelection.width })
+          const yIsInBox = utils.isBetween({ value: y, min: boxSelection.y, max: boxSelection.y + boxSelection.height })
           return xIsInBox && yIsInBox
         })
         return Boolean(isSelected)
