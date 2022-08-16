@@ -2,12 +2,10 @@
 nav.toolbar(v-if="visible")
   //- Box
   .segmented-buttons
-    button(:class="{ active: currentUserToolbarIsBox }" @pointerdown="toggleToolbar('box')" :title="boxBadgeLabel")
+    button(:class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')" :title="boxBadgeLabel")
       img.icon.box-icon(src="@/assets/box.svg")
       .label-badge.toolbar-badge-wrap(v-if="currentUserToolbarIsBox")
         span {{boxBadgeLabel}}
-    button(v-if="currentUserToolbarIsBox" @pointerdown="toggleToolbar('card')")
-      img.icon.cancel(src="@/assets/add.svg")
 </template>
 
 <script>
@@ -19,7 +17,7 @@ export default {
   computed: {
     isTouchDevice () { return this.$store.state.isTouchDevice },
     currentUserToolbar () { return this.$store.state.currentUserToolbar },
-    currentUserToolbarIsCard () { return this.currentUserToolbar === 'card' },
+    // currentUserToolbarIsCard () { return this.currentUserToolbar === 'card' },
     currentUserToolbarIsBox () { return this.currentUserToolbar === 'box' },
     boxBadgeLabel () {
       let label = 'Draw Box'
@@ -31,7 +29,13 @@ export default {
   },
   methods: {
     toggleToolbar (value) {
-      this.$store.commit('currentUserToolbar', value)
+      const initialValue = 'card'
+      const shouldToggleOffBox = value === 'box' && this.currentUserToolbarIsBox
+      if (shouldToggleOffBox) {
+        this.$store.commit('currentUserToolbar', initialValue)
+      } else {
+        this.$store.commit('currentUserToolbar', value)
+      }
     }
   },
   watch: {
