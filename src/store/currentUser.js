@@ -683,8 +683,11 @@ export default {
       const isTouchDevice = context.rootState.isTouchDevice
       const shouldUnlock = context.state.cardsCreatedCount >= count
       const shouldNotify = context.state.shouldNotifyUnlockedStickyCards
+      const usesStickyCards = context.state.shouldUseStickyCards
       if (isTouchDevice) { return }
-      if (shouldUnlock && shouldNotify) {
+      if (usesStickyCards) {
+
+      } else if (shouldUnlock && shouldNotify) {
         const updates = { shouldUseStickyCards: true, shouldNotifyUnlockedStickyCards: false }
         context.dispatch('update', updates)
         context.commit('triggerNotifyUnlockedStickyCards', null, { root: true })
