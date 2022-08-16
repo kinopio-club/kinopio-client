@@ -1385,7 +1385,8 @@ const store = createStore({
       }
       const isDrawingConnection = state.currentUserIsDrawingConnection
       const isDraggingCard = state.currentUserIsDraggingCard
-      return isPainting || isDrawingConnection || isDraggingCard
+      const isDraggingBox = state.currentUserIsDraggingBox
+      return isPainting || isDrawingConnection || isDraggingCard || isDraggingBox
     },
     otherUserById: (state, getters) => (userId) => {
       const otherUsers = state.otherUsers.filter(Boolean)

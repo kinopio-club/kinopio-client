@@ -192,19 +192,27 @@ export default {
         zoom = viewport.scale
       }
       const currentUserIsBoxSelecting = this.$store.state.currentUserIsBoxSelecting
+      const isDraggingCard = this.$store.state.currentUserIsDraggingCard
+      const isDraggingBox = this.$store.state.currentUserIsDraggingBox
+      const isDraggingItem = isDraggingCard || isDraggingBox
       delta = {
         left: Math.round(delta.x * zoom),
         top: Math.round(delta.y * zoom)
       }
       const cursor = this.cursor()
-      if (this.isDraggingCard) {
+      if (isDraggingItem) {
         const slowMultiplier = 0.9
-        const cardDelta = {
+        const itemDelta = {
           x: delta.left * slowMultiplier,
           y: delta.top * slowMultiplier
         }
         this.$store.dispatch('history/pause')
-        this.$store.dispatch('currentCards/move', { endCursor, prevCursor, delta: cardDelta })
+        if (isDraggingCard) {
+          this.$store.dispatch('currentCards/move', { endCursor, prevCursor, delta: itemDelta })
+        }
+        if (isDraggingBox) {
+          this.$store.dispatch('currentBoxes/move', { endCursor, prevCursor, delta: itemDelta })
+        }
       }
       if (this.isDrawingConnection) {
         this.$store.commit('triggeredDrawConnectionFrame', cursor)
