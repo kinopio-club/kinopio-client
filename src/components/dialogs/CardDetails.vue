@@ -91,7 +91,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .button-wrap
         button(:disabled="!canEditCard" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           img.icon.flower(src="@/assets/flower.svg")
-        ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addFile")
+        ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImage")
       //- Toggle Style Actions
       .button-wrap
         button(:disabled="!canEditCard" @click.left.stop="toggleStyleActionsIsVisible" :class="{active : StyleActionsIsVisible}")
@@ -554,13 +554,22 @@ export default {
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
     },
-    addFile (file) {
+    addImage (file) {
       const cardId = this.card.id
       const spaceId = this.$store.state.currentSpace.id
+      // remove existing image
+      if (this.formats.image) {
+        const newName = this.name.replace(this.formats.image, '')
+        this.updateCardName(newName)
+      }
+      // add new image
       this.$store.commit('triggerUploadComplete', {
         cardId,
         spaceId,
         url: file.url
+      })
+      this.$nextTick(() => {
+        this.updateMediaUrls()
       })
     },
     selectionStartPosition () {
