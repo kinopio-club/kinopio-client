@@ -225,6 +225,7 @@ export default {
       if (!isMeta) { return }
       if (!this.canEditSpace) { return }
       this.selectContainedCards()
+      this.$store.commit('currentDraggingBoxId', '')
       this.$store.dispatch('closeAllDialogs', 'Box.selectAllContainedCards')
     },
     selectContainedCards () {
