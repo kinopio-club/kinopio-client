@@ -372,12 +372,15 @@ export default {
       if (bing) {
         data = data.value
         this.images = data.map(image => {
+          const isImage = utils.urlIsImage(image.contentUrl)
+          if (!isImage) { return }
           return {
             id: image.imageid,
             previewUrl: image.thumbnailUrl,
             url: image.contentUrl
           }
         })
+        this.images = this.images.filter(image => Boolean(image))
       // giphy
       } else if (giphy) {
         this.images = data.map(image => {
