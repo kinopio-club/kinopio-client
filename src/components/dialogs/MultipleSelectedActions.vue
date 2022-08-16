@@ -80,7 +80,7 @@ dialog.narrow.multiple-selected-actions(
 import utils from '@/utils.js'
 import MoveOrCopyCards from '@/components/dialogs/MoveOrCopyCards.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
-import StyleActions from '@/components/StyleActions.vue'
+import StyleActions from '@/components/subsections/StyleActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
 

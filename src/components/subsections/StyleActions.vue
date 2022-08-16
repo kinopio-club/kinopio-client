@@ -1,5 +1,5 @@
 <template lang="pug">
-section.sub-section.style-actions(v-if="visible" @click.left.stop="closeDialogs")
+section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
   .row
     //- h1
     .button-wrap

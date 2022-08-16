@@ -19,7 +19,7 @@
         option(:value="name") {{name}}
 
   //- address
-  section.sub-section(v-if="countryRequiresAddress")
+  section.subsection(v-if="countryRequiresAddress")
     .row
       p Address is required for payments from {{currentCountryName}}
     input(type="text" name="address-line-1" placeholder="Address" v-model="addressLine1" @input="clearErrors")
@@ -387,6 +387,6 @@ export default {
   select
     width 100%
     margin-left 6px
-  .sub-section
+  .subsection
     margin-bottom 10px
 </style>

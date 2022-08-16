@@ -1,6 +1,6 @@
 <template lang="pug">
 a#pdf-downlaod-anchor.hidden
-section.sub-section.pdf(v-if="visible")
+section.subsection.pdf(v-if="visible")
   template(v-if="isLoading")
     .row
       Loader(:visible="true")

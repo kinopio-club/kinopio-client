@@ -29,7 +29,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
 
 <script>
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import StyleActions from '@/components/StyleActions.vue'
+import StyleActions from '@/components/subsections/StyleActions.vue'
 import utils from '@/utils.js'
 
 let prevBoxId
