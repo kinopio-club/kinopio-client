@@ -1497,4 +1497,7 @@ export default {
     .icon.time
       vertical-align -1px
 
+  dialog.image-picker
+    left -100px
+
 </style>
