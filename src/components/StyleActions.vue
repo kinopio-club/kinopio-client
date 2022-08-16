@@ -34,7 +34,7 @@ section.sub-section.style-actions(v-if="visible" @click.left.stop="closeDialogs"
     //- Box Fill
     .segmented-buttons(v-if="isBoxes")
       button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')")
-        img.icon.box-icon(src="@/assets/box.svg")
+        img.icon.box-icon(src="@/assets/box-filled.svg")
       button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')")
         img.icon.box-icon(src="@/assets/box-empty.svg")
 
