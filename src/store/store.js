@@ -1200,10 +1200,12 @@ const store = createStore({
     updatePageSizes: (context) => {
       const paddingX = Math.min(400, (utils.visualViewport().width / 4) * 3) + 100
       const paddingY = Math.min(400, (utils.visualViewport().height / 4) * 3)
-      const cards = utils.clone(context.rootState.currentSpace.cards)
-      if (cards.length) {
-        const xPositions = Array.from(cards, card => card.x)
-        const yPositions = Array.from(cards, card => card.y)
+      const cards = context.getters['currentCards/all']
+      const boxes = context.getters['currentBoxes/all']
+      const items = cards.concat(boxes)
+      if (items.length) {
+        const xPositions = Array.from(items, item => item.x)
+        const yPositions = Array.from(items, item => item.y)
         const x = Math.max(...xPositions)
         const y = Math.max(...yPositions)
         context.commit('updateMaxPageSizes', {
