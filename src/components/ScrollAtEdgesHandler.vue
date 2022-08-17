@@ -192,8 +192,8 @@ export default {
         zoom = viewport.scale
       }
       const currentUserIsBoxSelecting = this.$store.state.currentUserIsBoxSelecting
-      const isDraggingCard = this.$store.state.currentUserIsDraggingCard
-      const isDraggingBox = this.$store.state.currentUserIsDraggingBox
+      const isDraggingCard = this.$store.state.currentUserIsDraggingCard || this.$store.state.multipleCardsSelectedIds.length
+      const isDraggingBox = this.$store.state.currentUserIsDraggingBox || this.$store.state.multipleBoxesSelectedIds.length
       const isDraggingItem = isDraggingCard || isDraggingBox
       delta = {
         left: Math.round(delta.x * zoom),
