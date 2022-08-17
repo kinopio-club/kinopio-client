@@ -12,6 +12,7 @@
     :data-box-id="box.id"
     :style="labelStyles"
     :class="{unselectable: isPainting}"
+    tabindex="0"
 
     @mouseover="updateIsHover(true)"
     @mouseleave="updateIsHover(false)"

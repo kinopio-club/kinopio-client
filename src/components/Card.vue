@@ -135,7 +135,7 @@ article(
             @touchstart="startConnecting"
           )
             .connector-glow(:style="connectorGlowStyle" tabindex="-1")
-            button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: itemBackground }" tabindex="-1")
+            button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: itemBackground }" tabindex="-1" @keyup.stop.enter="showCardDetails")
               .connected-colors
                 template(v-if="isConnectingTo || isConnectingFrom")
                   .color(:style="{ background: newConnectionColor}")
