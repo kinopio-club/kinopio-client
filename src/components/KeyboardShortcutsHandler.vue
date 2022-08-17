@@ -629,12 +629,15 @@ export default {
       const isSpaceScope = checkIsSpaceScope(event)
       if (!isSpaceScope) { return }
       event.preventDefault()
-      await this.writeSelectedToClipboard()
-      console.log(event.type)
-      if (event.type === 'cut') {
-        this.remove()
+      try {
+        await this.writeSelectedToClipboard()
+        console.log(event.type)
+        if (event.type === 'cut') { this.remove() }
+        this.$store.commit('addNotification', { message: utils.pastTense(event.type), type: 'success', icon: 'cut' })
+      } catch (error) {
+        console.warn('🚑 handleCopyCutEvent', error)
+        this.$store.commit('addNotification', { message: `Could not ${event.type}`, type: 'danger', icon: 'cut' })
       }
-      this.$store.commit('addNotification', { message: utils.pastTense(event.type), type: 'success', icon: 'cut' })
     },
 
     // Paste
@@ -871,6 +874,7 @@ export default {
         }
       } catch (error) {
         console.warn('🚑 writeSelectedToClipboard', error)
+        throw { error }
       }
     },
 
