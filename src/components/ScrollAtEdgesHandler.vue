@@ -192,8 +192,8 @@ export default {
         zoom = viewport.scale
       }
       const currentUserIsBoxSelecting = this.$store.state.currentUserIsBoxSelecting
-      const isDraggingCard = this.$store.state.currentUserIsDraggingCard || this.$store.state.multipleCardsSelectedIds.length
-      const isDraggingBox = this.$store.state.currentUserIsDraggingBox || this.$store.state.multipleBoxesSelectedIds.length
+      const isDraggingCard = this.$store.state.currentUserIsDraggingCard
+      const isDraggingBox = this.$store.state.currentUserIsDraggingBox
       const isDraggingItem = isDraggingCard || isDraggingBox
       delta = {
         left: Math.round(delta.x * zoom),
@@ -207,10 +207,8 @@ export default {
           y: delta.top * slowMultiplier
         }
         this.$store.dispatch('history/pause')
-        if (isDraggingCard) {
+        if (isDraggingCard || isDraggingBox) {
           this.$store.dispatch('currentCards/move', { endCursor, prevCursor, delta: itemDelta })
-        }
-        if (isDraggingBox) {
           this.$store.dispatch('currentBoxes/move', { endCursor, prevCursor, delta: itemDelta })
         }
       }
