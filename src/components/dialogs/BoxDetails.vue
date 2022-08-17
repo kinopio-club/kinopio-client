@@ -79,6 +79,13 @@ export default {
     canEditBox () { return this.$store.getters['currentUser/canEditBox']() }
   },
   methods: {
+    broadcastShowBoxDetails () {
+      const updates = {
+        boxId: this.box.id,
+        userId: this.$store.state.currentUser.id
+      }
+      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxDetailsVisible' })
+    },
     removeBox () {
       this.$store.dispatch('history/resume')
       this.$store.dispatch('currentBoxes/remove', this.box)
@@ -153,6 +160,7 @@ export default {
           this.$store.dispatch('history/pause')
           prevBoxId = current.id
           this.closeDialogs()
+          this.broadcastShowBoxDetails()
           this.scrollIntoViewAndFocus()
         // close
         } else {

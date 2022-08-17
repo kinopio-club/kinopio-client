@@ -34,6 +34,9 @@
     template(v-else)
       span {{box.name}}
 
+    .selected-user-avatar(v-if="isRemoteSelected || isRemoteBoxDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteBoxDetailsVisibleColor}")
+      img(src="@/assets/anon-avatar.svg")
+
   .lock-button-wrap.inline-button-wrap(v-if="isLocked")
     button.inline-button(tabindex="-1" :style="{background: color}")
       img.icon.lock-icon(src="@/assets/lock.svg")
@@ -111,7 +114,10 @@ export default {
     isLocked () { return this.box.isLocked },
     userColor () { return this.$store.state.currentUser.color },
     color () {
-      if (this.isSelected) {
+      const remoteColor = this.remoteBoxDetailsVisibleColor || this.remoteSelectedColor || this.remoteUserResizingBoxesColor || this.remoteBoxDraggingColor
+      if (remoteColor) {
+        return remoteColor
+      } else if (this.isSelected) {
         return this.userColor
       } else {
         return this.normalizedBox.color
@@ -176,6 +182,65 @@ export default {
     },
     selectedBoxes () {
       return this.$store.getters['currentBoxes/isSelected']
+    },
+
+    // Remote
+
+    isRemoteSelected () {
+      const remoteBoxesSelected = this.$store.state.remoteBoxesSelected
+      const selectedBox = remoteBoxesSelected.find(box => box.boxId === this.box.id)
+      return Boolean(selectedBox)
+    },
+    isRemoteBoxDetailsVisible () {
+      const remoteBoxDetailsVisible = this.$store.state.remoteBoxDetailsVisible
+      const visibleBox = remoteBoxDetailsVisible.find(box => box.boxId === this.box.id)
+      return Boolean(visibleBox)
+    },
+    remoteBoxDetailsVisibleColor () {
+      const remoteBoxDetailsVisible = this.$store.state.remoteBoxDetailsVisible
+      const visibleBox = remoteBoxDetailsVisible.find(box => box.boxId === this.box.id)
+      if (visibleBox) {
+        const user = this.$store.getters['currentSpace/userById'](visibleBox.userId)
+        return user.color
+      } else {
+        return undefined
+      }
+    },
+    isRemoteBoxDragging () {
+      const remoteBoxesDragging = this.$store.state.remoteBoxesDragging
+      const isDragging = remoteBoxesDragging.find(box => box.boxId === this.box.id)
+      return Boolean(isDragging)
+    },
+    remoteSelectedColor () {
+      const remoteBoxesSelected = this.$store.state.remoteBoxesSelected
+      const selectedBox = remoteBoxesSelected.find(box => box.boxId === this.box.id)
+      if (selectedBox) {
+        const user = this.$store.getters['currentSpace/userById'](selectedBox.userId)
+        return user.color
+      } else {
+        return undefined
+      }
+    },
+    remoteUserResizingBoxesColor () {
+      const remoteUserResizingBoxes = this.$store.state.remoteUserResizingBoxes
+      if (!remoteUserResizingBoxes.length) { return }
+      let user = remoteUserResizingBoxes.find(user => user.boxIds.includes(this.box.id))
+      if (user) {
+        user = this.$store.getters['currentSpace/userById'](user.userId)
+        return user.color
+      } else {
+        return undefined
+      }
+    },
+    remoteBoxDraggingColor () {
+      const remoteBoxesDragging = this.$store.state.remoteBoxesDragging
+      const draggingBox = remoteBoxesDragging.find(box => box.boxId === this.box.id)
+      if (draggingBox) {
+        const user = this.$store.getters['currentSpace/userById'](draggingBox.userId)
+        return user.color
+      } else {
+        return undefined
+      }
     }
 
   },
@@ -217,6 +282,11 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Box.startBoxInfoInteraction')
       this.$store.commit('currentUserIsDraggingBox', true)
       this.$store.commit('currentDraggingBoxId', this.box.id)
+      const updates = {
+        boxId: this.box.id,
+        userId: this.$store.state.currentUser.id
+      }
+      this.$store.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesDragging' })
       if (event.shiftKey) { return } // should not select contained cards if shift key
       this.selectContainedCards()
     },
@@ -296,13 +366,16 @@ export default {
       this.isHover = value
     },
     showBoxDetails (event) {
+      const userId = this.$store.state.currentUser.id
       this.$store.dispatch('currentBoxes/afterMove')
       if (this.$store.state.currentUserIsPainting) { return }
       if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
-      if (this.$store.state.boxesWereDragged) { return }
+      if (this.$store.state.boxesWereDragged) {
+        this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
+        return
+      }
       if (!this.canEditBox) { this.$store.commit('triggerReadOnlyJiggle') }
-      const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
       this.$store.dispatch('closeAllDialogs', 'Box.showBoxDetails')
       this.$store.dispatch('clearMultipleSelected')
@@ -510,6 +583,19 @@ export default {
     position absolute
     z-index -1
     pointer-events none
+
+  // same as Card.vue
+  .selected-user-avatar
+    padding 0 3px
+    border-radius 3px
+    position absolute
+    top -5px
+    left -5px
+    pointer-events none
+    z-index 1
+    img
+      width 10px
+      height 10px
 
 .box-jiggle
   animation boxJiggle 0.5s infinite ease-out forwards

@@ -87,6 +87,7 @@ const store = createStore({
     remoteUserResizingBoxs: [],
     multipleBoxesSelectedIds: [],
     currentBoxIsNew: false,
+    remoteBoxDetailsVisible: [],
     // resizing boxes
     currentUserIsResizingBox: false,
     currentUserIsResizingBoxIds: [],
@@ -608,11 +609,21 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsDraggingBox' })
       state.currentUserIsDraggingBox = value
     },
-
-    // removeRemoteUserResizingBoxes: (state, update) => {
-    // removeRemoteUserResizingBoxIds??
-    //   state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
-    // },
+    updateRemoteBoxDetailsVisible: (state, update) => {
+      utils.typeCheck({ value: update, type: 'object', origin: 'updateRemoteBoxDetailsVisible' })
+      delete update.type
+      let boxDetailsVisible = utils.clone(state.remoteBoxDetailsVisible)
+      boxDetailsVisible = boxDetailsVisible.filter(box => box.id !== update.boxId) || []
+      boxDetailsVisible.push(update)
+      state.remoteBoxDetailsVisible = boxDetailsVisible
+    },
+    clearRemoteBoxDetailsVisible: (state, update) => {
+      utils.typeCheck({ value: update, type: 'object', origin: 'clearRemoteBoxDetailsVisible' })
+      state.remoteBoxDetailsVisible = state.remoteBoxDetailsVisible.filter(box => box.userId !== update.userId) || []
+    },
+    removeRemoteUserResizingBoxes: (state, update) => {
+      state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
+    },
     updateRemoteUserResizingBoxes: (state, update) => {
       state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
       state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.concat(update)
@@ -699,17 +710,17 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'boxesWereDragged' })
       state.boxesWereDragged = value
     },
-    // addToRemoteCardsDragging: (state, update) => {
-    //   utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteCardsDragging' })
-    //   delete update.type
-    //   let cards = utils.clone(state.remoteCardsDragging)
-    //   cards = cards.filter(card => card.userId !== update.userId) || []
-    //   cards.push(update)
-    //   state.remoteCardsDragging = cards
-    // },
+    addToRemoteBoxesDragging: (state, update) => {
+      utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteBoxesDragging' })
+      delete update.type
+      let boxes = utils.clone(state.remoteBoxesDragging)
+      boxes = boxes.filter(box => box.userId !== update.userId) || []
+      boxes.push(update)
+      state.remoteBoxesDragging = boxes
+    },
     clearRemoteBoxesDragging: (state, update) => {
       utils.typeCheck({ value: update, type: 'object', origin: 'clearRemoteBoxesDragging' })
-      state.remoteBoxesDragging = state.remoteBoxesDragging.filter(card => card.userId !== update.userId)
+      state.remoteBoxesDragging = state.remoteBoxesDragging.filter(box => box.userId !== update.userId)
     },
     preventDraggedBoxFromShowingDetails: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'preventDraggedBoxFromShowingDetails' })
@@ -930,6 +941,7 @@ const store = createStore({
       const user = update.user || update.updates.user
       state.remoteCardsSelected = state.remoteCardsSelected.filter(card => card.userId !== user.id)
       state.remoteConnectionsSelected = state.remoteConnectionsSelected.filter(connection => connection.userId !== user.id)
+      state.remoteBoxesSelected = state.remoteBoxesSelected.filter(box => box.userId !== user.id)
     },
     previousMultipleConnectionsSelectedIds: (state, connectionIds) => {
       utils.typeCheck({ value: connectionIds, type: 'array', origin: 'previousMultipleConnectionsSelectedIds' })
@@ -1251,6 +1263,7 @@ const store = createStore({
       context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'updateUserPresence' }, { root: true })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteCardDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
+      context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteBoxDetailsVisible' })
     },
     toggleCardSelected: (context, cardId) => {
       const previousMultipleCardsSelectedIds = context.state.previousMultipleCardsSelectedIds

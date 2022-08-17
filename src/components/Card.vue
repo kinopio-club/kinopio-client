@@ -739,21 +739,6 @@ export default {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       return multipleCardsSelectedIds.includes(this.id)
     },
-    isRemoteSelected () {
-      const remoteCardsSelected = this.$store.state.remoteCardsSelected
-      const selectedCard = remoteCardsSelected.find(card => card.cardId === this.id)
-      return Boolean(selectedCard)
-    },
-    isRemoteCardDetailsVisible () {
-      const remoteCardDetailsVisible = this.$store.state.remoteCardDetailsVisible
-      const visibleCard = remoteCardDetailsVisible.find(card => card.cardId === this.id)
-      return Boolean(visibleCard)
-    },
-    isRemoteCardDragging () {
-      const remoteCardsDragging = this.$store.state.remoteCardsDragging
-      const isDragging = remoteCardsDragging.find(card => card.cardId === this.id)
-      return Boolean(isDragging)
-    },
     selectedColor () {
       const color = this.$store.state.currentUser.color
       if (this.isSelected) {
@@ -769,6 +754,28 @@ export default {
       } else {
         return undefined
       }
+    },
+    hasConnections () {
+      const connections = this.$store.getters['currentConnections/byCardId'](this.id)
+      return Boolean(connections.length)
+    },
+
+    // Remote
+
+    isRemoteSelected () {
+      const remoteCardsSelected = this.$store.state.remoteCardsSelected
+      const selectedCard = remoteCardsSelected.find(card => card.cardId === this.id)
+      return Boolean(selectedCard)
+    },
+    isRemoteCardDetailsVisible () {
+      const remoteCardDetailsVisible = this.$store.state.remoteCardDetailsVisible
+      const visibleCard = remoteCardDetailsVisible.find(card => card.cardId === this.id)
+      return Boolean(visibleCard)
+    },
+    isRemoteCardDragging () {
+      const remoteCardsDragging = this.$store.state.remoteCardsDragging
+      const isDragging = remoteCardsDragging.find(card => card.cardId === this.id)
+      return Boolean(isDragging)
     },
     remoteCardDetailsVisibleColor () {
       const remoteCardDetailsVisible = this.$store.state.remoteCardDetailsVisible
@@ -820,10 +827,6 @@ export default {
       } else {
         return undefined
       }
-    },
-    hasConnections () {
-      const connections = this.$store.getters['currentConnections/byCardId'](this.id)
-      return Boolean(connections.length)
     },
 
     // Filters
@@ -1415,7 +1418,6 @@ export default {
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
       if (this.$store.state.currentUserIsResizingBox || this.$store.state.currentUserIsDraggingBox) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
-      const userId = this.$store.state.currentUser.id
       const cardsWereDragged = this.$store.state.cardsWereDragged
       const shouldToggleSelected = event.shiftKey && !cardsWereDragged && !this.isConnectingTo
       if (shouldToggleSelected) {
@@ -1424,6 +1426,7 @@ export default {
         this.$store.commit('currentUserIsDraggingCard', false)
         return
       }
+      const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       this.preventDraggedButtonBadgeFromShowingDetails = this.$store.state.preventDraggedCardFromShowingDetails
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
