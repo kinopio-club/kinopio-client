@@ -75,7 +75,7 @@ const store = createStore({
     // minimap
     minimapIsVisible: false,
 
-    // box-shape selecting
+    // box-selecting
     currentUserIsBoxSelecting: false,
     currentUserBoxSelectStart: {},
     currentUserBoxSelectEnd: {},
