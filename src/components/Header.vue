@@ -92,7 +92,6 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               img.icon.right-arrow(src="@/assets/down-arrow.svg")
             button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
               img.icon.cancel(src="@/assets/add.svg")
-
     .right
       .controls(v-if="isAddPage && !isAppStoreView")
         .top-controls
@@ -132,6 +131,8 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
               img.icon.right-arrow(src="@/assets/down-arrow.svg")
             Sidebar(:visible="sidebarIsVisible")
+
+  Toolbar(:visible="isSpace")
   SelectAllBelow
 </template>
 
@@ -161,6 +162,7 @@ import utils from '@/utils.js'
 import SelectAllBelow from '@/components/SelectAllBelow.vue'
 import SpaceUsers from '@/components/SpaceUsers.vue'
 import Donate from '@/components/dialogs/Donate.vue'
+import Toolbar from '@/components/Toolbar.vue'
 
 let updateNotificationsIntervalTimer
 
@@ -194,7 +196,8 @@ export default {
     SelectAllBelow,
     Sidebar,
     SpaceUsers,
-    Donate
+    Donate,
+    Toolbar
   },
   props: {
     isPinchZooming: Boolean,
@@ -695,7 +698,6 @@ header
       > .keyboard-shortcuts
         max-height calc(100vh - 120px)
         top calc(100% - 6px)
-
   .logo
     cursor pointer
     display flex

@@ -91,16 +91,16 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .button-wrap
         button(:disabled="!canEditCard" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           img.icon.flower(src="@/assets/flower.svg")
-        ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addFile")
+        ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImage")
       //- Toggle Style Actions
       .button-wrap
-        button(:disabled="!canEditCard" @click.left.stop="toggleCardStyleActionsIsVisible" :class="{active : cardStyleActionsIsVisible}")
+        button(:disabled="!canEditCard" @click.left.stop="toggleStyleActionsIsVisible" :class="{active : StyleActionsIsVisible}")
           span Style
       //- Toggle Collaboration Info
       .button-wrap
         button.toggle-collaboration-info(@click.left.stop="toggleCollaborationInfoIsVisible" :class="{active : collaborationInfoIsVisible}")
           img.icon.time(src="@/assets/time.svg")
-    CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowCardStyleActions }")
+    StyleActions(:visible="StyleActionsIsVisible" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowStyleActions }")
     CardCollaborationInfo(:visible="collaborationInfoIsVisible" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
     .row(v-if="nameMetaRowIsVisible")
@@ -113,7 +113,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Split by Line Breaks
       .button-wrap(v-if="nameSplitIntoCardsCount")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
-          img.icon(src="@/assets/split-vertically.svg")
+          img.icon(src="@/assets/split.svg")
           span Split Card ({{nameSplitIntoCardsCount}})
 
     .row.badges-row(v-if="badgesRowIsVisible")
@@ -198,7 +198,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 </template>
 
 <script>
-import CardStyleActions from '@/components/CardStyleActions.vue'
+import StyleActions from '@/components/subsections/StyleActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
@@ -224,7 +224,7 @@ let openingAnimationTimer, openingStartTime, shouldCancelOpening
 export default {
   name: 'CardDetails',
   components: {
-    CardStyleActions,
+    StyleActions,
     ImagePicker,
     CardTips,
     TagPicker,
@@ -305,7 +305,7 @@ export default {
     })
   },
   computed: {
-    rowIsBelowCardStyleActions () { return this.nameMetaRowIsVisible || this.badgesRowIsVisible || this.collaborationInfoIsVisible || this.cardHasMedia || this.cardUrlPreviewIsVisible },
+    rowIsBelowStyleActions () { return this.nameMetaRowIsVisible || this.badgesRowIsVisible || this.collaborationInfoIsVisible || this.cardHasMedia || this.cardUrlPreviewIsVisible },
     nameMetaRowIsVisible () { return this.nameSplitIntoCardsCount || this.hasUrls },
     badgesRowIsVisible () { return this.tagsInCard.length || this.card.linkToSpaceId || this.nameIsComment || this.isInSearchResultsCards },
     parentElement () { return this.$refs.dialog },
@@ -542,7 +542,9 @@ export default {
       }
     },
     collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo },
-    cardStyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowCardStyleActions }
+    StyleActionsIsVisible () {
+      return this.$store.state.currentUser.shouldShowStyleActions
+    }
   },
   methods: {
     broadcastShowCardDetails () {
@@ -552,13 +554,22 @@ export default {
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
     },
-    addFile (file) {
+    addImage (file) {
       const cardId = this.card.id
       const spaceId = this.$store.state.currentSpace.id
+      // remove existing image
+      if (this.formats.image) {
+        const newName = this.name.replace(this.formats.image, '')
+        this.updateCardName(newName)
+      }
+      // add new image
       this.$store.commit('triggerUploadComplete', {
         cardId,
         spaceId,
         url: file.url
+      })
+      this.$nextTick(() => {
+        this.updateMediaUrls()
       })
     },
     selectionStartPosition () {
@@ -901,10 +912,10 @@ export default {
       this.imagePickerIsVisible = !isVisible
       this.initialSearch = this.normalizedName
     },
-    toggleCardStyleActionsIsVisible () {
+    toggleStyleActionsIsVisible () {
       this.closeDialogs()
-      const isVisible = !this.$store.state.currentUser.shouldShowCardStyleActions
-      this.$store.dispatch('currentUser/shouldShowCardStyleActions', isVisible)
+      const isVisible = !this.$store.state.currentUser.shouldShowStyleActions
+      this.$store.dispatch('currentUser/shouldShowStyleActions', isVisible)
       this.$nextTick(() => {
         this.scrollIntoView()
       })
@@ -1394,7 +1405,8 @@ export default {
         this.resetTextareaHeight()
         this.$nextTick(() => {
           this.startOpening()
-          this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
+          const card = this.$store.getters['currentCards/byId'](cardId)
+          this.$store.dispatch('checkIfItemShouldIncreasePageSize', card)
         })
       })
       this.previousSelectedTag = {}
@@ -1422,7 +1434,7 @@ export default {
       this.$store.dispatch('updatePageSizes')
       this.$nextTick(() => {
         this.updateCardMap(cardId)
-        this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
+        this.$store.dispatch('checkIfItemShouldIncreasePageSize', card)
       })
       this.$store.dispatch('history/resume')
       if (card.name || prevCardName) {
@@ -1484,5 +1496,8 @@ export default {
   button
     .icon.time
       vertical-align -1px
+
+  dialog.image-picker
+    left -100px
 
 </style>

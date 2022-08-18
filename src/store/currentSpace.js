@@ -221,10 +221,14 @@ const currentSpace = {
       })
       otherUserIds = uniq(otherUserIds)
       if (!otherUserIds.length) { return }
-      const users = await context.dispatch('api/getPublicUsers', otherUserIds, { root: true })
-      users.forEach(user => {
-        context.commit('updateOtherUsers', user, { root: true })
-      })
+      try {
+        const users = await context.dispatch('api/getPublicUsers', otherUserIds, { root: true })
+        users.forEach(user => {
+          context.commit('updateOtherUsers', user, { root: true })
+        })
+      } catch (error) {
+        console.warn('🚑 updateOtherUsers', error)
+      }
     },
     updateOtherSpaces: async (context, spaceId) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
@@ -303,6 +307,7 @@ const currentSpace = {
         space.connectionTypes = []
         space.connections = []
         space.cards = []
+        space.boxes = []
       } else {
         space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
         space.cards[1].x = random(180, 200)
@@ -418,7 +423,7 @@ const currentSpace = {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
       } catch (error) {
-        console.warn('🚑', error.status, error)
+        console.warn('🚑 getRemoteSpace', error.status, error)
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
           context.dispatch('loadLastSpace')
@@ -496,10 +501,11 @@ const currentSpace = {
       console.log('💕 update modules space id', space.id)
       context.dispatch('currentCards/updateSpaceId', space.id, { root: true })
       context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
+      context.dispatch('currentBoxes/updateSpaceId', space.id, { root: true })
     },
-    restoreSpaceInChunks: (context, { space, isRemote, addCards, addConnections, addConnectionTypes }) => {
+    restoreSpaceInChunks: (context, { space, isRemote, addCards, addConnections, addConnectionTypes, addBoxes }) => {
       if (!utils.objectHasKeys(space)) { return }
-      console.log('🌱 Restoring space', space, { 'isRemote': isRemote, addCards, addConnections, addConnectionTypes })
+      console.log('🌱 Restoring space', space, { 'isRemote': isRemote, addCards, addConnections, addConnectionTypes, addBoxes })
       const chunkSize = 50
       const timeStart = utils.normalizeToUnixTime(new Date())
       const origin = { x: window.scrollX, y: window.scrollY }
@@ -510,6 +516,7 @@ const currentSpace = {
       let connections = addConnections || space.connections || []
       cards = utils.normalizeItems(cards)
       connections = utils.normalizeItems(connections)
+      let boxes = addBoxes || space.boxes || []
       // sort cards
       const cardIds = Object.keys(cards)
       cards = cardIds.map(id => {
@@ -537,6 +544,7 @@ const currentSpace = {
       if (!isRemote) {
         context.commit('currentCards/clear', null, { root: true })
         context.commit('currentConnections/clear', null, { root: true })
+        context.commit('currentBoxes/clear', null, { root: true })
         context.dispatch('updateModulesSpaceId', space)
       }
       context.commit('isLoadingSpace', true, { root: true })
@@ -558,7 +566,11 @@ const currentSpace = {
         context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
         return
       }
+      // restore types
       context.commit('currentConnections/restoreTypes', connectionTypes, { root: true })
+      // restore boxes
+      context.commit('currentBoxes/restore', boxes, { root: true })
+      // restore chunks
       primaryChunks.forEach((chunk, index) => {
         defer(function () {
           if (space.id !== context.state.id) { return }
@@ -595,9 +607,11 @@ const currentSpace = {
       }
       let cards = context.rootState.currentCards.ids.length
       let connections = context.rootState.currentConnections.ids.length
+      let boxes = context.rootState.currentBoxes.ids.length
       console.log(`${emoji} Restore space complete in ${timeEnd - timeStart}ms,`, {
         cards,
         connections,
+        boxes,
         spaceName: space.name,
         isRemote,
         cardUsers: context.rootGetters['currentCards/userIds']
@@ -644,6 +658,7 @@ const currentSpace = {
       context.commit('clearSearch', null, { root: true })
       context.commit('hasEditedCurrentSpace', false, { root: true })
       context.commit('shouldPreventNextEnterKey', false, { root: true })
+      context.commit('minimapIsVisible', false, { root: true })
       // restore local space
       context.commit('restoreSpace', emptySpace)
       context.dispatch('history/reset', null, { root: true })
@@ -672,10 +687,17 @@ const currentSpace = {
       const connectionResults = utils.mergeSpaceKeyValues({ prevItems: connections, newItems: remoteSpace.connections })
       context.dispatch('currentConnections/mergeUnique', { newItems: connectionResults.updateItems, itemType: 'connection' }, { root: true })
       context.dispatch('currentConnections/mergeRemove', { removeItems: connectionResults.removeItems, itemType: 'connection' }, { root: true })
+      // boxes
+      const boxes = context.rootGetters['currentBoxes/all']
+      const boxResults = utils.mergeSpaceKeyValues({ prevItems: boxes, newItems: remoteSpace.boxes })
+      context.dispatch('currentBoxes/mergeUnique', { newItems: boxResults.updateItems, itemType: 'box' }, { root: true })
+      context.dispatch('currentBoxes/mergeRemove', { removeItems: boxResults.removeItems, itemType: 'box' }, { root: true })
+
       console.log('🎑 Merge space', {
         cards: cardResults,
         types: connectionTypeReults,
         connections: connectionResults,
+        boxes: boxResults,
         localSpace: space,
         space: remoteSpace
       })
@@ -684,7 +706,8 @@ const currentSpace = {
         isRemote: true,
         addCards: cardResults.addItems,
         addConnectionTypes: connectionTypeReults.addItems,
-        addConnections: connectionResults.addItems
+        addConnections: connectionResults.addItems,
+        addBoxes: boxResults.addItems
       })
     },
     loadLastSpace: async (context) => {

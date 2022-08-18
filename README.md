@@ -47,6 +47,23 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 | `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
 | `components/layers/MagicPaint.vue` | The layers used for animating painting, scroll locking on touch, and more with `<canvas>`. As well as for multiple card and connection selection which reveals `MultipleSelectedActions` |
 
+
+## Developing on HTTPS
+
+In rare cases when working with code that only works on https (e.g. clipboard copy and paste), use Ngrok to pipe your localhost through an https server.
+
+(Note that dev server connections won't work through Ngrok)
+
+### Setup Ngrok
+
+[login](http://ngrok.com) and download ngrok, then connect ngrok to the kinopio ngrok account
+
+    $ ./ngrok authtoken 1e2pCpJsJMwkEkqbDKF0p5eMArQ_5Ztb7NE8fqyftCnuizdab
+
+### Run Ngrok
+
+    $ ./ngrok http 3000
+
 ## See Also
 
 - [are.na/kinopio](https://www.are.na/kinopio)

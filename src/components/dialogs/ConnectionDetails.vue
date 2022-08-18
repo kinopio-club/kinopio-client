@@ -4,7 +4,6 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
     .row
       .button-wrap
         button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-          img.icon(src="@/assets/connection-path.svg")
           .current-color(:style="{backgroundColor: typeColor}")
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
       input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="focus" @blur="blur")
@@ -12,9 +11,6 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
     .row
       //- Arrows or Label
       ConnectionDecorators(:connections="[currentConnection]")
-      //- Filter
-      button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
-        img.icon(src="@/assets/filter.svg")
 
     p.edit-message(v-if="!canEditConnection")
       template(v-if="spacePrivacyIsOpen")
@@ -38,11 +34,15 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         img.icon(src="@/assets/remove.svg")
         span Remove
   section.results-actions(ref="resultsActions")
+    //- Use Last Type
     .row
       label(:class="{active: shouldUseLastConnectionType, disabled: !canEditConnection}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
         input(type="checkbox" v-model="shouldUseLastConnectionType")
         .badge.badge-in-button(:style="{backgroundColor: typeColor}")
         span Use Last Type
+      //- Filter
+      button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+        img.icon(src="@/assets/filter.svg")
 
     .row
       button(:disabled="!canEditConnection" @click.left="addConnectionType")
@@ -281,7 +281,7 @@ export default {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
       this.$store.dispatch('history/resume')
       const connectionType = utils.clone(this.currentConnectionType)
-      this.$store.dispatch('history/add', { connectionTypes: [connectionType], useSnapshot: true }, { root: true })
+      this.$store.dispatch('history/add', { connectionTypes: [connectionType], useSnapshot: true })
       this.inputIsFocused = false
     },
     updateNextConnectionColor () {
@@ -309,7 +309,7 @@ export default {
         this.$store.dispatch('history/resume')
         this.resultsSectionMaxHeight = undefined
         if (this.inputIsFocused) {
-          this.$store.dispatch('history/add', { connectionTypes: [prevConnectionType], useSnapshot: true }, { root: true })
+          this.$store.dispatch('history/add', { connectionTypes: [prevConnectionType], useSnapshot: true })
           this.inputIsFocused = false
         }
       }
@@ -333,10 +333,4 @@ export default {
     label
       .badge-in-button
         margin-left 0
-  .change-color
-    width 45px
-    display flex
-    > .icon
-      margin-right 5px
-      margin-top 1px
 </style>

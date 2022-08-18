@@ -53,7 +53,7 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
 <script>
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
-import Pdf from '@/components/Pdf.vue'
+import Pdf from '@/components/subsections/Pdf.vue'
 
 export default {
   name: 'Export',

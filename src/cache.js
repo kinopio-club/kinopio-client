@@ -119,7 +119,7 @@ export default {
       console.warn(updateErrorMessage)
       return
     }
-    const normalizeKeys = ['cards', 'connections', 'connectionTypes']
+    const normalizeKeys = ['cards', 'connections', 'connectionTypes', 'boxes']
     if (normalizeKeys.includes(key)) {
       value = utils.denormalizeItems(value)
     }
@@ -150,6 +150,18 @@ export default {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${spaceId}`, space)
   }, 200),
+  updateSpaceBoxesDebounced: debounce(function (boxes, spaceId) {
+    boxes = utils.denormalizeItems(boxes)
+    let space = this.space(spaceId)
+    if (!utils.objectHasKeys(space)) {
+      console.warn(updateErrorMessage)
+      return
+    }
+    boxes = utils.denormalizeItems(boxes)
+    space.boxes = boxes
+    space.cacheDate = Date.now()
+    this.storeLocal(`space-${spaceId}`, space)
+  }, 200),
   addToSpace ({ cards, connections, connectionTypes }, spaceId) {
     let space = this.space(spaceId)
     space.cards = space.cards || []
@@ -169,7 +181,8 @@ export default {
       cards: space.cards,
       connectionTypes: space.connectionTypes,
       connections: space.connections,
-      tags: space.tags
+      tags: space.tags,
+      boxes: space.boxes
     }
     const uniqueItems = utils.uniqueSpaceItems(items, nullCardUsers)
     space.cards = uniqueItems.cards.map(card => {
@@ -182,6 +195,7 @@ export default {
       tag.spaceId = space.id
       return tag
     })
+    space.boxes = uniqueItems.boxes
     this.storeLocal(`space-${space.id}`, space)
     return space
   },

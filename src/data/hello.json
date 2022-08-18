@@ -800,5 +800,6 @@
   "users": [],
   "collaborators": [],
   "spectators": [],
-  "clients": []
+  "clients": [],
+  "boxes": []
 }

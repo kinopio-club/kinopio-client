@@ -14,8 +14,11 @@ let spaceKeyIsDown = false
 let prevCursorPosition, currentCursorPosition
 
 const checkIsSpaceScope = (event) => {
-  const isBody = event.target.tagName === 'BODY'
-  const isMain = event.target.tagName === 'MAIN'
+  const tagName = event.target.tagName
+  const isFromInput = tagName === 'INPUT' || tagName === 'TEXTAREA'
+  if (isFromInput) { return }
+  const isBody = tagName === 'BODY'
+  const isMain = tagName === 'MAIN'
   const isFocusedCard = event.target.className === 'card'
   return isBody || isMain || isFocusedCard
 }
@@ -26,9 +29,9 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerAddCard') {
         this.addCard()
-      } else if (mutation.type === 'triggerSelectAllCardsBelowCursor') {
+      } else if (mutation.type === 'triggerSelectAllItemsBelowCursor') {
         const position = mutation.payload
-        this.selectAllCardsBelowCursor(position)
+        this.selectAllItemsBelowCursor(position)
       }
     })
   },
@@ -81,6 +84,7 @@ export default {
       } else if (key === 'Escape' || (key === 'z' && isSpaceScope)) {
         this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
         this.$store.commit('minimapIsVisible', false)
+        this.$store.commit('currentUserToolbar', 'card')
       // → Left
       } else if (key === 'ArrowLeft' && (isSpaceScope || isFromCard)) {
         this.focusNearestCardLeft()
@@ -117,6 +121,10 @@ export default {
         this.$store.commit('currentUserIsPanningReady', false)
         this.$store.commit('minimapIsVisible', false)
         spaceKeyIsDown = false
+      } else if (key === 'b' && isSpaceScope) {
+        this.$store.commit('currentUserToolbar', 'box')
+      } else if (key === 'c' && isSpaceScope) {
+        this.$store.commit('currentUserToolbar', 'card')
       }
     },
     // on key down
@@ -146,11 +154,11 @@ export default {
       // Select All Cards Below Cursor
       } else if (isMeta && event.shiftKey && key === 'a' && isSpaceScope) {
         event.preventDefault()
-        this.selectAllCardsBelowCursor()
+        this.selectAllItemsBelowCursor()
       // Select All Cards and Connections
       } else if (isMeta && key === 'a' && isSpaceScope) {
         event.preventDefault()
-        this.selectAllCardsAndConnections()
+        this.selectAllItems()
       // Search/Jump-to Space
       } else if (isMeta && key === 'k') {
         event.preventDefault()
@@ -231,7 +239,8 @@ export default {
       const rightMouseButton = 2
       const isRightClick = rightMouseButton === event.button
       const isSpaceScope = event.target.id === 'magic-painting'
-      const shouldBoxSelect = event.shiftKey && isSpaceScope
+      const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
+      const shouldBoxSelect = event.shiftKey && isSpaceScope && !toolbarIsBox
       const shouldPan = isRightClick && isSpaceScope
       const position = utils.cursorPositionInPage(event)
       if (shouldBoxSelect) {
@@ -550,7 +559,7 @@ export default {
       document.querySelector(`.card[data-card-id="${closestCard.id}"]`).focus()
     },
 
-    focusedCardIds () {
+    selectedCardIds () {
       return this.$store.state.multipleCardsSelectedIds || []
     },
 
@@ -590,7 +599,8 @@ export default {
     remove () {
       this.$store.dispatch('history/resume')
       const selectedConnectionIds = this.$store.state.multipleConnectionsSelectedIds
-      const cardIds = this.focusedCardIds()
+      const cardIds = this.selectedCardIds()
+      const boxes = this.$store.getters['currentBoxes/isSelected']
       selectedConnectionIds.forEach(connectionId => {
         if (this.canEditConnectionById(connectionId)) {
           const connection = this.$store.getters['currentConnections/byId'](connectionId)
@@ -602,6 +612,12 @@ export default {
           this.removeCardById(cardId)
         }
       })
+      boxes.forEach(box => {
+        const canEditBox = this.$store.getters['currentUser/canEditBox'](box)
+        if (canEditBox) {
+          this.$store.dispatch('currentBoxes/remove', box)
+        }
+      })
       this.$store.dispatch('currentConnections/removeUnusedTypes')
       this.clearAllSelectedCards()
       this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.remove')
@@ -610,17 +626,18 @@ export default {
     // Copy, Cut
 
     async handleCopyCutEvent (event) {
-      const isFromCard = event.target.classList[0] === 'card'
       const isSpaceScope = checkIsSpaceScope(event)
-      const shouldHandle = isFromCard || isSpaceScope
-      if (!shouldHandle) { return }
+      if (!isSpaceScope) { return }
       event.preventDefault()
-      await this.writeSelectedToClipboard()
-      console.log(event.type)
-      if (event.type === 'cut') {
-        this.remove()
+      try {
+        await this.writeSelectedToClipboard()
+        console.log(event.type)
+        if (event.type === 'cut') { this.remove() }
+        this.$store.commit('addNotification', { message: utils.pastTense(event.type), type: 'success', icon: 'cut' })
+      } catch (error) {
+        console.warn('🚑 handleCopyCutEvent', error)
+        this.$store.commit('addNotification', { message: `Could not ${event.type}`, type: 'danger', icon: 'cut' })
       }
-      this.$store.commit('addNotification', { message: utils.pastTense(event.type), type: 'success', icon: 'cut' })
     },
 
     // Paste
@@ -679,9 +696,21 @@ export default {
 
     handlePasteKinopioData (data, position) {
       data = utils.uniqueSpaceItems(data)
-      let { cards, connectionTypes, connections } = data
+      let { cards, connectionTypes, connections, boxes } = data
+      // relative card and box positions
+      cards = cards.map(card => {
+        card.isCard = true
+        return card
+      })
+      boxes = boxes.map(box => {
+        box.isBox = true
+        return box
+      })
+      let items = cards.concat(boxes)
+      items = utils.itemsPositionsShifted(items, position)
+      cards = items.filter(item => item.isCard)
+      boxes = items.filter(item => item.isBox)
       // add cards
-      cards = utils.cardsPositionsShifted(cards, position)
       this.$store.dispatch('currentCards/addMultiple', cards)
       // add new types
       connectionTypes = connectionTypes.map(type => {
@@ -707,19 +736,21 @@ export default {
           this.$store.dispatch('currentConnections/updatePaths', { connections, cards })
         })
       }, 20)
+      // add boxes
+      boxes.forEach(box => {
+        this.$store.dispatch('currentBoxes/add', { box })
+      })
       // select
       const cardIds = cards.map(card => card.id)
       const connectionIds = connections.map(connection => connection.id)
+      const boxIds = boxes.map(box => box.id)
       this.$store.commit('multipleCardsSelectedIds', cardIds)
       this.$store.commit('multipleConnectionsSelectedIds', connectionIds)
+      this.$store.commit('multipleBoxesSelectedIds', boxIds)
       // ⏺ history
       this.$store.dispatch('history/resume')
-      this.$store.dispatch('history/add', { cards, connectionTypes, connections, useSnapshot: true })
-      // after-creation updates
-      cards.forEach(card => {
-        this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId: card.id })
-        this.$store.dispatch('currentCards/removeTrackingQueryStrings', { cardId: card.id })
-      })
+      this.$store.dispatch('history/add', { cards, connectionTypes, connections, boxes, useSnapshot: true })
+      this.this.afterPaste(cards)
     },
 
     handlePastePlainText (data, position) {
@@ -766,10 +797,14 @@ export default {
       this.$store.dispatch('history/add', { cards, useSnapshot: true })
       // update page size
       this.$nextTick(() => {
-        cards.forEach(card => {
-          this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId: card.id })
-          this.$store.dispatch('currentCards/removeTrackingQueryStrings', { cardId: card.id })
-        })
+        this.afterPaste(cards)
+      })
+    },
+
+    afterPaste (cards) {
+      cards.forEach(card => {
+        this.$store.dispatch('checkIfItemShouldIncreasePageSize', card)
+        this.$store.dispatch('currentCards/removeTrackingQueryStrings', { cardId: card.id })
       })
     },
 
@@ -797,6 +832,10 @@ export default {
           card.name = utils.decodeEntitiesFromHTML(card.name)
           return card
         })
+        data.boxes = data.boxes.map(box => {
+          box.name = utils.decodeEntitiesFromHTML(box.name)
+          return box
+        })
         this.handlePasteKinopioData(data, position)
       } else {
         data.text = utils.decodeEntitiesFromHTML(data.text)
@@ -805,7 +844,7 @@ export default {
     },
 
     async writeSelectedToClipboard () {
-      const cardIds = this.focusedCardIds()
+      const cardIds = this.selectedCardIds()
       const cards = cardIds.map(cardId => {
         return this.$store.getters['currentCards/byId'](cardId)
       })
@@ -816,11 +855,12 @@ export default {
       const connectionTypes = connections.map(connection => {
         return this.$store.getters['currentConnections/typeByConnection'](connection)
       })
-      let data = { isKinopioData: true, cards, connections, connectionTypes }
+      const boxes = this.$store.getters['currentBoxes/isSelected']
+      let data = { isKinopioData: true, cards, connections, connectionTypes, boxes }
       data = JSON.stringify(data)
       data = `<kinopio>${data}</kinopio>`
       const text = utils.textFromCardNames(cards)
-      console.log('🎊 copyData', { cards, connections, connectionTypes }, text)
+      console.log('🎊 copyData', { cards, connections, connectionTypes, boxes }, text)
       try {
         if (navigator.clipboard.write) {
           await navigator.clipboard.write([
@@ -834,37 +874,46 @@ export default {
         }
       } catch (error) {
         console.warn('🚑 writeSelectedToClipboard', error)
+        throw { error }
       }
     },
 
     // Select All Cards Below Cursor
 
-    selectAllCardsBelowCursor (position) {
+    selectAllItemsBelowCursor (position) {
       const preventMultipleSelectedActionsIsVisible = this.$store.state.preventMultipleSelectedActionsIsVisible
       position = position || currentCursorPosition
       const zoom = this.$store.getters.spaceZoomDecimal
+      // cards
       let cards = utils.clone(this.$store.getters['currentCards/all'])
       cards = cards.filter(card => (card.y * zoom) > position.y)
-      cards = cards.map(card => card.id)
-      if (cards.length && preventMultipleSelectedActionsIsVisible) {
-        this.$store.commit('multipleCardsSelectedIds', cards)
-      } else if (cards.length) {
+      const cardIds = cards.map(card => card.id)
+      // boxes
+      let boxes = utils.clone(this.$store.getters['currentBoxes/all'])
+      boxes = boxes.filter(boxes => (boxes.y * zoom) > position.y)
+      const boxIds = boxes.map(boxes => boxes.id)
+      // select
+      if (cardIds.length && preventMultipleSelectedActionsIsVisible) {
+        this.$store.commit('multipleCardsSelectedIds', cardIds)
+        this.$store.commit('multipleBoxesSelectedIds', boxIds)
+      } else if (cardIds.length) {
         this.$store.commit('multipleSelectedActionsPosition', position)
         this.$store.commit('multipleSelectedActionsIsVisible', true)
-        this.$store.commit('multipleCardsSelectedIds', cards)
+        this.$store.commit('multipleCardsSelectedIds', cardIds)
+        this.$store.commit('multipleBoxesSelectedIds', boxIds)
       } else {
         this.$store.commit('multipleSelectedActionsIsVisible', false)
         this.$store.commit('multipleCardsSelectedIds', [])
+        this.$store.commit('multipleBoxesSelectedIds', [])
       }
     },
 
-    // Select All Cards
+    // Select All Cards, Connections, and Boxes
 
-    selectAllCardsAndConnections () {
-      let cards = utils.clone(this.$store.getters['currentCards/all'])
-      cards = cards.map(card => card.id)
-      let connections = utils.clone(this.$store.getters['currentConnections/all'])
-      connections = connections.map(connection => connection.id)
+    selectAllItems () {
+      const cardIds = utils.clone(this.$store.state.currentCards.ids)
+      const connectionIds = utils.clone(this.$store.state.currentConnections.ids)
+      const boxIds = utils.clone(this.$store.state.currentBoxes.ids)
       const dialogOffset = {
         width: 200 / 2,
         height: 150 / 2
@@ -875,8 +924,9 @@ export default {
       }
       this.$store.commit('multipleSelectedActionsPosition', viewportCenter)
       this.$store.commit('multipleSelectedActionsIsVisible', true)
-      this.$store.commit('multipleConnectionsSelectedIds', connections)
-      this.$store.commit('multipleCardsSelectedIds', cards)
+      this.$store.commit('multipleConnectionsSelectedIds', connectionIds)
+      this.$store.commit('multipleCardsSelectedIds', cardIds)
+      this.$store.commit('multipleBoxesSelectedIds', boxIds)
     },
 
     // Search/Jump-to

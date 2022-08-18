@@ -6,11 +6,11 @@ dialog.narrow.multiple-selected-actions(
   @click.left="closeDialogs"
   :style="styles"
 )
-  section(v-if="cardsIsSelected || connectionsIsSelected")
+  section(v-if="cardsIsSelected || connectionsIsSelected || boxesIsSelected")
     //- Edit Cards
-    .row(v-if="cardsIsSelected")
+    .row(v-if="cardsIsSelected || boxesIsSelected")
       //- [·]
-      .button-wrap.cards-checkboxes(:class="{ disabled: !canEditAll.cards }")
+      .button-wrap.cards-checkboxes(v-if="cardsIsSelected" :class="{ disabled: !canEditAll.cards }")
         label(v-if="cardsHaveCheckboxes" :class="{active: cardsCheckboxIsChecked}" tabindex="0")
           input(type="checkbox" v-model="cardCheckboxes" tabindex="-1")
         label(v-if="!cardsHaveCheckboxes" @click.left.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
@@ -22,16 +22,16 @@ dialog.narrow.multiple-selected-actions(
         span Connect
       //- Style
       .button-wrap
-        button(:disabled="!canEditAll.cards" @click.left.stop="toggleCardStyleActionsIsVisible" :class="{active : cardStyleActionsIsVisible}")
+        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleStyleActionsIsVisible" :class="{active : styleActionsIsVisible}")
           span Style
 
-    CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="cards" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }")
+    StyleActions(:visible="styleActionsIsVisible" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }")
 
     //- Edit Connections
     .row.edit-connection-types(v-if="connectionsIsSelected")
       //- Type Color
       .button-wrap
-        button.change-color(:disabled="!canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible")
+        button.change-color(:disabled="!canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: multipleConnectionsPickerVisible}")
           img.icon(src="@/assets/connection-path.svg")
           .segmented-colors.icon
             template(v-for="type in connectionTypes")
@@ -41,6 +41,21 @@ dialog.narrow.multiple-selected-actions(
       ConnectionDecorators(:connections="editableConnections")
 
   section
+    template(v-if="oneCardOrMultipleBoxesIsSelected")
+      .row
+        //- Align And Distribute
+        AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldAutoDistribute="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
+        //- Move/Copy
+        .segmented-buttons.move-or-copy-wrap(v-if="cardsIsSelected")
+          button(@click.left.stop="toggleCopyCardsIsVisible" :class="{ active: copyCardsIsVisible }")
+            span Copy
+            MoveOrCopyCards(:visible="copyCardsIsVisible" :actionIsMove="false" :exportData="exportData")
+          button(@click.left.stop="toggleMoveCardsIsVisible" :class="{ active: moveCardsIsVisible }" :disabled="!canEditAll.cards")
+            span Move
+            MoveOrCopyCards(:visible="moveCardsIsVisible" :actionIsMove="true" :exportData="exportData")
+      //- More Options
+      AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
+
     .row
       //- Remove
       button(:disabled="!canEditAll.all" @click.left="remove")
@@ -55,21 +70,6 @@ dialog.narrow.multiple-selected-actions(
         img.icon(src="@/assets/split.svg")
         span Split
 
-    template(v-if="multipleCardsSelectedIds.length")
-      .row
-        //- Align And Distribute
-        AlignAndDistribute(:visible="multipleCardsIsSelected" :shouldHideMoreOptions="true" :shouldAutoDistribute="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
-        //- Move/Copy
-        .segmented-buttons.move-or-copy-wrap
-          button(@click.left.stop="toggleCopyCardsIsVisible" :class="{ active: copyCardsIsVisible }")
-            span Copy
-            MoveOrCopyCards(:visible="copyCardsIsVisible" :actionIsMove="false" :exportData="exportData")
-          button(@click.left.stop="toggleMoveCardsIsVisible" :class="{ active: moveCardsIsVisible }" :disabled="!canEditAll.cards")
-            span Move
-            MoveOrCopyCards(:visible="moveCardsIsVisible" :actionIsMove="true" :exportData="exportData")
-      //- More Options
-      AlignAndDistribute(:visible="multipleCardsIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
-
     p(v-if="canEditAsNonMember && !selectedItemsIsCreatedByCurrentUser")
       span.badge.info
         img.icon.open(src="@/assets/open.svg")
@@ -80,7 +80,7 @@ dialog.narrow.multiple-selected-actions(
 import utils from '@/utils.js'
 import MoveOrCopyCards from '@/components/dialogs/MoveOrCopyCards.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
-import CardStyleActions from '@/components/CardStyleActions.vue'
+import StyleActions from '@/components/subsections/StyleActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
 
@@ -89,14 +89,14 @@ import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
 import uniqBy from 'lodash-es/uniqBy'
 
-let prevCards
+let prevCards, prevBoxes
 
 export default {
   name: 'MultipleSelectedActions',
   components: {
     MoveOrCopyCards,
     MultipleConnectionsPicker,
-    CardStyleActions,
+    StyleActions,
     AlignAndDistribute,
     ConnectionDecorators
   },
@@ -113,7 +113,12 @@ export default {
   },
   computed: {
     maxCardLength () { return utils.maxCardLength() },
-    cardStyleActionsIsVisible () { return this.$store.state.currentUser.shouldShowMultiCardStyleActions && this.cardsIsSelected },
+    shouldShowStyleActions () { return this.$store.state.currentUser.shouldShowStyleActions },
+    styleActionsIsVisible () {
+      const noStyleItemsSelected = !this.cardsIsSelected && !this.boxesIsSelected
+      if (noStyleItemsSelected) { return }
+      return this.shouldShowStyleActions
+    },
     visible () { return this.$store.state.multipleSelectedActionsIsVisible },
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     position () {
@@ -128,6 +133,7 @@ export default {
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
+    oneCardOrMultipleBoxesIsSelected () { return this.cards.length || this.boxes.length > 1 },
 
     // cards
 
@@ -216,17 +222,46 @@ export default {
       }))
     },
 
+    // boxes
+
+    boxesIsSelected () { return this.multipleBoxesSelectedIds.length > 0 },
+    multipleBoxesSelectedIds () { return this.$store.state.multipleBoxesSelectedIds },
+    boxes () {
+      let boxes = this.multipleBoxesSelectedIds.map(boxId => {
+        return this.$store.getters['currentBoxes/byId'](boxId)
+      })
+      boxes = boxes.filter(box => Boolean(box))
+      prevBoxes = boxes
+      return boxes
+    },
+    editableBoxes () {
+      if (this.isSpaceMember) {
+        return this.boxes
+      } else {
+        return this.boxes.filter(box => {
+          return this.$store.getters['currentUser/boxIsCreatedByCurrentUser'](box)
+        })
+      }
+    },
+
     // all
 
+    multipleCardOrBoxesIsSelected () {
+      const cards = this.multipleCardsIsSelected
+      const boxes = this.multipleBoxesSelectedIds.length > 1
+      return cards || boxes
+    },
     canEditAsNonMember () {
       const spaceIsOpen = this.$store.state.currentSpace.privacy === 'open'
       const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
       return spaceIsOpen && !isSpaceMember
     },
     selectedItemsIsCreatedByCurrentUser () {
-      const cardsByCurrentUser = this.numberOfSelectedItemsCreatedByCurrentUser.cards === this.cards.length
-      const connectionsByCurrentUser = this.numberOfSelectedItemsCreatedByCurrentUser.connections === this.connections.length
-      if (cardsByCurrentUser && connectionsByCurrentUser) {
+      const { cards, connections, boxes } = this.numberOfSelectedItemsCreatedByCurrentUser
+      const cardsByCurrentUser = cards === this.cards.length
+      const connectionsByCurrentUser = connections === this.connections.length
+      const boxesByCurrentUser = boxes === this.boxes.length
+      if (cardsByCurrentUser && connectionsByCurrentUser && boxesByCurrentUser) {
         return true
       } else {
         return false
@@ -235,15 +270,20 @@ export default {
     numberOfSelectedItemsCreatedByCurrentUser () {
       const connections = this.connections.filter(Boolean)
       const cards = this.cards.filter(Boolean)
+      const boxes = this.boxes.filter(Boolean)
       const connectionsCreatedByCurrentUser = connections.filter(connection => {
         return this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
       })
       const cardsCreatedByCurrentUser = cards.filter(card => {
         return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
       })
+      const boxesCreatedByCurrentUser = boxes.filter(box => {
+        return this.$store.getters['currentUser/boxIsCreatedByCurrentUser'](box)
+      })
       return {
         connections: connectionsCreatedByCurrentUser.length,
-        cards: cardsCreatedByCurrentUser.length
+        cards: cardsCreatedByCurrentUser.length,
+        boxes: boxesCreatedByCurrentUser.length
       }
     },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
@@ -251,8 +291,9 @@ export default {
       if (this.isSpaceMember) { return { cards: true, connections: true, all: true } }
       const cards = this.multipleCardsSelectedIds.length === this.numberOfSelectedItemsCreatedByCurrentUser.cards
       const connections = this.multipleConnectionsSelectedIds.length === this.numberOfSelectedItemsCreatedByCurrentUser.connections
-      const all = cards && connections
-      return { cards, connections, all }
+      const boxes = this.multipleBoxesSelectedIds.length === this.numberOfSelectedItemsCreatedByCurrentUser.boxes
+      const all = cards && connections && boxes
+      return { cards, connections, boxes, all }
     },
     multipleItemsSelected () {
       const total = this.multipleConnectionsSelectedIds.length + this.multipleCardsSelectedIds.length
@@ -353,7 +394,8 @@ export default {
       newNames = newNames.filter(name => Boolean(name))
       let position = { x: cards[0].x, y: cards[0].y }
       let newCards = []
-      this.remove()
+      const shouldRemoveCardsOnly = true
+      this.remove(shouldRemoveCardsOnly)
       // create merged cards
       newNames.forEach((newName, index) => {
         let newCard = {
@@ -383,10 +425,10 @@ export default {
       this.closeDialogs()
       this.multipleConnectionsPickerVisible = !isVisible
     },
-    toggleCardStyleActionsIsVisible () {
+    toggleStyleActionsIsVisible () {
       this.closeDialogs()
-      const isVisible = !this.$store.state.currentUser.shouldShowMultiCardStyleActions
-      this.$store.dispatch('currentUser/shouldShowMultiCardStyleActions', isVisible)
+      const isVisible = !this.shouldShowStyleActions
+      this.$store.dispatch('currentUser/shouldShowStyleActions', isVisible)
       this.$nextTick(() => {
         this.scrollIntoView()
       })
@@ -493,10 +535,13 @@ export default {
       })
       this.$store.dispatch('currentConnections/removeUnusedTypes')
     },
-    remove () {
+    remove (shouldRemoveCardsOnly) {
       this.$store.dispatch('history/resume')
       this.editableConnections.forEach(connection => this.$store.dispatch('currentConnections/remove', connection))
       this.editableCards.forEach(card => this.$store.dispatch('currentCards/remove', card))
+      if (!shouldRemoveCardsOnly) {
+        this.editableBoxes.forEach(box => this.$store.dispatch('currentBoxes/remove', box))
+      }
       this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.remove')
       this.$store.dispatch('clearMultipleSelected')
     },
@@ -523,7 +568,7 @@ export default {
         this.$store.dispatch('history/snapshots')
       } else {
         this.$store.dispatch('history/resume')
-        this.$store.dispatch('history/add', { cards: prevCards, useSnapshot: true })
+        this.$store.dispatch('history/add', { cards: prevCards, boxes: prevBoxes, useSnapshot: true })
       }
     }
   }
@@ -554,6 +599,8 @@ export default {
     width 11px
   .align-and-distribute + .move-or-copy-wrap
     margin-left 6px
+  .more-options
+    margin-bottom 10px
   .edit-connection-types
     .change-color
       height 24px

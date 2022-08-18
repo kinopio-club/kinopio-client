@@ -147,7 +147,9 @@ export default {
     isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
     canvasStyles () {
       return { top: this.pinchZoomOffsetTop + 'px', left: this.pinchZoomOffsetLeft + 'px' }
-    }
+    },
+    toolbarIsCard () { return this.$store.state.currentUserToolbar === 'card' },
+    toolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' }
   },
   methods: {
     userScroll () {
@@ -317,8 +319,8 @@ export default {
       const isPainting = this.$store.state.currentUserIsPainting
       if (this.isPanning) { return }
       if (this.isBoxSelecting) { return }
+      if (!this.toolbarIsCard) { return }
       if (!isPainting) { return }
-
       if (this.$store.getters.shouldScrollAtEdges(event) && event.cancelable) {
         event.preventDefault() // prevents touch swipe viewport scrolling
       }
@@ -344,6 +346,7 @@ export default {
       let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
       this.selectCards(circle)
       this.selectConnections(circle)
+      this.selectBoxes(circle)
       this.selectCardsAndConnectionsBetweenCircles(circle)
       paintingCircles.push(circle)
       this.broadcastCircle(circle)
@@ -362,9 +365,16 @@ export default {
         this.$store.commit('currentUserIsPainting', true)
         this.createInitialCircle()
       }
-      if (!multipleCardsIsSelected && !utils.unpinnedDialogIsVisible()) {
+      const shouldAdd = !multipleCardsIsSelected && !utils.unpinnedDialogIsVisible()
+      // add card
+      if (shouldAdd && this.toolbarIsCard) {
         this.$store.commit('shouldAddCard', true)
+      // add box
+      } else if (shouldAdd && this.toolbarIsBox) {
+        this.addBox(event)
+        return
       }
+      // clear selected
       if (!event.shiftKey) {
         this.$store.dispatch('clearMultipleSelected')
       }
@@ -388,6 +398,31 @@ export default {
           paintingCirclesTimer = undefined
         }, 0)
       }
+    },
+
+    // Boxes
+
+    addBox (event) {
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
+      let position = utils.cursorPositionInPage(event)
+      position = {
+        x: position.x * zoom,
+        y: position.y * zoom
+      }
+      const shouldPrevent = this.checkIfShouldPreventInteraction(position)
+      if (shouldPrevent) { return }
+      this.$store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
+      this.$store.commit('currentBoxIsNew', true)
+      event.preventDefault() // allows dragging boxes without scrolling
+    },
+    checkIfShouldPreventInteraction (position) {
+      const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()
+      if (currentUserCanEdit) { return }
+      const notificationWithPosition = document.querySelector('.notifications-with-position .item')
+      if (!notificationWithPosition) {
+        this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info' })
+      }
+      return true
     },
 
     // Selecting
@@ -512,6 +547,41 @@ export default {
         }
       })
     },
+    selectBoxes (point) {
+      if (this.shouldPreventSelectionOnMobile()) { return }
+      if (this.userCantEditSpace) { return }
+      const zoom = this.spaceCounterZoomDecimal
+      const boxes = this.$store.getters['currentBoxes/isNotLocked']
+      boxes.forEach(box => {
+        const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
+        const rect = element.getBoundingClientRect()
+        box = {
+          id: box.id,
+          name: box.name,
+          x: (rect.x + window.scrollX) * zoom,
+          y: (rect.y + window.scrollY) * zoom,
+          width: rect.width,
+          height: rect.height
+        }
+        const pointX = (point.x + window.scrollX) * zoom
+        const pointY = (point.y + window.scrollY) * zoom
+        const x = {
+          value: pointX,
+          min: box.x - circleSelectionRadius,
+          max: box.x + box.width + circleSelectionRadius
+        }
+        const y = {
+          value: pointY,
+          min: box.y - circleSelectionRadius,
+          max: box.y + box.height + circleSelectionRadius
+        }
+        const isBetweenX = utils.isBetween(x)
+        const isBetweenY = utils.isBetween(y)
+        if (isBetweenX && isBetweenY) {
+          this.$store.dispatch('addToMultipleBoxesSelected', box.id)
+        }
+      })
+    },
 
     // Remote Painting
 
@@ -574,6 +644,7 @@ export default {
       shouldCancelLocking = true
     },
     startLocking () {
+      if (this.toolbarIsBox) { return }
       currentUserIsLocking = true
       shouldCancelLocking = false
       setTimeout(() => {
@@ -638,6 +709,7 @@ export default {
       }
     },
     createInitialCircle () {
+      if (this.toolbarIsBox) { return }
       const initialCircle = {
         x: startCursor.x,
         y: startCursor.y,

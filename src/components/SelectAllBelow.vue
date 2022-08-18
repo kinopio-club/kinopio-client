@@ -41,9 +41,12 @@ export default {
       if (this.$store.state.minimapIsVisible) { return }
       if (this.$store.state.currentUserIsPainting) { return }
       if (this.$store.state.currentUserIsDraggingCard) { return }
+      if (this.$store.state.currentUserIsDraggingBox) { return }
       const edgeThreshold = 30
-      const header = document.querySelector('header').getBoundingClientRect().height + 10
-      const footer = document.querySelector('.footer-wrap').getBoundingClientRect().height + 10
+      let header = document.querySelector('header').getBoundingClientRect().height
+      const toolbar = document.querySelector('nav.toolbar').getBoundingClientRect().height
+      header = header + toolbar + 5
+      const footer = document.querySelector('.footer-wrap footer').getBoundingClientRect().height + 20
       const position = utils.cursorPositionInViewport(event)
       const viewport = utils.visualViewport()
       const isInThreshold = position.x <= edgeThreshold
@@ -53,7 +56,9 @@ export default {
         max: viewport.height - footer
       })
       const isInPosition = isInThreshold && isBetweenControls
-      if (isInPosition || this.isSelecting) {
+      const isCancelledByHover = Boolean(event.target.closest('button') || event.target.closest('article'))
+      const shouldShow = isInPosition && !isCancelledByHover
+      if (shouldShow || this.isSelecting) {
         this.positionY = position.y
         this.isVisible = true
       } else {
@@ -78,7 +83,7 @@ export default {
     selectAllBelow (event) {
       let position = utils.cursorPositionInPage(event)
       this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
-      this.$store.commit('triggerSelectAllCardsBelowCursor', position)
+      this.$store.commit('triggerSelectAllItemsBelowCursor', position)
     }
   }
 }

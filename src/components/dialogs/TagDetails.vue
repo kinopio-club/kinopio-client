@@ -216,7 +216,8 @@ export default {
   },
   methods: {
     selectCardsWithTag () {
-      const cards = this.$store.getters['currentCards/withTagName'](this.currentTag.name)
+      let cards = this.$store.getters['currentCards/withTagName'](this.currentTag.name)
+      cards = cards.filter(card => Boolean(card))
       if (!cards.length) { return }
       const cardIds = cards.map(card => card.id)
       this.$store.dispatch('closeAllDialogs', 'TagDetails.selectCardsWithTag')

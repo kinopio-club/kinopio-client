@@ -7,7 +7,7 @@ dialog.narrow.dialog-wrap(v-if="visible" :open="visible" @click.left.stop)
 </template>
 
 <script>
-import Pdf from '@/components/Pdf.vue'
+import Pdf from '@/components/subsections/Pdf.vue'
 
 export default {
   name: 'DialogWrap',

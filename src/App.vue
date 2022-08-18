@@ -7,9 +7,7 @@
 )
   base(v-if="isAddPage" target="_blank")
   #layout-viewport(:style="{ background: backgroundTint }")
-  .locked-cards(:style="zoomScale")
-    template(v-for="card in lockedCards")
-      Card(:card="card")
+  ItemsLocked
   MagicPaint
   OffscreenMarkers
   //- router-view is Space or Add
@@ -42,7 +40,7 @@ import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import Minimap from '@/components/Minimap.vue'
-import Card from '@/components/Card.vue'
+import ItemsLocked from '@/components/ItemsLocked.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -60,7 +58,7 @@ export default {
     LinkDetails,
     OffscreenMarkers,
     Minimap,
-    Card
+    ItemsLocked
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
@@ -101,7 +99,6 @@ export default {
     }
   },
   computed: {
-    lockedCards () { return this.$store.getters['currentCards/isLocked'] },
     backgroundTint () {
       const color = this.$store.state.currentSpace.backgroundTint
       const metaThemeColor = document.querySelector('meta[name=theme-color]')
@@ -139,19 +136,19 @@ export default {
       return hash.replace('index.', '') // xyzabc123
     },
     pageCursor () {
-      if (this.$store.state.currentUserIsPanning) {
+      const isPanning = this.$store.state.currentUserIsPanning
+      const isPanningReady = this.$store.state.currentUserIsPanningReady
+      const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
+      if (isPanning) {
         return 'grabbing'
-      } else if (this.$store.state.currentUserIsPanningReady) {
+      } else if (isPanningReady) {
         return 'grab'
+      } else if (toolbarIsBox) {
+        return 'crosshair'
       }
       return undefined
     },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
-    zoomScale () {
-      return {
-        transform: `scale(${this.spaceZoomDecimal})`
-      }
-    }
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
     toggleIsPinchZooming (event) {
@@ -243,11 +240,11 @@ export default {
       let description = 'Kinopio is the thinking tool for building new ideas and solving hard problems. Create spaces to brainstorm, research, plan and take notes.'
       const metaDescription = document.querySelector('meta[name=description]')
       const cards = this.$store.getters['currentCards/all']
-      const topLeftCard = utils.topLeftCard(cards)
-      if (!topLeftCard.name) {
+      const topLeftItem = utils.topLeftItem(cards)
+      if (!topLeftItem.name) {
         metaDescription.setAttribute('content', description)
       } else {
-        metaDescription.setAttribute('content', topLeftCard.name)
+        metaDescription.setAttribute('content', topLeftItem.name)
       }
     },
     clearMetaRSSFeed () {
@@ -454,6 +451,9 @@ label // used for checkbox buttons
     //     box-shadow var(--button-active-inset-shadow)
     //     background var(--secondary-active-background)
 
+.unselectable
+  pointer-events none !important
+
 select
   max-width 100%
   -webkit-appearance none
@@ -535,6 +535,7 @@ dialog
   box-shadow var(--hover-shadow)
   border-radius 3px
   overscroll-behavior-y contain
+  cursor auto
   &.is-pinnable
     transition left 0.1s, top 0.1s
   &.narrow
@@ -613,15 +614,15 @@ dialog
       user-select text
       &:first-child
         margin-top 0
-  section.sub-section
+  section.subsection
     border 1px solid var(--primary)
     padding 4px
     padding-bottom 0
     border-radius 3px
   section + section
     border-top 1px solid var(--primary)
-  section.sub-section + section,
-  section.sub-section + .row
+  section.subsection + section,
+  section.subsection + .row
     margin-top 10px
 
   .change-color
@@ -650,7 +651,6 @@ dialog
       border-top-left-radius 0
     button:last-child
       border-top-right-radius 0
-
   > .button-wrap > button,
   > button,
   > label
@@ -662,6 +662,23 @@ dialog
     &:last-child
       border-top-right-radius 3px
       border-bottom-right-radius 3px
+  // &.vertical
+  //   display flex
+  //   flex-direction column
+  //   .button-wrap
+  //     button
+  //       min-width 24px
+  //       border-radius 0
+  //       margin-bottom -1px
+  //     &:first-child
+  //       button
+  //         border-top-left-radius 3px
+  //         border-top-right-radius 3px
+  //     &:last-child
+  //       button
+  //         border-bottom-left-radius 3px
+  //         border-bottom-right-radius 3px
+
   button + button,
   label + button
     margin-left -1px
@@ -708,6 +725,9 @@ dialog
 .icon.right-arrow
   transform rotate(-90deg)
   vertical-align 2px
+
+.icon.box-icon
+  vertical-align 0
 
 label,
 li
@@ -1003,9 +1023,4 @@ progress::-webkit-progress-value
 progress::-moz-progress-bar
   background-color var(--primary)
   border-radius 2px
-
-.locked-cards
-  position absolute
-  top 0
-
 </style>

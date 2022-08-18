@@ -5,30 +5,14 @@ main.space(
   @touchstart="initInteractions"
   :style="styles"
 )
-  //- Connections
-  svg.connections
-    template(v-for="startCardId in currentConnectionStartCardIds")
-      CurrentConnection(:startCardId="startCardId" :startCursor="startCursor")
-    template(v-for="connection in remoteCurrentConnections")
-      Connection(:connection="connection")
-    template(v-for="connection in connections")
-      Connection(:connection="connection")
-  template(v-for="connection in connections")
-    //- Connection Decorators
-    ConnectionLabel(:connection="connection")
+  Connections(:startCursor="startCursor")
+  Boxes
+  Cards
+  LockedItemButtons
   //- Presence
   template(v-for="user in spaceMembers")
-    UserLabel(:user="user")
-  //- Cards
-  .cards
-    template(v-for="overlap in cardOverlaps")
-      .badge.label-badge.card-overlap-indicator(v-if="canEditSpace" :style="{ left: overlap.x + 'px', top: overlap.y + 'px' }" @click.left="selectOverlap(overlap)")
-        span {{overlap.length}}
-    template(v-for="card in unlockedCards")
-      Card(:card="card")
-    template(v-for="card in lockedCards")
-      CardUnlockButton(:card="card" :position="unlockButtonPosition(card)")
-
+    UserLabelCursor(:user="user")
+  BoxDetails
   CardDetails
   CardUserDetails
   ConnectionDetails
@@ -42,23 +26,22 @@ main.space(
 import Card from '@/components/Card.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import CardUserDetails from '@/components/dialogs/CardUserDetails.vue'
-import CurrentConnection from '@/components/CurrentConnection.vue'
-import Connection from '@/components/Connection.vue'
-import ConnectionLabel from '@/components/ConnectionLabel.vue'
-import UserLabel from '@/components/UserLabel.vue'
+import BoxDetails from '@/components/dialogs/BoxDetails.vue'
+import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import BoxSelecting from '@/components/BoxSelecting.vue'
-import CardUnlockButton from '@/components/CardUnlockButton.vue'
+import Boxes from '@/components/Boxes.vue'
+import Cards from '@/components/Cards.vue'
+import Connections from '@/components/Connections.vue'
+import LockedItemButtons from '@/components/LockedItemButtons.vue'
 import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
-
-const cardOverlaps = new Worker('/web-workers/card-overlaps.js')
 
 let prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer
@@ -69,16 +52,17 @@ export default {
     Card,
     CardDetails,
     CardUserDetails,
-    CurrentConnection,
-    Connection,
-    ConnectionLabel,
-    UserLabel,
+    BoxDetails,
+    UserLabelCursor,
     ConnectionDetails,
     MultipleSelectedActions,
     ScrollAtEdgesHandler,
     NotificationsWithPosition,
     BoxSelecting,
-    CardUnlockButton
+    Boxes,
+    Cards,
+    LockedItemButtons,
+    Connections
   },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')
@@ -87,13 +71,6 @@ export default {
     if (currentUserIsSignedIn) {
       this.$store.commit('broadcast/connect')
     }
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerUpdateCardOverlaps') {
-        this.updateCardOverlaps()
-      }
-    })
   },
   mounted () {
     // bind events to window to receive events when mouse is outside window
@@ -120,18 +97,11 @@ export default {
     })
 
     this.$store.dispatch('currentUser/restoreUserFavorites')
-    window.addEventListener('scroll', this.updateCardOverlapsDebounced)
-    window.addEventListener('resize', this.updateCardOverlapsDebounced)
-    this.updateCardOverlaps()
 
     // retry failed sync operations every 5 seconds
     processQueueIntervalTimer = setInterval(() => {
       this.$store.dispatch('api/processQueueOperations')
     }, 5000)
-
-    cardOverlaps.addEventListener('message', event => {
-      this.cardOverlaps = event.data
-    })
   },
   beforeUnmount () {
     window.removeEventListener('mousemove', this.interact)
@@ -143,14 +113,11 @@ export default {
     window.removeEventListener('offline', this.updateIsOnline)
     window.removeEventListener('unload', this.unloadPage)
     window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
-    window.removeEventListener('scroll', this.updateCardOverlapsDebounced)
-    window.removeEventListener('resize', this.updateCardOverlapsDebounced)
     clearInterval(processQueueIntervalTimer)
   },
   data () {
     return {
-      startCursor: {},
-      cardOverlaps: []
+      startCursor: {}
     }
   },
   computed: {
@@ -164,8 +131,6 @@ export default {
     },
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
     unlockedCards () { return this.$store.getters['currentCards/isNotLocked'] },
-    lockedCards () { return this.$store.getters['currentCards/isLocked'] },
-    currentConnectionStartCardIds () { return this.$store.state.currentConnectionStartCardIds },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
@@ -173,18 +138,18 @@ export default {
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
     isResizingCard () { return this.$store.state.currentUserIsResizingCard },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
-    connections () { return this.$store.getters['currentConnections/all'] },
+    isResizingBox () { return this.$store.state.currentUserIsResizingBox },
+    isDraggingBox () { return this.$store.state.currentUserIsDraggingBox },
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth },
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
     currentUser () { return this.$store.state.currentUser },
     isInteracting () {
-      if (this.isDraggingCard || this.isDrawingConnection || this.isResizingCard) {
+      if (this.isDraggingCard || this.isDrawingConnection || this.isResizingCard || this.isResizingBox || this.isDraggingBox) {
         return true
       } else { return false }
     },
-    remoteCurrentConnections () { return this.$store.state.remoteCurrentConnections },
     spaceMembers () {
       const excludeCurrentUser = true
       return this.$store.getters['currentSpace/members'](excludeCurrentUser)
@@ -192,32 +157,6 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
-    unlockButtonPosition (card) {
-      const element = document.querySelector(`article[data-card-id="${card.id}"] .lock-button-wrap`)
-      const rect = element.getBoundingClientRect()
-      return rect
-    },
-    updateCardOverlapsDebounced: debounce(function () {
-      this.updateCardOverlaps()
-    }, 500),
-    updateCardOverlaps () {
-      let cards = this.$store.getters['currentCards/all']
-      cards = utils.clone(cards)
-      const viewport = utils.visualViewport()
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
-      cardOverlaps.postMessage({ cards, viewport, zoom })
-    },
-    mergeOverlapGroup (previousValue, currentValue) {
-      let x = previousValue.x || 0
-      if (currentValue.x > x) {
-        x = currentValue.x
-      }
-      let y = previousValue.y || 0
-      if (currentValue.y > y) {
-        y = currentValue.y
-      }
-      return { x, y }
-    },
     correctCardConnectionPaths () {
       const space = utils.clone(this.$store.state.currentSpace)
       const user = utils.clone(this.$store.state.currentUser)
@@ -268,8 +207,8 @@ export default {
       if (this.spaceIsReadOnly) { return }
       this.startCursor = utils.cursorPositionInViewport(event)
     },
-
     constrainCursorToAxis (event) {
+      if (this.$store.state.currentUserIsDraggingBox) { return }
       if (!event.shiftKey) { return }
       const delta = {
         x: Math.abs(endCursor.x - this.startCursor.x),
@@ -281,6 +220,9 @@ export default {
         endCursor.x = prevCursor.x
       }
     },
+
+    // cards
+
     resizeCards () {
       if (!prevCursor) { return }
       const cardIds = this.$store.state.currentUserIsResizingCardIds
@@ -296,22 +238,66 @@ export default {
       this.$store.commit('currentUserIsResizingCard', false)
       this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserResizingCards' })
     },
+
+    // boxes
+
+    resizeBoxes () {
+      if (!prevCursor) { return }
+      const boxIds = this.$store.state.currentUserIsResizingBoxIds
+      const delta = {
+        x: Math.round(endCursor.x - prevCursor.x),
+        y: Math.round(endCursor.y - prevCursor.y)
+      }
+      this.$store.dispatch('currentBoxes/resize', { boxIds, delta })
+    },
+    stopResizingBoxes () {
+      if (!this.$store.state.currentUserIsResizingBox) { return }
+      this.$store.dispatch('history/resume')
+      const boxIds = this.$store.state.currentUserIsResizingBoxIds
+      const boxes = boxIds.map(id => this.$store.getters['currentBoxes/byId'](id))
+      this.$store.dispatch('history/add', { boxes, useSnapshot: true })
+      this.$store.commit('currentUserIsResizingBox', false)
+      this.$store.commit('currentUserToolbar', 'card')
+      this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserResizingBoxes' })
+      this.$store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
+    },
+
+    dragItems () {
+      this.$store.dispatch('history/pause')
+      const prevCursor = this.cursor()
+      const shouldPrevent = this.checkIfShouldPreventInteraction()
+      if (shouldPrevent) { return }
+      this.$store.dispatch('currentCards/move', {
+        endCursor,
+        prevCursor: prevCursor
+      })
+      this.checkShouldShowDetails()
+      this.$store.dispatch('currentBoxes/move', {
+        endCursor,
+        prevCursor: prevCursor
+      })
+    },
     interact (event) {
       endCursor = utils.cursorPositionInViewport(event)
-      if (this.isDraggingCard) {
+      if (this.isDraggingCard || this.isDraggingBox) {
         this.constrainCursorToAxis(event)
-        this.dragCard()
-        this.updateCardOverlaps()
+        this.dragItems()
       }
       if (this.isResizingCard) {
         this.resizeCards()
-        this.updateCardOverlaps()
+      }
+      if (this.isResizingBox) {
+        this.resizeBoxes()
       }
       prevCursor = utils.cursorPositionInViewport(event)
     },
     checkShouldShowDetails () {
-      if (!utils.cursorsAreClose(this.startCursor, endCursor)) {
+      const shouldShow = !utils.cursorsAreClose(this.startCursor, endCursor)
+      if (!shouldShow) { return }
+      if (this.$store.state.currentUserIsDraggingCard) {
         this.$store.commit('preventDraggedCardFromShowingDetails', true)
+      } else if (this.$store.state.currentUserIsDraggingBox) {
+        this.$store.commit('preventDraggedBoxFromShowingDetails', true)
       }
     },
     cursor () {
@@ -327,17 +313,6 @@ export default {
         y: cursor.y * zoom
       }
       return cursor
-    },
-    dragCard () {
-      this.$store.dispatch('history/pause')
-      const prevCursor = this.cursor()
-      const shouldPrevent = this.checkIfShouldPreventInteraction()
-      if (shouldPrevent) { return }
-      this.$store.dispatch('currentCards/move', {
-        endCursor,
-        prevCursor: prevCursor
-      })
-      this.checkShouldShowDetails()
     },
     checkIfShouldPreventInteraction () {
       if (this.spaceIsReadOnly) {
@@ -410,70 +385,69 @@ export default {
     },
     showMultipleSelectedActions (event) {
       if (this.spaceIsReadOnly) { return }
-      if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       if (this.$store.state.preventMultipleSelectedActionsIsVisible) { return }
-      const isMultipleSelected = this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length
+      const isMultipleSelected = this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length || this.$store.state.multipleBoxesSelectedIds.length
       if (isMultipleSelected) {
         const position = utils.cursorPositionInPage(event)
         this.$store.commit('multipleSelectedActionsPosition', position)
         this.$store.commit('multipleSelectedActionsIsVisible', true)
       }
     },
-    selectOverlap (overlap) {
-      this.$store.dispatch('closeAllDialogs', 'Space.selectOverlap')
-      const threshold = 20
-      const position = {
-        x: overlap.x + threshold,
-        y: overlap.y + threshold
+    addOrCloseCard (event) {
+      if (this.$store.state.shouldAddCard) {
+        const position = utils.cursorPositionInPage(event)
+        this.addCard(position)
+      } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
+        this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
       }
-      this.$store.commit('multipleCardsSelectedIds', overlap.ids)
-      this.$store.commit('multipleSelectedActionsPosition', position)
-      this.$store.commit('multipleSelectedActionsIsVisible', true)
     },
+    unselectCardsInDraggedBox () {
+      if (!this.$store.state.currentDraggingBoxId) { return }
+      if (this.$store.state.multipleBoxesSelectedIds.length) { return }
+      this.$store.dispatch('clearMultipleSelected')
+    },
+    showBoxDetails (event) {
+      if (!this.$store.state.currentBoxIsNew) { return }
+      const boxId = this.$store.state.currentUserIsResizingBoxIds[0]
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.$store.commit('boxDetailsIsVisibleForBoxId', boxId)
+        })
+      })
+    },
+
+    // 💣 stopInteractions and Space/stopPainting are run on all mouse and touch end events
+
     stopInteractions (event) {
-      // const temporaryDebugState = {
-      //   event: event,
-      //   shouldCancel: shouldCancel,
-      //   eventIsFromTextarea: this.eventIsFromTextarea(event),
-      //   currentUserIsDraggingCard: this.$store.state.currentUserIsDraggingCard,
-      //   shouldAddCard: this.$store.state.shouldAddCard,
-      //   cardDetailsIsVisibleForCardId: this.$store.state.cardDetailsIsVisibleForCardId,
-      //   multipleCardsSelectedIds: this.$store.state.multipleCardsSelectedIds,
-      //   preventDraggedCardFromShowingDetails: this.$store.state.preventDraggedCardFromShowingDetails,
-      //   currentDraggingCardId: this.$store.state.currentDraggingCardId,
-      //   currentUserIsPainting: this.$store.state.currentUserIsPainting,
-      //   currentUserIsPaintingLocked: this.$store.state.currentUserIsPainting,
-      //   isDraggingCard: this.isDraggingCard,
-      // }
-      console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
-      this.updateCardOverlaps()
+      console.log('💣 stopInteractions')
+      this.$store.dispatch('currentCards/afterMove')
+      this.$store.dispatch('currentBoxes/afterMove')
       this.addInteractionBlur()
       if (event.touches) {
         this.$store.commit('triggerUpdatePositionInVisualViewport')
       }
       this.checkIfShouldHideFooter(event)
       if (this.shouldCancel(event)) { return }
-      // add or close card
-      if (this.$store.state.shouldAddCard) {
-        const position = utils.cursorPositionInPage(event)
-        this.addCard(position)
-      } else if (this.$store.state.cardDetailsIsVisibleForCardId) {
-        this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
-      }
+      this.addOrCloseCard(event)
+      this.unselectCardsInDraggedBox()
       this.showMultipleSelectedActions(event)
+      this.showBoxDetails(event)
+      this.$store.commit('preventMultipleSelectedActionsIsVisible', false)
       this.$store.commit('importArenaChannelIsVisible', false)
       this.$store.commit('shouldAddCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
+      this.$store.commit('preventDraggedBoxFromShowingDetails', false)
       this.stopResizingCards()
+      this.stopResizingBoxes()
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
-      if (this.isDraggingCard) {
-        this.showMultipleSelectedActions(event)
-      }
       this.$store.commit('currentUserIsDraggingCard', false)
+      this.$store.commit('currentUserIsDraggingBox', false)
+      this.$store.commit('boxesWereDragged', false)
       this.updatePageSizes()
       this.$store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
       prevCursor = undefined
+      this.$store.commit('clearDraggingItems')
     }
   }
 }
@@ -502,16 +476,5 @@ export default {
   *
     pointer-events none !important
     cursor default
-
-svg.connections,
-.connection-labels
-  position absolute
-  top 0
-  left 0
-  width 100%
-  height 100%
-  path
-    pointer-events all
-    cursor pointer
 
 </style>

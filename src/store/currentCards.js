@@ -10,7 +10,9 @@ import qs from '@aguezz/qs-parse'
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
+
 let currentSpaceId
+let prevMovePositions = {}
 
 const cardMap = new Worker('/web-workers/card-map.js')
 // receive
@@ -297,7 +299,7 @@ const currentCards = {
         context.dispatch('updateDimensionsAndMap', card.id)
       }
     },
-    updateCardName (context, { card, newName }) {
+    updateName (context, { card, newName }) {
       const canEditCard = context.rootGetters['currentUser/canEditCard'](card)
       if (!canEditCard) { return }
       context.dispatch('update', {
@@ -425,6 +427,7 @@ const currentCards = {
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
         context.dispatch('updateDimensionsAndMap', cardId)
+        context.commit('triggerUpdateCardOverlaps', null, { root: true })
       })
     },
     removeResize: (context, { cardIds }) => {
@@ -434,6 +437,7 @@ const currentCards = {
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
         context.dispatch('updateDimensionsAndMap', cardId)
       })
+      context.commit('triggerUpdateCardOverlaps', null, { root: true })
     },
 
     // move
@@ -470,7 +474,12 @@ const currentCards = {
       // prevent cards with null or negative positions
       cards = utils.clone(cards)
       cards = cards.map(card => {
-        const position = utils.cardPositionFromElement(card.id)
+        let position
+        if (prevMovePositions[card.id]) {
+          position = prevMovePositions[card.id]
+        } else {
+          position = utils.cardPositionFromElement(card.id)
+        }
         card.x = position.x
         card.y = position.y
         // x
@@ -493,6 +502,7 @@ const currentCards = {
           z: card.z,
           id: card.id
         }
+        prevMovePositions[card.id] = card
         return card
       })
       // update
@@ -507,8 +517,10 @@ const currentCards = {
       })
     },
     afterMove: (context) => {
+      prevMovePositions = {}
       const spaceId = context.rootState.currentSpace.id
       const currentDraggingCardId = context.rootState.currentDraggingCardId
+      const currentDraggingCard = context.getters.byId(currentDraggingCardId)
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       let cards
       let connections = []
@@ -544,29 +556,11 @@ const currentCards = {
       connections = uniqBy(connections, 'id')
       context.commit('currentConnections/updatePaths', connections, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
-      context.dispatch('checkIfShouldIncreasePageSize', { cardId: currentDraggingCardId })
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
       context.dispatch('updateCardMap')
-    },
-    checkIfShouldIncreasePageSize: (context, { cardId }) => {
-      const card = context.getters.byId(cardId)
-      if (!card) { return }
-      const zoom = context.rootGetters.spaceZoomDecimal
-      let thresholdHeight = (context.rootState.viewportHeight * zoom) / 4
-      let thresholdWidth = (context.rootState.viewportWidth * zoom) / 4
-      const pageWidth = context.rootState.pageWidth
-      const pageHeight = context.rootState.pageHeight
-      const shouldIncreasePageWidth = (card.x + card.width + thresholdWidth) > pageWidth
-      const shouldIncreasePageHeight = (card.y + card.height + thresholdHeight) > pageHeight
-      if (shouldIncreasePageWidth) {
-        const width = pageWidth + thresholdWidth
-        context.commit('pageWidth', width, { root: true })
-      }
-      if (shouldIncreasePageHeight) {
-        const height = pageHeight + thresholdHeight
-        context.commit('pageHeight', height, { root: true })
-      }
+      context.commit('triggerUpdateCardOverlaps', null, { root: true })
+      context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })
     },
 
     // z-index
@@ -736,7 +730,7 @@ const currentCards = {
     users: (state, getters, rootState, rootGetters) => {
       return getters.userIds.map(id => rootGetters['currentSpace/userById'](id))
     },
-    backgroundColors: (state, getters) => {
+    previousColors: (state, getters) => {
       const cards = getters.all
       let colors = cards.map(card => card.backgroundColor)
       colors = colors.filter(color => Boolean(color))

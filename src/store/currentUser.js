@@ -37,8 +37,7 @@ export default {
     shouldEmailWeeklyReview: true,
     shouldShowMoreAlignOptions: false,
     shouldShowCardCollaborationInfo: false,
-    shouldShowCardStyleActions: false,
-    shouldShowMultiCardStyleActions: false,
+    shouldShowStyleActions: false,
     shouldInvertZoomDirection: false,
     shouldUseLastConnectionType: false,
     shouldOpenLinksInNewTab: false,
@@ -243,13 +242,9 @@ export default {
       state.shouldShowCardCollaborationInfo = value
       cache.updateUser('shouldShowCardCollaborationInfo', value)
     },
-    shouldShowCardStyleActions: (state, value) => {
-      state.shouldShowCardStyleActions = value
-      cache.updateUser('shouldShowCardStyleActions', value)
-    },
-    shouldShowMultiCardStyleActions: (state, value) => {
-      state.shouldShowMultiCardStyleActions = value
-      cache.updateUser('shouldShowMultiCardStyleActions', value)
+    shouldShowStyleActions: (state, value) => {
+      state.shouldShowStyleActions = value
+      cache.updateUser('shouldShowStyleActions', value)
     },
     showInExploreUpdatedAt: (state, value) => {
       state.showInExploreUpdatedAt = value
@@ -635,20 +630,12 @@ export default {
           shouldShowCardCollaborationInfo: value
         } }, { root: true })
     },
-    shouldShowCardStyleActions: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowCardStyleActions' })
-      context.commit('shouldShowCardStyleActions', value)
+    shouldShowStyleActions: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowStyleActions' })
+      context.commit('shouldShowStyleActions', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
-          shouldShowCardStyleActions: value
-        } }, { root: true })
-    },
-    shouldShowMultiCardStyleActions: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowMultiCardStyleActions' })
-      context.commit('shouldShowMultiCardStyleActions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          shouldShowMultiCardStyleActions: value
+          shouldShowStyleActions: value
         } }, { root: true })
     },
     showInExploreUpdatedAt: (context, value) => {
@@ -696,8 +683,11 @@ export default {
       const isTouchDevice = context.rootState.isTouchDevice
       const shouldUnlock = context.state.cardsCreatedCount >= count
       const shouldNotify = context.state.shouldNotifyUnlockedStickyCards
+      const usesStickyCards = context.state.shouldUseStickyCards
       if (isTouchDevice) { return }
-      if (shouldUnlock && shouldNotify) {
+      if (usesStickyCards) {
+
+      } else if (shouldUnlock && shouldNotify) {
         const updates = { shouldUseStickyCards: true, shouldNotifyUnlockedStickyCards: false }
         context.dispatch('update', updates)
         context.commit('triggerNotifyUnlockedStickyCards', null, { root: true })
@@ -735,12 +725,25 @@ export default {
       const isNoUser = !card.userId && !card.nameUpdatedByUserId
       return isCreatedByUser || isUpdatedByUser || isNoUser
     },
+    boxIsCreatedByCurrentUser: (state, getters, rootState) => (box) => {
+      const isCreatedByUser = state.id === box.userId
+      const isNoUser = !box.userId
+      return isCreatedByUser || isNoUser
+    },
     canEditCard: (state, getters, rootState, rootGetters) => (card) => {
       const isSpaceMember = getters.isSpaceMember()
       if (isSpaceMember) { return true }
       const canEditSpace = getters.canEditSpace
       const cardIsCreatedByCurrentUser = getters.cardIsCreatedByCurrentUser(card)
       if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
+      return false
+    },
+    canEditBox: (state, getters, rootState, rootGetters) => (box) => {
+      const isSpaceMember = getters.isSpaceMember()
+      if (isSpaceMember) { return true }
+      const canEditSpace = getters.canEditSpace
+      const boxIsCreatedByCurrentUser = getters.boxIsCreatedByCurrentUser(box)
+      if (canEditSpace && boxIsCreatedByCurrentUser) { return true }
       return false
     },
     connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {

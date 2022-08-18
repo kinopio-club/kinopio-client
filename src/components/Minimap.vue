@@ -14,13 +14,19 @@
   .cards-wrap
     template(v-for="card in cards")
       .card(:style="cardStyle(card)" :class="{ 'transparent-background': card.imageUrl, 'is-in-viewport': isInViewport(card) }" :data-card-minimap-id="card.id")
+  //- boxes
+  .boxes-wrap
+    template(v-for="box in boxes")
+      .box(:style="boxStyle(box)" :data-box-minimap-id="box.id")
+        .box-background.filled(v-if="boxFillIsFilled(box)" :style="{ backgroundColor: box.color }")
+
   //- remote users
   template(v-for="user in spaceMembers")
-    UserLabel(:user="user" :scale="scale")
+    UserLabelCursor(:user="user" :scale="scale")
 </template>
 
 <script>
-import UserLabel from '@/components/UserLabel.vue'
+import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
@@ -31,7 +37,7 @@ let canvas, context
 export default {
   name: 'ComponentName',
   components: {
-    UserLabel
+    UserLabelCursor
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -101,6 +107,9 @@ export default {
         backgroundColor: this.viewport.color,
         cursor: this.cursor
       }
+    },
+    boxes () {
+      return this.$store.getters['currentBoxes/all']
     }
   },
   methods: {
@@ -309,7 +318,7 @@ export default {
       if (card.imageUrl) {
         backgroundImage = `url('${card.imageUrl}')`
       }
-      const position = {
+      const styles = {
         width: `${Math.round(card.width * this.scale)}px`,
         height: `${Math.round(card.height * this.scale)}px`,
         left: `${Math.round(card.x * this.scale - offset)}px`,
@@ -318,7 +327,7 @@ export default {
         backgroundColor: card.backgroundColor,
         backgroundImage
       }
-      return position
+      return styles
     },
     isInViewport (card) {
       const zoom = this.$store.getters.spaceZoomDecimal
@@ -329,7 +338,24 @@ export default {
         height: card.height * zoom
       }
       return utils.isCardInViewport(card)
+    },
+
+    // Boxes
+
+    boxStyle (box) {
+      const styles = {
+        width: `${Math.round(box.resizeWidth * this.scale)}px`,
+        height: `${Math.round(box.resizeHeight * this.scale)}px`,
+        left: `${Math.round(box.x * this.scale - offset)}px`,
+        top: `${Math.round(box.y * this.scale - offset)}px`,
+        borderColor: box.color
+      }
+      return styles
+    },
+    boxFillIsFilled (box) {
+      return box.fill === 'filled'
     }
+
   },
   watch: {
     isVisible (value) {
@@ -350,16 +376,32 @@ export default {
   width 100vw
   height 100vh
   cursor pointer
+  backdrop-filter blur(8px)
   .overlay-background
     background-color var(--primary-background)
     opacity 0.5
   canvas#connections
     opacity 0.99
   .cards-wrap,
-  canvas#connections
+  canvas#connections,
+  .boxes-wrap
     position absolute
     left 0
     margin 20px
+  .box
+    position absolute
+    border-radius 3px
+    border-width 2px
+    border-style solid
+    z-index -1
+  .box-background
+    position absolute
+    left 0px
+    top 0px
+    width 100%
+    height 100%
+    &.filled
+      opacity 0.6
   .card
     position absolute
     background-color var(--secondary-background)

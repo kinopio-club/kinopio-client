@@ -73,7 +73,7 @@ const self = {
     patches: [],
     pointer: 0,
     isPaused: false,
-    snapshots: { cards: {}, connections: {}, connectionTypes: {} }
+    snapshots: { cards: {}, connections: {}, connectionTypes: {}, boxes: {} }
   },
   mutations: {
     add: (state, patch) => {
@@ -134,7 +134,8 @@ const self = {
       const cards = utils.clone(context.rootState.currentCards.cards)
       const connections = utils.clone(context.rootState.currentConnections.connections)
       const connectionTypes = utils.clone(context.rootState.currentConnections.types)
-      context.commit('snapshots', { cards, connections, connectionTypes })
+      const boxes = utils.clone(context.rootState.currentBoxes.boxes)
+      context.commit('snapshots', { cards, connections, connectionTypes, boxes })
     },
     pause: (context) => {
       if (context.state.isPaused) { return }
@@ -147,7 +148,7 @@ const self = {
 
     // Add Patch
 
-    add: (context, { cards, connections, connectionTypes, useSnapshot, isRemoved }) => {
+    add: (context, { cards, connections, connectionTypes, boxes, useSnapshot, isRemoved }) => {
       if (context.state.isPaused) { return }
       let patch = []
       // cards
@@ -183,6 +184,17 @@ const self = {
         })
         patch = patch.concat(connectionTypes)
       }
+      // boxes
+      if (boxes) {
+        boxes = boxes.map(box => {
+          let previous = context.rootGetters['currentBoxes/byId'](box.id)
+          if (useSnapshot) {
+            previous = context.state.snapshots['boxes'][box.id]
+          }
+          return normalizeUpdates({ item: box, itemType: 'box', previous, isRemoved })
+        })
+        patch = patch.concat(boxes)
+      }
       context.commit('add', patch)
       // context.commit('trim')
     },
@@ -202,7 +214,7 @@ const self = {
       patch.forEach(item => {
         console.log('⏪', item, { pointer, totalPatches: patches.length })
         const { action } = item
-        let card, connection, type
+        let card, connection, type, box
         switch (action) {
           case 'cardUpdated':
             card = item.prev
@@ -242,6 +254,18 @@ const self = {
             type = item.prev
             context.dispatch('currentConnections/updateType', type, { root: true })
             break
+          case 'boxCreated':
+            box = item.new
+            context.dispatch('currentBoxes/remove', box, { root: true })
+            break
+          case 'boxRemoved':
+            box = item.new
+            context.dispatch('currentBoxes/add', { box }, { root: true })
+            break
+          case 'boxUpdated':
+            box = item.prev
+            context.dispatch('currentBoxes/update', box, { root: true })
+            break
         }
       })
       context.dispatch('resume')
@@ -260,7 +284,7 @@ const self = {
       patch.forEach(item => {
         console.log('⏩', item, { pointer, totalPatches: patches.length })
         const { action } = item
-        let card, connection, type
+        let card, connection, type, box
         switch (action) {
           case 'cardUpdated':
             card = item.new
@@ -294,6 +318,18 @@ const self = {
           case 'connectionTypeUpdated':
             type = item.new
             context.dispatch('currentConnections/updateType', type, { root: true })
+            break
+          case 'boxCreated':
+            box = item.new
+            context.dispatch('currentBoxes/add', { box }, { root: true })
+            break
+          case 'boxRemoved':
+            box = item.new
+            context.dispatch('currentBoxes/remove', box, { root: true })
+            break
+          case 'boxUpdated':
+            box = item.new
+            context.dispatch('currentBoxes/update', box, { root: true })
             break
         }
       })
