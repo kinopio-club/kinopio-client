@@ -4,7 +4,6 @@ import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
-// import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
 
 // normalized state
