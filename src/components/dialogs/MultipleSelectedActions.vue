@@ -394,8 +394,7 @@ export default {
       newNames = newNames.filter(name => Boolean(name))
       let position = { x: cards[0].x, y: cards[0].y }
       let newCards = []
-      const shouldRemoveCardsOnly = true
-      this.remove(shouldRemoveCardsOnly)
+      this.remove({ shouldRemoveCardsOnly: true })
       // create merged cards
       newNames.forEach((newName, index) => {
         let newCard = {
@@ -535,7 +534,7 @@ export default {
       })
       this.$store.dispatch('currentConnections/removeUnusedTypes')
     },
-    remove (shouldRemoveCardsOnly) {
+    remove ({ shouldRemoveCardsOnly }) {
       this.$store.dispatch('history/resume')
       this.editableConnections.forEach(connection => this.$store.dispatch('currentConnections/remove', connection))
       this.editableCards.forEach(card => this.$store.dispatch('currentCards/remove', card))
