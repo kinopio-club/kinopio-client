@@ -4,7 +4,7 @@ nav.toolbar(v-if="visible")
   .segmented-buttons
     button(:class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')" :title="boxBadgeLabel")
       img.icon.box-icon(src="@/assets/box.svg")
-      .label-badge.toolbar-badge-wrap(v-if="currentUserToolbarIsBox")
+      .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsBox")
         span {{boxBadgeLabel}}
 </template>
 
@@ -18,7 +18,10 @@ export default {
     isTouchDevice () { return this.$store.state.isTouchDevice },
     currentUserToolbar () { return this.$store.state.currentUserToolbar },
     // currentUserToolbarIsCard () { return this.currentUserToolbar === 'card' },
-    currentUserToolbarIsBox () { return this.currentUserToolbar === 'box' },
+    currentUserToolbarIsBox () {
+      if (this.$store.state.currentUserIsResizingBox) { return }
+      return this.currentUserToolbar === 'box'
+    },
     boxBadgeLabel () {
       let label = 'Draw Box'
       if (!this.isTouchDevice) {
