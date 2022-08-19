@@ -310,7 +310,8 @@ export default {
       lockingAlpha: 0,
       translateX: 0,
       translateY: 0,
-      isAnimationUnsticking: false
+      isAnimationUnsticking: false,
+      stickyStretchResistance: 6
     }
   },
   computed: {
@@ -917,13 +918,42 @@ export default {
       stickyTimer = setTimeout(() => {
         stickyTimerComplete = true
       }, stickyTimerDuration)
+      this.updateStickyStretchResistance()
     },
     clearStickyTimer () {
       clearTimeout(stickyTimer)
       stickyTimerComplete = false
     },
+    isSize (width, height, min) {
+      const isWidth = width > min
+      const isHeight = height > min
+      return isWidth || isHeight
+    },
+    updateStickyStretchResistance () {
+      const zoom = this.$store.getters.spaceZoomDecimal
+      let { height, width } = this.card
+      height = height * zoom
+      width = width * zoom
+      let stretchResistance = 6 // higher resistance moves less
+      // larger sizes have higher resistance
+      const size = {
+        s: this.isSize(width, height, 300),
+        m: this.isSize(width, height, 600),
+        l: this.isSize(width, height, 1200),
+        xl: width > 1200 || height > 1200
+      }
+      if (size.xl) {
+        stretchResistance = 20
+      } else if (size.l) {
+        stretchResistance = 16
+      } else if (size.m) {
+        stretchResistance = 12
+      } else if (size.s) {
+        stretchResistance = 10
+      }
+      this.stickyStretchResistance = stretchResistance
+    },
     stickToCursor (event) {
-      const stretchResistance = 6
       if (this.isAnimationUnsticking) { return }
       if (preventSticking) { return }
       if (!stickyTimerComplete) { return }
@@ -941,8 +971,8 @@ export default {
         this.clearPositionOffsets()
         return
       }
-      const width = this.card.width
-      const height = this.card.height
+      const stretchResistance = this.stickyStretchResistance
+      const { height, width } = this.card
       const halfWidth = width / 2
       const halfHeight = height / 2
       let centerX = this.x + halfWidth
