@@ -563,6 +563,7 @@ const currentSpace = {
       }
       // restore space
       if (!primaryChunks.length) {
+        context.commit('currentBoxes/restore', boxes, { root: true })
         context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
         return
       }
