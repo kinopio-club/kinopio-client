@@ -8,9 +8,9 @@
           img.icon(src="@/assets/remove.svg")
 
   template(v-if="!loading")
-    .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails}")
+    .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': card.shouldHideUrlPreviewInfo && !card.shouldHideUrlPreviewImage}")
       //- buttons
-      .card-details-buttons(v-if="parentIsCardDetails" :class="{'has-padding': card.urlPreviewImage}")
+      .card-details-buttons(v-if="parentIsCardDetails")
         .row.reverse-row
           // remove
           .button-wrap
@@ -45,11 +45,11 @@
       //- on card
       img.preview-image(v-if="!parentIsCardDetails" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: card.shouldHideUrlPreviewImage, 'side-image': isImageCard}" @load="updateDimensionsAndMap")
       //- in carddetails
-      a.preview-image-wrap(:href="card.urlPreviewUrl" :class="{'side-image': isImageCard || parentIsCardDetails}")
-        img.preview-image(v-if="parentIsCardDetails" :src="card.urlPreviewImage" :class="{hidden: card.shouldHideUrlPreviewImage}" @load="updateDimensionsAndMap")
+      a.preview-image-wrap(v-if="parentIsCardDetails && !card.shouldHideUrlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !card.shouldHideUrlPreviewInfo)}")
+        img.preview-image( :src="card.urlPreviewImage" @load="updateDimensionsAndMap")
 
       //- info
-      .text(:class="{'side-text badge': !isImageCard && !parentIsCardDetails && shouldLoadUrlPreviewImage, hidden: card.shouldHideUrlPreviewInfo}" :style="{background: selectedColor}")
+      .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, hidden: card.shouldHideUrlPreviewInfo}" :style="{background: selectedColor}")
         img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
         img.icon.favicon.open(v-else src="@/assets/open.svg")
         .title {{filteredTitle}}
@@ -196,8 +196,9 @@ export default {
       border-top-right-radius 0
     &.is-card-details
       padding 4px
-      min-height 70px
-
+      min-height 100px
+    &.no-padding
+      padding 0
   .preview-image
     width 100%
     border-radius 3px
@@ -219,11 +220,15 @@ export default {
     max-width 40%
     margin-right 6px
 
-  .side-text
+  .text
     position absolute
     margin 8px
-    max-width calc(100% - 24px)
     background var(--secondary-hover-background)
+  .side-text
+    max-width calc(100% - 24px)
+    position static
+    margin 0
+    padding 4px
 
   .favicon
     border-radius 3px
@@ -244,10 +249,13 @@ export default {
     position absolute
     right 0
     top 0
+    padding 4px
+    pointer-events none
+    .button-wrap,
+    button
+      pointer-events all
     .reverse-row
       flex-direction row-reverse
-    &.has-padding
-      padding 4px
     .visit-button
       margin-right 6px
   button

@@ -86,8 +86,12 @@ export default {
       width 168px
 
     .card-details-buttons
+      pointer-events none
       margin-left 6px
       display flex
+      .button-wrap,
+      button
+        pointer-events all
 
   // similar to UrlPreview
   .image-preview,
