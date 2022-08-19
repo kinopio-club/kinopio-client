@@ -23,7 +23,7 @@
                 img.icon.visit(src="@/assets/visit.svg")
         //- hide url
         .row.reverse-row
-          button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}")
+          button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}" :disabled="!canEditCard")
             img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
             img.icon(v-else src="@/assets/view.svg")
             span URL
