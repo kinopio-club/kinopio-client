@@ -1,26 +1,26 @@
 <template lang="pug">
 .media-preview.row(v-if="visible")
   //- Image
-  .row(v-if="formats.image")
+  .image-preview.row(v-if="formats.image")
     a(:href="formats.image")
       img.image(:src="formats.image")
-    .card-details-buttons
-      .button-wrap
-        a(:href="formats.image")
-          button.visit-button
-            img.icon.visit(src="@/assets/visit.svg")
-      .button-wrap
-        button(@click="removeUrl(formats.image)" :disabled="!canEditCard")
-          img.icon(src="@/assets/remove.svg")
+      .card-details-buttons
+        .button-wrap
+          a(:href="formats.image")
+            button
+              img.icon.visit(src="@/assets/visit.svg")
+        .button-wrap
+          button(@click="removeUrl(formats.image)" :disabled="!canEditCard")
+            img.icon(src="@/assets/remove.svg")
   //- Video
-  .row(v-if="formats.video")
+  .video-preview.row(v-if="formats.video")
     a(:href="formats.video")
       video.video(autoplay loop muted playsinline)
         source(:src="formats.video")
     .card-details-buttons
       .button-wrap
         a(:href="formats.video")
-          button.visit-button
+          button
             img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
         button(@click="removeUrl(formats.video)" :disabled="!canEditCard")
@@ -31,7 +31,7 @@
     .card-details-buttons
       .button-wrap
         a(:href="formats.audio")
-          button.visit-button
+          button
             img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
         button(@click="removeUrl(formats.audio)" :disabled="!canEditCard")
@@ -71,17 +71,35 @@ export default {
 
 <style lang="stylus">
 .media-preview
+  flex-flow wrap
   .row
     align-items flex-start
     .image,
     .video
       border-radius 3px
-      max-height 80px
-      max-width 168px
+      &:hover
+        box-shadow var(--button-hover-shadow)
+      &:active
+        box-shadow var(--hover-shadow)
+
     .audio
       width 168px
 
     .card-details-buttons
       margin-left 6px
       display flex
+
+  // similar to UrlPreview
+  .image-preview,
+  .video-preview
+    .card-details-buttons
+      padding 6px
+      z-index 1
+      position absolute
+      right 0
+      top 0
+    .image
+      width 100%
+      position relative
+
 </style>
