@@ -98,7 +98,8 @@ export default {
       position absolute
       right 0
       top 0
-    .image
+    .image,
+    video
       width 100%
       position relative
 
