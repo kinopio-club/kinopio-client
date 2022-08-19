@@ -104,12 +104,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
     CardCollaborationInfo(:visible="collaborationInfoIsVisible" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
     .row(v-if="nameMetaRowIsVisible")
-      //- Show Url
-      .button-wrap(v-if="hasUrls")
-        button(:disabled="!canEditCard" @click.left.stop="toggleUrlsIsVisible" :class="{active: urlsIsVisible}")
-          img.icon(v-if="urlsIsVisible" src="@/assets/view-hidden.svg")
-          img.icon(v-else src="@/assets/view.svg")
-          span Hide URL
       //- Split by Line Breaks
       .button-wrap(v-if="nameSplitIntoCardsCount")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
@@ -146,7 +140,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span ((comment))
 
     MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats" @removeUrl="removeUrlFromName")
-    UrlPreview(:visible="cardUrlPreviewIsVisible" :loading="isLoadingUrlPreview" :card="card" :parentIsCardDetails="true")
+    UrlPreview(:visible="cardUrlPreviewIsVisible" :loading="isLoadingUrlPreview" :card="card" :parentIsCardDetails="true" :urlsIsVisibleInName="urlsIsVisible" @toggleUrlsIsVisible="toggleUrlsIsVisible")
 
     //- Read Only
     p.row.edit-message(v-if="!canEditCard")

@@ -93,7 +93,7 @@ export default {
   .image-preview,
   .video-preview
     .card-details-buttons
-      padding 6px
+      padding 4px
       z-index 1
       position absolute
       right 0

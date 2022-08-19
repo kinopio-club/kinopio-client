@@ -9,6 +9,7 @@
 
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails}")
+      //- buttons
       .card-details-buttons(v-if="parentIsCardDetails" :class="{'has-padding': card.urlPreviewImage}")
         .row.reverse-row
           // remove
@@ -20,8 +21,14 @@
             a(:href="card.urlPreviewUrl")
               button.visit-button
                 img.icon.visit(src="@/assets/visit.svg")
-        .row
-          //- hide info
+        //- hide url
+        .row.reverse-row
+          button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}")
+            img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
+            img.icon(v-else src="@/assets/view.svg")
+            span URL
+        //- hide image or image
+        .row.reverse-row
           .segmented-buttons
             button(v-if="previewHasImage" @click="toggleHideUrlPreviewImage" :class="{active : card.shouldHideUrlPreviewImage}" :disabled="!canEditCard")
               img.icon(v-if="!card.shouldHideUrlPreviewImage" src="@/assets/view.svg")
@@ -32,9 +39,15 @@
               img.icon(v-if="card.shouldHideUrlPreviewInfo" src="@/assets/view-hidden.svg")
               span Info
 
-      //- image
+      //- url preview image
       img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
-      img.preview-image(v-if="shouldLoadUrlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'side-image': isImageCard || parentIsCardDetails, hidden: card.shouldHideUrlPreviewImage}" @load="updateDimensionsAndMap")
+      template(v-if="shouldLoadUrlPreviewImage")
+      //- on card
+      img.preview-image(v-if="!parentIsCardDetails" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: card.shouldHideUrlPreviewImage, 'side-image': isImageCard}" @load="updateDimensionsAndMap")
+      //- in carddetails
+      a.preview-image-wrap(:href="card.urlPreviewUrl" :class="{'side-image': isImageCard || parentIsCardDetails}")
+        img.preview-image(v-if="parentIsCardDetails" :src="card.urlPreviewImage" :class="{hidden: card.shouldHideUrlPreviewImage}" @load="updateDimensionsAndMap")
+
       //- info
       .text(:class="{'side-text badge': !isImageCard && !parentIsCardDetails && shouldLoadUrlPreviewImage, hidden: card.shouldHideUrlPreviewInfo}" :style="{background: selectedColor}")
         img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
@@ -59,7 +72,8 @@ export default {
     parentIsCardDetails: Boolean,
     isSelected: Boolean,
     user: Object,
-    isImageCard: Boolean
+    isImageCard: Boolean,
+    urlsIsVisibleInName: Boolean
   },
   data () {
     return {
@@ -122,6 +136,9 @@ export default {
     }
   },
   methods: {
+    toggleUrlsIsVisible () {
+      this.$emit('toggleUrlsIsVisible')
+    },
     updateImageCanLoad () {
       this.imageCanLoad = true
     },
@@ -189,9 +206,18 @@ export default {
     -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
     &.selected
       mix-blend-mode color-burn
-    &.side-image
-      max-width 40%
-      margin-right 6px
+
+  a.preview-image-wrap
+    &:hover
+      .preview-image
+        box-shadow var(--button-hover-shadow)
+    &:active
+      .preview-image
+        box-shadow var(--hover-shadow)
+
+  .side-image
+    max-width 40%
+    margin-right 6px
 
   .side-text
     position absolute
