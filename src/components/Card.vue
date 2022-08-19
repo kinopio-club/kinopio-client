@@ -938,9 +938,9 @@ export default {
       // larger sizes have higher resistance
       const size = {
         s: this.isSize(width, height, 300),
-        m: this.isSize(width, height, 600),
-        l: this.isSize(width, height, 1200),
-        xl: width > 1200 || height > 1200
+        m: this.isSize(width, height, 500),
+        l: this.isSize(width, height, 1000),
+        xl: width > 1200 || height > 1000
       }
       if (size.xl) {
         stretchResistance = 20
