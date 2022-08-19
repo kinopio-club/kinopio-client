@@ -84,7 +84,6 @@ const store = createStore({
 
     // boxes
     boxDetailsIsVisibleForBoxId: '',
-    remoteUserResizingBoxs: [],
     multipleBoxesSelectedIds: [],
     currentBoxIsNew: false,
     remoteBoxDetailsVisible: [],
