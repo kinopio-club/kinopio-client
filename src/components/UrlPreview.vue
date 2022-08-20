@@ -11,9 +11,9 @@
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': card.shouldHideUrlPreviewInfo && !card.shouldHideUrlPreviewImage}")
       //- youtube
       .content-buttons(v-if="!parentIsCardDetails && isYoutubeUrl")
-        .button-wrap
-          button(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed")
-            img.icon.box-icon(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
+        .button-wrap.inline-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed")
+          button.inline-button
+            img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
             img.icon.play(v-else src="@/assets/play.svg")
       //- card details buttons
       .content-buttons(v-if="parentIsCardDetails")
@@ -305,6 +305,21 @@ export default {
       flex-direction row-reverse
     .visit-button
       margin-right 6px
+
+  .inline-button-wrap
+    cursor pointer
+    button
+      cursor pointer
+    .icon
+      &.play,
+      &.stop
+        position absolute
+        left 6px
+        top 3px
+      &.stop
+        left 4px
+        top 2px
+
   button
     &:disabled
       opacity 1
@@ -314,8 +329,4 @@ export default {
       span
         opacity 0.5
 
-  .icon.play
-    width 10px
-    height 10px
-    vertical-align 0
 </style>
