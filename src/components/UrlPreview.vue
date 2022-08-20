@@ -116,7 +116,7 @@ export default {
     },
     isYoutubeUrl () {
       const url = this.card.urlPreviewUrl
-      return url.includes('https://youtube.com') || url.includes('https://www.youtube.com')
+      return url.includes('https://youtube.com') || url.includes('https://www.youtube.com') || url.includes('https://youtu.be')
     },
     youtubeUrlVideoId () {
       if (!this.isYoutubeUrl) { return }
