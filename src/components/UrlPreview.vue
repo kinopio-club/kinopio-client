@@ -11,7 +11,7 @@
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': card.shouldHideUrlPreviewInfo && !card.shouldHideUrlPreviewImage}")
       //- youtube
       .content-buttons(v-if="!parentIsCardDetails && isYoutubeUrl")
-        .button-wrap.inline-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed")
+        .button-wrap.inline-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
           button.inline-button
             img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
             img.icon.play(v-else src="@/assets/play.svg")
