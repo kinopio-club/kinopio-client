@@ -958,8 +958,8 @@ export default {
       if (preventSticking) { return }
       if (!stickyTimerComplete) { return }
       const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap', 'toggle-comment-wrap', 'inline-button', 'badge']
-      const elements = ['button', 'progress']
-      const isOverAction = classes.includes(event.target.className) || elements.includes(event.type)
+      const elements = ['button', 'progress', 'iframe']
+      const isOverAction = classes.includes(event.target.className) || elements.includes(event.target.nodeName.toLowerCase())
       const isOverTag = event.target.className.includes('button-badge')
       if (this.shouldNotStick || isOverAction || isOverTag) {
         this.clearPositionOffsets()

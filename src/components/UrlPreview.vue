@@ -2,15 +2,21 @@
 .row.url-preview(v-if="visible && (previewHasInfo || previewHasImage)")
   Loader(:visible="loading")
   template(v-if="loading")
-    .card-details-buttons(v-if="parentIsCardDetails")
+    .content-buttons(v-if="parentIsCardDetails")
       .button-wrap
         button(@click="hidePreview")
           img.icon(src="@/assets/remove.svg")
 
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': card.shouldHideUrlPreviewInfo && !card.shouldHideUrlPreviewImage}")
-      //- buttons
-      .card-details-buttons(v-if="parentIsCardDetails")
+      //- youtube
+      .content-buttons(v-if="!parentIsCardDetails && isYoutubeUrl")
+        .button-wrap
+          button(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed")
+            img.icon.box-icon(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
+            img.icon.play(v-else src="@/assets/play.svg")
+      //- card details buttons
+      .content-buttons(v-if="parentIsCardDetails")
         .row.reverse-row
           // remove
           .button-wrap
@@ -38,31 +44,35 @@
               img.icon(v-if="!card.shouldHideUrlPreviewInfo" src="@/assets/view.svg")
               img.icon(v-if="card.shouldHideUrlPreviewInfo" src="@/assets/view-hidden.svg")
               span Info
-
-      //- url preview image
-      img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
-      template(v-if="shouldLoadUrlPreviewImage")
-      //- on card
-      img.preview-image(v-if="!parentIsCardDetails" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: card.shouldHideUrlPreviewImage, 'side-image': isImageCard}" @load="updateDimensionsAndMap")
-      //- in carddetails
-      a.preview-image-wrap(v-if="parentIsCardDetails && !card.shouldHideUrlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !card.shouldHideUrlPreviewInfo)}")
-        img.preview-image( :src="card.urlPreviewImage" @load="updateDimensionsAndMap")
-
-      //- info
-      .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, hidden: card.shouldHideUrlPreviewInfo}" :style="{background: selectedColor}")
-        img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
-        img.icon.favicon.open(v-else src="@/assets/open.svg")
-        .title {{filteredTitle}}
-        .description(v-if="description") {{description}}
+      // preview
+      template(v-if="!shouldDisplayEmbed")
+        //- url preview image
+        img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
+        template(v-if="shouldLoadUrlPreviewImage")
+        //- on card
+        img.preview-image(v-if="!parentIsCardDetails" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: card.shouldHideUrlPreviewImage, 'side-image': isImageCard}" @load="updateDimensionsAndMap")
+        //- in carddetails
+        a.preview-image-wrap(v-if="parentIsCardDetails && !card.shouldHideUrlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !card.shouldHideUrlPreviewInfo)}")
+          img.preview-image( :src="card.urlPreviewImage" @load="updateDimensionsAndMap")
+        //- info
+        .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, hidden: card.shouldHideUrlPreviewInfo}" :style="{background: selectedColor}")
+          img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+          img.icon.favicon.open(v-else src="@/assets/open.svg")
+          .title {{filteredTitle}}
+          .description(v-if="description") {{description}}
+      //- embed playback
+      CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl")
 </template>
 
 <script>
+import CardEmbed from '@/components/CardEmbed.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'UrlPreview',
   components: {
+    CardEmbed,
     Loader
   },
   props: {
@@ -77,7 +87,9 @@ export default {
   },
   data () {
     return {
-      imageCanLoad: false
+      imageCanLoad: false,
+      shouldDisplayEmbed: false,
+      embedUrl: ''
     }
   },
   computed: {
@@ -99,7 +111,27 @@ export default {
       return title
     },
     isTwitterUrl () {
-      return this.card.urlPreviewUrl.includes('https://twitter.com')
+      const url = this.card.urlPreviewUrl
+      return url.includes('https://twitter.com')
+    },
+    isYoutubeUrl () {
+      const url = this.card.urlPreviewUrl
+      return url.includes('https://youtube.com') || url.includes('https://www.youtube.com')
+    },
+    youtubeUrlVideoId () {
+      if (!this.isYoutubeUrl) { return }
+      const url = this.card.urlPreviewUrl
+      // matches 'v=' until next qs '&'
+      // www.youtube.com/watch?v=PYeY8fWUyO8 → "v=PYeY8fWUyO8"
+      const idPattern = new RegExp(/v=([^&]+)/g)
+      let id = url.match(idPattern)[0]
+      id = id.slice(2, id.length)
+      return id
+    },
+    youtubeEmbedUrl () {
+      if (!this.youtubeUrlVideoId) { return }
+      const url = `https://www.youtube-nocookie.com/embed/${this.youtubeUrlVideoId}?autoplay=1`
+      return url
     },
     twitterDescription () {
       if (!this.isTwitterUrl) { return }
@@ -136,6 +168,20 @@ export default {
     }
   },
   methods: {
+    toggleShouldDisplayEmbed () {
+      this.$store.dispatch('closeAllDialogs', 'UrlPreview')
+      if (this.shouldDisplayEmbed) {
+        this.embedUrl = ''
+        this.shouldDisplayEmbed = false
+      } else {
+        this.embedUrl = this.youtubeEmbedUrl
+        if (!this.embedUrl) {
+          this.$store.commit('addNotification', { message: 'Could not get embed URL', type: 'danger' })
+          return
+        }
+        this.shouldDisplayEmbed = true
+      }
+    },
     toggleUrlsIsVisible () {
       this.$emit('toggleUrlsIsVisible')
     },
@@ -244,7 +290,7 @@ export default {
   .description
     margin-top 10px
 
-  .card-details-buttons
+  .content-buttons
     z-index 1
     position absolute
     right 0
@@ -266,4 +312,9 @@ export default {
       img,
       span
         opacity 0.5
+
+  .icon.play
+    width 10px
+    height 10px
+    vertical-align 0
 </style>
