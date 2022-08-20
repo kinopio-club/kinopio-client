@@ -149,6 +149,7 @@ export default {
       const cardIsShort = this.card.height < 200
       const isCardView = !this.parentIsCardDetails
       if (this.twitterDescription) { return this.twitterDescription }
+      if (this.isYoutubeUrl) { return }
       if (isCardView) {
         description = utils.truncated(description)
       }
