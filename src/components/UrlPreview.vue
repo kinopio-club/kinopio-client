@@ -12,9 +12,9 @@
       //- youtube
       .content-buttons(v-if="!parentIsCardDetails && isYoutubeUrl")
         .button-wrap
-          button(@click.stop="toggleShouldDisplayEmbed")
-            span(v-if="shouldDisplayEmbed") Stop
-            span(v-else) Play
+          button(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed")
+            img.icon.box-icon(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
+            img.icon.play(v-else src="@/assets/play.svg")
       //- card details buttons
       .content-buttons(v-if="parentIsCardDetails")
         .row.reverse-row
@@ -312,4 +312,9 @@ export default {
       img,
       span
         opacity 0.5
+
+  .icon.play
+    width 10px
+    height 10px
+    vertical-align 0
 </style>
