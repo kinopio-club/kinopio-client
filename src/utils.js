@@ -1041,7 +1041,10 @@ export default {
     const cardIdDeltas = []
     const connectionTypeIdDeltas = []
     const user = cache.user()
-    items.cards = items.cards.map(card => {
+    let { cards, connections, connectionTypes, boxes, tags } = items
+    tags = tags || []
+    boxes = boxes || []
+    cards = cards.map(card => {
       const userId = this.itemUserId(user, card, nullItemUsers)
       const newId = nanoid()
       cardIdDeltas.push({
@@ -1052,7 +1055,7 @@ export default {
       card.userId = userId
       return card
     })
-    items.connectionTypes = items.connectionTypes.map(type => {
+    connectionTypes = connectionTypes.map(type => {
       const userId = this.itemUserId(user, type, nullItemUsers)
       const newId = nanoid()
       connectionTypeIdDeltas.push({
@@ -1063,7 +1066,7 @@ export default {
       type.userId = userId
       return type
     })
-    items.connections = items.connections.map(connection => {
+    connections = connections.map(connection => {
       const userId = this.itemUserId(user, connection, nullItemUsers)
       connection.id = nanoid()
       connection.connectionTypeId = this.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
@@ -1072,19 +1075,18 @@ export default {
       connection.userId = userId
       return connection
     })
-    items.boxes = items.boxes.map(box => {
+    boxes = boxes.map(box => {
       const userId = this.itemUserId(user, box, nullItemUsers)
       box.id = nanoid()
       box.userId = userId
       return box
     })
-    if (this.arrayHasItems(items.tags)) {
-      items.tags = items.tags.map(tag => {
-        tag.id = nanoid()
-        tag.cardId = this.updateAllIds(tag, 'cardId', cardIdDeltas)
-        return tag
-      })
-    }
+    tags = tags.map(tag => {
+      tag.id = nanoid()
+      tag.cardId = this.updateAllIds(tag, 'cardId', cardIdDeltas)
+      return tag
+    })
+    items = { cards, connections, connectionTypes, boxes, tags }
     return items
   },
   updateConnectionsType ({ connections, prevTypeId, newTypeId }) {
