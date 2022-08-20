@@ -408,6 +408,7 @@ export default {
     },
     showBoxDetails (event) {
       if (!this.$store.state.currentBoxIsNew) { return }
+      if (utils.isMobile()) { return }
       const boxId = this.$store.state.currentUserIsResizingBoxIds[0]
       this.$nextTick(() => {
         this.$nextTick(() => {
