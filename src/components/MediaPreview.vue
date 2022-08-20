@@ -4,7 +4,7 @@
   .image-preview.row(v-if="formats.image")
     a(:href="formats.image")
       img.image(:src="formats.image")
-      .card-details-buttons
+      .content-buttons
         .button-wrap
           a(:href="formats.image")
             button
@@ -17,7 +17,7 @@
     a(:href="formats.video")
       video.video(autoplay loop muted playsinline)
         source(:src="formats.video")
-    .card-details-buttons
+    .content-buttons
       .button-wrap
         a(:href="formats.video")
           button
@@ -28,7 +28,7 @@
   //- Audio
   .row(v-if="formats.audio")
     Audio(:visible="Boolean(formats.audio)" :url="formats.audio" :normalizedName="this.card.name" :parentIsCardDetails="true")
-    .card-details-buttons
+    .content-buttons
       .button-wrap
         a(:href="formats.audio")
           button
@@ -85,7 +85,7 @@ export default {
     .audio
       width 168px
 
-    .card-details-buttons
+    .content-buttons
       pointer-events none
       margin-left 6px
       display flex
@@ -96,7 +96,7 @@ export default {
   // similar to UrlPreview
   .image-preview,
   .video-preview
-    .card-details-buttons
+    .content-buttons
       padding 4px
       z-index 1
       position absolute

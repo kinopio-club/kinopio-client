@@ -2,15 +2,19 @@
 .row.url-preview(v-if="visible && (previewHasInfo || previewHasImage)")
   Loader(:visible="loading")
   template(v-if="loading")
-    .card-details-buttons(v-if="parentIsCardDetails")
+    .content-buttons(v-if="parentIsCardDetails")
       .button-wrap
         button(@click="hidePreview")
           img.icon(src="@/assets/remove.svg")
 
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': card.shouldHideUrlPreviewInfo && !card.shouldHideUrlPreviewImage}")
+      .content-buttons(v-if="!parentIsCardDetails")
+        .button-wrap
+          button |>
+
       //- buttons
-      .card-details-buttons(v-if="parentIsCardDetails")
+      .content-buttons(v-if="parentIsCardDetails")
         .row.reverse-row
           // remove
           .button-wrap
@@ -244,7 +248,7 @@ export default {
   .description
     margin-top 10px
 
-  .card-details-buttons
+  .content-buttons
     z-index 1
     position absolute
     right 0
