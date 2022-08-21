@@ -282,6 +282,19 @@ const self = {
         console.error('🚒 getUserRemovedSpaces', error)
       }
     },
+    getUserInboxSpace: async (context) => {
+      let space = cache.getInboxSpace()
+      if (space) { return space }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/inbox-space`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 getUserInboxSpace', error)
+      }
+    },
     getSpacesNotificationUnsubscribed: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }
@@ -545,6 +558,18 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 createCards', error)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
+      }
+    },
+    createCard: async (context, body) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/card`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 createCard', error)
         context.commit('notifyServerCouldNotSave', true, { root: true })
       }
     },

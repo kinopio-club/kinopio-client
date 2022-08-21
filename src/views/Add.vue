@@ -16,12 +16,12 @@ main.add-page
           .badge.danger(v-if="error.signInCredentials") Incorrect email or password
           .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
 
-    .persistent-item.sign-in(v-if="!isAppStoreView")
-      .badge
-        p If you don't have a Kinopio account yet, you can Sign Up for free
-        .row
-          a(:href="kinopioDomain")
-            button Kinopio →
+    //- .persistent-item.sign-in(v-if="!isAppStoreView")
+    //-   .badge
+    //-     p If you don't have a Kinopio account yet, you can Sign Up for free
+    //-     .row
+    //-       a(:href="kinopioDomain")
+    //-         button Kinopio →
 
   dialog.card-details(v-if="cardIsVisible" data-name="add-card")
     section
@@ -49,19 +49,15 @@ main.add-page
             img.icon.inbox-icon(src="@/assets/inbox.svg")
             span Add to Inbox
             Loader(:visible="loading.createCard")
-          .badge.label-badge.keyboard-shortcut-tip(v-if="keyboardShortcutTipIsVisible")
+          .badge.label-badge.info-badge(v-if="keyboardShortcutTipIsVisible")
             span Enter
 
       .row(v-if="isErrorOrSuccess")
         //- success
         template(v-if="success")
-          .badge.success
-            .row
-              span Card to Inbox
-            .row
-              a(:href="prevSuccessSpace.id")
-                button
-                  span {{prevSuccessSpace.name}} →
+          a(href="inbox")
+            .badge.success.button-badge
+              span Saved to Inbox
 
         //- Errors
         //- card limit
@@ -75,21 +71,13 @@ main.add-page
         .badge.danger(v-if="error.unknown") (シ_ _)シ Something went wrong, Please try again or contact support
         //- max card length
         .badge.danger(v-if="error.maxLength") To fit small screens, cards can't be longer than {{maxCardLength}} characters
-        //- no spaces
-        .badge.danger(v-if="error.noSpaces && !isAppStoreView")
-          span You'll need to visit Kinopio once before you can add cards
-          .row
-            a(:href="kinopioDomain")
-              button Kinopio →
-        //- spaces loading
-        .badge.danger(v-if="error.spacesLoading")
-          span Spaces loading, try again in a couple seconds
 
 </template>
 
 <script>
+import inboxSpace from '@/data/inbox.json'
+
 import Loader from '@/components/Loader.vue'
-// import cache from '@/cache.js'
 import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
@@ -114,11 +102,6 @@ export default {
     }, 5000)
     this.focusAndSelectName()
     this.init()
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'closeAllDialogs') {
-        this.closeDialogs()
-      }
-    })
   },
   beforeUnmount () {
     window.removeEventListener('mouseup', this.stopInteractions)
@@ -132,7 +115,6 @@ export default {
       password: '',
       spaces: [],
       inboxSpace: {},
-      prevSuccessSpace: {},
       selectedSpace: {},
       loading: {
         createCard: false,
@@ -141,8 +123,6 @@ export default {
       error: {
         unknown: false,
         maxLength: false,
-        noSpaces: false,
-        spacesLoading: false,
         missingUserApikey: false,
         // sign in
         tooManyAttempts: false,
@@ -173,9 +153,9 @@ export default {
       }
     },
     isErrorOrSuccess () {
-      return this.error.maxLength || this.error.unknown || this.error.noSpaces || this.error.spacesLoading || this.success
-    },
-    isAppStoreView () { return this.$store.state.isAppStoreView }
+      return this.error.maxLength || this.error.unknown || this.success
+    }
+    // isAppStoreView () { return this.$store.state.isAppStoreView }
   },
   methods: {
     insertUrl (event) {
@@ -239,7 +219,6 @@ export default {
       if (this.isSuccess(response)) {
         this.$store.commit('currentUser/updateUser', result)
         this.error.missingUserApikey = false
-        this.error.noSpaces = false
         this.init()
       } else {
         this.handleErrors(result)
@@ -301,10 +280,6 @@ export default {
       if (this.cardsCreatedIsOverLimit) { return }
       if (this.error.maxLength) { return }
       if (this.loading.createCard) { return }
-      if (this.loading.userSpaces) {
-        this.error.spacesLoading = true
-        return
-      }
       if (!this.newName) { return }
       this.loading.createCard = true
       const url = utils.urlFromString(this.newName)
@@ -318,38 +293,46 @@ export default {
           favicon: this.previewFavicon(links)
         }
       }
-      const body = [{
+      let card = {
         id: nanoid(),
         name: this.newName,
-        x: 100,
-        y: 100,
         z: 1,
         urlPreviewUrl: url,
         urlPreviewTitle: urlPreview.title,
         urlPreviewDescription: urlPreview.description,
         urlPreviewImage: urlPreview.image,
         urlPreviewFavicon: urlPreview.favicon
-      }]
-      console.log('🛫 create card', body)
-      // todo GET inboxspace on load from server
-      // cache.addToSpace({ cards: body, connections: [], connectionTypes: [] }, this.inboxSpace.id)
+      }
+      console.log('🛫 create card', card)
       try {
-        await this.$store.dispatch('api/createCards', body)
+        // get or create inbox space
+        let space = await this.$store.dispatch('api/getUserInboxSpace')
+        if (space) {
+          card.spaceId = space.id
+        } else {
+          const user = this.$store.state.currentUser
+          space = utils.clone(inboxSpace)
+          space.id = nanoid()
+          space.userId = user.id
+          space.users = [user]
+          space.cards[0].id = nanoid()
+          await this.$store.dispatch('api/createSpace', space)
+          card.spaceId = space.id
+        }
+        // save card to inbox
+        await this.$store.dispatch('api/createCard', card)
+        this.success = true
+        this.newName = ''
       } catch (error) {
         console.error('🚑 createCard', error)
         this.error.unknown = true
       }
       this.loading.createCard = false
-      // this.prevSuccessSpace = utils.clone(this.inboxSpace)
-      this.success = true
-      this.newName = ''
       this.focusAndSelectName()
     },
     clearErrorsAndSuccess () {
       this.error.unknown = false
       this.success = false
-      this.error.noSpaces = false
-      this.error.spacesLoading = false
     },
     updateMaxLengthError () {
       if (this.newName.length >= this.maxCardLength - 1) {
@@ -406,7 +389,7 @@ main.add-page
   .card-details
     display block
     position static
-  .keyboard-shortcut-tip
+  .info-badge
     position static
     display inline-block
     min-height 16px
@@ -416,8 +399,8 @@ main.add-page
   .loader
     margin-left 5px
   .badge
-    button
-      margin-top 2px
+    // button
+    //   margin-top 2px
     .loader
       margin-right 0
   .disabled
@@ -447,4 +430,7 @@ main.add-page
   .inbox-icon
     vertical-align 0
     margin-left 5px
+  a
+    color var(--primary)
+    text-decoration none
 </style>
