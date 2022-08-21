@@ -8,7 +8,7 @@
           img.icon(src="@/assets/remove.svg")
 
   template(v-if="!loading")
-    .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': card.shouldHideUrlPreviewInfo && !card.shouldHideUrlPreviewImage}")
+    .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': shouldHideInfo && !shouldHideImage}")
       //- youtube
       .content-buttons(v-if="!parentIsCardDetails && isYoutubeUrl")
         .button-wrap.inline-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
@@ -17,45 +17,38 @@
             img.icon.play(v-else src="@/assets/play.svg")
       //- card details buttons
       .content-buttons(v-if="parentIsCardDetails")
-        .row.reverse-row
+        .row
+          //- hide url
+          .button-wrap
+            button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}" :disabled="!canEditCard")
+              img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
+              img.icon(v-else src="@/assets/view.svg")
+              span URL
           // remove
           .button-wrap
             button(@click="hidePreview" :disabled="!canEditCard")
               img.icon(src="@/assets/remove.svg")
-          // link
-          .button-wrap
-            a(:href="card.urlPreviewUrl")
-              button.visit-button
-                img.icon.visit(src="@/assets/visit.svg")
-        //- hide url
-        .row.reverse-row
-          button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}" :disabled="!canEditCard")
-            img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
-            img.icon(v-else src="@/assets/view.svg")
-            span URL
-        //- hide image or image
-        .row.reverse-row
+        //- all, image, text
+        .row(v-if="previewHasImage && previewHasInfo")
           .segmented-buttons
-            button(v-if="previewHasImage" @click="toggleHideUrlPreviewImage" :class="{active : card.shouldHideUrlPreviewImage}" :disabled="!canEditCard")
-              img.icon(v-if="!card.shouldHideUrlPreviewImage" src="@/assets/view.svg")
-              img.icon(v-if="card.shouldHideUrlPreviewImage" src="@/assets/view-hidden.svg")
+            button(@click="showAll" :class="{active : !shouldHideImage && !shouldHideInfo}" :disabled="!canEditCard")
+              span All
+            button(@click="showImage" :class="{active : shouldHideInfo && !shouldHideImage}" :disabled="!canEditCard")
               span Image
-            button(v-if="previewHasInfo" @click="toggleHideUrlPreviewInfo" :class="{active : card.shouldHideUrlPreviewInfo}" :disabled="!canEditCard")
-              img.icon(v-if="!card.shouldHideUrlPreviewInfo" src="@/assets/view.svg")
-              img.icon(v-if="card.shouldHideUrlPreviewInfo" src="@/assets/view-hidden.svg")
-              span Info
+            button(@click="showInfo" :class="{active : shouldHideImage && !shouldHideInfo}" :disabled="!canEditCard")
+              span Text
       // preview
       template(v-if="!shouldDisplayEmbed")
         //- url preview image
         img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
         template(v-if="shouldLoadUrlPreviewImage")
         //- on card
-        img.preview-image(v-if="!parentIsCardDetails" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: card.shouldHideUrlPreviewImage, 'side-image': isImageCard}" @load="updateDimensionsAndMap")
+        img.preview-image(v-if="!parentIsCardDetails" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensionsAndMap")
         //- in carddetails
-        a.preview-image-wrap(v-if="parentIsCardDetails && !card.shouldHideUrlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !card.shouldHideUrlPreviewInfo)}")
+        a.preview-image-wrap(v-if="parentIsCardDetails && !shouldHideImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo)}")
           img.preview-image( :src="card.urlPreviewImage" @load="updateDimensionsAndMap")
         //- info
-        .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, hidden: card.shouldHideUrlPreviewInfo}" :style="{background: selectedColor}")
+        .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, hidden: shouldHideInfo}" :style="{background: selectedColor}")
           img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
           .title {{filteredTitle}}
@@ -101,6 +94,8 @@ export default {
       if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
       return false
     },
+    shouldHideInfo () { return this.card.shouldHideUrlPreviewInfo },
+    shouldHideImage () { return this.card.shouldHideUrlPreviewImage },
     selectedColor () {
       if (!this.isSelected) { return }
       return this.user.color
@@ -215,22 +210,31 @@ export default {
     updateDimensionsAndMap () {
       this.$store.dispatch('currentCards/updateDimensionsAndMap', this.card.id)
     },
-    toggleHideUrlPreviewInfo () {
-      const value = !this.card.shouldHideUrlPreviewInfo
+    showAll () {
       const card = {
         id: this.card.id,
-        shouldHideUrlPreviewInfo: value
+        shouldHideUrlPreviewInfo: false,
+        shouldHideUrlPreviewImage: false
       }
       this.$store.dispatch('currentCards/update', card)
     },
-    toggleHideUrlPreviewImage () {
-      const value = !this.card.shouldHideUrlPreviewImage
+    showImage () {
       const card = {
         id: this.card.id,
-        shouldHideUrlPreviewImage: value
+        shouldHideUrlPreviewInfo: true,
+        shouldHideUrlPreviewImage: false
+      }
+      this.$store.dispatch('currentCards/update', card)
+    },
+    showInfo () {
+      const card = {
+        id: this.card.id,
+        shouldHideUrlPreviewInfo: false,
+        shouldHideUrlPreviewImage: true
       }
       this.$store.dispatch('currentCards/update', card)
     }
+
   }
 }
 </script>
@@ -255,7 +259,7 @@ export default {
       border-top-right-radius 0
     &.is-card-details
       padding 4px
-      min-height 100px
+      min-height 60px
     &.no-padding
       padding 0
   .preview-image
@@ -313,10 +317,8 @@ export default {
     .button-wrap,
     button
       pointer-events all
-    .reverse-row
-      flex-direction row-reverse
-    .visit-button
-      margin-right 6px
+    .row
+      justify-content flex-end
 
   .inline-button-wrap
     cursor pointer
