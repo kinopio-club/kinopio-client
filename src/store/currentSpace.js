@@ -1,4 +1,5 @@
 import helloSpace from '@/data/hello.json'
+import inboxSpace from '@/data/inbox.json'
 import newSpace from '@/data/new.json'
 
 import words from '@/data/words.js'
@@ -171,8 +172,9 @@ const currentSpace = {
       // hello kinopio
       } else {
         console.log('🚃 Create new Hello Kinopio space')
-        await context.dispatch('createNewHelloSpace')
+        context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
+        context.dispatch('createNewInboxSpace')
       }
       context.dispatch('updateModulesSpaceId')
       context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
@@ -280,6 +282,16 @@ const currentSpace = {
 
     // Space
 
+    createNewInboxSpace: (context) => {
+      const users = [context.rootState.currentUser]
+      let space = utils.clone(inboxSpace)
+      space.id = nanoid()
+      space.createdAt = new Date()
+      space.editedAt = new Date()
+      space.users = users
+      const nullCardUsers = true
+      space = cache.updateIdsInSpace(space, nullCardUsers) // saves the space
+    },
     createNewHelloSpace: (context) => {
       const user = context.rootState.currentUser
       let space = utils.clone(helloSpace)
@@ -723,7 +735,7 @@ const currentSpace = {
       if (space) {
         context.dispatch('loadSpace', { space })
       } else {
-        await context.dispatch('createNewHelloSpace')
+        context.dispatch('createNewHelloSpace')
       }
       context.dispatch('updateUserLastSpaceId')
     },

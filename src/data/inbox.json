@@ -1,0 +1,31 @@
+{
+  "id": "1",
+  "name": "Inbox",
+  "privacy": "private",
+  "showInExplore": false,
+  "collaboratorKey": "",
+  "users": [],
+  "collaborators": [],
+  "spectators": [],
+  "clients": [],
+  "background": "",
+  "backgroundTint": "",
+  "moonPhase": "",
+  "isTemplate": false,
+  "cards": [
+    {
+      "id": "1",
+      "x": 100,
+      "y": 100,
+      "z": 0,
+      "name": "this is your inbox space, add whatever, use extensions or /add page"
+    }
+  ],
+  "connections": [],
+  "connectionTypes": [],
+  "cacheDate": 1565295601072,
+  "removedCards": [],
+  "originSpaceId": "",
+  "tags": [],
+  "boxes": []
+}
