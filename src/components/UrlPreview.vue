@@ -10,7 +10,7 @@
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': shouldHideInfo && !shouldHideImage}")
       //- youtube
-      .content-buttons(v-if="!parentIsCardDetails && isYoutubeUrl")
+      .content-buttons.card-inline-buttons(v-if="!parentIsCardDetails && isYoutubeUrl")
         .button-wrap.inline-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
           button.inline-button
             img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
@@ -319,6 +319,10 @@ export default {
       pointer-events all
     .row
       justify-content flex-end
+
+  .no-padding
+    .card-inline-buttons
+      padding 0
 
   .inline-button-wrap
     cursor pointer
