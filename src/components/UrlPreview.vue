@@ -114,18 +114,30 @@ export default {
       const url = this.card.urlPreviewUrl
       return url.includes('https://twitter.com')
     },
+    isYoutubeShortenedUrl () {
+      const url = this.card.urlPreviewUrl
+      return url.includes('https://youtu.be')
+    },
     isYoutubeUrl () {
       const url = this.card.urlPreviewUrl
-      return url.includes('https://youtube.com') || url.includes('https://www.youtube.com') || url.includes('https://youtu.be')
+      return url.includes('https://youtube.com') || url.includes('https://www.youtube.com') || this.isYoutubeShortenedUrl
     },
     youtubeUrlVideoId () {
       if (!this.isYoutubeUrl) { return }
       const url = this.card.urlPreviewUrl
-      // matches 'v=' until next qs '&'
-      // www.youtube.com/watch?v=PYeY8fWUyO8 → "v=PYeY8fWUyO8"
-      const idPattern = new RegExp(/v=([^&]+)/g)
-      let id = url.match(idPattern)[0]
-      id = id.slice(2, id.length)
+      let id
+      if (this.isYoutubeShortenedUrl) {
+        const idPattern = new RegExp(/([-a-zA-Z0-9])+$/g)
+        // matches end from last '/'
+        // https://youtu.be/-abABC123 → -abABC123
+        id = url.match(idPattern)[0]
+      } else {
+        // matches 'v=' until next qs '&'
+        // www.youtube.com/watch?v=PYeY8fWUyO8 → "v=PYeY8fWUyO8"
+        const idPattern = new RegExp(/v=([^&]+)/g)
+        id = url.match(idPattern)[0]
+        id = id.slice(2, id.length)
+      }
       return id
     },
     youtubeEmbedUrl () {
