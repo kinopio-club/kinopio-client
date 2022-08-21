@@ -15,8 +15,8 @@
   "cards": [
     {
       "id": "1",
-      "x": 100,
-      "y": 100,
+      "x": 70,
+      "y": 90,
       "z": 0,
       "name": "this is your inbox space, add whatever, use extensions or /add page\n\ncopy/paste/ select and move it to other spaces"
     }
