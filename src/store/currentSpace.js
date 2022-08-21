@@ -146,6 +146,7 @@ const currentSpace = {
     init: async (context) => {
       const spaceUrl = context.rootState.spaceUrlToLoad
       const loadJournalSpace = context.rootState.loadJournalSpace
+      const loadInboxSpace = context.rootState.loadInboxSpace
       const loadNewSpace = context.rootState.loadNewSpace
       const user = context.rootState.currentUser
       let isRemote
@@ -160,6 +161,10 @@ const currentSpace = {
       } else if (loadJournalSpace) {
         console.log('🚃 Restore journal space')
         await context.dispatch('loadJournalSpace')
+      // restore or create inbox space
+      } else if (loadInboxSpace) {
+        console.log('🚃 Restore inbox space')
+        context.dispatch('loadInboxSpace')
       // create new space
       } else if (loadNewSpace) {
         console.log('🚃 Create new space')
@@ -524,6 +529,17 @@ const currentSpace = {
       }
       context.commit('loadJournalSpace', false, { root: true })
       context.commit('loadJournalSpaceTomorrow', false, { root: true })
+    },
+    loadInboxSpace: (context) => {
+      const spaces = cache.getAllSpaces()
+      const inboxSpace = spaces.find(space => space.name === 'Inbox')
+      if (inboxSpace) {
+        const space = { id: inboxSpace.id }
+        context.dispatch('changeSpace', { space })
+      } else {
+        context.dispatch('addInboxSpace')
+      }
+      context.commit('loadInboxSpace', false, { root: true })
     },
     updateModulesSpaceId: (context, space) => {
       space = space || context.state

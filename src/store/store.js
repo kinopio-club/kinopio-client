@@ -175,6 +175,7 @@ const store = createStore({
     loadJournalSpaceTomorrow: false,
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
+    loadInboxSpace: false,
 
     // notifications
     notifications: [],
@@ -276,6 +277,10 @@ const store = createStore({
     loadNewSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'loadNewSpace' })
       state.loadNewSpace = value
+    },
+    loadInboxSpace: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'loadInboxSpace' })
+      state.loadInboxSpace = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'addUrlPreviewLoadingForCardIds' })
