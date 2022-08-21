@@ -120,7 +120,7 @@ export default {
     },
     isYoutubeUrl () {
       const url = this.card.urlPreviewUrl
-      return url.includes('https://youtube.com') || url.includes('https://www.youtube.com') || this.isYoutubeShortenedUrl
+      return url.includes('https://youtube.com') || url.includes('https://www.youtube.com') || url.includes('https://m.youtube.com') || this.isYoutubeShortenedUrl
     },
     youtubeUrlVideoId () {
       if (!this.isYoutubeUrl) { return }
