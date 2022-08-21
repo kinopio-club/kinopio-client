@@ -92,12 +92,6 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
               img.icon.cancel(src="@/assets/add.svg")
     .right
-      .controls
-        .top-controls
-          SpaceUsers
-          a(:href="kinopioDomain")
-            button Kinopio →
-
       .controls(v-if="isSpace")
         .top-controls
           SpaceUsers
