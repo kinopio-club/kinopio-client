@@ -41,56 +41,29 @@ main.add-page
           @keydown.alt.enter.exact.stop="insertLineBreak"
           @keydown.ctrl.enter.exact.stop="insertLineBreak"
         )
-      //- space
-      .row
-        .button-wrap
-          button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
-            //- today journal badge
-            span.badge.info.inline-badge(v-if="isTodayJournal" title="Today's journal")
-              img.icon.today-icon(src="@/assets/today.svg")
-            MoonPhase(:moonPhase="currentSpace.moonPhase")
-            span(v-if="currentSpace.name") {{currentSpace.name}}
-            span(v-else) Last Space
-            img.down-arrow(src="@/assets/down-arrow.svg")
-            Loader(:visible="loading.userSpaces")
-          SpacePicker(
-            :visible="spacePickerIsVisible"
-            :shouldShowNewSpace="true"
-            :shouldShowDailyJournalSpace="true"
-            :userSpaces="spaces"
-            @selectSpace="updateCurrentSpace"
-            :selectedSpace="currentSpace"
-          )
-        .button-wrap(v-if="currentSpace.id")
-          a(:href="currentSpace.id")
-            button →
       //- add card
       .row
         .button-wrap
           button(@click.stop="createCard" :class="{active: loading.createCard, disabled: error.maxLength}")
             img.icon(src="@/assets/add.svg")
-            span Add Card
+            img.icon.inbox-icon(src="@/assets/inbox.svg")
+            span Add to Inbox
             Loader(:visible="loading.createCard")
           .badge.label-badge.keyboard-shortcut-tip(v-if="keyboardShortcutTipIsVisible")
             span Enter
+
       .row(v-if="isErrorOrSuccess")
         //- success
         template(v-if="success")
           .badge.success
             .row
-              span Card Added at Top of Space
+              span Card to Inbox
             .row
               a(:href="prevSuccessSpace.id")
                 button
                   span {{prevSuccessSpace.name}} →
-            //- default
-            .row
-              label(:class="{active: currentIsUserDefaults}" @click.left.prevent="updateUserDefaults" @keydown.stop.enter="updateUserDefaults")
-                input(type="checkbox" v-model="currentIsUserDefaults")
-                span Set as Default
 
         //- Errors
-
         //- card limit
         template(v-if="cardsCreatedIsOverLimit")
           .badge.danger
@@ -112,20 +85,13 @@ main.add-page
         .badge.danger(v-if="error.spacesLoading")
           span Spaces loading, try again in a couple seconds
 
-  section.default-space-info
-    .row(v-if="success && defaultSpace && !currentIsUserDefaults")
-      span Default space is {{defaultSpace.name}}
-
 </template>
 
 <script>
-import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
-import cache from '@/cache.js'
+// import cache from '@/cache.js'
 import utils from '@/utils.js'
-import MoonPhase from '@/components/MoonPhase.vue'
 
-import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
 
 let processQueueIntervalTimer, shouldCancel
@@ -133,9 +99,7 @@ let processQueueIntervalTimer, shouldCancel
 export default {
   name: 'AddPage',
   components: {
-    SpacePicker,
-    Loader,
-    MoonPhase
+    Loader
   },
   created () {
     window.document.title = 'Add Card'
@@ -143,7 +107,6 @@ export default {
   mounted () {
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
-    window.addEventListener('keyup', this.handleShortcuts)
     window.addEventListener('message', this.insertUrl)
     // retry failed sync operations every 5 seconds
     processQueueIntervalTimer = setInterval(() => {
@@ -160,7 +123,6 @@ export default {
   beforeUnmount () {
     window.removeEventListener('mouseup', this.stopInteractions)
     window.removeEventListener('touchend', this.stopInteractions)
-    window.removeEventListener('keyup', this.handleShortcuts)
     window.removeEventListener('message', this.insertUrl)
     clearInterval(processQueueIntervalTimer)
   },
@@ -169,13 +131,11 @@ export default {
       email: '',
       password: '',
       spaces: [],
-      currentSpace: {},
+      inboxSpace: {},
       prevSuccessSpace: {},
       selectedSpace: {},
-      spacePickerIsVisible: false,
       loading: {
         createCard: false,
-        userSpaces: false,
         signIn: false
       },
       error: {
@@ -201,16 +161,6 @@ export default {
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
     maxCardLength () { return utils.maxCardLength() },
     currentUser () { return this.$store.state.currentUser },
-    isTodayJournal () {
-      if (this.currentSpace.moonPhase) {
-        const createdAt = utils.journalSpaceDateFromName(this.currentSpace.name)
-        if (!createdAt) { return }
-        const today = utils.journalSpaceName()
-        return createdAt === today
-      } else {
-        return false
-      }
-    },
     name: {
       get () {
         return this.newName
@@ -224,12 +174,6 @@ export default {
     },
     isErrorOrSuccess () {
       return this.error.maxLength || this.error.unknown || this.error.noSpaces || this.error.spacesLoading || this.success
-    },
-    currentIsUserDefaults () {
-      return this.prevSuccessSpace.id === this.currentUser.defaultAddSpaceId
-    },
-    defaultSpace () {
-      return this.spaces.find(space => space.id === this.currentUser.defaultAddSpaceId)
     },
     isAppStoreView () { return this.$store.state.isAppStoreView }
   },
@@ -247,11 +191,9 @@ export default {
       this.$store.dispatch('currentUser/init')
       if (!this.currentUserIsSignedIn) {
         this.error.missingUserApikey = true
-        return
       } else {
         this.error.missingUserApikey = false
       }
-      await this.updateUserSpaces()
     },
     textareaSizes () {
       const textarea = this.$refs.name
@@ -363,10 +305,6 @@ export default {
         this.error.spacesLoading = true
         return
       }
-      if (!this.currentSpace.id) {
-        this.error.noSpaces = true
-        return
-      }
       if (!this.newName) { return }
       this.loading.createCard = true
       const url = utils.urlFromString(this.newName)
@@ -386,7 +324,6 @@ export default {
         x: 100,
         y: 100,
         z: 1,
-        spaceId: this.currentSpace.id,
         urlPreviewUrl: url,
         urlPreviewTitle: urlPreview.title,
         urlPreviewDescription: urlPreview.description,
@@ -394,7 +331,8 @@ export default {
         urlPreviewFavicon: urlPreview.favicon
       }]
       console.log('🛫 create card', body)
-      cache.addToSpace({ cards: body, connections: [], connectionTypes: [] }, this.currentSpace.id)
+      // todo GET inboxspace on load from server
+      // cache.addToSpace({ cards: body, connections: [], connectionTypes: [] }, this.inboxSpace.id)
       try {
         await this.$store.dispatch('api/createCards', body)
       } catch (error) {
@@ -402,7 +340,7 @@ export default {
         this.error.unknown = true
       }
       this.loading.createCard = false
-      this.prevSuccessSpace = utils.clone(this.currentSpace)
+      // this.prevSuccessSpace = utils.clone(this.inboxSpace)
       this.success = true
       this.newName = ''
       this.focusAndSelectName()
@@ -434,103 +372,12 @@ export default {
       })
     },
 
-    // spaces
-
-    updateUserSpacesWithSpaces (spaces) {
-      spaces = this.sortSpacesByEditedAt(spaces)
-      spaces = this.updateFavoriteSpaces(spaces)
-      this.spaces = spaces
-      this.updateCurrentSpace()
-    },
-    async updateUserSpaces () {
-      let spaces = cache.getAllSpaces()
-      this.updateUserSpacesWithSpaces(spaces)
-      this.loading.userSpaces = true
-      try {
-        const remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
-        this.updateUserSpacesWithSpaces(remoteSpaces)
-        this.loading.userSpaces = false
-      } catch (error) {
-        console.error('🚑 updateUserSpaces', error)
-        this.error.unknown = true
-        this.loading.userSpaces = false
-      }
-    },
-    updateCurrentSpace (space) {
-      if (space) {
-        this.closeDialogs()
-        this.focusAndSelectName()
-      }
-      space = space || this.defaultSpace || this.spaces[0]
-      console.log('🐙 currentSpace', space)
-      if (space) {
-        this.currentSpace = space
-        this.error.noSpaces = false
-      } else {
-        this.currentSpace = {}
-      }
-    },
-    sortSpacesByEditedAt (spaces) {
-      const sortedSpaces = spaces.sort((a, b) => {
-        const bEditedAt = dayjs(b.editedAt).unix()
-        const aEditedAt = dayjs(a.editedAt).unix()
-        return bEditedAt - aEditedAt
-      })
-      return sortedSpaces
-    },
-    orderByFavoriteSpaces (spaces) {
-      let favoriteSpaces = []
-      spaces = spaces.filter(space => {
-        if (space.isFavorite) {
-          favoriteSpaces.push(space)
-        } else {
-          return space
-        }
-      })
-      return favoriteSpaces.concat(spaces)
-    },
-    updateFavoriteSpaces (spaces) {
-      const userFavoriteSpaces = this.currentUser.favoriteSpaces
-      const favoriteSpaceIds = userFavoriteSpaces.map(space => space.id)
-      spaces = spaces.map(space => {
-        if (favoriteSpaceIds.includes(space.id)) {
-          space.isFavorite = true
-        }
-        return space
-      })
-      spaces = this.orderByFavoriteSpaces(spaces)
-      return spaces
-    },
-
-    // default
-
-    updateUserDefaults () {
-      const shouldClear = this.prevSuccessSpace.id === this.currentUser.defaultAddSpaceId
-      if (shouldClear) {
-        this.$store.dispatch('currentUser/update', { defaultAddSpaceId: null })
-      } else {
-        this.$store.dispatch('currentUser/update', { defaultAddSpaceId: this.prevSuccessSpace.id })
-      }
-    },
-
     // handlers
 
     updateKeyboardShortcutTipIsVisible (value) {
       this.keyboardShortcutTipIsVisible = value
     },
-    closeDialogs () {
-      this.spacePickerIsVisible = false
-    },
-    toggleSpacePickerIsVisible () {
-      if (this.loading.userSpaces) { return }
-      const value = !this.spacePickerIsVisible
-      this.closeDialogs()
-      this.spacePickerIsVisible = value
-    },
-    handleShortcuts (event) {
-      if (event.key === 'Escape') { this.closeDialogs() }
-    },
-    // based on Space.vue
+    // // based on Space.vue
     shouldCancel (event) {
       if (shouldCancel) {
         shouldCancel = false
@@ -555,8 +402,6 @@ export default {
 
 <style lang="stylus">
 main.add-page
-  position absolute
-  top 50px
   padding 8px
   .card-details
     display block
@@ -583,11 +428,6 @@ main.add-page
       margin-bottom 4px
       &:last-child
         margin-bottom 0
-  section.default-space-info
-    margin-top 10px
-    padding-left 8px
-    padding-right 8px
-    width 250px
   .notifications
     width 250px
     .row
@@ -604,4 +444,7 @@ main.add-page
     .badge
       display inline-block
       margin-top 10px
+  .inbox-icon
+    vertical-align 0
+    margin-left 5px
 </style>

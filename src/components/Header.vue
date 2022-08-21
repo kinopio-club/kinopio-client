@@ -24,11 +24,8 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             img.down-arrow(src="@/assets/down-arrow.svg")
           About(:visible="aboutIsVisible")
           KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-      .space-meta-rows(v-if="isAddPage")
-        p
-          span.badge.info Add Card
 
-      .space-meta-rows(v-if="!isAddPage")
+      .space-meta-rows
         .space-details-row.segmented-buttons
           //- Current Space
           .button-wrap
@@ -95,7 +92,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
               img.icon.cancel(src="@/assets/add.svg")
     .right
-      .controls(v-if="isAddPage && !isAppStoreView")
+      .controls
         .top-controls
           SpaceUsers
           a(:href="kinopioDomain")
@@ -289,6 +286,7 @@ export default {
       const connectionDetailsIsVisible = this.$store.state.connectionDetailsIsVisibleForConnectionId
       const contentDialogIsVisible = cardDetailsIsVisible || connectionDetailsIsVisible
       const isTouchDevice = this.$store.getters.isTouchDevice
+      if (this.isAddPage) { return }
       if (contentDialogIsVisible && isTouchDevice) {
         return false
       } else {
@@ -297,7 +295,6 @@ export default {
     },
     isEmbed () { return this.$store.state.isEmbed },
     isAddPage () { return this.$store.state.isAddPage },
-    isAppStoreView () { return this.$store.state.isAppStoreView },
     isSpace () {
       const isOther = this.isEmbed || this.isAddPage
       const isSpace = !isOther
