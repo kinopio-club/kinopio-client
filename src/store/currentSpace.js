@@ -172,6 +172,7 @@ const currentSpace = {
       // hello kinopio
       } else {
         console.log('🚃 Create new Hello Kinopio space')
+        context.dispatch('createNewInboxSpace', true)
         context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
       }
@@ -336,18 +337,23 @@ const currentSpace = {
       context.dispatch('restoreSpaceInChunks', { space })
       context.dispatch('loadBackground')
     },
-    createNewInboxSpace: (context) => {
-      window.scrollTo(0, 0)
+    createNewInboxSpace: (context, shouldCreateWithoutLoading) => {
       let space = utils.clone(inboxSpace)
       space.id = nanoid()
       space.createdAt = new Date()
       space.editedAt = new Date()
       space.userId = context.rootState.currentUser.id
-      context.commit('isLoadingSpace', true, { root: true })
-      context.commit('clearSearch', null, { root: true })
-      isLoadingRemoteSpace = false
-      context.dispatch('restoreSpaceInChunks', { space })
-      context.dispatch('loadBackground')
+      if (shouldCreateWithoutLoading) {
+        space.users = [context.rootState.currentUser]
+        const nullCardUsers = true
+        cache.updateIdsInSpace(space, nullCardUsers) // saves space
+      } else {
+        context.commit('isLoadingSpace', true, { root: true })
+        context.commit('clearSearch', null, { root: true })
+        isLoadingRemoteSpace = false
+        context.dispatch('restoreSpaceInChunks', { space })
+        context.dispatch('loadBackground')
+      }
     },
     saveNewSpace: (context) => {
       const space = utils.clone(context.state)
