@@ -44,6 +44,8 @@ span.space-list-wrap
             //- space meta
             span(v-if="space.isFavorite")
               img.icon.favorite-icon(src="@/assets/heart.svg")
+            span(v-if="space.name === 'Inbox'")
+              img.icon.favorite-icon(src="@/assets/box.svg")
 
             //- span(v-if="space.backgroundTint")
             //-   .badge.inline-badge.color-only-badge(:style="{ background: space.backgroundTint }")

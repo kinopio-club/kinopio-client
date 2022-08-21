@@ -263,6 +263,13 @@ export default {
       spaces = this.orderByFavoriteSpaces(spaces)
       return spaces
     },
+    updateInboxSpace (spaces) {
+      const inbox = spaces.find(space => space.name === 'Inbox')
+      if (!inbox) { return spaces }
+      spaces = spaces.filter(space => space.name !== 'Inbox')
+      spaces.unshift(inbox)
+      return spaces
+    },
     updateLocalSpaces () {
       this.debouncedUpdateLocalSpaces()
     },
@@ -275,6 +282,7 @@ export default {
         userSpaces = this.updateWithExistingRemoteSpaces(userSpaces)
         userSpaces = this.sortSpacesByEditedAt(userSpaces)
         userSpaces = this.updateFavoriteSpaces(userSpaces)
+        userSpaces = this.updateInboxSpace(userSpaces)
         this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
       })
     }, 350, { leading: true }),
@@ -311,7 +319,8 @@ export default {
       if (!this.remoteSpaces) { return }
       this.removeRemovedCachedSpaces(this.remoteSpaces)
       this.sortSpacesByEditedAt(this.remoteSpaces)
-      const spaces = this.updateFavoriteSpaces(this.remoteSpaces)
+      let spaces = this.updateFavoriteSpaces(this.remoteSpaces)
+      spaces = this.updateInboxSpace(spaces)
       this.spaces = spaces
       this.updateCachedSpacesDate()
     },
