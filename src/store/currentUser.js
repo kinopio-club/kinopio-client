@@ -50,7 +50,6 @@ export default {
     dialogSpaceFilterShowHidden: false,
     defaultSpaceBackground: undefined,
     defaultSpaceBackgroundTint: undefined,
-    defaultAddSpaceId: undefined,
     downgradeAt: null,
     showWeather: false,
     weatherLocation: undefined,
@@ -293,10 +292,6 @@ export default {
     defaultSpaceBackgroundTint: (state, value) => {
       state.defaultSpaceBackgroundTint = value
       cache.updateUser('defaultSpaceBackgroundTint', value)
-    },
-    defaultAddSpaceId: (state, value) => {
-      state.defaultAddSpaceId = value
-      cache.updateUser('defaultAddSpaceId', value)
     },
     showWeather: (state, value) => {
       state.showWeather = value
