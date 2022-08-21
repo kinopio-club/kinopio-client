@@ -33,6 +33,8 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           //- Current Space
           .button-wrap
             button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active: spaceDetailsIsVisible}")
+              span(v-if="currentSpaceIsInbox")
+                img.icon.inbox-icon(src="@/assets/inbox.svg")
               span(v-show="currentSpaceIsTemplate")
                 img.icon.templates(src="@/assets/templates.svg")
               MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
@@ -349,6 +351,10 @@ export default {
       if (currentSpace.isTemplate) { return true }
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(currentSpace.id)
+    },
+    currentSpaceIsInbox () {
+      const currentSpace = this.$store.state.currentSpace
+      return currentSpace.name === 'Inbox'
     },
     shouldShowInExplore () {
       const privacy = this.$store.state.currentSpace.privacy
@@ -857,6 +863,11 @@ header
   .icon.offline
     height 13px
     vertical-align -2px
+
+  .inbox-icon
+    margin-right 4px
+    width 12px
+    vertical-align 0
 
   .badge.space-status-success
     margin 0
