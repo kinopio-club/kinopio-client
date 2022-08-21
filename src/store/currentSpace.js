@@ -177,7 +177,7 @@ const currentSpace = {
       // hello kinopio
       } else {
         console.log('🚃 Create new Hello Kinopio space')
-        context.dispatch('createNewInboxSpace', true)
+        context.dispatch('createNewInboxSpace', { shouldCreateWithoutLoading: true })
         context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
       }
@@ -342,7 +342,7 @@ const currentSpace = {
       context.dispatch('restoreSpaceInChunks', { space })
       context.dispatch('loadBackground')
     },
-    createNewInboxSpace: (context, shouldCreateWithoutLoading) => {
+    createNewInboxSpace: (context, { shouldCreateWithoutLoading }) => {
       let space = utils.clone(inboxSpace)
       space.id = nanoid()
       space.createdAt = new Date()
