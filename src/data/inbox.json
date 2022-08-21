@@ -8,7 +8,7 @@
   "collaborators": [],
   "spectators": [],
   "clients": [],
-  "background": "",
+  "background": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-large-boxes-2x.png",
   "backgroundTint": "",
   "moonPhase": "",
   "isTemplate": false,
@@ -18,7 +18,7 @@
       "x": 100,
       "y": 100,
       "z": 0,
-      "name": "this is your inbox space, add whatever, use extensions or /add page"
+      "name": "this is your inbox space, add whatever, use extensions or /add page\n\ncopy/paste/ select and move it to other spaces"
     }
   ],
   "connections": [],

@@ -174,7 +174,6 @@ const currentSpace = {
         console.log('🚃 Create new Hello Kinopio space')
         context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
-        context.dispatch('createNewInboxSpace')
       }
       context.dispatch('updateModulesSpaceId')
       context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
@@ -282,16 +281,6 @@ const currentSpace = {
 
     // Space
 
-    createNewInboxSpace: (context) => {
-      const users = [context.rootState.currentUser]
-      let space = utils.clone(inboxSpace)
-      space.id = nanoid()
-      space.createdAt = new Date()
-      space.editedAt = new Date()
-      space.users = users
-      const nullCardUsers = true
-      space = cache.updateIdsInSpace(space, nullCardUsers) // saves the space
-    },
     createNewHelloSpace: (context) => {
       const user = context.rootState.currentUser
       let space = utils.clone(helloSpace)
@@ -342,6 +331,19 @@ const currentSpace = {
       context.commit('isLoadingSpace', true, { root: true })
       const weather = await context.dispatch('api/getWeather', null, { root: true })
       const space = utils.journalSpace(currentUser, isTomorrow, weather)
+      context.commit('clearSearch', null, { root: true })
+      isLoadingRemoteSpace = false
+      context.dispatch('restoreSpaceInChunks', { space })
+      context.dispatch('loadBackground')
+    },
+    createNewInboxSpace: (context) => {
+      window.scrollTo(0, 0)
+      let space = utils.clone(inboxSpace)
+      space.id = nanoid()
+      space.createdAt = new Date()
+      space.editedAt = new Date()
+      space.userId = context.rootState.currentUser.id
+      context.commit('isLoadingSpace', true, { root: true })
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
       context.dispatch('restoreSpaceInChunks', { space })
@@ -412,6 +414,15 @@ const currentSpace = {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       await context.dispatch('createNewJournalSpace')
+      context.dispatch('saveNewSpace')
+      context.dispatch('updateUserLastSpaceId')
+      context.commit('notifySignUpToEditSpace', false, { root: true })
+      context.commit('triggerUpdateWindowHistory', {}, { root: true })
+    },
+    addInboxSpace: (context) => {
+      const user = context.rootState.currentUser
+      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
+      context.dispatch('createNewInboxSpace')
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })

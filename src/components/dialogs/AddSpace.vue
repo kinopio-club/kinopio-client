@@ -10,6 +10,7 @@ dialog.add-space.narrow(
 )
   section
     .row
+      //- Add Space
       .segmented-buttons
         button.success(@click="addSpace")
           img.icon(src="@/assets/add.svg")
@@ -21,6 +22,7 @@ dialog.add-space.narrow(
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
         input(type="checkbox" v-model="newSpacesAreBlank")
         span New Spaces Are Blank
+    //- Add Journal
     .row
       .segmented-buttons
         button(@click="addJournalSpace")
@@ -35,6 +37,16 @@ dialog.add-space.narrow(
     template(v-if="editPromptsIsVisible" )
       Prompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
     PromptPicker(v-if="editPromptsIsVisible" :visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack" @addCustomPrompt="addCustomPrompt")
+
+  //- Inbox
+  //- v-if currentUserHasInboxSpace
+  section
+    button(@click="addInboxSpace")
+      img.icon(src="@/assets/add.svg")
+      img.icon.inbox-icon(src="@/assets/inbox.svg")
+      span Inbox
+    p description of inbox
+
   //- Templates
   section
     button(@click="triggerTemplatesIsVisible")
@@ -132,6 +144,12 @@ export default {
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
       }
     },
+    addInboxSpace () {
+      this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
+      window.scrollTo(0, 0)
+      this.$store.dispatch('currentSpace/addInboxSpace')
+      this.$store.dispatch('currentSpace/updateSpacePageSize')
+    },
     toggleNewSpacesAreBlank () {
       const value = !this.newSpacesAreBlank
       this.$store.dispatch('currentUser/newSpacesAreBlank', value)
@@ -210,4 +228,8 @@ export default {
     padding 4px
   .button-down-arrow
     padding 0
+  .inbox-icon
+    margin 0
+    margin-left 5px
+
 </style>
