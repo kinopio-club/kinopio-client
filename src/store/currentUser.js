@@ -687,6 +687,17 @@ export default {
         context.dispatch('update', updates)
         context.commit('triggerNotifyUnlockedStickyCards', null, { root: true })
       }
+    },
+    inboxSpace: async (context) => {
+      let space = cache.getInboxSpace()
+      if (!space) {
+        try {
+          space = await context.dispatch('api/getUserInboxSpace', null, { root: true })
+        } catch (error) {
+          console.warn('🚑 inboxSpace', error)
+        }
+      }
+      return space
     }
   },
   getters: {

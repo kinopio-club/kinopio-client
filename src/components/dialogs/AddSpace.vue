@@ -40,12 +40,12 @@ dialog.add-space.narrow(
 
   //- Inbox
   //- v-if currentUserHasInboxSpace, see app.createcard, run on dialog visible
-  section
+  section(v-if="!hasInboxSpace")
     button(@click="addInboxSpace")
       img.icon(src="@/assets/add.svg")
       img.icon.inbox-icon(src="@/assets/inbox.svg")
       span Inbox
-    p description of inbox
+    p For collecting ideas to figure out later
 
   //- Templates
   section
@@ -104,7 +104,8 @@ export default {
         top: 5
       },
       screenIsShort: false,
-      dialogHeight: null
+      dialogHeight: null,
+      hasInboxSpace: true
     }
   },
   computed: {
@@ -151,6 +152,7 @@ export default {
     addInboxSpace () {
       this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
       window.scrollTo(0, 0)
+      // tODO fix
       this.$store.dispatch('currentSpace/addInboxSpace')
       this.$store.dispatch('currentSpace/updateSpacePageSize')
     },
@@ -207,6 +209,10 @@ export default {
       this.closeAll()
       this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
       this.$store.commit('triggerTemplatesIsVisible')
+    },
+    async checkIfUserHasInboxSpace () {
+      const inboxSpace = await this.$store.dispatch('currentUser/inboxSpace')
+      this.hasInboxSpace = Boolean(inboxSpace)
     }
   },
   watch: {
@@ -214,6 +220,9 @@ export default {
       this.closeAll()
       this.shouldHideFooter(false)
       this.updateDialogHeight()
+      if (visible) {
+        this.checkIfUserHasInboxSpace()
+      }
     }
   }
 }
