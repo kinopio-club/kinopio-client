@@ -175,7 +175,7 @@ export default {
   disablePinchZoom () {
     if (this.isIPhone()) {
       const viewport = document.querySelector('head meta[name=viewport]')
-      viewport.setAttribute('content', 'width=device-width, user-scalable=0')
+      viewport.setAttribute('content', 'width=device-width, user-scalable=0, maximum-scale=1')
     }
   },
   enablePinchZoom () {
