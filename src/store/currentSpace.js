@@ -161,10 +161,10 @@ const currentSpace = {
       } else if (loadJournalSpace) {
         console.log('🚃 Restore journal space')
         await context.dispatch('loadJournalSpace')
-      // restore or create inbox space
+      // restore inbox space
       } else if (loadInboxSpace) {
         console.log('🚃 Restore inbox space')
-        context.dispatch('loadInboxSpace')
+        await context.dispatch('loadInboxSpace')
       // create new space
       } else if (loadNewSpace) {
         console.log('🚃 Create new space')
@@ -532,14 +532,14 @@ const currentSpace = {
       context.commit('loadJournalSpace', false, { root: true })
       context.commit('loadJournalSpaceTomorrow', false, { root: true })
     },
-    loadInboxSpace: (context) => {
-      const spaces = cache.getAllSpaces()
-      const inboxSpace = spaces.find(space => space.name === 'Inbox')
+    loadInboxSpace: async (context) => {
+      const inboxSpace = await context.dispatch('currentUser/inboxSpace', null, { root: true })
       if (inboxSpace) {
         const space = { id: inboxSpace.id }
         context.dispatch('changeSpace', { space })
       } else {
-        context.dispatch('addInboxSpace')
+        context.commit('addNotification', { message: 'Inbox space not found', type: 'danger' }, { root: true })
+        context.dispatch('loadLastSpace')
       }
       context.commit('loadInboxSpace', false, { root: true })
     },

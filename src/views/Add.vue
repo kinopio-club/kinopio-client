@@ -62,6 +62,7 @@ import inboxSpace from '@/data/inbox.json'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 import { nanoid } from 'nanoid'
 
@@ -250,6 +251,19 @@ export default {
         element.setSelectionRange(0, length)
       }
     },
+    emptyInboxSpace () {
+      const user = this.$store.state.currentUser
+      let space = utils.clone(inboxSpace)
+      space.id = nanoid()
+      space.userId = user.id
+      space.users = [user]
+      space.cards = space.cards.map(card => {
+        card.id = nanoid()
+        card.spaceId = space.id
+        return card
+      })
+      return space
+    },
     async createCard () {
       this.clearErrorsAndSuccess()
       if (this.cardsCreatedIsOverLimit) { return }
@@ -284,17 +298,13 @@ export default {
         if (space) {
           card.spaceId = space.id
         } else {
-          const user = this.$store.state.currentUser
-          space = utils.clone(inboxSpace)
-          space.id = nanoid()
-          space.userId = user.id
-          space.users = [user]
-          space.cards[0].id = nanoid()
+          space = this.emptyInboxSpace()
           await this.$store.dispatch('api/createSpace', space)
           card.spaceId = space.id
         }
         // save card to inbox
         await this.$store.dispatch('api/createCard', card)
+        cache.addToSpace({ cards: [card] }, space.id)
         this.success = true
         this.newName = ''
       } catch (error) {

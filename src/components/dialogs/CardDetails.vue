@@ -502,7 +502,7 @@ export default {
       if (zoom === 1) {
         zoom = pinchCounterScale
       }
-      zoom = utils.roundFloat(zoom)
+      // zoom = utils.roundFloat(zoom)
       const left = `${this.card.x + 8}px`
       const top = `${this.card.y + 8}px`
       return { transform: `scale(${zoom})`, left, top }

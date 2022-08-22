@@ -175,6 +175,9 @@ export default {
     space.cards = space.cards || []
     space.connections = space.connections || []
     space.connectionTypes = space.connectionTypes || []
+    cards = cards || []
+    connections = connections || []
+    connectionTypes = connectionTypes || []
     cards.forEach(card => space.cards.push(card))
     connections.forEach(connection => space.connections.push(connection))
     connectionTypes.forEach(connectionType => space.connectionTypes.push(connectionType))

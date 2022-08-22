@@ -8,7 +8,7 @@
   "collaborators": [],
   "spectators": [],
   "clients": [],
-  "background": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-large-boxes-2x.png",
+  "background": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/blank.png",
   "backgroundTint": "",
   "moonPhase": "",
   "isTemplate": false,
@@ -18,7 +18,14 @@
       "x": 70,
       "y": 90,
       "z": 0,
-      "name": "this is your inbox space, add whatever, use extensions or /add page\n\ncopy/paste/ select and move it to other spaces"
+      "name": "Use this space to collect thoughts, todos, and ideas that don't have a place to go yet\n\nCapture ideas from anywhere with the [browser extension](https://help.kinopio.club/posts/extensions)"
+    },
+    {
+      "id": "2",
+      "x": 320,
+      "y": 90,
+      "z": 0,
+      "name": "When you're ready, work through your cards by moving them to other spaces"
     }
   ],
   "connections": [],

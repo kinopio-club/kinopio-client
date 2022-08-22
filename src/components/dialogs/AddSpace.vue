@@ -39,7 +39,6 @@ dialog.add-space.narrow(
     PromptPicker(v-if="editPromptsIsVisible" :visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack" @addCustomPrompt="addCustomPrompt")
 
   //- Inbox
-  //- v-if currentUserHasInboxSpace, see app.createcard, run on dialog visible
   section(v-if="!hasInboxSpace")
     button(@click="addInboxSpace")
       img.icon(src="@/assets/add.svg")
@@ -152,7 +151,6 @@ export default {
     addInboxSpace () {
       this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
       window.scrollTo(0, 0)
-      // tODO fix
       this.$store.dispatch('currentSpace/addInboxSpace')
       this.$store.dispatch('currentSpace/updateSpacePageSize')
     },
