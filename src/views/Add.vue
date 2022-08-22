@@ -1,61 +1,60 @@
 <template lang="pug">
 main.add-page
   //- sign in
-  dialog.card-details(v-if="error.missingUserApikey")
-    section
-      .notifications
-        .badge.info(v-if="showSignInInstructions") Sign in to Kinopio to use
-      form(@submit.prevent="signIn")
-        input(type="email" placeholder="Email" required v-model="email" @input="clearErrorsAndSuccess")
-        input(type="password" placeholder="Password" required v-model="password" @input="clearErrorsAndSuccess")
+  section(v-if="error.missingUserApikey")
+    .notifications
+      .badge.info(v-if="showSignInInstructions") Sign in to Kinopio to use
+    form(@submit.prevent="signIn")
+      input(type="email" placeholder="Email" required v-model="email" @input="clearErrorsAndSuccess")
+      input(type="password" placeholder="Password" required v-model="password" @input="clearErrorsAndSuccess")
+      .row
         button(type="submit" :class="{active : loading.signIn}")
           span Sign In
           Loader(:visible="loading.signIn")
-      .sign-in-errors
-        .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-        .badge.danger(v-if="error.signInCredentials") Incorrect email or password
-        .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
+    .sign-in-errors
+      .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+      .badge.danger(v-if="error.signInCredentials") Incorrect email or password
+      .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
   //- add
-  dialog.card-details(v-if="cardIsVisible" data-name="add-card")
-    section
-      .notifications
-        //- success
-        a(href="inbox" v-if="success")
-          .badge.success.button-badge
-            span Saved →
-        //- error: card limit
-        a(:href="kinopioDomain" v-if="cardsCreatedIsOverLimit")
-          .badge.danger.button-badge
-            span Upgrade for more →
-        //- error: connection
-        .badge.danger(v-if="error.unknown || error.maxLength") (シ_ _)シ Server error
-      //- textarea
-      .textarea-wrap
-        textarea.name(
-          ref="name"
-          rows="1"
-          placeholder="Type text here, or paste a URL"
-          v-model="name"
-          :maxlength="maxCardLength"
-          @keydown.enter.exact.prevent="createCard"
-          @focusin="updateKeyboardShortcutTipIsVisible(true)"
-          @focusout="updateKeyboardShortcutTipIsVisible(false)"
+  section(v-else data-name="add-card")
+    .notifications
+      //- success
+      a(href="inbox" v-if="success")
+        .badge.success.button-badge
+          span Saved →
+      //- error: card limit
+      a(:href="kinopioDomain" v-if="cardsCreatedIsOverLimit")
+        .badge.danger.button-badge
+          span Upgrade for more →
+      //- error: connection
+      .badge.danger(v-if="error.unknown || error.maxLength") (シ_ _)シ Server error
+    //- textarea
+    .textarea-wrap
+      textarea.name(
+        ref="name"
+        rows="1"
+        placeholder="Type text here, or paste a URL"
+        v-model="name"
+        :maxlength="maxCardLength"
+        @keydown.enter.exact.prevent="createCard"
+        @focusin="updateKeyboardShortcutTipIsVisible(true)"
+        @focusout="updateKeyboardShortcutTipIsVisible(false)"
 
-          @keyup.alt.enter.exact.stop
-          @keyup.ctrl.enter.exact.stop
-          @keydown.alt.enter.exact.stop="insertLineBreak"
-          @keydown.ctrl.enter.exact.stop="insertLineBreak"
-        )
-      //- button
-      .row
-        .button-wrap
-          button(@click.stop="createCard" :class="{active: loading.createCard, disabled: error.maxLength}")
-            img.icon(src="@/assets/add.svg")
-            img.icon.inbox-icon(src="@/assets/inbox.svg")
-            span Add to Inbox
-            Loader(:visible="loading.createCard")
-          .badge.label-badge.info-badge(v-if="keyboardShortcutTipIsVisible")
-            span Enter
+        @keyup.alt.enter.exact.stop
+        @keyup.ctrl.enter.exact.stop
+        @keydown.alt.enter.exact.stop="insertLineBreak"
+        @keydown.ctrl.enter.exact.stop="insertLineBreak"
+      )
+    //- button
+    .row
+      .button-wrap
+        button(@click.stop="createCard" :class="{active: loading.createCard, disabled: error.maxLength}")
+          img.icon(src="@/assets/add.svg")
+          img.icon.inbox-icon(src="@/assets/inbox.svg")
+          span Add to Inbox
+          Loader(:visible="loading.createCard")
+        .badge.label-badge.info-badge(v-if="keyboardShortcutTipIsVisible")
+          span Enter
 </template>
 
 <script>
@@ -66,7 +65,7 @@ import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
 
-let processQueueIntervalTimer, shouldCancel
+let processQueueIntervalTimer
 
 export default {
   name: 'AddPage',
@@ -77,8 +76,6 @@ export default {
     window.document.title = 'Add Card'
   },
   mounted () {
-    window.addEventListener('mouseup', this.stopInteractions)
-    window.addEventListener('touchend', this.stopInteractions)
     window.addEventListener('message', this.insertUrl)
     // retry failed sync operations every 5 seconds
     processQueueIntervalTimer = setInterval(() => {
@@ -88,8 +85,6 @@ export default {
     this.init()
   },
   beforeUnmount () {
-    window.removeEventListener('mouseup', this.stopInteractions)
-    window.removeEventListener('touchend', this.stopInteractions)
     window.removeEventListener('message', this.insertUrl)
     clearInterval(processQueueIntervalTimer)
   },
@@ -120,7 +115,6 @@ export default {
     }
   },
   computed: {
-    cardIsVisible () { return !this.error.missingUserApikey },
     kinopioDomain () { return utils.kinopioDomain() },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
@@ -137,7 +131,6 @@ export default {
         this.updateMaxLengthError()
       }
     }
-    // isAppStoreView () { return this.$store.state.isAppStoreView }
   },
   methods: {
     insertUrl (event) {
@@ -342,25 +335,6 @@ export default {
 
     updateKeyboardShortcutTipIsVisible (value) {
       this.keyboardShortcutTipIsVisible = value
-    },
-    // // based on Space.vue
-    shouldCancel (event) {
-      if (shouldCancel) {
-        shouldCancel = false
-        return true
-      }
-      if (event.target.nodeType === 9) { return true } // type 9 is Document
-      let fromDialog = event.target.closest('dialog')
-      fromDialog = fromDialog && fromDialog.dataset.name !== 'add-card'
-      const fromButton = event.target.closest('button')
-      const fromHeader = event.target.closest('header')
-      const fromFooter = event.target.closest('footer')
-      return Boolean(fromDialog || fromButton || fromHeader || fromFooter)
-    },
-    stopInteractions (event) {
-      console.log('💣 stopInteractions', this.shouldCancel(event))
-      if (this.shouldCancel(event)) { return }
-      this.$store.dispatch('closeAllDialogs', 'Add')
     }
   }
 }
@@ -369,11 +343,11 @@ export default {
 <style lang="stylus">
 main.add-page
   padding 8px
+  margin-top 2px
   section
     position relative
-  .card-details
     display block
-    position static
+    width 250px
   .info-badge
     position static
     display inline-block
