@@ -264,10 +264,10 @@ export default {
       return spaces
     },
     updateInboxSpace (spaces) {
-      const inbox = spaces.find(space => space.name === 'Inbox')
-      if (!inbox) { return spaces }
+      const inboxSpaces = spaces.filter(space => space.name === 'Inbox')
+      if (!inboxSpaces.length) { return spaces }
       spaces = spaces.filter(space => space.name !== 'Inbox')
-      spaces.unshift(inbox)
+      spaces = inboxSpaces.concat(spaces)
       return spaces
     },
     updateLocalSpaces () {
