@@ -177,7 +177,7 @@ const currentSpace = {
       // hello kinopio
       } else {
         console.log('🚃 Create new Hello Kinopio space')
-        context.dispatch('createNewInboxSpace', { shouldCreateWithoutLoading: true })
+        context.dispatch('createNewInboxSpace', true)
         context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
       }
@@ -342,12 +342,13 @@ const currentSpace = {
       context.dispatch('restoreSpaceInChunks', { space })
       context.dispatch('loadBackground')
     },
-    createNewInboxSpace: (context, { shouldCreateWithoutLoading }) => {
+    createNewInboxSpace: (context, shouldCreateWithoutLoading) => {
       let space = utils.clone(inboxSpace)
       space.id = nanoid()
       space.createdAt = new Date()
       space.editedAt = new Date()
       space.userId = context.rootState.currentUser.id
+
       if (shouldCreateWithoutLoading) {
         space.users = [context.rootState.currentUser]
         const nullCardUsers = true
@@ -430,6 +431,7 @@ const currentSpace = {
       context.commit('notifySignUpToEditSpace', false, { root: true })
       context.commit('triggerUpdateWindowHistory', {}, { root: true })
     },
+
     addInboxSpace: (context) => {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
