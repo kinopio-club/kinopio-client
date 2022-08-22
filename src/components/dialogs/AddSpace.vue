@@ -39,7 +39,7 @@ dialog.add-space.narrow(
     PromptPicker(v-if="editPromptsIsVisible" :visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack" @addCustomPrompt="addCustomPrompt")
 
   //- Inbox
-  //- v-if currentUserHasInboxSpace
+  //- v-if currentUserHasInboxSpace, see app.createcard, run on dialog visible
   section
     button(@click="addInboxSpace")
       img.icon(src="@/assets/add.svg")
@@ -49,9 +49,13 @@ dialog.add-space.narrow(
 
   //- Templates
   section
-    button(@click="triggerTemplatesIsVisible")
-      img.icon.templates(src="@/assets/templates.svg")
-      span Templates
+    .row
+      .button-wrap
+        button(@click="triggerTemplatesIsVisible")
+          img.icon.templates(src="@/assets/templates.svg")
+          span Templates
+      .button-wrap
+        button Import
 
 </template>
 

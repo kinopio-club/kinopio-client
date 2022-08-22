@@ -283,8 +283,6 @@ const self = {
       }
     },
     getUserInboxSpace: async (context) => {
-      let space = cache.getInboxSpace()
-      if (space) { return space }
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }
       try {

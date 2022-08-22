@@ -62,6 +62,7 @@ import inboxSpace from '@/data/inbox.json'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 import { nanoid } from 'nanoid'
 
@@ -280,8 +281,10 @@ export default {
       }
       console.log('🛫 create card', card)
       try {
-        // get or create inbox space
-        let space = await this.$store.dispatch('api/getUserInboxSpace')
+        let space = cache.getInboxSpace()
+        if (!space) {
+          space = await this.$store.dispatch('api/getUserInboxSpace')
+        }
         if (space) {
           card.spaceId = space.id
         } else {
