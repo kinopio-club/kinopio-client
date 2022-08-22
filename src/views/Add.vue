@@ -1,30 +1,35 @@
 <template lang="pug">
 main.add-page
-  //- error: missing user api key
-  aside.notifications(v-if="error.missingUserApikey")
-    .persistent-item.sign-in
-      .badge
-        p To use this extension you'll need to sign in first
-        form(@submit.prevent="signIn")
-          input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
-          input(type="password" placeholder="Password" required v-model="password" @input="clearErrors")
-          button(type="submit" :class="{active : loading.signIn}")
-            span Sign In
-            Loader(:visible="loading.signIn")
-        .sign-in-errors
-          .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-          .badge.danger(v-if="error.signInCredentials") Incorrect email or password
-          .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
-
-    //- .persistent-item.sign-in(v-if="!isAppStoreView")
-    //-   .badge
-    //-     p If you don't have a Kinopio account yet, you can Sign Up for free
-    //-     .row
-    //-       a(:href="kinopioDomain")
-    //-         button Kinopio →
-
+  //- sign in
+  dialog.card-details(v-if="error.missingUserApikey")
+    section
+      .notifications
+        .badge.info(v-if="showSignInInstructions") Sign in to Kinopio to use
+      form(@submit.prevent="signIn")
+        input(type="email" placeholder="Email" required v-model="email" @input="clearErrorsAndSuccess")
+        input(type="password" placeholder="Password" required v-model="password" @input="clearErrorsAndSuccess")
+        button(type="submit" :class="{active : loading.signIn}")
+          span Sign In
+          Loader(:visible="loading.signIn")
+      .sign-in-errors
+        .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+        .badge.danger(v-if="error.signInCredentials") Incorrect email or password
+        .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
+  //- add
   dialog.card-details(v-if="cardIsVisible" data-name="add-card")
     section
+      .notifications
+        //- success
+        a(href="inbox" v-if="success")
+          .badge.success.button-badge
+            span Saved →
+        //- error: card limit
+        a(:href="kinopioDomain" v-if="cardsCreatedIsOverLimit")
+          .badge.danger.button-badge
+            span Upgrade for more →
+        //- error: connection
+        .badge.danger(v-if="error.unknown || error.maxLength") (シ_ _)シ Server error
+      //- textarea
       .textarea-wrap
         textarea.name(
           ref="name"
@@ -41,7 +46,7 @@ main.add-page
           @keydown.alt.enter.exact.stop="insertLineBreak"
           @keydown.ctrl.enter.exact.stop="insertLineBreak"
         )
-      //- add card
+      //- button
       .row
         .button-wrap
           button(@click.stop="createCard" :class="{active: loading.createCard, disabled: error.maxLength}")
@@ -51,27 +56,6 @@ main.add-page
             Loader(:visible="loading.createCard")
           .badge.label-badge.info-badge(v-if="keyboardShortcutTipIsVisible")
             span Enter
-
-      .row(v-if="isErrorOrSuccess")
-        //- success
-        template(v-if="success")
-          a(href="inbox")
-            .badge.success.button-badge
-              span Saved to Inbox
-
-        //- Errors
-        //- card limit
-        template(v-if="cardsCreatedIsOverLimit")
-          .badge.danger
-            span To add more cards, you'll need to upgrade
-            .row
-              a(:href="kinopioDomain")
-                button Upgrade →
-        //- connection
-        .badge.danger(v-if="error.unknown") (シ_ _)シ Something went wrong, Please try again or contact support
-        //- max card length
-        .badge.danger(v-if="error.maxLength") To fit small screens, cards can't be longer than {{maxCardLength}} characters
-
 </template>
 
 <script>
@@ -131,7 +115,8 @@ export default {
       },
       success: false,
       newName: '',
-      keyboardShortcutTipIsVisible: false
+      keyboardShortcutTipIsVisible: false,
+      showSignInInstructions: true
     }
   },
   computed: {
@@ -151,9 +136,6 @@ export default {
         this.clearErrorsAndSuccess()
         this.updateMaxLengthError()
       }
-    },
-    isErrorOrSuccess () {
-      return this.error.maxLength || this.error.unknown || this.success
     }
     // isAppStoreView () { return this.$store.state.isAppStoreView }
   },
@@ -333,6 +315,7 @@ export default {
     clearErrorsAndSuccess () {
       this.error.unknown = false
       this.success = false
+      this.showSignInInstructions = false
     },
     updateMaxLengthError () {
       if (this.newName.length >= this.maxCardLength - 1) {
@@ -386,6 +369,8 @@ export default {
 <style lang="stylus">
 main.add-page
   padding 8px
+  section
+    position relative
   .card-details
     display block
     position static
@@ -399,8 +384,7 @@ main.add-page
   .loader
     margin-left 5px
   .badge
-    // button
-    //   margin-top 2px
+    z-index 1
     .loader
       margin-right 0
   .disabled
@@ -433,4 +417,10 @@ main.add-page
   a
     color var(--primary)
     text-decoration none
+  .notifications
+    margin 0
+    width initial
+    position absolute
+    right -12px
+    top -5px
 </style>
