@@ -97,6 +97,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           SpaceUsers
           UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
           Donate(:visible="donateIsVisible")
+          Import(:visible="importIsVisible")
           //- Share
           .button-wrap
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
@@ -156,6 +157,7 @@ import SelectAllBelow from '@/components/SelectAllBelow.vue'
 import SpaceUsers from '@/components/SpaceUsers.vue'
 import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
+import Import from '@/components/dialogs/Import.vue'
 
 let updateNotificationsIntervalTimer
 
@@ -190,7 +192,8 @@ export default {
     Sidebar,
     SpaceUsers,
     Donate,
-    Toolbar
+    Toolbar,
+    Import
   },
   props: {
     isPinchZooming: Boolean,
@@ -218,7 +221,8 @@ export default {
       isHidden: false,
       templatesIsVisible: false,
       sidebarIsVisible: false,
-      donateIsVisible: false
+      donateIsVisible: false,
+      importIsVisible: false
     }
   },
   created () {
@@ -257,6 +261,8 @@ export default {
         this.templatesIsVisible = true
       } else if (mutation.type === 'triggerRemovedIsVisible') {
         this.sidebarIsVisible = true
+      } else if (mutation.type === 'triggerImportIsVisible') {
+        this.importIsVisible = true
       }
     })
   },
@@ -439,6 +445,7 @@ export default {
       this.notificationsIsVisible = false
       this.addSpaceIsVisible = false
       this.templatesIsVisible = false
+      this.importIsVisible = false
       if (!spaceDetailsIsPinned) {
         this.spaceDetailsIsVisible = false
       }
