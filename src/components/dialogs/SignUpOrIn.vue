@@ -196,26 +196,15 @@ export default {
       if (this.isSuccess(response)) {
         this.$store.commit('clearAllNotifications', false)
         this.$store.commit('currentUser/apiKey', result.apiKey)
-        await this.createLocalSpacesOnRemote()
-        this.notifyUserSignedIn()
+        this.updateLocalSpacesWithNewUserId()
+        await this.$store.dispatch('api/createSpaces')
+        this.notifySignedIn()
         this.addCollaboratorToInvitedSpaces()
         const currentSpace = this.$store.state.currentSpace
         this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
       } else {
         await this.handleErrors(result)
       }
-    },
-
-    updateAllSpacesWithNewUserId () {
-      const userId = this.$store.state.currentUser.id
-      const spaces = cache.getAllSpaces()
-      spaces.forEach(space => {
-        space = utils.updateSpaceUserId(space, userId)
-        cache.updateSpace('userId', userId, space.id)
-        cache.updateSpace('cards', space.cards, space.id)
-        cache.updateSpace('connectionTypes', space.connectionTypes, space.id)
-        cache.updateSpace('connections', space.connections, space.id)
-      })
     },
 
     async signIn (event) {
@@ -233,9 +222,9 @@ export default {
         // update local spaces to remote user
         this.checkIfShouldRemoveSpace('Hello Kinopio')
         this.checkIfShouldRemoveSpace('Inbox')
-        this.updateAllSpacesWithNewUserId()
-        await this.createLocalSpacesOnRemote()
-        this.notifyUserSignedIn()
+        this.updateLocalSpacesWithNewUserId()
+        await this.$store.dispatch('api/createSpaces')
+        this.notifySignedIn()
         // add new spaces from remote
         const spaces = await this.$store.dispatch('api/getUserSpaces')
         cache.addSpaces(spaces)
@@ -253,6 +242,19 @@ export default {
       } else {
         await this.handleErrors(result)
       }
+    },
+
+    updateLocalSpacesWithNewUserId () {
+      const userId = this.$store.state.currentUser.id
+      const spaces = cache.getAllSpaces()
+      spaces.forEach(space => {
+        space = utils.updateSpaceUserId(space, userId)
+        cache.updateSpace('userId', userId, space.id)
+        cache.updateSpace('cards', space.cards, space.id)
+        cache.updateSpace('connectionTypes', space.connectionTypes, space.id)
+        cache.updateSpace('connections', space.connections, space.id)
+      })
+      console.log('🔵', cache.getAllSpaces())
     },
 
     updateCurrentSpace (previousUser) {
@@ -297,16 +299,7 @@ export default {
       this.addCollaboratorToCurrentSpace()
     },
 
-    async createLocalSpacesOnRemote () {
-      const userHasCachedSpaces = cache.getAllSpaces().length
-      if (userHasCachedSpaces) {
-        const updatedCurrentSpace = cache.space(this.$store.state.currentSpace.id)
-        this.$store.commit('currentSpace/restoreSpace', updatedCurrentSpace)
-        await this.$store.dispatch('api/createSpaces')
-      }
-    },
-
-    notifyUserSignedIn () {
+    notifySignedIn () {
       this.loading.signUpOrIn = false
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('addNotification', { message: 'Signed In', type: 'success' })

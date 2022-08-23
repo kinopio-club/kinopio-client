@@ -66,7 +66,7 @@ const normalizeResponse = async (response) => {
 }
 
 const normalizeSpaceToRemote = (space) => {
-  if (!space.removedCards) { return }
+  if (!space.removedCards) { return space }
   space.removedCards.forEach(card => {
     card.isRemoved = true
     space.cards.push(card)

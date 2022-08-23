@@ -1025,7 +1025,6 @@ export default {
       connection.userId = userId
       return connection
     })
-    console.log(space)
     return space
   },
   itemUserId (user, item, nullItemUsers) {
