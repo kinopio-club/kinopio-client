@@ -1,0 +1,38 @@
+{
+  "id": "1",
+  "name": "Inbox",
+  "privacy": "private",
+  "showInExplore": false,
+  "collaboratorKey": "",
+  "users": [],
+  "collaborators": [],
+  "spectators": [],
+  "clients": [],
+  "background": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/blank.png",
+  "backgroundTint": "",
+  "moonPhase": "",
+  "isTemplate": false,
+  "cards": [
+    {
+      "id": "1",
+      "x": 70,
+      "y": 90,
+      "z": 0,
+      "name": "Use this space to collect thoughts, todos, and ideas that don't have a place to go yet\n\nCapture ideas from anywhere with the [browser extension](https://help.kinopio.club/posts/extensions)"
+    },
+    {
+      "id": "2",
+      "x": 320,
+      "y": 90,
+      "z": 0,
+      "name": "When you're ready, work through your cards by moving them to other spaces"
+    }
+  ],
+  "connections": [],
+  "connectionTypes": [],
+  "cacheDate": 1565295601072,
+  "removedCards": [],
+  "originSpaceId": "",
+  "tags": [],
+  "boxes": []
+}

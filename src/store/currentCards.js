@@ -214,7 +214,7 @@ const currentCards = {
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       card.spaceId = currentSpaceId
-      context.dispatch('api/addToQueue', { name: 'createCard', handler: 'currentCards/add', body: card }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
       context.commit('create', card)
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
@@ -292,12 +292,12 @@ const currentCards = {
       }
       context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
-      context.commit('hasEditedCurrentSpace', true, { root: true })
       context.dispatch('history/add', { cards: [card] }, { root: true })
       context.commit('update', card)
       if (card.name) {
         context.dispatch('updateDimensionsAndMap', card.id)
       }
+      cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
     },
     updateName (context, { card, newName }) {
       const canEditCard = context.rootGetters['currentUser/canEditCard'](card)
@@ -730,7 +730,7 @@ const currentCards = {
     users: (state, getters, rootState, rootGetters) => {
       return getters.userIds.map(id => rootGetters['currentSpace/userById'](id))
     },
-    previousColors: (state, getters) => {
+    colors: (state, getters) => {
       const cards = getters.all
       let colors = cards.map(card => card.backgroundColor)
       colors = colors.filter(color => Boolean(color))

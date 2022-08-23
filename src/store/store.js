@@ -46,7 +46,6 @@ const store = createStore({
     isEmbed: false,
     isAddPage: false,
     isAppStoreView: false,
-    hasEditedCurrentSpace: false,
 
     // search
     searchIsVisible: false,
@@ -175,6 +174,7 @@ const store = createStore({
     loadJournalSpaceTomorrow: false,
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
+    loadInboxSpace: false,
 
     // notifications
     notifications: [],
@@ -276,6 +276,10 @@ const store = createStore({
     loadNewSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'loadNewSpace' })
       state.loadNewSpace = value
+    },
+    loadInboxSpace: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'loadInboxSpace' })
+      state.loadInboxSpace = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'addUrlPreviewLoadingForCardIds' })
@@ -429,6 +433,7 @@ const store = createStore({
     triggerCardDetailsCloseDialogs: () => {},
     triggerSpaceDetailsCloseDialogs: () => {},
     triggerTemplatesIsVisible: () => {},
+    triggerImportIsVisible: () => {},
     triggerSelectAllItemsBelowCursor: (state, position) => {},
     triggerSplitCard: (state, cardId) => {},
     triggerRemovedIsVisible: () => {},
@@ -477,10 +482,6 @@ const store = createStore({
     cardUserDetailsIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck({ cardId, type: 'string', origin: 'cardUserDetailsIsVisibleForCardId', allowUndefined: true })
       state.cardUserDetailsIsVisibleForCardId = cardId
-    },
-    hasEditedCurrentSpace: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'hasEditedCurrentSpace' })
-      state.hasEditedCurrentSpace = value
     },
 
     // Connecting

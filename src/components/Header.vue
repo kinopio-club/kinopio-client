@@ -24,15 +24,14 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             img.down-arrow(src="@/assets/down-arrow.svg")
           About(:visible="aboutIsVisible")
           KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-      .space-meta-rows(v-if="isAddPage")
-        p
-          span.badge.info Add Card
 
-      .space-meta-rows(v-if="!isAddPage")
+      .space-meta-rows
         .space-details-row.segmented-buttons
           //- Current Space
           .button-wrap
             button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active: spaceDetailsIsVisible}")
+              span(v-if="currentSpaceIsInbox")
+                img.icon.inbox-icon(src="@/assets/inbox.svg")
               span(v-show="currentSpaceIsTemplate")
                 img.icon.templates(src="@/assets/templates.svg")
               MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
@@ -64,13 +63,10 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           .segmented-buttons.add-space-functions
             //- Add Space
             .button-wrap
-              button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
+              button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
                 img.icon(src="@/assets/add.svg")
+                span New
               AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
-            //- Templates
-            .button-wrap
-              button(@click.left.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
-                img.icon.templates(src="@/assets/templates.svg")
               Templates(:visible="templatesIsVisible")
           //- Search
           .segmented-buttons
@@ -93,17 +89,12 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
               img.icon.cancel(src="@/assets/add.svg")
     .right
-      .controls(v-if="isAddPage && !isAppStoreView")
-        .top-controls
-          SpaceUsers
-          a(:href="kinopioDomain")
-            button Kinopio →
-
       .controls(v-if="isSpace")
         .top-controls
           SpaceUsers
           UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
           Donate(:visible="donateIsVisible")
+          Import(:visible="importIsVisible")
           //- Share
           .button-wrap
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
@@ -163,6 +154,7 @@ import SelectAllBelow from '@/components/SelectAllBelow.vue'
 import SpaceUsers from '@/components/SpaceUsers.vue'
 import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
+import Import from '@/components/dialogs/Import.vue'
 
 let updateNotificationsIntervalTimer
 
@@ -197,7 +189,8 @@ export default {
     Sidebar,
     SpaceUsers,
     Donate,
-    Toolbar
+    Toolbar,
+    Import
   },
   props: {
     isPinchZooming: Boolean,
@@ -225,7 +218,8 @@ export default {
       isHidden: false,
       templatesIsVisible: false,
       sidebarIsVisible: false,
-      donateIsVisible: false
+      donateIsVisible: false,
+      importIsVisible: false
     }
   },
   created () {
@@ -264,6 +258,8 @@ export default {
         this.templatesIsVisible = true
       } else if (mutation.type === 'triggerRemovedIsVisible') {
         this.sidebarIsVisible = true
+      } else if (mutation.type === 'triggerImportIsVisible') {
+        this.importIsVisible = true
       }
     })
   },
@@ -287,6 +283,7 @@ export default {
       const connectionDetailsIsVisible = this.$store.state.connectionDetailsIsVisibleForConnectionId
       const contentDialogIsVisible = cardDetailsIsVisible || connectionDetailsIsVisible
       const isTouchDevice = this.$store.getters.isTouchDevice
+      if (this.isAddPage) { return }
       if (contentDialogIsVisible && isTouchDevice) {
         return false
       } else {
@@ -295,7 +292,6 @@ export default {
     },
     isEmbed () { return this.$store.state.isEmbed },
     isAddPage () { return this.$store.state.isAddPage },
-    isAppStoreView () { return this.$store.state.isAppStoreView },
     isSpace () {
       const isOther = this.isEmbed || this.isAddPage
       const isSpace = !isOther
@@ -349,6 +345,10 @@ export default {
       if (currentSpace.isTemplate) { return true }
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(currentSpace.id)
+    },
+    currentSpaceIsInbox () {
+      const currentSpace = this.$store.state.currentSpace
+      return currentSpace.name === 'Inbox'
     },
     shouldShowInExplore () {
       const privacy = this.$store.state.currentSpace.privacy
@@ -442,6 +442,7 @@ export default {
       this.notificationsIsVisible = false
       this.addSpaceIsVisible = false
       this.templatesIsVisible = false
+      this.importIsVisible = false
       if (!spaceDetailsIsPinned) {
         this.spaceDetailsIsVisible = false
       }
@@ -481,11 +482,6 @@ export default {
       const isVisible = this.addSpaceIsVisible
       this.$store.dispatch('closeAllDialogs', 'Header.toggleAddSpaceIsVisible')
       this.addSpaceIsVisible = !isVisible
-    },
-    toggleTemplatesIsVisible () {
-      const isVisible = this.templatesIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Header.toggleTemplatesIsVisible')
-      this.templatesIsVisible = !isVisible
     },
     toggleSidebarIsVisible () {
       const isVisible = this.sidebarIsVisible
@@ -857,6 +853,11 @@ header
   .icon.offline
     height 13px
     vertical-align -2px
+
+  .inbox-icon
+    margin-right 4px
+    width 12px
+    vertical-align 0
 
   .badge.space-status-success
     margin 0

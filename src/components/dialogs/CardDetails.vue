@@ -300,7 +300,7 @@ export default {
   },
   computed: {
     rowIsBelowStyleActions () { return this.nameMetaRowIsVisible || this.badgesRowIsVisible || this.collaborationInfoIsVisible || this.cardHasMedia || this.cardUrlPreviewIsVisible },
-    nameMetaRowIsVisible () { return this.nameSplitIntoCardsCount || this.hasUrls },
+    nameMetaRowIsVisible () { return this.nameSplitIntoCardsCount || this.cardUrlPreviewIsVisible },
     badgesRowIsVisible () { return this.tagsInCard.length || this.card.linkToSpaceId || this.nameIsComment || this.isInSearchResultsCards },
     parentElement () { return this.$refs.dialog },
     card () {
@@ -502,7 +502,7 @@ export default {
       if (zoom === 1) {
         zoom = pinchCounterScale
       }
-      zoom = utils.roundFloat(zoom)
+      // zoom = utils.roundFloat(zoom)
       const left = `${this.card.x + 8}px`
       const top = `${this.card.y + 8}px`
       return { transform: `scale(${zoom})`, left, top }

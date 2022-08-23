@@ -17,6 +17,9 @@
         User(:user="updatedByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true" :hideYouLabel="true" :labelBadge="'Updater'")
         span.name {{updatedByUser.name}}
         UserDetails(:visible="userDetailsIsVisibleForUpdatedByUser" :user="updatedByUser")
+    //- created through api
+    .badge.secondary.system-badge(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
+      img.icon.system(src="@/assets/system.svg")
 </template>
 
 <script>
@@ -153,4 +156,6 @@ export default {
   .users
     display flex
     flex-wrap wrap
+  .system-badge
+    margin-top 1px
 </style>

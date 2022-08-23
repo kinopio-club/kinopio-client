@@ -16,7 +16,9 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
         const isAppStoreView = urlParams.get('appStoreView')
-        store.commit('isAppStoreView', isAppStoreView)
+        if (isAppStoreView) {
+          store.commit('isAppStoreView', isAppStoreView)
+        }
         store.commit('isAddPage', true)
         next()
       }
@@ -126,6 +128,13 @@ const router = createRouter({
       component: Space,
       beforeEnter: (to, from, next) => {
         store.commit('loadNewSpace', true)
+        next()
+      }
+    }, {
+      path: '/inbox',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        store.commit('loadInboxSpace', true)
         next()
       }
     }, {

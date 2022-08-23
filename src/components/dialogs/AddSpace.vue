@@ -10,6 +10,7 @@ dialog.add-space.narrow(
 )
   section
     .row
+      //- Add Space
       .segmented-buttons
         button.success(@click="addSpace")
           img.icon(src="@/assets/add.svg")
@@ -21,6 +22,7 @@ dialog.add-space.narrow(
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
         input(type="checkbox" v-model="newSpacesAreBlank")
         span New Spaces Are Blank
+    //- Add Journal
     .row
       .segmented-buttons
         button(@click="addJournalSpace")
@@ -35,11 +37,24 @@ dialog.add-space.narrow(
     template(v-if="editPromptsIsVisible" )
       Prompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
     PromptPicker(v-if="editPromptsIsVisible" :visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack" @addCustomPrompt="addCustomPrompt")
+
+  //- Inbox
+  section(v-if="!hasInboxSpace")
+    button(@click="addInboxSpace")
+      img.icon(src="@/assets/add.svg")
+      img.icon.inbox-icon(src="@/assets/inbox.svg")
+      span Inbox
+    p For collecting ideas to figure out later
+
   //- Templates
   section
-    button(@click="triggerTemplatesIsVisible")
-      img.icon.templates(src="@/assets/templates.svg")
-      span Templates
+    .row
+      .button-wrap
+        button(@click="triggerTemplatesIsVisible")
+          img.icon.templates(src="@/assets/templates.svg")
+          span Templates
+      .button-wrap
+        button(@click="triggerImportIsVisible") Import
 
 </template>
 
@@ -88,7 +103,8 @@ export default {
         top: 5
       },
       screenIsShort: false,
-      dialogHeight: null
+      dialogHeight: null,
+      hasInboxSpace: true
     }
   },
   computed: {
@@ -107,10 +123,10 @@ export default {
     },
     async addJournalSpace () {
       this.$emit('closeDialogs')
+      window.scrollTo(0, 0)
       this.$emit('addJournalSpace')
       if (this.shouldAddSpaceDirectly) {
         this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
-        window.scrollTo(0, 0)
         this.$store.dispatch('currentSpace/addJournalSpace')
         this.$store.dispatch('currentSpace/updateSpacePageSize')
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
@@ -118,6 +134,7 @@ export default {
     },
     addSpace () {
       const noUserSpaces = !cache.getAllSpaces().length
+      window.scrollTo(0, 0)
       if (noUserSpaces) {
         window.location.href = '/'
       } else {
@@ -126,11 +143,16 @@ export default {
       }
       if (this.shouldAddSpaceDirectly) {
         this.$store.dispatch('closeAllDialogs', 'addSpace.addSpace')
-        window.scrollTo(0, 0)
         this.$store.dispatch('currentSpace/addSpace')
         this.$store.dispatch('currentSpace/updateSpacePageSize')
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
       }
+    },
+    addInboxSpace () {
+      this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
+      window.scrollTo(0, 0)
+      this.$store.dispatch('currentSpace/addInboxSpace')
+      this.$store.dispatch('currentSpace/updateSpacePageSize')
     },
     toggleNewSpacesAreBlank () {
       const value = !this.newSpacesAreBlank
@@ -183,8 +205,17 @@ export default {
     },
     triggerTemplatesIsVisible () {
       this.closeAll()
-      this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
+      this.$store.dispatch('closeAllDialogs', 'addSpace.triggerTemplatesIsVisible')
       this.$store.commit('triggerTemplatesIsVisible')
+    },
+    triggerImportIsVisible () {
+      this.closeAll()
+      this.$store.dispatch('closeAllDialogs', 'addSpace.triggerImportIsVisible')
+      this.$store.commit('triggerImportIsVisible')
+    },
+    async checkIfUserHasInboxSpace () {
+      const inboxSpace = await this.$store.dispatch('currentUser/inboxSpace')
+      this.hasInboxSpace = Boolean(inboxSpace)
     }
   },
   watch: {
@@ -192,6 +223,9 @@ export default {
       this.closeAll()
       this.shouldHideFooter(false)
       this.updateDialogHeight()
+      if (visible) {
+        this.checkIfUserHasInboxSpace()
+      }
     }
   }
 }
@@ -210,4 +244,8 @@ export default {
     padding 4px
   .button-down-arrow
     padding 0
+  .inbox-icon
+    margin 0
+    margin-left 5px
+
 </style>

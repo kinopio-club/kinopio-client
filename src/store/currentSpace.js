@@ -1,4 +1,5 @@
 import helloSpace from '@/data/hello.json'
+import inboxSpace from '@/data/inbox.json'
 import newSpace from '@/data/new.json'
 
 import words from '@/data/words.js'
@@ -145,6 +146,7 @@ const currentSpace = {
     init: async (context) => {
       const spaceUrl = context.rootState.spaceUrlToLoad
       const loadJournalSpace = context.rootState.loadJournalSpace
+      const loadInboxSpace = context.rootState.loadInboxSpace
       const loadNewSpace = context.rootState.loadNewSpace
       const user = context.rootState.currentUser
       let isRemote
@@ -159,6 +161,10 @@ const currentSpace = {
       } else if (loadJournalSpace) {
         console.log('🚃 Restore journal space')
         await context.dispatch('loadJournalSpace')
+      // restore inbox space
+      } else if (loadInboxSpace) {
+        console.log('🚃 Restore inbox space')
+        await context.dispatch('loadInboxSpace')
       // create new space
       } else if (loadNewSpace) {
         console.log('🚃 Create new space')
@@ -171,7 +177,8 @@ const currentSpace = {
       // hello kinopio
       } else {
         console.log('🚃 Create new Hello Kinopio space')
-        await context.dispatch('createNewHelloSpace')
+        context.dispatch('createNewInboxSpace', true)
+        context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
       }
       context.dispatch('updateModulesSpaceId')
@@ -335,6 +342,25 @@ const currentSpace = {
       context.dispatch('restoreSpaceInChunks', { space })
       context.dispatch('loadBackground')
     },
+    createNewInboxSpace: (context, shouldCreateWithoutLoading) => {
+      let space = utils.clone(inboxSpace)
+      space.id = nanoid()
+      space.createdAt = new Date()
+      space.editedAt = new Date()
+      space.userId = context.rootState.currentUser.id
+
+      if (shouldCreateWithoutLoading) {
+        space.users = [context.rootState.currentUser]
+        const nullCardUsers = true
+        cache.updateIdsInSpace(space, nullCardUsers) // saves space
+      } else {
+        context.commit('isLoadingSpace', true, { root: true })
+        context.commit('clearSearch', null, { root: true })
+        isLoadingRemoteSpace = false
+        context.dispatch('restoreSpaceInChunks', { space })
+        context.dispatch('loadBackground')
+      }
+    },
     saveNewSpace: (context) => {
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
@@ -400,6 +426,16 @@ const currentSpace = {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       await context.dispatch('createNewJournalSpace')
+      context.dispatch('saveNewSpace')
+      context.dispatch('updateUserLastSpaceId')
+      context.commit('notifySignUpToEditSpace', false, { root: true })
+      context.commit('triggerUpdateWindowHistory', {}, { root: true })
+    },
+
+    addInboxSpace: (context) => {
+      const user = context.rootState.currentUser
+      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
+      context.dispatch('createNewInboxSpace')
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
@@ -495,6 +531,17 @@ const currentSpace = {
       }
       context.commit('loadJournalSpace', false, { root: true })
       context.commit('loadJournalSpaceTomorrow', false, { root: true })
+    },
+    loadInboxSpace: async (context) => {
+      const inboxSpace = await context.dispatch('currentUser/inboxSpace', null, { root: true })
+      if (inboxSpace) {
+        const space = { id: inboxSpace.id }
+        context.dispatch('changeSpace', { space })
+      } else {
+        context.commit('addNotification', { message: 'Inbox space not found', type: 'danger' }, { root: true })
+        context.dispatch('loadLastSpace')
+      }
+      context.commit('loadInboxSpace', false, { root: true })
     },
     updateModulesSpaceId: (context, space) => {
       space = space || context.state
@@ -657,7 +704,6 @@ const currentSpace = {
       context.commit('clearAllNotifications', null, { root: true })
       context.commit('clearSpaceFilters', null, { root: true })
       context.commit('clearSearch', null, { root: true })
-      context.commit('hasEditedCurrentSpace', false, { root: true })
       context.commit('shouldPreventNextEnterKey', false, { root: true })
       context.commit('minimapIsVisible', false, { root: true })
       // restore local space
@@ -723,7 +769,7 @@ const currentSpace = {
       if (space) {
         context.dispatch('loadSpace', { space })
       } else {
-        await context.dispatch('createNewHelloSpace')
+        context.dispatch('createNewHelloSpace')
       }
       context.dispatch('updateUserLastSpaceId')
     },
@@ -1081,6 +1127,12 @@ const currentSpace = {
       const domain = utils.kinopioDomain()
       const spaceUrl = utils.url({ name: state.name, id: state.id })
       return `${domain}/${spaceUrl}`
+    },
+    itemColors: (state, getters, rootState, rootGetters) => {
+      const cardColors = rootGetters['currentCards/colors']
+      const boxColors = rootGetters['currentBoxes/colors']
+      const colors = cardColors.concat(boxColors)
+      return uniq(colors)
     },
 
     // tags

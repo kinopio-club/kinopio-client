@@ -50,7 +50,6 @@ export default {
     dialogSpaceFilterShowHidden: false,
     defaultSpaceBackground: undefined,
     defaultSpaceBackgroundTint: undefined,
-    defaultAddSpaceId: undefined,
     downgradeAt: null,
     showWeather: false,
     weatherLocation: undefined,
@@ -293,10 +292,6 @@ export default {
     defaultSpaceBackgroundTint: (state, value) => {
       state.defaultSpaceBackgroundTint = value
       cache.updateUser('defaultSpaceBackgroundTint', value)
-    },
-    defaultAddSpaceId: (state, value) => {
-      state.defaultAddSpaceId = value
-      cache.updateUser('defaultAddSpaceId', value)
     },
     showWeather: (state, value) => {
       state.showWeather = value
@@ -692,6 +687,17 @@ export default {
         context.dispatch('update', updates)
         context.commit('triggerNotifyUnlockedStickyCards', null, { root: true })
       }
+    },
+    inboxSpace: async (context) => {
+      let space = cache.getInboxSpace()
+      if (!space) {
+        try {
+          space = await context.dispatch('api/getUserInboxSpace', null, { root: true })
+        } catch (error) {
+          console.warn('🚑 inboxSpace', error)
+        }
+      }
+      return space
     }
   },
   getters: {

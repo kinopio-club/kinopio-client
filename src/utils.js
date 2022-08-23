@@ -175,7 +175,7 @@ export default {
   disablePinchZoom () {
     if (this.isIPhone()) {
       const viewport = document.querySelector('head meta[name=viewport]')
-      viewport.setAttribute('content', 'width=device-width, user-scalable=0')
+      viewport.setAttribute('content', 'width=device-width, user-scalable=0, maximum-scale=1')
     }
   },
   enablePinchZoom () {
@@ -195,7 +195,7 @@ export default {
     if (shouldScrollX || shouldScrollY) {
       element.scrollIntoView({
         behavior,
-        block: 'center', // vertical
+        block: 'end', // vertical
         inline: 'end' // horizontal
       })
     }
@@ -1025,7 +1025,6 @@ export default {
       connection.userId = userId
       return connection
     })
-    console.log(space)
     return space
   },
   itemUserId (user, item, nullItemUsers) {

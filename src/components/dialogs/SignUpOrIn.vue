@@ -195,27 +195,16 @@ export default {
       const result = await response.json()
       if (this.isSuccess(response)) {
         this.$store.commit('clearAllNotifications', false)
-        await this.createSpaces(result.apiKey)
+        this.$store.commit('currentUser/apiKey', result.apiKey)
+        this.updateLocalSpacesWithNewUserId()
+        await this.$store.dispatch('api/createSpaces')
+        this.notifySignedIn()
         this.addCollaboratorToInvitedSpaces()
         const currentSpace = this.$store.state.currentSpace
         this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
       } else {
         await this.handleErrors(result)
       }
-    },
-
-    updateAllSpacesWithNewUserId () {
-      const userId = this.$store.state.currentUser.id
-      const spaces = cache.getAllSpaces()
-      const userHasCachedSpaces = spaces.length
-      if (!userHasCachedSpaces) { return }
-      spaces.forEach(space => {
-        space = utils.updateSpaceUserId(space, userId)
-        cache.updateSpace('userId', userId, space.id)
-        cache.updateSpace('cards', space.cards, space.id)
-        cache.updateSpace('connectionTypes', space.connectionTypes, space.id)
-        cache.updateSpace('connections', space.connections, space.id)
-      })
     },
 
     async signIn (event) {
@@ -231,21 +220,15 @@ export default {
         // update user to remote user
         this.$store.commit('currentUser/updateUser', result)
         // update local spaces to remote user
-        this.removeHelloSpace()
-        this.updateAllSpacesWithNewUserId()
-        await this.createSpaces(result.apiKey)
+        this.checkIfShouldRemoveSpace('Hello Kinopio')
+        this.checkIfShouldRemoveSpace('Inbox')
+        this.updateLocalSpacesWithNewUserId()
+        await this.$store.dispatch('api/createSpaces')
+        this.notifySignedIn()
         // add new spaces from remote
         const spaces = await this.$store.dispatch('api/getUserSpaces')
         cache.addSpaces(spaces)
-        // update currentSpace
-        const currentSpace = this.$store.state.currentSpace
-        const currentUser = this.$store.state.currentUser
-        this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
-        this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
-        const userIsSpaceUser = this.$store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
-        if (userIsSpaceUser) {
-          this.$store.commit('currentSpace/addUserToSpace', currentUser)
-        }
+        this.updateCurrentSpace(previousUser)
         this.$store.commit('clearAllNotifications', false)
         this.addCollaboratorToInvitedSpaces()
         this.$store.commit('triggerSpaceDetailsVisible')
@@ -261,12 +244,35 @@ export default {
       }
     },
 
-    removeHelloSpace () {
-      const space = this.$store.state.currentSpace
-      const isHelloSpace = space.name === 'Hello Kinopio'
-      const spaceIsUnedited = !this.$store.state.hasEditedCurrentSpace
-      if (isHelloSpace && spaceIsUnedited) {
-        this.$store.dispatch('currentSpace/removeCurrentSpace')
+    updateLocalSpacesWithNewUserId () {
+      const userId = this.$store.state.currentUser.id
+      const spaces = cache.getAllSpaces()
+      spaces.forEach(space => {
+        space = utils.updateSpaceUserId(space, userId)
+        cache.updateSpace('userId', userId, space.id)
+        cache.updateSpace('cards', space.cards, space.id)
+        cache.updateSpace('connectionTypes', space.connectionTypes, space.id)
+        cache.updateSpace('connections', space.connections, space.id)
+      })
+    },
+
+    updateCurrentSpace (previousUser) {
+      const currentUser = this.$store.state.currentUser
+      const currentSpace = this.$store.state.currentSpace
+      this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
+      this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
+      const userIsSpaceUser = this.$store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
+      if (userIsSpaceUser) {
+        this.$store.commit('currentSpace/addUserToSpace', currentUser)
+      }
+    },
+
+    checkIfShouldRemoveSpace (spaceName) {
+      let space = cache.getSpaceByName(spaceName)
+      if (!space) { return }
+      const isEdited = space.editedByUserId
+      if (!isEdited) {
+        cache.removeSpace(space)
         shouldLoadLastSpace = true
       }
     },
@@ -292,16 +298,9 @@ export default {
       this.addCollaboratorToCurrentSpace()
     },
 
-    async createSpaces (apiKey) {
-      this.$store.commit('currentUser/apiKey', apiKey)
-      const userHasCachedSpaces = cache.getAllSpaces().length
-      if (userHasCachedSpaces) {
-        const updatedCurrentSpace = cache.space(this.$store.state.currentSpace.id)
-        this.$store.commit('currentSpace/restoreSpace', updatedCurrentSpace)
-        await this.$store.dispatch('api/createSpaces')
-      }
+    notifySignedIn () {
       this.loading.signUpOrIn = false
-      this.$store.dispatch('closeAllDialogs', 'SignUpOrIn.createSpaces')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('addNotification', { message: 'Signed In', type: 'success' })
     },
 

@@ -22,7 +22,7 @@
   .preload
     .logo-hover
     .logo-active
-  .badge.label-badge.development-badge(v-if="isDevelopment") DEV
+  .badge.label-badge.development-badge(v-if="isDevelopment && !isAddPage") DEV
   //- pre-cached icons
   .icons.hidden
     img.icon(src="@/assets/offline.svg")

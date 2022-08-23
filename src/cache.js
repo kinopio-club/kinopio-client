@@ -96,6 +96,22 @@ export default {
   space (spaceId) {
     return this.getLocal(`space-${spaceId}`) || {}
   },
+  getInboxSpace () {
+    const keys = Object.keys(window.localStorage)
+    const spaceKeys = keys.filter(key => key.startsWith('space-'))
+    const spaces = spaceKeys.map(key => {
+      return this.getLocal(key)
+    })
+    return spaces.find(space => space.name === 'Inbox')
+  },
+  getSpaceByName (name) {
+    const keys = Object.keys(window.localStorage)
+    const spaceKeys = keys.filter(key => key.startsWith('space-'))
+    const spaces = spaceKeys.map(key => {
+      return this.getLocal(key)
+    })
+    return spaces.find(space => space.name === name)
+  },
   getAllSpaces () {
     const keys = Object.keys(window.localStorage)
     const spaceKeys = keys.filter(key => key.startsWith('space-'))
@@ -167,6 +183,9 @@ export default {
     space.cards = space.cards || []
     space.connections = space.connections || []
     space.connectionTypes = space.connectionTypes || []
+    cards = cards || []
+    connections = connections || []
+    connectionTypes = connectionTypes || []
     cards.forEach(card => space.cards.push(card))
     connections.forEach(connection => space.connections.push(connection))
     connectionTypes.forEach(connectionType => space.connectionTypes.push(connectionType))

@@ -25,7 +25,7 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
       .button-wrap
         button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
           img.icon(src="@/assets/add.svg")
-          span Space
+          span New
         AddSpace(:visible="addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace" @addJournalSpace="addJournalSpace")
       //- Filters
       .button-wrap
@@ -263,6 +263,13 @@ export default {
       spaces = this.orderByFavoriteSpaces(spaces)
       return spaces
     },
+    updateInboxSpace (spaces) {
+      const inboxSpaces = spaces.filter(space => space.name === 'Inbox')
+      if (!inboxSpaces.length) { return spaces }
+      spaces = spaces.filter(space => space.name !== 'Inbox')
+      spaces = inboxSpaces.concat(spaces)
+      return spaces
+    },
     updateLocalSpaces () {
       this.debouncedUpdateLocalSpaces()
     },
@@ -275,6 +282,7 @@ export default {
         userSpaces = this.updateWithExistingRemoteSpaces(userSpaces)
         userSpaces = this.sortSpacesByEditedAt(userSpaces)
         userSpaces = this.updateFavoriteSpaces(userSpaces)
+        userSpaces = this.updateInboxSpace(userSpaces)
         this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
       })
     }, 350, { leading: true }),
@@ -311,7 +319,8 @@ export default {
       if (!this.remoteSpaces) { return }
       this.removeRemovedCachedSpaces(this.remoteSpaces)
       this.sortSpacesByEditedAt(this.remoteSpaces)
-      const spaces = this.updateFavoriteSpaces(this.remoteSpaces)
+      let spaces = this.updateFavoriteSpaces(this.remoteSpaces)
+      spaces = this.updateInboxSpace(spaces)
       this.spaces = spaces
       this.updateCachedSpacesDate()
     },

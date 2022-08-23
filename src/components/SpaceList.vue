@@ -44,6 +44,8 @@ span.space-list-wrap
             //- space meta
             span(v-if="space.isFavorite")
               img.icon.favorite-icon(src="@/assets/heart.svg")
+            span(v-if="space.name === 'Inbox'")
+              img.icon.inbox-icon(src="@/assets/inbox.svg")
 
             //- span(v-if="space.backgroundTint")
             //-   .badge.inline-badge.color-only-badge(:style="{ background: space.backgroundTint }")
@@ -382,7 +384,8 @@ export default {
     height 12px
     vertical-align -2px
 
-  .favorite-icon
+  .favorite-icon,
+  .inbox-icon
     margin-right 4px
     width 12px
     min-width 12px
@@ -431,17 +434,13 @@ export default {
 
   .space-wrap
     position relative
-    // display flex
-    // align-items center
     button.duplicate
       position absolute
       right 4px
       top 3px
       z-index 1
-      // margin-top 4px
       padding 0
       padding-left 6px
       padding-right 6px
-      // margin-left 6px
 
 </style>

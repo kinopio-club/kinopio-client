@@ -1,149 +1,81 @@
 <template lang="pug">
 main.add-page
-  //- error: missing user api key
-  aside.notifications(v-if="error.missingUserApikey")
-    .persistent-item.sign-in
-      .badge
-        p To use this extension you'll need to sign in first
-        form(@submit.prevent="signIn")
-          input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
-          input(type="password" placeholder="Password" required v-model="password" @input="clearErrors")
-          button(type="submit" :class="{active : loading.signIn}")
-            span Sign In
-            Loader(:visible="loading.signIn")
-        .sign-in-errors
-          .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-          .badge.danger(v-if="error.signInCredentials") Incorrect email or password
-          .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
-
-    .persistent-item.sign-in(v-if="!isAppStoreView")
-      .badge
-        p If you don't have a Kinopio account yet, you can Sign Up for free
-        .row
-          a(:href="kinopioDomain")
-            button Kinopio →
-
-  dialog.card-details(v-if="cardIsVisible" data-name="add-card")
-    section
-      .textarea-wrap
-        textarea.name(
-          ref="name"
-          rows="1"
-          placeholder="Type text here, or paste a URL"
-          v-model="name"
-          :maxlength="maxCardLength"
-          @keydown.enter.exact.prevent="createCard"
-          @focusin="updateKeyboardShortcutTipIsVisible(true)"
-          @focusout="updateKeyboardShortcutTipIsVisible(false)"
-
-          @keyup.alt.enter.exact.stop
-          @keyup.ctrl.enter.exact.stop
-          @keydown.alt.enter.exact.stop="insertLineBreak"
-          @keydown.ctrl.enter.exact.stop="insertLineBreak"
-        )
-      //- space
+  //- sign in
+  section(v-if="error.missingUserApikey")
+    .notifications
+      .badge.info(v-if="showSignInInstructions") Sign in to Kinopio to use
+    form(@submit.prevent="signIn")
+      input(type="email" placeholder="Email" required v-model="email" @input="clearErrorsAndSuccess")
+      input(type="password" placeholder="Password" required v-model="password" @input="clearErrorsAndSuccess")
       .row
-        .button-wrap
-          button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
-            //- today journal badge
-            span.badge.info.inline-badge(v-if="isTodayJournal" title="Today's journal")
-              img.icon.today-icon(src="@/assets/today.svg")
-            MoonPhase(:moonPhase="currentSpace.moonPhase")
-            span(v-if="currentSpace.name") {{currentSpace.name}}
-            span(v-else) Last Space
-            img.down-arrow(src="@/assets/down-arrow.svg")
-            Loader(:visible="loading.userSpaces")
-          SpacePicker(
-            :visible="spacePickerIsVisible"
-            :shouldShowNewSpace="true"
-            :shouldShowDailyJournalSpace="true"
-            :userSpaces="spaces"
-            @selectSpace="updateCurrentSpace"
-            :selectedSpace="currentSpace"
-          )
-        .button-wrap(v-if="currentSpace.id")
-          a(:href="currentSpace.id")
-            button →
-      //- add card
-      .row
-        .button-wrap
-          button(@click.stop="createCard" :class="{active: loading.createCard, disabled: error.maxLength}")
-            img.icon(src="@/assets/add.svg")
-            span Add Card
-            Loader(:visible="loading.createCard")
-          .badge.label-badge.keyboard-shortcut-tip(v-if="keyboardShortcutTipIsVisible")
-            span Enter
-      .row(v-if="isErrorOrSuccess")
-        //- success
-        template(v-if="success")
-          .badge.success
-            .row
-              span Card Added at Top of Space
-            .row
-              a(:href="prevSuccessSpace.id")
-                button
-                  span {{prevSuccessSpace.name}} →
-            //- default
-            .row
-              label(:class="{active: currentIsUserDefaults}" @click.left.prevent="updateUserDefaults" @keydown.stop.enter="updateUserDefaults")
-                input(type="checkbox" v-model="currentIsUserDefaults")
-                span Set as Default
+        button(type="submit" :class="{active : loading.signIn}")
+          span Sign In
+          Loader(:visible="loading.signIn")
+    .sign-in-errors
+      .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+      .badge.danger(v-if="error.signInCredentials") Incorrect email or password
+      .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
+  //- add
+  section(v-else data-name="add-card")
+    .notifications
+      //- success
+      a(:href="spaceId" v-if="success")
+        .badge.success.button-badge
+          span Saved →
+      //- error: card limit
+      a(:href="kinopioDomain" v-if="cardsCreatedIsOverLimit")
+        .badge.danger.button-badge
+          span Upgrade for more →
+      //- error: connection
+      .badge.danger(v-if="error.unknown || error.maxLength") (シ_ _)シ Server error
+    //- textarea
+    .textarea-wrap
+      textarea.name(
+        ref="name"
+        rows="1"
+        placeholder="Type text here, or paste a URL"
+        v-model="name"
+        :maxlength="maxCardLength"
+        @keydown.enter.exact.prevent="createCard"
+        @focusin="updateKeyboardShortcutTipIsVisible(true)"
+        @focusout="updateKeyboardShortcutTipIsVisible(false)"
 
-        //- Errors
-
-        //- card limit
-        template(v-if="cardsCreatedIsOverLimit")
-          .badge.danger
-            span To add more cards, you'll need to upgrade
-            .row
-              a(:href="kinopioDomain")
-                button Upgrade →
-        //- connection
-        .badge.danger(v-if="error.unknown") (シ_ _)シ Something went wrong, Please try again or contact support
-        //- max card length
-        .badge.danger(v-if="error.maxLength") To fit small screens, cards can't be longer than {{maxCardLength}} characters
-        //- no spaces
-        .badge.danger(v-if="error.noSpaces && !isAppStoreView")
-          span You'll need to visit Kinopio once before you can add cards
-          .row
-            a(:href="kinopioDomain")
-              button Kinopio →
-        //- spaces loading
-        .badge.danger(v-if="error.spacesLoading")
-          span Spaces loading, try again in a couple seconds
-
-  section.default-space-info
-    .row(v-if="success && defaultSpace && !currentIsUserDefaults")
-      span Default space is {{defaultSpace.name}}
-
+        @keyup.alt.enter.exact.stop
+        @keyup.ctrl.enter.exact.stop
+        @keydown.alt.enter.exact.stop="insertLineBreak"
+        @keydown.ctrl.enter.exact.stop="insertLineBreak"
+      )
+    //- button
+    .row
+      .button-wrap
+        button(@click.stop="createCard" :class="{active: loading.createCard, disabled: error.maxLength}")
+          img.icon(src="@/assets/add.svg")
+          img.icon.inbox-icon(src="@/assets/inbox.svg")
+          span Add to Inbox
+          Loader(:visible="loading.createCard")
+        .badge.label-badge.info-badge(v-if="keyboardShortcutTipIsVisible")
+          span Enter
 </template>
 
 <script>
-import SpacePicker from '@/components/dialogs/SpacePicker.vue'
-import Loader from '@/components/Loader.vue'
-import cache from '@/cache.js'
-import utils from '@/utils.js'
-import MoonPhase from '@/components/MoonPhase.vue'
+import inboxSpace from '@/data/inbox.json'
 
-import dayjs from 'dayjs'
+import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
+
 import { nanoid } from 'nanoid'
 
-let processQueueIntervalTimer, shouldCancel
+let processQueueIntervalTimer
 
 export default {
   name: 'AddPage',
   components: {
-    SpacePicker,
-    Loader,
-    MoonPhase
+    Loader
   },
   created () {
     window.document.title = 'Add Card'
   },
   mounted () {
-    window.addEventListener('mouseup', this.stopInteractions)
-    window.addEventListener('touchend', this.stopInteractions)
-    window.addEventListener('keyup', this.handleShortcuts)
     window.addEventListener('message', this.insertUrl)
     // retry failed sync operations every 5 seconds
     processQueueIntervalTimer = setInterval(() => {
@@ -151,16 +83,8 @@ export default {
     }, 5000)
     this.focusAndSelectName()
     this.init()
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'closeAllDialogs') {
-        this.closeDialogs()
-      }
-    })
   },
   beforeUnmount () {
-    window.removeEventListener('mouseup', this.stopInteractions)
-    window.removeEventListener('touchend', this.stopInteractions)
-    window.removeEventListener('keyup', this.handleShortcuts)
     window.removeEventListener('message', this.insertUrl)
     clearInterval(processQueueIntervalTimer)
   },
@@ -168,21 +92,13 @@ export default {
     return {
       email: '',
       password: '',
-      spaces: [],
-      currentSpace: {},
-      prevSuccessSpace: {},
-      selectedSpace: {},
-      spacePickerIsVisible: false,
       loading: {
         createCard: false,
-        userSpaces: false,
         signIn: false
       },
       error: {
         unknown: false,
         maxLength: false,
-        noSpaces: false,
-        spacesLoading: false,
         missingUserApikey: false,
         // sign in
         tooManyAttempts: false,
@@ -191,26 +107,17 @@ export default {
       },
       success: false,
       newName: '',
-      keyboardShortcutTipIsVisible: false
+      keyboardShortcutTipIsVisible: false,
+      showSignInInstructions: true,
+      spaceId: ''
     }
   },
   computed: {
-    cardIsVisible () { return !this.error.missingUserApikey },
     kinopioDomain () { return utils.kinopioDomain() },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
     maxCardLength () { return utils.maxCardLength() },
     currentUser () { return this.$store.state.currentUser },
-    isTodayJournal () {
-      if (this.currentSpace.moonPhase) {
-        const createdAt = utils.journalSpaceDateFromName(this.currentSpace.name)
-        if (!createdAt) { return }
-        const today = utils.journalSpaceName()
-        return createdAt === today
-      } else {
-        return false
-      }
-    },
     name: {
       get () {
         return this.newName
@@ -221,17 +128,7 @@ export default {
         this.clearErrorsAndSuccess()
         this.updateMaxLengthError()
       }
-    },
-    isErrorOrSuccess () {
-      return this.error.maxLength || this.error.unknown || this.error.noSpaces || this.error.spacesLoading || this.success
-    },
-    currentIsUserDefaults () {
-      return this.prevSuccessSpace.id === this.currentUser.defaultAddSpaceId
-    },
-    defaultSpace () {
-      return this.spaces.find(space => space.id === this.currentUser.defaultAddSpaceId)
-    },
-    isAppStoreView () { return this.$store.state.isAppStoreView }
+    }
   },
   methods: {
     insertUrl (event) {
@@ -247,11 +144,9 @@ export default {
       this.$store.dispatch('currentUser/init')
       if (!this.currentUserIsSignedIn) {
         this.error.missingUserApikey = true
-        return
       } else {
         this.error.missingUserApikey = false
       }
-      await this.updateUserSpaces()
     },
     textareaSizes () {
       const textarea = this.$refs.name
@@ -297,7 +192,6 @@ export default {
       if (this.isSuccess(response)) {
         this.$store.commit('currentUser/updateUser', result)
         this.error.missingUserApikey = false
-        this.error.noSpaces = false
         this.init()
       } else {
         this.handleErrors(result)
@@ -354,21 +248,27 @@ export default {
         element.setSelectionRange(0, length)
       }
     },
+    emptyInboxSpace () {
+      const user = this.$store.state.currentUser
+      let space = utils.clone(inboxSpace)
+      space.id = nanoid()
+      space.userId = user.id
+      space.users = [user]
+      space.cards = space.cards.map(card => {
+        card.id = nanoid()
+        card.spaceId = space.id
+        return card
+      })
+      return space
+    },
     async createCard () {
       this.clearErrorsAndSuccess()
       if (this.cardsCreatedIsOverLimit) { return }
       if (this.error.maxLength) { return }
       if (this.loading.createCard) { return }
-      if (this.loading.userSpaces) {
-        this.error.spacesLoading = true
-        return
-      }
-      if (!this.currentSpace.id) {
-        this.error.noSpaces = true
-        return
-      }
       if (!this.newName) { return }
       this.loading.createCard = true
+      // url preview data
       const url = utils.urlFromString(this.newName)
       let urlPreview = {}
       if (url) {
@@ -380,38 +280,44 @@ export default {
           favicon: this.previewFavicon(links)
         }
       }
-      const body = [{
+      // create card
+      let card = {
         id: nanoid(),
         name: this.newName,
-        x: 100,
-        y: 100,
         z: 1,
-        spaceId: this.currentSpace.id,
         urlPreviewUrl: url,
         urlPreviewTitle: urlPreview.title,
         urlPreviewDescription: urlPreview.description,
         urlPreviewImage: urlPreview.image,
         urlPreviewFavicon: urlPreview.favicon
-      }]
-      console.log('🛫 create card', body)
-      cache.addToSpace({ cards: body, connections: [], connectionTypes: [] }, this.currentSpace.id)
+      }
+      // inbox space
       try {
-        await this.$store.dispatch('api/createCards', body)
+        let space = await this.$store.dispatch('currentUser/inboxSpace')
+        if (!space) {
+          space = this.emptyInboxSpace()
+          await this.$store.dispatch('api/createSpace', space)
+        }
+        // save card to inbox
+        const user = this.$store.state.currentUser
+        card.spaceId = space.id
+        card.userId = user.id
+        this.spaceId = space.id
+        console.log('🛫 create card', card)
+        this.$store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: space.id })
+        this.success = true
+        this.newName = ''
       } catch (error) {
         console.error('🚑 createCard', error)
         this.error.unknown = true
       }
       this.loading.createCard = false
-      this.prevSuccessSpace = utils.clone(this.currentSpace)
-      this.success = true
-      this.newName = ''
       this.focusAndSelectName()
     },
     clearErrorsAndSuccess () {
       this.error.unknown = false
       this.success = false
-      this.error.noSpaces = false
-      this.error.spacesLoading = false
+      this.showSignInInstructions = false
     },
     updateMaxLengthError () {
       if (this.newName.length >= this.maxCardLength - 1) {
@@ -434,120 +340,10 @@ export default {
       })
     },
 
-    // spaces
-
-    updateUserSpacesWithSpaces (spaces) {
-      spaces = this.sortSpacesByEditedAt(spaces)
-      spaces = this.updateFavoriteSpaces(spaces)
-      this.spaces = spaces
-      this.updateCurrentSpace()
-    },
-    async updateUserSpaces () {
-      let spaces = cache.getAllSpaces()
-      this.updateUserSpacesWithSpaces(spaces)
-      this.loading.userSpaces = true
-      try {
-        const remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
-        this.updateUserSpacesWithSpaces(remoteSpaces)
-        this.loading.userSpaces = false
-      } catch (error) {
-        console.error('🚑 updateUserSpaces', error)
-        this.error.unknown = true
-        this.loading.userSpaces = false
-      }
-    },
-    updateCurrentSpace (space) {
-      if (space) {
-        this.closeDialogs()
-        this.focusAndSelectName()
-      }
-      space = space || this.defaultSpace || this.spaces[0]
-      console.log('🐙 currentSpace', space)
-      if (space) {
-        this.currentSpace = space
-        this.error.noSpaces = false
-      } else {
-        this.currentSpace = {}
-      }
-    },
-    sortSpacesByEditedAt (spaces) {
-      const sortedSpaces = spaces.sort((a, b) => {
-        const bEditedAt = dayjs(b.editedAt).unix()
-        const aEditedAt = dayjs(a.editedAt).unix()
-        return bEditedAt - aEditedAt
-      })
-      return sortedSpaces
-    },
-    orderByFavoriteSpaces (spaces) {
-      let favoriteSpaces = []
-      spaces = spaces.filter(space => {
-        if (space.isFavorite) {
-          favoriteSpaces.push(space)
-        } else {
-          return space
-        }
-      })
-      return favoriteSpaces.concat(spaces)
-    },
-    updateFavoriteSpaces (spaces) {
-      const userFavoriteSpaces = this.currentUser.favoriteSpaces
-      const favoriteSpaceIds = userFavoriteSpaces.map(space => space.id)
-      spaces = spaces.map(space => {
-        if (favoriteSpaceIds.includes(space.id)) {
-          space.isFavorite = true
-        }
-        return space
-      })
-      spaces = this.orderByFavoriteSpaces(spaces)
-      return spaces
-    },
-
-    // default
-
-    updateUserDefaults () {
-      const shouldClear = this.prevSuccessSpace.id === this.currentUser.defaultAddSpaceId
-      if (shouldClear) {
-        this.$store.dispatch('currentUser/update', { defaultAddSpaceId: null })
-      } else {
-        this.$store.dispatch('currentUser/update', { defaultAddSpaceId: this.prevSuccessSpace.id })
-      }
-    },
-
     // handlers
 
     updateKeyboardShortcutTipIsVisible (value) {
       this.keyboardShortcutTipIsVisible = value
-    },
-    closeDialogs () {
-      this.spacePickerIsVisible = false
-    },
-    toggleSpacePickerIsVisible () {
-      if (this.loading.userSpaces) { return }
-      const value = !this.spacePickerIsVisible
-      this.closeDialogs()
-      this.spacePickerIsVisible = value
-    },
-    handleShortcuts (event) {
-      if (event.key === 'Escape') { this.closeDialogs() }
-    },
-    // based on Space.vue
-    shouldCancel (event) {
-      if (shouldCancel) {
-        shouldCancel = false
-        return true
-      }
-      if (event.target.nodeType === 9) { return true } // type 9 is Document
-      let fromDialog = event.target.closest('dialog')
-      fromDialog = fromDialog && fromDialog.dataset.name !== 'add-card'
-      const fromButton = event.target.closest('button')
-      const fromHeader = event.target.closest('header')
-      const fromFooter = event.target.closest('footer')
-      return Boolean(fromDialog || fromButton || fromHeader || fromFooter)
-    },
-    stopInteractions (event) {
-      console.log('💣 stopInteractions', this.shouldCancel(event))
-      if (this.shouldCancel(event)) { return }
-      this.$store.dispatch('closeAllDialogs', 'Add')
     }
   }
 }
@@ -555,13 +351,13 @@ export default {
 
 <style lang="stylus">
 main.add-page
-  position absolute
-  top 50px
   padding 8px
-  .card-details
+  margin-top 2px
+  section
+    position relative
     display block
-    position static
-  .keyboard-shortcut-tip
+    width 250px
+  .info-badge
     position static
     display inline-block
     min-height 16px
@@ -571,8 +367,7 @@ main.add-page
   .loader
     margin-left 5px
   .badge
-    button
-      margin-top 2px
+    z-index 1
     .loader
       margin-right 0
   .disabled
@@ -583,11 +378,6 @@ main.add-page
       margin-bottom 4px
       &:last-child
         margin-bottom 0
-  section.default-space-info
-    margin-top 10px
-    padding-left 8px
-    padding-right 8px
-    width 250px
   .notifications
     width 250px
     .row
@@ -604,4 +394,16 @@ main.add-page
     .badge
       display inline-block
       margin-top 10px
+  .inbox-icon
+    vertical-align 0
+    margin-left 5px
+  a
+    color var(--primary)
+    text-decoration none
+  .notifications
+    margin 0
+    width initial
+    position absolute
+    right -12px
+    top -5px
 </style>

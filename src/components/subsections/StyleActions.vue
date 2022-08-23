@@ -27,7 +27,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
         :currentColor="color"
         :visible="colorPickerIsVisible"
         :removeIsVisible="true"
-        :otherColors="previousCardColors"
+        :recentColors="itemColors"
         @selectedColor="updateColor"
         @removeColor="removeColor"
       )
@@ -135,7 +135,7 @@ export default {
     },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    previousCardColors () { return this.$store.getters['currentCards/previousColors'] },
+    itemColors () { return this.$store.getters['currentSpace/itemColors'] },
     canEditAll () {
       if (this.isSpaceMember) { return true }
       const editableCards = this.cards.filter(card => this.$store.getters['currentUser/canEditCard'](card))
