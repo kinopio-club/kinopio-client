@@ -190,6 +190,9 @@ article(
     //- Search result
     span.badge.search(v-if="isInSearchResultsCards")
       img.icon.search(src="@/assets/search.svg")
+    //- Created Through API
+    .badge.secondary(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
+      img.icon.system(src="@/assets/system.svg")
     //- User
     .badge-wrap
       .badge.user-badge.button-badge(
@@ -2118,6 +2121,9 @@ article
         .icon
           margin-right 5px
           margin-top 1px
+        .icon.system
+          margin 0
+
     .badge + .badge,
     .badge-wrap + .badge
       margin-left 6px
