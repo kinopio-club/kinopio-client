@@ -104,6 +104,14 @@ export default {
     })
     return spaces.find(space => space.name === 'Inbox')
   },
+  getSpaceByName (name) {
+    const keys = Object.keys(window.localStorage)
+    const spaceKeys = keys.filter(key => key.startsWith('space-'))
+    const spaces = spaceKeys.map(key => {
+      return this.getLocal(key)
+    })
+    return spaces.find(space => space.name === name)
+  },
   getAllSpaces () {
     const keys = Object.keys(window.localStorage)
     const spaceKeys = keys.filter(key => key.startsWith('space-'))

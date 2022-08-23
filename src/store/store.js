@@ -46,7 +46,6 @@ const store = createStore({
     isEmbed: false,
     isAddPage: false,
     isAppStoreView: false,
-    hasEditedCurrentSpace: false,
 
     // search
     searchIsVisible: false,
@@ -483,10 +482,6 @@ const store = createStore({
     cardUserDetailsIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck({ cardId, type: 'string', origin: 'cardUserDetailsIsVisibleForCardId', allowUndefined: true })
       state.cardUserDetailsIsVisibleForCardId = cardId
-    },
-    hasEditedCurrentSpace: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'hasEditedCurrentSpace' })
-      state.hasEditedCurrentSpace = value
     },
 
     // Connecting

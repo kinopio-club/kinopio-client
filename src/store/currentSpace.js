@@ -704,7 +704,6 @@ const currentSpace = {
       context.commit('clearAllNotifications', null, { root: true })
       context.commit('clearSpaceFilters', null, { root: true })
       context.commit('clearSearch', null, { root: true })
-      context.commit('hasEditedCurrentSpace', false, { root: true })
       context.commit('shouldPreventNextEnterKey', false, { root: true })
       context.commit('minimapIsVisible', false, { root: true })
       // restore local space
