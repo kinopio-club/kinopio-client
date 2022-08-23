@@ -254,7 +254,6 @@ export default {
         cache.updateSpace('connectionTypes', space.connectionTypes, space.id)
         cache.updateSpace('connections', space.connections, space.id)
       })
-      console.log('🔵', cache.getAllSpaces())
     },
 
     updateCurrentSpace (previousUser) {
