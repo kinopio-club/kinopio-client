@@ -322,6 +322,12 @@ export default {
     isLocked: (state, getters) => {
       let boxes = getters.all
       return boxes.filter(box => box.isLocked)
+    },
+    colors: (state, getters) => {
+      const boxes = getters.all
+      let colors = boxes.map(box => box.color)
+      colors = colors.filter(color => Boolean(color))
+      return uniq(colors)
     }
   }
 }

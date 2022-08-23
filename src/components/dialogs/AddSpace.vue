@@ -54,7 +54,7 @@ dialog.add-space.narrow(
           img.icon.templates(src="@/assets/templates.svg")
           span Templates
       .button-wrap
-        button Import
+        button(@click="triggerImportIsVisible") Import
 
 </template>
 
@@ -205,8 +205,13 @@ export default {
     },
     triggerTemplatesIsVisible () {
       this.closeAll()
-      this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
+      this.$store.dispatch('closeAllDialogs', 'addSpace.triggerTemplatesIsVisible')
       this.$store.commit('triggerTemplatesIsVisible')
+    },
+    triggerImportIsVisible () {
+      this.closeAll()
+      this.$store.dispatch('closeAllDialogs', 'addSpace.triggerImportIsVisible')
+      this.$store.commit('triggerImportIsVisible')
     },
     async checkIfUserHasInboxSpace () {
       const inboxSpace = await this.$store.dispatch('currentUser/inboxSpace')

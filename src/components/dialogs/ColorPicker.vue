@@ -11,8 +11,8 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
       input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace)
   section
     //- Colors
-    .other-colors(v-if="otherColors")
-      template(v-for="color in otherColors")
+    .recent-colors(v-if="recentColors")
+      template(v-for="color in recentColors")
         button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)")
     .colors
       template(v-for="color in colors")
@@ -72,7 +72,7 @@ export default {
     visible: Boolean,
     removeIsVisible: Boolean,
     shouldLightenColors: Boolean,
-    otherColors: Array
+    recentColors: Array
   },
   data () {
     return {
@@ -199,7 +199,7 @@ export default {
     flex-wrap wrap
     justify-content space-evenly
     margin-bottom 8px
-  .other-colors
+  .recent-colors
     margin-bottom 8px
     margin-left 2px
   .color

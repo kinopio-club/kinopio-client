@@ -76,7 +76,7 @@ article(
             input(type="checkbox" v-model="checkboxState")
         //- Name
         .badge.comment-badge
-          .toggle-comment-wrap(@mouseup.left="toggleCommentIsVisible" @touchend="toggleCommentIsVisible")
+          .toggle-comment-wrap.inline-button-wrap(@mouseup.left="toggleCommentIsVisible" @touchend="toggleCommentIsVisible")
             button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
               img.icon.view(src="@/assets/comment.svg")
           //- User
@@ -2131,6 +2131,7 @@ article
   .toggle-comment-wrap
     display initial
     cursor pointer
+    padding-left 0
     padding-right 6px
     padding-bottom 6px
     padding-top 6px
