@@ -112,9 +112,9 @@ const self = {
 
     // Queue
 
-    addToQueue: (context, { name, body }) => {
+    addToQueue: (context, { name, body, spaceId }) => {
       body = utils.clone(body)
-      body.spaceId = context.rootState.currentSpace.id
+      body.spaceId = spaceId || context.rootState.currentSpace.id
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       if (!currentUserIsSignedIn) { return }
       let queue = cache.queue()

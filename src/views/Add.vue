@@ -19,7 +19,7 @@ main.add-page
   section(v-else data-name="add-card")
     .notifications
       //- success
-      a(href="inbox" v-if="success")
+      a(:href="spaceId" v-if="success")
         .badge.success.button-badge
           span Saved →
       //- error: card limit
@@ -92,9 +92,6 @@ export default {
     return {
       email: '',
       password: '',
-      spaces: [],
-      inboxSpace: {},
-      selectedSpace: {},
       loading: {
         createCard: false,
         signIn: false
@@ -111,7 +108,8 @@ export default {
       success: false,
       newName: '',
       keyboardShortcutTipIsVisible: false,
-      showSignInInstructions: true
+      showSignInInstructions: true,
+      spaceId: ''
     }
   },
   computed: {
@@ -270,6 +268,7 @@ export default {
       if (this.loading.createCard) { return }
       if (!this.newName) { return }
       this.loading.createCard = true
+      // url preview data
       const url = utils.urlFromString(this.newName)
       let urlPreview = {}
       if (url) {
@@ -281,6 +280,7 @@ export default {
           favicon: this.previewFavicon(links)
         }
       }
+      // create card
       let card = {
         id: nanoid(),
         name: this.newName,
@@ -291,18 +291,20 @@ export default {
         urlPreviewImage: urlPreview.image,
         urlPreviewFavicon: urlPreview.favicon
       }
-      console.log('🛫 create card', card)
+      // inbox space
       try {
         let space = await this.$store.dispatch('currentUser/inboxSpace')
-        if (space) {
-          card.spaceId = space.id
-        } else {
+        if (!space) {
           space = this.emptyInboxSpace()
           await this.$store.dispatch('api/createSpace', space)
-          card.spaceId = space.id
         }
         // save card to inbox
-        await this.$store.dispatch('api/createCard', card)
+        const user = this.$store.state.currentUser
+        card.spaceId = space.id
+        card.userId = user.id
+        this.spaceId = space.id
+        console.log('🛫 create card', card)
+        this.$store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: space.id })
         this.success = true
         this.newName = ''
       } catch (error) {
