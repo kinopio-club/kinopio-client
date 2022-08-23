@@ -62,7 +62,6 @@ import inboxSpace from '@/data/inbox.json'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
-import cache from '@/cache.js'
 
 import { nanoid } from 'nanoid'
 
@@ -304,7 +303,6 @@ export default {
         }
         // save card to inbox
         await this.$store.dispatch('api/createCard', card)
-        cache.addToSpace({ cards: [card] }, space.id)
         this.success = true
         this.newName = ''
       } catch (error) {
