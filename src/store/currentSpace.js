@@ -348,7 +348,10 @@ const currentSpace = {
       space.createdAt = new Date()
       space.editedAt = new Date()
       space.userId = context.rootState.currentUser.id
-
+      space.cards = space.cards.map(card => {
+        card.id = nanoid()
+        return card
+      })
       if (shouldCreateWithoutLoading) {
         space.users = [context.rootState.currentUser]
         const nullCardUsers = true
