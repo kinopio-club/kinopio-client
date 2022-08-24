@@ -261,6 +261,7 @@ export default {
       return fromDialog || fromHeader || fromFooter
     },
     stopPainting (event) {
+      if (this.$store.state.isAddPage) { return }
       if (this.shouldCancel(event)) { return }
       startCursor = startCursor || {}
       const endCursor = utils.cursorPositionInViewport(event)
