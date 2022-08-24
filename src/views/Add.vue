@@ -193,7 +193,9 @@ export default {
       if (this.isSuccess(response)) {
         this.$store.commit('currentUser/updateUser', result)
         this.init()
-        this.focusName()
+        this.$nextTick(() => {
+          this.focusName()
+        })
       } else {
         this.handleErrors(result)
       }
