@@ -109,6 +109,8 @@ export default {
         this.updatePosition()
       } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
+      } else if (mutation.type === 'triggerAddToInboxIsVisible') {
+        this.addToInboxIsVisible = true
       }
     })
     window.addEventListener('scroll', this.updatePosition)

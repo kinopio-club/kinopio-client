@@ -82,9 +82,8 @@ export default {
       // i
       } else if (key === 'i' && isSpaceScope) {
         if (this.$store.state.isAddPage) { return }
-        console.log('💐 i')
-        // TODO opens inbox quick entry
-
+        this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler')
+        this.$store.commit('triggerAddToInboxIsVisible')
       // Backspace, Clear, Delete
       } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
         this.remove()
