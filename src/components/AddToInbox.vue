@@ -39,8 +39,8 @@ section.add-to-inbox(v-if="visible")
   //- button
   .row
     .button-wrap
-      a(:href="spaceUrlPath")
-        button
+      a(:href="inboxUrl")
+        button(@click.left="changeToInboxSpace")
           img.icon.inbox-icon(src="@/assets/inbox.svg")
           span Inbox
     .button-wrap
@@ -94,7 +94,7 @@ export default {
       success: false,
       newName: '',
       keyboardShortcutTipIsVisible: false,
-      spaceUrlPath: 'inbox',
+      successSpaceId: '',
       kaomoji: ''
     }
   },
@@ -103,7 +103,7 @@ export default {
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
     maxCardLength () { return utils.maxCardLength() },
     currentUser () { return this.$store.state.currentUser },
-    isAddPage () { return this.$store.state.AddToInbox },
+    isAddPage () { return this.$store.state.isAddPage },
     name: {
       get () {
         return this.newName
@@ -114,8 +114,8 @@ export default {
         this.clearErrorsAndSuccess()
         this.updateMaxLengthError()
       }
-    }
-
+    },
+    inboxUrl () { return this.successSpaceId || 'inbox' }
   },
   methods: {
     updateKaomoji () {
@@ -246,7 +246,7 @@ export default {
         const user = this.$store.state.currentUser
         card.spaceId = space.id
         card.userId = user.id
-        this.spaceUrlPath = space.id
+        this.successSpaceId = space.id
         console.log('🛫 create card', card)
         this.$store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: space.id })
         this.updateKaomoji()
@@ -289,6 +289,19 @@ export default {
 
     updateKeyboardShortcutTipIsVisible (value) {
       this.keyboardShortcutTipIsVisible = value
+    },
+    async changeToInboxSpace (event) {
+      if (this.isAddPage) { return }
+      this.$store.dispatch('closeAllDialogs', 'AddToInbox')
+      event.preventDefault()
+      event.stopPropagation()
+      let space
+      if (this.successSpaceId) {
+        space = { id: this.successSpaceId }
+      } else {
+        space = await this.$store.dispatch('currentUser/inboxSpace')
+      }
+      this.$store.dispatch('currentSpace/changeSpace', { space })
     }
   }
 }

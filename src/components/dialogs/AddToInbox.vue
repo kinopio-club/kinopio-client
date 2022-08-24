@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.add-to-index(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.narrow.add-to-inbox(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     span Add To Inbox
   AddToInbox(:visible="visible")
@@ -20,5 +20,5 @@ export default {
 </script>
 
 <style lang="stylus">
-// dialog.add-to-index
+// dialog.add-to-inbox
 </style>
