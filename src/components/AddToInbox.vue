@@ -1,15 +1,22 @@
 <template lang="pug">
 section.add-to-inbox(v-if="visible")
-  .info
+  .info(v-if="isAddPage")
     .badge.info
       img.icon.inbox-icon(src="@/assets/inbox.svg")
       span Add to Inbox
+
+  .info(v-if="cardsCreatedIsOverLimit || error.unknownServerError || error.maxLength")
     //- error: card limit
-    a(:href="kinopioDomain" v-if="cardsCreatedIsOverLimit")
-      .badge.danger.button-badge
-        span Upgrade for more →
+    template(v-if="cardsCreatedIsOverLimit")
+      a(:href="kinopioDomain" v-if="isAddPage")
+        .badge.danger.button-badge
+          span Upgrade for more →
+      .badge.danger(v-else)
+        span Upgrade for more cards
+
     //- error: connection
     .badge.danger(v-if="error.unknownServerError || error.maxLength") (シ_ _)シ Server error
+
   //- textarea
   .row
     User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
@@ -45,7 +52,7 @@ section.add-to-inbox(v-if="visible")
         span Enter
   .row(v-if="success")
     .badge.success
-      span {{kaomoji}}, add another one?
+      span {{kaomoji}}, add another?
 </template>
 
 <script>
@@ -96,6 +103,7 @@ export default {
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
     maxCardLength () { return utils.maxCardLength() },
     currentUser () { return this.$store.state.currentUser },
+    isAddPage () { return this.$store.state.AddToInbox },
     name: {
       get () {
         return this.newName
@@ -329,8 +337,12 @@ section.add-to-inbox
     margin-left 6px
     textarea
       margin 0
+      min-height 18px
 
   .button-wrap + .button-wrap
     margin-left 6px
+
+  .badge
+    display inline-block
 
 </style>

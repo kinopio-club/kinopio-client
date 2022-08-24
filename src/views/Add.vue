@@ -16,7 +16,6 @@ main.add-page
           Loader(:visible="loading.signIn")
 
   AddToInbox(:visible="currentUserIsSignedIn")
-
 </template>
 
 <script>

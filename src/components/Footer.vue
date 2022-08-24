@@ -6,6 +6,10 @@
       .controls(v-if="isVisible" :class="{'hidden': isHidden}")
         section
           .button-wrap
+            button(@click.left="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
+              img.icon.inbox-icon(src="@/assets/inbox.svg")
+            AddToInbox(:visible="addToInboxIsVisible")
+          .button-wrap
             .segmented-buttons
               //- Explore
               button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
@@ -48,6 +52,7 @@ import Live from '@/components/dialogs/Live.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
 import FavoritesActions from '@/components/dialogs/FavoritesActions.vue'
 import MobileTips from '@/components/dialogs/MobileTips.vue'
+import AddToInbox from '@/components/dialogs/AddToInbox.vue'
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
@@ -73,7 +78,8 @@ export default {
     FavoritesActions,
     MobileTips,
     Loader,
-    SpaceZoom
+    SpaceZoom,
+    AddToInbox
   },
   props: {
     isPinchZooming: Boolean,
@@ -91,7 +97,8 @@ export default {
       isLoadingLiveSpaces: true,
       isFadingOut: false,
       isHidden: false,
-      exploreSpaces: []
+      exploreSpaces: [],
+      addToInboxIsVisible: false
     }
   },
   mounted () {
@@ -195,6 +202,7 @@ export default {
       this.exploreIsVisible = false
       this.liveIsVisible = false
       this.mobileTipsIsVisible = false
+      this.addToInboxIsVisible = false
     },
     toggleFavoritesActionsIsVisible () {
       const isVisible = this.favoritesActionsIsVisible
@@ -218,6 +226,11 @@ export default {
       if (this.liveIsVisible) {
         this.updateLiveSpaces()
       }
+    },
+    toggleAddToInboxIsVisible () {
+      const isVisible = this.addToInboxIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleAddToInboxIsVisible')
+      this.addToInboxIsVisible = !isVisible
     },
     toggleMobileTipsIsVisible () {
       const isVisible = this.mobileTipsIsVisible
@@ -453,4 +466,7 @@ footer
       padding 0
     .icon.camera
       vertical-align 0
+    .icon.inbox-icon
+      vertical-align 0px
+      width 13px
   </style>

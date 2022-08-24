@@ -1,0 +1,24 @@
+<template lang="pug">
+dialog.narrow.add-to-index(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+  section
+    span Add To Inbox
+  AddToInbox(:visible="visible")
+</template>
+
+<script>
+import AddToInbox from '@/components/AddToInbox.vue'
+
+export default {
+  name: 'AddToInboxDialog',
+  components: {
+    AddToInbox
+  },
+  props: {
+    visible: Boolean
+  }
+}
+</script>
+
+<style lang="stylus">
+// dialog.add-to-index
+</style>
