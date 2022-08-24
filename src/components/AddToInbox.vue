@@ -24,7 +24,7 @@ section.add-to-inbox(v-if="visible")
       textarea.name(
         ref="name"
         rows="1"
-        placeholder="Type text here, or paste a URL"
+        :placeholder="textareaPlaceholder"
         v-model="name"
         :maxlength="maxCardLength"
         @keydown.enter.exact.prevent="createCard"
@@ -122,7 +122,14 @@ export default {
         this.updateMaxLengthError()
       }
     },
-    inboxUrl () { return this.successSpaceId || 'inbox' }
+    inboxUrl () { return this.successSpaceId || 'inbox' },
+    textareaPlaceholder () {
+      if (this.isAddPage) {
+        return 'Type text here, or paste a URL'
+      } else {
+        return 'Type text here'
+      }
+    }
   },
   methods: {
     updateKaomoji () {
@@ -364,6 +371,7 @@ section.add-to-inbox
   .textarea-wrap
     margin-top 3px
     margin-left 6px
+    width 100%
     textarea
       margin 0
       min-height 18px
