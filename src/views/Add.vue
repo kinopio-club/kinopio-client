@@ -1,15 +1,18 @@
 <template lang="pug">
 main.add-page
-  //- sign in
   section(v-if="!currentUserIsSignedIn")
+
+    //- TODO move to bottom?
     .info
       .badge.info Sign in to use
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Server error
       .badge.danger(v-if="error.signInCredentials") Incorrect email or password
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
+
+    //- sign in form
     form(@submit.prevent="signIn")
-      input(type="email" placeholder="Email" required v-model="email" @input="clearErrorsAndSuccess")
-      input(type="password" placeholder="Password" required v-model="password" @input="clearErrorsAndSuccess")
+      input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
+      input(type="password" placeholder="Password" required v-model="password" @input="clearErrors")
       .row
         button(type="submit" :class="{active : loading.signIn}")
           span Sign In
@@ -64,6 +67,11 @@ export default {
   methods: {
     async initUser () {
       this.$store.dispatch('currentUser/init')
+    },
+    clearErrors () {
+      this.error.unknownServerError = false
+      this.error.signInCredentials = false
+      this.tooManyAttempts = false
     },
 
     // sign in

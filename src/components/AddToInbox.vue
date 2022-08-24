@@ -268,7 +268,6 @@ export default {
     },
     clearErrorsAndSuccess () {
       this.error.unknownServerError = false
-      this.error.signInCredentials = false
       this.success = false
     },
     updateMaxLengthError () {
