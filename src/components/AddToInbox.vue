@@ -104,6 +104,10 @@ export default {
     maxCardLength () { return utils.maxCardLength() },
     currentUser () { return this.$store.state.currentUser },
     isAddPage () { return this.$store.state.isAddPage },
+    successSpaceIsCurrentSpace () {
+      const currentSpace = this.$store.state.currentSpace
+      return this.successSpaceId === currentSpace.id
+    },
     name: {
       get () {
         return this.newName
@@ -248,7 +252,8 @@ export default {
         card.userId = user.id
         this.successSpaceId = space.id
         console.log('🛫 create card', card)
-        this.$store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: space.id })
+        card = await this.$store.dispatch('api/createCard', card)
+        this.updateCurrentSpace(card)
         this.updateKaomoji()
         this.success = true
         this.newName = ''
@@ -284,18 +289,27 @@ export default {
         this.textareaSizes()
       })
     },
+    updateCurrentSpace (card) {
+      if (this.isAddPage) { return }
+      if (!this.successSpaceIsCurrentSpace) { return }
+      this.$store.commit('currentCards/create', card)
+    },
 
     // handlers
 
     updateKeyboardShortcutTipIsVisible (value) {
       this.keyboardShortcutTipIsVisible = value
     },
+
+    // inbox button
+
     async changeToInboxSpace (event) {
       if (this.isAddPage) { return }
       this.$store.dispatch('closeAllDialogs', 'AddToInbox')
       event.preventDefault()
       event.stopPropagation()
       let space
+      if (this.successSpaceIsCurrentSpace) { return }
       if (this.successSpaceId) {
         space = { id: this.successSpaceId }
       } else {
