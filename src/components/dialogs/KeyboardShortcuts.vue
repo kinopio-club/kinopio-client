@@ -21,6 +21,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
+            img.icon.inbox-icon(src="@/assets/inbox.svg")
+            span Add to Inbox
+          .badge.keyboard-shortcut I
+      article
+        .row
+          .badge.title
             img.icon.cancel(src="@/assets/add.svg")
             span Close Dialogs
           .badge.keyboard-shortcut Escape
@@ -383,4 +389,6 @@ export default {
     .button-badge + .button-badge
       margin-top 6px
 
+  .inbox-icon
+    margin 0
 </style>
