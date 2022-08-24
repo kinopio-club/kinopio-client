@@ -20,5 +20,6 @@ export default {
 </script>
 
 <style lang="stylus">
-// dialog.add-to-inbox
+dialog.add-to-inbox
+  width 210px
 </style>

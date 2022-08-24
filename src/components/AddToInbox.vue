@@ -1,11 +1,9 @@
 <template lang="pug">
 section.add-to-inbox(v-if="visible")
-  .info(v-if="isAddPage")
-    .badge.info
-      img.icon.inbox-icon(src="@/assets/inbox.svg")
-      span Add to Inbox
+  .row(v-if="isAddPage")
+    span Add to Inbox
 
-  .info(v-if="cardsCreatedIsOverLimit || error.unknownServerError || error.maxLength")
+  .row(v-if="cardsCreatedIsOverLimit || error.unknownServerError || error.maxLength")
     //- error: card limit
     template(v-if="cardsCreatedIsOverLimit")
       a(:href="kinopioDomain" v-if="isAddPage")
@@ -53,7 +51,7 @@ section.add-to-inbox(v-if="visible")
         span Enter
   .row(v-if="success")
     .badge.success
-      span {{kaomoji}}, add another?
+      span Added
 </template>
 
 <script>
@@ -63,7 +61,6 @@ import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
-import sample from 'lodash-es/sample'
 
 export default {
   name: 'AddToInbox',
@@ -97,8 +94,7 @@ export default {
       success: false,
       newName: '',
       keyboardShortcutTipIsVisible: false,
-      successSpaceId: '',
-      kaomoji: ''
+      successSpaceId: ''
     }
   },
   computed: {
@@ -132,10 +128,6 @@ export default {
     }
   },
   methods: {
-    updateKaomoji () {
-      const kaomojis = ['( ^_^)／', '( ﾟ▽ﾟ)/', '(^-^*)/', '＼(°o°；）', '( ･ω･)ﾉ', '( ・_・)ノ', '＼( ･_･)']
-      this.kaomoji = sample(kaomojis)
-    },
     insertUrl (event) {
       const url = event.data
       this.newName = url + this.newName
@@ -264,7 +256,6 @@ export default {
         console.log('🛫 create card', card)
         card = await this.$store.dispatch('api/createCard', card)
         this.updateCurrentSpace(card)
-        this.updateKaomoji()
         this.success = true
         this.newName = ''
       } catch (error) {
@@ -272,6 +263,8 @@ export default {
         this.error.unknownServerError = true
       }
       this.loading.createCard = false
+      const textarea = this.$refs.name
+      textarea.style.height = 'initial'
       this.focusAndSelectName()
     },
     clearErrorsAndSuccess () {
@@ -345,15 +338,6 @@ section.add-to-inbox
       &:last-child
         margin-bottom 0
 
-  .info
-    margin 0
-    margin-bottom 10px
-    .badge
-      display inline-block
-      margin 0
-    > .badge
-      margin-right 6px
-
   .sign-in
     background var(--secondary-background)
     form
@@ -362,9 +346,11 @@ section.add-to-inbox
       margin-bottom 10px
     button
       margin 0
+
   .inbox-icon,
   .add-icon
     vertical-align 0
+
   a
     color var(--primary)
     text-decoration none
