@@ -35,6 +35,7 @@ section.add-to-inbox(v-if="visible")
         @keyup.ctrl.enter.exact.stop
         @keydown.alt.enter.exact.stop="insertLineBreak"
         @keydown.ctrl.enter.exact.stop="insertLineBreak"
+        @touchend="focusName"
       )
   //- button
   .row
