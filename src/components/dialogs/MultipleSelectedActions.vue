@@ -119,7 +119,10 @@ export default {
       if (noStyleItemsSelected) { return }
       return this.shouldShowStyleActions
     },
-    visible () { return this.$store.state.multipleSelectedActionsIsVisible },
+    visible () {
+      const isSelectedItems = this.multipleConnectionsSelectedIds.length || this.multipleBoxesSelectedIds.length || this.multipleBoxesSelectedIds.length
+      return this.$store.state.multipleSelectedActionsIsVisible && isSelectedItems
+    },
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     position () {
       const cursor = this.$store.state.multipleSelectedActionsPosition
