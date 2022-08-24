@@ -75,12 +75,14 @@ export default {
   },
   mounted () {
     window.addEventListener('message', this.insertUrl)
+    utils.disablePinchZoom()
     this.$nextTick(() => {
       this.focusAndSelectName()
     })
   },
   beforeUnmount () {
     window.removeEventListener('message', this.insertUrl)
+    utils.enablePinchZoom()
   },
   data () {
     return {
