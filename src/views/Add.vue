@@ -62,7 +62,7 @@ main.add-page
           span Enter
     .row(v-if="success")
       .badge.success
-        span Success, add another one?
+        span {{kaomoji}}, add another one?
 
 </template>
 
@@ -74,6 +74,7 @@ import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
+import sample from 'lodash-es/sample'
 
 let processQueueIntervalTimer
 
@@ -117,7 +118,8 @@ export default {
       success: false,
       newName: '',
       keyboardShortcutTipIsVisible: false,
-      spaceUrlPath: 'inbox'
+      spaceUrlPath: 'inbox',
+      kaomoji: ''
     }
   },
   computed: {
@@ -139,6 +141,10 @@ export default {
     }
   },
   methods: {
+    updateKaomoji () {
+      const kaomojis = ['( ^_^)／', '( ﾟ▽ﾟ)/', '(^-^*)/', '＼(°o°；）', '( ･ω･)ﾉ', '( ・_・)ノ', '＼( ･_･)']
+      this.kaomoji = sample(kaomojis)
+    },
     insertUrl (event) {
       const url = event.data
       this.newName = url + this.newName
@@ -311,6 +317,7 @@ export default {
         this.spaceUrlPath = space.id
         console.log('🛫 create card', card)
         this.$store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: space.id })
+        this.updateKaomoji()
         this.success = true
         this.newName = ''
       } catch (error) {
