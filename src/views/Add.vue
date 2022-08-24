@@ -49,18 +49,20 @@ main.add-page
     //- button
     .row
       .button-wrap
+        a(:href="spaceUrlPath")
+          button
+            img.icon.inbox-icon(src="@/assets/inbox.svg")
+            span Inbox
+      .button-wrap
         button(@click.stop="createCard" :class="{active: loading.createCard, disabled: error.maxLength}")
           img.icon.add-icon(src="@/assets/add.svg")
           span Add
           Loader(:visible="loading.createCard")
         .badge.label-badge.info-badge(v-if="keyboardShortcutTipIsVisible")
           span Enter
-    //- success
-    .row
-      a(:href="spaceId" v-if="success")
-        button.success
-          img.icon.inbox-icon(src="@/assets/inbox.svg")
-          span Added
+    .row(v-if="success")
+      .badge.success
+        span Success, add another one?
 
 </template>
 
@@ -115,7 +117,7 @@ export default {
       success: false,
       newName: '',
       keyboardShortcutTipIsVisible: false,
-      spaceId: ''
+      spaceUrlPath: 'inbox'
     }
   },
   computed: {
@@ -148,6 +150,9 @@ export default {
     },
     async init () {
       this.$store.dispatch('currentUser/init')
+      this.$nextTick(() => {
+        this.focusName()
+      })
     },
     textareaSizes () {
       const textarea = this.$refs.name
@@ -193,9 +198,6 @@ export default {
       if (this.isSuccess(response)) {
         this.$store.commit('currentUser/updateUser', result)
         this.init()
-        this.$nextTick(() => {
-          this.focusName()
-        })
       } else {
         this.handleErrors(result)
       }
@@ -306,7 +308,7 @@ export default {
         const user = this.$store.state.currentUser
         card.spaceId = space.id
         card.userId = user.id
-        this.spaceId = space.id
+        this.spaceUrlPath = space.id
         console.log('🛫 create card', card)
         this.$store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: space.id })
         this.success = true
@@ -419,4 +421,8 @@ main.add-page
       margin-bottom 0
     &:last-child
       margin-bottom 0
+
+  .button-wrap + .button-wrap
+    margin-left 6px
+
 </style>
