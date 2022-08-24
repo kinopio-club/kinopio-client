@@ -1,9 +1,12 @@
 <template lang="pug">
 main.add-page
   //- sign in
-  section(v-if="error.missingUserApikey")
-    .notifications
-      .badge.info(v-if="showSignInInstructions") Sign in to Kinopio to use
+  section(v-if="!currentUserIsSignedIn")
+    .info
+      .badge.info Sign in to use
+      .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Server error
+      .badge.danger(v-if="error.signInCredentials") Incorrect email or password
+      .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
     form(@submit.prevent="signIn")
       input(type="email" placeholder="Email" required v-model="email" @input="clearErrorsAndSuccess")
       input(type="password" placeholder="Password" required v-model="password" @input="clearErrorsAndSuccess")
@@ -11,56 +14,61 @@ main.add-page
         button(type="submit" :class="{active : loading.signIn}")
           span Sign In
           Loader(:visible="loading.signIn")
-    .sign-in-errors
-      .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-      .badge.danger(v-if="error.signInCredentials") Incorrect email or password
-      .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
+
   //- add
-  section(v-else data-name="add-card")
-    .notifications
-      //- success
-      a(:href="spaceId" v-if="success")
-        .badge.success.button-badge
-          span Saved →
+  section(v-if="currentUserIsSignedIn" data-name="add-card")
+    .info
+      .badge.info
+        img.icon.inbox-icon(src="@/assets/inbox.svg")
+        span Add to Inbox
       //- error: card limit
       a(:href="kinopioDomain" v-if="cardsCreatedIsOverLimit")
         .badge.danger.button-badge
           span Upgrade for more →
       //- error: connection
-      .badge.danger(v-if="error.unknown || error.maxLength") (シ_ _)シ Server error
+      .badge.danger(v-if="error.unknownServerError || error.maxLength") (シ_ _)シ Server error
     //- textarea
-    .textarea-wrap
-      textarea.name(
-        ref="name"
-        rows="1"
-        placeholder="Type text here, or paste a URL"
-        v-model="name"
-        :maxlength="maxCardLength"
-        @keydown.enter.exact.prevent="createCard"
-        @focusin="updateKeyboardShortcutTipIsVisible(true)"
-        @focusout="updateKeyboardShortcutTipIsVisible(false)"
+    .row
+      User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
+      .textarea-wrap
+        textarea.name(
+          ref="name"
+          rows="1"
+          placeholder="Type text here, or paste a URL"
+          v-model="name"
+          :maxlength="maxCardLength"
+          @keydown.enter.exact.prevent="createCard"
+          @focusin="updateKeyboardShortcutTipIsVisible(true)"
+          @focusout="updateKeyboardShortcutTipIsVisible(false)"
 
-        @keyup.alt.enter.exact.stop
-        @keyup.ctrl.enter.exact.stop
-        @keydown.alt.enter.exact.stop="insertLineBreak"
-        @keydown.ctrl.enter.exact.stop="insertLineBreak"
-      )
+          @keyup.alt.enter.exact.stop
+          @keyup.ctrl.enter.exact.stop
+          @keydown.alt.enter.exact.stop="insertLineBreak"
+          @keydown.ctrl.enter.exact.stop="insertLineBreak"
+        )
     //- button
     .row
       .button-wrap
         button(@click.stop="createCard" :class="{active: loading.createCard, disabled: error.maxLength}")
-          img.icon(src="@/assets/add.svg")
-          img.icon.inbox-icon(src="@/assets/inbox.svg")
-          span Add to Inbox
+          img.icon.add-icon(src="@/assets/add.svg")
+          span Add
           Loader(:visible="loading.createCard")
         .badge.label-badge.info-badge(v-if="keyboardShortcutTipIsVisible")
           span Enter
+    //- success
+    .row
+      a(:href="spaceId" v-if="success")
+        button.success
+          img.icon.inbox-icon(src="@/assets/inbox.svg")
+          span Added
+
 </template>
 
 <script>
 import inboxSpace from '@/data/inbox.json'
 
 import Loader from '@/components/Loader.vue'
+import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
@@ -70,7 +78,8 @@ let processQueueIntervalTimer
 export default {
   name: 'AddPage',
   components: {
-    Loader
+    Loader,
+    User
   },
   created () {
     window.document.title = 'Add Card'
@@ -97,18 +106,15 @@ export default {
         signIn: false
       },
       error: {
-        unknown: false,
         maxLength: false,
-        missingUserApikey: false,
+        unknownServerError: false,
         // sign in
         tooManyAttempts: false,
-        signInCredentials: false,
-        unknownServerError: false
+        signInCredentials: false
       },
       success: false,
       newName: '',
       keyboardShortcutTipIsVisible: false,
-      showSignInInstructions: true,
       spaceId: ''
     }
   },
@@ -142,11 +148,6 @@ export default {
     },
     async init () {
       this.$store.dispatch('currentUser/init')
-      if (!this.currentUserIsSignedIn) {
-        this.error.missingUserApikey = true
-      } else {
-        this.error.missingUserApikey = false
-      }
     },
     textareaSizes () {
       const textarea = this.$refs.name
@@ -191,8 +192,8 @@ export default {
       this.loading.signIn = false
       if (this.isSuccess(response)) {
         this.$store.commit('currentUser/updateUser', result)
-        this.error.missingUserApikey = false
         this.init()
+        this.focusName()
       } else {
         this.handleErrors(result)
       }
@@ -242,6 +243,7 @@ export default {
     },
     focusAndSelectName () {
       const element = this.$refs.name
+      if (!element) { return }
       const length = element.value.length
       this.focusName()
       if (length) {
@@ -309,15 +311,15 @@ export default {
         this.newName = ''
       } catch (error) {
         console.error('🚑 createCard', error)
-        this.error.unknown = true
+        this.error.unknownServerError = true
       }
       this.loading.createCard = false
       this.focusAndSelectName()
     },
     clearErrorsAndSuccess () {
-      this.error.unknown = false
+      this.error.unknownServerError = false
+      this.error.signInCredentials = false
       this.success = false
-      this.showSignInInstructions = false
     },
     updateMaxLengthError () {
       if (this.newName.length >= this.maxCardLength - 1) {
@@ -378,32 +380,41 @@ main.add-page
       margin-bottom 4px
       &:last-child
         margin-bottom 0
-  .notifications
-    width 250px
-    .row
-      margin-top 10px
-    .sign-in
-      background var(--secondary-background)
-      form
-        margin-top 10px
-      input
-        margin-bottom 10px
-      button
-        margin 0
-  .sign-in-errors
+
+  .info
+    margin 0
+    margin-bottom 10px
     .badge
       display inline-block
+      margin 0
+    > .badge
+      margin-right 6px
+
+  .sign-in
+    background var(--secondary-background)
+    form
       margin-top 10px
-  .inbox-icon
+    input
+      margin-bottom 10px
+    button
+      margin 0
+  .inbox-icon,
+  .add-icon
     vertical-align 0
-    margin-left 5px
   a
     color var(--primary)
     text-decoration none
-  .notifications
-    margin 0
-    width initial
-    position absolute
-    right -12px
-    top -5px
+  .textarea-wrap
+    margin-top 3px
+    margin-left 6px
+    textarea
+      margin 0
+  .row
+    margin-bottom 10px
+    display flex
+    position relative
+    > input
+      margin-bottom 0
+    &:last-child
+      margin-bottom 0
 </style>
