@@ -120,7 +120,7 @@ export default {
       return this.shouldShowStyleActions
     },
     visible () {
-      const isSelectedItems = this.multipleConnectionsSelectedIds.length || this.multipleBoxesSelectedIds.length || this.multipleBoxesSelectedIds.length
+      const isSelectedItems = this.multipleConnectionsSelectedIds.length || this.multipleCardsSelectedIds.length || this.multipleBoxesSelectedIds.length
       return this.$store.state.multipleSelectedActionsIsVisible && isSelectedItems
     },
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
