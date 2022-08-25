@@ -10,7 +10,8 @@ dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @tou
       p
         span To add cards to your inbox from anywhere,
         span.badge.info you need to Sign Up or In
-      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
+      button(@pointerup.stop="triggerSignUpOrInIsVisible")
+        span Sign Up or In
 
 </template>
 

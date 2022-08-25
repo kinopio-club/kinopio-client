@@ -39,11 +39,11 @@ section.add-to-inbox(v-if="visible")
   .row
     .button-wrap
       a(:href="inboxUrl")
-        button(@click.left="changeToInboxSpace")
+        button(@pointerup="changeToInboxSpace")
           img.icon.inbox-icon(src="@/assets/inbox.svg")
           span Inbox
     .button-wrap
-      button(@click.stop="addCard" :class="{active: loading.addCard, disabled: error.maxLength}")
+      button(@pointerup="addCard" :class="{active: loading.addCard, disabled: error.maxLength}")
         img.icon.add-icon(src="@/assets/add.svg")
         span Add
         Loader(:visible="loading.addCard")
