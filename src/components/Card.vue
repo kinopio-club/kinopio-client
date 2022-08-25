@@ -941,7 +941,7 @@ export default {
       let stretchResistance = 6 // higher resistance moves less
       // larger sizes have higher resistance
       const size = {
-        s: this.isSize(width, height, 300),
+        s: this.isSize(width, height, 250),
         m: this.isSize(width, height, 500),
         l: this.isSize(width, height, 1000),
         xl: width > 1200 || height > 1000
