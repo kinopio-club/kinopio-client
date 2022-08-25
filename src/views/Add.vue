@@ -3,7 +3,7 @@ main.add-page
   section(v-if="!currentUserIsSignedIn")
 
     //- TODO move to bottom?
-    .info
+    .row
       .badge.info Sign in to use
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Server error
       .badge.danger(v-if="error.signInCredentials") Incorrect email or password
@@ -131,15 +131,6 @@ main.add-page
     .loader
       margin-right 0
 
-  .info
-    margin 0
-    margin-bottom 10px
-    .badge
-      display inline-block
-      margin 0
-    > .badge
-      margin-right 6px
-
   .sign-in
     background var(--secondary-background)
     form
@@ -151,10 +142,10 @@ main.add-page
   a
     color var(--primary)
     text-decoration none
+
   .row
     margin-bottom 10px
     display flex
-    position relative
     > input
       margin-bottom 0
     &:last-child
