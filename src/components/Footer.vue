@@ -5,7 +5,7 @@
       Notifications
       .controls(v-if="isVisible" :class="{'hidden': isHidden}")
         section
-          .button-wrap
+          .button-wrap(v-if="userHasInbox")
             button(@click.left="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
             AddToInbox(:visible="addToInboxIsVisible")
@@ -98,7 +98,8 @@ export default {
       isFadingOut: false,
       isHidden: false,
       exploreSpaces: [],
-      addToInboxIsVisible: false
+      addToInboxIsVisible: false,
+      userHasInbox: false
     }
   },
   mounted () {
@@ -111,6 +112,8 @@ export default {
         this.hidden()
       } else if (mutation.type === 'triggerAddToInboxIsVisible') {
         this.addToInboxIsVisible = true
+      } else if (mutation.type === 'triggerCheckIfUseHasInboxSpace') {
+        this.updateUserHasInbox()
       }
     })
     window.addEventListener('scroll', this.updatePosition)
@@ -275,6 +278,10 @@ export default {
         }
       })
       return normalizedSpaces
+    },
+    async updateUserHasInbox () {
+      const inboxSpace = await this.$store.dispatch('currentUser/inboxSpace')
+      this.userHasInbox = Boolean(inboxSpace)
     },
 
     // preload explore spaces

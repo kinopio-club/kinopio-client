@@ -441,6 +441,7 @@ const store = createStore({
     triggerClearAllSpaceFilters: () => {},
     triggerNotifyUnlockedStickyCards: () => {},
     triggerAddToInboxIsVisible: () => {},
+    triggerCheckIfUseHasInboxSpace: () => {},
 
     // Cards
 
