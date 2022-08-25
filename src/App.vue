@@ -201,6 +201,7 @@ export default {
       }, 60)
     },
     touchEnd () {
+      if (this.$store.state.isAddPage) { return }
       this.isPinchZooming = false
       this.checkIfInertiaScrollEnd()
       if (shouldCancelUndo) {

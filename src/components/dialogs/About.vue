@@ -166,6 +166,7 @@ export default {
       return data
     },
     checkNewStuffIsUpdated (latestUpdateId) {
+      if (this.isAddPage) { return }
       const userlastReadId = parseInt(this.$store.state.currentUser.lastReadNewStuffId)
       const newStuffIsUpdated = Boolean(userlastReadId !== latestUpdateId)
       this.$store.commit('newStuffIsUpdated', newStuffIsUpdated)

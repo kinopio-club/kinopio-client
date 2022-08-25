@@ -440,6 +440,8 @@ const store = createStore({
     triggerUpdateConnectionPathWhileDragging: (state, { connection, path }) => {},
     triggerClearAllSpaceFilters: () => {},
     triggerNotifyUnlockedStickyCards: () => {},
+    triggerAddToInboxIsVisible: () => {},
+    triggerCheckIfUseHasInboxSpace: () => {},
 
     // Cards
 

@@ -202,6 +202,7 @@ export default {
         this.addCollaboratorToInvitedSpaces()
         const currentSpace = this.$store.state.currentSpace
         this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
+        this.$store.commit('triggerCheckIfUseHasInboxSpace')
       } else {
         await this.handleErrors(result)
       }
@@ -239,6 +240,7 @@ export default {
           this.$store.dispatch('currentSpace/loadLastSpace')
           this.$store.commit('triggerUpdateWindowHistory', { space: this.$store.state.currentSpace })
         }
+        this.$store.commit('triggerCheckIfUseHasInboxSpace')
       } else {
         await this.handleErrors(result)
       }

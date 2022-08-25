@@ -14,7 +14,7 @@ import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
 
-let prevCursor
+let prevCursor, prevType
 
 export default {
   name: 'CurrentConnection',
@@ -101,6 +101,7 @@ export default {
       this.checkCurrentConnectionSuccess()
       this.currentConnectionPath = path
       const connectionType = this.$store.getters['currentConnections/typeForNewConnections']
+      prevType = connectionType
       this.currentConnectionColor = connectionType.color
       this.$store.commit('currentConnectionColor', connectionType.color)
       const updates = {
@@ -139,9 +140,8 @@ export default {
       }
     },
     addConnection (connection) {
-      const type = this.$store.getters['currentConnections/typeForNewConnections']
-      this.$store.dispatch('currentConnections/add', { connection, type })
-      this.$store.dispatch('currentConnections/addType', type)
+      this.$store.dispatch('currentConnections/addType', prevType)
+      this.$store.dispatch('currentConnections/add', { connection, type: prevType })
     },
     createConnections () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
@@ -170,8 +170,8 @@ export default {
     },
     stopInteractions (event) {
       if (this.isDrawingConnection) {
-        this.createConnections()
         this.$store.dispatch('clearMultipleSelected')
+        this.createConnections()
       }
       this.$store.commit('currentConnectionSuccess', {})
       const isCurrentConnection = this.$store.state.currentConnectionStartCardIds.length

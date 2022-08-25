@@ -183,6 +183,7 @@ const currentSpace = {
       }
       context.dispatch('updateModulesSpaceId')
       context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
+      context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
     },
 
     // Users and otherSpaces
@@ -443,6 +444,7 @@ const currentSpace = {
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
       context.commit('triggerUpdateWindowHistory', {}, { root: true })
+      context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
     },
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
@@ -742,7 +744,6 @@ const currentSpace = {
       const boxResults = utils.mergeSpaceKeyValues({ prevItems: boxes, newItems: remoteSpace.boxes })
       context.dispatch('currentBoxes/mergeUnique', { newItems: boxResults.updateItems, itemType: 'box' }, { root: true })
       context.dispatch('currentBoxes/mergeRemove', { removeItems: boxResults.removeItems, itemType: 'box' }, { root: true })
-
       console.log('🎑 Merge space', {
         cards: cardResults,
         types: connectionTypeReults,
@@ -823,6 +824,7 @@ const currentSpace = {
         name: 'removeSpace',
         body: { id: space.id }
       }, { root: true })
+      context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
     },
     deleteSpace: (context, space) => {
       cache.deleteSpace(space)

@@ -73,10 +73,17 @@ export default {
       // ?
       if (key === '?' && isSpaceScope) {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
+      // n
       } else if (key === 'n' && isSpaceScope) {
+        if (this.$store.state.isAddPage) { return }
         this.$store.dispatch('currentSpace/addSpace')
         this.$store.commit('addNotification', { message: 'New space created', icon: 'add', type: 'success', label: 'n' })
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
+      // i
+      } else if (key === 'i' && isSpaceScope) {
+        if (this.$store.state.isAddPage) { return }
+        this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler')
+        this.$store.commit('triggerAddToInboxIsVisible')
       // Backspace, Clear, Delete
       } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
         this.remove()

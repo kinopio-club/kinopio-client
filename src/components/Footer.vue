@@ -5,6 +5,10 @@
       Notifications
       .controls(v-if="isVisible" :class="{'hidden': isHidden}")
         section
+          .button-wrap(v-if="userHasInbox")
+            button(@click.left="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
+              img.icon.inbox-icon(src="@/assets/inbox.svg")
+            AddToInbox(:visible="addToInboxIsVisible")
           .button-wrap
             .segmented-buttons
               //- Explore
@@ -48,6 +52,7 @@ import Live from '@/components/dialogs/Live.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
 import FavoritesActions from '@/components/dialogs/FavoritesActions.vue'
 import MobileTips from '@/components/dialogs/MobileTips.vue'
+import AddToInbox from '@/components/dialogs/AddToInbox.vue'
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
@@ -73,7 +78,8 @@ export default {
     FavoritesActions,
     MobileTips,
     Loader,
-    SpaceZoom
+    SpaceZoom,
+    AddToInbox
   },
   props: {
     isPinchZooming: Boolean,
@@ -91,7 +97,9 @@ export default {
       isLoadingLiveSpaces: true,
       isFadingOut: false,
       isHidden: false,
-      exploreSpaces: []
+      exploreSpaces: [],
+      addToInboxIsVisible: false,
+      userHasInbox: false
     }
   },
   mounted () {
@@ -102,6 +110,10 @@ export default {
         this.updatePosition()
       } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
+      } else if (mutation.type === 'triggerAddToInboxIsVisible') {
+        this.addToInboxIsVisible = true
+      } else if (mutation.type === 'triggerCheckIfUseHasInboxSpace') {
+        this.updateUserHasInbox()
       }
     })
     window.addEventListener('scroll', this.updatePosition)
@@ -195,6 +207,7 @@ export default {
       this.exploreIsVisible = false
       this.liveIsVisible = false
       this.mobileTipsIsVisible = false
+      this.addToInboxIsVisible = false
     },
     toggleFavoritesActionsIsVisible () {
       const isVisible = this.favoritesActionsIsVisible
@@ -218,6 +231,11 @@ export default {
       if (this.liveIsVisible) {
         this.updateLiveSpaces()
       }
+    },
+    toggleAddToInboxIsVisible () {
+      const isVisible = this.addToInboxIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleAddToInboxIsVisible')
+      this.addToInboxIsVisible = !isVisible
     },
     toggleMobileTipsIsVisible () {
       const isVisible = this.mobileTipsIsVisible
@@ -260,6 +278,10 @@ export default {
         }
       })
       return normalizedSpaces
+    },
+    async updateUserHasInbox () {
+      const inboxSpace = await this.$store.dispatch('currentUser/inboxSpace')
+      this.userHasInbox = Boolean(inboxSpace)
     },
 
     // preload explore spaces
@@ -453,4 +475,7 @@ footer
       padding 0
     .icon.camera
       vertical-align 0
+    .icon.inbox-icon
+      vertical-align 0px
+      width 13px
   </style>
