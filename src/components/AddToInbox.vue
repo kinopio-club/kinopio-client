@@ -25,7 +25,7 @@ section.add-to-inbox(v-if="visible")
         :placeholder="textareaPlaceholder"
         v-model="name"
         :maxlength="maxCardLength"
-        @keydown.enter.exact.prevent="createCard"
+        @keydown.enter.exact.prevent="addCard"
         @focusin="updateKeyboardShortcutTipIsVisible(true)"
         @focusout="updateKeyboardShortcutTipIsVisible(false)"
 
@@ -43,10 +43,10 @@ section.add-to-inbox(v-if="visible")
           img.icon.inbox-icon(src="@/assets/inbox.svg")
           span Inbox
     .button-wrap
-      button(@click.stop="createCard" :class="{active: loading.createCard, disabled: error.maxLength}")
+      button(@click.stop="addCard" :class="{active: loading.addCard, disabled: error.maxLength}")
         img.icon.add-icon(src="@/assets/add.svg")
         span Add
-        Loader(:visible="loading.createCard")
+        Loader(:visible="loading.addCard")
       .badge.label-badge.info-badge(v-if="keyboardShortcutTipIsVisible")
         span Enter
   .row(v-if="success")
@@ -85,7 +85,7 @@ export default {
   data () {
     return {
       loading: {
-        createCard: false
+        addCard: false
       },
       error: {
         maxLength: false,
@@ -211,13 +211,13 @@ export default {
       })
       return space
     },
-    async createCard () {
+    async addCard () {
       this.clearErrorsAndSuccess()
       if (this.cardsCreatedIsOverLimit) { return }
       if (this.error.maxLength) { return }
-      if (this.loading.createCard) { return }
+      if (this.loading.addCard) { return }
       if (!this.newName) { return }
-      this.loading.createCard = true
+      this.loading.addCard = true
       // url preview data
       const url = utils.urlFromString(this.newName)
       let urlPreview = {}
@@ -259,10 +259,10 @@ export default {
         this.success = true
         this.newName = ''
       } catch (error) {
-        console.error('🚑 createCard', error)
+        console.error('🚑 addCard', error)
         this.error.unknownServerError = true
       }
-      this.loading.createCard = false
+      this.loading.addCard = false
       const textarea = this.$refs.name
       textarea.style.height = 'initial'
       this.focusAndSelectName()
@@ -295,6 +295,7 @@ export default {
       if (this.isAddPage) { return }
       if (!this.successSpaceIsCurrentSpace) { return }
       this.$store.commit('currentCards/create', card)
+      this.$store.dispatch('currentCards/updateDimensionsAndMap', card.id)
     },
 
     // handlers
