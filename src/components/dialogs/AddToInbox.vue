@@ -2,7 +2,16 @@
 dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @touchend.stop.prevent @click.left.stop ref="dialog")
   section
     span Add To Inbox
-  AddToInbox(:visible="visible")
+  template(v-if="currentUserIsSignedIn")
+    AddToInbox(:visible="true")
+
+  template(v-else)
+    section
+      p
+        span To add cards to your inbox from anywhere,
+        span.badge.info you need to Sign Up or In
+      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
+
 </template>
 
 <script>
@@ -15,6 +24,15 @@ export default {
   },
   props: {
     visible: Boolean
+  },
+  computed: {
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+  },
+  methods: {
+    triggerSignUpOrInIsVisible () {
+      this.$store.dispatch('closeAllDialogs', 'SpacePicker.triggerSignUpOrInIsVisible')
+      this.$store.commit('triggerSignUpOrInIsVisible')
+    }
   }
 }
 </script>
