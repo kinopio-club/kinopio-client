@@ -7,6 +7,7 @@
         section
           .button-wrap(v-if="userHasInbox")
             button(@click.left="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
+              img.icon(src="@/assets/add.svg")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
             AddToInbox(:visible="addToInboxIsVisible")
           .button-wrap
@@ -475,7 +476,9 @@ footer
       padding 0
     .icon.camera
       vertical-align 0
-    .icon.inbox-icon
-      vertical-align 0px
-      width 13px
+  .inbox-icon
+    vertical-align 0px
+    width 13px
+    margin-left 6px
+
   </style>

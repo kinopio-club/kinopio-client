@@ -351,6 +351,7 @@ section.add-to-inbox
   .inbox-icon,
   .add-icon
     vertical-align 0
+    margin 0
 
   a
     color var(--primary)
