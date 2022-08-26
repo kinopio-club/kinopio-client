@@ -257,6 +257,7 @@ export default {
         card.spaceId = space.id
         card.userId = user.id
         this.successSpaceId = space.id
+        this.$emit('successSpaceId', space.id)
         console.log('🛫 create card', card)
         card = await this.$store.dispatch('api/createCard', card)
         this.updateCurrentSpace(card)

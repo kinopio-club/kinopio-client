@@ -5,10 +5,11 @@ dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @tou
       .title-row-flex
         span Add To Inbox
         .button-wrap
-          button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
-            img.icon.inbox-icon(src="@/assets/inbox.svg")
-            span Inbox
-    AddToInbox(:visible="true")
+          a(:href="inboxUrl")
+            button.small-button(@pointerup="changeToInboxSpace")
+              img.icon.inbox-icon(src="@/assets/inbox.svg")
+              span Inbox
+    AddToInbox(:visible="true" @successSpaceId="updateSuccessSpaceId")
 
   template(v-else)
     section
@@ -31,14 +32,42 @@ export default {
   props: {
     visible: Boolean
   },
+  data () {
+    return {
+      successSpaceId: ''
+    }
+  },
   computed: {
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    inboxUrl () { return this.successSpaceId || 'inbox' },
+    successSpaceIsCurrentSpace () {
+      const currentSpace = this.$store.state.currentSpace
+      return this.successSpaceId === currentSpace.id
+    }
   },
   methods: {
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'SpacePicker.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
+    },
+    updateSuccessSpaceId (value) {
+      this.successSpaceId = value
+    },
+    async changeToInboxSpace (event) {
+      if (this.isAddPage) { return }
+      this.$store.dispatch('closeAllDialogs', 'AddToInbox')
+      event.preventDefault()
+      event.stopPropagation()
+      let space
+      if (this.successSpaceIsCurrentSpace) { return }
+      if (this.successSpaceId) {
+        space = { id: this.successSpaceId }
+      } else {
+        space = await this.$store.dispatch('currentUser/inboxSpace')
+      }
+      this.$store.dispatch('currentSpace/changeSpace', { space })
     }
+
   }
 }
 </script>
