@@ -37,11 +37,7 @@ section.add-to-inbox(v-if="visible")
       )
   //- button
   .row
-    .button-wrap
-      a(:href="inboxUrl")
-        button(@pointerup="changeToInboxSpace")
-          img.icon.inbox-icon(src="@/assets/inbox.svg")
-          span Inbox
+    //- Add
     .button-wrap
       button(@pointerup="addCard" :class="{active: loading.addCard, disabled: error.maxLength}")
         img.icon.add-icon(src="@/assets/add.svg")
@@ -52,6 +48,14 @@ section.add-to-inbox(v-if="visible")
   .row(v-if="success")
     .badge.success
       span Added
+
+  .row(v-if="isAddPage")
+    .button-wrap
+      a(:href="inboxUrl")
+        button(@pointerup="changeToInboxSpace")
+          img.icon.inbox-icon(src="@/assets/inbox.svg")
+          span Inbox
+
 </template>
 
 <script>
