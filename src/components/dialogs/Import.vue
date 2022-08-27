@@ -19,15 +19,23 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialo
         li(v-for="(error in errors") {{error}}
 
   section
-    .button-wrap
-      button(@click.left.stop="toggleImportArenaChannelIsVisible" :class="{ active: importArenaChannelIsVisible}")
-        img.icon.arena(src="@/assets/arena.svg")
-        span Are.na Channel
-      ImportArenaChannel(:visible="importArenaChannelIsVisible" @updateSpaces="updateSpaces")
+    .row
+      .button-wrap
+        button(@click.left.stop="toggleImportArenaIsVisible" :class="{ active: importArenaIsVisible}")
+          img.icon.arena(src="@/assets/arena.svg")
+          span Are.na Channel
+        ImportArenaChannel(:visible="importArenaIsVisible" @updateSpaces="updateSpaces")
+    .row
+      .button-wrap
+        button(@click.left.stop="toggleImportReadwiseIsVisible" :class="{ active: importReadwiseIsVisible}")
+          img.icon.readwise(src="@/assets/readwise.svg")
+          span Readwise Highlights
+        ImportReadwiseHighlights(:visible="importReadwiseIsVisible" @updateSpaces="updateSpaces")
 
 </template>
 
 <script>
+import ImportReadwiseHighlights from '@/components/dialogs/ImportReadwiseHighlights.vue'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
@@ -37,7 +45,8 @@ export default {
   name: 'Import',
   components: {
     Loader,
-    ImportArenaChannel
+    ImportArenaChannel,
+    ImportReadwiseHighlights
   },
   props: {
     visible: Boolean
@@ -47,15 +56,24 @@ export default {
       loading: false,
       errors: [],
       unknownError: false,
-      importArenaChannelIsVisible: false
+      importArenaIsVisible: false,
+      importReadwiseIsVisible: false
     }
   },
   methods: {
-    toggleImportArenaChannelIsVisible () {
-      this.importArenaChannelIsVisible = !this.importArenaChannelIsVisible
+    toggleImportReadwiseIsVisible () {
+      const value = !this.importReadwiseIsVisible
+      this.closeDialogs()
+      this.importReadwiseIsVisible = value
+    },
+    toggleImportArenaIsVisible () {
+      const value = !this.importArenaIsVisible
+      this.closeDialogs()
+      this.importArenaIsVisible = value
     },
     closeDialogs () {
-      this.importArenaChannelIsVisible = false
+      this.importArenaIsVisible = false
+      this.importReadwiseIsVisible = false
     },
     selectFile () {
       if (this.loading) { return }
@@ -188,6 +206,9 @@ export default {
     list-style-type square
   .arena
     width 18px
+  .readwise
+    width 13px
+    vertical-align -2px
   .button-wrap
     dialog
       @media(max-height 500px)

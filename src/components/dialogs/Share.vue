@@ -330,4 +330,8 @@ export default {
     margin-left 6px
   .user
     vertical-align -3px
+  @media(max-height 570px)
+    dialog.import
+      top -100px
+
 </style>
