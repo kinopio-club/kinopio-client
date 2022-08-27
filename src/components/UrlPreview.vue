@@ -115,7 +115,17 @@ export default {
     },
     isYoutubeUrl () {
       const url = this.card.urlPreviewUrl
-      return url.includes('https://youtube.com') || url.includes('https://www.youtube.com') || url.includes('https://m.youtube.com') || this.isYoutubeShortenedUrl
+      const domains = ['https://youtube.com', 'https://www.youtube.com', 'https://m.youtube.com', 'https://youtu.be']
+      let isRoot, isVideo
+      domains.forEach(domain => {
+        if (url === domain) { isRoot = true }
+      })
+      console.log(domains, url, isRoot)
+      if (isRoot) { return }
+      domains.forEach(domain => {
+        if (url.includes(domain)) { isVideo = true }
+      })
+      return isVideo
     },
     youtubeUrlVideoId () {
       if (!this.isYoutubeUrl) { return }
