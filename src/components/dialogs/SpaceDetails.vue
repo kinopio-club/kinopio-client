@@ -195,8 +195,7 @@ export default {
     },
     addJournalSpace () {
       window.scrollTo(0, 0)
-      this.$store.dispatch('currentSpace/addJournalSpace')
-      this.updateLocalSpaces()
+      this.$store.dispatch('currentSpace/loadJournalSpace') // triggers updateLocalSpaces in addJournalSpace
       this.$store.commit('triggerFocusSpaceDetailsName')
     },
     toggleAddSpaceIsVisible () {

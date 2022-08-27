@@ -127,7 +127,7 @@ export default {
       this.$emit('addJournalSpace')
       if (this.shouldAddSpaceDirectly) {
         this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
-        this.$store.dispatch('currentSpace/addJournalSpace')
+        this.$store.dispatch('currentSpace/loadJournalSpace')
         this.$store.dispatch('currentSpace/updateSpacePageSize')
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
       }

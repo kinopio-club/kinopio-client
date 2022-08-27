@@ -533,6 +533,7 @@ const currentSpace = {
         context.dispatch('changeSpace', { space })
       } else {
         await context.dispatch('addJournalSpace')
+        context.commit('triggerSpaceDetailsUpdateLocalSpaces', null, { root: true })
       }
       context.commit('loadJournalSpace', false, { root: true })
       context.commit('loadJournalSpaceTomorrow', false, { root: true })
