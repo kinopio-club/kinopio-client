@@ -283,6 +283,14 @@ export default {
       this.$store.commit('preventCardDetailsOpeningAnimation', false)
       this.$store.dispatch('currentCards/showCardDetails', this.card.id)
     }
+    if (this.card.shouldUpdateUrlPreview) {
+      this.updateMediaUrls()
+      this.updateUrlPreview()
+      this.$store.dispatch('currentCards/update', {
+        id: this.card.id,
+        shouldUpdateUrlPreview: false
+      })
+    }
   },
   data () {
     return {
@@ -906,6 +914,7 @@ export default {
     },
     userDetailsIsVisible () { return this.$store.state.cardUserDetailsIsVisibleForCardId === this.id },
     preventUpdatePrevPreview () {
+      if (this.card.shouldUpdateUrlPreview) { return }
       const updateDelta = dayjs(this.updatedAt).diff(this.sessionStartDate, 'second')
       return updateDelta < 0
     }
