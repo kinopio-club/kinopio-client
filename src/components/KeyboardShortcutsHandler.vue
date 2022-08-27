@@ -720,10 +720,6 @@ export default {
       boxes = items.filter(item => item.isBox)
       // add cards
       this.$store.dispatch('currentCards/addMultiple', cards)
-      // add boxes
-      boxes.forEach(box => {
-        this.$store.dispatch('currentBoxes/add', box)
-      })
       // add new types
       connectionTypes = connectionTypes.map(type => {
         const existingType = this.$store.getters['currentConnections/existingTypeByData'](type)
