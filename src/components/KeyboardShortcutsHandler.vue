@@ -692,6 +692,7 @@ export default {
         }
       } catch (error) {
         console.error('🚑 getClipboardData', error)
+        this.$store.commit('addNotification', { message: `Could not paste`, type: 'danger', icon: 'cut' })
       }
     },
 
