@@ -758,7 +758,7 @@ export default {
       // ⏺ history
       this.$store.dispatch('history/resume')
       this.$store.dispatch('history/add', { cards, connectionTypes, connections, boxes, useSnapshot: true })
-      this.this.afterPaste(cards)
+      this.afterPaste(cards)
     },
 
     handlePastePlainText (data, position) {
