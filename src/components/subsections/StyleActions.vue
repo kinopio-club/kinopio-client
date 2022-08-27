@@ -47,6 +47,10 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       button(:disabled="!canEditAll" @click="toggleIsComment" :class="{active: isComment}")
         img.icon(src="@/assets/comment.svg")
 
+    //- Comment
+    .button-wrap(v-if="isSingleCard")
+      button(:disabled="!canEditAll" @click="replaceCardWithBox")
+        img.icon.box-icon(src="@/assets/box.svg")
 </template>
 
 <script>
@@ -56,6 +60,7 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
+import { nanoid } from 'nanoid'
 
 const defaultCardColor = '#c9c9c9'
 
@@ -98,6 +103,7 @@ export default {
   },
   computed: {
     isCards () { return Boolean(this.cards.length) },
+    isSingleCard () { return this.cards.length === 1 && !this.isBoxes },
     isBoxes () { return Boolean(this.boxes.length) },
     items () {
       let cards = utils.clone(this.cards)
@@ -336,6 +342,24 @@ export default {
         this.$store.dispatch('currentCards/update', card)
       })
       this.$store.dispatch('currentCards/updateCardMap')
+    },
+    replaceCardWithBox () {
+      this.$store.dispatch('closeAllDialogs', 'replaceCardWithBox')
+      let card = this.cards[0]
+      this.$store.dispatch('currentCards/remove', card)
+      const box = {
+        id: nanoid(),
+        name: card.name,
+        x: card.x,
+        y: card.y,
+        color: card.backgroundColor
+      }
+      this.$store.dispatch('currentBoxes/add', { box })
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.$store.commit('boxDetailsIsVisibleForBoxId', box.id)
+        })
+      })
     },
 
     // boxes only
