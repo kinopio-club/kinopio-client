@@ -3,7 +3,7 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.left.st
   section
     p Import Are.na Channel
 
-  template(v-if="!arenaAccessToken")
+  template(v-if="!accessToken")
     section
       p To import channels you need to connect your Are.na account to Kinopio
       .button-wrap
@@ -14,7 +14,7 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.left.st
             Loader(:visible="isAuthenticatingWithArena")
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
-  template(v-if="arenaAccessToken")
+  template(v-if="accessToken")
     section
       p Make a moodboard from the newest 100 blocks in a channel
       form(@submit.prevent="importChannel")
@@ -93,7 +93,7 @@ export default {
       if (this.isAuthenticatingWithArena) { return }
       return `http://dev.are.na/oauth/authorize?client_id=${arena.clientId}&redirect_uri=${arena.redirectUri}&response_type=code`
     },
-    arenaAccessToken () { return this.$store.state.currentUser.arenaAccessToken },
+    accessToken () { return this.$store.state.currentUser.arenaAccessToken },
     isAuthenticatingWithArena () { return this.$store.state.isAuthenticatingWithArena }
   },
   methods: {
