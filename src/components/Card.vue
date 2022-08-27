@@ -113,7 +113,7 @@ article(
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
-      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
+      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink || nameIsOnlyCheckbox}")
         //- Lock
         template(v-if="isLocked")
           // based on CardUnlockButton.vue
@@ -326,6 +326,11 @@ export default {
     }
   },
   computed: {
+    nameIsOnlyCheckbox () {
+      const isCheckOnly = this.card.name === '[x] '
+      const isUncheckOnly = this.card.name === '[] ' || this.card.name === '[ ] '
+      return isCheckOnly || isUncheckOnly
+    },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
     itemBackground () {
       let background = 'transparent'
