@@ -190,15 +190,21 @@ export default {
     const rect = element.getBoundingClientRect()
     const viewportWidth = this.visualViewport().width
     const viewportHeight = this.visualViewport().height
-    const shouldScrollX = (rect.x + rect.width) > viewportWidth
-    const shouldScrollY = (rect.y + rect.height) > viewportHeight
-    if (shouldScrollX || shouldScrollY) {
-      element.scrollIntoView({
-        behavior,
-        block: 'center', // vertical
-        inline: 'end' // horizontal
-      })
+    let x = rect.x + rect.width - viewportWidth
+    let y = rect.y + rect.height - viewportHeight
+    let scrollX = 0
+    let scrollY = 0
+    if (x > 0) {
+      scrollX = x + 20
     }
+    if (y > 0) {
+      scrollY = y + 80
+    }
+    window.scrollBy({
+      left: scrollX,
+      top: scrollY,
+      behavior
+    })
   },
   cursorPositionInViewport (event) {
     let x, y
