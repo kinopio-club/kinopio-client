@@ -121,8 +121,10 @@ export default {
       if (!connectionToRemove) { return }
       const connection = state.connections[connectionToRemove.id]
       if (!connection) { return }
-      state.ids = state.ids.filter(id => id !== connection.id)
-      delete state.connections[connection.id]
+      let ids = utils.clone(state.ids)
+      ids = ids.filter(id => id !== connection.id)
+      state.ids = ids
+      delete state.connections[connectionToRemove.id]
       cache.updateSpace('connections', state.connections, currentSpaceId)
     },
     removeType: (state, typeToRemove) => {
