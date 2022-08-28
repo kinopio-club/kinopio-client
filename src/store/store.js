@@ -97,7 +97,6 @@ const store = createStore({
     currentUserIsDraggingBoxIds: [],
     remoteBoxesDragging: [],
     preventDraggedBoxFromShowingDetails: false,
-    cardIdsInSameAxisAsCurrentDraggingCard: [],
 
     // cards
     shouldAddCard: false,
@@ -729,10 +728,6 @@ const store = createStore({
     preventDraggedBoxFromShowingDetails: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'preventDraggedBoxFromShowingDetails' })
       state.preventDraggedBoxFromShowingDetails = value
-    },
-    cardIdsInSameAxisAsCurrentDraggingCard: (state, value) => {
-      utils.typeCheck({ value, type: 'array', origin: 'cardIdsInSameAxisAsCurrentDraggingCard' })
-      state.cardIdsInSameAxisAsCurrentDraggingCard = value
     },
 
     // Tag Details
