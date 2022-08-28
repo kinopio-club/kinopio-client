@@ -1,12 +1,6 @@
 <template lang="pug">
 .row.url-preview(v-if="visible && (previewHasInfo || previewHasImage)")
   Loader(:visible="loading")
-  template(v-if="loading")
-    .content-buttons(v-if="parentIsCardDetails")
-      .button-wrap
-        button(@click="hidePreview")
-          img.icon(src="@/assets/remove.svg")
-
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': shouldHideInfo && !shouldHideImage}")
       //- youtube
@@ -24,19 +18,17 @@
               img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
               img.icon(v-else src="@/assets/view.svg")
               span URL
-          // remove
-          .button-wrap
-            button(@click="hidePreview" :disabled="!canEditCard")
-              img.icon(src="@/assets/remove.svg")
-        //- all, image, text
+        //- all, image, text, none
         .row(v-if="previewHasImage && previewHasInfo")
           .segmented-buttons
-            button(@click="showAll" :class="{active : !shouldHideImage && !shouldHideInfo}" :disabled="!canEditCard")
+            button(@click="showAll" :class="{active : isShowAll}" :disabled="!canEditCard")
               span All
-            button(@click="showImage" :class="{active : shouldHideInfo && !shouldHideImage}" :disabled="!canEditCard")
+            button(@click="showImage" :class="{active : isShowImage}" :disabled="!canEditCard")
               span Image
-            button(@click="showInfo" :class="{active : shouldHideImage && !shouldHideInfo}" :disabled="!canEditCard")
+            button(@click="showInfo" :class="{active : isShowInfo}" :disabled="!canEditCard")
               span Text
+            button(@click="showNone" :class="{active : isShowNone}" :disabled="!canEditCard")
+              span None
       // preview
       template(v-if="!shouldDisplayEmbed")
         //- url preview image
@@ -184,6 +176,21 @@ export default {
     },
     previewHasImage () {
       return Boolean(this.card.urlPreviewImage)
+    },
+    isShowAll () {
+      if (this.isShowNone) { return }
+      return !this.shouldHideImage && !this.shouldHideInfo
+    },
+    isShowImage () {
+      if (this.isShowNone) { return }
+      return this.shouldHideInfo && !this.shouldHideImage
+    },
+    isShowInfo () {
+      if (this.isShowNone) { return }
+      return this.shouldHideImage && !this.shouldHideInfo
+    },
+    isShowNone () {
+      return !this.card.urlPreviewIsVisible
     }
   },
   methods: {
@@ -207,23 +214,13 @@ export default {
     updateImageCanLoad () {
       this.imageCanLoad = true
     },
-    hidePreview () {
-      const update = {
-        id: this.card.id,
-        urlPreviewIsVisible: false
-      }
-      this.$store.dispatch('currentCards/update', update)
-      this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
-      this.$nextTick(() => {
-        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
-      })
-    },
     updateDimensionsAndMap () {
       this.$store.dispatch('currentCards/updateDimensionsAndMap', this.card.id)
     },
     showAll () {
       const card = {
         id: this.card.id,
+        urlPreviewIsVisible: true,
         shouldHideUrlPreviewInfo: false,
         shouldHideUrlPreviewImage: false
       }
@@ -232,6 +229,7 @@ export default {
     showImage () {
       const card = {
         id: this.card.id,
+        urlPreviewIsVisible: true,
         shouldHideUrlPreviewInfo: true,
         shouldHideUrlPreviewImage: false
       }
@@ -240,10 +238,22 @@ export default {
     showInfo () {
       const card = {
         id: this.card.id,
+        urlPreviewIsVisible: true,
         shouldHideUrlPreviewInfo: false,
         shouldHideUrlPreviewImage: true
       }
       this.$store.dispatch('currentCards/update', card)
+    },
+    showNone () {
+      const card = {
+        id: this.card.id,
+        urlPreviewIsVisible: false
+      }
+      this.$store.dispatch('currentCards/update', card)
+      this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
+      this.$nextTick(() => {
+        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
+      })
     }
 
   }
