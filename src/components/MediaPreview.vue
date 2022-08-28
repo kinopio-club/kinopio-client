@@ -9,9 +9,6 @@
           a(:href="formats.image")
             button
               img.icon.visit(src="@/assets/visit.svg")
-        .button-wrap
-          button(@click.stop.prevent="removeUrl(formats.image)" :disabled="!canEditCard")
-            img.icon(src="@/assets/remove.svg")
   //- Video
   .video-preview.row(v-if="formats.video")
     a(:href="formats.video")
@@ -22,9 +19,6 @@
         a(:href="formats.video")
           button
             img.icon.visit(src="@/assets/visit.svg")
-      .button-wrap
-        button(@click="removeUrl(formats.video)" :disabled="!canEditCard")
-          img.icon(src="@/assets/remove.svg")
   //- Audio
   .row(v-if="formats.audio")
     Audio(:visible="Boolean(formats.audio)" :url="formats.audio" :normalizedName="this.card.name" :parentIsCardDetails="true")
@@ -33,9 +27,6 @@
         a(:href="formats.audio")
           button
             img.icon.visit(src="@/assets/visit.svg")
-      .button-wrap
-        button(@click="removeUrl(formats.audio)" :disabled="!canEditCard")
-          img.icon(src="@/assets/remove.svg")
 </template>
 
 <script>
@@ -60,11 +51,6 @@ export default {
       if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
       return false
     }
-  },
-  methods: {
-    removeUrl (url) {
-      this.$emit('removeUrl', url)
-    }
   }
 }
 </script>
@@ -83,7 +69,7 @@ export default {
         box-shadow var(--hover-shadow)
 
     .audio
-      width 168px
+      width 203px
 
     .content-buttons
       pointer-events none
