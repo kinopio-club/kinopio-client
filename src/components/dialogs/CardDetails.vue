@@ -139,8 +139,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .badge.info(v-if="nameIsComment" :style="{backgroundColor: updatedByUser.color}")
         span ((comment))
 
-    MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats" @removeUrl="removeUrlFromName")
-    UrlPreview(:visible="cardUrlPreviewIsVisible" :loading="isLoadingUrlPreview" :card="card" :parentIsCardDetails="true" :urlsIsVisibleInName="urlsIsVisible" @toggleUrlsIsVisible="toggleUrlsIsVisible")
+    MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats")
+    UrlPreview(:visible="Boolean(card.urlPreviewUrl)" :loading="isLoadingUrlPreview" :card="card" :parentIsCardDetails="true" :urlsIsVisibleInName="urlsIsVisible" @toggleUrlsIsVisible="toggleUrlsIsVisible")
 
     //- Read Only
     p.row.edit-message(v-if="!canEditCard")
@@ -655,10 +655,6 @@ export default {
     updateLink ({ url, newUrl }) {
       url = url.trim()
       const newName = this.name.replace(url, newUrl)
-      this.updateCardName(newName)
-    },
-    removeUrlFromName (url) {
-      const newName = this.name.replace(url, '')
       this.updateCardName(newName)
     },
     toggleUrlsIsVisible () {
