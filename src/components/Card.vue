@@ -42,6 +42,7 @@ article(
     :data-background-color="card.backgroundColor"
     :data-tags="dataTags"
   )
+    .same-axis-guide-line(v-if="isCardInSameAxisAsCurrentDraggingCard")
     .selected-user-avatar(v-if="isRemoteSelected || isRemoteCardDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteCardDetailsVisibleColor}")
       img(src="@/assets/anon-avatar.svg")
 
@@ -487,7 +488,12 @@ export default {
       return userIsConnecting || currentUserIsDraggingBox || currentUserIsResizingBox || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked
     },
     isCardInSameAxisAsCurrentDraggingCard () {
+      if (this.isSelected || this.isBeingDragged) { return }
+      if (!this.$store.state.currentUserIsDraggingCard) { return }
+      // console.log(this.$store.state.cardIdsInSameAxisAsCurrentDraggingCard)
+      // return true
       const cardIds = this.$store.state.cardIdsInSameAxisAsCurrentDraggingCard
+      // console.log(cardIds)
       return cardIds.includes(this.id)
     },
     cardClasses () {
@@ -2214,6 +2220,14 @@ article
     img
       width 10px
       height 10px
+
+  .same-axis-guide-line
+    position absolute
+    left 0
+    top 0
+    width 1px
+    height 100%
+    border 1px solid red
 
 @keyframes bounce
   0%

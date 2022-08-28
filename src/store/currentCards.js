@@ -452,14 +452,15 @@ const currentCards = {
       // update cards in same axis
       const currentCard = cards.find(card => card.id === context.rootState.currentDraggingCardId)
       // let cardsInSameAxis = []
-      let cardsInSameAxis = context.state.cardMap.map(card => {
+      let cardIdsInSameAxis = context.state.cardMap.map(card => {
         if (card.id === currentCard.id) { return }
         if (card.x === currentCard.x || card.y === currentCard.y) {
           return card.id
         }
       })
-      cardsInSameAxis = cardsInSameAxis.filter(card => Boolean(card))
-      context.commit('cardIdsInSameAxisAsCurrentDraggingCard', cardsInSameAxis, { root: true })
+      cardIdsInSameAxis = cardIdsInSameAxis.filter(card => Boolean(card))
+      context.commit('cardIdsInSameAxisAsCurrentDraggingCard', cardIdsInSameAxis, { root: true })
+
       // perf = cardmap is too big? only viewport cards in cardmap?
       // todo = test w zoom out
     },
@@ -574,6 +575,7 @@ const currentCards = {
       context.dispatch('updateCardMap')
       context.commit('triggerUpdateCardOverlaps', null, { root: true })
       context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })
+      context.commit('cardIdsInSameAxisAsCurrentDraggingCard', [], { root: true })
     },
 
     // z-index
