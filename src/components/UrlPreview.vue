@@ -37,10 +37,10 @@
         //- on card
         img.preview-image(v-if="!parentIsCardDetails" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensionsAndMap")
         //- in carddetails
-        a.preview-image-wrap(v-if="parentIsCardDetails && !shouldHideImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo)}")
+        a.preview-image-wrap(v-if="parentIsCardDetails && !shouldHideImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
           img.preview-image( :src="card.urlPreviewImage" @load="updateDimensionsAndMap")
         //- info
-        .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, hidden: shouldHideInfo}" :style="{background: selectedColor}")
+        .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, hidden: shouldHideInfo, transparent: isShowNone}" :style="{background: selectedColor}")
           img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
           .title {{filteredTitle}}
@@ -86,8 +86,12 @@ export default {
       if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
       return false
     },
-    shouldHideInfo () { return this.card.shouldHideUrlPreviewInfo },
-    shouldHideImage () { return this.card.shouldHideUrlPreviewImage },
+    shouldHideInfo () {
+      return this.card.shouldHideUrlPreviewInfo
+    },
+    shouldHideImage () {
+      return this.card.shouldHideUrlPreviewImage
+    },
     selectedColor () {
       if (!this.isSelected) { return }
       return this.user.color
@@ -113,7 +117,6 @@ export default {
         if (url === domain) { isRoot = true }
         if (url === domain + '/') { isRoot = true }
       })
-      console.log(domains, url, isRoot)
       if (isRoot) { return }
       domains.forEach(domain => {
         if (url.includes(domain)) { isVideo = true }
@@ -247,7 +250,9 @@ export default {
     showNone () {
       const card = {
         id: this.card.id,
-        urlPreviewIsVisible: false
+        urlPreviewIsVisible: false,
+        shouldHideUrlPreviewInfo: false,
+        shouldHideUrlPreviewImage: false
       }
       this.$store.dispatch('currentCards/update', card)
       this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
@@ -367,5 +372,8 @@ export default {
       img,
       span
         opacity 0.5
+
+  .transparent
+    opacity 0.5
 
 </style>
