@@ -442,14 +442,27 @@ const currentCards = {
 
     // move
 
-    moveWhileDragging: (state, cards) => {
+    moveWhileDragging: (context, cards) => {
+      // move cards
       cards.forEach(card => {
         const element = document.querySelector(`article[data-card-id="${card.id}"]`)
         element.style.left = card.x + 'px'
         element.style.top = card.y + 'px'
       })
+      // update cards in same axis
+      const currentCard = cards.find(card => card.id === context.rootState.currentDraggingCardId)
+      // let cardsInSameAxis = []
+      let cardsInSameAxis = context.state.cardMap.map(card => {
+        if (card.id === currentCard.id) { return }
+        if (card.x === currentCard.x || card.y === currentCard.y) {
+          return card.id
+        }
+      })
+      cardsInSameAxis = cardsInSameAxis.filter(card => Boolean(card))
+      context.commit('cardIdsInSameAxisAsCurrentDraggingCard', cardsInSameAxis, { root: true })
+      // perf = cardmap is too big? only viewport cards in cardmap?
+      // todo = test w zoom out
     },
-
     move: (context, { endCursor, prevCursor, delta }) => {
       const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
