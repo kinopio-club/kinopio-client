@@ -8,6 +8,7 @@ main.space(
   Connections(:startCursor="startCursor")
   Boxes
   Cards
+  Guides
   LockedItemButtons
   //- Presence
   template(v-for="user in spaceMembers")
@@ -35,6 +36,7 @@ import NotificationsWithPosition from '@/components/NotificationsWithPosition.vu
 import BoxSelecting from '@/components/BoxSelecting.vue'
 import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
+import Guides from '@/components/Guides.vue'
 import Connections from '@/components/Connections.vue'
 import LockedItemButtons from '@/components/LockedItemButtons.vue'
 import utils from '@/utils.js'
@@ -61,6 +63,7 @@ export default {
     BoxSelecting,
     Boxes,
     Cards,
+    Guides,
     LockedItemButtons,
     Connections
   },
