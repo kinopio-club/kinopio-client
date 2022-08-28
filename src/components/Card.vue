@@ -22,7 +22,7 @@ article(
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
 
-    :class="{jiggle: shouldJiggle, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio, 'is-locked': isLocked, 'has-url-preview': cardUrlPreviewIsVisible }",
+    :class="cardClasses"
     :style="cardStyle"
     :data-card-id="id"
     :data-card-x="x"
@@ -485,6 +485,18 @@ export default {
       const currentUserIsDraggingBox = this.$store.state.currentUserIsDraggingBox
       const currentUserIsResizingBox = this.$store.state.currentUserIsResizingBox
       return userIsConnecting || currentUserIsDraggingBox || currentUserIsResizingBox || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked
+    },
+    cardClasses () {
+      return {
+        'jiggle': this.shouldJiggle,
+        'active': this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.uploadIsDraggedOver,
+        'filtered': this.isFiltered,
+        'media-card': this.isVisualCard || this.pendingUploadDataUrl,
+        'audio-card': this.isAudioCard,
+        'is-playing-audio': this.isPlayingAudio,
+        'is-locked': this.isLocked,
+        'has-url-preview': this.cardUrlPreviewIsVisible
+      }
     },
     cardStyle () {
       let backgroundColor
