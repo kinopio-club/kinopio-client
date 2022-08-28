@@ -748,16 +748,18 @@ export default {
           prevCard = card
           return card
         })
-        newCards = newCards.map(card => {
+        newCards.forEach(card => {
           card = utils.updateCardDimensions(card)
-          this.$store.dispatch('currentCards/update', {
+          card = {
             name: card.name,
             id: card.id,
             y: card.y,
             width: card.width,
-            height: card.height
-          })
-          return card
+            height: card.height,
+            urlPreviewIsVisible: true
+          }
+          this.$store.dispatch('currentCards/update', card)
+          this.$store.commit('triggerUpdateUrlPreview', card.id)
         })
         this.$store.dispatch('closeAllDialogs', 'CardDetails.addSplitCards')
       })

@@ -267,6 +267,11 @@ export default {
         let { cardId, url } = mutation.payload
         if (cardId !== this.card.id) { return }
         this.addFile({ url })
+      } else if (mutation.type === 'triggerUpdateUrlPreview') {
+        if (mutation.payload === this.card.id) {
+          this.updateMediaUrls()
+          this.updateUrlPreview()
+        }
       }
     })
   },

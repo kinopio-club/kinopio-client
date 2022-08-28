@@ -436,6 +436,7 @@ const store = createStore({
     triggerImportIsVisible: () => {},
     triggerSelectAllItemsBelowCursor: (state, position) => {},
     triggerSplitCard: (state, cardId) => {},
+    triggerUpdateUrlPreview: (state, cardId) => {},
     triggerRemovedIsVisible: () => {},
     triggerUpdateConnectionPathWhileDragging: (state, { connection, path }) => {},
     triggerClearAllSpaceFilters: () => {},
