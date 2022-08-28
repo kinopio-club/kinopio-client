@@ -10,7 +10,7 @@
             button
               img.icon.visit(src="@/assets/visit.svg")
         .button-wrap
-          button(@click="removeUrl(formats.image)" :disabled="!canEditCard")
+          button(@click.stop.prevent="removeUrl(formats.image)" :disabled="!canEditCard")
             img.icon(src="@/assets/remove.svg")
   //- Video
   .video-preview.row(v-if="formats.video")
