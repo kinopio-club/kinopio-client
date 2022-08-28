@@ -119,6 +119,7 @@ export default {
       let isRoot, isVideo
       domains.forEach(domain => {
         if (url === domain) { isRoot = true }
+        if (url === domain + '/') { isRoot = true }
       })
       console.log(domains, url, isRoot)
       if (isRoot) { return }
