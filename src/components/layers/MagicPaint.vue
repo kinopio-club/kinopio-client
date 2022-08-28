@@ -34,11 +34,16 @@ aside
     :currentCursor="currentCursor"
     :uploadIsDraggedOver="uploadIsDraggedOver"
   )
+  DragGuideLines(
+    :currentCursor="currentCursor"
+  )
+
 </template>
 
 <script>
 import utils from '@/utils.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
+import DragGuideLines from '@/components/DragGuideLines.vue'
 
 const circleRadius = 20
 const circleSelectionRadius = circleRadius - 10 // magnitude of sensitivity
@@ -75,7 +80,8 @@ let postScrollAnimationTimer, postScrollStartTime, shouldCancelPostScroll
 export default {
   name: 'MagicPaint',
   components: {
-    DropGuideLine
+    DropGuideLine,
+    DragGuideLines
   },
   created () {
     this.$store.subscribe((mutation, state) => {
