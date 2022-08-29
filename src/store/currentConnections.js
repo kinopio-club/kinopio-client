@@ -242,13 +242,11 @@ export default {
         }
       })
     },
-    updatePathsWhileDragging: (context, { connections, cards }) => {
+    updatePathsWhileDragging: (context, { connections }) => {
       connections.forEach(connection => {
         const path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
         const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
-        const updates = { connectionId: connection.id, path }
-        context.commit('triggerUpdateConnectionPathWhileDragging', updates, { root: true })
-        context.dispatch('broadcast/update', { updates, type: 'updateConnection', handler: 'triggerUpdateConnectionPathWhileDragging' }, { root: true })
+        context.dispatch('broadcast/update', { updates: connections, type: 'updateConnection', handler: 'currentConnections/updatePathsWhileDragging' }, { root: true })
         element.setAttribute('d', path)
       })
     },

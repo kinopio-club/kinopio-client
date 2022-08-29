@@ -509,7 +509,7 @@ const currentCards = {
       context.dispatch('moveWhileDragging', cards)
       connections = uniqBy(connections, 'id')
       context.commit('cardsWereDragged', true, { root: true })
-      context.dispatch('currentConnections/updatePathsWhileDragging', { connections, cards }, { root: true })
+      context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveWhileDraggingBroadcast' }, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsWhileDraggingBroadcast' }, { root: true })
       connections.forEach(connection => {
@@ -554,7 +554,7 @@ const currentCards = {
       })
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
       connections = uniqBy(connections, 'id')
-      context.commit('currentConnections/updatePaths', connections, { root: true })
+      context.dispatch('currentConnections/updatePaths', { connections }, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })

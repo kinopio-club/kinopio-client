@@ -438,7 +438,6 @@ const store = createStore({
     triggerSplitCard: (state, cardId) => {},
     triggerUpdateUrlPreview: (state, cardId) => {},
     triggerRemovedIsVisible: () => {},
-    triggerUpdateConnectionPathWhileDragging: (state, { connection, path }) => {},
     triggerClearAllSpaceFilters: () => {},
     triggerNotifyUnlockedStickyCards: () => {},
     triggerAddToInboxIsVisible: () => {},
