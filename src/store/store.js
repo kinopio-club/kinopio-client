@@ -211,9 +211,14 @@ const store = createStore({
       const body = document.body
       const html = document.documentElement
       const pageWidth = Math.max(state.maxPageSizeWidth, body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
-      const pageHeight = Math.max(state.maxPageSizeHeight, body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+      let pageHeight = Math.max(state.maxPageSizeHeight, body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
       const viewportWidth = utils.visualViewport().width
-      const viewportHeight = utils.visualViewport().height
+      let viewportHeight = utils.visualViewport().height
+      if (utils.isFirefox()) {
+        const zoom = state.spaceZoomPercent / 100
+        pageHeight = pageHeight * zoom
+        viewportHeight = viewportHeight * zoom
+      }
       state.pageWidth = Math.round(pageWidth)
       state.pageHeight = Math.round(pageHeight)
       state.viewportWidth = Math.round(viewportWidth)

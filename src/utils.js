@@ -461,6 +461,9 @@ export default {
   isMobile () {
     return Boolean(this.isIPhone() || this.isAndroid())
   },
+  isFirefox () {
+    return navigator.userAgent && /Firefox/.test(navigator.userAgent)
+  },
   isMultiTouch (event) {
     if (event.touches) {
       return event.touches.length > 1
