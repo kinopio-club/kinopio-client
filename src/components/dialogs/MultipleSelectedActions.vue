@@ -49,10 +49,7 @@ dialog.narrow.multiple-selected-actions(
         .segmented-buttons.move-or-copy-wrap(v-if="cardsIsSelected")
           button(@click.left.stop="toggleCopyCardsIsVisible" :class="{ active: copyCardsIsVisible }")
             span Copy
-            MoveOrCopyCards(:visible="copyCardsIsVisible" :actionIsMove="false" :exportData="exportData")
-          button(@click.left.stop="toggleMoveCardsIsVisible" :class="{ active: moveCardsIsVisible }" :disabled="!canEditAll.cards")
-            span Move
-            MoveOrCopyCards(:visible="moveCardsIsVisible" :actionIsMove="true" :exportData="exportData")
+            MoveOrCopyCards(:visible="copyCardsIsVisible" :exportData="exportData")
       //- More Options
       AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
 
@@ -103,7 +100,6 @@ export default {
   data () {
     return {
       copyCardsIsVisible: false,
-      moveCardsIsVisible: false,
       multipleConnectionsPickerVisible: false,
       cardsIsConnected: false,
       cardsHaveCheckboxes: false,
@@ -417,11 +413,6 @@ export default {
       this.closeDialogs()
       this.copyCardsIsVisible = !isVisible
     },
-    toggleMoveCardsIsVisible () {
-      const isVisible = this.moveCardsIsVisible
-      this.closeDialogs()
-      this.moveCardsIsVisible = !isVisible
-    },
     toggleMultipleConnectionsPickerVisible () {
       const isVisible = this.multipleConnectionsPickerVisible
       this.closeDialogs()
@@ -437,7 +428,6 @@ export default {
     },
     closeDialogs () {
       this.copyCardsIsVisible = false
-      this.moveCardsIsVisible = false
       this.multipleConnectionsPickerVisible = false
       this.$store.commit('triggerCardDetailsCloseDialogs')
     },

@@ -324,11 +324,10 @@ export default {
     alignTopItems (items, type) {
       let newItems = []
       const origin = items[0]
-      const zoom = this.spaceCounterZoomDecimal
       items.forEach((item, index) => {
         if (index > 0) {
           const previousItem = newItems[index - 1]
-          const previousRightSide = previousItem.x + (previousItem.width * zoom)
+          const previousRightSide = previousItem.x + previousItem.width
           item = utils.clone(item)
           item.y = origin.y
           if (this.shouldAutoDistribute) {
@@ -419,11 +418,10 @@ export default {
     alignLeftItems (items, type) {
       let newItems = []
       const origin = items[0]
-      const zoom = this.spaceCounterZoomDecimal
       items.forEach((item, index) => {
         if (index > 0) {
           const previousItem = newItems[index - 1]
-          const previousBottomSide = previousItem.y + (previousItem.height * zoom)
+          const previousBottomSide = previousItem.y + previousItem.height
           item = utils.clone(item)
           item.x = origin.x
           if (this.shouldAutoDistribute) {

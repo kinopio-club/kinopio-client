@@ -442,28 +442,29 @@ const currentCards = {
 
     // move
 
-    moveWhileDragging: (context, cards) => {
-      // move cards
+    moveWhileDragging: (state, cards) => {
       cards.forEach(card => {
         const element = document.querySelector(`article[data-card-id="${card.id}"]`)
         element.style.left = card.x + 'px'
         element.style.top = card.y + 'px'
       })
+
+      // todo: move to box moving while dragging
       // update cards in same axis
-      const currentCard = cards.find(card => card.id === context.rootState.currentDraggingCardId)
-      // let cardsInSameAxis = []
-      let cardIdsInSameAxis = context.state.cardMap.map(card => {
-        if (card.id === currentCard.id) { return }
-        if (card.x === currentCard.x || card.y === currentCard.y) {
-          return card.id
-        }
-      })
-      cardIdsInSameAxis = cardIdsInSameAxis.filter(card => Boolean(card))
-      context.commit('cardIdsInSameAxisAsCurrentDraggingCard', cardIdsInSameAxis, { root: true })
+      // const currentCard = cards.find(card => card.id === context.rootState.currentDraggingCardId)
+      // let cardIdsInSameAxis = context.state.cardMap.map(card => {
+      //   if (card.id === currentCard.id) { return }
+      //   if (card.x === currentCard.x || card.y === currentCard.y) {
+      //     return card.id
+      //   }
+      // })
+      // cardIdsInSameAxis = cardIdsInSameAxis.filter(card => Boolean(card))
+      // context.commit('cardIdsInSameAxisAsCurrentDraggingCard', cardIdsInSameAxis, { root: true })
 
       // perf = cardmap is too big? only viewport cards in cardmap?
       // todo = test w zoom out
     },
+
     move: (context, { endCursor, prevCursor, delta }) => {
       const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
@@ -523,7 +524,7 @@ const currentCards = {
       context.dispatch('moveWhileDragging', cards)
       connections = uniqBy(connections, 'id')
       context.commit('cardsWereDragged', true, { root: true })
-      context.dispatch('currentConnections/updatePathsWhileDragging', { connections, cards }, { root: true })
+      context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveWhileDraggingBroadcast' }, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsWhileDraggingBroadcast' }, { root: true })
       connections.forEach(connection => {
@@ -568,7 +569,7 @@ const currentCards = {
       })
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
       connections = uniqBy(connections, 'id')
-      context.commit('currentConnections/updatePaths', connections, { root: true })
+      context.dispatch('currentConnections/updatePaths', { connections }, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })

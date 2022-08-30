@@ -60,10 +60,6 @@ export default {
           const isFromStore = true
           this.showConnectionDetails(mutation.payload.event, isFromStore)
         }
-      } else if (mutation.type === 'triggerUpdateConnectionPathWhileDragging') {
-        if (mutation.payload.connectionId === this.id) {
-          this.updatedPathWhileDragging = mutation.payload.path
-        }
       }
     })
   },
@@ -71,8 +67,7 @@ export default {
     return {
       controlCurve: undefined,
       curvedPath: '',
-      frameCount: 0,
-      updatedPathWhileDragging: ''
+      frameCount: 0
     }
   },
   computed: {
@@ -290,7 +285,7 @@ export default {
     },
     animationFrame () {
       this.frameCount++
-      this.curvedPath = this.updatedPathWhileDragging || this.path
+      this.curvedPath = this.path
       const curvePattern = new RegExp(/(q[-0-9]*),([-0-9]*)\w+/)
       // "q90,40" from "m747,148 q90,40 -85,75"
       // "q-90,-40" from "m747,148 q-90,-40 -85,75" (negative)

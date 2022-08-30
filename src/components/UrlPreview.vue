@@ -111,6 +111,7 @@ export default {
     },
     isYoutubeUrl () {
       const url = this.card.urlPreviewUrl
+      if (url.includes('/channel/')) { return }
       const domains = ['https://youtube.com', 'https://www.youtube.com', 'https://m.youtube.com', 'https://youtu.be']
       let isRoot, isVideo
       domains.forEach(domain => {

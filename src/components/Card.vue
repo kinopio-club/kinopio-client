@@ -498,7 +498,6 @@ export default {
     },
     cardClasses () {
       return {
-        // 'same-axis': this.isCardInSameAxisAsCurrentDraggingCard,
         'jiggle': this.shouldJiggle,
         'active': this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.uploadIsDraggedOver,
         'filtered': this.isFiltered,
@@ -2236,10 +2235,6 @@ article
     transform translateY(4px)
   100%
     transform translateY(0)
-
-.same-axis
-  // animation jiggle 0.5s infinite ease-out forwards
-  background-color pink
 
 .jiggle
   animation jiggle 0.5s infinite ease-out forwards
