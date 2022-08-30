@@ -116,6 +116,7 @@ export default {
     // shift circle positions with scroll to simulate full size canvas
     this.updatePrevScrollPosition()
     window.addEventListener('scroll', this.userScroll)
+    window.addEventListener('touchmove', this.userScroll) // android fix
     window.addEventListener('load', this.clearCircles)
     this.startPostScroll()
   },
@@ -123,6 +124,7 @@ export default {
     window.removeEventListener('mouseup', this.stopPainting)
     window.removeEventListener('touchend', this.stopPainting)
     window.removeEventListener('scroll', this.userScroll)
+    window.removeEventListener('touchmove', this.userScroll)
     window.removeEventListener('load', this.clearCircles)
   },
   data () {
