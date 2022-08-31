@@ -2,9 +2,11 @@
 .space-zoom
   Slider(
     @updatePlayhead="updateSpaceZoom"
+    @resetPlayhead="resetSpaceZoom"
     :minValue="min"
     :value="spaceZoomPercent"
-    :maxValue="max"
+    :maxValue="initialValue"
+    :initialValue="initialValue"
     :animateJiggleRight="animateJiggleRight"
     :animateJiggleLeft="animateJiggleLeft"
     @removeAnimations="removeAnimations"
@@ -25,7 +27,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerSpaceZoomReset') {
-        this.updateSpaceZoomFromTrigger(this.max)
+        this.updateSpaceZoomFromTrigger(this.initialValue)
       }
       if (mutation.type === 'triggerSpaceZoomOut') {
         let percent = this.spaceZoomPercent
@@ -50,7 +52,8 @@ export default {
   data () {
     return {
       min: 40,
-      max: 100,
+      max: 140,
+      initialValue: 100,
       animateJiggleRight: false,
       animateJiggleLeft: false
     }
@@ -70,6 +73,9 @@ export default {
       this.$store.commit('spaceZoomPercent', percent)
       this.updateBackgroundZoom()
       this.$store.dispatch('currentCards/updateCardMap')
+    },
+    resetSpaceZoom () {
+      this.updateSpaceZoomFromTrigger(this.initialValue)
     },
     updateSpaceZoom (percent) {
       this.updateSpaceZoomPercent(percent)

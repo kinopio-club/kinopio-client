@@ -44,6 +44,7 @@ export default {
   props: {
     minValue: Number,
     maxValue: Number,
+    initialValue: Number,
     value: Number,
     animateJiggleRight: Boolean,
     animateJiggleLeft: Boolean
@@ -80,7 +81,7 @@ export default {
       return Math.round(this.value)
     },
     zoomPercentBadgeIsVisible () {
-      if (this.value !== this.maxValue) {
+      if (this.value !== this.initialValue) {
         return true
       } else {
         return false
@@ -105,11 +106,11 @@ export default {
   methods: {
     resetPlayhead () {
       this.playheadIsBeingDragged = false
-      this.buttonPosition = this.maxValue
+      this.buttonPosition = this.initialValue
       this.updateButtonPosition()
-      this.$emit('updatePlayhead', this.maxValue)
+      this.$emit('resetPlayhead')
     },
-    movePlayhead (event) {
+    movePlayhead (event, shouldSnapToInitial) {
       const progress = this.$refs.progress
       const rect = progress.getBoundingClientRect()
       const progressStartX = rect.x + window.scrollX
