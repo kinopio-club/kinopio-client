@@ -13,6 +13,9 @@ let spaceKeyIsDown = false
 
 let prevCursorPosition, currentCursorPosition
 
+const snapToInitialZoomDuration = 400
+let snapToInitialZoomTimeoutId
+
 const checkIsSpaceScope = (event) => {
   const tagName = event.target.tagName
   const isFromInput = tagName === 'INPUT' || tagName === 'TEXTAREA'
@@ -223,26 +226,38 @@ export default {
     },
     // on mouse wheel
     handleMouseWheelEvents (event) {
-      const isMeta = event.metaKey || event.ctrlKey // event.ctrlKey is true for trackpad pinch
+      const isMeta = event.metaKey || event.ctrlKey // event.ctrlKey is true for mac safari trackpad pinch
       if (!isMeta) { return }
       event.preventDefault()
       const deltaY = event.deltaY
       let shouldZoomIn = deltaY < 0
-      let shouldZoomOut = deltaY > 0
-      const invertZoom = event.webkitDirectionInvertedFromDevice // this.$store.state.currentUser.shouldInvertZoomDirection
-      if (invertZoom) {
-        shouldZoomIn = deltaY > 0
-        shouldZoomOut = deltaY < 0
-      }
       let speed = Math.min(Math.abs(deltaY), 5)
+      speed = speed * 1.5
       const position = utils.cursorPositionInPage(event)
-      console.log('🐸', event, speed, position) // pass position to store commit
+      console.log('🌻 speed x y', speed, position.x, position.y)
       if (shouldZoomIn) {
         this.$store.commit('triggerSpaceZoomIn', { speed, position })
-      } else if (shouldZoomOut) {
+      } else {
         this.$store.commit('triggerSpaceZoomOut', { speed, position })
       }
+      // start or reset snap to initial zoom check
+      clearTimeout(snapToInitialZoomTimeoutId)
+      snapToInitialZoomTimeoutId = setTimeout(() => {
+        this.checkIfShouldSnapToInitialZoom()
+      }, snapToInitialZoomDuration)
     },
+    checkIfShouldSnapToInitialZoom () {
+      const zoom = this.$store.state.spaceZoomPercent
+      const shouldSnap = utils.isBetween({
+        value: zoom,
+        min: 90,
+        max: 110
+      })
+      if (!shouldSnap) { return }
+      console.log('🦆 snap to initial zoom')
+      this.$store.commit('triggerSpaceZoomReset')
+    },
+
     // on mouse down
     handleMouseDownEvents (event) {
       const rightMouseButton = 2

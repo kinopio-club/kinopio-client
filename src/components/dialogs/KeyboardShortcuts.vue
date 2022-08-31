@@ -70,10 +70,6 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
             img.icon.magnifying-glass(src="@/assets/magnifying-glass.svg")
             span Zoom In or Out
           .badge.keyboard-shortcut {{meta}}-+/-, {{meta}}-Scroll
-        .row(v-if="!isMobile")
-          label(:class="{active: shouldInvertZoomDirection}" @click.left.prevent="toggleShouldInvertZoomDirection" @keydown.stop.enter="toggleShouldInvertZoomDirection")
-            input(type="checkbox" v-model="shouldInvertZoomDirection")
-            span Invert Zoom Direction
 
     //- Edit
     template(v-if="categoryIsVisible('edit')")
@@ -273,7 +269,6 @@ export default {
     meta () { return utils.metaKey() },
     currentUser () { return this.$store.state.currentUser },
     isMobile () { return utils.isMobile() },
-    shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection },
     shouldUseLastConnectionType () { return this.$store.state.currentUser.shouldUseLastConnectionType },
     lastOrNewConnectionTypeControlSetting () {
       if (this.shouldUseLastConnectionType) {
@@ -306,10 +301,6 @@ export default {
     categoryColor (categoryName) {
       const color = this.categoryByName(categoryName).color
       return color
-    },
-    toggleShouldInvertZoomDirection () {
-      const value = !this.shouldInvertZoomDirection
-      this.$store.dispatch('currentUser/shouldInvertZoomDirection', value)
     },
     updateDialogHeight () {
       if (!this.visible) { return }
