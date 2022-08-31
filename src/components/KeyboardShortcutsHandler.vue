@@ -230,16 +230,17 @@ export default {
       let shouldZoomIn = deltaY < 0
       let shouldZoomOut = deltaY > 0
       const invertZoom = event.webkitDirectionInvertedFromDevice // this.$store.state.currentUser.shouldInvertZoomDirection
-      console.log('🐸', event)
       if (invertZoom) {
         shouldZoomIn = deltaY > 0
         shouldZoomOut = deltaY < 0
       }
       let speed = Math.min(Math.abs(deltaY), 5)
+      const position = utils.cursorPositionInPage(event)
+      console.log('🐸', event, speed, position) // pass position to store commit
       if (shouldZoomIn) {
-        this.$store.commit('triggerSpaceZoomIn', { speed })
+        this.$store.commit('triggerSpaceZoomIn', { speed, position })
       } else if (shouldZoomOut) {
-        this.$store.commit('triggerSpaceZoomOut', { speed })
+        this.$store.commit('triggerSpaceZoomOut', { speed, position })
       }
     },
     // on mouse down
