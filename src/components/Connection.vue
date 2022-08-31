@@ -138,7 +138,10 @@ export default {
       const isSelected = remoteConnections.find(connection => connection.connectionId === this.id)
       return isSelected
     },
-    shouldAnimate () { return Boolean(this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected) },
+    shouldAnimate () {
+      if (this.$store.state.currentUserIsDraggingCard) { return }
+      return Boolean(this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected)
+    },
     isHovered () { return this.id === this.$store.state.currentUserIsHoveringOverConnectionId },
     shouldHideConnectionOutline () { return this.$store.state.shouldHideConnectionOutline },
 
