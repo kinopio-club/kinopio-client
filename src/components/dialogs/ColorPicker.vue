@@ -109,7 +109,7 @@ export default {
     hueIsRed () { return this.currentHue === 'red' },
     hueIsGreen () { return this.currentHue === 'green' },
     hueIsBlue () { return this.currentHue === 'blue' },
-    favoriteColors () { return this.$store.state.currentUser.favoriteColors },
+    favoriteColors () { return this.$store.state.currentUser.favoriteColors || [] },
     currentColorIsUserColor () { return this.favoriteColors.includes(this.currentColor) }
   },
   methods: {

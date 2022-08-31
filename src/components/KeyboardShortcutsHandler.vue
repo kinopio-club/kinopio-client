@@ -223,22 +223,23 @@ export default {
     },
     // on mouse wheel
     handleMouseWheelEvents (event) {
-      const isMeta = event.metaKey || event.ctrlKey
+      const isMeta = event.metaKey || event.ctrlKey // event.ctrlKey is true for trackpad pinch
       if (!isMeta) { return }
       event.preventDefault()
       const deltaY = event.deltaY
       let shouldZoomIn = deltaY < 0
       let shouldZoomOut = deltaY > 0
-      const invertZoom = this.$store.state.currentUser.shouldInvertZoomDirection
+      const invertZoom = event.webkitDirectionInvertedFromDevice // this.$store.state.currentUser.shouldInvertZoomDirection
+      console.log('🐸', event)
       if (invertZoom) {
         shouldZoomIn = deltaY > 0
         shouldZoomOut = deltaY < 0
       }
       let speed = Math.min(Math.abs(deltaY), 5)
       if (shouldZoomIn) {
-        this.$store.commit('triggerSpaceZoomIn', speed)
+        this.$store.commit('triggerSpaceZoomIn', { speed })
       } else if (shouldZoomOut) {
-        this.$store.commit('triggerSpaceZoomOut', speed)
+        this.$store.commit('triggerSpaceZoomOut', { speed })
       }
     },
     // on mouse down

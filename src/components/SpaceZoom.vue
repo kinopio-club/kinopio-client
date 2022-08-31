@@ -29,12 +29,20 @@ export default {
       }
       if (mutation.type === 'triggerSpaceZoomOut') {
         let percent = this.spaceZoomPercent
-        percent -= mutation.payload || increment
+        let speed
+        if (mutation.payload) {
+          speed = mutation.payload.speed
+        }
+        percent -= speed || increment
         this.updateSpaceZoomFromTrigger(percent)
       }
       if (mutation.type === 'triggerSpaceZoomIn') {
         let percent = this.spaceZoomPercent
-        percent += mutation.payload || increment
+        let speed
+        if (mutation.payload) {
+          speed = mutation.payload.speed
+        }
+        percent += speed || increment
         this.updateSpaceZoomFromTrigger(percent)
       }
     })
