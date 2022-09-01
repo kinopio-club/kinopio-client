@@ -13,8 +13,8 @@ let spaceKeyIsDown = false
 
 let prevCursorPosition, currentCursorPosition
 
-const snapToInitialZoomDuration = 400
-let snapToInitialZoomTimeoutId
+// const snapToInitialZoomDuration = 400
+// let snapToInitialZoomTimeoutId
 
 const checkIsSpaceScope = (event) => {
   const tagName = event.target.tagName
@@ -241,22 +241,22 @@ export default {
         this.$store.commit('triggerSpaceZoomOut', { speed })
       }
       // start or reset snap to initial zoom check
-      clearTimeout(snapToInitialZoomTimeoutId)
-      snapToInitialZoomTimeoutId = setTimeout(() => {
-        this.checkIfShouldSnapToInitialZoom()
-      }, snapToInitialZoomDuration)
+      // clearTimeout(snapToInitialZoomTimeoutId)
+      // snapToInitialZoomTimeoutId = setTimeout(() => {
+      //   this.checkIfShouldSnapToInitialZoom()
+      // }, snapToInitialZoomDuration)
     },
-    checkIfShouldSnapToInitialZoom () {
-      const zoom = this.$store.state.spaceZoomPercent
-      const shouldSnap = utils.isBetween({
-        value: zoom,
-        min: 90,
-        max: 110
-      })
-      if (!shouldSnap) { return }
-      console.log('🦆 snap to initial zoom')
-      this.$store.commit('triggerSpaceZoomReset')
-    },
+    // checkIfShouldSnapToInitialZoom () {
+    //   const zoom = this.$store.state.spaceZoomPercent
+    //   const shouldSnap = utils.isBetween({
+    //     value: zoom,
+    //     min: 90,
+    //     max: 110
+    //   })
+    //   if (!shouldSnap) { return }
+    //   console.log('🦆 snap to initial zoom')
+    //   this.$store.commit('triggerSpaceZoomReset')
+    // },
 
     // on mouse down
     handleMouseDownEvents (event) {
