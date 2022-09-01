@@ -122,11 +122,14 @@ export default {
   },
   computed: {
     styles () {
-      const zoom = 1 / this.spaceZoomDecimal
+      const origin = this.$store.state.prevZoomOrigin
+      const width = Math.round(this.pageWidth * this.spaceCounterZoomDecimal)
+      const height = Math.round(this.pageHeight * this.spaceCounterZoomDecimal)
       return {
-        width: `${this.pageWidth * zoom}px`,
-        height: `${this.pageHeight * zoom}px`,
-        transform: `scale(${this.spaceZoomDecimal})`
+        width: `${width}px`,
+        height: `${height}px`,
+        transform: `scale(${this.spaceZoomDecimal})`,
+        transformOrigin: `${origin.x}px ${origin.y}px`
       }
     },
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
@@ -154,7 +157,8 @@ export default {
       const excludeCurrentUser = true
       return this.$store.getters['currentSpace/members'](excludeCurrentUser)
     },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
   },
   methods: {
     correctCardConnectionPaths () {
@@ -461,6 +465,9 @@ export default {
   pointer-events none // so that painting can receive events
   position relative // used by svg connections
   transform-origin top left
+  // outline used to draw out of boundary areas during zoom
+  // outline size based on https://stackoverflow.com/questions/16637530/whats-the-maximum-pixel-value-of-css-width-and-height-properties
+  outline 10737418px var(--secondary-background) solid
   &.hidden-by-mindmap
     opacity 0.4
   .card-overlap-indicator
