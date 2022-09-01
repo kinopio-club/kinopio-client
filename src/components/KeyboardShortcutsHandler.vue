@@ -234,11 +234,11 @@ export default {
       let speed = Math.min(Math.abs(deltaY), 5)
       speed = speed * 1.5
       const position = utils.cursorPositionInPage(event)
-      console.log('🌻 speed x y', speed, position.x, position.y)
+      this.$store.commit('prevZoomOrigin', position)
       if (shouldZoomIn) {
-        this.$store.commit('triggerSpaceZoomIn', { speed, position })
+        this.$store.commit('triggerSpaceZoomIn', { speed })
       } else {
-        this.$store.commit('triggerSpaceZoomOut', { speed, position })
+        this.$store.commit('triggerSpaceZoomOut', { speed })
       }
       // start or reset snap to initial zoom check
       clearTimeout(snapToInitialZoomTimeoutId)

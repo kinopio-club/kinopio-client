@@ -37,8 +37,6 @@ const store = createStore({
     isTouchDevice: false,
     cardsCreatedLimit: 100,
     prevCursorPosition: { x: 0, y: 0 },
-    spaceZoomPercent: 100,
-    pinchCounterZoomDecimal: 1,
     currentSpacePath: '/',
     webfontIsLoaded: false,
     userHasScrolled: false,
@@ -46,6 +44,11 @@ const store = createStore({
     isEmbed: false,
     isAddPage: false,
     isAppStoreView: false,
+
+    // zooming
+    spaceZoomPercent: 100,
+    pinchCounterZoomDecimal: 1,
+    prevZoomOrigin: { x: 0, y: 0 },
 
     // search
     searchIsVisible: false,
@@ -323,14 +326,6 @@ const store = createStore({
     prevCursorPosition: (state, cursor) => {
       state.prevCursorPosition = cursor
     },
-    spaceZoomPercent: (state, value) => {
-      utils.typeCheck({ value, type: 'number', origin: 'spaceZoomPercent' })
-      state.spaceZoomPercent = value
-    },
-    pinchCounterZoomDecimal: (state, value) => {
-      utils.typeCheck({ value, type: 'number', origin: 'pinchCounterZoomDecimal' })
-      state.pinchCounterZoomDecimal = value
-    },
     currentSpacePath: (state, value) => {
       utils.typeCheck({ value, type: 'string', origin: 'currentSpacePath' })
       state.currentSpacePath = value
@@ -447,6 +442,21 @@ const store = createStore({
     triggerNotifyUnlockedStickyCards: () => {},
     triggerAddToInboxIsVisible: () => {},
     triggerCheckIfUseHasInboxSpace: () => {},
+
+    // Zoom
+
+    spaceZoomPercent: (state, value) => {
+      utils.typeCheck({ value, type: 'number', origin: 'spaceZoomPercent' })
+      state.spaceZoomPercent = value
+    },
+    pinchCounterZoomDecimal: (state, value) => {
+      utils.typeCheck({ value, type: 'number', origin: 'pinchCounterZoomDecimal' })
+      state.pinchCounterZoomDecimal = value
+    },
+    prevZoomOrigin: (state, position) => {
+      utils.typeCheck({ value: position, type: 'object', origin: 'prevZoomOrigin' })
+      state.prevZoomOrigin = position
+    },
 
     // Cards
 
