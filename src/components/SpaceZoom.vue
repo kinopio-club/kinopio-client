@@ -52,7 +52,7 @@ export default {
   data () {
     return {
       min: 40,
-      max: 140,
+      max: 100,
       initialValue: 100,
       animateJiggleRight: false,
       animateJiggleLeft: false
