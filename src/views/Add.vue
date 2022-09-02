@@ -1,4 +1,5 @@
 <template lang="pug">
+base(target="_blank")
 main.add-page
   section(v-if="!currentUserIsSignedIn")
 
