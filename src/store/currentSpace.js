@@ -329,7 +329,7 @@ const currentSpace = {
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
-      context.dispatch('loadBackground')
+      context.commit('triggerLoadBackground', null, { root: true })
     },
     createNewJournalSpace: async (context) => {
       const isTomorrow = context.rootState.loadJournalSpaceTomorrow
@@ -340,7 +340,7 @@ const currentSpace = {
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
       context.dispatch('restoreSpaceInChunks', { space })
-      context.dispatch('loadBackground')
+      context.commit('triggerLoadBackground', null, { root: true })
     },
     createNewInboxSpace: (context, shouldCreateWithoutLoading) => {
       let space = utils.clone(inboxSpace)
@@ -361,7 +361,7 @@ const currentSpace = {
         context.commit('clearSearch', null, { root: true })
         isLoadingRemoteSpace = false
         context.dispatch('restoreSpaceInChunks', { space })
-        context.dispatch('loadBackground')
+        context.commit('triggerLoadBackground', null, { root: true })
       }
     },
     saveNewSpace: (context) => {
@@ -390,7 +390,7 @@ const currentSpace = {
       }
       context.commit('triggerUpdateWindowHistory', { space, isRemote: currentUserIsSignedIn }, { root: true })
       context.commit('addUserToSpace', user)
-      context.dispatch('loadBackground')
+      context.commit('triggerLoadBackground', null, { root: true })
       context.dispatch('updateModulesSpaceId', space)
       nextTick(() => {
         context.dispatch('currentCards/updateDimensions', null, { root: true })
@@ -601,7 +601,7 @@ const currentSpace = {
       }
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('restoreSpace', space)
-      context.dispatch('loadBackground')
+      context.commit('triggerLoadBackground', null, { root: true })
       // split into chunks
       const cardChunks = utils.splitArrayIntoChunks(cards, chunkSize)
       const connectionChunks = utils.splitArrayIntoChunks(connections, chunkSize)
@@ -980,65 +980,6 @@ const currentSpace = {
       }
       context.dispatch('api/addToQueue', { name: 'createCardNotifications', body: notification }, { root: true })
       notifiedCardAdded.push(cardId)
-    },
-
-    // Background
-
-    loadBackground: async (context) => {
-      const element = document.querySelector('.app')
-      if (!element) { return }
-      const background = context.state.background
-      if (!utils.urlIsImage(background)) {
-        element.style.backgroundImage = ''
-        context.dispatch('updateBackgroundZoom')
-      }
-      try {
-        const image = await utils.loadImage(background)
-        if (image) {
-          element.style.backgroundImage = `url(${background})`
-          context.dispatch('updateBackgroundZoom')
-        }
-      } catch (error) {
-        if (background) {
-          console.warn('🚑 loadBackground', background, error)
-        }
-      }
-    },
-    updateBackgroundZoom: async (context) => {
-      const element = document.querySelector('.app')
-      if (!element) { return }
-      const defaultBackground = {
-        width: 310,
-        height: 200
-      }
-      const spaceZoomDecimal = context.rootGetters.spaceZoomDecimal
-      let backgroundImage = element.style.backgroundImage
-      backgroundImage = utils.urlFromCSSBackgroundImage(backgroundImage)
-      let isRetina
-      let image = new Image()
-      let width, height
-      if (backgroundImage) {
-        isRetina = backgroundImage.includes('-2x.') || backgroundImage.includes('@2x.')
-        image.src = backgroundImage
-        width = image.width
-        height = image.height
-        if (isRetina) {
-          width = width / 2
-          height = height / 2
-        }
-      } else {
-        width = defaultBackground.width
-        height = defaultBackground.height
-      }
-      width = width * spaceZoomDecimal
-      height = height * spaceZoomDecimal
-      if (width === 0 || height === 0) {
-        element.style.backgroundSize = 'initial'
-        return
-      }
-      width = Math.round(width)
-      height = Math.round(height)
-      element.style.backgroundSize = `${width}px ${height}px`
     },
 
     // Tags

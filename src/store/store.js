@@ -442,6 +442,7 @@ const store = createStore({
     triggerNotifyUnlockedStickyCards: () => {},
     triggerAddToInboxIsVisible: () => {},
     triggerCheckIfUseHasInboxSpace: () => {},
+    triggerLoadBackground: () => {},
 
     // Zoom
 

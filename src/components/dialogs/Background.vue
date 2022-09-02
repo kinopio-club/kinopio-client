@@ -242,7 +242,7 @@ export default {
     updateSpaceBackground (url) {
       url = url.url || url
       this.$store.dispatch('currentSpace/updateSpace', { background: url })
-      this.$store.dispatch('currentSpace/loadBackground')
+      this.$store.commit('triggerLoadBackground')
       this.updatePageSizes()
       this.clearSuccesses()
     },
