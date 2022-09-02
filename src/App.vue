@@ -7,6 +7,7 @@
 )
   base(v-if="isAddPage" target="_blank")
   #layout-viewport(:style="{ background: backgroundTint }")
+  //- locked items appear below MagicPaint
   ItemsLocked
   MagicPaint
   OffscreenMarkers
