@@ -80,7 +80,7 @@ export default {
       height 24px
       display flex
       align-items center
-      .user-label
+      .user-label-inline
         margin 0
         margin-left 6px
 
