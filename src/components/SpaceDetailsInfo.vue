@@ -16,7 +16,7 @@
   //- Name
   .textarea-wrap
     textarea.name(
-      :disabled="!canEditSpace"
+      :disabled="!isSpaceMember"
       ref="name"
       rows="1"
       placeholder="name"
@@ -32,7 +32,7 @@
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
   //- Explore
-  .badge.info(v-if="!canEditSpace") Read Only
+  .badge.info(v-if="!isSpaceMember") Read Only
   AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
 AskToAddToExplore
 
@@ -107,7 +107,6 @@ export default {
       }
     },
     currentSpace () { return this.$store.state.currentSpace },
-    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
       return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
