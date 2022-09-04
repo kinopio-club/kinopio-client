@@ -40,7 +40,7 @@
     "pug": "^3.0.2",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
-    "vite": "^2.5.7",
+    "vite": "^2.9.13",
     "yorkie": "^2.0.0"
   },
   "eslintConfig": {
