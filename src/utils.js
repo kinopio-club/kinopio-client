@@ -787,11 +787,8 @@ export default {
   // Connection Path Utils 🐙
 
   spaceZoomDecimal () {
-    const floatPattern = /[+-]?\d+(\.\d+)?/g
-    const element = document.querySelector('.space')
-    let scale = element.style.transform
-    scale = scale.match(floatPattern)[0]
-    return scale
+    const element = document.getElementById('space')
+    return element.dataset.zoom || 1
   },
   spaceCounterZoomDecimal () {
     return 1 / this.spaceZoomDecimal()
