@@ -946,10 +946,16 @@ export default {
         width: 200 / 2,
         height: 150 / 2
       }
-      const viewportCenter = {
+      const spaceOffset = utils.outsideSpaceOffset()
+      let viewportCenter = {
         x: (this.$store.state.viewportWidth / 2) + window.scrollX - dialogOffset.width,
         y: (this.$store.state.viewportHeight / 2) + window.scrollY - dialogOffset.height
       }
+      viewportCenter = {
+        x: viewportCenter.x - spaceOffset.x,
+        y: viewportCenter.y - spaceOffset.y
+      }
+      // compensate by substracting outside space area
       this.$store.commit('multipleSelectedActionsPosition', viewportCenter)
       this.$store.commit('multipleSelectedActionsIsVisible', true)
       this.$store.commit('multipleConnectionsSelectedIds', connectionIds)

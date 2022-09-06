@@ -252,6 +252,16 @@ export default {
     }
     return position
   },
+  outsideSpaceOffset () {
+    const space = document.getElementById('space')
+    const spaceRect = space.getBoundingClientRect()
+    const app = document.getElementById('app')
+    const appRrect = app.getBoundingClientRect()
+    return {
+      x: spaceRect.x - appRrect.x,
+      y: spaceRect.y - appRrect.y
+    }
+  },
   isPositionOutsideOfSpace (position) {
     const isOutsideX = position.x < 0
     const isOutsideY = position.y < 0
