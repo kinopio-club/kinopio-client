@@ -234,6 +234,24 @@ export default {
     }
     return { x, y }
   },
+  cursorPositionInSpace (event) {
+    let position = this.cursorPositionInPage(event)
+    // #space
+    const space = document.getElementById('space')
+    let rect = space.getBoundingClientRect()
+    position = {
+      x: position.x - rect.x,
+      y: position.y - rect.y
+    }
+    // #app
+    const app = document.getElementById('app')
+    rect = app.getBoundingClientRect()
+    position = {
+      x: position.x + rect.x,
+      y: position.y + rect.y
+    }
+    return position
+  },
   visualViewport () {
     const visualViewport = window.visualViewport
     let viewport

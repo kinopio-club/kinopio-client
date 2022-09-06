@@ -400,7 +400,7 @@ export default {
     },
     addOrCloseCard (event) {
       if (this.$store.state.shouldAddCard) {
-        const position = utils.cursorPositionInPage(event)
+        const position = utils.cursorPositionInSpace(event)
         this.addCard(position)
       } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
         this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
