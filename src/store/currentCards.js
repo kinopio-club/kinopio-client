@@ -5,6 +5,7 @@ import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
+import sortBy from 'lodash-es/sortBy'
 import { nextTick } from 'vue'
 import qs from '@aguezz/qs-parse'
 
@@ -30,6 +31,7 @@ const currentCards = {
   state: {
     ids: [],
     cards: {}, // {id, {card}}
+    sortedCards: {},
     removedCards: [], // denormalized
     cardMap: []
   },
@@ -155,6 +157,10 @@ const currentCards = {
     cardMap: (state, cardMap) => {
       utils.typeCheck({ value: cardMap, type: 'array', origin: 'cardMap' })
       state.cardMap = cardMap
+    },
+    sortedCards: (state, indexes) => {
+      utils.typeCheck({ value: indexes, type: 'object', origin: 'cardMap' })
+      state.sortedCards = indexes
     }
   },
   actions: {
@@ -223,6 +229,7 @@ const currentCards = {
       }, { root: true })
       context.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
       context.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
+      context.dispatch('updateSortedCards')
       context.dispatch('updateCardMap')
       context.dispatch('currentUser/checkIfShouldUnlockStickyCards', null, { root: true })
     },
@@ -247,6 +254,7 @@ const currentCards = {
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: newCards.length
       }, { root: true })
+      context.dispatch('updateSortedCards')
       context.dispatch('updateCardMap')
     },
     paste: (context, { card, cardId }) => {
@@ -274,6 +282,7 @@ const currentCards = {
       }, { root: true })
       context.dispatch('history/add', { cards: [card] }, { root: true })
       context.commit('create', card)
+      context.dispatch('updateSortedCards')
       context.dispatch('updateCardMap')
     },
 
@@ -558,6 +567,7 @@ const currentCards = {
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
+      context.dispatch('updateSortedCards')
       context.dispatch('updateCardMap')
       context.commit('triggerUpdateCardOverlaps', null, { root: true })
       context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })
@@ -629,6 +639,7 @@ const currentCards = {
       if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
         context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
       }
+      context.dispatch('updateSortedCards')
       context.dispatch('updateCardMap')
       context.commit('triggerUpdateCardOverlaps', null, { root: true })
     },
@@ -647,6 +658,7 @@ const currentCards = {
       context.commit('restoreRemoved', card)
       context.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'restoreRemovedCard', handler: 'currentCards/restoreRemoved' }, { root: true })
+      context.dispatch('updateSortedCards')
       context.dispatch('updateCardMap')
     },
 
@@ -671,9 +683,18 @@ const currentCards = {
     updateDimensionsAndMap: (context, cardId) => {
       nextTick(() => {
         context.dispatch('updateDimensions', cardId)
+        context.dispatch('updateSortedCards')
         context.dispatch('updateCardMap')
         context.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true }, { root: true })
       })
+    },
+    updateSortedCards: (context) => {
+      const cards = context.state.cards
+      const indexes = {
+        x: sortBy(cards, ['x']),
+        y: sortBy(cards, ['y'])
+      }
+      context.commit('sortedCards', indexes)
     }
   },
   getters: {

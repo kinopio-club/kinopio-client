@@ -669,6 +669,7 @@ const currentSpace = {
         isRemote,
         cardUsers: context.rootGetters['currentCards/userIds']
       })
+      context.dispatch('currentCards/updateSortedCards', null, { root: true })
       context.dispatch('updateSpacePageSize')
       if (isRemote) {
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', space)
