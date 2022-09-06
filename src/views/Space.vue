@@ -19,7 +19,6 @@ main#space.space(
   ConnectionDetails
   MultipleSelectedActions
   ScrollAtEdgesHandler
-  NotificationsWithPosition
   BoxSelecting
 </template>
 
@@ -32,7 +31,6 @@ import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
-import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import BoxSelecting from '@/components/BoxSelecting.vue'
 import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
@@ -58,7 +56,6 @@ export default {
     ConnectionDetails,
     MultipleSelectedActions,
     ScrollAtEdgesHandler,
-    NotificationsWithPosition,
     BoxSelecting,
     Boxes,
     Cards,
@@ -400,8 +397,16 @@ export default {
     },
     addOrCloseCard (event) {
       if (this.$store.state.shouldAddCard) {
-        const position = utils.cursorPositionInSpace(event)
+        let position = utils.cursorPositionInSpace(event)
+        // prevent addCard if position is outside space
+        if (utils.isPositionOutsideOfSpace(position)) {
+          position = utils.cursorPositionInPage(event)
+          this.$store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info' })
+          return
+        }
+        // add card
         this.addCard(position)
+      // close item details
       } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
         this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
       }
@@ -466,10 +471,7 @@ export default {
   pointer-events none // so that painting can receive events
   position relative // used by svg connections
   transform-origin top left
-  will-change transform // https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
-  // outline used to draw out of boundary areas during zoom
-  // outline size based on https://stackoverflow.com/questions/16637530/whats-the-maximum-pixel-value-of-css-width-and-height-properties
-  outline 10737418px var(--secondary-background) solid
+  will-change transform // perf optimization https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
   &.hidden-by-mindmap
     opacity 0.4
   .card-overlap-indicator

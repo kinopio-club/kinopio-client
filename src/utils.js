@@ -252,6 +252,11 @@ export default {
     }
     return position
   },
+  isPositionOutsideOfSpace (position) {
+    const isOutsideX = position.x < 0
+    const isOutsideY = position.y < 0
+    return isOutsideX || isOutsideY
+  },
   visualViewport () {
     const visualViewport = window.visualViewport
     let viewport
