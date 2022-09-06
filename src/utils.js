@@ -234,8 +234,8 @@ export default {
     }
     return { x, y }
   },
-  cursorPositionInSpace (event) {
-    let position = this.cursorPositionInPage(event)
+  cursorPositionInSpace ({ event, position }) {
+    position = position || this.cursorPositionInPage(event)
     // #space
     const space = document.getElementById('space')
     let rect = space.getBoundingClientRect()

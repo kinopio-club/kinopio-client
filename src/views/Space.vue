@@ -397,7 +397,7 @@ export default {
     },
     addOrCloseCard (event) {
       if (this.$store.state.shouldAddCard) {
-        let position = utils.cursorPositionInSpace(event)
+        let position = utils.cursorPositionInSpace({ event })
         // prevent addCard if position is outside space
         if (utils.isPositionOutsideOfSpace(position)) {
           position = utils.cursorPositionInPage(event)

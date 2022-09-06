@@ -506,6 +506,7 @@ export default {
     selectCards (point) {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
+      point = utils.cursorPositionInSpace({ position: point })
       const zoom = this.spaceCounterZoomDecimal
       const cardMap = this.$store.state.currentCards.cardMap
       const filterComments = this.$store.state.currentUser.filterComments
@@ -535,6 +536,7 @@ export default {
     selectConnectionPaths (point) {
       const zoom = this.spaceCounterZoomDecimal
       const paths = document.querySelectorAll('svg .connection-path')
+      point = utils.cursorPositionInSpace({ position: point })
       const pointX = (point.x + window.scrollX) * zoom
       const pointY = (point.y + window.scrollY) * zoom
       paths.forEach(path => {
