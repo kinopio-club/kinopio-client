@@ -4,6 +4,7 @@
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
 )
+  OutsideSpaceBackground
   SpaceBackground
   //- locked items appear below MagicPaint
   ItemsLocked
@@ -42,6 +43,7 @@ import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import Minimap from '@/components/Minimap.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import SpaceBackground from '@/components/SpaceBackground.vue'
+import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import utils from '@/utils.js'
 
@@ -62,6 +64,7 @@ export default {
     Minimap,
     ItemsLocked,
     SpaceBackground,
+    OutsideSpaceBackground,
     NotificationsWithPosition
   },
   created () {
@@ -343,7 +346,6 @@ body
 
 .app
   position relative
-  background-color teal
   > .development-badge
     color var(--primary-background)
     min-height initial
