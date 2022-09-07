@@ -4,8 +4,7 @@ aside
   canvas#magic-painting(
     @mousedown.left="startPainting"
     @touchstart="startPainting"
-    @mousemove="painting"
-    @touchmove="painting"
+    @pointermove="painting"
     :width="viewportWidth"
     :height="viewportHeight"
     :style="canvasStyles"
@@ -330,7 +329,12 @@ export default {
       if (!paintingCirclesTimer) {
         paintingCirclesTimer = window.requestAnimationFrame(this.paintCirclesAnimationFrame)
       }
-      this.createPaintingCircle(event)
+      if (event.getCoalescedEvents) {
+        const events = event.getCoalescedEvents()
+        events.forEach(event => this.createPaintingCircle(event))
+      } else {
+        this.createPaintingCircle(event)
+      }
       this.triggerHideTouchInterface()
     },
     triggerHideTouchInterface () {
