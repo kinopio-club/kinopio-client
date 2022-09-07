@@ -17,7 +17,7 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.success(v-if="notifyUnlockedStickyCards")
     video(autoplay loop muted playsinline width="244" height="94")
       source(src="@/assets/sticky-cards-demo.mp4")
-    p Nice! You've unlocked sticky cards. Set this later in User → Settings → Controls
+    p You've unlocked sticky cards. Set this later in User → Settings → Controls. Nice!
     .row
       label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
         input(type="checkbox" v-model="shouldUseStickyCards")
