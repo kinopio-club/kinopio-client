@@ -4,7 +4,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
     p About
   section
     .row
-      p Spatial thinking for building new ideas and solving hard problems
+      p Spatial thinking for building ideas and solving problems
     .row
       .button-wrap
         a(href="https://help.kinopio.club/about/")
