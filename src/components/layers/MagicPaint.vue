@@ -4,7 +4,8 @@ aside
   canvas#magic-painting(
     @mousedown.left="startPainting"
     @touchstart="startPainting"
-    @pointermove="painting"
+    @mousemove="painting"
+    @touchmove="painting"
     :width="viewportWidth"
     :height="viewportHeight"
     :style="canvasStyles"
