@@ -33,12 +33,6 @@
                 span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
             Favorites(:visible="favoritesIsVisible")
             FavoritesActions(:visible="favoritesActionsIsVisible")
-          //- Mobile Tips
-          .button-wrap(v-if="isMobileOrTouch && shouldShowMobileTips")
-            button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
-              img.icon(src="@/assets/press-and-hold.svg")
-              span Mobile Tips
-            MobileTips(:visible="mobileTipsIsVisible")
 
   .right(:class="{'is-embed': isEmbed, 'hidden': isHidden}")
     button(v-if="isNotSupportedByDevice" @pointerup="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
@@ -52,7 +46,6 @@ import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
 import FavoritesActions from '@/components/dialogs/FavoritesActions.vue'
-import MobileTips from '@/components/dialogs/MobileTips.vue'
 import AddToInbox from '@/components/dialogs/AddToInbox.vue'
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
@@ -77,7 +70,6 @@ export default {
     Notifications,
     Favorites,
     FavoritesActions,
-    MobileTips,
     Loader,
     SpaceZoom,
     AddToInbox
@@ -92,7 +84,6 @@ export default {
       favoritesIsVisible: false,
       exploreIsVisible: false,
       liveIsVisible: false,
-      mobileTipsIsVisible: false,
       position: {},
       liveSpaces: [],
       isLoadingLiveSpaces: true,
@@ -137,7 +128,6 @@ export default {
     clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
-    shouldShowMobileTips () { return !this.$store.state.currentUser.shouldHideMobileTips },
     isNotSupportedByDevice () { return !utils.isAndroid() },
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
     isAddPage () { return this.$store.state.isAddPage },
@@ -207,7 +197,6 @@ export default {
       this.favoritesIsVisible = false
       this.exploreIsVisible = false
       this.liveIsVisible = false
-      this.mobileTipsIsVisible = false
       this.addToInboxIsVisible = false
     },
     toggleFavoritesActionsIsVisible () {
@@ -237,11 +226,6 @@ export default {
       const isVisible = this.addToInboxIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleAddToInboxIsVisible')
       this.addToInboxIsVisible = !isVisible
-    },
-    toggleMobileTipsIsVisible () {
-      const isVisible = this.mobileTipsIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleMobileTipsIsVisible')
-      this.mobileTipsIsVisible = !isVisible
     },
     async updateFavorites () {
       await this.$store.dispatch('currentUser/restoreUserFavorites')

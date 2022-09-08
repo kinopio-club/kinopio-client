@@ -330,7 +330,12 @@ export default {
       if (!paintingCirclesTimer) {
         paintingCirclesTimer = window.requestAnimationFrame(this.paintCirclesAnimationFrame)
       }
-      this.createPaintingCircle(event)
+      if (event.getCoalescedEvents) {
+        const events = event.getCoalescedEvents()
+        events.forEach(event => this.createPaintingCircle(event))
+      } else {
+        this.createPaintingCircle(event)
+      }
       this.triggerHideTouchInterface()
     },
     triggerHideTouchInterface () {

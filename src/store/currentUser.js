@@ -55,8 +55,7 @@ export default {
     weatherUnitIsCelcius: false,
     shouldNotifyUnlockedStickyCards: true,
     shouldUseStickyCards: false,
-    shouldPauseConnectionDirections: false,
-    shouldHideMobileTips: false
+    shouldPauseConnectionDirections: false
   },
   mutations: {
     color: (state, value) => {
@@ -311,10 +310,6 @@ export default {
     shouldPauseConnectionDirections: (state, value) => {
       state.shouldPauseConnectionDirections = value
       cache.updateUser('shouldPauseConnectionDirections', value)
-    },
-    shouldHideMobileTips: (state, value) => {
-      state.shouldHideMobileTips = value
-      cache.updateUser('shouldHideMobileTips', value)
     }
   },
   actions: {

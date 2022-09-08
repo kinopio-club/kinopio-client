@@ -16,12 +16,6 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
         input(type="checkbox" v-model="shouldPauseConnectionDirections")
         span Pause Connection Directions
 
-  section
-    .row
-      label(:class="{ active: shouldHideMobileTips }" @click.left.prevent="toggleShouldHideMobileTips" @keydown.stop.enter="toggleShouldHideMobileTips")
-        input(type="checkbox" v-model="shouldHideMobileTips")
-        span Hide Mobile Tips
-
 </template>
 
 <script>
@@ -48,8 +42,7 @@ export default {
     isMobile () { return utils.isMobile() },
     shouldOpenLinksInNewTab () { return this.$store.state.currentUser.shouldOpenLinksInNewTab },
     shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
-    shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
-    shouldHideMobileTips () { return this.$store.state.currentUser.shouldHideMobileTips }
+    shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections }
   },
   methods: {
     toggleShouldOpenLinksInNewTab () {
@@ -64,10 +57,6 @@ export default {
       const value = !this.shouldPauseConnectionDirections
       this.$store.dispatch('currentUser/update', { shouldPauseConnectionDirections: value })
       this.$store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
-    },
-    toggleShouldHideMobileTips () {
-      const value = !this.shouldHideMobileTips
-      this.$store.dispatch('currentUser/update', { shouldHideMobileTips: value })
     },
     updateDialogHeight () {
       if (!this.visible) { return }
