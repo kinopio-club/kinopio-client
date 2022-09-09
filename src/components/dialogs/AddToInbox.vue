@@ -1,6 +1,6 @@
 <template lang="pug">
 dialog.add-to-inbox.narrow(v-if="visible" :open="visible" @touchstart.stop.prevent @touchend.stop.prevent @click.left.stop ref="dialog")
-  AddToInbox(@successSpaceId="updateSuccessSpaceId")
+  AddToInbox
 </template>
 
 <script>
@@ -14,26 +14,10 @@ export default {
   props: {
     visible: Boolean
   },
-  data () {
-    return {
-      successSpaceId: ''
-    }
-  },
   computed: {
-    inboxUrl () { return this.successSpaceId || 'inbox' },
-    successSpaceIsCurrentSpace () {
-      const currentSpace = this.$store.state.currentSpace
-      return this.successSpaceId === currentSpace.id
-    }
+    // inboxUrl () { return this.successSpaceId || 'inbox' },
   },
   methods: {
-    triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'SpacePicker.triggerSignUpOrInIsVisible')
-      this.$store.commit('triggerSignUpOrInIsVisible')
-    },
-    updateSuccessSpaceId (value) {
-      this.successSpaceId = value
-    }
   }
 }
 </script>
