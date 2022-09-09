@@ -265,6 +265,8 @@ export default {
       return normalizedSpaces
     },
     async updateUserHasInbox () {
+      const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
+      if (!currentUserIsSignedIn) { return }
       const inboxSpace = await this.$store.dispatch('currentUser/inboxSpace')
       this.userHasInbox = Boolean(inboxSpace)
     },

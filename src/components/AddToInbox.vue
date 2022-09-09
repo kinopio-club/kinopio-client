@@ -1,60 +1,59 @@
 <template lang="pug">
-section.add-to-inbox(v-if="visible")
-  .row(v-if="isAddPage")
-    span Add to Inbox
+.add-to-inbox-page
+  section(:class="{'margin-bottom': isAddPage}")
+    .title-row-flex
+      span Add To Inbox
+      .button-wrap
+        a(:href="inboxUrl")
+          button.small-button(@pointerup="changeToInboxSpace")
+            img.icon.inbox-icon(src="@/assets/inbox.svg")
+            span Inbox
 
-  .row(v-if="cardsCreatedIsOverLimit || error.unknownServerError || error.maxLength")
-    //- error: card limit
-    template(v-if="cardsCreatedIsOverLimit")
-      a(:href="kinopioDomain" v-if="isAddPage")
-        .badge.danger.button-badge
-          span Upgrade for more →
-      .badge.danger(v-else)
-        span Upgrade for more cards
+  section
+    .row(v-if="cardsCreatedIsOverLimit || error.unknownServerError || error.maxLength")
+      //- error: card limit
+      template(v-if="cardsCreatedIsOverLimit")
+        a(:href="kinopioDomain" v-if="isAddPage")
+          .badge.danger.button-badge
+            span Upgrade for more →
+        .badge.danger(v-else)
+          span Upgrade for more cards
+      //- error: connection
+      .badge.danger(v-if="error.unknownServerError || error.maxLength") (シ_ _)シ Server error
 
-    //- error: connection
-    .badge.danger(v-if="error.unknownServerError || error.maxLength") (シ_ _)シ Server error
+    //- textarea
+    .row
+      User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
+      .textarea-wrap(@touchend.stop)
+        textarea.name(
+          ref="name"
+          rows="1"
+          :placeholder="textareaPlaceholder"
+          v-model="name"
+          :maxlength="maxCardLength"
+          @keydown.enter.exact.prevent="addCard"
+          @focusin="updateKeyboardShortcutTipIsVisible(true)"
+          @focusout="updateKeyboardShortcutTipIsVisible(false)"
 
-  //- textarea
-  .row
-    User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
-    .textarea-wrap(@touchend.stop)
-      textarea.name(
-        ref="name"
-        rows="1"
-        :placeholder="textareaPlaceholder"
-        v-model="name"
-        :maxlength="maxCardLength"
-        @keydown.enter.exact.prevent="addCard"
-        @focusin="updateKeyboardShortcutTipIsVisible(true)"
-        @focusout="updateKeyboardShortcutTipIsVisible(false)"
-
-        @keyup.alt.enter.exact.stop
-        @keyup.ctrl.enter.exact.stop
-        @keydown.alt.enter.exact.stop="insertLineBreak"
-        @keydown.ctrl.enter.exact.stop="insertLineBreak"
-        @touchend="focusName"
-      )
-  //- button
-  .row
-    //- Add
-    .button-wrap
-      button(@pointerup="addCard" :class="{active: loading.addCard, disabled: error.maxLength}")
-        img.icon.add-icon(src="@/assets/add.svg")
-        span Add
-        Loader(:visible="loading.addCard")
-      .badge.label-badge.info-badge(v-if="keyboardShortcutTipIsVisible")
-        span Enter
-  .row(v-if="success")
-    .badge.success
-      span Added
-
-  .row(v-if="isAddPage")
-    .button-wrap
-      a(:href="inboxUrl")
-        button(@pointerup="changeToInboxSpace")
-          img.icon.inbox-icon(src="@/assets/inbox.svg")
-          span Inbox
+          @keyup.alt.enter.exact.stop
+          @keyup.ctrl.enter.exact.stop
+          @keydown.alt.enter.exact.stop="insertLineBreak"
+          @keydown.ctrl.enter.exact.stop="insertLineBreak"
+          @touchend="focusName"
+        )
+    //- button
+    .row
+      //- Add
+      .button-wrap
+        button(@pointerup="addCard" :class="{active: loading.addCard, disabled: error.maxLength}")
+          img.icon.add-icon(src="@/assets/add.svg")
+          span Add
+          Loader(:visible="loading.addCard")
+        .badge.label-badge.info-badge(v-if="keyboardShortcutTipIsVisible")
+          span Enter
+    .row(v-if="success")
+      .badge.success
+        span Added
 
 </template>
 
@@ -71,9 +70,6 @@ export default {
   components: {
     Loader,
     User
-  },
-  props: {
-    visible: Boolean
   },
   mounted () {
     window.addEventListener('message', this.insertUrl)
@@ -330,7 +326,23 @@ export default {
 </script>
 
 <style lang="stylus">
-section.add-to-inbox
+
+.add-to-inbox-page
+  max-width 250px
+  position relative
+  display block
+  section
+    &.row
+      justify-content space-between
+  .title-row-flex
+    display flex
+    justify-content space-between
+  .small-button
+    padding 0
+    padding-left 6px
+    padding-right 6px
+    margin-left 6px
+
   .info-badge
     position static
     display inline-block
@@ -374,5 +386,8 @@ section.add-to-inbox
 
   .badge
     display inline-block
+
+  .margin-bottom
+    margin-bottom 10px
 
 </style>
