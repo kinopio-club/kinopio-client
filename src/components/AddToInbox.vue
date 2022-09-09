@@ -241,21 +241,13 @@ export default {
         urlPreviewImage: urlPreview.image,
         urlPreviewFavicon: urlPreview.favicon
       }
-      // inbox space
+      // save card to inbox
       try {
-        let space = await this.$store.dispatch('currentUser/inboxSpace')
-        if (!space) {
-          space = this.emptyInboxSpace()
-          await this.$store.dispatch('api/createSpace', space)
-        }
-        // save card to inbox
         const user = this.$store.state.currentUser
-        card.spaceId = space.id
         card.userId = user.id
-        this.successSpaceId = space.id
-        this.$emit('successSpaceId', space.id)
-        console.log('🛫 create card', card)
-        card = await this.$store.dispatch('api/createCard', card)
+        console.log('🛫 create card in inbox', card)
+        card = await this.$store.dispatch('api/createCardInInbox', card)
+        this.successSpaceId = card.spaceId
         this.updateCurrentSpace(card)
         this.success = true
         this.newName = ''

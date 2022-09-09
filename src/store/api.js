@@ -572,6 +572,18 @@ const self = {
         context.commit('notifyServerCouldNotSave', true, { root: true })
       }
     },
+    createCardInInbox: async (context, body) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/card/to-inbox`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 createCard', error)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
+      }
+    },
 
     // ConnectionType
 
