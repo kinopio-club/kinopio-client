@@ -1,5 +1,5 @@
 <template lang="pug">
-.add-to-inbox-page
+.add-to-inbox-page(v-if="visible")
   section(:class="{'margin-bottom': isAddPage}")
     .title-row-flex
       span Add To Inbox
@@ -70,6 +70,9 @@ export default {
   components: {
     Loader,
     User
+  },
+  props: {
+    visible: Boolean
   },
   mounted () {
     window.addEventListener('message', this.insertUrl)
