@@ -1,6 +1,6 @@
 <template lang="pug">
-dialog.add-to-inbox.narrow(v-if="visible" :open="visible" @touchstart.stop.prevent @touchend.stop.prevent @click.left.stop ref="dialog")
-  AddToInbox
+dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @touchend.stop.prevent @click.left.stop ref="dialog")
+  AddToInbox(:visible="true")
 </template>
 
 <script>
