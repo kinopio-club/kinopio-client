@@ -1,10 +1,5 @@
 <template lang="pug">
 dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
-  section
-    label.show-users(:class="{active: actionIsMove}" @click.left.prevent="toggleActionIsMove" @keydown.stop.enter="toggleActionIsMove")
-      input(type="checkbox" v-model="actionIsMove")
-      span Move
-
   //- Copy Card Names
   section(v-if="!actionIsMove")
     textarea(ref="text") {{text()}}
@@ -49,6 +44,8 @@ export default {
   },
   props: {
     visible: Boolean,
+    actionIsMove: Boolean,
+
     exportData: Object
   },
   data () {
@@ -58,8 +55,7 @@ export default {
       spacePickerIsVisible: false,
       loading: false,
       textIsCopied: false,
-      cardsCreatedIsOverLimit: false,
-      actionIsMove: false
+      cardsCreatedIsOverLimit: false
     }
   },
   computed: {
@@ -95,9 +91,6 @@ export default {
     }
   },
   methods: {
-    toggleActionIsMove () {
-      this.actionIsMove = !this.actionIsMove
-    },
     triggerUpgradeUserIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'MoveOrCopyToSpace')
       this.$store.commit('triggerUpgradeUserIsVisible')
