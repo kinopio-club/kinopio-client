@@ -187,6 +187,9 @@ export default {
 
 <style lang="stylus" scoped>
 .export
+  top calc(100% - 8px)
+  left initial
+  right 8px
   overflow scroll
   max-height calc(100vh - 100px)
   @media(max-height 570px)

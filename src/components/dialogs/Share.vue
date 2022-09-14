@@ -10,6 +10,8 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
 
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
+
+    //- Public
     template(v-if="!spaceIsPrivate")
       input.url-textarea(ref="url" v-model="url")
       //- Share Options
@@ -26,15 +28,10 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           .button-wrap
             button(@click.left="copyUrl")
               span Copy Url
-        //- Embed
-        .button-wrap
-          button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
-            span Embed
-          Embed(:visible="embedIsVisible")
-
       //- Url Copied
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
 
+    //- Private
     template(v-if="spaceIsPrivate")
       p.share-private
         span To share this space publically, set the privacy to
@@ -46,23 +43,13 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           img.icon.open(src="@/assets/open.svg")
           span {{privacyName(0)}}
 
-  // Export, Import
-  section
-    .button-wrap
-      button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-        span Export
-      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
-    .button-wrap
-      button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
-        span Import
-      Import(:visible="importIsVisible" @closeDialog="closeDialogs")
-
-  section(v-if="spaceHasUrl && isSpaceMember")
-    .button-wrap
-      button(@click.left.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
-        User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true")
-        span Invite Collaborators
-      InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
+    //- Invite
+    .row(v-if="spaceHasUrl && isSpaceMember")
+      .button-wrap
+        button(@click.left.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
+          User
+          span Invite
+        InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
 
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
     // collaborators
@@ -78,6 +65,22 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
       span.badge.info you need to Sign Up or In
       span for your spaces to be synced and accessible anywhere.
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+
+  section
+    .row
+      //- Embed
+      .button-wrap(v-if="!spaceIsPrivate")
+        button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
+          span Embed
+        Embed(:visible="embedIsVisible")
+      // Export, Import
+      .segmented-buttons
+        Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
+        Import(:visible="importIsVisible" @closeDialog="closeDialogs")
+        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+          span Export
+        button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+          span Import
 
 </template>
 
@@ -299,7 +302,6 @@ export default {
   .description
     margin-top 3px
   dialog.privacy-picker,
-  dialog.embed,
   dialog.dialog-wrap
     left initial
     right 8px
@@ -309,6 +311,7 @@ export default {
   .collaborators
     max-height calc(100vh - 200px)
   .share-private
+    margin-bottom 10px
     .badge
       margin-left 6px
     .last-child

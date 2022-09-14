@@ -90,6 +90,7 @@ export default {
     background-position center
     border-radius 3px
     pointer-events none
+    background-color var(--secondary-active-background)
     &:hover,
     &:focus
       box-shadow var(--button-hover-shadow)
