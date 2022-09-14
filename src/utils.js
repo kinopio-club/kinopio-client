@@ -234,7 +234,7 @@ export default {
     }
     return { x, y }
   },
-  childDialogPositionFromParentElement (element) {
+  childDialogPositionFromParent ({ element }) {
     element = element.closest('.badge') || element.closest('button') || element
     const rect = element.getBoundingClientRect()
     const position = this.coordsWithCurrentScrollOffset({ x: rect.x, y: rect.y })

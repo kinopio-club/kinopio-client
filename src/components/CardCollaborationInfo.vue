@@ -103,7 +103,7 @@ export default {
         this.closeDialogs()
         return
       }
-      const position = utils.childDialogPositionFromParentElement(event.target)
+      const position = utils.childDialogPositionFromParent({ element: event.target })
       this.$store.commit('userDetailsUser', user)
       this.$store.commit('userDetailsPosition', position)
       this.$store.commit('userDetailsIsVisible', true)

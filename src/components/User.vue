@@ -73,7 +73,7 @@ export default {
     },
     showUserDetails () {
       const element = this.$refs.user
-      const position = utils.childDialogPositionFromParentElement(element, this.detailsOnRight)
+      const position = utils.childDialogPositionFromParent({ element })
       this.$store.commit('userDetailsUser', this.user)
       this.$store.commit('userDetailsPosition', position)
       this.$store.commit('userDetailsIsVisible', true)
