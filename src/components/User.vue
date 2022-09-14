@@ -52,14 +52,6 @@ export default {
     userDetailsIsVisibleForUser () { return this.userDetailsIsVisible && this.userDetailsIsUser }
   },
   methods: {
-    // displaySide () {
-    //     //   const dialogFromRight = this.$refs.user.getBoundingClientRect().right
-    //     //   const viewportWidth = this.$store.state.viewportWidth
-    //     //   const dialogWidth = 200 + 8
-    //     //   const isEnoughSpaceOnTheRight = Boolean((viewportWidth - dialogFromRight) < dialogWidth)
-    //     //   this.detailsIsOnRightSide = isEnoughSpaceOnTheRight
-    //     // }
-    // },
     toggleUserDetailsIsVisible () {
       const isVisible = this.userDetailsIsVisibleForUser
       if (this.shouldCloseAllDialogs) {
@@ -73,7 +65,11 @@ export default {
     },
     showUserDetails () {
       const element = this.$refs.user
-      const position = utils.childDialogPositionFromParent({ element })
+      let options = { element }
+      if (this.detailsOnRight) {
+        options.offsetX = -190
+      }
+      const position = utils.childDialogPositionFromParent(options)
       this.$store.commit('userDetailsUser', this.user)
       this.$store.commit('userDetailsPosition', position)
       this.$store.commit('userDetailsIsVisible', true)
