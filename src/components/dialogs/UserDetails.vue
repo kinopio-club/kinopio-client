@@ -146,13 +146,16 @@ export default {
     userDetailsPosition () { return this.$store.state.userDetailsPosition },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     styles () {
+      const position = this.userDetailsPosition
       let zoom = this.spaceCounterZoomDecimal
+      if (position.shouldIgnoreZoom) {
+        zoom = 1
+      }
       const viewport = utils.visualViewport()
       const pinchCounterScale = utils.roundFloat(1 / viewport.scale)
       if (zoom === 1) {
         zoom = pinchCounterScale
       }
-      const position = this.userDetailsPosition
       const styles = {
         transform: `scale(${zoom})`,
         left: position.x + 'px',

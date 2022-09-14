@@ -61,7 +61,7 @@ export default {
     },
     showUserDetails () {
       const element = this.$refs.user
-      let options = { element }
+      let options = { element, shouldIgnoreZoom: true }
       if (this.detailsOnRight) {
         options.offsetX = -190
       }

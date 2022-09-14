@@ -120,7 +120,7 @@ const store = createStore({
 
     // user details
     userDetailsIsVisible: false,
-    userDetailsPosition: {}, // x, y
+    userDetailsPosition: {}, // x, y, shouldIgnoreZoom
     userDetailsUser: {},
 
     // multiple selection

@@ -1297,7 +1297,7 @@ export default {
       this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.commit('currentUserIsDraggingCard', false)
       const user = this.createdByUser
-      const position = utils.childDialogPositionFromParent({ element: event.target })
+      const position = utils.childDialogPositionFromParent({ element: event.target, shouldIgnoreZoom: true })
       if (this.userDetailsIsUser) { return }
       // show dialog
       this.$store.commit('userDetailsUser', user)

@@ -244,7 +244,7 @@ export default {
     },
     showUserDetails (event, user) {
       let element = event.target
-      let options = { element, offsetX: 25 }
+      let options = { element, offsetX: 25, shouldIgnoreZoom: true }
       let position = utils.childDialogPositionFromParent(options)
       this.$store.commit('userDetailsUser', user)
       this.$store.commit('userDetailsPosition', position)

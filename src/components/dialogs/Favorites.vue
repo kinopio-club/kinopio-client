@@ -125,7 +125,7 @@ export default {
     },
     showUserDetails (event, user) {
       let element = event.target
-      let options = { element }
+      let options = { element, shouldIgnoreZoom: true }
       let position = utils.childDialogPositionFromParent(options)
       this.$store.commit('userDetailsUser', user)
       this.$store.commit('userDetailsPosition', position)
@@ -134,7 +134,7 @@ export default {
       this.$nextTick(() => {
         const child = document.querySelector('.user-details')
         const rect = child.getBoundingClientRect()
-        options = { element, offsetX: 100, offsetY: -(rect.height + 8) }
+        options = { element, offsetX: 100, offsetY: -(rect.height + 8), shouldIgnoreZoom: true }
         position = utils.childDialogPositionFromParent(options)
         this.$store.commit('userDetailsPosition', position)
       })
