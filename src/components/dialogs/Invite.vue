@@ -1,11 +1,11 @@
 <template lang="pug">
-dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.stop)
+dialog.narrow.invite(v-if="visible" :open="visible" @click.left.stop)
 
   // add by email
   // share link
 
   section
-    p Invite Collaborators
+    p Invite
   section
     Loader(:visible="loading")
     template(v-if="!loading && collaboratorKey")
@@ -34,8 +34,8 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
       p
         .badge.info
           img.icon(src="@/assets/view.svg")
-          span View
-        span No account needed
+          //- span View
+        span No account needed to view private spaces
     //- .row
     //-   p
     //-     .badge.info
@@ -54,7 +54,7 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 export default {
-  name: 'InviteCollaborators',
+  name: 'Invite',
   props: {
     visible: Boolean
   },
@@ -118,7 +118,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.invite-collaborators
+.invite
   left initial
   right 8px
   max-height calc(100vh - 180px)

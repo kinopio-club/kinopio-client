@@ -46,10 +46,10 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     //- Invite
     .row(v-if="spaceHasUrl && isSpaceMember")
       .button-wrap
-        button(@click.left.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
+        button(@click.left.stop="toggleInviteIsVisible" :class="{ active: inviteIsVisible }")
           User
           span Invite
-        InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
+        Invite(:visible="inviteIsVisible")
 
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
     // collaborators
@@ -86,7 +86,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
 
 <script>
 import PrivacyButton from '@/components/PrivacyButton.vue'
-import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
+import Invite from '@/components/dialogs/Invite.vue'
 import SpaceRssFeed from '@/components/dialogs/SpaceRssFeed.vue'
 import Embed from '@/components/dialogs/Embed.vue'
 import UserList from '@/components/UserList.vue'
@@ -100,7 +100,7 @@ export default {
   name: 'Share',
   components: {
     PrivacyButton,
-    InviteCollaborators,
+    Invite,
     SpaceRssFeed,
     Embed,
     UserList,
@@ -123,7 +123,7 @@ export default {
       urlIsCopied: false,
       spaceHasUrl: false,
       privacyPickerIsVisible: false,
-      inviteCollaboratorsIsVisible: false,
+      inviteIsVisible: false,
       selectedUser: {},
       dialogHeight: null,
       spaceRssFeedIsVisible: false,
@@ -207,10 +207,10 @@ export default {
       this.closeDialogs()
       this.privacyPickerIsVisible = !isVisible
     },
-    toggleInviteCollaboratorsIsVisible () {
-      const isVisible = this.inviteCollaboratorsIsVisible
+    toggleInviteIsVisible () {
+      const isVisible = this.inviteIsVisible
       this.closeDialogs()
-      this.inviteCollaboratorsIsVisible = !isVisible
+      this.inviteIsVisible = !isVisible
     },
     toggleSpaceRssFeedIsVisible () {
       const isVisible = this.spaceRssFeedIsVisible
@@ -234,7 +234,7 @@ export default {
     },
     closeDialogs () {
       this.privacyPickerIsVisible = false
-      this.inviteCollaboratorsIsVisible = false
+      this.inviteIsVisible = false
       this.spaceRssFeedIsVisible = false
       this.embedIsVisible = false
       this.exportIsVisible = false
