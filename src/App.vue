@@ -42,7 +42,7 @@ import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import Minimap from '@/components/Minimap.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
-import UserDetails from '@/components/dialogs/UserDetailsWithPosition.vue' // temp name
+import UserDetails from '@/components/dialogs/UserDetails.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
