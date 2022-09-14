@@ -6,7 +6,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
   section(v-if="!isCurrentUser")
     .user-info
       .row
-        User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
+        User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id")
         p.name.user-details-name {{user.name}}
       .row(v-if="user.description")
         textarea(ref="description" :value="user.description" disabled)
@@ -76,7 +76,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
   section(v-if="!isCurrentUser && userIsSignedIn && user.id")
     .button-wrap
       button(@click.left.stop="getUserSpaces" :class="{active: loadingUserspaces || spacePickerIsVisible}")
-        User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
+        User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id")
         span Spaces
         Loader(:visible="loadingUserspaces")
       SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :user="user" :userSpaces="userSpaces" @selectSpace="changeSpace")

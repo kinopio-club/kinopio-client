@@ -1,24 +1,21 @@
 <template lang="pug">
-.user(:data-user-id="userId" :key="userId" ref="element" @keydown.stop.enter="toggleUserDetails" :class="{ active: userDetailsIsVisible}")
+.user(:data-user-id="userId" :key="userId" ref="user" @keydown.stop.enter="toggleUserDetailsIsVisible" :class="{active: userDetailsIsVisibleForUser}")
   .user-avatar.anon-avatar(
-    @mouseup.left.stop="toggleUserDetails"
-    @touchend.stop="toggleUserDetails"
+    @mouseup.left.stop="toggleUserDetailsIsVisible"
+    @touchend.stop="toggleUserDetailsIsVisible"
     ref="user"
-    :class="{ clickable: isClickable, active: userDetailsIsVisible, 'is-small': isSmall }"
+    :class="{ clickable: isClickable, 'is-small': isSmall }"
     :style="{backgroundColor: userColor}"
   )
     .label-badge.you-badge(v-if="isCurrentUser && !hideYouLabel")
       span YOU
     .label-badge(v-if="labelBadge")
       span {{labelBadge}}
-  template(v-if="isClickable")
-    UserDetails(:visible="userDetailsIsVisible" :user="user" :detailsOnRight="detailsOnRight")
 </template>
 
 <script>
 import UserDetails from '@/components/dialogs/UserDetails.vue'
-
-let unsubscribe
+import utils from '@/utils.js'
 
 export default {
   name: 'User',
@@ -34,21 +31,6 @@ export default {
     isSmall: Boolean,
     labelBadge: String
   },
-  data () {
-    return {
-      userDetailsIsVisible: false
-    }
-  },
-  mounted () {
-    unsubscribe = this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'closeAllDialogs') {
-        this.userDetailsIsVisible = false
-      }
-    })
-  },
-  beforeUnmount () {
-    unsubscribe()
-  },
   computed: {
     userId () {
       if (!this.user) { return }
@@ -61,7 +43,13 @@ export default {
     isCurrentUser () {
       if (!this.user) { return }
       return this.user.id === this.$store.state.currentUser.id
-    }
+    },
+    userDetailsIsVisible () { return this.$store.state.userDetailsIsVisible },
+    userDetailsIsUser () {
+      const userDetailsUser = this.$store.state.userDetailsUser
+      return this.user.id === userDetailsUser.id
+    },
+    userDetailsIsVisibleForUser () { return this.userDetailsIsVisible && this.userDetailsIsUser }
   },
   methods: {
     // displaySide () {
@@ -72,14 +60,23 @@ export default {
     //     //   this.detailsIsOnRightSide = isEnoughSpaceOnTheRight
     //     // }
     // },
-    toggleUserDetails () {
-      const isVisible = this.userDetailsIsVisible
+    toggleUserDetailsIsVisible () {
+      const isVisible = this.userDetailsIsVisibleForUser
       if (this.shouldCloseAllDialogs) {
-        this.$store.dispatch('closeAllDialogs', 'User.toggleUserDetails')
+        this.$store.dispatch('closeAllDialogs', 'User.toggleUserDetailsIsVisible')
       }
-      this.$nextTick(() => {
-        this.userDetailsIsVisible = !isVisible
-      })
+      if (isVisible) {
+        this.$store.commit('userDetailsIsVisible', false)
+        return
+      }
+      this.showUserDetails()
+    },
+    showUserDetails () {
+      const element = this.$refs.user
+      const position = utils.childDialogPositionFromParentElement(element, this.detailsOnRight)
+      this.$store.commit('userDetailsUser', this.user)
+      this.$store.commit('userDetailsPosition', position)
+      this.$store.commit('userDetailsIsVisible', true)
     }
   }
 }
