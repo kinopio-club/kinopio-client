@@ -119,6 +119,11 @@ const store = createStore({
     triggeredTouchCardDragPosition: {},
     cardsWereDragged: false,
 
+    // user details
+    userDetailsIsVisible: false,
+    userDetailsPosition: {}, // x, y
+    userDetailsUser: {},
+
     // multiple selection
     multipleSelectedActionsIsVisible: false,
     preventMultipleSelectedActionsIsVisible: false,
@@ -257,6 +262,7 @@ const store = createStore({
       state.searchIsVisible = false
       state.cardsWereDragged = false
       state.boxesWereDragged = false
+      state.userDetailsIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isOnline' })
@@ -732,6 +738,21 @@ const store = createStore({
     preventDraggedBoxFromShowingDetails: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'preventDraggedBoxFromShowingDetails' })
       state.preventDraggedBoxFromShowingDetails = value
+    },
+
+    // User Details
+
+    userDetailsIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'userDetailsIsVisible' })
+      state.userDetailsIsVisible = value
+    },
+    userDetailsPosition: (state, position) => {
+      utils.typeCheck({ value: position, type: 'object', origin: 'userDetailsPosition' })
+      state.userDetailsPosition = position
+    },
+    userDetailsUser: (state, user) => {
+      utils.typeCheck({ value: user, type: 'object', origin: 'userDetailsUser' })
+      state.userDetailsUser = user
     },
 
     // Tag Details
