@@ -103,20 +103,11 @@ export default {
         this.closeDialogs()
         return
       }
-      this.$store.commit('userDetailsIsVisible', true)
-      this.$store.commit('userDetailsUser', user)
-      this.updateUserDetailsPosition(event)
-      this.$nextTick(() => {
-        this.scrollUserDetailsIntoView()
-      })
-    },
-    updateUserDetailsPosition (event) {
       const position = utils.childDialogPositionFromParentElement(event.target)
+      this.$store.commit('userDetailsUser', user)
       this.$store.commit('userDetailsPosition', position)
-    },
-    scrollUserDetailsIntoView () {
-      const element = document.querySelector('dialog.user-details')
-      utils.scrollIntoView(element)
+      this.$store.commit('userDetailsIsVisible', true)
+      this.$store.commit('triggerScrollUserDetailsIntoView')
     },
     scrollParentIntoView () {
       const element = this.parentElement

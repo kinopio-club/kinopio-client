@@ -452,6 +452,7 @@ const store = createStore({
     triggerNotifyUnlockedStickyCards: () => {},
     triggerAddToInboxIsVisible: () => {},
     triggerCheckIfUseHasInboxSpace: () => {},
+    triggerScrollUserDetailsIntoView: () => {},
 
     // Cards
 

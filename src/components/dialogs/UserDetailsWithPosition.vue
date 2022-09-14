@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.left.stop="closeDialogs" @keydown.stop :style="styles")
+dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.left.stop="closeDialogs" @keydown.stop :style="styles" ref="dialog")
   //- :class="{'right-side': detailsOnRight}"
 
   //- Not Current User
@@ -121,6 +121,13 @@ export default {
     Loader,
     UserBadges,
     SpacePicker
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerScrollUserDetailsIntoView' && this.visible) {
+        this.scrollUserDetailsIntoView()
+      }
+    })
   },
   data () {
     return {
@@ -309,6 +316,12 @@ export default {
     },
     async updateFavorites () {
       await this.$store.dispatch('currentUser/restoreUserFavorites')
+    },
+    scrollUserDetailsIntoView () {
+      this.$nextTick(() => {
+        const element = this.$refs.dialog
+        utils.scrollIntoView(element)
+      })
     }
   },
   watch: {
