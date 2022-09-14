@@ -234,15 +234,16 @@ export default {
     }
     return { x, y }
   },
-  childDialogPositionFromParent ({ element, offsetX }) {
-    element = element.closest('.badge') || element.closest('button') || element
+  childDialogPositionFromParent ({ element, offsetX, offsetY }) {
+    element = element.closest('li') || element.closest('.badge') || element.closest('button') || element
     offsetX = offsetX || 0
+    offsetY = offsetY || 0
     const rect = element.getBoundingClientRect()
     const position = this.coordsWithCurrentScrollOffset({ x: rect.x, y: rect.y })
     const zoom = this.spaceCounterZoomDecimal() || 1
     let indent = 8 * zoom
     const x = position.x + offsetX + indent
-    const y = position.y + rect.height - indent
+    const y = position.y + rect.height + offsetY - indent
     return { x, y }
   },
   visualViewport () {
