@@ -14,14 +14,10 @@
 </template>
 
 <script>
-import UserDetails from '@/components/dialogs/UserDetails.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'User',
-  components: {
-    UserDetails
-  },
   props: {
     isClickable: Boolean,
     user: Object,

@@ -309,10 +309,7 @@ export default {
     async removeCollaborator () {
       const user = this.user
       this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
-      if (!this.userDetailsIsFromList) {
-        this.$store.commit('closeAllDialogs', 'UserDetails.removeCollaborator')
-      }
-      this.$emit('removedCollaborator', user)
+      this.$store.commit('closeAllDialogs', 'UserDetails.removeCollaborator')
     },
     async updateFavorites () {
       await this.$store.dispatch('currentUser/restoreUserFavorites')

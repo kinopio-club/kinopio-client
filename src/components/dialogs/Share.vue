@@ -67,11 +67,10 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
     // collaborators
     template(v-if="spaceHasCollaborators")
-      UserList(:users="spaceCollaborators" :selectedUser="selectedUser" :showRemoveUser="isSpaceMember" @selectUser="showUserDetails" @removeUser="removeCollaborator" :isClickable="true")
+      UserList(:users="spaceCollaborators" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :showRemoveUser="isSpaceMember" @removeUser="removeCollaborator" :isClickable="true")
     // card users
     template(v-if="spaceHasOtherCardUsers")
-      UserList(:users="spaceOtherCardUsers" :selectedUser="selectedUser" :isClickable="true")
-    UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition" :userDetailsIsFromList="true" @removedCollaborator="removedCollaborator")
+      UserList(:users="spaceOtherCardUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 
   section(v-if="!spaceHasUrl")
     p
@@ -90,13 +89,9 @@ import Embed from '@/components/dialogs/Embed.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
-import { defineAsyncComponent } from 'vue'
 import User from '@/components/User.vue'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
-const UserDetails = defineAsyncComponent({
-  loader: () => import('@/components/dialogs/UserDetails.vue')
-})
 
 export default {
   name: 'Share',
@@ -106,7 +101,6 @@ export default {
     SpaceRssFeed,
     Embed,
     UserList,
-    UserDetails,
     User,
     Export,
     Import
@@ -128,8 +122,6 @@ export default {
       privacyPickerIsVisible: false,
       inviteCollaboratorsIsVisible: false,
       selectedUser: {},
-      userDetailsPosition: {},
-      userDetailsIsVisible: false,
       dialogHeight: null,
       spaceRssFeedIsVisible: false,
       embedIsVisible: false,
@@ -138,6 +130,11 @@ export default {
     }
   },
   computed: {
+    userDetailsIsVisible () { return this.$store.state.userDetailsIsVisible },
+    userDetailsSelectedUser () {
+      if (!this.userDetailsIsVisible) { return }
+      return this.$store.state.userDetailsUser
+    },
     url () { return this.$store.getters['currentSpace/url'] },
     spaceName () { return this.$store.state.currentSpace.name },
     spacePrivacy () { return this.$store.state.currentSpace.privacy },
@@ -239,31 +236,27 @@ export default {
       this.embedIsVisible = false
       this.exportIsVisible = false
       this.importIsVisible = false
-      this.userDetailsIsNotVisible()
+      this.$store.commit('userDetailsIsVisible', false)
+    },
+    toggleUserDetails (event, user) {
+      this.closeDialogs()
+      this.showUserDetails(event, user)
     },
     showUserDetails (event, user) {
-      const elementRect = event.target.getBoundingClientRect()
-      this.userDetailsIsNotVisible()
-      this.userDetailsPosition = {
-        top: elementRect.y - 6 + 'px'
-      }
-      this.selectedUser = user
-      this.userDetailsIsVisible = true
-    },
-    userDetailsIsNotVisible () {
-      this.userDetailsIsVisible = false
-      this.selectedUser = {}
-    },
-    removedCollaborator (user) {
-      const isCurrentUser = this.$store.state.currentUser.id === user.id
-      if (isCurrentUser) {
-        this.$store.dispatch('closeAllDialogs', 'Share.removedCollaborator')
-      }
-      this.userDetailsIsNotVisible()
+      let element = event.target
+      let options = { element, offsetX: 25 }
+      let position = utils.childDialogPositionFromParent(options)
+      this.$store.commit('userDetailsUser', user)
+      this.$store.commit('userDetailsPosition', position)
+      this.$store.commit('userDetailsIsVisible', true)
     },
     async removeCollaborator (user) {
       this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
-      this.removedCollaborator(user)
+      const isCurrentUser = this.$store.state.currentUser.id === user.id
+      if (isCurrentUser) {
+        this.$store.dispatch('closeAllDialogs', 'Share.removeCollaborator')
+      }
+      this.closeDialogs()
     },
     updateDialogHeight () {
       if (!this.visible) { return }
@@ -284,7 +277,6 @@ export default {
       this.updateSpaceHasUrl()
       this.closeDialogs()
       if (visible) {
-        this.userDetailsIsNotVisible()
         this.updateDialogHeight()
       }
     }
