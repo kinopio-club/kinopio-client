@@ -368,6 +368,7 @@ export default {
     },
     resizeControlIsVisible () {
       if (this.isLocked) { return }
+      if (this.isComment) { return }
       return this.resizeIsVisible && this.canEditCard
     },
     shouldJiggle () {
