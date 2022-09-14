@@ -1287,14 +1287,14 @@ export default {
     },
     toggleUserDetailsIsVisible () {
       if (isMultiTouch) { return }
-      let cardId = this.id
-      if (this.userDetailsIsVisible) {
-        cardId = ''
-      }
+      // let cardId = this.id
+      // if (this.userDetailsIsVisible) {
+      // cardId = ''
+      // }
       this.$store.dispatch('closeAllDialogs', 'Card.toggleUserDetailsIsVisible')
       this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.commit('currentUserIsDraggingCard', false)
-      this.$store.commit('cardUserDetailsIsVisibleForCardId', cardId)
+      // this.$store.commit('cardUserDetailsIsVisibleForCardId', cardId)
     },
     toggleFilterShowAbsoluteDates () {
       this.$store.dispatch('currentCards/incrementZ', this.id)

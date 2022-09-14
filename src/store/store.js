@@ -105,7 +105,6 @@ const store = createStore({
     childCardId: '',
     remoteCardDetailsVisible: [],
     preventCardDetailsOpeningAnimation: true,
-    cardUserDetailsIsVisibleForCardId: '',
     multipleCardsSelectedIds: [],
     // resizing card
     currentUserIsResizingCard: false,
@@ -491,10 +490,6 @@ const store = createStore({
     preventCardDetailsOpeningAnimation: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'preventCardDetailsOpeningAnimation' })
       state.preventCardDetailsOpeningAnimation = value
-    },
-    cardUserDetailsIsVisibleForCardId: (state, cardId) => {
-      utils.typeCheck({ cardId, type: 'string', origin: 'cardUserDetailsIsVisibleForCardId', allowUndefined: true })
-      state.cardUserDetailsIsVisibleForCardId = cardId
     },
 
     // Connecting

@@ -6,24 +6,21 @@
   .users
     //- created by
     template(v-if="createdByUserIsNotEmpty")
-      .badge.button-badge(:style="{background: createdByUser.color}" title="Created by" @click.left.stop="toggleUserDetails(createdByUser)")
+      .badge.button-badge(:style="{background: createdByUser.color}" :class="{active: userDetailsIsUser(createdByUser)}" title="Created by" @click.left.stop="toggleUserDetails($event, createdByUser)")
         User(:user="createdByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true" :hideYouLabel="true" :labelBadge="'Creator'")
         span.name {{createdByUser.name}}
-        UserDetails(:visible="userDetailsIsVisibleForCreatedByUser" :user="createdByUser")
     //- updated by
     template(v-if="isUpdatedByDifferentUser")
-      .badge.button-badge(:style="{background: updatedByUser.color}" title="Last edited by" @click.left.stop="toggleUserDetails(updatedByUser)")
+      .badge.button-badge(:style="{background: updatedByUser.color}" :class="{active: userDetailsIsUser(updatedByUser)}" title="Last edited by" @click.left.stop="toggleUserDetails($event, updatedByUser)")
         img.icon(src="@/assets/brush.svg")
         User(:user="updatedByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true" :hideYouLabel="true" :labelBadge="'Updater'")
         span.name {{updatedByUser.name}}
-        UserDetails(:visible="userDetailsIsVisibleForUpdatedByUser" :user="updatedByUser")
     //- created through api
     .badge.secondary.system-badge(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
 </template>
 
 <script>
-import UserDetails from '@/components/dialogs/UserDetails.vue'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
@@ -33,7 +30,6 @@ let updatedAbsoluteDate
 export default {
   name: 'CardCollaborationInfo',
   components: {
-    UserDetails,
     User
   },
   props: {
@@ -43,17 +39,10 @@ export default {
     card: Object,
     parentElement: Object
   },
-  data () {
-    return {
-      selectedUser: {},
-      userDetailsIsVisibleForCreatedByUser: false,
-      userDetailsIsVisibleForUpdatedByUser: false
-    }
-  },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerCardDetailsCloseDialogs' && this.visible) {
-        this.closeComponentDialogs()
+        this.$store.commit('userDetailsIsVisible', false)
       }
     })
   },
@@ -76,9 +65,15 @@ export default {
       } else {
         return 'now'
       }
-    }
+    },
+    userDetailsIsVisible () { return this.$store.state.userDetailsIsVisible }
   },
   methods: {
+    userDetailsIsUser (user) {
+      if (!this.userDetailsIsVisible) { return }
+      const userDetailsUser = this.$store.state.userDetailsUser
+      return user.id === userDetailsUser.id
+    },
     absoluteDate (date) {
       if (dateIsUpdated && updatedAbsoluteDate) {
         return updatedAbsoluteDate
@@ -95,41 +90,31 @@ export default {
       return utils.shortRelativeTime(date)
     },
     closeDialogs () {
-      this.closeComponentDialogs()
+      this.$store.commit('userDetailsIsVisible', false)
       this.$emit('closeDialogs')
-    },
-    closeComponentDialogs () {
-      this.userDetailsIsVisibleForCreatedByUser = false
-      this.userDetailsIsVisibleForUpdatedByUser = false
-      this.selectedUser = {}
     },
     toggleFilterShowAbsoluteDates () {
       this.closeDialogs()
       const value = !this.$store.state.currentUser.filterShowAbsoluteDates
       this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
     },
-    toggleUserDetails (user) {
-      let shouldHideDialog
-      const userIsCreatedByUser = user.id === this.createdByUser.id
-      const userIsUpdatedByUser = user.id === this.updatedByUser.id
-      const createdByUserDetailsIsVisible = userIsCreatedByUser && this.userDetailsIsVisibleForCreatedByUser
-      const updatedByUserDetailsIsVislble = userIsUpdatedByUser && this.userDetailsIsVisibleForUpdatedByUser
-      if (createdByUserDetailsIsVisible || updatedByUserDetailsIsVislble) {
-        shouldHideDialog = true
+    toggleUserDetails (event, user) {
+      if (this.userDetailsIsVisible) {
+        this.closeDialogs()
+        return
       }
-      this.closeDialogs()
-      if (shouldHideDialog) { return }
-      this.selectedUser = user
-      if (userIsCreatedByUser) {
-        this.userDetailsIsVisibleForCreatedByUser = true
-      } else {
-        this.userDetailsIsVisibleForUpdatedByUser = true
-      }
+      this.$store.commit('userDetailsIsVisible', true)
+      this.$store.commit('userDetailsUser', user)
+      this.updateUserDetailsPosition(event)
       this.$nextTick(() => {
-        this.scrollIntoView()
+        this.scrollUserDetailsIntoView()
       })
     },
-    scrollIntoView () {
+    updateUserDetailsPosition (event) {
+      const position = utils.childDialogPositionFromParentElement(event.target)
+      this.$store.commit('userDetailsPosition', position)
+    },
+    scrollUserDetailsIntoView () {
       const element = document.querySelector('dialog.user-details')
       utils.scrollIntoView(element)
     },

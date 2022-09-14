@@ -14,8 +14,8 @@ main.space(
     UserLabelCursor(:user="user")
   BoxDetails
   CardDetails
-  CardUserDetails
   ConnectionDetails
+  UserDetails
   MultipleSelectedActions
   ScrollAtEdgesHandler
   NotificationsWithPosition
@@ -25,10 +25,10 @@ main.space(
 <script>
 import Card from '@/components/Card.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
-import CardUserDetails from '@/components/dialogs/CardUserDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
+import UserDetails from '@/components/dialogs/UserDetailsWithPosition.vue' // temp name
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
@@ -51,7 +51,6 @@ export default {
   components: {
     Card,
     CardDetails,
-    CardUserDetails,
     BoxDetails,
     UserLabelCursor,
     ConnectionDetails,
@@ -62,7 +61,8 @@ export default {
     Boxes,
     Cards,
     LockedItemButtons,
-    Connections
+    Connections,
+    UserDetails
   },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')
