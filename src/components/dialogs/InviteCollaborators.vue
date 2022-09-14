@@ -29,12 +29,20 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
       button(@click="updateCollaboratorKey") Try Again
     .row
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
-    .row.align-top(v-if="spaceIsPrivate")
+    //- View and Edit Permissions
+    .row(v-if="spaceIsPrivate")
       p
         .badge.info
-          img.icon.view(src="@/assets/view.svg")
-          img.icon.lock(src="@/assets/lock.svg")
-        span Invitees don't need an account to view private spaces
+          img.icon(src="@/assets/view.svg")
+          span View
+        span No account needed
+    //- .row
+    //-   p
+    //-     .badge.info
+    //-       img.icon(src="@/assets/view.svg")
+    //-       span Edit
+    //-     span Account needed
+    //- Free Cards
     .row(v-if="currentUserIsUpgraded")
       p
         .badge.success Free Cards
@@ -115,9 +123,4 @@ export default {
   right 8px
   max-height calc(100vh - 180px)
   overflow auto
-  .lock
-    margin-top 2px
-    padding-right 2px
-  .view
-    margin-right 4px
 </style>
