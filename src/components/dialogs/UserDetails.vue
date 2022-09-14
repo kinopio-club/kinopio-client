@@ -1,6 +1,5 @@
 <template lang="pug">
 dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.left.stop="closeDialogs" @keydown.stop :style="styles" ref="dialog")
-  //- :class="{'right-side': detailsOnRight}"
 
   //- Not Current User
   section(v-if="!isCurrentUser")
@@ -342,10 +341,6 @@ export default {
   cursor initial
   top calc(100% - 8px)
   position absolute
-
-  &.right-side
-    left initial
-    right 8px
   .current-user
     .user-badges
       margin-top -10px
