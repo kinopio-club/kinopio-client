@@ -11,7 +11,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
-    //- Public
+    //- Public space
     template(v-if="!spaceIsPrivate")
       p.row
         .url-textarea {{url}}
@@ -20,7 +20,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
             span(v-if="urlIsCopied") URL Copied
             span(v-else) Copy URL
 
-    //- Private
+    //- Private space
     template(v-if="spaceIsPrivate")
       p.share-private
         span To share this space publically, set the privacy to

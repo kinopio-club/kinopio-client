@@ -9,39 +9,24 @@ dialog.narrow.invite(v-if="visible" :open="visible" @click.left.stop)
   section
     Loader(:visible="loading")
     template(v-if="!loading && collaboratorKey")
-      //- Input
       .row
-        input.url-textarea(ref="url" v-model="url")
-      //- Copy Button
-      .row(v-if="!canNativeShare" @click.left="copyUrl")
-        button
-          span Copy Invite Url
-      .row(v-if="canNativeShare")
-        .segmented-buttons
-          button(@click.left="copyUrl" :disabled="loading")
-            span Copy Invite Url
-          button(@click.left="shareUrl" :disabled="loading")
-            img.icon(src="@/assets/share.svg")
-    //- Status
+        .url-textarea {{url}}
+        .input-button-wrap
+          button(@click.left="copyUrl" :class="{success: urlIsCopied}")
+            span(v-if="urlIsCopied") Invite Copied
+            span(v-else) Copy Invite URL
+    //- Error
     template(v-if="!loading && !collaboratorKey")
       .row
         .badge.danger シ_ _)シ Something went wrong
-      button(@click="updateCollaboratorKey") Try Again
-    .row
-      .badge.success.success-message(v-if="urlIsCopied") Url Copied
+      .row
+        button(@click="updateCollaboratorKey") Try Again
     //- View and Edit Permissions
     .row(v-if="spaceIsPrivate")
       p
         .badge.info
           img.icon(src="@/assets/view.svg")
-          //- span View
         span No account needed to view private spaces
-    //- .row
-    //-   p
-    //-     .badge.info
-    //-       img.icon(src="@/assets/view.svg")
-    //-       span Edit
-    //-     span Account needed
     //- Free Cards
     .row(v-if="currentUserIsUpgraded")
       p
@@ -70,9 +55,6 @@ export default {
     }
   },
   computed: {
-    // only works in https, supported by safari and android chrome
-    // https://caniuse.com/#feat=web-share
-    canNativeShare () { return Boolean(navigator.share) },
     spaceIsPrivate () { return this.$store.state.currentSpace.privacy === 'private' },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
