@@ -976,7 +976,7 @@ code
   padding 4px
   max-width 100%
   word-wrap anywhere
-
+  overflow auto
 .logo-image
   background-image url('assets/logo-base.png')
 .logo

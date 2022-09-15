@@ -3,20 +3,22 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
   section
     p Export {{exportTitle}}
   section
-    textarea(ref="text") {{text()}}
-    button(@click.left="copyText")
-      img.icon.cut(src="@/assets/cut.svg")
-      span Copy Content
+    //- Card Names
     .row
-      .badge.success(v-if="textIsCopied") Card Content Copied
-
+      .url-textarea
+        p(v-for="name in names")
+          span {{name}}
+      .input-button-wrap
+        button(@click.left="copyText" :class="{success: textIsCopied}")
+          span(v-if="textIsCopied") Copied
+          span(v-else) Copy Card Names
     //- PDF
     .row
       .button-wrap(v-if="currentUserIsSignedIn")
         button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
           span PDF
     Pdf(:visible="pdfIsVisible")
-
+    //- Duplicate
     button(@click.left="duplicateSpace")
       img.icon(src="@/assets/add.svg")
       span Duplicate Space
@@ -85,7 +87,9 @@ export default {
     }
   },
   computed: {
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    names () { return this.exportData.cards.map(card => card.name) },
+    text () { return utils.textFromCardNames(this.exportData.cards) }
   },
   methods: {
     fileName () {
@@ -94,11 +98,8 @@ export default {
       let fileName = spaceName || `kinopio-space-${spaceId}`
       return fileName
     },
-    text () {
-      return utils.textFromCardNames(this.exportData.cards)
-    },
     async copyText () {
-      const value = this.text()
+      const value = this.text
       await navigator.clipboard.writeText(value)
       this.textIsCopied = true
     },
@@ -185,7 +186,7 @@ export default {
 }
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 .export
   top calc(100% - 8px)
   left initial
@@ -210,4 +211,6 @@ export default {
     display none
   .info-container
     margin-top 10px
+  .url-textarea
+    max-height 100px
 </style>
