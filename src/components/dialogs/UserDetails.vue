@@ -1,11 +1,11 @@
 <template lang="pug">
-dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.left.stop="closeDialogs" @keydown.stop :class="{'right-side': detailsOnRight}" :style="userDetailsPosition")
+dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.left.stop="closeDialogs" @keydown.stop :style="styles" ref="dialog")
 
   //- Not Current User
   section(v-if="!isCurrentUser")
     .user-info
       .row
-        User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
+        User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id")
         p.name.user-details-name {{user.name}}
       .row(v-if="user.description")
         textarea(ref="description" :value="user.description" disabled)
@@ -75,7 +75,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
   section(v-if="!isCurrentUser && userIsSignedIn && user.id")
     .button-wrap
       button(@click.left.stop="getUserSpaces" :class="{active: loadingUserspaces || spacePickerIsVisible}")
-        User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
+        User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id")
         span Spaces
         Loader(:visible="loadingUserspaces")
       SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :user="user" :userSpaces="userSpaces" @selectSpace="changeSpace")
@@ -90,12 +90,12 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
   section(v-if="isCollaborator && currentUserIsSpaceMember")
     template(v-if="isCurrentUser && isCollaborator")
       button(@click.left.stop="removeCollaborator")
-        img.icon(src="@/assets/remove.svg")
+        img.icon.leave(src="@/assets/leave.svg")
         span Leave Space
     template(v-if="!isCurrentUser")
       button(@click.left.stop="removeCollaborator")
-        img.icon(src="@/assets/remove.svg")
-        span Remove Collaborator
+        img.icon.leave(src="@/assets/leave.svg")
+        span Remove From Space
 </template>
 
 <script>
@@ -121,12 +121,12 @@ export default {
     UserBadges,
     SpacePicker
   },
-  props: {
-    user: Object,
-    detailsOnRight: Boolean,
-    visible: Boolean,
-    userDetailsPosition: Object,
-    userDetailsIsFromList: Boolean
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerScrollUserDetailsIntoView' && this.visible) {
+        this.scrollUserDetailsIntoView()
+      }
+    })
   },
   data () {
     return {
@@ -141,6 +141,28 @@ export default {
     }
   },
   computed: {
+    visible () { return this.$store.state.userDetailsIsVisible },
+    user () { return this.$store.state.userDetailsUser },
+    userDetailsPosition () { return this.$store.state.userDetailsPosition },
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    styles () {
+      const position = this.userDetailsPosition
+      let zoom = this.spaceCounterZoomDecimal
+      if (position.shouldIgnoreZoom) {
+        zoom = 1
+      }
+      const viewport = utils.visualViewport()
+      const pinchCounterScale = utils.roundFloat(1 / viewport.scale)
+      if (zoom === 1) {
+        zoom = pinchCounterScale
+      }
+      const styles = {
+        transform: `scale(${zoom})`,
+        left: position.x + 'px',
+        top: position.y + 'px'
+      }
+      return styles
+    },
     cardsCreatedCount () { return this.$store.state.currentUser.cardsCreatedCount || 0 },
     userColor () { return this.user.color },
     userIsMember () { return Boolean(this.$store.getters['currentSpace/memberById'](this.user.id)) },
@@ -205,16 +227,7 @@ export default {
         return collaborator.id === this.user.id
       }))
     },
-    currentUserIsSpaceMember () {
-      return this.$store.getters['currentUser/isSpaceMember']()
-    },
-    positionTop () {
-      if (utils.objectHasKeys(this.userDetailsPosition)) {
-        return this.userDetailsPosition.top
-      } else {
-        return null
-      }
-    }
+    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() }
   },
   methods: {
     toggleIsFavoriteUser () {
@@ -298,13 +311,16 @@ export default {
     async removeCollaborator () {
       const user = this.user
       this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
-      if (!this.userDetailsIsFromList) {
-        this.$store.commit('closeAllDialogs', 'UserDetails.removeCollaborator')
-      }
-      this.$emit('removedCollaborator', user)
+      this.$store.commit('closeAllDialogs', 'UserDetails.removeCollaborator')
     },
     async updateFavorites () {
       await this.$store.dispatch('currentUser/restoreUserFavorites')
+    },
+    scrollUserDetailsIntoView () {
+      this.$nextTick(() => {
+        const element = this.$refs.dialog
+        utils.scrollIntoView(element)
+      })
     }
   },
   watch: {
@@ -325,11 +341,9 @@ export default {
 
 <style lang="stylus">
 .user-details
-  cursor: initial
+  cursor initial
   top calc(100% - 8px)
-  &.right-side
-    left initial
-    right 8px
+  position absolute
   .current-user
     .user-badges
       margin-top -10px

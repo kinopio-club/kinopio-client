@@ -198,7 +198,7 @@ article(
       .badge.user-badge.button-badge(
         v-if="filterShowUsers"
         :style="{background: createdByUser.color}"
-        :class="{active: userDetailsIsVisible}"
+        :class="{active: userDetailsIsUser}"
         @mouseup.left.stop
         @touchend.stop
         @click.left.prevent.stop="toggleUserDetailsIsVisible"
@@ -935,12 +935,18 @@ export default {
         borderRadius: borderRadius
       }
     },
-    userDetailsIsVisible () { return this.$store.state.cardUserDetailsIsVisibleForCardId === this.id },
     preventUpdatePrevPreview () {
       if (this.card.shouldUpdateUrlPreview) { return }
       const updateDelta = dayjs(this.updatedAt).diff(this.sessionStartDate, 'second')
       return updateDelta < 0
+    },
+    userDetailsIsUser () {
+      if (!this.$store.state.userDetailsIsVisible) { return }
+      const user = this.createdByUser
+      const userDetailsUser = this.$store.state.userDetailsUser
+      return user.id === userDetailsUser.id
     }
+
   },
   methods: {
 
@@ -1285,16 +1291,19 @@ export default {
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       event.stopPropagation()
     },
-    toggleUserDetailsIsVisible () {
+    toggleUserDetailsIsVisible (event) {
       if (isMultiTouch) { return }
-      let cardId = this.id
-      if (this.userDetailsIsVisible) {
-        cardId = ''
-      }
       this.$store.dispatch('closeAllDialogs', 'Card.toggleUserDetailsIsVisible')
       this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.commit('currentUserIsDraggingCard', false)
-      this.$store.commit('cardUserDetailsIsVisibleForCardId', cardId)
+      const user = this.createdByUser
+      const position = utils.childDialogPositionFromParent({ element: event.target, shouldIgnoreZoom: true })
+      if (this.userDetailsIsUser) { return }
+      // show dialog
+      this.$store.commit('userDetailsUser', user)
+      this.$store.commit('userDetailsPosition', position)
+      this.$store.commit('userDetailsIsVisible', true)
+      this.$store.commit('triggerScrollUserDetailsIntoView')
     },
     toggleFilterShowAbsoluteDates () {
       this.$store.dispatch('currentCards/incrementZ', this.id)

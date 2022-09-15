@@ -221,9 +221,9 @@ export default {
       window.scrollBy(delta)
     },
     speed (cursor, direction) {
-      const minSpeed = 20
-      const maxSpeed = 30
-      const maxSpeedOutsideWindow = 60
+      const minSpeed = 10
+      const maxSpeed = 20
+      const maxSpeedOutsideWindow = 50
       const viewportHeight = this.viewportHeight
       const viewportWidth = this.viewportWidth
       // viewportSize based on direction

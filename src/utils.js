@@ -234,6 +234,21 @@ export default {
     }
     return { x, y }
   },
+  childDialogPositionFromParent ({ element, offsetX, offsetY, shouldIgnoreZoom }) {
+    element = element.closest('li') || element.closest('.badge') || element.closest('button') || element
+    offsetX = offsetX || 0
+    offsetY = offsetY || 0
+    const rect = element.getBoundingClientRect()
+    const position = this.coordsWithCurrentScrollOffset({ x: rect.x, y: rect.y, shouldIgnoreZoom })
+    let zoom = this.spaceCounterZoomDecimal() || 1
+    if (shouldIgnoreZoom) {
+      zoom = 1
+    }
+    let indent = 8 * zoom
+    const x = position.x + offsetX + indent
+    const y = position.y + rect.height + offsetY - indent
+    return { x, y, shouldIgnoreZoom }
+  },
   visualViewport () {
     const visualViewport = window.visualViewport
     let viewport
@@ -802,8 +817,11 @@ export default {
     const rect = element.getBoundingClientRect()
     return this.rectCenter(rect)
   },
-  coordsWithCurrentScrollOffset ({ x, y }) {
-    const zoom = this.spaceCounterZoomDecimal() || 1
+  coordsWithCurrentScrollOffset ({ x, y, shouldIgnoreZoom }) {
+    let zoom = this.spaceCounterZoomDecimal() || 1
+    if (shouldIgnoreZoom) {
+      zoom = 1
+    }
     x = (x + window.scrollX) * zoom
     y = (y + window.scrollY) * zoom
     return { x, y }

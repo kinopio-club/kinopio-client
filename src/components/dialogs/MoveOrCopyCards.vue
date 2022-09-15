@@ -1,13 +1,15 @@
 <template lang="pug">
 dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
-  //- Copy Card Names
   section(v-if="!actionIsMove")
-    textarea(ref="text") {{text()}}
-    button(@click.left="copyText")
-      img.icon.cut(src="@/assets/cut.svg")
-      span Copy Content
+    //- Copy Card Names
     .row
-      .badge.success(v-if="textIsCopied") Card Content Copied
+      .url-textarea
+        p(v-for="name in names")
+          span {{name}}
+      .input-button-wrap
+        button(@click.left="copyText" :class="{success: textIsCopied}")
+          span(v-if="textIsCopied") Copied
+          span(v-else) Copy Card Names
 
   section
     .row
@@ -88,7 +90,9 @@ export default {
       const actionLabel = this.capitalize(this.actionLabel) // copy, move
       const pluralCard = this.capitalize(this.pluralCard) // card, cards
       return `${actionLabel} ${pluralCard} to Space`
-    }
+    },
+    names () { return this.exportData.cards.map(card => card.name) },
+    text () { return utils.textFromCardNames(this.exportData.cards) }
   },
   methods: {
     triggerUpgradeUserIsVisible () {
@@ -101,11 +105,8 @@ export default {
     pastTense (value) {
       return utils.pastTense(value)
     },
-    text () {
-      return utils.textFromCardNames(this.exportData.cards)
-    },
     async copyText () {
-      const value = this.text()
+      const value = this.text
       await navigator.clipboard.writeText(value)
       this.textIsCopied = true
     },
@@ -239,15 +240,8 @@ export default {
 .more-or-copy-cards
   top calc(100% - 8px)
   cursor initial
-  textarea
-    background-color var(--secondary-background)
-    border 0
-    border-radius 3px
-    padding 4px
-    margin-bottom 4px
-    height 60px
-  .badge.success
-    margin-top 10px
+  .url-textarea
+    max-height 100px
   .error-card-limit
     margin-top 10px
 </style>

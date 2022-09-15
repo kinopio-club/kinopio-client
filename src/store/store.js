@@ -105,7 +105,6 @@ const store = createStore({
     childCardId: '',
     remoteCardDetailsVisible: [],
     preventCardDetailsOpeningAnimation: true,
-    cardUserDetailsIsVisibleForCardId: '',
     multipleCardsSelectedIds: [],
     // resizing card
     currentUserIsResizingCard: false,
@@ -118,6 +117,11 @@ const store = createStore({
     preventDraggedCardFromShowingDetails: false,
     triggeredTouchCardDragPosition: {},
     cardsWereDragged: false,
+
+    // user details
+    userDetailsIsVisible: false,
+    userDetailsPosition: {}, // x, y, shouldIgnoreZoom
+    userDetailsUser: {},
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -257,6 +261,7 @@ const store = createStore({
       state.searchIsVisible = false
       state.cardsWereDragged = false
       state.boxesWereDragged = false
+      state.userDetailsIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isOnline' })
@@ -447,6 +452,7 @@ const store = createStore({
     triggerNotifyUnlockedStickyCards: () => {},
     triggerAddToInboxIsVisible: () => {},
     triggerCheckIfUseHasInboxSpace: () => {},
+    triggerScrollUserDetailsIntoView: () => {},
 
     // Cards
 
@@ -485,10 +491,6 @@ const store = createStore({
     preventCardDetailsOpeningAnimation: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'preventCardDetailsOpeningAnimation' })
       state.preventCardDetailsOpeningAnimation = value
-    },
-    cardUserDetailsIsVisibleForCardId: (state, cardId) => {
-      utils.typeCheck({ cardId, type: 'string', origin: 'cardUserDetailsIsVisibleForCardId', allowUndefined: true })
-      state.cardUserDetailsIsVisibleForCardId = cardId
     },
 
     // Connecting
@@ -732,6 +734,21 @@ const store = createStore({
     preventDraggedBoxFromShowingDetails: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'preventDraggedBoxFromShowingDetails' })
       state.preventDraggedBoxFromShowingDetails = value
+    },
+
+    // User Details
+
+    userDetailsIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'userDetailsIsVisible' })
+      state.userDetailsIsVisible = value
+    },
+    userDetailsPosition: (state, position) => {
+      utils.typeCheck({ value: position, type: 'object', origin: 'userDetailsPosition' })
+      state.userDetailsPosition = position
+    },
+    userDetailsUser: (state, user) => {
+      utils.typeCheck({ value: user, type: 'object', origin: 'userDetailsUser' })
+      state.userDetailsUser = user
     },
 
     // Tag Details

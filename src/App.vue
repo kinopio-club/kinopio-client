@@ -16,6 +16,7 @@
   Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
   TagDetails
   LinkDetails
+  UserDetails
   Minimap
   WindowHistoryHandler
   KeyboardShortcutsHandler
@@ -41,6 +42,7 @@ import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import Minimap from '@/components/Minimap.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
+import UserDetails from '@/components/dialogs/UserDetails.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -58,7 +60,8 @@ export default {
     LinkDetails,
     OffscreenMarkers,
     Minimap,
-    ItemsLocked
+    ItemsLocked,
+    UserDetails
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
@@ -509,6 +512,27 @@ label
     opacity 0.5
     pointer-events none
 
+.input-button-wrap
+  padding 8px
+  cursor pointer
+  position absolute
+  right 0
+  top 0
+  button
+    padding 0
+    padding-left 6px
+    padding-right 6px
+    height 17px
+    font-size 12px
+  &:hover
+    button
+      box-shadow var(--button-hover-shadow)
+      background-color var(--secondary-hover-background)
+  &:active
+    button
+      box-shadow var(--button-active-inset-shadow)
+      background-color var(--secondary-active-background)
+
 p,
 span
   -webkit-text-size-adjust auto
@@ -730,6 +754,10 @@ dialog
 .icon.box-icon
   vertical-align 0
 
+.icon.leave
+  transform rotate(-45deg)
+  vertical-align -2px
+
 label,
 li
   &:hover,
@@ -950,7 +978,9 @@ code
   border 0
   border-radius 3px
   padding 4px
-
+  max-width 100%
+  word-wrap anywhere
+  overflow auto
 .logo-image
   background-image url('assets/logo-base.png')
 .logo

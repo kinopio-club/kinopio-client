@@ -5,12 +5,12 @@ dialog.narrow.explore-rss-feed(v-if="visible" :open="visible" @click.left.stop)
 
   section
     p Subscribe to new spaces added to Explore
-    p
-      input.url-textarea(ref="url" v-model="url")
-      button(@click.left="copyUrl")
-        span Copy RSS Feed Url
-    p(v-if="urlIsCopied")
-      .badge.success.success-message Url Copied
+    p.row
+      .url-textarea {{url}}
+      .input-button-wrap
+        button(@click.left="copyUrl" :class="{success: urlIsCopied}")
+          span(v-if="urlIsCopied") URL Copied
+          span(v-else) Copy Feed URL
 </template>
 
 <script>

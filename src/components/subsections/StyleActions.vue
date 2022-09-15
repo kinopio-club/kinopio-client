@@ -302,6 +302,7 @@ export default {
       this.framePickerIsVisible = false
       this.tagPickerIsVisible = false
       this.colorPickerIsVisible = false
+      this.$store.commit('userDetailsIsVisible', false)
     },
 
     // cards only
