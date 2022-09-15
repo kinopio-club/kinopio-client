@@ -35,6 +35,7 @@ dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop)
         :minValue="40"
         :value="spaceZoomPercent"
         :maxValue="100"
+        :initialValue="100"
       )
 
 </template>
