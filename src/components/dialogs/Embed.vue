@@ -110,6 +110,11 @@ export default {
 
 <style lang="stylus">
 .embed
+  left initial
+  right 8px
+  overflow scroll
+  @media(max-width 350px)
+    right -50px
   textarea
     background-color var(--secondary-background)
     border 0

@@ -61,5 +61,5 @@ export default {
 
 <style lang="stylus">
 .space-rss-feed
-  margin-left -1rem
+  left -20px
 </style>

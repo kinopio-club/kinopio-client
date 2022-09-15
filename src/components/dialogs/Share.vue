@@ -8,6 +8,22 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           span RSS
         SpaceRssFeed(:visible="spaceRssFeedIsVisible")
 
+  section
+    .row
+      // Import, Export
+      .segmented-buttons
+        Import(:visible="importIsVisible" @closeDialog="closeDialogs")
+        Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
+        button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+          span Import
+        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+          span Export
+      //- Embed
+      .button-wrap(v-if="!spaceIsPrivate")
+        button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
+          span Embed
+        Embed(:visible="embedIsVisible")
+
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
@@ -18,7 +34,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         .input-button-wrap
           button(@click.left="copyUrl" :class="{success: urlIsCopied}")
             span(v-if="urlIsCopied") URL Copied
-            span(v-else) Copy URL
+            span(v-else) Copy Space URL
 
     //- Private space
     template(v-if="spaceIsPrivate")
@@ -54,22 +70,6 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
       span.badge.info you need to Sign Up or In
       span for your spaces to be synced and accessible anywhere.
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-
-  section
-    .row
-      //- Embed
-      .button-wrap(v-if="!spaceIsPrivate")
-        button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
-          span Embed
-        Embed(:visible="embedIsVisible")
-      // Export, Import
-      .segmented-buttons
-        Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
-        Import(:visible="importIsVisible" @closeDialog="closeDialogs")
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-          span Export
-        button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
-          span Import
 
 </template>
 

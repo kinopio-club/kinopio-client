@@ -99,10 +99,12 @@ export default {
 }
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 .invite
   left initial
   right 8px
   max-height calc(100vh - 180px)
   overflow auto
+  @media(max-height 570px)
+    top -100px
 </style>

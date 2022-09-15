@@ -185,15 +185,13 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped>
+<style lang="stylus">
 .export
   top calc(100% - 8px)
   left initial
   right 8px
   overflow scroll
   max-height calc(100vh - 100px)
-  @media(max-height 570px)
-    top -100px
   textarea
     background-color var(--secondary-background)
     border 0
