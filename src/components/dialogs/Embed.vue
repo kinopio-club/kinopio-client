@@ -8,39 +8,63 @@ dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop)
         button(@click="toggleIframeIsVisible" :class="{ active: iframeIsVisible }")
           span iFrame
         button(@click="toggleUrlIsVisible" :class="{ active: !iframeIsVisible }")
-          span Url
+          span URL
 
+    //- iFrame
     template(v-if="iframeIsVisible")
-      textarea(ref="iframe") {{iframe}}
-      button(@click="copy") Copy Code
-      .row(v-if="isCopied")
-        .badge.success.success-message Code Copied
-
+      .row
+        .url-textarea {{iframe}}
+        .input-button-wrap
+          button(@click.left="copy" :class="{success: isCopied}")
+            span(v-if="isCopied") Code Copied
+            span(v-else) Copy Code
+    //- Url
     template(v-if="!iframeIsVisible")
-      input.url-textarea(ref="url" v-model="url")
-      button(@click="copy") Copy Url
-      .row(v-if="isCopied")
-        .badge.success.success-message Url Copied
+      .row
+        .url-textarea {{url}}
+        .input-button-wrap
+          button(@click.left="copy" :class="{success: isCopied}")
+            span(v-if="isCopied") URL Copied
+            span(v-else) Copy URL
+
+    //- Zoom
+    .row
+      img.icon.icon-zoom(src="@/assets/search.svg")
+      Slider(
+        @updatePlayhead="updateZoom"
+        :minValue="40"
+        :value="spaceZoomPercent"
+        :maxValue="100"
+      )
+
 </template>
 
 <script>
+import Slider from '@/components/Slider.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'Embed',
+  components: {
+    Slider
+  },
   props: {
     visible: Boolean
   },
   data () {
     return {
       iframeIsVisible: true,
-      isCopied: false
+      isCopied: false,
+      min: 40,
+      max: 100
     }
   },
   computed: {
+    spaceZoomPercent () { return this.$store.state.spaceZoomPercent },
     url () {
       const spaceId = this.$store.state.currentSpace.id
-      return `${utils.kinopioDomain()}/embed/?spaceId=${spaceId}&zoom=100`
+      const zoom = this.spaceZoomPercent
+      return `${utils.kinopioDomain()}/embed/?spaceId=${spaceId}&zoom=${zoom}`
     },
     iframe () {
       return `<div class="kinopio-embed" style="height: 420px; width: 100%;">
@@ -50,6 +74,11 @@ export default {
     }
   },
   methods: {
+    updateZoom (percent) {
+      percent = percent / 100
+      percent = Math.round(this.min + (this.max - this.min) * percent)
+      this.$store.commit('spaceZoomPercent', percent)
+    },
     toggleIframeIsVisible () {
       this.iframeIsVisible = true
       this.isCopied = false
@@ -90,4 +119,9 @@ export default {
     height 100px
   .success-message
     margin-top 10px
+  .slider
+    margin-top -10px
+  .icon-zoom
+    margin-right 4px
+    margin-top -4px
 </style>
