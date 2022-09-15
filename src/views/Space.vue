@@ -15,7 +15,6 @@ main#space.space(
     UserLabelCursor(:user="user")
   BoxDetails
   CardDetails
-  CardUserDetails
   ConnectionDetails
   MultipleSelectedActions
   ScrollAtEdgesHandler
@@ -25,7 +24,6 @@ main#space.space(
 <script>
 import Card from '@/components/Card.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
-import CardUserDetails from '@/components/dialogs/CardUserDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
@@ -50,7 +48,6 @@ export default {
   components: {
     Card,
     CardDetails,
-    CardUserDetails,
     BoxDetails,
     UserLabelCursor,
     ConnectionDetails,

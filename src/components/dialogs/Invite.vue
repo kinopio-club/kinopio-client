@@ -1,40 +1,33 @@
 <template lang="pug">
-dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.stop)
+dialog.narrow.invite(v-if="visible" :open="visible" @click.left.stop)
 
   // add by email
   // share link
 
   section
-    p Invite Collaborators
+    p Invite
   section
     Loader(:visible="loading")
     template(v-if="!loading && collaboratorKey")
-      //- Input
       .row
-        input.url-textarea(ref="url" v-model="url")
-      //- Copy Button
-      .row(v-if="!canNativeShare" @click.left="copyUrl")
-        button
-          span Copy Invite Url
-      .row(v-if="canNativeShare")
-        .segmented-buttons
-          button(@click.left="copyUrl" :disabled="loading")
-            span Copy Invite Url
-          button(@click.left="shareUrl" :disabled="loading")
-            img.icon(src="@/assets/share.svg")
-    //- Status
+        .url-textarea {{url}}
+        .input-button-wrap
+          button(@click.left="copyUrl" :class="{success: urlIsCopied}")
+            span(v-if="urlIsCopied") Invite Copied
+            span(v-else) Copy Invite URL
+    //- Error
     template(v-if="!loading && !collaboratorKey")
       .row
         .badge.danger シ_ _)シ Something went wrong
-      button(@click="updateCollaboratorKey") Try Again
-    .row
-      .badge.success.success-message(v-if="urlIsCopied") Url Copied
-    .row.align-top(v-if="spaceIsPrivate")
+      .row
+        button(@click="updateCollaboratorKey") Try Again
+    //- View and Edit Permissions
+    .row(v-if="spaceIsPrivate")
       p
         .badge.info
-          img.icon.view(src="@/assets/view.svg")
-          img.icon.lock(src="@/assets/lock.svg")
-        span Invitees don't need an account to view private spaces
+          img.icon(src="@/assets/view.svg")
+        span No account needed to view private spaces
+    //- Free Cards
     .row(v-if="currentUserIsUpgraded")
       p
         .badge.success Free Cards
@@ -46,7 +39,7 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 export default {
-  name: 'InviteCollaborators',
+  name: 'Invite',
   props: {
     visible: Boolean
   },
@@ -62,9 +55,6 @@ export default {
     }
   },
   computed: {
-    // only works in https, supported by safari and android chrome
-    // https://caniuse.com/#feat=web-share
-    canNativeShare () { return Boolean(navigator.share) },
     spaceIsPrivate () { return this.$store.state.currentSpace.privacy === 'private' },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
@@ -109,15 +99,12 @@ export default {
 }
 </script>
 
-<style lang="stylus">
-.invite-collaborators
+<style lang="stylus" scoped>
+.invite
   left initial
   right 8px
   max-height calc(100vh - 180px)
   overflow auto
-  .lock
-    margin-top 2px
-    padding-right 2px
-  .view
-    margin-right 4px
+  @media(max-height 570px)
+    top -100px
 </style>

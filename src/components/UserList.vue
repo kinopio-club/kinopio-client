@@ -7,8 +7,8 @@ span
         .badge(:style="{background: user.color}" :class="{'narrow-badge': showRemoveUser}")
           User(:user="user" :isClickable="false")
           .name {{user.name}}
-        button.remove-user(v-if="showRemoveUser" @click.left.stop="removeUser(user)")
-          img.icon.remove(src="@/assets/remove.svg")
+        button.remove-user(v-if="showRemoveUser" @click.left.stop="removeUser(user)" title="Remove from space")
+          img.icon.leave(src="@/assets/leave.svg")
 </template>
 
 <script>

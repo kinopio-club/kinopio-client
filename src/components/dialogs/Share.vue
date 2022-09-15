@@ -8,33 +8,35 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           span RSS
         SpaceRssFeed(:visible="spaceRssFeedIsVisible")
 
+  section
+    .row
+      // Import, Export
+      .segmented-buttons
+        Import(:visible="importIsVisible" @closeDialog="closeDialogs")
+        Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
+        button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+          span Import
+        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+          span Export
+      //- Embed
+      .button-wrap(v-if="!spaceIsPrivate")
+        button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
+          span Embed
+        Embed(:visible="embedIsVisible")
+
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
+
+    //- Public space
     template(v-if="!spaceIsPrivate")
-      input.url-textarea(ref="url" v-model="url")
-      //- Share Options
-      .row
-        template(v-if="canNativeShare")
-          .segmented-buttons
-            //- Copy
-            button(@click.left="copyUrl")
-              span Copy
-            button(@click.left="shareUrl")
-              img.icon(src="@/assets/share.svg")
-        template(v-if="!canNativeShare")
-          //- Copy
-          .button-wrap
-            button(@click.left="copyUrl")
-              span Copy Url
-        //- Embed
-        .button-wrap
-          button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
-            span Embed
-          Embed(:visible="embedIsVisible")
+      p.row
+        .url-textarea {{url}}
+        .input-button-wrap
+          button(@click.left="copyUrl" :class="{success: urlIsCopied}")
+            span(v-if="urlIsCopied") URL Copied
+            span(v-else) Copy Space URL
 
-      //- Url Copied
-      .badge.success.success-message(v-if="urlIsCopied") Url Copied
-
+    //- Private space
     template(v-if="spaceIsPrivate")
       p.share-private
         span To share this space publically, set the privacy to
@@ -46,32 +48,21 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           img.icon.open(src="@/assets/open.svg")
           span {{privacyName(0)}}
 
-  // Export, Import
-  section
-    .button-wrap
-      button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-        span Export
-      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
-    .button-wrap
-      button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
-        span Import
-      Import(:visible="importIsVisible" @closeDialog="closeDialogs")
-
-  section(v-if="spaceHasUrl && isSpaceMember")
-    .button-wrap
-      button(@click.left.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
-        User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true")
-        span Invite Collaborators
-      InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
+    //- Invite
+    .row(v-if="spaceHasUrl && isSpaceMember")
+      .button-wrap
+        button(@click.left.stop="toggleInviteIsVisible" :class="{ active: inviteIsVisible }")
+          User
+          span Invite
+        Invite(:visible="inviteIsVisible")
 
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
     // collaborators
     template(v-if="spaceHasCollaborators")
-      UserList(:users="spaceCollaborators" :selectedUser="selectedUser" :showRemoveUser="isSpaceMember" @selectUser="showUserDetails" @removeUser="removeCollaborator" :isClickable="true")
+      UserList(:users="spaceCollaborators" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :showRemoveUser="isSpaceMember" @removeUser="removeCollaborator" :isClickable="true")
     // card users
     template(v-if="spaceHasOtherCardUsers")
-      UserList(:users="spaceOtherCardUsers" :selectedUser="selectedUser" :isClickable="true")
-    UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition" :userDetailsIsFromList="true" @removedCollaborator="removedCollaborator")
+      UserList(:users="spaceOtherCardUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 
   section(v-if="!spaceHasUrl")
     p
@@ -84,29 +75,24 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
 
 <script>
 import PrivacyButton from '@/components/PrivacyButton.vue'
-import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
+import Invite from '@/components/dialogs/Invite.vue'
 import SpaceRssFeed from '@/components/dialogs/SpaceRssFeed.vue'
 import Embed from '@/components/dialogs/Embed.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
-import { defineAsyncComponent } from 'vue'
 import User from '@/components/User.vue'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
-const UserDetails = defineAsyncComponent({
-  loader: () => import('@/components/dialogs/UserDetails.vue')
-})
 
 export default {
   name: 'Share',
   components: {
     PrivacyButton,
-    InviteCollaborators,
+    Invite,
     SpaceRssFeed,
     Embed,
     UserList,
-    UserDetails,
     User,
     Export,
     Import
@@ -126,10 +112,8 @@ export default {
       urlIsCopied: false,
       spaceHasUrl: false,
       privacyPickerIsVisible: false,
-      inviteCollaboratorsIsVisible: false,
+      inviteIsVisible: false,
       selectedUser: {},
-      userDetailsPosition: {},
-      userDetailsIsVisible: false,
       dialogHeight: null,
       spaceRssFeedIsVisible: false,
       embedIsVisible: false,
@@ -138,6 +122,11 @@ export default {
     }
   },
   computed: {
+    userDetailsIsVisible () { return this.$store.state.userDetailsIsVisible },
+    userDetailsSelectedUser () {
+      if (!this.userDetailsIsVisible) { return }
+      return this.$store.state.userDetailsUser
+    },
     url () { return this.$store.getters['currentSpace/url'] },
     spaceName () { return this.$store.state.currentSpace.name },
     spacePrivacy () { return this.$store.state.currentSpace.privacy },
@@ -148,9 +137,6 @@ export default {
     },
     // only works in https, supported by safari and android chrome
     // https://caniuse.com/#feat=web-share
-    canNativeShare () {
-      return Boolean(navigator.share)
-    },
     spaceIsPrivate () {
       return this.spacePrivacy === 'private'
     },
@@ -207,10 +193,10 @@ export default {
       this.closeDialogs()
       this.privacyPickerIsVisible = !isVisible
     },
-    toggleInviteCollaboratorsIsVisible () {
-      const isVisible = this.inviteCollaboratorsIsVisible
+    toggleInviteIsVisible () {
+      const isVisible = this.inviteIsVisible
       this.closeDialogs()
-      this.inviteCollaboratorsIsVisible = !isVisible
+      this.inviteIsVisible = !isVisible
     },
     toggleSpaceRssFeedIsVisible () {
       const isVisible = this.spaceRssFeedIsVisible
@@ -234,36 +220,32 @@ export default {
     },
     closeDialogs () {
       this.privacyPickerIsVisible = false
-      this.inviteCollaboratorsIsVisible = false
+      this.inviteIsVisible = false
       this.spaceRssFeedIsVisible = false
       this.embedIsVisible = false
       this.exportIsVisible = false
       this.importIsVisible = false
-      this.userDetailsIsNotVisible()
+      this.$store.commit('userDetailsIsVisible', false)
+    },
+    toggleUserDetails (event, user) {
+      this.closeDialogs()
+      this.showUserDetails(event, user)
     },
     showUserDetails (event, user) {
-      const elementRect = event.target.getBoundingClientRect()
-      this.userDetailsIsNotVisible()
-      this.userDetailsPosition = {
-        top: elementRect.y - 6 + 'px'
-      }
-      this.selectedUser = user
-      this.userDetailsIsVisible = true
-    },
-    userDetailsIsNotVisible () {
-      this.userDetailsIsVisible = false
-      this.selectedUser = {}
-    },
-    removedCollaborator (user) {
-      const isCurrentUser = this.$store.state.currentUser.id === user.id
-      if (isCurrentUser) {
-        this.$store.dispatch('closeAllDialogs', 'Share.removedCollaborator')
-      }
-      this.userDetailsIsNotVisible()
+      let element = event.target
+      let options = { element, offsetX: 25, shouldIgnoreZoom: true }
+      let position = utils.childDialogPositionFromParent(options)
+      this.$store.commit('userDetailsUser', user)
+      this.$store.commit('userDetailsPosition', position)
+      this.$store.commit('userDetailsIsVisible', true)
     },
     async removeCollaborator (user) {
       this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
-      this.removedCollaborator(user)
+      const isCurrentUser = this.$store.state.currentUser.id === user.id
+      if (isCurrentUser) {
+        this.$store.dispatch('closeAllDialogs', 'Share.removeCollaborator')
+      }
+      this.closeDialogs()
     },
     updateDialogHeight () {
       if (!this.visible) { return }
@@ -284,7 +266,6 @@ export default {
       this.updateSpaceHasUrl()
       this.closeDialogs()
       if (visible) {
-        this.userDetailsIsNotVisible()
         this.updateDialogHeight()
       }
     }
@@ -307,7 +288,6 @@ export default {
   .description
     margin-top 3px
   dialog.privacy-picker,
-  dialog.embed,
   dialog.dialog-wrap
     left initial
     right 8px
@@ -317,6 +297,7 @@ export default {
   .collaborators
     max-height calc(100vh - 200px)
   .share-private
+    margin-bottom 10px
     .badge
       margin-left 6px
     .last-child

@@ -106,9 +106,11 @@ export default {
   methods: {
     resetPlayhead () {
       this.playheadIsBeingDragged = false
-      this.buttonPosition = this.initialValue
-      this.updateButtonPosition()
       this.$emit('resetPlayhead')
+      this.$emit('updatePlayhead', this.maxValue)
+      this.$nextTick(() => {
+        this.updateButtonPosition()
+      })
     },
     movePlayhead (event, shouldSnapToInitial) {
       const progress = this.$refs.progress
@@ -158,7 +160,7 @@ export default {
 <style lang="stylus">
 .slider
   height 100%
-  width 100%
+  width 100px
   padding-bottom 10px
   padding-top 10px
   padding-right 5px

@@ -30,8 +30,7 @@ dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
     template(v-if="spacesIsVisible")
       SpaceList(:spaces="favoriteSpacesOrderedByEdited" :showUser="true" @selectSpace="changeSpace")
     template(v-if="!spacesIsVisible")
-      UserList(:users="favoriteUsers" :selectedUser="selectedUser" @selectUser="showUserDetails" :isClickable="true")
-      UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition")
+      UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 
 </template>
 
@@ -39,7 +38,6 @@ dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import UserList from '@/components/UserList.vue'
-import UserDetails from '@/components/dialogs/UserDetails.vue'
 import FavoritesFilters from '@/components/dialogs/FavoritesFilters.vue'
 import utils from '@/utils.js'
 
@@ -47,7 +45,6 @@ export default {
   name: 'Favorites',
   components: {
     Loader,
-    UserDetails,
     SpaceList,
     UserList,
     FavoritesFilters
@@ -58,13 +55,16 @@ export default {
   data () {
     return {
       spacesIsVisible: true,
-      userDetailsIsVisible: false,
-      selectedUser: {},
       userDetailsPosition: {},
       favoritesFiltersIsVisible: false
     }
   },
   computed: {
+    userDetailsIsVisible () { return this.$store.state.userDetailsIsVisible },
+    userDetailsSelectedUser () {
+      if (!this.userDetailsIsVisible) { return }
+      return this.$store.state.userDetailsUser
+    },
     dialogFavoritesFilters () { return this.$store.state.currentUser.dialogFavoritesFilters },
     currentUser () { return this.$store.state.currentUser },
     favoriteUsers () { return this.$store.state.currentUser.favoriteUsers },
@@ -119,29 +119,29 @@ export default {
         this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       }
     },
-    showUserDetails (event, user) {
+    toggleUserDetails (event, user) {
       this.closeDialogs()
-      this.selectedUser = user
-      this.userDetailsIsVisible = true
+      this.showUserDetails(event, user)
+    },
+    showUserDetails (event, user) {
+      let element = event.target
+      let options = { element, shouldIgnoreZoom: true }
+      let position = utils.childDialogPositionFromParent(options)
+      this.$store.commit('userDetailsUser', user)
+      this.$store.commit('userDetailsPosition', position)
+      this.$store.commit('userDetailsIsVisible', true)
+      // offset position
       this.$nextTick(() => {
-        const dialogRect = this.$refs.dialog.getBoundingClientRect()
-        const targetRect = event.target.getBoundingClientRect()
-        const userDetailsRect = document.querySelector('dialog.user-details').getBoundingClientRect()
-        const viewportHeight = this.$store.state.viewportHeight
-        let dialogPositionTop = targetRect.y - dialogRect.y
-        if (userDetailsRect.y + userDetailsRect.height > viewportHeight) {
-          dialogPositionTop = dialogPositionTop - userDetailsRect.height
-        }
-        this.userDetailsPosition = {
-          top: dialogPositionTop + 'px',
-          bottom: 'initial'
-        }
+        const child = document.querySelector('.user-details')
+        const rect = child.getBoundingClientRect()
+        options = { element, offsetX: 100, offsetY: -(rect.height + 8), shouldIgnoreZoom: true }
+        position = utils.childDialogPositionFromParent(options)
+        this.$store.commit('userDetailsPosition', position)
       })
     },
     closeDialogs () {
-      this.userDetailsIsVisible = false
-      this.selectedUser = {}
       this.favoritesFiltersIsVisible = false
+      this.$store.commit('userDetailsIsVisible', false)
     },
     async updateFavorites () {
       await this.$store.dispatch('currentUser/restoreUserFavorites')
