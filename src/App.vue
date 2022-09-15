@@ -512,6 +512,27 @@ label
     opacity 0.5
     pointer-events none
 
+.input-button-wrap
+  padding 8px
+  cursor pointer
+  position absolute
+  right 0
+  top 0
+  button
+    padding 0
+    padding-left 6px
+    padding-right 6px
+    height 17px
+    font-size 12px
+  &:hover
+    button
+      box-shadow var(--button-hover-shadow)
+      background-color var(--secondary-hover-background)
+  &:active
+    button
+      box-shadow var(--button-active-inset-shadow)
+      background-color var(--secondary-active-background)
+
 p,
 span
   -webkit-text-size-adjust auto
@@ -953,6 +974,8 @@ code
   border 0
   border-radius 3px
   padding 4px
+  max-width 100%
+  word-wrap anywhere
 
 .logo-image
   background-image url('assets/logo-base.png')

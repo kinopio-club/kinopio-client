@@ -95,7 +95,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
     template(v-if="!isCurrentUser")
       button(@click.left.stop="removeCollaborator")
         img.icon(src="@/assets/remove.svg")
-        span Remove Collaborator
+        span Remove From Space
 </template>
 
 <script>

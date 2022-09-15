@@ -13,21 +13,11 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
 
     //- Public
     template(v-if="!spaceIsPrivate")
-      input.url-textarea(ref="url" v-model="url")
-      //- Share Options
-      .row
-        template(v-if="canNativeShare")
-          .segmented-buttons
-            //- Copy
-            button(@click.left="copyUrl")
-              span Copy
-            button(@click.left="shareUrl")
-              img.icon(src="@/assets/share.svg")
-        template(v-if="!canNativeShare")
-          //- Copy
-          .button-wrap
-            button(@click.left="copyUrl")
-              span Copy Url
+      p.row
+        .url-textarea {{url}}
+        .input-button-wrap
+          button(@click.left="copyUrl")
+            span Copy URL
       //- Url Copied
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
 
@@ -148,9 +138,6 @@ export default {
     },
     // only works in https, supported by safari and android chrome
     // https://caniuse.com/#feat=web-share
-    canNativeShare () {
-      return Boolean(navigator.share)
-    },
     spaceIsPrivate () {
       return this.spacePrivacy === 'private'
     },
