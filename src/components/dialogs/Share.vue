@@ -16,10 +16,9 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
       p.row
         .url-textarea {{url}}
         .input-button-wrap
-          button(@click.left="copyUrl")
-            span Copy URL
-      //- Url Copied
-      .badge.success.success-message(v-if="urlIsCopied") Url Copied
+          button(@click.left="copyUrl" :class="{success: urlIsCopied}")
+            span(v-if="urlIsCopied") URL Copied
+            span(v-else) Copy URL
 
     //- Private
     template(v-if="spaceIsPrivate")
