@@ -6,6 +6,8 @@
 <script>
 import utils from '@/utils.js'
 
+const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/default-background-2x.png'
+
 export default {
   name: 'SpaceBackground',
   created () {
@@ -17,7 +19,7 @@ export default {
   },
   data () {
     return {
-      imageUrl: '',
+      imageUrl: defaultBackground,
       size: 'initial'
     }
   },
@@ -50,7 +52,7 @@ export default {
     async loadBackground () {
       const background = this.background
       if (!utils.urlIsImage(background)) {
-        this.imageUrl = ''
+        this.imageUrl = defaultBackground
         this.updateBackgroundSize()
       }
       try {
@@ -89,8 +91,8 @@ export default {
         height = defaultSize.height
       }
       if (width === 0 || height === 0) {
-        this.size = 'initial'
-        return
+        width = defaultSize.width
+        height = defaultSize.height
       }
       width = Math.round(width)
       height = Math.round(height)
@@ -114,6 +116,8 @@ export default {
   height 100%
   pointer-events none
   z-index 0
-  background-image url('assets/background-2x.png')
+  background-image url('/assets/background-2x.png')
+  background-color var(--primary-background)
+  background-size 310px 200px
 
 </style>
