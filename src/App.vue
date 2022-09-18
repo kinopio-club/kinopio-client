@@ -20,7 +20,7 @@
   Minimap
   WindowHistoryHandler
   KeyboardShortcutsHandler
-  NotificationsWithPosition(layer="space")
+  NotificationsWithPosition(layer="app")
   .preload
     .logo-hover
     .logo-active

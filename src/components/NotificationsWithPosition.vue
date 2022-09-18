@@ -8,9 +8,9 @@ aside.notifications-with-position
     :class="item.type"
     @animationend="remove"
   )
-    template(v-if="item.icon === 'cancel'")
-      img.icon.cancel(src="@/assets/add.svg")
-      span {{item.message}}
+    img.icon.cancel(v-if="item.icon === 'cancel'" src="@/assets/add.svg")
+    img.icon.checkmark(v-if="item.icon === 'checkmark'" src="@/assets/checkmark.svg")
+    span {{item.message}}
 </template>
 <script>
 export default {
@@ -45,4 +45,6 @@ export default {
     animation-direction forward
     animation-fill-mode forwards
     animation-timing-function ease-out
+  .checkmark
+    vertical-align 2px
 </style>
