@@ -14,15 +14,15 @@ dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop)
     template(v-if="iframeIsVisible")
       .row
         .url-textarea {{iframe}}
-        .input-button-wrap
-          button(@click.left="copy")
+        .input-button-wrap(@click.left="copy")
+          button
             span Copy Code
     //- Url
     template(v-if="!iframeIsVisible")
       .row
         .url-textarea {{url}}
-        .input-button-wrap
-          button(@click.left="copy")
+        .input-button-wrap(@click.left="copy")
+          button
             span Copy URL
 
     //- Zoom
@@ -85,6 +85,7 @@ export default {
       this.$store.commit('clearNotificationsWithPosition')
     },
     async copy (event) {
+      this.$store.commit('clearNotificationsWithPosition')
       let value
       if (this.iframeIsVisible) {
         value = this.iframe

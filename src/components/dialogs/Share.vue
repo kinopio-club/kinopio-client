@@ -31,10 +31,9 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     template(v-if="!spaceIsPrivate")
       p.row
         .url-textarea {{url}}
-        .input-button-wrap
-          button(@click.left="copyUrl" :class="{success: urlIsCopied}")
-            span(v-if="urlIsCopied") URL Copied
-            span(v-else) Copy Space URL
+        .input-button-wrap(@click.left="copyUrl")
+          button
+            span Copy Space URL
 
     //- Private space
     template(v-if="spaceIsPrivate")
@@ -172,9 +171,16 @@ export default {
       const name = state.friendlyName || state.name
       return utils.capitalizeFirstLetter(name)
     },
-    async copyUrl () {
-      await navigator.clipboard.writeText(this.url)
-      this.urlIsCopied = true
+    async copyUrl (event) {
+      this.$store.commit('clearNotificationsWithPosition')
+      const position = utils.cursorPositionInPage(event)
+      try {
+        await navigator.clipboard.writeText(this.url)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+      } catch (error) {
+        console.warn('🚑 copyText', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      }
     },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'Share.triggerSignUpOrInIsVisible')
@@ -262,7 +268,7 @@ export default {
   },
   watch: {
     visible (visible) {
-      this.urlIsCopied = false
+      this.$store.commit('clearNotificationsWithPosition')
       this.updateSpaceHasUrl()
       this.closeDialogs()
       if (visible) {

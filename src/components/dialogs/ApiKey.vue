@@ -11,8 +11,8 @@ dialog.narrow.api-key(v-if="visible" :open="visible" @click.left.stop ref="dialo
     template(v-if="keyIsRevealed")
       p.row
         .url-textarea {{key}}
-        .input-button-wrap
-          button(@click.left="copyKey")
+        .input-button-wrap(@click.left="copyKey")
+          button
             span Copy API Key
 
   section(v-if="!currentUserIsSignedIn")
@@ -69,6 +69,7 @@ export default {
       this.keyIsRevealed = true
     },
     async copyKey (event) {
+      this.$store.commit('clearNotificationsWithPosition')
       const position = utils.cursorPositionInPage(event)
       try {
         await navigator.clipboard.writeText(this.key)
