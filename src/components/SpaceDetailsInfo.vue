@@ -28,7 +28,7 @@
     .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
       button
         img.icon.pin(src="@/assets/pin.svg")
-.row
+.row.align-items-top
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
   //- Explore
@@ -208,4 +208,6 @@ export default {
     .pin-button-wrap
       button
         width 23px
+.row.align-items-top
+  align-items flex-start
 </style>
