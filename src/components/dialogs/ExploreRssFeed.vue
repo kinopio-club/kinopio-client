@@ -7,10 +7,9 @@ dialog.narrow.explore-rss-feed(v-if="visible" :open="visible" @click.left.stop)
     p Subscribe to new spaces added to Explore
     p.row
       .url-textarea {{url}}
-      .input-button-wrap
-        button(@click.left="copyUrl" :class="{success: urlIsCopied}")
-          span(v-if="urlIsCopied") URL Copied
-          span(v-else) Copy Feed URL
+      .input-button-wrap(@click.left="copyUrl")
+        button
+          span Copy Feed URL
 </template>
 
 <script>
@@ -23,22 +22,28 @@ export default {
   },
   data () {
     return {
-      urlIsCopied: false,
       url: ''
     }
   },
   methods: {
-    async copyUrl () {
-      await navigator.clipboard.writeText(this.url)
-      this.urlIsCopied = true
+    async copyUrl (event) {
+      this.$store.commit('clearNotificationsWithPosition')
+      const position = utils.cursorPositionInPage(event)
+      try {
+        await navigator.clipboard.writeText(this.url)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+      } catch (error) {
+        console.warn('🚑 copyText', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      }
     },
     updateUrl () {
-      this.urlIsCopied = false
       this.url = `${utils.host(true)}/space/explore-spaces/feed.json`
     }
   },
   watch: {
     visible (visible) {
+      this.$store.commit('clearNotificationsWithPosition')
       if (visible) {
         this.updateUrl()
       }
