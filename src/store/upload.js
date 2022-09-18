@@ -127,14 +127,14 @@ export default {
       }
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) {
-        context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position: currentCursor, type: 'info', icon: 'cancel' }, { root: true })
+        context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position: currentCursor, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
         context.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })
         return
       }
       let cardIds = []
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       if (!currentUserIsSignedIn) {
-        context.commit('addNotificationWithPosition', { message: 'Sign Up or In', position: currentCursor, type: 'info', icon: 'cancel' }, { root: true })
+        context.commit('addNotificationWithPosition', { message: 'Sign Up or In', position: currentCursor, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
         context.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' }, { root: true })
         return
       }
@@ -144,7 +144,7 @@ export default {
         return utils.isFileTooBig(file, userIsUpgraded)
       })
       if (filesTooBig) {
-        context.commit('addNotificationWithPosition', { message: 'Too Big', position: currentCursor, type: 'danger', icon: 'cancel' }, { root: true })
+        context.commit('addNotificationWithPosition', { message: 'Too Big', position: currentCursor, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
         context.commit('addNotification', { message: 'To upload files over 5mb, upgrade for unlimited size uploads', type: 'danger' }, { root: true })
         return
       }
@@ -184,7 +184,7 @@ export default {
           await context.dispatch('uploadFile', { file, cardId })
         } catch (error) {
           console.error('🚒', error)
-          context.commit('addNotificationWithPosition', { message: error.message, position: currentCursor, type: 'danger', icon: 'cancel' }, { root: true })
+          context.commit('addNotificationWithPosition', { message: error.message, position: currentCursor, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
           context.commit('addNotification', { message: error.message, type: 'danger' }, { root: true })
         }
       }))

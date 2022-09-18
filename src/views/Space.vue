@@ -18,6 +18,7 @@ main#space.space(
   ConnectionDetails
   MultipleSelectedActions
   ScrollAtEdgesHandler
+  NotificationsWithPosition(layer="space")
   BoxSelecting
 </template>
 
@@ -34,6 +35,7 @@ import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
 import Connections from '@/components/Connections.vue'
 import LockedItemButtons from '@/components/LockedItemButtons.vue'
+import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -57,7 +59,8 @@ export default {
     Boxes,
     Cards,
     LockedItemButtons,
-    Connections
+    Connections,
+    NotificationsWithPosition
   },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')
@@ -318,7 +321,7 @@ export default {
         const position = this.cursor()
         const notificationWithPosition = document.querySelector('.notifications-with-position .item')
         if (!notificationWithPosition) {
-          this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', icon: 'cancel' })
+          this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
         }
         return true
       }
@@ -340,7 +343,7 @@ export default {
         y: position.y * zoom
       }
       if (this.spaceIsReadOnly) {
-        this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', icon: 'cancel' })
+        this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
         return
       }
       this.normalizeSpaceCardsZ()

@@ -1127,7 +1127,7 @@ export default {
       event.stopPropagation()
       if (!this.canEditCard) {
         const position = utils.cursorPositionInSpace({ event })
-        this.$store.commit('addNotificationWithPosition', { message: 'Card is Read Only', position, type: 'info', icon: 'cancel' })
+        this.$store.commit('addNotificationWithPosition', { message: 'Card is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
         return
       }
       this.$store.commit('currentUserIsDraggingCard', false)

@@ -14,13 +14,14 @@
   router-view
   Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
   Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
+  NotificationsWithPosition
   TagDetails
   LinkDetails
   UserDetails
   Minimap
   WindowHistoryHandler
   KeyboardShortcutsHandler
-  NotificationsWithPosition
+  NotificationsWithPosition(layer="app")
   .preload
     .logo-hover
     .logo-active

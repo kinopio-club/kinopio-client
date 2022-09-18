@@ -31,10 +31,10 @@ export default {
       const position = utils.cursorPositionInPage(event)
       try {
         await navigator.clipboard.writeText(this.url)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', icon: 'checkmark' })
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
       } catch (error) {
         console.warn('🚑 copyText', error)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', icon: 'cancel' })
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
       }
     },
     updateUrl () {

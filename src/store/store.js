@@ -1165,6 +1165,10 @@ const store = createStore({
     // Notifications with Position
 
     addNotificationWithPosition: (state, notification) => {
+      if (!notification.layer) {
+        console.error('🚒 addNotificationWithPosition missing param layer')
+        return
+      }
       notification.id = nanoid()
       state.notificationsWithPosition.push(notification)
     },
