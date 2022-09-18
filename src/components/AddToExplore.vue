@@ -55,25 +55,24 @@ export default {
     spaceCardsCount () { return this.$store.getters['currentCards/all'].length }
   },
   methods: {
-    checkIfShouldShowInExplore () {
+    checkIfShouldPrevent () {
       if (this.showInExplore) { return true }
       if (!this.currentUserIsSignedIn) {
         this.error.userNeedsToSignUpOrIn = true
-        return
+        return true
       }
       if (this.spaceIsHelloKinopio) {
         this.error.spaceMustBeEdited = true
-        return
+        return true
       }
       if (this.spaceCardsCount < 10) {
         this.error.spaceCardsMinimum = true
-        return
+        return true
       }
-      return true
     },
     toggleShowInExplore () {
-      const shouldShowInExplore = this.checkIfShouldShowInExplore()
-      if (!shouldShowInExplore) { return }
+      const shouldPrevent = this.checkIfShouldPrevent()
+      if (shouldPrevent) { return }
       const currentPrivacy = this.$store.state.currentSpace.privacy
       if (currentPrivacy === 'private') {
         this.$store.dispatch('currentSpace/updateSpace', { privacy: 'closed' })

@@ -387,6 +387,7 @@ export default {
   },
   watch: {
     visible (visible) {
+      this.$store.commit('clearNotificationsWithPosition')
       if (visible) {
         this.updateLocalSpaces()
         this.updateWithRemoteSpaces()

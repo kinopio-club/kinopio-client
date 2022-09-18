@@ -28,6 +28,11 @@ export default {
     closeDialogs () {
       this.$store.commit('triggerSpaceDetailsCloseDialogs')
     }
+  },
+  watch: {
+    visible (visible) {
+      this.$store.commit('clearNotificationsWithPosition')
+    }
   }
 }
 </script>
