@@ -1163,6 +1163,9 @@ const store = createStore({
     removeNotificationWithPosition: (state) => {
       state.notificationsWithPosition.shift()
     },
+    clearNotificationsWithPosition: (state) => {
+      state.notificationsWithPosition = []
+    },
 
     // Filters
 

@@ -72,14 +72,16 @@ export default {
       const position = utils.cursorPositionInPage(event)
       try {
         await navigator.clipboard.writeText(this.key)
-        this.$store.commit('addNotificationWithPosition', { message: 'API Key Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
       } catch (error) {
+        console.warn('🚑 copyKey', error)
         this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
       }
     }
   },
   watch: {
     visible (visible) {
+      this.$store.commit('clearNotificationsWithPosition')
       this.keyIsRevealed = false
       this.key = ''
       if (visible) {
