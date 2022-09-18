@@ -40,7 +40,7 @@
         a.preview-image-wrap(v-if="parentIsCardDetails && !shouldHideImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
           img.preview-image( :src="card.urlPreviewImage" @load="updateDimensionsAndMap")
         //- info
-        .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, hidden: shouldHideInfo, transparent: isShowNone}" :style="{background: selectedColor}")
+        .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, hidden: shouldHideInfo, transparent: isShowNone}" :style="{background: selectedColor}")
           img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
           .title {{filteredTitle}}
@@ -314,6 +314,11 @@ export default {
     position absolute
     margin 8px
     background var(--secondary-hover-background)
+    border-top-left-radius 0
+    border-top-right-radius 0
+    &.text-with-image
+      border-radius 3px
+
   .side-text
     max-width calc(100% - 24px)
     position static
