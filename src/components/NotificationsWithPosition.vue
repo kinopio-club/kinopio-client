@@ -8,8 +8,9 @@ aside.notifications-with-position
     :class="item.type"
     @animationend="remove"
   )
-    img.icon.cancel(src="@/assets/add.svg")
-    span {{item.message}}
+    template(v-if="item.icon === 'cancel'")
+      img.icon.cancel(src="@/assets/add.svg")
+      span {{item.message}}
 </template>
 <script>
 export default {
