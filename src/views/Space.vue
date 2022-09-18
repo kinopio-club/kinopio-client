@@ -401,7 +401,7 @@ export default {
         // prevent addCard if position is outside space
         if (utils.isPositionOutsideOfSpace(position)) {
           position = utils.cursorPositionInPage(event)
-          this.$store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info' })
+          this.$store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
           return
         }
         // add card

@@ -4,7 +4,7 @@ aside.notifications-with-position
     v-for="item in items"
     v-bind:key="item.id"
     :data-notification-id="item.id"
-    :style="{ left: item.position.x + 'px', top: item.position.y + 'px' }"
+    :style="styles(item)"
     :class="item.type"
     @animationend="remove"
   )
@@ -22,11 +22,22 @@ export default {
     items () {
       const itemsInLayer = this.$store.state.notificationsWithPosition.filter(item => item.layer === this.layer)
       return itemsInLayer
-    }
+    },
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
   },
   methods: {
     remove () {
       this.$store.commit('removeNotificationWithPosition')
+    },
+    styles (item) {
+      let styles = {
+        left: item.position.x + 'px',
+        top: item.position.y + 'px'
+      }
+      if (this.layer === 'space') {
+        styles.transform = `scale(${this.spaceCounterZoomDecimal})`
+      }
+      return styles
     }
   }
 }
