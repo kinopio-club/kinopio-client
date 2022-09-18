@@ -37,6 +37,7 @@ export default {
         if (zoom === 100) {
           this.cancel()
         } else {
+          if (colorCycleTimer) { return }
           this.start()
         }
       }
