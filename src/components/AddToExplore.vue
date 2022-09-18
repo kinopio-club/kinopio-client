@@ -28,6 +28,10 @@
 </template>
 
 <script>
+import utils from '@/utils.js'
+
+let prevPrivacy = ''
+
 export default {
   name: 'ShowInExploreButton',
   emits: ['updateSpaces'],
@@ -55,31 +59,57 @@ export default {
     spaceCardsCount () { return this.$store.getters['currentCards/all'].length }
   },
   methods: {
-    checkIfShouldPrevent () {
-      if (this.showInExplore) { return true }
+    checkIfShouldPrevent (event) {
+      let shouldPrevent
+      if (this.showInExplore) { return }
       if (!this.currentUserIsSignedIn) {
         this.error.userNeedsToSignUpOrIn = true
-        return true
+        shouldPrevent = true
       }
       if (this.spaceIsHelloKinopio) {
         this.error.spaceMustBeEdited = true
-        return true
+        shouldPrevent = true
       }
       if (this.spaceCardsCount < 10) {
         this.error.spaceCardsMinimum = true
-        return true
+        shouldPrevent = true
+      }
+      // if (shouldPrevent) {
+      //   const position = utils.cursorPositionInPage(event)
+      //   this.$store.commit('addNotificationWithPosition', { message: 'Could Not Add', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      // }
+      return shouldPrevent
+    },
+    toggleShowInExplore (event) {
+      this.$store.commit('clearNotificationsWithPosition')
+      const shouldPrevent = this.checkIfShouldPrevent(event)
+      if (shouldPrevent) { return }
+      this.updateSpacePrivacy(event)
+      this.updateShowInExplore()
+      this.$emit('updateSpaces')
+    },
+    updateShowInExplore () {
+      const shouldShow = !this.showInExplore
+      const position = utils.cursorPositionInPage(event)
+      this.$store.dispatch('currentSpace/updateSpace', { showInExplore: shouldShow })
+      if (shouldShow) {
+        this.$store.commit('addNotificationWithPosition', { message: 'Added to Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
+      } else {
+        this.$store.commit('addNotificationWithPosition', { message: 'Removed from Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
       }
     },
-    toggleShowInExplore () {
-      const shouldPrevent = this.checkIfShouldPrevent()
-      if (shouldPrevent) { return }
+    updateSpacePrivacy (event) {
+      const shouldShow = !this.showInExplore
       const currentPrivacy = this.$store.state.currentSpace.privacy
-      if (currentPrivacy === 'private') {
-        this.$store.dispatch('currentSpace/updateSpace', { privacy: 'closed' })
+      if (shouldShow) {
+        prevPrivacy = currentPrivacy
+        if (currentPrivacy === 'private') {
+          this.$store.dispatch('currentSpace/updateSpace', { privacy: 'closed' })
+        }
+      } else {
+        prevPrivacy = prevPrivacy || 'closed'
+        this.$store.dispatch('currentSpace/updateSpace', { privacy: prevPrivacy })
       }
-      const value = !this.showInExplore
-      this.$store.dispatch('currentSpace/updateSpace', { showInExplore: value })
-      this.$emit('updateSpaces')
     },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'ShowInExploreButton.triggerSignUpOrInIsVisible')
