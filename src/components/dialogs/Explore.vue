@@ -70,6 +70,7 @@ export default {
   },
   watch: {
     visible (visible) {
+      this.$store.commit('clearNotificationsWithPosition')
       if (visible) {
         this.updateSpaces()
         this.updateDialogHeight()

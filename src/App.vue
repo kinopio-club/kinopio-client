@@ -21,6 +21,7 @@
   Minimap
   WindowHistoryHandler
   KeyboardShortcutsHandler
+  NotificationsWithPosition(layer="app")
   .preload
     .logo-hover
     .logo-active
@@ -47,6 +48,7 @@ import SpaceBackground from '@/components/SpaceBackground.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
+import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -68,7 +70,8 @@ export default {
     SpaceBackground,
     OutsideSpaceBackground,
     NotificationsWithPosition,
-    UserDetails
+    UserDetails,
+    NotificationsWithPosition
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)

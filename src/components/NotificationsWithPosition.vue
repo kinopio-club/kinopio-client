@@ -8,14 +8,21 @@ aside.notifications-with-position
     :class="item.type"
     @animationend="remove"
   )
-    img.icon.cancel(src="@/assets/add.svg")
+    img.icon.cancel(v-if="item.icon === 'cancel'" src="@/assets/add.svg")
+    img.icon.checkmark(v-if="item.icon === 'checkmark'" src="@/assets/checkmark.svg")
     span {{item.message}}
 </template>
 <script>
 export default {
   name: 'NotificationsWithPosition',
+  props: {
+    layer: String // app, space
+  },
   computed: {
-    items () { return this.$store.state.notificationsWithPosition }
+    items () {
+      const itemsInLayer = this.$store.state.notificationsWithPosition.filter(item => item.layer === this.layer)
+      return itemsInLayer
+    }
   },
   methods: {
     remove () {
@@ -38,4 +45,6 @@ export default {
     animation-direction forward
     animation-fill-mode forwards
     animation-timing-function ease-out
+  .checkmark
+    vertical-align 2px
 </style>

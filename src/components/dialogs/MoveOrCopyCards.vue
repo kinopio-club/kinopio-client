@@ -6,10 +6,9 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
       .url-textarea
         p(v-for="name in names")
           span {{name}}
-      .input-button-wrap
-        button(@click.left="copyText" :class="{success: textIsCopied}")
-          span(v-if="textIsCopied") Copied
-          span(v-else) Copy Card Names
+      .input-button-wrap(@click.left="copyText")
+        button
+          span Copy Card Names
 
   section
     .row
@@ -56,7 +55,6 @@ export default {
       selectedSpace: {},
       spacePickerIsVisible: false,
       loading: false,
-      textIsCopied: false,
       cardsCreatedIsOverLimit: false
     }
   },
@@ -106,9 +104,15 @@ export default {
       return utils.pastTense(value)
     },
     async copyText () {
-      const value = this.text
-      await navigator.clipboard.writeText(value)
-      this.textIsCopied = true
+      this.$store.commit('clearNotificationsWithPosition')
+      const position = utils.cursorPositionInPage(event)
+      try {
+        await navigator.clipboard.writeText(this.text)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+      } catch (error) {
+        console.warn('🚑 copyText', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      }
     },
     toggleSpacePickerIsVisible () {
       this.spacePickerIsVisible = !this.spacePickerIsVisible
@@ -223,12 +227,12 @@ export default {
   },
   watch: {
     visible (visible) {
+      this.$store.commit('clearNotificationsWithPosition')
       this.$nextTick(() => {
         if (visible) {
           this.closeDialogs()
           this.scrollIntoView()
           this.updateSpaces()
-          this.textIsCopied = false
         }
       })
     }

@@ -14,18 +14,16 @@ dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop)
     template(v-if="iframeIsVisible")
       .row
         .url-textarea {{iframe}}
-        .input-button-wrap
-          button(@click.left="copy" :class="{success: isCopied}")
-            span(v-if="isCopied") Code Copied
-            span(v-else) Copy Code
+        .input-button-wrap(@click.left="copy")
+          button
+            span Copy Code
     //- Url
     template(v-if="!iframeIsVisible")
       .row
         .url-textarea {{url}}
-        .input-button-wrap
-          button(@click.left="copy" :class="{success: isCopied}")
-            span(v-if="isCopied") URL Copied
-            span(v-else) Copy URL
+        .input-button-wrap(@click.left="copy")
+          button
+            span Copy URL
 
     //- Zoom
     .row
@@ -55,7 +53,6 @@ export default {
   data () {
     return {
       iframeIsVisible: true,
-      isCopied: false,
       min: 40,
       max: 100
     }
@@ -80,27 +77,35 @@ export default {
       percent = Math.round(this.min + (this.max - this.min) * percent)
       this.$store.commit('spaceZoomPercent', percent)
     },
-    toggleIframeIsVisible () {
+    toggleIframeIsVisible (event) {
       this.iframeIsVisible = true
-      this.isCopied = false
+      this.$store.commit('clearNotificationsWithPosition')
     },
     toggleUrlIsVisible () {
       this.iframeIsVisible = false
-      this.isCopied = false
+      this.$store.commit('clearNotificationsWithPosition')
     },
-    async copy () {
+    async copy (event) {
+      this.$store.commit('clearNotificationsWithPosition')
       let value
       if (this.iframeIsVisible) {
         value = this.iframe
       } else {
         value = this.url
       }
-      await navigator.clipboard.writeText(value)
-      this.isCopied = true
+      const position = utils.cursorPositionInPage(event)
+      try {
+        await navigator.clipboard.writeText(value)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+      } catch (error) {
+        console.warn('🚑 copy', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      }
     }
   },
   watch: {
     visible (visible) {
+      this.$store.commit('clearNotificationsWithPosition')
       if (visible) {
         this.toggleIframeIsVisible()
       }
