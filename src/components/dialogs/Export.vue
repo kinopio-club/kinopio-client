@@ -8,10 +8,9 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
       .url-textarea
         p(v-for="name in names")
           span {{name}}
-      .input-button-wrap
-        button(@click.left="copyText" :class="{success: textIsCopied}")
-          span(v-if="textIsCopied") Copied
-          span(v-else) Copy Card Names
+      .input-button-wrap(@click.left="copyText")
+        button
+          span Copy Card Names
     //- PDF
     .row
       .button-wrap(v-if="currentUserIsSignedIn")
@@ -77,7 +76,6 @@ export default {
   },
   data () {
     return {
-      textIsCopied: false,
       spaceIsDuplicated: false,
       dialogHeight: null,
       isLoadingCurrentSpace: false,
@@ -98,10 +96,16 @@ export default {
       let fileName = spaceName || `kinopio-space-${spaceId}`
       return fileName
     },
-    async copyText () {
-      const value = this.text
-      await navigator.clipboard.writeText(value)
-      this.textIsCopied = true
+    async copyText (event) {
+      this.$store.commit('clearNotificationsWithPosition')
+      const position = utils.cursorPositionInPage(event)
+      try {
+        await navigator.clipboard.writeText(this.text)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+      } catch (error) {
+        console.warn('🚑 copyText', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      }
     },
     downloadLocalJSON () {
       const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.exportData))
@@ -172,9 +176,9 @@ export default {
   },
   watch: {
     visible (visible) {
+      this.$store.commit('clearNotificationsWithPosition')
       this.$nextTick(() => {
         if (visible) {
-          this.textIsCopied = false
           this.pdfIsVisible = false
           this.scrollIntoView()
           this.spaceIsDuplicated = false

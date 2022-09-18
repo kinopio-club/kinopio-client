@@ -11,10 +11,9 @@ dialog.narrow.api-key(v-if="visible" :open="visible" @click.left.stop ref="dialo
     template(v-if="keyIsRevealed")
       p.row
         .url-textarea {{key}}
-        .input-button-wrap
-          button(@click.left="copyKey" :class="{success: keyIsCopied}")
-            span(v-if="keyIsCopied") Key Copied
-            span(v-else) Copy API Key
+        .input-button-wrap(@click.left="copyKey")
+          button
+            span Copy API Key
 
   section(v-if="!currentUserIsSignedIn")
     p After you sign up you'll be able to access your API Key here
@@ -46,7 +45,6 @@ export default {
     return {
       dialogHeight: null,
       keyIsRevealed: false,
-      keyIsCopied: false,
       key: ''
     }
   },
@@ -70,15 +68,22 @@ export default {
       console.log(this.key, cache.user().apiKey)
       this.keyIsRevealed = true
     },
-    async copyKey () {
-      await navigator.clipboard.writeText(this.key)
-      this.keyIsCopied = true
+    async copyKey (event) {
+      this.$store.commit('clearNotificationsWithPosition')
+      const position = utils.cursorPositionInPage(event)
+      try {
+        await navigator.clipboard.writeText(this.key)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+      } catch (error) {
+        console.warn('🚑 copyKey', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      }
     }
   },
   watch: {
     visible (visible) {
+      this.$store.commit('clearNotificationsWithPosition')
       this.keyIsRevealed = false
-      this.keyIsCopied = false
       this.key = ''
       if (visible) {
         this.updateDialogHeight()

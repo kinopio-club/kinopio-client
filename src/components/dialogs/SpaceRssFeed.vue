@@ -12,10 +12,9 @@ dialog.narrow.space-rss-feed(v-if="visible" :open="visible" @click.left.stop)
     template(v-if="!spaceIsPrivate")
       p.row
         .url-textarea {{url}}
-        .input-button-wrap
-          button(@click.left="copyUrl" :class="{success: urlIsCopied}")
-            span(v-if="urlIsCopied") URL Copied
-            span(v-else) Copy Feed URL
+        .input-button-wrap(@click.left="copyUrl")
+          button
+            span Copy Feed URL
 
 </template>
 
@@ -39,18 +38,25 @@ export default {
     }
   },
   methods: {
-    async copyUrl () {
-      await navigator.clipboard.writeText(this.url)
-      this.urlIsCopied = true
+    async copyUrl (event) {
+      this.$store.commit('clearNotificationsWithPosition')
+      const position = utils.cursorPositionInPage(event)
+      try {
+        await navigator.clipboard.writeText(this.url)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+      } catch (error) {
+        console.warn('🚑 copyText', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      }
     },
     updateUrl () {
       const spaceId = this.$store.state.currentSpace.id
-      this.urlIsCopied = false
       this.url = `${utils.host(true)}/space/${spaceId}/feed.json`
     }
   },
   watch: {
     visible (visible) {
+      this.$store.commit('clearNotificationsWithPosition')
       if (visible) {
         this.updateUrl()
       }

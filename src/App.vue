@@ -20,6 +20,7 @@
   Minimap
   WindowHistoryHandler
   KeyboardShortcutsHandler
+  NotificationsWithPosition(layer="app")
   .preload
     .logo-hover
     .logo-active
@@ -43,6 +44,7 @@ import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import Minimap from '@/components/Minimap.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
+import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -61,7 +63,8 @@ export default {
     OffscreenMarkers,
     Minimap,
     ItemsLocked,
-    UserDetails
+    UserDetails,
+    NotificationsWithPosition
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)

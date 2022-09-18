@@ -11,10 +11,9 @@ dialog.narrow.invite(v-if="visible" :open="visible" @click.left.stop)
     template(v-if="!loading && collaboratorKey")
       .row
         .url-textarea {{url}}
-        .input-button-wrap
-          button(@click.left="copyUrl" :class="{success: urlIsCopied}")
-            span(v-if="urlIsCopied") Invite Copied
-            span(v-else) Copy Invite URL
+        .input-button-wrap(@click.left="copyUrl")
+          button
+            span Copy Invite URL
     //- Error
     template(v-if="!loading && !collaboratorKey")
       .row
@@ -48,7 +47,6 @@ export default {
   },
   data () {
     return {
-      urlIsCopied: false,
       url: '',
       loading: false,
       collaboratorKey: ''
@@ -59,9 +57,16 @@ export default {
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
   methods: {
-    async copyUrl () {
-      await navigator.clipboard.writeText(this.url)
-      this.urlIsCopied = true
+    async copyUrl (event) {
+      this.$store.commit('clearNotificationsWithPosition')
+      const position = utils.cursorPositionInPage(event)
+      try {
+        await navigator.clipboard.writeText(this.url)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+      } catch (error) {
+        console.warn('🚑 copyText', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      }
     },
     shareUrl () {
       const data = {
@@ -90,8 +95,8 @@ export default {
   },
   watch: {
     visible (visible) {
+      this.$store.commit('clearNotificationsWithPosition')
       if (visible) {
-        this.urlIsCopied = false
         this.updateCollaboratorKey()
       }
     }
