@@ -17,7 +17,7 @@ main.space(
   ConnectionDetails
   MultipleSelectedActions
   ScrollAtEdgesHandler
-  NotificationsWithPosition
+  NotificationsWithPosition(layer="space")
   BoxSelecting
 </template>
 

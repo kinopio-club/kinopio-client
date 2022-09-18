@@ -14,8 +14,14 @@ aside.notifications-with-position
 <script>
 export default {
   name: 'NotificationsWithPosition',
+  props: {
+    layer: String // app, space
+  },
   computed: {
-    items () { return this.$store.state.notificationsWithPosition }
+    items () {
+      const itemsInLayer = this.$store.state.notificationsWithPosition.filter(item => item.layer === this.layer)
+      return itemsInLayer
+    }
   },
   methods: {
     remove () {
