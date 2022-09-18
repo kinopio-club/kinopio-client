@@ -41,7 +41,7 @@ export default {
       // notify read only if user cannot edit
       if (!this.canEditBox) {
         const position = utils.cursorPositionInPage(event)
-        this.$store.commit('addNotificationWithPosition', { message: 'Box is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
+        this.$store.commit('addNotificationWithPosition', { message: 'Box is Read Only', position, type: 'info', icon: 'cancel' })
         return
       }
       this.$store.commit('currentUserIsDraggingBox', false)

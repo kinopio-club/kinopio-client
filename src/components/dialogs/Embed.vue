@@ -96,10 +96,10 @@ export default {
       const position = utils.cursorPositionInPage(event)
       try {
         await navigator.clipboard.writeText(value)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', icon: 'checkmark' })
       } catch (error) {
         console.warn('🚑 copy', error)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', icon: 'cancel' })
       }
     }
   },

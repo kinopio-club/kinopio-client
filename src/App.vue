@@ -14,14 +14,13 @@
   router-view
   Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
   Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
-  NotificationsWithPosition
   TagDetails
   LinkDetails
   UserDetails
   Minimap
   WindowHistoryHandler
   KeyboardShortcutsHandler
-  NotificationsWithPosition(layer="app")
+  NotificationsWithPosition
   .preload
     .logo-hover
     .logo-active
@@ -46,7 +45,6 @@ import Minimap from '@/components/Minimap.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import SpaceBackground from '@/components/SpaceBackground.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
-import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import utils from '@/utils.js'
@@ -69,7 +67,6 @@ export default {
     ItemsLocked,
     SpaceBackground,
     OutsideSpaceBackground,
-    NotificationsWithPosition,
     UserDetails,
     NotificationsWithPosition
   },

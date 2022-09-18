@@ -18,7 +18,6 @@ main#space.space(
   ConnectionDetails
   MultipleSelectedActions
   ScrollAtEdgesHandler
-  NotificationsWithPosition(layer="space")
   BoxSelecting
 </template>
 
@@ -319,7 +318,7 @@ export default {
         const position = this.cursor()
         const notificationWithPosition = document.querySelector('.notifications-with-position .item')
         if (!notificationWithPosition) {
-          this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
+          this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', icon: 'cancel' })
         }
         return true
       }
@@ -341,7 +340,7 @@ export default {
         y: position.y * zoom
       }
       if (this.spaceIsReadOnly) {
-        this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
+        this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', icon: 'cancel' })
         return
       }
       this.normalizeSpaceCardsZ()
