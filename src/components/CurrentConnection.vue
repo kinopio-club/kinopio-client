@@ -145,7 +145,7 @@ export default {
       this.$store.dispatch('currentConnections/addType', prevType)
       this.$store.dispatch('currentConnections/add', { connection, type: prevType })
     },
-    createConnections () {
+    createConnections (event) {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       const startCardIds = this.$store.state.currentConnectionStartCardIds
       let endCardId
@@ -153,7 +153,7 @@ export default {
         endCardId = currentConnectionSuccess.id
       } else {
         const zoom = this.$store.getters.spaceCounterZoomDecimal
-        let position = this.$store.state.prevCursorPosition
+        let position = utils.cursorPositionInSpace({ event })
         position = {
           x: Math.round(position.x * zoom),
           y: Math.round(position.y * zoom)
@@ -173,7 +173,7 @@ export default {
     stopInteractions (event) {
       if (this.isDrawingConnection) {
         this.$store.dispatch('clearMultipleSelected')
-        this.createConnections()
+        this.createConnections(event)
       }
       this.$store.commit('currentConnectionSuccess', {})
       const isCurrentConnection = this.$store.state.currentConnectionStartCardIds.length
