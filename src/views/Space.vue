@@ -207,7 +207,7 @@ export default {
         shouldCancel = false
       }
       if (this.spaceIsReadOnly) { return }
-      this.startCursor = utils.cursorPositionInViewport(event)
+      this.startCursor = utils.cursorPositionInSpace({ event })
     },
     constrainCursorToAxis (event) {
       if (this.$store.state.currentUserIsDraggingBox) { return }

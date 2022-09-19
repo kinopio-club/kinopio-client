@@ -872,6 +872,8 @@ export default {
   connectionBetweenCards (startId, endId) {
     let start = this.connectorCoords(startId)
     let end = this.connectorCoords(endId)
+    start = this.cursorPositionInSpace({ position: start })
+    end = this.cursorPositionInSpace({ position: end })
     const path = this.connectionPathBetweenCoords(start, end)
     return path
   },
@@ -881,14 +883,12 @@ export default {
   },
   connectionPathBetweenCoords (start, end) {
     if (!start || !end) { return }
-    const offsetStart = this.coordsWithCurrentScrollOffset(start)
-    const offsetEnd = this.coordsWithCurrentScrollOffset(end)
     const delta = {
-      x: parseInt(offsetEnd.x - offsetStart.x),
-      y: parseInt(offsetEnd.y - offsetStart.y)
+      x: parseInt(end.x - start.x),
+      y: parseInt(end.y - start.y)
     }
-    let curve = this.curveControlPoint(offsetStart, delta)
-    return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
+    let curve = this.curveControlPoint(start, delta)
+    return `m${start.x},${start.y} ${curve} ${delta.x},${delta.y}`
   },
   trim (string) {
     // https://regexr.com/59m7a

@@ -61,46 +61,31 @@ export default {
   computed: {
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
     connections () { return this.$store.getters['currentConnections/all'] },
-    remoteCurrentConnections () { return this.$store.state.remoteCurrentConnections },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
+    remoteCurrentConnections () { return this.$store.state.remoteCurrentConnections }
   },
   methods: {
     interact (event) {
       if (this.isDrawingConnection) {
         this.drawConnection()
       }
-      prevCursor = utils.cursorPositionInViewport(event)
+      prevCursor = utils.cursorPositionInSpace({ event })
     },
     // same as Space
     cursor () {
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
       let cursor
       if (utils.objectHasKeys(prevCursor)) {
         cursor = prevCursor
       } else {
         cursor = this.startCursor
       }
-      cursor = {
-        x: cursor.x * zoom,
-        y: cursor.y * zoom
-      }
       return cursor
     },
     drawConnection () {
-      const zoom = this.spaceZoomDecimal
       let end = this.cursor()
-      if (zoom !== 1) {
-        end = {
-          x: end.x * zoom,
-          y: end.y * zoom
-        }
-      }
       const startCardId = this.startCardId
       let start = utils.connectorCoords(startCardId)
-      start = utils.updatePositionWithSpaceOffset(start)
-      end = utils.updatePositionWithSpaceOffset(end)
       const path = utils.connectionPathBetweenCoords(start, end)
-      this.checkCurrentConnectionSuccess()
+      // this.checkCurrentConnectionSuccess() TEMP
       this.currentConnectionPath = path
       const connectionType = this.$store.getters['currentConnections/typeForNewConnections']
       prevType = connectionType
@@ -117,8 +102,8 @@ export default {
     },
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
-      const zoom = this.spaceZoomDecimal
-      const cardElement = utils.cardElementFromPosition(cursor.x * zoom, cursor.y * zoom)
+      // const zoom = this.spaceZoomDecimal
+      const cardElement = utils.cardElementFromPosition(cursor.x, cursor.y)
       let updates = { userId: this.$store.state.currentUser.id }
       let isCurrentConnectionConnected
       if (cardElement) {
