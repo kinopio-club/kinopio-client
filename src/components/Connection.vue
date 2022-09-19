@@ -248,7 +248,7 @@ export default {
         this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.$store.state.multipleConnectionsSelectedIds))
         return
       }
-      const dialogPosition = utils.cursorPositionInPage(event)
+      const dialogPosition = utils.cursorPositionInSpace({ event })
       this.$store.dispatch('connectionDetailsIsVisibleForConnectionId', this.id)
       this.$store.commit('connectionDetailsPosition', dialogPosition)
       this.$store.dispatch('clearMultipleSelected')
