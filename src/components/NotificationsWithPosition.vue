@@ -56,6 +56,7 @@ export default {
     animation-direction forward
     animation-fill-mode forwards
     animation-timing-function ease-out
+    transform-origin top left
   .checkmark
     vertical-align 2px
 </style>

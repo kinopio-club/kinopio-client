@@ -96,7 +96,9 @@ export default {
         }
       }
       const startCardId = this.startCardId
-      const start = utils.connectorCoords(startCardId)
+      let start = utils.connectorCoords(startCardId)
+      start = utils.updatePositionWithSpaceOffset(start)
+      end = utils.updatePositionWithSpaceOffset(end)
       const path = utils.connectionPathBetweenCoords(start, end)
       this.checkCurrentConnectionSuccess()
       this.currentConnectionPath = path

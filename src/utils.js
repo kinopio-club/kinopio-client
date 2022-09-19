@@ -262,6 +262,13 @@ export default {
       y: spaceRect.y - appRrect.y
     }
   },
+  updatePositionWithSpaceOffset (position) {
+    const spaceOffset = this.outsideSpaceOffset()
+    return {
+      x: Math.round(position.x - spaceOffset.x),
+      y: Math.round(position.y - spaceOffset.y)
+    }
+  },
   isPositionOutsideOfSpace (position) {
     const isOutsideX = position.x < 0
     const isOutsideY = position.y < 0
@@ -859,7 +866,8 @@ export default {
   connectionBetweenCards (startId, endId) {
     let start = this.connectorCoords(startId)
     let end = this.connectorCoords(endId)
-    return this.connectionPathBetweenCoords(start, end)
+    const path = this.connectionPathBetweenCoords(start, end)
+    return path
   },
   curveControlPoint (start, end) {
     // q defines a quadratic curve control point
