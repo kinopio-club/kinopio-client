@@ -858,7 +858,9 @@ export default {
     const element = document.querySelector(`.connector[data-card-id="${cardId}"] button`)
     if (!element) { return }
     const rect = element.getBoundingClientRect()
-    return this.rectCenter(rect)
+    let position = this.rectCenter(rect)
+    position = this.cursorPositionInSpace({ position })
+    return position
   },
   coordsWithCurrentScrollOffset ({ x, y, shouldIgnoreZoom }) {
     let zoom = this.spaceCounterZoomDecimal() || 1
@@ -872,8 +874,6 @@ export default {
   connectionBetweenCards (startId, endId) {
     let start = this.connectorCoords(startId)
     let end = this.connectorCoords(endId)
-    start = this.cursorPositionInSpace({ position: start })
-    end = this.cursorPositionInSpace({ position: end })
     const path = this.connectionPathBetweenCoords(start, end)
     return path
   },
