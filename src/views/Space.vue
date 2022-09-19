@@ -42,7 +42,7 @@ import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 
-let prevCursor, endCursor, shouldCancel
+let prevCursor, currentCursor, shouldCancel
 let processQueueIntervalTimer
 
 export default {
@@ -213,13 +213,13 @@ export default {
       if (this.$store.state.currentUserIsDraggingBox) { return }
       if (!event.shiftKey) { return }
       const delta = {
-        x: Math.abs(endCursor.x - this.startCursor.x),
-        y: Math.abs(endCursor.y - this.startCursor.y)
+        x: Math.abs(currentCursor.x - this.startCursor.x),
+        y: Math.abs(currentCursor.y - this.startCursor.y)
       }
       if (delta.x > delta.y) {
-        endCursor.y = prevCursor.y
+        currentCursor.y = prevCursor.y
       } else {
-        endCursor.x = prevCursor.x
+        currentCursor.x = prevCursor.x
       }
     },
 
@@ -228,7 +228,7 @@ export default {
     resizeCards () {
       if (!prevCursor) { return }
       const cardIds = this.$store.state.currentUserIsResizingCardIds
-      const deltaX = endCursor.x - prevCursor.x
+      const deltaX = currentCursor.x - prevCursor.x
       this.$store.dispatch('currentCards/resize', { cardIds, deltaX })
     },
     stopResizingCards () {
@@ -239,92 +239,6 @@ export default {
       this.$store.dispatch('history/add', { cards, useSnapshot: true })
       this.$store.commit('currentUserIsResizingCard', false)
       this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserResizingCards' })
-    },
-
-    // boxes
-
-    resizeBoxes () {
-      if (!prevCursor) { return }
-      const boxIds = this.$store.state.currentUserIsResizingBoxIds
-      const delta = {
-        x: Math.round(endCursor.x - prevCursor.x),
-        y: Math.round(endCursor.y - prevCursor.y)
-      }
-      this.$store.dispatch('currentBoxes/resize', { boxIds, delta })
-    },
-    stopResizingBoxes () {
-      if (!this.$store.state.currentUserIsResizingBox) { return }
-      this.$store.dispatch('history/resume')
-      const boxIds = this.$store.state.currentUserIsResizingBoxIds
-      const boxes = boxIds.map(id => this.$store.getters['currentBoxes/byId'](id))
-      this.$store.dispatch('history/add', { boxes, useSnapshot: true })
-      this.$store.commit('currentUserIsResizingBox', false)
-      this.$store.commit('currentUserToolbar', 'card')
-      this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserResizingBoxes' })
-      this.$store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
-    },
-
-    dragItems () {
-      this.$store.dispatch('history/pause')
-      const prevCursor = this.cursor()
-      const shouldPrevent = this.checkIfShouldPreventInteraction()
-      if (shouldPrevent) { return }
-      this.$store.dispatch('currentCards/move', {
-        endCursor,
-        prevCursor: prevCursor
-      })
-      this.checkShouldShowDetails()
-      this.$store.dispatch('currentBoxes/move', {
-        endCursor,
-        prevCursor: prevCursor
-      })
-    },
-    interact (event) {
-      endCursor = utils.cursorPositionInViewport(event)
-      if (this.isDraggingCard || this.isDraggingBox) {
-        this.constrainCursorToAxis(event)
-        this.dragItems()
-      }
-      if (this.isResizingCard) {
-        this.resizeCards()
-      }
-      if (this.isResizingBox) {
-        this.resizeBoxes()
-      }
-      prevCursor = utils.cursorPositionInViewport(event)
-    },
-    checkShouldShowDetails () {
-      const shouldShow = !utils.cursorsAreClose(this.startCursor, endCursor)
-      if (!shouldShow) { return }
-      if (this.$store.state.currentUserIsDraggingCard) {
-        this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      } else if (this.$store.state.currentUserIsDraggingBox) {
-        this.$store.commit('preventDraggedBoxFromShowingDetails', true)
-      }
-    },
-    cursor () {
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
-      let cursor
-      if (utils.objectHasKeys(prevCursor)) {
-        cursor = prevCursor
-      } else {
-        cursor = this.startCursor
-      }
-      cursor = {
-        x: cursor.x * zoom,
-        y: cursor.y * zoom
-      }
-      return cursor
-    },
-    checkIfShouldPreventInteraction () {
-      if (this.spaceIsReadOnly) {
-        const position = this.cursor()
-        const notificationWithPosition = document.querySelector('.notifications-with-position .item')
-        if (!notificationWithPosition) {
-          this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
-        }
-        return true
-      }
     },
     normalizeSpaceCardsZ () {
       const sorted = sortBy(this.unlockedCards, ['z'])
@@ -346,6 +260,122 @@ export default {
       this.$store.dispatch('currentCards/add', { position, isParentCard })
       this.$store.commit('childCardId', '')
     },
+
+    addOrCloseCard (event) {
+      if (this.$store.state.shouldAddCard) {
+        let position = utils.cursorPositionInSpace({ event })
+        // prevent addCard if position is outside space
+        if (utils.isPositionOutsideOfSpace(position)) {
+          position = utils.cursorPositionInPage(event)
+          this.$store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+          return
+        }
+        // add card
+        this.addCard(event)
+      // close item details
+      } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
+        this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
+      }
+    },
+
+    // boxes
+
+    resizeBoxes () {
+      if (!prevCursor) { return }
+      const boxIds = this.$store.state.currentUserIsResizingBoxIds
+      const delta = {
+        x: Math.round(currentCursor.x - prevCursor.x),
+        y: Math.round(currentCursor.y - prevCursor.y)
+      }
+      this.$store.dispatch('currentBoxes/resize', { boxIds, delta })
+    },
+    stopResizingBoxes () {
+      if (!this.$store.state.currentUserIsResizingBox) { return }
+      this.$store.dispatch('history/resume')
+      const boxIds = this.$store.state.currentUserIsResizingBoxIds
+      const boxes = boxIds.map(id => this.$store.getters['currentBoxes/byId'](id))
+      this.$store.dispatch('history/add', { boxes, useSnapshot: true })
+      this.$store.commit('currentUserIsResizingBox', false)
+      this.$store.commit('currentUserToolbar', 'card')
+      this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserResizingBoxes' })
+      this.$store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
+    },
+    showBoxDetails (event) {
+      if (!this.$store.state.currentBoxIsNew) { return }
+      if (utils.isMobile()) { return }
+      const boxId = this.$store.state.currentUserIsResizingBoxIds[0]
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.$store.commit('boxDetailsIsVisibleForBoxId', boxId)
+        })
+      })
+    },
+
+    // interactions
+
+    dragItems () {
+      this.$store.dispatch('history/pause')
+      const prevCursor = this.cursor()
+      const shouldPrevent = this.checkIfShouldPreventInteraction()
+      if (shouldPrevent) { return }
+      this.$store.dispatch('currentCards/move', {
+        endCursor: currentCursor,
+        prevCursor: prevCursor
+      })
+      this.checkShouldShowDetails()
+      this.$store.dispatch('currentBoxes/move', {
+        endCursor: currentCursor,
+        prevCursor: prevCursor
+      })
+    },
+    interact (event) {
+      currentCursor = utils.cursorPositionInSpace({ event })
+      if (this.isDraggingCard || this.isDraggingBox) {
+        this.constrainCursorToAxis(event)
+        this.dragItems()
+      }
+      if (this.isResizingCard) {
+        this.resizeCards()
+      }
+      if (this.isResizingBox) {
+        this.resizeBoxes()
+      }
+      prevCursor = currentCursor
+    },
+    checkShouldShowDetails () {
+      const shouldShow = !utils.cursorsAreClose(this.startCursor, currentCursor)
+      if (!shouldShow) { return }
+      if (this.$store.state.currentUserIsDraggingCard) {
+        this.$store.commit('preventDraggedCardFromShowingDetails', true)
+      } else if (this.$store.state.currentUserIsDraggingBox) {
+        this.$store.commit('preventDraggedBoxFromShowingDetails', true)
+      }
+    },
+    cursor () {
+      let cursor
+      if (utils.objectHasKeys(prevCursor)) {
+        cursor = prevCursor
+      } else {
+        cursor = this.startCursor
+      }
+      return cursor
+    },
+    checkIfShouldPreventInteraction () {
+      if (this.spaceIsReadOnly) {
+        const position = this.cursor()
+        const notificationWithPosition = document.querySelector('.notifications-with-position .item')
+        if (!notificationWithPosition) {
+          this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
+        }
+        return true
+      }
+    },
+    unselectCardsInDraggedBox () {
+      if (!this.$store.state.currentDraggingBoxId) { return }
+      if (this.$store.state.multipleBoxesSelectedIds.length) { return }
+      this.$store.dispatch('clearMultipleSelected')
+    },
+
     eventIsFromTextarea (event) {
       if (event.target.nodeType !== 1) { return } // firefox check
       const node = event.target.nodeName
@@ -390,37 +420,6 @@ export default {
         this.$store.commit('multipleSelectedActionsPosition', position)
         this.$store.commit('multipleSelectedActionsIsVisible', true)
       }
-    },
-    addOrCloseCard (event) {
-      if (this.$store.state.shouldAddCard) {
-        let position = utils.cursorPositionInSpace({ event })
-        // prevent addCard if position is outside space
-        if (utils.isPositionOutsideOfSpace(position)) {
-          position = utils.cursorPositionInPage(event)
-          this.$store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
-          return
-        }
-        // add card
-        this.addCard(event)
-      // close item details
-      } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
-        this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
-      }
-    },
-    unselectCardsInDraggedBox () {
-      if (!this.$store.state.currentDraggingBoxId) { return }
-      if (this.$store.state.multipleBoxesSelectedIds.length) { return }
-      this.$store.dispatch('clearMultipleSelected')
-    },
-    showBoxDetails (event) {
-      if (!this.$store.state.currentBoxIsNew) { return }
-      if (utils.isMobile()) { return }
-      const boxId = this.$store.state.currentUserIsResizingBoxIds[0]
-      this.$nextTick(() => {
-        this.$nextTick(() => {
-          this.$store.commit('boxDetailsIsVisibleForBoxId', boxId)
-        })
-      })
     },
 
     // 💣 stopInteractions and Space/stopPainting are run on all mouse and touch end events

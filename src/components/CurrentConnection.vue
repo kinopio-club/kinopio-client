@@ -81,9 +81,9 @@ export default {
       return cursor
     },
     drawConnection (event) {
-      let end = this.cursor()
+      const end = this.cursor()
       const startCardId = this.startCardId
-      let start = utils.connectorCoords(startCardId)
+      const start = utils.connectorCoords(startCardId)
       const path = utils.connectionPathBetweenCoords(start, end)
       this.checkCurrentConnectionSuccess(event)
       this.currentConnectionPath = path

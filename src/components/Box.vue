@@ -249,8 +249,8 @@ export default {
     normalizeBox (box) {
       const init = 200
       box = utils.clone(box)
-      box.resizeWidth = box.resizeWidth || init
-      box.resizeHeight = box.resizeHeight || init
+      box.resizeWidth = Math.round(box.resizeWidth || init)
+      box.resizeHeight = Math.round(box.resizeHeight || init)
       box.color = box.color || randomColor({ luminosity: 'light' })
       box.fill = box.fill || 'filled'
       return box
