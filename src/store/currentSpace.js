@@ -299,7 +299,7 @@ const currentSpace = {
       context.dispatch('updateOtherSpaces')
     },
     createNewSpace: (context, space) => {
-      window.scrollTo(0, 0)
+      context.commit('triggerSpaceZoomReset', null, { root: true })
       let name
       if (space) {
         name = space.name
@@ -694,7 +694,7 @@ const currentSpace = {
       })
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
-      window.scrollTo(0, 0)
+      context.commit('triggerSpaceZoomReset', null, { root: true })
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('isAddPage', false, { root: true })
       const emptySpace = utils.emptySpace(space.id)
