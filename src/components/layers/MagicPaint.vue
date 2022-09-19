@@ -352,10 +352,11 @@ export default {
       let color = this.$store.state.currentUser.color
       this.currentCursor = utils.cursorPositionInViewport(event)
       let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
-      this.selectCards(circle)
-      this.selectConnections(circle)
+      const position = utils.cursorPositionInSpace({ event })
+      this.selectCards(position)
+      this.selectConnections(position)
       this.selectBoxes(circle)
-      this.selectCardsAndConnectionsBetweenCircles(circle)
+      // this.selectCardsAndConnectionsBetweenCircles(position)
       paintingCircles.push(circle)
       this.broadcastCircle(circle)
     },
@@ -452,77 +453,73 @@ export default {
       const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
       return isMobile && !isPaintingLocked
     },
-    selectConnections (circle) {
+    selectConnections (position) {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
-      this.selectConnectionPaths(circle)
+      this.selectConnectionPaths(position)
     },
-    selectCardsAndConnectionsBetweenCircles (circle) {
+    // selectCardsAndConnectionsBetweenCircles (circle) {
+    //   if (this.shouldPreventSelectionOnMobile()) { return }
+    //   if (this.userCantEditSpace) { return }
+    //   const prevCircle = paintingCircles[paintingCircles.length - 1] || circle
+    //   const delta = {
+    //     x: prevCircle.x - circle.x,
+    //     y: prevCircle.y - circle.y,
+    //     xAbsolute: Math.abs(prevCircle.x - circle.x),
+    //     yAbsolute: Math.abs(prevCircle.y - circle.y)
+    //   }
+    //   const furthestDelta = Math.max(delta.xAbsolute, delta.yAbsolute)
+    //   if (furthestDelta <= 5 || prevCircle.iteration > 1) { return }
+    //   const movementDirection = this.movementDirection(prevCircle, delta)
+    //   const increment = 2
+    //   let x = circle.x
+    //   let y = circle.y
+    //   if (movementDirection.x === 'right') {
+    //     x = prevCircle.x + increment
+    //     while (x < circle.x) {
+    //       x += increment
+    //       this.selectConnectionPaths({ x, y })
+    //       this.selectCards({ x, y })
+    //     }
+    //   } else if (movementDirection.x === 'left') {
+    //     x = prevCircle.x - increment
+    //     while (x > circle.x) {
+    //       x += -increment
+    //       this.selectConnectionPaths({ x, y })
+    //       this.selectCards({ x, y })
+    //     }
+    //   } else if (movementDirection.y === 'down') {
+    //     y = prevCircle.y + increment
+    //     while (y < circle.y) {
+    //       y += increment
+    //       this.selectConnectionPaths({ x, y })
+    //       this.selectCards({ x, y })
+    //     }
+    //   } else if (movementDirection.y === 'up') {
+    //     y = prevCircle.y - increment
+    //     while (y > circle.y) {
+    //       y += -increment
+    //       this.selectConnectionPaths({ x, y })
+    //       this.selectCards({ x, y })
+    //     }
+    //   }
+    // },
+    selectCards (position) {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
-      const prevCircle = paintingCircles[paintingCircles.length - 1] || circle
-      const delta = {
-        x: prevCircle.x - circle.x,
-        y: prevCircle.y - circle.y,
-        xAbsolute: Math.abs(prevCircle.x - circle.x),
-        yAbsolute: Math.abs(prevCircle.y - circle.y)
-      }
-      const furthestDelta = Math.max(delta.xAbsolute, delta.yAbsolute)
-      if (furthestDelta <= 5 || prevCircle.iteration > 1) { return }
-      const movementDirection = this.movementDirection(prevCircle, delta)
-      const increment = 2
-      let x = circle.x
-      let y = circle.y
-      if (movementDirection.x === 'right') {
-        x = prevCircle.x + increment
-        while (x < circle.x) {
-          x += increment
-          this.selectConnectionPaths({ x, y })
-          this.selectCards({ x, y })
-        }
-      } else if (movementDirection.x === 'left') {
-        x = prevCircle.x - increment
-        while (x > circle.x) {
-          x += -increment
-          this.selectConnectionPaths({ x, y })
-          this.selectCards({ x, y })
-        }
-      } else if (movementDirection.y === 'down') {
-        y = prevCircle.y + increment
-        while (y < circle.y) {
-          y += increment
-          this.selectConnectionPaths({ x, y })
-          this.selectCards({ x, y })
-        }
-      } else if (movementDirection.y === 'up') {
-        y = prevCircle.y - increment
-        while (y > circle.y) {
-          y += -increment
-          this.selectConnectionPaths({ x, y })
-          this.selectCards({ x, y })
-        }
-      }
-    },
-    selectCards (point) {
-      if (this.shouldPreventSelectionOnMobile()) { return }
-      if (this.userCantEditSpace) { return }
-      point = utils.cursorPositionInSpace({ position: point })
-      const zoom = this.spaceCounterZoomDecimal
-      const cardMap = this.$store.state.currentCards.cardMap
       const filterComments = this.$store.state.currentUser.filterComments
-      cardMap.forEach(card => {
+      const cards = this.$store.state.currentCards.sortedCards.x // temp
+      cards.forEach(card => {
         if (filterComments && card.isComment) { return }
         const cardX = card.x
         const cardY = card.y
-        const pointX = (point.x + window.scrollX) * zoom
-        const pointY = (point.y + window.scrollY) * zoom
         const x = {
-          value: pointX,
+          value: position.x,
           min: cardX - circleSelectionRadius,
           max: cardX + card.width + circleSelectionRadius
         }
         const y = {
-          value: pointY,
+          value: position.y,
           min: cardY - circleSelectionRadius,
           max: cardY + card.height + circleSelectionRadius
         }
@@ -533,29 +530,24 @@ export default {
         }
       })
     },
-    selectConnectionPaths (point) {
-      const zoom = this.spaceCounterZoomDecimal
+    selectConnectionPaths (position) {
       const paths = document.querySelectorAll('svg .connection-path')
-      point = utils.cursorPositionInSpace({ position: point })
-      const pointX = (point.x + window.scrollX) * zoom
-      const pointY = (point.y + window.scrollY) * zoom
       paths.forEach(path => {
         if (path.dataset['is-hidden-by-comment-filter'] === 'true') { return }
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
         let svgPoint = svg.createSVGPoint()
-        svgPoint.x = pointX
-        svgPoint.y = pointY
+        svgPoint.x = position.x
+        svgPoint.y = position.y
         const isSelected = path.isPointInStroke(svgPoint)
         if (isSelected) {
           this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
         }
       })
     },
-    selectBoxes (point) {
+    selectBoxes (position) {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
-      const zoom = this.spaceCounterZoomDecimal
       const boxes = this.$store.getters['currentBoxes/isNotLocked']
       boxes.forEach(box => {
         const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
@@ -563,20 +555,19 @@ export default {
         box = {
           id: box.id,
           name: box.name,
-          x: (rect.x + window.scrollX) * zoom,
-          y: (rect.y + window.scrollY) * zoom,
+          x: rect.x,
+          y: rect.y,
           width: rect.width,
           height: rect.height
         }
-        const pointX = (point.x + window.scrollX) * zoom
-        const pointY = (point.y + window.scrollY) * zoom
+
         const x = {
-          value: pointX,
+          value: position.x,
           min: box.x - circleSelectionRadius,
           max: box.x + box.width + circleSelectionRadius
         }
         const y = {
-          value: pointY,
+          value: position.y,
           min: box.y - circleSelectionRadius,
           max: box.y + box.height + circleSelectionRadius
         }
@@ -593,11 +584,12 @@ export default {
     broadcastCircle (circle) {
       const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()
       if (!currentUserCanEdit) { return }
+      const position = utils.cursorPositionInSpace({ position: circle })
       this.$store.commit('broadcast/update', {
         updates: {
           userId: this.$store.state.currentUser.id,
-          x: circle.x + window.scrollX,
-          y: circle.y + window.scrollY,
+          x: position.x,
+          y: position.y,
           color: circle.color,
           iteration: circle.iteration,
           zoom: this.spaceZoomDecimal
