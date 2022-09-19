@@ -133,10 +133,17 @@ export default {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       const startCardIds = this.$store.state.currentConnectionStartCardIds
       let endCardId
+      let position = utils.cursorPositionInSpace({ event })
+      const shouldPreventCreate = utils.isPositionOutsideOfSpace(position)
+      if (shouldPreventCreate) {
+        position = utils.cursorPositionInPage(event)
+        this.$store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+        return
+      }
       if (currentConnectionSuccess.id) {
         endCardId = currentConnectionSuccess.id
       } else {
-        let position = utils.cursorPositionInSpace({ event })
+        // create card
         endCardId = nanoid()
         this.$store.dispatch('currentCards/add', { position, id: endCardId })
       }
