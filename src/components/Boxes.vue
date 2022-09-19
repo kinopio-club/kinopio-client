@@ -1,6 +1,7 @@
 <template lang="pug">
 .boxes(:class="{unselectable: isPainting}")
   //- locked boxes rendered in ItemsLocked
+  //- boxes added in MagicPaint layer
   template(v-for="box in unlockedBoxes")
     Box(:box="box")
 </template>

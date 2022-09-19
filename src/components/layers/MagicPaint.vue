@@ -411,12 +411,7 @@ export default {
     // Boxes
 
     addBox (event) {
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
-      let position = utils.cursorPositionInPage(event)
-      position = {
-        x: position.x * zoom,
-        y: position.y * zoom
-      }
+      let position = utils.cursorPositionInSpace({ event })
       const shouldPrevent = this.checkIfShouldPreventInteraction(position)
       if (shouldPrevent) { return }
       this.$store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
@@ -763,7 +758,7 @@ export default {
     addCardsAndUploadFiles (event) {
       let files = event.dataTransfer.files
       files = Array.from(files)
-      this.currentCursor = utils.cursorPositionInPage(event)
+      this.currentCursor = utils.cursorPositionInSpace({ event })
       this.removeUploadIsDraggedOver()
       this.$store.dispatch('upload/addCardsAndUploadFiles', {
         files,
