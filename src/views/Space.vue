@@ -315,7 +315,6 @@ export default {
 
     dragItems () {
       this.$store.dispatch('history/pause')
-      const prevCursor = this.cursor()
       const shouldPrevent = this.checkIfShouldPreventInteraction()
       if (shouldPrevent) { return }
       this.$store.dispatch('currentCards/move', {

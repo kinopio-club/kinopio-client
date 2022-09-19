@@ -195,12 +195,7 @@ export default {
       })
     },
     move: (context, { endCursor, prevCursor, delta }) => {
-      const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
-      endCursor = {
-        x: endCursor.x * zoom,
-        y: endCursor.y * zoom
-      }
       delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
