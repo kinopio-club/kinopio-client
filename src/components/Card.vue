@@ -344,7 +344,6 @@ export default {
       }
       return this.selectedColor || this.remoteSelectedColor || background
     },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     isResizing () { return this.$store.state.currentUserIsResizingCard },
     dataTags () {
       let tags = utils.tagsFromStringWithoutBrackets(this.card.name)
@@ -1020,10 +1019,6 @@ export default {
       let centerX = this.x + halfWidth
       let centerY = this.y + halfHeight
       let position = utils.cursorPositionInSpace({ event })
-      position = {
-        x: position.x * this.spaceCounterZoomDecimal,
-        y: position.y * this.spaceCounterZoomDecimal
-      }
       // position from card center
       const xFromCenter = position.x - centerX
       const yFromCenter = position.y - centerY

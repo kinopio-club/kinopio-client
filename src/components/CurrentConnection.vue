@@ -152,12 +152,7 @@ export default {
       if (currentConnectionSuccess.id) {
         endCardId = currentConnectionSuccess.id
       } else {
-        const zoom = this.$store.getters.spaceCounterZoomDecimal
         let position = utils.cursorPositionInSpace({ event })
-        position = {
-          x: Math.round(position.x * zoom),
-          y: Math.round(position.y * zoom)
-        }
         endCardId = nanoid()
         this.$store.dispatch('currentCards/add', { position, id: endCardId })
       }

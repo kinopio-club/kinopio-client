@@ -250,6 +250,12 @@ export default {
       x: position.x + rect.x,
       y: position.y + rect.y
     }
+    // zoom
+    let zoom = this.spaceCounterZoomDecimal() || 1
+    position = {
+      x: Math.round(position.x * zoom),
+      y: Math.round(position.y * zoom)
+    }
     return position
   },
   outsideSpaceOffset () {
