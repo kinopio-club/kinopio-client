@@ -66,7 +66,7 @@ export default {
   methods: {
     interact (event) {
       if (this.isDrawingConnection) {
-        this.drawConnection()
+        this.drawConnection(event)
       }
       prevCursor = utils.cursorPositionInSpace({ event })
     },
@@ -80,12 +80,12 @@ export default {
       }
       return cursor
     },
-    drawConnection () {
+    drawConnection (event) {
       let end = this.cursor()
       const startCardId = this.startCardId
       let start = utils.connectorCoords(startCardId)
       const path = utils.connectionPathBetweenCoords(start, end)
-      // this.checkCurrentConnectionSuccess() TEMP
+      this.checkCurrentConnectionSuccess(event)
       this.currentConnectionPath = path
       const connectionType = this.$store.getters['currentConnections/typeForNewConnections']
       prevType = connectionType
@@ -100,10 +100,9 @@ export default {
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
     },
-    checkCurrentConnectionSuccess () {
-      const cursor = this.cursor()
-      // const zoom = this.spaceZoomDecimal
-      const cardElement = utils.cardElementFromPosition(cursor.x, cursor.y)
+    checkCurrentConnectionSuccess (event) {
+      const position = utils.cursorPositionInViewport(event)
+      const cardElement = utils.cardElementFromPosition(position.x, position.y)
       let updates = { userId: this.$store.state.currentUser.id }
       let isCurrentConnectionConnected
       if (cardElement) {
