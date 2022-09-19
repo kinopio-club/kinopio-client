@@ -859,6 +859,10 @@ export default {
     if (!element) { return }
     const rect = element.getBoundingClientRect()
     let position = this.rectCenter(rect)
+    position = {
+      x: position.x + window.scrollX,
+      y: position.y + window.scrollY
+    }
     position = this.cursorPositionInSpace({ position })
     return position
   },
