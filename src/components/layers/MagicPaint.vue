@@ -507,10 +507,9 @@ export default {
     selectCards (position) {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
-      const filterComments = this.$store.state.currentUser.filterComments
-      const cards = this.$store.state.currentCards.sortedCards.x // temp
+      const cards = this.$store.getters['currentCards/isSelectable'](position)
+      if (!cards) { return }
       cards.forEach(card => {
-        if (filterComments && card.isComment) { return }
         const cardX = card.x
         const cardY = card.y
         const x = {

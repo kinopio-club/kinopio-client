@@ -217,7 +217,6 @@ const store = createStore({
     updatePageSizes: (state) => {
       const body = document.body
       const html = document.documentElement
-      console.log('🌻', state.currentCards.sortedCards)
       const pageWidth = Math.max(state.maxPageSizeWidth, body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       let pageHeight = Math.max(state.maxPageSizeHeight, body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
       const viewportWidth = utils.visualViewport().width

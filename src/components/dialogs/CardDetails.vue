@@ -283,7 +283,7 @@ export default {
       } else if (mutation.type === 'cardDetailsIsVisibleForCardId') {
         const cardId = mutation.payload
         if (prevCardId) {
-          this.updateCardMap(prevCardId)
+          this.updateDimensions(prevCardId)
         }
         if (!cardId) { return }
         prevCardId = cardId
@@ -821,8 +821,8 @@ export default {
         this.notifiedMembers = true
       }
     },
-    updateCardMap (cardId) {
-      this.$store.dispatch('currentCards/updateDimensionsAndMap', cardId)
+    updateDimensions (cardId) {
+      this.$store.dispatch('currentCards/updateDimensions', { cardId })
     },
     checkIfIsInsertLineBreak (event) {
       const lineBreakInserted = event.ctrlKey || event.altKey
@@ -1367,7 +1367,7 @@ export default {
       this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
       this.$store.dispatch('currentCards/update', update)
       this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
-      this.$store.dispatch('currentCards/updateDimensionsAndMap', cardId)
+      this.$store.dispatch('currentCards/updateDimensions', { cards: [this.card] })
     },
     toggleUrlPreviewIsVisible () {
       const value = !this.card.urlPreviewIsVisible
@@ -1426,7 +1426,7 @@ export default {
       }
       this.$store.dispatch('updatePageSizes')
       this.$nextTick(() => {
-        this.updateCardMap(cardId)
+        this.updateDimensions(cardId)
         this.$store.dispatch('checkIfItemShouldIncreasePageSize', card)
       })
       this.$store.dispatch('history/resume')

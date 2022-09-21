@@ -53,7 +53,6 @@ export default {
         id: this.card.id,
         isLocked: false
       })
-      this.$store.dispatch('currentCards/updateCardMap')
     }
   }
 }

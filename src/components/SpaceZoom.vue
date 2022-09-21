@@ -70,14 +70,12 @@ export default {
       percent = Math.max(percent, this.min)
       percent = Math.min(percent, this.max)
       this.$store.commit('spaceZoomPercent', percent)
-      this.$store.dispatch('currentCards/updateCardMap')
     },
     resetSpaceZoom () {
       this.updateSpaceZoomFromTrigger(this.initialValue)
     },
     updateSpaceZoom (percent) {
       this.updateSpaceZoomPercent(percent)
-      this.$store.dispatch('currentCards/updateCardMap')
     },
     updateSpaceZoomPercent (percent) {
       percent = percent / 100

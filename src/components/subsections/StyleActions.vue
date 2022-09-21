@@ -256,7 +256,6 @@ export default {
           this.updateBox(item, { isLocked })
         }
       })
-      this.$store.dispatch('currentCards/updateCardMap')
     },
     prependToName ({ pattern, item, nameSegment }) {
       const markdown = this.markdown(pattern)
@@ -341,8 +340,8 @@ export default {
           delete card.name
         }
         this.$store.dispatch('currentCards/update', card)
+        this.$store.dispatch('currentCards/updateDimensions', { cards: [card] })
       })
-      this.$store.dispatch('currentCards/updateCardMap')
     },
     replaceCardWithBox () {
       this.$store.dispatch('closeAllDialogs', 'replaceCardWithBox')

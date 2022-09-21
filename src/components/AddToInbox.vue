@@ -291,7 +291,7 @@ export default {
       if (this.isAddPage) { return }
       if (!this.successSpaceIsCurrentSpace) { return }
       this.$store.commit('currentCards/create', card)
-      this.$store.dispatch('currentCards/updateDimensionsAndMap', card.id)
+      this.$store.dispatch('currentCards/updateDimensions', { cards: [card] })
     },
 
     // handlers

@@ -375,7 +375,7 @@ const currentSpace = {
       }, { root: true })
       context.commit('addUserToSpace', user)
       nextTick(() => {
-        context.dispatch('currentCards/updateDimensions', null, { root: true })
+        context.dispatch('currentCards/updateDimensions', {}, { root: true })
       })
       context.dispatch('updateModulesSpaceId', space)
     },
@@ -393,7 +393,7 @@ const currentSpace = {
       context.commit('triggerLoadBackground', null, { root: true })
       context.dispatch('updateModulesSpaceId', space)
       nextTick(() => {
-        context.dispatch('currentCards/updateDimensions', null, { root: true })
+        context.dispatch('currentCards/updateDimensions', {}, { root: true })
         context.commit('isLoadingSpace', false, { root: true })
       })
       context.commit('triggerUpdateCardOverlaps', null, { root: true })
@@ -641,7 +641,6 @@ const currentSpace = {
           } else if (chunk) {
             context.commit('currentCards/restore', chunk, { root: true })
           }
-          context.dispatch('currentCards/updateCardMap', null, { root: true })
           // complete
           const isRestoreComplete = index === primaryChunks.length - 1
           if (isRestoreComplete) {
@@ -669,7 +668,6 @@ const currentSpace = {
         isRemote,
         cardUsers: context.rootGetters['currentCards/userIds']
       })
-      context.dispatch('currentCards/updateSortedCards', null, { root: true })
       context.dispatch('updateSpacePageSize')
       if (isRemote) {
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', space)
@@ -684,8 +682,7 @@ const currentSpace = {
         context.dispatch('updateOtherUsers')
         context.dispatch('updateOtherSpaces')
         context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
-        context.dispatch('currentCards/updateDimensions', null, { root: true })
-        context.dispatch('currentCards/updateCardMap', null, { root: true })
+        context.dispatch('currentCards/updateDimensions', {}, { root: true })
         context.commit('triggerUpdateCardOverlaps', null, { root: true })
         nextTick(() => {
           context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })

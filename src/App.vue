@@ -88,16 +88,13 @@ export default {
     setTimeout(() => {
       window.addEventListener('scroll', this.updateUserHasScrolled)
     }, 100)
-    window.addEventListener('scroll', this.updateCardMap)
     this.updateMetaDescription()
-    this.updateCardMap()
     window.addEventListener('touchstart', this.touchStart)
     window.addEventListener('touchmove', this.touchMove)
     window.addEventListener('touchend', this.touchEnd)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateUserHasScrolled)
-    window.removeEventListener('scroll', this.updateCardMap)
     window.removeEventListener('touchstart', this.touchStart)
     window.removeEventListener('touchmove', this.touchMove)
     window.removeEventListener('touchend', this.touchEnd)
@@ -222,9 +219,6 @@ export default {
         this.$store.commit('addNotification', { message: 'Redo', icon: 'redo' })
       }
       multiTouchAction = null
-    },
-    updateCardMap () {
-      this.$store.dispatch('currentCards/updateCardMap') // debounced
     },
     broadcastCursor (event) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()

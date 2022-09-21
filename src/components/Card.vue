@@ -50,11 +50,11 @@ article(
 
     template(v-if="!isComment")
       //- Video
-      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateCardMap")
+      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateDimensions")
         source(:src="formats.video")
       //- Image
-      img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
-      img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
+      img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
+      img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
 
     .bottom-button-wrap
       //- resize
@@ -90,10 +90,10 @@ article(
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             //- Image
-            img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
-            img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
+            img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
+            img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
             //- Video
-            video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateCardMap")
+            video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateDimensions")
               source(:src="formats.video")
 
       //- Not Comment
@@ -1130,7 +1130,6 @@ export default {
         id: this.card.id,
         isLocked: false
       })
-      this.$store.dispatch('currentCards/updateCardMap')
     },
     connectionIsBeingDragged (connection) {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
@@ -1571,7 +1570,7 @@ export default {
           url: spaceId
         }
       }
-      this.$store.dispatch('currentCards/updateDimensionsAndMap', this.card.id)
+      this.updateDimensions()
       return space
     },
     openUrl (event, url) {
@@ -1841,10 +1840,10 @@ export default {
         urlPreviewFavicon: this.previewFavicon(links)
       }
       this.$store.dispatch('currentCards/update', update)
-      this.updateCardMap()
+      this.updateDimensions()
     },
-    updateCardMap () {
-      this.$store.dispatch('currentCards/updateDimensionsAndMap', this.card.id)
+    updateDimensions () {
+      this.$store.dispatch('currentCards/updateDimensions', { cards: [this.card] })
     },
     updateUrlPreviewErrorUrl (url) {
       const cardId = this.card.id
