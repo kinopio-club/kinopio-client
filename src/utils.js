@@ -256,7 +256,7 @@ export default {
     }
     return position
   },
-  cursorPositionInSpaceViewport ({ event }) {
+  cursorPositionInSpaceViewport (event) {
     let position = this.cursorPositionInViewport(event)
     return this.updatePositionWithSpaceOffset(position)
   },

@@ -63,7 +63,7 @@ export default {
   },
   methods: {
     initInteractions (event) {
-      const position = utils.cursorPositionInViewport(event)
+      const position = utils.cursorPositionInSpaceViewport(event)
       const zoom = this.spaceZoomDecimal
       startCursor = position
       endCursor = position
@@ -84,11 +84,11 @@ export default {
       if (this.$store.getters.shouldScrollAtEdges(event)) {
         this.updateMovementDirection()
       }
-      prevCursor = utils.cursorPositionInViewport(event)
+      prevCursor = utils.cursorPositionInSpaceViewport(event)
       prevCursorPage = utils.cursorPositionInPage(event)
     },
     scrollFrame () {
-      let delta, speed
+      let delta = { x: 0, y: 0 }
       const viewportHeight = this.viewportHeight
       const viewportWidth = this.viewportWidth
       const cursor = this.cursor()
@@ -98,38 +98,22 @@ export default {
       const cursorIsRightSide = cursor.x >= (viewportWidth - scrollAreaWidth)
       // Y movement
       if (movementDirection.y === 'up' && cursorIsTopSide && window.scrollY) {
-        speed = this.speed(cursor, 'up')
-        delta = {
-          x: 0,
-          y: -speed
-        }
-        this.scrollBy(delta)
+        const speed = this.speed(cursor, 'up')
+        delta.y = -speed
       } else if (movementDirection.y === 'down' && cursorIsBottomSide && this.shouldScrollDown()) {
-        speed = this.speed(cursor, 'down')
-        delta = {
-          x: 0,
-          y: speed
-        }
-        this.increasePageHeight(delta)
-        this.scrollBy(delta)
+        const speed = this.speed(cursor, 'down')
+        delta.y = speed
       }
       // X movement
       if (movementDirection.x === 'left' && cursorIsLeftSide && window.scrollX) {
-        speed = this.speed(cursor, 'left')
-        delta = {
-          x: -speed,
-          y: 0
-        }
-        this.scrollBy(delta)
+        const speed = this.speed(cursor, 'left')
+        delta.x = -speed
       } else if (movementDirection.x === 'right' && cursorIsRightSide && this.shouldScrollRight()) {
-        speed = this.speed(cursor, 'right')
-        delta = {
-          x: speed,
-          y: 0
-        }
-        this.increasePageWidth(delta)
-        this.scrollBy(delta)
+        const speed = this.speed(cursor, 'right')
+        delta.x = speed
       }
+      this.increasePageWidth(delta)
+      this.scrollBy(delta)
       if (scrollTimer) {
         window.requestAnimationFrame(this.scrollFrame)
       }
