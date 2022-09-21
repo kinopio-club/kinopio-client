@@ -475,18 +475,24 @@ const currentCards = {
           delete card.x
         } else {
           card.x = Math.max(0, card.x + delta.x)
-          card.x = Math.round(card.x)
+          // card x stays within viewport
+          const viewportWidth = context.rootState.viewportWidth
+          card.x = Math.max(card.x, window.scrollX)
+          card.x = Math.min(card.x, window.scrollX + viewportWidth)
         }
         // y
         if (card.y === undefined || card.y === null) {
           delete card.y
         } else {
           card.y = Math.max(0, card.y + delta.y)
-          card.y = Math.round(card.y)
+          // card y stays within viewport
+          const viewportHeight = context.rootState.viewportHeight
+          card.y = Math.max(card.y, window.scrollY)
+          card.y = Math.min(card.y, window.scrollY + viewportHeight)
         }
         card = {
-          x: card.x,
-          y: card.y,
+          x: Math.round(card.x),
+          y: Math.round(card.y),
           z: card.z,
           id: card.id
         }

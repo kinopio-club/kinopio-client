@@ -317,15 +317,13 @@ export default {
       this.$store.dispatch('history/pause')
       const shouldPrevent = this.checkIfShouldPreventInteraction()
       if (shouldPrevent) { return }
-      this.$store.dispatch('currentCards/move', {
+      const options = {
         endCursor: currentCursor,
-        prevCursor: prevCursor
-      })
+        prevCursor
+      }
+      this.$store.dispatch('currentCards/move', options)
       this.checkShouldShowDetails()
-      this.$store.dispatch('currentBoxes/move', {
-        endCursor: currentCursor,
-        prevCursor: prevCursor
-      })
+      this.$store.dispatch('currentBoxes/move', options)
     },
     interact (event) {
       currentCursor = utils.cursorPositionInSpace({ event })

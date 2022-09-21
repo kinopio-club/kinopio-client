@@ -484,7 +484,9 @@ export default {
       const userIsConnecting = this.$store.state.currentConnectionStartCardIds.length
       const currentUserIsDraggingBox = this.$store.state.currentUserIsDraggingBox
       const currentUserIsResizingBox = this.$store.state.currentUserIsResizingBox
-      return userIsConnecting || currentUserIsDraggingBox || currentUserIsResizingBox || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked
+      const currentUserIsDraggingCard = this.$store.state.currentUserIsDraggingCard
+      const currentUserIsResizingCard = this.$store.state.currentUserIsResizingCard
+      return userIsConnecting || currentUserIsDraggingBox || currentUserIsResizingBox || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked || currentUserIsDraggingCard || currentUserIsResizingCard
     },
     cardClasses () {
       return {

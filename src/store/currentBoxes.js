@@ -224,18 +224,24 @@ export default {
           delete box.x
         } else {
           box.x = Math.max(0, box.x + delta.x)
-          box.x = Math.round(box.x)
+          // box x stays within viewport
+          const viewportWidth = context.rootState.viewportWidth
+          box.x = Math.max(box.x, window.scrollX)
+          box.x = Math.min(box.x, window.scrollX + viewportWidth)
         }
         // y
         if (box.y === undefined || box.y === null) {
           delete box.y
         } else {
           box.y = Math.max(0, box.y + delta.y)
-          box.y = Math.round(box.y)
+          // box y stays within viewport
+          const viewportHeight = context.rootState.viewportHeight
+          box.y = Math.max(box.y, window.scrollY)
+          box.y = Math.min(box.y, window.scrollY + viewportHeight)
         }
         box = {
-          x: box.x,
-          y: box.y,
+          x: Math.round(box.x),
+          y: Math.round(box.y),
           id: box.id
         }
         prevMovePositions[box.id] = box

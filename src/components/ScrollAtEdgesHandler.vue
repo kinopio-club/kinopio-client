@@ -225,8 +225,7 @@ export default {
       if (this.currentUserIsPainting && !currentUserIsBoxSelecting) {
         this.$store.commit('triggeredPaintFramePosition', currentCursor)
       }
-      delta = { left: delta.x, top: delta.y }
-      window.scrollBy(delta)
+      window.scrollBy({ left: delta.x, top: delta.y })
       prevCursor = currentCursor
     },
 
