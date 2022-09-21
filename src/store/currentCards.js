@@ -466,7 +466,7 @@ const currentCards = {
         if (prevMovePositions[card.id]) {
           position = prevMovePositions[card.id]
         } else {
-          position = utils.cardPositionFromElement(card.id)
+          position = { x: card.x, y: card.y }
         }
         card.x = position.x
         card.y = position.y

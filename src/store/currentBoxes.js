@@ -215,7 +215,7 @@ export default {
         if (prevMovePositions[box.id]) {
           position = prevMovePositions[box.id]
         } else {
-          position = utils.boxPositionFromElement(box.id)
+          position = { x: box.x, y: box.y }
         }
         box.x = position.x
         box.y = position.y
