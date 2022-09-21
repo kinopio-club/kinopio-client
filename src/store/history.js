@@ -85,7 +85,7 @@ const self = {
       // add patch to pointer
       state.patches.splice(state.pointer, 0, patch)
       state.pointer = state.pointer + 1
-      console.log('⏺ history', { newPatch: patch, pointer: state.pointer })
+      // console.log('⏺ history', { newPatch: patch, pointer: state.pointer })
     },
     // trim: (state) => {
     // TODO trim history from pointer as seperate commit method

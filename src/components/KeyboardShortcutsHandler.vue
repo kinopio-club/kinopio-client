@@ -314,13 +314,6 @@ export default {
 
     // Add Parent and Child Cards
 
-    updateWithZoom (object) {
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
-      object.x = Math.round(object.x * zoom)
-      object.y = Math.round(object.y * zoom)
-      return object
-    },
-
     addCard () {
       if (this.$store.state.shouldPreventNextEnterKey) {
         this.$store.commit('shouldPreventNextEnterKey', false)
@@ -328,6 +321,7 @@ export default {
       }
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
+      // get cards via DOM because they may not exist in state
       const parentCardId = this.$store.state.parentCardId
       let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
       const childCardId = this.$store.state.childCardId
@@ -335,6 +329,7 @@ export default {
       const childCardData = this.$store.getters['currentCards/byId'](childCardId)
       const shouldOutdentChildToParent = childCard && !childCardData
       let initialPosition = {}
+      // set initial position for child
       let isParentCard = true
       if (shouldOutdentChildToParent) {
         const rect = childCard.getBoundingClientRect()
@@ -355,7 +350,7 @@ export default {
         initialPosition.x = window.pageXOffset + 40
         initialPosition.y = window.pageYOffset + 80
       }
-      initialPosition = this.updateWithZoom(initialPosition)
+      initialPosition = utils.cursorPositionInSpace({ position: initialPosition })
       const position = this.nonOverlappingCardPosition(initialPosition)
       parentCard = this.$store.getters['currentCards/byId'](parentCardId)
       let backgroundColor
@@ -393,7 +388,7 @@ export default {
         x: window.pageXOffset + rect.x + rect.width + incrementPosition,
         y: window.pageYOffset + rect.y + rect.height + incrementPosition
       }
-      initialPosition = this.updateWithZoom(initialPosition)
+      initialPosition = utils.cursorPositionInSpace({ position: initialPosition })
       const position = this.nonOverlappingCardPosition(initialPosition)
       parentCard = this.$store.getters['currentCards/byId'](parentCardId)
       this.$store.dispatch('currentCards/add', { position, backgroundColor: parentCard.backgroundColor })
