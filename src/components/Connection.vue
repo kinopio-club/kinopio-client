@@ -323,8 +323,7 @@ export default {
     addCardsAndUploadFiles (event) {
       let files = event.dataTransfer.files
       files = Array.from(files)
-      const currentCursor = utils.cursorPositionInViewport(event)
-      this.$store.dispatch('upload/addCardsAndUploadFiles', { files, currentCursor })
+      this.$store.dispatch('upload/addCardsAndUploadFiles', { files, currentCursor, event })
     }
   },
   watch: {
