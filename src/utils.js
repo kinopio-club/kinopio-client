@@ -258,6 +258,10 @@ export default {
     }
     return position
   },
+  cursorPositionInSpaceViewport ({ event }) {
+    let position = this.cursorPositionInViewport(event)
+    return this.updatePositionWithSpaceOffset(position)
+  },
   outsideSpaceOffset () {
     const space = document.getElementById('space')
     const spaceRect = space.getBoundingClientRect()
