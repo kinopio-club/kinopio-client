@@ -4,7 +4,7 @@
 <script>
 import utils from '@/utils.js'
 
-let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, scrollAreaHeight, scrollAreaWidth, maxHeight, maxWidth
+let prevCursor, prevCursorPage, currentCursor, scrollTimer, scrollAreaHeight, scrollAreaWidth, maxHeight, maxWidth
 let movementDirection = {}
 
 export default {
@@ -17,6 +17,7 @@ export default {
           clientX: position.x,
           clientY: position.y
         }
+        console.log('💖1')
         this.stopScrollTimer()
         this.initInteractions(event)
       }
@@ -26,6 +27,7 @@ export default {
           clientX: position.x,
           clientY: position.y
         }
+        console.log('💖2')
         this.stopScrollTimer()
         this.initInteractions(event)
       }
@@ -64,26 +66,50 @@ export default {
   methods: {
     // init
 
-    initCursors (event) {
-      const position = utils.cursorPositionInSpaceViewport(event)
-      startCursor = position
-      endCursor = position
+    initCursors ({ event, position }) {
+      if (event) {
+        position = utils.cursorPositionInSpaceViewport(event)
+      }
+      prevCursor = position
+      currentCursor = position
     },
     initMeasurements () {
-      // const zoom = this.spaceZoomDecimal
-      scrollAreaHeight = (this.viewportHeight / 8) // * zoom
+      scrollAreaHeight = (this.viewportHeight / 8)
       scrollAreaHeight = Math.max(50, scrollAreaHeight)
       scrollAreaHeight = Math.round(scrollAreaHeight)
-      scrollAreaWidth = (this.viewportWidth / 8) //* zoom
+      scrollAreaWidth = (this.viewportWidth / 8)
       scrollAreaWidth = Math.max(50, scrollAreaWidth)
       scrollAreaWidth = Math.round(scrollAreaWidth)
-      maxHeight = Math.max(6500, this.$store.state.viewportHeight) // * zoom
-      maxWidth = Math.max(6500, this.$store.state.viewportWidth) // * zoom
+      maxHeight = Math.max(6500, this.$store.state.viewportHeight)
+      maxWidth = Math.max(6500, this.$store.state.viewportWidth)
     },
+    initInteractions (event) {
+      this.initCursors({ event })
+      this.initMeasurements()
+      const shouldScroll = this.$store.getters.shouldScrollAtEdges(event)
+      if (shouldScroll) {
+        this.updateMovementDirection()
+      }
+      if (shouldScroll && !scrollTimer) {
+        scrollTimer = window.requestAnimationFrame(this.scrollFrame)
+      }
+    },
+
+    // interact
+
+    interact (event) {
+      currentCursor = utils.cursorPositionInSpaceViewport(event)
+      if (this.$store.getters.shouldScrollAtEdges(event)) {
+        this.updateMovementDirection()
+      }
+      prevCursorPage = utils.cursorPositionInPage(event)
+    },
+
+    // direction and speed
+
     updateMovementDirection () {
-      const cursor = this.cursor()
-      const xMove = endCursor.x - cursor.x
-      const yMove = endCursor.y - cursor.y
+      const xMove = prevCursor.x - currentCursor.x
+      const yMove = prevCursor.y - currentCursor.y
       if (Math.sign(yMove) === 1) {
         movementDirection.y = 'up'
       } else if (Math.sign(yMove) === -1) {
@@ -95,35 +121,7 @@ export default {
         movementDirection.x = 'right'
       }
     },
-    initInteractions (event) {
-      this.initCursors(event)
-      this.initMeasurements()
-      const shouldScroll = this.$store.getters.shouldScrollAtEdges(event)
-      if (shouldScroll) {
-        this.updateMovementDirection()
-      }
-      if (shouldScroll && !scrollTimer) {
-        scrollTimer = window.requestAnimationFrame(this.scrollFrame)
-      }
-    },
-    cursor () {
-      if (utils.objectHasKeys(prevCursor)) {
-        return prevCursor
-      } else {
-        return startCursor
-      }
-    },
-
-    // interactions
-
-    interact (event) {
-      if (this.$store.getters.shouldScrollAtEdges(event)) {
-        this.updateMovementDirection()
-      }
-      prevCursor = utils.cursorPositionInSpaceViewport(event)
-      prevCursorPage = utils.cursorPositionInPage(event)
-    },
-    speed (cursor, direction) {
+    speed (direction) {
       const minSpeed = 10
       const maxSpeed = 20
       const maxSpeedOutsideWindow = 50
@@ -133,13 +131,14 @@ export default {
       const directionIsY = direction === 'up' || direction === 'down'
       const directionIsX = direction === 'left' || direction === 'right'
       let scrollAreaSize, viewportSize
+      let cursor
       if (directionIsX) {
         scrollAreaSize = scrollAreaWidth
-        cursor = cursor.x
+        cursor = prevCursor.x
         viewportSize = viewportWidth
       } else if (directionIsY) {
         scrollAreaSize = scrollAreaHeight
-        cursor = cursor.y
+        cursor = prevCursor.y
         viewportSize = viewportHeight
       }
       // calc percent over scrollArea
@@ -161,35 +160,87 @@ export default {
       }
       return speed
     },
+
+    // scroll
+
     scrollFrame () {
+      if (!prevCursor) { return }
       let delta = { x: 0, y: 0 }
       const viewportHeight = this.viewportHeight
       const viewportWidth = this.viewportWidth
-      const cursor = this.cursor()
-      const cursorIsTopSide = cursor.y <= scrollAreaHeight
-      const cursorIsBottomSide = cursor.y >= (viewportHeight - scrollAreaHeight)
-      const cursorIsLeftSide = cursor.x <= scrollAreaWidth
-      const cursorIsRightSide = cursor.x >= (viewportWidth - scrollAreaWidth)
+      const cursorIsTopSide = prevCursor.y <= scrollAreaHeight
+      const cursorIsBottomSide = prevCursor.y >= (viewportHeight - scrollAreaHeight)
+      const cursorIsLeftSide = prevCursor.x <= scrollAreaWidth
+      const cursorIsRightSide = prevCursor.x >= (viewportWidth - scrollAreaWidth)
       // Y movement
       if (movementDirection.y === 'up' && cursorIsTopSide && window.scrollY) {
-        const speed = this.speed(cursor, 'up')
+        const speed = this.speed('up')
         delta.y = -speed
       } else if (movementDirection.y === 'down' && cursorIsBottomSide && this.shouldScrollDown()) {
-        const speed = this.speed(cursor, 'down')
+        const speed = this.speed('down')
         delta.y = speed
       }
       // X movement
       if (movementDirection.x === 'left' && cursorIsLeftSide && window.scrollX) {
-        const speed = this.speed(cursor, 'left')
+        const speed = this.speed('left')
         delta.x = -speed
       } else if (movementDirection.x === 'right' && cursorIsRightSide && this.shouldScrollRight()) {
-        const speed = this.speed(cursor, 'right')
+        const speed = this.speed('right')
         delta.x = speed
       }
-      this.increasePageWidth(delta)
+      delta = { x: Math.round(delta.x), y: Math.round(delta.y) }
+      this.increasePageSize(delta)
       this.scrollBy(delta)
       if (scrollTimer) {
         window.requestAnimationFrame(this.scrollFrame)
+      }
+    },
+    shouldScrollRight () {
+      this.updatePageSizes()
+      const scrolledTooFarRight = (window.scrollX + this.viewportWidth) > maxWidth
+      return !scrolledTooFarRight
+    },
+    shouldScrollDown () {
+      this.updatePageSizes()
+      const scrolledTooFarDown = (window.scrollY + this.viewportHeight) > maxHeight
+      return !scrolledTooFarDown
+    },
+    scrollBy (delta) {
+      console.log('🍅', delta) // TODO
+      if (utils.isAndroid()) { return }
+      const currentUserIsBoxSelecting = this.$store.state.currentUserIsBoxSelecting
+      const isDraggingCard = this.$store.state.currentUserIsDraggingCard
+      const isDraggingBox = this.$store.state.currentUserIsDraggingBox
+      const isDraggingItem = isDraggingCard || isDraggingBox
+      if (isDraggingItem) {
+        this.$store.dispatch('history/pause')
+        if (isDraggingCard || isDraggingBox) {
+          this.$store.dispatch('currentCards/move', { endCursor: currentCursor, prevCursor, delta })
+          this.$store.dispatch('currentBoxes/move', { endCursor: currentCursor, prevCursor, delta })
+        }
+      }
+      if (this.isDrawingConnection) {
+        this.$store.commit('triggeredDrawConnectionFrame', currentCursor)
+      }
+      if (this.currentUserIsPainting && !currentUserIsBoxSelecting) {
+        this.$store.commit('triggeredPaintFramePosition', currentCursor)
+      }
+      delta = { left: delta.x, top: delta.y }
+      window.scrollBy(delta)
+      prevCursor = currentCursor
+    },
+
+    // page size
+
+    updatePageSizes () {
+      this.$store.dispatch('updatePageSizes')
+    },
+    increasePageSize (delta) {
+      if (delta.x > 0) {
+        this.increasePageWidth(delta)
+      }
+      if (delta.y > 0) {
+        this.increasePageHeight(delta)
       }
     },
     increasePageWidth (delta) {
@@ -209,55 +260,6 @@ export default {
         const height = pageHeight + delta.y
         this.$store.commit('pageHeight', height)
       }
-    },
-    shouldScrollRight () {
-      this.updatePageSizes()
-      const scrolledTooFarRight = (window.scrollX + this.viewportWidth) > maxWidth
-      return !scrolledTooFarRight
-    },
-    shouldScrollDown () {
-      this.updatePageSizes()
-      const scrolledTooFarDown = (window.scrollY + this.viewportHeight) > maxHeight
-      return !scrolledTooFarDown
-    },
-    scrollBy (delta) {
-      if (utils.isAndroid()) { return }
-      // let zoom = this.spaceZoomDecimal
-      // if (zoom === 1) {
-      //   const viewport = utils.visualViewport()
-      //   zoom = viewport.scale
-      // }
-      const currentUserIsBoxSelecting = this.$store.state.currentUserIsBoxSelecting
-      const isDraggingCard = this.$store.state.currentUserIsDraggingCard
-      const isDraggingBox = this.$store.state.currentUserIsDraggingBox
-      const isDraggingItem = isDraggingCard || isDraggingBox
-      delta = {
-        left: Math.round(delta.x), //* zoom
-        top: Math.round(delta.y) //* zoom
-      }
-      const cursor = this.cursor()
-      if (isDraggingItem) {
-        const slowMultiplier = 0.9
-        const itemDelta = {
-          x: delta.left * slowMultiplier,
-          y: delta.top * slowMultiplier
-        }
-        this.$store.dispatch('history/pause')
-        if (isDraggingCard || isDraggingBox) {
-          this.$store.dispatch('currentCards/move', { endCursor, prevCursor, delta: itemDelta })
-          this.$store.dispatch('currentBoxes/move', { endCursor, prevCursor, delta: itemDelta })
-        }
-      }
-      if (this.isDrawingConnection) {
-        this.$store.commit('triggeredDrawConnectionFrame', cursor)
-      }
-      if (this.currentUserIsPainting && !currentUserIsBoxSelecting) {
-        this.$store.commit('triggeredPaintFramePosition', cursor)
-      }
-      window.scrollBy(delta)
-    },
-    updatePageSizes () {
-      this.$store.dispatch('updatePageSizes')
     },
 
     // end interactions
