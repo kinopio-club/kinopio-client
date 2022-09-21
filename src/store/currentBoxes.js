@@ -283,7 +283,6 @@ export default {
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveBroadcast' }, { root: true })
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/add', { boxes, useSnapshot: true }, { root: true })
-      context.dispatch('currentCards/updateCardMap', null, { root: true })
     },
 
     // remove

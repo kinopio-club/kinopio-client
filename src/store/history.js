@@ -220,7 +220,7 @@ const self = {
             card = item.prev
             context.dispatch('currentCards/update', card, { root: true })
             nextTick(() => {
-              context.dispatch('currentCards/updateDimensionsAndMap', card.id, { root: true })
+              context.dispatch('currentCards/updateDimensions', { cardId: card.id }, { root: true })
               context.dispatch('currentConnections/updatePaths', { cardId: card.id }, { root: true })
               context.commit('triggerUpdateCardOverlaps', null, { root: true })
             })
@@ -290,7 +290,7 @@ const self = {
             card = item.new
             context.dispatch('currentCards/update', card, { root: true })
             nextTick(() => {
-              context.dispatch('currentCards/updateDimensionsAndMap', card.id, { root: true })
+              context.dispatch('currentCards/updateDimensions', { cardId: card.id }, { root: true })
               context.dispatch('currentConnections/updatePaths', { cardId: card.id }, { root: true })
               context.commit('triggerUpdateCardOverlaps', null, { root: true })
             })

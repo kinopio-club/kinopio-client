@@ -35,10 +35,10 @@
         img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
         template(v-if="shouldLoadUrlPreviewImage")
         //- on card
-        img.preview-image(v-if="!parentIsCardDetails" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensionsAndMap")
+        img.preview-image(v-if="!parentIsCardDetails" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensions")
         //- in carddetails
         a.preview-image-wrap(v-if="parentIsCardDetails && !shouldHideImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
-          img.preview-image( :src="card.urlPreviewImage" @load="updateDimensionsAndMap")
+          img.preview-image( :src="card.urlPreviewImage" @load="updateDimensions")
         //- info
         .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, hidden: shouldHideInfo, transparent: isShowNone}" :style="{background: selectedColor}")
           img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
@@ -218,8 +218,8 @@ export default {
     updateImageCanLoad () {
       this.imageCanLoad = true
     },
-    updateDimensionsAndMap () {
-      this.$store.dispatch('currentCards/updateDimensionsAndMap', this.card.id)
+    updateDimensions () {
+      this.$store.dispatch('currentCards/updateDimensions', { cards: [this.card] })
     },
     showAll () {
       const card = {
