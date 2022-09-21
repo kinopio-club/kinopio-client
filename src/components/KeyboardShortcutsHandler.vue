@@ -253,7 +253,7 @@ export default {
       const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
       const shouldBoxSelect = event.shiftKey && isSpaceScope && !toolbarIsBox
       const shouldPan = isRightClick && isSpaceScope
-      const position = utils.cursorPositionInPage(event)
+      const position = utils.cursorPositionInSpace({ event })
       if (shouldBoxSelect) {
         event.preventDefault()
         this.$store.commit('currentUserIsBoxSelecting', true)
@@ -272,7 +272,7 @@ export default {
     // on mouse move
     handleMouseMoveEvents (event) {
       const speed = 2
-      const position = utils.cursorPositionInPage(event)
+      const position = utils.cursorPositionInSpace({ event })
       currentCursorPosition = position
       if (this.$store.state.currentUserIsBoxSelecting) {
         this.$store.commit('currentUserBoxSelectEnd', position)

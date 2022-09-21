@@ -68,8 +68,8 @@ export default {
   },
   computed: {
     currentUserIsBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
-    start () { return this.zoom(this.$store.state.currentUserBoxSelectStart) },
-    end () { return this.zoom(this.$store.state.currentUserBoxSelectEnd) },
+    start () { return this.$store.state.currentUserBoxSelectStart },
+    end () { return this.$store.state.currentUserBoxSelectEnd },
     userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
     currentUserStyles () {
       const { start, end } = this.orderedPoints(this.start, this.end)
@@ -89,7 +89,6 @@ export default {
       }
       return styles
     },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     remoteUserBoxSelectStyles () { return this.$store.state.remoteUserBoxSelectStyles },
     remotePreviousUserBoxSelectStyles () { return this.$store.state.remotePreviousUserBoxSelectStyles }
   },
@@ -102,13 +101,6 @@ export default {
     },
     removePreviousRemoteBoxStyle () {
       this.$store.commit('removeRemotePreviousBoxSelectStyle')
-    },
-    zoom (point) {
-      const zoom = this.spaceCounterZoomDecimal
-      return {
-        x: Math.ceil(point.x * zoom),
-        y: Math.ceil(point.y * zoom)
-      }
     },
     updatePreviouslySelectedItems () {
       previouslySelectedCardIds = this.$store.state.multipleCardsSelectedIds
@@ -295,6 +287,7 @@ export default {
       const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
       if (!element) { return }
       const pathData = element.getPathData()
+      if (!pathData.length) { return }
       let m, q
       pathData.forEach(data => {
         if (data.type === 'm') {
