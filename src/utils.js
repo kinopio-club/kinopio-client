@@ -143,8 +143,6 @@ export default {
   },
   unpinnedDialogIsVisible () {
     let dialogs = document.querySelectorAll('dialog')
-    const dialogIsVisible = Boolean(dialogs.length)
-    if (!dialogIsVisible) { return }
     // ignore pinned dialogs
     let pinnedDialogs = []
     dialogs.forEach(dialog => {
