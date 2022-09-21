@@ -13,6 +13,13 @@ import qs from '@aguezz/qs-parse'
 
 let currentSpaceId
 let prevMovePositions = {}
+let tallestCardHeight = 0
+
+const updateTallestCardHeight = (height) => {
+  if (height > tallestCardHeight) {
+    tallestCardHeight = Math.ceil(height)
+  }
+}
 
 const currentCards = {
   namespaced: true,
@@ -29,6 +36,7 @@ const currentCards = {
       state.ids = []
       state.cards = {}
       state.removedCards = []
+      tallestCardHeight = 0
     },
     restore: (state, cards) => {
       let cardIds = []
@@ -37,6 +45,7 @@ const currentCards = {
         card.x = card.x || 100
         card.y = card.y || 100
         state.cards[card.id] = card
+        updateTallestCardHeight(card.height)
       })
       state.ids = state.ids.concat(cardIds)
     },
@@ -318,6 +327,7 @@ const currentCards = {
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           context.commit('update', body)
           context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
+          updateTallestCardHeight(card.height)
         })
       })
     },
@@ -668,29 +678,27 @@ const currentCards = {
       return result
     },
     isSelectable: (state, getters, rootState) => (position) => {
-      const viewportHeight = Math.max(rootState.viewportHeight, 500)
+      const threshold = tallestCardHeight
       const canBeSelectedSortedByY = getters.canBeSelectedSortedByY
       let yIndex = canBeSelectedSortedByY.yIndex
       let cards = canBeSelectedSortedByY.cards
       // ┌─────────────────────────────────┐
-      // │Page Above                       │
+      // │Viewport                         │
       // ├─────────────────────────────────┤
-      // │Viewport Above //////////////////│
+      // │- Threshold /////////////////////│
       // │/////////////////////////////////│
+      // │//////////////█████//////////////│
+      // ├──────────────█ y █──────────────┤
+      // │//////////////█████//////////////│
       // │/////////////////////////////////│
-      // │////////////  y - vp ////////////│
-      // ├───────────────███───────────────┤
-      // │////////////  y + vp ////////////│
-      // │/////////////////////////////////│
-      // │/////////////////////////////////│
-      // │Viewport Below //////////////////│
+      // │+ Threshold /////////////////////│
       // ├─────────────────────────────────┤
-      // │Page Below                       │
+      // │Viewport                         │
       // └─────────────────────────────────┘
       // cards within y range
       yIndex = yIndex.map(y => parseInt(y))
-      const min = Math.max(position.y - viewportHeight, 0)
-      const max = min + viewportHeight
+      const min = Math.max(position.y - threshold, 0)
+      const max = min + threshold
       let minIndex = yIndex.findIndex(y => y >= min)
       let maxIndex = yIndex.findIndex(y => y >= max)
       if (minIndex === -1) { return }
