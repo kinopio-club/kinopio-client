@@ -352,11 +352,7 @@ export default {
       let color = this.$store.state.currentUser.color
       this.currentCursor = utils.cursorPositionInViewport(event)
       let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
-      const position = utils.cursorPositionInSpace({ event })
-      this.selectCards(position)
-      this.selectConnections(position)
-      this.selectBoxes(circle)
-      // this.selectCardsAndConnectionsBetweenCircles(position)
+      this.selectItems(event)
       paintingCircles.push(circle)
       this.broadcastCircle(circle)
     },
@@ -453,57 +449,17 @@ export default {
       const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
       return isMobile && !isPaintingLocked
     },
+    selectItems (event) {
+      const position = utils.cursorPositionInSpace({ event })
+      this.selectCards(position)
+      this.selectConnections(position)
+      this.selectBoxes(position)
+    },
     selectConnections (position) {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
       this.selectConnectionPaths(position)
     },
-    // selectCardsAndConnectionsBetweenCircles (circle) {
-    //   if (this.shouldPreventSelectionOnMobile()) { return }
-    //   if (this.userCantEditSpace) { return }
-    //   const prevCircle = paintingCircles[paintingCircles.length - 1] || circle
-    //   const delta = {
-    //     x: prevCircle.x - circle.x,
-    //     y: prevCircle.y - circle.y,
-    //     xAbsolute: Math.abs(prevCircle.x - circle.x),
-    //     yAbsolute: Math.abs(prevCircle.y - circle.y)
-    //   }
-    //   const furthestDelta = Math.max(delta.xAbsolute, delta.yAbsolute)
-    //   if (furthestDelta <= 5 || prevCircle.iteration > 1) { return }
-    //   const movementDirection = this.movementDirection(prevCircle, delta)
-    //   const increment = 2
-    //   let x = circle.x
-    //   let y = circle.y
-    //   if (movementDirection.x === 'right') {
-    //     x = prevCircle.x + increment
-    //     while (x < circle.x) {
-    //       x += increment
-    //       this.selectConnectionPaths({ x, y })
-    //       this.selectCards({ x, y })
-    //     }
-    //   } else if (movementDirection.x === 'left') {
-    //     x = prevCircle.x - increment
-    //     while (x > circle.x) {
-    //       x += -increment
-    //       this.selectConnectionPaths({ x, y })
-    //       this.selectCards({ x, y })
-    //     }
-    //   } else if (movementDirection.y === 'down') {
-    //     y = prevCircle.y + increment
-    //     while (y < circle.y) {
-    //       y += increment
-    //       this.selectConnectionPaths({ x, y })
-    //       this.selectCards({ x, y })
-    //     }
-    //   } else if (movementDirection.y === 'up') {
-    //     y = prevCircle.y - increment
-    //     while (y > circle.y) {
-    //       y += -increment
-    //       this.selectConnectionPaths({ x, y })
-    //       this.selectCards({ x, y })
-    //     }
-    //   }
-    // },
     selectCards (position) {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
