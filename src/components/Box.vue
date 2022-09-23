@@ -301,7 +301,7 @@ export default {
     },
     selectContainedCards () {
       const position = this.box
-      const cards = this.$store.getters['currentCards/isSelectable'](position)
+      const cards = this.$store.getters['currentCards/isSelectable']({ position, isBox: true })
       cards.forEach(card => {
         if (this.isCardInSelectedBoxes(card)) {
           this.$store.dispatch('addToMultipleCardsSelected', card.id)

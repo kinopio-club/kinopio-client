@@ -507,7 +507,7 @@ export default {
     selectCards (position) {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
-      const cards = this.$store.getters['currentCards/isSelectable'](position)
+      const cards = this.$store.getters['currentCards/isSelectable']({ position })
       if (!cards) { return }
       cards.forEach(card => {
         const cardX = card.x

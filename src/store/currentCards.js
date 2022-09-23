@@ -654,7 +654,7 @@ const currentCards = {
       }
       return result
     },
-    isSelectable: (state, getters, rootState) => (position) => {
+    isSelectable: (state, getters, rootState) => ({ position, isBox }) => {
       const threshold = tallestCardHeight
       const canBeSelectedSortedByY = getters.canBeSelectedSortedByY
       let yIndex = canBeSelectedSortedByY.yIndex
@@ -674,8 +674,12 @@ const currentCards = {
       // └─────────────────────────────────┘
       // cards within y range
       yIndex = yIndex.map(y => parseInt(y))
-      const min = Math.max(position.y - threshold, 0)
-      const max = min + threshold
+      let min = Math.max(position.y - threshold, 0)
+      let max = min + threshold
+      if (isBox) {
+        min = position.y
+        max = position.y + position.resizeHeight
+      }
       let minIndex = yIndex.findIndex(y => y >= min)
       let maxIndex = yIndex.findIndex(y => y >= max)
       if (minIndex === -1) { return }
