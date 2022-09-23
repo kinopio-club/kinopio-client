@@ -444,6 +444,7 @@ const currentCards = {
     },
 
     move: (context, delta) => {
+      if (!delta.x && !delta.y) { return }
       let connections = []
       let cards = context.getters.isSelected
       cards = utils.clone(cards)

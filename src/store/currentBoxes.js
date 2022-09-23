@@ -195,6 +195,7 @@ export default {
       })
     },
     move: (context, delta) => {
+      if (!delta.x && !delta.y) { return }
       let boxes = context.getters.isSelected
       boxes = utils.clone(boxes)
       delta = utils.deltaPreventsBunchingUpAtZero({ normalizedItems: prevMovePositions, delta })
