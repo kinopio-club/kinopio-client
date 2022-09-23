@@ -35,8 +35,6 @@
             FavoritesActions(:visible="favoritesActionsIsVisible")
 
   .right(:class="{'is-embed': isEmbed, 'hidden': isHidden}")
-    button(v-if="isNotSupportedByDevice" @pointerup="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
-      img.icon.minimap(src="@/assets/minimap.svg")
     template(v-if="!isMobileOrTouch")
       SpaceZoom
 </template>
@@ -59,7 +57,6 @@ let updateFavoritesIntervalTimer, updateLiveSpacesIntervalTimer
 const fadeOutDuration = 10
 const hiddenDuration = 20
 const updatePositionDuration = 60
-let shouldNotifyMinimapKeyboardShortcut = true
 let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
 
 export default {
@@ -128,8 +125,6 @@ export default {
     clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
-    isNotSupportedByDevice () { return !utils.isAndroid() },
-    minimapIsVisible () { return this.$store.state.minimapIsVisible },
     isAddPage () { return this.$store.state.isAddPage },
     isEmbed () { return this.$store.state.isEmbed },
     currentUser () { return this.$store.state.currentUser },
@@ -182,16 +177,6 @@ export default {
     }
   },
   methods: {
-    toggleMinimapIsVislble (event) {
-      this.closeDialogs()
-      const value = !this.minimapIsVisible
-      this.$store.commit('minimapIsVisible', value)
-      const isMouseClick = event.pointerType === 'mouse'
-      if (value && isMouseClick && shouldNotifyMinimapKeyboardShortcut) {
-        this.$store.commit('addNotification', { message: 'Hold z for minimap', type: 'currentUser', icon: 'minimap' })
-        shouldNotifyMinimapKeyboardShortcut = false
-      }
-    },
     closeDialogs (exclude) {
       this.favoritesActionsIsVisible = false
       this.favoritesIsVisible = false

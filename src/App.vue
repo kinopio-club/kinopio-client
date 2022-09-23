@@ -18,7 +18,6 @@
   TagDetails
   LinkDetails
   UserDetails
-  Minimap
   WindowHistoryHandler
   KeyboardShortcutsHandler
   NotificationsWithPosition(layer="app")
@@ -42,7 +41,6 @@ import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
-import Minimap from '@/components/Minimap.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import SpaceBackground from '@/components/SpaceBackground.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
@@ -64,7 +62,6 @@ export default {
     TagDetails,
     LinkDetails,
     OffscreenMarkers,
-    Minimap,
     ItemsLocked,
     SpaceBackground,
     OutsideSpaceBackground,
@@ -731,9 +728,6 @@ dialog
   padding 0
   height 9px
   vertical-align 0px
-
-.icon.minimap
-  height 13px
 
 .icon.left-arrow
   transform rotate(90deg)

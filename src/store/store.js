@@ -74,9 +74,6 @@ const store = createStore({
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
 
-    // minimap
-    minimapIsVisible: false,
-
     // box-selecting
     currentUserIsBoxSelecting: false,
     currentUserBoxSelectStart: {},
@@ -650,13 +647,6 @@ const store = createStore({
     updateRemoteUserResizingBoxes: (state, update) => {
       state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
       state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.concat(update)
-    },
-
-    // Minimap
-
-    minimapIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'minimapIsVisible' })
-      state.minimapIsVisible = value
     },
 
     // Toolbar Mode

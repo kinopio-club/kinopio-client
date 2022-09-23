@@ -55,12 +55,6 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
-            img.icon.minimap(src="@/assets/minimap.svg")
-            span Minimap
-          .badge.keyboard-shortcut Hold Z
-      article
-        .row
-          .badge.title
             img.icon.hand(src="@/assets/hand.svg")
             span Drag to Pan
           .badge.keyboard-shortcut Space/Right-Click Drag
@@ -70,6 +64,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
             img.icon.magnifying-glass(src="@/assets/magnifying-glass.svg")
             span Zoom In or Out
           .badge.keyboard-shortcut {{meta}}-+/-, {{meta}}-Scroll
+      article
+        .row
+          .badge.title
+            img.icon.magnifying-glass(src="@/assets/magnifying-glass-out.svg")
+            span Birds Eye View
+          .badge.keyboard-shortcut Hold Z
 
     //- Edit
     template(v-if="categoryIsVisible('edit')")
