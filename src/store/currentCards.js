@@ -444,17 +444,22 @@ const currentCards = {
     },
 
     move: (context, delta) => {
-      // TODO update box move too:
       let cards = context.getters.isSelected
       let connections = []
       cards = utils.clone(cards)
-      let draggedCardDelta
       const viewportWidth = context.rootState.viewportWidth
       const viewportHeight = context.rootState.viewportHeight
-      // update positions and prevent cards bunching up at 0
-      cards = cards.map((card, index) => {
+      // prevent cards bunching up at 0
+      if (utils.objectHasKeys(prevMovePositions)) {
+        const positions = utils.denormalizeItems(prevMovePositions)
+        const isCardXZero = positions.find(card => card.x === 0)
+        const isCardYZero = positions.find(card => card.y === 0)
+        if (isCardXZero) { delta.x = Math.max(delta.x, 0) }
+        if (isCardYZero) { delta.y = Math.max(delta.y, 0) }
+      }
+      // update positions
+      cards = cards.map(card => {
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
-        delta = draggedCardDelta || delta
         // get card position while dragging
         let position
         if (prevMovePositions[card.id]) {
@@ -464,17 +469,14 @@ const currentCards = {
         }
         card.x = position.x
         card.y = position.y
-        const prev = position
         // new x
         if (card.x === undefined || card.x === null) {
           delete card.x
         } else {
           card.x = Math.max(0, card.x + delta.x)
           // card x stays within viewport
-          if (index === 0) {
-            card.x = Math.max(card.x, window.scrollX)
-            card.x = Math.min(card.x, window.scrollX + viewportWidth)
-          }
+          card.x = Math.max(card.x, window.scrollX)
+          card.x = Math.min(card.x, window.scrollX + viewportWidth)
         }
         // new y
         if (card.y === undefined || card.y === null) {
@@ -482,10 +484,8 @@ const currentCards = {
         } else {
           card.y = Math.max(0, card.y + delta.y)
           // card y stays within viewport
-          if (index === 0) {
-            card.y = Math.max(card.y, window.scrollY)
-            card.y = Math.min(card.y, window.scrollY + viewportHeight)
-          }
+          card.y = Math.max(card.y, window.scrollY)
+          card.y = Math.min(card.y, window.scrollY + viewportHeight)
         }
         card = {
           x: Math.round(card.x),
@@ -494,12 +494,6 @@ const currentCards = {
           id: card.id
         }
         prevMovePositions[card.id] = card
-        if (index === 0) {
-          draggedCardDelta = {
-            x: card.x - prev.x,
-            y: card.y - prev.y
-          }
-        }
         return card
       })
       // update
