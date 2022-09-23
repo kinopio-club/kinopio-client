@@ -206,7 +206,7 @@ export default {
       return !scrolledTooFarDown
     },
     scrollBy (delta) {
-      console.log('🍅', delta) // TODO
+      // console.log('🍅', delta) // TODO
       if (utils.isAndroid()) { return }
       const currentUserIsBoxSelecting = this.$store.state.currentUserIsBoxSelecting
       const isDraggingCard = this.$store.state.currentUserIsDraggingCard

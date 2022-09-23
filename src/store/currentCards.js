@@ -447,15 +447,13 @@ const currentCards = {
       // TODO update box move too:
       let cards = context.getters.isSelected
       let connections = []
-      cards.forEach(card => {
-        connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
-      })
       cards = utils.clone(cards)
       let draggedCardDelta
       const viewportWidth = context.rootState.viewportWidth
       const viewportHeight = context.rootState.viewportHeight
       // update positions and prevent cards bunching up at 0
       cards = cards.map((card, index) => {
+        connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
         delta = draggedCardDelta || delta
         // get card position while dragging
         let position
@@ -466,7 +464,7 @@ const currentCards = {
         }
         card.x = position.x
         card.y = position.y
-        const prev = card
+        const prev = position
         // new x
         if (card.x === undefined || card.x === null) {
           delete card.x
@@ -498,8 +496,8 @@ const currentCards = {
         prevMovePositions[card.id] = card
         if (index === 0) {
           draggedCardDelta = {
-            x: prev.x - card.x,
-            y: prev.y - card.y
+            x: card.x - prev.x,
+            y: card.y - prev.y
           }
         }
         return card
@@ -724,10 +722,11 @@ const currentCards = {
       const multipleCardsSelectedIds = rootState.multipleCardsSelectedIds
       let cardIds
       if (multipleCardsSelectedIds.length) {
-        cardIds = multipleCardsSelectedIds
+        cardIds = [currentDraggingCardId].concat(multipleCardsSelectedIds)
       } else {
         cardIds = [currentDraggingCardId]
       }
+      cardIds = uniq(cardIds)
       const cards = cardIds.map(id => getters.byId(id))
       return cards
     },
