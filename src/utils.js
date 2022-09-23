@@ -753,7 +753,7 @@ export default {
     return items
   },
 
-  // Cards
+  // Cards, Boxes (Items)
 
   emptyCard () {
     return { width: 76, height: 32 }
@@ -845,6 +845,34 @@ export default {
     cards = cards.filter(card => Boolean(card))
     const data = cards.map(card => card.name)
     return join(data, '\n\n')
+  },
+  deltaPreventsBunchingUpAtZero ({ normalizedItems, delta }) {
+    if (!this.objectHasKeys(normalizedItems)) { return delta }
+    const items = this.denormalizeItems(normalizedItems)
+    const isZero = {
+      x: items.find(item => item.x === 0),
+      y: items.find(item => item.y === 0)
+    }
+    if (isZero.x) { delta.x = Math.max(delta.x, 0) }
+    if (isZero.y) { delta.y = Math.max(delta.y, 0) }
+    return delta
+  },
+  updateItemPositionByAxis ({ item, axis, delta }) {
+    let scroll = window.scrollX
+    let viewport = this.visualViewport().width
+    if (axis === 'y') {
+      scroll = window.scrollY
+      viewport = this.visualViewport().height
+    }
+    if (item[axis] === undefined || item[axis] === null) {
+      delete item[axis]
+    } else {
+      item[axis] = Math.max(0, item[axis] + delta[axis])
+      // keep item within viewport
+      item[axis] = Math.max(item[axis], scroll)
+      item[axis] = Math.min(item[axis], scroll + viewport)
+    }
+    return item
   },
 
   // Connection Path Utils 🐙

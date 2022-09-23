@@ -197,19 +197,7 @@ export default {
     move: (context, delta) => {
       let boxes = context.getters.isSelected
       boxes = utils.clone(boxes)
-      const viewportWidth = context.rootState.viewportWidth
-      const viewportHeight = context.rootState.viewportHeight
-      // prevent boxes bunching up at 0
-      if (utils.objectHasKeys(prevMovePositions)) {
-        const positions = utils.denormalizeItems(prevMovePositions)
-        const isZero = {
-          x: positions.find(box => box.x === 0),
-          y: positions.find(box => box.y === 0)
-        }
-        if (isZero.x) { delta.x = Math.max(delta.x, 0) }
-        if (isZero.y) { delta.y = Math.max(delta.y, 0) }
-      }
-      // positions
+      delta = utils.deltaPreventsBunchingUpAtZero({ normalizedItems: prevMovePositions, delta })
       boxes = boxes.map(box => {
         let position
         if (prevMovePositions[box.id]) {
@@ -219,24 +207,8 @@ export default {
         }
         box.x = position.x
         box.y = position.y
-        // new x
-        if (box.x === undefined || box.x === null) {
-          delete box.x
-        } else {
-          box.x = Math.max(0, box.x + delta.x)
-          // box x stays within viewport
-          box.x = Math.max(box.x, window.scrollX)
-          box.x = Math.min(box.x, window.scrollX + viewportWidth)
-        }
-        // new y
-        if (box.y === undefined || box.y === null) {
-          delete box.y
-        } else {
-          box.y = Math.max(0, box.y + delta.y)
-          // box y stays within viewport
-          box.y = Math.max(box.y, window.scrollY)
-          box.y = Math.min(box.y, window.scrollY + viewportHeight)
-        }
+        box = utils.updateItemPositionByAxis({ item: box, axis: 'x', delta })
+        box = utils.updateItemPositionByAxis({ item: box, axis: 'y', delta })
         box = {
           x: Math.round(box.x),
           y: Math.round(box.y),

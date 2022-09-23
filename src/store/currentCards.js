@@ -444,26 +444,12 @@ const currentCards = {
     },
 
     move: (context, delta) => {
-      let cards = context.getters.isSelected
-      console.log(cards)
-      cards = utils.clone(cards)
       let connections = []
-      const viewportWidth = context.rootState.viewportWidth
-      const viewportHeight = context.rootState.viewportHeight
-      // prevent cards bunching up at 0
-      if (utils.objectHasKeys(prevMovePositions)) {
-        const positions = utils.denormalizeItems(prevMovePositions)
-        const isZero = {
-          x: positions.find(card => card.x === 0),
-          y: positions.find(card => card.y === 0)
-        }
-        if (isZero.x) { delta.x = Math.max(delta.x, 0) }
-        if (isZero.y) { delta.y = Math.max(delta.y, 0) }
-      }
-      // positions
+      let cards = context.getters.isSelected
+      cards = utils.clone(cards)
+      delta = utils.deltaPreventsBunchingUpAtZero({ normalizedItems: prevMovePositions, delta })
       cards = cards.map(card => {
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
-        // get card position while dragging
         let position
         if (prevMovePositions[card.id]) {
           position = prevMovePositions[card.id]
@@ -472,24 +458,8 @@ const currentCards = {
         }
         card.x = position.x
         card.y = position.y
-        // new x
-        if (card.x === undefined || card.x === null) {
-          delete card.x
-        } else {
-          card.x = Math.max(0, card.x + delta.x)
-          // card x stays within viewport
-          card.x = Math.max(card.x, window.scrollX)
-          card.x = Math.min(card.x, window.scrollX + viewportWidth)
-        }
-        // new y
-        if (card.y === undefined || card.y === null) {
-          delete card.y
-        } else {
-          card.y = Math.max(0, card.y + delta.y)
-          // card y stays within viewport
-          card.y = Math.max(card.y, window.scrollY)
-          card.y = Math.min(card.y, window.scrollY + viewportHeight)
-        }
+        card = utils.updateItemPositionByAxis({ item: card, axis: 'x', delta })
+        card = utils.updateItemPositionByAxis({ item: card, axis: 'y', delta })
         card = {
           x: Math.round(card.x),
           y: Math.round(card.y),
