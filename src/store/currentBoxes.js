@@ -195,21 +195,21 @@ export default {
       })
     },
     move: (context, delta) => {
-      // if (!endCursor || !prevCursor) { return }
-      // delta = delta || {
-      //   x: endCursor.x - prevCursor.x,
-      //   y: endCursor.y - prevCursor.y
-      // }
       let boxes = context.getters.isSelected
-      // prevent boxes bunching up at 0
-      boxes.forEach(box => {
-        if (!box) { return }
-        if (box.x === 0) { delta.x = Math.max(0, delta.x) }
-        if (box.y === 0) { delta.y = Math.max(0, delta.y) }
-      })
-      boxes = boxes.filter(box => Boolean(box))
-      // prevent boxes with null or negative positions
       boxes = utils.clone(boxes)
+      const viewportWidth = context.rootState.viewportWidth
+      const viewportHeight = context.rootState.viewportHeight
+      // prevent boxes bunching up at 0
+      if (utils.objectHasKeys(prevMovePositions)) {
+        const positions = utils.denormalizeItems(prevMovePositions)
+        const isZero = {
+          x: positions.find(box => box.x === 0),
+          y: positions.find(box => box.y === 0)
+        }
+        if (isZero.x) { delta.x = Math.max(delta.x, 0) }
+        if (isZero.y) { delta.y = Math.max(delta.y, 0) }
+      }
+      // positions
       boxes = boxes.map(box => {
         let position
         if (prevMovePositions[box.id]) {
@@ -219,23 +219,21 @@ export default {
         }
         box.x = position.x
         box.y = position.y
-        // x
+        // new x
         if (box.x === undefined || box.x === null) {
           delete box.x
         } else {
           box.x = Math.max(0, box.x + delta.x)
           // box x stays within viewport
-          const viewportWidth = context.rootState.viewportWidth
           box.x = Math.max(box.x, window.scrollX)
           box.x = Math.min(box.x, window.scrollX + viewportWidth)
         }
-        // y
+        // new y
         if (box.y === undefined || box.y === null) {
           delete box.y
         } else {
           box.y = Math.max(0, box.y + delta.y)
           // box y stays within viewport
-          const viewportHeight = context.rootState.viewportHeight
           box.y = Math.max(box.y, window.scrollY)
           box.y = Math.min(box.y, window.scrollY + viewportHeight)
         }

@@ -445,19 +445,22 @@ const currentCards = {
 
     move: (context, delta) => {
       let cards = context.getters.isSelected
-      let connections = []
+      console.log(cards)
       cards = utils.clone(cards)
+      let connections = []
       const viewportWidth = context.rootState.viewportWidth
       const viewportHeight = context.rootState.viewportHeight
       // prevent cards bunching up at 0
       if (utils.objectHasKeys(prevMovePositions)) {
         const positions = utils.denormalizeItems(prevMovePositions)
-        const isCardXZero = positions.find(card => card.x === 0)
-        const isCardYZero = positions.find(card => card.y === 0)
-        if (isCardXZero) { delta.x = Math.max(delta.x, 0) }
-        if (isCardYZero) { delta.y = Math.max(delta.y, 0) }
+        const isZero = {
+          x: positions.find(card => card.x === 0),
+          y: positions.find(card => card.y === 0)
+        }
+        if (isZero.x) { delta.x = Math.max(delta.x, 0) }
+        if (isZero.y) { delta.y = Math.max(delta.y, 0) }
       }
-      // update positions
+      // positions
       cards = cards.map(card => {
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
         // get card position while dragging
@@ -720,6 +723,7 @@ const currentCards = {
       } else {
         cardIds = [currentDraggingCardId]
       }
+      cardIds = cardIds.filter(id => Boolean(id))
       cardIds = uniq(cardIds)
       const cards = cardIds.map(id => getters.byId(id))
       return cards
