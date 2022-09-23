@@ -17,7 +17,6 @@ export default {
           clientX: position.x,
           clientY: position.y
         }
-        console.log('💖1')
         this.stopScrollTimer()
         this.initInteractions(event)
       }
@@ -27,7 +26,6 @@ export default {
           clientX: position.x,
           clientY: position.y
         }
-        console.log('💖2')
         this.stopScrollTimer()
         this.initInteractions(event)
       }

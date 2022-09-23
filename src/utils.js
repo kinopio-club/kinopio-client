@@ -858,21 +858,12 @@ export default {
     return delta
   },
   updateItemPositionByAxis ({ item, axis, delta }) {
-    let scroll = window.scrollX
-    let viewport = this.visualViewport().width
-    if (axis === 'y') {
-      scroll = window.scrollY
-      viewport = this.visualViewport().height
-    }
     if (item[axis] === undefined || item[axis] === null) {
       delete item[axis]
     } else {
       item[axis] = Math.max(0, item[axis] + delta[axis])
-      // keep item within viewport
-      item[axis] = Math.max(item[axis], scroll)
-      item[axis] = Math.min(item[axis], scroll + viewport)
+      item[axis] = Math.round(item[axis])
     }
-    item[axis] = Math.round(item[axis])
     return item
   },
 

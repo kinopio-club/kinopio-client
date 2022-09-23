@@ -326,7 +326,7 @@ export default {
       this.checkShouldShowDetails()
     },
     interact (event) {
-      currentCursor = utils.cursorPositionInSpace({ event })
+      currentCursor = utils.cursorPositionInSpaceViewport(event)
       if (this.isDraggingCard || this.isDraggingBox) {
         this.constrainCursorToAxis(event)
         this.dragItems()
