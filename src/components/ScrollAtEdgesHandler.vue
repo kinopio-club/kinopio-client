@@ -211,13 +211,10 @@ export default {
       const currentUserIsBoxSelecting = this.$store.state.currentUserIsBoxSelecting
       const isDraggingCard = this.$store.state.currentUserIsDraggingCard
       const isDraggingBox = this.$store.state.currentUserIsDraggingBox
-      const isDraggingItem = isDraggingCard || isDraggingBox
-      if (isDraggingItem) {
+      if (isDraggingCard || isDraggingBox) {
         this.$store.dispatch('history/pause')
-        if (isDraggingCard || isDraggingBox) {
-          this.$store.dispatch('currentCards/move', delta)
-          this.$store.dispatch('currentBoxes/move', delta)
-        }
+        this.$store.dispatch('currentCards/move', delta)
+        this.$store.dispatch('currentBoxes/move', delta)
       }
       if (this.isDrawingConnection) {
         currentCursorPage = { x: currentCursorPage.x + delta.x, y: currentCursorPage.y + delta.y }

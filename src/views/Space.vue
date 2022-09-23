@@ -322,8 +322,8 @@ export default {
         y: currentCursor.y - prevCursor.y
       }
       this.$store.dispatch('currentCards/move', delta)
-      this.checkShouldShowDetails()
       this.$store.dispatch('currentBoxes/move', delta)
+      this.checkShouldShowDetails()
     },
     interact (event) {
       currentCursor = utils.cursorPositionInSpace({ event })
