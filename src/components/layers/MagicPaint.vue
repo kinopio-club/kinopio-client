@@ -433,18 +433,17 @@ export default {
       return isMobile && !isPaintingLocked
     },
     selectItems (event) {
+      if (this.shouldPreventSelectionOnMobile()) { return }
       const position = utils.cursorPositionInSpace({ event })
       this.selectCards(position)
       this.selectConnections(position)
       this.selectBoxes(position)
     },
     selectConnections (position) {
-      if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
       this.selectConnectionPaths(position)
     },
     selectCards (position) {
-      if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
       const cards = this.$store.getters['currentCards/isSelectable']({ position })
       if (!cards) { return }
@@ -484,7 +483,6 @@ export default {
       })
     },
     selectBoxes (position) {
-      if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
       const boxes = this.$store.getters['currentBoxes/isNotLocked']
       boxes.forEach(box => {
