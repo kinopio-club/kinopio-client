@@ -81,7 +81,7 @@ export default {
         box.x = updated.x
         box.y = updated.y
       })
-      cache.updateSpaceCardsDebounced(state.boxes, currentSpaceId)
+      cache.updateSpaceBoxesDebounced(state.boxes, currentSpaceId)
     },
 
     // remove
