@@ -198,7 +198,7 @@ export default {
       if (!delta.x && !delta.y) { return }
       let boxes = context.getters.isSelected
       boxes = utils.clone(boxes)
-      delta = utils.deltaPreventsBunchingUpAtZero({ normalizedItems: prevMovePositions, delta })
+      delta = utils.preventBunchingUpAtZero({ normalizedItems: prevMovePositions, delta })
       boxes = boxes.map(box => {
         let position
         if (prevMovePositions[box.id]) {

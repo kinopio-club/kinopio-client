@@ -448,7 +448,7 @@ const currentCards = {
       let connections = []
       let cards = context.getters.isSelected
       cards = utils.clone(cards)
-      delta = utils.deltaPreventsBunchingUpAtZero({ normalizedItems: prevMovePositions, delta })
+      delta = utils.preventBunchingUpAtZero({ normalizedItems: prevMovePositions, delta })
       cards = cards.map(card => {
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
         let position

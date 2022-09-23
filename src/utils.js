@@ -846,7 +846,7 @@ export default {
     const data = cards.map(card => card.name)
     return join(data, '\n\n')
   },
-  deltaPreventsBunchingUpAtZero ({ normalizedItems, delta }) {
+  preventBunchingUpAtZero ({ normalizedItems, delta }) {
     if (!this.objectHasKeys(normalizedItems)) { return delta }
     const items = this.denormalizeItems(normalizedItems)
     const isZero = {
