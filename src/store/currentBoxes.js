@@ -194,12 +194,12 @@ export default {
         element.style.top = box.y + 'px'
       })
     },
-    move: (context, { endCursor, prevCursor, delta }) => {
-      if (!endCursor || !prevCursor) { return }
-      delta = delta || {
-        x: endCursor.x - prevCursor.x,
-        y: endCursor.y - prevCursor.y
-      }
+    move: (context, delta) => {
+      // if (!endCursor || !prevCursor) { return }
+      // delta = delta || {
+      //   x: endCursor.x - prevCursor.x,
+      //   y: endCursor.y - prevCursor.y
+      // }
       let boxes = context.getters.isSelected
       // prevent boxes bunching up at 0
       boxes.forEach(box => {

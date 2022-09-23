@@ -215,8 +215,8 @@ export default {
       if (isDraggingItem) {
         this.$store.dispatch('history/pause')
         if (isDraggingCard || isDraggingBox) {
-          this.$store.dispatch('currentCards/move', { endCursor: currentCursor, prevCursor, delta })
-          this.$store.dispatch('currentBoxes/move', { endCursor: currentCursor, prevCursor, delta })
+          this.$store.dispatch('currentCards/move', delta)
+          this.$store.dispatch('currentBoxes/move', delta)
         }
       }
       if (this.isDrawingConnection) {
