@@ -11,7 +11,6 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'undo'" src="@/assets/undo.svg" class="undo")
         img.icon(v-else-if="item.icon === 'redo'" src="@/assets/undo.svg" class="redo")
         img.icon(v-else-if="item.icon === 'brush-y'" src="@/assets/brush-y.svg" class="brush-y")
-        img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
       span {{item.message}}
 
   .persistent-item.success(v-if="notifyUnlockedStickyCards")

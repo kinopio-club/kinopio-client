@@ -1,6 +1,6 @@
 <template lang="pug">
 main#space.space(
-  :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady, 'hidden-by-mindmap': minimapIsVisible}"
+  :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
   @mousedown.left="initInteractions"
   @touchstart="initInteractions"
   :style="styles"
@@ -127,7 +127,6 @@ export default {
         transform: `scale(${this.spaceZoomDecimal})`
       }
     },
-    minimapIsVisible () { return this.$store.state.minimapIsVisible },
     unlockedCards () { return this.$store.getters['currentCards/isNotLocked'] },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
@@ -459,8 +458,6 @@ export default {
   pointer-events none // so that painting can receive events
   position relative // used by svg connections
   transform-origin top left
-  &.hidden-by-mindmap
-    opacity 0.4
   .card-overlap-indicator
     position absolute
     z-index calc(var(--max-z) - 70)
