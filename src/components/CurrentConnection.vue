@@ -19,8 +19,7 @@ let prevCursor, prevType
 export default {
   name: 'CurrentConnection',
   props: {
-    startCardId: String,
-    startCursor: Object
+    startCardId: String
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -70,18 +69,13 @@ export default {
       }
       prevCursor = utils.cursorPositionInSpace({ event })
     },
-    // same as Space
-    cursor () {
-      let cursor
-      if (utils.objectHasKeys(prevCursor)) {
-        cursor = prevCursor
-      } else {
-        cursor = this.startCursor
-      }
-      return cursor
-    },
     drawConnection (event) {
-      const end = this.cursor()
+      let end
+      if (event) {
+        end = utils.cursorPositionInSpace({ event })
+      } else {
+        end = utils.cursorPositionInSpace({ position: prevCursor })
+      }
       const startCardId = this.startCardId
       const start = utils.connectorCoords(startCardId)
       const path = utils.connectionPathBetweenCoords(start, end)
@@ -101,6 +95,7 @@ export default {
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
     },
     checkCurrentConnectionSuccess (event) {
+      if (!event) { return }
       const position = utils.cursorPositionInViewport(event)
       const cardElement = utils.cardElementFromPosition(position.x, position.y)
       let updates = { userId: this.$store.state.currentUser.id }

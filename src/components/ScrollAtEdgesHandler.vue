@@ -4,7 +4,7 @@
 <script>
 import utils from '@/utils.js'
 
-let prevCursor, prevCursorPage, currentCursor, scrollTimer, scrollAreaHeight, scrollAreaWidth, maxHeight, maxWidth
+let prevCursor, prevCursorPage, currentCursor, currentCursorPage, scrollTimer, scrollAreaHeight, scrollAreaWidth, maxHeight, maxWidth
 let movementDirection = {}
 
 export default {
@@ -99,10 +99,11 @@ export default {
 
     interact (event) {
       currentCursor = utils.cursorPositionInSpaceViewport(event)
+      currentCursorPage = utils.cursorPositionInPage(event)
       if (this.$store.getters.shouldScrollAtEdges(event)) {
         this.updateMovementDirection()
       }
-      prevCursorPage = utils.cursorPositionInPage(event)
+      prevCursorPage = currentCursorPage
     },
 
     // direction and speed
@@ -206,7 +207,6 @@ export default {
       return !scrolledTooFarDown
     },
     scrollBy (delta) {
-      // console.log('🍅', delta) // TODO
       if (utils.isAndroid()) { return }
       const currentUserIsBoxSelecting = this.$store.state.currentUserIsBoxSelecting
       const isDraggingCard = this.$store.state.currentUserIsDraggingCard
@@ -220,7 +220,8 @@ export default {
         }
       }
       if (this.isDrawingConnection) {
-        this.$store.commit('triggeredDrawConnectionFrame', currentCursor)
+        currentCursorPage = { x: currentCursorPage.x + delta.x, y: currentCursorPage.y + delta.y }
+        this.$store.commit('triggeredDrawConnectionFrame', currentCursorPage)
       }
       if (this.currentUserIsPainting && !currentUserIsBoxSelecting) {
         this.$store.commit('triggeredPaintFramePosition', currentCursor)
@@ -267,6 +268,7 @@ export default {
       window.cancelAnimationFrame(scrollTimer)
       scrollTimer = undefined
       prevCursor = undefined
+      currentCursorPage = undefined
       movementDirection = {}
     },
     stopInteractions () {

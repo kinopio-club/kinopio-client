@@ -1,7 +1,7 @@
 <template lang="pug">
 svg.connections
   template(v-for="startCardId in currentConnectionStartCardIds")
-    CurrentConnection(:startCardId="startCardId" :startCursor="startCursor")
+    CurrentConnection(:startCardId="startCardId")
   template(v-for="connection in remoteCurrentConnections")
     Connection(:connection="connection")
   template(v-for="connection in connections")
@@ -21,9 +21,6 @@ export default {
     Connection,
     ConnectionLabel,
     CurrentConnection
-  },
-  props: {
-    startCursor: Object
   },
   computed: {
     currentConnectionStartCardIds () { return this.$store.state.currentConnectionStartCardIds },

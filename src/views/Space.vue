@@ -6,7 +6,7 @@ main#space.space(
   :style="styles"
   :data-zoom="spaceZoomDecimal"
 )
-  Connections(:startCursor="startCursor")
+  Connections
   Boxes
   Cards
   LockedItemButtons
