@@ -462,8 +462,8 @@ const currentCards = {
         card = utils.updateItemPositionByAxis({ item: card, axis: 'x', delta })
         card = utils.updateItemPositionByAxis({ item: card, axis: 'y', delta })
         card = {
-          x: Math.round(card.x),
-          y: Math.round(card.y),
+          x: card.x,
+          y: card.y,
           z: card.z,
           id: card.id
         }

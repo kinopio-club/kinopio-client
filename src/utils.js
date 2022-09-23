@@ -872,6 +872,7 @@ export default {
       item[axis] = Math.max(item[axis], scroll)
       item[axis] = Math.min(item[axis], scroll + viewport)
     }
+    item[axis] = Math.round(item[axis])
     return item
   },
 

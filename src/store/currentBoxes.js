@@ -211,8 +211,8 @@ export default {
         box = utils.updateItemPositionByAxis({ item: box, axis: 'x', delta })
         box = utils.updateItemPositionByAxis({ item: box, axis: 'y', delta })
         box = {
-          x: Math.round(box.x),
-          y: Math.round(box.y),
+          x: box.x,
+          y: box.y,
           id: box.id
         }
         prevMovePositions[box.id] = box
