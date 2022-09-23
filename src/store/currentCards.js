@@ -655,7 +655,7 @@ const currentCards = {
       return result
     },
     isSelectable: (state, getters, rootState) => ({ position, isBox }) => {
-      const threshold = tallestCardHeight
+      const threshold = tallestCardHeight + 10
       const canBeSelectedSortedByY = getters.canBeSelectedSortedByY
       let yIndex = canBeSelectedSortedByY.yIndex
       let cards = canBeSelectedSortedByY.cards

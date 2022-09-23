@@ -82,8 +82,8 @@ export default {
       if (mutation.type === 'triggeredPaintFramePosition') {
         const position = this.$store.state.triggeredPaintFramePosition
         const event = {
-          clientX: position.x,
-          clientY: position.y
+          pageX: position.x,
+          pageY: position.y
         }
         this.createPaintingCircle(event)
       } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
