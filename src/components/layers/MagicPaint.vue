@@ -434,23 +434,6 @@ export default {
 
     // Selecting
 
-    movementDirection (prevCircle, delta) {
-      let movementDirection = {}
-      if (delta.xAbsolute > delta.yAbsolute) {
-        if (Math.sign(delta.x) === 1) {
-          movementDirection.x = 'left'
-        } else if (Math.sign(delta.x) === -1) {
-          movementDirection.x = 'right'
-        }
-      } else if (delta.xAbsolute < delta.yAbsolute) {
-        if (Math.sign(delta.y) === 1) {
-          movementDirection.y = 'up'
-        } else if (Math.sign(delta.y) === -1) {
-          movementDirection.y = 'down'
-        }
-      }
-      return movementDirection
-    },
     shouldPreventSelectionOnMobile () {
       const isMobile = utils.isMobile()
       const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
