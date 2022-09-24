@@ -138,7 +138,7 @@ export default {
   },
   computed: {
     currentUserColor () { return this.$store.state.currentUser.color },
-    userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
+    userCannotEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
     // keep canvases updated to viewport size so you can draw on newly created areas
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
@@ -439,6 +439,7 @@ export default {
     },
     selectItems (event) {
       if (this.shouldPreventSelectionOnMobile()) { return }
+      if (this.userCannotEditSpace) { return }
       let position
       if (event.cursorPositionInSpaceViewport) {
         position = utils.updatePositionWithSpaceOffset(event)
@@ -446,15 +447,10 @@ export default {
         position = utils.cursorPositionInSpace({ event })
       }
       this.selectCards(position)
-      this.selectConnections(position)
+      this.selectConnectionPaths(position)
       this.selectBoxes(position)
     },
-    selectConnections (position) {
-      if (this.userCantEditSpace) { return }
-      this.selectConnectionPaths(position)
-    },
     selectCards (position) {
-      if (this.userCantEditSpace) { return }
       const cards = this.$store.getters['currentCards/isSelectable']({ position })
       if (!cards) { return }
       cards.forEach(card => {
@@ -493,7 +489,6 @@ export default {
       })
     },
     selectBoxes (position) {
-      if (this.userCantEditSpace) { return }
       const boxes = this.$store.getters['currentBoxes/isNotLocked']
       boxes.forEach(box => {
         const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
