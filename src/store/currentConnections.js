@@ -82,11 +82,6 @@ export default {
       })
       cache.updateSpaceConnectionsDebounced(state.connections, currentSpaceId)
     },
-    updatePath: (state, { connection, path }) => {
-      state.connections[connection.id].path = path
-      state.connections[connection.id].spaceId = currentSpaceId
-      cache.updateSpaceConnectionsDebounced(state.connections, currentSpaceId)
-    },
     updateType: (state, type) => {
       const keys = Object.keys(type)
       keys.forEach(key => {
