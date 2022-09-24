@@ -5,7 +5,7 @@ article(
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :key="id"
   ref="card"
-  :class="{'is-resizing': isResizing, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
+  :class="{'is-resizing': isResizing, 'is-hidden-by-opacity': isCardHiddenByCommentFilter, 'is-painting': currentUserIsPainting}"
 )
   .card(
     @mousedown.left.prevent="startDraggingCard"
@@ -345,6 +345,7 @@ export default {
       return this.selectedColor || this.remoteSelectedColor || background
     },
     isResizing () { return this.$store.state.currentUserIsResizingCard },
+    currentUserIsPainting () { return this.$store.state.currentUserIsPainting },
     dataTags () {
       let tags = utils.tagsFromStringWithoutBrackets(this.card.name)
       if (!tags) { return }
@@ -1484,7 +1485,7 @@ export default {
     showCardDetails (event) {
       this.$store.dispatch('currentCards/afterMove')
       if (this.isLocked) { return }
-      if (this.$store.state.currentUserIsPainting) { return }
+      if (this.currentUserIsPainting) { return }
       if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
       if (this.$store.state.currentUserIsResizingBox || this.$store.state.currentUserIsDraggingBox) { return }
@@ -1873,6 +1874,8 @@ article
   position absolute
   max-width var(--card-width)
   -webkit-touch-callout none
+  &.is-painting
+    pointer-events none !important
   &.is-resizing
     *
       outline none
