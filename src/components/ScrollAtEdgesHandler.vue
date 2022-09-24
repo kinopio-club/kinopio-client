@@ -206,6 +206,7 @@ export default {
     },
     scrollBy (delta) {
       if (utils.isAndroid()) { return }
+      if (delta.x === 0 && delta.y === 0) { return }
       const currentUserIsBoxSelecting = this.$store.state.currentUserIsBoxSelecting
       const isDraggingCard = this.$store.state.currentUserIsDraggingCard
       const isDraggingBox = this.$store.state.currentUserIsDraggingBox
