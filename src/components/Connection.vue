@@ -17,7 +17,7 @@ path.connection-path(
   @touchend.stop="showConnectionDetails"
   @keyup.stop.backspace="removeConnection"
   @keyup.stop.enter="showConnectionDetailsOnKeyup"
-  :class="{active: isSelected || detailsIsVisible || remoteDetailsIsVisible || isRemoteSelected || isCurrentCardConnection, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline, 'is-hidden-by-opacity': isHiddenByCommentFilter }"
+  :class="{active: isSelected || detailsIsVisible || remoteDetailsIsVisible || isRemoteSelected || isCurrentCardConnection, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline, 'is-hidden-by-opacity': isHiddenByCommentFilter, 'is-painting': currentUserIsPainting }"
   ref="connection"
   tabindex="0"
   @dragover.prevent
@@ -71,6 +71,7 @@ export default {
     }
   },
   computed: {
+    currentUserIsPainting () { return this.$store.state.currentUserIsPainting },
     cards () {
       const cards = utils.clone(this.$store.getters['currentCards/all'])
       const startCard = cards.find(card => card.id === this.startCardId)
@@ -350,4 +351,6 @@ export default {
     stroke-width 7
   &.hide-connection-outline
     outline none
+  &.is-painting
+    pointer-events none
 </style>
