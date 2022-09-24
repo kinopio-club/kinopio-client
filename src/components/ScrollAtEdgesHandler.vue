@@ -214,12 +214,20 @@ export default {
         this.$store.dispatch('currentCards/move', delta)
         this.$store.dispatch('currentBoxes/move', delta)
       }
+      currentCursorPage = { x: currentCursorPage.x + delta.x, y: currentCursorPage.y + delta.y }
+      const event = {
+        x: this.cursorPosition.x,
+        y: this.cursorPosition.y,
+        clientX: this.cursorPosition.x,
+        clientY: this.cursorPosition.y,
+        pageX: currentCursorPage.x,
+        pageY: currentCursorPage.y
+      }
       if (this.isDrawingConnection) {
-        currentCursorPage = { x: currentCursorPage.x + delta.x, y: currentCursorPage.y + delta.y }
-        this.$store.commit('triggeredDrawConnectionFrame', currentCursorPage)
+        this.$store.commit('triggeredDrawConnectionFrame', event)
       }
       if (this.currentUserIsPainting && !currentUserIsBoxSelecting) {
-        this.$store.commit('triggeredPaintFramePosition', currentCursor)
+        this.$store.commit('triggeredPaintFramePosition', event)
       }
       window.scrollBy({ left: delta.x, top: delta.y })
       prevCursor = currentCursor

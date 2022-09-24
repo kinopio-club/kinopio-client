@@ -80,12 +80,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggeredPaintFramePosition') {
-        const position = this.$store.state.triggeredPaintFramePosition
-        const event = {
-          x: position.x,
-          y: position.y,
-          cursorPositionInSpaceViewport: true
-        }
+        const event = this.$store.state.triggeredPaintFramePosition
         this.createPaintingCircle(event)
       } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
         this.updatePositionOffsetByPinchZoom()
@@ -351,11 +346,7 @@ export default {
       const currentUserIsPaintingLocked = this.$store.state.currentUserIsPaintingLocked
       if (event.touches && !currentUserIsPaintingLocked) { return }
       let color = this.$store.state.currentUser.color
-      if (event.cursorPositionInSpaceViewport) {
-        this.currentCursor = event
-      } else {
-        this.currentCursor = utils.cursorPositionInSpaceViewport(event)
-      }
+      this.currentCursor = utils.cursorPositionInSpaceViewport(event)
       let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
       this.selectItems(event)
       paintingCircles.push(circle)
@@ -440,12 +431,7 @@ export default {
     selectItems (event) {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCannotEditSpace) { return }
-      let position
-      if (event.cursorPositionInSpaceViewport) {
-        position = utils.updatePositionWithSpaceOffset(event)
-      } else {
-        position = utils.cursorPositionInSpace({ event })
-      }
+      const position = utils.cursorPositionInSpace({ event })
       this.selectCards(position)
       this.selectConnectionPaths(position)
       this.selectBoxes(position)
