@@ -432,9 +432,10 @@ export default {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCannotEditSpace) { return }
       const position = utils.cursorPositionInSpace({ event })
+      const viewportPosition = utils.cursorPositionInSpaceViewport(event)
       this.selectCards(position)
       this.selectConnectionPaths(position)
-      this.selectBoxes(position)
+      this.selectBoxes(viewportPosition)
     },
     selectCards (position) {
       const cards = this.$store.getters['currentCards/isSelectable']({ position })
@@ -487,7 +488,6 @@ export default {
           width: rect.width,
           height: rect.height
         }
-
         const x = {
           value: position.x,
           min: box.x - circleSelectionRadius,
