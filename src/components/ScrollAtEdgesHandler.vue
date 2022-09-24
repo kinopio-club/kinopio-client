@@ -206,7 +206,6 @@ export default {
     },
     scrollBy (delta) {
       if (utils.isAndroid()) { return }
-      if (delta.x === 0 && delta.y === 0) { return }
       const currentUserIsBoxSelecting = this.$store.state.currentUserIsBoxSelecting
       const isDraggingCard = this.$store.state.currentUserIsDraggingCard
       const isDraggingBox = this.$store.state.currentUserIsDraggingBox
@@ -217,10 +216,10 @@ export default {
       }
       currentCursorPage = { x: currentCursorPage.x + delta.x, y: currentCursorPage.y + delta.y }
       const event = {
-        x: this.cursorPosition.x,
-        y: this.cursorPosition.y,
-        clientX: this.cursorPosition.x,
-        clientY: this.cursorPosition.y,
+        x: currentCursor.x,
+        y: currentCursor.y,
+        clientX: currentCursor.x,
+        clientY: currentCursor.y,
         pageX: currentCursorPage.x,
         pageY: currentCursorPage.y
       }
