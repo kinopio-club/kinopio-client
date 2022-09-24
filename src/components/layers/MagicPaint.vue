@@ -82,8 +82,9 @@ export default {
       if (mutation.type === 'triggeredPaintFramePosition') {
         const position = this.$store.state.triggeredPaintFramePosition
         const event = {
-          pageX: position.x,
-          pageY: position.y
+          x: position.x,
+          y: position.y,
+          cursorPositionInSpaceViewport: true
         }
         this.createPaintingCircle(event)
       } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
@@ -266,7 +267,7 @@ export default {
       if (this.$store.state.isAddPage) { return }
       if (this.shouldCancel(event)) { return }
       startCursor = startCursor || {}
-      const endCursor = utils.cursorPositionInViewport(event)
+      const endCursor = utils.cursorPositionInSpaceViewport(event)
       const shouldAddCard = this.$store.state.shouldAddCard
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
@@ -350,7 +351,11 @@ export default {
       const currentUserIsPaintingLocked = this.$store.state.currentUserIsPaintingLocked
       if (event.touches && !currentUserIsPaintingLocked) { return }
       let color = this.$store.state.currentUser.color
-      this.currentCursor = utils.cursorPositionInViewport(event)
+      if (event.cursorPositionInSpaceViewport) {
+        this.currentCursor = event
+      } else {
+        this.currentCursor = utils.cursorPositionInSpaceViewport(event)
+      }
       let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
       this.selectItems(event)
       paintingCircles.push(circle)
@@ -359,8 +364,8 @@ export default {
     startPainting (event) {
       if (this.isPanning) { return }
       if (this.isBoxSelecting) { return }
-      startCursor = utils.cursorPositionInViewport(event)
-      this.currentCursor = utils.cursorPositionInViewport(event)
+      startCursor = utils.cursorPositionInSpaceViewport(event)
+      this.currentCursor = startCursor
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
       if (utils.isMultiTouch(event)) { return }
       this.startLocking()
@@ -434,7 +439,12 @@ export default {
     },
     selectItems (event) {
       if (this.shouldPreventSelectionOnMobile()) { return }
-      const position = utils.cursorPositionInSpace({ event })
+      let position
+      if (event.cursorPositionInSpaceViewport) {
+        position = utils.cursorPositionInSpace({ position: event })
+      } else {
+        position = utils.cursorPositionInSpace({ event })
+      }
       this.selectCards(position)
       this.selectConnections(position)
       this.selectBoxes(position)
@@ -677,7 +687,7 @@ export default {
     checkIfUploadIsDraggedOver (event) {
       const uploadIsFiles = event.dataTransfer.types.find(type => type === 'Files')
       if (!uploadIsFiles) { return }
-      this.currentCursor = utils.cursorPositionInViewport(event)
+      this.currentCursor = utils.cursorPositionInSpaceViewport(event)
       this.uploadIsDraggedOver = true
     },
     removeUploadIsDraggedOver () {
