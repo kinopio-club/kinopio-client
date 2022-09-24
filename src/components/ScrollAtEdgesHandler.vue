@@ -4,7 +4,7 @@
 <script>
 import utils from '@/utils.js'
 
-let prevCursor, prevCursorPage, currentCursor, currentCursorPage, scrollTimer, scrollAreaHeight, scrollAreaWidth, maxHeight, maxWidth
+let prevCursor, prevCursorPage, currentCursor, currentCursorPage, currentEvent, scrollTimer, scrollAreaHeight, scrollAreaWidth, maxHeight, maxWidth
 let movementDirection = {}
 
 export default {
@@ -70,6 +70,7 @@ export default {
       }
       prevCursor = position
       currentCursor = position
+      currentEvent = event
     },
     initMeasurements () {
       scrollAreaHeight = (this.viewportHeight / 8)
@@ -102,6 +103,7 @@ export default {
         this.updateMovementDirection()
       }
       prevCursorPage = currentCursorPage
+      currentEvent = event
     },
 
     // direction and speed
@@ -215,19 +217,11 @@ export default {
         this.$store.dispatch('currentBoxes/move', delta)
       }
       currentCursorPage = { x: currentCursorPage.x + delta.x, y: currentCursorPage.y + delta.y }
-      const event = {
-        x: currentCursor.x,
-        y: currentCursor.y,
-        clientX: currentCursor.x,
-        clientY: currentCursor.y,
-        pageX: currentCursorPage.x,
-        pageY: currentCursorPage.y
-      }
       if (this.isDrawingConnection) {
-        this.$store.commit('triggeredDrawConnectionFrame', event)
+        this.$store.commit('triggeredDrawConnectionFrame', currentEvent)
       }
       if (this.currentUserIsPainting && !currentUserIsBoxSelecting) {
-        this.$store.commit('triggeredPaintFramePosition', event)
+        this.$store.commit('triggeredPaintFramePosition', currentEvent)
       }
       window.scrollBy({ left: delta.x, top: delta.y })
       prevCursor = currentCursor
