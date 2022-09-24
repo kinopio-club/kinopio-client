@@ -432,10 +432,9 @@ export default {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCannotEditSpace) { return }
       const position = utils.cursorPositionInSpace({ event })
-      const viewportPosition = utils.cursorPositionInSpaceViewport(event)
       this.selectCards(position)
       this.selectConnectionPaths(position)
-      this.selectBoxes(viewportPosition)
+      this.selectBoxes(position)
     },
     selectCards (position) {
       const cards = this.$store.getters['currentCards/isSelectable']({ position })
@@ -483,8 +482,8 @@ export default {
         box = {
           id: box.id,
           name: box.name,
-          x: rect.x,
-          y: rect.y,
+          x: box.x,
+          y: box.y,
           width: rect.width,
           height: rect.height
         }
