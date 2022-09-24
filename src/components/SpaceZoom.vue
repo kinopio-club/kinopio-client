@@ -9,6 +9,7 @@
     :initialValue="initialValue"
     :animateJiggleRight="animateJiggleRight"
     :animateJiggleLeft="animateJiggleLeft"
+    minLabel="(Z)"
     @removeAnimations="removeAnimations"
     @pointerdown="closeAllDialogs"
   )
