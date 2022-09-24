@@ -441,7 +441,7 @@ export default {
       if (this.shouldPreventSelectionOnMobile()) { return }
       let position
       if (event.cursorPositionInSpaceViewport) {
-        position = utils.cursorPositionInSpace({ position: event })
+        position = utils.updatePositionWithSpaceOffset(event)
       } else {
         position = utils.cursorPositionInSpace({ event })
       }
