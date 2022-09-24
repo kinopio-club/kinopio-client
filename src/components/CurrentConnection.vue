@@ -14,7 +14,7 @@ import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
 
-let prevCursor, prevType
+let prevType
 
 export default {
   name: 'CurrentConnection',
@@ -24,8 +24,8 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggeredDrawConnectionFrame') {
-        prevCursor = this.$store.state.triggeredDrawConnectionFrame
-        this.drawConnection()
+        const event = this.$store.state.triggeredDrawConnectionFrame
+        this.drawConnection(event)
       }
     })
   },
@@ -67,15 +67,9 @@ export default {
       if (this.isDrawingConnection) {
         this.drawConnection(event)
       }
-      prevCursor = utils.cursorPositionInSpace({ event })
     },
     drawConnection (event) {
-      let end
-      if (event) {
-        end = utils.cursorPositionInSpace({ event })
-      } else {
-        end = utils.cursorPositionInSpace({ position: prevCursor })
-      }
+      const end = utils.cursorPositionInSpace({ event })
       const startCardId = this.startCardId
       const start = utils.connectorCoords(startCardId)
       const path = utils.connectionPathBetweenCoords(start, end)
@@ -165,7 +159,6 @@ export default {
       }
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.currentConnectionPath = undefined
-      prevCursor = undefined
     }
   }
 }
