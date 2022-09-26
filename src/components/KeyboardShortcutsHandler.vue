@@ -636,23 +636,28 @@ export default {
     async handleCopyCutEvent (event) {
       const isSpaceScope = checkIsSpaceScope(event)
       if (!isSpaceScope) { return }
+      this.$store.commit('clearNotificationsWithPosition')
+      const position = currentCursorPosition || prevCursorPosition
       event.preventDefault()
       try {
         await this.writeSelectedToClipboard()
         if (event.type === 'cut') { this.remove() }
-        this.$store.commit('addNotification', { message: utils.pastTense(event.type), type: 'success', icon: 'cut' })
+        this.$store.commit('addNotificationWithPosition', { message: utils.pastTense(event.type), position, type: 'success', layer: 'app', icon: 'cut' })
       } catch (error) {
         console.warn('🚑 handleCopyCutEvent', error)
         const message = error.message || `Could not ${event.type}`
-        this.$store.commit('addNotification', { message, type: 'danger', icon: 'cut' })
+        this.$store.commit('addNotificationWithPosition', { message, position, type: 'danger', layer: 'app', icon: 'cut' })
       }
     },
 
     // Paste
 
     async getClipboardData () {
+      this.$store.commit('clearNotificationsWithPosition')
+      const position = currentCursorPosition || prevCursorPosition
       try {
         let clipboardItems
+        // TODO add fallback for firefox
         if (!navigator.clipboard.read) {
           const message = 'Pasting cards is not supported by this browser'
           this.$store.commit('addNotification', { message, icon: 'cut', type: 'danger' })
@@ -664,8 +669,8 @@ export default {
           const hasHTML = item.types.includes('text/html')
           const hasText = item.types.includes('text/plain')
           if (hasImage) {
-            // TODO return { blob }
-            // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read
+          // TODO return { blob }
+          // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read
           // kinopio data, or html text
           } else if (hasHTML) {
             const index = item.types.indexOf('text/html')
@@ -675,10 +680,12 @@ export default {
             text = utils.innerHTMLText(text)
             const isJSON = utils.isStringJSON(text)
             if (!isJSON) {
+              this.$store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
               return { text }
             }
             const data = JSON.parse(text)
             if (data.isKinopioData) {
+              this.$store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
               return data
             }
           // plain text
@@ -688,12 +695,13 @@ export default {
             const blob = await item.getType(type)
             let text = await blob.text()
             text = utils.trim(text)
+            this.$store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
             return { text }
           }
         }
       } catch (error) {
         console.error('🚑 getClipboardData', error)
-        this.$store.commit('addNotification', { message: `Could not paste`, type: 'danger', icon: 'cut' })
+        this.$store.commit('addNotificationWithPosition', { message: `Could not paste`, position, type: 'danger', layer: 'app', icon: 'cut' })
       }
     },
 
