@@ -636,6 +636,7 @@ export default {
     async handleCopyCutEvent (event) {
       const isSpaceScope = checkIsSpaceScope(event)
       if (!isSpaceScope) { return }
+      this.$store.commit('clearNotificationsWithPosition')
       const position = currentCursorPosition || prevCursorPosition
       event.preventDefault()
       try {
@@ -652,9 +653,11 @@ export default {
     // Paste
 
     async getClipboardData () {
+      this.$store.commit('clearNotificationsWithPosition')
       const position = currentCursorPosition || prevCursorPosition
       try {
         let clipboardItems
+        // TODO add fallback for firefox
         if (!navigator.clipboard.read) {
           const message = 'Pasting cards is not supported by this browser'
           this.$store.commit('addNotification', { message, icon: 'cut', type: 'danger' })
