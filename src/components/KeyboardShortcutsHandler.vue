@@ -639,12 +639,12 @@ export default {
       event.preventDefault()
       try {
         await this.writeSelectedToClipboard()
-        console.log(event.type)
         if (event.type === 'cut') { this.remove() }
         this.$store.commit('addNotification', { message: utils.pastTense(event.type), type: 'success', icon: 'cut' })
       } catch (error) {
         console.warn('🚑 handleCopyCutEvent', error)
-        this.$store.commit('addNotification', { message: `Could not ${event.type}`, type: 'danger', icon: 'cut' })
+        const message = error.message || `Could not ${event.type}`
+        this.$store.commit('addNotification', { message, type: 'danger', icon: 'cut' })
       }
     },
 
@@ -868,6 +868,9 @@ export default {
         return this.$store.getters['currentConnections/typeByConnection'](connection)
       })
       const boxes = this.$store.getters['currentBoxes/isSelected']
+      if (!cards.length && !connections.length && !boxes.length) {
+        throw { message: 'No content selected' }
+      }
       let data = { isKinopioData: true, cards, connections, connectionTypes, boxes }
       data = JSON.stringify(data)
       data = `<kinopio>${data}</kinopio>`
