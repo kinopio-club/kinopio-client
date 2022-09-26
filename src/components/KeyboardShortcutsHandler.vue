@@ -806,7 +806,7 @@ export default {
       this.$store.dispatch('history/add', { cards, useSnapshot: true })
       // update page size
       this.$nextTick(() => {
-        this.afterPaste({ cards })
+        this.afterPaste({ cards, boxes: [] })
       })
     },
 
