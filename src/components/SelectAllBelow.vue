@@ -82,6 +82,7 @@ export default {
     }, 10, { leading: true }),
     selectAllBelow (event) {
       let position = utils.cursorPositionInPage(event)
+      position = utils.updatePositionWithSpaceOffset(position)
       this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
       this.$store.commit('triggerSelectAllItemsBelowCursor', position)
     }
