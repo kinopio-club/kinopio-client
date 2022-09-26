@@ -83,6 +83,7 @@ export default {
       if (!filterCommentsIsActive) { return }
       const startCard = this.cards.startCard
       const endCard = this.cards.endCard
+      if (!startCard || !endCard) { return }
       const startCardIsComment = startCard.isComment || utils.isNameComment(startCard.name)
       const endCardIsComment = startCard.isComment || utils.isNameComment(endCard.name)
       return startCardIsComment || endCardIsComment
