@@ -636,21 +636,23 @@ export default {
     async handleCopyCutEvent (event) {
       const isSpaceScope = checkIsSpaceScope(event)
       if (!isSpaceScope) { return }
+      const position = currentCursorPosition || prevCursorPosition
       event.preventDefault()
       try {
         await this.writeSelectedToClipboard()
         if (event.type === 'cut') { this.remove() }
-        this.$store.commit('addNotification', { message: utils.pastTense(event.type), type: 'success', icon: 'cut' })
+        this.$store.commit('addNotificationWithPosition', { message: utils.pastTense(event.type), position, type: 'success', layer: 'app', icon: 'cut' })
       } catch (error) {
         console.warn('🚑 handleCopyCutEvent', error)
         const message = error.message || `Could not ${event.type}`
-        this.$store.commit('addNotification', { message, type: 'danger', icon: 'cut' })
+        this.$store.commit('addNotificationWithPosition', { message, position, type: 'danger', layer: 'app', icon: 'cut' })
       }
     },
 
     // Paste
 
     async getClipboardData () {
+      const position = currentCursorPosition || prevCursorPosition
       try {
         let clipboardItems
         if (!navigator.clipboard.read) {
@@ -691,9 +693,10 @@ export default {
             return { text }
           }
         }
+        this.$store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
       } catch (error) {
         console.error('🚑 getClipboardData', error)
-        this.$store.commit('addNotification', { message: `Could not paste`, type: 'danger', icon: 'cut' })
+        this.$store.commit('addNotificationWithPosition', { message: `Could not paste`, position, type: 'danger', layer: 'app', icon: 'cut' })
       }
     },
 
