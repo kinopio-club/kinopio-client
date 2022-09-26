@@ -447,8 +447,13 @@ const currentCards = {
       if (!delta.x && !delta.y) { return }
       let connections = []
       let cards = context.getters.isSelected
+      const zoom = context.rootGetters.spaceCounterZoomDecimal
       cards = utils.clone(cards)
       delta = utils.preventBunchingUpAtZero({ normalizedItems: prevMovePositions, delta })
+      delta = {
+        x: delta.x * zoom,
+        y: delta.y * zoom
+      }
       cards = cards.map(card => {
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
         let position

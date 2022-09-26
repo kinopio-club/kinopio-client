@@ -197,8 +197,13 @@ export default {
     move: (context, delta) => {
       if (!delta.x && !delta.y) { return }
       let boxes = context.getters.isSelected
+      const zoom = context.rootGetters.spaceCounterZoomDecimal
       boxes = utils.clone(boxes)
       delta = utils.preventBunchingUpAtZero({ normalizedItems: prevMovePositions, delta })
+      delta = {
+        x: delta.x * zoom,
+        y: delta.y * zoom
+      }
       boxes = boxes.map(box => {
         let position
         if (prevMovePositions[box.id]) {
