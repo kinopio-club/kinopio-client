@@ -66,7 +66,7 @@ export default {
 
     initCursors ({ event, position }) {
       if (event) {
-        position = utils.cursorPositionInSpaceViewport(event)
+        position = utils.cursorPositionInViewport(event)
       }
       prevCursor = position
       currentCursor = position
@@ -97,7 +97,7 @@ export default {
     // interact
 
     interact (event) {
-      currentCursor = utils.cursorPositionInSpaceViewport(event)
+      currentCursor = utils.cursorPositionInViewport(event)
       currentCursorPage = utils.cursorPositionInPage(event)
       if (this.$store.getters.shouldScrollAtEdges(event)) {
         this.updateMovementDirection()
