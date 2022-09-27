@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.offscreen-markers(v-if="isVisible" :style="styles" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
+aside.offscreen-markers(v-if="isVisible" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
@@ -14,10 +14,6 @@ aside.offscreen-markers(v-if="isVisible" :style="styles" :class="{'fade-out': is
 <script>
 import utils from '@/utils.js'
 
-import debounce from 'lodash-es/debounce'
-
-const offscreenMarkers = new Worker('/web-workers/offscreen-markers.js')
-
 const updatePositionDuration = 10
 const fadeOutDuration = 10
 const hiddenDuration = 10
@@ -27,30 +23,27 @@ export default {
   name: 'OffscreenMarkers',
   mounted () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
-        this.updatePosition()
+      if (mutation.type === 'triggerUpdateOffscreenMarkers') {
+        this.updateOffscreenMarkers()
       } else if (mutation.type === 'isLoadingSpace') {
-        this.updatePosition()
+        this.updateOffscreenMarkers()
       } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
       }
     })
-    window.addEventListener('scroll', this.debouncedUpdateOffscreenMarkers)
-    offscreenMarkers.addEventListener('message', event => {
-      this.offscreenCardsByDirection = event.data
-    })
+    window.addEventListener('scroll', this.updateOffscreenMarkers)
     window.addEventListener('scroll', this.handleTouchInteractions)
     window.addEventListener('gesturestart', this.handleTouchInteractions)
     window.addEventListener('gesturechange', this.handleTouchInteractions)
     window.addEventListener('touchend', this.updatePosition)
-    visualViewport.addEventListener('resize', this.debouncedUpdateOffscreenMarkers)
+    visualViewport.addEventListener('resize', this.updateOffscreenMarkers)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.handleTouchInteractions)
     window.removeEventListener('gesturestart', this.handleTouchInteractions)
     window.removeEventListener('gesturechange', this.handleTouchInteractions)
     window.removeEventListener('touchend', this.updatePosition)
-    visualViewport.removeEventListener('resize', this.debouncedUpdateOffscreenMarkers)
+    visualViewport.removeEventListener('resize', this.updateOffscreenMarkers)
   },
   data () {
     return {
@@ -82,19 +75,6 @@ export default {
     },
     dialogsVisible () {
       return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleSelectedActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
-    },
-    styles () {
-      const viewport = this.viewport
-      const pinchZoomScale = viewport.scale
-      const counterPinchZoomScale = utils.roundFloat(1 / pinchZoomScale)
-      const pinchZoomOffsetLeft = viewport.offsetLeft
-      const pinchZoomOffsetTop = viewport.offsetTop
-      let styles = {}
-      if (pinchZoomScale > 1) {
-        styles.transform = `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${counterPinchZoomScale})`
-        styles['transform-origin'] = 'left top'
-      }
-      return styles
     },
     isAddPage () { return this.$store.state.isAddPage },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
@@ -217,16 +197,68 @@ export default {
         this.cancelUpdatePosition()
       }
     },
-    updateOffscreenMarkers: debounce(function () {
-      this.debouncedUpdateOffscreenMarkers()
-    }, 20),
-    debouncedUpdateOffscreenMarkers () {
-      let cards = this.$store.getters['currentCards/all']
-      cards = utils.clone(cards)
+
+    // calculate offscreen markers
+
+    zoomedViewport () {
       const viewport = utils.visualViewport()
-      const zoom = this.spaceZoomDecimal
-      offscreenMarkers.postMessage({ cards, viewport, zoom })
-      this.viewport = viewport
+      const zoom = this.$store.getters.spaceCounterZoomDecimal || 1
+      const space = document.getElementById('space')
+      if (!space) { return }
+      const spaceRect = space.getBoundingClientRect()
+      const zoomedViewport = {
+        height: Math.round(viewport.height * zoom),
+        width: Math.round(viewport.width * zoom),
+        scrollX: -Math.round(spaceRect.x * zoom),
+        scrollY: -Math.round(spaceRect.y * zoom)
+      }
+      return zoomedViewport
+    },
+    normalizeCardsByDirection () {
+      const viewport = this.zoomedViewport()
+      const cards = this.$store.getters['currentCards/all']
+      let normalizedCards = {
+        top: [],
+        left: [],
+        right: [],
+        bottom: [],
+        topleft: [],
+        topright: [],
+        bottomleft: [],
+        bottomright: []
+      }
+      cards.forEach(card => {
+        //           │        │  top-right
+        //           │  top   │
+        // ──────────┼────────┼───────────
+        //           │        │
+        //    left   │Viewport│  right
+        //           │        │
+        // ──────────┼────────┼───────────
+        //           │ bottom │
+        //           │        │
+        let x = ''
+        let y = ''
+        if (card.y > (viewport.height + viewport.scrollY)) {
+          y = 'bottom'
+        } else if (card.y < viewport.scrollY) {
+          y = 'top'
+        }
+        if (card.x > (viewport.width + viewport.scrollX)) {
+          x = 'right'
+        } else if (card.x < viewport.scrollX) {
+          x = 'left'
+        }
+        const direction = y + x
+        if (direction) {
+          normalizedCards[direction].push(card)
+        }
+      })
+      return normalizedCards
+    },
+    updateOffscreenMarkers () {
+      const cards = this.normalizeCardsByDirection()
+      this.offscreenCardsByDirection = cards
     }
   },
   watch: {

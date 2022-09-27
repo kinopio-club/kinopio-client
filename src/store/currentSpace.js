@@ -684,6 +684,7 @@ const currentSpace = {
         context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
         context.commit('triggerUpdateCardOverlaps', null, { root: true })
+        context.commit('triggerUpdateOffscreenMarkers', null, { root: true })
         nextTick(() => {
           context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
           context.dispatch('checkIfShouldPauseConnectionDirections')

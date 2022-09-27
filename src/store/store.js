@@ -435,6 +435,7 @@ const store = createStore({
     triggerUpdateWindowHistory: (state, options) => {},
     triggerAddCard: () => {},
     triggerUpdateCardOverlaps: () => {},
+    triggerUpdateOffscreenMarkers: () => {},
     triggerCardDetailsCloseDialogs: () => {},
     triggerSpaceDetailsCloseDialogs: () => {},
     triggerTemplatesIsVisible: () => {},

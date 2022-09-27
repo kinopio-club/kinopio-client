@@ -266,15 +266,15 @@ export default {
     const app = document.getElementById('app')
     const appRect = app.getBoundingClientRect()
     return {
-      x: spaceRect.x - appRect.x,
-      y: spaceRect.y - appRect.y
+      x: Math.round(spaceRect.x - appRect.x),
+      y: Math.round(spaceRect.y - appRect.y)
     }
   },
   updatePositionWithSpaceOffset (position) {
     const spaceOffset = this.outsideSpaceOffset()
     return {
-      x: Math.round(position.x - spaceOffset.x),
-      y: Math.round(position.y - spaceOffset.y)
+      x: position.x - spaceOffset.x,
+      y: position.y - spaceOffset.y
     }
   },
   isPositionOutsideOfSpace (position) {
