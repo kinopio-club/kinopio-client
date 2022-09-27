@@ -272,6 +272,8 @@ export default {
           this.updateMediaUrls()
           this.updateUrlPreview()
         }
+      } else if (mutation.type === 'triggerToggleZoomOut') {
+        this.unstickToCursor()
       }
     })
   },

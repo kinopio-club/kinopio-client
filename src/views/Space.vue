@@ -1,10 +1,11 @@
 <template lang="pug">
 main#space.space(
-  :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
+  :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady, 'is-zooming': isZooming}"
   @mousedown.left="initInteractions"
   @touchstart="initInteractions"
   :style="styles"
   :data-zoom="spaceZoomDecimal"
+  @transitionend="removeIsZooming"
 )
   Connections(:startCursor="startCursor")
   Boxes
@@ -62,6 +63,14 @@ export default {
     LockedItemButtons,
     Connections
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      const { type, payload } = mutation // eslint-disable-line no-unused-vars
+      if (type === 'triggerToggleZoomOut') {
+        this.isZooming = true
+      }
+    })
+  },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')
     this.$store.dispatch('currentSpace/init')
@@ -115,7 +124,8 @@ export default {
   },
   data () {
     return {
-      startCursor: {}
+      startCursor: {},
+      isZooming: false
     }
   },
   computed: {
@@ -154,6 +164,9 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
+    removeIsZooming () {
+      this.isZooming = false
+    },
     correctCardConnectionPaths () {
       const space = utils.clone(this.$store.state.currentSpace)
       const user = utils.clone(this.$store.state.currentUser)
@@ -454,10 +467,12 @@ export default {
 <style lang="stylus">
 .space
   width 100%
-  height 100vh
+  height 100%
   pointer-events none // so that painting can receive events
   position relative // used by svg connections
   transform-origin top left
+  &.is-zooming
+    transition transform 0.1s linear // 0.2?
   .card-overlap-indicator
     position absolute
     z-index calc(var(--max-z) - 70)

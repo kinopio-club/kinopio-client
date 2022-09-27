@@ -88,7 +88,7 @@ export default {
       } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
         this.remove()
       // Escape
-      } else if (key === 'Escape' || (key === 'z' && isSpaceScope)) {
+      } else if (key === 'Escape') {
         this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
         this.$store.commit('currentUserToolbar', 'card')
       } else if (key === '1' && isSpaceScope) {
@@ -189,7 +189,7 @@ export default {
         // Zoom Out to Min
       } else if (key === 'z' && isSpaceScope) {
         event.preventDefault()
-        // TODO toggle min / default zoom
+        this.toggleZoomOut()
       // Pan
       } else if (key === ' ' && isSpaceScope) {
         event.preventDefault()
@@ -866,8 +866,13 @@ export default {
       cards.forEach(card => {
         this.$store.dispatch('currentCards/update', { id: card.id, isLocked: shouldLock })
       })
-    }
+    },
 
+    // Zoom
+
+    toggleZoomOut () {
+      this.$store.commit('triggerToggleZoomOut')
+    }
   }
 }
 </script>
