@@ -251,6 +251,7 @@ export default {
       this.items.forEach(item => {
         if (item.isCard) {
           this.updateCard(item, { isLocked })
+          this.updateCardPaths(item)
         }
         if (item.isBox) {
           this.updateBox(item, { isLocked })
@@ -313,6 +314,11 @@ export default {
         card[key] = updates[key]
       })
       this.$store.dispatch('currentCards/update', card)
+    },
+    updateCardPaths (card) {
+      this.$nextTick(() => {
+        this.$store.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true })
+      })
     },
     toggleFramePickerIsVisible () {
       const isVisible = this.framePickerIsVisible

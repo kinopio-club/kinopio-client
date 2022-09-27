@@ -53,6 +53,9 @@ export default {
         id: this.card.id,
         isLocked: false
       })
+      this.$nextTick(() => {
+        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
+      })
     }
   }
 }
