@@ -25,7 +25,7 @@ const currentCards = {
   namespaced: true,
   state: {
     ids: [],
-    cards: {}, // {id, {card}}
+    cards: {}, // {id, {card}} normalized
     removedCards: [] // denormalized
   },
   mutations: {
@@ -659,7 +659,7 @@ const currentCards = {
       }
       return result
     },
-    isSelectable: (state, getters, rootState) => ({ position, isBox }) => {
+    isSelectable: (state, getters) => ({ position, isBox }) => {
       const threshold = tallestCardHeight + 10
       const canBeSelectedSortedByY = getters.canBeSelectedSortedByY
       let yIndex = canBeSelectedSortedByY.yIndex
