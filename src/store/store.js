@@ -427,6 +427,7 @@ const store = createStore({
     triggerSpaceZoomReset: () => {},
     triggerSpaceZoomOut: (state, options) => {},
     triggerSpaceZoomIn: (state, options) => {},
+    triggerToggleZoomOut: () => {},
     triggerUnloadPage: () => {},
     triggerShowNextSearchCard: () => {},
     triggerShowPreviousSearchCard: () => {},

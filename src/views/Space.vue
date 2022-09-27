@@ -2,7 +2,9 @@
 main#space.space(
   @touchstart="initInteractions"
   :style="styles"
+  :class="{ 'is-zooming': isZooming }"
   :data-zoom="spaceZoomDecimal"
+  @transitionend="removeIsZooming"
 )
   Connections
   Boxes
@@ -60,6 +62,14 @@ export default {
     Connections,
     NotificationsWithPosition
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      const { type, payload } = mutation // eslint-disable-line no-unused-vars
+      if (type === 'triggerToggleZoomOut') {
+        this.isZooming = true
+      }
+    })
+  },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')
     this.$store.dispatch('currentSpace/init')
@@ -113,17 +123,14 @@ export default {
   },
   data () {
     return {
-      startCursor: {}
+      startCursor: {},
+      isZooming: false
     }
   },
   computed: {
     styles () {
       const origin = this.$store.state.prevZoomOrigin
-      const width = Math.round(this.pageWidth * this.spaceCounterZoomDecimal)
-      const height = Math.round(this.pageHeight * this.spaceCounterZoomDecimal)
       return {
-        width: `${width}px`,
-        height: `${height}px`,
         transform: `scale(${this.spaceZoomDecimal})`,
         transformOrigin: `${origin.x}px ${origin.y}px`
       }
@@ -156,6 +163,9 @@ export default {
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
   },
   methods: {
+    removeIsZooming () {
+      this.isZooming = false
+    },
     correctCardConnectionPaths () {
       const space = utils.clone(this.$store.state.currentSpace)
       const user = utils.clone(this.$store.state.currentUser)
@@ -456,11 +466,13 @@ export default {
 <style lang="stylus">
 .space
   width 100%
-  height 100vh
+  height 100%
   pointer-events none // so that painting can receive events
   position relative // used by svg connections
   transform-origin top left
   will-change transform // perf optimization https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
+  &.is-zooming
+    transition transform 0.1s linear // 0.2?
   .card-overlap-indicator
     position absolute
     z-index calc(var(--max-z) - 70)

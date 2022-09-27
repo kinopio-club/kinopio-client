@@ -27,25 +27,32 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerSpaceZoomReset') {
+      const { type, payload } = mutation
+      if (type === 'triggerSpaceZoomReset') {
         this.updateSpaceZoomFromTrigger(this.initialValue)
         window.scrollTo(0, 0)
-      } else if (mutation.type === 'triggerSpaceZoomOut') {
+      } else if (type === 'triggerSpaceZoomOut') {
         let percent = this.spaceZoomPercent
         let speed
-        if (mutation.payload) {
-          speed = mutation.payload.speed
+        if (payload) {
+          speed = payload.speed
         }
         percent -= speed || increment
         this.updateSpaceZoomFromTrigger(percent)
-      } else if (mutation.type === 'triggerSpaceZoomIn') {
+      } else if (type === 'triggerSpaceZoomIn') {
         let percent = this.spaceZoomPercent
         let speed
-        if (mutation.payload) {
-          speed = mutation.payload.speed
+        if (payload) {
+          speed = payload.speed
         }
         percent += speed || increment
         this.updateSpaceZoomFromTrigger(percent)
+      } else if (type === 'triggerToggleZoomOut') {
+        let value = this.initialValue
+        if (this.spaceZoomPercent !== this.min) {
+          value = this.min
+        }
+        this.$store.commit('spaceZoomPercent', value)
       }
     })
   },
