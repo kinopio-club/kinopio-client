@@ -264,10 +264,10 @@ export default {
     const space = document.getElementById('space')
     const spaceRect = space.getBoundingClientRect()
     const app = document.getElementById('app')
-    const appRrect = app.getBoundingClientRect()
+    const appRect = app.getBoundingClientRect()
     return {
-      x: spaceRect.x - appRrect.x,
-      y: spaceRect.y - appRrect.y
+      x: spaceRect.x - appRect.x,
+      y: spaceRect.y - appRect.y
     }
   },
   updatePositionWithSpaceOffset (position) {
