@@ -47,7 +47,6 @@ const store = createStore({
 
     // zooming
     spaceZoomPercent: 100,
-    pinchCounterZoomDecimal: 1,
     prevZoomOrigin: { x: 0, y: 0 },
 
     // search
@@ -457,10 +456,6 @@ const store = createStore({
     spaceZoomPercent: (state, value) => {
       utils.typeCheck({ value, type: 'number', origin: 'spaceZoomPercent' })
       state.spaceZoomPercent = value
-    },
-    pinchCounterZoomDecimal: (state, value) => {
-      utils.typeCheck({ value, type: 'number', origin: 'pinchCounterZoomDecimal' })
-      state.pinchCounterZoomDecimal = value
     },
     prevZoomOrigin: (state, position) => {
       utils.typeCheck({ value: position, type: 'object', origin: 'prevZoomOrigin' })

@@ -9,7 +9,6 @@
     :placeholder="inputPlaceholder"
     v-model="filterItems"
     ref="filterInput"
-    @focus="resetPinchCounterZoomDecimal"
     @blur="triggerUpdatePositionInVisualViewport"
     @keydown.down.exact="focusNextItem"
     @keydown.up.exact="focusPreviousItem"
@@ -141,9 +140,6 @@ export default {
       this.$emit('updateFilter', this.filter)
       this.$emit('updateFilteredItems', [])
       this.$emit('clearFilter')
-    },
-    resetPinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', 1)
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')

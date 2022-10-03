@@ -40,8 +40,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.up.stop="triggerPickerNavigation"
 
         @keydown.tab.exact="triggerPickerSelectItem"
-
-        @focus="resetPinchCounterZoomDecimal"
       )
 
       TagPicker(
@@ -494,7 +492,6 @@ export default {
       }
     },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
       let zoom = this.spaceCounterZoomDecimal
       const viewport = utils.visualViewport()
@@ -1375,12 +1372,6 @@ export default {
       }
       this.$store.dispatch('currentCards/update', update)
     },
-    resetPinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', 1)
-    },
-    updatePinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
-    },
     resetTextareaHeight () {
       if (!this.visible) { return }
       this.$refs.name.style.height = 'initial'
@@ -1389,7 +1380,6 @@ export default {
       this.$nextTick(() => {
         this.broadcastShowCardDetails()
         this.clearErrors()
-        this.updatePinchCounterZoomDecimal()
         this.scrollIntoViewAndFocus()
         this.updatePreviousTags()
         this.updateNameSplitIntoCardsCount()

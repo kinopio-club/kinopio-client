@@ -74,7 +74,6 @@ dialog.image-picker(
         @keyup.stop.enter
         @mouseup.stop
         @touchend.stop
-        @focus="resetPinchCounterZoomDecimal"
       )
       button.borderless.clear-input-wrap(@click.left="clearSearch")
         img.icon.cancel(src="@/assets/add.svg")
@@ -515,9 +514,6 @@ export default {
           this.resultsSectionHeight = resultsSection + serviceSection + searchSection + 4
         })
       })
-    },
-    resetPinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', 1)
     }
   },
   watch: {

@@ -170,19 +170,6 @@ export default {
     const fromFooter = event.target.closest('footer')
     return fromDialog || fromHeader || fromFooter || dialogIsVisible
   },
-
-  pinchCounterZoomDecimal () {
-    return 1 / this.visualViewport().scale
-  },
-  isSignificantlyPinchZoomed () {
-    const pinchZoomScale = this.visualViewport().scale
-    return !this.isBetween({
-      value: pinchZoomScale,
-      min: 0.8,
-      max: 1.3
-    })
-  },
-
   scrollIntoView (element, behavior) {
     behavior = behavior || 'smooth'
     if (!element) { return }
