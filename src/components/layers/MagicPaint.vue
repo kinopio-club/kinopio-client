@@ -83,7 +83,6 @@ export default {
         const event = this.$store.state.triggeredPaintFramePosition
         this.createPaintingCircle(event)
       } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
-        this.updatePositionOffsetByPinchZoom()
         this.updateCirclesWithScroll()
       } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
         let circle = mutation.payload
@@ -158,18 +157,12 @@ export default {
     },
     scroll () {
       this.updateCirclesWithScroll()
-      this.updatePositionOffsetByPinchZoom()
       this.cancelLocking()
     },
     clearCircles () {
       initialCircles = []
       paintingCircles = []
       remotePaintingCircles = []
-    },
-    updatePositionOffsetByPinchZoom () {
-      if (!window.visualViewport) { return }
-      this.pinchZoomOffsetTop = window.visualViewport.offsetTop
-      this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
     },
     updatePrevScrollPosition () {
       prevScroll = {
@@ -350,7 +343,7 @@ export default {
       let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
       this.selectItems(event)
       paintingCircles.push(circle)
-      this.broadcastCircle(circle)
+      this.broadcastCircle(event, circle)
     },
     startPainting (event) {
       if (this.isPanning) { return }
@@ -507,10 +500,10 @@ export default {
 
     // Remote Painting
 
-    broadcastCircle (circle) {
+    broadcastCircle (event, circle) {
       const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()
       if (!currentUserCanEdit) { return }
-      const position = utils.cursorPositionInSpace({ position: circle })
+      const position = utils.cursorPositionInSpace({ event })
       this.$store.commit('broadcast/update', {
         updates: {
           userId: this.$store.state.currentUser.id,
@@ -525,14 +518,6 @@ export default {
       })
     },
     createRemotePaintingCircle (circle) {
-      const remoteZoom = 1 / circle.zoom
-      const localZoom = this.spaceCounterZoomDecimal
-      // remote zoom
-      circle.x = circle.x * remoteZoom
-      circle.y = circle.y * remoteZoom
-      // local zoom
-      circle.x = circle.x / localZoom
-      circle.y = circle.y / localZoom
       remotePaintingCircles.push(circle)
     },
     remotePainting () {
