@@ -73,10 +73,10 @@ export default {
       currentEvent = event
     },
     initMeasurements () {
-      scrollAreaHeight = (this.viewportHeight / 8)
+      scrollAreaHeight = (this.viewportHeight / 10)
       scrollAreaHeight = Math.max(50, scrollAreaHeight)
       scrollAreaHeight = Math.round(scrollAreaHeight)
-      scrollAreaWidth = (this.viewportWidth / 8)
+      scrollAreaWidth = (this.viewportWidth / 10)
       scrollAreaWidth = Math.max(50, scrollAreaWidth)
       scrollAreaWidth = Math.round(scrollAreaWidth)
       maxHeight = Math.max(6500, this.$store.state.viewportHeight)
