@@ -341,6 +341,7 @@ body
 
 .app
   position relative
+  touch-action pan-x pan-y
   > .development-badge
     color var(--primary-background)
     min-height initial
