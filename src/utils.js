@@ -123,11 +123,6 @@ export default {
       const dialogRect = dialog.getBoundingClientRect()
       height = height - (rect.y - dialogRect.y)
     }
-
-    const zoomScale = this.visualViewport().scale
-    if (zoomScale > 1) {
-      height = height * zoomScale
-    }
     return height
   },
   dialogIsVisible () {

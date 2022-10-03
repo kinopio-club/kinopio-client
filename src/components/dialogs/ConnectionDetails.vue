@@ -219,12 +219,11 @@ export default {
       this.inputIsFocused = true
     },
     updateResultsSectionMaxHeight () {
-      const pinchZoom = utils.visualViewport().scale
       const position = this.$store.state.connectionDetailsPosition
       const infoSection = this.$refs.infoSection.getBoundingClientRect()
       const resultsActions = this.$refs.resultsActions.getBoundingClientRect()
       const dialogInfoHeight = infoSection.height + resultsActions.height
-      const maxHeight = (this.$store.state.viewportHeight - position.y - dialogInfoHeight) * pinchZoom
+      const maxHeight = (this.$store.state.viewportHeight - position.y - dialogInfoHeight)
       const minHeight = 300
       let height = Math.max(minHeight, maxHeight)
       height = Math.round(height)
