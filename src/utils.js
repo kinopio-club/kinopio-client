@@ -170,18 +170,19 @@ export default {
     const fromFooter = event.target.closest('footer')
     return fromDialog || fromHeader || fromFooter || dialogIsVisible
   },
-  disablePinchZoom () {
-    if (this.isIPhone()) {
-      const viewport = document.querySelector('head meta[name=viewport]')
-      viewport.setAttribute('content', 'width=device-width, user-scalable=0, maximum-scale=1')
-    }
+
+  pinchCounterZoomDecimal () {
+    return 1 / this.visualViewport().scale
   },
-  enablePinchZoom () {
-    if (this.isIPhone()) {
-      const viewport = document.querySelector('head meta[name=viewport]')
-      viewport.setAttribute('content', 'width=device-width, initial-scale=1') // index.html default
-    }
+  isSignificantlyPinchZoomed () {
+    const pinchZoomScale = this.visualViewport().scale
+    return !this.isBetween({
+      value: pinchZoomScale,
+      min: 0.8,
+      max: 1.3
+    })
   },
+
   scrollIntoView (element, behavior) {
     behavior = behavior || 'smooth'
     if (!element) { return }
@@ -327,17 +328,6 @@ export default {
     viewport.pageLeft = Math.round(viewport.pageLeft)
     viewport.pageTop = Math.round(viewport.pageTop)
     return viewport
-  },
-  pinchCounterZoomDecimal () {
-    return 1 / this.visualViewport().scale
-  },
-  isSignificantlyPinchZoomed () {
-    const pinchZoomScale = this.visualViewport().scale
-    return !this.isBetween({
-      value: pinchZoomScale,
-      min: 0.8,
-      max: 1.3
-    })
   },
   rectCenter (rect) {
     const x = Math.round(rect.x + (rect.width / 2))

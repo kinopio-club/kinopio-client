@@ -922,7 +922,6 @@ export default {
       })
     },
     focusName (position) {
-      utils.disablePinchZoom()
       this.$nextTick(() => {
         const element = this.$refs.name
         const length = this.name.length
@@ -946,7 +945,6 @@ export default {
       if (utils.isIPhone()) {
         behavior = 'auto'
       }
-      utils.disablePinchZoom()
       this.$nextTick(() => {
         this.scrollIntoView(behavior)
         this.focusName()
@@ -1439,7 +1437,6 @@ export default {
     visible (visible) {
       if (!visible) {
         this.closeCard()
-        utils.enablePinchZoom()
       }
     }
   }
