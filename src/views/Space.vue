@@ -434,9 +434,6 @@ export default {
       this.$store.dispatch('currentCards/afterMove')
       this.$store.dispatch('currentBoxes/afterMove')
       this.addInteractionBlur()
-      if (event.touches) {
-        this.$store.commit('triggerUpdatePositionInVisualViewport')
-      }
       this.checkIfShouldHideFooter(event)
       if (this.shouldCancel(event)) { return }
       this.addOrCloseCard(event)

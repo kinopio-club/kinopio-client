@@ -9,7 +9,6 @@
     :placeholder="inputPlaceholder"
     v-model="filterItems"
     ref="filterInput"
-    @blur="triggerUpdatePositionInVisualViewport"
     @keydown.down.exact="focusNextItem"
     @keydown.up.exact="focusPreviousItem"
     @keydown.enter.exact.stop.prevent="selectItem"
@@ -140,9 +139,6 @@ export default {
       this.$emit('updateFilter', this.filter)
       this.$emit('updateFilteredItems', [])
       this.$emit('clearFilter')
-    },
-    triggerUpdatePositionInVisualViewport () {
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     focusNextItem () {
       this.$emit('focusNextItem')

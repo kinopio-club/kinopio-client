@@ -271,7 +271,6 @@ export default {
       }
       // prevent mouse events from firing after touch events on touch device
       if (event.cancelable) { event.preventDefault() }
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
       this.startPostScroll()
     },
 

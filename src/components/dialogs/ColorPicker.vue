@@ -3,12 +3,12 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
   section(v-if="removeIsVisible")
     .row
       .badge.inline-color-badge(:style="{backgroundColor: currentColor}")
-        input(v-model="color" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace)
+        input(v-model="color" @keyup.stop.backspace)
       button(@click="removeColor")
         img.icon(src="@/assets/remove.svg")
   section(v-if="!removeIsVisible")
     .badge(:style="{backgroundColor: currentColor}")
-      input(v-model="color" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace)
+      input(v-model="color" @keyup.stop.backspace)
   section
     //- Colors
     .recent-colors(v-if="recentColors")
@@ -168,9 +168,6 @@ export default {
       hues.forEach(hue => {
         this.buttonHues[hue] = randomColor({ luminosity, count: 2, hue })
       })
-    },
-    triggerUpdatePositionInVisualViewport () {
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     scrollIntoView () {
       this.$nextTick(() => {

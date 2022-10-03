@@ -264,7 +264,6 @@ export default {
       this.inputIsFocused = true
     },
     blur () {
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
       this.$store.dispatch('history/resume')
       const connectionType = utils.clone(this.currentConnectionType)
       this.$store.dispatch('history/add', { connectionTypes: [connectionType], useSnapshot: true })

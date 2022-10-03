@@ -25,7 +25,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         data-type="name"
         :maxlength="maxCardLength"
         @click.left="clickName"
-        @blur="triggerUpdatePositionInVisualViewport"
         @paste="updatePastedName"
 
         @keyup.alt.enter.exact.stop
@@ -783,9 +782,6 @@ export default {
       this.wasPasted = true
       this.$store.dispatch('currentCards/removeTrackingQueryStrings', { cardId: this.card.id })
     },
-    triggerUpdatePositionInVisualViewport () {
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
-    },
     addCheckbox () {
       const update = {
         id: this.card.id,
@@ -879,7 +875,6 @@ export default {
       this.$store.dispatch('history/resume')
       this.$store.dispatch('currentCards/remove', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
-      this.triggerUpdatePositionInVisualViewport()
     },
     textareaSizes () {
       let textareas = document.querySelectorAll('dialog textarea')
@@ -930,7 +925,6 @@ export default {
         if (length) {
           element.setSelectionRange(length, length)
         }
-        this.triggerUpdatePositionInVisualViewport()
       })
     },
     scrollIntoView (behavior) {
@@ -946,12 +940,10 @@ export default {
         this.scrollIntoView(behavior)
         this.focusName()
         this.triggerUpdateMagicPaintPositionOffset()
-        this.triggerUpdatePositionInVisualViewport()
       })
     },
     triggerUpdateMagicPaintPositionOffset () {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
-      this.triggerUpdatePositionInVisualViewport()
     },
     closeDialogs (shouldSkipGlobalDialogs) {
       this.$store.commit('triggerCardDetailsCloseDialogs')
@@ -1405,7 +1397,6 @@ export default {
       this.cancelOpening()
       this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', cardId)
       this.$store.commit('updateCurrentCardConnections')
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
       this.$store.commit('shouldPreventNextEnterKey', false)
       if (!card) { return }
       const cardHasName = Boolean(card.name)

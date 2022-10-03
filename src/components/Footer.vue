@@ -1,5 +1,5 @@
 <template lang="pug">
-.footer-wrap(:style="position" v-if="!isAddPage")
+.footer-wrap(v-if="!isAddPage")
   .left(v-if="!isEmbed" :class="{'fade-out': isFadingOut}")
     footer
       Notifications
@@ -55,8 +55,7 @@ let updateFavoritesIntervalTimer, updateLiveSpacesIntervalTimer
 
 const fadeOutDuration = 10
 const hiddenDuration = 20
-const updatePositionDuration = 60
-let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
+let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, shouldCancelFadeOut
 
 export default {
   name: 'Footer',
@@ -80,7 +79,6 @@ export default {
       favoritesIsVisible: false,
       exploreIsVisible: false,
       liveIsVisible: false,
-      position: {},
       liveSpaces: [],
       isLoadingLiveSpaces: true,
       isFadingOut: false,
@@ -94,8 +92,6 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.closeDialogs()
-      } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
-        this.updatePosition()
       } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hidden()
       } else if (mutation.type === 'triggerAddToInboxIsVisible') {
@@ -104,9 +100,7 @@ export default {
         this.updateUserHasInbox()
       }
     })
-    window.addEventListener('scroll', this.updatePosition)
     window.addEventListener('online', this.updateLiveSpaces)
-    this.updatePosition()
     this.updateFavorites()
     this.updateLiveSpaces()
     updateFavoritesIntervalTimer = setInterval(() => {
@@ -118,7 +112,6 @@ export default {
     this.updateExploreSpaces()
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.updatePosition)
     window.removeEventListener('online', this.updateLiveSpaces)
     clearInterval(updateFavoritesIntervalTimer)
     clearInterval(updateLiveSpacesIntervalTimer)
@@ -295,8 +288,6 @@ export default {
       window.cancelAnimationFrame(fadeOutTimer)
       fadeOutTimer = undefined
       this.isFadingOut = false
-      this.cancelUpdatePosition()
-      this.updatePosition()
     },
     fadeOutFrame () {
       fadeOutIteration++
@@ -306,57 +297,12 @@ export default {
       } else if (fadeOutIteration < fadeOutDuration) {
         window.requestAnimationFrame(this.fadeOutFrame)
       }
-    },
-
-    // update position
-
-    updatePosition () {
-      if (!this.$store.getters.isTouchDevice) { return }
-      updatePositionIteration = 0
-      if (updatePositionTimer) { return }
-      updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
-    },
-    cancelUpdatePosition () {
-      window.cancelAnimationFrame(updatePositionTimer)
-      updatePositionTimer = undefined
-    },
-    updatePositionFrame () {
-      updatePositionIteration++
-      this.updatePositionInVisualViewport()
-      if (updatePositionIteration < updatePositionDuration) {
-        window.requestAnimationFrame(this.updatePositionFrame)
-      } else {
-        this.cancelUpdatePosition()
-      }
-    },
-    updatePositionInVisualViewport () {
-      const viewport = utils.visualViewport()
-      const layoutViewport = document.getElementById('layout-viewport')
-      const scale = utils.roundFloat(viewport.scale)
-      const counterScale = utils.roundFloat(1 / viewport.scale)
-      const left = Math.round(viewport.offsetLeft)
-      let offsetTop = 0
-      if (navigator.standalone) {
-        offsetTop = 15
-      }
-      const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height)
-      let style = {
-        transform: `translate(${left}px, ${top + offsetTop}px) scale(${counterScale})`,
-        maxWidth: Math.round(viewport.width * scale) + 'px'
-      }
-      if (utils.isIPhone() && scale <= 1) {
-        style.transform = 'none'
-        style.zoom = counterScale
-        style.marginBottom = offsetTop + 'px'
-      }
-      this.position = style
     }
   },
   watch: {
     isPinchZooming (value) {
       if (value) {
         this.fadeOut()
-        this.updatePosition()
       } else {
         shouldCancelFadeOut = true
         this.cancelFadeOut()
@@ -366,7 +312,6 @@ export default {
       if (!utils.isAndroid()) { return }
       if (value) {
         this.fadeOut()
-        this.updatePosition()
       } else {
         shouldCancelFadeOut = true
         this.cancelFadeOut()
