@@ -1888,6 +1888,7 @@ article
     max-width var(--card-width)
     cursor pointer
     touch-action manipulation
+    will-change transform // perf optimization https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
     &:hover,
     &.hover
       box-shadow var(--hover-shadow)
