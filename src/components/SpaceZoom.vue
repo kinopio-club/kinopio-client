@@ -1,7 +1,7 @@
 <template lang="pug">
 .space-zoom
   Slider(
-    @updatePlayhead="updateSpaceZoom"
+    @updatePlayhead="updateZoomFromSlider"
     @resetPlayhead="resetSpaceZoom"
     :minValue="min"
     :value="spaceZoomPercent"
@@ -17,8 +17,10 @@
 
 <script>
 import Slider from '@/components/Slider.vue'
+import utils from '@/utils.js'
 
 const increment = 10
+let touchStartZoomValue
 
 export default {
   name: 'SpaceZoom',
@@ -29,7 +31,7 @@ export default {
     this.$store.subscribe((mutation, state) => {
       const { type, payload } = mutation
       if (type === 'triggerSpaceZoomReset') {
-        this.updateSpaceZoomFromTrigger(this.initialValue)
+        this.updateZoom(this.initialValue)
         window.scrollTo(0, 0)
       } else if (type === 'triggerSpaceZoomOut') {
         let percent = this.spaceZoomPercent
@@ -38,7 +40,7 @@ export default {
           speed = payload.speed
         }
         percent -= speed || increment
-        this.updateSpaceZoomFromTrigger(percent)
+        this.updateZoom(percent)
       } else if (type === 'triggerSpaceZoomIn') {
         let percent = this.spaceZoomPercent
         let speed
@@ -46,7 +48,7 @@ export default {
           speed = payload.speed
         }
         percent += speed || increment
-        this.updateSpaceZoomFromTrigger(percent)
+        this.updateZoom(percent)
       } else if (type === 'triggerToggleZoomOut') {
         let value = this.initialValue
         if (this.spaceZoomPercent !== this.min) {
@@ -55,6 +57,14 @@ export default {
         this.$store.commit('spaceZoomPercent', value)
       }
     })
+  },
+  mounted () {
+    window.addEventListener('touchmove', this.pinchZoom)
+    window.addEventListener('touchstart', this.initPinchZoom)
+  },
+  beforeUnmount () {
+    window.removeEventListener('touchmove', this.pinchZoom)
+    window.addEventListener('touchstart', this.initPinchZoom)
   },
   data () {
     return {
@@ -69,7 +79,32 @@ export default {
     spaceZoomPercent () { return this.$store.state.spaceZoomPercent }
   },
   methods: {
-    updateSpaceZoomFromTrigger (percent) {
+    removeAnimations () {
+      this.animateJiggleRight = false
+      this.animateJiggleLeft = false
+    },
+    closeAllDialogs () {
+      this.$store.dispatch('clearMultipleSelected')
+      this.$store.dispatch('closeAllDialogs', 'SpaceZoom')
+    },
+
+    // pinch zoom
+
+    initPinchZoom () {
+      touchStartZoomValue = this.spaceZoomPercent
+    },
+    pinchZoom (event) {
+      const isPinching = event.touches.length === 2
+      if (!isPinching) { return }
+      const position = utils.cursorPositionInPage(event)
+      this.$store.commit('prevZoomOrigin', position)
+      const percent = event.scale * touchStartZoomValue
+      this.updateZoom(percent)
+    },
+
+    // update zoom
+
+    updateZoom (percent) {
       if (percent > this.max) {
         this.animateJiggleRight = true
       } else if (percent < this.min) {
@@ -80,23 +115,12 @@ export default {
       this.$store.commit('spaceZoomPercent', percent)
     },
     resetSpaceZoom () {
-      this.updateSpaceZoomFromTrigger(this.initialValue)
+      this.updateZoom(this.initialValue)
     },
-    updateSpaceZoom (percent) {
-      this.updateSpaceZoomPercent(percent)
-    },
-    updateSpaceZoomPercent (percent) {
+    updateZoomFromSlider (percent) {
       percent = percent / 100
       percent = Math.round(this.min + (this.max - this.min) * percent)
       this.$store.commit('spaceZoomPercent', percent)
-    },
-    removeAnimations () {
-      this.animateJiggleRight = false
-      this.animateJiggleLeft = false
-    },
-    closeAllDialogs () {
-      this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('closeAllDialogs', 'SpaceZoom')
     }
   }
 }

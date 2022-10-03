@@ -2,9 +2,9 @@
 main#space.space(
   @pointerdown="initInteractions"
   :style="styles"
-  :class="{ 'is-zooming': isZooming }"
+  :class="{ 'is-zooming-animatino': isZoomingAnimation }"
   :data-zoom="spaceZoomDecimal"
-  @transitionend="removeIsZooming"
+  @transitionend="removeIsZoomingAnimation"
 )
   Connections
   Boxes
@@ -66,7 +66,7 @@ export default {
     this.$store.subscribe((mutation, state) => {
       const { type, payload } = mutation // eslint-disable-line no-unused-vars
       if (type === 'triggerToggleZoomOut') {
-        this.isZooming = true
+        this.isZoomingAnimation = true
       }
     })
   },
@@ -124,7 +124,7 @@ export default {
   data () {
     return {
       startCursor: {},
-      isZooming: false
+      isZoomingAnimation: false
     }
   },
   computed: {
@@ -163,8 +163,8 @@ export default {
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
   },
   methods: {
-    removeIsZooming () {
-      this.isZooming = false
+    removeIsZoomingAnimation () {
+      this.isZoomingAnimation = false
     },
     correctCardConnectionPaths () {
       const space = utils.clone(this.$store.state.currentSpace)
@@ -471,7 +471,7 @@ export default {
   position relative // used by svg connections
   transform-origin top left
   will-change transform // perf optimization https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
-  &.is-zooming
+  &.is-zooming-aniation
     transition transform 0.1s linear // 0.2?
   .card-overlap-indicator
     position absolute
