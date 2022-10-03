@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.offscreen-markers(v-if="isVisible" :class="{'fade-out': isFadeOut, 'hidden': isHidden}")
+aside.offscreen-markers(v-if="isVisible")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
@@ -15,9 +15,7 @@ aside.offscreen-markers(v-if="isVisible" :class="{'fade-out': isFadeOut, 'hidden
 import utils from '@/utils.js'
 
 const updatePositionDuration = 10
-const fadeOutDuration = 10
-const hiddenDuration = 10
-let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
+let updatePositionIteration, updatePositionTimer
 
 export default {
   name: 'OffscreenMarkers',
@@ -27,8 +25,6 @@ export default {
         this.updateOffscreenMarkers()
       } else if (mutation.type === 'isLoadingSpace') {
         this.updateOffscreenMarkers()
-      } else if (mutation.type === 'triggerHideTouchInterface') {
-        this.hidden()
       }
     })
     window.addEventListener('scroll', this.updateOffscreenMarkers)
@@ -57,9 +53,7 @@ export default {
         topright: [],
         bottomleft: [],
         bottomright: []
-      },
-      isFadeOut: false,
-      isHidden: false
+      }
     }
   },
   computed: {
@@ -122,59 +116,6 @@ export default {
   methods: {
     hasDirection (direction) {
       return Boolean(this.offscreenCardsByDirection[direction].length)
-    },
-
-    // hide
-
-    hidden (event) {
-      if (!this.$store.getters.isTouchDevice) { return }
-      hiddenIteration = 0
-      if (hiddenTimer) { return }
-      hiddenTimer = window.requestAnimationFrame(this.hiddenFrame)
-    },
-    hiddenFrame () {
-      hiddenIteration++
-      this.isHidden = true
-      if (hiddenIteration < hiddenDuration) {
-        window.requestAnimationFrame(this.hiddenFrame)
-      } else {
-        this.cancelHidden()
-      }
-    },
-    cancelHidden () {
-      window.cancelAnimationFrame(hiddenTimer)
-      hiddenTimer = undefined
-      this.isHidden = false
-    },
-
-    // fade out
-
-    handleTouchInteractions (event) {
-      if (!this.$store.getters.isTouchDevice) { return }
-      if (utils.shouldIgnoreTouchInteraction(event)) { return }
-      this.fadeOut()
-      this.updatePosition()
-    },
-    fadeOut () {
-      fadeOutIteration = 0
-      if (fadeOutTimer) { return }
-      fadeOutTimer = window.requestAnimationFrame(this.fadeOutFrame)
-    },
-    cancelFadeOut () {
-      window.cancelAnimationFrame(fadeOutTimer)
-      fadeOutTimer = undefined
-      this.isFadeOut = false
-      this.cancelUpdatePosition()
-      this.updatePosition()
-    },
-    fadeOutFrame () {
-      fadeOutIteration++
-      this.isFadeOut = true
-      if (fadeOutIteration < fadeOutDuration) {
-        window.requestAnimationFrame(this.fadeOutFrame)
-      } else {
-        this.cancelFadeOut()
-      }
     },
 
     // update position
