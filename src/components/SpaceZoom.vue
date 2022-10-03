@@ -2,7 +2,6 @@
 .space-zoom
   Slider(
     @updatePlayhead="updateZoomFromSlider"
-    @resetPlayhead="resetSpaceZoom"
     :minValue="min"
     :value="spaceZoomPercent"
     :maxValue="initialValue"
@@ -113,9 +112,6 @@ export default {
       percent = Math.max(percent, this.min)
       percent = Math.min(percent, this.max)
       this.$store.commit('spaceZoomPercent', percent)
-    },
-    resetSpaceZoom () {
-      this.updateZoom(this.initialValue)
     },
     updateZoomFromSlider (percent) {
       percent = percent / 100

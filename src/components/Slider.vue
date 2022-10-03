@@ -18,7 +18,7 @@
   )
     span {{ integerValue }}%
     span(v-if="valueIsMin") &nbsp;{{minLabel}}
-    button.inline-button(@mousedown.left.stop @click.left.stop="resetPlayhead")
+    button.inline-button(@mousedown.left.stop @click.left="resetPlayhead" @touchend.stop="resetPlayhead")
       img.icon.close(src="@/assets/add.svg")
 
   progress(
@@ -109,7 +109,6 @@ export default {
   methods: {
     resetPlayhead () {
       this.playheadIsBeingDragged = false
-      this.$emit('resetPlayhead')
       this.$emit('updatePlayhead', this.maxValue)
       this.$nextTick(() => {
         this.updateButtonPosition()
