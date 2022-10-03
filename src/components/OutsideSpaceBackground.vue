@@ -78,10 +78,15 @@ export default {
       g += gi
       b += bi
       this.backgroundColor = `rgb(${r}, ${g}, ${b})`
+      const metaThemeColor = document.querySelector('meta[name=theme-color]')
+      metaThemeColor.setAttribute('content', this.backgroundColor)
     },
     cancel () {
       window.cancelAnimationFrame(colorCycleTimer)
       colorCycleTimer = undefined
+      const color = this.$store.state.currentSpace.backgroundTint || '#ffffff'
+      const metaThemeColor = document.querySelector('meta[name=theme-color]')
+      metaThemeColor.setAttribute('content', color)
     },
     start () {
       this.updateBackgroundColor()
