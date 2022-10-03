@@ -97,7 +97,8 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerCardDetailsCloseDialogs' && this.visible) {
-        this.closeDialogs()
+        const shouldPreventEmit = true
+        this.closeDialogs(shouldPreventEmit)
       }
     })
   },
@@ -298,11 +299,13 @@ export default {
       this.closeDialogs()
       this.colorPickerIsVisible = !isVisible
     },
-    closeDialogs () {
+    closeDialogs (shouldPreventEmit) {
       this.framePickerIsVisible = false
       this.tagPickerIsVisible = false
       this.colorPickerIsVisible = false
       this.$store.commit('userDetailsIsVisible', false)
+      if (shouldPreventEmit === true) { return }
+      this.$emit('closeDialogs')
     },
 
     // cards only
