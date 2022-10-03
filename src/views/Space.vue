@@ -324,9 +324,10 @@ export default {
       this.$store.dispatch('history/pause')
       const shouldPrevent = this.checkIfShouldPreventInteraction()
       if (shouldPrevent) { return }
+      const cursor = this.cursor()
       const delta = {
-        x: currentCursor.x - prevCursor.x,
-        y: currentCursor.y - prevCursor.y
+        x: currentCursor.x - cursor.x,
+        y: currentCursor.y - cursor.y
       }
       this.$store.dispatch('currentCards/move', delta)
       this.$store.dispatch('currentBoxes/move', delta)

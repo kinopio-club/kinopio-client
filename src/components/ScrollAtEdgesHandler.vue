@@ -71,6 +71,7 @@ export default {
       prevCursor = position
       currentCursor = position
       currentEvent = event
+      currentCursorPage = utils.cursorPositionInPage(event)
     },
     initMeasurements () {
       scrollAreaHeight = (this.viewportHeight / 10)
