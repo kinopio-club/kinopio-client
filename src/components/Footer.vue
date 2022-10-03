@@ -1,6 +1,6 @@
 <template lang="pug">
-.footer-wrap(:style="position" v-if="!isAddPage" :class="{'fade-out': isFadingOut}")
-  .left(v-if="!isEmbed")
+.footer-wrap(:style="position" v-if="!isAddPage")
+  .left(v-if="!isEmbed" :class="{'fade-out': isFadingOut}")
     footer
       Notifications
       .controls(v-if="isVisible" :class="{'hidden': isHidden}")
@@ -34,7 +34,7 @@
             Favorites(:visible="favoritesIsVisible")
             FavoritesActions(:visible="favoritesActionsIsVisible")
 
-  .right(:class="{'is-embed': isEmbed, 'hidden': isHidden}")
+  .right(:class="{'is-embed': isEmbed}")
     SpaceZoom
 </template>
 
