@@ -35,8 +35,7 @@
             FavoritesActions(:visible="favoritesActionsIsVisible")
 
   .right(:class="{'is-embed': isEmbed, 'hidden': isHidden}")
-    template(v-if="!isMobileOrTouch")
-      SpaceZoom
+    SpaceZoom
 </template>
 
 <script>
@@ -136,11 +135,6 @@ export default {
         return isEditedByOtherUser && isEditedAndNotVisited
       })
       return favoriteSpaces.length
-    },
-    isMobileOrTouch () {
-      const isTouchDevice = this.$store.getters.isTouchDevice
-      const isMobile = utils.isMobile()
-      return isTouchDevice || isMobile
     },
     isVisible () {
       const isTouchDevice = this.$store.getters.isTouchDevice
