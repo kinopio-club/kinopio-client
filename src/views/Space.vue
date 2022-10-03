@@ -1,6 +1,6 @@
 <template lang="pug">
 main#space.space(
-  @touchstart="initInteractions"
+  @pointerdown="initInteractions"
   :style="styles"
   :class="{ 'is-zooming': isZooming }"
   :data-zoom="spaceZoomDecimal"
@@ -214,7 +214,7 @@ export default {
         shouldCancel = false
       }
       if (this.spaceIsReadOnly) { return }
-      this.startCursor = utils.cursorPositionInSpace({ event })
+      this.startCursor = utils.cursorPositionInSpaceViewport(event)
     },
     constrainCursorToAxis (event) {
       if (this.$store.state.currentUserIsDraggingBox) { return }
