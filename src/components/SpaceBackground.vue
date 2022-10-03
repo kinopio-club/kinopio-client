@@ -105,8 +105,8 @@ export default {
 <style lang="stylus">
 #layout-viewport
   position fixed
-  width 100%
-  height 100%
+  width 110%
+  height 110% // extra space covers extra ios scroll area
   pointer-events none
   z-index 0
   mix-blend-mode multiply
