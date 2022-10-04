@@ -20,6 +20,14 @@ aside.frames
     img.tombstone(src="@/assets/frames/dead-to-me/tombstone.png")
     img.spooky-eyes(src="@/assets/frames/dead-to-me/spooky-eyes.png")
     img.ghost(src="@/assets/frames/dead-to-me/ghost.png")
+
+  .lil-guys(v-if="isLilGuys")
+    img.pot-sitting(src="@/assets/frames/lil-guys/pot-sitting.png")
+    img.pot-standing-side(src="@/assets/frames/lil-guys/pot-standing-side.png")
+    img.flowers-02(src="@/assets/frames/lil-guys/flowers-02.png")
+    img.pot-hanging(src="@/assets/frames/lil-guys/pot-hanging.png")
+    img.flowers-01(src="@/assets/frames/lil-guys/flowers-01.png")
+
 </template>
 
 <script>
@@ -28,17 +36,21 @@ export default {
     card: Object
   },
   computed: {
+    id () { return this.card.frameId },
     isGardenLeaves () {
-      return Boolean(this.card.frameId === 1)
+      return Boolean(this.id === 1)
     },
     isMagicalHelper () {
-      return Boolean(this.card.frameId === 2)
+      return Boolean(this.id === 2)
     },
     isTeaTime () {
-      return Boolean(this.card.frameId === 3)
+      return Boolean(this.id === 3)
     },
     isDeadToMe () {
-      return Boolean(this.card.frameId === 4)
+      return Boolean(this.id === 4)
+    },
+    isLilGuys () {
+      return Boolean(this.id === 5)
     }
   }
 }
@@ -50,6 +62,7 @@ export default {
   img
     pointer-events none
     position absolute
+
   .dead-to-me
     .tombstone
       width 48px
@@ -69,6 +82,7 @@ export default {
       left -40px
       bottom 10px
       z-index -1
+
   .garden-leaves
     .leaves
       left -20px
@@ -83,6 +97,7 @@ export default {
       top -17px
       right 22px
       z-index -1
+
   .magical-helper
     .cat
       width 32px
@@ -96,6 +111,7 @@ export default {
       width 23px
       right 28px
       top -15px
+
   .morning-brew
     .pot
       left -25px
@@ -110,4 +126,28 @@ export default {
       right -12px
       bottom -8px
       transform rotate(12deg)
+
+  .lil-guys
+    .pot-sitting
+      width 30px
+      right 30px
+      top -20px
+    .pot-standing-side
+      width 30px
+      left -18px
+      bottom -13px
+    .flowers-02
+      width 30px
+      left 2px
+      top -22px
+    .pot-hanging
+      width 30px
+      right -26px
+      top calc(50% - 20px)
+      z-index -1
+    .flowers-01
+      width 29px
+      right -18px
+      bottom -1px
+      transform rotate(10deg)
 </style>
