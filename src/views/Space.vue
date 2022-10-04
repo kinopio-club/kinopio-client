@@ -2,7 +2,7 @@
 main#space.space(
   @pointerdown="initInteractions"
   :style="styles"
-  :class="{ 'is-zooming-animatino': isZoomingAnimation }"
+  :class="{ 'is-zooming-animation': isZoomingAnimation }"
   :data-zoom="spaceZoomDecimal"
   @transitionend="removeIsZoomingAnimation"
 )
@@ -469,7 +469,7 @@ export default {
   position relative // used by svg connections
   transform-origin top left
   will-change transform // perf optimization https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
-  &.is-zooming-aniation
+  &.is-zooming-animation
     transition transform 0.1s linear // 0.2?
   .card-overlap-indicator
     position absolute
