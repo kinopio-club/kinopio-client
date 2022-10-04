@@ -20,7 +20,6 @@
   UserDetails
   WindowHistoryHandler
   KeyboardShortcutsHandler
-  TouchScrollHandler
   NotificationsWithPosition(layer="app")
   .preload
     .logo-hover
@@ -39,7 +38,6 @@ import MagicPaint from '@/components/layers/MagicPaint.vue'
 import Footer from '@/components/Footer.vue'
 import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
-import TouchScrollHandler from '@/components/TouchScrollHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
@@ -61,7 +59,6 @@ export default {
     Footer,
     KeyboardShortcutsHandler,
     WindowHistoryHandler,
-    TouchScrollHandler,
     TagDetails,
     LinkDetails,
     OffscreenMarkers,
