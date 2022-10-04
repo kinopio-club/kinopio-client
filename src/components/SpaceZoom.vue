@@ -60,10 +60,12 @@ export default {
   mounted () {
     window.addEventListener('touchmove', this.pinchZoom)
     window.addEventListener('touchstart', this.initPinchZoom)
+    window.addEventListener('wheel', this.mouseWheelZoom, { passive: false })
   },
   beforeUnmount () {
     window.removeEventListener('touchmove', this.pinchZoom)
     window.addEventListener('touchstart', this.initPinchZoom)
+    window.removeEventListener('wheel', this.mouseWheelZoom, { passive: false })
   },
   data () {
     return {
@@ -85,6 +87,31 @@ export default {
     closeAllDialogs () {
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('closeAllDialogs', 'SpaceZoom')
+    },
+
+    // mouse wheel zoom
+
+    mouseWheelZoom (event) {
+      const isMeta = event.metaKey || event.ctrlKey // event.ctrlKey is true for mac safari trackpad pinch
+      if (!isMeta) { return }
+      event.preventDefault()
+      const deltaY = event.deltaY
+      let shouldZoomIn = deltaY < 0
+      let speed = Math.min(Math.abs(deltaY), 5)
+      speed = speed * 1.5
+      const position = utils.cursorPositionInPage(event)
+      this.$store.commit('prevZoomOrigin', position)
+      // let percent = this.spaceZoomPercent
+      // let speed
+      // if (payload) {
+      //   speed = payload.speed
+      // }
+      // percent += speed || increment
+      if (shouldZoomIn) {
+        this.$store.commit('triggerSpaceZoomIn', { speed })
+      } else {
+        this.$store.commit('triggerSpaceZoomOut', { speed })
+      }
     },
 
     // pinch zoom

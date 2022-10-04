@@ -42,7 +42,6 @@ export default {
     window.addEventListener('keyup', this.handleShortcuts)
     // event.metaKey only works on keydown
     window.addEventListener('keydown', this.handleMetaKeyShortcuts)
-    window.addEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
     window.addEventListener('mousedown', this.handleMouseDownEvents)
     window.addEventListener('mousemove', this.handleMouseMoveEvents)
     window.addEventListener('mouseup', this.handleMouseUpEvents)
@@ -55,7 +54,6 @@ export default {
   beforeUnmount () {
     window.removeEventListener('keyup', this.handleShortcuts)
     window.removeEventListener('keydown', this.handleMetaKeyShortcuts)
-    window.removeEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
     window.removeEventListener('mousedown', this.handleMouseDownEvents)
     window.removeEventListener('mousemove', this.handleMouseMoveEvents)
     window.removeEventListener('mouseup', this.handleMouseUpEvents)
@@ -205,39 +203,6 @@ export default {
         this.toggleLockCards()
       }
     },
-    // on mouse wheel
-    handleMouseWheelEvents (event) {
-      const isMeta = event.metaKey || event.ctrlKey // event.ctrlKey is true for mac safari trackpad pinch
-      if (!isMeta) { return }
-      event.preventDefault()
-      const deltaY = event.deltaY
-      let shouldZoomIn = deltaY < 0
-      let speed = Math.min(Math.abs(deltaY), 5)
-      speed = speed * 1.5
-      const position = utils.cursorPositionInPage(event)
-      this.$store.commit('prevZoomOrigin', position)
-      if (shouldZoomIn) {
-        this.$store.commit('triggerSpaceZoomIn', { speed })
-      } else {
-        this.$store.commit('triggerSpaceZoomOut', { speed })
-      }
-      // start or reset snap to initial zoom check
-      // clearTimeout(snapToInitialZoomTimeoutId)
-      // snapToInitialZoomTimeoutId = setTimeout(() => {
-      //   this.checkIfShouldSnapToInitialZoom()
-      // }, snapToInitialZoomDuration)
-    },
-    // checkIfShouldSnapToInitialZoom () {
-    //   const zoom = this.$store.state.spaceZoomPercent
-    //   const shouldSnap = utils.isBetween({
-    //     value: zoom,
-    //     min: 90,
-    //     max: 110
-    //   })
-    //   if (!shouldSnap) { return }
-    //   console.log('🦆 snap to initial zoom')
-    //   this.$store.commit('triggerSpaceZoomReset')
-    // },
 
     // on mouse down
     handleMouseDownEvents (event) {
@@ -883,8 +848,7 @@ export default {
     // Zoom
 
     toggleZoomOut () {
-      this.$store.commit('prevZoomOrigin', currentCursorPosition)
-      console.log(currentCursorPosition)
+      this.$store.commit('prevZoomOrigin', currentCursorPosition) // TODO position is center of visible viewport
       this.$store.commit('triggerToggleZoomOut')
     }
   }
