@@ -1410,6 +1410,8 @@ export default {
       this.$store.dispatch('history/pause')
     },
     closeCard () {
+      const element = this.$refs.name
+      element.blur()
       this.$store.commit('triggerHideTouchInterface')
       const cardId = prevCardId
       const card = this.$store.getters['currentCards/byId'](cardId)
