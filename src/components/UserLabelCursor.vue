@@ -50,6 +50,7 @@ export default {
   },
   computed: {
     userHasName () { return Boolean(this.user.name) },
+    minimapIsVisible () { return this.$store.state.minimapIsVisible },
     position () {
       return {
         left: this.left + 'px',
@@ -75,6 +76,7 @@ export default {
       this.top = this.top * scale
     },
     checkIsOnscreen () {
+      if (this.minimapIsVisible) { return }
       const isBetweenX = utils.isBetween({
         value: this.left,
         min: window.scrollX,
