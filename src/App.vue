@@ -1029,8 +1029,8 @@ code
 
 #layout-viewport
   position fixed
-  width 100%
-  height 100%
+  width 110%
+  height 110%
   pointer-events none
   z-index 0
   mix-blend-mode multiply
