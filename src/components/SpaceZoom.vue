@@ -26,8 +26,8 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerSpaceZoomReset') {
         this.updateSpaceZoomFromTrigger(this.max)
-      }
-      if (mutation.type === 'triggerSpaceZoomOut') {
+        window.scrollTo(0, 0)
+      } else if (mutation.type === 'triggerSpaceZoomOut') {
         let percent = this.spaceZoomPercent
         let speed
         if (mutation.payload) {
@@ -35,8 +35,7 @@ export default {
         }
         percent -= speed || increment
         this.updateSpaceZoomFromTrigger(percent)
-      }
-      if (mutation.type === 'triggerSpaceZoomIn') {
+      } else if (mutation.type === 'triggerSpaceZoomIn') {
         let percent = this.spaceZoomPercent
         let speed
         if (mutation.payload) {
@@ -69,12 +68,10 @@ export default {
       percent = Math.min(percent, this.max)
       this.$store.commit('spaceZoomPercent', percent)
       this.updateBackgroundZoom()
-      this.$store.dispatch('currentCards/updateCardMap')
     },
     updateSpaceZoom (percent) {
       this.updateSpaceZoomPercent(percent)
       this.updateBackgroundZoom()
-      this.$store.dispatch('currentCards/updateCardMap')
     },
     updateSpaceZoomPercent (percent) {
       percent = percent / 100

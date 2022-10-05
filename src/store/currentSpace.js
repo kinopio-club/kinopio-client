@@ -300,7 +300,7 @@ const currentSpace = {
       context.dispatch('updateOtherSpaces')
     },
     createNewSpace: (context, space) => {
-      window.scrollTo(0, 0)
+      context.commit('triggerSpaceZoomReset', null, { root: true })
       let name
       if (space) {
         name = space.name
@@ -376,7 +376,7 @@ const currentSpace = {
       }, { root: true })
       context.commit('addUserToSpace', user)
       nextTick(() => {
-        context.dispatch('currentCards/updateDimensions', null, { root: true })
+        context.dispatch('currentCards/updateDimensions', {}, { root: true })
       })
       context.dispatch('updateModulesSpaceId', space)
     },
@@ -394,7 +394,7 @@ const currentSpace = {
       context.dispatch('loadBackground')
       context.dispatch('updateModulesSpaceId', space)
       nextTick(() => {
-        context.dispatch('currentCards/updateDimensions', null, { root: true })
+        context.dispatch('currentCards/updateDimensions', {}, { root: true })
         context.commit('isLoadingSpace', false, { root: true })
       })
       context.commit('triggerUpdateCardOverlaps', null, { root: true })
@@ -642,7 +642,6 @@ const currentSpace = {
           } else if (chunk) {
             context.commit('currentCards/restore', chunk, { root: true })
           }
-          context.dispatch('currentCards/updateCardMap', null, { root: true })
           // complete
           const isRestoreComplete = index === primaryChunks.length - 1
           if (isRestoreComplete) {
@@ -684,8 +683,7 @@ const currentSpace = {
         context.dispatch('updateOtherUsers')
         context.dispatch('updateOtherSpaces')
         context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
-        context.dispatch('currentCards/updateDimensions', null, { root: true })
-        context.dispatch('currentCards/updateCardMap', null, { root: true })
+        context.dispatch('currentCards/updateDimensions', {}, { root: true })
         context.commit('triggerUpdateCardOverlaps', null, { root: true })
         nextTick(() => {
           context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
@@ -694,7 +692,7 @@ const currentSpace = {
       })
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
-      window.scrollTo(0, 0)
+      context.commit('triggerSpaceZoomReset', null, { root: true })
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('isAddPage', false, { root: true })
       const emptySpace = utils.emptySpace(space.id)

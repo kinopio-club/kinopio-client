@@ -300,8 +300,9 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Box.selectAllContainedCards')
     },
     selectContainedCards () {
-      const cardMap = this.$store.state.currentCards.cardMap
-      cardMap.forEach(card => {
+      const position = this.box
+      const cards = this.$store.getters['currentCards/isSelectable'](position)
+      cards.forEach(card => {
         if (this.isCardInSelectedBoxes(card)) {
           this.$store.dispatch('addToMultipleCardsSelected', card.id)
         }

@@ -68,7 +68,7 @@ export default {
     handleShortcuts (event) {
       const key = event.key
       // console.warn('🎹', key)
-      const isFromCard = event.target.classList[0] === 'card'
+      // const isFromCard = event.target.classList[0] === 'card'
       const isSpaceScope = checkIsSpaceScope(event)
       // ?
       if (key === '?' && isSpaceScope) {
@@ -88,23 +88,10 @@ export default {
       } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
         this.remove()
       // Escape
-      } else if (key === 'Escape' || (key === 'z' && isSpaceScope)) {
+      } else if (key === 'Escape') {
         this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
         this.$store.commit('minimapIsVisible', false)
         this.$store.commit('currentUserToolbar', 'card')
-      // → Left
-      } else if (key === 'ArrowLeft' && (isSpaceScope || isFromCard)) {
-        this.focusNearestCardLeft()
-      // ← Right
-      } else if (key === 'ArrowRight' && (isSpaceScope || isFromCard)) {
-        this.focusNearestCardRight()
-      // ↓ Down
-      } else if (key === 'ArrowDown' && (isSpaceScope || isFromCard)) {
-        this.focusNearestCardDown()
-      // ↑ Up
-      } else if (key === 'ArrowUp' && (isSpaceScope || isFromCard)) {
-        this.focusNearestCardUp()
-      // 1
       } else if (key === '1' && isSpaceScope) {
         let value = this.$store.state.currentUser.filterShowUsers
         value = !value
@@ -143,7 +130,6 @@ export default {
       const isCardScope = isFromCard || isFromCardName
       const isSpaceScope = checkIsSpaceScope(event)
       const isFromInput = event.target.closest('input') || event.target.closest('textarea')
-      const isMinimapShortcut = (key === ' ' && event.shiftKey) || key === 'z'
       // Add Child Card
       if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addChildCard()
@@ -203,10 +189,10 @@ export default {
         event.preventDefault()
         this.$store.commit('triggerSpaceZoomIn')
         // Minimap
-      } else if (isMinimapShortcut && isSpaceScope) {
+      } else if (key === 'z' && isSpaceScope) {
         event.preventDefault()
-        if (this.$store.state.minimapIsVisible) { return }
-        this.$store.commit('minimapIsVisible', true)
+        const value = !this.$store.state.minimapIsVisible
+        this.$store.commit('minimapIsVisible', value)
         this.$store.commit('currentUserIsPanningReady', false)
         this.$store.commit('currentUserIsPanning', false)
       // Pan
@@ -402,8 +388,8 @@ export default {
 
     // recursive
     nonOverlappingCardPosition (position) {
-      const cardMap = this.$store.state.currentCards.cardMap
-      const overlappingCard = cardMap.find(card => {
+      const cards = this.$store.getters['currentCards/isSelectable'](position)
+      const overlappingCard = cards.find(card => {
         const isBetweenX = utils.isBetween({
           value: position.x,
           min: card.x,
@@ -451,120 +437,6 @@ export default {
       this.addConnectionType()
       const type = this.$store.getters['currentConnections/typeForNewConnections']
       this.$store.dispatch('currentConnections/add', { connection, type })
-    },
-
-    // Keyboard Arrows
-
-    focusNearestCardLeft () {
-      this.focusCard('left')
-    },
-    focusNearestCardRight () {
-      this.focusCard('right')
-    },
-    focusNearestCardDown () {
-      this.focusCard('down')
-    },
-    focusNearestCardUp () {
-      this.focusCard('up')
-    },
-
-    closestCardToOriginCard (originCard, direction, cards) {
-      let closest = Number.MAX_VALUE
-      let closestCard
-      const distanceWeighting = 0.5
-      const angleWeighting = 0.5
-      cards.forEach(card => {
-        const originPosition = utils.rectCenter(originCard)
-        const cardPosition = utils.rectCenter(card)
-        const distance = utils.distanceBetweenTwoPoints(originPosition, cardPosition)
-        const angle = utils.angleBetweenTwoPoints(originPosition, cardPosition)
-        const orientation = this.orientation(direction)
-        const angleDelta = Math.abs(orientation - angle)
-        const cardCloseness = (distanceWeighting * distance) + (angleWeighting * angleDelta)
-        if (cardCloseness < closest) {
-          closest = cardCloseness
-          closestCard = card
-        }
-      })
-      if (closestCard) {
-        this.$store.commit('parentCardId', closestCard.id)
-        return closestCard
-      } else {
-        return originCard
-      }
-    },
-
-    orientation (direction) {
-      if (direction === 'up' || direction === 'down') {
-        return 90
-      } else {
-        return 0
-      }
-    },
-
-    closestCardToViewportCenter () {
-      const viewportWidth = this.$store.state.viewportWidth
-      const viewportHeight = this.$store.state.viewportHeight
-      const viewportCenter = {
-        x: (viewportWidth / 2) + window.scrollX,
-        y: (viewportHeight / 2) + window.scrollY
-      }
-      let closestDistanceFromCenter = Math.max(viewportWidth, viewportHeight)
-      let closestCard
-      const cardMap = this.$store.state.currentCards.cardMap
-      if (!cardMap.length) { return }
-      cardMap.forEach(card => {
-        const toPosition = utils.rectCenter(card)
-        const distance = utils.distanceBetweenTwoPoints(viewportCenter, toPosition)
-        if (distance < closestDistanceFromCenter) {
-          closestDistanceFromCenter = distance
-          closestCard = card
-        }
-      })
-      this.$store.commit('parentCardId', closestCard.id)
-      return closestCard
-    },
-
-    currentFocusedCard () {
-      const cardMap = this.$store.state.currentCards.cardMap
-      let lastCardId = this.$store.state.parentCardId || this.$store.state.childCardId
-      let lastCard = cardMap.find(card => card.id === lastCardId)
-      if (lastCard) {
-        return lastCard
-      } else {
-        return this.closestCardToViewportCenter()
-      }
-    },
-
-    focusCard (direction) {
-      const cardMap = this.$store.state.currentCards.cardMap
-      if (!cardMap.length) { return }
-      const originCard = this.currentFocusedCard()
-      let focusableCards
-      if (direction === 'left') {
-        focusableCards = cardMap.filter(card => {
-          const isOnLeftSide = card.x < originCard.x
-          return isOnLeftSide
-        })
-      } else if (direction === 'right') {
-        focusableCards = cardMap.filter(card => {
-          const isOnRightSide = card.x > originCard.x
-          return isOnRightSide
-        })
-      } else if (direction === 'down') {
-        focusableCards = cardMap.filter(card => {
-          const isOnDownSide = card.y > originCard.y
-          return isOnDownSide
-        })
-      } else if (direction === 'up') {
-        focusableCards = cardMap.filter(card => {
-          const isOnTopSide = card.y < originCard.y
-          return isOnTopSide
-        })
-      }
-      focusableCards = focusableCards.filter(card => card.id !== this.$store.state.parentCardId)
-      const closestCard = this.closestCardToOriginCard(originCard, direction, focusableCards)
-      document.querySelector(`.card[data-card-id="${closestCard.id}"]`).focus()
     },
 
     selectedCardIds () {
@@ -993,12 +865,12 @@ export default {
       }
       cards = cards.filter(card => Boolean(card))
       if (!cards) { return }
+      // update
       const lockedCards = cards.filter(card => card.isLocked)
       const shouldLock = cards.length !== lockedCards.length
       cards.forEach(card => {
         this.$store.dispatch('currentCards/update', { id: card.id, isLocked: shouldLock })
       })
-      this.$store.dispatch('currentCards/updateCardMap')
     }
 
   }
