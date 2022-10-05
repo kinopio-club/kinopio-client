@@ -314,7 +314,7 @@ export default {
 
 @font-face
   font-family 'OsakaMono-Kinopio'
-  src url("assets/fonts/OsakaMono-Kinopio.woff2") format("woff2")
+  src url("assets/fonts/tt-forma-nuova.woff2") format("woff2")
   font-weight normal
   font-style normal
 
@@ -389,9 +389,9 @@ select,
 label // used for checkbox buttons
   touch-action manipulation
   text-align left
-  padding 7px
-  padding-top 4px
-  padding-bottom 3px
+  padding 6px
+  padding-top 5px
+  padding-bottom 2px
   margin 0
   border 1px solid var(--primary)
   background-color var(--primary-background)
@@ -706,7 +706,7 @@ dialog
     margin-left -1px
 
 .icon
-  vertical-align -1px
+  vertical-align 0
   user-drag none
   -webkit-user-drag none
   pointer-events none
