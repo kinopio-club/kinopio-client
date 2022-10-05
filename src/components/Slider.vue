@@ -17,7 +17,6 @@
     :style="{left: zoomPercentBadgePosition + 'px'}"
   )
     span {{ integerValue }}%
-    span(v-if="valueIsMin") &nbsp;{{minLabel}}
     button.inline-button(@mousedown.left.stop @click.left.stop="resetPlayhead")
       img.icon.close(src="@/assets/add.svg")
 
@@ -47,8 +46,7 @@ export default {
     maxValue: Number,
     value: Number,
     animateJiggleRight: Boolean,
-    animateJiggleLeft: Boolean,
-    minLabel: String
+    animateJiggleLeft: Boolean
   },
   data () {
     return {
@@ -102,8 +100,7 @@ export default {
         max: this.maxValue
       })
       return value
-    },
-    valueIsMin () { return this.value === this.minValue }
+    }
   },
   methods: {
     resetPlayhead () {
