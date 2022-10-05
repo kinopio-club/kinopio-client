@@ -1733,6 +1733,7 @@ export default {
 
     updateUrlData () {
       this.updateSpaceLink()
+      if (this.$store.state.isLoadingSpace) { return }
       this.updateUrlPreview()
     },
 
