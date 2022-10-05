@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.offscreen-markers(v-if="isVisible")
+aside.offscreen-markers(v-if="isVisible" :styles="styles")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
