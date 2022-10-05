@@ -58,18 +58,8 @@ export default {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() }
   },
   methods: {
-    clearAll () {
-      this.connections.forEach(connection => {
-        this.$store.dispatch('currentConnections/update', {
-          id: connection.id,
-          directionIsVisible: false,
-          labelIsVisible: false
-        })
-      })
-    },
     showDirectionsIsVisible () {
       const value = !this.isSomeDirectionsIsVisible
-      this.clearAll()
       this.connections.forEach(connection => {
         this.$store.dispatch('currentConnections/update', {
           id: connection.id,
@@ -79,7 +69,6 @@ export default {
     },
     showLabelsIsVisible () {
       const value = !this.isSomeLabelsVisible
-      this.clearAll()
       this.connections.forEach(connection => {
         this.$store.dispatch('currentConnections/update', {
           id: connection.id,
