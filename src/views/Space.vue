@@ -1,9 +1,10 @@
 <template lang="pug">
-main.space(
+main#space.space(
   :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady, 'hidden-by-mindmap': minimapIsVisible}"
   @mousedown.left="initInteractions"
   @touchstart="initInteractions"
   :style="styles"
+  :data-zoom="spaceZoomDecimal"
 )
   Connections(:startCursor="startCursor")
   Boxes
