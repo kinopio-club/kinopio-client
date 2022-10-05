@@ -448,20 +448,22 @@ export default {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
       const zoom = this.spaceCounterZoomDecimal
+      point = {
+        x: Math.round((point.x + window.scrollX) * zoom),
+        y: Math.round((point.y + window.scrollY) * zoom)
+      }
       const cards = this.$store.getters['currentCards/isSelectable'](point)
       if (!cards) { return }
       cards.forEach(card => {
         const cardX = card.x
         const cardY = card.y
-        const pointX = (point.x + window.scrollX) * zoom
-        const pointY = (point.y + window.scrollY) * zoom
         const x = {
-          value: pointX,
+          value: point.x,
           min: cardX - circleSelectionRadius,
           max: cardX + card.width + circleSelectionRadius
         }
         const y = {
-          value: pointY,
+          value: point.y,
           min: cardY - circleSelectionRadius,
           max: cardY + card.height + circleSelectionRadius
         }
@@ -475,15 +477,17 @@ export default {
     selectConnectionPaths (point) {
       const zoom = this.spaceCounterZoomDecimal
       const paths = document.querySelectorAll('svg .connection-path')
-      const pointX = (point.x + window.scrollX) * zoom
-      const pointY = (point.y + window.scrollY) * zoom
+      point = {
+        x: Math.round((point.x + window.scrollX) * zoom),
+        y: Math.round((point.y + window.scrollY) * zoom)
+      }
       paths.forEach(path => {
         if (path.dataset['is-hidden-by-comment-filter'] === 'true') { return }
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
         let svgPoint = svg.createSVGPoint()
-        svgPoint.x = pointX
-        svgPoint.y = pointY
+        svgPoint.x = point.x
+        svgPoint.y = point.y
         const isSelected = path.isPointInStroke(svgPoint)
         if (isSelected) {
           this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
