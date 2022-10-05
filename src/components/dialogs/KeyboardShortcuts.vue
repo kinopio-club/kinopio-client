@@ -57,7 +57,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.title
             img.icon.minimap(src="@/assets/minimap.svg")
             span Minimap
-          .badge.keyboard-shortcut Hold Z
+          .badge.keyboard-shortcut Z
       article
         .row
           .badge.title

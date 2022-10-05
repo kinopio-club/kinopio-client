@@ -88,7 +88,7 @@ export default {
       } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
         this.remove()
       // Escape
-      } else if (key === 'Escape' || (key === 'z' && isSpaceScope)) {
+      } else if (key === 'Escape') {
         this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
         this.$store.commit('minimapIsVisible', false)
         this.$store.commit('currentUserToolbar', 'card')
@@ -130,7 +130,6 @@ export default {
       const isCardScope = isFromCard || isFromCardName
       const isSpaceScope = checkIsSpaceScope(event)
       const isFromInput = event.target.closest('input') || event.target.closest('textarea')
-      const isMinimapShortcut = (key === ' ' && event.shiftKey) || key === 'z'
       // Add Child Card
       if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addChildCard()
@@ -190,10 +189,10 @@ export default {
         event.preventDefault()
         this.$store.commit('triggerSpaceZoomIn')
         // Minimap
-      } else if (isMinimapShortcut && isSpaceScope) {
+      } else if (key === 'z' && isSpaceScope) {
         event.preventDefault()
-        if (this.$store.state.minimapIsVisible) { return }
-        this.$store.commit('minimapIsVisible', true)
+        const value = !this.$store.state.minimapIsVisible
+        this.$store.commit('minimapIsVisible', value)
         this.$store.commit('currentUserIsPanningReady', false)
         this.$store.commit('currentUserIsPanning', false)
       // Pan
