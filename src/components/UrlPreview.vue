@@ -19,13 +19,13 @@
               img.icon(v-else src="@/assets/view.svg")
               span URL
         //- all, image, text, none
-        .row(v-if="previewHasImage && previewHasInfo")
+        .row
           .segmented-buttons
-            button(@click="showAll" :class="{active : isShowAll}" :disabled="!canEditCard")
+            button(v-if="previewHasImage && previewHasInfo" @click="showAll" :class="{active : isShowAll}" :disabled="!canEditCard")
               span All
-            button(@click="showImage" :class="{active : isShowImage}" :disabled="!canEditCard")
+            button(v-if="previewHasImage" @click="showImage" :class="{active : isShowImage}" :disabled="!canEditCard")
               span Image
-            button(@click="showInfo" :class="{active : isShowInfo}" :disabled="!canEditCard")
+            button(v-if="previewHasInfo" @click="showInfo" :class="{active : isShowInfo}" :disabled="!canEditCard")
               span Text
             button(@click="showNone" :class="{active : isShowNone}" :disabled="!canEditCard")
               span None
