@@ -923,6 +923,10 @@ export default {
     },
     focusName (position) {
       utils.disablePinchZoom()
+      if (utils.visualViewport().scale !== 1) {
+        this.triggerUpdatePositionInVisualViewport()
+        return
+      }
       this.$nextTick(() => {
         const element = this.$refs.name
         const length = this.name.length

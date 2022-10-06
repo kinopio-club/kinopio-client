@@ -7,7 +7,7 @@
     .viewport-top(:style="viewportChildStyle" @mousedown="startPanningViewport")
       .button-wrap(@mousedown.stop @pointerup.stop="hideMinimap")
         button.small-button.active
-          img.icon(src="@/assets/minimap.svg")
+          img.icon.cancel(src="@/assets/add.svg")
   //- connections
   canvas#connections
   //- cards

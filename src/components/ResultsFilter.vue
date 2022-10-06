@@ -122,6 +122,7 @@ export default {
   methods: {
     addSpace () {
       const name = this.filter
+      window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addSpace', { name })
       this.$nextTick(() => {
         this.clearFilter()
