@@ -64,6 +64,29 @@ In rare cases when working with code that only works on https (e.g. clipboard co
 
     $ ./ngrok http 3000
 
+## How to update the Hello Kinopio Space
+
+The hello space serves as the entry point and marketing page for new users. It's generated within the app from `hello.json`.
+
+To update it, create the space and export it's json. Replace `hello.json` with the exported new json. Be sure to edit the following fields:
+
+| Special Fields | Value
+| ------------- |-------------|
+| `users` | `[]` |
+| `collaborators` | `[]` |
+| `spectators` | `[]` |
+| `clients` | `[]` |
+| `privacy` | `private` |
+| `collaboratorKey` | `''` |
+| `url` | remove |
+| `originSpaceId` | remove |
+| `editedAt` | remove |
+| `editedByUserId` | remove |
+| `createdAt` | remove |
+| `updatedAt` | remove |
+| `updateHash` | remove |
+
+
 ## See Also
 
 - [are.na/kinopio](https://www.are.na/kinopio)
