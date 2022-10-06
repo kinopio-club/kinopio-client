@@ -300,6 +300,11 @@ export default {
   dialog.user-details
     left initial
     right calc(100% - 20px)
+  dialog.import
+    top calc(100% - 8px)
+    left initial
+    right 8px
+
   .collaborators
     max-height calc(100vh - 200px)
   .share-private
