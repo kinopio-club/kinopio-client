@@ -40,11 +40,11 @@
         a.preview-image-wrap(v-if="parentIsCardDetails && !shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
           img.preview-image(:src="card.urlPreviewImage" @load="updateDimensions")
         //- info
-        .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, hidden: shouldHideInfo, transparent: isShowNone, 'text-only': shouldHideImage || !card.urlPreviewImage }" :style="{background: selectedColor}")
+        .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, hidden: shouldHideInfo, transparent: isShowNone, 'text-only': isTextOnly }" :style="{background: selectedColor}")
           img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
           .title {{filteredTitle}}
-          .description(v-if="description && !shouldHideDescription") {{description}}
+          .description(v-if="description && shouldShowDescription") {{description}}
       //- embed playback
       CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl")
 </template>
@@ -92,8 +92,12 @@ export default {
     shouldHideImage () {
       return this.card.shouldHideUrlPreviewImage
     },
-    shouldHideDescription () {
-      return !this.isTwitterUrl && !this.parentIsCardDetails
+    isTextOnly () {
+      return this.shouldHideImage || !this.card.urlPreviewImage
+    },
+    shouldShowDescription () {
+      if (this.isTextOnly) { return true }
+      return this.isTwitterUrl || this.parentIsCardDetails
     },
     selectedColor () {
       if (!this.isSelected) { return }
@@ -162,16 +166,11 @@ export default {
     },
     description () {
       let description = this.card.urlPreviewDescription
-      const image = this.card.urlPreviewImage
-      const cardIsShort = this.card.height < 200
       const isCardView = !this.parentIsCardDetails
       if (this.twitterDescription) { return this.twitterDescription }
       if (this.isYoutubeUrl) { return }
       if (isCardView) {
-        description = utils.truncated(description)
-      }
-      if (isCardView && image && cardIsShort) {
-        description = ''
+        description = utils.truncated(description, 200)
       }
       return description
     },
@@ -317,6 +316,7 @@ export default {
     position absolute
     margin 8px
     background var(--secondary-hover-background)
+    user-select text
     &.text-with-image
       border-radius 3px
     &.text-only
