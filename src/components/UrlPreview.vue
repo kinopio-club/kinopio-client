@@ -34,7 +34,7 @@
             button(@click="showNone" :class="{active : isShowNone}" :disabled="!canEditCard")
               span None
         // twitter thread
-        .row(v-if="isTweetUrl")
+        .row(v-if="tweetIdFromTwitterUrl")
           button
             img.icon.add-icon(src="@/assets/add.svg")
             img.icon.twitter(src="@/assets/twitter.svg")
@@ -121,11 +121,12 @@ export default {
     },
     isTwitterUrl () {
       const url = this.card.urlPreviewUrl
-      return url.includes('https://twitter.com')
+      return url.includes('https://twitter.com') || url.includes('https://mobile.twitter.com/')
     },
-    isTweetUrl () {
+    tweetIdFromTwitterUrl () {
       if (!this.isTwitterUrl) { return }
-      return this.isTwitterUrl
+      const url = this.card.urlPreviewUrl
+      return utils.tweetIdFromTwitterUrl(url)
     },
     isYoutubeShortenedUrl () {
       const url = this.card.urlPreviewUrl
