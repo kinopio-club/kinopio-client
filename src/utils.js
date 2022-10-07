@@ -45,9 +45,12 @@ export default {
       return `@/assets/${path}`
     }
   },
+  isDevelopment () {
+    return import.meta.env.MODE === 'development'
+  },
   kinopioDomain () {
     let domain = 'https://kinopio.club'
-    if (import.meta.env.MODE === 'development') {
+    if (this.isDevelopment()) {
       domain = 'http://kinopio.local:8080'
     }
     return domain
@@ -57,14 +60,14 @@ export default {
     if (useKinopioUrl) {
       host = 'https://api.kinopio.club'
     }
-    if (import.meta.env.MODE === 'development') {
+    if (this.isDevelopment()) {
       host = 'http://kinopio.local:3000'
     }
     return host
   },
   websocketHost () {
     let host = 'wss://kinopio-server.herokuapp.com'
-    if (import.meta.env.MODE === 'development') {
+    if (this.isDevelopment()) {
       host = 'ws://kinopio.local:3000'
     }
     return host
