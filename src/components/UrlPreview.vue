@@ -33,6 +33,13 @@
               span Text
             button(@click="showNone" :class="{active : isShowNone}" :disabled="!canEditCard")
               span None
+        // twitter thread
+        .row(v-if="isTweetUrl")
+          button
+            img.icon.add-icon(src="@/assets/add.svg")
+            img.icon.twitter(src="@/assets/twitter.svg")
+            span Thread
+
       // preview
       template(v-if="!shouldDisplayEmbed")
         //- url preview image
@@ -115,6 +122,10 @@ export default {
     isTwitterUrl () {
       const url = this.card.urlPreviewUrl
       return url.includes('https://twitter.com')
+    },
+    isTweetUrl () {
+      if (!this.isTwitterUrl) { return }
+      return this.isTwitterUrl
     },
     isYoutubeShortenedUrl () {
       const url = this.card.urlPreviewUrl
@@ -390,5 +401,11 @@ export default {
 
   .transparent
     opacity 0.5
+
+  .icon.twitter
+    width 15px
+  .add-icon
+    margin-right 4px
+    vertical-align 0px
 
 </style>
