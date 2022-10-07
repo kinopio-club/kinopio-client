@@ -1,5 +1,5 @@
 <template lang="pug">
-article(
+article#card(
   :style="positionStyle"
   :data-card-id="id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
@@ -485,7 +485,8 @@ export default {
       const userIsConnecting = this.$store.state.currentConnectionStartCardIds.length
       const currentUserIsDraggingBox = this.$store.state.currentUserIsDraggingBox
       const currentUserIsResizingBox = this.$store.state.currentUserIsResizingBox
-      return userIsConnecting || currentUserIsDraggingBox || currentUserIsResizingBox || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked
+      const currentUserIsPanning = this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning
+      return userIsConnecting || currentUserIsDraggingBox || currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked
     },
     cardClasses () {
       return {

@@ -11,7 +11,7 @@ let browserZoomLevel = 0
 let disableContextMenu = false
 let spaceKeyIsDown = false
 
-let prevCursorPosition, currentCursorPosition
+let prevCursorPosition, currentCursorPosition, prevRightClickPosition
 
 const checkIsSpaceScope = (event) => {
   const tagName = event.target.tagName
@@ -21,6 +21,12 @@ const checkIsSpaceScope = (event) => {
   const isMain = tagName === 'MAIN'
   const isFocusedCard = event.target.className === 'card'
   return isBody || isMain || isFocusedCard
+}
+
+const checkIsCardScope = (event) => {
+  const isFromCardName = event.target.closest('dialog.card-details')
+  const isFromCard = event.target.classList[0] === 'card'
+  return isFromCard || isFromCardName
 }
 
 export default {
@@ -125,9 +131,7 @@ export default {
     handleMetaKeyShortcuts (event) {
       const key = event.key
       const isMeta = event.metaKey || event.ctrlKey
-      const isFromCardName = event.target.closest('dialog.card-details')
-      const isFromCard = event.target.classList[0] === 'card'
-      const isCardScope = isFromCard || isFromCardName
+      const isCardScope = checkIsCardScope(event)
       const isSpaceScope = checkIsSpaceScope(event)
       const isFromInput = event.target.closest('input') || event.target.closest('textarea')
       // Add Child Card
@@ -232,10 +236,10 @@ export default {
     handleMouseDownEvents (event) {
       const rightMouseButton = 2
       const isRightClick = rightMouseButton === event.button
-      const isSpaceScope = event.target.id === 'magic-painting'
+      const isPaintScope = event.target.id === 'magic-painting'
       const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
-      const shouldBoxSelect = event.shiftKey && isSpaceScope && !toolbarIsBox
-      const shouldPan = isRightClick && isSpaceScope
+      const shouldBoxSelect = event.shiftKey && isPaintScope && !toolbarIsBox
+      const shouldPan = isRightClick
       const position = utils.cursorPositionInPage(event)
       if (shouldBoxSelect) {
         event.preventDefault()
@@ -243,6 +247,7 @@ export default {
         this.$store.commit('currentUserBoxSelectEnd', position)
         this.$store.commit('currentUserBoxSelectStart', position)
       } else if (shouldPan) {
+        prevRightClickPosition = utils.cursorPositionInPage(event)
         event.preventDefault()
         this.$store.commit('currentUserIsPanning', true)
         disableContextMenu = true
@@ -273,9 +278,20 @@ export default {
     },
     // on mouse up
     handleMouseUpEvents (event) {
+      const rightMouseButton = 2
+      const isRightClick = rightMouseButton === event.button
+      const isFromCard = event.target.closest('article#card')
+      const position = utils.cursorPositionInPage(event)
+      let isNearPrevRightClickPosition
+      if (isRightClick) {
+        isNearPrevRightClickPosition = utils.distanceBetweenTwoPoints(prevRightClickPosition, position) <= 5
+      }
       prevCursorPosition = undefined
       this.$store.commit('currentUserIsPanning', false)
       this.$store.commit('currentUserIsBoxSelecting', false)
+      if (isRightClick && isFromCard && isNearPrevRightClickPosition) {
+        console.log('🐁 is right click on card') // temp
+      }
     },
     // on scroll
     handleScrollEvents (event) {
