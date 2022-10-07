@@ -18,6 +18,10 @@
               img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
               img.icon(v-else src="@/assets/view.svg")
               span URL
+          .button-wrap
+            a(:href="card.urlPreviewUrl")
+              button
+                span →
         //- all, image, text, none
         .row
           .segmented-buttons
