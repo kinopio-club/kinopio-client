@@ -35,9 +35,9 @@
         img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
         template(v-if="shouldLoadUrlPreviewImage")
         //- on card
-        img.preview-image(v-if="!parentIsCardDetails && card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensions")
+        img.preview-image(v-if="!parentIsCardDetails" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensions")
         //- in carddetails
-        a.preview-image-wrap(v-if="parentIsCardDetails && !shouldHideImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard && !shouldHideInfo, transparent: isShowNone}")
+        a.preview-image-wrap(v-if="parentIsCardDetails && !shouldHideImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
           img.preview-image( :src="card.urlPreviewImage" @load="updateDimensions")
         //- info
         .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, hidden: shouldHideInfo, transparent: isShowNone}" :style="{background: selectedColor}")
@@ -311,8 +311,11 @@ export default {
     margin-right 6px
 
   .text
+    position absolute
+    margin 8px
     background var(--secondary-hover-background)
-    user-select text
+    border-top-left-radius 0
+    border-top-right-radius 0
     &.text-with-image
       border-radius 3px
 
