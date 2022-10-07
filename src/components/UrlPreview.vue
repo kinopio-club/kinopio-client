@@ -44,7 +44,7 @@
           img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
           .title {{filteredTitle}}
-          .description(v-if="description") {{description}}
+          .description(v-if="description && !shouldHideDescription") {{description}}
       //- embed playback
       CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl")
 </template>
@@ -91,6 +91,9 @@ export default {
     },
     shouldHideImage () {
       return this.card.shouldHideUrlPreviewImage
+    },
+    shouldHideDescription () {
+      return !this.isTwitterUrl && !this.parentIsCardDetails
     },
     selectedColor () {
       if (!this.isSelected) { return }
