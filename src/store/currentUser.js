@@ -38,7 +38,6 @@ export default {
     shouldShowMoreAlignOptions: false,
     shouldShowCardCollaborationInfo: false,
     shouldShowStyleActions: false,
-    shouldInvertZoomDirection: false,
     shouldUseLastConnectionType: false,
     shouldOpenLinksInNewTab: false,
     shouldRightMouseButtonPan: false,
@@ -247,10 +246,6 @@ export default {
     showInExploreUpdatedAt: (state, value) => {
       state.showInExploreUpdatedAt = value
       cache.updateUser('showInExploreUpdatedAt', value)
-    },
-    shouldInvertZoomDirection: (state, value) => {
-      state.shouldInvertZoomDirection = value
-      cache.updateUser('shouldInvertZoomDirection', value)
     },
     shouldOpenLinksInNewTab: (state, value) => {
       state.shouldOpenLinksInNewTab = value
@@ -634,14 +629,6 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           showInExploreUpdatedAt: value
-        } }, { root: true })
-    },
-    shouldInvertZoomDirection: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldInvertZoomDirection' })
-      context.commit('shouldInvertZoomDirection', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          shouldInvertZoomDirection: value
         } }, { root: true })
     },
     shouldOpenLinksInNewTab: (context, value) => {

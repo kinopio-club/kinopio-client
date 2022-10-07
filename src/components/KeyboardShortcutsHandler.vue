@@ -224,7 +224,7 @@ export default {
       const deltaY = event.deltaY
       let shouldZoomIn = deltaY < 0
       let shouldZoomOut = deltaY > 0
-      const invertZoom = event.webkitDirectionInvertedFromDevice // this.$store.state.currentUser.shouldInvertZoomDirection todo remove
+      const invertZoom = event.webkitDirectionInvertedFromDevice
       if (invertZoom) {
         shouldZoomIn = deltaY > 0
         shouldZoomOut = deltaY < 0
