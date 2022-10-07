@@ -29,6 +29,11 @@ const checkIsCardScope = (event) => {
   return isFromCard || isFromCardName
 }
 
+const checkIsPanScope = (event) => {
+  const isFromDialog = event.target.closest('dialog')
+  return !isFromDialog
+}
+
 export default {
   name: 'KeyboardShortcutsHandler',
   created () {
@@ -219,8 +224,7 @@ export default {
       const deltaY = event.deltaY
       let shouldZoomIn = deltaY < 0
       let shouldZoomOut = deltaY > 0
-      const invertZoom = event.webkitDirectionInvertedFromDevice // this.$store.state.currentUser.shouldInvertZoomDirection
-      console.log('🐸', event)
+      const invertZoom = event.webkitDirectionInvertedFromDevice // this.$store.state.currentUser.shouldInvertZoomDirection todo remove
       if (invertZoom) {
         shouldZoomIn = deltaY > 0
         shouldZoomOut = deltaY < 0
@@ -236,10 +240,10 @@ export default {
     handleMouseDownEvents (event) {
       const rightMouseButton = 2
       const isRightClick = rightMouseButton === event.button
-      const isPaintScope = event.target.id === 'magic-painting'
+      const isPanScope = checkIsPanScope(event)
       const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
-      const shouldBoxSelect = event.shiftKey && isPaintScope && !toolbarIsBox
-      const shouldPan = isRightClick
+      const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox
+      const shouldPan = isRightClick && isPanScope
       const position = utils.cursorPositionInPage(event)
       if (shouldBoxSelect) {
         event.preventDefault()
