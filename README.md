@@ -72,6 +72,7 @@ To update it, create the space and export it's json. Replace `hello.json` with t
 
 | Special Fields | Value
 | ------------- |-------------|
+| `name` | `Hello Kinopio` |
 | `users` | `[]` |
 | `collaborators` | `[]` |
 | `spectators` | `[]` |
