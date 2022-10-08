@@ -103,6 +103,7 @@ export default {
       space = utils.clearSpaceMeta(space, 'import')
       space = this.updateSpaceItemsUserId(space)
       const uniqueNewSpace = cache.updateIdsInSpace(space)
+      console.log('🍋 space to import', uniqueNewSpace)
       cache.saveSpace(uniqueNewSpace)
       this.$store.dispatch('currentSpace/loadSpace', { space: uniqueNewSpace, isLocalSpaceOnly: true })
       try {
