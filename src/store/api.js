@@ -825,7 +825,7 @@ const self = {
         console.error('🚒 urlPreview', error)
       }
     },
-    getWeather: async (context) => {
+    weather: async (context) => {
       const showWeather = context.rootState.currentUser.showWeather
       const weatherLocation = context.rootState.currentUser.weatherLocation
       const weatherUnitIsCelcius = context.rootState.currentUser.weatherUnitIsCelcius
