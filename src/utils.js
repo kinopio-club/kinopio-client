@@ -1591,12 +1591,12 @@ export default {
     // https://regexr.com/6vlno
     // matches /status/ and the subsequent tweet id number
     // https://mobile.twitter.com/YORIYUKIII/status/1577603265084395520 → 1577603265084395520
-    let twitterIdPattern = new RegExp(/\/status\/[0-9]*$/gm)
-    let match = url.match(twitterIdPattern)
+    let tweetIdPattern = new RegExp(/\/status\/[0-9]*$/gm)
+    let match = url.match(tweetIdPattern)
     if (!match) { return }
     // match again to extract just the id number
-    twitterIdPattern = new RegExp(/[0-9]*$/gm)
-    match = match[0].match(twitterIdPattern)
+    tweetIdPattern = new RegExp(/[0-9]*$/gm)
+    match = match[0].match(tweetIdPattern)
     if (!match) { return }
     match = match[0]
     // check that id is number
