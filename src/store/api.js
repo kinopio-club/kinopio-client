@@ -808,13 +808,8 @@ const self = {
     },
     urlPreview: async (context, url) => {
       try {
-        // let host = 'https://iframely.kinopio.club/iframely'
         const apiKey = '0788beaa34f65adc0fe7ac'
-        // const fallbackList = ['youtube', 'twitter', 'facebook', 'instagram', 'wikipedia', 'amazon', 'github']
-        // const shouldUseIFramely = fallbackList.find(item => url.includes(item))
-        // if (shouldUseIFramely) {
         const host = 'https://iframe.ly/api/iframely'
-        // }
         const response = await fetch(`${host}/?url=${encodeURIComponent(url)}&api_key=${apiKey}`)
         if (response.status !== 200) {
           throw new Error(response.status)
