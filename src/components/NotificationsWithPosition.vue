@@ -9,6 +9,7 @@ aside.notifications-with-position
     @animationend="remove"
   )
     img.icon.cancel(v-if="item.icon === 'cancel'" src="@/assets/add.svg")
+    img.icon.add(v-if="item.icon === 'add'" src="@/assets/add.svg")
     img.icon.checkmark(v-if="item.icon === 'checkmark'" src="@/assets/checkmark.svg")
     img.icon.cut(v-if="item.icon === 'cut'" src="@/assets/cut.svg")
     span {{item.message}}

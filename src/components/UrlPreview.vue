@@ -35,10 +35,11 @@
               span None
         // twitter thread
         .row(v-if="tweetIdFromTwitterUrl")
-          button
+          button(@click="addTwitterThreadCards")
             img.icon.add-icon(src="@/assets/add.svg")
             img.icon.twitter(src="@/assets/twitter.svg")
             span Thread
+            Loader(:visible="isLoadingTwitterThread")
 
       // preview
       template(v-if="!shouldDisplayEmbed")
@@ -65,6 +66,8 @@ import CardEmbed from '@/components/CardEmbed.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
+import { nanoid } from 'nanoid'
+
 export default {
   name: 'UrlPreview',
   components: {
@@ -85,7 +88,8 @@ export default {
     return {
       imageCanLoad: false,
       shouldDisplayEmbed: false,
-      embedUrl: ''
+      embedUrl: '',
+      isLoadingTwitterThread: false
     }
   },
   computed: {
@@ -216,6 +220,54 @@ export default {
     }
   },
   methods: {
+    async addTwitterThreadCards (event) {
+      const position = utils.cursorPositionInPage(event)
+      const spaceBetweenCards = 12
+      const origin = {
+        x: this.card.x,
+        y: this.card.y + this.card.height + spaceBetweenCards
+      }
+      this.isLoadingTwitterThread = true
+      const tweetId = this.tweetIdFromTwitterUrl
+
+      try {
+        const result = await this.$store.dispatch('api/twitterThread', tweetId)
+        const tweets = result.data
+        console.log('🕊', tweetId, tweets)
+        if (tweets.length) {
+          // TODO split out to method: addTweetCards(origin)
+          // TODO load url previews of child tweets before DistributeVertically
+          this.$store.dispatch('history/pause')
+          let cards = tweets.map(tweet => {
+            return {
+              id: nanoid(),
+              name: tweet.text,
+              x: origin.x,
+              y: origin.y
+            }
+          })
+          this.$store.dispatch('currentCards/addMultiple', cards)
+          this.$store.dispatch('currentCards/distributeVertically', cards)
+          this.$nextTick(() => {
+            // select
+            this.$store.dispatch('closeAllDialogs', 'UrlPreview')
+            const cardIds = cards.map(card => card.id)
+            this.$store.commit('multipleCardsSelectedIds', cardIds)
+            // ⏺ history
+            cards = cardIds.map(cardId => this.$store.getters['currentCards/byId'](cardId))
+            this.$store.dispatch('history/resume')
+            this.$store.dispatch('history/add', { cards, useSnapshot: true })
+            this.$store.commit('addNotificationWithPosition', { message: 'Thread Created', position, type: 'success', layer: 'app', icon: 'add' })
+          })
+        } else {
+          this.$store.commit('addNotificationWithPosition', { message: 'Tweet Not Found', position, type: 'danger', layer: 'app', icon: 'cancel' })
+        }
+      } catch (error) {
+        console.error('🚒 addTwitterThreadCards', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Tweet Not Found', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      }
+      this.isLoadingTwitterThread = false
+    },
     toggleShouldDisplayEmbed () {
       this.$store.dispatch('closeAllDialogs', 'UrlPreview')
       if (this.shouldDisplayEmbed) {
@@ -403,8 +455,6 @@ export default {
   .transparent
     opacity 0.5
 
-  .icon.twitter
-    width 15px
   .add-icon
     margin-right 4px
     vertical-align 0px

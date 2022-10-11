@@ -865,6 +865,16 @@ const self = {
         console.error('🚒 weather', error)
       }
     },
+    twitterThread: async (context, tweetId) => {
+      try {
+        const url = `${host}/services/twitter-thread?tweetId=${tweetId}`
+        const response = await fetch(url)
+        const data = await normalizeResponse(response)
+        return data
+      } catch (error) {
+        console.error('🚒 twitterThread', error)
+      }
+    },
 
     // Downloads
 
