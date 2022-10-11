@@ -1588,6 +1588,7 @@ export default {
     }
   },
   tweetIdFromTwitterUrl (url) {
+    url = this.urlWithoutQueryString(url)
     // https://regexr.com/6vlno
     // matches /status/ and the subsequent tweet id number
     // https://mobile.twitter.com/YORIYUKIII/status/1577603265084395520 → 1577603265084395520
