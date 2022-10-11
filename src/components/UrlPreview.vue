@@ -93,8 +93,9 @@ export default {
         const cards = newCards
         newCards = null
         setTimeout(() => {
-          this.addTwitterThreadCardsComplete(cards)
-        }, 100)
+          console.log('🕊 addTweetCardsComplete')
+          this.addTweetCardsComplete(cards)
+        }, 250)
       }
     })
   },
@@ -250,20 +251,7 @@ export default {
         const tweets = result.data
         console.log('🕊', tweetId, tweets)
         if (tweets.length) {
-          // TODO split out to method: addTweetCards(origin)
-          this.$store.dispatch('history/pause')
-          // add
-          let cards = tweets.map(tweet => {
-            return {
-              id: nanoid(),
-              name: tweet.text,
-              x: origin.x,
-              y: origin.y
-            }
-          })
-          this.$store.dispatch('currentCards/addMultiple', cards)
-          // wait for triggerUpdateUrlPreviewComplete
-          newCards = cards
+          this.addTweetCards(tweets, origin)
         } else {
           this.$store.commit('addNotificationWithPosition', { message: 'Tweet Not Found', position, type: 'danger', layer: 'app', icon: 'cancel' })
           this.isLoadingTwitterThread = false
@@ -274,7 +262,22 @@ export default {
         this.isLoadingTwitterThread = false
       }
     },
-    addTwitterThreadCardsComplete (cards) {
+    addTweetCards (tweets, origin) {
+      this.$store.dispatch('history/pause')
+      // add
+      let cards = tweets.map(tweet => {
+        return {
+          id: nanoid(),
+          name: tweet.text,
+          x: origin.x,
+          y: origin.y
+        }
+      })
+      this.$store.dispatch('currentCards/addMultiple', cards)
+      // wait for triggerUpdateUrlPreviewComplete to position cards
+      newCards = cards
+    },
+    addTweetCardsComplete (cards) {
       // position
       this.$store.dispatch('currentCards/distributeVertically', cards)
       this.$nextTick(() => {
