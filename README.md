@@ -62,7 +62,7 @@ In rare cases when working with code that only works on https (e.g. clipboard co
 
 ### Run Ngrok
 
-    $ ./ngrok http 3000
+    $ ./ngrok http 8080
 
 ## How to update the Hello Kinopio Space
 
