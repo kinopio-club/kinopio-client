@@ -674,39 +674,19 @@ export default {
         }
       })
       this.$store.dispatch('currentCards/addMultiple', cards)
-      // update y positions
+      this.$store.dispatch('currentCards/distributeVertically', cards)
       this.$nextTick(() => {
-        const spaceBetweenCards = 12
-        const zoom = this.$store.getters.spaceCounterZoomDecimal
-        let prevCard
-        cards.forEach((card, index) => {
-          if (index === 0) {
-            prevCard = card
-          } else {
-            const prevCardElement = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
-            const prevCardRect = prevCardElement.getBoundingClientRect()
-            card.y = prevCard.y + (prevCardRect.height * zoom) + spaceBetweenCards
-            prevCard = card
-          }
-          card = utils.updateCardDimensions(card)
-          this.$store.dispatch('currentCards/update', {
-            name: card.name,
-            id: card.id,
-            y: card.y,
-            width: card.width,
-            height: card.height
-          })
+        // select
+        const cardIds = cards.map(card => card.id)
+        this.$store.commit('multipleCardsSelectedIds', cardIds)
+        // ⏺ history
+        cards = cardIds.map(cardId => this.$store.getters['currentCards/byId'](cardId))
+        this.$store.dispatch('history/resume')
+        this.$store.dispatch('history/add', { cards, useSnapshot: true })
+        // update page size
+        this.$nextTick(() => {
+          this.afterPaste({ cards, boxes: [] })
         })
-      })
-      // select
-      const cardIds = cards.map(card => card.id)
-      this.$store.commit('multipleCardsSelectedIds', cardIds)
-      // ⏺ history
-      this.$store.dispatch('history/resume')
-      this.$store.dispatch('history/add', { cards, useSnapshot: true })
-      // update page size
-      this.$nextTick(() => {
-        this.afterPaste({ cards, boxes: [] })
       })
     },
 

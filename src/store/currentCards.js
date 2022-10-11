@@ -555,6 +555,34 @@ const currentCards = {
       context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })
     },
 
+    // distribute position
+
+    distributeVertically: (context, cards) => {
+      nextTick(() => {
+        const spaceBetweenCards = 12
+        const zoom = context.rootGetters.spaceCounterZoomDecimal
+        let prevCard
+        cards.forEach((card, index) => {
+          if (index === 0) {
+            prevCard = card
+          } else {
+            const prevCardElement = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+            const prevCardRect = prevCardElement.getBoundingClientRect()
+            card.y = prevCard.y + (prevCardRect.height * zoom) + spaceBetweenCards
+            prevCard = card
+          }
+          card = utils.updateCardDimensions(card)
+          context.dispatch('update', {
+            name: card.name,
+            id: card.id,
+            y: card.y,
+            width: card.width,
+            height: card.height
+          })
+        })
+      })
+    },
+
     // z-index
 
     incrementSelectedZs: (context) => {
