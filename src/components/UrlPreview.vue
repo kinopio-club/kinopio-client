@@ -35,7 +35,7 @@
               span None
         // twitter thread
         .row(v-if="tweetIdFromTwitterUrl")
-          button(@click="addTwitterThreadCards")
+          button(@click="addTwitterThreadCards" :class="{active: isLoadingTwitterThread}")
             img.icon.add-icon(src="@/assets/add.svg")
             img.icon.twitter(src="@/assets/twitter.svg")
             span Thread
@@ -68,6 +68,8 @@ import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
 
+let newCards, position
+
 export default {
   name: 'UrlPreview',
   components: {
@@ -83,6 +85,18 @@ export default {
     user: Object,
     isImageCard: Boolean,
     urlsIsVisibleInName: Boolean
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerUpdateUrlPreviewComplete') {
+        if (!newCards) { return }
+        const cards = newCards
+        newCards = null
+        setTimeout(() => {
+          this.addTwitterThreadCardsComplete(cards)
+        }, 100)
+      }
+    })
   },
   data () {
     return {
@@ -221,7 +235,8 @@ export default {
   },
   methods: {
     async addTwitterThreadCards (event) {
-      const position = utils.cursorPositionInPage(event)
+      if (this.isLoadingTwitterThread) { return }
+      position = utils.cursorPositionInPage(event)
       const spaceBetweenCards = 12
       const origin = {
         x: this.card.x,
@@ -236,8 +251,8 @@ export default {
         console.log('🕊', tweetId, tweets)
         if (tweets.length) {
           // TODO split out to method: addTweetCards(origin)
-          // TODO load url previews of child tweets before DistributeVertically
           this.$store.dispatch('history/pause')
+          // add
           let cards = tweets.map(tweet => {
             return {
               id: nanoid(),
@@ -247,25 +262,32 @@ export default {
             }
           })
           this.$store.dispatch('currentCards/addMultiple', cards)
-          this.$store.dispatch('currentCards/distributeVertically', cards)
-          this.$nextTick(() => {
-            // select
-            this.$store.dispatch('closeAllDialogs', 'UrlPreview')
-            const cardIds = cards.map(card => card.id)
-            this.$store.commit('multipleCardsSelectedIds', cardIds)
-            // ⏺ history
-            cards = cardIds.map(cardId => this.$store.getters['currentCards/byId'](cardId))
-            this.$store.dispatch('history/resume')
-            this.$store.dispatch('history/add', { cards, useSnapshot: true })
-            this.$store.commit('addNotificationWithPosition', { message: 'Thread Created', position, type: 'success', layer: 'app', icon: 'add' })
-          })
+          // wait for triggerUpdateUrlPreviewComplete
+          newCards = cards
         } else {
           this.$store.commit('addNotificationWithPosition', { message: 'Tweet Not Found', position, type: 'danger', layer: 'app', icon: 'cancel' })
+          this.isLoadingTwitterThread = false
         }
       } catch (error) {
         console.error('🚒 addTwitterThreadCards', error)
         this.$store.commit('addNotificationWithPosition', { message: 'Tweet Not Found', position, type: 'danger', layer: 'app', icon: 'cancel' })
+        this.isLoadingTwitterThread = false
       }
+    },
+    addTwitterThreadCardsComplete (cards) {
+      // position
+      this.$store.dispatch('currentCards/distributeVertically', cards)
+      this.$nextTick(() => {
+        // select
+        this.$store.dispatch('closeAllDialogs', 'UrlPreview')
+        const cardIds = cards.map(card => card.id)
+        this.$store.commit('multipleCardsSelectedIds', cardIds)
+        // ⏺ history
+        cards = cardIds.map(cardId => this.$store.getters['currentCards/byId'](cardId))
+        this.$store.dispatch('history/resume')
+        this.$store.dispatch('history/add', { cards, useSnapshot: true })
+        this.$store.commit('addNotificationWithPosition', { message: 'Thread Created', position, type: 'success', layer: 'app', icon: 'add' })
+      })
       this.isLoadingTwitterThread = false
     },
     toggleShouldDisplayEmbed () {

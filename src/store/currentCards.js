@@ -226,7 +226,9 @@ const currentCards = {
           width: card.width || utils.emptyCard().width,
           height: card.height || utils.emptyCard().height,
           userId: context.rootState.currentUser.id,
-          backgroundColor: card.backgroundColor
+          backgroundColor: card.backgroundColor,
+          shouldUpdateUrlPreview: true,
+          urlPreviewIsVisible: true
         }
         context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
         context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
