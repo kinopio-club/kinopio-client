@@ -18,6 +18,10 @@
               img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
               img.icon(v-else src="@/assets/view.svg")
               span URL
+          .button-wrap
+            a(:href="card.urlPreviewUrl")
+              button
+                span →
         //- all, image, text, none
         .row
           .segmented-buttons
@@ -29,6 +33,14 @@
               span Text
             button(@click="showNone" :class="{active : isShowNone}" :disabled="!canEditCard")
               span None
+        // twitter thread
+        .row(v-if="tweetIdFromTwitterUrl")
+          button(@click="addTwitterThreadCards" :class="{active: isLoadingTwitterThread}")
+            img.icon.add-icon(src="@/assets/add.svg")
+            img.icon.twitter(src="@/assets/twitter.svg")
+            span Thread
+            Loader(:visible="isLoadingTwitterThread")
+
       // preview
       template(v-if="!shouldDisplayEmbed")
         //- url preview image
@@ -54,6 +66,10 @@ import CardEmbed from '@/components/CardEmbed.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
+import { nanoid } from 'nanoid'
+
+let newCards, position
+
 export default {
   name: 'UrlPreview',
   components: {
@@ -70,11 +86,25 @@ export default {
     isImageCard: Boolean,
     urlsIsVisibleInName: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerUpdateUrlPreviewComplete') {
+        if (!newCards) { return }
+        const cards = newCards
+        newCards = null
+        setTimeout(() => {
+          console.log('🕊 addTweetCardsComplete')
+          this.addTweetCardsComplete(cards)
+        }, 250)
+      }
+    })
+  },
   data () {
     return {
       imageCanLoad: false,
       shouldDisplayEmbed: false,
-      embedUrl: ''
+      embedUrl: '',
+      isLoadingTwitterThread: false
     }
   },
   computed: {
@@ -110,7 +140,12 @@ export default {
     },
     isTwitterUrl () {
       const url = this.card.urlPreviewUrl
-      return url.includes('https://twitter.com')
+      return url.includes('https://twitter.com') || url.includes('https://mobile.twitter.com/')
+    },
+    tweetIdFromTwitterUrl () {
+      if (!this.isTwitterUrl) { return }
+      const url = this.card.urlPreviewUrl
+      return utils.tweetIdFromTwitterUrl(url)
     },
     isYoutubeShortenedUrl () {
       const url = this.card.urlPreviewUrl
@@ -200,6 +235,64 @@ export default {
     }
   },
   methods: {
+    async addTwitterThreadCards (event) {
+      if (this.isLoadingTwitterThread) { return }
+      position = utils.cursorPositionInPage(event)
+      const spaceBetweenCards = 12
+      const origin = {
+        x: this.card.x,
+        y: this.card.y + this.card.height + spaceBetweenCards
+      }
+      this.isLoadingTwitterThread = true
+      const tweetId = this.tweetIdFromTwitterUrl
+
+      try {
+        const result = await this.$store.dispatch('api/twitterThread', tweetId)
+        const tweets = result.data
+        console.log('🕊', tweetId, tweets)
+        if (tweets.length) {
+          this.addTweetCards(tweets, origin)
+        } else {
+          this.$store.commit('addNotificationWithPosition', { message: 'Tweet Not Found', position, type: 'danger', layer: 'app', icon: 'cancel' })
+          this.isLoadingTwitterThread = false
+        }
+      } catch (error) {
+        console.error('🚒 addTwitterThreadCards', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Tweet Not Found', position, type: 'danger', layer: 'app', icon: 'cancel' })
+        this.isLoadingTwitterThread = false
+      }
+    },
+    addTweetCards (tweets, origin) {
+      this.$store.dispatch('history/pause')
+      // add
+      let cards = tweets.map(tweet => {
+        return {
+          id: nanoid(),
+          name: tweet.text,
+          x: origin.x,
+          y: origin.y
+        }
+      })
+      this.$store.dispatch('currentCards/addMultiple', cards)
+      // wait for triggerUpdateUrlPreviewComplete to position cards
+      newCards = cards
+    },
+    addTweetCardsComplete (cards) {
+      // position
+      this.$store.dispatch('currentCards/distributeVertically', cards)
+      this.$nextTick(() => {
+        // select
+        this.$store.dispatch('closeAllDialogs', 'UrlPreview')
+        const cardIds = cards.map(card => card.id)
+        this.$store.commit('multipleCardsSelectedIds', cardIds)
+        // ⏺ history
+        cards = cardIds.map(cardId => this.$store.getters['currentCards/byId'](cardId))
+        this.$store.dispatch('history/resume')
+        this.$store.dispatch('history/add', { cards, useSnapshot: true })
+        this.$store.commit('addNotificationWithPosition', { message: 'Thread Created', position, type: 'success', layer: 'app', icon: 'add' })
+      })
+      this.isLoadingTwitterThread = false
+    },
     toggleShouldDisplayEmbed () {
       this.$store.dispatch('closeAllDialogs', 'UrlPreview')
       if (this.shouldDisplayEmbed) {
@@ -386,5 +479,9 @@ export default {
 
   .transparent
     opacity 0.5
+
+  .add-icon
+    margin-right 4px
+    vertical-align 0px
 
 </style>

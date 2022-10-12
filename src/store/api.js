@@ -808,13 +808,8 @@ const self = {
     },
     urlPreview: async (context, url) => {
       try {
-        // let host = 'https://iframely.kinopio.club/iframely'
         const apiKey = '0788beaa34f65adc0fe7ac'
-        // const fallbackList = ['youtube', 'twitter', 'facebook', 'instagram', 'wikipedia', 'amazon', 'github']
-        // const shouldUseIFramely = fallbackList.find(item => url.includes(item))
-        // if (shouldUseIFramely) {
         const host = 'https://iframe.ly/api/iframely'
-        // }
         const response = await fetch(`${host}/?url=${encodeURIComponent(url)}&api_key=${apiKey}`)
         if (response.status !== 200) {
           throw new Error(response.status)
@@ -825,7 +820,7 @@ const self = {
         console.error('🚒 urlPreview', error)
       }
     },
-    getWeather: async (context) => {
+    weather: async (context) => {
       const showWeather = context.rootState.currentUser.showWeather
       const weatherLocation = context.rootState.currentUser.weatherLocation
       const weatherUnitIsCelcius = context.rootState.currentUser.weatherUnitIsCelcius
@@ -868,6 +863,16 @@ const self = {
         return weather
       } catch (error) {
         console.error('🚒 weather', error)
+      }
+    },
+    twitterThread: async (context, tweetId) => {
+      try {
+        const url = `${host}/services/twitter-thread?tweetId=${tweetId}`
+        const response = await fetch(url)
+        const data = await normalizeResponse(response)
+        return data
+      } catch (error) {
+        console.error('🚒 twitterThread', error)
       }
     },
 

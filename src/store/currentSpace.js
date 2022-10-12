@@ -336,7 +336,7 @@ const currentSpace = {
       const isTomorrow = context.rootState.loadJournalSpaceTomorrow
       const currentUser = utils.clone(context.rootState.currentUser)
       context.commit('isLoadingSpace', true, { root: true })
-      const weather = await context.dispatch('api/getWeather', null, { root: true })
+      const weather = await context.dispatch('api/weather', null, { root: true })
       const space = utils.journalSpace(currentUser, isTomorrow, weather)
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false

@@ -275,7 +275,7 @@ export default {
       }
     })
   },
-  mounted () {
+  async mounted () {
     const cardIsMissingDimensions = Boolean(!this.card.width || !this.card.height)
     if (cardIsMissingDimensions) {
       let card = { id: this.card.id }
@@ -290,11 +290,12 @@ export default {
     }
     if (this.card.shouldUpdateUrlPreview) {
       this.updateMediaUrls()
-      this.updateUrlPreview()
+      await this.updateUrlPreview()
       this.$store.dispatch('currentCards/update', {
         id: this.card.id,
         shouldUpdateUrlPreview: false
       })
+      this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
     }
   },
   data () {

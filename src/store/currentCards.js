@@ -226,7 +226,9 @@ const currentCards = {
           width: card.width || utils.emptyCard().width,
           height: card.height || utils.emptyCard().height,
           userId: context.rootState.currentUser.id,
-          backgroundColor: card.backgroundColor
+          backgroundColor: card.backgroundColor,
+          shouldUpdateUrlPreview: true,
+          urlPreviewIsVisible: true
         }
         context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
         context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
@@ -553,6 +555,34 @@ const currentCards = {
       context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
       context.commit('triggerUpdateCardOverlaps', null, { root: true })
       context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })
+    },
+
+    // distribute position
+
+    distributeVertically: (context, cards) => {
+      nextTick(() => {
+        const spaceBetweenCards = 12
+        const zoom = context.rootGetters.spaceCounterZoomDecimal
+        let prevCard
+        cards.forEach((card, index) => {
+          if (index === 0) {
+            prevCard = card
+          } else {
+            const prevCardElement = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+            const prevCardRect = prevCardElement.getBoundingClientRect()
+            card.y = prevCard.y + (prevCardRect.height * zoom) + spaceBetweenCards
+            prevCard = card
+          }
+          card = utils.updateCardDimensions(card)
+          context.dispatch('update', {
+            name: card.name,
+            id: card.id,
+            y: card.y,
+            width: card.width,
+            height: card.height
+          })
+        })
+      })
     },
 
     // z-index
