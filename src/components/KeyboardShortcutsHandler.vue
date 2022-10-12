@@ -409,6 +409,7 @@ export default {
     // recursive
     nonOverlappingCardPosition (position) {
       const cards = this.$store.getters['currentCards/isSelectable'](position)
+      if (!cards) { return position }
       const overlappingCard = cards.find(card => {
         const isBetweenX = utils.isBetween({
           value: position.x,
