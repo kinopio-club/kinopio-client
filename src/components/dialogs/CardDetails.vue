@@ -923,8 +923,10 @@ export default {
     },
     focusName (position) {
       utils.disablePinchZoom()
-      if (utils.visualViewport().scale !== 1) {
+      const shouldPreventFocus = this.$store.state.shouldPreventNextFocusOnName
+      if (shouldPreventFocus) {
         this.triggerUpdatePositionInVisualViewport()
+        this.$store.commit('shouldPreventNextFocusOnName', false)
         return
       }
       this.$nextTick(() => {
