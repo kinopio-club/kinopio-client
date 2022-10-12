@@ -4,7 +4,8 @@
 <script>
 import utils from '@/utils.js'
 
-let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, scrollAreaHeight, scrollAreaWidth, maxHeight, maxWidth
+const scrollArea = 50
+let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, maxHeight, maxWidth
 let movementDirection = {}
 
 export default {
@@ -67,10 +68,6 @@ export default {
       const zoom = this.spaceZoomDecimal
       startCursor = position
       endCursor = position
-      scrollAreaHeight = (this.viewportHeight / 8) * zoom
-      scrollAreaHeight = Math.max(50, scrollAreaHeight)
-      scrollAreaWidth = (this.viewportWidth / 8) * zoom
-      scrollAreaWidth = Math.max(50, scrollAreaWidth)
       maxHeight = Math.max(6500, this.$store.state.viewportHeight) * zoom
       maxWidth = Math.max(6500, this.$store.state.viewportWidth) * zoom
       if (this.$store.getters.shouldScrollAtEdges(event)) {
@@ -92,10 +89,10 @@ export default {
       const viewportHeight = this.viewportHeight
       const viewportWidth = this.viewportWidth
       const cursor = this.cursor()
-      const cursorIsTopSide = cursor.y <= scrollAreaHeight
-      const cursorIsBottomSide = cursor.y >= (viewportHeight - scrollAreaHeight)
-      const cursorIsLeftSide = cursor.x <= scrollAreaWidth
-      const cursorIsRightSide = cursor.x >= (viewportWidth - scrollAreaWidth)
+      const cursorIsTopSide = cursor.y <= scrollArea
+      const cursorIsBottomSide = cursor.y >= (viewportHeight - scrollArea)
+      const cursorIsLeftSide = cursor.x <= scrollArea
+      const cursorIsRightSide = cursor.x >= (viewportWidth - scrollArea)
       // Y movement
       if (movementDirection.y === 'up' && cursorIsTopSide && window.scrollY) {
         speed = this.speed(cursor, 'up')
@@ -158,7 +155,7 @@ export default {
     },
     increasePageWidth (delta) {
       if (this.shouldPreventResize) { return }
-      const cursorIsRightSideOfPage = (this.pageWidth - prevCursorPage.x) < scrollAreaWidth
+      const cursorIsRightSideOfPage = (this.pageWidth - prevCursorPage.x) < scrollArea
       if (cursorIsRightSideOfPage) {
         const pageWidth = this.pageWidth
         const width = pageWidth + delta.x
@@ -167,7 +164,7 @@ export default {
     },
     increasePageHeight (delta) {
       if (this.shouldPreventResize) { return }
-      const cursorIsBottomSideOfPage = (this.pageHeight - prevCursorPage.y) < scrollAreaHeight
+      const cursorIsBottomSideOfPage = (this.pageHeight - prevCursorPage.y) < scrollArea
       if (cursorIsBottomSideOfPage) {
         const pageHeight = this.pageHeight
         const height = pageHeight + delta.y
@@ -229,27 +226,25 @@ export default {
       // viewportSize based on direction
       const directionIsY = direction === 'up' || direction === 'down'
       const directionIsX = direction === 'left' || direction === 'right'
-      let scrollAreaSize, viewportSize
+      let viewportSize
       if (directionIsX) {
-        scrollAreaSize = scrollAreaWidth
         cursor = cursor.x
         viewportSize = viewportWidth
       } else if (directionIsY) {
-        scrollAreaSize = scrollAreaHeight
         cursor = cursor.y
         viewportSize = viewportHeight
       }
       // calc percent over scrollArea
       let amount
       if (direction === 'up' || direction === 'left') {
-        amount = Math.abs(cursor - scrollAreaSize)
+        amount = Math.abs(cursor - scrollArea)
       }
       if (direction === 'down' || direction === 'right') {
-        amount = Math.abs(cursor - (viewportSize - scrollAreaSize))
+        amount = Math.abs(cursor - (viewportSize - scrollArea))
       }
-      let percent = utils.roundFloat(amount / scrollAreaSize)
+      let percent = utils.roundFloat(amount / scrollArea)
       // speed
-      let speed = percent * scrollAreaSize
+      let speed = percent * scrollArea
       speed = Math.max(speed, minSpeed)
       if (percent > 1) {
         speed = Math.min(speed, maxSpeedOutsideWindow)
