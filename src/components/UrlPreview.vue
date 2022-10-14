@@ -289,7 +289,7 @@ export default {
         cards = cardIds.map(cardId => this.$store.getters['currentCards/byId'](cardId))
         this.$store.dispatch('history/resume')
         this.$store.dispatch('history/add', { cards, useSnapshot: true })
-        this.$store.commit('addNotificationWithPosition', { message: 'Thread Created', position, type: 'success', layer: 'app', icon: 'add' })
+        this.$store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
       })
       this.isLoadingTwitterThread = false
     },
