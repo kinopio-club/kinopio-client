@@ -277,21 +277,49 @@ export default {
       // wait for triggerUpdateUrlPreviewComplete to position cards
       newCards = cards
     },
+    addAndSelectConnectionsBetweenTweetCards (cards) {
+      const type = this.$store.getters['currentConnections/typeForNewConnections']
+      if (!type) {
+        this.$store.dispatch('currentConnections/addType')
+      }
+      let connections = []
+      cards.forEach((card, index) => {
+        if (index === 0) { return }
+        const startCardId = cards[index - 1].id
+        const endCardId = cards[index].id
+        connections.push({
+          id: nanoid(),
+          startCardId,
+          endCardId,
+          path: utils.connectionBetweenCards(startCardId, endCardId)
+        })
+      })
+      connections.forEach(connection => {
+        this.$store.dispatch('currentConnections/add', { connection, type, shouldNotRecordHistory: true })
+        this.$store.dispatch('addToMultipleConnectionsSelected', connection.id)
+      })
+      return connections
+    },
     addTweetCardsComplete (cards) {
-      // position
+      this.$store.dispatch('history/pause')
+      this.$store.dispatch('closeAllDialogs', 'addTweetCardsComplete')
+      // position cards
       this.$store.dispatch('currentCards/distributeVertically', cards)
       this.$nextTick(() => {
-        // select
-        this.$store.dispatch('closeAllDialogs', 'UrlPreview')
-        const cardIds = cards.map(card => card.id)
-        this.$store.commit('multipleCardsSelectedIds', cardIds)
-        // ⏺ history
-        cards = cardIds.map(cardId => this.$store.getters['currentCards/byId'](cardId))
-        this.$store.dispatch('history/resume')
-        this.$store.dispatch('history/add', { cards, useSnapshot: true })
-        this.$store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
+        this.$nextTick(() => {
+          this.addAndSelectConnectionsBetweenTweetCards(cards)
+          // select cards
+          const cardIds = cards.map(card => card.id)
+          this.$store.commit('multipleCardsSelectedIds', cardIds)
+          // ⏺ history
+          cards = cardIds.map(cardId => this.$store.getters['currentCards/byId'](cardId))
+          this.$store.dispatch('history/resume')
+          this.$store.dispatch('history/add', { cards, useSnapshot: true })
+          this.$store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
+          this.$store.commit('triggerUpdateCardOverlaps')
+          this.isLoadingTwitterThread = false
+        })
       })
-      this.isLoadingTwitterThread = false
     },
     toggleShouldDisplayEmbed () {
       this.$store.dispatch('closeAllDialogs', 'UrlPreview')
