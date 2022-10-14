@@ -923,6 +923,12 @@ export default {
     },
     focusName (position) {
       utils.disablePinchZoom()
+      const shouldPreventFocus = this.$store.state.shouldPreventNextFocusOnName
+      if (shouldPreventFocus) {
+        this.triggerUpdatePositionInVisualViewport()
+        this.$store.commit('shouldPreventNextFocusOnName', false)
+        return
+      }
       this.$nextTick(() => {
         const element = this.$refs.name
         const length = this.name.length

@@ -45,9 +45,12 @@ export default {
       return `@/assets/${path}`
     }
   },
+  isDevelopment () {
+    return import.meta.env.MODE === 'development'
+  },
   kinopioDomain () {
     let domain = 'https://kinopio.club'
-    if (import.meta.env.MODE === 'development') {
+    if (this.isDevelopment()) {
       domain = 'http://kinopio.local:8080'
     }
     return domain
@@ -57,14 +60,14 @@ export default {
     if (useKinopioUrl) {
       host = 'https://api.kinopio.club'
     }
-    if (import.meta.env.MODE === 'development') {
+    if (this.isDevelopment()) {
       host = 'http://kinopio.local:3000'
     }
     return host
   },
   websocketHost () {
     let host = 'wss://kinopio-server.herokuapp.com'
-    if (import.meta.env.MODE === 'development') {
+    if (this.isDevelopment()) {
       host = 'ws://kinopio.local:3000'
     }
     return host
@@ -1582,6 +1585,24 @@ export default {
       return 'audio'
     } else {
       return 'link'
+    }
+  },
+  tweetIdFromTwitterUrl (url) {
+    url = this.urlWithoutQueryString(url)
+    // https://regexr.com/6vlno
+    // matches /status/ and the subsequent tweet id number
+    // https://mobile.twitter.com/YORIYUKIII/status/1577603265084395520 → 1577603265084395520
+    let tweetIdPattern = new RegExp(/\/status\/[0-9]*$/gm)
+    let match = url.match(tweetIdPattern)
+    if (!match) { return }
+    // match again to extract just the id number
+    tweetIdPattern = new RegExp(/[0-9]*$/gm)
+    match = match[0].match(tweetIdPattern)
+    if (!match) { return }
+    match = match[0]
+    // check that id is number
+    if (parseInt(match)) {
+      return match
     }
   },
 

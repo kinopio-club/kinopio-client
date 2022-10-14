@@ -1,5 +1,5 @@
 <template lang="pug">
-article(
+article#card(
   :style="positionStyle"
   :data-card-id="id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
@@ -275,7 +275,7 @@ export default {
       }
     })
   },
-  mounted () {
+  async mounted () {
     const cardIsMissingDimensions = Boolean(!this.card.width || !this.card.height)
     if (cardIsMissingDimensions) {
       let card = { id: this.card.id }
@@ -290,11 +290,12 @@ export default {
     }
     if (this.card.shouldUpdateUrlPreview) {
       this.updateMediaUrls()
-      this.updateUrlPreview()
+      await this.updateUrlPreview()
       this.$store.dispatch('currentCards/update', {
         id: this.card.id,
         shouldUpdateUrlPreview: false
       })
+      this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
     }
   },
   data () {
@@ -485,7 +486,8 @@ export default {
       const userIsConnecting = this.$store.state.currentConnectionStartCardIds.length
       const currentUserIsDraggingBox = this.$store.state.currentUserIsDraggingBox
       const currentUserIsResizingBox = this.$store.state.currentUserIsResizingBox
-      return userIsConnecting || currentUserIsDraggingBox || currentUserIsResizingBox || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked
+      const currentUserIsPanning = this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning
+      return userIsConnecting || currentUserIsDraggingBox || currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.isResizing || this.isLocked
     },
     cardClasses () {
       return {
@@ -1723,6 +1725,7 @@ export default {
     showCardDetailsTouch (event) {
       this.cancelLocking()
       if (this.touchIsNearTouchPosition(event)) {
+        this.$store.commit('shouldPreventNextFocusOnName', true)
         this.showCardDetails(event)
       }
       const userId = this.$store.state.currentUser.id

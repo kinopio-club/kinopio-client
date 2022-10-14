@@ -3,10 +3,6 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
   section
     p Controls
   section
-    .row(v-if="!isMobile")
-      label(:class="{active: shouldInvertZoomDirection}" @click.left.prevent="toggleShouldInvertZoomDirection" @keydown.stop.enter="toggleShouldInvertZoomDirection")
-        input(type="checkbox" v-model="shouldInvertZoomDirection")
-        span Invert Zoom Direction
     .row
       label(:class="{active: shouldOpenLinksInNewTab}" @click.left.prevent="toggleShouldOpenLinksInNewTab" @keydown.stop.enter="toggleShouldOpenLinksInNewTab")
         input(type="checkbox" v-model="shouldOpenLinksInNewTab")
@@ -44,16 +40,11 @@ export default {
   },
   computed: {
     isMobile () { return utils.isMobile() },
-    shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection },
     shouldOpenLinksInNewTab () { return this.$store.state.currentUser.shouldOpenLinksInNewTab },
     shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections }
   },
   methods: {
-    toggleShouldInvertZoomDirection () {
-      const value = !this.shouldInvertZoomDirection
-      this.$store.dispatch('currentUser/shouldInvertZoomDirection', value)
-    },
     toggleShouldOpenLinksInNewTab () {
       const value = !this.shouldOpenLinksInNewTab
       this.$store.dispatch('currentUser/shouldOpenLinksInNewTab', value)

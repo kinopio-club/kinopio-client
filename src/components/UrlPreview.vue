@@ -18,33 +18,45 @@
               img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
               img.icon(v-else src="@/assets/view.svg")
               span URL
+          .button-wrap
+            a(:href="card.urlPreviewUrl")
+              button
+                span →
         //- all, image, text, none
-        .row(v-if="previewHasImage && previewHasInfo")
+        .row
           .segmented-buttons
-            button(@click="showAll" :class="{active : isShowAll}" :disabled="!canEditCard")
+            button(v-if="previewHasImage && previewHasInfo" @click="showAll" :class="{active : isShowAll}" :disabled="!canEditCard")
               span All
-            button(@click="showImage" :class="{active : isShowImage}" :disabled="!canEditCard")
+            button(v-if="previewHasImage" @click="showImage" :class="{active : isShowImage}" :disabled="!canEditCard")
               span Image
-            button(@click="showInfo" :class="{active : isShowInfo}" :disabled="!canEditCard")
+            button(v-if="previewHasInfo" @click="showInfo" :class="{active : isShowInfo}" :disabled="!canEditCard")
               span Text
             button(@click="showNone" :class="{active : isShowNone}" :disabled="!canEditCard")
               span None
+        // twitter thread
+        .row(v-if="tweetIdFromTwitterUrl")
+          button(@click="addTwitterThreadCards" :class="{active: isLoadingTwitterThread}")
+            img.icon.add-icon(src="@/assets/add.svg")
+            img.icon.twitter(src="@/assets/twitter.svg")
+            span Thread
+            Loader(:visible="isLoadingTwitterThread")
+
       // preview
       template(v-if="!shouldDisplayEmbed")
         //- url preview image
         img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
         template(v-if="shouldLoadUrlPreviewImage")
         //- on card
-        img.preview-image(v-if="!parentIsCardDetails" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensions")
+        img.preview-image(v-if="!parentIsCardDetails && card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensions")
         //- in carddetails
-        a.preview-image-wrap(v-if="parentIsCardDetails && !shouldHideImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
-          img.preview-image( :src="card.urlPreviewImage" @load="updateDimensions")
+        a.preview-image-wrap(v-if="parentIsCardDetails && !shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
+          img.preview-image(:src="card.urlPreviewImage" @load="updateDimensions")
         //- info
-        .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, hidden: shouldHideInfo, transparent: isShowNone}" :style="{background: selectedColor}")
+        .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, hidden: shouldHideInfo, transparent: isShowNone, 'text-only': isTextOnly }" :style="{background: selectedColor}")
           img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
           .title {{filteredTitle}}
-          .description(v-if="description") {{description}}
+          .description(v-if="description && shouldShowDescription") {{description}}
       //- embed playback
       CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl")
 </template>
@@ -53,6 +65,10 @@
 import CardEmbed from '@/components/CardEmbed.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+
+import { nanoid } from 'nanoid'
+
+let newCards, position
 
 export default {
   name: 'UrlPreview',
@@ -70,11 +86,25 @@ export default {
     isImageCard: Boolean,
     urlsIsVisibleInName: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerUpdateUrlPreviewComplete') {
+        if (!newCards) { return }
+        const cards = newCards
+        newCards = null
+        setTimeout(() => {
+          console.log('🕊 addTweetCardsComplete')
+          this.addTweetCardsComplete(cards)
+        }, 250)
+      }
+    })
+  },
   data () {
     return {
       imageCanLoad: false,
       shouldDisplayEmbed: false,
-      embedUrl: ''
+      embedUrl: '',
+      isLoadingTwitterThread: false
     }
   },
   computed: {
@@ -92,6 +122,13 @@ export default {
     shouldHideImage () {
       return this.card.shouldHideUrlPreviewImage
     },
+    isTextOnly () {
+      return this.shouldHideImage || !this.card.urlPreviewImage
+    },
+    shouldShowDescription () {
+      if (this.isTextOnly) { return true }
+      return this.isTwitterUrl || this.parentIsCardDetails
+    },
     selectedColor () {
       if (!this.isSelected) { return }
       return this.user.color
@@ -103,7 +140,12 @@ export default {
     },
     isTwitterUrl () {
       const url = this.card.urlPreviewUrl
-      return url.includes('https://twitter.com')
+      return url.includes('https://twitter.com') || url.includes('https://mobile.twitter.com/')
+    },
+    tweetIdFromTwitterUrl () {
+      if (!this.isTwitterUrl) { return }
+      const url = this.card.urlPreviewUrl
+      return utils.tweetIdFromTwitterUrl(url)
     },
     isYoutubeShortenedUrl () {
       const url = this.card.urlPreviewUrl
@@ -159,16 +201,11 @@ export default {
     },
     description () {
       let description = this.card.urlPreviewDescription
-      const image = this.card.urlPreviewImage
-      const cardIsShort = this.card.height < 200
       const isCardView = !this.parentIsCardDetails
       if (this.twitterDescription) { return this.twitterDescription }
       if (this.isYoutubeUrl) { return }
       if (isCardView) {
-        description = utils.truncated(description)
-      }
-      if (isCardView && image && cardIsShort) {
-        description = ''
+        description = utils.truncated(description, 200)
       }
       return description
     },
@@ -198,6 +235,92 @@ export default {
     }
   },
   methods: {
+    async addTwitterThreadCards (event) {
+      if (this.isLoadingTwitterThread) { return }
+      position = utils.cursorPositionInPage(event)
+      const spaceBetweenCards = 12
+      const origin = {
+        x: this.card.x,
+        y: this.card.y + this.card.height + spaceBetweenCards
+      }
+      this.isLoadingTwitterThread = true
+      const tweetId = this.tweetIdFromTwitterUrl
+
+      try {
+        const result = await this.$store.dispatch('api/twitterThread', tweetId)
+        const tweets = result.data
+        console.log('🕊', tweetId, tweets)
+        if (tweets.length) {
+          this.addTweetCards(tweets, origin)
+        } else {
+          this.$store.commit('addNotificationWithPosition', { message: 'Tweet Not Found', position, type: 'danger', layer: 'app', icon: 'cancel' })
+          this.isLoadingTwitterThread = false
+        }
+      } catch (error) {
+        console.error('🚒 addTwitterThreadCards', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Tweet Not Found', position, type: 'danger', layer: 'app', icon: 'cancel' })
+        this.isLoadingTwitterThread = false
+      }
+    },
+    addTweetCards (tweets, origin) {
+      this.$store.dispatch('history/pause')
+      // add
+      let cards = tweets.map(tweet => {
+        return {
+          id: nanoid(),
+          name: tweet.text,
+          x: origin.x,
+          y: origin.y
+        }
+      })
+      this.$store.dispatch('currentCards/addMultiple', cards)
+      // wait for triggerUpdateUrlPreviewComplete to position cards
+      newCards = cards
+    },
+    addAndSelectConnectionsBetweenTweetCards (cards) {
+      const type = this.$store.getters['currentConnections/typeForNewConnections']
+      if (!type) {
+        this.$store.dispatch('currentConnections/addType')
+      }
+      let connections = []
+      cards.forEach((card, index) => {
+        if (index === 0) { return }
+        const startCardId = cards[index - 1].id
+        const endCardId = cards[index].id
+        connections.push({
+          id: nanoid(),
+          startCardId,
+          endCardId,
+          path: utils.connectionBetweenCards(startCardId, endCardId)
+        })
+      })
+      connections.forEach(connection => {
+        this.$store.dispatch('currentConnections/add', { connection, type, shouldNotRecordHistory: true })
+        this.$store.dispatch('addToMultipleConnectionsSelected', connection.id)
+      })
+      return connections
+    },
+    addTweetCardsComplete (cards) {
+      this.$store.dispatch('history/pause')
+      this.$store.dispatch('closeAllDialogs', 'addTweetCardsComplete')
+      // position cards
+      this.$store.dispatch('currentCards/distributeVertically', cards)
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.addAndSelectConnectionsBetweenTweetCards(cards)
+          // select cards
+          const cardIds = cards.map(card => card.id)
+          this.$store.commit('multipleCardsSelectedIds', cardIds)
+          // ⏺ history
+          cards = cardIds.map(cardId => this.$store.getters['currentCards/byId'](cardId))
+          this.$store.dispatch('history/resume')
+          this.$store.dispatch('history/add', { cards, useSnapshot: true })
+          this.$store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
+          this.$store.commit('triggerUpdateCardOverlaps')
+          this.isLoadingTwitterThread = false
+        })
+      })
+    },
     toggleShouldDisplayEmbed () {
       this.$store.dispatch('closeAllDialogs', 'UrlPreview')
       if (this.shouldDisplayEmbed) {
@@ -314,9 +437,12 @@ export default {
     position absolute
     margin 8px
     background var(--secondary-hover-background)
-    border-top-left-radius 0
-    border-top-right-radius 0
+    user-select text
     &.text-with-image
+      border-radius 3px
+    &.text-only
+      position relative
+      margin 0
       border-radius 3px
 
   .side-text
@@ -381,5 +507,9 @@ export default {
 
   .transparent
     opacity 0.5
+
+  .add-icon
+    margin-right 4px
+    vertical-align 0px
 
 </style>

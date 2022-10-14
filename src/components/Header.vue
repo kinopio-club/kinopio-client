@@ -41,6 +41,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             SpaceDetails(:visible="spaceDetailsIsVisible")
             ImportArenaChannel(:visible="importArenaChannelIsVisible")
             SpaceDetailsInfo(:visible="spaceDetailsInfoIsVisible")
+            Import(:visible="importIsVisible")
             //- Read Only badge
             .label-badge.read-only-badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
               span(:class="{'invisible': readOnlyJiggle}")
@@ -94,7 +95,6 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           SpaceUsers
           UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
           Donate(:visible="donateIsVisible")
-          Import(:visible="importIsVisible")
           //- Share
           .button-wrap
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")

@@ -755,6 +755,9 @@ dialog
   transform rotate(-45deg)
   vertical-align -2px
 
+.icon.twitter
+  width 15px
+
 label,
 li
   &:hover,

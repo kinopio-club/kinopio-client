@@ -43,6 +43,7 @@ const store = createStore({
     webfontIsLoaded: false,
     userHasScrolled: false,
     shouldPreventNextEnterKey: false,
+    shouldPreventNextFocusOnName: false,
     isEmbed: false,
     isAddPage: false,
     isAppStoreView: false,
@@ -355,6 +356,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'shouldPreventNextEnterKey' })
       state.shouldPreventNextEnterKey = value
     },
+    shouldPreventNextFocusOnName: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldPreventNextFocusOnName' })
+      state.shouldPreventNextFocusOnName = value
+    },
     isEmbed: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isEmbed' })
       state.isEmbed = value
@@ -450,6 +455,7 @@ const store = createStore({
     triggerSelectAllItemsBelowCursor: (state, position) => {},
     triggerSplitCard: (state, cardId) => {},
     triggerUpdateUrlPreview: (state, cardId) => {},
+    triggerUpdateUrlPreviewComplete: (state, cardId) => {},
     triggerRemovedIsVisible: () => {},
     triggerClearAllSpaceFilters: () => {},
     triggerNotifyUnlockedStickyCards: () => {},

@@ -11,7 +11,7 @@ let browserZoomLevel = 0
 let disableContextMenu = false
 let spaceKeyIsDown = false
 
-let prevCursorPosition, currentCursorPosition
+let prevCursorPosition, currentCursorPosition, prevRightClickPosition
 
 const checkIsSpaceScope = (event) => {
   const tagName = event.target.tagName
@@ -21,6 +21,17 @@ const checkIsSpaceScope = (event) => {
   const isMain = tagName === 'MAIN'
   const isFocusedCard = event.target.className === 'card'
   return isBody || isMain || isFocusedCard
+}
+
+const checkIsCardScope = (event) => {
+  const isFromCardName = event.target.closest('dialog.card-details')
+  const isFromCard = event.target.classList[0] === 'card'
+  return isFromCard || isFromCardName
+}
+
+const checkIsPanScope = (event) => {
+  const isFromDialog = event.target.closest('dialog')
+  return !isFromDialog
 }
 
 export default {
@@ -125,9 +136,7 @@ export default {
     handleMetaKeyShortcuts (event) {
       const key = event.key
       const isMeta = event.metaKey || event.ctrlKey
-      const isFromCardName = event.target.closest('dialog.card-details')
-      const isFromCard = event.target.classList[0] === 'card'
-      const isCardScope = isFromCard || isFromCardName
+      const isCardScope = checkIsCardScope(event)
       const isSpaceScope = checkIsSpaceScope(event)
       const isFromInput = event.target.closest('input') || event.target.closest('textarea')
       // Add Child Card
@@ -215,8 +224,7 @@ export default {
       const deltaY = event.deltaY
       let shouldZoomIn = deltaY < 0
       let shouldZoomOut = deltaY > 0
-      const invertZoom = event.webkitDirectionInvertedFromDevice // this.$store.state.currentUser.shouldInvertZoomDirection
-      console.log('🐸', event)
+      const invertZoom = event.webkitDirectionInvertedFromDevice
       if (invertZoom) {
         shouldZoomIn = deltaY > 0
         shouldZoomOut = deltaY < 0
@@ -232,10 +240,10 @@ export default {
     handleMouseDownEvents (event) {
       const rightMouseButton = 2
       const isRightClick = rightMouseButton === event.button
-      const isSpaceScope = event.target.id === 'magic-painting'
+      const isPanScope = checkIsPanScope(event)
       const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
-      const shouldBoxSelect = event.shiftKey && isSpaceScope && !toolbarIsBox
-      const shouldPan = isRightClick && isSpaceScope
+      const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox
+      const shouldPan = isRightClick && isPanScope
       const position = utils.cursorPositionInPage(event)
       if (shouldBoxSelect) {
         event.preventDefault()
@@ -243,6 +251,7 @@ export default {
         this.$store.commit('currentUserBoxSelectEnd', position)
         this.$store.commit('currentUserBoxSelectStart', position)
       } else if (shouldPan) {
+        prevRightClickPosition = utils.cursorPositionInPage(event)
         event.preventDefault()
         this.$store.commit('currentUserIsPanning', true)
         disableContextMenu = true
@@ -273,9 +282,20 @@ export default {
     },
     // on mouse up
     handleMouseUpEvents (event) {
+      const rightMouseButton = 2
+      const isRightClick = rightMouseButton === event.button
+      const isFromCard = event.target.closest('article#card')
+      const position = utils.cursorPositionInPage(event)
+      let isNearPrevRightClickPosition
+      if (isRightClick) {
+        isNearPrevRightClickPosition = utils.distanceBetweenTwoPoints(prevRightClickPosition, position) <= 5
+      }
       prevCursorPosition = undefined
       this.$store.commit('currentUserIsPanning', false)
       this.$store.commit('currentUserIsBoxSelecting', false)
+      if (isRightClick && isFromCard && isNearPrevRightClickPosition) {
+        console.log('🐁 is right click on card') // temp
+      }
     },
     // on scroll
     handleScrollEvents (event) {
@@ -389,6 +409,7 @@ export default {
     // recursive
     nonOverlappingCardPosition (position) {
       const cards = this.$store.getters['currentCards/isSelectable'](position)
+      if (!cards) { return position }
       const overlappingCard = cards.find(card => {
         const isBetweenX = utils.isBetween({
           value: position.x,
@@ -654,39 +675,19 @@ export default {
         }
       })
       this.$store.dispatch('currentCards/addMultiple', cards)
-      // update y positions
+      this.$store.dispatch('currentCards/distributeVertically', cards)
       this.$nextTick(() => {
-        const spaceBetweenCards = 12
-        const zoom = this.$store.getters.spaceCounterZoomDecimal
-        let prevCard
-        cards.forEach((card, index) => {
-          if (index === 0) {
-            prevCard = card
-          } else {
-            const prevCardElement = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
-            const prevCardRect = prevCardElement.getBoundingClientRect()
-            card.y = prevCard.y + (prevCardRect.height * zoom) + spaceBetweenCards
-            prevCard = card
-          }
-          card = utils.updateCardDimensions(card)
-          this.$store.dispatch('currentCards/update', {
-            name: card.name,
-            id: card.id,
-            y: card.y,
-            width: card.width,
-            height: card.height
-          })
+        // select
+        const cardIds = cards.map(card => card.id)
+        this.$store.commit('multipleCardsSelectedIds', cardIds)
+        // ⏺ history
+        cards = cardIds.map(cardId => this.$store.getters['currentCards/byId'](cardId))
+        this.$store.dispatch('history/resume')
+        this.$store.dispatch('history/add', { cards, useSnapshot: true })
+        // update page size
+        this.$nextTick(() => {
+          this.afterPaste({ cards, boxes: [] })
         })
-      })
-      // select
-      const cardIds = cards.map(card => card.id)
-      this.$store.commit('multipleCardsSelectedIds', cardIds)
-      // ⏺ history
-      this.$store.dispatch('history/resume')
-      this.$store.dispatch('history/add', { cards, useSnapshot: true })
-      // update page size
-      this.$nextTick(() => {
-        this.afterPaste({ cards, boxes: [] })
       })
     },
 

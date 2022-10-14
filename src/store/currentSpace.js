@@ -300,6 +300,7 @@ const currentSpace = {
       context.dispatch('updateOtherSpaces')
     },
     createNewSpace: (context, space) => {
+      context.commit('triggerSpaceZoomReset', null, { root: true })
       let name
       if (space) {
         name = space.name
@@ -335,7 +336,7 @@ const currentSpace = {
       const isTomorrow = context.rootState.loadJournalSpaceTomorrow
       const currentUser = utils.clone(context.rootState.currentUser)
       context.commit('isLoadingSpace', true, { root: true })
-      const weather = await context.dispatch('api/getWeather', null, { root: true })
+      const weather = await context.dispatch('api/weather', null, { root: true })
       const space = utils.journalSpace(currentUser, isTomorrow, weather)
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
@@ -378,7 +379,6 @@ const currentSpace = {
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
       })
       context.dispatch('updateModulesSpaceId', space)
-      context.commit('triggerSpaceZoomReset', null, { root: true })
     },
     saveImportedSpace: async (context) => {
       context.commit('isLoadingSpace', true, { root: true })
@@ -570,7 +570,6 @@ const currentSpace = {
       cards = utils.normalizeItems(cards)
       connections = utils.normalizeItems(connections)
       let boxes = addBoxes || space.boxes || []
-      context.commit('triggerSpaceZoomReset', null, { root: true })
       // sort cards
       const cardIds = Object.keys(cards)
       cards = cardIds.map(id => {
