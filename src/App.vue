@@ -334,7 +334,7 @@ export default {
   -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
   box-sizing border-box
-  font-family "OsakaMono-Kinopio", monospace
+  font-family "OsakaMono-Kinopio", sans-serif,monospace
   font-size 14px
   line-height 1.1
 
