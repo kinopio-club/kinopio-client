@@ -361,6 +361,7 @@ export default {
     startPainting (event) {
       if (this.isPanning) { return }
       if (this.isBoxSelecting) { return }
+      this.$store.dispatch('currentCards/updateTallestCardHeight')
       startCursor = utils.cursorPositionInViewport(event)
       this.currentCursor = utils.cursorPositionInViewport(event)
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)

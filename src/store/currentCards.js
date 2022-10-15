@@ -13,20 +13,14 @@ import qs from '@aguezz/qs-parse'
 
 let currentSpaceId
 let prevMovePositions = {}
-let tallestCardHeight = 0
-
-const updateTallestCardHeight = (height) => {
-  if (height > tallestCardHeight) {
-    tallestCardHeight = Math.ceil(height)
-  }
-}
 
 const currentCards = {
   namespaced: true,
   state: {
     ids: [],
     cards: {}, // {id, {card}}
-    removedCards: [] // denormalized
+    removedCards: [], // denormalized
+    tallestCardHeight: 0
   },
   mutations: {
 
@@ -36,7 +30,6 @@ const currentCards = {
       state.ids = []
       state.cards = {}
       state.removedCards = []
-      tallestCardHeight = 0
     },
     restore: (state, cards) => {
       let cardIds = []
@@ -45,7 +38,6 @@ const currentCards = {
         card.x = card.x || 100
         card.y = card.y || 100
         state.cards[card.id] = card
-        updateTallestCardHeight(card.height)
       })
       state.ids = state.ids.concat(cardIds)
     },
@@ -144,7 +136,14 @@ const currentCards = {
         card.y = updated.y
       })
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
+    },
+
+    // dimensions
+
+    tallestCardHeight: (state, value) => {
+      state.tallestCardHeight = value
     }
+
   },
   actions: {
 
@@ -296,43 +295,6 @@ const currentCards = {
       })
       context.dispatch('updateDimensions', { cards: [card] })
     },
-    updateDimensions: (context, { cards, cardId }) => {
-      let newCards = []
-      if (cards) {
-        utils.typeCheck({ value: cards, type: 'array', origin: 'updateDimensions cards' })
-        newCards = cards
-      } else if (cardId) {
-        utils.typeCheck({ value: cardId, type: 'string', origin: 'updateDimensions cardId' })
-        const card = context.getters.byId(cardId)
-        if (!card) { return }
-        newCards.push(card)
-      } else {
-        newCards = context.getters.all
-      }
-      newCards = utils.clone(newCards)
-      newCards = newCards.filter(card => Boolean(card))
-      newCards.forEach(card => {
-        const prevDimensions = {
-          width: card.width,
-          height: card.height
-        }
-        nextTick(() => {
-          card = utils.updateCardDimensions(card)
-          const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
-          if (!dimensionsChanged) { return }
-          const body = {
-            id: card.id,
-            width: Math.ceil(card.width),
-            height: Math.ceil(card.height)
-          }
-          context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
-          context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
-          context.commit('update', body)
-          context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
-          updateTallestCardHeight(card.height)
-        })
-      })
-    },
     toggleChecked (context, { cardId, value }) {
       utils.typeCheck({ value, type: 'boolean', origin: 'toggleChecked' })
       utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleChecked' })
@@ -406,6 +368,51 @@ const currentCards = {
           })
         })
       }, 100)
+    },
+
+    // dimensions
+
+    updateDimensions: (context, { cards, cardId }) => {
+      let newCards = []
+      if (cards) {
+        utils.typeCheck({ value: cards, type: 'array', origin: 'updateDimensions cards' })
+        newCards = cards
+      } else if (cardId) {
+        utils.typeCheck({ value: cardId, type: 'string', origin: 'updateDimensions cardId' })
+        const card = context.getters.byId(cardId)
+        if (!card) { return }
+        newCards.push(card)
+      } else {
+        newCards = context.getters.all
+      }
+      newCards = utils.clone(newCards)
+      newCards = newCards.filter(card => Boolean(card))
+      newCards.forEach(card => {
+        const prevDimensions = {
+          width: card.width,
+          height: card.height
+        }
+        nextTick(() => {
+          card = utils.updateCardDimensions(card)
+          const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
+          if (!dimensionsChanged) { return }
+          const body = {
+            id: card.id,
+            width: Math.ceil(card.width),
+            height: Math.ceil(card.height)
+          }
+          context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
+          context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
+          context.commit('update', body)
+          context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
+        })
+      })
+    },
+    updateTallestCardHeight: (context) => {
+      let cards = context.getters.canBeSelectedSortedByY.cards
+      cards = sortBy(cards, ['height'])
+      const value = cards[cards.length - 1].height
+      context.commit('tallestCardHeight', value)
     },
 
     // resize
@@ -713,7 +720,7 @@ const currentCards = {
       return result
     },
     isSelectable: (state, getters, rootState) => (position) => {
-      const threshold = tallestCardHeight
+      const threshold = state.tallestCardHeight
       const canBeSelectedSortedByY = getters.canBeSelectedSortedByY
       let yIndex = canBeSelectedSortedByY.yIndex
       let cards = canBeSelectedSortedByY.cards
