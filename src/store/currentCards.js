@@ -409,7 +409,7 @@ const currentCards = {
       })
     },
     updateTallestCardHeight: (context) => {
-      let cards = context.getters.canBeSelectedSortedByY.cards
+      let cards = context.getters.all
       console.log('t1', cards)
       cards = sortBy(cards, ['height'])
       console.log('t2', cards)
