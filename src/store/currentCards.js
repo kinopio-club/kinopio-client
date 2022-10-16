@@ -415,6 +415,7 @@ const currentCards = {
       console.log('t2', cards)
       console.log('t3', cards, cards.length)
       console.log('t4', cards[cards.length - 1])
+      if (cards.length === 0) { return }
       const value = cards[cards.length - 1].height
       context.commit('tallestCardHeight', value)
     },
