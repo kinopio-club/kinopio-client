@@ -11,7 +11,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   section
     .row
       // Import, Export
-      .segmented-buttons
+      .segmented-buttons(@click.stop)
         Import(:visible="importIsVisible" @closeDialog="closeDialogs")
         Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
