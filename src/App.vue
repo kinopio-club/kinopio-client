@@ -298,8 +298,6 @@ export default {
   --success-background #67ffbb
   --search-background yellow
 
-  --user-badge-moderator Gold
-  --user-badge-guide-maker DeepSkyBlue
   --user-badge-donor Pink
 
   // non-theme vars
@@ -756,7 +754,7 @@ dialog
   vertical-align -2px
 
 .icon.tweet
-  width 15px
+  height 12px
 
 label,
 li
