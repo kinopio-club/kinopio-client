@@ -9,7 +9,7 @@ dialog.blogs.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
         button Kinopio Blog →
 
   section
-    p My personal blog about building software
+    p My personal blog about the art and building of software
     p
       a(href="https://pketh.org")
         button pketh.org →
