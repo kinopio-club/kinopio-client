@@ -142,26 +142,31 @@ export default {
     toggleControlsSettingsIsVisible () {
       const isVisible = this.controlsSettingsIsVisible
       this.closeDialogs()
+      this.deleteAllConfirmationVisible = false
       this.controlsSettingsIsVisible = !isVisible
     },
     toggleUserBillingIsVisible () {
       const isVisible = this.userBillingIsVisible
       this.closeDialogs()
+      this.deleteAllConfirmationVisible = false
       this.userBillingIsVisible = !isVisible
     },
     toggleUpdateEmailIsVisible () {
       const isVisible = this.updateEmailIsVisible
       this.closeDialogs()
+      this.deleteAllConfirmationVisible = false
       this.updateEmailIsVisible = !isVisible
     },
     toggleNotificationSettingsIsVisible () {
       const isVisible = this.notificationSettingsIsVisible
       this.closeDialogs()
+      this.deleteAllConfirmationVisible = false
       this.notificationSettingsIsVisible = !isVisible
     },
     toggleApiKeyIsVisible () {
       const isVisible = this.apiKeyIsVisible
       this.closeDialogs()
+      this.deleteAllConfirmationVisible = false
       this.apiKeyIsVisible = !isVisible
     }
   },
