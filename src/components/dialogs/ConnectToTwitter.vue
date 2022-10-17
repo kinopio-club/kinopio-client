@@ -87,7 +87,7 @@ export default {
       this.isLoading = true
       const result = await this.$store.dispatch('api/twitterUser', username)
       const data = result.data
-      console.log('💖', data)
+      console.log('🕊', data)
       this.currentTwitterUser = data
       this.isLoading = false
       return data
