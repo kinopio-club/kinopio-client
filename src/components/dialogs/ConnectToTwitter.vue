@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.narrow.connect-to-twitter(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     p Connect to Twitter
 
@@ -15,13 +15,17 @@ dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="d
     .row
       p your twitter user name (input v-model)
     .row
-      input(placeholder="@twitterUsername" v-model="username")
-    //- p(v-if="isLoading")
-    Loader(:visible="isLoading")
-      //- .badge.success Ready to save threads
-    //- .badge.error {{twitterUsername}} not found
-    .row(v-if="currentTwitterUserIsVisible")
-      p @{{currentTwitterUser.username}}
+      textarea(placeholder="@twitterUsername" v-model="username" rows="1")
+
+    //- twitter profile preview
+    .row
+      Loader(:visible="isLoading")
+    template(v-if="currentTwitterUserIsVisible")
+      .row.twitter-profile
+        img(:src="currentTwitterUser.profile_image_url")
+        span @{{currentTwitterUser.username}}
+      .row
+        .badge.success Connected
 
 </template>
 
@@ -41,7 +45,6 @@ export default {
     return {
       twitterUsername: '',
       isLoading: false,
-      // isErrorTwitterUser: false,
       currentTwitterUser: {}
     }
   },
@@ -54,7 +57,8 @@ export default {
       set (newValue) {
         this.twitterUsername = newValue
         if (!newValue) {
-          this.$store.dispatch('currentUser/update', { twitterUsername: null })
+          console.log('blank value')
+          this.$store.dispatch('currentUser/update', { twitterUsername: '' })
         } else {
           this.updateTwitterUsername(newValue)
         }
@@ -69,31 +73,25 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'ConnectToTwitter')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
-    async updateTwitterUsername (newValue) {
+    async updateCurrentTwitterUser (username) {
       this.isLoading = true
+      const result = await this.$store.dispatch('api/twitterUser', username)
+      const data = result.data
+      console.log('💖', data)
+      this.currentTwitterUser = data
+      this.isLoading = false
+      return data
+    },
+    async updateTwitterUsername (newValue) {
       newValue = newValue.replace('@', '')
       try {
-        const result = await this.$store.dispatch('api/twitterUser', newValue)
-        const data = result.data
-        // const isUser = utils.objectHasKeys(data)
-
-        console.log('💖', data)
-        // if (isUser) {
-        this.currentTwitterUser = data
-
-        // } else {
-        //   this.isTwitterUserError = true
-        // }
-        // TODO if result..user
-        // dispatch currentUser/update
+        const user = await this.updateCurrentTwitterUser(newValue)
+        this.$store.dispatch('currentUser/update', { twitterUsername: user.username })
       } catch (error) {
         console.error('🚒 updateTwitterUsername', error)
       }
       this.isLoading = false
     },
-    // clearErrors () {
-    //   this.isErrorTwitterUser = false
-    // },
     clearCurrentTwitterUser (user) {
       this.currentTwitterUser = {}
     }
@@ -101,7 +99,9 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        console.log('🍋🍋🍋🍋🍋🍋🍋🍋')
+        const username = this.$store.state.currentUser.twitterUsername
+        this.twitterUsername = username
+        this.updateCurrentTwitterUser(username)
       }
     }
   }
@@ -110,5 +110,12 @@ export default {
 </script>
 
 <style lang="stylus">
-// dialog.dialog-name
+.connect-to-twitter
+  .twitter-profile
+    display flex
+    align-items center
+    img
+      border-radius 100px
+      width 24px
+      margin-right 4px
 </style>

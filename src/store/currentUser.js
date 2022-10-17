@@ -55,7 +55,8 @@ export default {
     weatherUnitIsCelcius: false,
     shouldNotifyUnlockedStickyCards: true,
     shouldUseStickyCards: false,
-    shouldPauseConnectionDirections: false
+    shouldPauseConnectionDirections: false,
+    twitterUsername: ''
   },
   mutations: {
     color: (state, value) => {
@@ -310,6 +311,10 @@ export default {
     shouldPauseConnectionDirections: (state, value) => {
       state.shouldPauseConnectionDirections = value
       cache.updateUser('shouldPauseConnectionDirections', value)
+    },
+    twitterUsername: (state, value) => {
+      state.twitterUsername = value
+      cache.updateUser('twitterUsername', value)
     }
   },
   actions: {
