@@ -755,7 +755,7 @@ dialog
   transform rotate(-45deg)
   vertical-align -2px
 
-.icon.twitter
+.icon.tweet
   width 15px
 
 label,

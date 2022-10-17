@@ -875,6 +875,16 @@ const self = {
         console.error('🚒 twitterThread', error)
       }
     },
+    twitterUser: async (context, username) => {
+      try {
+        const url = `${host}/services/twitter-user?username=${username}`
+        const response = await fetch(url)
+        const data = await normalizeResponse(response)
+        return data
+      } catch (error) {
+        console.error('🚒 twitterUser', error)
+      }
+    },
 
     // Downloads
 

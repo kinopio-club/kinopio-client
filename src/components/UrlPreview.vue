@@ -37,7 +37,7 @@
         .row(v-if="tweetIdFromTwitterUrl")
           button(@click="addTwitterThreadCards" :class="{active: isLoadingTwitterThread}")
             img.icon.add-icon(src="@/assets/add.svg")
-            img.icon.twitter(src="@/assets/twitter.svg")
+            img.icon.tweet(src="@/assets/twitter.svg")
             span Thread
             Loader(:visible="isLoadingTwitterThread")
 

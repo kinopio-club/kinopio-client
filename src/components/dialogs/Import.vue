@@ -19,11 +19,12 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialo
         li(v-for="(error in errors") {{error}}
 
   section
-    .button-wrap(@click.stop)
-      button(@click.left.stop="toggleImportArenaChannelIsVisible" :class="{ active: importArenaChannelIsVisible}")
-        img.icon.arena(src="@/assets/arena.svg")
-        span Are.na Channel
-      ImportArenaChannel(:visible="importArenaChannelIsVisible" @updateSpaces="updateSpaces")
+    .row
+      .button-wrap(@click.stop)
+        button(@click.left.stop="toggleImportArenaChannelIsVisible" :class="{ active: importArenaChannelIsVisible}")
+          img.icon.arena(src="@/assets/arena.svg")
+          span Are.na Channel
+        ImportArenaChannel(:visible="importArenaChannelIsVisible" @updateSpaces="updateSpaces")
 
 </template>
 
