@@ -11,21 +11,30 @@ dialog.narrow.connect-to-twitter(v-if="visible" :open="visible" @click.left.stop
 
   section(v-if="currentUserIsSignedIn")
     .row
-      .badge.secondary @KinopioClub save
+      p Save threads to kinopio by replying to any tweet with
     .row
-      p your twitter user name (input v-model)
+      p
+        .badge.secondary @KinopioClub save
+
     .row
+      template(v-if="currentTwitterUserIsVisible")
+        img.twitter-profile-image(:src="currentTwitterUser.profile_image_url")
+      template(v-else-if="isLoading")
+        Loader(:visible="true")
+      template(v-else)
+        img.icon.tweet(src="@/assets/twitter.svg")
       textarea(placeholder="@twitterUsername" v-model="username" rows="1")
 
-    //- twitter profile preview
     .row
-      Loader(:visible="isLoading")
-    template(v-if="currentTwitterUserIsVisible")
-      .row.twitter-profile
-        img(:src="currentTwitterUser.profile_image_url")
-        span @{{currentTwitterUser.username}}
-      .row
-        .badge.success Connected
+      .badge.danger(v-if="!currentTwitterUserIsVisible")
+        span Inactive
+      .badge.success(v-if="currentTwitterUserIsVisible")
+        span Connected
+        span(v-if="currentTwitterUser.name") {{' '}} to {{currentTwitterUser.name}}
+
+  //- section
+  //-   a(href="") Help
+    //- TODO help page
 
 </template>
 
@@ -58,7 +67,7 @@ export default {
         this.twitterUsername = newValue
         if (!newValue) {
           console.log('blank value')
-          this.$store.dispatch('currentUser/update', { twitterUsername: '' })
+          this.clearCurrentTwitterUser()
         } else {
           this.updateTwitterUsername(newValue)
         }
@@ -74,6 +83,7 @@ export default {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     async updateCurrentTwitterUser (username) {
+      if (!username) { return }
       this.isLoading = true
       const result = await this.$store.dispatch('api/twitterUser', username)
       const data = result.data
@@ -92,7 +102,8 @@ export default {
       }
       this.isLoading = false
     },
-    clearCurrentTwitterUser (user) {
+    clearCurrentTwitterUser () {
+      this.$store.dispatch('currentUser/update', { twitterUsername: '' })
       this.currentTwitterUser = {}
     }
   },
@@ -111,11 +122,14 @@ export default {
 
 <style lang="stylus">
 .connect-to-twitter
-  .twitter-profile
-    display flex
-    align-items center
-    img
-      border-radius 100px
-      width 24px
-      margin-right 4px
+  .twitter-profile-image,
+  .loader
+    border-radius 100px
+    width 24px
+    margin-right 4px
+  .loader
+    width 29px
+    height 24px
+  .icon.tweet
+    margin-right 6px
 </style>

@@ -177,7 +177,7 @@ export default {
 </script>
 
 <style lang="stylus">
-  @media(max-height 500px)
+  @media(max-height 600px)
     .user-settings
       top -100px !important
   .billing-cancel
