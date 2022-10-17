@@ -826,7 +826,7 @@ const self = {
       const weatherUnitIsCelcius = context.rootState.currentUser.weatherUnitIsCelcius
       if (!showWeather) { return }
       try {
-      // http://docs.pirateweather.net/en/latest/API
+        // http://docs.pirateweather.net/en/latest/API
         const apiKey = 'qM8rme33sr7AtpNB8l0xLa8itqjRk5Bi9HeQcecH'
         let url = `https://api.pirateweather.net/forecast/${apiKey}/${weatherLocation}?exclude=daily,minutely,alerts`
         if (weatherUnitIsCelcius) {
