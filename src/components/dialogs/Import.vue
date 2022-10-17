@@ -19,16 +19,24 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialo
         li(v-for="(error in errors") {{error}}
 
   section
-    .button-wrap(@click.stop)
-      button(@click.left.stop="toggleImportArenaChannelIsVisible" :class="{ active: importArenaChannelIsVisible}")
-        img.icon.arena(src="@/assets/arena.svg")
-        span Are.na Channel
-      ImportArenaChannel(:visible="importArenaChannelIsVisible" @updateSpaces="updateSpaces")
+    .row
+      .button-wrap(@click.stop)
+        button(@click.left.stop="toggleImportArenaChannelIsVisible" :class="{ active: importArenaChannelIsVisible}")
+          img.icon.arena(src="@/assets/arena.svg")
+          span Are.na Channel
+        ImportArenaChannel(:visible="importArenaChannelIsVisible" @updateSpaces="updateSpaces")
+    .row
+      .button-wrap(@click.stop)
+        button(@click.left.stop="toggleConnectToTwitterIsVisible" :class="{ active: connectToTwitterIsVisible}")
+          img.icon.tweet(src="@/assets/twitter.svg")
+          span Connect to Twitter
+        ConnectToTwitter(:visible="connectToTwitterIsVisible")
 
 </template>
 
 <script>
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
+import ConnectToTwitter from '@/components/dialogs/ConnectToTwitter.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -37,7 +45,8 @@ export default {
   name: 'Import',
   components: {
     Loader,
-    ImportArenaChannel
+    ImportArenaChannel,
+    ConnectToTwitter
   },
   props: {
     visible: Boolean
@@ -47,15 +56,20 @@ export default {
       loading: false,
       errors: [],
       unknownError: false,
-      importArenaChannelIsVisible: false
+      importArenaChannelIsVisible: false,
+      connectToTwitterIsVisible: false
     }
   },
   methods: {
     toggleImportArenaChannelIsVisible () {
       this.importArenaChannelIsVisible = !this.importArenaChannelIsVisible
     },
+    toggleConnectToTwitterIsVisible () {
+      this.connectToTwitterIsVisible = !this.connectToTwitterIsVisible
+    },
     closeDialogs () {
       this.importArenaChannelIsVisible = false
+      this.connectToTwitterIsVisible = false
     },
     selectFile () {
       if (this.loading) { return }
