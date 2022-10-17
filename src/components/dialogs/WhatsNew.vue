@@ -6,6 +6,9 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
       a(href="https://kinopio.club/-kinopio-roadmap-6TRE21gchHI7alHLuwzd5")
         button Roadmap →
     .button-wrap
+      a(href="https://blog.kinopio.club")
+        button Blog →
+    .button-wrap
       button(@click.left="refreshBrowser") Refresh
 
   section(v-if="!newStuff.length")
