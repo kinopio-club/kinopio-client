@@ -510,6 +510,6 @@ export default {
 
   .add-icon
     margin-right 4px
-    vertical-align 0px
+    vertical-align 0
 
 </style>

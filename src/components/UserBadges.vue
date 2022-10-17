@@ -7,10 +7,10 @@
   .badge.button-badge.success(v-if="user.isUpgraded" @click.stop="toggleDescription('Upgraded')" :class="{active: name === 'Upgraded'}")
     span Upgraded
   //- Moderator
-  .badge.button-badge.moderator(v-if="user.isModerator" @click.stop="toggleDescription('Moderator')" :class="{active: name === 'Moderator'}")
+  .badge.button-badge.info(v-if="user.isModerator" @click.stop="toggleDescription('Moderator')" :class="{active: name === 'Moderator'}")
     span Moderator
   //- Guide Maker
-  .badge.button-badge.guide-maker(v-if="user.isGuideMaker" @click.stop="toggleDescription('GuideMaker')" :class="{active: name === 'GuideMaker'}")
+  .badge.button-badge.info(v-if="user.isGuideMaker" @click.stop="toggleDescription('GuideMaker')" :class="{active: name === 'GuideMaker'}")
     span Guide Maker
   //- Donor
   .badge.button-badge.donor(v-if="user.isDonor" @click.stop="toggleDescription('Donor')" :class="{active: name === 'Donor'}")
@@ -60,10 +60,6 @@ export default {
   flex-wrap wrap
   .badge
     margin-top 10px
-  .moderator
-    background-color var(--user-badge-moderator)
-  .guide-maker
-    background-color var(--user-badge-guide-maker)
   .donor
     background-color var(--user-badge-donor)
 </style>
