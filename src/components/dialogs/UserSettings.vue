@@ -15,6 +15,12 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
         button(@click.left.stop="toggleNotificationSettingsIsVisible" :class="{active: notificationSettingsIsVisible}")
           span Notifications
         NotificationSettings(:visible="notificationSettingsIsVisible")
+    .row
+      .button-wrap
+        button(@click.left.stop="toggleConnectToTwitterIsVisible" :class="{ active: connectToTwitterIsVisible}")
+          img.icon.tweet(src="@/assets/twitter.svg")
+          span Connect to Twitter
+        ConnectToTwitter(:visible="connectToTwitterIsVisible")
 
   //- Account Settings
   section
@@ -70,6 +76,7 @@ import UpdateEmail from '@/components/dialogs/UpdateEmail.vue'
 import ApiKey from '@/components/dialogs/ApiKey.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
+import ConnectToTwitter from '@/components/dialogs/ConnectToTwitter.vue'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -80,7 +87,8 @@ export default {
     UpdateEmail,
     ApiKey,
     NotificationSettings,
-    ControlsSettings
+    ControlsSettings,
+    ConnectToTwitter
   },
   props: {
     visible: Boolean
@@ -95,7 +103,8 @@ export default {
         deleteUserPermanent: false
       },
       notificationSettingsIsVisible: false,
-      controlsSettingsIsVisible: false
+      controlsSettingsIsVisible: false,
+      connectToTwitterIsVisible: false
     }
   },
   computed: {
@@ -109,6 +118,12 @@ export default {
       this.apiKeyIsVisible = false
       this.notificationSettingsIsVisible = false
       this.controlsSettingsIsVisible = false
+      this.connectToTwitterIsVisible = false
+    },
+    toggleConnectToTwitterIsVisible () {
+      const isVisible = this.connectToTwitterIsVisible
+      this.closeDialogs()
+      this.connectToTwitterIsVisible = !isVisible
     },
     toggleDeleteAllConfirmationVisible () {
       this.deleteAllConfirmationVisible = !this.deleteAllConfirmationVisible

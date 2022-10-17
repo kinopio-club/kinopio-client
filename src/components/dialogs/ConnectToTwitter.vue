@@ -2,7 +2,14 @@
 dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     p Connect to Twitter
-  section
+
+  section(v-if="!currentUserIsSignedIn")
+    p
+      span.badge.info Sign Up or In
+      span to save tweet threads to Kinopio
+    button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+
+  section(v-if="currentUserIsSignedIn")
     p what it does, instruction
     p twitter user name (input v-model)
     p badge confirmation, ready to save threads
@@ -10,31 +17,22 @@ dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="d
 
 <script>
 export default {
-  name: 'DialogName',
-  components: {
-  },
+  name: 'ConnectToTwitter',
   props: {
     visible: Boolean
-  },
-  created () {
-  //   this.$store.subscribe((mutation, state) => {
-  //     if (mutation.type === 'closeAllDialogs') {
-  //       this.closeAllDialogs()
-  //     }
-  //   })
-  },
-  mounted () {
-  },
-  beforeUnmount () {
   },
   data () {
     return {
     }
   },
   computed: {
-    // kinopioDomain () { return utils.kinopioDomain() },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
+    triggerSignUpOrInIsVisible () {
+      this.$store.dispatch('closeAllDialogs', 'ConnectToTwitter')
+      this.$store.commit('triggerSignUpOrInIsVisible')
+    }
   }
 }
 </script>
