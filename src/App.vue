@@ -298,8 +298,6 @@ export default {
   --success-background #67ffbb
   --search-background yellow
 
-  --user-badge-donor Pink
-
   // non-theme vars
   --max-z 2147483646
   --hover-shadow 3px 3px 0 var(--heavy-shadow)

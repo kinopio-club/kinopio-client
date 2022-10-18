@@ -7,7 +7,7 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
     p Donations help support me. I'm grateful and flattered that you're even here.
     p
       span You'll also get the {{' '}}
-      span.badge.donor
+      span.badge.info
         span Donor
       span badge on your user profile
     p
@@ -162,6 +162,4 @@ dialog.donate
     display inline-block
   .user
     margin-right 6px
-  .donor
-    background-color var(--user-badge-donor)
 </style>

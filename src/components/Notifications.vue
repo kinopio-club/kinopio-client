@@ -42,8 +42,8 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a
       span
-        .badge.is-donor Donor
-      span , I appreciate it!
+        .badge.info.is-donor Donor
+      span , I really appreciate your support
     .row
       button(@click="removeNotifyThanksForDonating")
         img.icon.cancel(src="@/assets/add.svg")
@@ -454,7 +454,6 @@ export default {
 
   .badge
     &.is-donor
-      background-color var(--user-badge-donor)
       margin 0
       margin-left 6px
       vertical-align 0

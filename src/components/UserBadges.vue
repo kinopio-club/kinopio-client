@@ -13,7 +13,7 @@
   .badge.button-badge.info(v-if="user.isGuideMaker" @click.stop="toggleDescription('GuideMaker')" :class="{active: name === 'GuideMaker'}")
     span Guide Maker
   //- Donor
-  .badge.button-badge.donor(v-if="user.isDonor" @click.stop="toggleDescription('Donor')" :class="{active: name === 'Donor'}")
+  .badge.button-badge.info(v-if="user.isDonor" @click.stop="toggleDescription('Donor')" :class="{active: name === 'Donor'}")
     span Donor
 
 .row(v-if="description")
@@ -60,6 +60,4 @@ export default {
   flex-wrap wrap
   .badge
     margin-top 10px
-  .donor
-    background-color var(--user-badge-donor)
 </style>

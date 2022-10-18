@@ -19,7 +19,10 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
       .button-wrap
         button(@click.left.stop="toggleConnectToTwitterIsVisible" :class="{ active: connectToTwitterIsVisible}")
           img.icon.tweet(src="@/assets/twitter.svg")
-          span Connect to Twitter
+          template(v-if="twitterUsername")
+            span Connected to Twitter
+          template(v-else)
+            span Connect to Twitter
         ConnectToTwitter(:visible="connectToTwitterIsVisible")
 
   //- Account Settings
@@ -109,7 +112,8 @@ export default {
   },
   computed: {
     isSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    isUpgraded () { return this.$store.state.currentUser.isUpgraded }
+    isUpgraded () { return this.$store.state.currentUser.isUpgraded },
+    twitterUsername () { return this.$store.state.currentUser.twitterUsername }
   },
   methods: {
     closeDialogs () {
