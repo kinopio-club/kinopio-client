@@ -107,6 +107,8 @@ const store = createStore({
     remoteCardDetailsVisible: [],
     preventCardDetailsOpeningAnimation: true,
     multipleCardsSelectedIds: [],
+    newTweetCards: [],
+    prevNewTweetCards: [],
     // resizing card
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
@@ -869,6 +871,14 @@ const store = createStore({
     clearDraggingItems: (state) => {
       state.currentDraggingCardId = ''
       state.currentDraggingBoxId = ''
+    },
+    newTweetCards: (state, cards) => {
+      utils.typeCheck({ value: cards, type: 'array', origin: 'newTweetCards' })
+      state.newTweetCards = cards
+    },
+    clearNewTweetCards: (state) => {
+      state.prevNewTweetCards = state.newTweetCards
+      state.newTweetCards = []
     },
 
     // multiple cards

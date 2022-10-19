@@ -685,6 +685,60 @@ const currentCards = {
       context.commit('cardDetailsIsVisibleForCardId', cardId, { root: true })
       context.commit('parentCardId', cardId, { root: true })
       context.commit('loadSpaceShowDetailsForCardId', '', { root: true })
+    },
+
+    // tweet cards
+
+    checkIfShouldUpdateNewTweetCards: (context) => {
+      const newCards = context.rootState.newTweetCards
+      if (!newCards.length) { return }
+      const cards = utils.clone(newCards)
+      context.commit('clearNewTweetCards', null, { root: true })
+      setTimeout(() => {
+        context.dispatch('addTweetCardsComplete', cards)
+      }, 250)
+    },
+    addTweetCardsComplete: (context, cards) => {
+      console.log('🕊 addTweetCardsComplete', cards)
+      context.dispatch('history/pause', null, { root: true })
+      context.dispatch('closeAllDialogs', 'addTweetCardsComplete', { root: true })
+      // position cards
+      context.dispatch('currentCards/distributeVertically', cards, { root: true })
+      nextTick(() => {
+        nextTick(() => {
+          context.dispatch('addAndSelectConnectionsBetweenTweetCards', cards)
+          // select cards
+          const cardIds = cards.map(card => card.id)
+          context.commit('multipleCardsSelectedIds', cardIds, { root: true })
+          // ⏺ history
+          cards = cardIds.map(cardId => context.getters.byId(cardId))
+          context.dispatch('history/resume', null, { root: true })
+          context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
+          context.commit('triggerUpdateCardOverlaps', null, { root: true })
+        })
+      })
+    },
+    addAndSelectConnectionsBetweenTweetCards: (context, cards) => {
+      const type = context.rootGetters['currentConnections/typeForNewConnections']
+      if (!type) {
+        context.dispatch('currentConnections/addType', null, { root: true })
+      }
+      let connections = []
+      cards.forEach((card, index) => {
+        if (index === 0) { return }
+        const startCardId = cards[index - 1].id
+        const endCardId = cards[index].id
+        connections.push({
+          id: nanoid(),
+          startCardId,
+          endCardId,
+          path: utils.connectionBetweenCards(startCardId, endCardId)
+        })
+      })
+      connections.forEach(connection => {
+        context.dispatch('currentConnections/add', { connection, type, shouldNotRecordHistory: true }, { root: true })
+        context.dispatch('addToMultipleConnectionsSelected', connection.id, { root: true })
+      })
     }
   },
   getters: {
