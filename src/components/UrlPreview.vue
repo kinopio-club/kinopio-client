@@ -1,5 +1,5 @@
 <template lang="pug">
-.row.url-preview(v-if="visible && (previewHasInfo || previewHasImage)")
+.row.url-preview(v-if="visible")
   Loader(:visible="loading")
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': shouldHideInfo && !shouldHideImage}")
