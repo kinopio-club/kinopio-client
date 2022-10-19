@@ -752,7 +752,7 @@ header
       .icon.tweet
         margin-right 4px
       .icon.tweet
-        vertical-align -2px
+        vertical-align -1px
     dialog
       max-width initial
     > .button-wrap

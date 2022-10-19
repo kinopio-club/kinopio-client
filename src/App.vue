@@ -752,7 +752,8 @@ dialog
   vertical-align -2px
 
 .icon.tweet
-  height 12px
+  height 10px
+  vertical-align 0
 
 label,
 li

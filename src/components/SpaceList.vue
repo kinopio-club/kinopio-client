@@ -381,10 +381,9 @@ export default {
     vertical-align -1px
 
   .icon.tweet
-    min-width 15px
-    height 12px
+    min-width 12px
     margin-right 4px
-    vertical-align -2px
+    vertical-align -1px
 
   .name
     margin 0
