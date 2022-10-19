@@ -34,6 +34,8 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
                 img.icon.inbox-icon(src="@/assets/inbox.svg")
               span(v-show="currentSpaceIsTemplate")
                 img.icon.templates(src="@/assets/templates.svg")
+              span(v-if="currentSpaceIsFromTweet")
+                img.icon.tweet(src="@/assets/twitter.svg")
               MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
               span {{currentSpaceName}}
               PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
@@ -345,6 +347,10 @@ export default {
       if (currentSpace.isTemplate) { return true }
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(currentSpace.id)
+    },
+    currentSpaceIsFromTweet () {
+      const currentSpace = this.$store.state.currentSpace
+      return currentSpace.isFromTweet
     },
     currentSpaceIsInbox () {
       const currentSpace = this.$store.state.currentSpace
@@ -742,8 +748,11 @@ header
       text-overflow ellipsis
     .space-name-button
       max-width 100%
-      .icon.templates
+      .icon.templates,
+      .icon.tweet
         margin-right 4px
+      .icon.tweet
+        vertical-align -2px
     dialog
       max-width initial
     > .button-wrap
