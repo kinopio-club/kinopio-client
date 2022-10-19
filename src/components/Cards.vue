@@ -25,6 +25,8 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUpdateCardOverlaps') {
         this.updateCardOverlapsDebounced()
+      } else if (mutation.type === 'triggerUpdateUrlPreviewComplete') {
+        this.$store.dispatch('currentCards/checkIfShouldUpdateNewTweetCards')
       }
     })
   },

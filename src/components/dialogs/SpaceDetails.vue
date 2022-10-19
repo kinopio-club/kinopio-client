@@ -107,7 +107,8 @@ export default {
       resultsSectionHeight: null,
       dialogHeight: null,
       journalSpaces: [],
-      nonJournalSpaces: [],
+      tweetSpaces: [],
+      normalSpaces: [],
       spaceFiltersIsVisible: false
     }
   },
@@ -127,9 +128,12 @@ export default {
       if (this.dialogSpaceFilters === 'journals') {
         this.updateJournalSpaces()
         spaces = this.journalSpaces
+      } else if (this.dialogSpaceFilters === 'tweets') {
+        this.updateTweetSpaces()
+        spaces = this.tweetSpaces
       } else if (this.dialogSpaceFilters === 'spaces') {
-        this.updateNonJournalSpaces()
-        spaces = this.nonJournalSpaces
+        this.updateNormalSpaces()
+        spaces = this.normalSpaces
       } else {
         spaces = this.spaces
       }
@@ -327,9 +331,14 @@ export default {
       const journalSpaces = this.spaces.filter(space => space.moonPhase)
       this.journalSpaces = journalSpaces
     },
-    updateNonJournalSpaces () {
-      const nonJournalSpaces = this.spaces.filter(space => !space.moonPhase)
-      this.nonJournalSpaces = nonJournalSpaces
+    updateTweetSpaces () {
+      const tweetSpaces = this.spaces.filter(space => space.isFromTweet)
+      this.tweetSpaces = tweetSpaces
+    },
+    updateNormalSpaces () {
+      let normalSpaces = this.spaces.filter(space => !space.moonPhase)
+      normalSpaces = normalSpaces.filter(space => !space.isFromTweet)
+      this.normalSpaces = normalSpaces
     },
     updateCachedSpacesDate () {
       this.spaces.forEach(space => {

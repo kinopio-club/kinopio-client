@@ -1,5 +1,5 @@
 <template lang="pug">
-.row.url-preview(v-if="visible && (previewHasInfo || previewHasImage)")
+.row.url-preview(v-if="visible")
   Loader(:visible="loading")
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': shouldHideInfo && !shouldHideImage}")
@@ -68,7 +68,7 @@ import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
 
-let newCards, position
+let position
 
 export default {
   name: 'UrlPreview',
@@ -89,13 +89,10 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUpdateUrlPreviewComplete') {
-        if (!newCards) { return }
-        const cards = newCards
-        newCards = null
-        setTimeout(() => {
-          console.log('🕊 addTweetCardsComplete')
-          this.addTweetCardsComplete(cards)
-        }, 250)
+        if (!this.isLoadingTwitterThread) { return }
+        const cards = this.$store.state.prevNewTweetCards
+        this.$store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
+        this.isLoadingTwitterThread = false
       }
     })
   },
@@ -274,52 +271,8 @@ export default {
         }
       })
       this.$store.dispatch('currentCards/addMultiple', cards)
-      // wait for triggerUpdateUrlPreviewComplete to position cards
-      newCards = cards
-    },
-    addAndSelectConnectionsBetweenTweetCards (cards) {
-      const type = this.$store.getters['currentConnections/typeForNewConnections']
-      if (!type) {
-        this.$store.dispatch('currentConnections/addType')
-      }
-      let connections = []
-      cards.forEach((card, index) => {
-        if (index === 0) { return }
-        const startCardId = cards[index - 1].id
-        const endCardId = cards[index].id
-        connections.push({
-          id: nanoid(),
-          startCardId,
-          endCardId,
-          path: utils.connectionBetweenCards(startCardId, endCardId)
-        })
-      })
-      connections.forEach(connection => {
-        this.$store.dispatch('currentConnections/add', { connection, type, shouldNotRecordHistory: true })
-        this.$store.dispatch('addToMultipleConnectionsSelected', connection.id)
-      })
-      return connections
-    },
-    addTweetCardsComplete (cards) {
-      this.$store.dispatch('history/pause')
-      this.$store.dispatch('closeAllDialogs', 'addTweetCardsComplete')
-      // position cards
-      this.$store.dispatch('currentCards/distributeVertically', cards)
-      this.$nextTick(() => {
-        this.$nextTick(() => {
-          this.addAndSelectConnectionsBetweenTweetCards(cards)
-          // select cards
-          const cardIds = cards.map(card => card.id)
-          this.$store.commit('multipleCardsSelectedIds', cardIds)
-          // ⏺ history
-          cards = cardIds.map(cardId => this.$store.getters['currentCards/byId'](cardId))
-          this.$store.dispatch('history/resume')
-          this.$store.dispatch('history/add', { cards, useSnapshot: true })
-          this.$store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
-          this.$store.commit('triggerUpdateCardOverlaps')
-          this.isLoadingTwitterThread = false
-        })
-      })
+      this.$store.commit('newTweetCards', cards)
+      // wait for triggerUpdateUrlPreviewComplete to checkIfShouldUpdateNewTweetCards
     },
     toggleShouldDisplayEmbed () {
       this.$store.dispatch('closeAllDialogs', 'UrlPreview')

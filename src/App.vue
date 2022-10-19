@@ -752,7 +752,8 @@ dialog
   vertical-align -2px
 
 .icon.tweet
-  height 12px
+  height 10px
+  vertical-align 0
 
 label,
 li
@@ -802,7 +803,7 @@ ul.results-list
   li
     display flex
     padding 4px 7px
-    align-items center
+    align-items flex-start
     border-radius 3px
     user-select none
     cursor pointer
