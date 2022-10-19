@@ -290,11 +290,12 @@ export default {
     }
     if (this.card.shouldUpdateUrlPreview) {
       this.updateMediaUrls()
-      await this.updateUrlPreview()
+      const isUpdatedSuccess = await this.updateUrlPreview()
       this.$store.dispatch('currentCards/update', {
         id: this.card.id,
         shouldUpdateUrlPreview: false
       })
+      if (!isUpdatedSuccess) { return }
       this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
     }
   },
@@ -1784,11 +1785,13 @@ export default {
         url = this.removeHiddenQueryString(url)
         let response = await this.$store.dispatch('api/urlPreview', url)
         this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-        if (!response) { return }
+        if (!response) { throw 'api/urlPreview' }
         let { data, host } = response
         console.log('🚗 link preview', host, data)
         const { links, meta } = data
+        if (!links) { throw 'link preview error' }
         this.updateUrlPreviewSuccess({ links, meta, cardId, url })
+        return true
       } catch (error) {
         console.warn('🚑', error, url)
         this.updateUrlPreviewErrorUrl(url)

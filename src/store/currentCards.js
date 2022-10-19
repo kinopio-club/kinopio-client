@@ -568,6 +568,7 @@ const currentCards = {
     // distribute position
 
     distributeVertically: (context, cards) => {
+      cards = utils.clone(cards)
       nextTick(() => {
         const spaceBetweenCards = 12
         const zoom = context.rootGetters.spaceCounterZoomDecimal
@@ -694,12 +695,11 @@ const currentCards = {
       if (!newCards.length) { return }
       const cards = utils.clone(newCards)
       context.commit('clearNewTweetCards', null, { root: true })
-      setTimeout(() => {
-        context.dispatch('addTweetCardsComplete', cards)
-      }, 250)
+      context.commit('isLoadingSpace', true, { root: true })
+      console.log('🕊 addTweetCards', cards)
+      context.dispatch('addTweetCardsComplete', cards)
     },
     addTweetCardsComplete: (context, cards) => {
-      console.log('🕊 addTweetCardsComplete', cards)
       context.dispatch('history/pause', null, { root: true })
       context.dispatch('closeAllDialogs', 'addTweetCardsComplete', { root: true })
       // position cards
@@ -715,6 +715,13 @@ const currentCards = {
           context.dispatch('history/resume', null, { root: true })
           context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
           context.commit('triggerUpdateCardOverlaps', null, { root: true })
+          // wait for images to load
+          setTimeout(() => {
+            context.dispatch('currentCards/distributeVertically', cards, { root: true })
+            context.commit('isLoadingSpace', false, { root: true })
+            context.dispatch('updatePageSizes', null, { root: true })
+            console.log('🕊 addTweetCardsComplete', cards)
+          }, 1000)
         })
       })
     },

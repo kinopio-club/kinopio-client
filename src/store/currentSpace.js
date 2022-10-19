@@ -688,6 +688,7 @@ const currentSpace = {
         nextTick(() => {
           context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
           context.dispatch('checkIfShouldPauseConnectionDirections')
+          context.dispatch('checkIfShouldUpdateNewTweetCards', space)
         })
       })
     },
@@ -862,6 +863,13 @@ const currentSpace = {
       } else {
         context.dispatch('unpauseConnectionDirections')
       }
+    },
+    checkIfShouldUpdateNewTweetCards: (context, space) => {
+      if (!space.isFromTweet) { return }
+      if (space.updateHash) { return }
+      const cards = space.cards.reverse()
+      console.log('🕊 updating tweet space', cards)
+      context.commit('newTweetCards', cards, { root: true })
     },
     pauseConnectionDirections: (context, space) => {
       const svg = document.querySelector('svg.connections')
