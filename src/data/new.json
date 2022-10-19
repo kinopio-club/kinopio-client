@@ -12,6 +12,7 @@
   "backgroundTint": "",
   "moonPhase": "",
   "isTemplate": false,
+  "isFromTweet": false,
   "cards": [
     {
       "id": "1",

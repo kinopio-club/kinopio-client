@@ -1228,6 +1228,7 @@ export default {
     space.connections = []
     space.isTemplate = false
     space.isHidden = false
+    space.isFromTweet = false
     space = this.spaceDefaultBackground(space, currentUser)
     // cards
     space.cards.push({ id: nanoid(), name: summary, x: 60, y: 100, frameId: 0 })
@@ -1259,7 +1260,7 @@ export default {
     if (isTomorrow) {
       date = date.add(1, 'day')
     }
-    return `${date.format('dddd MMM D/YY')}` // Thursday Oct 8/20
+    return `${date.format('ddd MMM D/YY')}` // Thu Oct 8/20
   },
   journalSpaceDateFromName (name) {
     // https://regexr.com/6471p

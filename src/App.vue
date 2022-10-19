@@ -802,7 +802,7 @@ ul.results-list
   li
     display flex
     padding 4px 7px
-    align-items center
+    align-items flex-start
     border-radius 3px
     user-select none
     cursor pointer

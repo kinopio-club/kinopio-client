@@ -52,8 +52,12 @@ span.space-list-wrap
             MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
             //- template
             span(v-if="space.isTemplate")
-              img.icon.templates(src="@/assets/templates.svg")
+              img.icon.templates(src="@/assets/templates.svg" title="Template")
             .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
+            //- tweet space
+            span(v-if="space.isFromTweet" title="Tweet space")
+              img.icon.tweet(src="@/assets/twitter.svg")
+
             //- space details
             .name
               span(v-if="this.filter")
@@ -358,6 +362,9 @@ export default {
   .inline-badge
     margin-left 0
     flex none
+    min-height 15px
+    height 15px
+    padding-top 0
 
   .new-badge
     word-break keep-all
@@ -371,6 +378,12 @@ export default {
   .today-icon
     width 12px
     height 12px
+    vertical-align -1px
+
+  .icon.tweet
+    min-width 15px
+    height 12px
+    margin-right 4px
     vertical-align -2px
 
   .name
