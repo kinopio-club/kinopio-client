@@ -145,4 +145,6 @@ export default {
     margin-top 10px
   .moon-phase
     margin 0
+  .icon.tweet
+    vertical-align -1px
 </style>
