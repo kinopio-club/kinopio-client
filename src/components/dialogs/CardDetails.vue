@@ -300,7 +300,7 @@ export default {
   },
   computed: {
     rowIsBelowStyleActions () { return this.nameMetaRowIsVisible || this.badgesRowIsVisible || this.collaborationInfoIsVisible || this.cardHasMedia || this.cardUrlPreviewIsVisible },
-    nameMetaRowIsVisible () { return this.nameSplitIntoCardsCount || this.cardUrlPreviewIsVisible },
+    nameMetaRowIsVisible () { return this.nameSplitIntoCardsCount },
     badgesRowIsVisible () { return this.tagsInCard.length || this.card.linkToSpaceId || this.nameIsComment || this.isInSearchResultsCards },
     parentElement () { return this.$refs.dialog },
     card () {
