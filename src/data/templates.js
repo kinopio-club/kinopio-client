@@ -60,7 +60,7 @@ export default {
       {
         id: '1t4616FBkaJOxMdrt9O_p',
         categoryId: 4,
-        name: 'Sofware Architecture'
+        name: 'Software Architecture'
       },
       {
         id: 'WSzpRkVqSdv8GKCSCrwrg',
