@@ -867,9 +867,12 @@ const currentSpace = {
     checkIfShouldUpdateNewTweetCards: (context, space) => {
       if (!space.isFromTweet) { return }
       if (space.updateHash) { return }
-      context.commit('isLoadingSpace', true, { root: true })
       const cards = space.cards.reverse()
       console.log('🕊 updating tweet space', cards)
+      const isUrlPreviews = cards.find(card => utils.urlFromString(card.name))
+      if (isUrlPreviews) {
+        context.commit('isLoadingSpace', true, { root: true })
+      }
       context.commit('newTweetCards', cards, { root: true })
     },
     pauseConnectionDirections: (context, space) => {
