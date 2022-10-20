@@ -283,7 +283,7 @@ export default {
           return this.$store.getters['currentUser/canEditSpace'](space)
         })
         userSpaces = this.updateWithExistingRemoteSpaces(userSpaces)
-        userSpaces = this.sortSpacesByEditedAt(userSpaces)
+        userSpaces = this.sortSpacesByEditedOrCreatedAt(userSpaces)
         userSpaces = this.updateFavoriteSpaces(userSpaces)
         userSpaces = this.updateInboxSpace(userSpaces)
         this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
@@ -307,7 +307,11 @@ export default {
       })
       return spaces
     },
-    sortSpacesByEditedAt (spaces) {
+    sortSpacesByEditedOrCreatedAt (spaces) {
+      spaces = spaces.map(space => {
+        space.editedAt = space.editedAt || space.createdAt
+        return space
+      })
       const sortedSpaces = spaces.sort((a, b) => {
         const bEditedAt = dayjs(b.editedAt).unix()
         const aEditedAt = dayjs(a.editedAt).unix()
@@ -321,7 +325,7 @@ export default {
       this.isLoadingRemoteSpaces = false
       if (!this.remoteSpaces) { return }
       this.removeRemovedCachedSpaces(this.remoteSpaces)
-      this.sortSpacesByEditedAt(this.remoteSpaces)
+      this.sortSpacesByEditedOrCreatedAt(this.remoteSpaces)
       let spaces = this.updateFavoriteSpaces(this.remoteSpaces)
       spaces = this.updateInboxSpace(spaces)
       this.spaces = spaces
