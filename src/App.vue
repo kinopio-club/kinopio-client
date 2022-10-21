@@ -528,7 +528,7 @@ label
 
 .bottom-button-wrap
   .resize-button-wrap
-    transform translate(8px, 10px)
+    transform translate(8px, 11px)
     .resize-button
       border 0
       width 12px
