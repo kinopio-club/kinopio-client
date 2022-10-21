@@ -52,9 +52,8 @@
       )
       button.inline-button.resize-button(
         tabindex="-1"
-        :style="{background: color}"
       )
-        img.resize-icon.icon(src="@/assets/resize.svg")
+        img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
   //- fill
   .background.filled(v-if="hasFill" :style="{background: color}")
@@ -558,6 +557,7 @@ export default {
     bottom 0px
     display flex
     .resize-button-wrap
+      transform translate(10px, 13px)
       z-index 1
       cursor ew-resize
       button
