@@ -526,6 +526,19 @@ label
       box-shadow var(--button-active-inset-shadow)
       background-color var(--secondary-active-background)
 
+.bottom-button-wrap
+  .resize-button-wrap
+    transform translate(8px, 10.5px)
+    &:hover
+      .resize-button
+        opacity 1
+    .resize-button
+      border 0
+      width 12px
+      height 12px
+      padding 0
+      background-color transparent
+      opacity 0.3
 p,
 span
   -webkit-text-size-adjust auto

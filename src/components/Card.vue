@@ -56,16 +56,15 @@ article#card(
       img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
       img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
 
-    .bottom-button-wrap
+    .bottom-button-wrap(v-if="resizeIsVisible")
       //- resize
       .resize-button-wrap.inline-button-wrap(
-        v-if="resizeControlIsVisible"
         @mousedown.left.stop="startResizing"
         @touchstart.stop="startResizing"
         @dblclick="removeResize"
       )
         button.inline-button.resize-button(tabindex="-1" :style="{background: itemBackground}")
-          img.resize-icon.icon(src="@/assets/resize.svg")
+          img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
@@ -86,7 +85,7 @@ article#card(
               span {{createdByUser.name}}
           template(v-if="!commentIsVisible")
             User(:user="createdByUser" :isClickable="false")
-          p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}" :style="{minWidth: nameLineMinWidth - 10 + 'px'}")
+          p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             //- Image
@@ -107,13 +106,13 @@ article#card(
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
           //- Name
-          p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
+          p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
-      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink || nameIsOnlyCheckbox}")
+      span.card-buttons-wrap
         //- Lock
         template(v-if="isLocked")
           // based on CardUnlockButton.vue
@@ -322,7 +321,6 @@ export default {
       },
       linkToPreview: '',
       prevNameLineMinWidth: 0,
-      nameIsOnlyMarkdownLink: false,
       isLocking: true,
       lockingPercent: 0,
       lockingAlpha: 0,
@@ -333,11 +331,6 @@ export default {
     }
   },
   computed: {
-    nameIsOnlyCheckbox () {
-      const isCheckOnly = this.card.name === '[x] '
-      const isUncheckOnly = this.card.name === '[] ' || this.card.name === '[ ] '
-      return isCheckOnly || isUncheckOnly
-    },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
     itemBackground () {
       let background = 'transparent'
@@ -356,22 +349,13 @@ export default {
       return tags
     },
     resizeWidth () {
-      if (!this.resizeIsVisible) { return }
       const resizeWidth = this.card.resizeWidth
       if (!resizeWidth) { return }
       return resizeWidth + 'px'
     },
-    resizeIsVisible () {
-      return Boolean(this.formats.image || this.formats.video)
-    },
     isLocked () {
       if (!this.card) { return }
       return this.card.isLocked
-    },
-    resizeControlIsVisible () {
-      if (this.isLocked) { return }
-      if (this.isComment) { return }
-      return this.resizeIsVisible && this.canEditCard
     },
     shouldJiggle () {
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
@@ -383,6 +367,11 @@ export default {
       const results = this.$store.state.searchResultsCards
       if (!results.length) { return }
       return Boolean(results.find(card => this.card.id === card.id))
+    },
+    resizeIsVisible () {
+      if (this.isLocked) { return }
+      if (!this.canEditSpace) { return }
+      return true
     },
     currentSelectedTag () { return this.$store.state.currentSelectedTag },
     currentSelectedLink () { return this.$store.state.currentSelectedLink },
@@ -707,7 +696,6 @@ export default {
         }
         return segment
       })
-      this.checkIfNameIsOnlyMarkdownLink(segments)
       return segments
     },
     cardUrlPreviewIsVisible () {
@@ -729,23 +717,6 @@ export default {
           return true
         }
       })
-    },
-    nameLineMinWidth () {
-      const averageCharacterWidth = 6.5
-      let maxWidth = 190
-      if (this.cardHasUrls || this.hasCheckbox) {
-        maxWidth = 162
-      }
-      if (this.cardHasUrls && this.hasCheckbox) {
-        maxWidth = 132
-      }
-      if (!this.normalizedName) { return 0 }
-      let width = this.longestNameLineLength() * averageCharacterWidth
-      if (this.card.linkToSpaceId && width <= maxWidth) {
-        this.checkIfShouldUpdateCardConnectionPaths(width)
-      }
-      width = Math.min(width, maxWidth)
-      return Math.ceil(width)
     },
     isConnectingTo () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
@@ -1144,24 +1115,6 @@ export default {
       const currentDraggingCardId = this.$store.state.currentDraggingCardId
       const cardIdsBeingDragged = multipleCardsSelectedIds.concat(currentDraggingCardId)
       return cardIdsBeingDragged.find(cardId => connection.startCardId === cardId || connection.endCardId === cardId)
-    },
-    checkIfNameIsOnlyMarkdownLink (segments) {
-      if (!segments.length) {
-        this.nameIsOnlyMarkdownLink = false
-        return
-      }
-      if (segments[0].markdown.length <= 1) {
-        this.nameIsOnlyMarkdownLink = false
-        return
-      }
-      const content = segments[0].markdown[1].result[0]
-      const contentIsName = content === this.name
-      const contentisLink = content.match(utils.markdown().linkPattern)
-      if (contentIsName && contentisLink) {
-        this.nameIsOnlyMarkdownLink = true
-      } else {
-        this.nameIsOnlyMarkdownLink = false
-      }
     },
     checkIfShouldUpdateCardConnectionPaths (width) {
       this.$nextTick(() => {
@@ -2000,6 +1953,8 @@ article
       padding 8px
       align-self right
       cursor cell
+      button
+        z-index 1
     .checkbox-wrap
       &:hover
         label
@@ -2201,9 +2156,6 @@ article
     .user-badge,
     .user
       margin-right 0
-
-  .tappable-area
-    margin-left 20px
 
   .url-preview-wrap
     padding 8px
