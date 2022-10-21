@@ -112,7 +112,7 @@ article#card(
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
-      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink || nameIsOnlyCheckbox}")
+      span.card-buttons-wrap
         //- Lock
         template(v-if="isLocked")
           // based on CardUnlockButton.vue
@@ -321,7 +321,6 @@ export default {
       },
       linkToPreview: '',
       prevNameLineMinWidth: 0,
-      nameIsOnlyMarkdownLink: false,
       isLocking: true,
       lockingPercent: 0,
       lockingAlpha: 0,
@@ -332,11 +331,6 @@ export default {
     }
   },
   computed: {
-    nameIsOnlyCheckbox () {
-      const isCheckOnly = this.card.name === '[x] '
-      const isUncheckOnly = this.card.name === '[] ' || this.card.name === '[ ] '
-      return isCheckOnly || isUncheckOnly
-    },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
     itemBackground () {
       let background = 'transparent'
@@ -697,7 +691,6 @@ export default {
         }
         return segment
       })
-      this.checkIfNameIsOnlyMarkdownLink(segments)
       return segments
     },
     cardUrlPreviewIsVisible () {
@@ -1117,24 +1110,6 @@ export default {
       const currentDraggingCardId = this.$store.state.currentDraggingCardId
       const cardIdsBeingDragged = multipleCardsSelectedIds.concat(currentDraggingCardId)
       return cardIdsBeingDragged.find(cardId => connection.startCardId === cardId || connection.endCardId === cardId)
-    },
-    checkIfNameIsOnlyMarkdownLink (segments) {
-      if (!segments.length) {
-        this.nameIsOnlyMarkdownLink = false
-        return
-      }
-      if (segments[0].markdown.length <= 1) {
-        this.nameIsOnlyMarkdownLink = false
-        return
-      }
-      const content = segments[0].markdown[1].result[0]
-      const contentIsName = content === this.name
-      const contentisLink = content.match(utils.markdown().linkPattern)
-      if (contentIsName && contentisLink) {
-        this.nameIsOnlyMarkdownLink = true
-      } else {
-        this.nameIsOnlyMarkdownLink = false
-      }
     },
     checkIfShouldUpdateCardConnectionPaths (width) {
       this.$nextTick(() => {
@@ -2176,9 +2151,6 @@ article
     .user-badge,
     .user
       margin-right 0
-
-  .tappable-area
-    margin-left 20px
 
   .url-preview-wrap
     padding 8px
