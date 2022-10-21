@@ -56,7 +56,7 @@ article#card(
       img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
       img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
 
-    .bottom-button-wrap
+    .bottom-button-wrap(v-if="resizeIsVisible")
       //- resize
       .resize-button-wrap.inline-button-wrap(
         @mousedown.left.stop="startResizing"
@@ -367,6 +367,11 @@ export default {
       const results = this.$store.state.searchResultsCards
       if (!results.length) { return }
       return Boolean(results.find(card => this.card.id === card.id))
+    },
+    resizeIsVisible () {
+      if (this.isLocked) { return }
+      if (!this.canEditSpace) { return }
+      return true
     },
     currentSelectedTag () { return this.$store.state.currentSelectedTag },
     currentSelectedLink () { return this.$store.state.currentSelectedLink },

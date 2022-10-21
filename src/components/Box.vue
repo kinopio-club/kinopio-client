@@ -43,7 +43,7 @@
       img.icon.lock-icon(src="@/assets/lock.svg")
 
   //- resize
-  .bottom-button-wrap(v-if="!isLocked" :class="{unselectable: isPainting}")
+  .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPainting}")
     .resize-button-wrap.inline-button-wrap(
         @pointerover="updateIsHover(true)"
         @pointerleave="updateIsHover(false)"
@@ -110,6 +110,11 @@ export default {
     isSelected () {
       const selectedIds = this.$store.state.multipleBoxesSelectedIds
       return selectedIds.includes(this.box.id)
+    },
+    resizeIsVisible () {
+      if (this.isLocked) { return }
+      if (!this.canEditSpace) { return }
+      return true
     },
     isLocked () { return this.box.isLocked },
     userColor () { return this.$store.state.currentUser.color },
