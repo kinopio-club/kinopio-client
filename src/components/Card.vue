@@ -59,13 +59,12 @@ article#card(
     .bottom-button-wrap
       //- resize
       .resize-button-wrap.inline-button-wrap(
-        v-if="resizeControlIsVisible"
         @mousedown.left.stop="startResizing"
         @touchstart.stop="startResizing"
         @dblclick="removeResize"
       )
         button.inline-button.resize-button(tabindex="-1" :style="{background: itemBackground}")
-          img.resize-icon.icon(src="@/assets/resize.svg")
+          img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
@@ -86,7 +85,7 @@ article#card(
               span {{createdByUser.name}}
           template(v-if="!commentIsVisible")
             User(:user="createdByUser" :isClickable="false")
-          p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}" :style="{minWidth: nameLineMinWidth - 10 + 'px'}")
+          p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             //- Image
@@ -107,7 +106,7 @@ article#card(
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
           //- Name
-          p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
+          p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             Loader(:visible="isLoadingUrlPreview")
@@ -356,22 +355,13 @@ export default {
       return tags
     },
     resizeWidth () {
-      if (!this.resizeIsVisible) { return }
       const resizeWidth = this.card.resizeWidth
       if (!resizeWidth) { return }
       return resizeWidth + 'px'
     },
-    resizeIsVisible () {
-      return Boolean(this.formats.image || this.formats.video)
-    },
     isLocked () {
       if (!this.card) { return }
       return this.card.isLocked
-    },
-    resizeControlIsVisible () {
-      if (this.isLocked) { return }
-      if (this.isComment) { return }
-      return this.resizeIsVisible && this.canEditCard
     },
     shouldJiggle () {
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
@@ -729,23 +719,6 @@ export default {
           return true
         }
       })
-    },
-    nameLineMinWidth () {
-      const averageCharacterWidth = 6.5
-      let maxWidth = 190
-      if (this.cardHasUrls || this.hasCheckbox) {
-        maxWidth = 162
-      }
-      if (this.cardHasUrls && this.hasCheckbox) {
-        maxWidth = 132
-      }
-      if (!this.normalizedName) { return 0 }
-      let width = this.longestNameLineLength() * averageCharacterWidth
-      if (this.card.linkToSpaceId && width <= maxWidth) {
-        this.checkIfShouldUpdateCardConnectionPaths(width)
-      }
-      width = Math.min(width, maxWidth)
-      return Math.ceil(width)
     },
     isConnectingTo () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
@@ -2000,6 +1973,8 @@ article
       padding 8px
       align-self right
       cursor cell
+      button
+        z-index 1
     .checkbox-wrap
       &:hover
         label
