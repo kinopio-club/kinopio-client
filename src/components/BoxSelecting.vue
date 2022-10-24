@@ -50,6 +50,7 @@ export default {
         this.updateSelectableConnections()
       // on move
       } else if (mutation.type === 'currentUserBoxSelectEnd') {
+        if (this.shouldPreventBoxSelecting) { return }
         const { start, end, relativePosition } = this.orderedPoints(this.start, this.end)
         const boxSelection = this.boxSelection(start, end)
         this.selectItems(boxSelection, relativePosition)
@@ -71,7 +72,12 @@ export default {
     start () { return this.zoom(this.$store.state.currentUserBoxSelectStart) },
     end () { return this.zoom(this.$store.state.currentUserBoxSelectEnd) },
     userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
+    shouldPreventBoxSelecting () {
+      const isDraggingCard = this.$store.state.currentUserIsDraggingCard
+      return isDraggingCard
+    },
     currentUserStyles () {
+      if (this.shouldPreventBoxSelecting) { return }
       const { start, end } = this.orderedPoints(this.start, this.end)
       const { left, top, width, height } = this.boxSelection(start, end)
       const color = this.$store.state.currentUser.color
