@@ -73,8 +73,8 @@ export default {
     end () { return this.zoom(this.$store.state.currentUserBoxSelectEnd) },
     userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
     shouldPreventBoxSelecting () {
-      const isDraggingCard = this.$store.state.currentUserIsDraggingCard
-      return isDraggingCard
+      const isDraggingItem = this.$store.state.currentUserIsDraggingCard || this.$store.state.currentUserIsDraggingBox
+      return isDraggingItem
     },
     currentUserStyles () {
       if (this.shouldPreventBoxSelecting) { return }

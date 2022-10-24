@@ -18,14 +18,12 @@
     @mouseleave="updateIsHover(false)"
     @mousedown.left="startBoxInfoInteraction"
 
-    @mouseup.left="showBoxDetails"
-    @keyup.stop.enter="showBoxDetails"
+    @mouseup.left="endBoxInfoInteraction"
+    @keyup.stop.enter="endBoxInfoInteraction"
 
     @touchstart="startLocking"
     @touchmove="updateCurrentTouchPosition"
-    @touchend="showBoxDetailsTouch"
-
-    @click="selectAllContainedCards"
+    @touchend="endBoxInfoInteractionTouch"
   )
     .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
     template(v-if="isH1")
@@ -292,21 +290,25 @@ export default {
         userId: this.$store.state.currentUser.id
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesDragging' })
-      if (event.shiftKey) { return } // should not select contained cards if shift key
+      if (event.shiftKey) { return } // should not select contained items if shift key
       this.selectContainedCards()
+      this.selectContainedBoxes()
     },
-    selectAllContainedCards (event) {
-      const isMeta = event.metaKey || event.ctrlKey
-      if (!isMeta) { return }
-      if (!this.canEditSpace) { return }
-      this.selectContainedCards()
-      this.$store.commit('currentDraggingBoxId', '')
-      this.$store.dispatch('closeAllDialogs', 'Box.selectAllContainedCards')
+    selectContainedBoxes () {
+      let boxes = this.$store.getters['currentBoxes/all']
+      boxes = utils.clone(boxes)
+      boxes.forEach(box => {
+        box.width = box.resizeWidth
+        box.height = box.resizeHeight
+        if (this.isItemInSelectedBoxes(box)) {
+          this.$store.dispatch('addToMultipleBoxesSelected', box.id)
+        }
+      })
     },
     selectContainedCards () {
       const cards = this.$store.getters['currentCards/canBeSelectedSortedByY'].cards
       cards.forEach(card => {
-        if (this.isCardInSelectedBoxes(card)) {
+        if (this.isItemInSelectedBoxes(card, 'card')) {
           this.$store.dispatch('addToMultipleCardsSelected', card.id)
         }
       })
@@ -314,10 +316,12 @@ export default {
         this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
       }
     },
-    isCardInSelectedBoxes (card) {
-      if (card.isLocked) { return }
-      const canEditCard = this.$store.getters['currentUser/canEditCard'](card)
-      if (!canEditCard) { return }
+    isItemInSelectedBoxes (item, type) {
+      if (type === 'card') {
+        const canEditCard = this.$store.getters['currentUser/canEditCard'](item)
+        if (!canEditCard) { return }
+      }
+      if (item.isLocked) { return }
       const boxes = this.selectedBoxes
       const isInside = boxes.find(box => {
         box = this.normalizeBox(box)
@@ -332,7 +336,7 @@ export default {
         // │      x1 = x          x2 = x + w     │
         // │         ██───────────────██         │
         // │         │                 │         │
-        // │         │      Card       │         │
+        // │         │      Item       │         │
         // │         │                 │         │
         // │         ██───────────────██         │
         // │      y1 = y          y2 = y + h     │
@@ -342,22 +346,22 @@ export default {
         // │                                     │
         // └─────────────────────────────────────┘
         const x1 = utils.isBetween({
-          value: card.x,
+          value: item.x,
           min: x,
           max: x + width
         })
         const x2 = utils.isBetween({
-          value: card.x + card.width,
+          value: item.x + item.width,
           min: x,
           max: x + width
         })
         const y1 = utils.isBetween({
-          value: card.y,
+          value: item.y,
           min: y,
           max: y + height
         })
         const y2 = utils.isBetween({
-          value: card.y + card.height,
+          value: item.y + item.height,
           min: y,
           max: y + height
         })
@@ -370,23 +374,28 @@ export default {
       if (this.isPainting) { return }
       this.isHover = value
     },
-    showBoxDetails (event) {
+    endBoxInfoInteraction (event) {
+      const isMeta = event.metaKey || event.ctrlKey
       const userId = this.$store.state.currentUser.id
       this.$store.dispatch('currentBoxes/afterMove')
+      this.$store.dispatch('currentCards/afterMove')
       if (this.$store.state.currentUserIsPainting) { return }
       if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
-      if (this.$store.state.boxesWereDragged) {
-        this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
-        return
-      }
       if (!this.canEditBox) { this.$store.commit('triggerReadOnlyJiggle') }
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
-      this.$store.dispatch('closeAllDialogs', 'Box.showBoxDetails')
-      this.$store.dispatch('clearMultipleSelected')
-      this.$store.commit('boxDetailsIsVisibleForBoxId', this.box.id)
+      this.$store.dispatch('closeAllDialogs', 'Box.endBoxInfoInteraction')
+      if (isMeta) {
+        this.$store.dispatch('multipleBoxesSelectedIds', [])
+      } else {
+        this.$store.dispatch('clearMultipleSelected')
+      }
+      if (!this.$store.state.boxesWereDragged && !isMeta) {
+        this.$store.commit('boxDetailsIsVisibleForBoxId', this.box.id)
+      }
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible, to prevent stopInteractions()
       this.$store.commit('currentUserIsDraggingBox', false)
+      this.$store.commit('boxesWereDragged', false)
     },
 
     // h1, h2
@@ -490,10 +499,10 @@ export default {
         return true
       }
     },
-    showBoxDetailsTouch (event) {
+    endBoxInfoInteractionTouch (event) {
       this.cancelLocking()
       if (this.touchIsNearTouchPosition(event)) {
-        this.showBoxDetails(event)
+        this.endBoxInfoInteraction(event)
       }
     }
   }
