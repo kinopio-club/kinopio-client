@@ -358,6 +358,8 @@ export default {
       return this.card.isLocked
     },
     shouldJiggle () {
+      const isShiftKeyDown = this.$store.state.currentUserIsBoxSelecting
+      if (isShiftKeyDown) { return }
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
     isSelectedOrDragging () {
