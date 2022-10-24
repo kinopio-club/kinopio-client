@@ -6,7 +6,12 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
       .button-wrap
         button.change-color(:disabled="!canEditBox" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: box.color}")
-        ColorPicker(:currentColor="box.color" :visible="colorPickerIsVisible" @selectedColor="updateColor")
+        ColorPicker(
+          :currentColor="box.color"
+          :visible="colorPickerIsVisible"
+          :recentColors="itemColors"
+          @selectedColor="updateColor"
+        )
       //- name
       input.name(
         :disabled="!canEditBox"
@@ -76,7 +81,8 @@ export default {
         this.update({ name })
       }
     },
-    canEditBox () { return this.$store.getters['currentUser/canEditBox']() }
+    canEditBox () { return this.$store.getters['currentUser/canEditBox']() },
+    itemColors () { return this.$store.getters['currentSpace/itemColors'] }
   },
   methods: {
     broadcastShowBoxDetails () {
