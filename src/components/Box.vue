@@ -392,10 +392,10 @@ export default {
       }
       if (!this.$store.state.boxesWereDragged && !isMeta) {
         this.$store.commit('boxDetailsIsVisibleForBoxId', this.box.id)
+        event.stopPropagation() // prevent stopInteractions() from closing boxDetails
+        this.$store.commit('currentUserIsDraggingBox', false)
+        this.$store.commit('boxesWereDragged', false)
       }
-      event.stopPropagation() // only stop propagation if cardDetailsIsVisible, to prevent stopInteractions()
-      this.$store.commit('currentUserIsDraggingBox', false)
-      this.$store.commit('boxesWereDragged', false)
     },
 
     // h1, h2
