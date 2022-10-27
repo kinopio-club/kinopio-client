@@ -17,11 +17,11 @@ dialog.narrow.space-filters(v-if="visible" :open="visible" @click.left.stop ref=
 
     .segmented-buttons
       button(@click="showAllSpaces" :class="{active: allIsActive}") All
+      button(@click="showSpacesOnly" :class="{active: spacesIsActive}") Normal
       button(@click="showJournalsOnly" :class="{active: journalsIsActive}")
         MoonPhase(:moonPhase="moonPhase.name")
       button(@click="showTweetSpacesOnly" :class="{active: tweetsIsActive}")
         img.icon.tweet(src="@/assets/twitter.svg")
-      button(@click="showSpacesOnly" :class="{active: spacesIsActive}") Spaces
 
   section.results-section.collaborators
     UserList(:users="spaceUsers" :isClickable="true" @selectUser="filterByUser" :selectedUser="dialogSpaceFilterByUser")
