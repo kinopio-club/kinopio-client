@@ -18,10 +18,10 @@ section.filters
         span Todo
     //- More Filters
     .button-wrap
-      button(:class="{active: moreFiltersVisible, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreFiltersVisible")
+      button(:class="{active: moreSearchFiltersVisible, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
         img.icon(src="@/assets/filter.svg")
         span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
-      MoreFilters(:visible="moreFiltersVisible")
+      MoreSearchFilters(:visible="moreSearchFiltersVisible")
   .row
     //- Comments Hide
     .button-wrap
@@ -33,7 +33,7 @@ section.filters
 </template>
 
 <script>
-import MoreFilters from '@/components/dialogs/MoreFilters.vue'
+import MoreSearchFilters from '@/components/dialogs/MoreSearchFilters.vue'
 import frames from '@/data/frames.js'
 import utils from '@/utils.js'
 import { defineAsyncComponent } from 'vue'
@@ -47,18 +47,18 @@ export default {
   name: 'Filters',
   components: {
     User,
-    MoreFilters
+    MoreSearchFilters
   },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerMoreFiltersIsNotVisible') {
-        this.moreFiltersVisible = false
+        this.moreSearchFiltersVisible = false
       }
     })
   },
   data () {
     return {
-      moreFiltersVisible: false
+      moreSearchFiltersVisible: false
     }
   },
   computed: {
@@ -76,8 +76,8 @@ export default {
     filterComments () { return this.currentUser.filterComments }
   },
   methods: {
-    toggleMoreFiltersVisible () {
-      this.moreFiltersVisible = !this.moreFiltersVisible
+    toggleMoreSearchFiltersVisible () {
+      this.moreSearchFiltersVisible = !this.moreSearchFiltersVisible
     },
 
     // Toggle filters
