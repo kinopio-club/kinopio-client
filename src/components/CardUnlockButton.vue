@@ -35,6 +35,7 @@ export default {
       return { backgroundColor: 'transparent' }
     },
     canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     connectionTypes () { return this.$store.getters['currentConnections/typesByCardId'](this.card.id) }
   },
   methods: {
@@ -43,7 +44,7 @@ export default {
         return
       }
       event.stopPropagation()
-      if (!this.canEditCard) {
+      if (!this.canEditCard || !this.canEditSpace) {
         const position = utils.cursorPositionInPage(event)
         this.$store.commit('addNotificationWithPosition', { message: 'Card is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
         return
