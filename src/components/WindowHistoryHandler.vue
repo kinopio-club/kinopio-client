@@ -20,19 +20,20 @@ export default {
   },
   methods: {
     async updateWindowHistory ({ space, isRemote }) {
+      const isEmbed = this.$store.state.isEmbed
       space = space || this.currentSpace
       const spaceUrl = utils.url(space)
       const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
       const spaceHasUrl = currentUserIsSignedIn || isRemote
       if (spaceHasUrl) {
         this.$store.commit('currentSpacePath', spaceUrl, { root: true })
-        if (navigator.standalone) { return }
+        if (navigator.standalone || isEmbed) { return }
         await this.$router.push('/' + spaceUrl)
         const state = utils.clone(this.$store.state)
         history.replaceState({ ...history.state, ...state }, '')
       } else {
         this.$store.commit('currentSpacePath', '/', { root: true })
-        if (navigator.standalone) { return }
+        if (navigator.standalone || isEmbed) { return }
         this.$router.replace({ path: '/' })
       }
     },
