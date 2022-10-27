@@ -19,7 +19,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
       //- Embed
-      .button-wrap(v-if="!spaceIsPrivate")
+      .button-wrap
         button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
           span Embed
         Embed(:visible="embedIsVisible")
@@ -134,8 +134,6 @@ export default {
       const canEdit = this.$store.getters['currentUser/canEditSpace']()
       return canEdit
     },
-    // only works in https, supported by safari and android chrome
-    // https://caniuse.com/#feat=web-share
     spaceIsPrivate () {
       return this.spacePrivacy === 'private'
     },
@@ -192,6 +190,8 @@ export default {
         text: this.spaceName,
         url: this.url
       }
+      // only works in https, supported by safari and android chrome
+      // https://caniuse.com/#feat=web-share
       navigator.share(data)
     },
     togglePrivacyPickerIsVisible () {

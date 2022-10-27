@@ -3,43 +3,64 @@ dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop)
   section
     p Embed
   section
-    .row
-      .segmented-buttons
-        button(@click="toggleIframeIsVisible" :class="{ active: iframeIsVisible }")
-          span iFrame
-        button(@click="toggleUrlIsVisible" :class="{ active: !iframeIsVisible }")
-          span URL
 
-    //- iFrame
-    template(v-if="iframeIsVisible")
-      .row
-        .url-textarea {{iframe}}
-        .input-button-wrap(@click.left="copy")
-          button
-            span Copy Code
-    //- Url
-    template(v-if="!iframeIsVisible")
-      .row
-        .url-textarea {{url}}
-        .input-button-wrap(@click.left="copy")
-          button
-            span Copy URL
+    template(v-if="!currentUserIsSignedIn")
+      p
+        span Sign Up or In to embed this space anywhere
+      button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+    template(v-else-if="!spaceIsPublic")
+      p To embed this space, set the privacy to
+        span.badge.info
+          img.icon.closed(src="@/assets/unlock.svg")
+          span {{privacyName(1)}}
+        span or
+        span.badge.success.last-child
+          img.icon.open(src="@/assets/open.svg")
+          span {{privacyName(0)}}
 
-    //- Zoom
-    .row
-      img.icon.icon-zoom(src="@/assets/search.svg")
-      Slider(
-        @updatePlayhead="updateZoom"
-        :minValue="40"
-        :value="spaceZoomPercent"
-        :maxValue="100"
-      )
+    // if not signed in
+
+    // else if space is private
+
+    template(v-if="isEmbedable")
+      .row
+        .segmented-buttons
+          button(@click="toggleIframeIsVisible" :class="{ active: iframeIsVisible }")
+            span iFrame
+          button(@click="toggleUrlIsVisible" :class="{ active: !iframeIsVisible }")
+            span URL
+
+      //- iFrame
+      template(v-if="iframeIsVisible")
+        .row
+          .url-textarea {{iframe}}
+          .input-button-wrap(@click.left="copy")
+            button
+              span Copy Code
+      //- Url
+      template(v-if="!iframeIsVisible")
+        .row
+          .url-textarea {{url}}
+          .input-button-wrap(@click.left="copy")
+            button
+              span Copy URL
+
+      //- Zoom
+      .row
+        img.icon.icon-zoom(src="@/assets/search.svg")
+        Slider(
+          @updatePlayhead="updateZoom"
+          :minValue="40"
+          :value="spaceZoomPercent"
+          :maxValue="100"
+        )
 
 </template>
 
 <script>
 import Slider from '@/components/Slider.vue'
 import utils from '@/utils.js'
+import privacy from '@/data/privacy.js'
 
 export default {
   name: 'Embed',
@@ -57,6 +78,14 @@ export default {
     }
   },
   computed: {
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    spacePrivacy () { return this.$store.state.currentSpace.privacy },
+    spaceIsPublic () {
+      return this.spacePrivacy !== 'private'
+    },
+    isEmbedable () {
+      return this.currentUserIsSignedIn && this.spaceIsPublic
+    },
     spaceZoomPercent () { return this.$store.state.spaceZoomPercent },
     url () {
       const spaceId = this.$store.state.currentSpace.id
@@ -100,6 +129,15 @@ export default {
         console.warn('🚑 copy', error)
         this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
       }
+    },
+    triggerSignUpOrInIsVisible () {
+      this.$store.dispatch('closeAllDialogs', 'ShowInExploreButton.triggerSignUpOrInIsVisible')
+      this.$store.commit('triggerSignUpOrInIsVisible')
+    },
+    privacyName (number) {
+      const state = privacy.states()[number]
+      const name = state.friendlyName || state.name
+      return utils.capitalizeFirstLetter(name)
     }
   },
   watch: {
