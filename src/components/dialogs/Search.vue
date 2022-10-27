@@ -1,6 +1,6 @@
 <template lang="pug">
 dialog.search(@click="closeDialogs" v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
-  Filters
+  SearchFilters
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(
       :showFilter="true"
@@ -38,7 +38,7 @@ dialog.search(@click="closeDialogs" v-if="visible" :open="visible" ref="dialog" 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import User from '@/components/User.vue'
 import NameSegment from '@/components/NameSegment.vue'
-import Filters from '@/components/Filters.vue'
+import SearchFilters from '@/components/SearchFilters.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -54,7 +54,7 @@ export default {
     ResultsFilter,
     User,
     NameSegment,
-    Filters
+    SearchFilters
   },
   props: {
     visible: Boolean
