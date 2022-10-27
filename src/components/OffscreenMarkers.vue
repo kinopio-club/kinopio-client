@@ -191,13 +191,13 @@ edge = 4px
   pointer-events none
   z-index 1
   opacity 0.5
-  transition 0.2s all
   .marker
     width width
     height height
     background-repeat no-repeat
     background-size contain
     position absolute
+    transition 0.1s all
   .top
     top edge
     left "calc(50% -  %s)" % (width / 2)
