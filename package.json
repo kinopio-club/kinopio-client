@@ -13,6 +13,7 @@
     "@aguezz/qs-parse": "^2.0.0",
     "@stripe/stripe-js": "^1.7.0",
     "adaptive-quadratic-curve": "^1.0.2",
+    "colord": "^2.9.3",
     "dayjs": "^1.9.1",
     "hex-to-rgba": "^2.0.1",
     "lodash-es": "^4.17.15",

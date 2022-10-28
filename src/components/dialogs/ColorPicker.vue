@@ -61,8 +61,9 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
 <script>
 import utils from '@/utils.js'
 
-import validateColor from 'validate-color'
 import randomColor from 'randomcolor'
+
+// to remove
 import shader from 'shader'
 
 export default {
@@ -92,16 +93,10 @@ export default {
         return this.currentColor
       },
       set (color) {
-        let validate = validateColor
-        if (typeof validate !== 'function') {
-          validate = validateColor.validateHTMLColor
-        }
-        if (validate(color)) {
+        if (utils.colorIsValid(color)) {
           this.updateColorFromInput(color)
-        } else if (validate('#' + color)) {
+        } else if (utils.colorIsValid(`#${color}`)) {
           this.updateColorFromInput('#' + color)
-        } else if (validateColor.validateHTMLColorName(color)) {
-          this.updateColorFromInput(color)
         }
       }
     },

@@ -12,10 +12,13 @@ import times from 'lodash-es/times'
 import join from 'lodash-es/join'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { colord, extend } from 'colord'
+import namesPlugin from 'colord/plugins/names'
 
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
+extend([namesPlugin])
 dayjs.extend(relativeTime)
 let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
@@ -690,6 +693,9 @@ export default {
 
   cssVariable (name) {
     return getComputedStyle(document.documentElement).getPropertyValue(`--${name}`)
+  },
+  colorIsValid (color) {
+    return colord(color).isValid()
   },
 
   // normalize items
