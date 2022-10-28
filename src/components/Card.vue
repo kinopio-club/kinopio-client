@@ -1999,8 +1999,8 @@ article
       top 2px
     .resize-icon
       position absolute
-      left 4px
-      top 4.5px
+      left 5px
+      top 5.5px
     .lock-icon
       position absolute
       left 5.5px
