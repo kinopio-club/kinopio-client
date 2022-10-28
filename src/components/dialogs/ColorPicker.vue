@@ -62,8 +62,6 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
 import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
-
-// to remove
 import shader from 'shader'
 
 export default {
