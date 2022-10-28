@@ -449,7 +449,6 @@ const store = createStore({
     triggerShowConnectionDetails: (state, options) => {},
     triggerUpdateWindowHistory: (state, options) => {},
     triggerAddCard: () => {},
-    triggerUpdateCardOverlaps: () => {},
     triggerCardDetailsCloseDialogs: () => {},
     triggerSpaceDetailsCloseDialogs: () => {},
     triggerTemplatesIsVisible: () => {},

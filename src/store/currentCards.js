@@ -429,7 +429,6 @@ const currentCards = {
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
         context.dispatch('updateDimensions', { cards: [card] })
-        context.commit('triggerUpdateCardOverlaps', null, { root: true })
       })
     },
     removeResize: (context, { cardIds }) => {
@@ -440,7 +439,6 @@ const currentCards = {
         const card = context.getters.byId(cardId)
         context.dispatch('updateDimensions', { cards: [card] })
       })
-      context.commit('triggerUpdateCardOverlaps', null, { root: true })
     },
 
     // move
@@ -561,7 +559,6 @@ const currentCards = {
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
-      context.commit('triggerUpdateCardOverlaps', null, { root: true })
       context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })
     },
 
@@ -660,7 +657,6 @@ const currentCards = {
       if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
         context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
       }
-      context.commit('triggerUpdateCardOverlaps', null, { root: true })
     },
     deleteCard: (context, card) => {
       context.commit('deleteCard', card)
@@ -714,7 +710,6 @@ const currentCards = {
           cards = cardIds.map(cardId => context.getters.byId(cardId))
           context.dispatch('history/resume', null, { root: true })
           context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
-          context.commit('triggerUpdateCardOverlaps', null, { root: true })
           // wait for images to load
           setTimeout(() => {
             context.dispatch('currentCards/distributeVertically', cards, { root: true })

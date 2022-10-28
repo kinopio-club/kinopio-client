@@ -397,7 +397,6 @@ const currentSpace = {
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
         context.commit('isLoadingSpace', false, { root: true })
       })
-      context.commit('triggerUpdateCardOverlaps', null, { root: true })
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
     },
     duplicateSpace: async (context) => {
@@ -684,7 +683,6 @@ const currentSpace = {
         context.dispatch('updateOtherSpaces')
         context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
-        context.commit('triggerUpdateCardOverlaps', null, { root: true })
         nextTick(() => {
           context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
           context.dispatch('checkIfShouldPauseConnectionDirections')
