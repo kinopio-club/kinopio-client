@@ -864,10 +864,12 @@ code
     margin 0
   .user
     vertical-align middle
-    margin-right 3px
     .user-avatar
       width 16px
-      height 15px
+      height 12px
+      .anon-avatar
+        top 5px
+        left 0
   .loader
     width 14px
     height 14px
@@ -915,8 +917,12 @@ code
   background-color var(--danger-background)
 
 .anon-avatar
-  background-image url('assets/anon-avatar.svg')
-  background-size 70%
+  position absolute
+  top 9px
+  left 4px
+  width 16px
+  &.is-dark
+    filter invert(1)
 
 .marker
   background-image url('assets/marker.svg')

@@ -80,9 +80,7 @@ article#card(
               img.icon.view(src="@/assets/comment.svg")
           //- User
           template(v-if="commentIsVisible")
-            .badge.user-badge.user-badge.comment-user-badge(:style="{background: createdByUser.color}")
-              User(:user="createdByUser" :isClickable="false")
-              span {{createdByUser.name}}
+            UserLabelInline(:user="createdByUser")
           template(v-if="!commentIsVisible")
             User(:user="createdByUser" :isClickable="false")
           p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}")
@@ -194,17 +192,8 @@ article#card(
       img.icon.system(src="@/assets/system.svg")
     //- User
     .badge-wrap
-      .badge.user-badge.button-badge(
-        v-if="filterShowUsers"
-        :style="{background: createdByUser.color}"
-        :class="{active: userDetailsIsUser}"
-        @mouseup.left.stop
-        @touchend.stop
-        @click.left.prevent.stop="toggleUserDetailsIsVisible"
-        @touchend.prevent.stop="toggleUserDetailsIsVisible"
-      )
-        User(:user="createdByUser" :isClickable="false")
-        .name {{createdByUser.name}}
+      template(v-if="filterShowUsers")
+        UserLabelInline(:user="createdByUser" :isClickable="true")
     //- Date
     .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
       img.icon.time(src="@/assets/time.svg")
@@ -220,6 +209,7 @@ import Audio from '@/components/Audio.vue'
 import User from '@/components/User.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 
 import dayjs from 'dayjs'
 import hexToRgba from 'hex-to-rgba'
@@ -249,7 +239,8 @@ export default {
     Audio,
     User,
     NameSegment,
-    UrlPreview
+    UrlPreview,
+    UserLabelInline
   },
   props: {
     card: Object
@@ -1882,9 +1873,6 @@ article
         margin-top 6px
         margin-left 6px
         margin-bottom 6px
-        .user-avatar
-          width 17px
-          height 16px
       .comment
         &.is-checked
           text-decoration line-through

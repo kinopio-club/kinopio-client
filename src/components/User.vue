@@ -1,12 +1,13 @@
 <template lang="pug">
 .user(:data-user-id="userId" :key="userId" ref="user" @keydown.stop.enter="toggleUserDetailsIsVisible" :class="{active: userDetailsIsVisibleForUser}")
-  .user-avatar.anon-avatar(
+  .user-avatar(
     @mouseup.left.stop="toggleUserDetailsIsVisible"
     @touchend.stop="toggleUserDetailsIsVisible"
     ref="user"
     :class="{ clickable: isClickable, 'is-small': isSmall }"
     :style="{backgroundColor: userColor}"
   )
+    img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark, 'is-small': isSmall }")
     .label-badge.you-badge(v-if="isCurrentUser && !hideYouLabel")
       span YOU
     .label-badge(v-if="labelBadge")
@@ -45,7 +46,8 @@ export default {
       const userDetailsUser = this.$store.state.userDetailsUser
       return this.user.id === userDetailsUser.id
     },
-    userDetailsIsVisibleForUser () { return this.userDetailsIsVisible && this.userDetailsIsUser }
+    userDetailsIsVisibleForUser () { return this.userDetailsIsVisible && this.userDetailsIsUser },
+    colorIsDark () { return utils.colorIsDark(this.userColor) }
   },
   methods: {
     toggleUserDetailsIsVisible () {
@@ -86,8 +88,6 @@ export default {
   .user-avatar
     width 24px
     height 24px
-    background-repeat no-repeat
-    background-position center
     border-radius 3px
     pointer-events none
     background-color var(--secondary-active-background)
@@ -105,6 +105,7 @@ export default {
     &.is-small
       width 17px
       height 16px
+
   .label-badge
     bottom -7px
     width initial
@@ -117,6 +118,11 @@ button
     vertical-align middle
     .user-avatar
       width 15px
-      height 15px
+      height 14px
       margin-top -2px
+      .anon-avatar
+        left 2px
+        top 3px
+        width 10.5px
+
 </style>

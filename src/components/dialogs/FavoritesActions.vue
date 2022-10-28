@@ -15,7 +15,7 @@ dialog.favorities-actions.narrow(v-if="visible" :open="visible" @click.left.stop
         button(:class="{active: isFavoriteUser(user)}" @click.left.prevent="toggleIsFavoriteUser(user)" @keydown.stop.enter="toggleIsFavoriteUser(user)")
           img.icon(v-if="isFavoriteUser(user)" src="@/assets/heart.svg")
           img.icon(v-else src="@/assets/heart-empty.svg")
-          UserLabelInline(:user="user" :isInline="true")
+          UserLabelInline(:user="user")
 
 </template>
 
