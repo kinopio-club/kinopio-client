@@ -697,6 +697,11 @@ export default {
   colorIsValid (color) {
     return colord(color).isValid()
   },
+  colorIsDark (color) {
+    if (!color) { return }
+    if (color === 'transparent') { return }
+    return colord(color).isDark()
+  },
 
   // normalize items
 

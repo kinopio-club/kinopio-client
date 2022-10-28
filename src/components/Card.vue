@@ -63,7 +63,7 @@ article#card(
         @touchstart.stop="startResizing"
         @dblclick="removeResize"
       )
-        button.inline-button.resize-button(tabindex="-1" :style="{background: itemBackground}")
+        button.inline-button.resize-button(tabindex="-1")
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
@@ -132,6 +132,7 @@ article#card(
             :data-card-id="id"
             @mousedown.left="startConnecting"
             @touchstart="startConnecting"
+            :class="{ 'is-dark': connectionTypeColorisDark }"
           )
             .connector-glow(:style="connectorGlowStyle" tabindex="-1")
             button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: itemBackground }" tabindex="-1" @keyup.stop.enter="showCardDetails")
@@ -399,6 +400,14 @@ export default {
     z () { return this.card.z },
     commentIsVisible () { return this.card.commentIsVisible },
     connectionTypes () { return this.$store.getters['currentConnections/typesByCardId'](this.id) },
+    connectionTypeColorisDark () {
+      const type = this.connectionTypes[0]
+      if (!type) {
+        return utils.colorIsDark(this.card.backgroundColor)
+      } else {
+        return utils.colorIsDark(type.color)
+      }
+    },
     newConnectionColor () { return this.$store.state.currentConnectionColor },
     name () {
       this.updateMediaUrls()
@@ -491,7 +500,8 @@ export default {
         'audio-card': this.isAudioCard,
         'is-playing-audio': this.isPlayingAudio,
         'is-locked': this.isLocked,
-        'has-url-preview': this.cardUrlPreviewIsVisible
+        'has-url-preview': this.cardUrlPreviewIsVisible,
+        'is-dark': this.backgroundColorIsDark
       }
     },
     cardStyle () {
@@ -510,6 +520,10 @@ export default {
         styles.background = hexToRgba(color, 0.5) || color
       }
       return styles
+    },
+    backgroundColorIsDark () {
+      const color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.card.backgroundColor
+      return utils.colorIsDark(color)
     },
     connectorGlowStyle () {
       const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor
@@ -1860,6 +1874,9 @@ article
     &:active,
     &.active
       box-shadow var(--active-shadow)
+    &.is-dark
+      .name
+        color var(--primary-background)
     .card-comment
       > .badge
         margin 0
@@ -1947,6 +1964,12 @@ article
           min-width 0
           padding 0
           border none
+          border-color var(--primary)
+      &.is-dark
+        button
+          border-color var(--primary-background)
+        img
+          filter invert(1)
       .connector-glow
         position absolute
         width 36px
