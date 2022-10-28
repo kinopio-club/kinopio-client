@@ -128,6 +128,11 @@ export default {
       if (this.luminosity === value) { return }
       this.luminosity = value
       this.shuffleColors()
+      if (value === 'light') {
+        this.$store.dispatch('currentUser/update', { shouldUseDarkColors: false })
+      } else {
+        this.$store.dispatch('currentUser/update', { shouldUseDarkColors: true })
+      }
     },
     removeColor () {
       this.$emit('removeColor')
@@ -180,10 +185,19 @@ export default {
         const element = this.$refs.dialog
         utils.scrollIntoView(element)
       })
+    },
+    updateLuminosityFromCurrentUser () {
+      const value = this.$store.state.currentUser.shouldUseDarkColors
+      if (value) {
+        this.updateLuminosity('dark')
+      } else {
+        this.updateLuminosity('light')
+      }
     }
   },
   watch: {
     visible (visible) {
+      this.updateLuminosityFromCurrentUser()
       this.shuffleColors()
       this.updateButtonHues()
       this.scrollIntoView()

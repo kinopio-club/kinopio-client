@@ -56,7 +56,8 @@ export default {
     shouldNotifyUnlockedStickyCards: true,
     shouldUseStickyCards: false,
     shouldPauseConnectionDirections: false,
-    twitterUsername: ''
+    twitterUsername: '',
+    shouldUseDarkColors: false
   },
   mutations: {
     color: (state, value) => {
@@ -315,6 +316,10 @@ export default {
     twitterUsername: (state, value) => {
       state.twitterUsername = value
       cache.updateUser('twitterUsername', value)
+    },
+    shouldUseDarkColors: (state, value) => {
+      state.shouldUseDarkColors = value
+      cache.updateUser('shouldUseDarkColors', value)
     }
   },
   actions: {
