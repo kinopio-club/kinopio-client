@@ -124,7 +124,7 @@ article#card(
           //- Url →
           a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
             .url.inline-button-wrap
-              button.inline-button(:style="{background: itemBackground}" tabindex="-1")
+              button.inline-button(:style="{background: itemBackground}" :class="{'is-dark': backgroundColorIsDark}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
           //- Connector
           .connector.inline-button-wrap(
@@ -132,10 +132,9 @@ article#card(
             :data-card-id="id"
             @mousedown.left="startConnecting"
             @touchstart="startConnecting"
-            :class="{ 'is-dark': connectionTypeColorisDark }"
           )
             .connector-glow(:style="connectorGlowStyle" tabindex="-1")
-            button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: itemBackground }" tabindex="-1" @keyup.stop.enter="showCardDetails")
+            button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom, 'is-dark': connectionTypeColorisDark}" :style="{background: itemBackground }" tabindex="-1" @keyup.stop.enter="showCardDetails")
               .connected-colors
                 template(v-if="isConnectingTo || isConnectingFrom")
                   .color(:style="{ background: newConnectionColor}")
@@ -1965,11 +1964,6 @@ article
           padding 0
           border none
           border-color var(--primary)
-      &.is-dark
-        button
-          border-color var(--primary-background)
-        img
-          filter invert(1)
       .connector-glow
         position absolute
         width 36px
@@ -2208,6 +2202,12 @@ article
     img
       width 10px
       height 10px
+
+  button
+    &.is-dark
+      border-color var(--primary-background)
+      img
+        filter invert(1)
 
 @keyframes bounce
   0%
