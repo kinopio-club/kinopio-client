@@ -222,6 +222,7 @@ import NameSegment from '@/components/NameSegment.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 
 import dayjs from 'dayjs'
+import hexToRgba from 'hex-to-rgba'
 
 let isMultiTouch
 let initialTouchEvent = {}
@@ -498,12 +499,17 @@ export default {
       if (!this.isVisualCard) {
         backgroundColor = this.card.backgroundColor
       }
-      const color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || backgroundColor
-      return {
+      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || backgroundColor
+      let styles = {
         background: color,
         width: this.resizeWidth,
         maxWidth: this.resizeWidth
       }
+      if (this.isComment) {
+        color = color || utils.cssVariable('secondary-background')
+        styles.background = hexToRgba(color, 0.5) || color
+      }
+      return styles
     },
     connectorGlowStyle () {
       const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor

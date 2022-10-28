@@ -21,6 +21,9 @@ let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
 
 export default {
+  cssVariable (name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(`--${name}`)
+  },
   userPrefersReducedMotion () {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
     if (query.matches) {
