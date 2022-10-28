@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "serve": "vite",
+    "serve": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .js,.vue"
@@ -27,9 +27,8 @@
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.3",
-    "@vitejs/plugin-vue": "^1.6.2",
+    "@vitejs/plugin-vue": "^3.2.0",
     "@vue/compiler-sfc": "^3.2.6",
-    "@vue/devtools": "6.0.0-beta.12",
     "@vue/eslint-config-standard": "^4.0.0",
     "autoprefixer": "^10.4.2",
     "babel-eslint": "^10.0.1",
@@ -40,7 +39,7 @@
     "pug": "^3.0.2",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
-    "vite": "^2.9.13",
+    "vite": "^3.2.1",
     "yorkie": "^2.0.0"
   },
   "eslintConfig": {
