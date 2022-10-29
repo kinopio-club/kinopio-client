@@ -393,7 +393,7 @@ export default {
     connectionTypeColorisDark () {
       const type = this.connectionTypes[0]
       if (!type) {
-        return utils.colorIsDark(this.card.backgroundColor)
+        return utils.colorIsDark(this.backgroundColor)
       } else {
         return utils.colorIsDark(type.color)
       }
@@ -494,6 +494,9 @@ export default {
         'is-dark': this.backgroundColorIsDark
       }
     },
+    backgroundColor () {
+      return this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.card.backgroundColor
+    },
     cardStyle () {
       let backgroundColor
       if (!this.isVisualCard) {
@@ -512,7 +515,7 @@ export default {
       return styles
     },
     backgroundColorIsDark () {
-      const color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.card.backgroundColor
+      const color = this.backgroundColor
       return utils.colorIsDark(color)
     },
     connectorGlowStyle () {
