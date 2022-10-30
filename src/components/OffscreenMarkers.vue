@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.offscreen-markers(v-if="isVisible" :styles="styles")
+aside.offscreen-markers(v-if="isVisible" :styles="styles" :class="{ 'is-dark': backgroundTintIsDark }")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
@@ -89,6 +89,10 @@ export default {
         styles['transform-origin'] = 'left top'
       }
       return styles
+    },
+    backgroundTintIsDark () {
+      const color = this.$store.state.currentSpace.backgroundTint
+      return utils.colorIsDark(color)
     },
     isAddPage () { return this.$store.state.isAddPage },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
@@ -187,10 +191,13 @@ edge = 4px
   position fixed
   width 100%
   height 100%
-  mix-blend-mode color-burn
   pointer-events none
   z-index 1
   opacity 0.5
+  &.is-dark
+    .marker
+      filter invert(1)
+
   .marker
     width width
     height height
