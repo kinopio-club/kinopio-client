@@ -10,7 +10,7 @@
 )
   .user-avatar
     img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
-  span.user-name(v-if="userHasName" :class="{ 'is-dark': colorIsDark }") {{ user.name }}
+  span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ user.name }}
 </template>
 
 <script>
@@ -20,7 +20,8 @@ export default {
   name: 'UserLabelInline',
   props: {
     user: Object,
-    isClickable: Boolean
+    isClickable: Boolean,
+    shouldHideName: Boolean
   },
   computed: {
     userHasName () { return Boolean(this.user.name) },

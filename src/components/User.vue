@@ -105,6 +105,10 @@ export default {
     &.is-small
       width 17px
       height 16px
+      .anon-avatar
+        left 2px
+        top 3px
+        width 10.5px
 
   .label-badge
     bottom -7px

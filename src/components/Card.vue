@@ -82,7 +82,7 @@ article#card(
           template(v-if="commentIsVisible")
             UserLabelInline(:user="createdByUser")
           template(v-if="!commentIsVisible")
-            User(:user="createdByUser" :isClickable="false")
+            UserLabelInline(:user="createdByUser" :shouldHideName="true")
           p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
@@ -206,7 +206,6 @@ import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
 import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
-import User from '@/components/User.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -237,7 +236,6 @@ export default {
     Frames,
     Loader,
     Audio,
-    User,
     NameSegment,
     UrlPreview,
     UserLabelInline
@@ -1882,6 +1880,9 @@ article
         .image
           margin-top 10px
           border-radius 3px
+      .user-label-inline
+        transform translateY(-1px)
+        margin 0
 
     .card-content-wrap
       display flex
