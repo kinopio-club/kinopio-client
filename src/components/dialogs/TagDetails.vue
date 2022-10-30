@@ -6,7 +6,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
     button.change-color.select-all(@click="selectCardsWithTag")
       .current-color(:style="{backgroundColor: color}")
       span Select
-  section(:style="{backgroundColor: color}")
+  section(:style="{backgroundColor: color}" :class="{'is-dark': isDark}")
     .row.tag-title-row
       .row
         .button-wrap
@@ -21,7 +21,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
 
     //- no cards found
     template(v-if="!cards.length && !loading")
-      p Tag more cards with [[{{currentTag.name}}]] to see them here
+      p.no-cards Tag more cards with [[{{currentTag.name}}]] to see them here
       button(v-if="visibleFromTagList" @click.left.stop="removeTag")
         img.icon(src="@/assets/remove.svg")
         span Remove Tag
@@ -57,7 +57,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
                 //- Tags
                 span.badge.tag-badge(
                   v-if="segment.isTag"
-                  :style="{backgroundColor: segment.color}"
+                  :style="tagStyle(segment)"
                   :class="{ active: currentTag.name === segment.name }"
                 )
                   span {{segment.name}}
@@ -212,9 +212,13 @@ export default {
       set () {
         this.toggleFilteredInSpace()
       }
+    },
+    isDark () {
+      return utils.colorIsDark(this.color)
     }
   },
   methods: {
+    tagStyle (segment) { return utils.tagStyle(segment) },
     selectCardsWithTag () {
       let cards = this.$store.getters['currentCards/withTagName'](this.currentTag.name)
       cards = cards.filter(card => Boolean(card))
@@ -526,4 +530,8 @@ export default {
       margin 0
   .toggle-filter
     min-width 45px
+  .is-dark
+    .tag-name,
+    .no-cards
+      filter invert(1)
 </style>

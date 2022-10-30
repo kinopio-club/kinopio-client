@@ -117,7 +117,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Tags
       template(v-for="tag in tagsInCard")
         span.badge.button-badge(
-          :style="{backgroundColor: tag.color}"
+          :style="tagStyle(tag)"
           :class="{ active: currentSelectedTag.name === tag.name }"
           tabindex="0"
           @click.left.stop="showTagDetailsIsVisible($event, tag)"
@@ -542,6 +542,7 @@ export default {
     }
   },
   methods: {
+    tagStyle (tag) { return utils.tagStyle(tag) },
     broadcastShowCardDetails () {
       const updates = {
         cardId: this.card.id,

@@ -7,13 +7,13 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
   section.results-section
     ul.results-list
       li(v-if="search" @click="selectTag(null, true)" @touchend.stop :class="{hover: focusOnName === search}")
-        .badge.tag-badge(:style="{backgroundColor: searchTagColor}")
+        .badge.tag-badge(:style="tagStyle({color: searchTagColor})")
           span {{search}}
           .badge.label-badge(v-if="!searchTagMatch")
             span New Tag
 
       li(v-for="tag in filteredTags" @click="selectTag(tag, true)" @touchend.stop :class="{hover: focusOnName === tag.name}")
-        .badge.tag-badge(:style="{backgroundColor: tag.color}")
+        .badge.tag-badge(:style="tagStyle(tag)")
           span {{tag.name}}
 
     Loader(:visible="loading")
@@ -130,6 +130,7 @@ export default {
     }
   },
   methods: {
+    tagStyle (tag) { return utils.tagStyle(tag) },
     updateTags () {
       const spaceTags = this.$store.getters['currentSpace/spaceTags']
       this.tags = spaceTags || []

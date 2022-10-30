@@ -1777,7 +1777,6 @@ export default {
       spaceId: spaceId
     }
   },
-
   indexesOf (string, search) {
     // adapted from https://stackoverflow.com/a/3410549
     search = search.replaceAll('[', '\\[')
@@ -1792,6 +1791,15 @@ export default {
       results.push(position)
     }
     return results
+  },
+  tagStyle (tag) {
+    let styles = { backgroundColor: tag.color }
+    const isDark = this.colorIsDark(tag.color)
+    if (isDark) {
+      const color = this.cssVariable('primary')
+      styles.color = this.invertColor(color)
+    }
+    return styles
   },
 
   // Name Segments 🎫

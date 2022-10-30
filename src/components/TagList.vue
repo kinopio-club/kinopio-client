@@ -21,7 +21,7 @@ span.tag-list(@click.left="closeDialogs")
           v-on:keyup.enter="selectTag($event, tag)"
           :class="{ active: tagIsActive(tag), hover: tagIsFocused(tag) }"
         )
-          .badge(:style="{backgroundColor: tag.color, 'pointerEvents': 'none'}")
+          .badge(:style="tagStyle(tag)")
             span {{tag.name}}
   p.info(v-if="!tags")
     span Type
@@ -32,7 +32,7 @@ span.tag-list(@click.left="closeDialogs")
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
-// import utils from '@/utils.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'TagList',
@@ -67,6 +67,7 @@ export default {
     }
   },
   methods: {
+    tagStyle (tag) { return utils.tagStyle(tag) },
     tagIsActive (tag) {
       const isTagDetails = this.tagDetailsTag.name === tag.name
       let isCurrentTag
@@ -193,4 +194,6 @@ export default {
 .tag-list
   .info
     margin 6px
+  .badge
+    pointer-events none
 </style>

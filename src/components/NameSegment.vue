@@ -32,7 +32,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   //- Tags
   span.badge.button-badge(
     v-if="segment.isTag"
-    :style="{backgroundColor: segment.color}"
+    :style="tagStyle(segment)"
     :class="{ active: currentSelectedTag.name === segment.name }"
     @click.left="showTagDetailsIsVisible($event, segment)"
     @touchend.stop="showTagDetailsIsVisible($event, segment)"
@@ -104,6 +104,7 @@ export default {
     }
   },
   methods: {
+    tagStyle (segment) { return utils.tagStyle(segment) },
     codeSegmentStyle (segment) {
       if (!segment.isDark) { return }
       const color = utils.cssVariable('secondary-active-background-dark')
