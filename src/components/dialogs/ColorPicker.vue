@@ -3,12 +3,12 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
   section(v-if="removeIsVisible")
     .row
       .badge.inline-color-badge(:style="{backgroundColor: currentColor}")
-        input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace)
+        input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
       button(@click="removeColor")
         img.icon(src="@/assets/remove.svg")
   section(v-if="!removeIsVisible")
     .badge(:style="{backgroundColor: currentColor}")
-      input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace)
+      input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
   section
     //- Colors
     .recent-colors(v-if="recentColors")
@@ -103,7 +103,8 @@ export default {
     hueIsGreen () { return this.currentHue === 'green' },
     hueIsBlue () { return this.currentHue === 'blue' },
     favoriteColors () { return this.$store.state.currentUser.favoriteColors || [] },
-    currentColorIsUserColor () { return this.favoriteColors.includes(this.currentColor) }
+    currentColorIsUserColor () { return this.favoriteColors.includes(this.currentColor) },
+    isDark () { return utils.colorIsDark(this.currentColor) }
   },
   methods: {
     colorIsCurrent (color) {
