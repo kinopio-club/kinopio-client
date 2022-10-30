@@ -2195,12 +2195,6 @@ article
       width 10px
       height 10px
 
-  button
-    &.is-dark
-      border-color var(--primary-background)
-      img
-        filter invert(1)
-
 @keyframes bounce
   0%
     transform translateY(0)

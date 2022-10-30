@@ -336,8 +336,4 @@ export default {
     label
       .badge-in-button
         margin-left 0
-  input
-    &.is-dark
-      color var(--primary-background)
-      border-color var(--primary-background)
 </style>

@@ -1,6 +1,6 @@
 <template lang="pug">
 .box-unlock-button.inline-button-wrap(:style="positionStyles" @mouseup.left="unlockBox" @touchend="unlockBox")
-  button.inline-button(tabindex="-1" :style="backgroundStyles")
+  button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{ 'is-dark': isDark }")
     img.icon.lock-icon(src="@/assets/lock.svg")
 </template>
 
@@ -32,7 +32,11 @@ export default {
       return { backgroundColor: 'transparent' }
     },
     canEditBox () { return this.$store.getters['currentUser/canEditBox'](this.box) },
-    connectionTypes () { return this.$store.getters['currentConnections/typesByBoxId'](this.box.id) }
+    connectionTypes () { return this.$store.getters['currentConnections/typesByBoxId'](this.box.id) },
+    isDark () {
+      const color = this.box.color
+      return utils.colorIsDark(color)
+    }
   },
   methods: {
     unlockBox (event) {

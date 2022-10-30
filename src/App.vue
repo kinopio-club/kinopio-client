@@ -378,6 +378,9 @@ textarea,
   &:disabled
     color var(--primary)
     border-bottom 0
+  &.is-dark
+    color var(--primary-background)
+    border-color var(--primary-background)
 
 button,
 input[type="color"],
@@ -438,15 +441,10 @@ label // used for checkbox buttons
     color var(--primary)
     opacity 0.5
     pointer-events none
-    // &:hover,
-    // &:active
-    //   box-shadow none
-    //   background-color var(--primary-background)
-    // &.active
-    //   &:hover,
-    //   &:active
-    //     box-shadow var(--button-active-inset-shadow)
-    //     background var(--secondary-active-background)
+  &.is-dark
+    border-color var(--primary-background)
+    img
+      filter invert(1)
 
 .unselectable
   pointer-events none !important
