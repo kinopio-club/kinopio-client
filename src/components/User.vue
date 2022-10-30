@@ -10,8 +10,6 @@
     img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark, 'is-small': isSmall }")
     .label-badge.you-badge(v-if="isCurrentUser && !hideYouLabel")
       span YOU
-    .label-badge(v-if="labelBadge")
-      span {{labelBadge}}
 </template>
 
 <script>
@@ -25,8 +23,7 @@ export default {
     detailsOnRight: Boolean,
     shouldCloseAllDialogs: Boolean,
     hideYouLabel: Boolean,
-    isSmall: Boolean,
-    labelBadge: String
+    isSmall: Boolean
   },
   computed: {
     userId () {
@@ -94,8 +91,6 @@ export default {
     &:hover,
     &:focus
       box-shadow var(--button-hover-shadow)
-      .label-badge
-        transform translateY(2px)
     &:active,
     &.active
       box-shadow var(--button-active-inset-shadow)
@@ -110,9 +105,6 @@ export default {
         top 3px
         width 10.5px
 
-  .label-badge
-    bottom -7px
-    width initial
   .you-badge
     width 100%
 button

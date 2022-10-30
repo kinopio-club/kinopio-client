@@ -7,6 +7,7 @@
   @mouseup="toggleUserDetailsIsVisible"
   @touchend="toggleUserDetailsIsVisible"
   ref="user"
+  :title="title"
 )
   .user-avatar
     img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
@@ -21,7 +22,8 @@ export default {
   props: {
     user: Object,
     isClickable: Boolean,
-    shouldHideName: Boolean
+    shouldHideName: Boolean,
+    title: String
   },
   computed: {
     userHasName () { return Boolean(this.user.name) },
@@ -38,9 +40,6 @@ export default {
       if (!this.isClickable) { return }
       event.stopPropagation()
       const isVisible = this.userDetailsIsVisibleForUser
-      if (utils.unpinnedDialogIsVisible()) {
-        this.$store.dispatch('closeAllDialogs', 'User.toggleUserDetailsIsVisible')
-      }
       if (isVisible) {
         this.$store.commit('userDetailsIsVisible', false)
         return
