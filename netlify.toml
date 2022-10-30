@@ -1,0 +1,2 @@
+[build]
+  environment = { NODE_VERSION = "17.8.0" }
