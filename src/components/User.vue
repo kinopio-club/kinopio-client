@@ -1,15 +1,15 @@
 <template lang="pug">
-.user(:data-user-id="userId" :key="userId" ref="user" @keydown.stop.enter="toggleUserDetailsIsVisible" :class="{active: userDetailsIsVisibleForUser}")
+.user(:data-user-id="userId" :key="userId" ref="user" @keydown.stop.enter="toggleUserDetailsIsVisible" :class="{active: userDetailsIsVisibleForUser, 'is-small': isSmall }")
   .user-avatar(
     @mouseup.left.stop="toggleUserDetailsIsVisible"
     @touchend.stop="toggleUserDetailsIsVisible"
     ref="user"
-    :class="{ clickable: isClickable, 'is-small': isSmall }"
+    :class="{ clickable: isClickable }"
     :style="{backgroundColor: userColor}"
   )
-    img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark, 'is-small': isSmall }")
-    .label-badge.you-badge(v-if="isCurrentUser && !hideYouLabel")
-      span YOU
+    img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
+  .label-badge.you-badge(v-if="isCurrentUser && !hideYouLabel")
+    span YOU
 </template>
 
 <script>
@@ -97,14 +97,18 @@ export default {
     &.clickable
       cursor pointer
       pointer-events all
-    &.is-small
+  &.is-small
+    .user-avatar
       width 17px
       height 16px
       .anon-avatar
-        left 2px
-        top 3px
+        left 3px
+        top 5px
         width 10.5px
 
+  .label-badge
+    bottom -7px
+    width initial
   .you-badge
     width 100%
 button
