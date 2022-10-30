@@ -4,25 +4,20 @@ span
   ul.results-list.user-list
     template(v-for="user in usersFiltered" :key="user.id")
       li(@click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !isClickable }")
-        .badge(:style="{background: user.color}" :class="{'narrow-badge': showRemoveUser}")
-          User(:user="user" :isClickable="false")
-          .name {{user.name}}
+        UserLabelInline(:user="user")
         button.remove-user(v-if="showRemoveUser" @click.left.stop="removeUser(user)" title="Remove from space")
           img.icon.leave(src="@/assets/leave.svg")
 </template>
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
-import { defineAsyncComponent } from 'vue'
-const User = defineAsyncComponent({
-  loader: () => import('@/components/User.vue')
-})
+import UserLabelInline from '@/components/UserLabelInline.vue'
 
 export default {
   name: 'UserList',
   components: {
-    User,
-    ResultsFilter
+    ResultsFilter,
+    UserLabelInline
   },
   props: {
     isClickable: Boolean,
@@ -79,6 +74,7 @@ export default {
 <style lang="stylus">
 .user-list
   li
+    align-items center !important
     button
       margin-left auto
     .name
@@ -96,10 +92,4 @@ export default {
         box-shadow none
         background-color transparent
         outline none
-    .user
-      .label-badge
-        width 21px
-        height 10px
-        span
-          font-size 10px
 </style>

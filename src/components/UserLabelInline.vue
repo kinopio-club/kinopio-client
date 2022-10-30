@@ -68,13 +68,13 @@ export default {
   min-height initial
   padding 0 2px
   .user-avatar
-    width 7px
+    width 4px
     margin-right 4px
     display inline-block
     .anon-avatar
       left 4px
       top 7px
-      width 14px
+      width 10.5px
   .user-name
     margin-left 6px
     &.is-dark
