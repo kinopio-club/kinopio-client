@@ -298,6 +298,10 @@ export default {
   --success-background #67ffbb
   --search-background yellow
 
+  // dark variants
+  --text-link-dark #9ab2ee
+  --secondary-active-background-dark #666
+
   // non-theme vars
   --max-z 2147483646
   --hover-shadow 3px 3px 0 var(--heavy-shadow)

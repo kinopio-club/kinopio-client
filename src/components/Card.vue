@@ -685,6 +685,7 @@ export default {
     nameSegments () {
       let segments = utils.cardNameSegments(this.normalizedName)
       segments = segments.map(segment => {
+        segment.isDark = this.backgroundColorIsDark
         // tags
         if (segment.isTag) {
           let tag = this.$store.getters['currentSpace/tagByName'](segment.name)

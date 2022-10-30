@@ -702,6 +702,9 @@ export default {
     if (color === 'transparent') { return }
     return colord(color).brightness() < 0.4
   },
+  invertColor (color) {
+    return colord(color).invert().toHex()
+  },
 
   // normalize items
 
