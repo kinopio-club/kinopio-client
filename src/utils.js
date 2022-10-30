@@ -700,7 +700,7 @@ export default {
   colorIsDark (color) {
     if (!color) { return }
     if (color === 'transparent') { return }
-    return colord(color).isDark()
+    return colord(color).brightness() < 0.4
   },
 
   // normalize items
