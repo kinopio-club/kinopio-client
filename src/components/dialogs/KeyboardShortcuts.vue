@@ -373,7 +373,7 @@ export default {
   .section-title
     margin-bottom 10px
   .hand
-    verical-align middle
+    vertical-align middle
 
   .categories
     margin-top -6px
