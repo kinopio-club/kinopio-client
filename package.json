@@ -74,5 +74,9 @@
     "*.{js,vue}": [
       "eslint --fix"
     ]
+  },
+  "engines": {
+    "node": "^17.8.0",
+    "npm": "^8.5.5"
   }
 }
