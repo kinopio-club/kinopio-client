@@ -306,7 +306,10 @@ export default {
       const cards = this.multipleCardsSelectedIds.map(cardId => {
         return this.$store.getters['currentCards/byId'](cardId)
       })
-      return { 'cards': cards }
+      const boxes = this.multipleBoxesSelectedIds.map(boxId => {
+        return this.$store.getters['currentBoxes/byId'](boxId)
+      })
+      return { cards, boxes }
     },
     styles () {
       let zoom
