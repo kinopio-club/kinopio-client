@@ -30,16 +30,8 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
         NameMatch(:name="segment.content" :indexes="matchIndexes(segment.content)")
       span(v-else :class="{ strikethrough: isStrikeThrough }") {{segment.content}}
   //- Tags
-  span.badge.button-badge(
-    v-if="segment.isTag"
-    :style="tagStyle(segment)"
-    :class="{ active: currentSelectedTag.name === segment.name }"
-    @click.left="showTagDetailsIsVisible($event, segment)"
-    @touchend.stop="showTagDetailsIsVisible($event, segment)"
-    @keyup.stop.enter="showTagDetailsIsVisible($event, segment)"
-    :data-tag-id="segment.id"
-    :data-tag-name="segment.name"
-  ) {{segment.name}}
+  template(v-if="segment.isTag")
+    Tag(:tag="segment" :isClickable="true" :isActive="currentSelectedTag.name === segment.name" @clickTag="showTagDetailsIsVisible")
   //- Link
   a.link-badge-url(v-if="segment.isLink" :href="segment.name")
     span.badge.button-badge.link-badge(
@@ -63,6 +55,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
 <script>
 import User from '@/components/User.vue'
 import NameMatch from '@/components/NameMatch.vue'
+import Tag from '@/components/Tag.vue'
 import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
@@ -73,7 +66,8 @@ export default {
   name: 'NameSegment',
   components: {
     User,
-    NameMatch
+    NameMatch,
+    Tag
   },
   props: {
     segment: Object,
@@ -104,7 +98,6 @@ export default {
     }
   },
   methods: {
-    tagStyle (segment) { return utils.tagStyle(segment) },
     codeSegmentStyle (segment) {
       if (!segment.isDark) { return }
       const color = utils.cssVariable('secondary-active-background-dark')

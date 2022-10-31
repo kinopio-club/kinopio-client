@@ -7,21 +7,16 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
   section.results-section
     ul.results-list
       li(v-if="search" @click="selectTag(null, true)" @touchend.stop :class="{hover: focusOnName === search}")
-        .badge.tag-badge(:style="tagStyle({color: searchTagColor})")
-          span {{search}}
-          .badge.label-badge(v-if="!searchTagMatch")
-            span New Tag
-
+        Tag(:tag="searchTag" :tagBadgeLabel="tagBadgeLabel")
       li(v-for="tag in filteredTags" @click="selectTag(tag, true)" @touchend.stop :class="{hover: focusOnName === tag.name}")
-        .badge.tag-badge(:style="tagStyle(tag)")
-          span {{tag.name}}
-
+        Tag(:tag="tag")
     Loader(:visible="loading")
 </template>
 
 <script>
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
+import Tag from '@/components/Tag.vue'
 import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
@@ -33,7 +28,8 @@ let unsubscribe
 export default {
   name: 'TagPicker',
   components: {
-    Loader
+    Loader,
+    Tag
   },
   mounted () {
     unsubscribe = this.$store.subscribe((mutation, state) => {
@@ -127,10 +123,20 @@ export default {
       } else {
         return this.randomColor
       }
+    },
+    searchTag () {
+      return {
+        name: this.search,
+        color: this.searchTagColor
+      }
     }
   },
   methods: {
-    tagStyle (tag) { return utils.tagStyle(tag) },
+    tagBadgeLabel () {
+      if (!this.searchTagMatch) {
+        return 'New Tag'
+      }
+    },
     updateTags () {
       const spaceTags = this.$store.getters['currentSpace/spaceTags']
       this.tags = spaceTags || []
