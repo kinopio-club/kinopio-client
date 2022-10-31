@@ -112,9 +112,6 @@ export default {
         sizeLimit: false,
         unknownUploadError: false
       },
-      success: {
-        userDefaultsIsUpdated: false
-      },
       backgroundTint: ''
     }
   },
@@ -235,28 +232,22 @@ export default {
       this.$store.dispatch('currentSpace/updateSpace', { background: url })
       this.$store.dispatch('currentSpace/loadBackground')
       this.updatePageSizes()
-      this.clearSuccesses()
     },
     removeBackgroundTint () {
       this.updateBackgroundTint('')
       this.closeDialogs()
       this.$emit('updateSpaces')
-      this.clearSuccesses()
     },
     updateBackgroundTint (value) {
       this.backgroundTint = value
       this.$store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
       this.updatePageSizes()
       this.$emit('updateSpaces')
-      this.clearSuccesses()
     },
     updatePageSizes () {
       this.$nextTick(() => {
         this.$store.dispatch('updatePageSizes')
       })
-    },
-    clearSuccesses () {
-      this.success.userDefaultsIsUpdated = false
     },
     clearErrors () {
       this.error.isNotImageUrl = false
@@ -296,7 +287,6 @@ export default {
     },
     async uploadFile () {
       this.clearErrors()
-      this.clearSuccesses()
       const spaceId = this.currentSpace.id
       const input = this.$refs.input
       const file = input.files[0]
@@ -322,7 +312,6 @@ export default {
         this.backgroundTint = this.currentSpace.backgroundTint
         this.closeDialogs()
         this.clearErrors()
-        this.clearSuccesses()
       } else {
         if (this.error.isNotImageUrl) {
           this.removeBackground()

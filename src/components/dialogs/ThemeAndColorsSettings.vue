@@ -2,21 +2,44 @@
 dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     p Theme and Colors
+    //- section
+    //-   .row
+    //-     p Theme | blah
+
   section
     .row
-      p Colors
+      p Color to use as the default for new cards
     .row
-      button
-        img.icon.cancel(src="@/assets/add.svg")
-        span Clear All
-    .row
-      label(:class="{active: currentIsUserDefaults}" @click.left.prevent="updateUserDefaults" @keydown.stop.enter="updateUserDefaults")
-        input(type="checkbox" v-model="currentIsUserDefaults")
-        template(v-if="userHasDefaults")
-          BackgroundPreview(:space="spaceDefaults")
-        span Default Background
+      .button-wrap
+        .segmented-buttons
+          button
+            //- toggles color picker
+            template(v-if="userHasDefaults")
+              BackgroundPreview(:space="spaceDefaults")
+              //- default card color
+            span Default Card
+          button
+            img.icon.cancel(src="@/assets/add.svg")
 
-    p [default card color]
+  section
+    .row
+      p Set current background as the default for new spaces
+    .row
+      //- label(:class="{active: currentBackgroundIsDefault}" @click.left.prevent="updateBackground" @keydown.stop.enter="updateBackground")
+      //-   input(type="checkbox" v-model="currentBackgroundIsDefault")
+      //-   template(v-if="userHasDefaults")
+      //-     BackgroundPreview(:space="spaceDefaults")
+      //-   span Default Background
+      .button-wrap
+        .segmented-buttons
+          button
+            //- sets background, doesn't remove it, active if current
+            template(v-if="userHasDefaults")
+              BackgroundPreview(:space="spaceDefaults")
+            span Set Background
+          button
+            //- @click removeBackground
+            img.icon.cancel(src="@/assets/add.svg")
 
 </template>
 
@@ -46,7 +69,7 @@ export default {
     userHasDefaults () {
       return Boolean(this.defaultSpaceBackground || this.defaultSpaceBackgroundTint)
     },
-    currentIsUserDefaults () {
+    currentBackgroundIsDefault () {
       const backgroundIsDefault = this.defaultSpaceBackground === this.currentSpace.background
       const backgroundTintIsDefault = this.currentUser.defaultSpaceBackgroundTint === this.currentSpace.backgroundTint
       return backgroundIsDefault && backgroundTintIsDefault
@@ -54,22 +77,14 @@ export default {
 
   },
   methods: {
-    updateUserDefaults () {
+    updateBackground () {
       const background = this.currentSpace.background
       const backgroundTint = this.currentSpace.backgroundTint
-      const isUnchanged = background === this.defaultSpaceBackground && backgroundTint === this.defaultSpaceBackgroundTint
-      if (isUnchanged) {
-        this.removeUserDefaults()
-        return
-      }
       this.$store.dispatch('currentUser/update', { defaultSpaceBackground: background, defaultSpaceBackgroundTint: backgroundTint })
-      this.success.userDefaultsIsUpdated = true
     },
-    removeUserDefaults () {
+    removeBackground () {
       this.$store.dispatch('currentUser/update', { defaultSpaceBackground: null, defaultSpaceBackgroundTint: null })
-      this.clearSuccesses()
     }
-
   }
 }
 </script>
