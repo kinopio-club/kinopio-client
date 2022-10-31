@@ -1,12 +1,13 @@
 <template lang="pug">
-.user-label(v-if="visible" :data-id="user.id" :style="position")
+.user-label.user-label-cursor(v-if="visible" :data-id="user.id" :style="position")
   .pointer(v-if="isOnscreen")
     svg(width="13px" height="14px" viewBox="0 0 13 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink")
       g(stroke="none" stroke-width="1" fill="none" fill-rule="evenodd")
         path(:fill="color" d="M4.3472708,-1.34216658 L10.8472708,10.3578334 C7.96172333,8.79783342 5.79505666,8.01783342 4.3472708,8.01783342 C2.89948494,8.01783342 0.732818273,8.79783342 -2.1527292,10.3578334 L4.3472708,-1.34216658 Z" transform="translate(4.347271, 4.507833) rotate(-42.000000) translate(-4.347271, -4.507833) ")
   .badge(:style="backgroundColor" :class="{'is-off-screen': !isOnscreen}")
-    .user-avatar.anon-avatar
-    span.user-name(v-if="isOnscreen && userHasName") {{ user.name }}
+    .user-avatar
+      img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
+    span.user-name(v-if="isOnscreen && userHasName" :class="{ 'is-dark': colorIsDark }") {{ user.name }}
 </template>
 
 <script>
@@ -61,7 +62,8 @@ export default {
       return {
         background: this.user.color
       }
-    }
+    },
+    colorIsDark () { return utils.colorIsDark(this.user.color) }
   },
   methods: {
     updatePositionWithZoom (cursor) {
@@ -149,13 +151,15 @@ export default {
     margin-top -5px
     &.is-off-screen
       margin 0
-  .anon-avatar
-    width 15px
-    height 15px
+  .user-avatar
+    width 12px
     display inline-block
-    background-repeat no-repeat
-    background-position center
-    vertical-align middle
+  .anon-avatar
+    left 4px
+    top 7px
+    width 14px
   .user-name
     margin-left 6px
+    &.is-dark
+      filter invert(1)
 </style>

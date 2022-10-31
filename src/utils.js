@@ -12,13 +12,16 @@ import times from 'lodash-es/times'
 import join from 'lodash-es/join'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-
+import { colord, extend } from 'colord'
+import namesPlugin from 'colord/plugins/names'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
-dayjs.extend(relativeTime)
 let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
+
+dayjs.extend(relativeTime)
+extend([namesPlugin]) // colord
 
 export default {
   userPrefersReducedMotion () {
@@ -690,6 +693,17 @@ export default {
 
   cssVariable (name) {
     return getComputedStyle(document.documentElement).getPropertyValue(`--${name}`)
+  },
+  colorIsValid (color) {
+    return colord(color).isValid()
+  },
+  colorIsDark (color) {
+    if (!color) { return }
+    if (color === 'transparent') { return }
+    return colord(color).brightness() < 0.4
+  },
+  invertColor (color) {
+    return colord(color).invert().toHex()
   },
 
   // normalize items
@@ -1763,7 +1777,6 @@ export default {
       spaceId: spaceId
     }
   },
-
   indexesOf (string, search) {
     // adapted from https://stackoverflow.com/a/3410549
     search = search.replaceAll('[', '\\[')
@@ -1778,6 +1791,15 @@ export default {
       results.push(position)
     }
     return results
+  },
+  tagStyle (tag) {
+    let styles = { backgroundColor: tag.color }
+    const isDark = this.colorIsDark(tag.color)
+    if (isDark) {
+      const color = this.cssVariable('primary')
+      styles.color = this.invertColor(color)
+    }
+    return styles
   },
 
   // Name Segments 🎫

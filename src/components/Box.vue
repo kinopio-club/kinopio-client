@@ -11,7 +11,7 @@
   .box-info(
     :data-box-id="box.id"
     :style="labelStyles"
-    :class="{unselectable: isPainting}"
+    :class="{unselectable: isPainting, 'is-dark': colorIsDark}"
     tabindex="0"
 
     @mouseover="updateIsHover(true)"
@@ -126,6 +126,7 @@ export default {
         return this.normalizedBox.color
       }
     },
+    colorIsDark () { return utils.colorIsDark(this.color) },
     fill () { return this.normalizedBox.fill },
     hasFill () { return this.fill !== 'empty' },
     labelStyles () {
@@ -549,6 +550,8 @@ export default {
       box-shadow var(--hover-shadow)
     &:active
       box-shadow var(--active-shadow)
+    &.is-dark
+      color var(--primary-background)
 
   .lock-button-wrap
     pointer-events all

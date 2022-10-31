@@ -3,25 +3,20 @@
   .badge.secondary.button-badge(@click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
     img.icon.time(src="@/assets/time.svg")
     span.name {{dateUpdatedAt}}
-  .users
+  .users(@click.stop)
     //- created by
     template(v-if="createdByUserIsNotEmpty")
-      .badge.button-badge(:style="{background: createdByUser.color}" :class="{active: userDetailsIsUser(createdByUser)}" title="Created by" @click.left.stop="toggleUserDetails($event, createdByUser)")
-        User(:user="createdByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true" :hideYouLabel="true" :labelBadge="'Creator'")
-        span.name {{createdByUser.name}}
+      UserLabelInline(:user="createdByUser" :isClickable="true" :title="'Created by'")
     //- updated by
     template(v-if="isUpdatedByDifferentUser")
-      .badge.button-badge(:style="{background: updatedByUser.color}" :class="{active: userDetailsIsUser(updatedByUser)}" title="Last edited by" @click.left.stop="toggleUserDetails($event, updatedByUser)")
-        img.icon(src="@/assets/brush.svg")
-        User(:user="updatedByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true" :hideYouLabel="true" :labelBadge="'Updater'")
-        span.name {{updatedByUser.name}}
+      UserLabelInline(:user="updatedByUser" :isClickable="true" :title="'Updated by'")
     //- created through api
     .badge.secondary.system-badge(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
 </template>
 
 <script>
-import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
 
 let dateIsUpdated
@@ -30,7 +25,7 @@ let updatedAbsoluteDate
 export default {
   name: 'CardCollaborationInfo',
   components: {
-    User
+    UserLabelInline
   },
   props: {
     visible: Boolean,

@@ -298,6 +298,10 @@ export default {
   --success-background #67ffbb
   --search-background yellow
 
+  // dark variants
+  --text-link-dark #9ab2ee
+  --secondary-active-background-dark #666
+
   // non-theme vars
   --max-z 2147483646
   --hover-shadow 3px 3px 0 var(--heavy-shadow)
@@ -378,6 +382,9 @@ textarea,
   &:disabled
     color var(--primary)
     border-bottom 0
+  &.is-dark
+    color var(--primary-background)
+    border-color var(--primary-background)
 
 button,
 input[type="color"],
@@ -438,15 +445,10 @@ label // used for checkbox buttons
     color var(--primary)
     opacity 0.5
     pointer-events none
-    // &:hover,
-    // &:active
-    //   box-shadow none
-    //   background-color var(--primary-background)
-    // &.active
-    //   &:hover,
-    //   &:active
-    //     box-shadow var(--button-active-inset-shadow)
-    //     background var(--secondary-active-background)
+  &.is-dark
+    border-color var(--primary-background)
+    img
+      filter invert(1)
 
 .unselectable
   pointer-events none !important
@@ -864,10 +866,12 @@ code
     margin 0
   .user
     vertical-align middle
-    margin-right 3px
     .user-avatar
       width 16px
-      height 15px
+      height 12px
+      .anon-avatar
+        top 5px
+        left 0
   .loader
     width 14px
     height 14px
@@ -915,8 +919,12 @@ code
   background-color var(--danger-background)
 
 .anon-avatar
-  background-image url('assets/anon-avatar.svg')
-  background-size 70%
+  position absolute
+  top 9px
+  left 4px
+  width 16px
+  &.is-dark
+    filter invert(1)
 
 .marker
   background-image url('assets/marker.svg')

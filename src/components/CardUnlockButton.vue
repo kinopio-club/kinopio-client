@@ -1,6 +1,6 @@
 <template lang="pug">
 .card-unlock-button.inline-button-wrap(:style="positionStyles" @mouseup.left="unlockCard" @touchend="unlockCard")
-  button.inline-button(tabindex="-1" :style="backgroundStyles")
+  button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{ 'is-dark': isDark }")
     .connected-colors
       template(v-for="type in connectionTypes")
         .color(:style="{ background: type.color}")
@@ -36,7 +36,15 @@ export default {
     },
     canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
-    connectionTypes () { return this.$store.getters['currentConnections/typesByCardId'](this.card.id) }
+    connectionTypes () { return this.$store.getters['currentConnections/typesByCardId'](this.card.id) },
+    isDark () {
+      const type = this.connectionTypes[0]
+      if (!type) {
+        return utils.colorIsDark(this.card.backgroundColor)
+      } else {
+        return utils.colorIsDark(type.color)
+      }
+    }
   },
   methods: {
     unlockCard (event) {

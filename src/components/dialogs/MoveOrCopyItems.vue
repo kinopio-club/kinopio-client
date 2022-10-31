@@ -12,7 +12,7 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
 
   section
     .row
-      p {{actionLabelCapitalized}} {{pluralCard}} to space
+      p {{actionLabelCapitalized}} {{pluralItem}} to space
     .row
       .button-wrap
         button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
@@ -38,7 +38,7 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 
 export default {
-  name: 'MoveOrCopyCards',
+  name: 'MoveOrCopyItems',
   components: {
     SpacePicker,
     Loader
@@ -46,7 +46,6 @@ export default {
   props: {
     visible: Boolean,
     actionIsMove: Boolean,
-
     exportData: Object
   },
   data () {
@@ -62,6 +61,9 @@ export default {
     multipleCardsSelectedIds () {
       return utils.clone(this.$store.state.multipleCardsSelectedIds)
     },
+    multipleBoxesSelectedIds () {
+      return utils.clone(this.$store.state.multipleBoxesSelectedIds)
+    },
     multipleCardsIsSelected () {
       const numberOfCards = this.multipleCardsSelectedIds.length
       return Boolean(numberOfCards > 1)
@@ -72,9 +74,9 @@ export default {
     currentSpace () {
       return this.$store.state.currentSpace
     },
-    pluralCard () {
-      const condition = this.multipleCardsSelectedIds.length !== 1
-      return utils.pluralize('card', condition)
+    pluralItem () {
+      const condition = this.multipleCardsSelectedIds.length + this.multipleBoxesSelectedIds.length !== 1
+      return utils.pluralize('item', condition)
     },
     actionLabel () {
       if (this.actionIsMove) {
@@ -86,8 +88,8 @@ export default {
     actionLabelCapitalized () { return utils.capitalizeFirstLetter(this.actionLabel) },
     buttonLabel () {
       const actionLabel = this.capitalize(this.actionLabel) // copy, move
-      const pluralCard = this.capitalize(this.pluralCard) // card, cards
-      return `${actionLabel} ${pluralCard} to Space`
+      const pluralItem = this.capitalize(this.pluralItem) // item, items
+      return `${actionLabel} ${pluralItem} to Space`
     },
     names () { return this.exportData.cards.map(card => card.name) },
     text () { return utils.textFromCardNames(this.exportData.cards) }
@@ -123,21 +125,26 @@ export default {
         this.$store.dispatch('currentConnections/removeFromCard', card)
       })
     },
+    removeBoxes (boxes) {
+      boxes.forEach(box => {
+        this.$store.dispatch('currentBoxes/remove', box)
+      })
+    },
     notifySuccess () {
       const actionLabel = this.pastTense(this.actionLabel)
-      const message = `${this.cardsCount} ${this.pluralCard} ${actionLabel} to ${this.selectedSpace.name}` // 3 cards copied to SpacePalace
+      const message = `${this.cardsCount} ${this.pluralItem} ${actionLabel} to ${this.selectedSpace.name}` // 3 cards copied to SpacePalace
       this.$store.commit('notifyMoveOrCopyToSpaceDetails', { id: this.selectedSpace.id, name: this.selectedSpace.name, message })
       this.$store.commit('notifyMoveOrCopyToSpace', true)
     },
     notifyNewSpaceSuccess (newSpace) {
       const actionLabel = this.pastTense(this.actionLabel)
-      const message = `${newSpace.name} added with ${this.cardsCount} ${this.pluralCard} ${actionLabel} ` // SpacePalace added with 3 cards copied
+      const message = `${newSpace.name} added with ${this.cardsCount} ${this.pluralItem} ${actionLabel} ` // SpacePalace added with 3 cards copied
       this.$store.commit('notifyMoveOrCopyToSpaceDetails', { id: newSpace.id, name: newSpace.name, message })
       this.$store.commit('notifyMoveOrCopyToSpace', true)
     },
     selectedItems () {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
-      const cards = multipleCardsSelectedIds.map(id => this.$store.getters['currentCards/byId'](id))
+      const { cards, boxes } = this.exportData
       const connections = this.$store.getters['currentConnections/all'].filter(connection => {
         const isStartCardMatch = multipleCardsSelectedIds.includes(connection.startCardId)
         const isEndCardMatch = multipleCardsSelectedIds.includes(connection.endCardId)
@@ -145,19 +152,21 @@ export default {
       })
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
       const connectionTypes = connectionTypeIds.map(id => this.$store.getters['currentConnections/typeByTypeId'](id))
-      return { cards, connectionTypes, connections }
+      return { cards, connectionTypes, connections, boxes }
     },
     async copyToSelectedSpace (items) {
       this.loading = true
       const nullCardUsers = true
       const newItems = utils.uniqueSpaceItems(utils.clone(items), nullCardUsers)
-      let { cards, connectionTypes, connections } = newItems
+      let { cards, connectionTypes, connections, boxes } = newItems
       cards = this.mapRemoteItems(cards)
       connectionTypes = this.mapRemoteItems(connectionTypes)
       connections = this.mapRemoteItems(connections)
+      boxes = this.mapRemoteItems(boxes)
       await this.$store.dispatch('api/createCards', cards)
       await this.$store.dispatch('api/createConnectionTypes', connectionTypes)
       await this.$store.dispatch('api/createConnections', connections)
+      await this.$store.dispatch('api/createBoxes', boxes)
       const spaceIsCached = Boolean(cache.space(this.selectedSpace.id).cards)
       if (!spaceIsCached) {
         const space = { id: this.selectedSpace.id }
@@ -184,6 +193,7 @@ export default {
       this.notifySuccess()
       if (this.actionIsMove) {
         this.removeCards(items.cards)
+        this.removeBoxes(items.boxes)
         items.isRemoved = true
         this.$store.dispatch('history/resume')
         this.$store.dispatch('history/add', items)
@@ -246,6 +256,7 @@ export default {
   cursor initial
   .url-textarea
     max-height 100px
+    width 100%
   .error-card-limit
     margin-top 10px
 </style>

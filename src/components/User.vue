@@ -1,16 +1,15 @@
 <template lang="pug">
-.user(:data-user-id="userId" :key="userId" ref="user" @keydown.stop.enter="toggleUserDetailsIsVisible" :class="{active: userDetailsIsVisibleForUser}")
-  .user-avatar.anon-avatar(
+.user(:data-user-id="userId" :key="userId" ref="user" @keydown.stop.enter="toggleUserDetailsIsVisible" :class="{active: userDetailsIsVisibleForUser, 'is-small': isSmall }")
+  .user-avatar(
     @mouseup.left.stop="toggleUserDetailsIsVisible"
     @touchend.stop="toggleUserDetailsIsVisible"
     ref="user"
-    :class="{ clickable: isClickable, 'is-small': isSmall }"
+    :class="{ clickable: isClickable }"
     :style="{backgroundColor: userColor}"
   )
-    .label-badge.you-badge(v-if="isCurrentUser && !hideYouLabel")
-      span YOU
-    .label-badge(v-if="labelBadge")
-      span {{labelBadge}}
+    img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
+  .label-badge.you-badge(v-if="isCurrentUser && !hideYouLabel")
+    span YOU
 </template>
 
 <script>
@@ -24,8 +23,7 @@ export default {
     detailsOnRight: Boolean,
     shouldCloseAllDialogs: Boolean,
     hideYouLabel: Boolean,
-    isSmall: Boolean,
-    labelBadge: String
+    isSmall: Boolean
   },
   computed: {
     userId () {
@@ -45,7 +43,8 @@ export default {
       const userDetailsUser = this.$store.state.userDetailsUser
       return this.user.id === userDetailsUser.id
     },
-    userDetailsIsVisibleForUser () { return this.userDetailsIsVisible && this.userDetailsIsUser }
+    userDetailsIsVisibleForUser () { return this.userDetailsIsVisible && this.userDetailsIsUser },
+    colorIsDark () { return utils.colorIsDark(this.userColor) }
   },
   methods: {
     toggleUserDetailsIsVisible () {
@@ -86,25 +85,27 @@ export default {
   .user-avatar
     width 24px
     height 24px
-    background-repeat no-repeat
-    background-position center
     border-radius 3px
     pointer-events none
     background-color var(--secondary-active-background)
     &:hover,
     &:focus
       box-shadow var(--button-hover-shadow)
-      .label-badge
-        transform translateY(2px)
     &:active,
     &.active
       box-shadow var(--button-active-inset-shadow)
     &.clickable
       cursor pointer
       pointer-events all
-    &.is-small
+  &.is-small
+    .user-avatar
       width 17px
       height 16px
+      .anon-avatar
+        left 3px
+        top 5px
+        width 10.5px
+
   .label-badge
     bottom -7px
     width initial
@@ -117,6 +118,11 @@ button
     vertical-align middle
     .user-avatar
       width 15px
-      height 15px
+      height 14px
       margin-top -2px
+      .anon-avatar
+        left 2px
+        top 3px
+        width 10.5px
+
 </style>

@@ -49,10 +49,10 @@ dialog.narrow.multiple-selected-actions(
         .segmented-buttons.move-or-copy-wrap(v-if="cardsIsSelected")
           button(@click.left.stop="toggleCopyCardsIsVisible" :class="{ active: copyCardsIsVisible }")
             span Copy
-            MoveOrCopyCards(:visible="copyCardsIsVisible" :actionIsMove="false" :exportData="exportData")
+            MoveOrCopyItems(:visible="copyCardsIsVisible" :actionIsMove="false" :exportData="exportData")
           button(@click.left.stop="toggleMoveCardsIsVisible" :class="{ active: moveCardsIsVisible }" :disabled="!canEditAll.cards")
             span Move
-            MoveOrCopyCards(:visible="moveCardsIsVisible" :actionIsMove="true" :exportData="exportData")
+            MoveOrCopyItems(:visible="moveCardsIsVisible" :actionIsMove="true" :exportData="exportData")
       //- More Options
       AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
 
@@ -78,7 +78,7 @@ dialog.narrow.multiple-selected-actions(
 
 <script>
 import utils from '@/utils.js'
-import MoveOrCopyCards from '@/components/dialogs/MoveOrCopyCards.vue'
+import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import StyleActions from '@/components/subsections/StyleActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
@@ -94,7 +94,7 @@ let prevCards, prevBoxes
 export default {
   name: 'MultipleSelectedActions',
   components: {
-    MoveOrCopyCards,
+    MoveOrCopyItems,
     MultipleConnectionsPicker,
     StyleActions,
     AlignAndDistribute,
@@ -306,7 +306,10 @@ export default {
       const cards = this.multipleCardsSelectedIds.map(cardId => {
         return this.$store.getters['currentCards/byId'](cardId)
       })
-      return { 'cards': cards }
+      const boxes = this.multipleBoxesSelectedIds.map(boxId => {
+        return this.$store.getters['currentBoxes/byId'](boxId)
+      })
+      return { cards, boxes }
     },
     styles () {
       let zoom

@@ -21,8 +21,7 @@ span.tag-list(@click.left="closeDialogs")
           v-on:keyup.enter="selectTag($event, tag)"
           :class="{ active: tagIsActive(tag), hover: tagIsFocused(tag) }"
         )
-          .badge(:style="{backgroundColor: tag.color, 'pointerEvents': 'none'}")
-            span {{tag.name}}
+          Tag(:tag="tag")
   p.info(v-if="!tags")
     span Type
     span {{' '}}
@@ -32,12 +31,13 @@ span.tag-list(@click.left="closeDialogs")
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
-// import utils from '@/utils.js'
+import Tag from '@/components/Tag.vue'
 
 export default {
   name: 'TagList',
   components: {
-    ResultsFilter
+    ResultsFilter,
+    Tag
   },
   props: {
     tags: Array,
@@ -193,4 +193,6 @@ export default {
 .tag-list
   .info
     margin 6px
+  .badge
+    pointer-events none
 </style>

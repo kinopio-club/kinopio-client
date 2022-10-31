@@ -7,7 +7,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
         template(v-if="markdown.type === 'text'")
           span {{markdown.content}}
         template(v-else-if="markdown.type === 'link'")
-          a(@mouseup="updateShouldCancel" @click="openUrl($event, escapedUrl(markdown.result[2]))" :href="escapedUrl(markdown.result[2])") {{markdown.result[1]}}
+          a(:style="linkSegmentStyle(segment)" @mouseup="updateShouldCancel" @click="openUrl($event, escapedUrl(markdown.result[2]))" :href="escapedUrl(markdown.result[2])") {{markdown.result[1]}}
         template(v-else-if="markdown.type === 'bold'")
           strong {{markdown.content}}
         template(v-else-if="markdown.type === 'h1'")
@@ -21,25 +21,17 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
         template(v-else-if="markdown.type === 'strikethrough'")
           del {{markdown.content}}
         template(v-else-if="markdown.type === 'codeBlock'")
-          pre {{markdown.content}}
+          pre(:style="codeSegmentStyle(segment)") {{markdown.content}}
         template(v-else-if="markdown.type === 'code'")
-          code {{markdown.content}}
+          code(:style="codeSegmentStyle(segment)") {{markdown.content}}
     //- Name results list
     template(v-if="!segment.markdown")
       span(v-if="search")
         NameMatch(:name="segment.content" :indexes="matchIndexes(segment.content)")
       span(v-else :class="{ strikethrough: isStrikeThrough }") {{segment.content}}
   //- Tags
-  span.badge.button-badge(
-    v-if="segment.isTag"
-    :style="{backgroundColor: segment.color}"
-    :class="{ active: currentSelectedTag.name === segment.name }"
-    @click.left="showTagDetailsIsVisible($event, segment)"
-    @touchend.stop="showTagDetailsIsVisible($event, segment)"
-    @keyup.stop.enter="showTagDetailsIsVisible($event, segment)"
-    :data-tag-id="segment.id"
-    :data-tag-name="segment.name"
-  ) {{segment.name}}
+  template(v-if="segment.isTag")
+    Tag(:tag="segment" :isClickable="true" :isActive="currentSelectedTag.name === segment.name" @clickTag="showTagDetailsIsVisible")
   //- Link
   a.link-badge-url(v-if="segment.isLink" :href="segment.name")
     span.badge.button-badge.link-badge(
@@ -49,7 +41,8 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       @keyup.stop.enter="showLinkDetailsIsVisible($event, segment)"
     )
       template(v-if="segmentSpace(segment)")
-        User(v-if="segmentSpace(segment).users" :user="segmentSpace(segment).users[0]" :isClickable="false")
+        template(v-if="segmentSpace(segment).users")
+          UserLabelInline(:user="segmentSpace(segment).users[0]" :shouldHideName="true")
         span {{segmentSpace(segment).name || segment.content || segment.name }}
         img.icon.private(v-if="spaceIsPrivate(segmentSpace(segment))" src="@/assets/lock.svg")
       template(v-else)
@@ -61,8 +54,9 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
 </template>
 
 <script>
-import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
+import Tag from '@/components/Tag.vue'
 import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
@@ -72,8 +66,9 @@ let shouldCancel = false
 export default {
   name: 'NameSegment',
   components: {
-    User,
-    NameMatch
+    UserLabelInline,
+    NameMatch,
+    Tag
   },
   props: {
     segment: Object,
@@ -104,6 +99,16 @@ export default {
     }
   },
   methods: {
+    codeSegmentStyle (segment) {
+      if (!segment.isDark) { return }
+      const color = utils.cssVariable('secondary-active-background-dark')
+      return { backgroundColor: color }
+    },
+    linkSegmentStyle (segment) {
+      if (!segment.isDark) { return }
+      const color = utils.cssVariable('text-link-dark')
+      return { color }
+    },
     matchIndexes (name) {
       if (!name) { return [] }
       const options = {

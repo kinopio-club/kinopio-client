@@ -5,9 +5,7 @@
       template(v-for="(card in comments")
         li(@click="showCardDetails(card)")
           p
-            span.badge.user-badge(:style="{background: userColor(card)}")
-              User(:user="card.user" :isClickable="false" :hideYouLabel="true")
-              span {{userName(card)}}
+            UserLabelInline(:user="card.user")
           .comment-name
             img.icon.comment-icon(src="@/assets/comment.svg")
             template(v-for="segment in card.nameSegments")
@@ -22,7 +20,7 @@
 </template>
 
 <script>
-import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 
@@ -33,7 +31,7 @@ export default {
   name: 'Comments',
   components: {
     NameSegment,
-    User
+    UserLabelInline
   },
   props: {
     visible: Boolean
@@ -72,18 +70,6 @@ export default {
     }
   },
   methods: {
-    userColor (card) {
-      if (!card) { return }
-      if (card.user) {
-        return card.user.color
-      }
-    },
-    userName (card) {
-      if (!card) { return }
-      if (card.user) {
-        return card.user.name
-      }
-    },
     showCardDetails (card) {
       const filterComments = this.$store.state.currentUser.filterComments
       if (filterComments) {
@@ -136,6 +122,4 @@ export default {
     .comment-icon
       margin-left 4px
       vertical-align -2px
-  .user-badge
-    background var(--secondary-active-background)
 </style>

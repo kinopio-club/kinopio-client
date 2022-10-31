@@ -63,7 +63,7 @@ article#card(
         @touchstart.stop="startResizing"
         @dblclick="removeResize"
       )
-        button.inline-button.resize-button(tabindex="-1" :style="{background: itemBackground}")
+        button.inline-button.resize-button(tabindex="-1")
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
@@ -80,11 +80,9 @@ article#card(
               img.icon.view(src="@/assets/comment.svg")
           //- User
           template(v-if="commentIsVisible")
-            .badge.user-badge.user-badge.comment-user-badge(:style="{background: createdByUser.color}")
-              User(:user="createdByUser" :isClickable="false")
-              span {{createdByUser.name}}
+            UserLabelInline(:user="createdByUser")
           template(v-if="!commentIsVisible")
-            User(:user="createdByUser" :isClickable="false")
+            UserLabelInline(:user="createdByUser" :shouldHideName="true")
           p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
@@ -124,7 +122,7 @@ article#card(
           //- Url →
           a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
             .url.inline-button-wrap
-              button.inline-button(:style="{background: itemBackground}" tabindex="-1")
+              button.inline-button(:style="{background: itemBackground}" :class="{'is-dark': backgroundColorIsDark}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
           //- Connector
           .connector.inline-button-wrap(
@@ -134,7 +132,7 @@ article#card(
             @touchstart="startConnecting"
           )
             .connector-glow(:style="connectorGlowStyle" tabindex="-1")
-            button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: itemBackground }" tabindex="-1" @keyup.stop.enter="showCardDetails")
+            button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom, 'is-dark': connectionTypeColorisDark}" :style="{background: itemBackground }" tabindex="-1" @keyup.stop.enter="showCardDetails")
               .connected-colors
                 template(v-if="isConnectingTo || isConnectingFrom")
                   .color(:style="{ background: newConnectionColor}")
@@ -194,17 +192,8 @@ article#card(
       img.icon.system(src="@/assets/system.svg")
     //- User
     .badge-wrap
-      .badge.user-badge.button-badge(
-        v-if="filterShowUsers"
-        :style="{background: createdByUser.color}"
-        :class="{active: userDetailsIsUser}"
-        @mouseup.left.stop
-        @touchend.stop
-        @click.left.prevent.stop="toggleUserDetailsIsVisible"
-        @touchend.prevent.stop="toggleUserDetailsIsVisible"
-      )
-        User(:user="createdByUser" :isClickable="false")
-        .name {{createdByUser.name}}
+      template(v-if="filterShowUsers")
+        UserLabelInline(:user="createdByUser" :isClickable="true")
     //- Date
     .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
       img.icon.time(src="@/assets/time.svg")
@@ -217,9 +206,9 @@ import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
 import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
-import User from '@/components/User.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 
 import dayjs from 'dayjs'
 import hexToRgba from 'hex-to-rgba'
@@ -247,9 +236,9 @@ export default {
     Frames,
     Loader,
     Audio,
-    User,
     NameSegment,
-    UrlPreview
+    UrlPreview,
+    UserLabelInline
   },
   props: {
     card: Object
@@ -399,6 +388,14 @@ export default {
     z () { return this.card.z },
     commentIsVisible () { return this.card.commentIsVisible },
     connectionTypes () { return this.$store.getters['currentConnections/typesByCardId'](this.id) },
+    connectionTypeColorisDark () {
+      const type = this.connectionTypes[0]
+      if (!type) {
+        return utils.colorIsDark(this.backgroundColor)
+      } else {
+        return utils.colorIsDark(type.color)
+      }
+    },
     newConnectionColor () { return this.$store.state.currentConnectionColor },
     name () {
       this.updateMediaUrls()
@@ -491,8 +488,12 @@ export default {
         'audio-card': this.isAudioCard,
         'is-playing-audio': this.isPlayingAudio,
         'is-locked': this.isLocked,
-        'has-url-preview': this.cardUrlPreviewIsVisible
+        'has-url-preview': this.cardUrlPreviewIsVisible,
+        'is-dark': this.backgroundColorIsDark
       }
+    },
+    backgroundColor () {
+      return this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.card.backgroundColor
     },
     cardStyle () {
       let backgroundColor
@@ -510,6 +511,10 @@ export default {
         styles.background = hexToRgba(color, 0.5) || color
       }
       return styles
+    },
+    backgroundColorIsDark () {
+      const color = this.backgroundColor
+      return utils.colorIsDark(color)
     },
     connectorGlowStyle () {
       const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor
@@ -680,6 +685,7 @@ export default {
     nameSegments () {
       let segments = utils.cardNameSegments(this.normalizedName)
       segments = segments.map(segment => {
+        segment.isDark = this.backgroundColorIsDark
         // tags
         if (segment.isTag) {
           let tag = this.$store.getters['currentSpace/tagByName'](segment.name)
@@ -1860,21 +1866,24 @@ article
     &:active,
     &.active
       box-shadow var(--active-shadow)
+    &.is-dark
+      .name
+        color var(--primary-background)
     .card-comment
       > .badge
         margin 0
         margin-top 6px
         margin-left 6px
         margin-bottom 6px
-        .user-avatar
-          width 17px
-          height 16px
       .comment
         &.is-checked
           text-decoration line-through
         .image
           margin-top 10px
           border-radius 3px
+      .user-label-inline
+        transform translateY(-1px)
+        margin 0
 
     .card-content-wrap
       display flex
@@ -1947,6 +1956,7 @@ article
           min-width 0
           padding 0
           border none
+          border-color var(--primary)
       .connector-glow
         position absolute
         width 36px

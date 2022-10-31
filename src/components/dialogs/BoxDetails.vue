@@ -21,6 +21,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         @blur="blur"
         @keydown.enter.stop.prevent="closeAllDialogs"
         maxLength="600"
+        :class="{'is-dark': colorisDark}"
       )
     StyleActions(:visible="true" :boxes="[box]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row
@@ -82,7 +83,11 @@ export default {
       }
     },
     canEditBox () { return this.$store.getters['currentUser/canEditBox']() },
-    itemColors () { return this.$store.getters['currentSpace/itemColors'] }
+    itemColors () { return this.$store.getters['currentSpace/itemColors'] },
+    colorisDark () {
+      const color = this.box.color
+      return utils.colorIsDark(color)
+    }
   },
   methods: {
     broadcastShowBoxDetails () {
@@ -187,4 +192,6 @@ export default {
 .box-details
   input.name
     margin-left 6px
+    &.is-dark
+      color var(--primary-background)
 </style>

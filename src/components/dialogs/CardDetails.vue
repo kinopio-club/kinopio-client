@@ -116,14 +116,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         img.icon.search(src="@/assets/search.svg")
       //- Tags
       template(v-for="tag in tagsInCard")
-        span.badge.button-badge(
-          :style="{backgroundColor: tag.color}"
-          :class="{ active: currentSelectedTag.name === tag.name }"
-          tabindex="0"
-          @click.left.stop="showTagDetailsIsVisible($event, tag)"
-          @touchend.stop="showTagDetailsIsVisible($event, tag)"
-          @keyup.stop.enter="showTagDetailsIsVisible($event, tag)"
-        ) {{tag.name}}
+        Tag(:tag="tag" :isClickable="true" :isActive="currentSelectedTag.name === tag.name" @clickTag="showTagDetailsIsVisible")
       //- Links
       .badge.button-badge.link-badge(
         v-if="card.linkToSpaceId"
@@ -132,7 +125,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @touchend.stop="showLinkDetailsIsVisible($event)"
         @keyup.stop.enter="showLinkDetailsIsVisible($event)"
       )
-        User(v-if="linkToSpace" :user="linkToSpace.users[0]" :isClickable="false")
+        template(v-if="linkToSpace")
+          UserLabelInline(:user="linkToSpace.users[0]" :shouldHideName="true")
         span {{linkName}}
         img.icon.private(v-if="spaceIsPrivate" src="@/assets/lock.svg")
       //- Comment
@@ -196,8 +190,9 @@ import StyleActions from '@/components/subsections/StyleActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
+import Tag from '@/components/Tag.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
-import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
@@ -222,11 +217,12 @@ export default {
     ImagePicker,
     CardTips,
     TagPicker,
+    Tag,
     SpacePicker,
     Loader,
     UrlPreview,
     MediaPreview,
-    User,
+    UserLabelInline,
     CardCollaborationInfo
   },
   data () {
@@ -1328,7 +1324,8 @@ export default {
     },
     showTagDetailsIsVisible (event, tag) {
       this.closeDialogs()
-      const tagRect = event.target.getBoundingClientRect()
+      const element = event.target.closest('.tag')
+      const tagRect = element.getBoundingClientRect()
       this.$store.commit('tagDetailsPosition', {
         x: window.scrollX + tagRect.x + 2,
         y: window.scrollY + tagRect.y + tagRect.height - 2,

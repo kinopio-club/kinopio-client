@@ -3,12 +3,12 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
   section(v-if="removeIsVisible")
     .row
       .badge.inline-color-badge(:style="{backgroundColor: currentColor}")
-        input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace)
+        input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
       button(@click="removeColor")
         img.icon(src="@/assets/remove.svg")
   section(v-if="!removeIsVisible")
     .badge(:style="{backgroundColor: currentColor}")
-      input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace)
+      input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
   section
     //- Colors
     .recent-colors(v-if="recentColors")
@@ -61,7 +61,6 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
 <script>
 import utils from '@/utils.js'
 
-import validateColor from 'validate-color'
 import randomColor from 'randomcolor'
 import shader from 'shader'
 
@@ -92,16 +91,10 @@ export default {
         return this.currentColor
       },
       set (color) {
-        let validate = validateColor
-        if (typeof validate !== 'function') {
-          validate = validateColor.validateHTMLColor
-        }
-        if (validate(color)) {
+        if (utils.colorIsValid(color)) {
           this.updateColorFromInput(color)
-        } else if (validate('#' + color)) {
+        } else if (utils.colorIsValid(`#${color}`)) {
           this.updateColorFromInput('#' + color)
-        } else if (validateColor.validateHTMLColorName(color)) {
-          this.updateColorFromInput(color)
         }
       }
     },
@@ -110,7 +103,8 @@ export default {
     hueIsGreen () { return this.currentHue === 'green' },
     hueIsBlue () { return this.currentHue === 'blue' },
     favoriteColors () { return this.$store.state.currentUser.favoriteColors || [] },
-    currentColorIsUserColor () { return this.favoriteColors.includes(this.currentColor) }
+    currentColorIsUserColor () { return this.favoriteColors.includes(this.currentColor) },
+    isDark () { return utils.colorIsDark(this.currentColor) }
   },
   methods: {
     colorIsCurrent (color) {

@@ -6,7 +6,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: typeColor}")
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
-      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="focus" @blur="blur")
+      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="focus" @blur="blur" :class="{'is-dark': typeColorisDark}")
 
     .row
       //- Arrows or Label
@@ -168,6 +168,9 @@ export default {
       set () {
         this.toggleFilteredInSpace()
       }
+    },
+    typeColorisDark () {
+      return utils.colorIsDark(this.typeColor)
     }
   },
   methods: {

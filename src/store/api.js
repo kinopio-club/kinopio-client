@@ -639,6 +639,21 @@ const self = {
       }
     },
 
+    // Boxes
+
+    createBoxes: async (context, body) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/box/multiple`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 createBoxes', error)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
+      }
+    },
+
     // Tag
 
     getCardsWithTag: async (context, name) => {

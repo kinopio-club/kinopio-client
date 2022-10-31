@@ -6,7 +6,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
     button.change-color.select-all(@click="selectCardsWithTag")
       .current-color(:style="{backgroundColor: color}")
       span Select
-  section(:style="{backgroundColor: color}")
+  section(:style="{backgroundColor: color}" :class="{'is-dark': isDark}")
     .row.tag-title-row
       .row
         .button-wrap
@@ -21,7 +21,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
 
     //- no cards found
     template(v-if="!cards.length && !loading")
-      p Tag more cards with [[{{currentTag.name}}]] to see them here
+      p.no-cards Tag more cards with [[{{currentTag.name}}]] to see them here
       button(v-if="visibleFromTagList" @click.left.stop="removeTag")
         img.icon(src="@/assets/remove.svg")
         span Remove Tag
@@ -55,12 +55,9 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
                 img.card-image(v-if="segment.isImage" :src="segment.url")
                 span(v-if="segment.isText") {{segment.content}}
                 //- Tags
-                span.badge.tag-badge(
-                  v-if="segment.isTag"
-                  :style="{backgroundColor: segment.color}"
-                  :class="{ active: currentTag.name === segment.name }"
-                )
-                  span {{segment.name}}
+                template(v-if="segment.isTag")
+                  Tag(:tag="segment" :isActive="currentTag.name === segment.name")
+
     Loader(:visible="loading")
 </template>
 
@@ -69,6 +66,7 @@ import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import User from '@/components/User.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import Tag from '@/components/Tag.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -83,6 +81,7 @@ export default {
     ColorPicker,
     User,
     BackgroundPreview,
+    Tag,
     Loader,
     ResultsFilter
   },
@@ -212,6 +211,9 @@ export default {
       set () {
         this.toggleFilteredInSpace()
       }
+    },
+    isDark () {
+      return utils.colorIsDark(this.color)
     }
   },
   methods: {
@@ -507,9 +509,6 @@ export default {
       vertical-align middle
   .space-badge
     background-color var(--secondary-background)
-  .tag-badge
-    &.active
-      box-shadow var(--button-active-inset-shadow)
   .user
     vertical-align middle
     margin-right 3px
@@ -526,4 +525,8 @@ export default {
       margin 0
   .toggle-filter
     min-width 45px
+  .is-dark
+    .tag-name,
+    .no-cards
+      filter invert(1)
 </style>
