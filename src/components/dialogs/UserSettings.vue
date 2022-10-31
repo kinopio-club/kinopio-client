@@ -7,15 +7,20 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
   section
     .row
       .button-wrap
+        button(@click.left.stop="toggleColorsAndThemeSettingsIsVisible" :class="{active: colorsAndThemeSettingsIsVisible}")
+          span Theme and Colors
+        ColorsAndThemeSettings(:visible="colorsAndThemeSettingsIsVisible")
+    .row
+      .button-wrap
         button(@click.left.stop="toggleControlsSettingsIsVisible" :class="{active: controlsSettingsIsVisible}")
           span Controls
         ControlsSettings(:visible="controlsSettingsIsVisible")
+
     .row
       .button-wrap
-        button(@click.left.stop="toggleNotificationSettingsIsVisible" :class="{active: notificationSettingsIsVisible}")
-          span Notifications
-        NotificationSettings(:visible="notificationSettingsIsVisible")
-    .row
+        button(@click.left.stop="toggleIntegrationsSettingsIsVisible" :class="{active: integrationsSettingsIsVisible}")
+          span Integrations
+    .row(v-if="integrationsSettingsIsVisible")
       .button-wrap
         button(@click.left.stop="toggleConnectToTwitterIsVisible" :class="{ active: connectToTwitterIsVisible}")
           img.icon.tweet(src="@/assets/twitter.svg")
@@ -24,6 +29,12 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
           template(v-else)
             span Connect to Twitter
         ConnectToTwitter(:visible="connectToTwitterIsVisible")
+
+    .row
+      .button-wrap
+        button(@click.left.stop="toggleNotificationSettingsIsVisible" :class="{active: notificationSettingsIsVisible}")
+          span Notifications
+        NotificationSettings(:visible="notificationSettingsIsVisible")
 
   //- Account Settings
   section
@@ -80,6 +91,7 @@ import ApiKey from '@/components/dialogs/ApiKey.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 import ConnectToTwitter from '@/components/dialogs/ConnectToTwitter.vue'
+import ColorsAndThemeSettings from '@/components/dialogs/ColorsAndThemeSettings.vue'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -91,7 +103,8 @@ export default {
     ApiKey,
     NotificationSettings,
     ControlsSettings,
-    ConnectToTwitter
+    ConnectToTwitter,
+    ColorsAndThemeSettings
   },
   props: {
     visible: Boolean
@@ -107,7 +120,9 @@ export default {
       },
       notificationSettingsIsVisible: false,
       controlsSettingsIsVisible: false,
-      connectToTwitterIsVisible: false
+      connectToTwitterIsVisible: false,
+      integrationsSettingsIsVisible: false,
+      colorsAndThemeSettingsIsVisible: false
     }
   },
   computed: {
@@ -123,6 +138,7 @@ export default {
       this.notificationSettingsIsVisible = false
       this.controlsSettingsIsVisible = false
       this.connectToTwitterIsVisible = false
+      this.colorsAndThemeSettingsIsVisible = false
     },
     toggleConnectToTwitterIsVisible () {
       const isVisible = this.connectToTwitterIsVisible
@@ -172,7 +188,18 @@ export default {
       this.closeDialogs()
       this.deleteAllConfirmationVisible = false
       this.apiKeyIsVisible = !isVisible
+    },
+    toggleIntegrationsSettingsIsVisible () {
+      this.deleteAllConfirmationVisible = false
+      this.integrationsSettingsIsVisible = !this.integrationsSettingsIsVisible
+    },
+    toggleColorsAndThemeSettingsIsVisible () {
+      const isVisible = this.colorsAndThemeSettingsIsVisible
+      this.closeDialogs()
+      this.deleteAllConfirmationVisible = false
+      this.colorsAndThemeSettingsIsVisible = !isVisible
     }
+
   },
   watch: {
     visible (value) {

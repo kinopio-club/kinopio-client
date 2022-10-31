@@ -185,6 +185,7 @@ const currentCards = {
       }
       let cards = context.getters.all
       const highestCardZ = utils.highestCardZ(cards)
+      const defaultBackgroundColor = context.rootState.currentUser.defaultCardBackgroundColor
       let card = {
         id: id || nanoid(),
         x: position.x,
@@ -198,7 +199,7 @@ const currentCards = {
         width: utils.emptyCard().width,
         height: utils.emptyCard().height,
         isLocked: false,
-        backgroundColor
+        backgroundColor: backgroundColor || defaultBackgroundColor
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       card.spaceId = currentSpaceId
