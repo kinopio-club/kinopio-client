@@ -130,6 +130,7 @@ export default {
     add: (context, { box, shouldResize }) => {
       const count = context.state.ids.length
       const minBoxSize = 70
+      const defaultColor = context.rootState.currentUser.defaultBoxBackgroundColor
       box = {
         id: box.id || nanoid(),
         spaceId: currentSpaceId,
@@ -138,7 +139,7 @@ export default {
         y: box.y,
         resizeWidth: box.resizeWidth || minBoxSize,
         resizeHeight: box.resizeHeight || minBoxSize,
-        color: box.color || randomColor({ luminosity: 'light' }),
+        color: box.color || defaultColor || randomColor({ luminosity: 'light' }),
         fill: box.fill || 'filled', // empty, filled
         name: box.name || `Box ${count}`
       }
