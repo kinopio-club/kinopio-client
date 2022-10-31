@@ -8,7 +8,7 @@
   :class="{ 'button-badge': isClickable, 'active': isActive }"
   :style="tagStyle"
 )
-  span {{tag.name}}
+  span.tag-name(:class="{ 'is-dark': isDark }") {{tag.name}}
   .badge.label-badge(v-if="badgeLabel")
     span {{badgeLabel}}
 </template>
@@ -27,7 +27,8 @@ export default {
     badgeLabel: String
   },
   computed: {
-    tagStyle () { return utils.tagStyle(this.tag) }
+    tagStyle () { return utils.tagStyle(this.tag) },
+    isDark () { return utils.colorIsDark(this.tag.color) }
   },
   methods: {
     clickTag (event) {
@@ -38,7 +39,9 @@ export default {
 </script>
 
 <style lang="stylus">
-// .tag
-//   &.active
-//     box-shadow var(--button-active-inset-shadow)
+.tag
+  .tag-name
+    color var(--primary)
+    &.is-dark
+      filter invert(1)
 </style>
