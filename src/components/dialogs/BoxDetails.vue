@@ -11,6 +11,9 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           :visible="colorPickerIsVisible"
           :recentColors="itemColors"
           @selectedColor="updateColor"
+          :defaultIsVisible="true"
+          :defaultColor="defaultColor"
+          @updateDefaultColor="updateDefaultColor"
         )
       //- name
       input.name(
@@ -87,9 +90,13 @@ export default {
     colorisDark () {
       const color = this.box.color
       return utils.colorIsDark(color)
-    }
+    },
+    defaultColor () { return this.$store.state.currentUser.defaultBoxBackgroundColor }
   },
   methods: {
+    updateDefaultColor (color) {
+      this.$store.dispatch('currentUser/update', { defaultBoxBackgroundColor: color })
+    },
     broadcastShowBoxDetails () {
       const updates = {
         boxId: this.box.id,

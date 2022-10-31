@@ -56,6 +56,16 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
     template(v-for="color in favoriteColors")
       button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)")
 
+  //- Default
+
+  template(v-if="defaultIsVisible")
+    section
+      label(:class="{active: currentIsDefaultColor}" @click.left.prevent="updateDefaultColor" @keydown.stop.enter="updateDefaultColor")
+        input(type="checkbox" v-model="currentIsDefaultColor")
+        template(v-if="defaultColor")
+          span.default-color(:style="{backgroundColor: defaultColor}")
+        span Default
+
 </template>
 
 <script>
@@ -71,7 +81,9 @@ export default {
     visible: Boolean,
     removeIsVisible: Boolean,
     shouldLightenColors: Boolean,
-    recentColors: Array
+    recentColors: Array,
+    defaultIsVisible: Boolean,
+    defaultColor: String
   },
   data () {
     return {
@@ -104,9 +116,19 @@ export default {
     hueIsBlue () { return this.currentHue === 'blue' },
     favoriteColors () { return this.$store.state.currentUser.favoriteColors || [] },
     currentColorIsUserColor () { return this.favoriteColors.includes(this.currentColor) },
-    isDark () { return utils.colorIsDark(this.currentColor) }
+    isDark () { return utils.colorIsDark(this.currentColor) },
+    currentIsDefaultColor () { return this.currentColor === this.defaultColor }
   },
   methods: {
+    updateDefaultColor () {
+      const isSame = this.currentColor === this.defaultColor
+      const isDefaultCardColor = this.currentColor === utils.cssVariable('secondary-background')
+      if (isSame || isDefaultCardColor) {
+        this.$emit('updateDefaultColor', null)
+      } else {
+        this.$emit('updateDefaultColor', this.currentColor)
+      }
+    },
     colorIsCurrent (color) {
       return color === this.currentColor
     },
@@ -243,16 +265,22 @@ export default {
     flex-wrap wrap
     align-items center
     margin-bottom -5px
-    button.toggle-favorite-color
+    button
       display flex
       align-items center
       margin-right 5px
       margin-bottom 5px
-    .current-color
+    .color
+      width 26px
+  button,
+  label
+    .current-color,
+    .default-color
       height 14px
       width 14px
       border-radius 3px
       display inline-block
-    .color
-      width 26px
+    .default-color
+      vertical-align -3px
+      margin-right 4px
 </style>

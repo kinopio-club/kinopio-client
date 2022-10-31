@@ -30,6 +30,9 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
         :recentColors="itemColors"
         @selectedColor="updateColor"
         @removeColor="removeColor"
+        :defaultIsVisible="true"
+        :defaultColor="defaultColor"
+        @updateDefaultColor="updateDefaultColorForItem"
       )
     //- Box Fill
     .segmented-buttons(v-if="isBoxes")
@@ -62,7 +65,7 @@ import utils from '@/utils.js'
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
-const defaultCardColor = '#c9c9c9'
+const defaultCardColor = utils.cssVariable('secondary-background')
 
 export default {
   name: 'StyleActions',
@@ -91,7 +94,8 @@ export default {
     return {
       framePickerIsVisible: false,
       tagPickerIsVisible: false,
-      colorPickerIsVisible: false
+      colorPickerIsVisible: false,
+      defaultColor: ''
     }
   },
   created () {
@@ -101,6 +105,9 @@ export default {
         this.closeDialogs(shouldPreventEmit)
       }
     })
+  },
+  mounted () {
+    this.updateDefaultColor()
   },
   computed: {
     isCards () { return Boolean(this.cards.length) },
@@ -140,6 +147,7 @@ export default {
         return defaultCardColor
       }
     },
+    currentUser () { return this.$store.state.currentUser },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     itemColors () { return this.$store.getters['currentSpace/itemColors'] },
@@ -307,6 +315,35 @@ export default {
       this.$emit('closeDialogs')
     },
 
+    // default color
+
+    updateDefaultColorForItem (color) {
+      if (this.isCards) {
+        this.$store.dispatch('currentUser/update', { defaultCardBackgroundColor: color })
+      }
+      if (this.isBoxes) {
+        this.$store.dispatch('currentUser/update', { defaultBoxBackgroundColor: color })
+      }
+      this.updateDefaultColor()
+    },
+    updateDefaultColor () {
+      const cardColor = this.currentUser.defaultCardBackgroundColor
+      const boxColor = this.currentUser.defaultBoxBackgroundColor
+      let itemColor
+      if (cardColor === boxColor) {
+        itemColor = cardColor
+      }
+      let color
+      if (this.isCards && this.isBoxes && itemColor) {
+        color = itemColor
+      } else if (this.isCards) {
+        color = cardColor
+      } else if (this.isBoxes) {
+        color = boxColor
+      }
+      this.defaultColor = color
+    },
+
     // cards only
 
     updateCard (card, updates) {
@@ -380,7 +417,15 @@ export default {
         this.updateBox(box, { fill })
       })
     }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.updateDefaultColor()
+      }
+    }
   }
+
 }
 </script>
 

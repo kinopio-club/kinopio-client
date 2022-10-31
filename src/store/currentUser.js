@@ -50,6 +50,7 @@ export default {
     dialogSpaceFilterShowHidden: false,
     defaultSpaceBackground: undefined,
     defaultSpaceBackgroundTint: undefined,
+    defaultCardBackgroundColor: undefined,
     downgradeAt: null,
     showWeather: false,
     weatherLocation: undefined,
@@ -289,6 +290,14 @@ export default {
     defaultSpaceBackgroundTint: (state, value) => {
       state.defaultSpaceBackgroundTint = value
       cache.updateUser('defaultSpaceBackgroundTint', value)
+    },
+    defaultCardBackgroundColor: (state, value) => {
+      state.defaultCardBackgroundColor = value
+      cache.updateUser('defaultCardBackgroundColor', value)
+    },
+    defaultBoxBackgroundColor: (state, value) => {
+      state.defaultBoxBackgroundColor = value
+      cache.updateUser('defaultBoxBackgroundColor', value)
     },
     showWeather: (state, value) => {
       state.showWeather = value
