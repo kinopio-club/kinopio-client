@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.offscreen-markers(v-if="isVisible" :styles="styles" :class="{ 'is-dark': backgroundTintIsDark }")
+aside.offscreen-markers(v-if="isVisible" :styles="styles" :class="{ 'is-dark': isDark }")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
@@ -13,6 +13,7 @@ aside.offscreen-markers(v-if="isVisible" :styles="styles" :class="{ 'is-dark': b
 
 <script>
 import utils from '@/utils.js'
+import backgroundImages from '@/data/backgroundImages.json'
 
 import debounce from 'lodash-es/debounce'
 
@@ -90,9 +91,20 @@ export default {
       }
       return styles
     },
-    backgroundTintIsDark () {
-      const color = this.$store.state.currentSpace.backgroundTint
-      return utils.colorIsDark(color)
+    backgroundImage () {
+      const background = this.$store.state.currentSpace.background
+      const backgroundImage = backgroundImages.find(image => {
+        return image.url === background
+      })
+      return backgroundImage
+    },
+    isDark () {
+      if (this.backgroundImage) {
+        return this.backgroundImage.isDark
+      } else {
+        const color = this.$store.state.currentSpace.backgroundTint
+        return utils.colorIsDark(color)
+      }
     },
     isAddPage () { return this.$store.state.isAddPage },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
