@@ -38,7 +38,7 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 
 export default {
-  name: 'MoveOrCopyCards',
+  name: 'MoveOrCopyItems',
   components: {
     SpacePicker,
     Loader
