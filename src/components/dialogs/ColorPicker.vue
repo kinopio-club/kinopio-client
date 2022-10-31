@@ -133,8 +133,9 @@ export default {
     },
     shuffleColors () {
       const luminosity = this.luminosity
+      const isDark = luminosity === 'dark'
       this.colors = randomColor({ luminosity, count: 14, hue: this.currentHue })
-      if (this.shouldLightenColors) {
+      if (this.shouldLightenColors && !isDark) {
         this.colors = this.colors.map(color => shader(color, 0.4))
       }
       this.colors.unshift(this.currentColor)
