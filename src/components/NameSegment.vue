@@ -41,7 +41,8 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       @keyup.stop.enter="showLinkDetailsIsVisible($event, segment)"
     )
       template(v-if="segmentSpace(segment)")
-        User(v-if="segmentSpace(segment).users" :user="segmentSpace(segment).users[0]" :isClickable="false")
+        template(v-if="segmentSpace(segment).users")
+          UserLabelInline(:user="segmentSpace(segment).users[0]" :shouldHideName="true")
         span {{segmentSpace(segment).name || segment.content || segment.name }}
         img.icon.private(v-if="spaceIsPrivate(segmentSpace(segment))" src="@/assets/lock.svg")
       template(v-else)
@@ -53,7 +54,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
 </template>
 
 <script>
-import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
 import utils from '@/utils.js'
@@ -65,7 +66,7 @@ let shouldCancel = false
 export default {
   name: 'NameSegment',
   components: {
-    User,
+    UserLabelInline,
     NameMatch,
     Tag
   },

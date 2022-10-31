@@ -80,4 +80,9 @@ export default {
     &.is-dark
       filter invert(1)
 
+.button-badge
+  .user-label-inline
+    padding-bottom 0
+    .anon-avatar
+      top 6px
 </style>

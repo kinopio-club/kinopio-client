@@ -125,7 +125,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @touchend.stop="showLinkDetailsIsVisible($event)"
         @keyup.stop.enter="showLinkDetailsIsVisible($event)"
       )
-        User(v-if="linkToSpace" :user="linkToSpace.users[0]" :isClickable="false")
+        template(v-if="linkToSpace")
+          UserLabelInline(:user="linkToSpace.users[0]" :shouldHideName="true")
         span {{linkName}}
         img.icon.private(v-if="spaceIsPrivate" src="@/assets/lock.svg")
       //- Comment
@@ -191,7 +192,7 @@ import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
 import Tag from '@/components/Tag.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
-import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
@@ -221,7 +222,7 @@ export default {
     Loader,
     UrlPreview,
     MediaPreview,
-    User,
+    UserLabelInline,
     CardCollaborationInfo
   },
   data () {
