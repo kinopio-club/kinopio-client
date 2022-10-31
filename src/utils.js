@@ -17,10 +17,11 @@ import namesPlugin from 'colord/plugins/names'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
-dayjs.extend(relativeTime)
-extend([namesPlugin])
 let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
+
+dayjs.extend(relativeTime)
+extend([namesPlugin]) // colord
 
 export default {
   userPrefersReducedMotion () {
