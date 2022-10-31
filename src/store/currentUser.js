@@ -3,6 +3,7 @@ import cache from '@/cache.js'
 
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
+import { nextTick } from 'vue'
 
 export default {
   namespaced: true,
@@ -526,6 +527,7 @@ export default {
         body: {
           filterShowUsers: value
         } }, { root: true })
+      context.dispatch('updateConnectionPaths')
     },
     toggleFilterShowDateUpdated: (context, value) => {
       context.commit('filterShowDateUpdated', value)
@@ -533,6 +535,7 @@ export default {
         body: {
           filterShowDateUpdated: value
         } }, { root: true })
+      context.dispatch('updateConnectionPaths')
     },
     toggleFilterShowAbsoluteDates: (context, value) => {
       context.commit('filterShowAbsoluteDates', value)
@@ -540,6 +543,7 @@ export default {
         body: {
           filterShowAbsoluteDates: value
         } }, { root: true })
+      context.dispatch('updateConnectionPaths')
     },
     toggleFilterUnchecked: (context, value) => {
       context.commit('filterUnchecked', value)
@@ -555,12 +559,20 @@ export default {
           filterComments: value
         } }, { root: true })
     },
+    updateConnectionPaths: (context) => {
+      nextTick(() => {
+        nextTick(() => {
+          context.dispatch('currentConnections/correctPaths', {}, { root: true })
+        })
+      })
+    },
     clearUserFilters: (context) => {
       context.dispatch('toggleFilterShowUsers', false)
       context.dispatch('toggleFilterShowDateUpdated', false)
       context.dispatch('toggleFilterShowAbsoluteDates', false)
       context.dispatch('toggleFilterUnchecked', false)
       context.dispatch('toggleFilterComments', false)
+      context.dispatch('updateConnectionPaths')
     },
     addJournalPrompt: (context, prompt) => {
       utils.typeCheck({ value: prompt, type: 'object', origin: 'addJournalPrompt' })
