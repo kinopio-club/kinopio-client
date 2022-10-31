@@ -18,6 +18,13 @@ export default {
     BoxUnlockButton,
     CardUnlockButton
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerUpdateLockedItemButtonsPositions') {
+        this.$forceUpdate()
+      }
+    })
+  },
   props: {
     visible: Boolean
   },

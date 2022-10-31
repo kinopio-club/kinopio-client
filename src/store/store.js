@@ -463,6 +463,7 @@ const store = createStore({
     triggerAddToInboxIsVisible: () => {},
     triggerCheckIfUseHasInboxSpace: () => {},
     triggerScrollUserDetailsIntoView: () => {},
+    triggerUpdateLockedItemButtonsPositions: () => {},
 
     // Cards
 

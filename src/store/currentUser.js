@@ -527,7 +527,7 @@ export default {
         body: {
           filterShowUsers: value
         } }, { root: true })
-      context.dispatch('updateConnectionPaths')
+      context.dispatch('updatePathsAndPositions')
     },
     toggleFilterShowDateUpdated: (context, value) => {
       context.commit('filterShowDateUpdated', value)
@@ -535,7 +535,7 @@ export default {
         body: {
           filterShowDateUpdated: value
         } }, { root: true })
-      context.dispatch('updateConnectionPaths')
+      context.dispatch('updatePathsAndPositions')
     },
     toggleFilterShowAbsoluteDates: (context, value) => {
       context.commit('filterShowAbsoluteDates', value)
@@ -543,7 +543,7 @@ export default {
         body: {
           filterShowAbsoluteDates: value
         } }, { root: true })
-      context.dispatch('updateConnectionPaths')
+      context.dispatch('updatePathsAndPositions')
     },
     toggleFilterUnchecked: (context, value) => {
       context.commit('filterUnchecked', value)
@@ -559,10 +559,11 @@ export default {
           filterComments: value
         } }, { root: true })
     },
-    updateConnectionPaths: (context) => {
+    updatePathsAndPositions: (context) => {
       nextTick(() => {
         nextTick(() => {
           context.dispatch('currentConnections/correctPaths', {}, { root: true })
+          context.commit('triggerUpdateLockedItemButtonsPositions', null, { root: true })
         })
       })
     },
@@ -572,7 +573,7 @@ export default {
       context.dispatch('toggleFilterShowAbsoluteDates', false)
       context.dispatch('toggleFilterUnchecked', false)
       context.dispatch('toggleFilterComments', false)
-      context.dispatch('updateConnectionPaths')
+      context.dispatch('updatePathsAndPositions')
     },
     addJournalPrompt: (context, prompt) => {
       utils.typeCheck({ value: prompt, type: 'object', origin: 'addJournalPrompt' })
