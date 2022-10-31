@@ -67,6 +67,7 @@ export default {
     overflow hidden
     display inline-block
     vertical-align -3px
+    z-index 1
   .background-tint
     height 100%
     width 100%

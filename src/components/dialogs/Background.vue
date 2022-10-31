@@ -76,10 +76,9 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
       .row
         label(:class="{active: currentIsUserDefaults}" @click.left.prevent="updateUserDefaults" @keydown.stop.enter="updateUserDefaults")
           input(type="checkbox" v-model="currentIsUserDefaults")
-          span Set as Default
-      .row(v-if="userHasDefaults")
-        BackgroundPreview(:space="spaceDefaults")
-        span Default background for new spaces
+          template(v-if="userHasDefaults")
+            BackgroundPreview(:space="spaceDefaults")
+          span Default
 
 </template>
 
