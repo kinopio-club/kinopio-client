@@ -2,9 +2,6 @@
 dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog")
   section
     p Theme and Colors
-    //- section
-    //-   .row
-    //-     p light | dark
   section
     .row
       p Color to use as the default for new cards
@@ -21,11 +18,6 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
     .row
       p Set current background as the default for new spaces
     .row
-      //- label(:class="{active: currentBackgroundIsDefault}" @click.left.prevent="updateBackground" @keydown.stop.enter="updateBackground")
-      //-   input(type="checkbox" v-model="currentBackgroundIsDefault")
-      //-   template(v-if="userHasDefaults")
-      //-     BackgroundPreview(:space="spaceDefaults")
-      //-   span Default Background
       .button-wrap
         .segmented-buttons
           button(:class="{active: currentBackgroundIsDefault}" @click.left.stop="updateBackground")
