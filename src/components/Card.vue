@@ -132,19 +132,17 @@ article#card(
             @touchstart="startConnecting"
           )
             .connector-glow(:style="connectorGlowStyle" tabindex="-1")
-            button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom, 'is-dark': connectionTypeColorisDark}" :style="{background: itemBackground }" tabindex="-1" @keyup.stop.enter="showCardDetails")
-              .connected-colors
-                template(v-if="isConnectingTo || isConnectingFrom")
-                  .color(:style="{ background: newConnectionColor}")
-                template(v-else-if="isRemoteConnecting")
-                  .color(:style="{ background: remoteConnectionColor }")
-                template(v-else v-for="type in connectionTypes")
-                  .color(:style="{ background: type.color}")
+            .connected-colors
+              template(v-if="isConnectingTo || isConnectingFrom")
+                .color(:style="{ background: newConnectionColor}")
+              template(v-else-if="isRemoteConnecting")
+                .color(:style="{ background: remoteConnectionColor }")
+              template(v-else v-for="type in connectionTypes")
+                .color(:style="{ background: type.color}")
 
+            button.inline-button.connector-button(:class="{ active: isConnectingTo || isConnectingFrom, 'is-dark': connectionTypeColorisDark}" :style="{background: itemBackground }" tabindex="-1" @keyup.stop.enter="showCardDetails")
               template(v-if="hasConnections")
-                img.connector-icon(src="@/assets/connector-closed.svg")
-              template(v-else)
-                img.connector-icon(src="@/assets/connector-open.svg")
+                img.connector-icon(src="@/assets/connector-closed-in-card.svg")
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible")
       UrlPreview(
         :visible="cardUrlPreviewIsVisible"
@@ -389,11 +387,11 @@ export default {
     commentIsVisible () { return this.card.commentIsVisible },
     connectionTypes () { return this.$store.getters['currentConnections/typesByCardId'](this.id) },
     connectionTypeColorisDark () {
-      const type = this.connectionTypes[0]
-      if (!type) {
+      const lastType = this.connectionTypes[this.connectionTypes.length - 1]
+      if (!lastType) {
         return utils.colorIsDark(this.backgroundColor)
       } else {
-        return utils.colorIsDark(type.color)
+        return utils.colorIsDark(lastType.color)
       }
     },
     newConnectionColor () { return this.$store.state.currentConnectionColor },
@@ -1941,6 +1939,7 @@ article
     .connector
       position relative
       height 32px
+      padding-top 9px !important
       &.invisible
         height 32px
         width 36px
@@ -1959,11 +1958,11 @@ article
           border-color var(--primary)
       .connector-glow
         position absolute
-        width 36px
-        height 36px
+        width 34px
+        height 34px
+        top -1px
+        left -1px
         border-radius 100px
-        top -2px
-        left 0px
         pointer-events none
 
     .connector,
@@ -1994,19 +1993,30 @@ article
           background-color var(--secondary-active-background)
     .connected-colors
       position absolute
-      left 0
-      top 0
       display flex
-      height 100%
-      width 100%
-      border-radius 2px
+      height 12px
+      width 12px
+      top 10px
+      left 9px
       overflow hidden
+      border-radius 100px
       .color
         width 100%
+    .connector-button
+      border-radius 100px
+      width 14px
+      height 14px
+      padding 0
+    .connector-button
+      border 1px solid var(--primary)
+      &.is-dark
+        border-color var(--primary-background)
     .connector-icon
       position absolute
-      left 4px
-      top 2px
+      left -1px
+      top -1px
+      width 10px
+
     .resize-icon
       position absolute
       left 5px
