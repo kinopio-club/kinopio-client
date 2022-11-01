@@ -141,8 +141,10 @@ article#card(
                 .color(:style="{ background: type.color}")
 
             button.inline-button.connector-button(:class="{ active: isConnectingTo || isConnectingFrom, 'is-dark': connectionTypeColorisDark}" :style="{background: itemBackground }" tabindex="-1" @keyup.stop.enter="showCardDetails")
-              template(v-if="hasConnections")
-                img.connector-icon(src="@/assets/connector-closed-in-card-2.svg")
+              template(v-if="hasConnections || isConnectingFrom || isConnectingTo")
+                img.connector-icon(src="@/assets/connector-closed-in-card.svg")
+              //- template(v-else)
+              //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible")
       UrlPreview(
         :visible="cardUrlPreviewIsVisible"
@@ -2015,7 +2017,7 @@ article
       position absolute
       left -1px
       top -1px
-      width 9px
+      width 10px
 
     .resize-icon
       position absolute

@@ -132,6 +132,7 @@ export default {
     },
     filteredTitle () {
       let title = this.card.urlPreviewTitle
+      if (!title) { return }
       title = title.replace('on Twitter', '')
       return title
     },
