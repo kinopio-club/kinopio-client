@@ -14,10 +14,8 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
         .segmented-buttons
           button
             //- toggles color picker
-            template(v-if="userHasDefaults")
-              BackgroundPreview(:space="spaceDefaults")
-              //- default card color
-            span Default Card
+            .icon.current-color(:style="{ 'background-color': defaultCardColor }")
+            span Card Color
           button
             img.icon.cancel(src="@/assets/add.svg")
 
@@ -45,6 +43,7 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
 
 <script>
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'ColorsAndThemeSettings',
@@ -65,7 +64,6 @@ export default {
         backgroundTint: this.defaultSpaceBackgroundTint
       }
     },
-
     userHasDefaults () {
       return Boolean(this.defaultSpaceBackground || this.defaultSpaceBackgroundTint)
     },
@@ -73,8 +71,12 @@ export default {
       const backgroundIsDefault = this.defaultSpaceBackground === this.currentSpace.background
       const backgroundTintIsDefault = this.currentUser.defaultSpaceBackgroundTint === this.currentSpace.backgroundTint
       return backgroundIsDefault && backgroundTintIsDefault
+    },
+    defaultCardColor () {
+      const color = utils.cssVariable('secondary-background')
+      const userDefault = this.currentUser.defaultCardBackgroundColor
+      return userDefault || color
     }
-
   },
   methods: {
     updateBackground () {
@@ -93,4 +95,11 @@ export default {
 dialog.theme-and-colors-settings
   .background-preview
     margin-right 6px
+  .current-color
+    height 14px
+    width 14px
+    margin-bottom 1px
+    border-radius 3px
+    display inline-block
+    vertical-align -3px
 </style>
