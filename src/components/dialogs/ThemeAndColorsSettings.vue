@@ -1,24 +1,22 @@
 <template lang="pug">
-dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog")
   section
     p Theme and Colors
     //- section
     //-   .row
-    //-     p Theme | blah
-
+    //-     p light | dark
   section
     .row
       p Color to use as the default for new cards
     .row
       .button-wrap
         .segmented-buttons
-          button
-            //- toggles color picker
+          button(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
             .icon.current-color(:style="{ 'background-color': defaultCardColor }")
             span Card Color
-          button
+          button(@click.left.stop="removeDefaultCardColor")
             img.icon.cancel(src="@/assets/add.svg")
-
+          ColorPicker(:currentColor="defaultCardColor" :visible="colorPickerIsVisible" @selectedColor="updateDefaultCardColor")
   section
     .row
       p Set current background as the default for new spaces
@@ -43,15 +41,22 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
 
 <script>
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'ColorsAndThemeSettings',
   components: {
-    BackgroundPreview
+    BackgroundPreview,
+    ColorPicker
   },
   props: {
     visible: Boolean
+  },
+  data () {
+    return {
+      colorPickerIsVisible: false
+    }
   },
   computed: {
     currentUser () { return this.$store.state.currentUser },
@@ -79,13 +84,30 @@ export default {
     }
   },
   methods: {
+    closeDialogs () {
+      this.colorPickerIsVisible = false
+    },
     updateBackground () {
       const background = this.currentSpace.background
       const backgroundTint = this.currentSpace.backgroundTint
       this.$store.dispatch('currentUser/update', { defaultSpaceBackground: background, defaultSpaceBackgroundTint: backgroundTint })
+      this.closeDialogs()
     },
     removeBackground () {
       this.$store.dispatch('currentUser/update', { defaultSpaceBackground: null, defaultSpaceBackgroundTint: null })
+      this.closeDialogs()
+    },
+    updateDefaultCardColor (color) {
+      this.$store.dispatch('currentUser/update', { defaultCardBackgroundColor: color })
+    },
+    removeDefaultCardColor () {
+      this.updateDefaultCardColor(null)
+      this.closeDialogs()
+    },
+    toggleColorPicker () {
+      const value = !this.colorPickerIsVisible
+      this.closeDialogs()
+      this.colorPickerIsVisible = value
     }
   }
 }
