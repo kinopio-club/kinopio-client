@@ -193,6 +193,7 @@ export default {
     },
     toggleIntegrationsSettingsIsVisible () {
       this.deleteAllConfirmationVisible = false
+      this.closeDialogs()
       this.integrationsSettingsIsVisible = !this.integrationsSettingsIsVisible
     },
     toggleThemeAndColorsSettingsIsVisible () {
