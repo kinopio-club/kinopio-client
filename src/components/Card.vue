@@ -140,7 +140,7 @@ article#card(
               template(v-else v-for="type in connectionTypes")
                 .color(:style="{ background: type.color}")
 
-            button.inline-button.connector-button(:class="{ active: isConnectingTo || isConnectingFrom, 'is-dark': connectionTypeColorisDark}" :style="{background: itemBackground }" tabindex="-1" @keyup.stop.enter="showCardDetails")
+            button.inline-button.connector-button(:class="{ active: isConnectingTo || isConnectingFrom, 'is-dark': connectionTypeColorisDark}" :style="{background: connectorButtonBackground }" tabindex="-1" @keyup.stop.enter="showCardDetails")
               template(v-if="hasConnections || isConnectingFrom || isConnectingTo")
                 img.connector-icon(src="@/assets/connector-closed-in-card.svg")
               //- template(v-else)
@@ -329,6 +329,10 @@ export default {
       }
       return this.selectedColor || this.remoteSelectedColor || background
     },
+    connectorButtonBackground () {
+      if (this.hasConnections || this.isConnectingFrom || this.isConnectingTo) { return }
+      return this.itemBackground
+    },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     isResizing () { return this.$store.state.currentUserIsResizingCard },
     dataTags () {
@@ -418,13 +422,13 @@ export default {
     },
     connectorIsVisible () {
       const spaceIsOpen = this.$store.state.currentSpace.privacy === 'open' && this.currentUserIsSignedIn
+      let isVisible
       if (this.isRemoteConnecting) {
-        return true
+        isVisible = true
       } else if (spaceIsOpen || this.canEditCard || this.connectionTypes.length) {
-        return true
-      } else {
-        return false
+        isVisible = true
       }
+      return isVisible
     },
     cardButtonsIsVisible () {
       if (this.connectorIsVisible || this.isLocked || Boolean(this.formats.link || this.formats.file)) {
@@ -2005,10 +2009,19 @@ article
       .color
         width 100%
     .connector-button
+      background-color transparent
       border-radius 100px
       width 14px
       height 14px
       padding 0
+      &:hover,
+      &:active
+        background-color transparent
+    .inline-button-wrap
+      &:hover,
+      &:active
+        .connector-button
+          background-color transparent
     .connector-button
       border 1px solid var(--primary)
       &.is-dark
