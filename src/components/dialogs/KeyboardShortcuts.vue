@@ -180,7 +180,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
-            User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true")
+            UserLabelInline(:user="currentUser" :shouldHideName="true")
             span Toggle Card User Filter
           .badge.keyboard-shortcut 1
       article
@@ -239,7 +239,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
 </template>
 
 <script>
-import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import keyboardShortcutsCategories from '@/data/keyboardShortcutsCategories.js'
 import utils from '@/utils.js'
 
@@ -249,7 +249,7 @@ export default {
     visible: Boolean
   },
   components: {
-    User
+    UserLabelInline
   },
   created () {
     this.$store.subscribe((mutation, state) => {
