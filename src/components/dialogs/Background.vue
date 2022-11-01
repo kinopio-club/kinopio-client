@@ -71,15 +71,6 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
 
-    // default
-    //- template(v-if="spaceHasBackground || userHasDefaults")
-    //-   .row
-    //-     label(:class="{active: currentIsUserDefaults}" @click.left.prevent="updateUserDefaults" @keydown.stop.enter="updateUserDefaults")
-    //-       input(type="checkbox" v-model="currentIsUserDefaults")
-    //-       template(v-if="userHasDefaults")
-    //-         BackgroundPreview(:space="spaceDefaults")
-    //-       span Default
-
 </template>
 
 <script>
@@ -170,36 +161,8 @@ export default {
       }
       return this.backgroundTint
     }
-    // spaceHasBackground () {
-    //   const background = this.currentSpace.background
-    //   const backgroundTint = this.currentSpace.backgroundTint
-    //   return background || backgroundTint
-    // },
-    // userHasDefaults () {
-    //   return Boolean(this.defaultSpaceBackground || this.defaultSpaceBackgroundTint)
-    // },
-    // currentIsUserDefaults () {
-    //   const backgroundIsDefault = this.defaultSpaceBackground === this.currentSpace.background
-    //   const backgroundTintIsDefault = this.currentUser.defaultSpaceBackgroundTint === this.currentSpace.backgroundTint
-    //   return backgroundIsDefault && backgroundTintIsDefault
-    // }
   },
   methods: {
-    // updateUserDefaults () {
-    //   const background = this.currentSpace.background
-    //   const backgroundTint = this.currentSpace.backgroundTint
-    //   const isUnchanged = background === this.defaultSpaceBackground && backgroundTint === this.defaultSpaceBackgroundTint
-    //   if (isUnchanged) {
-    //     this.removeUserDefaults()
-    //     return
-    //   }
-    //   this.$store.dispatch('currentUser/update', { defaultSpaceBackground: background, defaultSpaceBackgroundTint: backgroundTint })
-    //   this.success.userDefaultsIsUpdated = true
-    // },
-    // removeUserDefaults () {
-    //   this.$store.dispatch('currentUser/update', { defaultSpaceBackground: null, defaultSpaceBackgroundTint: null })
-    //   this.clearSuccesses()
-    // },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
       this.closeDialogs()
