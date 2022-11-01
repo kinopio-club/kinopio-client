@@ -28,13 +28,11 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
       //-   span Default Background
       .button-wrap
         .segmented-buttons
-          button
-            //- sets background, doesn't remove it, active if current
+          button(:class="{active: currentBackgroundIsDefault}" @click.left.stop="updateBackground")
             template(v-if="userHasDefaults")
               BackgroundPreview(:space="spaceDefaults")
             span Set Background
-          button
-            //- @click removeBackground
+          button(@click.left.stop="removeBackground")
             img.icon.cancel(src="@/assets/add.svg")
 
 </template>
