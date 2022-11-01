@@ -13,7 +13,8 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
             span Card Color
           button(@click.left.stop="removeDefaultCardColor")
             img.icon.cancel(src="@/assets/add.svg")
-          ColorPicker(:currentColor="defaultCardColor" :visible="colorPickerIsVisible" @selectedColor="updateDefaultCardColor")
+        ColorPicker(:currentColor="defaultCardColor" :visible="colorPickerIsVisible" @selectedColor="updateDefaultCardColor")
+
   section
     .row
       p Set current background as the default for new spaces
