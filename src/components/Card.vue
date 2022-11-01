@@ -142,7 +142,7 @@ article#card(
 
             button.inline-button.connector-button(:class="{ active: isConnectingTo || isConnectingFrom, 'is-dark': connectionTypeColorisDark}" :style="{background: itemBackground }" tabindex="-1" @keyup.stop.enter="showCardDetails")
               template(v-if="hasConnections")
-                img.connector-icon(src="@/assets/connector-closed-in-card.svg")
+                img.connector-icon(src="@/assets/connector-closed-in-card-2.svg")
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible")
       UrlPreview(
         :visible="cardUrlPreviewIsVisible"
@@ -2015,7 +2015,7 @@ article
       position absolute
       left -1px
       top -1px
-      width 10px
+      width 9px
 
     .resize-icon
       position absolute

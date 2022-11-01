@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="9px" height="14px" viewBox="0 0 9 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Combined Shape</title>
+    <g id="kinopio" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="square" stroke-linejoin="round">
+        <g id="Artboard" transform="translate(-258.000000, -272.000000)" fill="#000000" stroke="#000000">
+            <g id="Combined-Shape" transform="translate(259.000000, 272.965034)">
+                <path d="M1.33373062,5.32907052e-14 C4.74550467,5.32907052e-14 7.511294,2.76578933 7.511294,6.17756338 C7.511294,9.58933743 4.74550467,12.3551268 1.33373062,12.3551268 C0.874874857,12.3551268 0.427703702,12.305099 -0.00262600719,12.2102004 C2.4357948,11.5695788 3.54000325,8.89009051 3.54000325,6.17756338 C3.54000325,3.46503625 2.4357948,0.785547923 -0.00291010355,0.144292253 C0.427703702,0.0500277481 0.874874857,5.32907052e-14 1.33373062,5.32907052e-14 Z" transform="translate(3.755647, 6.177563) rotate(-180.000000) translate(-3.755647, -6.177563) "></path>
+            </g>
+        </g>
+    </g>
+</svg>
