@@ -603,7 +603,7 @@ export default {
   .connector-icon
     width 11px
   .align-and-distribute + .move-or-copy-wrap
-    margin-left 6px
+    margin-left 4px
   .more-options
     margin-bottom 10px
   .edit-connection-types

@@ -8,7 +8,7 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
           span {{name}}
       .input-button-wrap(@click.left="copyText")
         button
-          span Copy Card Names
+          span Copy Names
 
   section
     .row

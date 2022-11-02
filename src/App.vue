@@ -311,27 +311,10 @@ export default {
   --active-inset-shadow inset 0 2px 3px var(--light-shadow)
   --button-hover-shadow 2px 2px 0 var(--heavy-shadow)
   --button-active-inset-shadow inset 0 1px 2px var(--heavy-shadow)
+  --entity-radius 5px
 
   --serif-font recoleta, georgia, serif
-
-// @font-face
-//   font-family 'OsakaMono-Kinopio'
-//   src url("assets/fonts/OsakaMono-Kinopio.woff2") format("woff2")
-//   font-weight normal
-//   font-style normal
-
-@font-face
-  font-family 'GT-America'
-  src url("assets/fonts/GT-America/GT-America-Standard-Regular-Trial.woff2") format("woff2")
-  // src url("assets/fonts/GT-Corporate-Web.woff2") format("woff2")
-  font-weight normal
-  font-style normal
-
-// @font-face
-//   font-family 'GT-America'
-//   src url("assets/fonts/GT-America/GT-America-Standard-Bold-Trial.woff2.woff2") format("woff2")
-//   font-weight bold
-//   font-style normal
+  --mono-font monospace
 
 @font-face
   font-family 'Recoleta'
@@ -349,10 +332,9 @@ export default {
   -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
   box-sizing border-box
-  // font-family "GT-America", sans-serif
-  font-family sans-serif
+  font-family "Helvetica Neue", Helvetica, Arial, sans-serif
   font-size 14px
-  line-height 1.1
+  line-height 1.2
 
 body
   margin 0
@@ -408,15 +390,11 @@ select,
 label // used for checkbox buttons
   touch-action manipulation
   text-align left
-  // padding 7px
-  // padding-top 4px
-  // padding-bottom 3px
-  padding 6px 8px
-  padding-bottom 5px
+  padding 5px 9px
   margin 0
   border 1px solid var(--primary)
   background-color var(--primary-background)
-  border-radius 4px
+  border-radius var(--entity-radius)
   cursor pointer
   user-select none
   color var(--primary)
@@ -535,7 +513,7 @@ label
     padding 0
     padding-left 6px
     padding-right 6px
-    height 17px
+    // height 17px
     font-size 12px
   &:hover
     button
@@ -548,7 +526,7 @@ label
 
 .bottom-button-wrap
   .resize-button-wrap
-    transform translate(8px, 10.5px)
+    transform translate(8px, 11.5px)
     &:hover
       .resize-button
         opacity 1
@@ -559,10 +537,15 @@ label
       padding 0
       background-color transparent
       opacity 0.3
+
+code,
+pre
+  font-family var(--mono-font)
+  font-size 13px
+
 p,
 span
   -webkit-text-size-adjust auto
-
 p
   margin 0
   margin-top 10px
@@ -584,13 +567,13 @@ dialog
   background-color var(--primary-background)
   border 1px solid var(--primary)
   box-shadow var(--hover-shadow)
-  border-radius 3px
+  border-radius var(--entity-radius)
   overscroll-behavior-y contain
   cursor auto
   &.is-pinnable
     transition left 0.1s, top 0.1s
   &.narrow
-    width 203px
+    width 224px
   button,
   label
     background-color var(--primary-background)
@@ -606,7 +589,7 @@ dialog
   .button-wrap + label,
   .segmented-buttons + .button-wrap,
   .button-wrap + .segmented-buttons
-    margin-left 6px
+    margin-left 4px
   .title-row
     display flex
     justify-content space-between
@@ -632,7 +615,7 @@ dialog
       padding-bottom 0px
       padding-left 5px
       padding-right 5px
-      border-radius 3px
+      border-radius var(--entity-radius)
       margin 0
 
   p + button,
@@ -656,11 +639,11 @@ dialog
   section
     padding 8px
     &:first-child
-      border-top-left-radius 2px
-      border-top-right-radius 2px
+      border-top-left-radius calc(var(--entity-radius) - 1px)
+      border-top-right-radius calc(var(--entity-radius) - 1px)
     &:last-child
-      border-bottom-left-radius 2px
-      border-bottom-right-radius 2px
+      border-bottom-left-radius calc(var(--entity-radius) - 1px)
+      border-bottom-right-radius calc(var(--entity-radius) - 1px)
     p
       user-select text
       &:first-child
@@ -708,11 +691,11 @@ dialog
     margin 0
     border-radius 0
     &:first-child
-      border-top-left-radius 3px
-      border-bottom-left-radius 3px
+      border-top-left-radius var(--entity-radius)
+      border-bottom-left-radius var(--entity-radius)
     &:last-child
-      border-top-right-radius 3px
-      border-bottom-right-radius 3px
+      border-top-right-radius var(--entity-radius)
+      border-bottom-right-radius var(--entity-radius)
   // &.vertical
   //   display flex
   //   flex-direction column
@@ -858,7 +841,7 @@ ul.results-list
 code
   min-width 17px
   min-height 19px
-  border-radius 3px
+  border-radius var(--entity-radius)
   padding 2px 5px
   margin-right 6px
   vertical-align -1px

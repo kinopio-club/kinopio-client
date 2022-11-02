@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p
+    .row.title-row
       span Share
       .button-wrap(v-if="spaceHasUrl")
         button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: spaceRssFeedIsVisible }")
@@ -316,10 +316,8 @@ export default {
   .privacy-button + input
     margin-top 10px
   .small-button
-    padding 0
-    padding-left 6px
-    padding-right 6px
-    margin-left 6px
+    height initial
+    padding 0px 4px
   .user
     vertical-align -3px
 </style>

@@ -363,7 +363,7 @@ export default {
       border-top-right-radius 0
     &.is-card-details
       padding 4px
-      min-height 60px
+      min-height 114px
     &.no-padding
       padding 0
   .preview-image

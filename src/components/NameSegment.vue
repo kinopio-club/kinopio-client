@@ -177,11 +177,6 @@ export default {
       -webkit-touch-callout none // for ios
       &:hover
         text-decoration none
-    strong
-      font-weight normal
-      color var(--primary-background)
-      background-color var(--primary)
-      border-radius 3px
     pre
       font-weight normal
       background-color var(--secondary-active-background)

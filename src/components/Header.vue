@@ -776,13 +776,13 @@ header
             margin 0
         &:first-child
           > button
-            border-top-left-radius 3px
-            border-bottom-left-radius 3px
+            border-top-left-radius var(--entity-radius)
+            border-bottom-left-radius var(--entity-radius)
             border-right 0
         &:last-child
           > button
-            border-top-right-radius 3px
-            border-bottom-right-radius 3px
+            border-top-right-radius var(--entity-radius)
+            border-bottom-right-radius var(--entity-radius)
             border-right 1px solid var(--primary)
 
   .left,
