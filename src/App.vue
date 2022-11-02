@@ -323,14 +323,15 @@ export default {
 @font-face
   font-family 'GT-America'
   src url("assets/fonts/GT-America/GT-America-Standard-Regular-Trial.woff2") format("woff2")
+  // src url("assets/fonts/GT-Corporate-Web.woff2") format("woff2")
   font-weight normal
   font-style normal
 
-@font-face
-  font-family 'GT-America'
-  src url("assets/fonts/GT-America/GT-America-Standard-Bold-Trial.woff2.woff2") format("woff2")
-  font-weight bold
-  font-style normal
+// @font-face
+//   font-family 'GT-America'
+//   src url("assets/fonts/GT-America/GT-America-Standard-Bold-Trial.woff2.woff2") format("woff2")
+//   font-weight bold
+//   font-style normal
 
 @font-face
   font-family 'Recoleta'
@@ -348,7 +349,8 @@ export default {
   -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
   box-sizing border-box
-  font-family "GT-America", monospace
+  // font-family "GT-America", sans-serif
+  font-family sans-serif
   font-size 14px
   line-height 1.1
 
