@@ -298,6 +298,8 @@ export default {
   --success-background #67ffbb
   --search-background yellow
 
+  --button-border #999
+
   // dark variants
   --text-link-dark #9ab2ee
   --secondary-active-background-dark #666
@@ -312,10 +314,22 @@ export default {
 
   --serif-font recoleta, georgia, serif
 
+// @font-face
+//   font-family 'OsakaMono-Kinopio'
+//   src url("assets/fonts/OsakaMono-Kinopio.woff2") format("woff2")
+//   font-weight normal
+//   font-style normal
+
 @font-face
-  font-family 'OsakaMono-Kinopio'
-  src url("assets/fonts/OsakaMono-Kinopio.woff2") format("woff2")
+  font-family 'GT-America'
+  src url("assets/fonts/GT-America/GT-America-Standard-Regular-Trial.woff2") format("woff2")
   font-weight normal
+  font-style normal
+
+@font-face
+  font-family 'GT-America'
+  src url("assets/fonts/GT-America/GT-America-Standard-Bold-Trial.woff2.woff2") format("woff2")
+  font-weight bold
   font-style normal
 
 @font-face
@@ -334,7 +348,7 @@ export default {
   -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
   box-sizing border-box
-  font-family "OsakaMono-Kinopio", monospace
+  font-family "GT-America", monospace
   font-size 14px
   line-height 1.1
 
@@ -392,16 +406,19 @@ select,
 label // used for checkbox buttons
   touch-action manipulation
   text-align left
-  padding 7px
-  padding-top 4px
-  padding-bottom 3px
+  // padding 7px
+  // padding-top 4px
+  // padding-bottom 3px
+  padding 6px 8px
+  padding-bottom 5px
   margin 0
   border 1px solid var(--primary)
   background-color var(--primary-background)
-  border-radius 3px
+  border-radius 4px
   cursor pointer
   user-select none
   color var(--primary)
+  height 28px
   .down-arrow
     padding-left 4px
     vertical-align 1px
@@ -496,7 +513,6 @@ textarea
 label
   padding-bottom 4px
   display inline-block
-  height 24px
   input
     margin 0
     &:focus

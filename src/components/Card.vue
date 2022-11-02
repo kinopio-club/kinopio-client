@@ -1964,9 +1964,9 @@ article
           border-color var(--primary)
       .connector-glow
         position absolute
-        width 34px
-        height 34px
-        top -1px
+        width 32px
+        height 32px
+        top 0px
         left -1px
         border-radius 100px
         pointer-events none
