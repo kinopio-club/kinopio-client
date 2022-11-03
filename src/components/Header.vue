@@ -705,6 +705,8 @@ header
     display flex
     > .logo-image
       min-width 45px
+      .label-badge
+        bottom 0
     img
       vertical-align middle
     .down-arrow

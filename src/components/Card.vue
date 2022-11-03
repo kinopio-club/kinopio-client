@@ -1918,6 +1918,7 @@ article
           padding-right 4px
           input
             margin 0
+            margin-top -1px
             width 10px
             height 10px
             background-size contain
