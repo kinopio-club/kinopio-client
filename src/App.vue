@@ -881,8 +881,12 @@ code
   display flex
   justify-content center
   span
-    font-size 10px
+    font-size 12px
     color var(--primary-background)
+  &.small-badge
+    padding 0 1px
+    span
+      font-size 10px
 
 .link-badge
   background-color var(--secondary-active-background)
@@ -890,8 +894,6 @@ code
     .label-badge
       width 21px
       height 10px
-      span
-        font-size 10px
   > .icon.private
     margin-left 3px
 

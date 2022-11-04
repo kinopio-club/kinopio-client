@@ -19,7 +19,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
         .button-wrap
           .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active: aboutIsVisible}" tabindex="0")
             .logo-image
-              .label-badge(v-if="shouldShowNewStuffIsUpdated")
+              .label-badge.small-badge(v-if="shouldShowNewStuffIsUpdated")
                 span NEW
             img.down-arrow(src="@/assets/down-arrow.svg")
           About(:visible="aboutIsVisible")
