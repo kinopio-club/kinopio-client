@@ -640,11 +640,9 @@ dialog
     margin-top 10px
 
   .change-color
-    padding-top 4px
     .current-color
       height 14px
       width 14px
-      margin-bottom 1px
       border-radius 3px
   a
     text-decoration-thickness 1px
