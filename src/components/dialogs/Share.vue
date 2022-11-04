@@ -32,8 +32,8 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
       p.row
         .url-textarea {{url}}
         .input-button-wrap(@click.left="copyUrl")
-          button
-            span Copy Space URL
+          button.small-button
+            span Copy URL
 
     //- Private space
     template(v-if="spaceIsPrivate")
@@ -51,7 +51,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     .row(v-if="spaceHasUrl && isSpaceMember")
       .button-wrap
         button(@click.left.stop="toggleInviteIsVisible" :class="{ active: inviteIsVisible }")
-          User
+          UserLabelInline(:shouldHideName="true" :user="currentUser")
           span Invite
         Invite(:visible="inviteIsVisible")
 
@@ -80,7 +80,7 @@ import Embed from '@/components/dialogs/Embed.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
-import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 
@@ -92,7 +92,7 @@ export default {
     SpaceRssFeed,
     Embed,
     UserList,
-    User,
+    UserLabelInline,
     Export,
     Import
   },

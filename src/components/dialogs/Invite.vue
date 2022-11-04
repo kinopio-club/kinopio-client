@@ -12,7 +12,7 @@ dialog.narrow.invite(v-if="visible" :open="visible" @click.left.stop)
       .row
         .url-textarea {{url}}
         .input-button-wrap(@click.left="copyUrl")
-          button
+          button.small-button
             span Copy Invite URL
     //- Error
     template(v-if="!loading && !collaboratorKey")
