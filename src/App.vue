@@ -314,7 +314,7 @@ export default {
   --entity-radius 5px
 
   --serif-font recoleta, georgia, serif
-  --mono-font monospace
+  --mono-font Menlo, Monaco, monospace
 
 @font-face
   font-family 'Recoleta'

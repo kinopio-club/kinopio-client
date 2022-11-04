@@ -183,11 +183,13 @@ export default {
       border-radius 3px
       margin 0
       white-space pre-wrap
+      vertical-align 0
     code
       font-weight normal
       background-color var(--secondary-active-background)
       border-radius 3px
       margin-right 0
+      vertical-align 0
     h1
       font-family var(--serif-font)
       font-size 22px
