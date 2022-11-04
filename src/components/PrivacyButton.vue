@@ -60,13 +60,5 @@ export default {
 </script>
 
 <style lang="stylus">
-.privacy-button
-  .badge
-    margin 0
-  .badge.explore-message
-    display inline-flex
-    margin 0
-  .badge + .explore-message
-    margin-left 3px
-
+// .privacy-button
 </style>

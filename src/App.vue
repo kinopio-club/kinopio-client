@@ -419,6 +419,7 @@ label // used for checkbox buttons
   .badge
     display inline
     vertical-align 0
+    margin-top -2px
   &.danger
     &:hover,
     &.hover,

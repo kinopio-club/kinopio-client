@@ -415,8 +415,6 @@ export default {
 
 <style lang="stylus">
 .space-details
-  .explore-message
-    display flex
   button.disabled
     opacity 0.5
     pointer-events none
