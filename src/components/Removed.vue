@@ -45,7 +45,7 @@
           .badge
             img.undo.icon(src="@/assets/undo.svg")
           .name {{item.name}}
-          button(v-if="!isRemoveConfirmationVisible(item)" @click.left.stop="showRemoveConfirmation(item)")
+          button.small-button(v-if="!isRemoveConfirmationVisible(item)" @click.left.stop="showRemoveConfirmation(item)")
             img.icon(src="@/assets/remove.svg")
 
           .remove-confirmation(v-if="isRemoveConfirmationVisible(item)")
@@ -289,12 +289,9 @@ export default {
 <style lang="stylus">
 .removed
   overflow auto
-  // > section
   border-top 1px solid var(--primary)
   .results-section
     max-height initial
-    // border-top 1px solid var(--primary)
-    // padding-top 4px
     .button-wrap
       margin-left 4px
       margin-top 4px
@@ -319,4 +316,6 @@ export default {
   .results-actions
     padding 4px
     padding-top 0
+  .undo
+    vertical-align 1px
 </style>
