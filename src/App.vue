@@ -821,7 +821,8 @@ ul.results-list
   padding 0
   li
     display flex
-    padding 4px 7px
+    padding 6px 7px
+    padding-bottom 5px
     align-items flex-start
     border-radius 3px
     user-select none

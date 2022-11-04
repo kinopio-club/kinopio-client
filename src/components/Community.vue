@@ -1,17 +1,15 @@
 <template lang="pug">
-.community(v-if="visible" :open="visible" @click.left.stop='closeDialogs')
-  section
-    p
-      img.icon.sunglasses(src="@/assets/sunglasses.svg")
-      span Explore Community Spaces
-      .button-wrap
-        button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
-          span RSS
-        ExploreRssFeed(:visible="exploreRssFeedIsVisible")
-    p(v-if="loading")
-      Loader(:visible="loading")
-  section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="spaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace" :userShowInExploreDate="userShowInExploreDate")
+section.community(v-if="visible" :open="visible" @click.left.stop='closeDialogs')
+  .row.title-row
+    span Explore Community Spaces
+    .button-wrap
+      button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
+        span RSS
+      ExploreRssFeed(:visible="exploreRssFeedIsVisible")
+  p(v-if="loading")
+    Loader(:visible="loading")
+section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+  SpaceList(:spaces="spaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace" :userShowInExploreDate="userShowInExploreDate")
 </template>
 
 <script>
