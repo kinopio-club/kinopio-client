@@ -9,7 +9,8 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
       a(href="https://blog.kinopio.club")
         button Blog →
     .button-wrap
-      button(@click.left="refreshBrowser") Refresh
+      button(@click.left="refreshBrowser")
+        img.refresh.icon(src="@/assets/refresh.svg")
 
   section(v-if="!newStuff.length")
     Loader(:visible="true")
@@ -157,4 +158,9 @@ export default {
   code
     background-color var(--secondary-background)
     margin 0
+  .refresh
+    margin 0
+    height 11px
+    vertical-align 0
+
 </style>

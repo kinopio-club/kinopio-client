@@ -598,29 +598,6 @@ dialog
     display flex
     justify-content space-between
     align-items center
-    .button-wrap
-      padding 8px
-      margin -8px
-      cursor pointer
-      &:hover
-        button
-          box-shadow 3px 3px 0 var(--heavy-shadow)
-          background var(--secondary-hover-background)
-      &:active,
-      &.active
-        button
-          box-shadow none
-          color var(--primary)
-          background var(--secondary-active-background)
-    .button-wrap + .button-wrap
-      margin-left 0px
-    button
-      padding-top 2px
-      padding-bottom 0px
-      padding-left 5px
-      padding-right 5px
-      border-radius var(--entity-radius)
-      margin 0
 
   p + button,
   button + p,

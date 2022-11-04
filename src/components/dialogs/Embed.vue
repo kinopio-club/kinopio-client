@@ -35,15 +35,15 @@ dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop)
         .row
           .url-textarea {{iframe}}
           .input-button-wrap(@click.left="copy")
-            button
-              span Copy Code
+            button.small-button
+              span Copy Embed Code
       //- Url
       template(v-if="!iframeIsVisible")
         .row
           .url-textarea {{url}}
           .input-button-wrap(@click.left="copy")
-            button
-              span Copy URL
+            button.small-button
+              span Copy Embed URL
 
       //- Zoom
       .row

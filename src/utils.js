@@ -119,7 +119,7 @@ export default {
   },
   elementHeight (element, isChildElement) {
     if (!element) { return }
-    const threshold = 20
+    const threshold = 50
     const rect = element.getBoundingClientRect()
     let height
     const viewportHeight = this.visualViewport().height

@@ -12,12 +12,13 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     .row
       // Import, Export
       .segmented-buttons(@click.stop)
-        Import(:visible="importIsVisible" @closeDialog="closeDialogs")
-        Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
+          Import(:visible="importIsVisible" @closeDialog="closeDialogs")
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
+          Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
+
       //- Embed
       .button-wrap
         button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
@@ -309,8 +310,6 @@ export default {
     max-height calc(100vh - 200px)
   .share-private
     margin-bottom 10px
-    .badge
-      margin-left 6px
     .last-child
       margin 0
   .privacy-button + input

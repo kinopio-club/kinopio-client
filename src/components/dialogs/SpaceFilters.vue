@@ -147,4 +147,6 @@ export default {
     margin 0
   .icon.tweet
     vertical-align -1px
+  .cancel
+    vertical-align 0
 </style>
