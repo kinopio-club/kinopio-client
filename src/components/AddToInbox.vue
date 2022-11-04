@@ -1,7 +1,7 @@
 <template lang="pug">
 .add-to-inbox-page(v-if="visible")
   section(:class="{'margin-bottom': isAddPage}")
-    .title-row-flex
+    .row.title-row-flex
       span Add To Inbox
       .button-wrap
         a(:href="inboxUrl")
@@ -332,11 +332,6 @@ export default {
   .title-row-flex
     display flex
     justify-content space-between
-  .small-button
-    padding 0
-    padding-left 6px
-    padding-right 6px
-    margin-left 6px
 
   .info-badge
     position static

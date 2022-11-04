@@ -447,7 +447,7 @@ label // used for checkbox buttons
     img
       filter invert(1)
   &.small-button
-    height initial
+    height 20px
     padding 0px 4px
 
 .unselectable
