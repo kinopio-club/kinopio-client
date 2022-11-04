@@ -1948,6 +1948,7 @@ article
       position relative
       height 32px
       padding-top 9px !important
+      z-index 2
       &.invisible
         height 32px
         width 36px
