@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.sidebar.narrow.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
+dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   section
     .row.title-row-flex
       .button-wrap
@@ -20,8 +20,8 @@ dialog.sidebar.narrow.is-pinnable(v-if="visible" :open="visible" @click.left.sto
 
       //- Pin
       .title-row
-        .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-          button
+        .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
+          button.small-button
             img.icon.pin.right-pin(src="@/assets/pin.svg")
 
   Tags(:visible="tagsIsVisible" :parentIsPinned="dialogIsPinned")
@@ -134,7 +134,6 @@ export default {
   left initial
   right 8px
   max-height calc(100vh - 25px)
-  width 215px !important
   &.is-pinned
     top -13px
   .title-row-flex

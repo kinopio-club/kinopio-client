@@ -446,6 +446,9 @@ label // used for checkbox buttons
     border-color var(--primary-background)
     img
       filter invert(1)
+  &.small-button
+    height initial
+    padding 0px 4px
 
 .unselectable
   pointer-events none !important

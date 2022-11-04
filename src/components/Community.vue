@@ -91,9 +91,4 @@ export default {
     display flex
   button + a
     margin-left 6px
-  .small-button
-    padding 0
-    padding-left 6px
-    padding-right 6px
-    margin-left 6px
 </style>

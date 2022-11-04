@@ -1,32 +1,34 @@
 <template lang="pug">
 .row.space-details-info(@click.left="closeDialogsAndEmit")
-  .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-    BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
-    //- Background Upload Progress
-    .uploading-container-footer(v-if="pendingUpload")
-      .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
-        Loader(:visible="true")
-        span {{pendingUpload.percentComplete}}%
-    //- Background Remote Upload Progress
-    .uploading-container-footer(v-if="remotePendingUpload")
-      .badge.info
-        Loader(:visible="true")
-        span {{remotePendingUpload.percentComplete}}%
-    Background(:visible="backgroundIsVisible" @updateSpaces="updateSpaces")
-  //- Name
-  .textarea-wrap
-    textarea.name(
-      :disabled="!isSpaceMember"
-      ref="name"
-      rows="1"
-      placeholder="name"
-      v-model="spaceName"
-      @keydown.enter.stop.prevent="closeAllDialogs"
-    )
+  .row.space-info-wrap
+    .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
+      BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
+      //- Background Upload Progress
+      .uploading-container-footer(v-if="pendingUpload")
+        .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
+          Loader(:visible="true")
+          span {{pendingUpload.percentComplete}}%
+      //- Background Remote Upload Progress
+      .uploading-container-footer(v-if="remotePendingUpload")
+        .badge.info
+          Loader(:visible="true")
+          span {{remotePendingUpload.percentComplete}}%
+      Background(:visible="backgroundIsVisible" @updateSpaces="updateSpaces")
+    //- Name
+    .textarea-wrap
+      textarea.name(
+        :disabled="!isSpaceMember"
+        ref="name"
+        rows="1"
+        placeholder="name"
+        v-model="spaceName"
+        @keydown.enter.stop.prevent="closeAllDialogs"
+      )
+
   //- Pin Dialog
   .title-row(v-if="!shouldHidePin")
-    .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-      button
+    .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
+      button.small-button
         img.icon.pin(src="@/assets/pin.svg")
 .row.align-items-top
   //- Privacy
@@ -172,42 +174,47 @@ export default {
 <style lang="stylus">
 .space-details-info
   align-items flex-start !important
-  textarea.name
+  justify-content space-between
+
+  .space-info-wrap
     margin 0
-  > .button-wrap + textarea
-    margin 0
-  > .button-wrap
-    padding-right 6px
-    > button
-      width 24px
-      height 24px
-      background-size cover
-      background-position center
-  > .button-wrap + p
-    margin-top 0
-  &.not-space-member
-    margin 0
-    margin-bottom 10px
-  .uploading-container-footer
-    position absolute
-    top 15px
-    left 8px
-    width 100px
-    pointer-events none
-    z-index 1
-    .badge
-      display inline-block
-      &.absolute
-        position absolute
-        top 6px
-        left 6px
-  .privacy-button
-    min-width 24px
-  .title-row
-    margin-left 6px
-    .pin-button-wrap
-      button
-        width 23px
+    .textarea-wrap
+      width 145px
+    textarea.name
+      margin 0
+      width 100%
+    > .button-wrap + textarea
+      margin 0
+    > .button-wrap
+      padding-right 6px
+      > button
+        width 24px
+        height 24px
+        background-size cover
+        background-position center
+    > .button-wrap + p
+      margin-top 0
+    &.not-space-member
+      margin 0
+      margin-bottom 10px
+    .uploading-container-footer
+      position absolute
+      top 15px
+      left 8px
+      width 100px
+      pointer-events none
+      z-index 1
+      .badge
+        display inline-block
+        &.absolute
+          position absolute
+          top 6px
+          left 6px
+    .privacy-button
+      min-width 24px
+    .title-row
+      margin-left 6px
+
 .row.align-items-top
   align-items flex-start
 </style>

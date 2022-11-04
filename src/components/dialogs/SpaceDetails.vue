@@ -415,10 +415,6 @@ export default {
 
 <style lang="stylus">
 .space-details
-  .privacy-button
-    > button
-      height 24px
-      min-width 24px
   .explore-message
     display flex
   button.disabled
