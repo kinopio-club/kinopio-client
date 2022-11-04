@@ -24,7 +24,8 @@
   .preload
     .logo-hover
     .logo-active
-  .badge.label-badge.development-badge(v-if="isDevelopment && !isAddPage") DEV
+  .badge.label-badge.development-badge(v-if="isDevelopment && !isAddPage")
+    span DEV
   //- pre-cached icons
   .icons.hidden
     img.icon(src="@/assets/offline.svg")
@@ -346,7 +347,6 @@ body
   background-image url('assets/background-2x.png')
   position relative
   > .development-badge
-    color var(--primary-background)
     min-height initial
     left initial
     right 0px
@@ -354,7 +354,6 @@ body
     position fixed
     pointer-events none
     z-index 100
-    font-size 12px
   &.no-background
     background-image none
 
@@ -884,7 +883,7 @@ code
   display flex
   justify-content center
   span
-    font-size 12px
+    font-size 10px
     color var(--primary-background)
 
 .link-badge
