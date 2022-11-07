@@ -9,7 +9,7 @@
   "spectators": [],
   "clients": [],
   "background": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/blank.png",
-  "backgroundTint": "",
+  "backgroundTint": "#223c2f",
   "moonPhase": "",
   "isTemplate": false,
   "cards": [
