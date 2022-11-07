@@ -494,8 +494,6 @@ export default {
       display inline-block
       vertical-align -3px
       margin-right 4px
-  .tag-name
-    margin-left 6px
   .results-section
     border-top 1px solid var(--primary)
     padding-top 3px
@@ -521,6 +519,8 @@ export default {
   .tag-title-row
     justify-content space-between
     align-items flex-start
+    .tag-name
+      margin-left 6px
     > .row
       margin 0
   .toggle-filter
