@@ -516,7 +516,6 @@ label
     padding 0
     padding-left 6px
     padding-right 6px
-    // height 17px
     font-size 12px
   &:hover
     button
