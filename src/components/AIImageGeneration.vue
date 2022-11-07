@@ -32,7 +32,7 @@
           span Generate
 
     section.instructions
-      p Dall-e image generation work best with prompts that include a
+      p Dall-e AI image generation work best with prompts that include a
       span.badge.info subject
       span {{', '}}
       span.badge.success action
@@ -46,11 +46,10 @@
           span.badge.success shopping for groceries
           span {{' '}}
           span.badge.danger in the style of ukiyo-e
-        img(src="https://cdn.openai.com/dall-e-2/demos/text2im/teddy_bears/groceries/ukiyo-e/2.jpg")
+        img(src="https://kinopio-updates.us-east-1.linodeobjects.com/dall-e-example.jpg")
 
-      //- p
-      //-   .badge.info AI Image Generation is in Beta
-
+    section
+      p This feature is in beta, a montly limit may be introduced in the future if needed
 </template>
 
 <script>
