@@ -900,6 +900,16 @@ const self = {
         console.error('🚒 twitterUser', error)
       }
     },
+    AICreateImage: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/services/ai-create-image`, options)
+        const data = await normalizeResponse(response)
+        return data
+      } catch (error) {
+        console.error('🚒 AICreateImage', error)
+      }
+    },
 
     // Downloads
 

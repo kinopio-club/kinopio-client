@@ -1,5 +1,6 @@
 <template lang="pug">
 .ai-image-generation(v-if="visible")
+  //- input
   template(v-if="!currentUserIsSignedIn || !currentUserIsUpgraded")
     section
       p Because of the cost of generating AI images, you'll need to upgrade your account
@@ -8,7 +9,6 @@
           span Sign Up or In
         button(v-if="!currentUserIsUpgraded" @click.left="triggerUpgradeUserIsVisible")
           span Upgrade
-
   template(v-else)
     section.results-section.search-input-wrap
       .search-wrap
@@ -28,28 +28,35 @@
         )
         button.borderless.clear-input-wrap(@click.left="clear")
           img.icon.cancel(src="@/assets/add.svg")
-
       .button-wrap
-        button
+        button(@click="generateImage" :class="{ active: loading }")
           img.icon.openai(src="@/assets/openai.svg")
           span Generate
 
-    section.instructions
-      p Dall-e AI image generation work best with detailed prompts that include a
-      span.badge.info subject
-      span {{', '}}
-      span.badge.success action
-      span , and{{' '}}
-      span.badge.danger style
-
-      section.example.subsection
-        p
-          span.badge.info Teddy bears
-          span {{' '}}
-          span.badge.success shopping for groceries
-          span {{' '}}
-          span.badge.danger in the style of ukiyo-e
-        img(src="https://kinopio-updates.us-east-1.linodeobjects.com/dall-e-example.jpg")
+    //- results
+    template(v-if="loading || imageUrl")
+      section.results
+        .row
+          Loader(:visible="loading")
+        //- ..results..
+    //- instructions
+    template(v-else)
+      section.instructions
+        p Dall-e AI image generation work best with detailed prompts that include a
+        span.badge.info subject
+        span {{', '}}
+        span.badge.success action
+        span , and{{' '}}
+        span.badge.danger style
+        //- example
+        section.example.subsection
+          p
+            span.badge.info Teddy bears
+            span {{' '}}
+            span.badge.success shopping for groceries
+            span {{' '}}
+            span.badge.danger in the style of ukiyo-e
+          img(src="https://kinopio-updates.us-east-1.linodeobjects.com/dall-e-example.jpg")
 
     section
       p This feature is in beta, a montly limit may be introduced in the future if needed
@@ -71,7 +78,8 @@ export default {
   data () {
     return {
       loading: false,
-      prompt: ''
+      prompt: '',
+      imageUrl: ''
     }
   },
   computed: {
@@ -88,12 +96,21 @@ export default {
   },
   methods: {
     generateImage () {
-      // if (this.prompt) {
-      //   this.loading = true
-      //   api call (via server),
-      // }
-
-      // user confirms the image by clicking on it -> emit selectImage(image)
+      if (!this.prompt) { return }
+      if (this.loading) { return }
+      this.loading = true
+      const body = {
+        prompt: this.prompt,
+        userId: this.$store.state.currentUser.id
+      }
+      try {
+        this.$store.dispatch('api/AICreateImage', body)
+      } catch (error) {
+        console.error('🚒 generateImage', error)
+        // handle err: rate limit, user limit err
+      }
+      // this.loading = false
+      // Then, user confirms the image by clicking on it -> emit selectImage(image)
     },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
@@ -143,7 +160,8 @@ export default {
   .results-section
     .button-wrap
       margin 4px
-  .instructions
+  .instructions,
+  .results
     border-top 0
     .badge
       margin 0
