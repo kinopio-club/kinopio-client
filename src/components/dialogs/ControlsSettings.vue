@@ -6,7 +6,7 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
     .row
       label(:class="{active: shouldOpenLinksInNewTab}" @click.left.prevent="toggleShouldOpenLinksInNewTab" @keydown.stop.enter="toggleShouldOpenLinksInNewTab")
         input(type="checkbox" v-model="shouldOpenLinksInNewTab")
-        span Open Card URLs in New Tabs
+        span Open URLs in New Tabs
     .row
       label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
         input(type="checkbox" v-model="shouldUseStickyCards")
@@ -81,5 +81,5 @@ export default {
   overflow auto
   width 222px
   .double-line-height
-    height 38px
+    height 44px
 </style>

@@ -115,7 +115,7 @@ article#card(
         template(v-if="isLocked")
           // based on CardUnlockButton.vue
           //- .connector maintains connection paths when card is locked
-          .lock-button-wrap.inline-button-wrap.connector(@mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="id")
+          .lock-button-wrap.inline-button-wrap(@mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="id")
             button.inline-button(tabindex="-1" :style="{background: itemBackground}")
               img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
@@ -1858,7 +1858,7 @@ article
     *
       outline none
   .card
-    border-radius 3px
+    border-radius var(--entity-radius)
     user-select none
     background-color var(--secondary-background)
     max-width var(--card-width)
@@ -1918,11 +1918,13 @@ article
           padding-right 4px
           input
             margin 0
+            margin-top -1px
             width 10px
             height 10px
             background-size contain
       .name
         margin 8px
+        margin-top 7px
         margin-right 0
         align-self stretch
         word-break break-word
@@ -1946,6 +1948,7 @@ article
       position relative
       height 32px
       padding-top 9px !important
+      z-index 2
       &.invisible
         height 32px
         width 36px
@@ -1964,9 +1967,9 @@ article
           border-color var(--primary)
       .connector-glow
         position absolute
-        width 34px
-        height 34px
-        top -1px
+        width 32px
+        height 32px
+        top 0px
         left -1px
         border-radius 100px
         pointer-events none
@@ -2085,7 +2088,7 @@ article
           background-color transparent
       .image,
       video
-        border-radius 3px
+        border-radius var(--entity-radius)
         display block
         -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
         &.selected
@@ -2196,6 +2199,7 @@ article
   .comment-badge
     padding-left 0
     padding-right 0
+    padding-bottom 0
     .user-badge,
     .user
       margin-right 0

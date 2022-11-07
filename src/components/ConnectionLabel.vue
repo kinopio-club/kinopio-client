@@ -11,7 +11,7 @@
   :class="{filtered: isFiltered}"
   ref="label"
 )
-  span {{typeName}}
+  span(:class="{ 'is-dark': isDark }") {{typeName}}
 </template>
 
 <script>
@@ -122,7 +122,8 @@ export default {
         }
       })
       return shouldHide
-    }
+    },
+    isDark () { return utils.colorIsDark(this.typeColor) }
   },
   methods: {
     checkIsMultiTouch (event) {
@@ -196,4 +197,6 @@ export default {
   position absolute
   &.cursor-default
     cursor default
+  .is-dark
+    filter invert(1)
 </style>

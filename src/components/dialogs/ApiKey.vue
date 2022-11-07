@@ -12,7 +12,7 @@ dialog.narrow.api-key(v-if="visible" :open="visible" @click.left.stop ref="dialo
       p.row
         .url-textarea {{key}}
         .input-button-wrap(@click.left="copyKey")
-          button
+          button.small-button
             span Copy API Key
 
   section(v-if="!currentUserIsSignedIn")

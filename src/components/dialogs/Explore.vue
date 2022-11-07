@@ -84,8 +84,4 @@ export default {
 <style lang="stylus">
 .explore
   max-height calc(100vh - 100px)
-.header
-  border-bottom 1px solid var(--primary)
-  border-bottom-left-radius 0
-  border-bottom-right-radius 0
 </style>

@@ -19,7 +19,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
         .button-wrap
           .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active: aboutIsVisible}" tabindex="0")
             .logo-image
-              .label-badge(v-if="shouldShowNewStuffIsUpdated")
+              .label-badge.small-badge(v-if="shouldShowNewStuffIsUpdated")
                 span NEW
             img.down-arrow(src="@/assets/down-arrow.svg")
           About(:visible="aboutIsVisible")
@@ -705,6 +705,8 @@ header
     display flex
     > .logo-image
       min-width 45px
+      .label-badge
+        bottom 0
     img
       vertical-align middle
     .down-arrow
@@ -776,13 +778,13 @@ header
             margin 0
         &:first-child
           > button
-            border-top-left-radius 3px
-            border-bottom-left-radius 3px
+            border-top-left-radius var(--entity-radius)
+            border-bottom-left-radius var(--entity-radius)
             border-right 0
         &:last-child
           > button
-            border-top-right-radius 3px
-            border-bottom-right-radius 3px
+            border-top-right-radius var(--entity-radius)
+            border-bottom-right-radius var(--entity-radius)
             border-right 1px solid var(--primary)
 
   .left,

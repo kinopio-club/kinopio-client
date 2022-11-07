@@ -203,6 +203,7 @@ export default {
 
 <style lang="stylus">
 .color-picker
+  width 200px !important
   .colors
     display flex
     flex-wrap wrap
@@ -221,6 +222,7 @@ export default {
   .refresh
     margin 0
     height 11px
+    vertical-align 0
   .segmented-buttons
     margin-top 0
   .luminosity-picker
@@ -228,15 +230,14 @@ export default {
   .inline-color-badge
     width 83%
   input[type="color"]
-    width 26px
-    height 24px
-    padding 10px
+    width 30px
+    height 28px
   .spectrum
-    top 5px
-    left 7px
+    top 7px
+    left 8px
     position absolute
-    width 13px
-    height 13px
+    width 14px
+    height 14px
     pointer-events none
   section.favorite-colors
     display flex

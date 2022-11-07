@@ -16,13 +16,13 @@
       @keydown.ctrl.enter.exact.stop="insertLineBreak"
       @focus="checkOnFocus"
     )
-    div(v-if="isPack" :data-id="prompt.id")
+    div.prompt-pack-name(v-if="isPack" :data-id="prompt.id")
       span.random Random
       span.badge.button-badge(:style="{background: pack.color}" @click.stop="showPicker")
         span {{name}}
 
     .button-wrap
-      button.remove(@click.left="removePrompt")
+      button.remove.small-button(@click.left="removePrompt")
         img.icon(src="@/assets/remove.svg")
         span
 </template>
@@ -88,16 +88,14 @@ export default {
 
 <style lang="stylus">
 .prompt + .prompt
-  margin-top 4px
+  margin-top 10px
 .prompt
+  .prompt-pack-name
+    width 100%
   textarea
     margin-bottom 5px
   button.remove
     margin-left 6px
-    width 26px
-    height 24px
-    vertical-align 8px
-    flex none
   .row
     justify-content space-between
   .random

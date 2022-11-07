@@ -13,7 +13,7 @@ dialog.narrow.space-rss-feed(v-if="visible" :open="visible" @click.left.stop)
       p.row
         .url-textarea {{url}}
         .input-button-wrap(@click.left="copyUrl")
-          button
+          button.small-button
             span Copy Feed URL
 
 </template>
@@ -66,6 +66,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.space-rss-feed
-  left -20px
+dialog.space-rss-feed
+  left initial
+  right 4px
 </style>

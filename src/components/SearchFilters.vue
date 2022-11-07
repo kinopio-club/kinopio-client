@@ -18,9 +18,9 @@ section.filters
         span Todo
     //- More Filters
     .button-wrap
-      button(:class="{active: moreSearchFiltersVisible, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
+      button(:class="{active: moreSearchFiltersVisible || totalFiltersActive, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
         img.icon(src="@/assets/filter.svg")
-        span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
+        span.badge.info.filter-is-active(v-if="totalFiltersActive")
       MoreSearchFilters(:visible="moreSearchFiltersVisible")
   .row
     //- Comments Hide
@@ -122,4 +122,9 @@ export default {
       right 8px
   .comment-icon
     vertical-align -2px
+  .filter-is-active
+    width 8px
+    height 16px
+    min-width initial
+    min-height initial
 </style>

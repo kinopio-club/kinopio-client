@@ -102,8 +102,7 @@ export default {
     .background-tint
       border-radius 4px
   button
-    width 24px
-    height 24px
+    width 28px
     background-size cover
     background-position center
 

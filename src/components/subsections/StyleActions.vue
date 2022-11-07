@@ -388,6 +388,7 @@ export default {
 .style-actions
   padding 4px
   padding-bottom 0
+  background-color transparent
   .row
     max-width 203px
     display block
@@ -395,7 +396,7 @@ export default {
   .button-wrap,
   .segmented-buttons
     margin-left 0
-    margin-right 6px
+    margin-right 4px
     vertical-align middle
     margin-bottom 10px
   .segmented-buttons

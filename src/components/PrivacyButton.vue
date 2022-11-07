@@ -61,12 +61,7 @@ export default {
 
 <style lang="stylus">
 .privacy-button
-  .badge
-    margin 0
-  .badge.explore-message
-    display inline-flex
-    margin 0
-  .badge + .explore-message
-    margin-left 3px
-
+  > button
+    height initial
+    padding-top 7px
 </style>

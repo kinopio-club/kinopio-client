@@ -77,10 +77,4 @@ export default {
     span
       color var(--primary)
       vertical-align 1px
-  .small-button
-    padding-top 4px
-    padding-bottom 3px
-    padding-left 5px
-    padding-right 5px
-    border-radius 3px
 </style>

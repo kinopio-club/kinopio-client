@@ -8,7 +8,7 @@
     :style="{backgroundColor: userColor}"
   )
     img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
-  .label-badge.you-badge(v-if="isCurrentUser && !hideYouLabel")
+  .label-badge.you-badge.small-badge(v-if="isCurrentUser && !hideYouLabel")
     span YOU
 </template>
 

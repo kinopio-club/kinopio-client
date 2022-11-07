@@ -8,7 +8,7 @@ dialog.narrow.explore-rss-feed(v-if="visible" :open="visible" @click.left.stop)
     p.row
       .url-textarea {{url}}
       .input-button-wrap(@click.left="copyUrl")
-        button
+        button.small-button
           span Copy Feed URL
 </template>
 
@@ -54,7 +54,7 @@ export default {
 
 <style lang="stylus" scoped>
 .explore-rss-feed
-  top calc(100% - 8px) !important
+  top calc(100% - 12px) !important
   bottom initial !important
 
   @media(max-width 400px)

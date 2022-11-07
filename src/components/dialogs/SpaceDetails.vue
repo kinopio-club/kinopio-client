@@ -62,7 +62,6 @@ import dayjs from 'dayjs'
 let shouldUpdateFavorites = true
 const maxIterations = 30
 let currentIteration, updatePositionTimer
-const offsetfooterHeight = 50
 
 export default {
   name: 'SpaceDetails',
@@ -388,13 +387,13 @@ export default {
     updateDialogHeight () {
       this.$nextTick(() => {
         let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element) - offsetfooterHeight
+        this.dialogHeight = utils.elementHeight(element)
       })
     },
     updateResultsSectionHeight () {
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeight(element) - 2 - offsetfooterHeight
+        this.resultsSectionHeight = utils.elementHeight(element) - 2
       })
     }
   },
@@ -415,12 +414,6 @@ export default {
 
 <style lang="stylus">
 .space-details
-  .privacy-button
-    > button
-      height 24px
-      min-width 24px
-  .explore-message
-    display flex
   button.disabled
     opacity 0.5
     pointer-events none

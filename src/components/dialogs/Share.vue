@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p
+    .row.title-row
       span Share
       .button-wrap(v-if="spaceHasUrl")
         button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: spaceRssFeedIsVisible }")
@@ -12,12 +12,13 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     .row
       // Import, Export
       .segmented-buttons(@click.stop)
-        Import(:visible="importIsVisible" @closeDialog="closeDialogs")
-        Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
+          Import(:visible="importIsVisible" @closeDialog="closeDialogs")
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
+          Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
+
       //- Embed
       .button-wrap
         button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
@@ -32,8 +33,8 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
       p.row
         .url-textarea {{url}}
         .input-button-wrap(@click.left="copyUrl")
-          button
-            span Copy Space URL
+          button.small-button
+            span Copy URL
 
     //- Private space
     template(v-if="spaceIsPrivate")
@@ -51,7 +52,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     .row(v-if="spaceHasUrl && isSpaceMember")
       .button-wrap
         button(@click.left.stop="toggleInviteIsVisible" :class="{ active: inviteIsVisible }")
-          User
+          UserLabelInline(:shouldHideName="true" :user="currentUser")
           span Invite
         Invite(:visible="inviteIsVisible")
 
@@ -80,7 +81,7 @@ import Embed from '@/components/dialogs/Embed.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
-import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 
@@ -92,7 +93,7 @@ export default {
     SpaceRssFeed,
     Embed,
     UserList,
-    User,
+    UserLabelInline,
     Export,
     Import
   },
@@ -309,17 +310,10 @@ export default {
     max-height calc(100vh - 200px)
   .share-private
     margin-bottom 10px
-    .badge
-      margin-left 6px
     .last-child
       margin 0
   .privacy-button + input
     margin-top 10px
-  .small-button
-    padding 0
-    padding-left 6px
-    padding-right 6px
-    margin-left 6px
   .user
     vertical-align -3px
 </style>

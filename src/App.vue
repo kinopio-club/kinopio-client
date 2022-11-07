@@ -24,7 +24,8 @@
   .preload
     .logo-hover
     .logo-active
-  .badge.label-badge.development-badge(v-if="isDevelopment && !isAddPage") DEV
+  .badge.label-badge.development-badge(v-if="isDevelopment && !isAddPage")
+    span DEV
   //- pre-cached icons
   .icons.hidden
     img.icon(src="@/assets/offline.svg")
@@ -298,6 +299,8 @@ export default {
   --success-background #67ffbb
   --search-background yellow
 
+  --button-border #999
+
   // dark variants
   --text-link-dark #9ab2ee
   --secondary-active-background-dark #666
@@ -309,14 +312,10 @@ export default {
   --active-inset-shadow inset 0 2px 3px var(--light-shadow)
   --button-hover-shadow 2px 2px 0 var(--heavy-shadow)
   --button-active-inset-shadow inset 0 1px 2px var(--heavy-shadow)
+  --entity-radius 5px
 
   --serif-font recoleta, georgia, serif
-
-@font-face
-  font-family 'OsakaMono-Kinopio'
-  src url("assets/fonts/OsakaMono-Kinopio.woff2") format("woff2")
-  font-weight normal
-  font-style normal
+  --mono-font Menlo, Monaco, monospace
 
 @font-face
   font-family 'Recoleta'
@@ -334,9 +333,9 @@ export default {
   -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
   box-sizing border-box
-  font-family "OsakaMono-Kinopio", monospace
+  font-family "Helvetica Neue", Helvetica, Arial, sans-serif
   font-size 14px
-  line-height 1.1
+  line-height 1.2
 
 body
   margin 0
@@ -348,7 +347,6 @@ body
   background-image url('assets/background-2x.png')
   position relative
   > .development-badge
-    color var(--primary-background)
     min-height initial
     left initial
     right 0px
@@ -356,7 +354,6 @@ body
     position fixed
     pointer-events none
     z-index 100
-    font-size 12px
   &.no-background
     background-image none
 
@@ -392,16 +389,15 @@ select,
 label // used for checkbox buttons
   touch-action manipulation
   text-align left
-  padding 7px
-  padding-top 4px
-  padding-bottom 3px
+  padding 5px 9px
   margin 0
   border 1px solid var(--primary)
   background-color var(--primary-background)
-  border-radius 3px
+  border-radius var(--entity-radius)
   cursor pointer
   user-select none
   color var(--primary)
+  height 28px
   .down-arrow
     padding-left 4px
     vertical-align 1px
@@ -422,6 +418,7 @@ label // used for checkbox buttons
   .badge
     display inline
     vertical-align 0
+    margin-top -2px
   &.danger
     &:hover,
     &.hover,
@@ -449,6 +446,9 @@ label // used for checkbox buttons
     border-color var(--primary-background)
     img
       filter invert(1)
+  &.small-button
+    height 20px
+    padding 0px 4px
 
 .unselectable
   pointer-events none !important
@@ -496,7 +496,6 @@ textarea
 label
   padding-bottom 4px
   display inline-block
-  height 24px
   input
     margin 0
     &:focus
@@ -517,7 +516,6 @@ label
     padding 0
     padding-left 6px
     padding-right 6px
-    height 17px
     font-size 12px
   &:hover
     button
@@ -530,7 +528,7 @@ label
 
 .bottom-button-wrap
   .resize-button-wrap
-    transform translate(8px, 10.5px)
+    transform translate(8px, 11.5px)
     &:hover
       .resize-button
         opacity 1
@@ -541,10 +539,15 @@ label
       padding 0
       background-color transparent
       opacity 0.3
+
+code,
+pre
+  font-family var(--mono-font)
+  font-size 13px
+
 p,
 span
   -webkit-text-size-adjust auto
-
 p
   margin 0
   margin-top 10px
@@ -566,13 +569,13 @@ dialog
   background-color var(--primary-background)
   border 1px solid var(--primary)
   box-shadow var(--hover-shadow)
-  border-radius 3px
+  border-radius var(--entity-radius)
   overscroll-behavior-y contain
   cursor auto
   &.is-pinnable
     transition left 0.1s, top 0.1s
   &.narrow
-    width 203px
+    width 224px
   button,
   label
     background-color var(--primary-background)
@@ -588,34 +591,11 @@ dialog
   .button-wrap + label,
   .segmented-buttons + .button-wrap,
   .button-wrap + .segmented-buttons
-    margin-left 6px
+    margin-left 4px
   .title-row
     display flex
     justify-content space-between
     align-items center
-    .button-wrap
-      padding 8px
-      margin -8px
-      cursor pointer
-      &:hover
-        button
-          box-shadow 3px 3px 0 var(--heavy-shadow)
-          background var(--secondary-hover-background)
-      &:active,
-      &.active
-        button
-          box-shadow none
-          color var(--primary)
-          background var(--secondary-active-background)
-    .button-wrap + .button-wrap
-      margin-left 0px
-    button
-      padding-top 2px
-      padding-bottom 0px
-      padding-left 5px
-      padding-right 5px
-      border-radius 3px
-      margin 0
 
   p + button,
   button + p,
@@ -638,11 +618,11 @@ dialog
   section
     padding 8px
     &:first-child
-      border-top-left-radius 2px
-      border-top-right-radius 2px
+      border-top-left-radius calc(var(--entity-radius) - 1px)
+      border-top-right-radius calc(var(--entity-radius) - 1px)
     &:last-child
-      border-bottom-left-radius 2px
-      border-bottom-right-radius 2px
+      border-bottom-left-radius calc(var(--entity-radius) - 1px)
+      border-bottom-right-radius calc(var(--entity-radius) - 1px)
     p
       user-select text
       &:first-child
@@ -659,11 +639,9 @@ dialog
     margin-top 10px
 
   .change-color
-    padding-top 4px
     .current-color
       height 14px
       width 14px
-      margin-bottom 1px
       border-radius 3px
   a
     text-decoration-thickness 1px
@@ -690,11 +668,11 @@ dialog
     margin 0
     border-radius 0
     &:first-child
-      border-top-left-radius 3px
-      border-bottom-left-radius 3px
+      border-top-left-radius var(--entity-radius)
+      border-bottom-left-radius var(--entity-radius)
     &:last-child
-      border-top-right-radius 3px
-      border-bottom-right-radius 3px
+      border-top-right-radius var(--entity-radius)
+      border-bottom-right-radius var(--entity-radius)
   // &.vertical
   //   display flex
   //   flex-direction column
@@ -817,7 +795,8 @@ ul.results-list
   padding 0
   li
     display flex
-    padding 4px 7px
+    padding 6px 7px
+    padding-bottom 5px
     align-items flex-start
     border-radius 3px
     user-select none
@@ -840,7 +819,7 @@ ul.results-list
 code
   min-width 17px
   min-height 19px
-  border-radius 3px
+  border-radius var(--entity-radius)
   padding 2px 5px
   margin-right 6px
   vertical-align -1px
@@ -903,6 +882,10 @@ code
   span
     font-size 12px
     color var(--primary-background)
+  &.small-badge
+    padding 0 1px
+    span
+      font-size 10px
 
 .link-badge
   background-color var(--secondary-active-background)
@@ -910,8 +893,6 @@ code
     .label-badge
       width 21px
       height 10px
-      span
-        font-size 10px
   > .icon.private
     margin-left 3px
 

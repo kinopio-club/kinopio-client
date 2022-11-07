@@ -1,5 +1,5 @@
 <template lang="pug">
-.badge.status.explore-message(v-if="showInExplore && !isSpaceMember")
+.badge.status(v-if="showInExplore && !isSpaceMember")
   img.icon.sunglasses(src="@/assets/sunglasses.svg")
   span Explore
 
