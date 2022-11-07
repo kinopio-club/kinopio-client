@@ -15,7 +15,7 @@
         img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusPromptInput")
         Loader(:visible="loading")
         textarea(
-          placeholder="a cool bear in flight"
+          placeholder="Puppies in a victorian style"
           v-model="promptInput"
           ref="promptInput"
           @focus="resetPinchCounterZoomDecimal"
@@ -26,13 +26,16 @@
           @touchend.stop
           rows="1"
         )
+        button.borderless.clear-input-wrap(@click.left="clear")
+          img.icon.cancel(src="@/assets/add.svg")
+
       .button-wrap
         button
           img.icon.openai(src="@/assets/openai.svg")
           span Generate
 
     section.instructions
-      p Dall-e AI image generation work best with prompts that include a
+      p Dall-e AI image generation work best with detailed prompts that include a
       span.badge.info subject
       span {{', '}}
       span.badge.success action
@@ -119,6 +122,10 @@ export default {
     triggerUpgradeUserIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'AIImageGeneration.triggerUpgradeUserIsVisible')
       this.$store.commit('triggerUpgradeUserIsVisible')
+    },
+    clear () {
+      this.updatePrompt('')
+      // and clear returned image
     }
   },
   watch: {
