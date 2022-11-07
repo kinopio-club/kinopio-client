@@ -389,4 +389,5 @@ export default {
     margin-left 6px
   .subsection
     margin-bottom 10px
+    padding-bottom 0
 </style>

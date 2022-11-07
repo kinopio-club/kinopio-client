@@ -628,10 +628,9 @@ dialog
       &:first-child
         margin-top 0
   section.subsection
-    border 1px solid var(--primary)
-    padding 4px
-    padding-bottom 0
-    border-radius 3px
+    background-color var(--secondary-background)
+    padding 5px
+    border-radius var(--entity-radius)
   section + section
     border-top 1px solid var(--primary)
   section.subsection + section,

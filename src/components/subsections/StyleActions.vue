@@ -389,6 +389,10 @@ export default {
   padding 4px
   padding-bottom 0
   background-color transparent
+  &.subsection
+    border 1px solid var(--primary)
+    padding 4px
+    padding-bottom 0
   .row
     max-width 203px
     display block

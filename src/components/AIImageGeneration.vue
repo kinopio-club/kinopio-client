@@ -28,14 +28,28 @@
         )
       .button-wrap
         button
-          //- img.icon
           img.icon.openai(src="@/assets/openai.svg")
           span Generate
 
     section.instructions
-      p {{initialPrompt}}
-      p
-        .badge.info AI Image Generation is in Beta
+      p Dall-e image generation work best with prompts that include a
+      span.badge.info subject
+      span {{', '}}
+      span.badge.success action
+      span , and{{' '}}
+      span.badge.danger style
+
+      section.example.subsection
+        p
+          span.badge.info Teddy bears
+          span {{' '}}
+          span.badge.success shopping for groceries
+          span {{' '}}
+          span.badge.danger in the style of ukiyo-e
+        img(src="https://cdn.openai.com/dall-e-2/demos/text2im/teddy_bears/groceries/ukiyo-e/2.jpg")
+
+      //- p
+      //-   .badge.info AI Image Generation is in Beta
 
 </template>
 
@@ -125,8 +139,17 @@ export default {
       margin 4px
   .instructions
     border-top 0
+    .badge
+      margin 0
   .openai
     width 16px
     vertical-align -3px
-
+  .badge.search
+    background-color var(--search-background)
+  .example
+    display flex
+    margin-top 10px
+    img
+      max-width 50%
+      border-radius var(--entity-radius)
 </style>

@@ -57,7 +57,7 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
         UpdateEmail(:visible="updateEmailIsVisible")
 
   //- Delete Account
-  section
+  section.delete-account
     .row
       button.danger(v-if="!deleteAllConfirmationVisible" @click.left="toggleDeleteAllConfirmationVisible")
         img.icon(src="@/assets/remove.svg")
@@ -67,7 +67,7 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
           span.badge.danger Permanently delete
           span(v-if="isSignedIn") all your spaces and user data from this computer and Kinopio's servers?
           span(v-else) all your spaces and user data from this computer?
-        p.badge.secondary(v-if="isUpgraded")
+        section.subsection(v-if="isUpgraded")
           //- span.badge.info.badge-billing Use Billing ⤴
           //- .row.billing-cancel
           span Or cancel paid subscription
@@ -222,4 +222,8 @@ export default {
   .billing-cancel
     margin-top 2px
     padding-bottom 2px
+  .delete-account
+    .subsection
+      margin-top 10px
+      margin-bottom 10px
 </style>
