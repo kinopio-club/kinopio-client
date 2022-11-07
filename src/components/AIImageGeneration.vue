@@ -1,16 +1,16 @@
 <template lang="pug">
 .ai-image-generation(v-if="visible")
-  //- input
-  template(v-if="!currentUserIsSignedIn || !currentUserIsUpgraded")
-    section
-      p Because of the cost of generating AI images, you'll need to upgrade your account
+  section.results-section.search-input-wrap
+    section.subsection(v-if="shouldPrevent")
+      p Because of the cost of generating AI images, you'll need to upgrade your account to use this
       .button-wrap
         button(v-if="!currentUserIsSignedIn" @click.left="triggerSignUpOrInIsVisible")
           span Sign Up or In
         button(v-if="!currentUserIsUpgraded" @click.left="triggerUpgradeUserIsVisible")
           span Upgrade
-  template(v-else)
-    section.results-section.search-input-wrap
+
+    //- input
+    template(v-if="!shouldPrevent")
       .search-wrap
         img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusPromptInput")
         Loader(:visible="loading")
@@ -29,37 +29,37 @@
         button.borderless.clear-input-wrap(@click.left="clear")
           img.icon.cancel(src="@/assets/add.svg")
       .button-wrap
-        button(@click="generateImage" :class="{ active: loading }")
+        button.button-generate(@click="generateImage" :class="{ active: loading }")
           img.icon.openai(src="@/assets/openai.svg")
           span Generate
 
-    //- results
-    template(v-if="loading || imageUrl")
-      section.results
-        .row
-          Loader(:visible="loading")
-        //- ..results..
-    //- instructions
-    template(v-else)
-      section.instructions
-        p Dall-e AI image generation work best with detailed prompts that include a
-        span.badge.info subject
-        span {{', '}}
-        span.badge.success action
-        span , and{{' '}}
-        span.badge.danger style
-        //- example
-        section.example.subsection
-          p
-            span.badge.info Teddy bears
-            span {{' '}}
-            span.badge.success shopping for groceries
-            span {{' '}}
-            span.badge.danger in the style of ukiyo-e
-          img(src="https://kinopio-updates.us-east-1.linodeobjects.com/dall-e-example.jpg")
+  //- results
+  template(v-if="loading || imageUrl")
+    section.results
+      .row
+        Loader(:visible="loading")
+      //- ..results..
+  //- instructions
+  template(v-else)
+    section.instructions
+      p Dall-e AI image generation work best with detailed prompts that include a
+      span.badge.info subject
+      span {{', '}}
+      span.badge.success action
+      span , and{{' '}}
+      span.badge.danger style
+      //- example
+      section.example.subsection
+        p
+          span.badge.info Teddy bears
+          span {{' '}}
+          span.badge.success shopping for groceries
+          span {{' '}}
+          span.badge.danger in the style of ukiyo-e
+        img(src="https://kinopio-updates.us-east-1.linodeobjects.com/dall-e-example.jpg")
 
-    section
-      p This feature is in beta, a montly limit may be introduced in the future if needed
+  section
+    p This feature is in beta, a montly limit may be introduced in the future if needed
 </template>
 
 <script>
@@ -92,7 +92,8 @@ export default {
       }
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
+    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
+    shouldPrevent () { return !this.currentUserIsSignedIn || !this.currentUserIsUpgraded }
   },
   methods: {
     generateImage () {
@@ -157,9 +158,8 @@ export default {
 
 <style lang="stylus">
 .ai-image-generation
-  .results-section
-    .button-wrap
-      margin 4px
+  .button-generate
+    margin 4px
   .instructions,
   .results
     border-top 0
