@@ -30,7 +30,7 @@
         button.borderless.clear-input-wrap(@click.left="clear")
           img.icon.cancel(src="@/assets/add.svg")
       .button-wrap
-        button.button-generate(@click="generateImage" :class="{ active: loading }")
+        button.button-generate(@click="generateImage" :class="{ active: promptIsLoadingPrompt }")
           img.icon.openai(src="@/assets/openai.svg")
           span Generate
       //- error
@@ -38,17 +38,19 @@
         .row
           span.badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
-  //- results
-  template(v-if="loading || images")
+  //- loading
+  template(v-if="loading")
     section.results
-      .row
-        Loader(:visible="loading")
+      .row.loading-row
+        Loader(:visible="true")
+        p.info This may take up to 30 seconds…
+  //- results
+  template(v-else-if="images")
+    section.results
       ul.results-list.image-list
         template(v-for="image in images")
           li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
             img(:src="image.url")
-
-      //- ..results..
   //- instructions
   template(v-else)
     section.instructions
@@ -84,15 +86,15 @@ export default {
   props: {
     visible: Boolean,
     initialPrompt: String,
-    cardUrl: String,
-    cardId: String
+    cardUrl: String
   },
   data () {
     return {
       loading: false,
       error: false,
       prompt: '',
-      images: undefined
+      images: undefined,
+      loadingPrompt: ''
     }
   },
   computed: {
@@ -106,7 +108,8 @@ export default {
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
-    shouldPrevent () { return !this.currentUserIsSignedIn || !this.currentUserIsUpgraded }
+    shouldPrevent () { return !this.currentUserIsSignedIn || !this.currentUserIsUpgraded },
+    promptIsLoadingPrompt () { return this.prompt === this.loadingPrompt }
   },
   methods: {
     isCardUrl (image) {
@@ -117,24 +120,22 @@ export default {
     },
     async generateImage () {
       if (!this.prompt) { return }
-      if (this.loading) { return }
+      if (this.loading && this.promptIsLoadingPrompt) { return }
       this.loading = true
       this.images = undefined
       this.error = false
       const body = {
         prompt: this.prompt,
-        userId: this.$store.state.currentUser.id,
-        cardId: this.cardId
+        userId: this.$store.state.currentUser.id
       }
       try {
         this.images = await this.$store.dispatch('api/createAIImage', body)
+        // TODO increment user generations count, by 1
       } catch (error) {
         console.error('🚒 generateImage', error)
         this.error = true
-        // handle err: rate limit, user limit err
       }
       this.loading = false
-      // Then, user confirms the image by clicking on it -> emit selectImage(image)
     },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
@@ -167,7 +168,7 @@ export default {
     },
     clear () {
       this.updatePrompt('')
-      // and clear returned image
+      this.images = undefined
     }
   },
   watch: {
@@ -204,4 +205,9 @@ export default {
     img
       max-width 50%
       border-radius var(--entity-radius)
+  .loading-row
+    align-items center
+    p.info
+      margin 0
+      margin-left 6px
 </style>

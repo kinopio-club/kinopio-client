@@ -908,6 +908,7 @@ const self = {
         return data
       } catch (error) {
         console.error('🚒 createAIImage', error)
+        throw new Error(error)
       }
     },
 
