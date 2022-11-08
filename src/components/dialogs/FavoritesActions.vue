@@ -75,9 +75,10 @@ export default {
 
 <style lang="stylus">
 .favorities-actions
+  button
+    height initial
   .favorite-users
     button
-      height 24px
       display flex
       align-items center
       .user-label-inline
