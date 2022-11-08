@@ -214,7 +214,7 @@ export default {
       margin-top 2px
       margin-right 2px
     .loader
-      margin-right 5px
+      margin-right 6px
       width 14px
 
   .badge.search
