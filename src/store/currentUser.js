@@ -59,7 +59,8 @@ export default {
     shouldUseStickyCards: false,
     shouldPauseConnectionDirections: false,
     twitterUsername: '',
-    shouldUseDarkColors: false
+    shouldUseDarkColors: false,
+    lastUsedImagePickerService: ''
   },
   mutations: {
     color: (state, value) => {
@@ -322,6 +323,10 @@ export default {
     twitterUsername: (state, value) => {
       state.twitterUsername = value
       cache.updateUser('twitterUsername', value)
+    },
+    lastUsedImagePickerService: (state, value) => {
+      state.lastUsedImagePickerService = value
+      cache.updateUser('lastUsedImagePickerService', value)
     },
     shouldUseDarkColors: (state, value) => {
       state.shouldUseDarkColors = value

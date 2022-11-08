@@ -142,7 +142,7 @@ export default {
     return {
       images: [],
       search: '',
-      service: 'stickers', // 'stickers', 'gifs', 'bing', 'backgrounds', 'recent'
+      service: 'stickers', // 'stickers', 'gifs', 'bing', 'backgrounds', 'recent', 'ai'
       loading: false,
       minDialogHeight: 400,
       dialogHeight: null,
@@ -218,7 +218,8 @@ export default {
         return false
       }
     },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    lastUsedImagePickerService () { return this.$store.state.currentUser.lastUsedImagePickerService }
   },
   methods: {
     removeImage () {
@@ -235,25 +236,31 @@ export default {
     toggleServiceIsBackgrounds () {
       this.service = 'backgrounds'
       this.searchAgainBackgrounds()
+      this.updateLastUsedImagePickerService()
     },
     toggleServiceIsRecent () {
       this.service = 'recent'
       this.updateImagesFromCachedSpace()
+      this.updateLastUsedImagePickerService()
     },
     toggleServiceIsBing () {
       this.service = 'bing'
       this.searchAgain()
+      this.updateLastUsedImagePickerService()
     },
     toggleServiceIsAI () {
       this.service = 'ai'
+      this.updateLastUsedImagePickerService()
     },
     toggleServiceIsStickers () {
       this.service = 'stickers'
       this.searchAgain()
+      this.updateLastUsedImagePickerService()
     },
     toggleServiceIsGifs () {
       this.service = 'gifs'
       this.searchAgain()
+      this.updateLastUsedImagePickerService()
     },
     updateImagesFromCachedSpace () {
       let spaces = cache.getAllSpaces()
@@ -520,12 +527,22 @@ export default {
     },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
+    },
+    updateLastUsedImagePickerService () {
+      if (this.isBackgroundImage) { return }
+      this.$store.dispatch('currentUser/update', { lastUsedImagePickerService: this.service })
+    },
+    updateServiceFromLastUsedService () {
+      if (this.isBackgroundImage) { return }
+      if (!this.lastUsedImagePickerService) { return }
+      this.service = this.lastUsedImagePickerService
     }
   },
   watch: {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
+          this.updateServiceFromLastUsedService()
           this.search = this.initialSearch
           if (this.isBackgroundImage) {
             this.toggleServiceIsBackgrounds()
