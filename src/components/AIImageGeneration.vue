@@ -12,7 +12,7 @@
     //- input
     template(v-if="!shouldPrevent")
       .search-wrap
-        img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusPromptInput")
+        img.icon.openai(v-if="!loading" src="@/assets/openai.svg" @click.left="focusPromptInput")
         Loader(:visible="loading")
         textarea(
           placeholder="Puppies in a victorian style"
@@ -33,6 +33,7 @@
         button.button-generate(@click="generateImage" :class="{ active: promptIsLoadingPrompt }")
           img.icon.openai(src="@/assets/openai.svg")
           span Generate
+
       //- error
       p(v-if="error")
         .row
@@ -54,7 +55,7 @@
   //- instructions
   template(v-else)
     section.instructions
-      p Dall-e AI image generation works best with detailed prompts that include a{{' '}}
+      p DALL·E AI image generation works best with detailed prompts that include a{{' '}}
         span.badge.info subject
         span {{', '}}
         span.badge.success action
@@ -72,6 +73,11 @@
 
   section
     p This feature is in beta, a montly limit may be introduced in the future if needed
+    .button-wrap
+      button
+        img.icon.flower(src="@/assets/flower.svg")
+        span AI History
+
 </template>
 
 <script>
@@ -109,7 +115,10 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     shouldPrevent () { return !this.currentUserIsSignedIn || !this.currentUserIsUpgraded },
-    promptIsLoadingPrompt () { return this.prompt === this.loadingPrompt }
+    promptIsLoadingPrompt () {
+      if (!this.prompt) { return }
+      return this.prompt === this.loadingPrompt
+    }
   },
   methods: {
     isCardUrl (image) {
@@ -169,6 +178,8 @@ export default {
     clear () {
       this.updatePrompt('')
       this.images = undefined
+      const textarea = this.$refs.promptInput
+      textarea.style.height = 'initial'
     }
   },
   watch: {
@@ -197,6 +208,15 @@ export default {
   .openai
     width 16px
     vertical-align -3px
+  .search-wrap
+    align-items flex-start
+    .openai
+      margin-top 2px
+      margin-right 2px
+    .loader
+      margin-right 5px
+      width 14px
+
   .badge.search
     background-color var(--search-background)
   .example
@@ -210,4 +230,6 @@ export default {
     p.info
       margin 0
       margin-left 6px
+  .flower
+    vertical-align -2px
 </style>
