@@ -247,6 +247,18 @@ const self = {
         console.error('🚒 getUser', error)
       }
     },
+    getUserAIImages: async (context, limit) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        limit = limit || 100
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/ai-images?limit=${limit}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 getUserAIImages', error)
+      }
+    },
     getUserFavorites: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }
