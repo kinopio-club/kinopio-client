@@ -20,6 +20,7 @@
           ref="promptInput"
           @focus="resetPinchCounterZoomDecimal"
           @update="textareaSize"
+          @keydown.enter.exact.prevent="generateImage"
           @keyup.stop.backspace
           @keyup.stop.enter
           @mouseup.stop
@@ -32,12 +33,21 @@
         button.button-generate(@click="generateImage" :class="{ active: loading }")
           img.icon.openai(src="@/assets/openai.svg")
           span Generate
+      //- error
+      p(v-if="error")
+        .row
+          span.badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
   //- results
-  template(v-if="loading || imageUrl")
+  template(v-if="loading || images")
     section.results
       .row
         Loader(:visible="loading")
+      ul.results-list.image-list
+        template(v-for="image in images")
+          li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
+            img(:src="image.url")
+
       //- ..results..
   //- instructions
   template(v-else)
@@ -73,13 +83,15 @@ export default {
   },
   props: {
     visible: Boolean,
-    initialPrompt: String
+    initialPrompt: String,
+    cardUrl: String
   },
   data () {
     return {
       loading: false,
+      error: false,
       prompt: '',
-      imageUrl: ''
+      images: undefined
     }
   },
   computed: {
@@ -96,21 +108,30 @@ export default {
     shouldPrevent () { return !this.currentUserIsSignedIn || !this.currentUserIsUpgraded }
   },
   methods: {
-    generateImage () {
+    isCardUrl (image) {
+      return this.cardUrl === image.url
+    },
+    selectImage (image) {
+      this.$emit('selectImage', image)
+    },
+    async generateImage () {
       if (!this.prompt) { return }
       if (this.loading) { return }
       this.loading = true
+      this.images = undefined
+      this.error = false
       const body = {
         prompt: this.prompt,
         userId: this.$store.state.currentUser.id
       }
       try {
-        this.$store.dispatch('api/AICreateImage', body)
+        this.images = await this.$store.dispatch('api/createAIImage', body)
       } catch (error) {
         console.error('🚒 generateImage', error)
+        this.error = true
         // handle err: rate limit, user limit err
       }
-      // this.loading = false
+      this.loading = false
       // Then, user confirms the image by clicking on it -> emit selectImage(image)
     },
     resetPinchCounterZoomDecimal () {
@@ -131,6 +152,7 @@ export default {
     },
     updatePrompt (prompt) {
       this.prompt = prompt
+      this.error = false
       this.textareaSize()
     },
     triggerSignUpOrInIsVisible () {
@@ -149,7 +171,11 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
+        this.images = undefined
         this.updatePrompt(this.initialPrompt)
+        this.$nextTick(() => {
+          this.textareaSize()
+        })
       }
     }
   }
