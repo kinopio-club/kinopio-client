@@ -87,8 +87,4 @@ export default {
   p
     margin-top 0 !important
     margin-left 6px
-  .weather-units
-    button
-      width 27px
-      text-overflow initial
 </style>
