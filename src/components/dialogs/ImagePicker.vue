@@ -62,7 +62,7 @@ dialog.image-picker(
         button(@click="removeImage")
           img.icon(src="@/assets/remove.svg")
 
-  AIImageGeneration(@selectImage="selectImage" :visible="serviceIsAI" :initialPrompt="search" :cardUrl="cardUrl")
+  AIImageGeneration(@selectImage="selectImage" :visible="serviceIsAI" :initialPrompt="search" :cardUrl="cardUrl" :cardId="cardId")
   template(v-if="!serviceIsAI")
     //- search box
     section.results-section.search-input-wrap(ref="searchSection")

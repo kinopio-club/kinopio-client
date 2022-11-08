@@ -84,7 +84,8 @@ export default {
   props: {
     visible: Boolean,
     initialPrompt: String,
-    cardUrl: String
+    cardUrl: String,
+    cardId: String
   },
   data () {
     return {
@@ -122,7 +123,8 @@ export default {
       this.error = false
       const body = {
         prompt: this.prompt,
-        userId: this.$store.state.currentUser.id
+        userId: this.$store.state.currentUser.id,
+        cardId: this.cardId
       }
       try {
         this.images = await this.$store.dispatch('api/createAIImage', body)
