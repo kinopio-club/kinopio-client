@@ -54,12 +54,12 @@
   //- instructions
   template(v-else)
     section.instructions
-      p Dall-e AI image generation work best with detailed prompts that include a
-      span.badge.info subject
-      span {{', '}}
-      span.badge.success action
-      span , and{{' '}}
-      span.badge.danger style
+      p Dall-e AI image generation works best with detailed prompts that include a{{' '}}
+        span.badge.info subject
+        span {{', '}}
+        span.badge.success action
+        span , and{{' '}}
+        span.badge.danger style
       //- example
       section.example.subsection
         p
