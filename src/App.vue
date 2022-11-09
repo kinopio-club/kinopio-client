@@ -636,6 +636,8 @@ dialog
   section.subsection + section,
   section.subsection + .row
     margin-top 10px
+  section.subsection + section.subsection
+    border-top 0
 
   .change-color
     .current-color
