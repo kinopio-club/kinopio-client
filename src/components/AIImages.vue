@@ -1,6 +1,8 @@
 <template lang="pug">
 .ai-images(v-if="visible" @click.stop="clear")
-  section.results-section(ref="section" :style="{'max-height': height + 'px'}")
+  section
+    p 10/life free , 50/month upgraded
+  section.results-section(v-if="AIImages.length" ref="section" :style="{'max-height': height + 'px'}")
     ul.results-list.image-list
       template(v-for="image in AIImages")
         li
@@ -18,7 +20,12 @@
           .input-button-wrap.copy-image-url(@click.stop="copy($event, image.url)")
             button.small-button
               img.icon.copy(src="@/assets/copy.svg")
-
+  section(v-else)
+    p AI Images you generate from cards can be found here.
+    p
+      .badge.secondary Card →{{' '}}
+        img.icon.flower(src="@/assets/flower.svg")
+        span → AI
 </template>
 
 <script>
@@ -121,5 +128,7 @@ export default {
         width 16px
         vertical-align -3px
         min-height initial
+  .flower
+    vertical-align -2px
 
 </style>
