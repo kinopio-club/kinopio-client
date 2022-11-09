@@ -52,7 +52,7 @@
             img(:src="image.url")
   //- instructions
   template(v-else)
-    section.instructions
+    section.instructions(v-if="AIImagesIsUnderLimit")
       p DALL·E AI image generation works best with detailed prompts that include a{{' '}}
         span.badge.info subject
         span {{', '}}
@@ -111,7 +111,8 @@ export default {
     promptIsLoadingPrompt () {
       if (!this.prompt) { return }
       return this.prompt === this.loadingPrompt
-    }
+    },
+    AIImagesIsUnderLimit () { return this.$store.getters['currentUser/AIImagesIsUnderLimit'] }
   },
   methods: {
     isCardUrl (image) {
@@ -194,6 +195,9 @@ export default {
 .ai-image-generation
   .button-generate
     margin 4px
+    margin-bottom 10px
+  .instructions
+    padding-top 0
   .instructions,
   .results
     border-top 0
