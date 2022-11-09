@@ -28,7 +28,7 @@
         button.borderless.clear-input-wrap(@click.left="clear")
           img.icon.cancel(src="@/assets/add.svg")
       .button-wrap
-        button.button-generate(@click="generateImage" :class="{ active: promptIsLoadingPrompt }")
+        button.button-generate(@click="generateImage" :class="{ active: promptIsLoadingPrompt }" :disabled="!AIImagesIsUnderLimit")
           img.icon.openai(src="@/assets/openai.svg")
           span Generate
 
@@ -123,6 +123,7 @@ export default {
     },
     async generateImage () {
       if (!this.prompt) { return }
+      if (!this.AIImagesIsUnderLimit) { return }
       if (this.loading && this.promptIsLoadingPrompt) { return }
       this.loading = true
       this.images = undefined
@@ -196,7 +197,8 @@ export default {
   .button-generate
     margin 4px
     margin-bottom 10px
-  .instructions
+  .instructions,
+  .results
     padding-top 0
   .instructions,
   .results

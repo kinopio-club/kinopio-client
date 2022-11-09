@@ -865,6 +865,10 @@ export default {
         return state.AIImages
       }
     },
+    AIImagesThisMonthCount: (state, getters) => {
+      const images = getters.AIImagesThisMonth
+      return Math.floor(images.length / 2)
+    },
     AIImageLimitUpgradedUser: (state) => {
       return 50
     },
@@ -876,7 +880,7 @@ export default {
       }
     },
     AIImagesIsUnderLimit: (state, getters) => {
-      const current = getters.AIImagesThisMonth
+      const current = getters.AIImagesThisMonthCount
       const limit = getters.AIImagesLimit
       return current < limit
     }

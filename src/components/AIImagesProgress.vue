@@ -1,8 +1,8 @@
 <template lang="pug">
 section.ai-images-progress(v-if="currentUserIsSignedIn" :class="{'margin-bottom-zero': currentUserIsUpgraded && !showAIImageHistoryButton}")
-  p {{AIImagesThisMonth}}/{{AIImagesLimit}} AI prompts used
+  p {{AIImagesThisMonthCount}}/{{AIImagesLimit}} AI requests used
     span(v-if="currentUserIsUpgraded") {{' '}}this month
-  progress(:value="AIImagesThisMonth" :max="AIImagesLimit")
+  progress(:value="AIImagesThisMonthCount" :max="AIImagesLimit")
   .row(v-if="showAIImageHistoryButton")
     .button-wrap.history-button
       button(@click.stop="triggerAIImagesIsVisible")
@@ -11,7 +11,7 @@ section.ai-images-progress(v-if="currentUserIsSignedIn" :class="{'margin-bottom-
   //- upgrade
   .row(v-if="!currentUserIsUpgraded")
     button.upgrade-button(@click="triggerUpgradeUserIsVisible")
-      span Upgrade to get {{AIImageLimitUpgradedUser}} AI prompts each month
+      span Upgrade to get {{AIImageLimitUpgradedUser}} AI requests each month
 </template>
 
 <script>
@@ -29,7 +29,7 @@ export default {
   computed: {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
-    AIImagesThisMonth () { return this.$store.getters['currentUser/AIImagesThisMonth'].length },
+    AIImagesThisMonthCount () { return this.$store.getters['currentUser/AIImagesThisMonthCount'] },
     AIImagesLimit () { return this.$store.getters['currentUser/AIImagesLimit'] },
     AIImageLimitUpgradedUser () { return this.$store.getters['currentUser/AIImageLimitUpgradedUser'] }
 
