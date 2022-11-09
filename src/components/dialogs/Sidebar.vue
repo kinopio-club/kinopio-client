@@ -76,6 +76,10 @@ export default {
         this.$nextTick(() => {
           this.toggleRemovedIsVisible()
         })
+      } else if (mutation.type === 'triggerAIImagesIsVisible') {
+        this.$nextTick(() => {
+          this.toggleAIImagesIsVisible()
+        })
       }
     })
   },

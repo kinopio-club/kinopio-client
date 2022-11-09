@@ -258,7 +258,7 @@ export default {
         this.hidden()
       } else if (mutation.type === 'triggerTemplatesIsVisible') {
         this.templatesIsVisible = true
-      } else if (mutation.type === 'triggerRemovedIsVisible') {
+      } else if (mutation.type === 'triggerRemovedIsVisible' || mutation.type === 'triggerAIImagesIsVisible') {
         this.sidebarIsVisible = true
       } else if (mutation.type === 'triggerImportIsVisible') {
         this.importIsVisible = true

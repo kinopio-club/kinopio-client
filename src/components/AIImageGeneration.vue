@@ -74,7 +74,7 @@
   section
     p This feature is in beta, a montly limit may be introduced in the future if needed
     .button-wrap
-      button
+      button(@click.stop="triggerAIImagesIsVisible")
         img.icon.flower(src="@/assets/flower.svg")
         span AI History
 
@@ -185,6 +185,10 @@ export default {
       this.images = undefined
       const textarea = this.$refs.promptInput
       textarea.style.height = 'initial'
+    },
+    triggerAIImagesIsVisible () {
+      this.$store.dispatch('closeAllDialogs', 'AIImageGeneration')
+      this.$store.commit('triggerAIImagesIsVisible')
     }
   },
   watch: {
