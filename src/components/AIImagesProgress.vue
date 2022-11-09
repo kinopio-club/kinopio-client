@@ -11,7 +11,7 @@ section.ai-images-progress(v-if="currentUserIsSignedIn" :class="{'margin-bottom-
   //- upgrade
   .row(v-if="!currentUserIsUpgraded")
     button.upgrade-button(@click="triggerUpgradeUserIsVisible")
-      span Upgrade to get 50 AI prompts each month
+      span Upgrade to get {{AIImageLimitUpgradedUser}} AI prompts each month
 </template>
 
 <script>
@@ -30,7 +30,8 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     AIImagesThisMonth () { return this.$store.getters['currentUser/AIImagesThisMonth'].length },
-    AIImagesLimit () { return this.$store.getters['currentUser/AIImagesLimit'] }
+    AIImagesLimit () { return this.$store.getters['currentUser/AIImagesLimit'] },
+    AIImageLimitUpgradedUser () { return this.$store.getters['currentUser/AIImageLimitUpgradedUser'] }
 
   },
   methods: {

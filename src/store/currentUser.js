@@ -865,9 +865,12 @@ export default {
         return state.AIImages
       }
     },
+    AIImageLimitUpgradedUser: (state) => {
+      return 50
+    },
     AIImagesLimit: (state, getters) => {
       if (state.isUpgraded) {
-        return 50
+        return getters.AIImageLimitUpgradedUser
       } else {
         return 10
       }
