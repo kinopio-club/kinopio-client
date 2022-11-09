@@ -13,7 +13,8 @@ dialog.narrow.api-key(v-if="visible" :open="visible" @click.left.stop ref="dialo
         .url-textarea {{key}}
         .input-button-wrap(@click.left="copyKey")
           button.small-button
-            span Copy API Key
+            img.icon.copy(src="@/assets/copy.svg")
+            span API Key
 
   section(v-if="!currentUserIsSignedIn")
     p After you sign up you'll be able to access your API Key here

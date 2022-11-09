@@ -36,14 +36,16 @@ dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop)
           .url-textarea {{iframe}}
           .input-button-wrap(@click.left="copy")
             button.small-button
-              span Copy Embed Code
+              img.icon.copy(src="@/assets/copy.svg")
+              span Embed Code
       //- Url
       template(v-if="!iframeIsVisible")
         .row
           .url-textarea {{url}}
           .input-button-wrap(@click.left="copy")
             button.small-button
-              span Copy Embed URL
+              img.icon.copy(src="@/assets/copy.svg")
+              span Embed URL
 
       //- Zoom
       .row

@@ -936,6 +936,8 @@ code
 
 .cut
   vertical-align 0
+.copy
+  vertical-align -0.5px
 
 .cancel
   transform rotate(45deg)

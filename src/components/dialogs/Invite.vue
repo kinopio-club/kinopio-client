@@ -13,7 +13,8 @@ dialog.narrow.invite(v-if="visible" :open="visible" @click.left.stop)
         .url-textarea {{url}}
         .input-button-wrap(@click.left="copyUrl")
           button.small-button
-            span Copy Invite URL
+            img.icon.copy(src="@/assets/copy.svg")
+            span Invite URL
     //- Error
     template(v-if="!loading && !collaboratorKey")
       .row

@@ -17,7 +17,7 @@
             //- a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
             button.small-button
               //-     span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
-              img.icon.cut(src="@/assets/cut.svg")
+              img.icon.copy(src="@/assets/copy.svg")
 
 </template>
 
@@ -91,5 +91,4 @@ export default {
       top 10px
     .icon
       min-height initial
-      vertical-align 1px
 </style>
