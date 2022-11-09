@@ -1,13 +1,15 @@
 <template lang="pug">
 .ai-image-generation(v-if="visible")
-  section.results-section.search-input-wrap
-    section.subsection(v-if="!currentUserIsSignedIn")
+  //- sign up
+  section(v-if="!currentUserIsSignedIn")
+    section.subsection
       p Because of the cost of generating AI images, you'll need to sign in or up to use this
       .button-wrap
         button(@click.left="triggerSignUpOrInIsVisible")
           span Sign Up or In
 
-    //- input
+  section.results-section.search-input-wrap
+    //- prompt textarea
     template(v-if="currentUserIsSignedIn")
       .search-wrap
         img.icon.openai(v-if="!loading" src="@/assets/openai.svg" @click.left="focusPromptInput")
