@@ -148,7 +148,7 @@ export default {
     },
     updateCurrentUserAIImages () {
       let AIImages = this.$store.state.currentUser.AIImages
-      AIImages = AIImages.concat(this.images)
+      AIImages = this.images.concat(AIImages)
       this.$store.commit('currentUser/AIImages', AIImages)
     },
     resetPinchCounterZoomDecimal () {

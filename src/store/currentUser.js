@@ -4,6 +4,8 @@ import cache from '@/cache.js'
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
+import dayjs from 'dayjs'
+import groupBy from 'lodash-es/groupBy'
 
 export default {
   namespaced: true,
@@ -849,6 +851,26 @@ export default {
       const connections = rootState.filteredConnectionTypeIds
       const frames = rootState.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
+    },
+
+    // AI Images
+
+    AIImagesGroupedByPrompt: (state) => {
+      const images = state.AIImages
+      return groupBy(images, 'prompt')
+    },
+    AIImagesThisMonth: (state) => {
+      const currentMonth = dayjs().month()
+      return state.AIImages.filter(image => {
+        const month = dayjs(image.createdAt).month()
+        return month === currentMonth
+      })
+    },
+    AIImagesLimit: (state, getters) => {
+      // 10 life
+      // 50 mnth
+    },
+    AIImagesIsOverLimit: (state, getters) => {
     }
   }
 }
