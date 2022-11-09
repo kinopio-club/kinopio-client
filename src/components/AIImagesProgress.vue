@@ -1,10 +1,10 @@
 <template lang="pug">
-section.ai-images-progress(v-if="currentUserIsSignedIn" :class="{ 'is-upgraded': currentUserIsUpgraded }")
+section.ai-images-progress(v-if="currentUserIsSignedIn" :class="{'margin-bottom-zero': currentUserIsUpgraded && !showAIImageHistoryButton}")
   p {{AIImagesThisMonth}}/{{AIImagesLimit}} AI prompts used
     span(v-if="currentUserIsUpgraded") {{' '}}this month
   progress(:value="AIImagesThisMonth" :max="AIImagesLimit")
   .row(v-if="showAIImageHistoryButton")
-    .button-wrap
+    .button-wrap.history-button
       button(@click.stop="triggerAIImagesIsVisible")
         img.icon.flower(src="@/assets/flower.svg")
         span AI History
@@ -58,7 +58,6 @@ export default {
   progress
     margin-top 2px
     margin-bottom 10px
-  &.is-upgraded
-    progress
-      margin-bottom 0
+  &.margin-bottom-zero
+    padding-bottom 0
 </style>
