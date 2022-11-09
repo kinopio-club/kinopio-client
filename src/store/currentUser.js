@@ -60,7 +60,8 @@ export default {
     shouldPauseConnectionDirections: false,
     twitterUsername: '',
     shouldUseDarkColors: false,
-    lastUsedImagePickerService: ''
+    lastUsedImagePickerService: '',
+    AIImages: []
   },
   mutations: {
     color: (state, value) => {
@@ -331,6 +332,10 @@ export default {
     shouldUseDarkColors: (state, value) => {
       state.shouldUseDarkColors = value
       cache.updateUser('shouldUseDarkColors', value)
+    },
+    AIImages: (state, value) => {
+      state.AIImages = value
+      cache.updateUser('AIImages', value)
     }
   },
   actions: {

@@ -139,12 +139,17 @@ export default {
       }
       try {
         this.images = await this.$store.dispatch('api/createAIImage', body)
-        // TODO increment user generations count, by 1
+        this.updateCurrentUserAIImages()
       } catch (error) {
         console.error('🚒 generateImage', error)
         this.error = true
       }
       this.loading = false
+    },
+    updateCurrentUserAIImages () {
+      let AIImages = this.$store.state.currentUser.AIImages
+      AIImages = AIImages.concat(this.images)
+      this.$store.commit('currentUser/AIImages', AIImages)
     },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
