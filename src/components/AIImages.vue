@@ -1,24 +1,23 @@
 <template lang="pug">
-.ai-images(v-if="visible")
-  section(ref="section" :style="{'max-height': height + 'px'}")
-    //- p ai images go here, grouped by prompt, in img picker style 2-col grid
-    //- p or is prompt only revealed on img click?
-    //- p img action is small btn 'copy' (w notification 'copied url')
-    template(v-for="AIImage in AIImagesGroupedByPrompt")
-      section.subsection
-        .row.prompt-row
-          img.icon.openai(src="@/assets/openai.svg")
-          span {{prompt(AIImage)}}
-        ul.results-list.image-list
-          template(v-for="image in images(AIImage)")
-            //- :key="image.id"
-            li
-              //- (@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
-              img(:src="image.url")
-              //- a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
-              button.small-button(@click="copyUrl($event, image.url)")
-                //-     span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
-                img.icon.copy(src="@/assets/copy.svg")
+.ai-images(v-if="visible" @click.stop="clear")
+  section.results-section(ref="section" :style="{'max-height': height + 'px'}")
+    ul.results-list.image-list
+      template(v-for="image in AIImages")
+        li
+          div
+            img(:src="image.url" @click.stop="toggleSelectedImage(image)" :class="{ active: isSelectedImage(image) }")
+            //- prompt
+            p.prompt(v-if="isSelectedImage(image)")
+              img.icon.openai(src="@/assets/openai.svg")
+              span {{image.prompt}}
+              //- copy prompt
+              .input-button-wrap.copy-prompt(@click.stop="copyPrompt($event, image.prompt)")
+                button.small-button
+                  img.icon.copy(src="@/assets/copy.svg")
+          //- copy url
+          .input-button-wrap.copy-image-url(@click.stop="copyUrl($event, image.url)")
+            button.small-button
+              img.icon.copy(src="@/assets/copy.svg")
 
 </template>
 
@@ -27,8 +26,6 @@ import utils from '@/utils.js'
 
 export default {
   name: 'AIImages',
-  components: {
-  },
   props: {
     visible: Boolean
   },
@@ -39,27 +36,23 @@ export default {
       }
     })
   },
-  // mounted () {
-  //   console.log('🍋🍋🍋',this.$store.getters['currentUser/AIImagesGroupedByPrompt'])
-  // },
-  // beforeUnmount () {
-  // },
   data () {
     return {
-      height: null
+      height: null,
+      selectedAIImage: {}
     }
   },
   computed: {
-    AIImagesGroupedByPrompt () {
-      return this.$store.getters['currentUser/AIImagesGroupedByPrompt']
+    AIImages () {
+      return this.$store.state.currentUser.AIImages
     }
   },
   methods: {
-    prompt (AIImage) {
-      return AIImage[0].prompt
+    isSelectedImage (image) {
+      return this.selectedAIImage.url === image.url
     },
-    images (AIImage) {
-      return Object.values(AIImage)
+    clear () {
+      this.selectedAIImage = {}
     },
     updateHeight () {
       if (!this.visible) { return }
@@ -69,13 +62,26 @@ export default {
       })
     },
     copyUrl (event, url) {
-      console.log(event, url)
+      console.log('💖', event, url)
       event.target.blur()
+    },
+    copyPrompt (event, prompt) {
+      console.log('🔥', event, prompt)
+      event.target.blur()
+    },
+    toggleSelectedImage (image) {
+      if (image.url === this.selectedAIImage.url) {
+        this.clear()
+      } else {
+        console.log('🌷', image)
+        this.selectedAIImage = image
+      }
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
+        this.clear()
         this.updateHeight()
       }
     }
@@ -90,22 +96,27 @@ export default {
   .prompt-row
     align-items flex-start
     user-select text
-  .openai
-    width 16px
-    margin-top 2px
+  ul.results-list.image-list
+    .copy-image-url
+      padding-right 4px
+    .copy-prompt
+      padding-right 0
+      margin-right -4px
+      padding-top 0
+    .small-button
+      position static
+      width 25px
+      .icon
+        min-height initial
+    li
+      .prompt
+        position relative
+        margin-top 0
+        span
+          margin-left 3px
+      .openai
+        width 16px
+        vertical-align -3px
+        min-height initial
 
-  .small-button
-    top 10px !important
-    .icon
-      min-height initial
-  li
-    &:hover
-      .small-button
-        box-shadow var(--button-hover-shadow)
-        background-color var(--secondary-hover-background)
-    &:active
-      .small-button
-        box-shadow var(--button-active-inset-shadow)
-        color var(--primary)
-        background-color var(--secondary-active-background)
 </style>
