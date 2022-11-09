@@ -5,7 +5,6 @@ import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
 import dayjs from 'dayjs'
-import groupBy from 'lodash-es/groupBy'
 
 export default {
   namespaced: true,
@@ -855,10 +854,6 @@ export default {
 
     // AI Images
 
-    AIImagesGroupedByPrompt: (state) => {
-      const images = state.AIImages
-      return groupBy(images, 'prompt')
-    },
     AIImagesThisMonth: (state) => {
       const currentMonth = dayjs().month()
       return state.AIImages.filter(image => {
