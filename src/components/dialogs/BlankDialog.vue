@@ -5,6 +5,8 @@ dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="d
 </template>
 
 <script>
+// import utils from '@/utils.js'
+
 export default {
   name: 'DialogName',
   components: {
@@ -31,6 +33,13 @@ export default {
     // kinopioDomain () { return utils.kinopioDomain() },
   },
   methods: {
+  },
+  watch: {
+    // visible (visible) {
+    //   if (visible) {
+    //     this.updateResultsSectionHeight()
+    //   }
+    // }
   }
 }
 </script>

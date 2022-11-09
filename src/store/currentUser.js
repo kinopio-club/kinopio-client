@@ -855,17 +855,27 @@ export default {
     // AI Images
 
     AIImagesThisMonth: (state) => {
-      const currentMonth = dayjs().month()
-      return state.AIImages.filter(image => {
-        const month = dayjs(image.createdAt).month()
-        return month === currentMonth
-      })
+      if (state.isUpgraded) {
+        const currentMonth = dayjs().month()
+        return state.AIImages.filter(image => {
+          const month = dayjs(image.createdAt).month()
+          return month === currentMonth
+        })
+      } else {
+        return state.AIImages
+      }
     },
     AIImagesLimit: (state, getters) => {
-      // 10 life
-      // 50 mnth
+      if (state.isUpgraded) {
+        return 50
+      } else {
+        return 10
+      }
     },
-    AIImagesIsOverLimit: (state, getters) => {
+    AIImagesIsUnderLimit: (state, getters) => {
+      const current = getters.AIImagesThisMonth
+      const limit = getters.AIImagesLimit
+      return current < limit
     }
   }
 }

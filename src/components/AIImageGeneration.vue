@@ -1,16 +1,14 @@
 <template lang="pug">
 .ai-image-generation(v-if="visible")
   section.results-section.search-input-wrap
-    section.subsection(v-if="shouldPrevent")
-      p Because of the cost of generating AI images, you'll need to upgrade your account to use this
+    section.subsection(v-if="!currentUserIsSignedIn")
+      p Because of the cost of generating AI images, you'll need to sign in or up to use this
       .button-wrap
-        button(v-if="!currentUserIsSignedIn" @click.left="triggerSignUpOrInIsVisible")
+        button(@click.left="triggerSignUpOrInIsVisible")
           span Sign Up or In
-        button(v-if="!currentUserIsUpgraded" @click.left="triggerUpgradeUserIsVisible")
-          span Upgrade
 
     //- input
-    template(v-if="!shouldPrevent")
+    template(v-if="currentUserIsSignedIn")
       .search-wrap
         img.icon.openai(v-if="!loading" src="@/assets/openai.svg" @click.left="focusPromptInput")
         Loader(:visible="loading")
@@ -71,23 +69,20 @@
           span.badge.danger in the style of ukiyo-e
         img(src="https://kinopio-updates.us-east-1.linodeobjects.com/dall-e-example.jpg")
 
-  section
-    p This feature is in beta, a montly limit may be introduced in the future if needed
-    .button-wrap
-      button(@click.stop="triggerAIImagesIsVisible")
-        img.icon.flower(src="@/assets/flower.svg")
-        span AI History
+  AIImagesProgress(:showAIImageHistoryButton="true")
 
 </template>
 
 <script>
+import AIImagesProgress from '@/components/AIImagesProgress.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'AIImageGeneration',
   components: {
-    Loader
+    Loader,
+    AIImagesProgress
   },
   props: {
     visible: Boolean,
@@ -113,8 +108,6 @@ export default {
       }
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
-    shouldPrevent () { return !this.currentUserIsSignedIn || !this.currentUserIsUpgraded },
     promptIsLoadingPrompt () {
       if (!this.prompt) { return }
       return this.prompt === this.loadingPrompt
@@ -173,22 +166,14 @@ export default {
       this.textareaSize()
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'AIImageGeneration.triggerSignUpOrInIsVisible')
+      this.$store.dispatch('closeAllDialogs', 'AIImageGeneration')
       this.$store.commit('triggerSignUpOrInIsVisible')
-    },
-    triggerUpgradeUserIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'AIImageGeneration.triggerUpgradeUserIsVisible')
-      this.$store.commit('triggerUpgradeUserIsVisible')
     },
     clear () {
       this.updatePrompt('')
       this.images = undefined
       const textarea = this.$refs.promptInput
       textarea.style.height = 'initial'
-    },
-    triggerAIImagesIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'AIImageGeneration')
-      this.$store.commit('triggerAIImagesIsVisible')
     }
   },
   watch: {

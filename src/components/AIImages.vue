@@ -1,7 +1,12 @@
 <template lang="pug">
 .ai-images(v-if="visible" @click.stop="clear")
-  section
-    p 10/life free , 50/month upgraded
+  section(v-if="!AIImages.length")
+    p AI Images you generate from cards can be found here.
+    p
+      .badge.secondary Card →{{' '}}
+        img.icon.flower(src="@/assets/flower.svg")
+        span → AI
+  AIImagesProgress
   section.results-section(v-if="AIImages.length" ref="section" :style="{'max-height': height + 'px'}")
     ul.results-list.image-list
       template(v-for="image in AIImages")
@@ -20,19 +25,17 @@
           .input-button-wrap.copy-image-url(@click.stop="copy($event, image.url)")
             button.small-button
               img.icon.copy(src="@/assets/copy.svg")
-  section(v-else)
-    p AI Images you generate from cards can be found here.
-    p
-      .badge.secondary Card →{{' '}}
-        img.icon.flower(src="@/assets/flower.svg")
-        span → AI
 </template>
 
 <script>
+import AIImagesProgress from '@/components/AIImagesProgress.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'AIImages',
+  components: {
+    AIImagesProgress
+  },
   props: {
     visible: Boolean
   },
