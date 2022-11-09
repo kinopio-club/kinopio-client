@@ -11,11 +11,11 @@
               img.icon.openai(src="@/assets/openai.svg")
               span {{image.prompt}}
               //- copy prompt
-              .input-button-wrap.copy-prompt(@click.stop="copyPrompt($event, image.prompt)")
+              .input-button-wrap.copy-prompt(@click.stop="copy($event, image.prompt)")
                 button.small-button
                   img.icon.copy(src="@/assets/copy.svg")
           //- copy url
-          .input-button-wrap.copy-image-url(@click.stop="copyUrl($event, image.url)")
+          .input-button-wrap.copy-image-url(@click.stop="copy($event, image.url)")
             button.small-button
               img.icon.copy(src="@/assets/copy.svg")
 
@@ -61,19 +61,22 @@ export default {
         this.height = utils.elementHeight(element, true)
       })
     },
-    copyUrl (event, url) {
-      console.log('💖', event, url)
-      event.target.blur()
-    },
-    copyPrompt (event, prompt) {
-      console.log('🔥', event, prompt)
+    async copy (event, text) {
+      let position = utils.cursorPositionInPage(event)
+      position.x = position.x - 60
+      try {
+        await navigator.clipboard.writeText(text)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+      } catch (error) {
+        console.warn('🚑 copyText', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      }
       event.target.blur()
     },
     toggleSelectedImage (image) {
       if (image.url === this.selectedAIImage.url) {
         this.clear()
       } else {
-        console.log('🌷', image)
         this.selectedAIImage = image
       }
     }
