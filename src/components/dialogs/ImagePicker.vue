@@ -577,25 +577,6 @@ export default {
   .search-input-wrap
     max-height initial
 
-  .image-list
-    display flex
-    flex-wrap wrap
-    align-items flex-start
-    li
-      position relative
-      width 50%
-      img
-        border-radius 3px
-        min-height 100px
-    .small-button
-      position absolute
-      top 6px
-      right 10px
-      padding 0px
-      padding-left 4px
-      padding-right 3px
-      max-width 80%
-
   .error-container
     p,
     .badge
