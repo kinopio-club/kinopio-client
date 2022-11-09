@@ -2,7 +2,8 @@
 dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   section
     .row.title-row-flex
-      .button-wrap
+      .button-wrap.segmented-buttons-wrap
+        //- first row
         .segmented-buttons
           //- Tags
           button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
@@ -17,6 +18,11 @@ dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="clos
           button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
             img.icon(src="@/assets/remove.svg")
             img.icon.remove-undo(src="@/assets/undo.svg")
+        //- second row
+        .segmented-buttons
+          button(@click.left="toggleAIImagesIsVisible" :class="{ active: AIImagesIsVisible}")
+            img.icon(src="@/assets/flower.svg")
+            span AI
 
       //- Pin
       .title-row
@@ -28,6 +34,7 @@ dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="clos
   Links(:visible="linksIsVisible" :parentIsPinned="dialogIsPinned")
   Comments(:visible="commentsIsVisible")
   Removed(:visible="removedIsVisible")
+  AIImages(:visible="AIImagesIsVisible")
 
 </template>
 
@@ -37,6 +44,7 @@ import Links from '@/components/Links.vue'
 import Tags from '@/components/Tags.vue'
 import Comments from '@/components/Comments.vue'
 import Removed from '@/components/Removed.vue'
+import AIImages from '@/components/AIImages.vue'
 
 export default {
   name: 'Sidebar',
@@ -44,7 +52,8 @@ export default {
     Links,
     Tags,
     Comments,
-    Removed
+    Removed,
+    AIImages
   },
   props: {
     visible: Boolean
@@ -55,7 +64,8 @@ export default {
       tagsIsVisible: true,
       linksIsVisible: false,
       commentsIsVisible: false,
-      removedIsVisible: false
+      removedIsVisible: false,
+      AIImagesIsVisible: false
     }
   },
   created () {
@@ -85,6 +95,7 @@ export default {
       this.tagsIsVisible = false
       this.commentsIsVisible = false
       this.removedIsVisible = false
+      this.AIImagesIsVisible = false
     },
     toggleTagsIsVisible () {
       const value = !this.tagsIsVisible
@@ -109,6 +120,12 @@ export default {
       if (!value) { return }
       this.clearIsVisible()
       this.removedIsVisible = value
+    },
+    toggleAIImagesIsVisible () {
+      const value = !this.AIImagesIsVisible
+      if (!value) { return }
+      this.clearIsVisible()
+      this.AIImagesIsVisible = value
     },
     updateDialogHeight () {
       if (!this.visible) { return }
@@ -153,4 +170,18 @@ export default {
       &:first-child
         border-top-left-radius 0
         border-top-right-radius 0
+  .segmented-buttons-wrap
+    .segmented-buttons
+      &:first-child
+        button
+          &:first-child
+            border-bottom-left-radius 0
+      &:last-child
+        margin-top -1px
+        button
+          &:first-child
+            border-top-left-radius 0
+          &:last-child
+            border-top-right-radius 0
+
 </style>
