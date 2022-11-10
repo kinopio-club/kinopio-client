@@ -1468,8 +1468,8 @@ export default {
     urls = urls.map(url => this.trim(url))
     urls = urls.filter(url => {
       if (!url) { return }
-      const urlIsMarkdownEmphasis = Boolean(this.markdown().emphasisPattern2.exec(url))
-      const isInvalidUrl = urlIsMarkdownEmphasis || this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
+      // const urlIsMarkdownEmphasis = Boolean(this.markdown().emphasisPattern2.exec(url))
+      const isInvalidUrl = this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
       if (!isInvalidUrl) {
         return true
       }

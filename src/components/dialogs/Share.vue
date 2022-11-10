@@ -34,7 +34,8 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         .url-textarea {{url}}
         .input-button-wrap(@click.left="copyUrl")
           button.small-button
-            span Copy URL
+            img.icon.copy(src="@/assets/copy.svg")
+            span URL
 
     //- Private space
     template(v-if="spaceIsPrivate")

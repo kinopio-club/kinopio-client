@@ -4,6 +4,8 @@
 </template>
 
 <script>
+// import utils from '@/utils.js'
+
 export default {
   name: 'ComponentName',
   components: {
@@ -30,6 +32,13 @@ export default {
     // kinopioDomain () { return utils.kinopioDomain() },
   },
   methods: {
+  },
+  watch: {
+    // visible (visible) {
+    //   if (visible) {
+    //     this.updateResultsSectionHeight()
+    //   }
+    // }
   }
 }
 </script>

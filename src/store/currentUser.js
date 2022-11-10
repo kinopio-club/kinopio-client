@@ -4,6 +4,7 @@ import cache from '@/cache.js'
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
+import dayjs from 'dayjs'
 
 export default {
   namespaced: true,
@@ -59,7 +60,9 @@ export default {
     shouldUseStickyCards: false,
     shouldPauseConnectionDirections: false,
     twitterUsername: '',
-    shouldUseDarkColors: false
+    shouldUseDarkColors: false,
+    lastUsedImagePickerService: '',
+    AIImages: []
   },
   mutations: {
     color: (state, value) => {
@@ -323,9 +326,17 @@ export default {
       state.twitterUsername = value
       cache.updateUser('twitterUsername', value)
     },
+    lastUsedImagePickerService: (state, value) => {
+      state.lastUsedImagePickerService = value
+      cache.updateUser('lastUsedImagePickerService', value)
+    },
     shouldUseDarkColors: (state, value) => {
       state.shouldUseDarkColors = value
       cache.updateUser('shouldUseDarkColors', value)
+    },
+    AIImages: (state, value) => {
+      state.AIImages = value
+      cache.updateUser('AIImages', value)
     }
   },
   actions: {
@@ -409,6 +420,7 @@ export default {
       if (!context.getters.isSignedIn) { return }
       const remoteUser = await context.dispatch('api/getUser', null, { root: true })
       if (!remoteUser) { return }
+      remoteUser.AIImages = await context.dispatch('api/getUserAIImages', null, { root: true }) || []
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       console.log('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
@@ -838,6 +850,39 @@ export default {
       const connections = rootState.filteredConnectionTypeIds
       const frames = rootState.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
+    },
+
+    // AI Images
+
+    AIImagesThisMonth: (state) => {
+      if (state.isUpgraded) {
+        const currentMonth = dayjs().month()
+        return state.AIImages.filter(image => {
+          const month = dayjs(image.createdAt).month()
+          return month === currentMonth
+        })
+      } else {
+        return state.AIImages
+      }
+    },
+    AIImagesThisMonthCount: (state, getters) => {
+      const images = getters.AIImagesThisMonth
+      return Math.floor(images.length / 2)
+    },
+    AIImageLimitUpgradedUser: (state) => {
+      return 50
+    },
+    AIImagesLimit: (state, getters) => {
+      if (state.isUpgraded) {
+        return getters.AIImageLimitUpgradedUser
+      } else {
+        return 10
+      }
+    },
+    AIImagesIsUnderLimit: (state, getters) => {
+      const current = getters.AIImagesThisMonthCount
+      const limit = getters.AIImagesLimit
+      return current < limit
     }
   }
 }

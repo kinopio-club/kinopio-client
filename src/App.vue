@@ -628,15 +628,16 @@ dialog
       &:first-child
         margin-top 0
   section.subsection
-    border 1px solid var(--primary)
-    padding 4px
-    padding-bottom 0
-    border-radius 3px
+    background-color var(--secondary-background)
+    padding 5px
+    border-radius var(--entity-radius)
   section + section
     border-top 1px solid var(--primary)
   section.subsection + section,
   section.subsection + .row
     margin-top 10px
+  section.subsection + section.subsection
+    border-top 0
 
   .change-color
     .current-color
@@ -814,6 +815,24 @@ ul.results-list
     &.disabled
       opacity 0.5
       pointer-events none
+  &.image-list
+    display flex
+    flex-wrap wrap
+    align-items flex-start
+    li
+      position relative
+      width 50%
+      img
+        border-radius 3px
+        min-height 100px
+    .small-button
+      position absolute
+      top 6px
+      right 10px
+      padding 0px
+      padding-left 4px
+      padding-right 3px
+      max-width 80%
 
 .badge,
 code
@@ -919,6 +938,8 @@ code
 
 .cut
   vertical-align 0
+.copy
+  vertical-align -0.5px
 
 .cancel
   transform rotate(45deg)

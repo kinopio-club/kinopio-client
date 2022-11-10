@@ -14,7 +14,8 @@ dialog.narrow.space-rss-feed(v-if="visible" :open="visible" @click.left.stop)
         .url-textarea {{url}}
         .input-button-wrap(@click.left="copyUrl")
           button.small-button
-            span Copy Feed URL
+            img.icon.copy(src="@/assets/copy.svg")
+            span Feed URL
 
 </template>
 

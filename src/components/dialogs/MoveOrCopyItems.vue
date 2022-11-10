@@ -8,7 +8,8 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
           span {{name}}
       .input-button-wrap(@click.left="copyText")
         button.small-button
-          span Copy Card Names
+          img.icon.copy(src="@/assets/copy.svg")
+          span Card Names
 
   section
     .row

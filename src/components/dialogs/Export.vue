@@ -10,7 +10,8 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
           span {{name}}
       .input-button-wrap(@click.left="copyText")
         button.small-button
-          span Copy Card Names
+          img.icon.copy(src="@/assets/copy.svg")
+          span Card Names
     //- PDF
     .row
       .button-wrap(v-if="currentUserIsSignedIn")

@@ -7,17 +7,19 @@ dialog.image-picker(
   :class="{'background-image-picker' : isBackgroundImage }"
   :style="{'max-height': dialogHeight + 'px', 'min-height': minDialogHeight + 'px'}"
 )
+
+  //- card options
   section(v-if="!isBackgroundImage" ref="cardImageServiceSection")
-    //- card images
     .row.title-row-flex
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
           img.icon.sticker(src="@/assets/sticker.svg")
+        button(@click.left.stop="toggleServiceIsAI" :class="{active : serviceIsAI}" title="AI")
+          span AI
         button(@click.left.stop="toggleServiceIsBing" :class="{active : serviceIsBing}" title="bing")
           img.icon(src="@/assets/search.svg")
         button(@click.left.stop="toggleServiceIsGifs" :class="{active : serviceIsGifs}" title="gifs")
           span GIF
-
       .button-wrap
         button(@click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile")
@@ -46,7 +48,7 @@ dialog.image-picker(
     .error-container-top(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
-  //- background images
+  //- background options
   section(v-if="isBackgroundImage" ref="serviceSection")
     .row.title-row-flex
       .segmented-buttons
@@ -56,57 +58,50 @@ dialog.image-picker(
           span Recent
         button(@click.left.stop="toggleServiceIsBing" :class="{active : serviceIsBing}")
           img.icon(src="@/assets/search.svg")
-
       .button-wrap(v-if="removeIsVisible")
         button(@click="removeImage")
           img.icon(src="@/assets/remove.svg")
 
-  //- search box
-  section.results-section.search-input-wrap(ref="searchSection")
-    .search-wrap(v-if="serviceHasSearch")
-      img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
-      Loader(:visible="loading")
-      input(
-        :placeholder="placeholder"
-        v-model="searchInput"
-        ref="searchInput"
-        @keyup.stop.backspace
-        @keyup.stop.enter
-        @mouseup.stop
-        @touchend.stop
-        @focus="resetPinchCounterZoomDecimal"
-      )
-      button.borderless.clear-input-wrap(@click.left="clearSearch")
-        img.icon.cancel(src="@/assets/add.svg")
-    //- .row.search-options-row
-    //-   //- p
-    //-   //-   span Blobs
-    //-   //-   span Arrows
-    //-   .segmented-buttons
-    //-     button Blobs
-    //-     button Arrows
-    //-     button something
+  AIImageGeneration(@selectImage="selectImage" :visible="serviceIsAI" :initialPrompt="search" :cardUrl="cardUrl")
+  template(v-if="!serviceIsAI")
+    //- search box
+    section.results-section.search-input-wrap(ref="searchSection")
+      .search-wrap(v-if="serviceHasSearch")
+        img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
+        Loader(:visible="loading")
+        input(
+          :placeholder="placeholder"
+          v-model="searchInput"
+          ref="searchInput"
+          @focus="resetPinchCounterZoomDecimal"
+          @keyup.stop.backspace
+          @keyup.stop.enter
+          @mouseup.stop
+          @touchend.stop
+        )
+        button.borderless.clear-input-wrap(@click.left="clearSearch")
+          img.icon.cancel(src="@/assets/add.svg")
+      .error-container(v-if="isNoSearchResults || error.unknownServerError || error.userIsOffline")
+        p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
+        .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+        .badge.danger(v-if="error.userIsOffline") Can't search {{service}} while offline, Please try again later
 
-    .error-container(v-if="isNoSearchResults || error.unknownServerError || error.userIsOffline")
-      p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
-      .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-      .badge.danger(v-if="error.userIsOffline") Can't search {{service}} while offline, Please try again later
-
-  //- search results
-  section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    ul.results-list.image-list
-      template(v-for="image in images" :key="image.id")
-        li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
-          img(:src="image.previewUrl")
-          a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
-            button.small-button
-              span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
-              span →
+    //- search results
+    section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+      ul.results-list.image-list
+        template(v-for="image in images" :key="image.id")
+          li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
+            img(:src="image.previewUrl")
+            a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
+              button.small-button
+                span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
+                span →
 
 </template>
 
 <script>
 import Loader from '@/components/Loader.vue'
+import AIImageGeneration from '@/components/AIImageGeneration.vue'
 import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
 import cache from '@/cache.js'
@@ -120,7 +115,8 @@ const numberOfImages = 25
 export default {
   name: 'ImagePicker',
   components: {
-    Loader
+    Loader,
+    AIImageGeneration
   },
   props: {
     visible: Boolean,
@@ -146,7 +142,7 @@ export default {
     return {
       images: [],
       search: '',
-      service: 'stickers', // 'stickers', 'gifs', 'bing', 'backgrounds', 'recent'
+      service: 'stickers', // 'stickers', 'gifs', 'bing', 'backgrounds', 'recent', 'ai'
       loading: false,
       minDialogHeight: 400,
       dialogHeight: null,
@@ -198,6 +194,9 @@ export default {
     serviceIsStickers () {
       return this.service === 'stickers'
     },
+    serviceIsAI () {
+      return this.service === 'ai'
+    },
     serviceIsGifs () {
       return this.service === 'gifs'
     },
@@ -219,7 +218,8 @@ export default {
         return false
       }
     },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    lastUsedImagePickerService () { return this.$store.state.currentUser.lastUsedImagePickerService }
   },
   methods: {
     removeImage () {
@@ -236,22 +236,31 @@ export default {
     toggleServiceIsBackgrounds () {
       this.service = 'backgrounds'
       this.searchAgainBackgrounds()
+      this.updateLastUsedImagePickerService()
     },
     toggleServiceIsRecent () {
       this.service = 'recent'
       this.updateImagesFromCachedSpace()
+      this.updateLastUsedImagePickerService()
     },
     toggleServiceIsBing () {
       this.service = 'bing'
       this.searchAgain()
+      this.updateLastUsedImagePickerService()
+    },
+    toggleServiceIsAI () {
+      this.service = 'ai'
+      this.updateLastUsedImagePickerService()
     },
     toggleServiceIsStickers () {
       this.service = 'stickers'
       this.searchAgain()
+      this.updateLastUsedImagePickerService()
     },
     toggleServiceIsGifs () {
       this.service = 'gifs'
       this.searchAgain()
+      this.updateLastUsedImagePickerService()
     },
     updateImagesFromCachedSpace () {
       let spaces = cache.getAllSpaces()
@@ -518,12 +527,22 @@ export default {
     },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
+    },
+    updateLastUsedImagePickerService () {
+      if (this.isBackgroundImage) { return }
+      this.$store.dispatch('currentUser/update', { lastUsedImagePickerService: this.service })
+    },
+    updateServiceFromLastUsedService () {
+      if (this.isBackgroundImage) { return }
+      if (!this.lastUsedImagePickerService) { return }
+      this.service = this.lastUsedImagePickerService
     }
   },
   watch: {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
+          this.updateServiceFromLastUsedService()
           this.search = this.initialSearch
           if (this.isBackgroundImage) {
             this.toggleServiceIsBackgrounds()
@@ -557,25 +576,6 @@ export default {
 
   .search-input-wrap
     max-height initial
-
-  .image-list
-    display flex
-    flex-wrap wrap
-    align-items flex-start
-    li
-      position relative
-      width 50%
-      img
-        border-radius 3px
-        min-height 100px
-    .small-button
-      position absolute
-      top 6px
-      right 10px
-      padding 0px
-      padding-left 4px
-      padding-right 3px
-      max-width 80%
 
   .error-container
     p,
