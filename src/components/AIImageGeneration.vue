@@ -26,6 +26,7 @@
           @mouseup.stop
           @touchend.stop
           rows="1"
+          :maxlength="400"
         )
         button.borderless.clear-input-wrap(@click.left="clear")
           img.icon.cancel(src="@/assets/add.svg")
@@ -34,10 +35,11 @@
           img.icon.openai(src="@/assets/openai.svg")
           span Generate
 
-      //- error
-      p(v-if="error")
-        .row
-          span.badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+      //- errors
+      .row.error-row(v-if="error")
+        span.badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+      .row.error-row(v-if="lengthError")
+        span.badge.danger Prompts cannot be longer than 400 characters
 
   //- loading
   template(v-if="loading")
@@ -95,6 +97,7 @@ export default {
     return {
       loading: false,
       error: false,
+      lengthError: false,
       prompt: '',
       images: undefined,
       loadingPrompt: ''
@@ -127,9 +130,14 @@ export default {
       if (!this.prompt) { return }
       if (!this.AIImagesIsUnderLimit) { return }
       if (this.loading && this.promptIsLoadingPrompt) { return }
+      if (this.prompt > this.lengthError) {
+        this.lengthError = true
+        return
+      }
       this.loading = true
       this.images = undefined
       this.error = false
+      this.lengthError = false
       const body = {
         prompt: this.prompt,
         userId: this.$store.state.currentUser.id
@@ -167,6 +175,7 @@ export default {
     updatePrompt (prompt) {
       this.prompt = prompt
       this.error = false
+      this.lengthError = false
       this.textareaSize()
     },
     triggerSignUpOrInIsVisible () {
@@ -234,4 +243,6 @@ export default {
       margin-left 6px
   .flower
     vertical-align -2px
+  .error-row
+    margin-bottom 10px !important
 </style>
