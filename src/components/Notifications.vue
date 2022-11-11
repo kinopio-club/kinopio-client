@@ -43,7 +43,7 @@ aside.notifications(@click.left="closeAllDialogs")
     p Thank you for being a
       span
         .badge.info.is-donor Donor
-      span , I really appreciate your support
+      span , I deeply appreciate your support
     .row
       button(@click="removeNotifyThanksForDonating")
         img.icon.cancel(src="@/assets/add.svg")
@@ -380,7 +380,7 @@ export default {
   display flex
   flex-direction column
   align-items flex-start
-  max-width 260px
+  max-width 264px
   .item,
   .persistent-item
     pointer-events all
@@ -443,7 +443,8 @@ export default {
     display inline-block
     color var(--primary-background)
     margin-right 6px
-    font-size 12px
+    font-size 10px
+    vertical-align 1px
 
   .redo
     transform scaleX(-1)
