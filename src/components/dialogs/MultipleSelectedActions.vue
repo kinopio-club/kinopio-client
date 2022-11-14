@@ -608,7 +608,6 @@ export default {
     margin-bottom 10px
   .edit-connection-types
     .change-color
-      height 24px
       max-width 48px
       padding-top 3px
       display flex
