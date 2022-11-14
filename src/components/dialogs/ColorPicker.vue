@@ -232,6 +232,8 @@ export default {
   input[type="color"]
     width 30px
     height 28px
+    &::-moz-color-swatch
+      display none
   .spectrum
     top 7px
     left 8px
