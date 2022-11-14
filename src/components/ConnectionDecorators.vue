@@ -18,6 +18,13 @@ button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsI
 button(@click.left="reverseConnections" :disabled="!canEditAll")
   img.icon.reverse(src="@/assets/connection-reverse.svg")
 
+.button-wrap.path-curve-options
+  .segmented-buttons
+    button
+      img.icon.connection-path(src="@/assets/connection-path.svg")
+    button
+      img.icon.connection-path(src="@/assets/connection-path.svg")
+
 </template>
 
 <script>

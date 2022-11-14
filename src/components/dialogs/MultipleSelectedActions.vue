@@ -32,7 +32,7 @@ dialog.narrow.multiple-selected-actions(
       //- Type Color
       .button-wrap
         button.change-color(:disabled="!canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: multipleConnectionsPickerVisible}")
-          img.icon(src="@/assets/connection-path.svg")
+          img.icon.connection-path(src="@/assets/connection-path.svg")
           .segmented-colors.icon
             template(v-for="type in connectionTypes")
               .current-color(:style="{ background: type.color }")
@@ -607,17 +607,21 @@ export default {
   .more-options
     margin-bottom 10px
   .edit-connection-types
+    flex-wrap wrap
+    .path-curve-options
+      margin-left 0
+      margin-top 10px
     .change-color
       max-width 48px
-      padding-top 3px
       display flex
       overflow hidden
-      img
-        margin-top 3px
+      align-items center
       .segmented-colors
         margin-left 5px
         max-width 56px
         margin-top 1px
+        display flex
+
   .button-wrap.disabled
     opacity 0.5
     pointer-events none
