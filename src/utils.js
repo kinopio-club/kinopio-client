@@ -819,6 +819,26 @@ export default {
     const data = cards.map(card => card.name)
     return join(data, '\n\n')
   },
+  trim (string) {
+    // https://regexr.com/59m7a
+    // unlike string.trim(), this removes line breaks too
+    return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/g, '')
+  },
+  hasBlankCharacters (string) {
+    if (!string) { return true }
+    // https://regexr.com/5i5a3
+    // matches space, enter, tab, whitespace characters
+    const blankPattern = new RegExp(/( |\s|\t)+/gm)
+    if (string.match(blankPattern)) {
+      return true
+    }
+  },
+  splitByBlankCharacters (string) {
+    // https://regexr.com/5i5a3
+    // matches space, enter, tab, whitespace characters
+    const blankPattern = new RegExp(/( |\s|\t)+/gm)
+    return string.split(blankPattern)
+  },
 
   // Connection Path Utils 🐙
 
@@ -863,26 +883,6 @@ export default {
     }
     let curve = this.curveControlPoint(offsetStart, delta)
     return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
-  },
-  trim (string) {
-    // https://regexr.com/59m7a
-    // unlike string.trim(), this removes line breaks too
-    return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/g, '')
-  },
-  hasBlankCharacters (string) {
-    if (!string) { return true }
-    // https://regexr.com/5i5a3
-    // matches space, enter, tab, whitespace characters
-    const blankPattern = new RegExp(/( |\s|\t)+/gm)
-    if (string.match(blankPattern)) {
-      return true
-    }
-  },
-  splitByBlankCharacters (string) {
-    // https://regexr.com/5i5a3
-    // matches space, enter, tab, whitespace characters
-    const blankPattern = new RegExp(/( |\s|\t)+/gm)
-    return string.split(blankPattern)
   },
   coordsFromConnectionPath (path) {
     // https://regexr.com/66idp
