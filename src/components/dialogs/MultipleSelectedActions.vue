@@ -32,10 +32,11 @@ dialog.narrow.multiple-selected-actions(
       //- Type Color
       .button-wrap
         button.change-color(:disabled="!canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: multipleConnectionsPickerVisible}")
-          img.icon.connection-path(src="@/assets/connection-path.svg")
+          //- img.icon.connection-path(src="@/assets/connection-path.svg")
           .segmented-colors.icon
             template(v-for="type in connectionTypes")
               .current-color(:style="{ background: type.color }")
+          span Type
         MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible" :selectedConnections="editableConnections" :selectedConnectionTypes="editableConnectionTypes")
       //- Arrows or Label
       ConnectionDecorators(:connections="editableConnections")
@@ -612,13 +613,11 @@ export default {
       margin-left 0
       margin-top 10px
     .change-color
-      max-width 48px
       display flex
       overflow hidden
       align-items center
       .segmented-colors
-        margin-left 5px
-        max-width 56px
+        max-width 14px
         margin-top 1px
         display flex
 

@@ -20,14 +20,16 @@ button(@click.left="reverseConnections" :disabled="!canEditAll")
 
 .button-wrap.path-curve-options
   .segmented-buttons
-    button
+    button(:class="{active: allPathsIsCurved}")
       img.icon.connection-path(src="@/assets/connection-path.svg")
     button
-      img.icon.connection-path(src="@/assets/connection-path.svg")
+      img.icon.connection-path(src="@/assets/connection-path-straight.svg")
 
 </template>
 
 <script>
+import utils from '@/utils.js'
+
 export default {
   name: 'ConnectionDecorators',
   components: {
@@ -62,7 +64,15 @@ export default {
       })
       return connectionsCreatedByCurrentUser.length === this.connections.length
     },
-    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() }
+    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    allPathsIsCurved () {
+      const curvedConnections = this.connections.filter(connection => {
+        const controlPoint = utils.curveControlPointFromPath(connection.path)
+        const isCurved = controlPoint.x && controlPoint.y
+        return isCurved
+      })
+      return curvedConnections.length === this.connections.length
+    }
   },
   methods: {
     showDirectionsIsVisible () {
@@ -105,7 +115,8 @@ button
     &.clear
       vertical-align 4px
     &.arrow
-      vertical-align -3px
-    &.reverse
+      vertical-align -2px
+    &.reverse,
+    &.connection-path
       vertical-align 0
 </style>
