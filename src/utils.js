@@ -1062,6 +1062,10 @@ export default {
       card.userId = userId
       return card
     })
+    space.boxes = space.boxes.map(box => {
+      box.userId = userId
+      return box
+    })
     space.connectionTypes = space.connectionTypes.map(type => {
       type.userId = userId
       return type
