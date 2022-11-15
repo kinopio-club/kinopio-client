@@ -450,10 +450,12 @@ export default {
       }
       const baseCard = document.querySelector(`.card[data-card-id="${baseCardId}"]`)
       if (!baseCard) { return }
+      const controlPoint = this.$store.state.currentUser.defaultConnectionControlPoint
       let connection = {
         startCardId: baseCardId,
         endCardId: currentCardId,
-        path: this.$store.getters['currentConnections/connectionBetweenCards'](baseCardId, currentCardId)
+        path: this.$store.getters['currentConnections/connectionBetweenCards'](baseCardId, currentCardId, controlPoint),
+        controlPoint
       }
       this.addConnectionType()
       const type = this.$store.getters['currentConnections/typeForNewConnections']
