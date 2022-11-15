@@ -220,7 +220,7 @@ export default {
     updatePaths: (context, { cardId, shouldUpdateApi, connections }) => {
       connections = utils.clone(connections || context.getters.byCardId(cardId))
       connections.map(connection => {
-        connection.path = context.getters.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        connection.path = context.getters.connectionBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
         connection.spaceId = currentSpaceId
         if (shouldUpdateApi) {
           context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
@@ -236,7 +236,7 @@ export default {
     },
     updatePathsWhileDragging: (context, { connections }) => {
       const paths = connections.map(connection => {
-        const path = context.getters.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        const path = context.getters.connectionBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
         const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
         element.setAttribute('d', path)
         return {
@@ -251,7 +251,7 @@ export default {
       if (!context.getters.all.length) { return }
       let connections = []
       context.getters.all.forEach(connection => {
-        const path = context.getters.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        const path = context.getters.connectionBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
         if (!path) { return }
         if (path === connection.path) { return }
         connections.push(connection)
@@ -377,20 +377,17 @@ export default {
       })
       return Boolean(existing.length)
     },
-    connectionBetweenCards: (state, getters) => (startCardId, endCardId) => {
+    connectionBetweenCards: (state, getters) => (startCardId, endCardId, controlPoint) => {
       const start = utils.connectorCoords(startCardId)
       const end = utils.connectorCoords(endCardId)
-      return getters.connectionPathBetweenCoords(start, end)
+      return getters.connectionPathBetweenCoords(start, end, controlPoint)
     },
     curveControlPoint: (state, getters, rootState) => {
       // q defines a quadratic curve control point
       let controlPoint = 'q90,40'
-      if (rootState.currentUser.newConnectionPathsShouldBeStraight) {
-        controlPoint = `q00,00`
-      }
       return controlPoint
     },
-    connectionPathBetweenCoords: (state, getters) => (start, end) => {
+    connectionPathBetweenCoords: (state, getters) => (start, end, controlPoint) => {
       if (!start || !end) { return }
       const offsetStart = utils.coordsWithCurrentScrollOffset(start)
       const offsetEnd = utils.coordsWithCurrentScrollOffset(end)
@@ -398,7 +395,7 @@ export default {
         x: parseInt(offsetEnd.x - offsetStart.x),
         y: parseInt(offsetEnd.y - offsetStart.y)
       }
-      let curve = getters.curveControlPoint
+      let curve = controlPoint || getters.curveControlPoint
       return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
     }
 

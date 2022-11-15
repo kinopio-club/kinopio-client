@@ -52,6 +52,7 @@ export default {
     defaultSpaceBackground: undefined,
     defaultSpaceBackgroundTint: undefined,
     defaultCardBackgroundColor: undefined,
+    defaultConnectionControlPoint: null, // null, 'q00,00'
     downgradeAt: null,
     showWeather: false,
     weatherLocation: undefined,
@@ -297,6 +298,10 @@ export default {
     defaultCardBackgroundColor: (state, value) => {
       state.defaultCardBackgroundColor = value
       cache.updateUser('defaultCardBackgroundColor', value)
+    },
+    defaultConnectionControlPoint: (state, value) => {
+      state.defaultConnectionControlPoint = value
+      cache.updateUser('defaultConnectionControlPoint', value)
     },
     showWeather: (state, value) => {
       state.showWeather = value

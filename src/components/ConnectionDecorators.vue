@@ -20,9 +20,9 @@ button(@click.left="reverseConnections" :disabled="!canEditAll")
 
 .button-wrap.path-curve-options
   .segmented-buttons
-    button(:class="{active: allPathsIsCurved}")
+    button(:class="{active: allPathsIsCurved}" @click="togglePathIsStraight(false)")
       img.icon.connection-path(src="@/assets/connection-path.svg")
-    button
+    button(:class="{active: allPathsIsStraight}" @click="togglePathIsStraight(true)")
       img.icon.connection-path(src="@/assets/connection-path-straight.svg")
 
 </template>
@@ -72,6 +72,14 @@ export default {
         return isCurved
       })
       return curvedConnections.length === this.connections.length
+    },
+    allPathsIsStraight () {
+      const curvedConnections = this.connections.filter(connection => {
+        const controlPoint = utils.curveControlPointFromPath(connection.path)
+        const isCurved = !controlPoint.x && !controlPoint.y
+        return isCurved
+      })
+      return curvedConnections.length === this.connections.length
     }
   },
   methods: {
@@ -104,7 +112,22 @@ export default {
         })
       })
       this.$store.dispatch('currentConnections/updatePaths', { connections: this.connections, shouldUpdateApi: true })
+    },
+    togglePathIsStraight (isStraight) {
+      let controlPoint = null
+      if (isStraight) {
+        controlPoint = `q00,00`
+      }
+      this.connections.forEach(connection => {
+        this.$store.dispatch('currentConnections/update', {
+          id: connection.id,
+          controlPoint
+        })
+      })
+      this.$store.dispatch('currentConnections/updatePaths', { connections: this.connections, shouldUpdateApi: true })
+      this.$store.dispatch('currentUser/update', { defaultConnectionControlPoint: controlPoint })
     }
+
   }
 }
 </script>
