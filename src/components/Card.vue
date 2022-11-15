@@ -3,6 +3,7 @@ article#card(
   :style="positionStyle"
   :data-card-id="id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
+  :data-is-visible-in-viewport="isVisibleInViewport"
   :key="id"
   ref="card"
   :class="{'is-resizing': isResizing, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
@@ -42,13 +43,14 @@ article#card(
     :data-background-color="card.backgroundColor"
     :data-tags="dataTags"
   )
+
     .selected-user-avatar(v-if="isRemoteSelected || isRemoteCardDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteCardDetailsVisibleColor}")
       img(src="@/assets/anon-avatar.svg")
 
     .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
-    template(v-if="!isComment")
+    template(v-if="!isComment && isVisibleInViewport")
       //- Video
       video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateDimensions")
         source(:src="formats.video")
@@ -66,7 +68,7 @@ article#card(
         button.inline-button.resize-button(tabindex="-1")
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
-    span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
+    span.card-content-wrap(v-if="isVisibleInViewport" :style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
       .card-comment(v-if="isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- [·]
@@ -94,7 +96,7 @@ article#card(
               source(:src="formats.video")
 
       //- Not Comment
-      .card-content(v-if="!isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-content(v-if="!isComment && isVisibleInViewport" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -245,22 +247,25 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updateRemoteCurrentConnection' || mutation.type === 'removeRemoteCurrentConnection') {
+      const { type, payload } = mutation
+      if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
         this.updateRemoteConnections()
-      } else if (mutation.type === 'triggerScrollCardIntoView') {
-        if (mutation.payload === this.card.id) {
+      } else if (type === 'triggerScrollCardIntoView') {
+        if (payload === this.card.id) {
           const element = this.$refs.card
           utils.scrollIntoView(element)
         }
-      } else if (mutation.type === 'triggerUploadComplete') {
-        let { cardId, url } = mutation.payload
+      } else if (type === 'triggerUploadComplete') {
+        let { cardId, url } = payload
         if (cardId !== this.card.id) { return }
         this.addFile({ url })
-      } else if (mutation.type === 'triggerUpdateUrlPreview') {
-        if (mutation.payload === this.card.id) {
+      } else if (type === 'triggerUpdateUrlPreview') {
+        if (payload === this.card.id) {
           this.updateMediaUrls()
           this.updateUrlPreview()
         }
+      } else if (type === 'triggerIsPinchZooming' || type === 'spaceZoomPercent') {
+        this.updateIsVisibleInViewport()
       }
     })
   },
@@ -287,6 +292,11 @@ export default {
       if (!isUpdatedSuccess) { return }
       this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
     }
+    this.updateIsVisibleInViewport()
+    window.addEventListener('scroll', this.updateIsVisibleInViewport)
+  },
+  beforeUnmount () {
+    window.removeEventListener('scroll', this.updateIsVisibleInViewport)
   },
   data () {
     return {
@@ -317,7 +327,8 @@ export default {
       translateX: 0,
       translateY: 0,
       isAnimationUnsticking: false,
-      stickyStretchResistance: 6
+      stickyStretchResistance: 6,
+      isVisibleInViewport: true
     }
   },
   computed: {
@@ -941,6 +952,10 @@ export default {
 
   },
   methods: {
+    updateIsVisibleInViewport () {
+      const zoom = this.$store.getters.spaceZoomDecimal
+      this.isVisibleInViewport = utils.isCardInViewport(this.card, zoom)
+    },
 
     // sticky
 

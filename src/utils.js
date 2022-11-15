@@ -731,8 +731,17 @@ export default {
   emptyCard () {
     return { width: 76, height: 32 }
   },
-  isCardInViewport (card) {
-    const viewport = this.visualViewport()
+  isCardInViewport (card, zoom) {
+    let viewport = this.visualViewport()
+    zoom = zoom || 1
+    zoom = viewport.scale * zoom
+    zoom = 1 / zoom
+    viewport = {
+      pageLeft: viewport.pageLeft * zoom,
+      width: viewport.width * zoom,
+      pageTop: viewport.pageTop * zoom,
+      height: viewport.height * zoom
+    }
     // x
     const isStartInViewportX = card.x > viewport.pageLeft || card.x + card.width > viewport.pageLeft
     const isEndInViewportX = card.x < viewport.pageLeft + viewport.width
