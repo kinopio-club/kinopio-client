@@ -97,8 +97,7 @@ export default {
       if (!paths) { return }
       connections.forEach(connection => {
         const path = paths.find(path => path.id === connection.id).path
-        const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
-        element.setAttribute('d', path)
+        state.connections[connection.id].path = path
       })
     },
     updatePathsBroadcast: (state, { connections }) => {

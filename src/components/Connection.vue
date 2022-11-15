@@ -98,7 +98,6 @@ export default {
     connectionPath () { return this.connection.path },
     remoteCardsIsDragging () { return Boolean(this.$store.state.remoteCardsDragging.length) },
     path () {
-      if (this.isRemoteSelected && this.remoteCardsIsDragging) { return } // TODO TEMP?
       if (this.controlCurve) {
         const { controlPoint, x, y } = this.controlCurve
         const path = this.curvedPath || this.connection.path
