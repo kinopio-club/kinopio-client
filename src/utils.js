@@ -864,26 +864,6 @@ export default {
     y = (y + window.scrollY) * zoom
     return { x, y }
   },
-  connectionBetweenCards (startId, endId) {
-    let start = this.connectorCoords(startId)
-    let end = this.connectorCoords(endId)
-    return this.connectionPathBetweenCoords(start, end)
-  },
-  curveControlPoint (start, end) {
-    // q defines a quadratic curve control point
-    return 'q90,40'
-  },
-  connectionPathBetweenCoords (start, end) {
-    if (!start || !end) { return }
-    const offsetStart = this.coordsWithCurrentScrollOffset(start)
-    const offsetEnd = this.coordsWithCurrentScrollOffset(end)
-    const delta = {
-      x: parseInt(offsetEnd.x - offsetStart.x),
-      y: parseInt(offsetEnd.y - offsetStart.y)
-    }
-    let curve = this.curveControlPoint(offsetStart, delta)
-    return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
-  },
   coordsFromConnectionPath (path) {
     // https://regexr.com/66idp
     // matches first 2 digit groups in path: m295,284 q90,40 87,57 → [295, 284]

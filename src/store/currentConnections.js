@@ -74,14 +74,6 @@ export default {
         state.connections[connection.id][key] = connection[key]
       })
     },
-    updatePaths: (state, connections) => {
-      connections.forEach(connection => {
-        const path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
-        state.connections[connection.id].path = path
-        state.connections[connection.id].spaceId = currentSpaceId
-      })
-      cache.updateSpaceConnectionsDebounced(state.connections, currentSpaceId)
-    },
     updatePath: (state, { connection, path }) => {
       state.connections[connection.id].path = path
       state.connections[connection.id].spaceId = currentSpaceId
@@ -101,9 +93,10 @@ export default {
 
     // broadcast
 
-    updatePathsWhileDraggingBroadcast: (state, { connections }) => {
+    updatePathsWhileDraggingBroadcast: (state, { connections, paths }) => {
+      if (!paths) { return }
       connections.forEach(connection => {
-        const path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        const path = paths.find(path => path.id === connection.id).path
         const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
         element.setAttribute('d', path)
       })
@@ -228,7 +221,7 @@ export default {
     updatePaths: (context, { cardId, shouldUpdateApi, connections }) => {
       connections = utils.clone(connections || context.getters.byCardId(cardId))
       connections.map(connection => {
-        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        connection.path = context.getters.connectionBetweenCards(connection.startCardId, connection.endCardId)
         connection.spaceId = currentSpaceId
         if (shouldUpdateApi) {
           context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
@@ -243,19 +236,23 @@ export default {
       })
     },
     updatePathsWhileDragging: (context, { connections }) => {
-      connections.forEach(connection => {
-        const path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+      const paths = connections.map(connection => {
+        const path = context.getters.connectionBetweenCards(connection.startCardId, connection.endCardId)
         const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
-        context.dispatch('broadcast/update', { updates: connections, type: 'updateConnection', handler: 'currentConnections/updatePathsWhileDragging' }, { root: true })
         element.setAttribute('d', path)
+        return {
+          id: connection.id,
+          path
+        }
       })
+      context.dispatch('broadcast/update', { updates: { connections, paths }, type: 'updateConnection', handler: 'currentConnections/updatePathsWhileDraggingBroadcast' }, { root: true })
     },
     correctPaths: (context, { shouldUpdateApi }) => {
       if (!context.rootState.webfontIsLoaded) { return }
       if (!context.getters.all.length) { return }
       let connections = []
       context.getters.all.forEach(connection => {
-        const path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        const path = context.getters.connectionBetweenCards(connection.startCardId, connection.endCardId)
         if (!path) { return }
         if (path === connection.path) { return }
         connections.push(connection)
@@ -329,15 +326,6 @@ export default {
       const typeIds = uniq(state.typeIds)
       return typeIds.map(id => state.types[id])
     },
-    isExistingPath: (state, getters) => ({ startCardId, endCardId }) => {
-      const connections = getters.all
-      const existing = connections.filter(connection => {
-        let start = connection.startCardId === startCardId
-        let end = connection.endCardId === endCardId
-        return start && end
-      })
-      return Boolean(existing.length)
-    },
     byCardId: (state, getters) => (cardId) => {
       const connections = getters.all
       return connections.filter(connection => {
@@ -377,6 +365,43 @@ export default {
         return isColor && isName
       })
       return existingType
+    },
+
+    // path utils
+
+    isExistingPath: (state, getters) => ({ startCardId, endCardId }) => {
+      const connections = getters.all
+      const existing = connections.filter(connection => {
+        let start = connection.startCardId === startCardId
+        let end = connection.endCardId === endCardId
+        return start && end
+      })
+      return Boolean(existing.length)
+    },
+    connectionBetweenCards: (state, getters) => (startCardId, endCardId) => {
+      const start = utils.connectorCoords(startCardId)
+      const end = utils.connectorCoords(endCardId)
+      return getters.connectionPathBetweenCoords(start, end)
+    },
+    curveControlPoint: (state, getters, rootState) => {
+      // q defines a quadratic curve control point
+      let controlPoint = 'q90,40'
+      if (rootState.currentUser.newConnectionPathsShouldBeStraight) {
+        controlPoint = `q00,00`
+      }
+      return controlPoint
+    },
+    connectionPathBetweenCoords: (state, getters) => (start, end) => {
+      if (!start || !end) { return }
+      const offsetStart = utils.coordsWithCurrentScrollOffset(start)
+      const offsetEnd = utils.coordsWithCurrentScrollOffset(end)
+      const delta = {
+        x: parseInt(offsetEnd.x - offsetStart.x),
+        y: parseInt(offsetEnd.y - offsetStart.y)
+      }
+      let curve = getters.curveControlPoint
+      return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
     }
+
   }
 }

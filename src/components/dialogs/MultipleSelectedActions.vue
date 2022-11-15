@@ -521,7 +521,7 @@ export default {
           const endCardId = cardIds[index + 1]
           if (this.connectionAlreadyExists(startCardId, endCardId)) { return }
           const id = nanoid()
-          const path = utils.connectionBetweenCards(startCardId, endCardId)
+          const path = this.$store.getters['currentConnections/connectionBetweenCards'](startCardId, endCardId)
           return {
             id, startCardId, endCardId, path
           }

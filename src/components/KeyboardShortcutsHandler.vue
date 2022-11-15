@@ -453,7 +453,7 @@ export default {
       let connection = {
         startCardId: baseCardId,
         endCardId: currentCardId,
-        path: utils.connectionBetweenCards(baseCardId, currentCardId)
+        path: this.$store.getters['currentConnections/connectionBetweenCards'](baseCardId, currentCardId)
       }
       this.addConnectionType()
       const type = this.$store.getters['currentConnections/typeForNewConnections']

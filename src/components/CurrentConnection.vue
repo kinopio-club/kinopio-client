@@ -97,7 +97,7 @@ export default {
       }
       const startCardId = this.startCardId
       const start = utils.connectorCoords(startCardId)
-      const path = utils.connectionPathBetweenCoords(start, end)
+      const path = this.$store.getters['currentConnections/connectionPathBetweenCoords'](start, end)
       this.checkCurrentConnectionSuccess()
       this.currentConnectionPath = path
       const connectionType = this.$store.getters['currentConnections/typeForNewConnections']
@@ -162,7 +162,7 @@ export default {
       // create connections to endCardId
       this.$nextTick(() => {
         startCardIds.forEach(startCardId => {
-          const path = utils.connectionBetweenCards(startCardId, endCardId)
+          const path = this.$store.getters['currentConnections/connectionBetweenCards'](startCardId, endCardId)
           const connection = { startCardId, endCardId, path }
           this.addConnection(connection)
         })
