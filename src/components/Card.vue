@@ -954,7 +954,7 @@ export default {
   methods: {
     updateIsVisibleInViewport () {
       const zoom = this.$store.getters.spaceZoomDecimal
-      this.isVisibleInViewport = utils.isCardInViewport(this.card, zoom)
+      this.isVisibleInViewport = utils.isItemInViewport(this.card, zoom)
     },
 
     // sticky
