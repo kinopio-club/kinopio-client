@@ -255,6 +255,7 @@ export default {
         cache.updateSpace('cards', space.cards, space.id)
         cache.updateSpace('connectionTypes', space.connectionTypes, space.id)
         cache.updateSpace('connections', space.connections, space.id)
+        cache.updateSpace('boxes', space.boxes, space.id)
       })
     },
 

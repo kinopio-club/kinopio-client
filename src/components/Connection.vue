@@ -96,6 +96,7 @@ export default {
     startCardId () { return this.connection.startCardId },
     endCardId () { return this.connection.endCardId },
     connectionPath () { return this.connection.path },
+    remoteCardsIsDragging () { return Boolean(this.$store.state.remoteCardsDragging.length) },
     path () {
       if (this.controlCurve) {
         const { controlPoint, x, y } = this.controlCurve
@@ -195,13 +196,13 @@ export default {
         const currentCard = this.$store.getters['currentCards/byId'](currentCardId)
         cards = [currentCard]
       // remote multiple
-      } else if (remoteCardsDragging.length && remoteCardsSelected.length) {
+      } else if (this.remoteCardsIsDragging && remoteCardsSelected.length) {
         cards = remoteCardsSelected.map(card => {
           card.id = card.cardId
           return card
         })
       // remote single
-      } else if (remoteCardsDragging.length) {
+      } else if (this.remoteCardsIsDragging) {
         cards = remoteCardsDragging.map(card => {
           card.id = card.cardId
           return card

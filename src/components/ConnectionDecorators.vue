@@ -18,9 +18,18 @@ button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsI
 button(@click.left="reverseConnections" :disabled="!canEditAll")
   img.icon.reverse(src="@/assets/connection-reverse.svg")
 
+.button-wrap.path-curve-options
+  .segmented-buttons
+    button(:class="{active: allPathsIsCurved}" @click="togglePathIsStraight(false)")
+      img.icon.connection-path(src="@/assets/connection-path.svg")
+    button(:class="{active: allPathsIsStraight}" @click="togglePathIsStraight(true)")
+      img.icon.connection-path(src="@/assets/connection-path-straight.svg")
+
 </template>
 
 <script>
+import utils from '@/utils.js'
+
 export default {
   name: 'ConnectionDecorators',
   components: {
@@ -55,7 +64,23 @@ export default {
       })
       return connectionsCreatedByCurrentUser.length === this.connections.length
     },
-    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() }
+    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    allPathsIsCurved () {
+      const curvedConnections = this.connections.filter(connection => {
+        const controlPoint = utils.curveControlPointFromPath(connection.path)
+        const isCurved = controlPoint.x && controlPoint.y
+        return isCurved
+      })
+      return curvedConnections.length === this.connections.length
+    },
+    allPathsIsStraight () {
+      const curvedConnections = this.connections.filter(connection => {
+        const controlPoint = utils.curveControlPointFromPath(connection.path)
+        const isCurved = !controlPoint.x && !controlPoint.y
+        return isCurved
+      })
+      return curvedConnections.length === this.connections.length
+    }
   },
   methods: {
     showDirectionsIsVisible () {
@@ -87,7 +112,22 @@ export default {
         })
       })
       this.$store.dispatch('currentConnections/updatePaths', { connections: this.connections, shouldUpdateApi: true })
+    },
+    togglePathIsStraight (isStraight) {
+      let controlPoint = null
+      if (isStraight) {
+        controlPoint = `q00,00`
+      }
+      this.connections.forEach(connection => {
+        this.$store.dispatch('currentConnections/update', {
+          id: connection.id,
+          controlPoint
+        })
+      })
+      this.$store.dispatch('currentConnections/updatePaths', { connections: this.connections, shouldUpdateApi: true })
+      this.$store.dispatch('currentUser/update', { defaultConnectionControlPoint: controlPoint })
     }
+
   }
 }
 </script>
@@ -98,7 +138,8 @@ button
     &.clear
       vertical-align 4px
     &.arrow
-      vertical-align -3px
-    &.reverse
+      vertical-align -2px
+    &.reverse,
+    &.connection-path
       vertical-align 0
 </style>

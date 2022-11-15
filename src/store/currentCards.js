@@ -735,7 +735,7 @@ const currentCards = {
           id: nanoid(),
           startCardId,
           endCardId,
-          path: utils.connectionBetweenCards(startCardId, endCardId)
+          path: this.$store.getters['currentConnections/connectionBetweenCards'](startCardId, endCardId)
         })
       })
       connections.forEach(connection => {

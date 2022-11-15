@@ -819,6 +819,26 @@ export default {
     const data = cards.map(card => card.name)
     return join(data, '\n\n')
   },
+  trim (string) {
+    // https://regexr.com/59m7a
+    // unlike string.trim(), this removes line breaks too
+    return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/g, '')
+  },
+  hasBlankCharacters (string) {
+    if (!string) { return true }
+    // https://regexr.com/5i5a3
+    // matches space, enter, tab, whitespace characters
+    const blankPattern = new RegExp(/( |\s|\t)+/gm)
+    if (string.match(blankPattern)) {
+      return true
+    }
+  },
+  splitByBlankCharacters (string) {
+    // https://regexr.com/5i5a3
+    // matches space, enter, tab, whitespace characters
+    const blankPattern = new RegExp(/( |\s|\t)+/gm)
+    return string.split(blankPattern)
+  },
 
   // Connection Path Utils 🐙
 
@@ -843,46 +863,6 @@ export default {
     x = (x + window.scrollX) * zoom
     y = (y + window.scrollY) * zoom
     return { x, y }
-  },
-  connectionBetweenCards (startId, endId) {
-    let start = this.connectorCoords(startId)
-    let end = this.connectorCoords(endId)
-    return this.connectionPathBetweenCoords(start, end)
-  },
-  curveControlPoint (start, end) {
-    // q defines a quadratic curve control point
-    return 'q90,40'
-  },
-  connectionPathBetweenCoords (start, end) {
-    if (!start || !end) { return }
-    const offsetStart = this.coordsWithCurrentScrollOffset(start)
-    const offsetEnd = this.coordsWithCurrentScrollOffset(end)
-    const delta = {
-      x: parseInt(offsetEnd.x - offsetStart.x),
-      y: parseInt(offsetEnd.y - offsetStart.y)
-    }
-    let curve = this.curveControlPoint(offsetStart, delta)
-    return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
-  },
-  trim (string) {
-    // https://regexr.com/59m7a
-    // unlike string.trim(), this removes line breaks too
-    return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/g, '')
-  },
-  hasBlankCharacters (string) {
-    if (!string) { return true }
-    // https://regexr.com/5i5a3
-    // matches space, enter, tab, whitespace characters
-    const blankPattern = new RegExp(/( |\s|\t)+/gm)
-    if (string.match(blankPattern)) {
-      return true
-    }
-  },
-  splitByBlankCharacters (string) {
-    // https://regexr.com/5i5a3
-    // matches space, enter, tab, whitespace characters
-    const blankPattern = new RegExp(/( |\s|\t)+/gm)
-    return string.split(blankPattern)
   },
   coordsFromConnectionPath (path) {
     // https://regexr.com/66idp
@@ -1061,6 +1041,10 @@ export default {
       }
       card.userId = userId
       return card
+    })
+    space.boxes = space.boxes.map(box => {
+      box.userId = userId
+      return box
     })
     space.connectionTypes = space.connectionTypes.map(type => {
       type.userId = userId
