@@ -291,7 +291,6 @@ export default {
       if (!isUpdatedSuccess) { return }
       this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
     }
-
     observer = new IntersectionObserver(this.handleIntersect, { threshold: 0.1 })
     observer.observe(this.$refs.card)
   },
@@ -953,14 +952,8 @@ export default {
   },
   methods: {
     handleIntersect (entries, observer) {
-      // console.log('🎄',entries.length)
       const entry = entries[0]
-      // entries.forEach((entry) => {
-      console.log('🌳', this.card.name, entry.isIntersecting)
-      // })
       this.isVisibleInViewport = entry.isIntersecting
-
-      // move to connections
       if (entry.isIntersecting) {
         this.$nextTick(() => {
           this.$nextTick(() => {
