@@ -587,7 +587,7 @@ const currentSpace = {
         } else {
           const startId = connection.startCardId
           const endId = connection.endCardId
-          connection.path = this.$store.getters['currentConnections/connectionBetweenCards'](startId, endId)
+          connection.path = context.rootGetters['currentConnections/connectionBetweenCards'](startId, endId)
         }
         return connection
       })
