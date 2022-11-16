@@ -954,7 +954,20 @@ export default {
   methods: {
     updateIsVisibleInViewport () {
       const zoom = this.$store.getters.spaceZoomDecimal
-      this.isVisibleInViewport = utils.isItemInViewport(this.card, zoom)
+      const isVisiblePrev = this.isVisibleInViewport
+      const isVisible = utils.isItemInViewport(this.card, zoom)
+      this.isVisibleInViewport = isVisible
+      if (!isVisiblePrev && isVisible) {
+        // visible connection
+        console.log('🍋 show connection')
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id })
+          })
+        })
+      } else if (isVisiblePrev && !isVisible) {
+        console.log('🍓 hide connection')
+      }
     },
 
     // sticky
