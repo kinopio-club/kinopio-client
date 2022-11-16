@@ -11,6 +11,8 @@ import utils from '@/utils.js'
 
 let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
+
+console.log('🌳🌳🌳🌳🌳🌳 clientId', clientId)
 let showDebugMessages = true
 if (import.meta.env.MODE === 'development') {
   showDebugMessages = false
