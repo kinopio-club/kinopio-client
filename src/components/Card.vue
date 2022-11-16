@@ -3,6 +3,7 @@ article#card(
   :style="positionStyle"
   :data-card-id="id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
+  :data-is-visible-in-viewport="isVisibleInViewport"
   :key="id"
   ref="card"
   :class="{'is-resizing': isResizing, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
@@ -48,7 +49,7 @@ article#card(
     .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
-    template(v-if="!isComment")
+    template(v-if="!isComment && isVisibleInViewport")
       //- Video
       video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateDimensions")
         source(:src="formats.video")
@@ -68,7 +69,7 @@ article#card(
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
-      .card-comment(v-if="isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-comment(v-if="isComment && isVisibleInViewport" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
@@ -94,7 +95,7 @@ article#card(
               source(:src="formats.video")
 
       //- Not Comment
-      .card-content(v-if="!isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-content(v-if="!isComment && isVisibleInViewport" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -218,6 +219,7 @@ let initialTouchEvent = {}
 let touchPosition = {}
 let currentTouchPosition = {}
 const defaultCardPosition = 100
+let observer
 
 // locking
 // long press to touch drag card
@@ -245,19 +247,20 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updateRemoteCurrentConnection' || mutation.type === 'removeRemoteCurrentConnection') {
+      const { type, payload } = mutation
+      if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
         this.updateRemoteConnections()
-      } else if (mutation.type === 'triggerScrollCardIntoView') {
-        if (mutation.payload === this.card.id) {
+      } else if (type === 'triggerScrollCardIntoView') {
+        if (payload === this.card.id) {
           const element = this.$refs.card
           utils.scrollIntoView(element)
         }
-      } else if (mutation.type === 'triggerUploadComplete') {
-        let { cardId, url } = mutation.payload
+      } else if (type === 'triggerUploadComplete') {
+        let { cardId, url } = payload
         if (cardId !== this.card.id) { return }
         this.addFile({ url })
-      } else if (mutation.type === 'triggerUpdateUrlPreview') {
-        if (mutation.payload === this.card.id) {
+      } else if (type === 'triggerUpdateUrlPreview') {
+        if (payload === this.card.id) {
           this.updateMediaUrls()
           this.updateUrlPreview()
         }
@@ -287,6 +290,11 @@ export default {
       if (!isUpdatedSuccess) { return }
       this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
     }
+    observer = new IntersectionObserver(this.handleIntersect, { threshold: 0, rootMargin: '500px 0px 0px 500px' })
+    observer.observe(this.$refs.card)
+  },
+  beforeUnmount () {
+    observer.unobserve(this.$refs.card)
   },
   data () {
     return {
@@ -317,7 +325,8 @@ export default {
       translateX: 0,
       translateY: 0,
       isAnimationUnsticking: false,
-      stickyStretchResistance: 6
+      stickyStretchResistance: 6,
+      isVisibleInViewport: true
     }
   },
   computed: {
@@ -941,6 +950,17 @@ export default {
 
   },
   methods: {
+    handleIntersect (entries, observer) {
+      const entry = entries[0]
+      this.isVisibleInViewport = entry.isIntersecting
+      if (entry.isIntersecting) {
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id })
+          })
+        })
+      }
+    },
 
     // sticky
 

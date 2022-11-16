@@ -284,7 +284,11 @@ export default {
     handleMouseUpEvents (event) {
       const rightMouseButton = 2
       const isRightClick = rightMouseButton === event.button
-      const isFromCard = event.target.closest('article#card')
+      const isFromOutsideWindow = event.target.nodeType === Node.DOCUMENT_NODE
+      let isFromCard
+      if (!isFromOutsideWindow) {
+        isFromCard = event.target.closest('article#card')
+      }
       const position = utils.cursorPositionInPage(event)
       let isNearPrevRightClickPosition
       if (isRightClick) {
