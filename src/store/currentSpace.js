@@ -587,7 +587,7 @@ const currentSpace = {
         } else {
           const startId = connection.startCardId
           const endId = connection.endCardId
-          connection.path = context.rootGetters['currentConnections/connectionBetweenCards'](startId, endId) // end id is being discarded by vp
+          connection.path = context.rootGetters['currentConnections/connectionBetweenCards'](startId, endId)
         }
         return connection
       })

@@ -43,7 +43,6 @@ article#card(
     :data-background-color="card.backgroundColor"
     :data-tags="dataTags"
   )
-
     .selected-user-avatar(v-if="isRemoteSelected || isRemoteCardDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteCardDetailsVisibleColor}")
       img(src="@/assets/anon-avatar.svg")
 
