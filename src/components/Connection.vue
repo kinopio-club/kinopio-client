@@ -29,7 +29,7 @@ defs
     stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
     stop(offset="90%" :stop-color="typeColor")
 
-circle(v-if="directionIsVisible && !isUpdatingPath" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}")
+circle(v-if="directionIsVisible && !isUpdatingPath && isVisibleInViewport" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}")
   animateMotion(dur="3s" repeatCount="indefinite" :path="path" rotate="auto")
 </template>
 
@@ -37,6 +37,7 @@ circle(v-if="directionIsVisible && !isUpdatingPath" r="7" :fill="gradientIdRefer
 import utils from '@/utils.js'
 
 let animationTimer, isMultiTouch, startCursor, currentCursor
+let observer
 
 export default {
   name: 'Connection',
@@ -63,11 +64,19 @@ export default {
       }
     })
   },
+  mounted () {
+    observer = new IntersectionObserver(this.handleIntersect, { threshold: 0.1 })
+    observer.observe(this.$refs.connection)
+  },
+  beforeUnmount () {
+    observer.unobserve(this.$refs.connection)
+  },
   data () {
     return {
       controlCurve: undefined,
       curvedPath: '',
-      frameCount: 0
+      frameCount: 0,
+      isVisibleInViewport: false
     }
   },
   computed: {
@@ -219,6 +228,10 @@ export default {
     }
   },
   methods: {
+    handleIntersect (entries, observer) {
+      const entry = entries[0]
+      this.isVisibleInViewport = entry.isIntersecting
+    },
     checkIfShouldPauseConnectionDirections () {
       this.$store.dispatch('currentSpace/unpauseConnectionDirections')
       this.$nextTick(() => {
