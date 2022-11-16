@@ -315,6 +315,9 @@ export default {
       margin 0
   .privacy-button + input
     margin-top 10px
+  .privacy-button
+    > button
+      padding-top 7px
   .user
     vertical-align -3px
 </style>

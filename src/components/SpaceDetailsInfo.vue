@@ -210,10 +210,11 @@ export default {
           position absolute
           top 6px
           left 6px
-    .privacy-button
-      min-width 24px
     .title-row
       margin-left 6px
+
+  .privacy-button
+    min-width 24px
 
 .row.align-items-top
   align-items flex-start
