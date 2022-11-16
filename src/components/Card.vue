@@ -68,9 +68,9 @@ article#card(
         button.inline-button.resize-button(tabindex="-1")
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
-    span.card-content-wrap(v-if="isVisibleInViewport" :style="{width: resizeWidth, 'max-width': resizeWidth }")
+    span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
-      .card-comment(v-if="isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-comment(v-if="isComment && isVisibleInViewport" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
