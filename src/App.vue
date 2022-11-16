@@ -749,6 +749,9 @@ dialog
   height 10px
   vertical-align 0
 
+.icon.remove
+  vertical-align 0
+
 label,
 li
   &:hover,

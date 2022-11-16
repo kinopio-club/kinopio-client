@@ -6,7 +6,7 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
       .segmented-buttons
         //- Remove
         button(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
-          img.icon(src="@/assets/remove.svg")
+          img.icon.remove(src="@/assets/remove.svg")
           span {{removeLabel}}
         // Hide Space
         button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
