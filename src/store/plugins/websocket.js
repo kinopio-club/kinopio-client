@@ -124,6 +124,7 @@ export default function createWebSocketPlugin () {
           if (data.clientId === clientId) { return }
           if (data.message !== 'updateRemoteUserCursor' && showDebugMessages) {
             console.log('🌛 received', data)
+            console.log('🌛🌛', data.clientId, clientId, data.clientId === clientId)
           }
           if (data.space) {
             if (data.space.id !== store.state.currentSpace.id) { return }
