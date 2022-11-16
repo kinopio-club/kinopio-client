@@ -291,7 +291,7 @@ export default {
       if (!isUpdatedSuccess) { return }
       this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
     }
-    observer = new IntersectionObserver(this.handleIntersect, { threshold: 0.1 })
+    observer = new IntersectionObserver(this.handleIntersect, { threshold: 0, rootMargin: '500px 0px 0px 500px' })
     observer.observe(this.$refs.card)
   },
   beforeUnmount () {

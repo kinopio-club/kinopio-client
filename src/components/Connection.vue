@@ -65,7 +65,7 @@ export default {
     })
   },
   mounted () {
-    observer = new IntersectionObserver(this.handleIntersect, { threshold: 0.1 })
+    observer = new IntersectionObserver(this.handleIntersect)
     observer.observe(this.$refs.connection)
   },
   beforeUnmount () {
