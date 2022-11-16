@@ -749,7 +749,8 @@ dialog
   height 10px
   vertical-align 0
 
-.icon.remove
+.icon.remove,
+.icon.add
   vertical-align 0
 
 label,

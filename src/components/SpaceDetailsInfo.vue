@@ -30,11 +30,15 @@
     .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
       button.small-button
         img.icon.pin(src="@/assets/pin.svg")
+
 .row.align-items-top
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
   //- Explore
   .badge.info(v-if="!isSpaceMember") Read Only
+  .button-wrap(v-if="isSpaceMember")
+    button
+      span M
   AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
 AskToAddToExplore
 
@@ -213,9 +217,9 @@ export default {
     .title-row
       margin-left 6px
 
-  .privacy-button
-    min-width 24px
-
 .row.align-items-top
   align-items flex-start
+  .privacy-button
+    min-width 28px
+
 </style>
