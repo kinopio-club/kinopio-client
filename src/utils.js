@@ -59,7 +59,7 @@ export default {
     return domain
   },
   host (useKinopioUrl) {
-    let host = 'https://kinopio-server.herokuapp.com'
+    let host = 'https://http://api.kinopio.club/'
     if (useKinopioUrl) {
       host = 'https://api.kinopio.club'
     }
@@ -69,7 +69,7 @@ export default {
     return host
   },
   websocketHost () {
-    let host = 'wss://kinopio-server.herokuapp.com'
+    let host = 'wss://http://api.kinopio.club/'
     if (this.isDevelopment()) {
       host = 'ws://kinopio.local:3000'
     }
