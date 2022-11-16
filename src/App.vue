@@ -158,7 +158,6 @@ export default {
     toggleIsPinchZooming (event) {
       if (utils.shouldIgnoreTouchInteraction(event)) { return }
       this.isPinchZooming = true
-      this.$store.commit('triggerIsPinchZooming')
     },
     touchStart (event) {
       shouldCancelUndo = false
@@ -183,9 +182,6 @@ export default {
       if (isFromDialog) { return }
       shouldCancelUndo = true
       this.isTouchScrolling = true
-      if (this.isPinchZooming) {
-        this.$store.commit('triggerIsPinchZooming')
-      }
     },
     checkIfInertiaScrollEnd () {
       if (!utils.isAndroid) { return }
@@ -210,7 +206,6 @@ export default {
     },
     touchEnd () {
       if (this.$store.state.isAddPage) { return }
-      this.$store.commit('triggerIsPinchZooming')
       this.isPinchZooming = false
       this.checkIfInertiaScrollEnd()
       if (shouldCancelUndo) {

@@ -442,7 +442,6 @@ const store = createStore({
     triggerSpaceZoomReset: () => {},
     triggerSpaceZoomOut: (state, options) => {},
     triggerSpaceZoomIn: (state, options) => {},
-    triggerIsPinchZooming: () => {},
     triggerUnloadPage: () => {},
     triggerShowNextSearchCard: () => {},
     triggerShowPreviousSearchCard: () => {},
