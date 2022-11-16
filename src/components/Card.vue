@@ -220,6 +220,7 @@ let initialTouchEvent = {}
 let touchPosition = {}
 let currentTouchPosition = {}
 const defaultCardPosition = 100
+let observer
 
 // locking
 // long press to touch drag card
@@ -264,8 +265,6 @@ export default {
           this.updateMediaUrls()
           this.updateUrlPreview()
         }
-      } else if (type === 'triggerIsPinchZooming' || type === 'spaceZoomPercent') {
-        this.updateIsVisibleInViewport()
       }
     })
   },
@@ -292,11 +291,12 @@ export default {
       if (!isUpdatedSuccess) { return }
       this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
     }
-    this.updateIsVisibleInViewport()
-    window.addEventListener('scroll', this.updateIsVisibleInViewport)
+
+    observer = new IntersectionObserver(this.handleIntersect, { threshold: 0.1 })
+    observer.observe(this.$refs.card)
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.updateIsVisibleInViewport)
+    observer.unobserve(this.$refs.card)
   },
   data () {
     return {
@@ -952,21 +952,21 @@ export default {
 
   },
   methods: {
-    updateIsVisibleInViewport () {
-      const zoom = this.$store.getters.spaceZoomDecimal
-      const isVisiblePrev = this.isVisibleInViewport
-      const isVisible = utils.isItemInViewport(this.card, zoom)
-      this.isVisibleInViewport = isVisible
-      if (!isVisiblePrev && isVisible) {
-        // visible connection
-        console.log('🍋 show connection')
+    handleIntersect (entries, observer) {
+      // console.log('🎄',entries.length)
+      const entry = entries[0]
+      // entries.forEach((entry) => {
+      console.log('🌳', this.card.name, entry.isIntersecting)
+      // })
+      this.isVisibleInViewport = entry.isIntersecting
+
+      // move to connections
+      if (entry.isIntersecting) {
         this.$nextTick(() => {
           this.$nextTick(() => {
             this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id })
           })
         })
-      } else if (isVisiblePrev && !isVisible) {
-        console.log('🍓 hide connection')
       }
     },
 
