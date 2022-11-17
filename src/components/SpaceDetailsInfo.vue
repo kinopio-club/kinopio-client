@@ -31,17 +31,24 @@
       button.small-button
         img.icon.pin(src="@/assets/pin.svg")
 
+.row.align-items-top(v-if="!isSpaceMember")
+  .badge.info(v-if="!spacePrivacyIsOpen") Read Only
+  .badge.success(v-if="spacePrivacyIsOpen") Open to All
+  .badge.status(v-if="showInExplore")
+    img.icon.sunglasses(src="@/assets/sunglasses.svg")
+    span Explore
+
 .row.align-items-top
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
-  //- Explore
-  .badge.info(v-if="!isSpaceMember") Read Only
-  .button-wrap(v-if="isSpaceMember" @click.left.stop="toggleStatsIsVisible" :class="{active: statsIsVisible}")
+  //- Stats
+  .button-wrap(@click.left.stop="toggleStatsIsVisible" :class="{active: statsIsVisible}")
     button
       span M
     Stats(:visible="statsIsVisible")
+  //- Explore
   AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
-AskToAddToExplore
+  AskToAddToExplore
 
 </template>
 
@@ -106,6 +113,8 @@ export default {
     }
   },
   computed: {
+    spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
+    showInExplore () { return this.$store.state.currentSpace.showInExplore },
     spaceName: {
       get () {
         return this.$store.state.currentSpace.name
