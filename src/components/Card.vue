@@ -2189,7 +2189,7 @@ article
         display flex
         .icon
           margin-right 5px
-          margin-top 1px
+          margin-top 3px
         .icon.system
           margin 0
 

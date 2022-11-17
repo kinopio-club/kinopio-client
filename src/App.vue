@@ -706,7 +706,7 @@ dialog
 
 .time
   height 12px
-  vertical-align -2px
+  vertical-align -1px
 
 .minus
   vertical-align middle
