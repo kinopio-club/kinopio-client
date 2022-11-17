@@ -219,7 +219,6 @@ let initialTouchEvent = {}
 let touchPosition = {}
 let currentTouchPosition = {}
 const defaultCardPosition = 100
-let observer
 
 // locking
 // long press to touch drag card
@@ -290,11 +289,11 @@ export default {
       if (!isUpdatedSuccess) { return }
       this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
     }
-    observer = new IntersectionObserver(this.handleIntersect, { threshold: 0, rootMargin: '500px 0px 0px 500px' })
-    observer.observe(this.$refs.card)
+    this.observer = new IntersectionObserver(this.handleIntersect, { threshold: 0, rootMargin: '500px 0px 0px 500px' })
+    this.startObserver()
   },
   beforeUnmount () {
-    observer.unobserve(this.$refs.card)
+    this.stopObserver()
   },
   data () {
     return {
@@ -326,7 +325,8 @@ export default {
       translateY: 0,
       isAnimationUnsticking: false,
       stickyStretchResistance: 6,
-      isVisibleInViewport: true
+      isVisibleInViewport: true,
+      observer: null
     }
   },
   computed: {
@@ -950,8 +950,24 @@ export default {
 
   },
   methods: {
+
+    // intersection observer
+
+    stopObserver () {
+      this.observer.disconnect()
+    },
+    startObserver () {
+      if (!this.$refs.card) { return }
+      this.observer.observe(this.$refs.card)
+    },
     handleIntersect (entries, observer) {
       const entry = entries[0]
+      // restart incorrectly triggered observers
+      if (entry.target.dataset.cardId !== this.card.id) {
+        this.stopObserver()
+        this.startObserver()
+        return
+      }
       this.isVisibleInViewport = entry.isIntersecting
       if (entry.isIntersecting) {
         this.$nextTick(() => {
