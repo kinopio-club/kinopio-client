@@ -968,7 +968,7 @@ export default {
         this.startObserver()
         return
       }
-      console.log('💐 observe card intersect', this.card.name, entry.target, entry.isIntersecting)
+      console.log('💐 observe card intersect:', this.card.name, this.card.id, entry.target.dataset.cardId, entry.isIntersecting)
       this.isVisibleInViewport = entry.isIntersecting
       if (entry.isIntersecting) {
         this.$nextTick(() => {
