@@ -67,7 +67,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             //- Add Space
             .button-wrap
               button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
-                img.icon(src="@/assets/add.svg")
+                img.icon.add(src="@/assets/add.svg")
                 span New
               AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
               Templates(:visible="templatesIsVisible")
@@ -739,8 +739,10 @@ header
       vertical-align 0
     > .time
       margin-left 5px
-      vertical-align -1px
+      vertical-align 0
       height 11px
+    > .search
+      vertical-align 0
 
   .space-details-row
     display initial
