@@ -36,9 +36,10 @@
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
   //- Explore
   .badge.info(v-if="!isSpaceMember") Read Only
-  .button-wrap(v-if="isSpaceMember")
+  .button-wrap(v-if="isSpaceMember" @click.left.stop="toggleStatsIsVisible" :class="{active: statsIsVisible}")
     button
       span M
+    Stats(:visible="statsIsVisible")
   AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
 AskToAddToExplore
 
@@ -46,6 +47,7 @@ AskToAddToExplore
 
 <script>
 import Background from '@/components/dialogs/Background.vue'
+import Stats from '@/components/dialogs/Stats.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
@@ -61,7 +63,8 @@ export default {
     Loader,
     PrivacyButton,
     AddToExplore,
-    AskToAddToExplore
+    AskToAddToExplore,
+    Stats
   },
   props: {
     shouldHideExplore: Boolean,
@@ -98,7 +101,8 @@ export default {
   data () {
     return {
       backgroundIsVisible: false,
-      privacyPickerIsVisible: false
+      privacyPickerIsVisible: false,
+      statsIsVisible: false
     }
   },
   computed: {
@@ -157,9 +161,15 @@ export default {
       this.closeDialogsAndEmit()
       this.privacyPickerIsVisible = !isVisible
     },
+    toggleStatsIsVisible () {
+      const isVisible = this.statsIsVisible
+      this.closeDialogsAndEmit()
+      this.statsIsVisible = !isVisible
+    },
     closeDialogs () {
       this.backgroundIsVisible = false
       this.privacyPickerIsVisible = false
+      this.statsIsVisible = false
     },
     closeDialogsAndEmit () {
       this.closeDialogs()
