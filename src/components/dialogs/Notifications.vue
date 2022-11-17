@@ -269,4 +269,7 @@ export default {
       margin 8px 0
       margin-left -4px
       width calc(100% + 8px)
+    .tag
+      display inline-block
+      margin-right 0
 </style>
