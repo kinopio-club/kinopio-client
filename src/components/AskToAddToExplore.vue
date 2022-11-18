@@ -1,16 +1,18 @@
 <template lang="pug">
-.row(v-if="isVisible")
-  .button-wrap(v-if="!isAsked")
+.button-wrap.ask-to-add-to-explore(v-if="isVisible")
+  template(v-if="!isAsked")
     button(@click.left.prevent="askToAddToExplore" @keydown.stop.enter="askToAddToExplore")
+      img.icon.add(src="@/assets/add.svg")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
-      span Ask to Add to Explore
+      span Ask
     template(v-if="error.userNeedsToSignUpOrIn")
       p
         span.badge.info Sign Up or In
         span to propose spaces to be added to explore
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
-  .badge.success(v-if="isAsked") Space Creator Notified – Thank You for Sharing the Love
+  template(v-else)
+    .badge.success Space Creator Notified – Thank You for Sharing the Love
 
 </template>
 
@@ -62,4 +64,7 @@ export default {
 </script>
 
 <style lang="stylus">
+.ask-to-add-to-explore
+  .icon.add
+    margin-right 4px
 </style>

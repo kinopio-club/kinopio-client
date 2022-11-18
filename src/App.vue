@@ -706,7 +706,7 @@ dialog
 
 .time
   height 12px
-  vertical-align -2px
+  vertical-align -1px
 
 .minus
   vertical-align middle
@@ -749,7 +749,8 @@ dialog
   height 10px
   vertical-align 0
 
-.icon.remove
+.icon.remove,
+.icon.add
   vertical-align 0
 
 label,

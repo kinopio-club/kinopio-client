@@ -1,13 +1,10 @@
 <template lang="pug">
-.badge.status(v-if="showInExplore && !isSpaceMember")
-  img.icon.sunglasses(src="@/assets/sunglasses.svg")
-  span Explore
-
 .button-wrap.add-to-explore(v-if="isSpaceMember")
   button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
+    span(v-if="!showInExplore")
+      img.icon.add(src="@/assets/add.svg")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
     span(v-if="showInExplore") In Explore
-    span(v-else) Add to Explore
 
   template(v-if="error.userNeedsToSignUpOrIn")
     p
@@ -133,4 +130,6 @@ export default {
 .add-to-explore
   input
     vertical-align -1px !important
+  .icon.add
+    margin-right 4px
 </style>

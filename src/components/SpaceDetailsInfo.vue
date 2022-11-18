@@ -27,16 +27,23 @@
 
   //- Pin Dialog
   .title-row(v-if="!shouldHidePin")
-    .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-      button.small-button
+    .button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
+      button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
+
+.row.align-items-top(v-if="!isSpaceMember")
+  .badge.info(v-if="!spacePrivacyIsOpen") Read Only
+  .badge.success(v-if="spacePrivacyIsOpen") Open to All
+  .badge.status(v-if="showInExplore")
+    img.icon.sunglasses(src="@/assets/sunglasses.svg")
+    span Explore
+
 .row.align-items-top
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
   //- Explore
-  .badge.info(v-if="!isSpaceMember") Read Only
   AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
-AskToAddToExplore
+  AskToAddToExplore
 
 </template>
 
@@ -98,6 +105,8 @@ export default {
     }
   },
   computed: {
+    spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
+    showInExplore () { return this.$store.state.currentSpace.showInExplore },
     spaceName: {
       get () {
         return this.$store.state.currentSpace.name
@@ -213,9 +222,9 @@ export default {
     .title-row
       margin-left 6px
 
-  .privacy-button
-    min-width 24px
-
 .row.align-items-top
   align-items flex-start
+  .privacy-button
+    min-width 28px
+
 </style>

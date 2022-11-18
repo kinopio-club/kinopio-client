@@ -144,6 +144,7 @@ const currentSpace = {
 
   actions: {
     init: async (context) => {
+      context.commit('isLoadingSpace', true, { root: true })
       const spaceUrl = context.rootState.spaceUrlToLoad
       const loadJournalSpace = context.rootState.loadJournalSpace
       const loadInboxSpace = context.rootState.loadInboxSpace
@@ -650,7 +651,6 @@ const currentSpace = {
       })
     },
     restoreSpaceComplete: (context, { space, isRemote, timeStart }) => {
-      context.commit('isLoadingSpace', false, { root: true })
       context.dispatch('history/reset', null, { root: true })
       const timeEnd = utils.normalizeToUnixTime(new Date())
       let emoji = '🌳'
@@ -689,6 +689,7 @@ const currentSpace = {
           context.dispatch('checkIfShouldUpdateNewTweetCards', space)
         })
       })
+      context.commit('isLoadingSpace', false, { root: true })
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
       if (!context.rootState.isEmbed) {
