@@ -90,13 +90,6 @@ export default {
       const value = !this.$store.state.currentUser.filterShowAbsoluteDates
       this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
     }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        console.log('💖')
-      }
-    }
   }
 }
 </script>
