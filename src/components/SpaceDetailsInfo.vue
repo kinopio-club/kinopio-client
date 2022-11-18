@@ -44,7 +44,7 @@
   //- Stats
   .button-wrap(@click.left.stop="toggleStatsIsVisible" :class="{active: statsIsVisible}")
     button
-      span M
+      img.icon(src="@/assets/stats.svg")
     Stats(:visible="statsIsVisible")
   //- Explore
   AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
