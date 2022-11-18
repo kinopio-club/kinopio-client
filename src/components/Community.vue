@@ -6,16 +6,24 @@ section.community(v-if="visible" :open="visible" @click.left.stop='closeDialogs'
       button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
         span RSS
       ExploreRssFeed(:visible="exploreRssFeedIsVisible")
+  section.subsection
+    p Share this space with the community
+    p
+      AddToExplore(@updateSpaces="updateSpaces")
+      AskToAddToExplore
+
   p(v-if="loading")
     Loader(:visible="loading")
 section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-  SpaceList(:spaces="spaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace" :userShowInExploreDate="userShowInExploreDate")
+  SpaceList(:spaces="exploreSpaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace" :userShowInExploreDate="userShowInExploreDate")
 </template>
 
 <script>
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import ExploreRssFeed from '@/components/dialogs/ExploreRssFeed.vue'
+import AddToExplore from '@/components/AddToExplore.vue'
+import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import utils from '@/utils.js'
 
 export default {
@@ -23,7 +31,9 @@ export default {
   components: {
     Loader,
     SpaceList,
-    ExploreRssFeed
+    ExploreRssFeed,
+    AddToExplore,
+    AskToAddToExplore
   },
   props: {
     visible: Boolean,
@@ -41,15 +51,32 @@ export default {
   data () {
     return {
       resultsSectionHeight: null,
-      exploreRssFeedIsVisible: false
+      exploreRssFeedIsVisible: false,
+      filteredSpaces: undefined
     }
   },
   computed: {
     showInExploreLabel () {
       return 'Show Space in Explore'
-    }
+    },
+    currentSpace () { return this.$store.state.currentSpace },
+    currentSpaceInExplore () { return this.currentSpace.showInExplore },
+    exploreSpaces () { return this.filteredSpaces || this.spaces }
   },
   methods: {
+    updateSpaces () {
+      if (this.currentSpaceInExplore) {
+        this.removeCurrentSpaceFromFilteredSpaces()
+        this.filteredSpaces.unshift(this.currentSpace)
+      } else {
+        this.removeCurrentSpaceFromFilteredSpaces()
+      }
+    },
+    removeCurrentSpaceFromFilteredSpaces () {
+      let spaces = this.exploreSpaces
+      spaces = spaces.filter(space => space.id !== this.currentSpace.id)
+      this.filteredSpaces = spaces
+    },
     closeDialogs () {
       this.exploreRssFeedIsVisible = false
     },

@@ -67,4 +67,6 @@ export default {
 .ask-to-add-to-explore
   .icon.add
     margin-right 4px
+  .badge
+    display inline-block !important
 </style>
