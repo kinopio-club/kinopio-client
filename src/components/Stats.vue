@@ -2,9 +2,7 @@
 
 section.stats(v-if="visible" @click.stop="clear")
   p Stats for {{currentSpace.name}}
-  //- TODO current space doesn't update, switch to watcher?, or prop, or Forceupdates w this.$forceUpdate() on visible?
   //- TODO Loader :visible space is loading
-
   //- TODO if not loading
   table
     tbody
@@ -14,9 +12,9 @@ section.stats(v-if="visible" @click.stop="clear")
         td Boxes
         td Tags
       tr
-        td {{currentSpace.cards.length}}
-        td {{currentSpace.connections.length}}
-        td {{currentSpace.boxes.length}}
+        td {{cards.length}}
+        td {{connections.length}}
+        td {{boxes.length}}
         td {{tags.length}}
 
   table
@@ -38,7 +36,7 @@ section.stats(v-if="visible" @click.stop="clear")
       tr.table-header
         td Word Count
       tr
-        td 12
+        td {{wordCount}}
 
 </template>
 
@@ -54,24 +52,23 @@ export default {
   props: {
     visible: Boolean
   },
-  // data () {
-  //   return {
-  //     displayDateIsRelative: true
-  //   }
-  // },
   computed: {
     currentSpace () {
-      // console.log(this.$store.state.currentSpace)
       return this.$store.state.currentSpace
     },
     showAbsoluteDate () { return this.$store.state.currentUser.filterShowAbsoluteDates },
-    tags () { return this.$store.getters['currentSpace/spaceTags'] }
-
-    // pluralizedBoxes () {
-    //   const count = this.currentSpace.boxes.length
-    //   if (count === 1) { return 'box' }
-    //   return 'boxes'
-    // }
+    tags () { return this.$store.getters['currentSpace/spaceTags'] },
+    cards () { return this.$store.getters['currentCards/all'] },
+    connections () { return this.$store.getters['currentConnections/all'] },
+    boxes () { return this.$store.getters['currentBoxes/all'] },
+    wordCount () {
+      let words = ''
+      this.cards.forEach(card => {
+        words = words + ' ' + card.name
+      })
+      const wordCount = words.split(' ').length
+      return wordCount
+    }
   },
   methods: {
     date (date) {
