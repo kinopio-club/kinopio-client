@@ -56,9 +56,6 @@ export default {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     },
-    updateCurrentSpace () {
-      this.$emit('updateCurrentSpace')
-    },
     updateResultsSectionHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
