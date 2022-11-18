@@ -1,5 +1,5 @@
 <template lang="pug">
-.card-unlock-button.inline-button-wrap(:style="positionStyles" @mouseup.left="unlockCard" @touchend="unlockCard")
+.card-unlock-button.inline-button-wrap(:style="positionStyles" @mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id")
   button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{ 'is-dark': isDark }")
     .connected-colors
       template(v-for="type in connectionTypes")
@@ -88,7 +88,7 @@ export default {
     display flex
     height 100%
     width 100%
-    border-radius 2px
+    border-radius calc(var(--entity-radius) - 1px)
     overflow hidden
     .color
       width 100%

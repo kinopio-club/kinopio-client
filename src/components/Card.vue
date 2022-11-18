@@ -358,7 +358,11 @@ export default {
     },
     isLocked () {
       if (!this.card) { return }
-      return this.card.isLocked
+      const isLocked = this.card.isLocked
+      if (isLocked) {
+        this.stopObserver()
+      }
+      return isLocked
     },
     shouldJiggle () {
       const isShiftKeyDown = this.$store.state.currentUserIsBoxSelecting
@@ -954,20 +958,25 @@ export default {
     // intersection observer
 
     stopObserver () {
+      if (!this.observer) { return }
       this.observer.disconnect()
     },
     startObserver () {
       if (!this.$refs.card) { return }
       this.observer.observe(this.$refs.card)
     },
+    restartObserver () {
+      this.stopObserver()
+      this.startObserver()
+    },
     handleIntersect (entries, observer) {
       const entry = entries[0]
       // restart incorrectly triggered observers
       if (entry.target.dataset.cardId !== this.card.id) {
-        this.stopObserver()
-        this.startObserver()
+        this.restartObserver()
         return
       }
+      console.log('💐 observe card intersect:', this.card.name, this.card.id, entry.target.dataset.cardId, entry.isIntersecting)
       this.isVisibleInViewport = entry.isIntersecting
       if (entry.isIntersecting) {
         this.$nextTick(() => {
