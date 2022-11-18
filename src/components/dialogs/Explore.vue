@@ -1,6 +1,6 @@
 <template lang="pug">
 dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
-  Community(:visible="true" :loading="loading" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace" :userShowInExploreDate="comparisonDate")
+  Community(:visible="true" :loading="loading" :spaces="spaces" :userShowInExploreDate="comparisonDate")
 </template>
 
 <script>
@@ -44,15 +44,6 @@ export default {
       this.spaces = await this.$store.dispatch('api/getExploreSpaces')
       this.newSpaces = this.spaces
       this.loading = false
-    },
-    updateCurrentSpace () {
-      const currentSpace = this.$store.state.currentSpace
-      const spacesHasCurrentSpace = this.spaces.find(space => space.id === currentSpace.id)
-      if (spacesHasCurrentSpace) {
-        this.spaces = this.spaces.filter(space => space.id !== currentSpace.id)
-      } else {
-        this.spaces.unshift(currentSpace)
-      }
     },
     updateDialogHeight () {
       if (!this.visible) { return }

@@ -1,5 +1,8 @@
 <template lang="pug">
 .row.space-details-info(@click.left="closeDialogsAndEmit")
+
+  //- Space Meta
+
   .row.space-info-wrap
     .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
       BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
@@ -38,11 +41,15 @@
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
     span Explore
 
-.row.align-items-top
+//- Space Privacy and Explore
+
+.row.align-items-top(v-if="isSpaceMember")
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
   //- Explore
   AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
+.row.align-items-top(v-if="!isSpaceMember && !showInExplore")
+  //- Explore Ask
   AskToAddToExplore
 
 </template>
