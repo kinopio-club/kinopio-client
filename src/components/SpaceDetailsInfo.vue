@@ -27,8 +27,8 @@
 
   //- Pin Dialog
   .title-row(v-if="!shouldHidePin")
-    .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-      button.small-button
+    .button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
+      button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
 
 .row.align-items-top(v-if="!isSpaceMember")
@@ -41,11 +41,6 @@
 .row.align-items-top
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
-  //- Stats
-  .button-wrap(@click.left.stop="toggleStatsIsVisible" :class="{active: statsIsVisible}")
-    button
-      img.icon(src="@/assets/stats.svg")
-    Stats(:visible="statsIsVisible")
   //- Explore
   AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
   AskToAddToExplore
@@ -54,7 +49,6 @@
 
 <script>
 import Background from '@/components/dialogs/Background.vue'
-import Stats from '@/components/dialogs/Stats.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
@@ -70,8 +64,7 @@ export default {
     Loader,
     PrivacyButton,
     AddToExplore,
-    AskToAddToExplore,
-    Stats
+    AskToAddToExplore
   },
   props: {
     shouldHideExplore: Boolean,
@@ -108,8 +101,7 @@ export default {
   data () {
     return {
       backgroundIsVisible: false,
-      privacyPickerIsVisible: false,
-      statsIsVisible: false
+      privacyPickerIsVisible: false
     }
   },
   computed: {
@@ -170,15 +162,9 @@ export default {
       this.closeDialogsAndEmit()
       this.privacyPickerIsVisible = !isVisible
     },
-    toggleStatsIsVisible () {
-      const isVisible = this.statsIsVisible
-      this.closeDialogsAndEmit()
-      this.statsIsVisible = !isVisible
-    },
     closeDialogs () {
       this.backgroundIsVisible = false
       this.privacyPickerIsVisible = false
-      this.statsIsVisible = false
     },
     closeDialogsAndEmit () {
       this.closeDialogs()

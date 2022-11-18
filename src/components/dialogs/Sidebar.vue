@@ -20,14 +20,18 @@ dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="clos
             img.icon.remove-undo(src="@/assets/undo.svg")
         //- second row
         .segmented-buttons
+          //- AI Images
           button(@click.left="toggleAIImagesIsVisible" :class="{ active: AIImagesIsVisible}")
             img.icon(src="@/assets/flower.svg")
             span AI
+          //- Stats
+          button(@click.left="toggleStatsIsVisible" :class="{active: statsIsVisible}")
+            img.icon(src="@/assets/stats.svg")
 
       //- Pin
       .title-row
-        .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-          button.small-button
+        .button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
+          button.small-button(:class="{active: dialogIsPinned}")
             img.icon.pin.right-pin(src="@/assets/pin.svg")
 
   Tags(:visible="tagsIsVisible" :parentIsPinned="dialogIsPinned")
@@ -35,6 +39,7 @@ dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="clos
   Comments(:visible="commentsIsVisible")
   Removed(:visible="removedIsVisible")
   AIImages(:visible="AIImagesIsVisible")
+  Stats(:visible="statsIsVisible")
 
 </template>
 
@@ -45,6 +50,7 @@ import Tags from '@/components/Tags.vue'
 import Comments from '@/components/Comments.vue'
 import Removed from '@/components/Removed.vue'
 import AIImages from '@/components/AIImages.vue'
+import Stats from '@/components/Stats.vue'
 
 export default {
   name: 'Sidebar',
@@ -53,7 +59,8 @@ export default {
     Tags,
     Comments,
     Removed,
-    AIImages
+    AIImages,
+    Stats
   },
   props: {
     visible: Boolean
@@ -65,7 +72,8 @@ export default {
       linksIsVisible: false,
       commentsIsVisible: false,
       removedIsVisible: false,
-      AIImagesIsVisible: false
+      AIImagesIsVisible: false,
+      statsIsVisible: false
     }
   },
   created () {
@@ -100,6 +108,7 @@ export default {
       this.commentsIsVisible = false
       this.removedIsVisible = false
       this.AIImagesIsVisible = false
+      this.statsIsVisible = false
     },
     toggleTagsIsVisible () {
       const value = !this.tagsIsVisible
@@ -130,6 +139,12 @@ export default {
       if (!value) { return }
       this.clearIsVisible()
       this.AIImagesIsVisible = value
+    },
+    toggleStatsIsVisible () {
+      const value = !this.statsIsVisible
+      if (!value) { return }
+      this.clearIsVisible()
+      this.statsIsVisible = value
     },
     updateDialogHeight () {
       if (!this.visible) { return }

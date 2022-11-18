@@ -1,43 +1,51 @@
 <template lang="pug">
-dialog.narrow.stats(v-if="visible" :open="visible" @click.left.stop ref="dialog")
-  section
-    p Stats for {{currentSpace.name}}
-  section
-    //- TODO current space doesn't update, switch to watcher?, or prop, or Forceupdates w this.$forceUpdate() on visible?
-    //- Loader :visible space is loading
-    //- if not loading
-    table
-      tbody
-        tr.table-header
-          td Cards
-          td Connections
-          td Boxes
-        tr
-          td {{currentSpace.cards.length}}
-          td {{currentSpace.connections.length}}
-          td {{currentSpace.boxes.length}}
 
-    // created
-    p
-      img.icon.time(src="@/assets/time.svg")
-      span Created
-    .row
-      .badge.button-badge.secondary(@click.stop="toggleFilterShowAbsoluteDates")
-        span {{date(currentSpace.createdAt)}}
+section.stats(v-if="visible" @click.stop="clear")
+  p Stats for {{currentSpace.name}}
+  //- TODO current space doesn't update, switch to watcher?, or prop, or Forceupdates w this.$forceUpdate() on visible?
+  //- TODO Loader :visible space is loading
 
-    // last edited
-    template(v-if="currentSpace.editedAt")
-      p
-        img.icon.time(src="@/assets/time.svg")
-        span Last Edited
-      .row
-        .badge.button-badge.secondary(@click.stop="toggleFilterShowAbsoluteDates")
-          span {{date(currentSpace.editedAt)}}
+  //- TODO if not loading
+  table
+    tbody
+      tr.table-header
+        td Cards
+        td Connections
+        td Boxes
+        td Tags
+      tr
+        td {{currentSpace.cards.length}}
+        td {{currentSpace.connections.length}}
+        td {{currentSpace.boxes.length}}
+        td {{tags.length}}
+
+  table
+    tbody
+      tr.table-header
+        td Created
+        td(v-if="currentSpace.editedAt")
+          span Last Edited
+      tr
+        td
+          .badge.button-badge.secondary(@click.stop="toggleFilterShowAbsoluteDates")
+            span {{date(currentSpace.createdAt)}}
+        td(v-if="currentSpace.editedAt")
+          .badge.button-badge.secondary(@click.stop="toggleFilterShowAbsoluteDates")
+            span {{date(currentSpace.editedAt)}}
+
+  table
+    tbody
+      tr.table-header
+        td Word Count
+      tr
+        td 12
 
 </template>
 
 <script>
 import utils from '@/utils.js'
+
+import dayjs from 'dayjs'
 
 export default {
   name: 'Stats',
@@ -53,10 +61,12 @@ export default {
   // },
   computed: {
     currentSpace () {
-      console.log(this.$store.state.currentSpace)
+      // console.log(this.$store.state.currentSpace)
       return this.$store.state.currentSpace
     },
-    showAbsoluteDate () { return this.$store.state.currentUser.filterShowAbsoluteDates }
+    showAbsoluteDate () { return this.$store.state.currentUser.filterShowAbsoluteDates },
+    tags () { return this.$store.getters['currentSpace/spaceTags'] }
+
     // pluralizedBoxes () {
     //   const count = this.currentSpace.boxes.length
     //   if (count === 1) { return 'box' }
@@ -66,7 +76,7 @@ export default {
   methods: {
     date (date) {
       if (this.showAbsoluteDate) {
-        return new Date(date).toLocaleString()
+        return dayjs(date).format('YYYY-MM-DD')
       } else {
         date = utils.shortRelativeTime(date)
         if (date === 'now') {
@@ -88,6 +98,13 @@ export default {
     //   }
     //   return utils.pluralize(word, condition)
     // }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        console.log('💖')
+      }
+    }
   }
 }
 </script>
@@ -95,6 +112,7 @@ export default {
 <style lang="stylus">
 .stats
   table
+    margin-top 10px
     border-collapse collapse
     td
       border 1px solid var(--secondary-active-background)
