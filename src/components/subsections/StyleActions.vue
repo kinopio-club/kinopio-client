@@ -47,9 +47,9 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       button(:disabled="!canEditAll" @click="toggleIsComment" :class="{active: isComment}")
         img.icon(src="@/assets/comment.svg")
 
-    //- Comment
-    .button-wrap(v-if="isSingleCard")
-      button(:disabled="!canEditAll" @click="replaceCardWithBox")
+    //- Surround with Box
+    .button-wrap(v-if="isCards")
+      button(:disabled="!canEditSpace" @click="containCardsInBox")
         img.icon.box-icon(src="@/assets/box.svg")
 </template>
 
@@ -60,7 +60,7 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
-import { nanoid } from 'nanoid'
+// import { nanoid } from 'nanoid'
 
 const defaultCardColor = '#c9c9c9'
 
@@ -346,23 +346,26 @@ export default {
         this.$store.dispatch('currentCards/updateDimensions', { cards: [card] })
       })
     },
-    replaceCardWithBox () {
-      this.$store.dispatch('closeAllDialogs', 'replaceCardWithBox')
-      let card = this.cards[0]
-      this.$store.dispatch('currentCards/remove', card)
-      const box = {
-        id: nanoid(),
-        name: card.name,
-        x: card.x,
-        y: card.y,
-        color: card.backgroundColor
-      }
-      this.$store.dispatch('currentBoxes/add', { box })
-      this.$nextTick(() => {
-        this.$nextTick(() => {
-          this.$store.commit('boxDetailsIsVisibleForBoxId', box.id)
-        })
-      })
+    containCardsInBox () {
+      // this.cards
+    //   this.$store.dispatch('closeAllDialogs', 'containCardsInBox')
+
+      //   const box = {
+      //     id: nanoid(),
+      //     name: card.name,
+      //     x: card.x,
+      //     y: card.y,
+      // resizeWidth, resizeHeight
+      //   }
+      //   this.$store.dispatch('currentBoxes/add', { box })
+
+      // ?
+      //   this.$nextTick(() => {
+      //     this.$nextTick(() => {
+      //       this.$store.commit('boxDetailsIsVisibleForBoxId', box.id)
+      //     })
+      //   })
+
     },
 
     // boxes only
