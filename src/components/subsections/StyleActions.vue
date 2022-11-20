@@ -60,7 +60,7 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
-// import { nanoid } from 'nanoid'
+import { nanoid } from 'nanoid'
 
 const defaultCardColor = '#c9c9c9'
 
@@ -347,25 +347,58 @@ export default {
       })
     },
     containCardsInBox () {
-      // this.cards
-    //   this.$store.dispatch('closeAllDialogs', 'containCardsInBox')
+      // x,y
+      // ┌────────┐
+      // │        │
+      // │      width
+      // │        │
+      // └────────┘
+      // height
+      // const card = this.cards[0]
+      // let box = { x: card., width: 0, y: 0, height: 0}
 
-      //   const box = {
-      //     id: nanoid(),
-      //     name: card.name,
-      //     x: card.x,
-      //     y: card.y,
-      // resizeWidth, resizeHeight
-      //   }
-      //   this.$store.dispatch('currentBoxes/add', { box })
+      // initial box size
+      let box = this.cards[0]
+      // size box around cards
 
-      // ?
+      this.cards.forEach((card, index) => {
+        let { x, y, width, height, resizeWidth } = card
+        width = resizeWidth || width
+        console.log(height, width, card.width, card.resizeWidth)
+
+        if (box.x > x) {
+          box.x = x
+        }
+        if (box.width < width) {
+          box.width = width
+        }
+        if (box.y > y) {
+          box.y = y
+        }
+        if (box.height < height) {
+          box.height = height
+        }
+      })
+      console.log('🐸', box)
+      // add box margins
+      const margin = 20
+      box = {
+        id: nanoid(),
+        x: box.x - margin,
+        resizeWidth: box.width + (margin * 2),
+        y: box.y - (margin * 2),
+        resizeHeight: box.height + (margin * 3)
+      }
+      console.log('🐸🐸', box)
+
+      this.$store.dispatch('currentBoxes/add', { box })
+      this.$store.dispatch('closeAllDialogs', 'containCardsInBox')
+
+      // this.$nextTick(() => {
       //   this.$nextTick(() => {
-      //     this.$nextTick(() => {
-      //       this.$store.commit('boxDetailsIsVisibleForBoxId', box.id)
-      //     })
+      //     this.$store.commit('boxDetailsIsVisibleForBoxId', box.id)
       //   })
-
+      // })
     },
 
     // boxes only
