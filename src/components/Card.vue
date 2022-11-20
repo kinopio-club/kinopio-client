@@ -976,6 +976,8 @@ export default {
         this.restartObserver()
         return
       }
+      // keep playing audio cards
+      if (this.isPlayingAudio) { return }
       console.log('💐 observe card intersect:', this.card.name, this.card.id, entry.target.dataset.cardId, entry.isIntersecting)
       this.isVisibleInViewport = entry.isIntersecting
       if (entry.isIntersecting) {
