@@ -61,6 +61,7 @@ import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
+import sortBy from 'lodash-es/sortBy'
 
 const defaultCardColor = '#c9c9c9'
 
@@ -350,36 +351,40 @@ export default {
       // x,y
       // ┌────────┐
       // │        │
-      // │      width
+      // │        h
       // │        │
-      // └────────┘
-      // height
-      // const card = this.cards[0]
-      // let box = { x: card., width: 0, y: 0, height: 0}
+      // └───w────┘
 
       // initial box size
-      let box = this.cards[0]
+      let box = utils.clone(this.cards[0])
       // size box around cards
-
-      this.cards.forEach((card, index) => {
-        let { x, y, width, height, resizeWidth } = card
+      // box x, width
+      let cards = sortBy(this.cards, ['x'])
+      cards.forEach(card => {
+        let { x, width, resizeWidth } = card
         width = resizeWidth || width
-        console.log(height, width, card.width, card.resizeWidth)
-
-        if (box.x > x) {
-          box.x = x
-        }
-        if (box.width < width) {
-          box.width = width
-        }
-        if (box.y > y) {
-          box.y = y
-        }
-        if (box.height < height) {
-          box.height = height
+        // x
+        if (x < box.x) { box.x = x }
+        // width
+        let xEnd = x + width
+        const xDelta = xEnd - box.x
+        if (xDelta > box.width) {
+          box.width = xDelta
         }
       })
-      console.log('🐸', box)
+      // box y, height
+      cards = sortBy(this.cards, ['y'])
+      cards.forEach(card => {
+        let { y, height } = card
+        // y
+        if (y < box.y) { box.y = y }
+        // height
+        let yEnd = y + height
+        const yDelta = yEnd - box.y
+        if (yDelta > box.height) {
+          box.height = yDelta
+        }
+      })
       // add box margins
       const margin = 20
       box = {
@@ -389,16 +394,13 @@ export default {
         y: box.y - (margin * 2),
         resizeHeight: box.height + (margin * 3)
       }
-      console.log('🐸🐸', box)
-
       this.$store.dispatch('currentBoxes/add', { box })
       this.$store.dispatch('closeAllDialogs', 'containCardsInBox')
-
-      // this.$nextTick(() => {
-      //   this.$nextTick(() => {
-      //     this.$store.commit('boxDetailsIsVisibleForBoxId', box.id)
-      //   })
-      // })
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.$store.commit('boxDetailsIsVisibleForBoxId', box.id)
+        })
+      })
     },
 
     // boxes only
