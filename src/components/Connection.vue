@@ -37,7 +37,6 @@ circle(v-if="directionIsVisible && !isUpdatingPath && isVisibleInViewport" r="7"
 import utils from '@/utils.js'
 
 let animationTimer, isMultiTouch, startCursor, currentCursor
-let observer
 
 export default {
   name: 'Connection',
@@ -65,18 +64,19 @@ export default {
     })
   },
   mounted () {
-    observer = new IntersectionObserver(this.handleIntersect)
-    observer.observe(this.$refs.connection)
+    this.observer = new IntersectionObserver(this.handleIntersect)
+    this.startObserver()
   },
   beforeUnmount () {
-    observer.unobserve(this.$refs.connection)
+    this.stopObserver()
   },
   data () {
     return {
       controlCurve: undefined,
       curvedPath: '',
       frameCount: 0,
-      isVisibleInViewport: false
+      isVisibleInViewport: true,
+      observer: null
     }
   },
   computed: {
@@ -228,9 +228,26 @@ export default {
     }
   },
   methods: {
+    startObserver () {
+      if (!this.$refs.connection) { return }
+      this.observer.observe(this.$refs.connection)
+    },
+    stopObserver () {
+      if (!this.observer) { return }
+      this.observer.disconnect()
+    },
+    restartObserver () {
+      this.stopObserver()
+      this.startObserver()
+    },
     handleIntersect (entries, observer) {
       const entry = entries[0]
-      this.isVisibleInViewport = entry.isIntersecting
+      if (entry.target.dataset.id !== this.connection.id) {
+        this.restartObserver()
+        return
+      }
+      console.log(entry.target.dataset.id, entry.isIntersecting)
+      this.isVisibleInViewport = entry.isIntersecting // true //entry.isIntersecting
     },
     checkIfShouldPauseConnectionDirections () {
       this.$store.dispatch('currentSpace/unpauseConnectionDirections')
