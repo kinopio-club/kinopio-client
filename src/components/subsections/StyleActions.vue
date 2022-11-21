@@ -391,8 +391,8 @@ export default {
         id: nanoid(),
         x: box.x - margin,
         resizeWidth: box.width + (margin * 2),
-        y: box.y - (margin * 2),
-        resizeHeight: box.height + (margin * 3)
+        y: box.y - (margin * 2.5),
+        resizeHeight: box.height + (margin * 3.5)
       }
       this.$store.dispatch('currentBoxes/add', { box })
       this.$store.dispatch('closeAllDialogs', 'containCardsInBox')
