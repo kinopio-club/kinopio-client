@@ -962,6 +962,7 @@ export default {
       this.observer.disconnect()
     },
     startObserver () {
+      if (this.$store.state.disableViewportOptimizations) { return }
       if (!this.$refs.card) { return }
       this.observer.observe(this.$refs.card)
     },
