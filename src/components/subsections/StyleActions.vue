@@ -47,9 +47,9 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       button(:disabled="!canEditAll" @click="toggleIsComment" :class="{active: isComment}")
         img.icon(src="@/assets/comment.svg")
 
-    //- Comment
-    .button-wrap(v-if="isSingleCard")
-      button(:disabled="!canEditAll" @click="replaceCardWithBox")
+    //- Surround with Box
+    .button-wrap(v-if="isCards")
+      button(:disabled="!canEditSpace" @click="containCardsInBox")
         img.icon.box-icon(src="@/assets/box.svg")
 </template>
 
@@ -61,6 +61,7 @@ import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
+import sortBy from 'lodash-es/sortBy'
 
 const defaultCardColor = '#c9c9c9'
 
@@ -346,18 +347,55 @@ export default {
         this.$store.dispatch('currentCards/updateDimensions', { cards: [card] })
       })
     },
-    replaceCardWithBox () {
-      this.$store.dispatch('closeAllDialogs', 'replaceCardWithBox')
-      let card = this.cards[0]
-      this.$store.dispatch('currentCards/remove', card)
-      const box = {
+    containCardsInBox () {
+      // x,y
+      // ┌────────┐
+      // │        │
+      // │        h
+      // │        │
+      // └───w────┘
+
+      // initial box size
+      let box = utils.clone(this.cards[0])
+      // size box around cards
+      // box x, width
+      let cards = sortBy(this.cards, ['x'])
+      cards.forEach(card => {
+        let { x, width, resizeWidth } = card
+        width = resizeWidth || width
+        // x
+        if (x < box.x) { box.x = x }
+        // width
+        let xEnd = x + width
+        const xDelta = xEnd - box.x
+        if (xDelta > box.width) {
+          box.width = xDelta
+        }
+      })
+      // box y, height
+      cards = sortBy(this.cards, ['y'])
+      cards.forEach(card => {
+        let { y, height } = card
+        // y
+        if (y < box.y) { box.y = y }
+        // height
+        let yEnd = y + height
+        const yDelta = yEnd - box.y
+        if (yDelta > box.height) {
+          box.height = yDelta
+        }
+      })
+      // add box margins
+      const margin = 20
+      box = {
         id: nanoid(),
-        name: card.name,
-        x: card.x,
-        y: card.y,
-        color: card.backgroundColor
+        x: box.x - margin,
+        resizeWidth: box.width + (margin * 2),
+        y: box.y - (margin * 2.5),
+        resizeHeight: box.height + (margin * 3.5)
       }
       this.$store.dispatch('currentBoxes/add', { box })
+      this.$store.dispatch('closeAllDialogs', 'containCardsInBox')
       this.$nextTick(() => {
         this.$nextTick(() => {
           this.$store.commit('boxDetailsIsVisibleForBoxId', box.id)

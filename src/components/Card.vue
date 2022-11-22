@@ -963,6 +963,7 @@ export default {
       observer.disconnect()
     },
     startObserver () {
+      if (this.$store.state.disableViewportOptimizations) { return }
       if (!this.$refs.card) { return }
       this.$nextTick(() => {
         observer.observe(this.$refs.card)
@@ -980,6 +981,8 @@ export default {
         this.restartObserver()
         return
       }
+      // keep playing audio cards
+      if (this.isPlayingAudio) { return }
       console.log('💐 observe card intersect:', this.card.name, this.card.id, entry.target.dataset.cardId, entry.isIntersecting)
       this.isVisibleInViewport = entry.isIntersecting
       if (entry.isIntersecting) {
