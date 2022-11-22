@@ -232,6 +232,8 @@ let preventSticking = false
 let stickyTimerComplete = false
 let stickyTimer
 
+let observer
+
 export default {
   components: {
     Frames,
@@ -289,7 +291,7 @@ export default {
       if (!isUpdatedSuccess) { return }
       this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
     }
-    this.observer = new IntersectionObserver(this.handleIntersect, { threshold: 0, rootMargin: '500px 0px 0px 500px' })
+    observer = new IntersectionObserver(this.handleIntersect, { threshold: 0, rootMargin: '500px 0px 0px 500px' })
     this.startObserver()
   },
   beforeUnmount () {
@@ -325,8 +327,7 @@ export default {
       translateY: 0,
       isAnimationUnsticking: false,
       stickyStretchResistance: 6,
-      isVisibleInViewport: true,
-      observer: null
+      isVisibleInViewport: true
     }
   },
   computed: {
@@ -958,14 +959,17 @@ export default {
     // intersection observer
 
     stopObserver () {
-      if (!this.observer) { return }
-      this.observer.disconnect()
+      if (!observer) { return }
+      observer.disconnect()
     },
     startObserver () {
       if (!this.$refs.card) { return }
-      this.observer.observe(this.$refs.card)
+      this.$nextTick(() => {
+        observer.observe(this.$refs.card)
+      })
     },
     restartObserver () {
+      this.isVisibleInViewport = true
       this.stopObserver()
       this.startObserver()
     },
