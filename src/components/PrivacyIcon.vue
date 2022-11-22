@@ -45,4 +45,6 @@ export default {
 </script>
 
 <style lang="stylus">
+.icon.privacy-icon
+  vertical-align 0
 </style>

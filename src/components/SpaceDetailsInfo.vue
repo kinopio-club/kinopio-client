@@ -45,7 +45,7 @@
 
 .row.align-items-top(v-if="isSpaceMember")
   //- Privacy
-  PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
+  PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
   //- Explore
   AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
 .row.align-items-top(v-if="!isSpaceMember && !showInExplore")

@@ -317,7 +317,7 @@ export default {
     margin-top 10px
   .privacy-button
     > button
-      padding-top 7px
+      padding-top 8px
   .user
     vertical-align -3px
 </style>

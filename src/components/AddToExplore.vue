@@ -4,6 +4,7 @@
     span(v-if="!showInExplore")
       img.icon.add(src="@/assets/add.svg")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
+    span(v-if="!showInExplore") Explore
     span(v-if="showInExplore") In Explore
 
   template(v-if="error.userNeedsToSignUpOrIn")
