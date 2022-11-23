@@ -67,19 +67,14 @@ export default {
       percent = Math.max(percent, this.min)
       percent = Math.min(percent, this.max)
       this.$store.commit('spaceZoomPercent', percent)
-      this.updateBackgroundZoom()
     },
     updateSpaceZoom (percent) {
       this.updateSpaceZoomPercent(percent)
-      this.updateBackgroundZoom()
     },
     updateSpaceZoomPercent (percent) {
       percent = percent / 100
       percent = Math.round(this.min + (this.max - this.min) * percent)
       this.$store.commit('spaceZoomPercent', percent)
-    },
-    updateBackgroundZoom () {
-      this.$store.dispatch('currentSpace/updateBackgroundZoom')
     },
     removeAnimations () {
       this.animateJiggleRight = false

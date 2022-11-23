@@ -84,7 +84,7 @@ const checkIfShouldUpdateBackground = (store, { message, updates }) => {
   updateKeys.forEach(key => {
     const shouldUpdateBackground = key === 'background' || key === 'backgroundTint'
     if (message === 'updateSpace' && shouldUpdateBackground) {
-      store.dispatch('currentSpace/loadBackground')
+      store.commit('triggerLoadBackground')
     }
   })
 }
