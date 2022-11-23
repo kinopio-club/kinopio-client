@@ -118,7 +118,7 @@ export default {
   height 100%
   pointer-events none
   z-index 0
-  background-image url('assets/background-2x.png')
   transform-origin top left
+  background var(--primary-background)
 
 </style>
