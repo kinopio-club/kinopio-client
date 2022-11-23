@@ -4,7 +4,7 @@
     button(@click.left.prevent="askToAddToExplore" @keydown.stop.enter="askToAddToExplore")
       img.icon.add(src="@/assets/add.svg")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
-      span Ask
+      span Ask to Add To Explore
     template(v-if="error.userNeedsToSignUpOrIn")
       p
         span.badge.info Sign Up or In

@@ -470,6 +470,7 @@ const store = createStore({
     triggerCheckIfUseHasInboxSpace: () => {},
     triggerScrollUserDetailsIntoView: () => {},
     triggerUpdateLockedItemButtonsPositions: () => {},
+    triggerLoadBackground: () => {},
 
     // Cards
 

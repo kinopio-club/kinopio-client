@@ -6,7 +6,7 @@
   :class="{ 'no-background': isAddPage }"
 )
   base(v-if="isAddPage" target="_blank")
-  #layout-viewport(:style="{ background: backgroundTint }")
+  SpaceBackground
   ItemsLocked
   MagicPaint
   OffscreenMarkers
@@ -46,6 +46,7 @@ import Minimap from '@/components/Minimap.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
+import SpaceBackground from '@/components/SpaceBackground.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -65,7 +66,8 @@ export default {
     Minimap,
     ItemsLocked,
     UserDetails,
-    NotificationsWithPosition
+    NotificationsWithPosition,
+    SpaceBackground
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
@@ -85,7 +87,6 @@ export default {
       window.addEventListener('scroll', this.updateUserHasScrolled)
     }, 100)
     this.updateMetaDescription()
-    this.$store.dispatch('currentSpace/updateBackgroundZoom')
     window.addEventListener('touchstart', this.touchStart)
     window.addEventListener('touchmove', this.touchMove)
     window.addEventListener('touchend', this.touchEnd)
@@ -103,12 +104,6 @@ export default {
     }
   },
   computed: {
-    backgroundTint () {
-      const color = this.$store.state.currentSpace.backgroundTint
-      const metaThemeColor = document.querySelector('meta[name=theme-color]')
-      metaThemeColor.setAttribute('content', color)
-      return color
-    },
     spaceName () { return this.$store.state.currentSpace.name },
     isDevelopment () {
       if (import.meta.env.MODE === 'development') {
@@ -344,7 +339,6 @@ body
   overflow auto // enables window.scrollBy support
 
 .app
-  background-image url('assets/background-2x.png')
   position relative
   > .development-badge
     min-height initial
@@ -354,8 +348,6 @@ body
     position fixed
     pointer-events none
     z-index 100
-  &.no-background
-    background-image none
 
 img,
 video
@@ -1053,14 +1045,6 @@ code
   .badge + .badge,
   a + a
     margin-left 3px
-
-#layout-viewport
-  position fixed
-  width 110%
-  height 110%
-  pointer-events none
-  z-index 0
-  mix-blend-mode multiply
 
 progress
   appearance none
