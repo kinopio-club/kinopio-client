@@ -51,7 +51,11 @@ export default {
   },
   computed: {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    showInExplore () { return this.$store.state.currentSpace.showInExplore },
+    showInExplore () {
+      const showInExplore = this.$store.state.currentSpace.showInExplore
+      const isNotPrivate = this.$store.state.currentSpace.privacy !== 'private'
+      return showInExplore && isNotPrivate
+    },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     spaceIsHelloKinopio () { return this.$store.getters['currentSpace/isHelloKinopio'] },
     spaceCardsCount () { return this.$store.getters['currentCards/all'].length }
@@ -129,6 +133,7 @@ export default {
 
 <style lang="stylus">
 .add-to-explore
+  max-width 60%
   input
     vertical-align -1px !important
   .icon.add
