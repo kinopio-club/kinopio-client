@@ -6,6 +6,7 @@
   :class="{ 'no-background': isAddPage }"
 )
   base(v-if="isAddPage" target="_blank")
+  OutsideSpaceBackground
   SpaceBackground
   ItemsLocked
   MagicPaint
@@ -47,6 +48,7 @@ import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import SpaceBackground from '@/components/SpaceBackground.vue'
+import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -67,7 +69,8 @@ export default {
     ItemsLocked,
     UserDetails,
     NotificationsWithPosition,
-    SpaceBackground
+    SpaceBackground,
+    OutsideSpaceBackground
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
