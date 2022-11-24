@@ -14,7 +14,7 @@ import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
 
-let prevCursor, prevType
+let prevType
 
 export default {
   name: 'CurrentConnection',
@@ -25,8 +25,8 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggeredDrawConnectionFrame') {
-        prevCursor = this.$store.state.triggeredDrawConnectionFrame
-        this.drawConnection()
+        const event = this.$store.state.triggeredDrawConnectionFrame
+        this.drawConnection(event)
       }
     })
   },
@@ -67,39 +67,17 @@ export default {
   methods: {
     interact (event) {
       if (this.isDrawingConnection) {
-        this.drawConnection()
+        this.drawConnection(event)
       }
-      prevCursor = utils.cursorPositionInViewport(event)
     },
-    // same as Space
-    cursor () {
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
-      let cursor
-      if (utils.objectHasKeys(prevCursor)) {
-        cursor = prevCursor
-      } else {
-        cursor = this.startCursor
-      }
-      cursor = {
-        x: cursor.x * zoom,
-        y: cursor.y * zoom
-      }
-      return cursor
-    },
-    drawConnection () {
-      const zoom = this.spaceZoomDecimal
-      let end = this.cursor()
-      if (zoom !== 1) {
-        end = {
-          x: end.x * zoom,
-          y: end.y * zoom
-        }
-      }
+    drawConnection (event) {
+      let end = utils.cursorPositionInSpace({ event })
       const startCardId = this.startCardId
-      const start = utils.connectorCoords(startCardId)
+      let start = utils.connectorCoords(startCardId) // TODO get real pos
+      start = utils.cursorPositionInSpace({ position: start })
       const controlPoint = this.$store.state.currentUser.defaultConnectionControlPoint
       const path = this.$store.getters['currentConnections/connectionPathBetweenCoords'](start, end, controlPoint)
-      this.checkCurrentConnectionSuccess()
+      this.checkCurrentConnectionSuccess(event)
       this.currentConnectionPath = path
       const connectionType = this.$store.getters['currentConnections/typeForNewConnections']
       prevType = connectionType
@@ -114,10 +92,10 @@ export default {
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
     },
-    checkCurrentConnectionSuccess () {
-      const cursor = this.cursor()
-      const zoom = this.spaceZoomDecimal
-      const cardElement = utils.cardElementFromPosition(cursor.x * zoom, cursor.y * zoom)
+    checkCurrentConnectionSuccess (event) {
+      if (!event) { return }
+      const position = utils.cursorPositionInViewport(event)
+      const cardElement = utils.cardElementFromPosition(position.x, position.y)
       let updates = { userId: this.$store.state.currentUser.id }
       let isCurrentConnectionConnected
       if (cardElement) {
@@ -144,19 +122,21 @@ export default {
       this.$store.dispatch('currentConnections/addType', prevType)
       this.$store.dispatch('currentConnections/add', { connection, type: prevType })
     },
-    createConnections () {
+    createConnections (event) {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       const startCardIds = this.$store.state.currentConnectionStartCardIds
       let endCardId
+      let position = utils.cursorPositionInSpace({ event })
+      const shouldPreventCreate = utils.isPositionOutsideOfSpace(position)
+      if (shouldPreventCreate) {
+        position = utils.cursorPositionInPage(event)
+        this.$store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+        return
+      }
       if (currentConnectionSuccess.id) {
         endCardId = currentConnectionSuccess.id
       } else {
-        const zoom = this.$store.getters.spaceCounterZoomDecimal
-        let position = this.$store.state.prevCursorPosition
-        position = {
-          x: Math.round(position.x * zoom),
-          y: Math.round(position.y * zoom)
-        }
+        // create card
         endCardId = nanoid()
         this.$store.dispatch('currentCards/add', { position, id: endCardId })
       }
@@ -173,7 +153,7 @@ export default {
     stopInteractions (event) {
       if (this.isDrawingConnection) {
         this.$store.dispatch('clearMultipleSelected')
-        this.createConnections()
+        this.createConnections(event)
       }
       this.$store.commit('currentConnectionSuccess', {})
       const isCurrentConnection = this.$store.state.currentConnectionStartCardIds.length
@@ -184,7 +164,6 @@ export default {
       }
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.currentConnectionPath = undefined
-      prevCursor = undefined
     }
   }
 }
