@@ -42,7 +42,7 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a
       span
-        .badge.success.is-donor Donor
+        .badge.info.is-donor Donor
       span , I deeply appreciate your support
     .row
       button(@click="removeNotifyThanksForDonating")
