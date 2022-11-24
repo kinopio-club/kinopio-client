@@ -215,26 +215,19 @@ const store = createStore({
     otherTags: []
   },
   mutations: {
-    updatePageSizes: (state) => {
-      const body = document.body
-      const html = document.documentElement
-      const pageWidth = Math.max(state.maxPageSizeWidth, body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
-      let pageHeight = Math.max(state.maxPageSizeHeight, body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+    resetPageSizes: (state) => {
+      state.pageWidth = 0
+      state.pageHeight = 0
+    },
+    updatePageSizes: (state, itemsRect) => {
       const viewportWidth = utils.visualViewport().width
       let viewportHeight = utils.visualViewport().height
-      if (utils.isFirefox()) {
-        const zoom = state.spaceZoomPercent / 100
-        pageHeight = pageHeight * zoom
-        viewportHeight = viewportHeight * zoom
-      }
-      state.pageWidth = Math.round(pageWidth)
-      state.pageHeight = Math.round(pageHeight)
       state.viewportWidth = Math.round(viewportWidth)
       state.viewportHeight = Math.round(viewportHeight)
-    },
-    updateMaxPageSizes: (state, { width, height }) => {
-      state.maxPageSizeWidth = width
-      state.maxPageSizeHeight = height
+      let pageWidth = Math.max(viewportWidth, itemsRect.width, state.pageWidth)
+      let pageHeight = Math.max(viewportHeight, itemsRect.height, state.pageHeight)
+      state.pageWidth = Math.round(pageWidth)
+      state.pageHeight = Math.round(pageHeight)
     },
     updateSpacePageSize: (state) => {
       const extraScrollArea = 160
@@ -1267,22 +1260,16 @@ const store = createStore({
       context.commit('spaceUrlToLoad', matches.spaceUrl)
     },
     updatePageSizes: (context) => {
-      const paddingX = Math.min(400, (utils.visualViewport().width / 4) * 3) + 100
-      const paddingY = Math.min(400, (utils.visualViewport().height / 4) * 3)
+      const padding = 250
       const cards = context.getters['currentCards/all']
       const boxes = context.getters['currentBoxes/all']
       const items = cards.concat(boxes)
-      if (items.length) {
-        const xPositions = Array.from(items, item => item.x)
-        const yPositions = Array.from(items, item => item.y)
-        const x = Math.max(...xPositions)
-        const y = Math.max(...yPositions)
-        context.commit('updateMaxPageSizes', {
-          width: x + paddingX,
-          height: y + paddingY
-        })
+      let itemsRect = utils.boundaryRectFromItems(items)
+      itemsRect = {
+        width: itemsRect.x + itemsRect.width + padding,
+        height: itemsRect.y + itemsRect.height + padding
       }
-      context.commit('updatePageSizes')
+      context.commit('updatePageSizes', itemsRect)
     },
     checkIfItemShouldIncreasePageSize: (context, item) => {
       if (!item) { return }
