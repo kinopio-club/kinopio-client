@@ -378,8 +378,10 @@ export default {
       return Boolean(existing.length)
     },
     connectionPathBetweenCards: (state, getters) => (startCardId, endCardId, controlPoint) => {
-      const start = utils.connectorCoords(startCardId)
-      const end = utils.connectorCoords(endCardId)
+      let start = utils.connectorCoords(startCardId)
+      start = utils.cursorPositionInSpace(null, start)
+      let end = utils.connectorCoords(endCardId)
+      end = utils.cursorPositionInSpace(null, end)
       return getters.connectionPathBetweenCoords(start, end, controlPoint)
     },
     curveControlPoint: (state, getters, rootState) => {
@@ -389,14 +391,12 @@ export default {
     },
     connectionPathBetweenCoords: (state, getters) => (start, end, controlPoint) => {
       if (!start || !end) { return }
-      const offsetStart = utils.coordsWithCurrentScrollOffset(start)
-      const offsetEnd = utils.coordsWithCurrentScrollOffset(end)
       const delta = {
-        x: parseInt(offsetEnd.x - offsetStart.x),
-        y: parseInt(offsetEnd.y - offsetStart.y)
+        x: parseInt(end.x - start.x),
+        y: parseInt(end.y - start.y)
       }
       let curve = controlPoint || getters.curveControlPoint
-      return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
+      return `m${start.x},${start.y} ${curve} ${delta.x},${delta.y}`
     }
 
   }

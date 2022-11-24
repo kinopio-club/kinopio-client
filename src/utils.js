@@ -961,7 +961,9 @@ export default {
     const cardUnlockButton = document.querySelector(`.card-unlock-button[data-card-id="${cardId}"] button`)
     const element = cardConnector || cardUnlockButton
     if (!element) { return }
-    const rect = element.getBoundingClientRect()
+    let rect = element.getBoundingClientRect()
+    rect.x = rect.x + window.scrollX
+    rect.y = rect.y + window.scrollY
     return this.rectCenter(rect)
   },
   coordsWithCurrentScrollOffset ({ x, y, shouldIgnoreZoom }) {
