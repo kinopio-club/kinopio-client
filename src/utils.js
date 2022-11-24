@@ -851,6 +851,10 @@ export default {
     return string.split(blankPattern)
   },
   boundaryRectFromItems (items) {
+    console.log(items)
+    if (!items.length) {
+      return { x: 0, y: 0, width: 0, height: 0 }
+    }
     // x,y
     // ┌────────┐
     // │        │
@@ -858,7 +862,14 @@ export default {
     // │        │
     // └───w────┘
     // initial rect size
-    let rect = this.clone(items[0])
+    items = this.clone(items)
+    const initial = items[0]
+    let rect = {
+      x: initial.x,
+      y: initial.y,
+      width: initial.resizeWidth || initial.width,
+      height: initial.resizeHeight || initial.height
+    }
     // size rect around items
 
     // rect x, width

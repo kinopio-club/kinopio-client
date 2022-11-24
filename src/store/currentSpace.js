@@ -694,6 +694,7 @@ const currentSpace = {
       if (!context.rootState.isEmbed) {
         context.commit('triggerSpaceZoomReset', null, { root: true })
       }
+      context.commit('resetPageSizes', null, { root: true })
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('isAddPage', false, { root: true })
       const emptySpace = utils.emptySpace(space.id)
