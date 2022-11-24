@@ -61,7 +61,6 @@ import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
-import sortBy from 'lodash-es/sortBy'
 
 const defaultCardColor = '#c9c9c9'
 
@@ -348,43 +347,7 @@ export default {
       })
     },
     containCardsInBox () {
-      // x,y
-      // ┌────────┐
-      // │        │
-      // │        h
-      // │        │
-      // └───w────┘
-
-      // initial box size
-      let box = utils.clone(this.cards[0])
-      // size box around cards
-      // box x, width
-      let cards = sortBy(this.cards, ['x'])
-      cards.forEach(card => {
-        let { x, width, resizeWidth } = card
-        width = resizeWidth || width
-        // x
-        if (x < box.x) { box.x = x }
-        // width
-        let xEnd = x + width
-        const xDelta = xEnd - box.x
-        if (xDelta > box.width) {
-          box.width = xDelta
-        }
-      })
-      // box y, height
-      cards = sortBy(this.cards, ['y'])
-      cards.forEach(card => {
-        let { y, height } = card
-        // y
-        if (y < box.y) { box.y = y }
-        // height
-        let yEnd = y + height
-        const yDelta = yEnd - box.y
-        if (yDelta > box.height) {
-          box.height = yDelta
-        }
-      })
+      let box = utils.boundaryRectFromItems(this.cards)
       // add box margins
       const margin = 20
       box = {
