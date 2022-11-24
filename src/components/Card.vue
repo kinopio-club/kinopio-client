@@ -1063,11 +1063,7 @@ export default {
       const halfHeight = height / 2
       let centerX = this.x + halfWidth
       let centerY = this.y + halfHeight
-      let position = utils.cursorPositionInPage(event)
-      position = {
-        x: position.x * this.spaceCounterZoomDecimal,
-        y: position.y * this.spaceCounterZoomDecimal
-      }
+      let position = utils.cursorPositionInSpace({ event })
       // position from card center
       const xFromCenter = position.x - centerX
       const yFromCenter = position.y - centerY
@@ -1170,7 +1166,7 @@ export default {
       }
       event.stopPropagation()
       if (!this.canEditCard) {
-        const position = utils.cursorPositionInPage(event)
+        const position = utils.cursorPositionInSpace({ event })
         this.$store.commit('addNotificationWithPosition', { message: 'Card is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
         return
       }
