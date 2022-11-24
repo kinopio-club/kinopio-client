@@ -230,6 +230,8 @@ export default {
         shouldZoomOut = deltaY < 0
       }
       let speed = Math.min(Math.abs(deltaY), 5)
+      const position = utils.cursorPositionInPage(event)
+      this.$store.commit('prevZoomOrigin', position)
       if (shouldZoomIn) {
         this.$store.commit('triggerSpaceZoomIn', { speed })
       } else if (shouldZoomOut) {

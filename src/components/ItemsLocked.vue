@@ -24,8 +24,9 @@ export default {
     lockedCards () { return this.$store.getters['currentCards/isLocked'] },
     lockedBoxes () { return this.$store.getters['currentBoxes/isLocked'] },
     zoomScale () {
+      const transform = this.$store.getters.transformZoom
       return {
-        transform: `scale(${this.spaceZoomDecimal})`
+        transform: transform
       }
     }
   }

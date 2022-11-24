@@ -121,10 +121,11 @@ export default {
   computed: {
     styles () {
       const zoom = 1 / this.spaceZoomDecimal
+      const transform = this.$store.getters.transformZoom
       return {
         width: `${this.pageWidth * zoom}px`,
         height: `${this.pageHeight * zoom}px`,
-        transform: `scale(${this.spaceZoomDecimal})`
+        transform: transform
       }
     },
     minimapIsVisible () { return this.$store.state.minimapIsVisible },

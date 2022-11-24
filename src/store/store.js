@@ -37,7 +37,6 @@ const store = createStore({
     isTouchDevice: false,
     cardsCreatedLimit: 100,
     prevCursorPosition: { x: 0, y: 0 },
-    spaceZoomPercent: 100,
     pinchCounterZoomDecimal: 1,
     currentSpacePath: '/',
     webfontIsLoaded: false,
@@ -48,6 +47,10 @@ const store = createStore({
     isAddPage: false,
     isAppStoreView: false,
     disableViewportOptimizations: false, // for urlbox
+
+    // zooming
+    spaceZoomPercent: 100,
+    prevZoomOrigin: { x: 0, y: 0 },
 
     // search
     searchIsVisible: false,
@@ -328,10 +331,6 @@ const store = createStore({
     prevCursorPosition: (state, cursor) => {
       state.prevCursorPosition = cursor
     },
-    spaceZoomPercent: (state, value) => {
-      utils.typeCheck({ value, type: 'number', origin: 'spaceZoomPercent' })
-      state.spaceZoomPercent = value
-    },
     pinchCounterZoomDecimal: (state, value) => {
       utils.typeCheck({ value, type: 'number', origin: 'pinchCounterZoomDecimal' })
       state.pinchCounterZoomDecimal = value
@@ -464,6 +463,17 @@ const store = createStore({
     triggerScrollUserDetailsIntoView: () => {},
     triggerUpdateLockedItemButtonsPositions: () => {},
     triggerLoadBackground: () => {},
+
+    // Zoom
+
+    spaceZoomPercent: (state, value) => {
+      utils.typeCheck({ value, type: 'number', origin: 'spaceZoomPercent' })
+      state.spaceZoomPercent = value
+    },
+    prevZoomOrigin: (state, position) => {
+      utils.typeCheck({ value: position, type: 'object', origin: 'prevZoomOrigin' })
+      state.prevZoomOrigin = position
+    },
 
     // Cards
 
@@ -1485,6 +1495,13 @@ const store = createStore({
     },
     isTouchDevice: (state) => {
       return state.isTouchDevice || utils.isMobile()
+    },
+    transformZoom: (state, getters) => {
+      const zoom = getters.spaceZoomDecimal
+      const origin = state.prevZoomOrigin
+      // https://stackoverflow.com/questions/51077632/simulating-transform-origin-using-translate
+      const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
+      return transform
     }
   },
 
