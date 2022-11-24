@@ -6,7 +6,7 @@ section.community(v-if="visible" :open="visible" @click.left.stop='closeDialogs'
       button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
         span RSS
       ExploreRssFeed(:visible="exploreRssFeedIsVisible")
-  section.subsection
+  section.subsection(v-if="showExploreActions")
     p Share this space with the community
     p
       AddToExplore(@updateSpaces="updateSpaces")
@@ -56,6 +56,15 @@ export default {
     }
   },
   computed: {
+    showExploreActions () {
+      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
+      const isInExplore = this.$store.state.currentSpace.showInExplore
+      if (isSpaceMember) {
+        return true
+      } else {
+        return !isInExplore
+      }
+    },
     showInExploreLabel () {
       return 'Show Space in Explore'
     },
