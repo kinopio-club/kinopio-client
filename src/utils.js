@@ -850,6 +850,46 @@ export default {
     const blankPattern = new RegExp(/( |\s|\t)+/gm)
     return string.split(blankPattern)
   },
+  BoundaryRectFromCards (cards) {
+    // x,y
+    // ┌────────┐
+    // │        │
+    // │        h
+    // │        │
+    // └───w────┘
+    // initial rect size
+    let rect = this.clone(cards[0])
+    // size rect around cards
+
+    // rect x, width
+    let sortedCards = sortBy(cards, ['x'])
+    sortedCards.forEach(card => {
+      let { x, width, resizeWidth } = card
+      width = resizeWidth || width
+      // x
+      if (x < rect.x) { rect.x = x }
+      // width
+      let xEnd = x + width
+      const xDelta = xEnd - rect.x
+      if (xDelta > rect.width) {
+        rect.width = xDelta
+      }
+    })
+    // rect y, height
+    sortedCards = sortBy(cards, ['y'])
+    sortedCards.forEach(card => {
+      let { y, height } = card
+      // y
+      if (y < rect.y) { rect.y = y }
+      // height
+      let yEnd = y + height
+      const yDelta = yEnd - rect.y
+      if (yDelta > rect.height) {
+        rect.height = yDelta
+      }
+    })
+    return rect
+  },
 
   // Connection Path Utils 🐙
 
