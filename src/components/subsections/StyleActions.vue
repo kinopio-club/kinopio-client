@@ -347,7 +347,7 @@ export default {
       })
     },
     containCardsInBox () {
-      let box = utils.BoundaryRectFromCards(this.cards)
+      let box = utils.boundaryRectFromItems(this.cards)
       // add box margins
       const margin = 20
       box = {

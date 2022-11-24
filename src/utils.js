@@ -850,7 +850,7 @@ export default {
     const blankPattern = new RegExp(/( |\s|\t)+/gm)
     return string.split(blankPattern)
   },
-  BoundaryRectFromCards (cards) {
+  boundaryRectFromItems (items) {
     // x,y
     // ┌────────┐
     // │        │
@@ -858,13 +858,13 @@ export default {
     // │        │
     // └───w────┘
     // initial rect size
-    let rect = this.clone(cards[0])
-    // size rect around cards
+    let rect = this.clone(items[0])
+    // size rect around items
 
     // rect x, width
-    let sortedCards = sortBy(cards, ['x'])
-    sortedCards.forEach(card => {
-      let { x, width, resizeWidth } = card
+    let sortedItems = sortBy(items, ['x'])
+    sortedItems.forEach(item => {
+      let { x, width, resizeWidth } = item
       width = resizeWidth || width
       // x
       if (x < rect.x) { rect.x = x }
@@ -876,9 +876,10 @@ export default {
       }
     })
     // rect y, height
-    sortedCards = sortBy(cards, ['y'])
-    sortedCards.forEach(card => {
-      let { y, height } = card
+    sortedItems = sortBy(items, ['y'])
+    sortedItems.forEach(item => {
+      let { y, height, resizeHeight } = item
+      height = resizeHeight || height
       // y
       if (y < rect.y) { rect.y = y }
       // height
