@@ -79,9 +79,6 @@ export default {
     ConnectionDecorators
   },
   name: 'ConnectionDetails',
-  mounted () {
-    this.updatePinchCounterZoomDecimal()
-  },
   data () {
     return {
       colorPickerIsVisible: false,
@@ -112,15 +109,9 @@ export default {
     spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
       const position = this.$store.state.connectionDetailsPosition
-      let zoom
-      if (utils.isSignificantlyPinchZoomed()) {
-        zoom = this.pinchCounterZoomDecimal
-      } else {
-        zoom = this.spaceCounterZoomDecimal
-      }
+      const zoom = this.spaceCounterZoomDecimal
       return {
         left: `${position.x}px`,
         top: `${position.y}px`,
@@ -231,12 +222,11 @@ export default {
       this.inputIsFocused = true
     },
     updateResultsSectionMaxHeight () {
-      const pinchZoom = utils.visualViewport().scale
       const position = this.$store.state.connectionDetailsPosition
       const infoSection = this.$refs.infoSection.getBoundingClientRect()
       const resultsActions = this.$refs.resultsActions.getBoundingClientRect()
       const dialogInfoHeight = infoSection.height + resultsActions.height
-      const maxHeight = (this.$store.state.viewportHeight - position.y - dialogInfoHeight) * pinchZoom
+      const maxHeight = (this.$store.state.viewportHeight - position.y - dialogInfoHeight)
       const minHeight = 300
       let height = Math.max(minHeight, maxHeight)
       height = Math.round(height)
@@ -273,12 +263,8 @@ export default {
       this.filter = filter
     },
     focus () {
-      this.$store.commit('pinchCounterZoomDecimal', 1)
       this.$store.dispatch('history/pause')
       this.inputIsFocused = true
-    },
-    updatePinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     },
     blur () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
@@ -306,7 +292,6 @@ export default {
     },
     visible (visible) {
       if (visible) {
-        this.updatePinchCounterZoomDecimal()
         this.updateNextConnectionColor()
       } else {
         this.$store.dispatch('history/resume')

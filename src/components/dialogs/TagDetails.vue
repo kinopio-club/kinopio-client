@@ -118,7 +118,6 @@ export default {
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     currentSpaceId () { return this.$store.state.currentSpace.id },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     position () {
       if (utils.objectHasKeys(this.newPosition)) {
         return this.newPosition
@@ -436,9 +435,6 @@ export default {
       this.cards = this.cards.concat(cards)
       this.updateDialogHeight()
     },
-    updatePinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
-    },
     relativeDate (card) {
       let date = card.nameUpdatedAt || card.updatedAt
       if (!date) {
@@ -454,7 +450,6 @@ export default {
       if (tag && this.visible) {
         this.newPosition = {}
         this.updateCards()
-        this.updatePinchCounterZoomDecimal()
         this.closeDialogs()
         this.$nextTick(() => {
           this.scrollIntoView()

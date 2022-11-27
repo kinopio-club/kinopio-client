@@ -1,11 +1,12 @@
 <template lang='pug'>
 .app(
   @pointermove="broadcastCursor"
-  @touchstart="isTouchDevice"
+  @touchstart="updateIsTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
   :class="{ 'no-background': isAddPage }"
 )
   base(v-if="isAddPage" target="_blank")
+
   OutsideSpaceBackground
   SpaceBackground
   ItemsLocked
@@ -13,8 +14,8 @@
   OffscreenMarkers
   //- router-view is Space or Add
   router-view
-  Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
-  Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
+  Header
+  Footer
   TagDetails
   LinkDetails
   UserDetails
@@ -51,10 +52,6 @@ import SpaceBackground from '@/components/SpaceBackground.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import utils from '@/utils.js'
 
-let multiTouchAction, shouldCancelUndo
-
-let inertiaScrollEndIntervalTimer, prevPosition
-
 export default {
   components: {
     Header,
@@ -90,21 +87,9 @@ export default {
       window.addEventListener('scroll', this.updateUserHasScrolled)
     }, 100)
     this.updateMetaDescription()
-    window.addEventListener('touchstart', this.touchStart)
-    window.addEventListener('touchmove', this.touchMove)
-    window.addEventListener('touchend', this.touchEnd)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateUserHasScrolled)
-    window.removeEventListener('touchstart', this.touchStart)
-    window.removeEventListener('touchmove', this.touchMove)
-    window.removeEventListener('touchend', this.touchEnd)
-  },
-  data () {
-    return {
-      isPinchZooming: false,
-      isTouchScrolling: false
-    }
   },
   computed: {
     spaceName () { return this.$store.state.currentSpace.name },
@@ -153,74 +138,6 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
-    toggleIsPinchZooming (event) {
-      if (utils.shouldIgnoreTouchInteraction(event)) { return }
-      this.isPinchZooming = true
-    },
-    touchStart (event) {
-      shouldCancelUndo = false
-      if (!utils.isMultiTouch(event)) {
-        multiTouchAction = null
-        return
-      }
-      this.$store.commit('shouldAddCard', false)
-      const touches = event.touches.length
-      if (touches >= 2) {
-        this.toggleIsPinchZooming(event)
-      }
-      // undo/redo
-      if (touches === 2) {
-        multiTouchAction = 'undo'
-      } else if (touches === 3) {
-        multiTouchAction = 'redo'
-      }
-    },
-    touchMove (event) {
-      const isFromDialog = event.target.closest('dialog')
-      if (isFromDialog) { return }
-      shouldCancelUndo = true
-      this.isTouchScrolling = true
-    },
-    checkIfInertiaScrollEnd () {
-      if (!utils.isAndroid) { return }
-      if (inertiaScrollEndIntervalTimer) { return }
-      prevPosition = null
-      inertiaScrollEndIntervalTimer = setInterval(() => {
-        const viewport = utils.visualViewport()
-        const current = {
-          left: viewport.offsetLeft,
-          top: viewport.offsetTop
-        }
-        if (!prevPosition) {
-          prevPosition = current
-        } else if (prevPosition.left === current.left && prevPosition.top === current.top) {
-          clearInterval(inertiaScrollEndIntervalTimer)
-          inertiaScrollEndIntervalTimer = null
-          this.isTouchScrolling = false
-        } else {
-          prevPosition = current
-        }
-      }, 60)
-    },
-    touchEnd () {
-      if (this.$store.state.isAddPage) { return }
-      this.isPinchZooming = false
-      this.checkIfInertiaScrollEnd()
-      if (shouldCancelUndo) {
-        shouldCancelUndo = false
-        multiTouchAction = ''
-        return
-      }
-      if (!multiTouchAction) { return }
-      if (multiTouchAction === 'undo') {
-        this.$store.dispatch('history/undo')
-        this.$store.commit('addNotification', { message: 'Undo', icon: 'undo' })
-      } else if (multiTouchAction === 'redo') {
-        this.$store.dispatch('history/redo')
-        this.$store.commit('addNotification', { message: 'Redo', icon: 'redo' })
-      }
-      multiTouchAction = null
-    },
     broadcastCursor (event) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
@@ -229,7 +146,7 @@ export default {
       updates.zoom = this.spaceZoomDecimal
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
     },
-    isTouchDevice () {
+    updateIsTouchDevice () {
       this.$store.commit('isTouchDevice', true)
     },
     updateUserHasScrolled () {

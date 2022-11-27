@@ -18,7 +18,6 @@
           placeholder="Puppies in a victorian style"
           v-model="promptInput"
           ref="promptInput"
-          @focus="resetPinchCounterZoomDecimal"
           @update="textareaSize"
           @keydown.enter.exact.prevent="generateImage"
           @keyup.stop.backspace
@@ -155,9 +154,6 @@ export default {
       let AIImages = this.$store.state.currentUser.AIImages
       AIImages = this.images.concat(AIImages)
       this.$store.commit('currentUser/AIImages', AIImages)
-    },
-    resetPinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', 1)
     },
     focusPromptInput () {
       if (utils.isMobile()) { return }

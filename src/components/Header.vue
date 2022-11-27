@@ -194,10 +194,10 @@ export default {
     Toolbar,
     Import
   },
-  props: {
-    isPinchZooming: Boolean,
-    isTouchScrolling: Boolean
-  },
+  // props: {
+  //   isPinchZooming: Boolean,
+  //   isTouchScrolling: Boolean
+  // },
   data () {
     return {
       aboutIsVisible: false,

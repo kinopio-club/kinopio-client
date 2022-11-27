@@ -73,7 +73,6 @@ dialog.image-picker(
           :placeholder="placeholder"
           v-model="searchInput"
           ref="searchInput"
-          @focus="resetPinchCounterZoomDecimal"
           @keyup.stop.backspace
           @keyup.stop.enter
           @mouseup.stop
@@ -524,9 +523,6 @@ export default {
           this.resultsSectionHeight = resultsSection + serviceSection + searchSection + 4
         })
       })
-    },
-    resetPinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', 1)
     },
     updateLastUsedImagePickerService () {
       if (this.isBackgroundImage) { return }

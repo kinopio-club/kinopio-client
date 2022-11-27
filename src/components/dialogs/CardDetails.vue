@@ -40,8 +40,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.up.stop="triggerPickerNavigation"
 
         @keydown.tab.exact="triggerPickerSelectItem"
-
-        @focus="resetPinchCounterZoomDecimal"
       )
 
       TagPicker(
@@ -490,15 +488,8 @@ export default {
       }
     },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
       let zoom = this.spaceCounterZoomDecimal
-      const viewport = utils.visualViewport()
-      const pinchCounterScale = 1 / viewport.scale
-      if (zoom === 1) {
-        zoom = pinchCounterScale
-      }
-      // zoom = utils.roundFloat(zoom)
       const left = `${this.card.x + 8}px`
       const top = `${this.card.y + 8}px`
       return { transform: `scale(${zoom})`, left, top }
@@ -918,7 +909,6 @@ export default {
       })
     },
     focusName (position) {
-      utils.disablePinchZoom()
       const shouldPreventFocus = this.$store.state.shouldPreventNextFocusOnName
       if (shouldPreventFocus) {
         this.triggerUpdatePositionInVisualViewport()
@@ -948,7 +938,6 @@ export default {
       if (utils.isIPhone()) {
         behavior = 'auto'
       }
-      utils.disablePinchZoom()
       this.$nextTick(() => {
         this.scrollIntoView(behavior)
         this.focusName()
@@ -1380,12 +1369,6 @@ export default {
       }
       this.$store.dispatch('currentCards/update', update)
     },
-    resetPinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', 1)
-    },
-    updatePinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
-    },
     resetTextareaHeight () {
       if (!this.visible) { return }
       this.$refs.name.style.height = 'initial'
@@ -1394,7 +1377,6 @@ export default {
       this.$nextTick(() => {
         this.broadcastShowCardDetails()
         this.clearErrors()
-        this.updatePinchCounterZoomDecimal()
         this.scrollIntoViewAndFocus()
         this.updatePreviousTags()
         this.updateNameSplitIntoCardsCount()
@@ -1444,7 +1426,6 @@ export default {
     visible (visible) {
       if (!visible) {
         this.closeCard()
-        utils.enablePinchZoom()
       }
     }
   }

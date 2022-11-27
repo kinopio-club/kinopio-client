@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.offscreen-markers(v-if="isVisible" :styles="styles" :class="{ 'is-dark': isDark }")
+aside.offscreen-markers(v-if="isVisible" :class="{ 'is-dark': isDark }")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
@@ -77,19 +77,6 @@ export default {
     },
     dialogsVisible () {
       return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleSelectedActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
-    },
-    styles () {
-      const viewport = this.viewport
-      const pinchZoomScale = viewport.scale
-      const counterPinchZoomScale = utils.roundFloat(1 / pinchZoomScale)
-      const pinchZoomOffsetLeft = viewport.offsetLeft
-      const pinchZoomOffsetTop = viewport.offsetTop
-      let styles = {}
-      if (pinchZoomScale > 1) {
-        styles.transform = `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${counterPinchZoomScale})`
-        styles['transform-origin'] = 'left top'
-      }
-      return styles
     },
     backgroundImage () {
       const background = this.$store.state.currentSpace.background

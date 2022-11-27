@@ -151,11 +151,6 @@ export default {
       if (position.shouldIgnoreZoom) {
         zoom = 1
       }
-      const viewport = utils.visualViewport()
-      const pinchCounterScale = utils.roundFloat(1 / viewport.scale)
-      if (zoom === 1) {
-        zoom = pinchCounterScale
-      }
       const styles = {
         transform: `scale(${zoom})`,
         left: position.x + 'px',

@@ -73,10 +73,10 @@ export default {
     SpaceZoom,
     AddToInbox
   },
-  props: {
-    isPinchZooming: Boolean,
-    isTouchScrolling: Boolean
-  },
+  // props: {
+  //   isPinchZooming: Boolean,
+  //   isTouchScrolling: Boolean
+  // },
   data () {
     return {
       favoritesActionsIsVisible: false,

@@ -127,7 +127,6 @@ export default {
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     userColor () { return this.$store.state.currentUser.color },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     oneCardOrMultipleBoxesIsSelected () { return this.cards.length || this.boxes.length > 1 },
 
@@ -542,9 +541,6 @@ export default {
     scrollIntoView () {
       const element = this.$refs.dialog
       utils.scrollIntoView(element)
-    },
-    updatePinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     }
   },
   watch: {
@@ -553,7 +549,6 @@ export default {
         this.checkCardsHaveCheckboxes()
         this.checkCardsCheckboxIsChecked()
         this.$nextTick(() => {
-          this.updatePinchCounterZoomDecimal()
           this.checkIsCardsConnected()
           this.$store.dispatch('currentConnections/removeUnusedTypes')
           this.scrollIntoView()

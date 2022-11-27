@@ -8,7 +8,6 @@ aside
     @touchmove="painting"
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="canvasStyles"
     @dragenter="checkIfUploadIsDraggedOver"
     @dragover.prevent="checkIfUploadIsDraggedOver"
     @dragleave="removeUploadIsDraggedOver"
@@ -18,17 +17,14 @@ aside
   canvas#remote-painting.remote-painting(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="canvasStyles"
   )
   canvas#locking.locking(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="canvasStyles"
   )
   canvas#initial-circle.initial-circle(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="canvasStyles"
   )
   DropGuideLine(
     :currentCursor="currentCursor"
@@ -124,8 +120,6 @@ export default {
   },
   data () {
     return {
-      pinchZoomOffsetTop: 0,
-      pinchZoomOffsetLeft: 0,
       currentCursor: {},
       uploadIsDraggedOver: false
     }
@@ -142,9 +136,6 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     isPanning () { return this.$store.state.currentUserIsPanningReady },
     isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
-    canvasStyles () {
-      return { top: this.pinchZoomOffsetTop + 'px', left: this.pinchZoomOffsetLeft + 'px' }
-    },
     toolbarIsCard () { return this.$store.state.currentUserToolbar === 'card' },
     toolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' }
   },

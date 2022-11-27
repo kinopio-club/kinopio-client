@@ -178,15 +178,11 @@ export default {
     checkIfShouldRequestSpace () {
       if (!this.isSpace || this.space.isLoadingOrInvalid) { return }
       return this.remoteSpaceId !== this.space.id
-    },
-    updatePinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     }
   },
   watch: {
     isVisible (visible) {
       if (visible) {
-        this.updatePinchCounterZoomDecimal()
         const shouldRequestSpace = this.checkIfShouldRequestSpace()
         if (!shouldRequestSpace) {
           this.scrollIntoView()

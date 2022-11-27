@@ -37,7 +37,6 @@ const store = createStore({
     isTouchDevice: false,
     cardsCreatedLimit: 100,
     prevCursorPosition: { x: 0, y: 0 },
-    pinchCounterZoomDecimal: 1,
     currentSpacePath: '/',
     webfontIsLoaded: false,
     userHasScrolled: false,
@@ -330,10 +329,6 @@ const store = createStore({
     },
     prevCursorPosition: (state, cursor) => {
       state.prevCursorPosition = cursor
-    },
-    pinchCounterZoomDecimal: (state, value) => {
-      utils.typeCheck({ value, type: 'number', origin: 'pinchCounterZoomDecimal' })
-      state.pinchCounterZoomDecimal = value
     },
     currentSpacePath: (state, value) => {
       utils.typeCheck({ value, type: 'string', origin: 'currentSpacePath' })
