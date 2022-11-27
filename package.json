@@ -35,7 +35,7 @@
     "babel-eslint": "^10.0.1",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^7.18.0",
-    "lint-staged": "^11.1.2",
+    "lint-staged": "^13.0.4",
     "postcss": "^8.3.6",
     "pug": "^3.0.2",
     "stylus": "^0.54.5",
