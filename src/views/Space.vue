@@ -331,12 +331,12 @@ export default {
         this.$store.dispatch('currentCards/update', { id: card.id, z: index })
       })
     },
-    addCard (position) {
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
+    addCard (event) {
+      let position = utils.cursorPositionInSpace(event)
       const isParentCard = true
       position = {
-        x: position.x * zoom,
-        y: position.y * zoom
+        x: position.x,
+        y: position.y
       }
       if (this.spaceIsReadOnly) {
         this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
