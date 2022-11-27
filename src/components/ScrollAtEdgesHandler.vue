@@ -5,7 +5,7 @@
 import utils from '@/utils.js'
 
 const scrollArea = 50
-let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, maxHeight, maxWidth
+let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, maxHeight, maxWidth, currentEvent
 let movementDirection = {}
 
 export default {
@@ -64,6 +64,7 @@ export default {
   },
   methods: {
     initInteractions (event) {
+      currentEvent = event
       const position = utils.cursorPositionInViewport(event)
       const zoom = this.spaceZoomDecimal
       startCursor = position
@@ -78,6 +79,7 @@ export default {
       }
     },
     interact (event) {
+      currentEvent = event
       if (this.$store.getters.shouldScrollAtEdges(event)) {
         this.updateMovementDirection()
       }
@@ -196,7 +198,6 @@ export default {
         left: Math.round(delta.x * zoom),
         top: Math.round(delta.y * zoom)
       }
-      const cursor = this.cursor()
       if (isDraggingItem) {
         const slowMultiplier = 0.9
         const itemDelta = {
@@ -210,10 +211,10 @@ export default {
         }
       }
       if (this.isDrawingConnection) {
-        this.$store.commit('triggeredDrawConnectionFrame', cursor)
+        this.$store.commit('triggeredDrawConnectionFrame', currentEvent)
       }
       if (this.currentUserIsPainting && !currentUserIsBoxSelecting) {
-        this.$store.commit('triggeredPaintFramePosition', cursor)
+        this.$store.commit('triggeredPaintFramePosition', currentEvent)
       }
       window.scrollBy(delta)
     },
