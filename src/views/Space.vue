@@ -387,7 +387,7 @@ export default {
       if (this.$store.state.preventMultipleSelectedActionsIsVisible) { return }
       const isMultipleSelected = this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length || this.$store.state.multipleBoxesSelectedIds.length
       if (isMultipleSelected) {
-        const position = utils.cursorPositionInPage(event)
+        const position = utils.cursorPositionInSpace({ event })
         this.$store.commit('multipleSelectedActionsPosition', position)
         this.$store.commit('multipleSelectedActionsIsVisible', true)
       }

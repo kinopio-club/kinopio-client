@@ -125,14 +125,6 @@ export default {
       return this.$store.state.multipleSelectedActionsIsVisible && isSelectedItems
     },
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
-    position () {
-      const cursor = this.$store.state.multipleSelectedActionsPosition
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
-      return {
-        left: `${cursor.x * zoom}px`,
-        top: `${cursor.y * zoom}px`
-      }
-    },
     userColor () { return this.$store.state.currentUser.color },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
@@ -313,17 +305,11 @@ export default {
       return { cards, boxes }
     },
     styles () {
-      let zoom
-      if (utils.isSignificantlyPinchZoomed()) {
-        zoom = this.pinchCounterZoomDecimal
-      } else {
-        zoom = this.spaceCounterZoomDecimal
-      }
+      const position = this.$store.state.multipleSelectedActionsPosition
       return {
         backgroundColor: this.userColor,
-        left: this.position.left,
-        top: this.position.top,
-        transform: `scale(${zoom})`
+        left: position.x + 'px',
+        top: position.y + 'px'
       }
     }
   },
