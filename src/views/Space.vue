@@ -332,12 +332,12 @@ export default {
         this.$store.dispatch('currentCards/update', { id: card.id, z: index })
       })
     },
-    addCard (position) {
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
+    addCard (event) {
+      let position = utils.cursorPositionInSpace({ event })
       const isParentCard = true
       position = {
-        x: position.x * zoom,
-        y: position.y * zoom
+        x: position.x,
+        y: position.y
       }
       if (this.spaceIsReadOnly) {
         this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
@@ -394,8 +394,7 @@ export default {
     },
     addOrCloseCard (event) {
       if (this.$store.state.shouldAddCard) {
-        const position = utils.cursorPositionInPage(event)
-        this.addCard(position)
+        this.addCard(event)
       } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
         this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
       }
