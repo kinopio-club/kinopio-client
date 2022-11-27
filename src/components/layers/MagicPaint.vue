@@ -80,14 +80,9 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggeredPaintFramePosition') {
-        const position = this.$store.state.triggeredPaintFramePosition
-        const event = {
-          clientX: position.x,
-          clientY: position.y
-        }
+        const event = this.$store.state.triggeredPaintFramePosition
         this.createPaintingCircle(event)
       } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
-        this.updatePositionOffsetByPinchZoom()
         this.updateCirclesWithScroll()
       } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
         let circle = mutation.payload
@@ -137,7 +132,7 @@ export default {
   },
   computed: {
     currentUserColor () { return this.$store.state.currentUser.color },
-    userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
+    userCannotEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
     // keep canvases updated to viewport size so you can draw on newly created areas
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
@@ -162,18 +157,12 @@ export default {
     },
     scroll () {
       this.updateCirclesWithScroll()
-      this.updatePositionOffsetByPinchZoom()
       this.cancelLocking()
     },
     clearCircles () {
       initialCircles = []
       paintingCircles = []
       remotePaintingCircles = []
-    },
-    updatePositionOffsetByPinchZoom () {
-      if (!window.visualViewport) { return }
-      this.pinchZoomOffsetTop = window.visualViewport.offsetTop
-      this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
     },
     updatePrevScrollPosition () {
       prevScroll = {
@@ -282,7 +271,6 @@ export default {
       }
       // prevent mouse events from firing after touch events on touch device
       if (event.cancelable) { event.preventDefault() }
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
       this.startPostScroll()
     },
 
@@ -352,18 +340,15 @@ export default {
       let color = this.$store.state.currentUser.color
       this.currentCursor = utils.cursorPositionInViewport(event)
       let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
-      this.selectCards(circle)
-      this.selectConnections(circle)
-      this.selectBoxes(circle)
+      this.selectItems(event)
       paintingCircles.push(circle)
-      this.broadcastCircle(circle)
+      this.broadcastCircle(event, circle)
     },
     startPainting (event) {
       if (this.isPanning) { return }
       if (this.isBoxSelecting) { return }
-      this.$store.dispatch('currentCards/updateTallestCardHeight')
       startCursor = utils.cursorPositionInViewport(event)
-      this.currentCursor = utils.cursorPositionInViewport(event)
+      this.currentCursor = startCursor
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
       if (utils.isMultiTouch(event)) { return }
       this.startLocking()
@@ -411,11 +396,11 @@ export default {
     // Boxes
 
     addBox (event) {
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
-      let position = utils.cursorPositionInPage(event)
-      position = {
-        x: position.x * zoom,
-        y: position.y * zoom
+      let position = utils.cursorPositionInSpace({ event })
+      if (utils.isPositionOutsideOfSpace(position)) {
+        position = utils.cursorPositionInPage(event)
+        this.$store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+        return
       }
       const shouldPrevent = this.checkIfShouldPreventInteraction(position)
       if (shouldPrevent) { return }
@@ -440,31 +425,27 @@ export default {
       const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
       return isMobile && !isPaintingLocked
     },
-    selectConnections (circle) {
+    selectItems (event) {
       if (this.shouldPreventSelectionOnMobile()) { return }
-      if (this.userCantEditSpace) { return }
-      this.selectConnectionPaths(circle)
+      if (this.userCannotEditSpace) { return }
+      const position = utils.cursorPositionInSpace({ event })
+      this.selectCards(position)
+      this.selectConnectionPaths(position)
+      this.selectBoxes(position)
     },
-    selectCards (point) {
-      if (this.shouldPreventSelectionOnMobile()) { return }
-      if (this.userCantEditSpace) { return }
-      const zoom = this.spaceCounterZoomDecimal
-      point = {
-        x: Math.round((point.x + window.scrollX) * zoom),
-        y: Math.round((point.y + window.scrollY) * zoom)
-      }
-      const cards = this.$store.getters['currentCards/isSelectable'](point)
+    selectCards (position) {
+      const cards = this.$store.getters['currentCards/isSelectable'](position)
       if (!cards) { return }
       cards.forEach(card => {
         const cardX = card.x
         const cardY = card.y
         const x = {
-          value: point.x,
+          value: position.x,
           min: cardX - circleSelectionRadius,
           max: cardX + card.width + circleSelectionRadius
         }
         const y = {
-          value: point.y,
+          value: position.y,
           min: cardY - circleSelectionRadius,
           max: cardY + card.height + circleSelectionRadius
         }
@@ -475,30 +456,22 @@ export default {
         }
       })
     },
-    selectConnectionPaths (point) {
-      const zoom = this.spaceCounterZoomDecimal
+    selectConnectionPaths (position) {
       const paths = document.querySelectorAll('svg .connection-path')
-      point = {
-        x: Math.round((point.x + window.scrollX) * zoom),
-        y: Math.round((point.y + window.scrollY) * zoom)
-      }
       paths.forEach(path => {
         if (path.dataset['is-hidden-by-comment-filter'] === 'true') { return }
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
         let svgPoint = svg.createSVGPoint()
-        svgPoint.x = point.x
-        svgPoint.y = point.y
+        svgPoint.x = position.x
+        svgPoint.y = position.y
         const isSelected = path.isPointInStroke(svgPoint)
         if (isSelected) {
           this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
         }
       })
     },
-    selectBoxes (point) {
-      if (this.shouldPreventSelectionOnMobile()) { return }
-      if (this.userCantEditSpace) { return }
-      const zoom = this.spaceCounterZoomDecimal
+    selectBoxes (position) {
       const boxes = this.$store.getters['currentBoxes/isNotLocked']
       boxes.forEach(box => {
         const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
@@ -506,20 +479,18 @@ export default {
         box = {
           id: box.id,
           name: box.name,
-          x: (rect.x + window.scrollX) * zoom,
-          y: (rect.y + window.scrollY) * zoom,
+          x: box.x,
+          y: box.y,
           width: rect.width,
           height: rect.height
         }
-        const pointX = (point.x + window.scrollX) * zoom
-        const pointY = (point.y + window.scrollY) * zoom
         const x = {
-          value: pointX,
+          value: position.x,
           min: box.x - circleSelectionRadius,
           max: box.x + box.width + circleSelectionRadius
         }
         const y = {
-          value: pointY,
+          value: position.y,
           min: box.y - circleSelectionRadius,
           max: box.y + box.height + circleSelectionRadius
         }
@@ -533,14 +504,15 @@ export default {
 
     // Remote Painting
 
-    broadcastCircle (circle) {
+    broadcastCircle (event, circle) {
       const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()
       if (!currentUserCanEdit) { return }
+      const position = utils.cursorPositionInSpace({ event })
       this.$store.commit('broadcast/update', {
         updates: {
           userId: this.$store.state.currentUser.id,
-          x: circle.x + window.scrollX,
-          y: circle.y + window.scrollY,
+          x: position.x,
+          y: position.y,
           color: circle.color,
           iteration: circle.iteration,
           zoom: this.spaceZoomDecimal
@@ -550,14 +522,6 @@ export default {
       })
     },
     createRemotePaintingCircle (circle) {
-      const remoteZoom = 1 / circle.zoom
-      const localZoom = this.spaceCounterZoomDecimal
-      // remote zoom
-      circle.x = circle.x * remoteZoom
-      circle.y = circle.y * remoteZoom
-      // local zoom
-      circle.x = circle.x / localZoom
-      circle.y = circle.y / localZoom
       remotePaintingCircles.push(circle)
     },
     remotePainting () {
@@ -701,11 +665,10 @@ export default {
     addCardsAndUploadFiles (event) {
       let files = event.dataTransfer.files
       files = Array.from(files)
-      this.currentCursor = utils.cursorPositionInPage(event)
       this.removeUploadIsDraggedOver()
       this.$store.dispatch('upload/addCardsAndUploadFiles', {
         files,
-        currentCursor: this.currentCursor
+        event
       })
     }
   }

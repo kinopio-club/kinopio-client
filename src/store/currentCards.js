@@ -13,14 +13,20 @@ import qs from '@aguezz/qs-parse'
 
 let currentSpaceId
 let prevMovePositions = {}
+let tallestCardHeight = 0
+
+const updateTallestCardHeight = (height) => {
+  if (height > tallestCardHeight) {
+    tallestCardHeight = Math.ceil(height)
+  }
+}
 
 const currentCards = {
   namespaced: true,
   state: {
     ids: [],
     cards: {}, // {id, {card}}
-    removedCards: [], // denormalized
-    tallestCardHeight: 0
+    removedCards: [] // denormalized
   },
   mutations: {
 
@@ -30,6 +36,7 @@ const currentCards = {
       state.ids = []
       state.cards = {}
       state.removedCards = []
+      tallestCardHeight = 0
     },
     restore: (state, cards) => {
       let cardIds = []
@@ -38,6 +45,7 @@ const currentCards = {
         card.x = card.x || 100
         card.y = card.y || 100
         state.cards[card.id] = card
+        updateTallestCardHeight(card.height)
       })
       state.ids = state.ids.concat(cardIds)
     },
@@ -406,15 +414,9 @@ const currentCards = {
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           context.commit('update', body)
           context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
+          updateTallestCardHeight(card.height)
         })
       })
-    },
-    updateTallestCardHeight: (context) => {
-      let cards = context.getters.all
-      cards = sortBy(cards, ['height'])
-      if (cards.length === 0) { return }
-      const value = cards[cards.length - 1].height
-      context.commit('tallestCardHeight', value)
     },
 
     // resize
@@ -778,7 +780,7 @@ const currentCards = {
       return result
     },
     isSelectable: (state, getters, rootState) => (position) => {
-      const threshold = state.tallestCardHeight
+      const threshold = tallestCardHeight
       const canBeSelectedSortedByY = getters.canBeSelectedSortedByY
       let yIndex = canBeSelectedSortedByY.yIndex
       let cards = canBeSelectedSortedByY.cards
