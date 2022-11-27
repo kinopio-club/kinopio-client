@@ -81,24 +81,11 @@ export default {
     space () { return this.currentLink.space },
     isSpace () { return utils.objectHasKeys(this.currentLink.space) },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
       const position = this.position || this.$store.state.linkDetailsPosition
-      const isChildDialog = this.cardDetailsIsVisibleForCardId
-      let zoom = this.$store.getters.spaceZoomDecimal
-      if (isChildDialog) {
-        zoom = 1
-      }
-      const x = zoom * position.x
-      const y = zoom * position.y
-      let scale
-      if (utils.isSignificantlyPinchZoomed()) {
-        scale = this.pinchCounterZoomDecimal
-      }
       return {
-        left: `${x}px`,
-        top: `${y}px`,
-        transform: `scale(${scale})`
+        left: `${position.x}px`,
+        top: `${position.y}px`
       }
     },
     url () {
