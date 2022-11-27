@@ -120,7 +120,7 @@ export default {
       })
     },
     addCardsAndUploadFiles: async (context, { files, event }) => {
-      const position = utils.cursorPositionInSpace({ event })
+      let position = utils.cursorPositionInSpace({ event })
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) {
         context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position: position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
@@ -132,6 +132,13 @@ export default {
       if (!currentUserIsSignedIn) {
         context.commit('addNotificationWithPosition', { message: 'Sign Up or In', position: position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
         context.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' }, { root: true })
+        return
+      }
+      // check if outside space
+      const isOutsideSpace = utils.isPositionOutsideOfSpace(position)
+      if (isOutsideSpace) {
+        position = utils.cursorPositionInPage(event)
+        context.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' }, { root: true })
         return
       }
       // check sizeLimit
