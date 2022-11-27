@@ -127,21 +127,9 @@ export default {
       }
     },
     styles () {
-      const isChildDialog = this.cardDetailsIsVisibleForCardId || this.visibleFromTagList
-      let zoom = this.$store.getters.spaceZoomDecimal
-      if (isChildDialog) {
-        zoom = 1
-      }
-      const x = zoom * this.position.x
-      const y = zoom * this.position.y
-      let scale
-      if (utils.isSignificantlyPinchZoomed()) {
-        scale = this.pinchCounterZoomDecimal
-      }
       return {
-        left: `${x}px`,
-        top: `${y}px`,
-        transform: `scale(${scale})`
+        left: `${this.position.x}px`,
+        top: `${this.position.y}px`
       }
     },
     color () {
