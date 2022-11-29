@@ -91,7 +91,7 @@ export default {
         x: -delta.x,
         y: -delta.y
       }
-      console.log('🍋', scrollBy, event.pageY, event.layerY, event.changedTouches[0].pageY)
+      console.log('🍋', scrollBy.y, delta.y, currentCursor.y, startCursor.y)
       window.scrollBy({
         left: scrollBy.x,
         top: scrollBy.y
