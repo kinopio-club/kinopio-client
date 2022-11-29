@@ -47,7 +47,7 @@ export default {
       const position = this.cursorPositionInPage(event)
       startCursor = position
       currentCursor = position
-      console.log('🐢 start, update cursors', startCursor.y, event.clientY)
+      console.log('🐢 start, update cursors', startCursor.y)
       // this.cancelMomentum() shouldCancelMomentum = true
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
@@ -58,7 +58,7 @@ export default {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
       currentCursor = this.cursorPositionInPage(event)
-      console.log('🍓 touchmove, update pos y', currentCursor.y, event.clientY)
+      console.log('🍓 touchmove, update pos y', currentCursor.y)
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
         this.pinchZoom(event)
@@ -91,7 +91,7 @@ export default {
         x: -delta.x,
         y: -delta.y
       }
-      console.log('🍋', scrollBy, event.pageY, event.clientY)
+      console.log('🍋', scrollBy, event.pageY, event.layerY, event.changedTouches[0].pageY)
       window.scrollBy({
         left: scrollBy.x,
         top: scrollBy.y
