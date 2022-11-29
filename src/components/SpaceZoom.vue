@@ -60,11 +60,6 @@ export default {
   },
   methods: {
     updateSpaceZoomFromTrigger (percent) {
-      if (percent > this.max) {
-        this.animateJiggleRight = true
-      } else if (percent < this.min) {
-        this.animateJiggleLeft = true
-      }
       percent = Math.max(percent, this.min)
       percent = Math.min(percent, this.max)
       this.$store.commit('spaceZoomPercent', percent)
@@ -84,6 +79,15 @@ export default {
     closeAllDialogs () {
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('closeAllDialogs', 'SpaceZoom')
+    }
+  },
+  watch: {
+    spaceZoomPercent (value) {
+      if (value >= this.max) {
+        this.animateJiggleRight = true
+      } else if (value <= this.min) {
+        this.animateJiggleLeft = true
+      }
     }
   }
 }

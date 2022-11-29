@@ -14,22 +14,21 @@ export default {
     // window.addEventListener('touchstart', this.touchStart)
     // window.addEventListener('touchmove', this.touchMove)
     // window.addEventListener('touchend', this.touchEnd)
-    window.addEventListener('touchmove', this.pinchZoom, { passive: false })
-    window.addEventListener('touchstart', this.initPinchZoom, { passive: false })
+    window.addEventListener('touchstart', this.touchStart, { passive: false })
+    window.addEventListener('touchmove', this.touchMove, { passive: false })
   },
   beforeUnmount () {
     // window.removeEventListener('touchstart', this.touchStart)
     // window.removeEventListener('touchmove', this.touchMove)
     // window.removeEventListener('touchend', this.touchEnd)
-    window.removeEventListener('touchmove', this.pinchZoom, { passive: false })
-    window.removeEventListener('touchstart', this.initPinchZoom, { passive: false })
+    window.removeEventListener('touchstart', this.touchStart, { passive: false })
+    window.removeEventListener('touchmove', this.touchMove, { passive: false })
   },
   data () {
     return {
     }
   },
   computed: {
-    // https://raw.githubusercontent.com/kinopio-club/kinopio-client/5026c48ad4a3801fed3018eb42cb63f481ec560d/src/components/SpaceZoom.vue?token=GHSAT0AAAAAAB26SPJ43YH3LGDYLK2V4XNAY4FF2OA
     spaceZoomPercent () { return this.$store.state.spaceZoomPercent },
     max () { return consts.spaceZoom.max }, // 100
     min () { return consts.spaceZoom.min } // 40
@@ -37,16 +36,30 @@ export default {
   },
   methods: {
 
+    touchStart (event) {
+      event.preventDefault()
+      const isMultiTouch = utils.isMultiTouch(event)
+      if (isMultiTouch) {
+        this.initPinchZoom(event)
+      } else {
+      }
+    },
+
+    touchMove (event) {
+      event.preventDefault()
+      const isMultiTouch = utils.isMultiTouch(event)
+      if (isMultiTouch) {
+        this.pinchZoom(event)
+      } else {
+      }
+    },
+
     // pinch zoom
 
     initPinchZoom (event) {
-      if (!utils.isMultiTouch(event)) { return }
-      event.preventDefault()
       touchStartZoomValue = this.spaceZoomPercent
     },
     pinchZoom (event) {
-      if (!utils.isMultiTouch(event)) { return }
-      event.preventDefault()
       const isPinching = event.touches.length === 2
       if (!isPinching) { return }
       const position = utils.cursorPositionInPage(event)
@@ -56,11 +69,6 @@ export default {
     },
 
     updateZoom (percent) {
-      // if (percent > this.max) {
-      //   this.animateJiggleRight = true
-      // } else if (percent < this.min) {
-      //   this.animateJiggleLeft = true
-      // }
       percent = Math.max(percent, this.min)
       percent = Math.min(percent, this.max)
       this.$store.commit('spaceZoomPercent', percent)
