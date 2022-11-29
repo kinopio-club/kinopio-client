@@ -8,17 +8,22 @@ import utils from '@/utils.js'
 // let multiTouchAction, shouldCancelUndo
 let touchStartZoomValue
 
+// let velocity, timestamp
+// collect on mousemove
+// velocity is the amount of movement divided by the time since the last frame)
+
 export default {
   name: 'TouchInteractionHandler',
   mounted () {
-    // window.addEventListener('touchend', this.touchEnd) initiates momentum scroll raf
     window.addEventListener('touchstart', this.touchStart, { passive: false })
     window.addEventListener('touchmove', this.touchMove, { passive: false })
+    window.addEventListener('touchend', this.touchEnd, { passive: false })
   },
   beforeUnmount () {
     // window.removeEventListener('touchend', this.touchEnd)
     window.removeEventListener('touchstart', this.touchStart, { passive: false })
     window.removeEventListener('touchmove', this.touchMove, { passive: false })
+    window.removeEventListener('touchend', this.touchEnd, { passive: false })
   },
   data () {
     return {
@@ -31,32 +36,62 @@ export default {
 
   },
   methods: {
-
     touchStart (event) {
       if (this.shouldIgnore(event)) { return }
-      console.log('🌳 start', event)
+      console.log('🐢 start', event)
       event.preventDefault()
+      this.cancelMomentumScroll()
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
         this.initPinchZoom(event)
-      } else {
       }
     },
     touchMove (event) {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
-      console.log('💦 move')
+      console.log('🏎 move', event)
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
         this.pinchZoom(event)
       } else {
+        this.swipeScroll(event)
       }
+    },
+    touchEnd (event) {
+      if (this.shouldIgnore(event)) { return }
+      event.preventDefault()
+      console.log('🍇 end', event)
+      const isMultiTouch = utils.isMultiTouch(event)
+      if (isMultiTouch) { return }
+      this.swipeScrollEnd(event)
     },
     shouldIgnore (event) {
       const element = event.target
       const isDialog = element.closest('dialog')
       const isButton = element.closest('button')
       return isDialog || isButton
+    },
+
+    // swipe scroll
+
+    swipeScroll (event) {
+      // On each mouse drag event (or touch event),
+      // you store the velocity (so the amount of movement divided by the time since the last frame)
+      // and a timestamp.
+      // You only need the last one, so that's just two variables.
+    },
+    swipeScrollEnd (event) {
+      // When the mouse/touch is released, check to see if the last timestamp is recent enough (I use 0.3 seconds).
+      // If so, set a variable inertialVelocity to the last calculated velocity; otherwise set it to 0 to prevent scrolling if the user carefully selected a position.
+    },
+    startMomentumScroll () {
+      // RAF: Then on every update (either through a timer, or each render call, depending on how you're rendering),
+    },
+    momentumScroll () {
+      // scroll by inertialVelocity * INERTIA_SCROLL_FACTOR (I use 0.9) and multiply inertialVelocity by INERTIA_ACCELERATION (I use 0.98).
+    },
+    cancelMomentumScroll () {
+
     },
 
     // pinch zoom
