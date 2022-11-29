@@ -44,9 +44,7 @@ export default {
     touchStart (event) {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
-      const position = this.cursorPositionInPage(event)
-      startCursor = position
-      currentCursor = position
+      startCursor = this.cursorPositionInPage(event)
       console.log('🐢 start, update cursors', startCursor.y)
       // this.cancelMomentum() shouldCancelMomentum = true
       const isMultiTouch = utils.isMultiTouch(event)
@@ -76,26 +74,19 @@ export default {
       const isDialog = element.closest('dialog')
       const isButton = element.closest('button')
       const isDraggingItem = this.$store.state.currentUserIsDraggingBox || this.$store.state.currentUserIsDraggingCard
+      console.log(isDraggingItem) // TODO bug fix dragging cards shouldn't scroll, shouldn't scroll when connecting either
       return isDialog || isButton || isDraggingItem
     },
 
     // swipe scroll
 
     scroll (event) {
-      const delta = {
-        x: currentCursor.x - startCursor.x,
-        y: currentCursor.y - startCursor.y
-      }
-      // inverted to match page scroll direction on touch
-      const scrollBy = {
-        x: -delta.x,
-        y: -delta.y
-      }
-      console.log('🍋', scrollBy.y, delta.y, currentCursor.y, startCursor.y)
-      window.scrollBy({
-        left: scrollBy.x,
-        top: scrollBy.y
-      })
+      // const delta = {
+      //   x: currentCursor.x - startCursor.x,
+      //   y: currentCursor.y - startCursor.y
+      // }
+      const position = this.cursorPositionInPage(event)
+      this.$store.commit('zoomOrigin', position) // TODO make something better
     },
 
     //   // velocity is amount of movement divided by the time since the last frame
