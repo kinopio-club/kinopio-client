@@ -8,8 +8,15 @@ import utils from '@/utils.js'
 // let multiTouchAction, shouldCancelUndo
 let touchStartZoomValue
 
-let timestamp, prevPosition
+let scrollTimer
+// timestamp
+
+// shouldCancelScroll
 // let velocity
+// shouldCancelMomentum
+// let startCursor, prevCursor, prevCursorPage, endCursor
+let prevCursor, currentCursor
+// let movementDirection = {}
 
 export default {
   name: 'TouchInteractionHandler',
@@ -32,36 +39,92 @@ export default {
     spaceZoomPercent () { return this.$store.state.spaceZoomPercent },
     max () { return consts.spaceZoom.max }, // 100
     min () { return consts.spaceZoom.min } // 40
-
   },
   methods: {
+    cursorPositionInPage (event) {
+      return {
+        x: event.pageX,
+        y: event.pageY
+      }
+    },
     touchStart (event) {
       if (this.shouldIgnore(event)) { return }
-      console.log('🐢 start', event)
       event.preventDefault()
-      this.initPrevPosition(event)
-      // this.cancelMomentum()
+      // prevPosition = utils.cursorPositionInPage(event)
+      const position = this.cursorPositionInPage(event)
+      // startCursor = position
+      prevCursor = position
+      currentCursor = position
+      console.log('🐢 start, update cursors', prevCursor, currentCursor)
+
+      // prevCursor = position
+      // endCursor = position
+
+      // shouldCancelScroll = false
+      // this.cancelMomentum() shouldCancelMomentum = true
       const isMultiTouch = utils.isMultiTouch(event)
-      if (!isMultiTouch) { return }
-      this.initPinchZoom(event)
+      if (isMultiTouch) {
+        this.initPinchZoom(event)
+      } else if (!scrollTimer) {
+        // = prevCursor
+        // this.updateMovementDirection()
+        scrollTimer = window.requestAnimationFrame(this.scrollFrame)
+      }
     },
     touchMove (event) {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
-      console.log('🏎 move', event)
+      // position = this.cursorPositionInPage(event)
+      // prevCursor = this.cursorPositionInPage(event)
+      currentCursor = this.cursorPositionInPage(event)
+      // prevCursorPage = this.cursorPositionInPage(event)
+
+      console.log('🍓 touchmove, update pos', currentCursor)
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
         this.pinchZoom(event)
       } else {
-        this.scroll(event)
+        // this.updateMovementDirection()
       }
     },
     touchEnd (event) {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
       console.log('🍇 end', event)
+      // shouldCancelScroll = true
+      this.stopScrollTimer()
       // this.startMomentum(event)
     },
+    stopScrollTimer () {
+      window.cancelAnimationFrame(scrollTimer)
+      scrollTimer = undefined
+      // prevCursor = undefined
+      // currentCursor = undefined
+      // movementDirection = {}
+    },
+
+    // updateMovementDirection () {
+    //   const cursor = this.cursor()
+    //   const xMove = endCursor.x - cursor.x
+    //   const yMove = endCursor.y - cursor.y
+    //   if (Math.sign(yMove) === 1) {
+    //     movementDirection.y = 'up'
+    //   } else if (Math.sign(yMove) === -1) {
+    //     movementDirection.y = 'down'
+    //   }
+    //   if (Math.sign(xMove) === 1) {
+    //     movementDirection.x = 'left'
+    //   } else if (Math.sign(xMove) === -1) {
+    //     movementDirection.x = 'right'
+    //   }
+    // },
+    // cursor () {
+    //   if (utils.objectHasKeys(prevCursor)) {
+    //     return prevCursor
+    //   } else {
+    //     return startCursor
+    //   }
+    // },
     shouldIgnore (event) {
       const element = event.target
       const isDialog = element.closest('dialog')
@@ -71,23 +134,35 @@ export default {
 
     // swipe scroll
 
-    initPrevPosition (event) {
-      const position = utils.cursorPositionInPage(event)
-      prevPosition = position
-    },
-    scroll (event) {
-      // console.log('swipeScroll', event)
-      // track position and calculate velocity
-      const position = utils.cursorPositionInPage(event)
-      // if (prevPosition) {
-      const frameTime = event.timeStamp - timestamp
-      timestamp = event.timeStamp
+    // initPrevPosition (event) {
+    //   const position = this.cursorPositionInPage(event)
+    //   prevPosition = position
+    // },
+    scrollFrame () {
+      // const cursor = this.cursor()
+      // we start polling the point position to accumulate velocity
+      // Once we stop(), we will use accumulated velocity to keep scrolling
+      // an object.
+
+      // const position = utils.cursorPositionInPage(event)
+      // const frameTime = event.timeStamp - timestamp
+      // timestamp = event.timeStamp
       const delta = {
-        x: position.x - prevPosition.x,
-        y: position.y - prevPosition.y
+        x: currentCursor.x - prevCursor.x,
+        y: currentCursor.y - prevCursor.y
       }
-      window.scrollBy(-delta.x, -delta.y)
-      console.log('🌻', delta, position, prevPosition, frameTime)
+      const deltaInverted = {
+        left: -delta.x,
+        top: -delta.y
+      }
+      window.scrollBy(deltaInverted)
+
+      console.log('🌻', deltaInverted) // 'currentCursor', currentCursor, 'prevCursor', prevCursor
+      // prevCursor = currentCursor
+
+      if (scrollTimer) {
+        window.requestAnimationFrame(this.scrollFrame)
+      }
 
       // prevPosition = {
       //   x: Math.max(prevPosition.x + delta.x, 0),
@@ -119,7 +194,7 @@ export default {
     pinchZoom (event) {
       const isPinching = event.touches.length === 2
       if (!isPinching) { return }
-      const position = utils.cursorPositionInPage(event)
+      const position = this.cursorPositionInPage(event)
       this.$store.commit('zoomOrigin', position)
       const percent = event.scale * touchStartZoomValue
       this.updateZoom(percent)
