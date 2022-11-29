@@ -8,15 +8,10 @@ import utils from '@/utils.js'
 // let multiTouchAction, shouldCancelUndo
 let touchStartZoomValue
 
-let scrollTimer
 // timestamp
-
-// shouldCancelScroll
 // let velocity
-// shouldCancelMomentum
-// let startCursor, prevCursor, prevCursorPage, endCursor
-let prevCursor, currentCursor
-// let movementDirection = {}
+let startCursor, currentCursor
+let movementDirection = {}
 
 export default {
   name: 'TouchInteractionHandler',
@@ -50,81 +45,56 @@ export default {
     touchStart (event) {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
-      // prevPosition = utils.cursorPositionInPage(event)
       const position = this.cursorPositionInPage(event)
-      // startCursor = position
-      prevCursor = position
+      startCursor = position
       currentCursor = position
-      console.log('🐢 start, update cursors', prevCursor, currentCursor)
-
-      // prevCursor = position
-      // endCursor = position
+      console.log('🐢 start, update cursors', startCursor.y)
+      this.updateMovementDirection()
+      // startCursor = position
+      // startCursor = startCursor
 
       // shouldCancelScroll = false
       // this.cancelMomentum() shouldCancelMomentum = true
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
         this.initPinchZoom(event)
-      } else if (!scrollTimer) {
-        // = prevCursor
-        // this.updateMovementDirection()
-        scrollTimer = window.requestAnimationFrame(this.scrollFrame)
       }
     },
     touchMove (event) {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
-      // position = this.cursorPositionInPage(event)
-      // prevCursor = this.cursorPositionInPage(event)
       currentCursor = this.cursorPositionInPage(event)
-      // prevCursorPage = this.cursorPositionInPage(event)
-
-      console.log('🍓 touchmove, update pos', currentCursor)
+      console.log('🍓 touchmove, update pos', currentCursor.y)
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
         this.pinchZoom(event)
       } else {
-        // this.updateMovementDirection()
+        this.scroll(event)
       }
     },
     touchEnd (event) {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
       console.log('🍇 end', event)
-      // shouldCancelScroll = true
-      this.stopScrollTimer()
-      // this.startMomentum(event)
-    },
-    stopScrollTimer () {
-      window.cancelAnimationFrame(scrollTimer)
-      scrollTimer = undefined
-      // prevCursor = undefined
-      // currentCursor = undefined
-      // movementDirection = {}
     },
 
-    // updateMovementDirection () {
-    //   const cursor = this.cursor()
-    //   const xMove = endCursor.x - cursor.x
-    //   const yMove = endCursor.y - cursor.y
-    //   if (Math.sign(yMove) === 1) {
-    //     movementDirection.y = 'up'
-    //   } else if (Math.sign(yMove) === -1) {
-    //     movementDirection.y = 'down'
-    //   }
-    //   if (Math.sign(xMove) === 1) {
-    //     movementDirection.x = 'left'
-    //   } else if (Math.sign(xMove) === -1) {
-    //     movementDirection.x = 'right'
-    //   }
-    // },
-    // cursor () {
-    //   if (utils.objectHasKeys(prevCursor)) {
-    //     return prevCursor
-    //   } else {
-    //     return startCursor
-    //   }
-    // },
+    updateMovementDirection () {
+      // temp?
+      // inverted to match page scroll direction on touch
+      // console.log('💐',startCursor.y, currentCursor.y)
+      const xMove = startCursor.x - currentCursor.x
+      const yMove = startCursor.y - currentCursor.y
+      if (Math.sign(yMove) === 1) {
+        movementDirection.y = 'down'
+      } else if (Math.sign(yMove) === -1) {
+        movementDirection.y = 'up'
+      }
+      if (Math.sign(xMove) === 1) {
+        movementDirection.x = 'right'
+      } else if (Math.sign(xMove) === -1) {
+        movementDirection.x = 'left'
+      }
+    },
     shouldIgnore (event) {
       const element = event.target
       const isDialog = element.closest('dialog')
@@ -134,47 +104,33 @@ export default {
 
     // swipe scroll
 
-    // initPrevPosition (event) {
-    //   const position = this.cursorPositionInPage(event)
-    //   prevPosition = position
-    // },
-    scrollFrame () {
-      // const cursor = this.cursor()
-      // we start polling the point position to accumulate velocity
-      // Once we stop(), we will use accumulated velocity to keep scrolling
-      // an object.
-
-      // const position = utils.cursorPositionInPage(event)
-      // const frameTime = event.timeStamp - timestamp
-      // timestamp = event.timeStamp
+    scroll (event) {
       const delta = {
-        x: currentCursor.x - prevCursor.x,
-        y: currentCursor.y - prevCursor.y
+        x: currentCursor.x - startCursor.x,
+        y: currentCursor.y - startCursor.y
       }
-      const deltaInverted = {
-        left: -delta.x,
-        top: -delta.y
-      }
-      window.scrollBy(deltaInverted)
-
-      console.log('🌻', deltaInverted) // 'currentCursor', currentCursor, 'prevCursor', prevCursor
-      // prevCursor = currentCursor
-
-      if (scrollTimer) {
-        window.requestAnimationFrame(this.scrollFrame)
+      // inverted to match page scroll direction on touch
+      const scrollBy = {
+        x: -delta.x,
+        y: -delta.y
       }
 
-      // prevPosition = {
-      //   x: Math.max(prevPosition.x + delta.x, 0),
-      //   y: Math.max(prevPosition.y + delta.y, 0),
-      // }
-
-      // velocity is amount of movement divided by the time since the last frame
-      // velocity = {
-      //   x: delta.x / frameTime,
-      //   y: delta.y / frameTime,
-      // }
+      if (movementDirection.y === 'down' && scrollBy.y < 0) {
+        console.log('🍋🍋', scrollBy.y, movementDirection.y, currentCursor.y, startCursor.y, event)
+      }
+      window.scrollBy({
+        left: scrollBy.x,
+        top: scrollBy.y
+      })
+      this.updateMovementDirection()
     },
+
+    //   // velocity is amount of movement divided by the time since the last frame
+    //   // velocity = {
+    //   //   x: delta.x / frameTime,
+    //   //   y: delta.y / frameTime,
+    //   // }
+    // },
     startMomentum (event) {
       // When the mouse/touch is released, check to see if the last timestamp is recent enough (I use 0.3 seconds).
       // If so, set a variable inertialVelocity to the last calculated velocity; otherwise set it to 0 to prevent scrolling if the user carefully selected a position.
