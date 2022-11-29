@@ -11,7 +11,6 @@ let touchStartZoomValue
 // timestamp
 // let velocity
 let startCursor, currentCursor
-let movementDirection = {}
 
 export default {
   name: 'TouchInteractionHandler',
@@ -48,12 +47,7 @@ export default {
       const position = this.cursorPositionInPage(event)
       startCursor = position
       currentCursor = position
-      console.log('🐢 start, update cursors', startCursor.y)
-      this.updateMovementDirection()
-      // startCursor = position
-      // startCursor = startCursor
-
-      // shouldCancelScroll = false
+      console.log('🐢 start, update cursors', startCursor.y, event.clientY)
       // this.cancelMomentum() shouldCancelMomentum = true
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
@@ -64,7 +58,7 @@ export default {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
       currentCursor = this.cursorPositionInPage(event)
-      console.log('🍓 touchmove, update pos', currentCursor.y)
+      console.log('🍓 touchmove, update pos y', currentCursor.y, event.clientY)
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
         this.pinchZoom(event)
@@ -76,24 +70,6 @@ export default {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
       console.log('🍇 end', event)
-    },
-
-    updateMovementDirection () {
-      // temp?
-      // inverted to match page scroll direction on touch
-      // console.log('💐',startCursor.y, currentCursor.y)
-      const xMove = startCursor.x - currentCursor.x
-      const yMove = startCursor.y - currentCursor.y
-      if (Math.sign(yMove) === 1) {
-        movementDirection.y = 'down'
-      } else if (Math.sign(yMove) === -1) {
-        movementDirection.y = 'up'
-      }
-      if (Math.sign(xMove) === 1) {
-        movementDirection.x = 'right'
-      } else if (Math.sign(xMove) === -1) {
-        movementDirection.x = 'left'
-      }
     },
     shouldIgnore (event) {
       const element = event.target
@@ -114,15 +90,11 @@ export default {
         x: -delta.x,
         y: -delta.y
       }
-
-      if (movementDirection.y === 'down' && scrollBy.y < 0) {
-        console.log('🍋🍋', scrollBy.y, movementDirection.y, currentCursor.y, startCursor.y, event)
-      }
+      console.log('🍋', scrollBy, event.pageY, event.clientY)
       window.scrollBy({
         left: scrollBy.x,
         top: scrollBy.y
       })
-      this.updateMovementDirection()
     },
 
     //   // velocity is amount of movement divided by the time since the last frame
