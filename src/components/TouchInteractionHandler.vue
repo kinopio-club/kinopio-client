@@ -11,15 +11,11 @@ let touchStartZoomValue
 export default {
   name: 'TouchInteractionHandler',
   mounted () {
-    // window.addEventListener('touchstart', this.touchStart)
-    // window.addEventListener('touchmove', this.touchMove)
-    // window.addEventListener('touchend', this.touchEnd)
+    // window.addEventListener('touchend', this.touchEnd) initiates momentum scroll raf
     window.addEventListener('touchstart', this.touchStart, { passive: false })
     window.addEventListener('touchmove', this.touchMove, { passive: false })
   },
   beforeUnmount () {
-    // window.removeEventListener('touchstart', this.touchStart)
-    // window.removeEventListener('touchmove', this.touchMove)
     // window.removeEventListener('touchend', this.touchEnd)
     window.removeEventListener('touchstart', this.touchStart, { passive: false })
     window.removeEventListener('touchmove', this.touchMove, { passive: false })
@@ -37,6 +33,8 @@ export default {
   methods: {
 
     touchStart (event) {
+      if (this.shouldIgnore(event)) { return }
+      console.log('🌳 start', event)
       event.preventDefault()
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
@@ -44,14 +42,21 @@ export default {
       } else {
       }
     },
-
     touchMove (event) {
+      if (this.shouldIgnore(event)) { return }
       event.preventDefault()
+      console.log('💦 move')
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
         this.pinchZoom(event)
       } else {
       }
+    },
+    shouldIgnore (event) {
+      const element = event.target
+      const isDialog = element.closest('dialog')
+      const isButton = element.closest('button')
+      return isDialog || isButton
     },
 
     // pinch zoom
@@ -67,14 +72,13 @@ export default {
       const percent = event.scale * touchStartZoomValue
       this.updateZoom(percent)
     },
-
     updateZoom (percent) {
       percent = Math.max(percent, this.min)
       percent = Math.min(percent, this.max)
       this.$store.commit('spaceZoomPercent', percent)
     }
 
-    // sets store isPinchZooming, isTouchScrolling. to be used by footer and header
+    // sets store isPinchZooming, isTouchScrolling. to be used by footer and header = should still use?
 
     // touchStart (event) {
 
