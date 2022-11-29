@@ -14,7 +14,7 @@
 
 <script>
 import Slider from '@/components/Slider.vue'
-import constants from '@/constants.js'
+import consts from '@/consts.js'
 
 const increment = 10
 
@@ -54,8 +54,8 @@ export default {
     }
   },
   computed: {
-    max () { return constants.spaceZoom().max }, // 100
-    min () { return constants.spaceZoom().min }, // 40
+    max () { return consts.spaceZoom.max }, // 100
+    min () { return consts.spaceZoom.min }, // 40
     spaceZoomPercent () { return this.$store.state.spaceZoomPercent }
   },
   methods: {
