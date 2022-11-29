@@ -191,7 +191,9 @@ export default {
       if (!this.spaces.length) {
         this.isLoading = true
       }
-      const spaces = await this.$store.dispatch('api/getUserSpaces')
+      const currentUser = this.$store.state.currentUser
+      let spaces = await this.$store.dispatch('api/getUserSpaces')
+      spaces = utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       this.isLoading = false
       if (!spaces) { return }
       this.spaces = spaces

@@ -990,6 +990,7 @@ code
   border-radius 3px
   padding 4px
   max-width 100%
+  min-height 35px
   word-wrap anywhere
   overflow auto
 .logo-image
