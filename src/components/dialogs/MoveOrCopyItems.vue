@@ -19,7 +19,7 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
         button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
           span {{selectedSpace.name}}
           img.down-arrow(src="@/assets/down-arrow.svg")
-        SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace")
+        SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true")
     button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
       img.icon.visit(src="@/assets/visit.svg")
       span {{buttonLabel}}
