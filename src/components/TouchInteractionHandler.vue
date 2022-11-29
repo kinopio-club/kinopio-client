@@ -8,9 +8,8 @@ import utils from '@/utils.js'
 // let multiTouchAction, shouldCancelUndo
 let touchStartZoomValue
 
-// let velocity, timestamp
-// collect on mousemove
-// velocity is the amount of movement divided by the time since the last frame)
+let timestamp, prevPosition
+// let velocity
 
 export default {
   name: 'TouchInteractionHandler',
@@ -40,11 +39,11 @@ export default {
       if (this.shouldIgnore(event)) { return }
       console.log('🐢 start', event)
       event.preventDefault()
-      this.cancelMomentumScroll()
+      this.initPrevPosition(event)
+      // this.cancelMomentum()
       const isMultiTouch = utils.isMultiTouch(event)
-      if (isMultiTouch) {
-        this.initPinchZoom(event)
-      }
+      if (!isMultiTouch) { return }
+      this.initPinchZoom(event)
     },
     touchMove (event) {
       if (this.shouldIgnore(event)) { return }
@@ -54,16 +53,14 @@ export default {
       if (isMultiTouch) {
         this.pinchZoom(event)
       } else {
-        this.swipeScroll(event)
+        this.scroll(event)
       }
     },
     touchEnd (event) {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
       console.log('🍇 end', event)
-      const isMultiTouch = utils.isMultiTouch(event)
-      if (isMultiTouch) { return }
-      this.swipeScrollEnd(event)
+      // this.startMomentum(event)
     },
     shouldIgnore (event) {
       const element = event.target
@@ -74,25 +71,45 @@ export default {
 
     // swipe scroll
 
-    swipeScroll (event) {
-      // On each mouse drag event (or touch event),
-      // you store the velocity (so the amount of movement divided by the time since the last frame)
-      // and a timestamp.
-      // You only need the last one, so that's just two variables.
+    initPrevPosition (event) {
+      const position = utils.cursorPositionInPage(event)
+      prevPosition = position
     },
-    swipeScrollEnd (event) {
+    scroll (event) {
+      // console.log('swipeScroll', event)
+      // track position and calculate velocity
+      const position = utils.cursorPositionInPage(event)
+      // if (prevPosition) {
+      const frameTime = event.timeStamp - timestamp
+      timestamp = event.timeStamp
+      const delta = {
+        x: position.x - prevPosition.x,
+        y: position.y - prevPosition.y
+      }
+      window.scrollBy(-delta.x, -delta.y)
+      console.log('🌻', delta, position, prevPosition, frameTime)
+
+      // prevPosition = {
+      //   x: Math.max(prevPosition.x + delta.x, 0),
+      //   y: Math.max(prevPosition.y + delta.y, 0),
+      // }
+
+      // velocity is amount of movement divided by the time since the last frame
+      // velocity = {
+      //   x: delta.x / frameTime,
+      //   y: delta.y / frameTime,
+      // }
+    },
+    startMomentum (event) {
       // When the mouse/touch is released, check to see if the last timestamp is recent enough (I use 0.3 seconds).
       // If so, set a variable inertialVelocity to the last calculated velocity; otherwise set it to 0 to prevent scrolling if the user carefully selected a position.
+      // start RAF momentumScroll: Then on every update (either through a timer, or each render call, depending on how you're rendering),
     },
-    startMomentumScroll () {
-      // RAF: Then on every update (either through a timer, or each render call, depending on how you're rendering),
-    },
-    momentumScroll () {
+    momentum () {
       // scroll by inertialVelocity * INERTIA_SCROLL_FACTOR (I use 0.9) and multiply inertialVelocity by INERTIA_ACCELERATION (I use 0.98).
     },
-    cancelMomentumScroll () {
-
-    },
+    // cancelMomentum () {
+    // },
 
     // pinch zoom
 
