@@ -75,7 +75,8 @@ export default {
       const element = event.target
       const isDialog = element.closest('dialog')
       const isButton = element.closest('button')
-      return isDialog || isButton
+      const isDraggingItem = this.$store.state.currentUserIsDraggingBox || this.$store.state.currentUserIsDraggingCard
+      return isDialog || isButton || isDraggingItem
     },
 
     // swipe scroll
