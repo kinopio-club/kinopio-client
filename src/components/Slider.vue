@@ -17,7 +17,7 @@
     :style="{left: zoomPercentBadgePosition + 'px'}"
   )
     span {{ integerValue }}%
-    button.inline-button(@mousedown.left.stop @click.left.stop="resetPlayhead")
+    button.inline-button(@mousedown.left.stop @click.left.stop="resetPlayhead" @touchend.stop="resetPlayhead")
       img.icon.close(src="@/assets/add.svg")
 
   progress(

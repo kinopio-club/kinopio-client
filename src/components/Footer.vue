@@ -37,8 +37,7 @@
   .right(:class="{'is-embed': isEmbed, 'hidden': isHidden}")
     button(v-if="isNotSupportedByDevice" @pointerup="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
       img.icon.minimap(src="@/assets/minimap.svg")
-    template(v-if="!isMobileOrTouch")
-      SpaceZoom
+    SpaceZoom
 </template>
 
 <script>
@@ -140,11 +139,6 @@ export default {
         return isEditedByOtherUser && isEditedAndNotVisited
       })
       return favoriteSpaces.length
-    },
-    isMobileOrTouch () {
-      const isTouchDevice = this.$store.getters.isTouchDevice
-      const isMobile = utils.isMobile()
-      return isTouchDevice || isMobile
     },
     isVisible () {
       const isTouchDevice = this.$store.getters.isTouchDevice

@@ -6,7 +6,6 @@
   :class="{ 'no-background': isAddPage }"
 )
   base(v-if="isAddPage" target="_blank")
-
   OutsideSpaceBackground
   SpaceBackground
   ItemsLocked
@@ -23,6 +22,7 @@
   WindowHistoryHandler
   KeyboardShortcutsHandler
   NotificationsWithPosition(layer="app")
+  TouchInteractionHandler
   .preload
     .logo-hover
     .logo-active
@@ -41,6 +41,7 @@ import MagicPaint from '@/components/layers/MagicPaint.vue'
 import Footer from '@/components/Footer.vue'
 import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
+import TouchInteractionHandler from '@/components/TouchInteractionHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
@@ -58,6 +59,7 @@ export default {
     MagicPaint,
     Footer,
     KeyboardShortcutsHandler,
+    TouchInteractionHandler,
     WindowHistoryHandler,
     TagDetails,
     LinkDetails,
