@@ -794,6 +794,7 @@ const currentSpace = {
     },
     changeSpace: async (context, { space, isRemote }) => {
       console.log('🚟 Change space', { space, isRemote })
+      context.commit('resetZoomAndScroll', null, { root: true })
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('notifySpaceNotFound', false, { root: true })
       space = utils.clone(space)

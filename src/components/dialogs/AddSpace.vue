@@ -123,7 +123,7 @@ export default {
     },
     async addJournalSpace () {
       this.$emit('closeDialogs')
-      window.scrollTo(0, 0)
+      this.$store.commit('resetZoomAndScroll')
       this.$emit('addJournalSpace')
       if (this.shouldAddSpaceDirectly) {
         this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
@@ -134,7 +134,7 @@ export default {
     },
     addSpace () {
       const noUserSpaces = !cache.getAllSpaces().length
-      window.scrollTo(0, 0)
+      this.$store.commit('resetZoomAndScroll')
       if (noUserSpaces) {
         window.location.href = '/'
       } else {
@@ -150,7 +150,7 @@ export default {
     },
     addInboxSpace () {
       this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
-      window.scrollTo(0, 0)
+      this.$store.commit('resetZoomAndScroll')
       this.$store.dispatch('currentSpace/addInboxSpace')
       this.$store.dispatch('currentSpace/updateSpacePageSize')
     },

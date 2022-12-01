@@ -191,13 +191,13 @@ export default {
       this.spaceFiltersIsVisible = !isVisible
     },
     addSpace () {
-      window.scrollTo(0, 0)
+      this.$store.commit('resetZoomAndScroll')
       this.$store.dispatch('currentSpace/addSpace')
       this.updateLocalSpaces()
       this.$store.commit('triggerFocusSpaceDetailsName')
     },
     addJournalSpace () {
-      window.scrollTo(0, 0)
+      this.$store.commit('resetZoomAndScroll')
       this.$store.dispatch('currentSpace/loadJournalSpace') // triggers updateLocalSpaces in addJournalSpace
       this.$store.commit('triggerFocusSpaceDetailsName')
     },

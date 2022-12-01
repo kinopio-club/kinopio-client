@@ -27,7 +27,7 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerSpaceZoomReset') {
         this.updateSpaceZoomFromTrigger(this.max)
-        window.scrollTo(0, 0)
+        this.$store.commit('resetZoom')
       } else if (mutation.type === 'triggerSpaceZoomOut') {
         let percent = this.spaceZoomPercent
         let speed

@@ -490,6 +490,16 @@ const store = createStore({
       position.y = Math.max(position.y, maxY)
       state.touchScrollOrigin = position
     },
+    resetZoom: (state) => {
+      state.spaceZoomPercent = 100
+      state.zoomOrigin = { x: 0, y: 0 }
+    },
+    resetZoomAndScroll: (state) => {
+      window.scrollTo(0, 0)
+      state.spaceZoomPercent = 100
+      state.zoomOrigin = { x: 0, y: 0 }
+      state.touchScrollOrigin = { x: 0, y: 0 }
+    },
 
     // Cards
 
