@@ -30,19 +30,6 @@ export default {
   name: 'OutsideSpaceBackground',
   components: {
   },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'spaceZoomPercent') {
-        const zoom = mutation.payload
-        if (zoom === 100) {
-          this.cancel()
-        } else {
-          if (colorCycleTimer) { return }
-          this.start()
-        }
-      }
-    })
-  },
   mounted () {
     this.start()
   },
@@ -56,7 +43,6 @@ export default {
   },
   computed: {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
-    zoomIsInitial () { return this.spaceZoomDecimal === 1 },
     styles () {
       return {
         backgroundColor: this.backgroundColor
@@ -102,10 +88,6 @@ export default {
       // TODO update w more efficient modulo math
     },
     colorCycleFrame () {
-      if (this.zoomIsInitial) {
-        this.cancel()
-        return
-      }
       colorCycleIteration++
       if (this.shouldUpdate()) {
         this.updateBackgroundColor()
