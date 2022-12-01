@@ -118,15 +118,17 @@ export default {
     pinchZoom (event) {
       const isPinching = event.touches.length === 2
       if (!isPinching) { return }
-      const position = this.cursorPositionInPage(event)
-      this.$store.commit('zoomOrigin', position)
-      const percent = event.scale * touchStartZoomValue
-      this.updateZoom(percent)
+      this.updateZoom(event)
     },
-    updateZoom (percent) {
+    updateZoom (event) {
+      let percent = event.scale * touchStartZoomValue
       percent = Math.max(percent, this.min)
       percent = Math.min(percent, this.max)
       this.$store.commit('spaceZoomPercent', percent)
+
+      // todo
+      const position = this.cursorPositionInPage(event)
+      this.$store.commit('zoomOrigin', position)
     }
 
     // sets store isPinchZooming, isTouchScrolling. to be used by footer and header = should still use?
