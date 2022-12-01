@@ -7,12 +7,13 @@
 )
   base(v-if="isAddPage" target="_blank")
   OutsideSpaceBackground
-  SpaceBackground
-  ItemsLocked
-  MagicPaint
-  OffscreenMarkers
-  //- router-view is Space or Add
-  router-view
+  .touch-scroll-offset(:style="touchScroll")
+    SpaceBackground
+    ItemsLocked
+    MagicPaint
+    OffscreenMarkers
+    //- router-view is Space or Add
+    router-view
   Header
   Footer
   TagDetails
@@ -94,6 +95,10 @@ export default {
     window.removeEventListener('scroll', this.updateUserHasScrolled)
   },
   computed: {
+    touchScroll () {
+      const transform = this.$store.getters.transformTouchScroll
+      return { transform }
+    },
     spaceName () { return this.$store.state.currentSpace.name },
     isDevelopment () {
       if (import.meta.env.MODE === 'development') {

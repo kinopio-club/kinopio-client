@@ -47,9 +47,10 @@ const store = createStore({
     isAppStoreView: false,
     disableViewportOptimizations: false, // for urlbox
 
-    // zooming
+    // zooming and touch
     spaceZoomPercent: 100,
     zoomOrigin: { x: 0, y: 0 },
+    touchScrollOrigin: { x: 0, y: 0 },
 
     // search
     searchIsVisible: false,
@@ -468,6 +469,10 @@ const store = createStore({
     zoomOrigin: (state, position) => {
       utils.typeCheck({ value: position, type: 'object', origin: 'zoomOrigin' })
       state.zoomOrigin = position
+    },
+    touchScrollOrigin: (state, position) => {
+      utils.typeCheck({ value: position, type: 'object', origin: 'touchScrollOrigin' })
+      state.touchScrollOrigin = position
     },
 
     // Cards
@@ -1491,19 +1496,16 @@ const store = createStore({
     isTouchDevice: (state) => {
       return state.isTouchDevice || utils.isMobile()
     },
+    transformTouchScroll: (state) => {
+      const origin = state.touchScrollOrigin
+      const transform = `translate(${origin.x}px, ${origin.y}px)`
+      return transform
+    },
     transformZoom: (state, getters) => {
       const zoom = getters.spaceZoomDecimal
       const origin = state.zoomOrigin
-      // https://stackoverflow.com/questions/51077632/simulating-transform-origin-using-translate
-      // let transform
-      // if (zoom !== 1) {
-      // transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
-      // } else {
-      // temp, doesn't handle both zoom and touch scroll together,
-      // new var for touchScrollCursorPosition
-      const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom})`
-      // }
-
+      // https://developer.mozilla.org/en-US/docs/Web/CSS/transform-origin
+      const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
       return transform
     }
   },

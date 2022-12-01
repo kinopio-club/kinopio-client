@@ -55,7 +55,6 @@ export default {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
       currentCursor = this.cursorPositionInPage(event)
-      console.log('🍓 touchmove, update pos y', currentCursor.y)
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
         this.pinchZoom(event)
@@ -73,23 +72,22 @@ export default {
       const isDialog = element.closest('dialog')
       const isButton = element.closest('button')
       const isDraggingItem = this.$store.state.currentUserIsDraggingBox || this.$store.state.currentUserIsDraggingCard
-      console.log(isDraggingItem) // TODO bug fix dragging cards shouldn't scroll, shouldn't scroll when connecting either
       return isDialog || isButton || isDraggingItem
     },
 
-    // swipe scroll
+    // touch scroll
 
     scroll (event) {
       const delta = {
         x: currentCursor.x - prevCursor.x,
         y: currentCursor.y - prevCursor.y
       }
-      const prevScrollBy = this.$store.state.zoomOrigin
+      const prevScrollBy = this.$store.state.touchScrollOrigin
       const scrollBy = {
         x: prevScrollBy.x + delta.x,
         y: prevScrollBy.y + delta.y
       }
-      this.$store.commit('zoomOrigin', scrollBy)
+      this.$store.commit('touchScrollOrigin', scrollBy)
       prevCursor = currentCursor
     },
 
@@ -125,8 +123,6 @@ export default {
       percent = Math.max(percent, this.min)
       percent = Math.min(percent, this.max)
       this.$store.commit('spaceZoomPercent', percent)
-
-      // todo
       const position = this.cursorPositionInPage(event)
       this.$store.commit('zoomOrigin', position)
     }
