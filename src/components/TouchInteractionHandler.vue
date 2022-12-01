@@ -10,7 +10,7 @@ let touchStartZoomValue
 
 // timestamp
 // let velocity
-let startCursor, currentCursor
+let prevCursor, currentCursor
 
 export default {
   name: 'TouchInteractionHandler',
@@ -44,9 +44,8 @@ export default {
     touchStart (event) {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
-      startCursor = this.cursorPositionInPage(event)
-      console.log('🐢 start, update cursors', startCursor.y)
-      // this.cancelMomentum() shouldCancelMomentum = true
+      prevCursor = this.cursorPositionInPage(event)
+      // this.cancelMomentum() timer, shouldCancelMomentum = true
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
         this.initPinchZoom(event)
@@ -81,12 +80,26 @@ export default {
     // swipe scroll
 
     scroll (event) {
-      // const delta = {
-      //   x: currentCursor.x - startCursor.x,
-      //   y: currentCursor.y - startCursor.y
-      // }
-      const position = this.cursorPositionInPage(event)
-      this.$store.commit('zoomOrigin', position) // TODO make something better
+      const delta = {
+        x: currentCursor.x - prevCursor.x,
+        y: currentCursor.y - prevCursor.y
+      }
+
+      const prevScrollBy = this.$store.state.zoomOrigin
+      // const zoom = this.$store.getters.spaceCounterZoomDecimal
+      const scrollBy = {
+        x: prevScrollBy.x + delta.x,
+        y: prevScrollBy.y + delta.y
+      }
+
+      console.log('🌻', prevCursor, currentCursor, delta, scrollBy) // delta is amount to scroll by
+
+      // center of page,
+      // offset from
+
+      // const position = this.cursorPositionInPage(event)
+      this.$store.commit('zoomOrigin', scrollBy) // TODO make something better
+      prevCursor = currentCursor
     },
 
     //   // velocity is amount of movement divided by the time since the last frame
