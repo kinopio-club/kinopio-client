@@ -1,6 +1,6 @@
 <template lang="pug">
 .space-background(:style="backgroundStyles")
-#layout-viewport(v-if="visible" :style="{ background: backgroundTint }")
+  .space-background-tint(v-if="isSpace" :style="backgroundTintStyles")
 </template>
 
 <script>
@@ -22,11 +22,16 @@ export default {
     }
   },
   computed: {
-    visible () {
+    isSpace () {
       const isAddPage = this.$store.state.isAddPage
       return !isAddPage
     },
     currentSpace () { return this.$store.state.currentSpace },
+    backgroundTintStyles () {
+      return {
+        background: this.backgroundTint
+      }
+    },
     backgroundStyles () {
       const transform = this.$store.getters.transformZoom
       const styles = {
@@ -102,10 +107,10 @@ export default {
 </script>
 
 <style lang="stylus">
-#layout-viewport
-  position fixed
-  width 110%
-  height 110%
+.space-background-tint
+  position absolute
+  width 100%
+  height 100%
   pointer-events none
   z-index 0
   mix-blend-mode multiply
@@ -118,5 +123,4 @@ export default {
   z-index 0
   transform-origin top left
   background var(--primary-background)
-
 </style>

@@ -1,5 +1,6 @@
 <template lang="pug">
 .outside-space-background(:style="styles")
+  .space-background-tint(:style="backgroundTintStyles")
 </template>
 
 <script>
@@ -46,6 +47,11 @@ export default {
     styles () {
       return {
         backgroundColor: this.backgroundColor
+      }
+    },
+    backgroundTintStyles () {
+      return {
+        background: this.$store.state.currentSpace.backgroundTint
       }
     }
   },
@@ -106,4 +112,12 @@ export default {
   width 110%
   height 110%
   background-color var(--secondary-background)
+.space-background-tint
+  position absolute
+  width 100%
+  height 100%
+  pointer-events none
+  z-index 0
+  mix-blend-mode multiply
+  transform-origin top left
 </style>
