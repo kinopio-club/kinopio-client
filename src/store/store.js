@@ -1495,14 +1495,14 @@ const store = createStore({
       const zoom = getters.spaceZoomDecimal
       const origin = state.zoomOrigin
       // https://stackoverflow.com/questions/51077632/simulating-transform-origin-using-translate
-      let transform
-      if (zoom !== 1) {
-        transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
-      } else {
-        // temp, doesn't handle both zoom and touch scroll together,
-        // new var for touchScrollCursorPosition
-        transform = `translate(${origin.x}px, ${origin.y}px)`
-      }
+      // let transform
+      // if (zoom !== 1) {
+      // transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
+      // } else {
+      // temp, doesn't handle both zoom and touch scroll together,
+      // new var for touchScrollCursorPosition
+      const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom})`
+      // }
 
       return transform
     }
