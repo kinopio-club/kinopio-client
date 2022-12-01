@@ -120,7 +120,7 @@ export default {
   },
   computed: {
     styles () {
-      const zoom = 1 / this.spaceZoomDecimal
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
       const transform = this.$store.getters.transformZoom
       return {
         width: `${this.pageWidth * zoom}px`,
