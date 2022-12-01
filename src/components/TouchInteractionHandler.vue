@@ -84,21 +84,12 @@ export default {
         x: currentCursor.x - prevCursor.x,
         y: currentCursor.y - prevCursor.y
       }
-
       const prevScrollBy = this.$store.state.zoomOrigin
-      // const zoom = this.$store.getters.spaceCounterZoomDecimal
       const scrollBy = {
         x: prevScrollBy.x + delta.x,
         y: prevScrollBy.y + delta.y
       }
-
-      console.log('🌻', prevCursor, currentCursor, delta, scrollBy) // delta is amount to scroll by
-
-      // center of page,
-      // offset from
-
-      // const position = this.cursorPositionInPage(event)
-      this.$store.commit('zoomOrigin', scrollBy) // TODO make something better
+      this.$store.commit('zoomOrigin', scrollBy)
       prevCursor = currentCursor
     },
 
