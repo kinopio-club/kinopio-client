@@ -938,7 +938,7 @@ const currentSpace = {
         y: Math.max(card.y - 100, 0)
       }
       nextTick(() => {
-        window.scrollTo(position.x, position.y)
+        context.commit('triggerScrollTo', { x: position.x, y: position.y }, { root: true })
       })
     },
 

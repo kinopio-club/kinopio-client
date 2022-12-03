@@ -16,8 +16,13 @@ export default {
       } else if (mutation.type === 'triggerScrollBy') {
         const { x, y } = mutation.payload
         this.scrollBy(x, y)
+      } else if (mutation.type === 'triggerScrollTo') {
+        this.scrollTo(mutation.payload)
       }
     })
+  },
+  computed: {
+    isTouchDevice () { return this.$store.state.isTouchDevice }
   },
   methods: {
     scrollIntoView ({ element, behavior }) {
@@ -38,10 +43,16 @@ export default {
       }
       this.scrollBy(scrollX, scrollY, behavior)
     },
+    scrollTo (position) {
+      if (this.isTouchDevice) {
+        this.$store.commit('touchScrollOrigin', position)
+      } else {
+        window.scrollTo(position.x, position.y)
+      }
+    },
     scrollBy (x, y, behavior) {
       behavior = behavior || 'smooth'
-      const isTouchDevice = this.$store.state.isTouchDevice
-      if (isTouchDevice) {
+      if (this.isTouchDevice) {
         console.log('❤️', window.scrollX)
         // if (scrollTimer) { return }
         // shouldCancelScroll = false
