@@ -24,7 +24,7 @@
   KeyboardShortcutsHandler
   NotificationsWithPosition(layer="app")
   TouchInteractionHandler
-  ScrollByHandler
+  ScrollHandler
   .preload
     .logo-hover
     .logo-active
@@ -44,7 +44,7 @@ import Footer from '@/components/Footer.vue'
 import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import TouchInteractionHandler from '@/components/TouchInteractionHandler.vue'
-import ScrollByHandler from '@/components/ScrollByHandler.vue'
+import ScrollHandler from '@/components/ScrollHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
@@ -63,7 +63,7 @@ export default {
     Footer,
     KeyboardShortcutsHandler,
     TouchInteractionHandler,
-    ScrollByHandler,
+    ScrollHandler,
     WindowHistoryHandler,
     TagDetails,
     LinkDetails,
