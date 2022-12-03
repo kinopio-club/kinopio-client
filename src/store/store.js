@@ -459,6 +459,8 @@ const store = createStore({
     triggerScrollUserDetailsIntoView: () => {},
     triggerUpdateLockedItemButtonsPositions: () => {},
     triggerLoadBackground: () => {},
+    triggerScrollIntoView: (state, options) => {},
+    triggerScrollBy: (state, options) => {},
 
     // Zoom
 

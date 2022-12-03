@@ -254,7 +254,7 @@ export default {
       } else if (type === 'triggerScrollCardIntoView') {
         if (payload === this.card.id) {
           const element = this.$refs.card
-          utils.scrollIntoView(element)
+          this.$store.commit('triggerScrollIntoView', { element })
         }
       } else if (type === 'triggerUploadComplete') {
         let { cardId, url } = payload

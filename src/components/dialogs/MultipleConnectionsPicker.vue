@@ -60,7 +60,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      this.$store.commit('triggerScrollIntoView', { element })
     },
     updateNextConnectionColor () {
       this.nextConnectionTypeColor = randomColor({ luminosity: 'light' })

@@ -939,7 +939,7 @@ export default {
     },
     scrollIntoView (behavior) {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element, behavior)
+      this.$store.commit('triggerScrollIntoView', { element })
     },
     scrollIntoViewAndFocus () {
       let behavior

@@ -237,7 +237,7 @@ export default {
         const element = this.$refs.dialog
         this.updateResultsSectionMaxHeight()
         this.$nextTick(() => {
-          utils.scrollIntoView(element)
+          this.$store.commit('triggerScrollIntoView', { element })
         })
       })
     },

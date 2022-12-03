@@ -176,28 +176,6 @@ export default {
     const fromFooter = event.target.closest('footer')
     return fromDialog || fromHeader || fromFooter || dialogIsVisible
   },
-  scrollIntoView (element, behavior) {
-    behavior = behavior || 'smooth'
-    if (!element) { return }
-    const rect = element.getBoundingClientRect()
-    const viewportWidth = this.visualViewport().width
-    const viewportHeight = this.visualViewport().height
-    let x = rect.x + rect.width - viewportWidth
-    let y = rect.y + rect.height - viewportHeight
-    let scrollX = 0
-    let scrollY = 0
-    if (x > 0) {
-      scrollX = x + 20
-    }
-    if (y > 0) {
-      scrollY = y + 80
-    }
-    window.scrollBy({
-      left: scrollX,
-      top: scrollY,
-      behavior
-    })
-  },
   cursorPositionInViewport (event) {
     let x, y
     if (event.touches) {

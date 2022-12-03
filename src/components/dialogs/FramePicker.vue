@@ -11,7 +11,7 @@ dialog.narrow.frame-details(v-if="visible" :open="visible" ref="dialog" @click.l
 <script>
 import frames from '@/data/frames.js'
 import FrameBadge from '@/components/FrameBadge.vue'
-import utils from '@/utils.js'
+// import utils from '@/utils.js'
 
 export default {
   name: 'FramePicker',
@@ -44,7 +44,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      this.$store.commit('triggerScrollIntoView', { element })
     }
   },
   watch: {

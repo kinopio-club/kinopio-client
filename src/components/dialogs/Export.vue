@@ -152,7 +152,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      this.$store.commit('triggerScrollIntoView', { element })
     },
     duplicateSpace () {
       this.$store.dispatch('currentSpace/duplicateSpace')

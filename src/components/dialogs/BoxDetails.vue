@@ -145,7 +145,7 @@ export default {
       this.$nextTick(() => {
         const element = this.$refs.dialog
         this.$nextTick(() => {
-          utils.scrollIntoView(element)
+          this.$store.commit('triggerScrollIntoView', { element })
         })
       })
     },

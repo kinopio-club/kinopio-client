@@ -165,7 +165,7 @@ export default {
     scrollIntoView () {
       this.$nextTick(() => {
         const element = this.$refs.dialog
-        utils.scrollIntoView(element)
+        this.$store.commit('triggerScrollIntoView', { element })
       })
     },
     toggleFilterShowAbsoluteDate () {

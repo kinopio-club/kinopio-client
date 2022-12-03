@@ -279,7 +279,7 @@ export default {
           x: Math.ceil((prevCursorPosition.x - position.x) * speed),
           y: Math.ceil((prevCursorPosition.y - position.y) * speed)
         }
-        window.scrollBy(delta.x, delta.y)
+        this.$store.commit('triggerScrollBy', delta)
       }
     },
     // on mouse up
@@ -318,7 +318,7 @@ export default {
 
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-      utils.scrollIntoView(element)
+      this.$store.commit('triggerScrollIntoView', { element })
     },
 
     // Add Parent and Child Cards

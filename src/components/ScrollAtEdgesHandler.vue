@@ -216,7 +216,7 @@ export default {
       if (this.currentUserIsPainting && !currentUserIsBoxSelecting) {
         this.$store.commit('triggeredPaintFramePosition', currentEvent)
       }
-      window.scrollBy(delta)
+      this.$store.commit('triggerScrollBy', delta)
     },
     speed (cursor, direction) {
       const minSpeed = 10
