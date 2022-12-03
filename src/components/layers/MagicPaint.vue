@@ -76,8 +76,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggeredPaintFramePosition') {
-        const event = this.$store.state.triggeredPaintFramePosition
-        this.createPaintingCircle(event)
+        this.createPaintingCircle({ position: this.$store.state.triggeredPaintFramePosition })
       } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
         this.updateCirclesWithScroll()
       } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
