@@ -917,17 +917,25 @@ export default {
       }
       this.$nextTick(() => {
         const element = this.$refs.name
-        const length = this.name.length
         if (!element) { return }
         element.focus()
-        if (position) {
-          element.setSelectionRange(position, position)
-        }
-        if (length) {
-          element.setSelectionRange(length, length)
-        }
+        this.updateInputCursorPosition(position)
         this.triggerUpdatePositionInVisualViewport()
       })
+    },
+    updateInputCursorPosition (position) {
+      const isTouchDevice = this.$store.state.isTouchDevice
+      const element = this.$refs.name
+      const length = this.name.length
+      if (isTouchDevice) {
+        element.setSelectionRange(0, 0) // prevents ios window scrolling
+      } else {
+        if (position) {
+          element.setSelectionRange(position, position)
+        } else if (length) {
+          element.setSelectionRange(length, length)
+        }
+      }
     },
     scrollIntoView (behavior) {
       const element = this.$refs.dialog
