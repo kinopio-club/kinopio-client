@@ -144,15 +144,16 @@ export default {
     isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
     toolbarIsCard () { return this.$store.state.currentUserToolbar === 'card' },
     toolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' },
-    touchScroll () {
-      const transform = this.$store.getters.transformTouchScroll
-      return { transform }
-    },
+    isTouchDevice () { return this.$store.state.isTouchDevice },
     positionStyles () {
-      return {
+      let position = {
         left: this.scrollPosition.x + 'px',
         top: this.scrollPosition.y + 'px'
       }
+      if (this.isTouchDevice) {
+        // TODO figure out how to move canvases w parent , or viewport (counter transformTouchScroll)?
+      }
+      return position
     }
   },
   methods: {

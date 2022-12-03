@@ -47,7 +47,7 @@ const store = createStore({
     isAppStoreView: false,
     disableViewportOptimizations: false, // for urlbox
 
-    // zooming and touch
+    // zoom and touch
     spaceZoomPercent: 100,
     zoomOrigin: { x: 0, y: 0 },
     touchScrollOrigin: { x: 0, y: 0 },
