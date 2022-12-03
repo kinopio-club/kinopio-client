@@ -41,7 +41,6 @@ const store = createStore({
     webfontIsLoaded: false,
     userHasScrolled: false,
     shouldPreventNextEnterKey: false,
-    shouldPreventNextFocusOnName: false,
     isEmbed: false,
     isAddPage: false,
     isAppStoreView: false,
@@ -346,10 +345,6 @@ const store = createStore({
     shouldPreventNextEnterKey: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'shouldPreventNextEnterKey' })
       state.shouldPreventNextEnterKey = value
-    },
-    shouldPreventNextFocusOnName: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldPreventNextFocusOnName' })
-      state.shouldPreventNextFocusOnName = value
     },
     isEmbed: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isEmbed' })
