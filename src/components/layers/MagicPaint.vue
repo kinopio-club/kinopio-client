@@ -1,7 +1,7 @@
 <template lang="pug">
 aside
   //- Magic painting is ephemeral brush strokes that select items
-  canvas#magic-painting(
+  canvas#magic-painting.magic-painting(
     @mousedown.left="startPainting"
     @touchstart="startPainting"
     @mousemove="painting"
@@ -13,18 +13,22 @@ aside
     @dragleave="removeUploadIsDraggedOver"
     @dragend="removeUploadIsDraggedOver"
     @drop.prevent.stop="addCardsAndUploadFiles"
+    :style="positionStyles"
   )
   canvas#remote-painting.remote-painting(
     :width="viewportWidth"
     :height="viewportHeight"
+    :style="positionStyles"
   )
   canvas#locking.locking(
     :width="viewportWidth"
     :height="viewportHeight"
+    :style="positionStyles"
   )
   canvas#initial-circle.initial-circle(
     :width="viewportWidth"
     :height="viewportHeight"
+    :style="positionStyles"
   )
   DropGuideLine(
     :currentCursor="currentCursor"
@@ -84,6 +88,8 @@ export default {
         delete circle.type
         this.createRemotePaintingCircle(circle)
         this.remotePainting()
+      } else if (mutation.type === 'resetZoomAndScroll') {
+        this.scrollPosition = { x: 0, y: 0 }
       }
     })
   },
@@ -120,7 +126,8 @@ export default {
   data () {
     return {
       currentCursor: {},
-      uploadIsDraggedOver: false
+      uploadIsDraggedOver: false,
+      scrollPosition: { x: 0, y: 0 }
     }
   },
   computed: {
@@ -136,7 +143,17 @@ export default {
     isPanning () { return this.$store.state.currentUserIsPanningReady },
     isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
     toolbarIsCard () { return this.$store.state.currentUserToolbar === 'card' },
-    toolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' }
+    toolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' },
+    touchScroll () {
+      const transform = this.$store.getters.transformTouchScroll
+      return { transform }
+    },
+    positionStyles () {
+      return {
+        left: this.scrollPosition.x + 'px',
+        top: this.scrollPosition.y + 'px'
+      }
+    }
   },
   methods: {
     userScroll () {
@@ -146,6 +163,10 @@ export default {
       this.scroll()
     },
     scroll () {
+      this.scrollPosition = {
+        x: window.scrollX,
+        y: window.scrollY
+      }
       this.updateCirclesWithScroll()
       this.cancelLocking()
     },
@@ -669,6 +690,9 @@ export default {
 canvas
   position fixed
   top 0
+  left 0
+  width 100vw
+  height 100vh
 .locking,
 .initial-circle,
 .remote-painting
