@@ -264,7 +264,8 @@ export default {
       openingAlpha: 0,
       previousSelectedTag: {},
       currentSearchTag: {},
-      newTagColor: ''
+      newTagColor: '',
+      isWaitingToFocus: false
     }
   },
   created () {
@@ -283,6 +284,10 @@ export default {
         if (!cardId) { return }
         prevCardId = cardId
         this.showCard(cardId)
+      } else if (mutation.type === 'triggerScrolledIntoView') {
+        if (!this.isWaitingToFocus) { return }
+        this.focusName()
+        this.isWaitingToFocus = false
       }
     })
   },
@@ -936,10 +941,19 @@ export default {
       const element = this.$refs.dialog
       this.$store.commit('triggerScrollIntoView', { element })
     },
+    scrollIntoViewAndWaitToFocus () {
+      const element = this.$refs.dialog
+      const isTouchDevice = this.$store.state.isTouchDevice
+      this.$store.commit('triggerScrollIntoView', { element, toCenterTop: isTouchDevice })
+      if (isTouchDevice) {
+        this.isWaitingToFocus = true
+      } else {
+        this.focusName()
+      }
+    },
     scrollIntoViewAndFocus () {
       this.$nextTick(() => {
-        this.scrollIntoView()
-        this.focusName()
+        this.scrollIntoViewAndWaitToFocus()
         this.triggerUpdateMagicPaintPositionOffset()
         this.triggerUpdatePositionInVisualViewport()
       })

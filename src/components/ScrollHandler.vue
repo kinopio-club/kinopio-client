@@ -14,8 +14,7 @@ export default {
       if (mutation.type === 'triggerScrollIntoView') {
         this.scrollIntoView(mutation.payload)
       } else if (mutation.type === 'triggerScrollBy') {
-        const { x, y } = mutation.payload
-        this.scrollBy(x, y)
+        this.scrollBy(mutation.payload)
       } else if (mutation.type === 'triggerScrollTo') {
         this.scrollTo(mutation.payload)
       }
@@ -25,8 +24,8 @@ export default {
     isTouchDevice () { return this.$store.state.isTouchDevice }
   },
   methods: {
-    scrollIntoView ({ element, behavior }) {
-      console.log('🚙', element, behavior)
+    scrollIntoView ({ element, toCenterTop }) {
+      console.log('🚙 scrollIntoView', element, toCenterTop)
       if (!element) { return }
       const rect = element.getBoundingClientRect()
       const viewportWidth = this.$store.state.viewportWidth
@@ -41,16 +40,16 @@ export default {
       if (y > 0) {
         scrollY = y + 80
       }
-      this.scrollBy(scrollX, scrollY, behavior)
+      this.scrollBy({ x: scrollX, y: scrollY, behavior: 'smooth' })
     },
-    scrollTo (position) {
+    scrollTo ({ x, y }) {
       if (this.isTouchDevice) {
-        this.$store.commit('touchScrollOrigin', position)
+        this.$store.commit('touchScrollOrigin', { x, y })
       } else {
-        window.scrollTo(position.x, position.y)
+        window.scrollTo(x, y)
       }
     },
-    scrollBy (x, y, behavior) {
+    scrollBy ({ x, y, behavior }) {
       behavior = behavior || 'smooth'
       if (this.isTouchDevice) {
         console.log('❤️', window.scrollX)
@@ -61,7 +60,9 @@ export default {
         //   x: currentScroll.x - x,
         //   y: currentScroll.y - y
         // }
+        //  raf if smooth
         // scrollTimer = window.requestAnimationFrame(this.scrollFrame)
+        this.$store.commit('triggerScrolledIntoView') // tODO run this After smooth scroll raf is completed
       } else {
         console.log('💖', x, y, behavior)
         window.scrollBy({
