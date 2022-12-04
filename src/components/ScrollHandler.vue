@@ -2,7 +2,7 @@
 </template>
 
 <script>
-// import utils from '@/utils.js'
+import utils from '@/utils.js'
 
 const scrollTimerDuration = 100 // ms
 let scrollTimer, scrollStartTime, shouldCancelScroll //, scrollByTotal
@@ -24,35 +24,79 @@ export default {
     isTouchDevice () { return this.$store.state.isTouchDevice }
   },
   methods: {
-    scrollIntoView ({ element, toCenterTop }) {
-      console.log('🚙 scrollIntoView', element, toCenterTop)
-      if (!element) { return }
-      const rect = element.getBoundingClientRect()
-      const viewportWidth = this.$store.state.viewportWidth
-      const viewportHeight = this.$store.state.viewportHeight
-      let x = rect.x + rect.width - viewportWidth
-      let y = rect.y + rect.height - viewportHeight
-      let scrollX = 0
-      let scrollY = 0
-      if (x > 0) {
-        scrollX = x + 20
-      }
-      if (y > 0) {
-        scrollY = y + 80
-      }
-      this.scrollBy({ x: scrollX, y: scrollY, behavior: 'smooth' })
-    },
-    scrollTo ({ x, y }) {
+    scrollTo ({ x, y, behavior }) {
+      behavior = behavior || 'auto'
       if (this.isTouchDevice) {
         this.$store.commit('touchScrollOrigin', { x, y })
       } else {
-        window.scrollTo(x, y)
+        window.scrollTo(x, y, behavior)
       }
+    },
+    scrollIntoView ({ element, toCenterTop }) {
+      console.log('🚙 scrollIntoView', element, toCenterTop)
+      if (!element) { return }
+      const padding = 20
+      let rect = element.getBoundingClientRect()
+      const position = utils.cursorPositionInSpace({ position: rect })
+      rect.x = position.x
+      rect.y = position.y
+      const viewport = {
+        width: this.$store.state.viewportWidth,
+        height: this.$store.state.viewportHeight
+      }
+      const touchScrollOrigin = this.$store.state.touchScrollOrigin
+      const scroll = {
+        x: -touchScrollOrigin.x || window.scrollX,
+        y: -touchScrollOrigin.y || window.scrollY
+      }
+
+      //           ┌────────────────────────────┐
+      //           │          Viewport          │
+      //           │                            │
+      //           │                            │
+      //        ┌──┼───────────────┐            │
+      //        │//│               │░           │
+      //        x//│    rect       │░           │
+      //        │//│               │░           │
+      //        └──┼────width──────┘░           │
+      //         ░░░░░░░░░░░░░░░░░░░░           │
+      //           │                            │
+      //           │            ┌───────────────┼──┐
+      //           │            │               │//│░
+      //           │            x       rect    │//│░
+      //           │            │               │//│░
+      //           │            └───────width──────┘░
+      //           │             ░░░░░░░░░░░░░░░░░░░░
+      //           │                            │
+      //           │                            │
+      //           │                            │
+      //  scrollX  └────────────width───────────┘
+
+      let x = 0
+      let y = 0
+      // x
+      const xOverlapLeft = rect.x - scroll.x
+      const xOverlapRight = (xOverlapLeft + rect.width) - viewport.width
+      if (xOverlapLeft < 0) {
+        x = xOverlapLeft - padding
+      } else if (xOverlapRight > 0) {
+        x = xOverlapRight + padding
+      }
+      // y
+      const yOverlapLeft = rect.y - scroll.y
+      const yOverlapRight = (yOverlapLeft + rect.height) - viewport.height
+      if (yOverlapLeft < 0) {
+        y = yOverlapLeft - padding
+      } else if (yOverlapRight > 0) {
+        y = yOverlapRight + padding
+      }
+      // TODO add toCenterTop handling using half vph
+      this.scrollBy({ x, y, behavior: 'smooth' })
     },
     scrollBy ({ x, y, behavior }) {
       behavior = behavior || 'smooth'
       if (this.isTouchDevice) {
-        console.log('❤️', window.scrollX)
+        console.log('❤️ scrollBy', x, y)
         // if (scrollTimer) { return }
         // shouldCancelScroll = false
         // const currentScroll = this.$store.state.touchScrollOrigin
@@ -62,9 +106,10 @@ export default {
         // }
         //  raf if smooth
         // scrollTimer = window.requestAnimationFrame(this.scrollFrame)
+        this.$store.commit('updateTouchScrollOriginBy', { x, y }) // temp
         this.$store.commit('triggerScrolledIntoView') // tODO run this After smooth scroll raf is completed
       } else {
-        console.log('💖', x, y, behavior)
+        console.log('💖 window scrollBy', x, y, behavior)
         window.scrollBy({
           left: x,
           top: y,

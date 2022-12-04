@@ -489,6 +489,11 @@ const store = createStore({
       position.y = Math.max(position.y, maxY)
       state.touchScrollOrigin = position
     },
+    updateTouchScrollOriginBy: (state, position) => {
+      let origin = state.touchScrollOrigin
+      origin.x = origin.x - position.x
+      origin.y = origin.y - position.y
+    },
     resetZoom: (state) => {
       state.spaceZoomPercent = 100
       state.zoomOrigin = { x: 0, y: 0 }
