@@ -80,7 +80,11 @@ export default {
       // x
       const xOverlapLeft = rect.x - scroll.x
       const xOverlapRight = (xOverlapLeft + rect.width) - viewport.width
-      if (xOverlapLeft < 0) {
+      if (toCenterTop) {
+        const viewportCenter = scroll.x + (viewport.width / 2)
+        const centeredCardX = viewportCenter - (rect.width / 2)
+        x = rect.x - centeredCardX
+      } else if (xOverlapLeft < 0) {
         x = xOverlapLeft - padding
       } else if (xOverlapRight > 0) {
         x = xOverlapRight + padding
@@ -100,7 +104,13 @@ export default {
     scrollBy ({ x, y, behavior }) {
       behavior = behavior || 'smooth'
       if (this.isTouchDevice) {
-        console.log('❤️ scrollBy', x, y)
+        this.scrollByOnTouchDevice({ x, y, behavior })
+      } else {
+        this.scrollByOnMouseDevice({ x, y, behavior })
+      }
+    },
+    scrollByOnTouchDevice ({ x, y, behavior }) {
+      if (behavior === 'smooth1') {
         // if (scrollTimer) { return }
         // shouldCancelScroll = false
         // const currentScroll = this.$store.state.touchScrollOrigin
@@ -110,16 +120,21 @@ export default {
         // }
         //  raf if smooth
         // scrollTimer = window.requestAnimationFrame(this.scrollFrame)
-        this.$store.commit('updateTouchScrollOriginBy', { x, y }) // temp
-        this.$store.commit('triggerScrolledIntoView') // tODO run this After smooth scroll raf is completed
       } else {
-        console.log('💖 window scrollBy', x, y, behavior)
-        window.scrollBy({
-          left: x,
-          top: y,
-          behavior
+        console.log('❤️ scrollBy', x, y)
+        this.$store.commit('updateTouchScrollOriginBy', { x, y })
+        this.$nextTick(() => {
+          this.$store.commit('triggerScrolledIntoView')
         })
       }
+    },
+    scrollByOnMouseDevice ({ x, y, behavior }) {
+      console.log('💖 window scrollBy', x, y, behavior)
+      window.scrollBy({
+        left: x,
+        top: y,
+        behavior
+      })
     },
     scrollFrame (timestamp) {
       if (!scrollStartTime) {
@@ -133,7 +148,11 @@ export default {
         this.translateScroll(percentComplete)
         window.requestAnimationFrame(this.scrollFrame)
       } else {
+        console.log('scroll complete') // TEMP
         this.cancelScroll()
+        this.$nextTick(() => {
+          this.$store.commit('triggerScrolledIntoView')
+        })
       }
     },
     translateScroll (percentComplete) {
