@@ -44,6 +44,9 @@ export default {
         width: this.$store.state.viewportWidth,
         height: this.$store.state.viewportHeight
       }
+      if (toCenterTop) {
+        viewport.height = (viewport.height / 2) - padding
+      }
       const touchScrollOrigin = this.$store.state.touchScrollOrigin
       const scroll = {
         x: -touchScrollOrigin.x || window.scrollX,
@@ -83,14 +86,15 @@ export default {
         x = xOverlapRight + padding
       }
       // y
-      const yOverlapLeft = rect.y - scroll.y
-      const yOverlapRight = (yOverlapLeft + rect.height) - viewport.height
-      if (yOverlapLeft < 0) {
-        y = yOverlapLeft - padding
-      } else if (yOverlapRight > 0) {
-        y = yOverlapRight + padding
+      const yOverlapTop = rect.y - scroll.y
+      const yOverlapBelow = (yOverlapTop + rect.height) - viewport.height
+      if (rect.height > viewport.height) {
+        y = scroll.y + padding + 100
+      } else if (yOverlapTop < 0) {
+        y = yOverlapTop - padding
+      } else if (yOverlapBelow > 0) {
+        y = yOverlapBelow + padding
       }
-      // TODO add toCenterTop handling using half vph
       this.scrollBy({ x, y, behavior: 'smooth' })
     },
     scrollBy ({ x, y, behavior }) {
