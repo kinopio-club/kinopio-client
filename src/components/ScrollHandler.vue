@@ -33,13 +33,10 @@ export default {
       }
     },
     scrollIntoView ({ element, toCenterTop }) {
-      console.log('🚙 scrollIntoView', element, toCenterTop)
       if (!element) { return }
       const padding = 20
       let rect = element.getBoundingClientRect()
       const position = utils.cursorPositionInSpace({ position: rect })
-      rect.x = position.x
-      rect.y = position.y
       const viewport = {
         width: this.$store.state.viewportWidth,
         height: this.$store.state.viewportHeight
@@ -48,9 +45,15 @@ export default {
         viewport.height = (viewport.height / 2) - padding
       }
       const touchScrollOrigin = this.$store.state.touchScrollOrigin
-      const scroll = {
-        x: -touchScrollOrigin.x || window.scrollX,
-        y: -touchScrollOrigin.y || window.scrollY
+      let scroll = {
+        x: (-touchScrollOrigin.x || window.scrollX),
+        y: (-touchScrollOrigin.y || window.scrollY)
+      }
+      rect = {
+        x: position.x + scroll.x,
+        y: position.y + scroll.y,
+        width: rect.width,
+        height: rect.height
       }
 
       //           ┌────────────────────────────┐
