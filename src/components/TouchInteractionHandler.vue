@@ -65,7 +65,6 @@ export default {
     touchEnd (event) {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
-      console.log('🍇 end', event)
     },
     shouldIgnore (event) {
       const element = event.target

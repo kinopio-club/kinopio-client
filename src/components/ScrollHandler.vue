@@ -49,9 +49,7 @@ export default {
       if (!element) { return }
       const padding = 20
       const headerPadding = 100
-      // const zoom = this.$store.getters.spaceZoomDecimal
       const touchScrollOrigin = this.$store.state.touchScrollOrigin
-      // const zoomOrigin = this.$store.state.zoomOrigin
       const scroll = {
         x: (-touchScrollOrigin.x || window.scrollX),
         y: (-touchScrollOrigin.y || window.scrollY)
@@ -91,9 +89,8 @@ export default {
       // x to scroll by
       const xOverlapLeft = rect.x - scroll.x
       const xOverlapRight = (xOverlapLeft + rect.width) - viewport.width
-      // console.log('🍇 x overlaps',xOverlapLeft, xOverlapRight)
       if (toCenterTop) {
-        const viewportCenter = scroll.x + (viewport.width / 2)
+        const viewportCenter = viewport.width / 2
         const centeredCardX = viewportCenter - (rect.width / 2)
         x = (rect.x - scroll.x) - centeredCardX
       } else if (xOverlapLeft < 0) {
@@ -101,17 +98,13 @@ export default {
       } else if (xOverlapRight > 0) {
         x = xOverlapRight + padding
       }
-
       // y to scroll by
       const yOverlapTop = rect.y - scroll.y
       const yOverlapBelow = (yOverlapTop + rect.height) - viewport.height
-      const rectIsInBottomQuarter = rect.y > (scroll.y + (viewport.height / 4))
       const rectIsInBottomHalf = rect.y > (scroll.y + (viewport.height / 2))
       if (toCenterTop) {
-        if (rectIsInBottomQuarter) {
-          y = viewport.height / 4
-        } else if (rectIsInBottomHalf) {
-          y = viewport.height / 2
+        if (rectIsInBottomHalf) {
+          y = (viewport.height / 2) * this.$store.getters.spaceZoomDecimal
         } else {
           y = 0
         }
