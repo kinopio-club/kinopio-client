@@ -47,7 +47,7 @@ export default {
     scrollIntoView ({ element, toCenterTop }) {
       if (!element) { return }
       const padding = 20
-      const bigPadding = 100
+      const headerPadding = 100
       let rect = element.getBoundingClientRect()
       const position = utils.cursorPositionInSpace({ position: rect })
       const touchScrollOrigin = this.$store.state.touchScrollOrigin
@@ -103,14 +103,16 @@ export default {
       const yOverlapBelow = (yOverlapTop + rect.height) - viewport.height
       const rectIsInBottomQuarter = rect.pageY - scroll.y > (scroll.y + (viewport.height / 4))
       const rectIsInBottomHalf = rect.pageY - scroll.y > (scroll.y + (viewport.height / 2))
-      if (toCenterTop && rectIsInBottomHalf) {
+      if (toCenterTop) {
         if (rectIsInBottomQuarter) {
           y = viewport.height / 4
-        } else {
+        } else if (rectIsInBottomHalf) {
           y = viewport.height / 2
+        } else {
+          y = 0
         }
       } else if (rect.height > viewport.height) {
-        y = scroll.y + bigPadding
+        y = scroll.y + headerPadding
       } else if (yOverlapTop < 0) {
         y = yOverlapTop - padding
       } else if (yOverlapBelow > 0) {
