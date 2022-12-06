@@ -34,6 +34,7 @@ export default {
   },
   methods: {
     updateViewport () {
+      // explicitly update viewport to prevent using short viewport when ios keyboard is open
       viewport = utils.visualViewport()
     },
     scrollTo ({ x, y, behavior }) {
@@ -48,16 +49,17 @@ export default {
       if (!element) { return }
       const padding = 20
       const headerPadding = 100
-      let rect = element.getBoundingClientRect()
-      const position = utils.cursorPositionInSpace({ position: rect })
+      // const zoom = this.$store.getters.spaceZoomDecimal
       const touchScrollOrigin = this.$store.state.touchScrollOrigin
+      // const zoomOrigin = this.$store.state.zoomOrigin
       const scroll = {
         x: (-touchScrollOrigin.x || window.scrollX),
         y: (-touchScrollOrigin.y || window.scrollY)
       }
+      let rect = element.getBoundingClientRect()
       rect = {
-        spaceX: position.x + scroll.x,
-        spaceY: position.y + scroll.y,
+        x: rect.x + scroll.x,
+        y: rect.y + scroll.y,
         width: rect.width,
         height: rect.height
       }
@@ -87,22 +89,24 @@ export default {
       let x = 0
       let y = 0
       // x to scroll by
-      const xOverlapLeft = rect.spaceX - scroll.x
+      const xOverlapLeft = rect.x - scroll.x
       const xOverlapRight = (xOverlapLeft + rect.width) - viewport.width
+      // console.log('🍇 x overlaps',xOverlapLeft, xOverlapRight)
       if (toCenterTop) {
         const viewportCenter = scroll.x + (viewport.width / 2)
         const centeredCardX = viewportCenter - (rect.width / 2)
-        x = (rect.spaceX - scroll.x) - centeredCardX
+        x = (rect.x - scroll.x) - centeredCardX
       } else if (xOverlapLeft < 0) {
         x = xOverlapLeft - padding
       } else if (xOverlapRight > 0) {
         x = xOverlapRight + padding
       }
+
       // y to scroll by
-      const yOverlapTop = rect.spaceY - scroll.y
+      const yOverlapTop = rect.y - scroll.y
       const yOverlapBelow = (yOverlapTop + rect.height) - viewport.height
-      const rectIsInBottomQuarter = rect.spaceY - scroll.y > (scroll.y + (viewport.height / 4))
-      const rectIsInBottomHalf = rect.spaceY - scroll.y > (scroll.y + (viewport.height / 2))
+      const rectIsInBottomQuarter = rect.y > (scroll.y + (viewport.height / 4))
+      const rectIsInBottomHalf = rect.y > (scroll.y + (viewport.height / 2))
       if (toCenterTop) {
         if (rectIsInBottomQuarter) {
           y = viewport.height / 4
@@ -118,6 +122,7 @@ export default {
       } else if (yOverlapBelow > 0) {
         y = yOverlapBelow + padding
       }
+      // console.log(x,y)
       this.scrollBy({ x, y, behavior: 'smooth' })
     },
     scrollBy ({ x, y, behavior }) {
