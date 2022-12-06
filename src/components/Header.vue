@@ -1,5 +1,5 @@
 <template lang="pug">
-header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hidden': isHidden, 'hidden-by-mindmap': minimapIsVisible }")
+header(v-if="isVisible" :class="{'fade-out': isFadingOut, 'hidden': isHidden, 'hidden-by-mindmap': minimapIsVisible }")
   //- embed
   nav.embed-nav(v-if="isEmbed")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
@@ -162,8 +162,7 @@ let updateNotificationsIntervalTimer
 
 const fadeOutDuration = 10
 const hiddenDuration = 20
-const updatePositionDuration = 60
-let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
+let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, shouldCancelFadeOut
 
 export default {
   name: 'Header',
@@ -211,7 +210,6 @@ export default {
       upgradeUserIsVisible: false,
       spaceStatusIsVisible: false,
       offlineIsVisible: false,
-      position: {},
       readOnlyJiggle: false,
       notifications: [],
       notificationsIsLoading: true,
@@ -230,8 +228,6 @@ export default {
         this.closeAllDialogs()
       } else if (mutation.type === 'triggerSpaceDetailsVisible') {
         this.spaceDetailsIsVisible = true
-      } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
-        this.updatePosition()
       } else if (mutation.type === 'triggerSpaceDetailsInfoIsVisible') {
         this.spaceDetailsInfoIsVisible = true
       } else if (mutation.type === 'triggerSignUpOrInIsVisible') {
@@ -266,15 +262,12 @@ export default {
     })
   },
   mounted () {
-    window.addEventListener('scroll', this.updatePosition)
-    this.updatePosition()
     this.updateNotifications()
     updateNotificationsIntervalTimer = setInterval(() => {
       this.updateNotifications()
     }, 1000 * 60 * 10) // 10 minutes
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.updatePosition)
     clearInterval(updateNotificationsIntervalTimer)
   },
   computed: {
@@ -553,8 +546,6 @@ export default {
       window.cancelAnimationFrame(fadeOutTimer)
       fadeOutTimer = undefined
       this.isFadingOut = false
-      this.cancelUpdatePosition()
-      this.updatePosition()
     },
     fadeOutFrame () {
       fadeOutIteration++
@@ -564,44 +555,6 @@ export default {
       } else if (fadeOutIteration < fadeOutDuration) {
         window.requestAnimationFrame(this.fadeOutFrame)
       }
-    },
-
-    // update position
-
-    updatePosition () {
-      if (!this.$store.getters.isTouchDevice) { return }
-      updatePositionIteration = 0
-      if (updatePositionTimer) { return }
-      updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
-    },
-    cancelUpdatePosition () {
-      window.cancelAnimationFrame(updatePositionTimer)
-      updatePositionTimer = undefined
-    },
-    updatePositionFrame () {
-      updatePositionIteration++
-      this.updatePositionInVisualViewport()
-      if (updatePositionIteration < updatePositionDuration) {
-        window.requestAnimationFrame(this.updatePositionFrame)
-      } else {
-        this.cancelUpdatePosition()
-      }
-    },
-    updatePositionInVisualViewport () {
-      const viewport = utils.visualViewport()
-      const scale = utils.roundFloat(viewport.scale)
-      const counterScale = utils.roundFloat(1 / viewport.scale)
-      const left = Math.round(viewport.offsetLeft)
-      const top = Math.round(viewport.offsetTop)
-      let style = {
-        transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
-        maxWidth: Math.round(viewport.width * scale) + 'px'
-      }
-      if (utils.isIPhone() && scale <= 1) {
-        style.transform = 'none'
-        style.zoom = counterScale
-      }
-      this.position = style
     },
 
     // notifications
@@ -646,7 +599,6 @@ export default {
     isPinchZooming (value) {
       if (value) {
         this.fadeOut()
-        this.updatePosition()
       } else {
         shouldCancelFadeOut = true
         this.cancelFadeOut()
@@ -656,7 +608,6 @@ export default {
       if (!utils.isAndroid()) { return }
       if (value) {
         this.fadeOut()
-        this.updatePosition()
       } else {
         shouldCancelFadeOut = true
         this.cancelFadeOut()
