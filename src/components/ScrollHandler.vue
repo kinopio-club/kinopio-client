@@ -51,7 +51,7 @@ export default {
       let rect = element.getBoundingClientRect()
       const position = utils.cursorPositionInSpace({ position: rect })
       const touchScrollOrigin = this.$store.state.touchScrollOrigin
-      let scroll = {
+      const scroll = {
         x: (-touchScrollOrigin.x || window.scrollX),
         y: (-touchScrollOrigin.y || window.scrollY)
       }
