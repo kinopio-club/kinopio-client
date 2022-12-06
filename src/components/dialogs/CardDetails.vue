@@ -924,17 +924,12 @@ export default {
       })
     },
     updateInputCursorPosition (position) {
-      const isTouchDevice = this.$store.state.isTouchDevice
       const element = this.$refs.name
       const length = this.name.length
-      if (isTouchDevice) {
-        element.setSelectionRange(0, 0) // prevents ios window scrolling
-      } else {
-        if (position) {
-          element.setSelectionRange(position, position)
-        } else if (length) {
-          element.setSelectionRange(length, length)
-        }
+      if (position) {
+        element.setSelectionRange(position, position)
+      } else if (length) {
+        element.setSelectionRange(length, length)
       }
     },
     scrollIntoView () {

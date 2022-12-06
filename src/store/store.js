@@ -222,12 +222,12 @@ const store = createStore({
       state.pageHeight = 0
     },
     updatePageSizes: (state, itemsRect) => {
-      const viewportWidth = utils.visualViewport().width
-      let viewportHeight = utils.visualViewport().height
-      state.viewportWidth = Math.round(viewportWidth)
-      state.viewportHeight = Math.round(viewportHeight)
-      let pageWidth = Math.max(viewportWidth, itemsRect.width, state.pageWidth)
-      let pageHeight = Math.max(viewportHeight, itemsRect.height, state.pageHeight)
+      const viewportWidth = Math.round(utils.visualViewport().width)
+      const viewportHeight = Math.round(utils.visualViewport().height)
+      state.viewportWidth = viewportWidth
+      state.viewportHeight = viewportHeight
+      const pageWidth = Math.max(viewportWidth, itemsRect.width, state.pageWidth)
+      const pageHeight = Math.max(viewportHeight, itemsRect.height, state.pageHeight)
       state.pageWidth = Math.round(pageWidth)
       state.pageHeight = Math.round(pageHeight)
     },
