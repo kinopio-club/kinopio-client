@@ -56,8 +56,8 @@ export default {
         y: (-touchScrollOrigin.y || window.scrollY)
       }
       rect = {
-        pageX: position.x + scroll.x,
-        pageY: position.y + scroll.y,
+        spaceX: position.x + scroll.x,
+        spaceY: position.y + scroll.y,
         width: rect.width,
         height: rect.height
       }
@@ -87,22 +87,22 @@ export default {
       let x = 0
       let y = 0
       // x to scroll by
-      const xOverlapLeft = rect.pageX - scroll.x
+      const xOverlapLeft = rect.spaceX - scroll.x
       const xOverlapRight = (xOverlapLeft + rect.width) - viewport.width
       if (toCenterTop) {
         const viewportCenter = scroll.x + (viewport.width / 2)
         const centeredCardX = viewportCenter - (rect.width / 2)
-        x = (rect.pageX - scroll.x) - centeredCardX
+        x = (rect.spaceX - scroll.x) - centeredCardX
       } else if (xOverlapLeft < 0) {
         x = xOverlapLeft - padding
       } else if (xOverlapRight > 0) {
         x = xOverlapRight + padding
       }
       // y to scroll by
-      const yOverlapTop = rect.pageY - scroll.y
+      const yOverlapTop = rect.spaceY - scroll.y
       const yOverlapBelow = (yOverlapTop + rect.height) - viewport.height
-      const rectIsInBottomQuarter = rect.pageY - scroll.y > (scroll.y + (viewport.height / 4))
-      const rectIsInBottomHalf = rect.pageY - scroll.y > (scroll.y + (viewport.height / 2))
+      const rectIsInBottomQuarter = rect.spaceY - scroll.y > (scroll.y + (viewport.height / 4))
+      const rectIsInBottomHalf = rect.spaceY - scroll.y > (scroll.y + (viewport.height / 2))
       if (toCenterTop) {
         if (rectIsInBottomQuarter) {
           y = viewport.height / 4
