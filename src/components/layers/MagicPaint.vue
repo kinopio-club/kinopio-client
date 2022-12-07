@@ -90,6 +90,8 @@ export default {
         this.remotePainting()
       } else if (mutation.type === 'resetZoomAndScroll') {
         this.scrollPosition = { x: 0, y: 0 }
+      } else if (mutation.type === 'touchScrollOrigin') {
+        this.userScroll()
       }
     })
   },
@@ -165,10 +167,7 @@ export default {
       this.scroll()
     },
     scroll () {
-      this.scrollPosition = {
-        x: window.scrollX,
-        y: window.scrollY
-      }
+      this.scrollPosition = this.$store.getters.currentScrollPosition
       this.updateCirclesWithScroll()
       this.cancelLocking()
     },
@@ -178,10 +177,7 @@ export default {
       remotePaintingCircles = []
     },
     updatePrevScrollPosition () {
-      prevScroll = {
-        x: window.scrollX,
-        y: window.scrollY
-      }
+      prevScroll = this.$store.getters.currentScrollPosition
     },
     updateCirclePositions (circles, scrollDelta) {
       return circles.map(circle => {
@@ -191,9 +187,10 @@ export default {
       })
     },
     updateCirclesWithScroll () {
+      const scroll = this.$store.getters.currentScrollPosition
       const scrollDelta = {
-        x: window.scrollX - prevScroll.x,
-        y: window.scrollY - prevScroll.y
+        x: scroll.x - prevScroll.x,
+        y: scroll.y - prevScroll.y
       }
       if (initialCircles.length) {
         initialCircles = this.updateCirclePositions(initialCircles, scrollDelta) // covers locking circles of varialbe radius/
@@ -442,7 +439,7 @@ export default {
     selectItems (event) {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCannotEditSpace) { return }
-      const position = utils.cursorPositionInSpace({ event })
+      let position = utils.cursorPositionInSpace({ event })
       this.selectCards(position)
       this.selectConnectionPaths(position)
       this.selectBoxes(position)
@@ -544,13 +541,14 @@ export default {
       }
     },
     remotePaintCirclesAnimationFrame () {
+      const scroll = this.$store.getters.currentScrollPosition
       remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
       remotePaintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       remotePaintingCircles.forEach(item => {
         item.iteration++
         let circle = JSON.parse(JSON.stringify(item))
-        circle.x = circle.x - window.scrollX
-        circle.y = circle.y - window.scrollY
+        circle.x = circle.x - scroll.x
+        circle.y = circle.y - scroll.y
         const shouldDrawOffscreen = true
         this.drawCircle(circle, remotePaintingContext, shouldDrawOffscreen)
       })

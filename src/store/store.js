@@ -1542,6 +1542,13 @@ const store = createStore({
       // https://developer.mozilla.org/en-US/docs/Web/CSS/transform-origin
       const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
       return transform
+    },
+    currentScrollPosition: (state) => {
+      const touchScrollOrigin = state.touchScrollOrigin
+      return {
+        x: (-touchScrollOrigin.x || window.scrollX),
+        y: (-touchScrollOrigin.y || window.scrollY)
+      }
     }
   },
 
