@@ -4,6 +4,8 @@
 <script>
 import utils from '@/utils.js'
 
+import { mapState, mapGetters } from 'vuex'
+
 const scrollArea = 50
 let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, maxHeight, maxWidth, currentEvent
 let movementDirection = {}
@@ -13,7 +15,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentUserIsPaintingLocked' && mutation.payload) {
-        const position = this.$store.state.triggeredPaintFramePosition
+        const position = this.triggeredPaintFramePosition
         const event = {
           clientX: position.x,
           clientY: position.y
@@ -22,7 +24,7 @@ export default {
         this.initInteractions(event)
       }
       if (mutation.type === 'triggeredTouchCardDragPosition') {
-        const position = this.$store.state.triggeredTouchCardDragPosition
+        const position = this.triggeredTouchCardDragPosition
         const event = {
           clientX: position.x,
           clientY: position.y
@@ -50,16 +52,25 @@ export default {
     window.removeEventListener('touchend', this.stopInteractions)
   },
   computed: {
-    viewportHeight () { return this.$store.state.viewportHeight },
-    viewportWidth () { return this.$store.state.viewportWidth },
-    pageHeight () { return this.$store.state.pageHeight },
-    pageWidth () { return this.$store.state.pageWidth },
-    currentUserIsPainting () { return this.$store.state.currentUserIsPainting },
-    isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
-    isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
-    isResizingCard () { return this.$store.state.currentUserIsResizingCard },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
+    ...mapState([
+      'viewportHeight',
+      'viewportWidth',
+      'pageHeight',
+      'pageWidth',
+      'currentUserIsPainting',
+      'isDraggingCard',
+      'isDrawingConnection',
+      'isResizingCard',
+      'currentUserIsBoxSelecting',
+      'currentUserIsDraggingCard',
+      'currentUserIsDraggingBox',
+      'triggeredPaintFramePosition',
+      'triggeredTouchCardDragPosition'
+    ]),
+    ...mapGetters([
+      'spaceCounterZoomDecimal',
+      'spaceZoomDecimal'
+    ]),
     shouldPreventResize () { return this.currentUserIsPainting || this.isDrawingConnection || this.isResizingCard }
   },
   methods: {
@@ -69,8 +80,8 @@ export default {
       const zoom = this.spaceZoomDecimal
       startCursor = position
       endCursor = position
-      maxHeight = Math.max(6500, this.$store.state.viewportHeight) * zoom
-      maxWidth = Math.max(6500, this.$store.state.viewportWidth) * zoom
+      maxHeight = Math.max(6500, this.viewportHeight) * zoom
+      maxWidth = Math.max(6500, this.viewportWidth) * zoom
       if (this.$store.getters.shouldScrollAtEdges(event)) {
         this.updateMovementDirection()
       }
@@ -190,10 +201,7 @@ export default {
         const viewport = utils.visualViewport()
         zoom = viewport.scale
       }
-      const currentUserIsBoxSelecting = this.$store.state.currentUserIsBoxSelecting
-      const isDraggingCard = this.$store.state.currentUserIsDraggingCard
-      const isDraggingBox = this.$store.state.currentUserIsDraggingBox
-      const isDraggingItem = isDraggingCard || isDraggingBox
+      const isDraggingItem = this.currentUserIsDraggingCard || this.currentUserIsDraggingBox
       delta = {
         left: Math.round(delta.x * zoom),
         top: Math.round(delta.y * zoom)
@@ -205,15 +213,13 @@ export default {
           y: delta.top * slowMultiplier
         }
         this.$store.dispatch('history/pause')
-        if (isDraggingCard || isDraggingBox) {
-          this.$store.dispatch('currentCards/move', { endCursor, prevCursor, delta: itemDelta })
-          this.$store.dispatch('currentBoxes/move', { endCursor, prevCursor, delta: itemDelta })
-        }
+        this.$store.dispatch('currentCards/move', { endCursor, prevCursor, delta: itemDelta })
+        this.$store.dispatch('currentBoxes/move', { endCursor, prevCursor, delta: itemDelta })
       }
       if (this.isDrawingConnection) {
         this.$store.commit('triggeredDrawConnectionFrame', currentEvent)
       }
-      if (this.currentUserIsPainting && !currentUserIsBoxSelecting) {
+      if (this.currentUserIsPainting && !this.currentUserIsBoxSelecting) {
         this.$store.commit('triggeredPaintFramePosition', currentEvent)
       }
       this.$store.commit('triggerScrollBy', delta)
