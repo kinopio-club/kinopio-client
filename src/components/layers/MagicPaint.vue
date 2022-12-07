@@ -80,7 +80,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggeredPaintFramePosition') {
-        this.createPaintingCircle({ position: this.$store.state.triggeredPaintFramePosition })
+        this.createPaintingCircle({}, this.$store.state.triggeredPaintFramePosition)
       } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
         this.updateCirclesWithScroll()
       } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
@@ -179,6 +179,16 @@ export default {
     updatePrevScrollPosition () {
       prevScroll = this.$store.getters.currentScrollPosition
     },
+    cursor (event) {
+      let cursor = utils.cursorPositionInViewport(event)
+      if (this.$store.state.isTouchDevice) {
+        cursor = {
+          x: cursor.x,
+          y: cursor.y - circleRadius
+        }
+      }
+      return cursor
+    },
     updateCirclePositions (circles, scrollDelta) {
       return circles.map(circle => {
         circle.x = circle.x - scrollDelta.x
@@ -265,7 +275,7 @@ export default {
       if (this.$store.state.isAddPage) { return }
       if (this.shouldCancel(event)) { return }
       startCursor = startCursor || {}
-      const endCursor = utils.cursorPositionInViewport(event)
+      const endCursor = this.cursor(event)
       const cursorsAreClose = utils.cursorsAreClose(startCursor, endCursor)
       const shouldAddCard = this.$store.state.shouldAddCard
       currentUserIsLocking = false
@@ -341,7 +351,7 @@ export default {
       if (!this.$store.state.currentUserIsPaintingLocked) { return }
       this.$store.commit('triggerHideTouchInterface')
     },
-    createPaintingCircle (event) {
+    createPaintingCircle (event, position) {
       const isTouch = Boolean(event.touches)
       const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
       if (isTouch && !isPaintingLocked) { return }
@@ -349,26 +359,21 @@ export default {
       const currentUserIsPaintingLocked = this.$store.state.currentUserIsPaintingLocked
       if (event.touches && !currentUserIsPaintingLocked) { return }
       let color = this.$store.state.currentUser.color
-      this.currentCursor = utils.cursorPositionInViewport(event)
+      this.currentCursor = position || this.cursor(event)
       let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
-      this.selectItems(event)
+      this.selectItems(event, position)
       paintingCircles.push(circle)
       this.broadcastCircle(event, circle)
     },
     startPainting (event) {
       if (this.isPanning) { return }
       if (this.isBoxSelecting) { return }
-      startCursor = utils.cursorPositionInViewport(event)
+      startCursor = this.cursor(event)
       this.currentCursor = startCursor
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
       if (utils.isMultiTouch(event)) { return }
       this.startLocking()
-      if (event.touches) {
-        this.$store.commit('currentUserIsPainting', false)
-      } else {
-        this.$store.commit('currentUserIsPainting', true)
-        this.createInitialCircle()
-      }
+      this.createInitialCircle()
       const shouldAdd = !multipleCardsIsSelected && !utils.unpinnedDialogIsVisible()
       // add card
       if (shouldAdd && this.toolbarIsCard) {
@@ -385,6 +390,7 @@ export default {
       this.$store.commit('previousMultipleCardsSelectedIds', utils.clone(this.$store.state.multipleCardsSelectedIds))
       this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.$store.state.multipleConnectionsSelectedIds))
       this.$store.dispatch('closeAllDialogs', 'MagicPaint.startPainting')
+      this.$store.commit('currentUserIsPainting', true)
     },
     paintCirclesAnimationFrame () {
       paintingCircles = utils.filterCircles(paintingCircles, maxIterations)
@@ -436,10 +442,11 @@ export default {
       const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
       return isMobile && !isPaintingLocked
     },
-    selectItems (event) {
+    selectItems (event, position) {
+      // event = event || {}
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCannotEditSpace) { return }
-      let position = utils.cursorPositionInSpace({ event })
+      position = position || utils.cursorPositionInSpace({ event })
       this.selectCards(position)
       this.selectConnectionPaths(position)
       this.selectBoxes(position)
@@ -668,7 +675,7 @@ export default {
     checkIfUploadIsDraggedOver (event) {
       const uploadIsFiles = event.dataTransfer.types.find(type => type === 'Files')
       if (!uploadIsFiles) { return }
-      this.currentCursor = utils.cursorPositionInViewport(event)
+      this.currentCursor = this.cursor(event)
       this.uploadIsDraggedOver = true
     },
     removeUploadIsDraggedOver () {
