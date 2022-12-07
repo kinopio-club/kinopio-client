@@ -151,7 +151,8 @@ export default {
         top: this.scrollPosition.y + 'px'
       }
       if (this.isTouchDevice) {
-        // TODO figure out how to move canvases w parent , or viewport (counter transformTouchScroll)?
+        const transform = this.$store.getters.transformCounterTouchScroll
+        position = { transform }
       }
       return position
     }

@@ -1531,6 +1531,11 @@ const store = createStore({
       const transform = `translate(${origin.x}px, ${origin.y}px)`
       return transform
     },
+    transformCounterTouchScroll: (state) => {
+      const origin = state.touchScrollOrigin
+      const transform = `translate(${-origin.x}px, ${-origin.y}px)`
+      return transform
+    },
     transformZoom: (state, getters) => {
       const zoom = getters.spaceZoomDecimal
       const origin = state.zoomOrigin
