@@ -69,9 +69,9 @@ export default {
     return host
   },
   websocketHost () {
-    let host = 'wss://http://api.kinopio.club/'
+    let host = 'wss://api.kinopio.club/'
     if (this.isDevelopment()) {
-      host = 'ws://kinopio.local:3000'
+      host = 'wss://kinopio.local:3000'
     }
     return host
   },
