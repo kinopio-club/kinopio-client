@@ -71,7 +71,8 @@ export default {
       const isDialog = element.closest('dialog')
       const isButton = element.closest('button')
       const isDraggingItem = this.$store.state.currentUserIsDraggingBox || this.$store.state.currentUserIsDraggingCard
-      return isDialog || isButton || isDraggingItem
+      const preventInteractions = this.$store.state.currentUserIsPaintingLocked
+      return isDialog || isButton || isDraggingItem || preventInteractions
     },
 
     // touch scroll
