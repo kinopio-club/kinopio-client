@@ -5,6 +5,8 @@
 import consts from '@/consts.js'
 import utils from '@/utils.js'
 
+import { mapState } from 'vuex'
+
 // let multiTouchAction, shouldCancelUndo
 let touchStartZoomValue
 
@@ -30,7 +32,13 @@ export default {
     }
   },
   computed: {
-    spaceZoomPercent () { return this.$store.state.spaceZoomPercent },
+    ...mapState([
+      'spaceZoomPercent',
+      'currentUserIsDraggingBox',
+      'currentUserIsDraggingCard',
+      'currentUserIsPaintingLocked',
+      'touchScrollOrigin'
+    ]),
     max () { return consts.spaceZoom.max }, // 100
     min () { return consts.spaceZoom.min } // 40
   },
@@ -70,8 +78,8 @@ export default {
       const element = event.target
       const isDialog = element.closest('dialog')
       const isButton = element.closest('button')
-      const isDraggingItem = this.$store.state.currentUserIsDraggingBox || this.$store.state.currentUserIsDraggingCard
-      const preventInteractions = this.$store.state.currentUserIsPaintingLocked
+      const isDraggingItem = this.currentUserIsDraggingBox || this.currentUserIsDraggingCard
+      const preventInteractions = this.currentUserIsPaintingLocked
       return isDialog || isButton || isDraggingItem || preventInteractions
     },
 
@@ -82,7 +90,7 @@ export default {
         x: currentCursor.x - prevCursor.x,
         y: currentCursor.y - prevCursor.y
       }
-      const prevScrollBy = this.$store.state.touchScrollOrigin
+      const prevScrollBy = this.touchScrollOrigin
       const scrollBy = {
         x: prevScrollBy.x + delta.x,
         y: prevScrollBy.y + delta.y
@@ -160,7 +168,7 @@ export default {
     // },
 
     // touchEnd () {
-    //   if (this.$store.state.isAddPage) { return }
+    //   if (this.isAddPage) { return }
     //   this.isPinchZooming = false
     //   this.checkIfInertiaScrollEnd()
 
