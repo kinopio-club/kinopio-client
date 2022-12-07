@@ -590,6 +590,7 @@ export default {
       if (shouldCancelLocking) {
         currentUserIsLocking = false
         shouldCancelLocking = false
+        this.$store.commit('currentUserIsPaintingLocked', false)
       }
       if (currentUserIsLocking && percentComplete <= 1) {
         const minSize = circleRadius
