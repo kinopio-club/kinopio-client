@@ -19,16 +19,11 @@ import debounce from 'lodash-es/debounce'
 
 const offscreenMarkers = new Worker('/web-workers/offscreen-markers.js')
 
-const updatePositionDuration = 10
-let updatePositionIteration, updatePositionTimer
-
 export default {
   name: 'OffscreenMarkers',
   mounted () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
-        this.updatePosition()
-      } else if (mutation.type === 'isLoadingSpace') {
+      if (mutation.type === 'isLoadingSpace') {
         this.updateOffscreenMarkers()
       }
     })
@@ -39,14 +34,12 @@ export default {
     window.addEventListener('scroll', this.handleTouchInteractions)
     window.addEventListener('gesturestart', this.handleTouchInteractions)
     window.addEventListener('gesturechange', this.handleTouchInteractions)
-    window.addEventListener('touchend', this.updatePosition)
     visualViewport.addEventListener('resize', this.debouncedUpdateOffscreenMarkers)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.handleTouchInteractions)
     window.removeEventListener('gesturestart', this.handleTouchInteractions)
     window.removeEventListener('gesturechange', this.handleTouchInteractions)
-    window.removeEventListener('touchend', this.updatePosition)
     visualViewport.removeEventListener('resize', this.debouncedUpdateOffscreenMarkers)
   },
   data () {
@@ -143,24 +136,6 @@ export default {
 
     // update position
 
-    updatePosition () {
-      updatePositionIteration = 0
-      if (updatePositionTimer) { return }
-      updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
-    },
-    cancelUpdatePosition () {
-      window.cancelAnimationFrame(updatePositionTimer)
-      updatePositionTimer = undefined
-    },
-    updatePositionFrame () {
-      updatePositionIteration++
-      this.updateOffscreenMarkers()
-      if (updatePositionIteration < updatePositionDuration) {
-        window.requestAnimationFrame(this.updatePositionFrame)
-      } else {
-        this.cancelUpdatePosition()
-      }
-    },
     updateOffscreenMarkers: debounce(function () {
       this.debouncedUpdateOffscreenMarkers()
     }, 20),
@@ -171,11 +146,6 @@ export default {
       const zoom = this.spaceZoomDecimal
       offscreenMarkers.postMessage({ cards, viewport, zoom })
       this.viewport = viewport
-    }
-  },
-  watch: {
-    spaceZoomDecimal (value) {
-      this.updateOffscreenMarkers()
     }
   }
 }

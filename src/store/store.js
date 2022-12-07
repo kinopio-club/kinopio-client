@@ -417,7 +417,6 @@ const store = createStore({
     triggerUpdateRemoteUserCursor: () => {},
     triggerUpdateRemoteDropGuideLine: () => {},
     triggerUpdateStopRemoteUserDropGuideLine: () => {},
-    triggerUpdatePositionInVisualViewport: () => {},
     triggerHideTouchInterface: () => {},
     triggerUpgradeUserIsVisible: () => {},
     triggerDonateIsVisible: () => {},

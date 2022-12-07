@@ -161,7 +161,6 @@ export default {
       const length = this.search.length
       element.focus()
       element.setSelectionRange(length, length)
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     textareaSize () {
       const textarea = this.$refs.promptInput

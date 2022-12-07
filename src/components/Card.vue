@@ -1158,7 +1158,6 @@ export default {
         id: this.card.id,
         name: utils.trim(name)
       })
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     unlockCard (event) {
       if (this.$store.state.currentUserIsDrawingConnection) {

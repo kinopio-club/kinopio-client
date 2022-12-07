@@ -18,7 +18,6 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         placeholder="Box Name"
         v-model="name"
         ref="name"
-        @blur="blur"
         @keydown.enter.stop.prevent="closeAllDialogs"
         maxLength="600"
         :class="{'is-dark': colorisDark}"
@@ -137,9 +136,6 @@ export default {
         element.setSelectionRange(start, length)
       }
       this.$store.commit('currentBoxIsNew', false)
-    },
-    blur () {
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     scrollIntoView () {
       this.$nextTick(() => {

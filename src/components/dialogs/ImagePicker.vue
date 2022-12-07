@@ -430,7 +430,6 @@ export default {
       const length = this.search.length
       element.focus()
       element.setSelectionRange(length, length)
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     clearSearch () {
       this.search = ''
@@ -450,7 +449,6 @@ export default {
       const element = this.$refs.dialog
       if (!element) { return }
       this.$store.commit('triggerScrollIntoView', { element })
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     isCardUrl (image) {
       return this.cardUrl === image.url
