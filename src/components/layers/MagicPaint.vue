@@ -40,6 +40,8 @@ aside
 import utils from '@/utils.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
+import { mapState, mapGetters } from 'vuex'
+
 const circleRadius = 20
 const circleSelectionRadius = circleRadius - 10 // magnitude of sensitivity
 
@@ -80,7 +82,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggeredPaintFramePosition') {
-        this.createPaintingCircle({}, this.$store.state.triggeredPaintFramePosition)
+        this.createPaintingCircle({}, this.triggeredPaintFramePosition)
       } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
         this.updateCirclesWithScroll()
       } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
@@ -133,27 +135,46 @@ export default {
     }
   },
   computed: {
-    currentUserColor () { return this.$store.state.currentUser.color },
-    userCannotEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
+    ...mapState([
+      'triggeredPaintFramePosition',
+      'pageHeight',
+      'pageWidth',
+      'viewportHeight',
+      'viewportWidth',
+      'currentUserIsPanningReady',
+      'currentUserIsBoxSelecting',
+      'currentUserToolbar',
+      'isTouchDevice',
+      'currentUserIsPainting',
+      'currentUserIsPaintingLocked',
+      'isAddPage',
+      'shouldAddCard',
+      'multipleCardsSelectedIds',
+      'multipleConnectionsSelectedIds',
+      'currentUser'
+    ]),
+    ...mapGetters([
+      'spaceCounterZoomDecimal',
+      'spaceZoomDecimal',
+      'transformCounterTouchScroll',
+      'currentScrollPosition',
+      'shouldScrollAtEdges',
+      'currentUser/canEditSpace',
+      'currentCards/isSelectable',
+      'currentBoxes/isNotLocked'
+    ]),
+    currentUserColor () { return this.currentUser.color },
+    userCannotEditSpace () { return !this['currentUser/canEditSpace']() },
+    toolbarIsCard () { return this.currentUserToolbar === 'card' },
+    toolbarIsBox () { return this.currentUserToolbar === 'box' },
     // keep canvases updated to viewport size so you can draw on newly created areas
-    pageHeight () { return this.$store.state.pageHeight },
-    pageWidth () { return this.$store.state.pageWidth },
-    viewportHeight () { return this.$store.state.viewportHeight },
-    viewportWidth () { return this.$store.state.viewportWidth },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
-    isPanning () { return this.$store.state.currentUserIsPanningReady },
-    isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
-    toolbarIsCard () { return this.$store.state.currentUserToolbar === 'card' },
-    toolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' },
-    isTouchDevice () { return this.$store.state.isTouchDevice },
     positionStyles () {
       let position = {
         left: this.scrollPosition.x + 'px',
         top: this.scrollPosition.y + 'px'
       }
       if (this.isTouchDevice) {
-        const transform = this.$store.getters.transformCounterTouchScroll
+        const transform = this.transformCounterTouchScroll
         position = { transform }
       }
       return position
@@ -167,7 +188,7 @@ export default {
       this.scroll()
     },
     scroll () {
-      this.scrollPosition = this.$store.getters.currentScrollPosition
+      this.scrollPosition = this.currentScrollPosition
       this.updateCirclesWithScroll()
       this.cancelLocking()
     },
@@ -177,7 +198,7 @@ export default {
       remotePaintingCircles = []
     },
     updatePrevScrollPosition () {
-      prevScroll = this.$store.getters.currentScrollPosition
+      prevScroll = this.currentScrollPosition
     },
     cursor (event) {
       let cursor = utils.cursorPositionInViewport(event)
@@ -191,7 +212,7 @@ export default {
       })
     },
     updateCirclesWithScroll () {
-      const scroll = this.$store.getters.currentScrollPosition
+      const scroll = this.currentScrollPosition
       const scrollDelta = {
         x: scroll.x - prevScroll.x,
         y: scroll.y - prevScroll.y
@@ -266,12 +287,12 @@ export default {
       return fromDialog || fromHeader || fromFooter
     },
     stopPainting (event) {
-      if (this.$store.state.isAddPage) { return }
+      if (this.isAddPage) { return }
       if (this.shouldCancel(event)) { return }
       startCursor = startCursor || {}
       const endCursor = this.cursor(event)
       const cursorsAreClose = utils.cursorsAreClose(startCursor, endCursor)
-      const shouldAddCard = this.$store.state.shouldAddCard
+      const shouldAddCard = this.shouldAddCard
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
       lockingAnimationTimer = undefined
@@ -322,12 +343,11 @@ export default {
     // Painting
 
     painting (event) {
-      const isPainting = this.$store.state.currentUserIsPainting
-      if (this.isPanning) { return }
-      if (this.isBoxSelecting) { return }
+      if (this.currentUserIsPanningReady) { return }
+      if (this.currentUserIsBoxSelecting) { return }
       if (!this.toolbarIsCard) { return }
-      if (!isPainting) { return }
-      if (this.$store.getters.shouldScrollAtEdges(event) && event.cancelable) {
+      if (!this.currentUserIsPainting) { return }
+      if (this.shouldScrollAtEdges(event) && event.cancelable) {
         event.preventDefault() // prevents touch swipe viewport scrolling
       }
       if (!paintingCirclesTimer) {
@@ -342,17 +362,13 @@ export default {
       this.triggerHideTouchInterface()
     },
     triggerHideTouchInterface () {
-      if (!this.$store.state.currentUserIsPaintingLocked) { return }
+      if (!this.currentUserIsPaintingLocked) { return }
       this.$store.commit('triggerHideTouchInterface')
     },
     createPaintingCircle (event, position) {
-      const isTouch = Boolean(event.touches)
-      const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
-      if (isTouch && !isPaintingLocked) { return }
-      if (this.isBoxSelecting) { return }
-      const currentUserIsPaintingLocked = this.$store.state.currentUserIsPaintingLocked
-      if (event.touches && !currentUserIsPaintingLocked) { return }
-      let color = this.$store.state.currentUser.color
+      if (this.currentUserIsBoxSelecting) { return }
+      if (event.touches && !this.currentUserIsPaintingLocked) { return }
+      let color = this.currentUserColor
       this.currentCursor = position || this.cursor(event)
       let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
       this.selectItems(event, position)
@@ -360,11 +376,11 @@ export default {
       this.broadcastCircle(event, circle)
     },
     startPainting (event) {
-      if (this.isPanning) { return }
-      if (this.isBoxSelecting) { return }
+      if (this.currentUserIsPanningReady) { return }
+      if (this.currentUserIsBoxSelecting) { return }
       startCursor = this.cursor(event)
       this.currentCursor = startCursor
-      const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
+      const multipleCardsIsSelected = Boolean(this.multipleCardsSelectedIds.length)
       if (utils.isMultiTouch(event)) { return }
       this.startLocking()
       this.createInitialCircle()
@@ -381,8 +397,8 @@ export default {
       if (!event.shiftKey) {
         this.$store.dispatch('clearMultipleSelected')
       }
-      this.$store.commit('previousMultipleCardsSelectedIds', utils.clone(this.$store.state.multipleCardsSelectedIds))
-      this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.$store.state.multipleConnectionsSelectedIds))
+      this.$store.commit('previousMultipleCardsSelectedIds', utils.clone(this.multipleCardsSelectedIds))
+      this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.multipleConnectionsSelectedIds))
       this.$store.dispatch('closeAllDialogs', 'MagicPaint.startPainting')
       this.$store.commit('currentUserIsPainting', true)
     },
@@ -420,7 +436,7 @@ export default {
       event.preventDefault() // allows dragging boxes without scrolling on touch
     },
     checkIfShouldPreventInteraction (position) {
-      const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()
+      const currentUserCanEdit = this['currentUser/canEditSpace']()
       if (currentUserCanEdit) { return }
       const notificationWithPosition = document.querySelector('.notifications-with-position .item')
       if (!notificationWithPosition) {
@@ -433,8 +449,7 @@ export default {
 
     shouldPreventSelectionOnMobile () {
       const isMobile = utils.isMobile()
-      const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
-      return isMobile && !isPaintingLocked
+      return isMobile && !this.currentUserIsPaintingLocked
     },
     selectItems (event, position) {
       // event = event || {}
@@ -446,7 +461,7 @@ export default {
       this.selectBoxes(position)
     },
     selectCards (position) {
-      const cards = this.$store.getters['currentCards/isSelectable'](position)
+      const cards = this['currentCards/isSelectable'](position)
       if (!cards) { return }
       cards.forEach(card => {
         const cardX = card.x
@@ -484,7 +499,7 @@ export default {
       })
     },
     selectBoxes (position) {
-      const boxes = this.$store.getters['currentBoxes/isNotLocked']
+      const boxes = this['currentBoxes/isNotLocked']
       boxes.forEach(box => {
         const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
         const rect = element.getBoundingClientRect()
@@ -517,12 +532,12 @@ export default {
     // Remote Painting
 
     broadcastCircle (event, circle) {
-      const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()
+      const currentUserCanEdit = this['currentUser/canEditSpace']()
       if (!currentUserCanEdit) { return }
       const position = utils.cursorPositionInSpace({ event })
       this.$store.commit('broadcast/update', {
         updates: {
-          userId: this.$store.state.currentUser.id,
+          userId: this.currentUser.id,
           x: position.x,
           y: position.y,
           color: circle.color,
@@ -542,7 +557,7 @@ export default {
       }
     },
     remotePaintCirclesAnimationFrame () {
-      const scroll = this.$store.getters.currentScrollPosition
+      const scroll = this.currentScrollPosition
       remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
       remotePaintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       remotePaintingCircles.forEach(item => {
