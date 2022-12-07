@@ -181,12 +181,6 @@ export default {
     },
     cursor (event) {
       let cursor = utils.cursorPositionInViewport(event)
-      if (this.$store.state.isTouchDevice) {
-        cursor = {
-          x: cursor.x,
-          y: cursor.y - circleRadius
-        }
-      }
       return cursor
     },
     updateCirclePositions (circles, scrollDelta) {
@@ -699,8 +693,8 @@ canvas
   position fixed
   top 0
   left 0
-  width 100vw
-  height 100vh
+  width 100dvw
+  height 100dvh
 .locking,
 .initial-circle,
 .remote-painting
