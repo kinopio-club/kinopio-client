@@ -269,6 +269,7 @@ export default {
       if (this.shouldCancel(event)) { return }
       startCursor = startCursor || {}
       const endCursor = utils.cursorPositionInViewport(event)
+      const cursorsAreClose = utils.cursorsAreClose(startCursor, endCursor)
       const shouldAddCard = this.$store.state.shouldAddCard
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
@@ -276,7 +277,7 @@ export default {
       lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       this.$store.commit('currentUserIsPaintingLocked', false)
       this.$store.commit('currentUserIsPainting', false)
-      if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddCard && event.cancelable) {
+      if (cursorsAreClose && shouldAddCard && event.cancelable) {
         this.$store.commit('shouldAddCard', true)
         event.preventDefault()
       } else {

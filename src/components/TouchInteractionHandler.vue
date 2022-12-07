@@ -88,6 +88,7 @@ export default {
       }
       this.$store.commit('touchScrollOrigin', scrollBy)
       prevCursor = currentCursor
+      this.$store.commit('shouldAddCard', false)
     },
 
     //   // velocity is amount of movement divided by the time since the last frame
