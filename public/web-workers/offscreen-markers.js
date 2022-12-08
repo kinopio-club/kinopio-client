@@ -52,15 +52,21 @@ const direction = (card, viewport) => {
   //           │ bottom │
   //
   //           │        │
+  const isPosition = {
+    bottom: card.y > (viewport.height + scrollY),
+    top: card.y < scrollY,
+    right: card.x > (viewport.width + scrollX),
+    left: card.x < scrollX
+  }
 
-  if (card.y > (viewport.height + scrollY)) {
+  if (isPosition.bottom) {
     y = 'bottom'
-  } else if (card.y < scrollY) {
+  } else if (isPosition.top) {
     y = 'top'
   }
-  if (card.x > (viewport.width + scrollX)) {
+  if (isPosition.right) {
     x = 'right'
-  } else if (card.x < scrollX) {
+  } else if (isPosition.left) {
     x = 'left'
   }
   return y + x
