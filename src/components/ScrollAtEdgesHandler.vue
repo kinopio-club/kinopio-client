@@ -69,7 +69,8 @@ export default {
     ]),
     ...mapGetters([
       'spaceCounterZoomDecimal',
-      'spaceZoomDecimal'
+      'spaceZoomDecimal',
+      'currentScrollPosition'
     ]),
     shouldPreventResize () { return this.currentUserIsPainting || this.isDrawingConnection || this.isResizingCard }
   },
@@ -108,8 +109,12 @@ export default {
         left: cursor.x <= scrollArea,
         right: cursor.x >= (viewportWidth - scrollArea)
       }
+      const canScroll = {
+        x: this.currentScrollPosition().x > 0,
+        y: this.currentScrollPosition().y > 0
+      }
       // Y movement
-      if (movementDirection.y === 'up' && cursorSide.top && window.scrollY) {
+      if (movementDirection.y === 'up' && cursorSide.top && canScroll.y) {
         speed = this.speed(cursor, 'up')
         delta = {
           x: 0,
@@ -126,7 +131,7 @@ export default {
         this.scrollBy(delta)
       }
       // X movement
-      if (movementDirection.x === 'left' && cursorSide.left && window.scrollX) {
+      if (movementDirection.x === 'left' && cursorSide.left && canScroll.x) {
         speed = this.speed(cursor, 'left')
         delta = {
           x: -speed,
