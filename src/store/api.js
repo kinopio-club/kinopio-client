@@ -5,7 +5,7 @@ import debounce from 'lodash-es/debounce'
 import merge from 'lodash-es/merge'
 import { nanoid } from 'nanoid'
 
-let host = 'https://api.kinopio.club/'
+let host = 'https://api.kinopio.club'
 if (import.meta.env.MODE === 'development') {
   host = 'http://kinopio.local:3000'
 }
