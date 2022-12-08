@@ -102,19 +102,21 @@ export default {
       const viewportHeight = this.viewportHeight
       const viewportWidth = this.viewportWidth
       const cursor = this.cursor()
-      const cursorIsTopSide = cursor.y <= scrollArea
-      const cursorIsBottomSide = cursor.y >= (viewportHeight - scrollArea)
-      const cursorIsLeftSide = cursor.x <= scrollArea
-      const cursorIsRightSide = cursor.x >= (viewportWidth - scrollArea)
+      const cursorSide = {
+        top: cursor.y <= scrollArea,
+        bottom: cursor.y >= (viewportHeight - scrollArea),
+        left: cursor.x <= scrollArea,
+        right: cursor.x >= (viewportWidth - scrollArea)
+      }
       // Y movement
-      if (movementDirection.y === 'up' && cursorIsTopSide && window.scrollY) {
+      if (movementDirection.y === 'up' && cursorSide.top && window.scrollY) {
         speed = this.speed(cursor, 'up')
         delta = {
           x: 0,
           y: -speed
         }
         this.scrollBy(delta)
-      } else if (movementDirection.y === 'down' && cursorIsBottomSide && this.shouldScrollDown()) {
+      } else if (movementDirection.y === 'down' && cursorSide.bottom && this.shouldScrollDown()) {
         speed = this.speed(cursor, 'down')
         delta = {
           x: 0,
@@ -124,14 +126,14 @@ export default {
         this.scrollBy(delta)
       }
       // X movement
-      if (movementDirection.x === 'left' && cursorIsLeftSide && window.scrollX) {
+      if (movementDirection.x === 'left' && cursorSide.left && window.scrollX) {
         speed = this.speed(cursor, 'left')
         delta = {
           x: -speed,
           y: 0
         }
         this.scrollBy(delta)
-      } else if (movementDirection.x === 'right' && cursorIsRightSide && this.shouldScrollRight()) {
+      } else if (movementDirection.x === 'right' && cursorSide.right && this.shouldScrollRight()) {
         speed = this.speed(cursor, 'right')
         delta = {
           x: speed,
@@ -168,8 +170,8 @@ export default {
     },
     increasePageWidth (delta) {
       if (this.shouldPreventResize) { return }
-      const cursorIsRightSideOfPage = (this.pageWidth - prevCursorPage.x) < scrollArea
-      if (cursorIsRightSideOfPage) {
+      const cursorSideIsPageRight = (this.pageWidth - prevCursorPage.x) < scrollArea
+      if (cursorSideIsPageRight) {
         const pageWidth = this.pageWidth
         const width = pageWidth + delta.x
         this.$store.commit('pageWidth', width)
@@ -177,8 +179,8 @@ export default {
     },
     increasePageHeight (delta) {
       if (this.shouldPreventResize) { return }
-      const cursorIsBottomSideOfPage = (this.pageHeight - prevCursorPage.y) < scrollArea
-      if (cursorIsBottomSideOfPage) {
+      const cursorSideIsPageBottom = (this.pageHeight - prevCursorPage.y) < scrollArea
+      if (cursorSideIsPageBottom) {
         const pageHeight = this.pageHeight
         const height = pageHeight + delta.y
         this.$store.commit('pageHeight', height)
@@ -203,14 +205,15 @@ export default {
       }
       const isDraggingItem = this.currentUserIsDraggingCard || this.currentUserIsDraggingBox
       delta = {
-        left: Math.round(delta.x * zoom),
-        top: Math.round(delta.y * zoom)
+        x: Math.round(delta.x * zoom),
+        y: Math.round(delta.y * zoom),
+        behavior: 'auto'
       }
       if (isDraggingItem) {
         const slowMultiplier = 0.9
         const itemDelta = {
-          x: delta.left * slowMultiplier,
-          y: delta.top * slowMultiplier
+          x: delta.x * slowMultiplier,
+          y: delta.y * slowMultiplier
         }
         this.$store.dispatch('history/pause')
         this.$store.dispatch('currentCards/move', { endCursor, prevCursor, delta: itemDelta })

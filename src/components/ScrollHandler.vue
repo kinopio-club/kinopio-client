@@ -1,4 +1,4 @@
-<template lang="pug">
+<template lang='pug'>
 </template>
 
 <script>
@@ -111,7 +111,6 @@ export default {
       } else if (yOverlapBelow > 0) {
         y = yOverlapBelow + padding
       }
-      // console.log(x,y)
       this.scrollBy({ x, y, behavior: 'smooth' })
     },
     scrollBy ({ x, y, behavior }) {
