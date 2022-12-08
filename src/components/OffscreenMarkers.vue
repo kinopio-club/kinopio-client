@@ -1,14 +1,14 @@
 <template lang="pug">
 aside.offscreen-markers(v-if="isVisible" :style="positionStyles" :class="{ 'is-dark': isDark }")
-  .marker.topleft(v-if="hasDirectionTopLeft")
-  .marker.topright(v-if="hasDirectionTopRight")
-  .marker.bottomleft(v-if="hasDirectionBottomLeft")
-  .marker.bottomright(v-if="hasDirectionBottomRight")
+  .marker.topleft(v-if="hasDirection('topleft')")
+  .marker.topright(v-if="hasDirection('topright')")
+  .marker.bottomleft(v-if="hasDirection('bottomleft')")
+  .marker.bottomright(v-if="hasDirection('bottomright')")
 
-  .marker.top(v-if="offscreenCardsTop.length" :style="{ left: topMarkerOffset }")
-  .marker.left(v-if="offscreenCardsLeft.length" :style="{ top: leftMarkerOffset }")
-  .marker.right(v-if="offscreenCardsRight.length" :style="{ top: rightMarkerOffset }")
-  .marker.bottom(v-if="offscreenCardsBottom.length" :style="{ left: bottomMarkerOffset }")
+  .marker.top(v-if="offscreenCards.top.length" :style="{ left: topPosition }")
+  .marker.left(v-if="offscreenCards.left.length" :style="{ top: leftPosition }")
+  .marker.right(v-if="offscreenCards.right.length" :style="{ top: rightPosition }")
+  .marker.bottom(v-if="offscreenCards.bottom.length" :style="{ left: bottomPosition }")
 </template>
 
 <script>
@@ -25,25 +25,25 @@ export default {
   mounted () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'isLoadingSpace') {
-        this.updateOffscreenMarkers()
+        this.debouncedUpdateOffscreenMarkers()
       }
     })
-    window.addEventListener('scroll', this.debouncedUpdateOffscreenMarkers)
+    window.addEventListener('scroll', this.updateOffscreenMarkers)
     offscreenMarkers.addEventListener('message', event => {
-      this.offscreenCardsByDirection = event.data
+      this.offscreenCards = event.data
     })
     window.addEventListener('scroll', this.updateScrollPosition)
-    visualViewport.addEventListener('resize', this.debouncedUpdateOffscreenMarkers)
+    visualViewport.addEventListener('resize', this.updateOffscreenMarkers)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateScrollPosition)
-    visualViewport.removeEventListener('resize', this.debouncedUpdateOffscreenMarkers)
+    visualViewport.removeEventListener('resize', this.updateOffscreenMarkers)
   },
   data () {
     return {
       viewport: {},
       scrollPosition: { x: 0, y: 0 },
-      offscreenCardsByDirection: {
+      offscreenCards: {
         top: [],
         left: [],
         right: [],
@@ -110,41 +110,33 @@ export default {
         return utils.colorIsDark(color)
       }
     },
-    hasDirectionTopLeft () { return this.hasDirection('topleft') },
-    hasDirectionTopRight () { return this.hasDirection('topright') },
-    hasDirectionBottomLeft () { return this.hasDirection('bottomleft') },
-    hasDirectionBottomRight () { return this.hasDirection('bottomright') },
     // top
-    offscreenCardsTop () { return this.offscreenCardsByDirection.top },
-    topMarkerOffset () {
-      let cards = this.offscreenCardsTop
+    topPosition () {
+      let cards = this.offscreenCards.top
       if (!cards.length) { return }
       cards = cards.map(card => card.x)
       const average = utils.averageOfNumbers(cards)
       return average - this.viewport.pageLeft + 'px'
     },
     // left
-    offscreenCardsLeft () { return this.offscreenCardsByDirection.left },
-    leftMarkerOffset () {
-      let cards = this.offscreenCardsLeft
+    leftPosition () {
+      let cards = this.offscreenCards.left
       if (!cards.length) { return }
       cards = cards.map(card => card.y)
       const average = utils.averageOfNumbers(cards)
       return average - this.viewport.pageTop + 'px'
     },
     // right
-    offscreenCardsRight () { return this.offscreenCardsByDirection.right },
-    rightMarkerOffset () {
-      let cards = this.offscreenCardsRight
+    rightPosition () {
+      let cards = this.offscreenCards.right
       if (!cards.length) { return }
       cards = cards.map(card => card.y)
       const average = utils.averageOfNumbers(cards)
       return average - this.viewport.pageTop + 'px'
     },
     // bottom
-    offscreenCardsBottom () { return this.offscreenCardsByDirection.bottom },
-    bottomMarkerOffset () {
-      let cards = this.offscreenCardsBottom
+    bottomPosition () {
+      let cards = this.offscreenCards.bottom
       if (!cards.length) { return }
       cards = cards.map(card => card.x)
       const average = utils.averageOfNumbers(cards)
@@ -153,15 +145,15 @@ export default {
   },
   methods: {
     hasDirection (direction) {
-      return Boolean(this.offscreenCardsByDirection[direction].length)
+      return Boolean(this.offscreenCards[direction].length)
     },
     updateScrollPosition () {
       this.scrollPosition = this.currentScrollPosition()
     },
-    updateOffscreenMarkers: debounce(function () {
-      this.debouncedUpdateOffscreenMarkers()
+    debouncedUpdateOffscreenMarkers: debounce(function () {
+      this.updateOffscreenMarkers()
     }, 20),
-    debouncedUpdateOffscreenMarkers () {
+    updateOffscreenMarkers () {
       let cards = this['currentCards/all']
       cards = utils.clone(cards)
       const viewport = utils.visualViewport()
