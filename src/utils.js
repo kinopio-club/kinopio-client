@@ -59,7 +59,7 @@ export default {
     return domain
   },
   host (useKinopioUrl) {
-    let host = 'https://http://api.kinopio.club/'
+    let host = 'https://api.kinopio.club/'
     if (useKinopioUrl) {
       host = 'https://api.kinopio.club'
     }
