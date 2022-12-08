@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.offscreen-markers(v-if="isVisible" :class="{ 'is-dark': isDark }")
+aside.offscreen-markers(v-if="isVisible" :style="positionStyles" :class="{ 'is-dark': isDark }")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
@@ -32,20 +32,17 @@ export default {
     offscreenMarkers.addEventListener('message', event => {
       this.offscreenCardsByDirection = event.data
     })
-    window.addEventListener('scroll', this.handleTouchInteractions)
-    window.addEventListener('gesturestart', this.handleTouchInteractions)
-    window.addEventListener('gesturechange', this.handleTouchInteractions)
+    window.addEventListener('scroll', this.updateScrollPosition)
     visualViewport.addEventListener('resize', this.debouncedUpdateOffscreenMarkers)
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.handleTouchInteractions)
-    window.removeEventListener('gesturestart', this.handleTouchInteractions)
-    window.removeEventListener('gesturechange', this.handleTouchInteractions)
+    window.removeEventListener('scroll', this.updateScrollPosition)
     visualViewport.removeEventListener('resize', this.debouncedUpdateOffscreenMarkers)
   },
   data () {
     return {
       viewport: {},
+      scrollPosition: { x: 0, y: 0 },
       offscreenCardsByDirection: {
         top: [],
         left: [],
@@ -64,11 +61,14 @@ export default {
       'multipleSelectedActionsIsVisible',
       'connectionDetailsIsVisibleForConnectionId',
       'currentSpace',
-      'isAddPage'
+      'isAddPage',
+      'isTouchDevice'
     ]),
     ...mapGetters([
       'spaceZoomDecimal',
-      'currentCards/all'
+      'currentCards/all',
+      'currentScrollPosition',
+      'transformCounterTouchScroll'
     ]),
     isVisible () {
       if (this.isAddPage) { return }
@@ -80,6 +80,18 @@ export default {
       if (this.dialogsVisible) { isVisible = false }
       return isVisible
     },
+    positionStyles () {
+      let position = {
+        left: this.scrollPosition.x + 'px',
+        top: this.scrollPosition.y + 'px'
+      }
+      if (this.isTouchDevice) {
+        const transform = this.transformCounterTouchScroll
+        position = { transform }
+      }
+      return position
+    },
+
     dialogsVisible () {
       return Boolean(this.cardDetailsIsVisibleForCardId || this.multipleSelectedActionsIsVisible || this.connectionDetailsIsVisibleForConnectionId)
     },
@@ -143,9 +155,9 @@ export default {
     hasDirection (direction) {
       return Boolean(this.offscreenCardsByDirection[direction].length)
     },
-
-    // update position
-
+    updateScrollPosition () {
+      this.scrollPosition = this.currentScrollPosition()
+    },
     updateOffscreenMarkers: debounce(function () {
       this.debouncedUpdateOffscreenMarkers()
     }, 20),
