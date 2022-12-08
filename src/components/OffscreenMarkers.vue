@@ -25,6 +25,7 @@ export default {
   mounted () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'isLoadingSpace') {
+        this.updateScrollPosition()
         this.debouncedUpdateOffscreenMarkers()
       }
     })
@@ -157,9 +158,9 @@ export default {
       let cards = this['currentCards/all']
       cards = utils.clone(cards)
       const viewport = utils.visualViewport()
+      this.viewport = viewport
       const zoom = this.spaceZoomDecimal
       offscreenMarkers.postMessage({ cards, viewport, zoom })
-      this.viewport = viewport
     }
   }
 }
@@ -172,8 +173,8 @@ edge = 4px
 
 .offscreen-markers
   position fixed
-  width 100%
-  height 100%
+  width 100vw
+  height 100vh
   pointer-events none
   z-index 1
   opacity 0.5
