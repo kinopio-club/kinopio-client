@@ -16,6 +16,7 @@ import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
 
 import debounce from 'lodash-es/debounce'
+import { mapState, mapGetters } from 'vuex'
 
 const offscreenMarkers = new Worker('/web-workers/offscreen-markers.js')
 
@@ -58,6 +59,18 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'cardDetailsIsVisibleForCardId',
+      'multipleSelectedActionsIsVisible',
+      'connectionDetailsIsVisibleForConnectionId',
+      'currentSpace',
+      'isAddPage'
+
+    ]),
+    ...mapGetters([
+      'spaceZoomDecimal',
+      'currentCards/all'
+    ]),
     isVisible () {
       if (this.isAddPage) { return }
       const isTouchDevice = this.$store.getters.isTouchDevice
@@ -69,10 +82,10 @@ export default {
       return isVisible
     },
     dialogsVisible () {
-      return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleSelectedActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
+      return Boolean(this.cardDetailsIsVisibleForCardId || this.multipleSelectedActionsIsVisible || this.connectionDetailsIsVisibleForConnectionId)
     },
     backgroundImage () {
-      const background = this.$store.state.currentSpace.background
+      const background = this.currentSpace.background
       const backgroundImage = backgroundImages.find(image => {
         return image.url === background
       })
@@ -82,12 +95,10 @@ export default {
       if (this.backgroundImage) {
         return this.backgroundImage.isDark
       } else {
-        const color = this.$store.state.currentSpace.backgroundTint
+        const color = this.currentSpace.backgroundTint
         return utils.colorIsDark(color)
       }
     },
-    isAddPage () { return this.$store.state.isAddPage },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     hasDirectionTopLeft () { return this.hasDirection('topleft') },
     hasDirectionTopRight () { return this.hasDirection('topright') },
     hasDirectionBottomLeft () { return this.hasDirection('bottomleft') },
@@ -140,7 +151,7 @@ export default {
       this.debouncedUpdateOffscreenMarkers()
     }, 20),
     debouncedUpdateOffscreenMarkers () {
-      let cards = this.$store.getters['currentCards/all']
+      let cards = this['currentCards/all']
       cards = utils.clone(cards)
       const viewport = utils.visualViewport()
       const zoom = this.spaceZoomDecimal
