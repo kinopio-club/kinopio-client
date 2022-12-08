@@ -79,7 +79,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Remove
       .button-wrap
         button(:disabled="!canEditCard" @click.left="removeCard")
-          img.icon(src="@/assets/remove.svg")
+          img.icon.remove(src="@/assets/remove.svg")
           span Remove
       //- [·]
       .button-wrap.cards-checkboxes

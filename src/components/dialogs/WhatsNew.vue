@@ -158,6 +158,11 @@ export default {
   code
     background-color var(--secondary-background)
     margin 0
+  blockquote
+    background-color var(--secondary-background)
+    padding 5px
+    border-radius var(--entity-radius)
+    margin 10px 0
   .refresh
     margin 0
     height 11px

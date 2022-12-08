@@ -6,7 +6,7 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
       .segmented-buttons
         //- Remove
         button(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
-          img.icon(src="@/assets/remove.svg")
+          img.icon.remove(src="@/assets/remove.svg")
           span {{removeLabel}}
         // Hide Space
         button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
@@ -16,7 +16,7 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
     //-  Duplicate
     .button-wrap(v-if="!isSpaceMember")
       button(@click.left="duplicateSpace")
-        img.icon(src="@/assets/add.svg")
+        img.icon.add(src="@/assets/add.svg")
         span Duplicate
 
   section.results-actions
@@ -24,7 +24,7 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
       //- Add Space
       .button-wrap
         button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
-          img.icon(src="@/assets/add.svg")
+          img.icon.add(src="@/assets/add.svg")
           span New
         AddSpace(:visible="addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace" @addJournalSpace="addJournalSpace")
       //- Filters

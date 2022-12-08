@@ -25,7 +25,13 @@ const router = createRouter({
     }, {
       path: '/',
       name: 'space',
-      component: Space
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        store.commit('disableViewportOptimizations', disableViewportOptimizations)
+        next()
+      }
     }, {
       path: '/beta',
       name: 'beta',
@@ -79,6 +85,8 @@ const router = createRouter({
         const apiKey = store.state.currentUser.apiKey
         const spaceId = urlParams.get('spaceId')
         const collaboratorKey = urlParams.get('collaboratorKey')
+        const disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        store.commit('disableViewportOptimizations', disableViewportOptimizations)
         if (!spaceId || !collaboratorKey) { return }
         store.commit('isLoadingSpace', true)
         if (apiKey) {

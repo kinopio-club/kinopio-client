@@ -332,12 +332,12 @@ export default {
     isInViewport (card) {
       const zoom = this.$store.getters.spaceZoomDecimal
       card = {
-        x: card.x * zoom,
-        y: card.y * zoom,
-        width: card.width * zoom,
-        height: card.height * zoom
+        x: card.x,
+        y: card.y,
+        width: card.width,
+        height: card.height
       }
-      return utils.isCardInViewport(card)
+      return utils.isItemInViewport(card, zoom)
     },
 
     // Boxes

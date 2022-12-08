@@ -289,6 +289,8 @@ dialog.search
     display block !important
     .button-badge
       box-shadow none
+      display initial
+      margin-right 0
       &:hover,
       &:active
         box-shadow none

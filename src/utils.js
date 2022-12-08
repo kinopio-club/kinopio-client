@@ -728,21 +728,32 @@ export default {
   emptyCard () {
     return { width: 76, height: 32 }
   },
-  isCardInViewport (card) {
-    const viewport = this.visualViewport()
+  isItemInViewport (item, zoom) {
+    let viewport = this.visualViewport()
+    zoom = zoom || 1
+    zoom = viewport.scale * zoom
+    zoom = 1 / zoom
+    viewport = {
+      pageLeft: viewport.pageLeft * zoom,
+      width: viewport.width * zoom,
+      pageTop: viewport.pageTop * zoom,
+      height: viewport.height * zoom
+    }
+    item = {
+      x: item.x,
+      y: item.y,
+      width: item.width || item.resizeWidth,
+      height: item.height || item.resizeHeight
+    }
     // x
-    const isStartInViewportX = card.x > viewport.pageLeft || card.x + card.width > viewport.pageLeft
-    const isEndInViewportX = card.x < viewport.pageLeft + viewport.width
+    const isStartInViewportX = item.x > viewport.pageLeft || item.x + item.width > viewport.pageLeft
+    const isEndInViewportX = item.x < viewport.pageLeft + viewport.width
     const isInViewportX = isStartInViewportX && isEndInViewportX
     // y
-    const isStartInViewportY = card.y > viewport.pageTop || card.y + card.height > viewport.pageTop
-    const isEndInViewportY = card.y < viewport.pageTop + viewport.height
+    const isStartInViewportY = item.y > viewport.pageTop || item.y + item.height > viewport.pageTop
+    const isEndInViewportY = item.y < viewport.pageTop + viewport.height
     const isInViewportY = isStartInViewportY && isEndInViewportY
     return isInViewportX && isInViewportY
-  },
-  isElementInViewport (element) {
-    const rect = element.getBoundingClientRect()
-    return this.isCardInViewport(rect)
   },
   updateCardDimensions (card) {
     if (!card) { return }
@@ -847,7 +858,9 @@ export default {
     return 1 / this.spaceZoomDecimal()
   },
   connectorCoords (cardId) {
-    const element = document.querySelector(`.connector[data-card-id="${cardId}"] button`)
+    const cardConnector = document.querySelector(`.connector[data-card-id="${cardId}"] button`)
+    const cardUnlockButton = document.querySelector(`.card-unlock-button[data-card-id="${cardId}"] button`)
+    const element = cardConnector || cardUnlockButton
     if (!element) { return }
     const rect = element.getBoundingClientRect()
     return this.rectCenter(rect)

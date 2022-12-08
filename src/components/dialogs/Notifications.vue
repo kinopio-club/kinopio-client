@@ -24,9 +24,7 @@ dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="
             p
               span.badge.info(v-if="!notification.isRead") New
               img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="isAskToAddToExplore(notification)")
-              span.badge.user-badge.user-badge(:style="{background: userColor(notification)}")
-                User(:user="notification.user" :isClickable="false" :hideYouLabel="true")
-                span {{userName(notification)}}
+              UserLabelInline(:user="notification.user")
               template(v-if="isAskToAddToExplore(notification)")
                 span asked to add
                 span.badge.space-badge
@@ -43,7 +41,7 @@ dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="
 
 <script>
 import Loader from '@/components/Loader.vue'
-import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -53,7 +51,7 @@ export default {
   name: 'Notifications',
   components: {
     Loader,
-    User,
+    UserLabelInline,
     NameSegment,
     BackgroundPreview
   },
@@ -271,4 +269,7 @@ export default {
       margin 8px 0
       margin-left -4px
       width calc(100% + 8px)
+    .tag
+      display inline-block
+      margin-right 0
 </style>

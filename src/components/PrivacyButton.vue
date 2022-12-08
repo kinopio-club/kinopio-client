@@ -1,8 +1,9 @@
 <template lang="pug">
 .button-wrap.privacy-button(v-if="isSpaceMember || isInvitedButCannotEditSpace")
   button(@click.left.stop="togglePrivacyPickerIsVisible" :disabled="isInvitedButCannotEditSpace" :class="{ active: privacyPickerIsVisible }")
-    template(v-if="showIconOnly")
+    template(v-if="showShortName")
       PrivacyIcon(:privacy="privacyState.name")
+      span {{shortName}}
     template(v-else)
       .badge(:class="privacyState.color")
         PrivacyIcon(:privacy="privacyState.name")
@@ -26,7 +27,7 @@ export default {
   props: {
     privacyPickerIsVisible: Boolean,
     showDescription: Boolean,
-    showIconOnly: Boolean
+    showShortName: Boolean
   },
   computed: {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
@@ -42,6 +43,10 @@ export default {
     },
     name () {
       const name = this.privacyState.friendlyName || this.privacyState.name
+      return utils.capitalizeFirstLetter(name)
+    },
+    shortName () {
+      const name = this.privacyState.shortName || this.privacyState.name
       return utils.capitalizeFirstLetter(name)
     }
   },
@@ -61,7 +66,6 @@ export default {
 
 <style lang="stylus">
 .privacy-button
-  > button
+  button
     height initial
-    padding-top 7px
 </style>

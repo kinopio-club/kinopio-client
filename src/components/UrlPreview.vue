@@ -58,7 +58,7 @@
           .title {{filteredTitle}}
           .description(v-if="description && shouldShowDescription") {{description}}
       //- embed playback
-      CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl")
+      CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
 </template>
 
 <script>

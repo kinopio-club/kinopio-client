@@ -47,6 +47,7 @@ const store = createStore({
     isEmbed: false,
     isAddPage: false,
     isAppStoreView: false,
+    disableViewportOptimizations: false, // for urlbox
 
     // search
     searchIsVisible: false,
@@ -373,6 +374,10 @@ const store = createStore({
     isAppStoreView: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isAppStoreView' })
       state.isAppStoreView = value
+    },
+    disableViewportOptimizations: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'disableViewportOptimizations' })
+      state.disableViewportOptimizations = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })

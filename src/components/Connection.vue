@@ -29,7 +29,7 @@ defs
     stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
     stop(offset="90%" :stop-color="typeColor")
 
-circle(v-if="directionIsVisible && !isUpdatingPath" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}")
+circle(v-if="directionIsVisible && !isUpdatingPath && isVisibleInViewport" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}")
   animateMotion(dur="3s" repeatCount="indefinite" :path="path" rotate="auto")
 </template>
 
@@ -67,7 +67,8 @@ export default {
     return {
       controlCurve: undefined,
       curvedPath: '',
-      frameCount: 0
+      frameCount: 0,
+      isVisibleInViewport: true
     }
   },
   computed: {

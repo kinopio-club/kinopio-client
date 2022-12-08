@@ -11,6 +11,8 @@ import utils from '@/utils.js'
 
 let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
+
+console.log('🌳 websocket clientId', clientId)
 let showDebugMessages = true
 if (import.meta.env.MODE === 'development') {
   showDebugMessages = false
@@ -123,7 +125,7 @@ export default function createWebSocketPlugin () {
           data = JSON.parse(data)
           if (data.clientId === clientId) { return }
           if (data.message !== 'updateRemoteUserCursor' && showDebugMessages) {
-            console.log('🌛 received', data)
+            console.log('🌛 received', data, data.clientId)
           }
           if (data.space) {
             if (data.space.id !== store.state.currentSpace.id) { return }
