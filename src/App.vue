@@ -121,10 +121,8 @@ export default {
       'currentCards/all'
     ]),
     touchScroll () {
-      const transform = this.transformTouchScroll
-      return { transform }
+      return { transform: this.transformTouchScroll }
     },
-    spaceName () { return this.currentSpace.name },
     isDevelopment () {
       if (import.meta.env.MODE === 'development') {
         return true
@@ -165,8 +163,7 @@ export default {
         return 'crosshair'
       }
       return undefined
-    },
-    spaceZoomDecimal () { return this.spaceZoomDecimal }
+    }
   },
   methods: {
     broadcastCursor (event) {
