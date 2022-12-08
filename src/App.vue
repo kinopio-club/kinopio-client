@@ -2,7 +2,7 @@
 .app(
   @pointermove="broadcastCursor"
   @touchstart="updateIsTouchDevice"
-  :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
+  :style="{ width: appPageWidth, height: appPageHeight, cursor: pageCursor }"
   :class="{ 'no-background': isAddPage }"
 )
   base(v-if="isAddPage" target="_blank")
@@ -130,12 +130,12 @@ export default {
         return false
       }
     },
-    pageWidth () {
+    appPageWidth () {
       if (this.isAddPage) { return }
       const size = Math.max(this.pageWidth, this.viewportWidth)
       return size + 'px'
     },
-    pageHeight () {
+    appPageHeight () {
       if (this.isAddPage) { return }
       const size = Math.max(this.pageHeight, this.viewportHeight)
       return size + 'px'
