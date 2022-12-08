@@ -58,11 +58,8 @@ export default {
     }
     return domain
   },
-  host (useKinopioUrl) {
+  host () {
     let host = 'https://api.kinopio.club/'
-    if (useKinopioUrl) {
-      host = 'https://api.kinopio.club'
-    }
     if (this.isDevelopment()) {
       host = 'http://kinopio.local:3000'
     }
