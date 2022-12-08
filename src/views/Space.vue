@@ -1,6 +1,6 @@
 <template lang="pug">
 main#space.space(
-  :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady, 'hidden-by-mindmap': minimapIsVisible}"
+  :class="{'is-interacting': isInteracting, 'is-not-interacting': currentUserIsPainting || currentUserIsPanningReady, 'hidden-by-mindmap': minimapIsVisible}"
   @mousedown.left="initInteractions"
   @touchstart="initInteractions"
   :style="styles"
@@ -41,6 +41,7 @@ import utils from '@/utils.js'
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
+import { mapState, mapGetters } from 'vuex'
 
 let prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer
@@ -65,7 +66,7 @@ export default {
   beforeCreate () {
     this.$store.dispatch('currentUser/init')
     this.$store.dispatch('currentSpace/init')
-    const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
+    const currentUserIsSignedIn = this['currentUser/isSignedIn']
     if (currentUserIsSignedIn) {
       this.$store.commit('broadcast/connect')
     }
@@ -119,45 +120,69 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'minimapIsVisible',
+      'currentUserIsPainting',
+      'currentUserIsPanningReady',
+      'currentUserIsDrawingConnection',
+      'currentUserIsResizingCard',
+      'currentUserIsResizingCardIds',
+      'currentUserIsDraggingCard',
+      'currentUserIsResizingBox',
+      'currentUserIsDraggingBox',
+      'viewportHeight',
+      'viewportWidth',
+      'pageHeight',
+      'pageWidth',
+      'currentUser',
+      'currentSpace',
+      'currentUserIsResizingBoxIds',
+      'preventMultipleSelectedActionsIsVisible',
+      'multipleCardsSelectedIds',
+      'multipleConnectionsSelectedIds',
+      'multipleBoxesSelectedIds',
+      'currentDraggingBoxId',
+      'cardDetailsIsVisibleForCardId',
+      'boxDetailsIsVisibleForBoxId',
+      'currentUserIsResizingBox',
+      'isTouchDevice',
+      'shouldAddCard',
+      'currentBoxIsNew'
+    ]),
+    ...mapGetters([
+      'transformZoom',
+      'currentCards/isNotLocked',
+      'currentUser/canEditSpace',
+      'spaceZoomDecimal',
+      'spaceCounterZoomDecimal',
+      'currentSpace/members',
+      'currentCards/byId',
+      'currentBoxes/byId',
+      'currentUser/isSignedIn'
+    ]),
+
     styles () {
-      const transform = this.$store.getters.transformZoom
+      const transform = this.transformZoom
       return {
         width: `${this.pageWidth}px`,
         height: `${this.pageHeight}px`,
         transform: transform
       }
     },
-    minimapIsVisible () { return this.$store.state.minimapIsVisible },
-    unlockedCards () { return this.$store.getters['currentCards/isNotLocked'] },
-    isPainting () { return this.$store.state.currentUserIsPainting },
-    isPanningReady () { return this.$store.state.currentUserIsPanningReady },
-    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
-    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
-    isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
-    isResizingCard () { return this.$store.state.currentUserIsResizingCard },
-    isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
-    isResizingBox () { return this.$store.state.currentUserIsResizingBox },
-    isDraggingBox () { return this.$store.state.currentUserIsDraggingBox },
-    viewportHeight () { return this.$store.state.viewportHeight },
-    viewportWidth () { return this.$store.state.viewportWidth },
-    pageHeight () { return this.$store.state.pageHeight },
-    pageWidth () { return this.$store.state.pageWidth },
-    currentUser () { return this.$store.state.currentUser },
     isInteracting () {
-      if (this.isDraggingCard || this.isDrawingConnection || this.isResizingCard || this.isResizingBox || this.isDraggingBox) {
+      if (this.currentUserIsDraggingCard || this.currentUserIsDrawingConnection || this.currentUserIsResizingCard || this.currentUserIsResizingBox || this.currentUserIsDraggingBox) {
         return true
       } else { return false }
     },
     spaceMembers () {
       const excludeCurrentUser = true
-      return this.$store.getters['currentSpace/members'](excludeCurrentUser)
-    },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
+      return this['currentSpace/members'](excludeCurrentUser)
+    }
   },
   methods: {
     correctCardConnectionPaths () {
-      const space = utils.clone(this.$store.state.currentSpace)
-      const user = utils.clone(this.$store.state.currentUser)
+      const space = utils.clone(this.currentSpace)
+      const user = utils.clone(this.currentUser)
       const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
       this.$store.dispatch('currentConnections/correctPaths', { shouldUpdateApi: currentSpaceIsRemote })
     },
@@ -202,11 +227,11 @@ export default {
       } else {
         shouldCancel = false
       }
-      if (this.spaceIsReadOnly) { return }
+      if (!this['currentUser/canEditSpace']) { return }
       this.startCursor = utils.cursorPositionInViewport(event)
     },
     constrainCursorToAxis (event) {
-      if (this.$store.state.currentUserIsDraggingBox) { return }
+      if (this.currentUserIsDraggingBox) { return }
       if (!event.shiftKey) { return }
       const delta = {
         x: Math.abs(endCursor.x - this.startCursor.x),
@@ -223,15 +248,15 @@ export default {
 
     resizeCards () {
       if (!prevCursor) { return }
-      const cardIds = this.$store.state.currentUserIsResizingCardIds
+      const cardIds = this.currentUserIsResizingCardIds
       const deltaX = endCursor.x - prevCursor.x
       this.$store.dispatch('currentCards/resize', { cardIds, deltaX })
     },
     stopResizingCards () {
-      if (!this.$store.state.currentUserIsResizingCard) { return }
+      if (!this.currentUserIsResizingCard) { return }
       this.$store.dispatch('history/resume')
-      const cardIds = this.$store.state.currentUserIsResizingCardIds
-      const cards = cardIds.map(id => this.$store.getters['currentCards/byId'](id))
+      const cardIds = this.currentUserIsResizingCardIds
+      const cards = cardIds.map(id => this['currentCards/byId'](id))
       this.$store.dispatch('history/add', { cards, useSnapshot: true })
       this.$store.commit('currentUserIsResizingCard', false)
       this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserResizingCards' })
@@ -241,7 +266,7 @@ export default {
 
     resizeBoxes () {
       if (!prevCursor) { return }
-      const boxIds = this.$store.state.currentUserIsResizingBoxIds
+      const boxIds = this.currentUserIsResizingBoxIds
       const delta = {
         x: Math.round(endCursor.x - prevCursor.x),
         y: Math.round(endCursor.y - prevCursor.y)
@@ -249,10 +274,10 @@ export default {
       this.$store.dispatch('currentBoxes/resize', { boxIds, delta })
     },
     stopResizingBoxes () {
-      if (!this.$store.state.currentUserIsResizingBox) { return }
+      if (!this.currentUserIsResizingBox) { return }
       this.$store.dispatch('history/resume')
-      const boxIds = this.$store.state.currentUserIsResizingBoxIds
-      const boxes = boxIds.map(id => this.$store.getters['currentBoxes/byId'](id))
+      const boxIds = this.currentUserIsResizingBoxIds
+      const boxes = boxIds.map(id => this['currentBoxes/byId'](id))
       this.$store.dispatch('history/add', { boxes, useSnapshot: true })
       this.$store.commit('currentUserIsResizingBox', false)
       this.$store.commit('currentUserToolbar', 'card')
@@ -277,14 +302,14 @@ export default {
     },
     interact (event) {
       endCursor = utils.cursorPositionInViewport(event)
-      if (this.isDraggingCard || this.isDraggingBox) {
+      if (this.currentUserIsDraggingCard || this.currentUserIsDraggingBox) {
         this.constrainCursorToAxis(event)
         this.dragItems()
       }
-      if (this.isResizingCard) {
+      if (this.currentUserIsResizingCard) {
         this.resizeCards()
       }
-      if (this.isResizingBox) {
+      if (this.currentUserIsResizingBox) {
         this.resizeBoxes()
       }
       prevCursor = utils.cursorPositionInViewport(event)
@@ -292,14 +317,14 @@ export default {
     checkShouldShowDetails () {
       const shouldShow = !utils.cursorsAreClose(this.startCursor, endCursor)
       if (!shouldShow) { return }
-      if (this.$store.state.currentUserIsDraggingCard) {
+      if (this.currentUserIsDraggingCard) {
         this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      } else if (this.$store.state.currentUserIsDraggingBox) {
+      } else if (this.currentUserIsDraggingBox) {
         this.$store.commit('preventDraggedBoxFromShowingDetails', true)
       }
     },
     cursor () {
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
+      const zoom = this.spaceCounterZoomDecimal
       let cursor
       if (utils.objectHasKeys(prevCursor)) {
         cursor = prevCursor
@@ -313,7 +338,7 @@ export default {
       return cursor
     },
     checkIfShouldPreventInteraction () {
-      if (this.spaceIsReadOnly) {
+      if (!this['currentUser/canEditSpace']) {
         const position = this.cursor()
         const notificationWithPosition = document.querySelector('.notifications-with-position .item')
         if (!notificationWithPosition) {
@@ -323,7 +348,7 @@ export default {
       }
     },
     normalizeSpaceCardsZ () {
-      const sorted = sortBy(this.unlockedCards, ['z'])
+      const sorted = sortBy(this['currentCards/isNotLocked'], ['z'])
       const zList = sorted.map(card => card.z)
       const isNormalized = uniq(zList).length === zList.length
       if (isNormalized) { return }
@@ -338,7 +363,7 @@ export default {
         x: position.x,
         y: position.y
       }
-      if (this.spaceIsReadOnly) {
+      if (!this['currentUser/canEditSpace']) {
         this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
         return
       }
@@ -370,8 +395,7 @@ export default {
     },
     checkIfShouldHideFooter (event) {
       if (event.target.nodeType !== 1) { return } // firefox check
-      const isTouchDevice = this.$store.state.isTouchDevice
-      if (!isTouchDevice) { return }
+      if (!this.isTouchDevice) { return }
       const node = event.target.nodeName
       const isTextarea = node === 'TEXTAREA'
       const isInput = node === 'INPUT'
@@ -382,9 +406,9 @@ export default {
       }
     },
     showMultipleSelectedActions (event) {
-      if (this.spaceIsReadOnly) { return }
-      if (this.$store.state.preventMultipleSelectedActionsIsVisible) { return }
-      const isMultipleSelected = this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length || this.$store.state.multipleBoxesSelectedIds.length
+      if (!this['currentUser/canEditSpace']) { return }
+      if (this.preventMultipleSelectedActionsIsVisible) { return }
+      const isMultipleSelected = this.multipleCardsSelectedIds.length || this.multipleConnectionsSelectedIds.length || this.multipleBoxesSelectedIds.length
       if (isMultipleSelected) {
         const position = utils.cursorPositionInSpace({ event })
         this.$store.commit('multipleSelectedActionsPosition', position)
@@ -392,7 +416,7 @@ export default {
       }
     },
     addOrCloseCard (event) {
-      if (this.$store.state.shouldAddCard) {
+      if (this.shouldAddCard) {
         let position = utils.cursorPositionInSpace({ event })
         // prevent addCard if position is outside space
         if (utils.isPositionOutsideOfSpace(position)) {
@@ -403,19 +427,19 @@ export default {
         // add card
         this.addCard(event)
       // close item details
-      } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
+      } else if (this.cardDetailsIsVisibleForCardId || this.boxDetailsIsVisibleForBoxId) {
         this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
       }
     },
     unselectCardsInDraggedBox () {
-      if (!this.$store.state.currentDraggingBoxId) { return }
-      if (this.$store.state.multipleBoxesSelectedIds.length) { return }
+      if (!this.currentDraggingBoxId) { return }
+      if (this.multipleBoxesSelectedIds.length) { return }
       this.$store.dispatch('clearMultipleSelected')
     },
     showBoxDetails (event) {
-      if (!this.$store.state.currentBoxIsNew) { return }
+      if (!this.currentBoxIsNew) { return }
       if (utils.isMobile()) { return }
-      const boxId = this.$store.state.currentUserIsResizingBoxIds[0]
+      const boxId = this.currentUserIsResizingBoxIds[0]
       this.$nextTick(() => {
         this.$nextTick(() => {
           this.$store.commit('boxDetailsIsVisibleForBoxId', boxId)
