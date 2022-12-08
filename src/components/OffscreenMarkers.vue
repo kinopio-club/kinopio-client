@@ -65,7 +65,6 @@ export default {
       'connectionDetailsIsVisibleForConnectionId',
       'currentSpace',
       'isAddPage'
-
     ]),
     ...mapGetters([
       'spaceZoomDecimal',

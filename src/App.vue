@@ -56,6 +56,8 @@ import SpaceBackground from '@/components/SpaceBackground.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import utils from '@/utils.js'
 
+import { mapState, mapGetters } from 'vuex'
+
 export default {
   components: {
     Header,
@@ -98,11 +100,31 @@ export default {
     window.removeEventListener('scroll', this.updateUserHasScrolled)
   },
   computed: {
+    ...mapState([
+      'currentSpace',
+      'isAddPage',
+      'pageWidth',
+      'pageHeight',
+      'viewportWidth',
+      'viewportHeight',
+      'currentUserIsPanning',
+      'currentUserIsPanningReady',
+      'currentUserToolbar',
+      'currentUser',
+      'userHasScrolled'
+
+    ]),
+    ...mapGetters([
+      'transformTouchScroll',
+      'currentUser/canEditSpace',
+      'spaceZoomDecimal',
+      'currentCards/all'
+    ]),
     touchScroll () {
-      const transform = this.$store.getters.transformTouchScroll
+      const transform = this.transformTouchScroll
       return { transform }
     },
-    spaceName () { return this.$store.state.currentSpace.name },
+    spaceName () { return this.currentSpace.name },
     isDevelopment () {
       if (import.meta.env.MODE === 'development') {
         return true
@@ -110,15 +132,14 @@ export default {
         return false
       }
     },
-    isAddPage () { return this.$store.state.isAddPage },
     pageWidth () {
       if (this.isAddPage) { return }
-      const size = Math.max(this.$store.state.pageWidth, this.$store.state.viewportWidth)
+      const size = Math.max(this.pageWidth, this.viewportWidth)
       return size + 'px'
     },
     pageHeight () {
       if (this.isAddPage) { return }
-      const size = Math.max(this.$store.state.pageHeight, this.$store.state.viewportHeight)
+      const size = Math.max(this.pageHeight, this.viewportHeight)
       return size + 'px'
     },
     buildHash () {
@@ -133,9 +154,9 @@ export default {
       return hash.replace('index.', '') // xyzabc123
     },
     pageCursor () {
-      const isPanning = this.$store.state.currentUserIsPanning
-      const isPanningReady = this.$store.state.currentUserIsPanningReady
-      const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
+      const isPanning = this.currentUserIsPanning
+      const isPanningReady = this.currentUserIsPanningReady
+      const toolbarIsBox = this.currentUserToolbar === 'box'
       if (isPanning) {
         return 'grabbing'
       } else if (isPanningReady) {
@@ -145,14 +166,14 @@ export default {
       }
       return undefined
     },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
+    spaceZoomDecimal () { return this.spaceZoomDecimal }
   },
   methods: {
     broadcastCursor (event) {
-      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      const canEditSpace = this['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       let updates = utils.cursorPositionInSpace({ event })
-      updates.userId = this.$store.state.currentUser.id
+      updates.userId = this.currentUser.id
       updates.zoom = this.spaceZoomDecimal
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
     },
@@ -160,13 +181,13 @@ export default {
       this.$store.commit('isTouchDevice', true)
     },
     updateUserHasScrolled () {
-      if (this.$store.state.userHasScrolled) { return }
+      if (this.userHasScrolled) { return }
       this.$store.commit('userHasScrolled', true)
     },
     updateMetaDescription () {
       let description = 'Kinopio is the thinking tool for building new ideas and solving hard problems. Create spaces to brainstorm, research, plan and take notes.'
       const metaDescription = document.querySelector('meta[name=description]')
-      const cards = this.$store.getters['currentCards/all']
+      const cards = this['currentCards/all']
       const topLeftItem = utils.topLeftItem(cards)
       if (!topLeftItem.name) {
         metaDescription.setAttribute('content', description)
@@ -182,12 +203,12 @@ export default {
     },
     updateMetaRSSFeed () {
       const spaceHasUrl = utils.spaceHasUrl()
-      const spaceIsPrivate = this.$store.state.currentSpace.privacy === 'private'
+      const spaceIsPrivate = this.currentSpace.privacy === 'private'
       this.clearMetaRSSFeed()
       if (!spaceHasUrl) { return }
       if (spaceIsPrivate) { return }
       const head = document.querySelector('head')
-      const spaceId = this.$store.state.currentSpace.id
+      const spaceId = this.currentSpace.id
       const url = `${utils.host(true)}/space/${spaceId}/feed.json`
       let link = document.createElement('link')
       link.rel = 'alternative'
