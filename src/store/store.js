@@ -1542,7 +1542,7 @@ const store = createStore({
       const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
       return transform
     },
-    currentScrollPosition: (state) => {
+    currentScrollPosition: (state) => () => {
       const touchScrollOrigin = state.touchScrollOrigin
       return {
         x: (-touchScrollOrigin.x || window.scrollX),

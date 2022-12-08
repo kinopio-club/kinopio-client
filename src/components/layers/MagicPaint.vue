@@ -188,7 +188,7 @@ export default {
       this.scroll()
     },
     scroll () {
-      this.scrollPosition = this.currentScrollPosition
+      this.scrollPosition = this.currentScrollPosition()
       this.updateCirclesWithScroll()
       this.cancelLocking()
     },
@@ -198,7 +198,7 @@ export default {
       remotePaintingCircles = []
     },
     updatePrevScrollPosition () {
-      prevScroll = this.currentScrollPosition
+      prevScroll = this.currentScrollPosition()
     },
     cursor (event) {
       let cursor = utils.cursorPositionInViewport(event)
@@ -212,7 +212,7 @@ export default {
       })
     },
     updateCirclesWithScroll () {
-      const scroll = this.currentScrollPosition
+      const scroll = this.currentScrollPosition()
       const scrollDelta = {
         x: scroll.x - prevScroll.x,
         y: scroll.y - prevScroll.y
@@ -557,7 +557,7 @@ export default {
       }
     },
     remotePaintCirclesAnimationFrame () {
-      const scroll = this.currentScrollPosition
+      const scroll = this.currentScrollPosition()
       remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
       remotePaintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       remotePaintingCircles.forEach(item => {

@@ -49,7 +49,7 @@ export default {
       if (!element) { return }
       const padding = 20
       const headerPadding = 100
-      const scroll = this.$store.getters.currentScrollPosition
+      const scroll = this.$store.getters.currentScrollPosition()
       let rect = element.getBoundingClientRect()
       rect = {
         x: rect.x + scroll.x,
