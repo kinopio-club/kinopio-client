@@ -449,7 +449,7 @@ export default {
   },
   cursorsAreClose (startCursor, endCursor) {
     if (!startCursor) { return }
-    const threshold = 5
+    const threshold = 5 * this.spaceCounterZoomDecimal()
     const xRange = {
       value: endCursor.x,
       min: startCursor.x - threshold,
