@@ -52,8 +52,11 @@ export default {
       }
     },
     touchStart (event) {
+      if (this.shouldPreventMultiTouchAction(event)) {
+        event.preventDefault()
+        return
+      }
       if (this.shouldIgnore(event)) { return }
-      event.preventDefault()
       prevCursor = this.cursorPositionInPage(event)
       // this.cancelMomentum() timer, shouldCancelMomentum = true
       const isMultiTouch = utils.isMultiTouch(event)
@@ -62,6 +65,10 @@ export default {
       }
     },
     touchMove (event) {
+      if (this.shouldPreventMultiTouchAction(event)) {
+        event.preventDefault()
+        return
+      }
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
       currentCursor = this.cursorPositionInPage(event)
@@ -83,6 +90,19 @@ export default {
       const isDraggingItem = this.currentUserIsDraggingBox || this.currentUserIsDraggingCard
       const preventInteractions = this.currentUserIsPaintingLocked || this.currentUserIsResizingCard || this.currentUserIsDrawingConnection
       return isDialog || isButton || isDraggingItem || preventInteractions
+    },
+    shouldPreventMultiTouchAction (event) {
+      const isMultiTouch = utils.isMultiTouch(event)
+      if (!isMultiTouch) { return }
+      let isDialog, isButton
+      let touches = []
+      const touchesKeys = Object.keys(event.touches)
+      touchesKeys.forEach(key => touches.push(event.touches[key]))
+      touches.forEach(touch => {
+        isDialog = touch.target.closest('dialog')
+        isButton = touch.target.closest('button')
+      })
+      return isDialog || isButton
     },
 
     // touch scroll

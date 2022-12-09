@@ -160,7 +160,6 @@ export default {
       'currentBoxes/byId',
       'currentUser/isSignedIn'
     ]),
-
     styles () {
       const transform = this.transformZoom
       return {
