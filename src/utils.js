@@ -228,6 +228,14 @@ export default {
       y: Math.round(spaceRect.y - appRect.y)
     }
   },
+  updatePositionWithSpaceOffset (position) {
+    const spaceOffset = this.outsideSpaceOffset()
+    if (!spaceOffset) { return position }
+    return {
+      x: position.x - spaceOffset.x,
+      y: position.y - spaceOffset.y
+    }
+  },
   cursorPositionInPage (event) {
     let x, y
     if (event.touches) {

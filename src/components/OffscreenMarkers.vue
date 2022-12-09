@@ -173,9 +173,9 @@ export default {
       const viewport = utils.visualViewport()
       this.viewport = viewport
       const zoom = this.spaceZoomDecimal
-      const scroll = utils.clone(this.currentScrollPosition())
-      const outsideSpaceOffset = utils.outsideSpaceOffset()
-      offscreenMarkers.postMessage({ cards, viewport, zoom, scroll, outsideSpaceOffset })
+      let scroll = utils.clone(this.currentScrollPosition())
+      scroll = utils.updatePositionWithSpaceOffset(scroll)
+      offscreenMarkers.postMessage({ cards, viewport, zoom, scroll })
     }
   },
   watch: {

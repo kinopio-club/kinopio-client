@@ -1,7 +1,7 @@
 // offscreen cards by direction
 
 self.onmessage = function (event) {
-  const { cards, viewport, zoom, scroll, outsideSpaceOffset } = event.data
+  const { cards, viewport, zoom, scroll } = event.data
   const markerHeight = 16
   const markerWidth = 12
   let newCards = cards.map(card => {
@@ -10,11 +10,11 @@ self.onmessage = function (event) {
     card = {
       id: card.id,
       name: card.name,
-      x: xCenter * zoom,
-      y: yCenter * zoom
+      x: Math.round(xCenter * zoom),
+      y: Math.round(yCenter * zoom)
     }
     // direction relative to viewport
-    card.direction = direction({ card, viewport, scroll, outsideSpaceOffset })
+    card.direction = direction({ card, viewport, scroll })
     return card
   })
   newCards = newCards.filter(card => card.direction)
@@ -39,7 +39,7 @@ const normalizeCardsByDirection = (cards) => {
   return normalizedCards
 }
 
-const direction = ({ card, viewport, scroll, outsideSpaceOffset }) => {
+const direction = ({ card, viewport, scroll }) => {
   let x = ''
   let y = ''
   //           │        │
@@ -56,9 +56,9 @@ const direction = ({ card, viewport, scroll, outsideSpaceOffset }) => {
   //
   //           │        │
   const isPosition = {
-    bottom: card.y > (viewport.height + scroll.y - outsideSpaceOffset.y),
+    bottom: card.y > (viewport.height + scroll.y),
     top: card.y < scroll.y,
-    right: card.x > (viewport.width + scroll.x - outsideSpaceOffset.x),
+    right: card.x > (viewport.width + scroll.x),
     left: card.x < scroll.x
   }
   if (isPosition.bottom) {
