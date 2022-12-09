@@ -171,6 +171,7 @@ export default {
   .vertical-line
     position absolute
     top 23px
+    z-index -1
     &.first-child
       left 3px
     &.second-child
