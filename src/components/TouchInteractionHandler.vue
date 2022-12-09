@@ -37,6 +37,8 @@ export default {
       'currentUserIsDraggingBox',
       'currentUserIsDraggingCard',
       'currentUserIsPaintingLocked',
+      'currentUserIsDrawingConnection',
+      'currentUserIsResizingCard',
       'touchScrollOrigin'
     ]),
     max () { return consts.spaceZoom.max }, // 100
@@ -79,7 +81,7 @@ export default {
       const isDialog = element.closest('dialog')
       const isButton = element.closest('button')
       const isDraggingItem = this.currentUserIsDraggingBox || this.currentUserIsDraggingCard
-      const preventInteractions = this.currentUserIsPaintingLocked
+      const preventInteractions = this.currentUserIsPaintingLocked || this.currentUserIsResizingCard || this.currentUserIsDrawingConnection
       return isDialog || isButton || isDraggingItem || preventInteractions
     },
 

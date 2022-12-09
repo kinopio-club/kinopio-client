@@ -59,8 +59,8 @@ export default {
       'pageWidth',
       'currentUserIsPainting',
       'isDraggingCard',
-      'isDrawingConnection',
-      'isResizingCard',
+      'currentUserIsDrawingConnection',
+      'currentUserIsResizingCard',
       'currentUserIsBoxSelecting',
       'currentUserIsDraggingCard',
       'currentUserIsDraggingBox',
@@ -72,7 +72,7 @@ export default {
       'spaceZoomDecimal',
       'currentScrollPosition'
     ]),
-    shouldPreventResize () { return this.currentUserIsPainting || this.isDrawingConnection || this.isResizingCard }
+    shouldPreventResize () { return this.currentUserIsPainting || this.currentUserIsDrawingConnection || this.currentUserIsResizingCard }
   },
   methods: {
     initInteractions (event) {
@@ -224,7 +224,7 @@ export default {
         this.$store.dispatch('currentCards/move', { endCursor, prevCursor, delta: itemDelta })
         this.$store.dispatch('currentBoxes/move', { endCursor, prevCursor, delta: itemDelta })
       }
-      if (this.isDrawingConnection) {
+      if (this.currentUserIsDrawingConnection) {
         this.$store.commit('triggeredDrawConnectionFrame', currentEvent)
       }
       if (this.currentUserIsPainting && !this.currentUserIsBoxSelecting) {
