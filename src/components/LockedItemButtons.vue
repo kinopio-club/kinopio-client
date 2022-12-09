@@ -42,7 +42,17 @@ export default {
     cardButtonPosition (card) {
       const element = document.querySelector(`article[data-card-id="${card.id}"] .lock-button-wrap`)
       if (!element) { return }
-      const rect = element.getBoundingClientRect()
+      let rect = element.getBoundingClientRect()
+      const scroll = this.$store.getters.currentScrollPosition()
+      const zoom = this.$store.getters.spaceZoomDecimal
+      const offset = {
+        x: scroll.x * zoom,
+        y: scroll.y * zoom
+      }
+      rect = {
+        x: rect.x + offset.x,
+        y: rect.y + offset.y
+      }
       return rect
     }
   }
