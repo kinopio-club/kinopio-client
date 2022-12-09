@@ -217,6 +217,17 @@ export default {
     const isOutsideY = position.y < 0
     return isOutsideX || isOutsideY
   },
+  outsideSpaceOffset () {
+    const space = document.getElementById('space')
+    if (!space) { return }
+    const spaceRect = space.getBoundingClientRect()
+    const app = document.getElementById('app')
+    const appRect = app.getBoundingClientRect()
+    return {
+      x: Math.round(spaceRect.x - appRect.x),
+      y: Math.round(spaceRect.y - appRect.y)
+    }
+  },
   cursorPositionInPage (event) {
     let x, y
     if (event.touches) {

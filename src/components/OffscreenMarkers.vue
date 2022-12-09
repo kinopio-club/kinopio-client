@@ -23,21 +23,23 @@ const offscreenMarkers = new Worker('/web-workers/offscreen-markers.js')
 export default {
   name: 'OffscreenMarkers',
   mounted () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'isLoadingSpace') {
-        this.updateScrollPosition()
-        this.debouncedUpdateOffscreenMarkers()
-      }
-    })
-    window.addEventListener('scroll', this.updateOffscreenMarkers)
     offscreenMarkers.addEventListener('message', event => {
       this.offscreenCards = event.data
     })
-    window.addEventListener('scroll', this.updateScrollPosition)
+    this.$store.subscribe((mutation, state) => {
+      const { type } = mutation
+      if (mutation.type === 'isLoadingSpace') {
+        this.debouncedUpdateOffscreenMarkers()
+        this.updateOffscreenMarkers()
+      } else if (type === 'touchScrollOrigin') {
+        this.debouncedUpdateOffscreenMarkers()
+      }
+    })
+    window.addEventListener('scroll', this.handleScroll)
     visualViewport.addEventListener('resize', this.updateOffscreenMarkers)
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.updateScrollPosition)
+    window.removeEventListener('scroll', this.handleScroll)
     visualViewport.removeEventListener('resize', this.updateOffscreenMarkers)
   },
   data () {
@@ -63,7 +65,10 @@ export default {
       'connectionDetailsIsVisibleForConnectionId',
       'currentSpace',
       'isAddPage',
-      'isTouchDevice'
+      'isTouchDevice',
+      'touchScrollOrigin',
+      'spaceZoomPercent',
+      'zoomOrigin'
     ]),
     ...mapGetters([
       'spaceZoomDecimal',
@@ -113,33 +118,37 @@ export default {
     },
     // top
     topPosition () {
+      const offset = utils.outsideSpaceOffset().x
       let cards = this.offscreenCards.top
       if (!cards.length) { return }
-      cards = cards.map(card => card.x)
+      cards = cards.map(card => card.x + offset)
       const average = utils.averageOfNumbers(cards)
       return average - this.viewport.pageLeft + 'px'
     },
     // left
     leftPosition () {
+      const offset = utils.outsideSpaceOffset().y
       let cards = this.offscreenCards.left
       if (!cards.length) { return }
-      cards = cards.map(card => card.y)
+      cards = cards.map(card => card.y + offset)
       const average = utils.averageOfNumbers(cards)
       return average - this.viewport.pageTop + 'px'
     },
     // right
     rightPosition () {
+      const offset = utils.outsideSpaceOffset().y
       let cards = this.offscreenCards.right
       if (!cards.length) { return }
-      cards = cards.map(card => card.y)
+      cards = cards.map(card => card.y + offset)
       const average = utils.averageOfNumbers(cards)
       return average - this.viewport.pageTop + 'px'
     },
     // bottom
     bottomPosition () {
+      const offset = utils.outsideSpaceOffset().x
       let cards = this.offscreenCards.bottom
       if (!cards.length) { return }
-      cards = cards.map(card => card.x)
+      cards = cards.map(card => card.x + offset)
       const average = utils.averageOfNumbers(cards)
       return average - this.viewport.pageLeft + 'px'
     }
@@ -147,6 +156,10 @@ export default {
   methods: {
     hasDirection (direction) {
       return Boolean(this.offscreenCards[direction].length)
+    },
+    handleScroll () {
+      this.updateScrollPosition()
+      this.debouncedUpdateOffscreenMarkers()
     },
     updateScrollPosition () {
       this.scrollPosition = this.currentScrollPosition()
@@ -160,7 +173,20 @@ export default {
       const viewport = utils.visualViewport()
       this.viewport = viewport
       const zoom = this.spaceZoomDecimal
-      offscreenMarkers.postMessage({ cards, viewport, zoom })
+      const scroll = utils.clone(this.currentScrollPosition())
+      const outsideSpaceOffset = utils.outsideSpaceOffset()
+      offscreenMarkers.postMessage({ cards, viewport, zoom, scroll, outsideSpaceOffset })
+    }
+  },
+  watch: {
+    touchScrollOrigin (value) {
+      this.handleScroll()
+    },
+    spaceZoomPercent (value) {
+      this.handleScroll()
+    },
+    zoomOrigin (value) {
+      this.handleScroll()
     }
   }
 }
@@ -173,8 +199,10 @@ edge = 4px
 
 .offscreen-markers
   position fixed
-  width 100vw
-  height 100vh
+  left 0
+  top 0
+  width 100dvw
+  height 100dvh
   pointer-events none
   z-index 1
   opacity 0.5

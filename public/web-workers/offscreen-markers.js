@@ -1,15 +1,20 @@
 // offscreen cards by direction
 
 self.onmessage = function (event) {
-  const { cards, viewport, zoom } = event.data
+  const { cards, viewport, zoom, scroll, outsideSpaceOffset } = event.data
   const markerHeight = 16
   const markerWidth = 12
   let newCards = cards.map(card => {
-    card.x = card.x + (card.width / 2) - (markerWidth / 2)
-    card.x = card.x * zoom
-    card.y = card.y + (card.height / 2) - (markerHeight / 2)
-    card.y = card.y * zoom
-    card.direction = direction(card, viewport)
+    const xCenter = card.x + (card.width / 2) - (markerWidth / 2)
+    const yCenter = card.y + (card.height / 2) - (markerHeight / 2)
+    card = {
+      id: card.id,
+      name: card.name,
+      x: xCenter * zoom,
+      y: yCenter * zoom
+    }
+    // direction relative to viewport
+    card.direction = direction({ card, viewport, scroll, outsideSpaceOffset })
     return card
   })
   newCards = newCards.filter(card => card.direction)
@@ -34,17 +39,15 @@ const normalizeCardsByDirection = (cards) => {
   return normalizedCards
 }
 
-const direction = (card, viewport) => {
-  const scrollX = viewport.pageLeft
-  const scrollY = viewport.pageTop
+const direction = ({ card, viewport, scroll, outsideSpaceOffset }) => {
   let x = ''
   let y = ''
   //           │        │
   //                       top-right
   //           │  top   │
   //
-  // ─ ─ ─ ─ ─ ┼────────┼ ─ ─ ─ ─ ─
-  //           │        │
+  // ─ ─ ─ ─ ─ ┼────y───┼ ─ ─ ─ ─ ─
+  //           x        │
   //    left   │Viewport│  right
   //           │        │
   // ─ ─ ─ ─ ─ ┼────────┼ ─ ─ ─ ─ ─
@@ -53,12 +56,11 @@ const direction = (card, viewport) => {
   //
   //           │        │
   const isPosition = {
-    bottom: card.y > (viewport.height + scrollY),
-    top: card.y < scrollY,
-    right: card.x > (viewport.width + scrollX),
-    left: card.x < scrollX
+    bottom: card.y > (viewport.height + scroll.y - outsideSpaceOffset.y),
+    top: card.y < scroll.y,
+    right: card.x > (viewport.width + scroll.x - outsideSpaceOffset.x),
+    left: card.x < scroll.x
   }
-
   if (isPosition.bottom) {
     y = 'bottom'
   } else if (isPosition.top) {
