@@ -19,11 +19,13 @@ export default {
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     positionStyles () {
       if (!this.position) { return }
-      let x = this.position.x
-      let y = this.position.y
+      let left = this.position.left
+      let top = this.position.top
+      left = (left + window.scrollX)
+      top = (top + window.scrollY)
       return {
-        left: x + 'px',
-        top: y + 'px'
+        left: left + 'px',
+        top: top + 'px'
       }
     },
     backgroundStyles () {

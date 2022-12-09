@@ -36,23 +36,13 @@ export default {
     boxButtonPosition (box) {
       const element = document.querySelector(`.box[data-box-id="${box.id}"] .lock-button-wrap`)
       if (!element) { return }
-      const scroll = this.$store.getters.currentScrollPosition()
-      let rect = element.getBoundingClientRect()
-      rect = {
-        x: rect.x + scroll.x,
-        y: rect.y + scroll.y
-      }
+      const rect = element.getBoundingClientRect()
       return rect
     },
     cardButtonPosition (card) {
       const element = document.querySelector(`article[data-card-id="${card.id}"] .lock-button-wrap`)
       if (!element) { return }
-      const scroll = this.$store.getters.currentScrollPosition()
-      let rect = element.getBoundingClientRect()
-      rect = {
-        x: rect.x + scroll.x,
-        y: rect.y + scroll.y
-      }
+      const rect = element.getBoundingClientRect()
       return rect
     }
   }
