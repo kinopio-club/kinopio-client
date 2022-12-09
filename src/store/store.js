@@ -472,18 +472,22 @@ const store = createStore({
       utils.typeCheck({ value: position, type: 'object', origin: 'touchScrollOrigin' })
       const viewportWidth = state.viewportWidth
       const viewportHeight = state.viewportHeight
+      const spaceZoomDecimal = state.spaceZoomPercent / 100
+      const zoom = 1 / spaceZoomDecimal
       const pageWidth = state.pageWidth
       const pageHeight = -state.pageHeight
-      const thresholdX = Math.round(viewportWidth / 6)
-      const thresholdY = Math.round(viewportHeight / 6)
+      const threshold = {
+        x: Math.round((viewportWidth * zoom) / 6),
+        y: Math.round((viewportHeight * zoom) / 6)
+      }
       // x bounds
-      const minX = viewportWidth - thresholdX
-      const maxX = -pageWidth + thresholdX
+      const minX = viewportWidth - threshold.x
+      const maxX = -pageWidth + threshold.x
       position.x = Math.min(position.x, minX)
       position.x = Math.max(position.x, maxX)
       // y bounds
-      const minY = viewportHeight - thresholdY
-      const maxY = pageHeight + thresholdY
+      const minY = viewportHeight - threshold.y
+      const maxY = pageHeight + threshold.y
       position.y = Math.min(position.y, minY)
       position.y = Math.max(position.y, maxY)
       state.touchScrollOrigin = position
