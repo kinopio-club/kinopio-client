@@ -10,6 +10,7 @@ import currentCards from '@/store/currentCards.js'
 import currentConnections from '@/store/currentConnections.js'
 import currentBoxes from '@/store/currentBoxes.js'
 import upload from '@/store/upload.js'
+import windowScroll from '@/libs/windowScroll.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
@@ -264,6 +265,9 @@ const store = createStore({
       state.cardsWereDragged = false
       state.boxesWereDragged = false
       state.userDetailsIsVisible = false
+      if (state.isTouchDevice) {
+        windowScroll.scrollTo({ x: 0, y: 0 })
+      }
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isOnline' })

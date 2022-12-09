@@ -195,7 +195,6 @@ import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
 import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
 import utils from '@/utils.js'
-import windowScroll from '@/libs/windowScroll.js'
 
 import qs from '@aguezz/qs-parse'
 import { nanoid } from 'nanoid'
@@ -1418,9 +1417,6 @@ export default {
       this.$store.dispatch('history/resume')
       if (card.name || prevCardName) {
         this.$store.dispatch('history/add', { cards: [card], useSnapshot: true })
-      }
-      if (this.$store.state.isTouchDevice) {
-        windowScroll.scrollTo({ x: 0, y: 0 })
       }
     }
   },
