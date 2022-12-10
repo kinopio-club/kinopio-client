@@ -50,11 +50,10 @@ export default {
     cardButtonPosition (card) {
       const element = document.querySelector(`article[data-card-id="${card.id}"] .lock-button-wrap`)
       if (!element) { return }
-      const currentScrollPosition = this.currentScrollPosition()
       const zoom = this.spaceZoomDecimal
       const offset = {
-        x: currentScrollPosition.x * zoom,
-        y: currentScrollPosition.y * zoom
+        x: this.currentScrollPosition.x * zoom,
+        y: this.currentScrollPosition.y * zoom
       }
       let rect = element.getBoundingClientRect()
       rect = {
