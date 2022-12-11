@@ -1,10 +1,10 @@
 <template lang="pug">
 //- boxes
 template(v-for="box in lockedBoxes")
-  BoxUnlockButton(:box="box" :position="boxButtonPosition(box)")
+  BoxUnlockButton(:box="box")
 //- boxes
 template(v-for="card in lockedCards")
-  CardUnlockButton(:card="card" :position="cardButtonPosition(card)")
+  CardUnlockButton(:card="card")
 
 </template>
 
@@ -34,34 +34,9 @@ export default {
     ...mapState([
     ]),
     ...mapGetters([
-      'currentScrollPosition',
-      'spaceZoomDecimal'
     ]),
     lockedBoxes () { return this.$store.getters['currentBoxes/isLocked'] },
     lockedCards () { return this.$store.getters['currentCards/isLocked'] }
-  },
-  methods: {
-    boxButtonPosition (box) {
-      const element = document.querySelector(`.box[data-box-id="${box.id}"] .lock-button-wrap`)
-      if (!element) { return }
-      const rect = element.getBoundingClientRect()
-      return rect
-    },
-    cardButtonPosition (card) {
-      const element = document.querySelector(`article[data-card-id="${card.id}"] .lock-button-wrap`)
-      if (!element) { return }
-      const zoom = this.spaceZoomDecimal
-      const offset = {
-        x: this.currentScrollPosition.x * zoom,
-        y: this.currentScrollPosition.y * zoom
-      }
-      let rect = element.getBoundingClientRect()
-      rect = {
-        x: rect.x + offset.x,
-        y: rect.y + offset.y
-      }
-      return rect
-    }
   }
 }
 </script>

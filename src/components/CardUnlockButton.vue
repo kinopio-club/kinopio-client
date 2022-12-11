@@ -10,33 +10,39 @@
 <script>
 import utils from '@/utils.js'
 
+import { mapState, mapGetters } from 'vuex'
+
 export default {
   name: 'CardUnlockButton',
   components: {
   },
   props: {
-    card: Object,
-    position: Object
+    card: Object
   },
   computed: {
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    ...mapState([
+      'currentUserIsDrawingConnection'
+    ]),
+    ...mapGetters([
+      'currentUser/canEditCard',
+      'currentUser/canEditSpace',
+      'currentConnections/typesByCardId'
+    ]),
     positionStyles () {
-      if (!this.position) { return }
-      let left = this.position.left
-      let top = this.position.top
-      left = (left + window.scrollX)
-      top = (top + window.scrollY)
+      const width = this.card.resizeWidth || this.card.width
+      const buttonWidth = 36
       return {
-        left: left + 'px',
-        top: top + 'px'
+        left: `${this.card.x + width - buttonWidth}px`,
+        top: `${this.card.y}px`
       }
     },
+
     backgroundStyles () {
       return { backgroundColor: 'transparent' }
     },
-    canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) },
-    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
-    connectionTypes () { return this.$store.getters['currentConnections/typesByCardId'](this.card.id) },
+    canEditCard () { return this['currentUser/canEditCard'](this.card) },
+    canEditSpace () { return this['currentUser/canEditSpace']() },
+    connectionTypes () { return this['currentConnections/typesByCardId'](this.card.id) },
     isDark () {
       const type = this.connectionTypes[0]
       if (!type) {
@@ -48,7 +54,7 @@ export default {
   },
   methods: {
     unlockCard (event) {
-      if (this.$store.state.currentUserIsDrawingConnection) {
+      if (this.currentUserIsDrawingConnection) {
         return
       }
       event.stopPropagation()

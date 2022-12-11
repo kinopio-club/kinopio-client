@@ -7,32 +7,37 @@
 <script>
 import utils from '@/utils.js'
 
+import { mapState, mapGetters } from 'vuex'
+
 export default {
   name: 'BoxUnlockButton',
   components: {
   },
   props: {
-    box: Object,
-    position: Object
+    box: Object
   },
   computed: {
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    ...mapState([
+      'currentUserIsDrawingConnection'
+    ]),
+    ...mapGetters([
+      'currentUser/canEditBox',
+      'currentConnections/typesByBoxId'
+    ]),
     positionStyles () {
-      if (!this.position) { return }
-      let left = this.position.left
-      let top = this.position.top
-      left = (left + window.scrollX)
-      top = (top + window.scrollY)
+      const width = this.box.resizeWidth
+      const buttonWidth = 36
+      const threshold = 2
       return {
-        left: left + 'px',
-        top: top + 'px'
+        left: `${this.box.x + width - buttonWidth - threshold}px`,
+        top: `${this.box.y + threshold}px`
       }
     },
     backgroundStyles () {
       return { backgroundColor: 'transparent' }
     },
-    canEditBox () { return this.$store.getters['currentUser/canEditBox'](this.box) },
-    connectionTypes () { return this.$store.getters['currentConnections/typesByBoxId'](this.box.id) },
+    canEditBox () { return this['currentUser/canEditBox'](this.box) },
+    connectionTypes () { return this['currentConnections/typesByBoxId'](this.box.id) },
     isDark () {
       const color = this.box.color
       return utils.colorIsDark(color)
@@ -40,7 +45,7 @@ export default {
   },
   methods: {
     unlockBox (event) {
-      if (this.$store.state.currentUserIsDrawingConnection) { return }
+      if (this.currentUserIsDrawingConnection) { return }
       event.stopPropagation()
       // notify read only if user cannot edit
       if (!this.canEditBox) {
