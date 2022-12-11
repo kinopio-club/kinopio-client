@@ -314,8 +314,6 @@ export default {
       prevCursor = utils.cursorPositionInViewport(event)
     },
     checkShouldShowDetails () {
-      const shouldShow = !utils.cursorsAreClose(this.startCursor, endCursor)
-      if (!shouldShow) { return }
       if (this.currentUserIsDraggingCard) {
         this.$store.commit('preventDraggedCardFromShowingDetails', true)
       } else if (this.currentUserIsDraggingBox) {
