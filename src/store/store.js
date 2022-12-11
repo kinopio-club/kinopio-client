@@ -51,7 +51,6 @@ const store = createStore({
     spaceZoomPercent: 100,
     zoomOrigin: { x: 0, y: 0 },
     touchScrollOrigin: { x: 0, y: 0 },
-    windowScrollPosition: { x: 0, y: 0 },
 
     // search
     searchIsVisible: false,
@@ -463,7 +462,7 @@ const store = createStore({
     triggerScrollTo: (state, options) => {}, // { x, y }
     triggerScrolledIntoView: () => {},
 
-    // Zoom and Scroll
+    // Zoom
 
     spaceZoomPercent: (state, value) => {
       utils.typeCheck({ value, type: 'number', origin: 'spaceZoomPercent' })
@@ -512,12 +511,6 @@ const store = createStore({
       state.zoomOrigin = { x: 0, y: 0 }
       state.touchScrollOrigin = { x: 0, y: 0 }
       state.windowScrollPosition = { x: 0, y: 0 }
-    },
-    windowScrollPosition: (state) => {
-      state.windowScrollPosition = {
-        x: window.scrollX,
-        y: window.scrollY
-      }
     },
 
     // Cards
@@ -1558,12 +1551,11 @@ const store = createStore({
       const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
       return transform
     },
-    currentScrollPosition: (state) => {
+    currentScrollPosition: (state) => () => {
       const touchScrollOrigin = state.touchScrollOrigin
-      const windowScrollPosition = state.windowScrollPosition
       return {
-        x: (-touchScrollOrigin.x || windowScrollPosition.x),
-        y: (-touchScrollOrigin.y || windowScrollPosition.y)
+        x: (-touchScrollOrigin.x || window.scrollX),
+        y: (-touchScrollOrigin.y || window.scrollY)
       }
     }
   },

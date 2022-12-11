@@ -25,11 +25,9 @@ export default {
   mounted () {
     this.updateViewport()
     window.addEventListener('resize', this.updateViewport)
-    window.addEventListener('scroll', this.updateWindowScrollPosition)
   },
   beforeUnmount () {
     window.removeEventListener('resize', this.updateViewport)
-    window.removeEventListener('scroll', this.updateWindowScrollPosition)
   },
   computed: {
     isTouchDevice () { return this.$store.state.isTouchDevice }
@@ -38,9 +36,6 @@ export default {
     updateViewport () {
       // explicitly update viewport to prevent using short viewport when ios keyboard is open
       viewport = utils.visualViewport()
-    },
-    updateWindowScrollPosition () {
-      this.$store.commit('windowScrollPosition')
     },
     scrollTo ({ x, y, behavior }) {
       behavior = behavior || 'auto'
