@@ -160,10 +160,6 @@ const currentCards = {
           const rect = element.getBoundingClientRect()
           card.filteredWidth = Math.round(rect.width)
         })
-      } else {
-        cards.forEach(card => {
-          card.filteredWidth = null
-        })
       }
     }
   },
@@ -429,6 +425,7 @@ const currentCards = {
           context.commit('update', body)
           context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
           updateTallestCardHeight(card.height)
+          context.dispatch('updateFilteredWidths')
         })
       })
     },
@@ -438,8 +435,6 @@ const currentCards = {
       nextTick(() => {
         if (isFiltersActive) {
           context.commit('filteredWidths', true)
-        } else {
-          context.commit('filteredWidths', false)
         }
       })
     },

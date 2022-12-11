@@ -21,7 +21,8 @@ export default {
   },
   computed: {
     ...mapState([
-      'currentUserIsDrawingConnection'
+      'currentUserIsDrawingConnection',
+      'currentUser'
     ]),
     ...mapGetters([
       'currentUser/canEditCard',
@@ -29,7 +30,11 @@ export default {
       'currentConnections/typesByCardId'
     ]),
     positionStyles () {
-      const width = this.card.filteredWidth || this.card.resizeWidth || this.card.width
+      const isFiltersActive = this.currentUser.filterShowUsers || this.currentUser.filterShowDateUpdated
+      let width = this.card.resizeWidth || this.card.width
+      if (isFiltersActive) {
+        width = this.card.filteredWidth || width
+      }
       const buttonWidth = 36
       return {
         left: `${this.card.x + width - buttonWidth}px`,
