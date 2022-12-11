@@ -5,7 +5,8 @@ section.filters
     .button-wrap
       label.show-users(:class="{active: filterShowUsers}" @click.left.prevent="toggleFilterShowUsers" @keydown.stop.enter="toggleFilterShowUsers")
         input(type="checkbox" v-model="filterShowUsers")
-        User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true" :isSmall="true")
+        UserLabelInline(:user="currentUser" :shouldHideName="true")
+
     //- Time
     .button-wrap
       label(:class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
@@ -36,17 +37,14 @@ section.filters
 import MoreSearchFilters from '@/components/dialogs/MoreSearchFilters.vue'
 import frames from '@/data/frames.js'
 import utils from '@/utils.js'
-import { defineAsyncComponent } from 'vue'
 
 import uniq from 'lodash-es/uniq'
-const User = defineAsyncComponent({
-  loader: () => import('@/components/User.vue')
-})
+import UserLabelInline from '@/components/UserLabelInline.vue'
 
 export default {
   name: 'Filters',
   components: {
-    User,
+    UserLabelInline,
     MoreSearchFilters
   },
   created () {
@@ -108,11 +106,9 @@ export default {
     display inline-block
     vertical-align middle
     margin-right 0
-  .show-users
-    width 50px
-  .user
-    position absolute
-    top 4px
+  .user-label-inline
+    margin-top -4px
+    height 10px
   .has-badge
     padding-top 2px
     padding-bottom 1px

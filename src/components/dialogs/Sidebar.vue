@@ -26,7 +26,7 @@ dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="clos
             span AI
           //- Stats
           button(@click.left="toggleStatsIsVisible" :class="{active: statsIsVisible}")
-            img.icon(src="@/assets/stats.svg")
+            img.icon.stats(src="@/assets/stats.svg")
 
       //- Pin
       .title-row
