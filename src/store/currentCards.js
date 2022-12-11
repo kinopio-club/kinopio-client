@@ -150,8 +150,22 @@ const currentCards = {
 
     tallestCardHeight: (state, value) => {
       state.tallestCardHeight = value
+    },
+    filteredWidths: (state, value) => {
+      const cards = state.ids.map(id => state.cards[id])
+      if (value) {
+        cards.forEach(card => {
+          const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+          if (!element) { return }
+          const rect = element.getBoundingClientRect()
+          card.filteredWidth = Math.round(rect.width)
+        })
+      } else {
+        cards.forEach(card => {
+          card.filteredWidth = null
+        })
+      }
     }
-
   },
   actions: {
 
@@ -416,6 +430,17 @@ const currentCards = {
           context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
           updateTallestCardHeight(card.height)
         })
+      })
+    },
+    updateFilteredWidths: (context) => {
+      const currentUser = context.rootState.currentUser
+      const isFiltersActive = currentUser.filterShowUsers || currentUser.filterShowDateUpdated
+      nextTick(() => {
+        if (isFiltersActive) {
+          context.commit('filteredWidths', true)
+        } else {
+          context.commit('filteredWidths', false)
+        }
       })
     },
 

@@ -29,7 +29,7 @@ export default {
       'currentConnections/typesByCardId'
     ]),
     positionStyles () {
-      const width = this.card.resizeWidth || this.card.width
+      const width = this.card.filteredWidth || this.card.resizeWidth || this.card.width
       const buttonWidth = 36
       return {
         left: `${this.card.x + width - buttonWidth}px`,

@@ -582,6 +582,7 @@ export default {
         } }, { root: true })
     },
     updatePathsAndPositions: (context) => {
+      context.dispatch('currentCards/updateFilteredWidths', null, { root: true })
       nextTick(() => {
         nextTick(() => {
           context.dispatch('currentConnections/correctPaths', {}, { root: true })
