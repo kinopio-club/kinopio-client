@@ -6,6 +6,8 @@
 <script>
 // import utils from '@/utils.js'
 
+import { mapState, mapGetters } from 'vuex'
+
 export default {
   name: 'ComponentName',
   components: {
@@ -29,6 +31,10 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+    ]),
+    ...mapGetters([
+    ])
     // kinopioDomain () { return utils.kinopioDomain() },
   },
   methods: {
