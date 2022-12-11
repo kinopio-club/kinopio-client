@@ -50,7 +50,4 @@ export default {
 </script>
 
 <style lang="stylus">
-.boxes
-  position absolute
-  top 0
 </style>
