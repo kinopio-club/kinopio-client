@@ -1,6 +1,6 @@
 <template lang="pug">
 article#card(
-  :style="positionStyle"
+  :style="positionStyles"
   :data-card-id="id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :data-is-visible-in-viewport="isVisibleInViewport"
@@ -323,8 +323,8 @@ export default {
       isLocking: true,
       lockingPercent: 0,
       lockingAlpha: 0,
-      translateX: 0,
-      translateY: 0,
+      stickyTranslateX: 0,
+      stickyTranslateY: 0,
       isAnimationUnsticking: false,
       stickyStretchResistance: 6,
       isVisibleInViewport: true
@@ -649,7 +649,7 @@ export default {
         return this.isChecked
       }
     },
-    positionStyle () {
+    positionStyles () {
       let z = this.z
       let pointerEvents = 'auto'
       if (this.currentCardDetailsIsVisible) {
@@ -665,7 +665,7 @@ export default {
         width: this.resizeWidth,
         maxWidth: this.resizeWidth,
         pointerEvents,
-        transform: `translate(${this.translateX}, ${this.translateY})`
+        transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
       }
     },
     canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) },
@@ -1048,13 +1048,13 @@ export default {
       const isOverAction = classes.includes(event.target.className) || elements.includes(event.target.nodeName.toLowerCase())
       const isOverTag = event.target.className.includes('button-badge')
       if (this.shouldNotStick || isOverAction || isOverTag) {
-        this.clearPositionOffsets()
+        this.clearStickyPositionOffsets()
         preventSticking = true
         return
       }
       const isButtonHover = event.target.closest('.inline-button-wrap')
       if (isButtonHover) {
-        this.clearPositionOffsets()
+        this.clearStickyPositionOffsets()
         return
       }
       const stretchResistance = this.stickyStretchResistance
@@ -1075,14 +1075,14 @@ export default {
       xOffset = Math.round(xOffset)
       let yOffset = (yPercent * halfHeight) / stretchResistance
       yOffset = Math.round(yOffset)
-      this.translateX = xOffset + 'px'
-      this.translateY = yOffset + 'px'
+      this.stickyTranslateX = xOffset + 'px'
+      this.stickyTranslateY = yOffset + 'px'
     },
     unstickToCursor () {
       this.clearStickyTimer()
       this.isAnimationUnsticking = true
-      const xOffset = parseInt(this.translateX)
-      const yOffset = parseInt(this.translateY)
+      const xOffset = parseInt(this.stickyTranslateX)
+      const yOffset = parseInt(this.stickyTranslateY)
       let timing = {
         duration: 0, // sum of keyframe offsets
         easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
@@ -1111,13 +1111,13 @@ export default {
       if (!element) { return }
       const animation = element.animate(keyframes, timing)
       animation.onfinish = () => {
-        this.clearPositionOffsets()
+        this.clearStickyPositionOffsets()
         this.isAnimationUnsticking = false
       }
     },
-    clearPositionOffsets () {
-      this.translateX = 0
-      this.translateY = 0
+    clearStickyPositionOffsets () {
+      this.stickyTranslateX = 0
+      this.stickyTranslateY = 0
     },
 
     updateTypeForConnection (connectionId) {
@@ -1539,7 +1539,7 @@ export default {
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
       this.updatePreviousResultCardId()
-      this.clearPositionOffsets()
+      this.clearStickyPositionOffsets()
     },
     updatePreviousResultCardId () {
       const search = this.$store.state.search
