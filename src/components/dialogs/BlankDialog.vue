@@ -7,6 +7,8 @@ dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="d
 <script>
 // import utils from '@/utils.js'
 
+import { mapState, mapGetters } from 'vuex'
+
 export default {
   name: 'DialogName',
   components: {
@@ -30,6 +32,10 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+    ]),
+    ...mapGetters([
+    ])
     // kinopioDomain () { return utils.kinopioDomain() },
   },
   methods: {
