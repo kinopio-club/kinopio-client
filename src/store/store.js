@@ -510,7 +510,6 @@ const store = createStore({
       state.spaceZoomPercent = 100
       state.zoomOrigin = { x: 0, y: 0 }
       state.touchScrollOrigin = { x: 0, y: 0 }
-      state.windowScrollPosition = { x: 0, y: 0 }
     },
 
     // Cards

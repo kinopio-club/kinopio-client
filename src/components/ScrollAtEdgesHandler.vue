@@ -110,8 +110,8 @@ export default {
         right: cursor.x >= (viewportWidth - scrollArea)
       }
       const canScroll = {
-        x: this.currentScrollPosition.x > 0,
-        y: this.currentScrollPosition.y > 0
+        x: this.currentScrollPosition().x > 0,
+        y: this.currentScrollPosition().y > 0
       }
       // Y movement
       if (movementDirection.y === 'up' && cursorSide.top && canScroll.y) {

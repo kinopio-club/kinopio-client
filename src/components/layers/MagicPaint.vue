@@ -90,6 +90,8 @@ export default {
         delete circle.type
         this.createRemotePaintingCircle(circle)
         this.remotePainting()
+      } else if (mutation.type === 'resetZoomAndScroll') {
+        this.scrollPosition = { x: 0, y: 0 }
       } else if (mutation.type === 'touchScrollOrigin') {
         this.userScroll()
       }
@@ -128,7 +130,8 @@ export default {
   data () {
     return {
       currentCursor: {},
-      uploadIsDraggedOver: false
+      uploadIsDraggedOver: false,
+      scrollPosition: { x: 0, y: 0 }
     }
   },
   computed: {
@@ -167,8 +170,8 @@ export default {
     // keep canvases updated to viewport size so you can draw on newly created areas
     positionStyles () {
       let position = {
-        left: this.currentScrollPosition.x + 'px',
-        top: this.currentScrollPosition.y + 'px'
+        left: this.scrollPosition.x + 'px',
+        top: this.scrollPosition.y + 'px'
       }
       if (this.isTouchDevice) {
         const transform = this.transformCounterTouchScroll
@@ -185,6 +188,7 @@ export default {
       this.scroll()
     },
     scroll () {
+      this.scrollPosition = this.currentScrollPosition()
       this.updateCirclesWithScroll()
       this.cancelLocking()
     },
@@ -194,7 +198,7 @@ export default {
       remotePaintingCircles = []
     },
     updatePrevScrollPosition () {
-      prevScroll = this.currentScrollPosition
+      prevScroll = this.currentScrollPosition()
     },
     cursor (event) {
       let cursor = utils.cursorPositionInViewport(event)
@@ -208,7 +212,7 @@ export default {
       })
     },
     updateCirclesWithScroll () {
-      const scroll = this.currentScrollPosition
+      const scroll = this.currentScrollPosition()
       const scrollDelta = {
         x: scroll.x - prevScroll.x,
         y: scroll.y - prevScroll.y
@@ -553,7 +557,7 @@ export default {
       }
     },
     remotePaintCirclesAnimationFrame () {
-      const scroll = this.currentScrollPosition
+      const scroll = this.currentScrollPosition()
       remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
       remotePaintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       remotePaintingCircles.forEach(item => {

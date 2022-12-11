@@ -45,6 +45,7 @@ export default {
   data () {
     return {
       viewport: {},
+      scrollPosition: { x: 0, y: 0 },
       offscreenCards: {
         top: [],
         left: [],
@@ -87,8 +88,8 @@ export default {
     },
     positionStyles () {
       let position = {
-        left: this.currentScrollPosition.x + 'px',
-        top: this.currentScrollPosition.y + 'px'
+        left: this.scrollPosition.x + 'px',
+        top: this.scrollPosition.y + 'px'
       }
       if (this.isTouchDevice) {
         const transform = this.transformCounterTouchScroll
@@ -157,7 +158,11 @@ export default {
       return Boolean(this.offscreenCards[direction].length)
     },
     handleScroll () {
+      this.updateScrollPosition()
       this.debouncedUpdateOffscreenMarkers()
+    },
+    updateScrollPosition () {
+      this.scrollPosition = this.currentScrollPosition()
     },
     debouncedUpdateOffscreenMarkers: debounce(function () {
       this.updateOffscreenMarkers()
@@ -168,7 +173,7 @@ export default {
       const viewport = utils.visualViewport()
       this.viewport = viewport
       const zoom = this.spaceZoomDecimal
-      let scroll = utils.clone(this.currentScrollPosition)
+      let scroll = utils.clone(this.currentScrollPosition())
       scroll = utils.updatePositionWithSpaceOffset(scroll)
       offscreenMarkers.postMessage({ cards, viewport, zoom, scroll })
     }
