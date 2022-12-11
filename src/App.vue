@@ -636,7 +636,6 @@ dialog
     margin-left -1px
 
 .icon
-  vertical-align -1px
   user-drag none
   -webkit-user-drag none
   pointer-events none
@@ -687,11 +686,9 @@ dialog
 
 .icon.tweet
   height 10px
-  vertical-align 0
 
-.icon.remove,
-.icon.add
-  vertical-align 0
+.icon.stats
+  vertical-align -1px
 
 label,
 li
@@ -702,7 +699,7 @@ li
   input[type="checkbox"]
     pointer-events none
     margin-right 5px
-    vertical-align -2px
+    vertical-align -1px
     cursor pointer
     appearance none
     border 1px solid var(--primary)
