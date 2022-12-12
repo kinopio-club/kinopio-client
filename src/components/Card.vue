@@ -361,10 +361,11 @@ export default {
       'connectionDetailsIsVisibleForConnectionId',
       'remotePendingUploads',
       'currentUserIsDraggingCard',
-      'currentUserIsDrawingConnection'
+      'currentUserIsDrawingConnection',
+      'viewportHeight'
     ]),
     ...mapGetters([
-      'spaceZoomDecimal',
+      'spaceCounterZoomDecimal',
       'currentConnections/all',
       'currentUser/canEditSpace',
       'currentConnections/typesByCardId',
@@ -378,8 +379,27 @@ export default {
       'currentUser/totalCardFadingFiltersActive',
       'currentConnections/typeForNewConnections',
       'currentUser/isSpaceMember',
-      'otherSpaceById'
+      'otherSpaceById',
+      'currentScrollPosition'
     ]),
+    isVisibleInViewport () {
+      const threshold = 100
+      const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
+      // top
+      const cardTop = {
+        value: this.y,
+        min: this.currentScrollPosition.y - threshold,
+        max: this.currentScrollPosition.y + viewport + threshold
+      }
+      const isTopVisible = utils.isBetween(cardTop)
+      // bottom
+      let cardBottom = cardTop
+      const height = this.card.resizeHeight || this.card.height
+      cardBottom.value = this.y + height
+      const isBottomVisible = utils.isBetween(cardBottom)
+      // both
+      return isTopVisible || isBottomVisible
+    },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
     itemBackground () {
       let background = 'transparent'
@@ -565,6 +585,9 @@ export default {
       if (this.isComment) {
         color = color || utils.cssVariable('secondary-background')
         styles.background = hexToRgba(color, 0.5) || color
+      }
+      if (!this.isVisibleInViewport) {
+        styles.width = this.card.resizeWidth || this.card.width
       }
       return styles
     },
@@ -1847,6 +1870,12 @@ export default {
   watch: {
     linkToPreview (value) {
       this.updateUrlData()
+    },
+    isVisibleInViewport (newValue, prevValue) {
+      const isChanged = newValue !== prevValue
+      if (newValue && isChanged) {
+        this.$store.commit('triggerUpdateLockedCardButtonPosition', this.card.id)
+      }
     }
   }
 }

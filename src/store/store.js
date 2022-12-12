@@ -458,6 +458,7 @@ const store = createStore({
     triggerCheckIfUseHasInboxSpace: () => {},
     triggerScrollUserDetailsIntoView: () => {},
     triggerUpdateLockedItemButtonsPositions: () => {},
+    triggerUpdateLockedCardButtonPosition: (state, cardId) => {},
     triggerLoadBackground: () => {},
     triggerScrollIntoView: (state, options) => {}, // { element, toCenterTop }
     triggerScrollBy: (state, options) => {}, // { x, y, behavior }

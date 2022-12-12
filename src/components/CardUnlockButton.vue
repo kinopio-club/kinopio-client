@@ -19,6 +19,20 @@ export default {
   props: {
     card: Object
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerUpdateLockedCardButtonPosition') {
+        if (mutation.payload === this.card.id) {
+          this.refreshKey++ // forces styles to recompute
+        }
+      }
+    })
+  },
+  data () {
+    return {
+      refreshKey: 0
+    }
+  },
   computed: {
     ...mapState([
       'currentUserIsDrawingConnection',
@@ -30,6 +44,7 @@ export default {
       'currentConnections/typesByCardId'
     ]),
     positionStyles () {
+      this.refreshKey // eslint-disable-line no-unused-expressions
       const isFiltersActive = this.currentUser.filterShowUsers || this.currentUser.filterShowDateUpdated
       let width = this.card.resizeWidth || this.card.width
       if (isFiltersActive) {
