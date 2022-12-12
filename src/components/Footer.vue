@@ -1,6 +1,6 @@
 <template lang="pug">
-.footer-wrap(v-if="!isAddPage" :class="{'fade-out': isFadingOut}")
-  .left(v-if="!isEmbed")
+.footer-wrap(v-if="!isAddPage")
+  .left(v-if="!isEmbed" :class="{'fade-out': isFadingOut}")
     footer
       Notifications
       .controls(v-if="isVisible" :class="{'hidden': isHidden}")
