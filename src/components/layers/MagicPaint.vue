@@ -41,6 +41,7 @@ import utils from '@/utils.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
 import { mapState, mapGetters } from 'vuex'
+import isEqual from 'lodash-es/isEqual'
 
 const circleRadius = 20
 const circleSelectionRadius = circleRadius - 10 // magnitude of sensitivity
@@ -288,15 +289,14 @@ export default {
       if (this.shouldCancel(event)) { return }
       startCursor = startCursor || {}
       const endCursor = this.cursor(event)
-      const cursorsAreClose = utils.cursorsAreClose(startCursor, endCursor)
-      const shouldAddCard = this.shouldAddCard
+      const cursorIsUnchanged = isEqual(startCursor, endCursor)
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
       lockingAnimationTimer = undefined
       lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       this.$store.commit('currentUserIsPaintingLocked', false)
       this.$store.commit('currentUserIsPainting', false)
-      if (cursorsAreClose && shouldAddCard && event.cancelable) {
+      if (cursorIsUnchanged && this.shouldAddCard && event.cancelable) {
         this.$store.commit('shouldAddCard', true)
         event.preventDefault()
       } else {
