@@ -58,6 +58,7 @@ export default {
       }
       if (this.shouldIgnore(event)) { return }
       prevCursor = this.cursorPositionInPage(event)
+      this.$store.commit('isTouchScrollingOrPinchZooming', true)
       // this.cancelMomentum() timer, shouldCancelMomentum = true
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
@@ -82,6 +83,7 @@ export default {
     touchEnd (event) {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
+      this.$store.commit('isTouchScrollingOrPinchZooming', false)
     },
     shouldIgnore (event) {
       const element = event.target

@@ -51,6 +51,7 @@ import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
+import { mapState, mapGetters } from 'vuex'
 import dayjs from 'dayjs'
 
 let updateFavoritesIntervalTimer, updateLiveSpacesIntervalTimer
@@ -70,25 +71,6 @@ export default {
     Loader,
     SpaceZoom,
     AddToInbox
-  },
-  // props: {
-  //   isPinchZooming: Boolean,
-  //   isTouchScrolling: Boolean
-  // },
-  data () {
-    return {
-      favoritesActionsIsVisible: false,
-      favoritesIsVisible: false,
-      exploreIsVisible: false,
-      liveIsVisible: false,
-      liveSpaces: [],
-      isLoadingLiveSpaces: true,
-      isFadingOut: false,
-      isHidden: false,
-      exploreSpaces: [],
-      addToInboxIsVisible: false,
-      userHasInbox: false
-    }
   },
   mounted () {
     this.$store.subscribe((mutation, state) => {
@@ -118,7 +100,27 @@ export default {
     clearInterval(updateFavoritesIntervalTimer)
     clearInterval(updateLiveSpacesIntervalTimer)
   },
+  data () {
+    return {
+      favoritesActionsIsVisible: false,
+      favoritesIsVisible: false,
+      exploreIsVisible: false,
+      liveIsVisible: false,
+      liveSpaces: [],
+      isLoadingLiveSpaces: true,
+      isFadingOut: false,
+      isHidden: false,
+      exploreSpaces: [],
+      addToInboxIsVisible: false,
+      userHasInbox: false
+    }
+  },
   computed: {
+    ...mapState([
+      'isTouchScrollingOrPinchZooming'
+    ]),
+    ...mapGetters([
+    ]),
     isNotSupportedByDevice () { return !utils.isAndroid() },
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
     isAddPage () { return this.$store.state.isAddPage },
@@ -309,16 +311,7 @@ export default {
     }
   },
   watch: {
-    isPinchZooming (value) {
-      if (value) {
-        this.fadeOut()
-      } else {
-        shouldCancelFadeOut = true
-        this.cancelFadeOut()
-      }
-    },
-    isTouchScrolling (value) {
-      if (!utils.isAndroid()) { return }
+    isTouchScrollingOrPinchZooming (value) {
       if (value) {
         this.fadeOut()
       } else {

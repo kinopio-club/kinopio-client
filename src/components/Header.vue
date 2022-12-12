@@ -158,6 +158,8 @@ import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
 import Import from '@/components/dialogs/Import.vue'
 
+import { mapState, mapGetters } from 'vuex'
+
 let updateNotificationsIntervalTimer
 
 const fadeOutDuration = 10
@@ -192,35 +194,6 @@ export default {
     Donate,
     Toolbar,
     Import
-  },
-  // props: {
-  //   isPinchZooming: Boolean,
-  //   isTouchScrolling: Boolean
-  // },
-  data () {
-    return {
-      aboutIsVisible: false,
-      spaceDetailsIsVisible: false,
-      spaceDetailsInfoIsVisible: false,
-      signUpOrInIsVisible: false,
-      shareIsVisible: false,
-      notificationsIsVisible: false,
-      loadingSignUpOrIn: false,
-      keyboardShortcutsIsVisible: false,
-      upgradeUserIsVisible: false,
-      spaceStatusIsVisible: false,
-      offlineIsVisible: false,
-      readOnlyJiggle: false,
-      notifications: [],
-      notificationsIsLoading: true,
-      addSpaceIsVisible: false,
-      isFadingOut: false,
-      isHidden: false,
-      templatesIsVisible: false,
-      sidebarIsVisible: false,
-      donateIsVisible: false,
-      importIsVisible: false
-    }
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -270,7 +243,37 @@ export default {
   beforeUnmount () {
     clearInterval(updateNotificationsIntervalTimer)
   },
+  data () {
+    return {
+      aboutIsVisible: false,
+      spaceDetailsIsVisible: false,
+      spaceDetailsInfoIsVisible: false,
+      signUpOrInIsVisible: false,
+      shareIsVisible: false,
+      notificationsIsVisible: false,
+      loadingSignUpOrIn: false,
+      keyboardShortcutsIsVisible: false,
+      upgradeUserIsVisible: false,
+      spaceStatusIsVisible: false,
+      offlineIsVisible: false,
+      readOnlyJiggle: false,
+      notifications: [],
+      notificationsIsLoading: true,
+      addSpaceIsVisible: false,
+      isFadingOut: false,
+      isHidden: false,
+      templatesIsVisible: false,
+      sidebarIsVisible: false,
+      donateIsVisible: false,
+      importIsVisible: false
+    }
+  },
   computed: {
+    ...mapState([
+      'isTouchScrollingOrPinchZooming'
+    ]),
+    ...mapGetters([
+    ]),
     kinopioDomain () { return utils.kinopioDomain() },
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
     isVisible () {
@@ -596,16 +599,7 @@ export default {
     }
   },
   watch: {
-    isPinchZooming (value) {
-      if (value) {
-        this.fadeOut()
-      } else {
-        shouldCancelFadeOut = true
-        this.cancelFadeOut()
-      }
-    },
-    isTouchScrolling (value) {
-      if (!utils.isAndroid()) { return }
+    isTouchScrollingOrPinchZooming (value) {
       if (value) {
         this.fadeOut()
       } else {

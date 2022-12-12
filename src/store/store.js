@@ -51,6 +51,7 @@ const store = createStore({
     spaceZoomPercent: 100,
     zoomOrigin: { x: 0, y: 0 },
     // scroll
+    isTouchScrollingOrPinchZooming: false,
     touchScrollOrigin: { x: 0, y: 0 },
     windowScroll: { x: 0, y: 0 },
 
@@ -520,6 +521,9 @@ const store = createStore({
         y: window.scrollY
       }
       state.windowScroll = position
+    },
+    isTouchScrollingOrPinchZooming: (state, value) => {
+      state.isTouchScrollingOrPinchZooming = value
     },
 
     // Cards
