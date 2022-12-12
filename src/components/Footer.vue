@@ -117,15 +117,23 @@ export default {
   },
   computed: {
     ...mapState([
-      'isTouchScrollingOrPinchZooming'
+      'isTouchScrollingOrPinchZooming',
+      'minimapIsVisible',
+      'isAddPage',
+      'isEmbed',
+      'currentUser',
+      'shouldExplicitlyHideFooter',
+      'cardDetailsIsVisibleForCardId',
+      'multipleSelectedActionsIsVisible',
+      'connectionDetailsIsVisibleForConnectionId',
+      'shouldHideFooter'
     ]),
     ...mapGetters([
+      'currentSpace/isFavorite',
+      'isTouchDevice',
+      'currentUser/isSignedIn'
     ]),
     isNotSupportedByDevice () { return !utils.isAndroid() },
-    minimapIsVisible () { return this.$store.state.minimapIsVisible },
-    isAddPage () { return this.$store.state.isAddPage },
-    isEmbed () { return this.$store.state.isEmbed },
-    currentUser () { return this.$store.state.currentUser },
     favoriteSpacesEditedCount () {
       let favoriteSpaces = utils.clone(this.currentUser.favoriteSpaces)
       favoriteSpaces = favoriteSpaces.filter(space => {
@@ -136,21 +144,16 @@ export default {
       return favoriteSpaces.length
     },
     isVisible () {
-      const isTouchDevice = this.$store.getters.isTouchDevice
-      const shouldExplicitlyHideFooter = this.$store.state.shouldExplicitlyHideFooter
-      const contentDialogIsVisible = Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleSelectedActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
+      const contentDialogIsVisible = Boolean(this.cardDetailsIsVisibleForCardId || this.multipleSelectedActionsIsVisible || this.connectionDetailsIsVisibleForConnectionId)
       // only hide footer on touch devices
-      if (!isTouchDevice) { return true }
-      if (shouldExplicitlyHideFooter) { return }
+      if (!this.isTouchDevice) { return true }
+      if (this.shouldExplicitlyHideFooter) { return }
       let isVisible = true
       if (contentDialogIsVisible) { isVisible = false }
       if (this.shouldHideFooter) { isVisible = false }
       return isVisible
     },
-    shouldHideFooter () {
-      return this.$store.state.shouldHideFooter
-    },
-    isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
+    isFavoriteSpace () { return this['currentSpace/isFavorite'] },
     isMobile () {
       return utils.isMobile()
     },
@@ -158,7 +161,7 @@ export default {
       return utils.isMobile() && navigator.standalone // is homescreen app
     },
     unreadExploreSpacesLength () {
-      let readDate = this.$store.state.currentUser.showInExploreUpdatedAt
+      let readDate = this.currentUser.showInExploreUpdatedAt
       if (!readDate) { return '20+' }
       readDate = dayjs(readDate)
       const unreadSpaces = this.exploreSpaces.filter(space => {
@@ -248,7 +251,7 @@ export default {
       return normalizedSpaces
     },
     async updateUserHasInbox () {
-      const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
+      const currentUserIsSignedIn = this['currentUser/isSignedIn']
       if (!currentUserIsSignedIn) { return }
       const inboxSpace = await this.$store.dispatch('currentUser/inboxSpace')
       this.userHasInbox = Boolean(inboxSpace)
@@ -267,7 +270,7 @@ export default {
     // hide
 
     hidden (event) {
-      if (!this.$store.getters.isTouchDevice) { return }
+      if (!this.isTouchDevice) { return }
       hiddenIteration = 0
       if (hiddenTimer) { return }
       hiddenTimer = window.requestAnimationFrame(this.hiddenFrame)
