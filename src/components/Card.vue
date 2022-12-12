@@ -77,14 +77,14 @@ article#card(
         //- Name
         .badge.comment-badge
           .toggle-comment-wrap.inline-button-wrap(@mouseup.left="toggleCommentIsVisible" @touchend="toggleCommentIsVisible")
-            button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
+            button.inline-button(:class="{active: card.commentIsVisible}" tabindex="-1")
               img.icon.view(src="@/assets/comment.svg")
           //- User
-          template(v-if="commentIsVisible")
+          template(v-if="card.commentIsVisible")
             UserLabelInline(:user="createdByUser")
-          template(v-if="!commentIsVisible")
+          template(v-if="!card.commentIsVisible")
             UserLabelInline(:user="createdByUser" :shouldHideName="true")
-          p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}")
+          p.comment.name-segments(v-if="card.commentIsVisible" :class="{'is-checked': isChecked}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             //- Image
@@ -385,19 +385,16 @@ export default {
     isVisibleInViewport () {
       const threshold = 100
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      // top
-      const cardTop = {
+      const top = {
         value: this.y,
         min: this.currentScrollPosition.y - threshold,
         max: this.currentScrollPosition.y + viewport + threshold
       }
-      const isTopVisible = utils.isBetween(cardTop)
-      // bottom
-      let cardBottom = cardTop
+      const isTopVisible = utils.isBetween(top)
+      let bottom = top
       const height = this.card.resizeHeight || this.card.height
-      cardBottom.value = this.y + height
-      const isBottomVisible = utils.isBetween(cardBottom)
-      // both
+      bottom.value = this.y + height
+      const isBottomVisible = utils.isBetween(bottom)
       return isTopVisible || isBottomVisible
     },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
