@@ -47,10 +47,12 @@ const store = createStore({
     isAppStoreView: false,
     disableViewportOptimizations: false, // for urlbox
 
-    // zoom and touch
+    // zoom
     spaceZoomPercent: 100,
     zoomOrigin: { x: 0, y: 0 },
+    // scroll
     touchScrollOrigin: { x: 0, y: 0 },
+    windowScroll: { x: 0, y: 0 },
 
     // search
     searchIsVisible: false,
@@ -510,6 +512,9 @@ const store = createStore({
       state.spaceZoomPercent = 100
       state.zoomOrigin = { x: 0, y: 0 }
       state.touchScrollOrigin = { x: 0, y: 0 }
+    },
+    windowScroll: (state, position) => {
+      state.windowScroll = position
     },
 
     // Cards
@@ -1551,10 +1556,19 @@ const store = createStore({
       return transform
     },
     currentScrollPosition: (state) => () => {
+      console.log('🔮', window.scrollY, state.windowScroll.y)
       const touchScrollOrigin = state.touchScrollOrigin
       return {
         x: (-touchScrollOrigin.x || window.scrollX),
         y: (-touchScrollOrigin.y || window.scrollY)
+      }
+    },
+    cs2: (state) => {
+      const touchScroll = state.touchScrollOrigin
+      const windowScroll = state.windowScroll
+      return {
+        x: (-touchScroll.x || windowScroll.x),
+        y: (-touchScroll.y || windowScroll.y)
       }
     }
   },
