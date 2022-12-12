@@ -12,17 +12,29 @@ aside.notifications-with-position
     img.icon.add(v-if="item.icon === 'add'" src="@/assets/add.svg")
     img.icon.checkmark(v-if="item.icon === 'checkmark'" src="@/assets/checkmark.svg")
     img.icon.cut(v-if="item.icon === 'cut'" src="@/assets/cut.svg")
+    img.icon.undo(v-if="item.icon === 'undo'" src="@/assets/undo.svg")
+
     span {{item.message}}
 </template>
+
 <script>
+import { mapState, mapGetters } from 'vuex'
+import isEqual from 'lodash-es/isEqual'
+
 export default {
   name: 'NotificationsWithPosition',
   props: {
     layer: String // app, space
   },
   computed: {
+    ...mapState([
+      'notificationsWithPosition'
+    ]),
+    ...mapGetters([
+      'currentScrollPosition'
+    ]),
     items () {
-      const itemsInLayer = this.$store.state.notificationsWithPosition.filter(item => item.layer === this.layer)
+      const itemsInLayer = this.notificationsWithPosition.filter(item => item.layer === this.layer)
       return itemsInLayer
     }
   },
@@ -30,8 +42,16 @@ export default {
     remove () {
       this.$store.commit('removeNotificationWithPosition')
     }
+  },
+  watch: {
+    currentScrollPosition (position, prevPosition) {
+      const cursorIsUnchanged = isEqual(position, prevPosition)
+      if (cursorIsUnchanged) { return }
+      this.$store.commit('clearNotificationsWithPosition')
+    }
   }
 }
+
 </script>
 
 <style lang="stylus">
