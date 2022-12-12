@@ -7,12 +7,10 @@ import utils from '@/utils.js'
 import { mapState } from 'vuex'
 import isEqual from 'lodash-es/isEqual'
 
-// let multiTouchAction, shouldCancelUndo
 let touchStartZoomValue
 
-// timestamp
 // let velocity
-let prevCursor, currentCursor
+let startCursor, prevCursor, currentCursor, timeStamp
 let touches = []
 
 export default {
@@ -52,13 +50,14 @@ export default {
         return
       }
       if (this.shouldIgnore(event)) { return }
-      prevCursor = this.cursorPositionInPage(event)
-      currentCursor = prevCursor
-      this.$store.commit('isTouchScrollingOrPinchZooming', true)
+      startCursor = this.cursorPositionInPage(event)
+      prevCursor = startCursor
+      currentCursor = startCursor
+      this.$store.commit('isTouchScrollingOrPinchZooming', true) // fades out header, footer
       // this.cancelMomentum() timer, shouldCancelMomentum = true
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
-        this.initPinchZoom(event)
+        this.startPinchZoom(event)
       }
     },
     touchMove (event) {
@@ -69,6 +68,7 @@ export default {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
       currentCursor = this.cursorPositionInPage(event)
+      timeStamp = event.timeStamp
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
         this.pinchZoom(event)
@@ -80,6 +80,7 @@ export default {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
       this.$store.commit('isTouchScrollingOrPinchZooming', false)
+      this.startMomentum(event)
       this.checkIfTouchIsUndoOrRedo()
       touches = []
     },
@@ -108,7 +109,7 @@ export default {
     // Undo and redo
 
     checkIfTouchIsUndoOrRedo () {
-      const cursorIsUnchanged = isEqual(currentCursor, prevCursor)
+      const cursorIsUnchanged = isEqual(currentCursor, startCursor)
       if (!cursorIsUnchanged) { return }
       if (touches.length === 2) {
         this.$store.dispatch('history/undo')
@@ -138,7 +139,7 @@ export default {
 
     // pinch zoom
 
-    initPinchZoom (event) {
+    startPinchZoom (event) {
       touchStartZoomValue = this.spaceZoomPercent
     },
     pinchZoom (event) {
@@ -153,18 +154,26 @@ export default {
       this.$store.commit('zoomOrigin', position)
     },
 
-    //   // velocity is amount of movement divided by the time since the last frame
-    //   // velocity = {
-    //   //   x: delta.x / frameTime,
-    //   //   y: delta.y / frameTime,
-    //   // }
-    // },
     startMomentum (event) {
+      const cursorIsUnchanged = isEqual(currentCursor, startCursor)
+      if (cursorIsUnchanged) { return }
+      const delta = {
+        time: Math.round(event.timeStamp - timeStamp)
+      }
+      console.log(delta.time, cursorIsUnchanged, currentCursor, startCursor)
+
       // When the mouse/touch is released, check to see if the last timestamp is recent enough (I use 0.3 seconds).
       // If so, set a variable inertialVelocity to the last calculated velocity; otherwise set it to 0 to prevent scrolling if the user carefully selected a position.
       // start RAF momentumScroll: Then on every update (either through a timer, or each render call, depending on how you're rendering),
+
+      //   // velocity is amount of movement divided by the time since the last frame
+      //   // velocity = {
+      //   //   x: delta.x / frameTime,
+      //   //   y: delta.y / frameTime,
+      //   // }
+      // },
     },
-    momentum () {
+    momentumFrame () {
       // scroll by inertialVelocity * INERTIA_SCROLL_FACTOR (I use 0.9) and multiply inertialVelocity by INERTIA_ACCELERATION (I use 0.98).
     }
     // cancelMomentum () {
