@@ -513,7 +513,11 @@ const store = createStore({
       state.zoomOrigin = { x: 0, y: 0 }
       state.touchScrollOrigin = { x: 0, y: 0 }
     },
-    windowScroll: (state, position) => {
+    updateWindowScroll: (state) => {
+      const position = {
+        x: window.scrollX,
+        y: window.scrollY
+      }
       state.windowScroll = position
     },
 
@@ -1555,15 +1559,7 @@ const store = createStore({
       const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
       return transform
     },
-    currentScrollPosition: (state) => () => {
-      console.log('🔮', window.scrollY, state.windowScroll.y)
-      const touchScrollOrigin = state.touchScrollOrigin
-      return {
-        x: (-touchScrollOrigin.x || window.scrollX),
-        y: (-touchScrollOrigin.y || window.scrollY)
-      }
-    },
-    cs2: (state) => {
+    currentScrollPosition: (state) => {
       const touchScroll = state.touchScrollOrigin
       const windowScroll = state.windowScroll
       return {

@@ -36,11 +36,7 @@ export default {
   },
   methods: {
     updateWindowScroll () {
-      const position = {
-        x: window.scrollX,
-        y: window.scrollY
-      }
-      this.$store.commit('windowScroll', position)
+      this.$store.commit('updateWindowScroll')
     },
     // explicitly update viewport to prevent using short viewport when ios keyboard is open
     updateViewport () {
@@ -58,7 +54,7 @@ export default {
       if (!element) { return }
       const padding = 20
       const headerPadding = 100
-      const scroll = this.$store.getters.currentScrollPosition()
+      const scroll = this.$store.getters.currentScrollPosition
       let rect = element.getBoundingClientRect()
       rect = {
         x: rect.x + scroll.x,

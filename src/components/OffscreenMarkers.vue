@@ -162,7 +162,7 @@ export default {
       this.debouncedUpdateOffscreenMarkers()
     },
     updateScrollPosition () {
-      this.scrollPosition = this.currentScrollPosition()
+      this.scrollPosition = this.currentScrollPosition
     },
     debouncedUpdateOffscreenMarkers: debounce(function () {
       this.updateOffscreenMarkers()
@@ -173,7 +173,7 @@ export default {
       const viewport = utils.visualViewport()
       this.viewport = viewport
       const zoom = this.spaceZoomDecimal
-      let scroll = utils.clone(this.currentScrollPosition())
+      let scroll = utils.clone(this.currentScrollPosition)
       scroll = utils.updatePositionWithSpaceOffset(scroll)
       offscreenMarkers.postMessage({ cards, viewport, zoom, scroll })
     }
