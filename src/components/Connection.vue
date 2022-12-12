@@ -1,37 +1,37 @@
 <template lang="pug">
-path.connection-path(
-  fill="none"
-  :stroke="typeColor"
-  stroke-width="5"
-  :data-start-card="startCardId"
-  :data-end-card="endCardId"
-  :data-id="id"
-  :data-type-name="typeName"
-  :data-type-id="connectionTypeId"
-  :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
-  :data-is-visible-in-viewport="isVisibleInViewport"
-  :key="id"
-  :d="path"
-  @mousedown.left="startDraggingConnection"
-  @touchstart="startDraggingConnection"
-  @mouseup.left="showConnectionDetails"
-  @touchend.stop="showConnectionDetails"
-  @keyup.stop.backspace="removeConnection"
-  @keyup.stop.enter="showConnectionDetailsOnKeyup"
-  :class="{active: isSelected || detailsIsVisible || remoteDetailsIsVisible || isRemoteSelected || isCurrentCardConnection, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline, 'is-hidden-by-opacity': isHiddenByCommentFilter }"
-  ref="connection"
-  tabindex="0"
-  @dragover.prevent
-  @drop.prevent.stop="addCardsAndUploadFiles"
-)
+template(v-if="isVisibleInViewport")
+  path.connection-path(
+    fill="none"
+    :stroke="typeColor"
+    stroke-width="5"
+    :data-start-card="startCardId"
+    :data-end-card="endCardId"
+    :data-id="id"
+    :data-type-name="typeName"
+    :data-type-id="connectionTypeId"
+    :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
+    :key="id"
+    :d="path"
+    @mousedown.left="startDraggingConnection"
+    @touchstart="startDraggingConnection"
+    @mouseup.left="showConnectionDetails"
+    @touchend.stop="showConnectionDetails"
+    @keyup.stop.backspace="removeConnection"
+    @keyup.stop.enter="showConnectionDetailsOnKeyup"
+    :class="{active: isSelected || detailsIsVisible || remoteDetailsIsVisible || isRemoteSelected || isCurrentCardConnection, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline, 'is-hidden-by-opacity': isHiddenByCommentFilter }"
+    ref="connection"
+    tabindex="0"
+    @dragover.prevent
+    @drop.prevent.stop="addCardsAndUploadFiles"
+  )
 
-defs
-  linearGradient(:id="gradientId")
-    stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
-    stop(offset="90%" :stop-color="typeColor")
+  defs
+    linearGradient(:id="gradientId")
+      stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
+      stop(offset="90%" :stop-color="typeColor")
 
-circle(v-if="directionIsVisible && !isUpdatingPath && isVisibleInViewport" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}")
-  animateMotion(dur="3s" repeatCount="indefinite" :path="path" rotate="auto")
+  circle(v-if="directionIsVisible && !isUpdatingPath" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}")
+    animateMotion(dur="3s" repeatCount="indefinite" :path="path" rotate="auto")
 </template>
 
 <script>
@@ -90,33 +90,38 @@ export default {
       'shouldHideConnectionOutline',
       'filteredConnectionTypeIds',
       'filteredFrameIds',
-      'filteredTagNames'
+      'filteredTagNames',
+      'viewportHeight'
     ]),
     ...mapGetters([
       'currentCards/all',
       'currentUser/isSpaceMember',
       'currentUser/canEditSpace',
       'currentCards/byId',
-      'currentConnections/typeByTypeId'
+      'currentConnections/typeByTypeId',
+      'currentScrollPosition',
+      'spaceCounterZoomDecimal'
     ]),
     isVisibleInViewport () {
-      return true
-      // const threshold = 100
-      // const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      // // top
-      // const cardTop = {
-      //   value: this.y,
-      //   min: this.currentScrollPosition.y - threshold,
-      //   max: this.currentScrollPosition.y + viewport + threshold
-      // }
-      // const isTopVisible = utils.isBetween(cardTop)
-      // // bottom
-      // let cardBottom = cardTop
-      // const height = this.card.resizeHeight || this.card.height
-      // cardBottom.value = this.y + height
-      // const isBottomVisible = utils.isBetween(cardBottom)
-      // // both
-      // return isTopVisible || isBottomVisible
+      const threshold = 100
+      const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
+      let yStart = utils.coordsFromConnectionPath(this.connection.path).y
+      let yEnd = utils.endCoordsFromConnectionPath(this.connection.path).y
+      if (yStart < yEnd) {
+        const y = yStart
+        yStart = yEnd
+        yEnd = y
+      }
+      const top = {
+        value: yStart,
+        min: this.currentScrollPosition.y - threshold,
+        max: this.currentScrollPosition.y + viewport + threshold
+      }
+      const isTopVisible = utils.isBetween(top)
+      let bottom = top
+      bottom.value = yEnd
+      const isBottomVisible = utils.isBetween(bottom)
+      return isTopVisible || isBottomVisible
     },
     cards () {
       const cards = utils.clone(this['currentCards/all'])
