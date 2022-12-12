@@ -44,6 +44,8 @@ export default {
         }
         percent += speed || increment
         this.updateSpaceZoomFromTrigger(percent)
+      } else if (mutation.type === 'triggerUpdateSpaceZoomSlider') {
+        this.checkIfShouldAnimationJiggle(mutation.payload)
       }
     })
   },
@@ -60,9 +62,7 @@ export default {
   },
   methods: {
     updateSpaceZoomFromTrigger (percent) {
-      percent = Math.max(percent, this.min)
-      percent = Math.min(percent, this.max)
-      this.$store.commit('spaceZoomPercent', percent)
+      this.$store.dispatch('spaceZoomPercent', percent)
     },
     updateSpaceZoom (percent) {
       this.updateSpaceZoomPercent(percent)
@@ -70,7 +70,7 @@ export default {
     updateSpaceZoomPercent (percent) {
       percent = percent / 100
       percent = Math.round(this.min + (this.max - this.min) * percent)
-      this.$store.commit('spaceZoomPercent', percent)
+      this.$store.dispatch('spaceZoomPercent', percent)
     },
     removeAnimations () {
       this.animateJiggleRight = false
@@ -79,15 +79,18 @@ export default {
     closeAllDialogs () {
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('closeAllDialogs', 'SpaceZoom')
-    }
-  },
-  watch: {
-    spaceZoomPercent (value) {
+    },
+    checkIfShouldAnimationJiggle (value) {
       if (value >= this.max) {
         this.animateJiggleRight = true
       } else if (value <= this.min) {
         this.animateJiggleLeft = true
       }
+    }
+  },
+  watch: {
+    spaceZoomPercent (value) {
+      this.checkIfShouldAnimationJiggle(value)
     }
   }
 }

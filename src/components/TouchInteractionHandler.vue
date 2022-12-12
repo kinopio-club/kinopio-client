@@ -2,7 +2,6 @@
 </template>
 
 <script>
-import consts from '@/consts.js'
 import utils from '@/utils.js'
 
 import { mapState } from 'vuex'
@@ -38,9 +37,7 @@ export default {
       'currentUserIsDrawingConnection',
       'currentUserIsResizingCard',
       'touchScrollOrigin'
-    ]),
-    max () { return consts.spaceZoom.max }, // 100
-    min () { return consts.spaceZoom.min } // 40
+    ])
   },
   methods: {
     cursorPositionInPage (event) {
@@ -151,9 +148,7 @@ export default {
     },
     updateZoom (event) {
       let percent = event.scale * touchStartZoomValue
-      percent = Math.max(percent, this.min)
-      percent = Math.min(percent, this.max)
-      this.$store.commit('spaceZoomPercent', percent)
+      this.$store.dispatch('spaceZoomPercent', percent)
       const position = this.cursorPositionInPage(event)
       this.$store.commit('zoomOrigin', position)
     },

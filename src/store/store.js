@@ -1,5 +1,6 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
 // store modules
 import api from '@/store/api.js'
 import broadcast from '@/store/broadcast.js'
@@ -465,6 +466,7 @@ const store = createStore({
     triggerScrollBy: (state, options) => {}, // { x, y, behavior }
     triggerScrollTo: (state, options) => {}, // { x, y }
     triggerScrolledIntoView: () => {},
+    triggerUpdateSpaceZoomSlider: (state, value) => {},
 
     // Zoom
 
@@ -1502,7 +1504,20 @@ const store = createStore({
     spaceDetailsIsPinned: (context, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsIsPinned' })
       context.commit('spaceDetailsIsPinned', value)
+    },
+
+    // Scrolling
+
+    spaceZoomPercent: (context, value) => {
+      utils.typeCheck({ value, type: 'number', origin: 'spaceZoomPercent' })
+      const min = consts.spaceZoom.min
+      const max = consts.spaceZoom.max
+      value = Math.max(value, min)
+      value = Math.min(value, max)
+      context.commit('spaceZoomPercent', value)
+      context.commit('triggerUpdateSpaceZoomSlider', value)
     }
+
   },
   getters: {
     shouldScrollAtEdges: (state, getters) => (event) => {
