@@ -176,7 +176,8 @@ export default {
     spaceMembers () {
       const excludeCurrentUser = true
       return this['currentSpace/members'](excludeCurrentUser)
-    }
+    },
+    canEditSpace () { return this['currentUser/canEditSpace']() }
   },
   methods: {
     correctCardConnectionPaths () {
@@ -226,7 +227,7 @@ export default {
       } else {
         shouldCancel = false
       }
-      if (!this['currentUser/canEditSpace']) { return }
+      if (!this.canEditSpace) { return }
       this.startCursor = utils.cursorPositionInViewport(event)
     },
     constrainCursorToAxis (event) {
@@ -335,7 +336,7 @@ export default {
       return cursor
     },
     checkIfShouldPreventInteraction () {
-      if (!this['currentUser/canEditSpace']) {
+      if (!this.canEditSpace) {
         const position = this.cursor()
         const notificationWithPosition = document.querySelector('.notifications-with-position .item')
         if (!notificationWithPosition) {
@@ -360,7 +361,7 @@ export default {
         x: position.x,
         y: position.y
       }
-      if (!this['currentUser/canEditSpace']) {
+      if (!this.canEditSpace) {
         this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
         return
       }
@@ -403,7 +404,7 @@ export default {
       }
     },
     showMultipleSelectedActions (event) {
-      if (!this['currentUser/canEditSpace']) { return }
+      if (!this.canEditSpace) { return }
       if (this.preventMultipleSelectedActionsIsVisible) { return }
       const isMultipleSelected = this.multipleCardsSelectedIds.length || this.multipleConnectionsSelectedIds.length || this.multipleBoxesSelectedIds.length
       if (isMultipleSelected) {
