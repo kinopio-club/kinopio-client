@@ -9,8 +9,7 @@ import isEqual from 'lodash-es/isEqual'
 
 let touchStartZoomValue
 
-// let velocity
-let startCursor, prevCursor, currentCursor, timeStamp
+let wasZoomed, startCursor, prevCursor, currentCursor, prevTimeStamp, scrollDelta, velocity
 let touches = []
 
 export default {
@@ -68,7 +67,7 @@ export default {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
       currentCursor = this.cursorPositionInPage(event)
-      timeStamp = event.timeStamp
+      prevTimeStamp = event.timeStamp
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
         this.pinchZoom(event)
@@ -83,6 +82,7 @@ export default {
       this.startMomentum(event)
       this.checkIfTouchIsUndoOrRedo()
       touches = []
+      wasZoomed = false
     },
     shouldIgnore (event) {
       const element = event.target
@@ -123,14 +123,14 @@ export default {
     // touch scroll
 
     scroll (event) {
-      const delta = {
+      scrollDelta = {
         x: currentCursor.x - prevCursor.x,
         y: currentCursor.y - prevCursor.y
       }
       const prevScrollBy = this.touchScrollOrigin
       const scrollBy = {
-        x: prevScrollBy.x + delta.x,
-        y: prevScrollBy.y + delta.y
+        x: prevScrollBy.x + scrollDelta.x,
+        y: prevScrollBy.y + scrollDelta.y
       }
       this.$store.commit('touchScrollOrigin', scrollBy)
       prevCursor = currentCursor
@@ -140,6 +140,7 @@ export default {
     // pinch zoom
 
     startPinchZoom (event) {
+      wasZoomed = true
       touchStartZoomValue = this.spaceZoomPercent
     },
     pinchZoom (event) {
@@ -148,6 +149,7 @@ export default {
       this.updateZoom(event)
     },
     updateZoom (event) {
+      wasZoomed = true
       let percent = event.scale * touchStartZoomValue
       this.$store.dispatch('spaceZoomPercent', percent)
       const position = this.cursorPositionInPage(event)
@@ -155,12 +157,14 @@ export default {
     },
 
     startMomentum (event) {
-      const cursorIsUnchanged = isEqual(currentCursor, startCursor)
-      if (cursorIsUnchanged) { return }
-      const delta = {
-        time: Math.round(event.timeStamp - timeStamp)
+      if (wasZoomed) { return }
+      const time = Math.round(prevTimeStamp - event.timeStamp)
+      if (!time) { return }
+      velocity = {
+        x: scrollDelta.x / time,
+        y: scrollDelta.y / time
       }
-      console.log(delta.time, cursorIsUnchanged, currentCursor, startCursor)
+      console.log('💦', velocity)
 
       // When the mouse/touch is released, check to see if the last timestamp is recent enough (I use 0.3 seconds).
       // If so, set a variable inertialVelocity to the last calculated velocity; otherwise set it to 0 to prevent scrolling if the user carefully selected a position.
