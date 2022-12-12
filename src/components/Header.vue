@@ -270,46 +270,60 @@ export default {
   },
   computed: {
     ...mapState([
-      'isTouchScrollingOrPinchZooming'
+      'isTouchScrollingOrPinchZooming',
+      'minimapIsVisible',
+      'cardDetailsIsVisibleForCardId',
+      'connectionDetailsIsVisibleForConnectionId',
+      'isEmbed',
+      'isAddPage',
+      'newStuffIsUpdated',
+      'importArenaChannelIsVisible',
+      'currentSpace',
+      'currentUser',
+      'isLoadingSpace',
+      'isJoiningSpace',
+      'isReconnectingToBroadcast',
+      'isOnline',
+      'searchIsVisible',
+      'searchResultsCards',
+      'search',
+      'previousResultCardId',
+      'spaceDetailsIsPinned',
+      'sidebarIsPinned'
     ]),
     ...mapGetters([
+      'isTouchDevice',
+      'currentSpace/url',
+      'currentSpace/isHelloKinopio',
+      'currentUser/canEditSpace',
+      'currentUser/totalFiltersActive',
+      'currentUser/isSignedIn'
     ]),
     kinopioDomain () { return utils.kinopioDomain() },
-    minimapIsVisible () { return this.$store.state.minimapIsVisible },
     isVisible () {
-      const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
-      const connectionDetailsIsVisible = this.$store.state.connectionDetailsIsVisibleForConnectionId
-      const contentDialogIsVisible = cardDetailsIsVisible || connectionDetailsIsVisible
-      const isTouchDevice = this.$store.getters.isTouchDevice
+      const contentDialogIsVisible = this.cardDetailsIsVisibleForCardId || this.connectionDetailsIsVisibleForConnectionId
       if (this.isAddPage) { return }
-      if (contentDialogIsVisible && isTouchDevice) {
+      if (contentDialogIsVisible && this.isTouchDevice) {
         return false
       } else {
         return true
       }
     },
-    isEmbed () { return this.$store.state.isEmbed },
-    isAddPage () { return this.$store.state.isAddPage },
     isSpace () {
       const isOther = this.isEmbed || this.isAddPage
       const isSpace = !isOther
       return isSpace
     },
-    currentSpaceUrl () { return this.$store.getters['currentSpace/url'] },
+    currentSpaceUrl () { return this['currentSpace/url'] },
     shouldShowNewStuffIsUpdated () {
-      const newStuffIsUpdated = this.$store.state.newStuffIsUpdated
-      const isNotDefaultSpace = !this.$store.getters['currentSpace/isHelloKinopio']
-      const userCanEditSpace = this.$store.getters['currentUser/canEditSpace']()
-      return newStuffIsUpdated && isNotDefaultSpace && userCanEditSpace
+      const isNotDefaultSpace = !this['currentSpace/isHelloKinopio']
+      return this.newStuffIsUpdated && isNotDefaultSpace && this.userCanEditSpace
     },
-    userCanEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
-    importArenaChannelIsVisible () { return this.$store.state.importArenaChannelIsVisible },
-    currentSpace () { return this.$store.state.currentSpace },
-    currentUser () { return this.$store.state.currentUser },
+    userCanEditSpace () { return this['currentUser/canEditSpace']() },
     userIsUpgraded () { return this.currentUser.isUpgraded },
     currentSpaceName () {
-      const id = this.$store.state.currentSpace.id
-      const name = this.$store.state.currentSpace.name
+      const id = this.currentSpace.id
+      const name = this.currentSpace.name
       if (name) {
         return name
       } else {
@@ -317,14 +331,11 @@ export default {
       }
     },
     currentUserIsSignedIn () {
-      return this.$store.getters['currentUser/isSignedIn']
+      return this['currentUser/isSignedIn']
     },
     spaceHasStatus () {
       if (!this.isOnline) { return }
-      const isLoadingSpace = this.$store.state.isLoadingSpace
-      const isJoiningSpace = this.$store.state.isJoiningSpace
-      const isReconnectingToBroadcast = this.$store.state.isReconnectingToBroadcast
-      return isLoadingSpace || isJoiningSpace || isReconnectingToBroadcast
+      return this.isLoadingSpace || this.isJoiningSpace || this.isReconnectingToBroadcast
     },
     spaceHasStatusAndStatusDialogIsNotVisible () {
       if (this.spaceHasStatus) {
@@ -335,36 +346,32 @@ export default {
         return false
       }
     },
-    isOnline () {
-      return this.$store.state.isOnline
-    },
     currentSpaceIsTemplate () {
-      const currentSpace = this.$store.state.currentSpace
+      const currentSpace = this.currentSpace
       if (currentSpace.isTemplate) { return true }
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(currentSpace.id)
     },
     currentSpaceIsFromTweet () {
-      const currentSpace = this.$store.state.currentSpace
+      const currentSpace = this.currentSpace
       return currentSpace.isFromTweet
     },
     currentSpaceIsInbox () {
-      const currentSpace = this.$store.state.currentSpace
+      const currentSpace = this.currentSpace
       return currentSpace.name === 'Inbox'
     },
     shouldShowInExplore () {
-      const privacy = this.$store.state.currentSpace.privacy
+      const privacy = this.currentSpace.privacy
       if (privacy === 'private') { return false }
-      return this.$store.state.currentSpace.showInExplore
+      return this.currentSpace.showInExplore
     },
     notificationsUnreadCount () {
       if (!this.notifications) { return 0 }
       const unread = this.notifications.filter(notification => !notification.isRead)
       return unread.length || 0
     },
-    searchIsVisible () { return this.$store.state.searchIsVisible },
-    searchResultsCount () { return this.$store.state.searchResultsCards.length },
-    totalFiltersActive () { return this.$store.getters['currentUser/totalFiltersActive'] },
+    searchResultsCount () { return this.searchResultsCards.length },
+    totalFiltersActive () { return this['currentUser/totalFiltersActive'] },
     searchResultsOrFilters () {
       if (this.searchResultsCount || this.totalFiltersActive) {
         return true
@@ -384,15 +391,13 @@ export default {
       this.$store.commit('previousResultCardId', card.id)
     },
     showNextSearchCard () {
-      const search = this.$store.state.search
-      if (!search) { return }
-      const cards = this.$store.state.searchResultsCards
-      const previousResultCardId = this.$store.state.previousResultCardId
-      if (!previousResultCardId) {
+      if (!this.search) { return }
+      const cards = this.searchResultsCards
+      if (!this.previousResultCardId) {
         this.showCardDetails(cards[0])
         return
       }
-      const currentIndex = cards.findIndex(card => card.id === previousResultCardId)
+      const currentIndex = cards.findIndex(card => card.id === this.previousResultCardId)
       let index = currentIndex + 1
       if (cards.length === index) {
         index = 0
@@ -400,15 +405,13 @@ export default {
       this.showCardDetails(cards[index])
     },
     showPreviousSearchCard () {
-      const search = this.$store.state.search
-      if (!search) { return }
-      const cards = this.$store.state.searchResultsCards
-      const previousResultCardId = this.$store.state.previousResultCardId
-      if (!previousResultCardId) {
+      if (!this.search) { return }
+      const cards = this.searchResultsCards
+      if (!this.previousResultCardId) {
         this.showCardDetails(cards[0])
         return
       }
-      const currentIndex = cards.findIndex(card => card.id === previousResultCardId)
+      const currentIndex = cards.findIndex(card => card.id === this.previousResultCardId)
       let index = currentIndex - 1
       if (index < 0) {
         index = cards.length - 1
@@ -430,8 +433,6 @@ export default {
       this.readOnlyJiggle = false
     },
     closeAllDialogs () {
-      const spaceDetailsIsPinned = this.$store.state.spaceDetailsIsPinned
-      const sidebarIsPinned = this.$store.state.sidebarIsPinned
       this.aboutIsVisible = false
       this.spaceDetailsInfoIsVisible = false
       this.signUpOrInIsVisible = false
@@ -445,10 +446,10 @@ export default {
       this.addSpaceIsVisible = false
       this.templatesIsVisible = false
       this.importIsVisible = false
-      if (!spaceDetailsIsPinned) {
+      if (!this.spaceDetailsIsPinned) {
         this.spaceDetailsIsVisible = false
       }
-      if (!sidebarIsPinned) {
+      if (!this.sidebarIsPinned) {
         this.sidebarIsVisible = false
       }
     },
@@ -517,7 +518,7 @@ export default {
     // hide
 
     hidden (event) {
-      if (!this.$store.getters.isTouchDevice) { return }
+      if (!this.isTouchDevice) { return }
       hiddenIteration = 0
       if (hiddenTimer) { return }
       hiddenTimer = window.requestAnimationFrame(this.hiddenFrame)
