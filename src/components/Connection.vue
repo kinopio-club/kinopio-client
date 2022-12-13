@@ -103,36 +103,35 @@ export default {
       'spaceCounterZoomDecimal'
     ]),
     isVisibleInViewport () {
-      return true
-      // if (this.isUpdatingPath) { return true }
-      // const threshold = 0
-      // let viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      // let y1 = utils.coordsFromConnectionPath(this.connection.path).y
-      // let y2 = utils.endCoordsFromConnectionPath(this.connection.path).y + y1
-      // if (y1 > y2) {
-      //   const y = y1
-      //   y1 = y2
-      //   y2 = y
-      // }
-      // //       ┌───┐
-      // //   y1  │\\\│
-      // //   ●   │\\\│
-      // //   │   │\\\│
-      // //   │   │\\\│  ┌───┐
-      // //   │   │\\\│  │\\\│
-      // //   │   └───┘  │\\\│
-      // //   │          │\\\│
-      // //   │          │\\\│ ┌───┐
-      // //   │          │\\\│ │\\\│
-      // //   │          └───┘ │\\\│
-      // //   │                │\\\│
-      // //   ●                │\\\│
-      // //   y2               │\\\│
-      // //                    └───┘
-      // const y1IsBelow = y1 > this.currentScrollPosition.y + viewport + threshold
-      // const y2IsAbove = y2 < this.currentScrollPosition.y + threshold
-      // const isNotInview = y1IsBelow || y2IsAbove
-      // return !isNotInview
+      if (this.isUpdatingPath) { return true }
+      const threshold = 0
+      let viewport = this.viewportHeight * this.spaceCounterZoomDecimal
+      let y1 = utils.coordsFromConnectionPath(this.connection.path).y
+      let y2 = utils.endCoordsFromConnectionPath(this.connection.path).y + y1
+      if (y1 > y2) {
+        const y = y1
+        y1 = y2
+        y2 = y
+      }
+      //       ┌───┐
+      //   y1  │\\\│
+      //   ●   │\\\│
+      //   │   │\\\│
+      //   │   │\\\│  ┌───┐
+      //   │   │\\\│  │\\\│
+      //   │   └───┘  │\\\│
+      //   │          │\\\│
+      //   │          │\\\│ ┌───┐
+      //   │          │\\\│ │\\\│
+      //   │          └───┘ │\\\│
+      //   │                │\\\│
+      //   ●                │\\\│
+      //   y2               │\\\│
+      //                    └───┘
+      const y1IsBelow = y1 > this.currentScrollPosition.y + viewport + threshold
+      const y2IsAbove = y2 < this.currentScrollPosition.y + threshold
+      const isNotInview = y1IsBelow || y2IsAbove
+      return !isNotInview
     },
     cards () {
       const cards = utils.clone(this['currentCards/all'])

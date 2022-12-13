@@ -13,11 +13,11 @@ main#space.space(
   //- Presence
   template(v-for="user in spaceMembers")
     UserLabelCursor(:user="user")
-  //- BoxDetails
-  //- CardDetails
-  //- ConnectionDetails
-  //- MultipleSelectedActions
-  //- ScrollAtEdgesHandler
+  BoxDetails
+  CardDetails
+  ConnectionDetails
+  MultipleSelectedActions
+  ScrollAtEdgesHandler
   NotificationsWithPosition(layer="space")
   BoxSelecting
 </template>

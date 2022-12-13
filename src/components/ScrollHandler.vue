@@ -24,20 +24,20 @@ export default {
   },
   mounted () {
     this.updateViewport()
-    // window.addEventListener('scroll', this.updateWindowScroll)
+    window.addEventListener('scroll', this.updateWindowScroll)
     window.addEventListener('resize', this.updateViewport)
   },
   beforeUnmount () {
-    // window.removeEventListener('scroll', this.updateWindowScroll)
+    window.removeEventListener('scroll', this.updateWindowScroll)
     window.removeEventListener('resize', this.updateViewport)
   },
   computed: {
     isTouchDevice () { return this.$store.state.isTouchDevice }
   },
   methods: {
-    // updateWindowScroll () {
-    // this.$store.commit('updateWindowScroll')
-    // },
+    updateWindowScroll () {
+      this.$store.commit('updateWindowScroll')
+    },
     // explicitly update viewport to prevent using short viewport when ios keyboard is open
     updateViewport () {
       viewport = utils.visualViewport()
