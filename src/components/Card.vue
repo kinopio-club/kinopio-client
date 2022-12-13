@@ -384,6 +384,7 @@ export default {
       'otherSpaceById',
       'currentScrollPosition',
       'shouldReduceDetails'
+
     ]),
     isVisibleInViewport () {
       if (this.shouldJiggle) { return true }
