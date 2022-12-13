@@ -277,7 +277,8 @@ export default {
         }
         const delta = {
           x: Math.ceil((prevCursorPosition.x - position.x) * speed),
-          y: Math.ceil((prevCursorPosition.y - position.y) * speed)
+          y: Math.ceil((prevCursorPosition.y - position.y) * speed),
+          behavior: 'auto'
         }
         this.$store.commit('triggerScrollBy', delta)
       }
