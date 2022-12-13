@@ -3,6 +3,6 @@
 export default {
   spaceZoom: {
     max: 100,
-    min: 40
+    min: 20
   }
 }
