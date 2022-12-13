@@ -1586,9 +1586,6 @@ const store = createStore({
         x: (-touchScroll.x || windowScroll.x),
         y: (-touchScroll.y || windowScroll.y)
       }
-    },
-    shouldReduceDetails: (state) => {
-      return state.spaceZoomPercent < 50
     }
   },
 

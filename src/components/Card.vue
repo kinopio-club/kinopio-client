@@ -4,7 +4,6 @@ article#card(
   :data-card-id="id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :data-is-visible-in-viewport="isVisibleInViewport"
-  :data-should-reduce-details="shouldReduceDetails"
   :data-width="card.width"
   :key="id"
   ref="card"
@@ -51,7 +50,7 @@ article#card(
     .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
-    template(v-if="!isComment && shouldRender")
+    template(v-if="!isComment && isVisibleInViewport")
       //- Video
       video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateDimensions")
         source(:src="formats.video")
@@ -69,9 +68,9 @@ article#card(
         button.inline-button.resize-button(tabindex="-1")
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
-    .card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
+    span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
-      .card-comment(v-if="isComment && shouldRender" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-comment(v-if="isComment && isVisibleInViewport" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
@@ -97,7 +96,7 @@ article#card(
               source(:src="formats.video")
 
       //- Not Comment
-      .card-content(v-if="!isComment && shouldRender" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-content(v-if="!isComment && isVisibleInViewport" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -382,8 +381,7 @@ export default {
       'currentConnections/typeForNewConnections',
       'currentUser/isSpaceMember',
       'otherSpaceById',
-      'currentScrollPosition',
-      'shouldReduceDetails'
+      'currentScrollPosition'
     ]),
     isVisibleInViewport () {
       if (this.shouldJiggle) { return true }
@@ -700,10 +698,6 @@ export default {
         return this.isChecked
       }
     },
-    shouldRender () {
-      if (this.shouldReduceDetails) { return }
-      return this.isVisibleInViewport
-    },
     positionStyles () {
       let z = this.z
       let pointerEvents = 'auto'
@@ -722,7 +716,7 @@ export default {
         pointerEvents,
         transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
       }
-      if (!this.isVisibleInViewport && this.shouldReduceDetails) {
+      if (!this.isVisibleInViewport) {
         styles.width = this.card.resizeWidth || this.card.width + 'px'
       }
       return styles
