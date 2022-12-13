@@ -103,25 +103,35 @@ export default {
       'spaceCounterZoomDecimal'
     ]),
     isVisibleInViewport () {
-      const threshold = 100
-      const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      let yStart = utils.coordsFromConnectionPath(this.connection.path).y
-      let yEnd = utils.endCoordsFromConnectionPath(this.connection.path).y
-      if (yStart < yEnd) {
-        const y = yStart
-        yStart = yEnd
-        yEnd = y
+      if (this.isUpdatingPath) { return true }
+      const threshold = 0
+      let viewport = this.viewportHeight * this.spaceCounterZoomDecimal
+      let y1 = utils.coordsFromConnectionPath(this.connection.path).y
+      let y2 = utils.endCoordsFromConnectionPath(this.connection.path).y + y1
+      if (y1 > y2) {
+        const y = y1
+        y1 = y2
+        y2 = y
       }
-      const top = {
-        value: yStart,
-        min: this.currentScrollPosition.y - threshold,
-        max: this.currentScrollPosition.y + viewport + threshold
-      }
-      const isTopVisible = utils.isBetween(top)
-      let bottom = top
-      bottom.value = yEnd
-      const isBottomVisible = utils.isBetween(bottom)
-      return isTopVisible || isBottomVisible
+      //       ┌───┐
+      //   y1  │\\\│
+      //   ●   │\\\│
+      //   │   │\\\│
+      //   │   │\\\│  ┌───┐
+      //   │   │\\\│  │\\\│
+      //   │   └───┘  │\\\│
+      //   │          │\\\│
+      //   │          │\\\│ ┌───┐
+      //   │          │\\\│ │\\\│
+      //   │          └───┘ │\\\│
+      //   │                │\\\│
+      //   ●                │\\\│
+      //   y2               │\\\│
+      //                    └───┘
+      const y1IsBelow = y1 > this.currentScrollPosition.y + viewport + threshold
+      const y2IsAbove = y2 < this.currentScrollPosition.y + threshold
+      const isNotInview = y1IsBelow || y2IsAbove
+      return !isNotInview
     },
     cards () {
       const cards = utils.clone(this['currentCards/all'])

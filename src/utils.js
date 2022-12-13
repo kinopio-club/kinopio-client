@@ -765,6 +765,7 @@ export default {
     if (!card) { return }
     const element = document.querySelector(`article [data-card-id="${card.id}"]`)
     if (!element) { return }
+    if (!element.dataset['is-visible-in-viewport']) { return }
     const rect = element.getBoundingClientRect()
     const zoom = this.spaceCounterZoomDecimal()
     card.width = Math.ceil(rect.width * zoom)

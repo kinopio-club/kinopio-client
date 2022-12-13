@@ -4,6 +4,7 @@ article#card(
   :data-card-id="id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :data-is-visible-in-viewport="isVisibleInViewport"
+  :data-width="card.width"
   :key="id"
   ref="card"
   :class="{'is-resizing': currentUserIsResizingCard, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
@@ -383,6 +384,7 @@ export default {
       'currentScrollPosition'
     ]),
     isVisibleInViewport () {
+      if (this.shouldJiggle) { return true }
       const threshold = 100
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
       const top = {
@@ -583,9 +585,6 @@ export default {
         color = color || utils.cssVariable('secondary-background')
         styles.background = hexToRgba(color, 0.5) || color
       }
-      if (!this.isVisibleInViewport) {
-        styles.width = this.card.resizeWidth || this.card.width
-      }
       return styles
     },
     backgroundColorIsDark () {
@@ -713,7 +712,7 @@ export default {
         z = 0
         pointerEvents = 'none'
       }
-      return {
+      let styles = {
         left: `${this.x}px`,
         top: `${this.y}px`,
         zIndex: z,
@@ -722,6 +721,10 @@ export default {
         pointerEvents,
         transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
       }
+      if (!this.isVisibleInViewport) {
+        styles.width = this.card.resizeWidth || this.card.width + 'px'
+      }
+      return styles
     },
     canEditCard () { return this['currentUser/canEditCard'](this.card) },
     normalizedName () {
@@ -1931,6 +1934,7 @@ article
       margin-right 8px
     .card-buttons-wrap
       display flex
+      margin-left auto
     .name-wrap,
     .card-comment
       display flex
