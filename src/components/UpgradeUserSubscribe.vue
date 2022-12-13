@@ -177,18 +177,11 @@ export default {
     },
     mountStripeElements () {
       if (this.loading.stripeIsLoading) { return }
-      elements = stripe.elements({
-        fonts: [{
-          family: 'OsakaMono-Kinopio',
-          src: 'url(https://kinopio-email.us-east-1.linodeobjects.com/OsakaMono-Kinopio.woff2)',
-          weight: 'normal',
-          style: 'normal'
-        }]
-      })
+      elements = stripe.elements()
       let options = {
         style: {
-          base: { fontFamily: "'OsakaMono-Kinopio', monospace" },
-          invalid: { color: 'black' } // change if dark theme
+          base: { fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" },
+          invalid: { color: utils.cssVariable('primary') } // change if dark theme
         },
         classes: {
           base: 'stripe-element',
