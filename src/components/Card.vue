@@ -4,6 +4,7 @@ article#card(
   :data-card-id="id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :data-is-visible-in-viewport="isVisibleInViewport"
+  :data-width="card.width"
   :key="id"
   ref="card"
   :class="{'is-resizing': currentUserIsResizingCard, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
@@ -77,14 +78,14 @@ article#card(
         //- Name
         .badge.comment-badge
           .toggle-comment-wrap.inline-button-wrap(@mouseup.left="toggleCommentIsVisible" @touchend="toggleCommentIsVisible")
-            button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
+            button.inline-button(:class="{active: card.commentIsVisible}" tabindex="-1")
               img.icon.view(src="@/assets/comment.svg")
           //- User
-          template(v-if="commentIsVisible")
+          template(v-if="card.commentIsVisible")
             UserLabelInline(:user="createdByUser")
-          template(v-if="!commentIsVisible")
+          template(v-if="!card.commentIsVisible")
             UserLabelInline(:user="createdByUser" :shouldHideName="true")
-          p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}")
+          p.comment.name-segments(v-if="card.commentIsVisible" :class="{'is-checked': isChecked}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             //- Image
@@ -383,21 +384,19 @@ export default {
       'currentScrollPosition'
     ]),
     isVisibleInViewport () {
+      if (this.shouldJiggle) { return true }
       const threshold = 100
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      // top
-      const cardTop = {
+      const top = {
         value: this.y,
         min: this.currentScrollPosition.y - threshold,
         max: this.currentScrollPosition.y + viewport + threshold
       }
-      const isTopVisible = utils.isBetween(cardTop)
-      // bottom
-      let cardBottom = cardTop
+      const isTopVisible = utils.isBetween(top)
+      let bottom = top
       const height = this.card.resizeHeight || this.card.height
-      cardBottom.value = this.y + height
-      const isBottomVisible = utils.isBetween(cardBottom)
-      // both
+      bottom.value = this.y + height
+      const isBottomVisible = utils.isBetween(bottom)
       return isTopVisible || isBottomVisible
     },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
@@ -586,9 +585,6 @@ export default {
         color = color || utils.cssVariable('secondary-background')
         styles.background = hexToRgba(color, 0.5) || color
       }
-      if (!this.isVisibleInViewport) {
-        styles.width = this.card.resizeWidth || this.card.width
-      }
       return styles
     },
     backgroundColorIsDark () {
@@ -716,7 +712,7 @@ export default {
         z = 0
         pointerEvents = 'none'
       }
-      return {
+      let styles = {
         left: `${this.x}px`,
         top: `${this.y}px`,
         zIndex: z,
@@ -725,6 +721,10 @@ export default {
         pointerEvents,
         transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
       }
+      if (!this.isVisibleInViewport) {
+        styles.width = this.card.resizeWidth || this.card.width + 'px'
+      }
+      return styles
     },
     canEditCard () { return this['currentUser/canEditCard'](this.card) },
     normalizedName () {
@@ -1934,6 +1934,7 @@ article
       margin-right 8px
     .card-buttons-wrap
       display flex
+      margin-left auto
     .name-wrap,
     .card-comment
       display flex

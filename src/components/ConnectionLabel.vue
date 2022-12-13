@@ -143,6 +143,7 @@ export default {
       this.$nextTick(() => {
         const zoom = this.$store.getters.spaceCounterZoomDecimal
         let connection = document.querySelector(`.connection-path[data-id="${this.id}"]`)
+        if (!connection) { return }
         connection = connection.getBoundingClientRect()
         let label = this.$refs.label
         let labelOffset
