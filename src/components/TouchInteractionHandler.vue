@@ -7,12 +7,9 @@ import utils from '@/utils.js'
 import { mapState } from 'vuex'
 import isEqual from 'lodash-es/isEqual'
 
-// let multiTouchAction, shouldCancelUndo
 let touchStartZoomValue
 
-// timestamp
-// let velocity
-let prevCursor, currentCursor
+let wasZoomed, startCursor, prevCursor, currentCursor, prevTimeStamp, scrollDelta, velocity
 let touches = []
 
 export default {
@@ -52,13 +49,14 @@ export default {
         return
       }
       if (this.shouldIgnore(event)) { return }
-      prevCursor = this.cursorPositionInPage(event)
-      currentCursor = prevCursor
-      this.$store.commit('isTouchScrollingOrPinchZooming', true)
+      startCursor = this.cursorPositionInPage(event)
+      prevCursor = startCursor
+      currentCursor = startCursor
+      this.$store.commit('isTouchScrollingOrPinchZooming', true) // fades out header, footer
       // this.cancelMomentum() timer, shouldCancelMomentum = true
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
-        this.initPinchZoom(event)
+        this.startPinchZoom(event)
       }
     },
     touchMove (event) {
@@ -69,6 +67,7 @@ export default {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
       currentCursor = this.cursorPositionInPage(event)
+      prevTimeStamp = event.timeStamp
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
         this.pinchZoom(event)
@@ -80,8 +79,10 @@ export default {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
       this.$store.commit('isTouchScrollingOrPinchZooming', false)
+      this.startMomentum(event)
       this.checkIfTouchIsUndoOrRedo()
       touches = []
+      wasZoomed = false
     },
     shouldIgnore (event) {
       const element = event.target
@@ -108,7 +109,7 @@ export default {
     // Undo and redo
 
     checkIfTouchIsUndoOrRedo () {
-      const cursorIsUnchanged = isEqual(currentCursor, prevCursor)
+      const cursorIsUnchanged = isEqual(currentCursor, startCursor)
       if (!cursorIsUnchanged) { return }
       if (touches.length === 2) {
         this.$store.dispatch('history/undo')
@@ -122,14 +123,14 @@ export default {
     // touch scroll
 
     scroll (event) {
-      const delta = {
+      scrollDelta = {
         x: currentCursor.x - prevCursor.x,
         y: currentCursor.y - prevCursor.y
       }
       const prevScrollBy = this.touchScrollOrigin
       const scrollBy = {
-        x: prevScrollBy.x + delta.x,
-        y: prevScrollBy.y + delta.y
+        x: prevScrollBy.x + scrollDelta.x,
+        y: prevScrollBy.y + scrollDelta.y
       }
       this.$store.commit('touchScrollOrigin', scrollBy)
       prevCursor = currentCursor
@@ -138,7 +139,8 @@ export default {
 
     // pinch zoom
 
-    initPinchZoom (event) {
+    startPinchZoom (event) {
+      wasZoomed = true
       touchStartZoomValue = this.spaceZoomPercent
     },
     pinchZoom (event) {
@@ -147,24 +149,35 @@ export default {
       this.updateZoom(event)
     },
     updateZoom (event) {
+      wasZoomed = true
       let percent = event.scale * touchStartZoomValue
       this.$store.dispatch('spaceZoomPercent', percent)
       const position = this.cursorPositionInPage(event)
       this.$store.commit('zoomOrigin', position)
     },
 
-    //   // velocity is amount of movement divided by the time since the last frame
-    //   // velocity = {
-    //   //   x: delta.x / frameTime,
-    //   //   y: delta.y / frameTime,
-    //   // }
-    // },
     startMomentum (event) {
+      if (wasZoomed) { return }
+      const time = Math.round(prevTimeStamp - event.timeStamp)
+      if (!time) { return }
+      velocity = {
+        x: scrollDelta.x / time,
+        y: scrollDelta.y / time
+      }
+      console.log('💦', velocity)
+
       // When the mouse/touch is released, check to see if the last timestamp is recent enough (I use 0.3 seconds).
       // If so, set a variable inertialVelocity to the last calculated velocity; otherwise set it to 0 to prevent scrolling if the user carefully selected a position.
       // start RAF momentumScroll: Then on every update (either through a timer, or each render call, depending on how you're rendering),
+
+      //   // velocity is amount of movement divided by the time since the last frame
+      //   // velocity = {
+      //   //   x: delta.x / frameTime,
+      //   //   y: delta.y / frameTime,
+      //   // }
+      // },
     },
-    momentum () {
+    momentumFrame () {
       // scroll by inertialVelocity * INERTIA_SCROLL_FACTOR (I use 0.9) and multiply inertialVelocity by INERTIA_ACCELERATION (I use 0.98).
     }
     // cancelMomentum () {
