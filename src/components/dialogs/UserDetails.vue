@@ -90,11 +90,11 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
   section(v-if="isCollaborator && currentUserIsSpaceMember")
     template(v-if="isCurrentUser && isCollaborator")
       button(@click.left.stop="removeCollaborator")
-        img.icon.leave(src="@/assets/leave.svg")
+        img.icon.cancel(src="@/assets/add.svg")
         span Leave Space
     template(v-if="!isCurrentUser")
       button(@click.left.stop="removeCollaborator")
-        img.icon.leave(src="@/assets/leave.svg")
+        img.icon.cancel(src="@/assets/add.svg")
         span Remove From Space
 </template>
 
