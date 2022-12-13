@@ -404,11 +404,7 @@ export default {
       }
     },
     showMultipleSelectedActions (event) {
-      if (!this.canEditSpace) {
-        const position = utils.cursorPositionInSpace({ event })
-        this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
-        return
-      }
+      if (!this.canEditSpace) { return }
       if (this.preventMultipleSelectedActionsIsVisible) { return }
       const isMultipleSelected = this.multipleCardsSelectedIds.length || this.multipleConnectionsSelectedIds.length || this.multipleBoxesSelectedIds.length
       if (isMultipleSelected) {
