@@ -6,7 +6,7 @@
   :class="{ 'no-background': isAddPage }"
 )
   base(v-if="isAddPage" target="_blank")
-  OutsideSpaceBackground
+  //- OutsideSpaceBackground
   .touch-scroll-offset(:style="touchScroll")
     SpaceBackground
     ItemsLocked
@@ -15,14 +15,14 @@
     router-view
   Header
   Footer
-  TagDetails
-  LinkDetails
-  UserDetails
+  //- TagDetails
+  //- LinkDetails
+  //- UserDetails
   Minimap
   WindowHistoryHandler
   KeyboardShortcutsHandler
   NotificationsWithPosition(layer="app")
-  //- TouchInteractionHandler
+  TouchInteractionHandler
   ScrollHandler
   .preload
     .logo-hover

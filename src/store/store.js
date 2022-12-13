@@ -1580,12 +1580,13 @@ const store = createStore({
       return transform
     },
     currentScrollPosition: (state) => {
-      const touchScroll = state.touchScrollOrigin
-      const windowScroll = state.windowScroll
-      return {
-        x: (-touchScroll.x || windowScroll.x),
-        y: (-touchScroll.y || windowScroll.y)
-      }
+      return {}
+      // const touchScroll = state.touchScrollOrigin
+      // const windowScroll = state.windowScroll
+      // return {
+      //   x: (-touchScroll.x || windowScroll.x),
+      //   y: (-touchScroll.y || windowScroll.y)
+      // }
     },
     shouldReduceDetails: (state) => {
       return state.spaceZoomPercent < 40
