@@ -17,7 +17,7 @@ main#space.space(
   CardDetails
   ConnectionDetails
   MultipleSelectedActions
-  ScrollAtEdgesHandler
+  //- ScrollAtEdgesHandler
   NotificationsWithPosition(layer="space")
   BoxSelecting
 </template>

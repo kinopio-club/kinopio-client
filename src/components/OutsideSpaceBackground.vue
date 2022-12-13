@@ -82,9 +82,9 @@ export default {
     },
     start () {
       this.updateBackgroundColor()
-      colorCycleIteration = 0
-      if (colorCycleTimer) { return }
-      colorCycleTimer = window.requestAnimationFrame(this.colorCycleFrame)
+      // colorCycleIteration = 0
+      // if (colorCycleTimer) { return }
+      // colorCycleTimer = window.requestAnimationFrame(this.colorCycleFrame)
     },
     shouldUpdate () {
       const result = colorCycleIteration / colorCycleDuration

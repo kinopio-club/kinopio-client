@@ -10,8 +10,8 @@
   .touch-scroll-offset(:style="touchScroll")
     SpaceBackground
     ItemsLocked
-    MagicPaint
-    OffscreenMarkers
+    //- MagicPaint
+    //- OffscreenMarkers
     //- router-view is Space or Add
     router-view
   Header
@@ -19,7 +19,7 @@
   TagDetails
   LinkDetails
   UserDetails
-  Minimap
+  //- Minimap
   WindowHistoryHandler
   KeyboardShortcutsHandler
   NotificationsWithPosition(layer="app")
