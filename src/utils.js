@@ -189,6 +189,7 @@ export default {
     return { x, y }
   },
   cursorPositionInSpace ({ event, position }) {
+    if (!event && !position) { return }
     position = position || this.cursorPositionInPage(event)
     // #space
     const space = document.getElementById('space')
@@ -762,11 +763,12 @@ export default {
     return isInViewportX && isInViewportY
   },
   updateCardDimensions (card) {
-    if (!card) { return }
-    const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+    const element = document.querySelector(`article[data-card-id="${card.id}"]`)
+    let { isVisibleInViewport, shouldReduceDetails } = element.dataset
+    isVisibleInViewport = isVisibleInViewport === 'true'
+    shouldReduceDetails = shouldReduceDetails === 'true'
     if (!element) { return }
-    if (!element.dataset['is-visible-in-viewport']) { return }
-    if (!element.dataset['should-reduce-details']) { return }
+    if (!isVisibleInViewport || shouldReduceDetails) { return }
     const rect = element.getBoundingClientRect()
     const zoom = this.spaceCounterZoomDecimal()
     card.width = Math.ceil(rect.width * zoom)

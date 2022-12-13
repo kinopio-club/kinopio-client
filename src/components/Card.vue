@@ -59,7 +59,7 @@ article#card(
       img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
       img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
 
-    .bottom-button-wrap(v-if="resizeIsVisible")
+    .bottom-button-wrap(v-if="resizeIsVisible && shouldRender")
       //- resize
       .resize-button-wrap.inline-button-wrap(
         @mousedown.left.stop="startResizing"
@@ -69,7 +69,7 @@ article#card(
         button.inline-button.resize-button(tabindex="-1")
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
-    .card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
+    .card-content-wrap(v-if="shouldRender" :style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
       .card-comment(v-if="isComment && shouldRender" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- [·]
@@ -148,7 +148,7 @@ article#card(
                 img.connector-icon(src="@/assets/connector-closed-in-card.svg")
               //- template(v-else)
               //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible")
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible && shouldRender")
       UrlPreview(
         :visible="cardUrlPreviewIsVisible"
         :card="card"
@@ -568,19 +568,25 @@ export default {
       return this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.card.backgroundColor
     },
     cardStyle () {
-      let backgroundColor
+      const defaultColor = utils.cssVariable('secondary-background')
+      let color
       if (!this.isVisualCard) {
-        backgroundColor = this.card.backgroundColor
+        color = this.card.backgroundColor
       }
-      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || backgroundColor
+      color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || color
       let styles = {
         background: color,
         width: this.resizeWidth,
         maxWidth: this.resizeWidth
       }
       if (this.isComment) {
-        color = color || utils.cssVariable('secondary-background')
+        color = color || defaultColor
         styles.background = hexToRgba(color, 0.5) || color
+      }
+      if (!this.shouldRender) {
+        styles.width = this.card.resizeWidth || this.card.width + 'px'
+        styles.height = this.card.height + 'px'
+        styles.background = styles.background || defaultColor
       }
       return styles
     },
@@ -722,7 +728,7 @@ export default {
         pointerEvents,
         transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
       }
-      if (!this.isVisibleInViewport && this.shouldReduceDetails) {
+      if (!this.shouldRender) {
         styles.width = this.card.resizeWidth || this.card.width + 'px'
       }
       return styles

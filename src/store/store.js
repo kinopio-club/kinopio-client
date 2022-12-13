@@ -1588,7 +1588,7 @@ const store = createStore({
       }
     },
     shouldReduceDetails: (state) => {
-      return state.spaceZoomPercent < 50
+      return state.spaceZoomPercent < 40
     }
   },
 
