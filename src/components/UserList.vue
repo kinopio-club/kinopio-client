@@ -6,7 +6,7 @@ span
       li(@click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !isClickable }")
         UserLabelInline(:user="user")
         button.remove-user(v-if="showRemoveUser" @click.left.stop="removeUser(user)" title="Remove from space")
-          img.icon.leave(src="@/assets/leave.svg")
+          img.icon.cancel(src="@/assets/add.svg")
 </template>
 
 <script>
