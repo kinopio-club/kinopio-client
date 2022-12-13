@@ -43,6 +43,7 @@
     User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
     .badge.info
       span {{price.amount}}/{{price.period}}
+    .badge.secondary Tax included
 
   button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
     span Upgrade Account
