@@ -57,6 +57,7 @@ export default {
   },
   methods: {
     updateBackgroundColor () {
+      if (this.$store.state.isTouchScrollingOrPinchZooming) { return }
       if (r > max || r < min) {
         ri = ri * -1
       }
