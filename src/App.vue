@@ -10,7 +10,7 @@
   .touch-scroll-offset(:style="touchScroll")
     SpaceBackground
     ItemsLocked
-    MagicPaint
+    //- MagicPaint
     //- router-view is Space or Add
     router-view
   Header
