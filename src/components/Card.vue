@@ -1949,6 +1949,7 @@ export default {
       const isChanged = newValue !== prevValue
       if (isChanged) {
         this.checkIfShouldPauseVideo()
+        this.$store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
       }
     }
   }
