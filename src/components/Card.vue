@@ -53,7 +53,7 @@ article#card(
 
     template(v-if="!isComment && shouldRender")
       //- Video
-      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateDimensions")
+      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateDimensions" ref="video")
         source(:src="formats.video")
       //- Image
       img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
@@ -372,7 +372,8 @@ export default {
       'remotePendingUploads',
       'currentUserIsDraggingCard',
       'currentUserIsDrawingConnection',
-      'viewportHeight'
+      'viewportHeight',
+      'isTouchScrollingOrPinchZooming'
     ]),
     ...mapGetters([
       'spaceCounterZoomDecimal',
@@ -1006,7 +1007,6 @@ export default {
       if (!this.userDetailsIsVisible) { return }
       return this.createdByUser.id === this.userDetailsUser.id
     }
-
   },
   methods: {
 
@@ -1923,6 +1923,15 @@ export default {
         urlPreviewUrl: url
       }
       this.$store.dispatch('currentCards/update', update)
+    },
+    checkIfShouldPauseVideo (value) {
+      if (!this.formats.video) { return }
+      const element = this.$refs.video
+      if (this.isTouchScrollingOrPinchZooming) {
+        element.pause()
+      } else {
+        element.play()
+      }
     }
   },
   watch: {
@@ -1933,6 +1942,13 @@ export default {
       const isChanged = newValue !== prevValue
       if (newValue && isChanged) {
         this.$store.commit('triggerUpdateLockedCardButtonPosition', this.card.id)
+        this.checkIfShouldPauseVideo()
+      }
+    },
+    isTouchScrollingOrPinchZooming (newValue, prevValue) {
+      const isChanged = newValue !== prevValue
+      if (isChanged) {
+        this.checkIfShouldPauseVideo()
       }
     }
   }
