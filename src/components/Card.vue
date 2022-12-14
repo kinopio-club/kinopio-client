@@ -52,13 +52,7 @@ article#card(
     Frames(:card="card")
 
     template(v-if="!isComment && shouldRender")
-      //- Video
-      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateDimensions" ref="video")
-        source(:src="formats.video")
-      //- Image
-      img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
-      img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
-
+      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" :isVisibleInViewport="isVisibleInViewport")
     .bottom-button-wrap(v-if="resizeIsVisible && shouldRender")
       //- resize
       .resize-button-wrap.inline-button-wrap(
@@ -89,13 +83,7 @@ article#card(
           p.comment.name-segments(v-if="card.commentIsVisible" :class="{'is-checked': isChecked}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
-            //- Image
-            img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
-            img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
-            //- Video
-            video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateDimensions")
-              source(:src="formats.video")
-
+            ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" :isVisibleInViewport="isVisibleInViewport")
       //- Not Comment
       .card-content(v-if="!isComment && shouldRender" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- Audio
@@ -209,6 +197,7 @@ import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
 import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
+import ImageOrVideo from '@/components/ImageOrVideo.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -242,6 +231,7 @@ export default {
     Frames,
     Loader,
     Audio,
+    ImageOrVideo,
     NameSegment,
     UrlPreview,
     UserLabelInline
@@ -268,8 +258,6 @@ export default {
           this.updateMediaUrls()
           this.updateUrlPreview()
         }
-      } else if (type === 'triggerOptimizePerformanceDuringScrollOrZoom') {
-        this.checkIfShouldPauseVideo()
       }
     })
   },
@@ -1925,15 +1913,6 @@ export default {
         urlPreviewUrl: url
       }
       this.$store.dispatch('currentCards/update', update)
-    },
-    checkIfShouldPauseVideo (value) {
-      if (!this.formats.video) { return }
-      const element = this.$refs.video
-      if (this.isTouchScrollingOrPinchZooming) {
-        element.pause()
-      } else {
-        element.play()
-      }
     }
   },
   watch: {
@@ -1944,7 +1923,6 @@ export default {
       const isChanged = newValue !== prevValue
       if (newValue && isChanged) {
         this.$store.commit('triggerUpdateLockedCardButtonPosition', this.card.id)
-        this.checkIfShouldPauseVideo()
       }
     }
   }
@@ -2191,13 +2169,6 @@ article
         &:active,
         &.active
           background-color transparent
-      .image,
-      video
-        border-radius var(--entity-radius)
-        display block
-        -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
-        &.selected
-          mix-blend-mode color-burn
       .card-content-wrap
         position absolute
         top 0
