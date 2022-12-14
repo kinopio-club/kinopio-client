@@ -2,7 +2,7 @@
 .app(
   @pointermove="broadcastCursor"
   @touchstart="updateIsTouchDevice"
-  :style="{ width: appPageWidth, height: appPageHeight, cursor: pageCursor }"
+  :style="{ width: pageWidth + 'px', height: pageHeight + 'px', cursor: pageCursor }"
   :class="{ 'no-background': isAddPage }"
 )
   base(v-if="isAddPage" target="_blank")
@@ -100,16 +100,15 @@ export default {
     ...mapState([
       'currentSpace',
       'isAddPage',
-      'pageWidth',
-      'pageHeight',
       'viewportWidth',
       'viewportHeight',
       'currentUserIsPanning',
       'currentUserIsPanningReady',
       'currentUserToolbar',
       'currentUser',
-      'userHasScrolled'
-
+      'userHasScrolled',
+      'pageWidth',
+      'pageHeight'
     ]),
     ...mapGetters([
       'transformTouchScroll',
@@ -126,16 +125,6 @@ export default {
       } else {
         return false
       }
-    },
-    appPageWidth () {
-      if (this.isAddPage) { return }
-      const size = Math.max(this.pageWidth, this.viewportWidth)
-      return size + 'px'
-    },
-    appPageHeight () {
-      if (this.isAddPage) { return }
-      const size = Math.max(this.pageHeight, this.viewportHeight)
-      return size + 'px'
     },
     buildHash () {
       const regex = /(index\.)([a-z0-9])\w+/
