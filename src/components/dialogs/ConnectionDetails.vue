@@ -111,11 +111,11 @@ export default {
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     styles () {
       const position = this.$store.state.connectionDetailsPosition
-      const zoom = this.spaceCounterZoomDecimal
+      // const zoom = this.spaceCounterZoomDecimal
       return {
         left: `${position.x}px`,
-        top: `${position.y}px`,
-        transform: `scale(${zoom})`
+        top: `${position.y}px`
+        // transform: `scale(${zoom})`
       }
     },
     currentConnection () {

@@ -304,13 +304,13 @@ export default {
       return { cards, boxes }
     },
     styles () {
-      const zoom = this.spaceCounterZoomDecimal
+      // const zoom = this.spaceCounterZoomDecimal
       const position = this.$store.state.multipleSelectedActionsPosition
       return {
         backgroundColor: this.userColor,
         left: position.x + 'px',
-        top: position.y + 'px',
-        transform: `scale(${zoom})`
+        top: position.y + 'px'
+        // transform: `scale(${zoom})`
       }
     }
   },

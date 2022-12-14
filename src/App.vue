@@ -18,10 +18,17 @@
     router-view
   Header
   Footer
+  //- item detail dialogs
   TagDetails
   LinkDetails
   UserDetails
+  BoxDetails
+  CardDetails
+  ConnectionDetails
+  MultipleSelectedActions
+  //- temp
   Minimap
+  //- interaction handlers
   WindowHistoryHandler
   KeyboardShortcutsHandler
   NotificationsWithPosition(layer="app")
@@ -37,6 +44,7 @@
     img.icon(src="@/assets/offline.svg")
     img.icon(src="@/assets/center-horizontally.svg")
     img.icon(src="@/assets/distribute-horizontally.svg")
+    img.icon(src="@/assets/add.svg")
 </template>
 
 <script>
@@ -55,6 +63,10 @@ import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import SpaceBackground from '@/components/SpaceBackground.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
+import BoxDetails from '@/components/dialogs/BoxDetails.vue'
+import CardDetails from '@/components/dialogs/CardDetails.vue'
+import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
+import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import utils from '@/utils.js'
 
 import { mapState, mapGetters } from 'vuex'
@@ -75,7 +87,11 @@ export default {
     UserDetails,
     NotificationsWithPosition,
     SpaceBackground,
-    OutsideSpaceBackground
+    OutsideSpaceBackground,
+    CardDetails,
+    BoxDetails,
+    ConnectionDetails,
+    MultipleSelectedActions
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)

@@ -12,10 +12,6 @@ main#space.space(
   //- Presence
   template(v-for="user in spaceMembers")
     UserLabelCursor(:user="user")
-  BoxDetails
-  CardDetails
-  ConnectionDetails
-  MultipleSelectedActions
   ScrollAtEdgesHandler
   NotificationsWithPosition(layer="space")
   BoxSelecting
@@ -23,11 +19,7 @@ main#space.space(
 
 <script>
 import Card from '@/components/Card.vue'
-import CardDetails from '@/components/dialogs/CardDetails.vue'
-import BoxDetails from '@/components/dialogs/BoxDetails.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
-import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
-import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import BoxSelecting from '@/components/BoxSelecting.vue'
@@ -49,11 +41,7 @@ export default {
   name: 'Space',
   components: {
     Card,
-    CardDetails,
-    BoxDetails,
     UserLabelCursor,
-    ConnectionDetails,
-    MultipleSelectedActions,
     ScrollAtEdgesHandler,
     NotificationsWithPosition,
     BoxSelecting,

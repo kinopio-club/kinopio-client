@@ -59,9 +59,9 @@ export default {
     visible () { return utils.objectHasKeys(this.box) },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     styles () {
-      let zoom = this.spaceCounterZoomDecimal
+      // let zoom = this.spaceCounterZoomDecimal
       const styles = {
-        transform: `scale(${zoom})`,
+        // transform: `scale(${zoom})`,
         left: `${this.box.x + 8}px`,
         top: `${this.box.y + 8}px`,
         backgroundColor: this.box.color

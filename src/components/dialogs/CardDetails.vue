@@ -493,10 +493,10 @@ export default {
     },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     styles () {
-      let zoom = this.spaceCounterZoomDecimal
+      // let zoom = this.spaceCounterZoomDecimal
       const left = `${this.card.x + 8}px`
       const top = `${this.card.y + 8}px`
-      return { transform: `scale(${zoom})`, left, top }
+      return { transform: left, top }
     },
     cardUrlPreviewIsVisible () {
       const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
