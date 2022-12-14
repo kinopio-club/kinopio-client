@@ -6,8 +6,8 @@ import utils from '@/utils.js'
 
 let viewport
 
-// const scrollTimerDuration = 150 // ms
-// let scrollTimer, scrollStartTime, shouldCancelScroll, scrollByTotal, prevScrolledBy
+const scrollTimerDuration = 150 // ms
+let scrollTimer, scrollStartTime, shouldCancelScroll, scrollByTotal, prevScrolledBy
 
 export default {
   name: 'ScrollByHandler',
@@ -44,11 +44,11 @@ export default {
     },
     scrollTo ({ x, y, behavior }) {
       behavior = behavior || 'auto'
-      // if (this.isTouchDevice) {
-      //   this.$store.commit('touchScrollOrigin', { x, y })
-      // } else {
-      window.scrollTo(x, y, behavior)
-      // }
+      if (this.isTouchDevice) {
+        this.$store.commit('touchScrollOrigin', { x, y })
+      } else {
+        window.scrollTo(x, y, behavior)
+      }
     },
     scrollIntoView ({ element, toCenterTop }) {
       if (!element) { return }
@@ -120,59 +120,59 @@ export default {
     },
     scrollBy ({ x, y, behavior }) {
       behavior = behavior || 'smooth'
-      // if (this.isTouchDevice) {
-      //   this.scrollByOnTouchDevice({ x, y, behavior })
-      // } else {
-      this.scrollByOnMouseDevice({ x, y, behavior })
-      // }
+      if (this.isTouchDevice) {
+        this.scrollByOnTouchDevice({ x, y, behavior })
+      } else {
+        this.scrollByOnMouseDevice({ x, y, behavior })
+      }
     },
-    // scrollByOnTouchDevice ({ x, y, behavior }) {
-    //   if (behavior === 'smooth') {
-    //     if (scrollTimer) { return }
-    //     scrollByTotal = { x, y }
-    //     prevScrolledBy = { x: 0, y: 0 }
-    //     shouldCancelScroll = false
-    //     scrollTimer = window.requestAnimationFrame(this.scrollFrame)
-    //   } else {
-    //     this.$store.commit('updateTouchScrollOriginBy', { x, y })
-    //     this.$nextTick(() => {
-    //       this.$store.commit('triggerScrolledIntoView')
-    //     })
-    //   }
-    // },
-    // scrollFrame (timestamp) {
-    //   if (!scrollStartTime) {
-    //     scrollStartTime = timestamp
-    //   }
-    //   const elaspedTime = timestamp - scrollStartTime
-    //   const percentComplete = (elaspedTime / scrollTimerDuration) // between 0 and 1
-    //   let scrollBy = {
-    //     x: Math.round(scrollByTotal.x * percentComplete) - prevScrolledBy.x,
-    //     y: Math.round(scrollByTotal.y * percentComplete) - prevScrolledBy.y
-    //   }
-    //   prevScrolledBy = {
-    //     x: prevScrolledBy.x + scrollBy.x,
-    //     y: prevScrolledBy.y + scrollBy.y
-    //   }
-    //   if (shouldCancelScroll) {
-    //     console.log('shouldCancelScroll') // TEMP
-    //     this.cancelScroll()
-    //   } else if (percentComplete <= 1.1) {
-    //     this.$store.commit('updateTouchScrollOriginBy', scrollBy)
-    //     window.requestAnimationFrame(this.scrollFrame)
-    //   } else {
-    //     this.cancelScroll()
-    //     this.$nextTick(() => {
-    //       this.$store.commit('triggerScrolledIntoView')
-    //     })
-    //   }
-    // },
-    // cancelScroll () {
-    //   window.cancelAnimationFrame(scrollTimer)
-    //   shouldCancelScroll = true
-    //   scrollTimer = undefined
-    //   scrollStartTime = undefined
-    // },
+    scrollByOnTouchDevice ({ x, y, behavior }) {
+      if (behavior === 'smooth') {
+        if (scrollTimer) { return }
+        scrollByTotal = { x, y }
+        prevScrolledBy = { x: 0, y: 0 }
+        shouldCancelScroll = false
+        scrollTimer = window.requestAnimationFrame(this.scrollFrame)
+      } else {
+        this.$store.commit('updateTouchScrollOriginBy', { x, y })
+        this.$nextTick(() => {
+          this.$store.commit('triggerScrolledIntoView')
+        })
+      }
+    },
+    scrollFrame (timestamp) {
+      if (!scrollStartTime) {
+        scrollStartTime = timestamp
+      }
+      const elaspedTime = timestamp - scrollStartTime
+      const percentComplete = (elaspedTime / scrollTimerDuration) // between 0 and 1
+      let scrollBy = {
+        x: Math.round(scrollByTotal.x * percentComplete) - prevScrolledBy.x,
+        y: Math.round(scrollByTotal.y * percentComplete) - prevScrolledBy.y
+      }
+      prevScrolledBy = {
+        x: prevScrolledBy.x + scrollBy.x,
+        y: prevScrolledBy.y + scrollBy.y
+      }
+      if (shouldCancelScroll) {
+        console.log('shouldCancelScroll') // TEMP
+        this.cancelScroll()
+      } else if (percentComplete <= 1.1) {
+        this.$store.commit('updateTouchScrollOriginBy', scrollBy)
+        window.requestAnimationFrame(this.scrollFrame)
+      } else {
+        this.cancelScroll()
+        this.$nextTick(() => {
+          this.$store.commit('triggerScrolledIntoView')
+        })
+      }
+    },
+    cancelScroll () {
+      window.cancelAnimationFrame(scrollTimer)
+      shouldCancelScroll = true
+      scrollTimer = undefined
+      scrollStartTime = undefined
+    },
     scrollByOnMouseDevice ({ x, y, behavior }) {
       window.scrollBy({
         left: x,
