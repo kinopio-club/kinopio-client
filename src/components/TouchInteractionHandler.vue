@@ -52,7 +52,7 @@ export default {
       startCursor = this.cursorPositionInPage(event)
       prevCursor = startCursor
       currentCursor = startCursor
-      this.$store.commit('isTouchScrollingOrPinchZooming', true) // fades out header, footer
+      this.$store.dispatch('isTouchScrollingOrPinchZooming', true)
       // this.cancelMomentum() timer, shouldCancelMomentum = true
       const isMultiTouch = utils.isMultiTouch(event)
       if (isMultiTouch) {
@@ -78,7 +78,7 @@ export default {
     touchEnd (event) {
       if (this.shouldIgnore(event)) { return }
       event.preventDefault()
-      this.$store.commit('isTouchScrollingOrPinchZooming', false)
+      this.$store.dispatch('isTouchScrollingOrPinchZooming', false)
       this.startMomentum(event)
       this.checkIfTouchIsUndoOrRedo()
       touches = []

@@ -268,6 +268,8 @@ export default {
           this.updateMediaUrls()
           this.updateUrlPreview()
         }
+      } else if (type === 'triggerOptimizePerformanceDuringScrollOrZoom') {
+        this.checkIfShouldPauseVideo()
       }
     })
   },
@@ -1943,13 +1945,6 @@ export default {
       if (newValue && isChanged) {
         this.$store.commit('triggerUpdateLockedCardButtonPosition', this.card.id)
         this.checkIfShouldPauseVideo()
-      }
-    },
-    isTouchScrollingOrPinchZooming (newValue, prevValue) {
-      const isChanged = newValue !== prevValue
-      if (isChanged) {
-        this.checkIfShouldPauseVideo()
-        this.$store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
       }
     }
   }

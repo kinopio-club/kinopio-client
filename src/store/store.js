@@ -53,6 +53,7 @@ const store = createStore({
     zoomOrigin: { x: 0, y: 0 },
     // scroll
     isTouchScrollingOrPinchZooming: false,
+    isMouseZooming: false,
     touchScrollOrigin: { x: 0, y: 0 },
     windowScroll: { x: 0, y: 0 },
 
@@ -467,6 +468,7 @@ const store = createStore({
     triggerScrollTo: (state, options) => {}, // { x, y }
     triggerScrolledIntoView: () => {},
     triggerUpdateSpaceZoomSlider: (state, value) => {},
+    triggerOptimizePerformanceDuringScrollOrZoom: () => {},
 
     // Zoom
 
@@ -1516,8 +1518,16 @@ const store = createStore({
       value = Math.min(value, max)
       context.commit('spaceZoomPercent', value)
       context.commit('triggerUpdateSpaceZoomSlider', value)
+    },
+    isTouchScrollingOrPinchZooming: (context, value) => {
+      const prevValue = context.state.isTouchScrollingOrPinchZooming
+      context.commit('isTouchScrollingOrPinchZooming', value)
+      const isChanged = value !== prevValue
+      console.log(value, prevValue)
+      if (!isChanged) { return }
+      context.commit('triggerOptimizePerformanceDuringScrollOrZoom')
+      context.dispatch('currentSpace/checkIfShouldPauseConnectionDirections', null, { root: true })
     }
-
   },
   getters: {
     shouldScrollAtEdges: (state, getters) => (event) => {
