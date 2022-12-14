@@ -386,15 +386,16 @@ export default {
       'shouldReduceDetails'
     ]),
     isVisibleInViewport () {
-      if (this.shouldJiggle) { return true }
-      const threshold = 100 * this.spaceCounterZoomDecimal
-      const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      const min = this.currentScrollPosition.y - threshold
-      const max = this.currentScrollPosition.y + viewport + threshold
-      const isTopVisible = utils.isBetween({ value: this.y, min, max })
-      const height = this.card.resizeHeight || this.card.height
-      const isBottomVisible = utils.isBetween({ value: this.y + height, min, max })
-      return isTopVisible || isBottomVisible
+      return true
+      // if (this.shouldJiggle) { return true }
+      // const threshold = 100 * this.spaceCounterZoomDecimal
+      // const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
+      // const min = this.currentScrollPosition.y - threshold
+      // const max = this.currentScrollPosition.y + viewport + threshold
+      // const isTopVisible = utils.isBetween({ value: this.y, min, max })
+      // const height = this.card.resizeHeight || this.card.height
+      // const isBottomVisible = utils.isBetween({ value: this.y + height, min, max })
+      // return isTopVisible || isBottomVisible
     },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
     itemBackground () {
@@ -707,8 +708,9 @@ export default {
       }
     },
     shouldRender () {
-      if (this.shouldReduceDetails) { return }
-      return this.isVisibleInViewport
+      return true
+      // if (this.shouldReduceDetails) { return }
+      // return this.isVisibleInViewport
     },
     positionStyles () {
       let z = this.z
