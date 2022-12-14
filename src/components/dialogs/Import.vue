@@ -84,19 +84,21 @@ export default {
     },
     updateSpaceItemsUserId (space) {
       const currentUserId = this.$store.state.currentUser.id
-      const cards = space.cards.map(card => {
+      space.cards = space.cards.map(card => {
         card.userId = null
         card.z = card.z || 1
         card.x = card.x || 100
         card.y = card.y || 100
         return card
       })
-      const connections = space.connections.map(connection => {
+      space.connections = space.connections.map(connection => {
         connection.userId = currentUserId
         return connection
       })
-      space.cards = cards
-      space.connections = connections
+      space.boxes = space.boxes.map(box => {
+        box.userId = currentUserId
+        return box
+      })
       return space
     },
     async importSpace (space) {
