@@ -707,8 +707,9 @@ export default {
       }
     },
     shouldRender () {
-      if (this.shouldReduceDetails) { return }
-      return this.isVisibleInViewport
+      return true
+      // if (this.shouldReduceDetails) { return }
+      // return this.isVisibleInViewport
     },
     positionStyles () {
       let z = this.z
