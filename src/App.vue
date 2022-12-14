@@ -29,6 +29,7 @@
   //- temp
   Minimap
   //- interaction handlers
+  ScrollAtEdgesHandler
   WindowHistoryHandler
   KeyboardShortcutsHandler
   NotificationsWithPosition(layer="app")
@@ -67,6 +68,7 @@ import BoxDetails from '@/components/dialogs/BoxDetails.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
+import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import utils from '@/utils.js'
 
 import { mapState, mapGetters } from 'vuex'
@@ -91,7 +93,8 @@ export default {
     CardDetails,
     BoxDetails,
     ConnectionDetails,
-    MultipleSelectedActions
+    MultipleSelectedActions,
+    ScrollAtEdgesHandler
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)

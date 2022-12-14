@@ -12,7 +12,6 @@ main#space.space(
   //- Presence
   template(v-for="user in spaceMembers")
     UserLabelCursor(:user="user")
-  ScrollAtEdgesHandler
   NotificationsWithPosition(layer="space")
   BoxSelecting
 </template>
@@ -20,7 +19,6 @@ main#space.space(
 <script>
 import Card from '@/components/Card.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
-import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import BoxSelecting from '@/components/BoxSelecting.vue'
 import Boxes from '@/components/Boxes.vue'
@@ -42,7 +40,6 @@ export default {
   components: {
     Card,
     UserLabelCursor,
-    ScrollAtEdgesHandler,
     NotificationsWithPosition,
     BoxSelecting,
     Boxes,
