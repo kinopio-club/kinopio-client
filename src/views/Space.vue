@@ -4,7 +4,6 @@ main#space.space(
   @mousedown.left="initInteractions"
   @touchstart="initInteractions"
   :style="styles"
-  :data-zoom="spaceZoomDecimal"
 )
   Connections(:startCursor="startCursor")
   Boxes
@@ -150,7 +149,6 @@ export default {
       'currentBoxIsNew'
     ]),
     ...mapGetters([
-      'transformZoom',
       'currentCards/isNotLocked',
       'currentUser/canEditSpace',
       'spaceZoomDecimal',
@@ -161,11 +159,9 @@ export default {
       'currentUser/isSignedIn'
     ]),
     styles () {
-      const transform = this.transformZoom
       return {
         width: `${this.pageWidth}px`,
-        height: `${this.pageHeight}px`,
-        transform: transform
+        height: `${this.pageHeight}px`
       }
     },
     isInteracting () {

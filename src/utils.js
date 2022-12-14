@@ -912,7 +912,7 @@ export default {
   // Connection Path Utils 🐙
 
   spaceZoomDecimal () {
-    const element = document.getElementById('space')
+    const element = document.getElementById('main')
     return element.dataset.zoom || 1
   },
   spaceCounterZoomDecimal () {

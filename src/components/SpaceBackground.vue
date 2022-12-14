@@ -33,11 +33,9 @@ export default {
       }
     },
     backgroundStyles () {
-      const transform = this.$store.getters.transformZoom
       const styles = {
         backgroundImage: `url('${this.imageUrl}')`,
-        backgroundSize: this.size,
-        transform: transform
+        backgroundSize: this.size
       }
       return styles
     },

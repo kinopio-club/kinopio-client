@@ -1562,23 +1562,6 @@ const store = createStore({
     isTouchDevice: (state) => {
       return state.isTouchDevice || utils.isMobile()
     },
-    transformTouchScroll: (state) => {
-      const origin = state.touchScrollOrigin
-      const transform = `translate(${origin.x}px, ${origin.y}px)`
-      return transform
-    },
-    transformCounterTouchScroll: (state) => {
-      const origin = state.touchScrollOrigin
-      const transform = `translate(${-origin.x}px, ${-origin.y}px)`
-      return transform
-    },
-    transformZoom: (state, getters) => {
-      const zoom = getters.spaceZoomDecimal
-      const origin = state.zoomOrigin
-      // https://developer.mozilla.org/en-US/docs/Web/CSS/transform-origin
-      const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
-      return transform
-    },
     currentScrollPosition: (state) => {
       const touchScroll = state.touchScrollOrigin
       const windowScroll = state.windowScroll
@@ -1589,7 +1572,28 @@ const store = createStore({
     },
     shouldReduceDetails: (state) => {
       return state.spaceZoomPercent < 40
+    },
+
+    // transformTouchScroll: (state) => {
+    //   const origin = state.touchScrollOrigin
+    //   const transform = `translate(${origin.x}px, ${origin.y}px)`
+    //   return transform
+    // },
+    // transformCounterTouchScroll: (state) => {
+    //   const origin = state.touchScrollOrigin
+    //   const transform = `translate(${-origin.x}px, ${-origin.y}px)`
+    //   return transform
+    // },
+    transformScrollingAndZoom: (state, getters) => {
+      const zoom = getters.spaceZoomDecimal
+      // state.touchScrollOrigin if touchdevice? or replace touchzoom w zoomorigin globally
+      const origin = state.zoomOrigin
+      // https://developer.mozilla.org/en-US/docs/Web/CSS/transform-origin
+      const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
+      // translate3d , translate matrix?
+      return transform
     }
+
   },
 
   modules: {

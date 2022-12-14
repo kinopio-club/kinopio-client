@@ -154,7 +154,7 @@ export default {
     ...mapGetters([
       'spaceCounterZoomDecimal',
       'spaceZoomDecimal',
-      'transformCounterTouchScroll',
+      // 'transformCounterTouchScroll',
       'currentScrollPosition',
       'shouldScrollAtEdges',
       'currentUser/canEditSpace',
@@ -171,10 +171,10 @@ export default {
         left: this.currentScrollPosition.x + 'px',
         top: this.currentScrollPosition.y + 'px'
       }
-      if (this.isTouchDevice) {
-        const transform = this.transformCounterTouchScroll
-        position = { transform }
-      }
+      // if (this.isTouchDevice) {
+      //   const transform = this.transformCounterTouchScroll
+      //   position = { transform }
+      // }
       return position
     }
   },

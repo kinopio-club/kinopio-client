@@ -7,7 +7,10 @@
 )
   base(v-if="isAddPage" target="_blank")
   OutsideSpaceBackground
-  .touch-scroll-offset(:style="touchScroll")
+  #main(
+    :style="positionAndZoomStyles"
+    :data-zoom="spaceZoomDecimal"
+  )
     SpaceBackground
     ItemsLocked
     MagicPaint
@@ -111,13 +114,13 @@ export default {
       'pageHeight'
     ]),
     ...mapGetters([
-      'transformTouchScroll',
+      'transformScrollingAndZoom',
       'currentUser/canEditSpace',
       'spaceZoomDecimal',
       'currentCards/all'
     ]),
-    touchScroll () {
-      return { transform: this.transformTouchScroll }
+    positionAndZoomStyles () {
+      return { transform: this.transformScrollingAndZoom }
     },
     isDevelopment () {
       if (import.meta.env.MODE === 'development') {
