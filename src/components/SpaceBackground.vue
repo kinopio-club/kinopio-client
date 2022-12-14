@@ -112,13 +112,11 @@ export default {
   pointer-events none
   z-index 0
   mix-blend-mode multiply
-  transform-origin top left
 .space-background
   position absolute
   width 100%
   height 100%
   pointer-events none
   z-index 0
-  transform-origin top left
   background var(--primary-background)
 </style>

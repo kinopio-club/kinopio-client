@@ -1587,10 +1587,17 @@ const store = createStore({
     transformScrollingAndZoom: (state, getters) => {
       const zoom = getters.spaceZoomDecimal
       // state.touchScrollOrigin if touchdevice? or replace touchzoom w zoomorigin globally
-      const origin = state.zoomOrigin
-      // https://developer.mozilla.org/en-US/docs/Web/CSS/transform-origin
-      const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
-      // translate3d , translate matrix?
+      // const { x, y } = state.zoomOrigin
+      // x = x * zoom
+      // y = y * zoom
+      const x = 0
+      const y = 0
+      // const transform = `translate3d(${x}px, ${y}px, 0) scale(${zoom}`
+      const transform = `matrix(${zoom}, 0, 0, ${zoom}, ${x}, ${y})`
+      // const transform = `matrix3d(${zoom}, 0, 0, 0, 0, ${zoom}, 0, 0, 0, 0, 1, 0, ${x}, ${y}, 0, 1)`
+
+      // const transform = `scale(${zoom}`
+
       return transform
     }
 

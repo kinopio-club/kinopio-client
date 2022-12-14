@@ -120,5 +120,4 @@ export default {
   pointer-events none
   z-index 0
   mix-blend-mode multiply
-  transform-origin top left
 </style>

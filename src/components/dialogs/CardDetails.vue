@@ -1433,7 +1433,6 @@ export default {
 <style lang="stylus">
 .card-details
   width 278px
-  transform-origin top left
   > section
     background-color var(--secondary-background)
   .textarea-wrap

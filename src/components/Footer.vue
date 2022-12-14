@@ -340,7 +340,6 @@ export default {
   padding 8px
   max-width 100%
   pointer-events none
-  transform-origin left bottom
   .right
     pointer-events all
     text-align right

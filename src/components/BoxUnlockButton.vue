@@ -65,7 +65,6 @@ export default {
 
 <style lang="stylus">
 .box-unlock-button
-  transform-origin top left
   pointer-events all
   cursor pointer
   position absolute

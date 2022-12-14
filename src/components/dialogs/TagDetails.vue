@@ -468,7 +468,6 @@ export default {
 <style lang="stylus">
 .tag-details
   cursor auto
-  transform-origin top left
   section.edit-card
     background-color var(--secondary-background)
   button.select-all

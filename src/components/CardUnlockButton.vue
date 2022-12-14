@@ -98,7 +98,6 @@ export default {
 
 <style lang="stylus">
 .card-unlock-button
-  transform-origin top left
   pointer-events all
   cursor pointer
   position absolute

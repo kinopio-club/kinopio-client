@@ -566,7 +566,6 @@ export default {
 
 <style lang="stylus">
 .multiple-selected-actions
-  transform-origin top left
   .segmented-colors
     display inline-block
     vertical-align middle

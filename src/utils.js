@@ -71,7 +71,7 @@ export default {
   websocketHost () {
     let host = 'wss://kinopio-server.herokuapp.com'
     if (this.isDevelopment()) {
-      host = 'ws://kinopio.local:3000'
+      host = 'wss://kinopio.local:3000'
     }
     return host
   },

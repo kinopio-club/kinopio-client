@@ -435,7 +435,6 @@ export default {
     z-index 1
   .viewport
     position absolute
-    transform-origin top left
     border 2px solid
     border-radius 5px
     cursor grab

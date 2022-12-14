@@ -624,7 +624,6 @@ header
   display flex
   justify-content space-between
   transition 0.2s opacity
-  transform-origin left top
   &.hidden-by-mindmap
     opacity 0.2
   nav,
