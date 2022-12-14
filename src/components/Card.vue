@@ -235,6 +235,8 @@ let preventSticking = false
 let stickyTimerComplete = false
 let stickyTimer
 
+let observer
+
 export default {
   components: {
     Frames,
@@ -292,6 +294,11 @@ export default {
       if (!isUpdatedSuccess) { return }
       this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
     }
+    observer = new IntersectionObserver(this.handleIntersect, { threshold: 0, rootMargin: '500px 0px 0px 500px' })
+    this.startObserver()
+  },
+  beforeUnmount () {
+    this.stopObserver()
   },
   data () {
     return {
@@ -322,7 +329,8 @@ export default {
       stickyTranslateX: 0,
       stickyTranslateY: 0,
       isAnimationUnsticking: false,
-      stickyStretchResistance: 6
+      stickyStretchResistance: 6,
+      isVisibleInViewport: true
     }
   },
   computed: {
@@ -385,18 +393,18 @@ export default {
       'currentScrollPosition',
       'shouldReduceDetails'
     ]),
-    isVisibleInViewport () {
-      return true
-      // if (this.shouldJiggle) { return true }
-      // const threshold = 100 * this.spaceCounterZoomDecimal
-      // const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      // const min = this.currentScrollPosition.y - threshold
-      // const max = this.currentScrollPosition.y + viewport + threshold
-      // const isTopVisible = utils.isBetween({ value: this.y, min, max })
-      // const height = this.card.resizeHeight || this.card.height
-      // const isBottomVisible = utils.isBetween({ value: this.y + height, min, max })
-      // return isTopVisible || isBottomVisible
-    },
+    // isVisibleInViewport () {
+    //   return true
+    // if (this.shouldJiggle) { return true }
+    // const threshold = 100 * this.spaceCounterZoomDecimal
+    // const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
+    // const min = this.currentScrollPosition.y - threshold
+    // const max = this.currentScrollPosition.y + viewport + threshold
+    // const isTopVisible = utils.isBetween({ value: this.y, min, max })
+    // const height = this.card.resizeHeight || this.card.height
+    // const isBottomVisible = utils.isBetween({ value: this.y + height, min, max })
+    // return isTopVisible || isBottomVisible
+    // },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
     itemBackground () {
       let background = 'transparent'
@@ -424,6 +432,9 @@ export default {
     isLocked () {
       if (!this.card) { return }
       const isLocked = this.card.isLocked
+      if (isLocked) {
+        this.stopObserver()
+      }
       return isLocked
     },
     shouldJiggle () {
@@ -998,6 +1009,44 @@ export default {
 
   },
   methods: {
+
+    // intersection observer
+
+    stopObserver () {
+      if (!observer) { return }
+      observer.disconnect()
+    },
+    startObserver () {
+      if (this.disableViewportOptimizations) { return }
+      if (!this.$refs.card) { return }
+      this.$nextTick(() => {
+        observer.observe(this.$refs.card)
+      })
+    },
+    restartObserver () {
+      this.isVisibleInViewport = true
+      this.stopObserver()
+      this.startObserver()
+    },
+    handleIntersect (entries, observer) {
+      const entry = entries[0]
+      // restart incorrectly triggered observers
+      if (entry.target.dataset.cardId !== this.card.id) {
+        this.restartObserver()
+        return
+      }
+      // keep playing audio cards
+      if (this.isPlayingAudio) { return }
+      console.log('💐 observe card intersect:', this.card.name, this.card.id, entry.target.dataset.cardId, entry.isIntersecting)
+      this.isVisibleInViewport = entry.isIntersecting
+      if (entry.isIntersecting) {
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id })
+          })
+        })
+      }
+    },
 
     // sticky
 
