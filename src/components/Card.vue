@@ -723,6 +723,7 @@ export default {
         z = 0
         pointerEvents = 'none'
       }
+      const transformScrollingAndZoom = this.$store.getters.transformScrollingAndZoom
       let styles = {
         left: `${this.x}px`,
         top: `${this.y}px`,
@@ -730,7 +731,7 @@ export default {
         width: this.resizeWidth,
         maxWidth: this.resizeWidth,
         pointerEvents,
-        transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
+        transform: transformScrollingAndZoom
       }
       if (!this.shouldRender) {
         styles.width = this.card.resizeWidth || this.card.width + 'px'

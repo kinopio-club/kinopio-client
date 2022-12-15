@@ -139,7 +139,8 @@ export default {
       'currentCards/all'
     ]),
     positionAndZoomStyles () {
-      return { transform: this.transformScrollingAndZoom }
+      return null
+      // return { transform: this.transformScrollingAndZoom }
     },
     isDevelopment () {
       if (import.meta.env.MODE === 'development') {
