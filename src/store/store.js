@@ -51,9 +51,9 @@ const store = createStore({
     // zoom
     spaceZoomPercent: 100,
     zoomOrigin: { x: 0, y: 0 },
+    isZooming: false,
     // scroll
     isTouchScrollingOrPinchZooming: false,
-    isMouseZooming: false,
     touchScrollOrigin: { x: 0, y: 0 },
     windowScroll: { x: 0, y: 0 },
 
@@ -479,6 +479,9 @@ const store = createStore({
     zoomOrigin: (state, position) => {
       utils.typeCheck({ value: position, type: 'object', origin: 'zoomOrigin' })
       state.zoomOrigin = position
+    },
+    isZooming: (state, value) => {
+      state.isZooming = value
     },
     touchScrollOrigin: (state, position) => {
       utils.typeCheck({ value: position, type: 'object', origin: 'touchScrollOrigin' })
@@ -1519,14 +1522,23 @@ const store = createStore({
       context.commit('spaceZoomPercent', value)
       context.commit('triggerUpdateSpaceZoomSlider', value)
     },
+    optimizePerformanceDuringScrollOrZoom: (context) => {
+      context.commit('triggerOptimizePerformanceDuringScrollOrZoom')
+      context.dispatch('currentSpace/checkIfShouldPauseConnectionDirections', null, { root: true })
+    },
     isTouchScrollingOrPinchZooming: (context, value) => {
       const prevValue = context.state.isTouchScrollingOrPinchZooming
       context.commit('isTouchScrollingOrPinchZooming', value)
       const isChanged = value !== prevValue
-      console.log(value, prevValue)
       if (!isChanged) { return }
-      context.commit('triggerOptimizePerformanceDuringScrollOrZoom')
-      context.dispatch('currentSpace/checkIfShouldPauseConnectionDirections', null, { root: true })
+      context.dispatch('optimizePerformanceDuringScrollOrZoom')
+    },
+    isZooming: (context, value) => {
+      const prevValue = context.state.isZooming
+      context.commit('isZooming', value)
+      const isChanged = value !== prevValue
+      if (!isChanged) { return }
+      context.dispatch('optimizePerformanceDuringScrollOrZoom')
     }
   },
   getters: {
@@ -1594,6 +1606,9 @@ const store = createStore({
     //   const transform = `translate(${-origin.x}px, ${-origin.y}px)`
     //   return transform
     // },
+    isInteractingScrollOrZoom: (state) => {
+      return state.isZooming || state.isTouchScrollingOrPinchZooming
+    },
     transformScrollingAndZoom: (state, getters) => {
       const zoom = getters.spaceZoomDecimal
       // state.touchScrollOrigin if touchdevice? or replace touchzoom w zoomorigin globally

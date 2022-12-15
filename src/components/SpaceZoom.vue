@@ -8,7 +8,7 @@
     :animateJiggleRight="animateJiggleRight"
     :animateJiggleLeft="animateJiggleLeft"
     @removeAnimations="removeAnimations"
-    @pointerdown="closeAllDialogs"
+    @pointerdown="pointerDown"
   )
 </template>
 
@@ -76,7 +76,8 @@ export default {
       this.animateJiggleRight = false
       this.animateJiggleLeft = false
     },
-    closeAllDialogs () {
+    pointerDown () {
+      this.$store.dispatch('isZooming', true)
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('closeAllDialogs', 'SpaceZoom')
     },

@@ -81,6 +81,7 @@ export default {
       // console.warn('🎹', key)
       // const isFromCard = event.target.classList[0] === 'card'
       const isSpaceScope = checkIsSpaceScope(event)
+      this.$store.dispatch('isZooming', false)
       // ?
       if (key === '?' && isSpaceScope) {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
@@ -231,6 +232,7 @@ export default {
       }
       let speed = Math.min(Math.abs(deltaY), 5)
       const position = utils.cursorPositionInPage(event)
+      this.$store.dispatch('isZooming', true)
       this.$store.commit('zoomOrigin', position)
       if (shouldZoomIn) {
         this.$store.commit('triggerSpaceZoomIn', { speed })

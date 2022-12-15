@@ -40,19 +40,19 @@ export default {
   },
   computed: {
     ...mapState([
-      'isTouchScrollingOrPinchZooming'
     ]),
     ...mapGetters([
+      'isInteractingScrollOrZoom'
     ])
   },
   methods: {
     updateDimensions () {
       this.$store.dispatch('currentCards/updateDimensions', { cards: [this.card] })
     },
-    checkIfShouldPauseVideo (value) {
+    checkIfShouldPauseVideo () {
       if (!this.video) { return }
       const element = this.$refs.video
-      if (this.isTouchScrollingOrPinchZooming) {
+      if (this.isInteractingScrollOrZoom) {
         element.pause()
       } else {
         element.play()
@@ -60,11 +60,8 @@ export default {
     }
   },
   watch: {
-    isVisibleInViewport (newValue, prevValue) {
-      const isChanged = newValue !== prevValue
-      if (newValue && isChanged) {
-        this.checkIfShouldPauseVideo()
-      }
+    isVisibleInViewport (value) {
+      this.checkIfShouldPauseVideo()
     }
   }
 }

@@ -455,6 +455,7 @@ export default {
       this.$store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
       prevCursor = undefined
       this.$store.commit('clearDraggingItems')
+      this.$store.dispatch('isZooming', false)
     }
   }
 }
