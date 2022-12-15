@@ -62,6 +62,7 @@
 import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
+import { mapState, mapGetters } from 'vuex'
 
 const borderWidth = 2
 // let prevCursor
@@ -90,6 +91,11 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+    ]),
+    ...mapGetters([
+      'transformScrollingAndZoom'
+    ]),
     normalizedBox () {
       return this.normalizeBox(this.box)
     },
@@ -102,7 +108,8 @@ export default {
         top: y + 'px',
         width: width + 'px',
         height: height + 'px',
-        border: `${borderWidth}px solid ${this.color}`
+        border: `${borderWidth}px solid ${this.color}`,
+        transform: this.transformScrollingAndZoom
       }
     },
     isSelected () {
@@ -518,6 +525,9 @@ export default {
   min-height var(--min-box-size)
   min-width var(--min-box-size)
   pointer-events none
+  will-change transform
+  transform-origin top left
+  transform-style preserve-3d
   &.hover
     box-shadow var(--hover-shadow)
   &.active

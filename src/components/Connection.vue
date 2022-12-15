@@ -1,6 +1,7 @@
 <template lang="pug">
 template(v-if="isVisibleInViewport")
   path.connection-path(
+    :style="styles"
     fill="none"
     :stroke="typeColor"
     stroke-width="5"
@@ -100,8 +101,13 @@ export default {
       'currentCards/byId',
       'currentConnections/typeByTypeId',
       'currentScrollPosition',
-      'spaceCounterZoomDecimal'
+      'spaceCounterZoomDecimal',
+      'transformScrollingAndZoom'
     ]),
+    styles () {
+      const styles = { transform: this.transformScrollingAndZoom }
+      return styles
+    },
     isVisibleInViewport () {
       return true
       // if (this.isUpdatingPath) { return true }
@@ -404,6 +410,9 @@ export default {
 
 <style lang="stylus">
 .connection-path
+  will-change transform
+  transform-origin top left
+  transform-style preserve-3d
   touch-action manipulation
   &:hover,
   &.hover,

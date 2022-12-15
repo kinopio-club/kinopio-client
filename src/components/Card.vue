@@ -382,7 +382,8 @@ export default {
       'currentUser/isSpaceMember',
       'otherSpaceById',
       'currentScrollPosition',
-      'shouldReduceDetails'
+      'shouldReduceDetails',
+      'transformScrollingAndZoom'
     ]),
     // isVisibleInViewport () {
     //   return true
@@ -723,7 +724,6 @@ export default {
         z = 0
         pointerEvents = 'none'
       }
-      const transformScrollingAndZoom = this.$store.getters.transformScrollingAndZoom
       let styles = {
         left: `${this.x}px`,
         top: `${this.y}px`,
@@ -731,7 +731,7 @@ export default {
         width: this.resizeWidth,
         maxWidth: this.resizeWidth,
         pointerEvents,
-        transform: transformScrollingAndZoom
+        transform: this.transformScrollingAndZoom
       }
       if (!this.shouldRender) {
         styles.width = this.card.resizeWidth || this.card.width + 'px'
