@@ -1937,6 +1937,9 @@ article
   position absolute
   max-width var(--card-width)
   -webkit-touch-callout none
+  will-change transform
+  transform-origin top left
+  transform-style preserve-3d
   &.is-resizing
     *
       outline none

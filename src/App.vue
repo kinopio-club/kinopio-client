@@ -306,11 +306,6 @@ body
     pointer-events none
     z-index 100
 
-#main
-  will-change transform
-  transform-origin top left
-  transform-style preserve-3d
-
 img,
 video
   max-width 100%
