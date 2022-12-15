@@ -49,6 +49,12 @@ export default {
       }
     })
   },
+  mounted () {
+    window.addEventListener('pointerup', this.pointerUp)
+  },
+  beforeUnmount () {
+    window.removeEventListener('pointerup', this.pointerUp)
+  },
   data () {
     return {
       animateJiggleRight: false,
@@ -80,6 +86,9 @@ export default {
       this.$store.dispatch('isZooming', true)
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('closeAllDialogs', 'SpaceZoom')
+    },
+    pointerUp () {
+      this.$store.dispatch('isZooming', false)
     },
     checkIfShouldAnimationJiggle (value) {
       if (value >= this.max) {
