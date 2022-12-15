@@ -308,6 +308,7 @@ body
 #main
   will-change transform
   transform-origin top left
+  transform-style preserve-3d
 
 img,
 video
