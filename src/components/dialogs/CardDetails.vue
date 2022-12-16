@@ -75,7 +75,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
     .row
       //- Remove
       .button-wrap
-        button(:disabled="!canEditCard" @click.left="removeCard")
+        button.danger(:disabled="!canEditCard" @click.left="removeCard")
           img.icon.remove(src="@/assets/remove.svg")
           span Remove
       //- [·]
