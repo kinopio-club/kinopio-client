@@ -54,6 +54,7 @@ export default {
         shouldZoomOut = deltaY < 0
       }
       let speed = Math.min(Math.abs(deltaY), 5)
+      speed = speed * 2
       const position = utils.cursorPositionInPage(event)
       this.$store.dispatch('isZooming', true)
       this.$store.commit('zoomOrigin', position)
