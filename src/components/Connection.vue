@@ -1,7 +1,6 @@
 <template lang="pug">
-template(v-if="isVisibleInViewport")
+g.connection(v-if="isVisibleInViewport" :style="styles")
   path.connection-path(
-    :style="styles"
     fill="none"
     :stroke="typeColor"
     stroke-width="5"
