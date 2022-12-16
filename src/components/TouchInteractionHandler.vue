@@ -87,7 +87,7 @@ export default {
     shouldIgnore (event) {
       const element = event.target
       const isDialog = element.closest('dialog')
-      const isButton = element.closest('button')
+      const isButton = element.closest('button') || element.closest('.button-wrap') || element.closest('.slider')
       const isDraggingItem = this.currentUserIsDraggingBox || this.currentUserIsDraggingCard
       const preventInteractions = this.currentUserIsPaintingLocked || this.currentUserIsResizingCard || this.currentUserIsDrawingConnection
       return isDialog || isButton || isDraggingItem || preventInteractions
@@ -99,8 +99,9 @@ export default {
       const touchesKeys = Object.keys(event.touches)
       touchesKeys.forEach(key => touches.push(event.touches[key]))
       touches.forEach(touch => {
-        isDialog = touch.target.closest('dialog')
-        isButton = touch.target.closest('button')
+        const { target } = touch
+        isDialog = target.closest('dialog')
+        isButton = target.closest('button') || target.closest('.button-wrap') || target.closest('.slider')
       })
 
       return isDialog || isButton
