@@ -383,7 +383,7 @@ export default {
       'otherSpaceById',
       'currentScrollPosition',
       'shouldReduceDetails',
-      'transformScrollingAndZoom',
+      'transformScrollingAndZoomWithPosition',
       'spaceZoomDecimal'
     ]),
     // isVisibleInViewport () {
@@ -726,13 +726,11 @@ export default {
         pointerEvents = 'none'
       }
       let styles = {
-        left: `${this.x * this.spaceZoomDecimal}px`,
-        top: `${this.y * this.spaceZoomDecimal}px`,
         zIndex: z,
         width: this.resizeWidth,
         maxWidth: this.resizeWidth,
         pointerEvents,
-        transform: this.transformScrollingAndZoom
+        transform: this.transformScrollingAndZoomWithPosition(this.x, this.y)
       }
       if (!this.shouldRender) {
         styles.width = this.card.resizeWidth || this.card.width + 'px'

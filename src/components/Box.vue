@@ -94,8 +94,8 @@ export default {
     ...mapState([
     ]),
     ...mapGetters([
-      'transformScrollingAndZoom',
-      'spaceZoomDecimal'
+      'spaceZoomDecimal',
+      'transformScrollingAndZoomWithPosition'
     ]),
     normalizedBox () {
       return this.normalizeBox(this.box)
@@ -105,12 +105,10 @@ export default {
       const width = resizeWidth
       const height = resizeHeight
       return {
-        left: (x * this.spaceZoomDecimal) + 'px',
-        top: (y * this.spaceZoomDecimal) + 'px',
         width: width + 'px',
         height: height + 'px',
         border: `${borderWidth}px solid ${this.color}`,
-        transform: this.transformScrollingAndZoom
+        transform: this.transformScrollingAndZoomWithPosition(x, y)
       }
     },
     isSelected () {

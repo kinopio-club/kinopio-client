@@ -1624,6 +1624,25 @@ const store = createStore({
       // const transform = `scale(${zoom}`
 
       return transform
+    },
+
+    transformScrollingAndZoomWithPosition: (state, getters) => (x, y) => {
+      const zoom = getters.spaceZoomDecimal
+      x = x * zoom
+      y = y * zoom
+      // state.touchScrollOrigin if touchdevice? or replace touchzoom w zoomorigin globally
+      // const { x, y } = state.zoomOrigin
+      // x = x * zoom
+      // y = y * zoom
+      // const x = 0
+      // const y = 0
+      // const transform = `translate3d(${x}px, ${y}px, 0) scale(${zoom}`
+      const transform = `matrix(${zoom}, 0, 0, ${zoom}, ${x}, ${y})`
+      // const transform = `matrix3d(${zoom}, 0, 0, 0, 0, ${zoom}, 0, 0, 0, 0, 1, 0, ${x}, ${y}, 0, 1)`
+
+      // const transform = `scale(${zoom}`
+
+      return transform
     }
 
   },

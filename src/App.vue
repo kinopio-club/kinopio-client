@@ -8,7 +8,6 @@
   base(v-if="isAddPage" target="_blank")
   OutsideSpaceBackground
   #main(
-    :style="positionAndZoomStyles"
     :data-zoom="spaceZoomDecimal"
   )
     SpaceBackground
@@ -133,15 +132,10 @@ export default {
       'pageHeight'
     ]),
     ...mapGetters([
-      'transformScrollingAndZoom',
       'currentUser/canEditSpace',
       'spaceZoomDecimal',
       'currentCards/all'
     ]),
-    positionAndZoomStyles () {
-      return null
-      // return { transform: this.transformScrollingAndZoom }
-    },
     isDevelopment () {
       if (import.meta.env.MODE === 'development') {
         return true
