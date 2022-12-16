@@ -3,6 +3,7 @@
 
 <script>
 import utils from '@/utils.js'
+import debounce from 'lodash-es/debounce'
 
 let viewport
 
@@ -26,15 +27,42 @@ export default {
     this.updateViewport()
     window.addEventListener('scroll', this.updateWindowScroll)
     window.addEventListener('resize', this.updateViewport)
+    window.addEventListener('wheel', this.debounceMouseWheelZoom, { passive: false })
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateWindowScroll)
     window.removeEventListener('resize', this.updateViewport)
+    window.removeEventListener('wheel', this.debounceMouseWheelZoom, { passive: false })
   },
   computed: {
     isTouchDevice () { return this.$store.state.isTouchDevice }
   },
   methods: {
+    debounceMouseWheelZoom (event) {
+      const isMeta = event.metaKey || event.ctrlKey // event.ctrlKey is true for trackpad pinch
+      if (!isMeta) { return }
+      event.preventDefault()
+      this.mouseWheelZoom(event)
+    },
+    mouseWheelZoom: debounce(async function (event) {
+      const deltaY = event.deltaY
+      let shouldZoomIn = deltaY < 0
+      let shouldZoomOut = deltaY > 0
+      const invertZoom = event.webkitDirectionInvertedFromDevice
+      if (invertZoom) {
+        shouldZoomIn = deltaY > 0
+        shouldZoomOut = deltaY < 0
+      }
+      let speed = Math.min(Math.abs(deltaY), 5)
+      const position = utils.cursorPositionInPage(event)
+      this.$store.dispatch('isZooming', true)
+      this.$store.commit('zoomOrigin', position)
+      if (shouldZoomIn) {
+        this.$store.commit('triggerSpaceZoomIn', { speed })
+      } else if (shouldZoomOut) {
+        this.$store.commit('triggerSpaceZoomOut', { speed })
+      }
+    }, { leading: true }, 16), // 16ms = 1 frame at 60fps
     updateWindowScroll () {
       this.$store.commit('updateWindowScroll')
     },
