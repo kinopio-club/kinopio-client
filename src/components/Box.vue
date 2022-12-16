@@ -94,7 +94,8 @@ export default {
     ...mapState([
     ]),
     ...mapGetters([
-      'transformScrollingAndZoom'
+      'transformScrollingAndZoom',
+      'spaceZoomDecimal'
     ]),
     normalizedBox () {
       return this.normalizeBox(this.box)
@@ -104,8 +105,8 @@ export default {
       const width = resizeWidth
       const height = resizeHeight
       return {
-        left: x + 'px',
-        top: y + 'px',
+        left: (x * this.spaceZoomDecimal) + 'px',
+        top: (y * this.spaceZoomDecimal) + 'px',
         width: width + 'px',
         height: height + 'px',
         border: `${borderWidth}px solid ${this.color}`,

@@ -1,7 +1,7 @@
 <template lang="pug">
 .connection-label.badge(
   v-if="visible"
-  :style="{ background: typeColor, left: position.left + 'px', top: position.top + 'px'}"
+  :style="styles"
   @click.left="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
   @touchstart="checkIsMultiTouch"
@@ -35,6 +35,15 @@ export default {
   },
   computed: {
     visible () { return this.connection.labelIsVisible && !this.isUpdatingPath },
+    styles () {
+      const zoom = this.$store.getters.spaceZoomDecimal
+      return {
+        background: this.typeColor,
+        left: (this.position.left * zoom) + 'px',
+        top: (this.position.top * zoom) + 'px',
+        transform: `scale(${zoom})`
+      }
+    },
     id () { return this.connection.id },
     connectionTypeId () { return this.connection.connectionTypeId },
     connectionType () { return this.$store.getters['currentConnections/typeByTypeId'](this.connectionTypeId) },
@@ -196,6 +205,9 @@ export default {
   pointer-events all
   cursor pointer
   position absolute
+  will-change transform
+  transform-origin top left
+  transform-style preserve-3d
   &.cursor-default
     cursor default
   .is-dark
