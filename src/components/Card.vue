@@ -383,7 +383,8 @@ export default {
       'otherSpaceById',
       'currentScrollPosition',
       'shouldReduceDetails',
-      'transformScrollingAndZoom'
+      'transformScrollingAndZoom',
+      'spaceZoomDecimal'
     ]),
     // isVisibleInViewport () {
     //   return true
@@ -417,7 +418,7 @@ export default {
       return tags
     },
     resizeWidth () {
-      const resizeWidth = this.card.resizeWidth || this.card.width
+      const resizeWidth = this.card.resizeWidth
       if (!resizeWidth) { return }
       return resizeWidth + 'px'
     },
@@ -725,8 +726,8 @@ export default {
         pointerEvents = 'none'
       }
       let styles = {
-        left: `${this.x}px`,
-        top: `${this.y}px`,
+        left: `${this.x * this.spaceZoomDecimal}px`,
+        top: `${this.y * this.spaceZoomDecimal}px`,
         zIndex: z,
         width: this.resizeWidth,
         maxWidth: this.resizeWidth,
