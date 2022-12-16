@@ -417,7 +417,7 @@ export default {
       return tags
     },
     resizeWidth () {
-      const resizeWidth = this.card.resizeWidth
+      const resizeWidth = this.card.resizeWidth || this.card.width
       if (!resizeWidth) { return }
       return resizeWidth + 'px'
     },
