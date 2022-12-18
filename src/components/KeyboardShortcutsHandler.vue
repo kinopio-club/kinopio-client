@@ -50,7 +50,6 @@ export default {
     window.addEventListener('keyup', this.handleShortcuts)
     // event.metaKey only works on keydown
     window.addEventListener('keydown', this.handleMetaKeyShortcuts)
-    window.addEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
     window.addEventListener('mousedown', this.handleMouseDownEvents)
     window.addEventListener('mousemove', this.handleMouseMoveEvents)
     window.addEventListener('mouseup', this.handleMouseUpEvents)
@@ -63,7 +62,6 @@ export default {
   beforeUnmount () {
     window.removeEventListener('keyup', this.handleShortcuts)
     window.removeEventListener('keydown', this.handleMetaKeyShortcuts)
-    window.removeEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
     window.removeEventListener('mousedown', this.handleMouseDownEvents)
     window.removeEventListener('mousemove', this.handleMouseMoveEvents)
     window.removeEventListener('mouseup', this.handleMouseUpEvents)
@@ -214,26 +212,6 @@ export default {
       } else if (event.shiftKey && isMeta && key === 'l') {
         event.preventDefault()
         this.toggleLockCards()
-      }
-    },
-    // on mouse wheel
-    handleMouseWheelEvents (event) {
-      const isMeta = event.metaKey || event.ctrlKey // event.ctrlKey is true for trackpad pinch
-      if (!isMeta) { return }
-      event.preventDefault()
-      const deltaY = event.deltaY
-      let shouldZoomIn = deltaY < 0
-      let shouldZoomOut = deltaY > 0
-      const invertZoom = event.webkitDirectionInvertedFromDevice
-      if (invertZoom) {
-        shouldZoomIn = deltaY > 0
-        shouldZoomOut = deltaY < 0
-      }
-      let speed = Math.min(Math.abs(deltaY), 5)
-      if (shouldZoomIn) {
-        this.$store.commit('triggerSpaceZoomIn', { speed })
-      } else if (shouldZoomOut) {
-        this.$store.commit('triggerSpaceZoomOut', { speed })
       }
     },
     // on mouse down
