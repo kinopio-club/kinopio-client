@@ -719,7 +719,7 @@ dialog
   vertical-align 0px
 
 .icon.minimap
-  height 13px
+  vertical-align -2px
 
 .icon.left-arrow
   transform rotate(90deg)

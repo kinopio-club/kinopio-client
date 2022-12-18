@@ -35,8 +35,9 @@
             FavoritesActions(:visible="favoritesActionsIsVisible")
 
   .right(:class="{'is-embed': isEmbed, 'hidden': isHidden}")
-    button(v-if="isNotSupportedByDevice" @pointerup="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
-      img.icon.minimap(src="@/assets/minimap.svg")
+    .button-wrap.minimap-button(v-if="isNotSupportedByDevice" @pointerup="toggleMinimapIsVislble")
+      button.small-button.inline-button(:class="{ active: minimapIsVisible }")
+        img.icon.minimap(src="@/assets/minimap.svg")
     template(v-if="!isMobileOrTouch")
       SpaceZoom
 </template>
@@ -407,6 +408,8 @@ export default {
   pointer-events none
   transform-origin left bottom
   .right
+    display flex
+    align-items center
     pointer-events all
     text-align right
     transition 0.2s opacity
@@ -417,6 +420,16 @@ export default {
     margin-bottom 10px
   &.is-mobile-standalone
     margin-bottom 20px
+
+  .minimap-button
+    padding-right 6px
+    padding-top 6px
+    cursor pointer
+    .inline-button
+      cursor inherit
+
+  .icon.minimap
+    vertical-align 0
 
   .left,
   .right
