@@ -356,8 +356,7 @@ export default {
       'remotePendingUploads',
       'currentUserIsDraggingCard',
       'currentUserIsDrawingConnection',
-      'viewportHeight',
-      'isTouchScrollingOrPinchZooming'
+      'viewportHeight'
     ]),
     ...mapGetters([
       'spaceCounterZoomDecimal',
@@ -378,7 +377,8 @@ export default {
       'currentScrollPosition',
       'shouldReduceDetails',
       'transformScrollingAndZoomWithPosition',
-      'spaceZoomDecimal'
+      'spaceZoomDecimal',
+      'isInteractingScrollOrZoom'
     ]),
     isVisibleInViewport () {
       if (this.shouldJiggle) { return true }
@@ -386,9 +386,12 @@ export default {
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
       const min = this.currentScrollPosition.y - threshold
       const max = this.currentScrollPosition.y + viewport + threshold
-      const isTopVisible = utils.isBetween({ value: this.y, min, max })
-      const height = this.card.resizeHeight || this.card.height
-      const isBottomVisible = utils.isBetween({ value: this.y + height, min, max })
+      const y = this.y * this.spaceZoomDecimal
+      const isTopVisible = utils.isBetween({ value: y, min, max })
+      let height = this.card.resizeHeight || this.card.height
+      height = height * this.spaceZoomDecimal
+      const isBottomVisible = utils.isBetween({ value: y + height, min, max })
+      // console.log(this.card.name, isTopVisible, isBottomVisible, y, height, this.currentScrollPosition.y)
       const isVisible = isTopVisible || isBottomVisible
       return isVisible
     },
@@ -541,6 +544,7 @@ export default {
     shouldNotStick () {
       const shouldUseStickyCards = this.currentUser.shouldUseStickyCards
       if (!shouldUseStickyCards) { return true }
+      if (this.isInteractingScrollOrZoom) { return true }
       const userIsConnecting = this.currentConnectionStartCardIds.length
       const currentUserIsDraggingBox = this.currentUserIsDraggingBox
       const currentUserIsResizingBox = this.currentUserIsResizingBox
@@ -716,10 +720,8 @@ export default {
         z = 0
         pointerEvents = 'none'
       }
-      console.log('🔥', this.stickyTranslateX, this.x)
       const x = this.x + this.stickyTranslateX
       const y = this.y + this.stickyTranslateY
-      console.log('🍇', y)
       let styles = {
         zIndex: z,
         width: this.resizeWidth,
@@ -1041,6 +1043,10 @@ export default {
     },
     stickToCursor (event) {
       if (this.isAnimationUnsticking) { return }
+      if (this.isInteractingScrollOrZoom) {
+        this.completeStickyAnimation()
+        return
+      }
       if (preventSticking) { return }
       if (!stickyTimerComplete) { return }
       const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap', 'toggle-comment-wrap', 'inline-button', 'badge']
@@ -1079,37 +1085,35 @@ export default {
       yOffset = Math.round(yOffset)
       this.stickyTranslateX = xOffset
       this.stickyTranslateY = yOffset
-
-      console.log('💖💖💖', xOffset)
     },
     unstickToCursor () {
       this.clearStickyTimer()
+      if (this.isInteractingScrollOrZoom) {
+        this.completeStickyAnimation()
+        return
+      }
       this.isAnimationUnsticking = true
-      const xOffset = this.stickyTranslateX
-      const yOffset = this.stickyTranslateY
       let timing = {
         duration: 0, // sum of keyframe offsets
         easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
         iterations: 1
       }
-      const swings = [-0.9, 0.6, -0.4, 0.2, 0] // [-1, 0.75, -0.5, 0.25, 0]
-      let keyframes = [
-        { transform: this.transformScrollingAndZoomWithPosition(xOffset * swings[0], yOffset * swings[0]), offset: 50 },
-        { transform: this.transformScrollingAndZoomWithPosition(xOffset * swings[1], yOffset * swings[1]), offset: 75 },
-        { transform: this.transformScrollingAndZoomWithPosition(xOffset * swings[2], yOffset * swings[2]), offset: 50 },
-        { transform: this.transformScrollingAndZoomWithPosition(xOffset * swings[3], yOffset * swings[3]), offset: 100 },
-        { transform: this.transformScrollingAndZoomWithPosition(xOffset * swings[4], yOffset * swings[4]), offset: 100 }
-      ]
-
-      // let keyframes = [
-      //   { transform: `translate(${xOffset * swings[0]}px,   ${yOffset * swings[0]}px)`, offset: 50 },
-      //   { transform: `translate(${xOffset * swings[1]}px, ${yOffset * swings[1]}px)`, offset: 75 },
-      //   { transform: `translate(${xOffset * swings[2]}px, ${yOffset * swings[2]}px)`, offset: 50 },
-      //   { transform: `translate(${xOffset * swings[3]}px, ${yOffset * swings[3]}px)`, offset: 100 },
-      //   { transform: `translate(${xOffset * swings[4]}px,    ${yOffset * swings[4]}px)`, offset: 100 }
-      // ]
-
-      console.log('🌷', keyframes, xOffset, yOffset)
+      const swings = [-0.9, 0.6, -0.4, 0.2, 0]
+      const offsets = [50, 75, 50, 100, 100]
+      let keyframes = []
+      swings.forEach((swing, index) => {
+        const stickyTranslate = {
+          x: this.stickyTranslateX * swing,
+          y: this.stickyTranslateY * swing
+        }
+        const position = {
+          x: this.x + stickyTranslate.x,
+          y: this.y + stickyTranslate.y
+        }
+        const transform = this.transformScrollingAndZoomWithPosition(position.x, position.y)
+        const keyframe = { transform, offset: offsets[index] }
+        keyframes.push(keyframe)
+      })
       keyframes.forEach(keyframe => {
         timing.duration = timing.duration + keyframe.offset
       })
@@ -1121,13 +1125,16 @@ export default {
         return keyframe
       })
       // play animation
-      const element = this.$refs.cardInner
+      const element = this.$refs.card
       if (!element) { return }
       const animation = element.animate(keyframes, timing) // TODO replace w raf? only alter stickyTranslateX, go back to ref on card
       animation.onfinish = () => {
-        this.clearStickyPositionOffsets()
-        this.isAnimationUnsticking = false
+        this.completeStickyAnimation()
       }
+    },
+    completeStickyAnimation () {
+      this.clearStickyPositionOffsets()
+      this.isAnimationUnsticking = false
     },
     clearStickyPositionOffsets () {
       this.stickyTranslateX = 0
