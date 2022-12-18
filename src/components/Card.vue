@@ -314,7 +314,8 @@ export default {
       stickyTranslateX: 0,
       stickyTranslateY: 0,
       isAnimationUnsticking: false,
-      stickyStretchResistance: 6
+      stickyStretchResistance: 6,
+      isPossibleVisibleInViewport: null
     }
   },
   computed: {
@@ -378,9 +379,15 @@ export default {
       'shouldReduceDetails',
       'transformScrollingAndZoomWithPosition',
       'spaceZoomDecimal',
-      'isInteractingScrollOrZoom'
+      'isInteractingScrollOrZoom',
+      'currentCards/isPossiblyVisibleInViewportDuringZoom'
     ]),
     isVisibleInViewport () {
+      if (this.isPossiblyVisibleInCurrentZoom) {
+        if (!this.isPossiblyVisibleInCurrentZoom.includes(this.card.id)) {
+          return
+        }
+      }
       if (this.shouldJiggle) { return true }
       const threshold = 0 // 100 * this.spaceCounterZoomDecimalc
       const fallbackHeight = 200
@@ -389,7 +396,7 @@ export default {
       const max = this.currentScrollPosition.y + viewport + threshold
       const y = this.y * this.spaceZoomDecimal
       const isTopVisible = utils.isBetween({ value: y, min, max })
-      let height = this.card.resizeHeight || this.card.height || fallbackHeight
+      let height = this.card.height || fallbackHeight
       height = height * this.spaceZoomDecimal
       const isBottomVisible = utils.isBetween({ value: y + height, min, max })
       // console.log(this.card.name, isTopVisible, isBottomVisible, y, height, this.currentScrollPosition.y)
@@ -1902,6 +1909,13 @@ export default {
       const isChanged = newValue !== prevValue
       if (newValue && isChanged) {
         this.$store.commit('triggerUpdateLockedCardButtonPosition', this.card.id)
+      }
+    },
+    isInteractingScrollOrZoom (newValue, prevValue) {
+      if (!newValue) {
+        this.isPossiblyVisibleInCurrentZoom = null
+      } else if (newValue && newValue !== prevValue) {
+        this.isPossiblyVisibleInCurrentZoom = this['currentCards/isPossiblyVisibleInViewportDuringZoom']
       }
     }
   }

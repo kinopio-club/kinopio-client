@@ -1,5 +1,6 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
@@ -875,6 +876,19 @@ const currentCards = {
       let colors = cards.map(card => card.backgroundColor)
       colors = colors.filter(color => Boolean(color))
       return uniq(colors)
+    },
+    isPossiblyVisibleInViewportDuringZoom: (state, getters, rootState, rootGetters) => {
+      const cards = getters.all
+      let ids = []
+      cards.forEach(card => {
+        const fallbackHeight = 200
+        const height = card.height || fallbackHeight
+        const minCounterZoom = 1 / (consts.spaceZoom.min / 100)
+        const min = card.y > rootGetters.currentScrollPosition.y
+        const max = card.y + height + (rootState.viewportHeight * minCounterZoom)
+        if (min && max) { ids.push(card.id) }
+      })
+      return ids
     }
   }
 }
