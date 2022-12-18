@@ -10,7 +10,6 @@
   SpaceBackground
   ItemsLocked
   MagicPaint
-  OffscreenMarkers
   //- router-view is Space or Add
   router-view
   Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
@@ -42,7 +41,6 @@ import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
-import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import Minimap from '@/components/Minimap.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
@@ -64,7 +62,6 @@ export default {
     WindowHistoryHandler,
     TagDetails,
     LinkDetails,
-    OffscreenMarkers,
     Minimap,
     ItemsLocked,
     UserDetails,
