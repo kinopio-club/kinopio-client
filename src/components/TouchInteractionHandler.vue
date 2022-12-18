@@ -2,15 +2,17 @@
 </template>
 
 <script>
-import utils from '@/utils.js'
+// import utils from '@/utils.js'
 
 import { mapState } from 'vuex'
 import isEqual from 'lodash-es/isEqual'
 
-let touchStartZoomValue
+// let touchStartZoomValue
 
-let wasZoomed, startCursor, prevCursor, currentCursor, prevTimeStamp, scrollDelta, velocity
+// let wasZoomed, startCursor, prevCursor, currentCursor, prevTimeStamp, scrollDelta, velocity
 let touches = []
+
+let startCursor, currentCursor
 
 export default {
   name: 'TouchInteractionHandler',
@@ -44,45 +46,50 @@ export default {
       }
     },
     touchStart (event) {
-      if (this.shouldPreventMultiTouchAction(event)) {
-        event.preventDefault()
-        return
-      }
+      // if (this.shouldPreventMultiTouchAction(event)) {
+      //   event.preventDefault()
+      //   return
+      // }
       if (this.shouldIgnore(event)) { return }
       startCursor = this.cursorPositionInPage(event)
-      prevCursor = startCursor
+      // prevCursor = startCursor
       currentCursor = startCursor
+      touches = event.touches
       this.$store.dispatch('isTouchScrollingOrPinchZooming', true)
       // this.cancelMomentum() timer, shouldCancelMomentum = true
-      const isMultiTouch = utils.isMultiTouch(event)
-      if (isMultiTouch) {
-        this.startPinchZoom(event)
-      }
+      // const isMultiTouch = utils.isMultiTouch(event)
+      // if (isMultiTouch) {
+      //   this.startPinchZoom(event)
+      // }
     },
     touchMove (event) {
-      if (this.shouldPreventMultiTouchAction(event)) {
-        event.preventDefault()
-        return
-      }
+      // if (this.shouldPreventMultiTouchAction(event)) {
+      //   event.preventDefault()
+      //   return
+      // }
       if (this.shouldIgnore(event)) { return }
-      event.preventDefault()
+      // event.preventDefault()
+      touches = event.touches
       currentCursor = this.cursorPositionInPage(event)
-      prevTimeStamp = event.timeStamp
-      const isMultiTouch = utils.isMultiTouch(event)
-      if (isMultiTouch) {
-        this.pinchZoom(event)
-      } else {
-        this.scroll(event)
-      }
+      // prevTimeStamp = event.timeStamp
+      // const isMultiTouch = utils.isMultiTouch(event)
+      // if (isMultiTouch) {
+      //   this.pinchZoom(event)
+      // } else {
+      //   this.scroll(event)
+      // }
     },
     touchEnd (event) {
       if (this.shouldIgnore(event)) { return }
-      event.preventDefault()
-      this.$store.dispatch('isTouchScrollingOrPinchZooming', false)
-      this.startMomentum(event)
+      // event.preventDefault()
+
+      // this.startMomentum(event)
       this.checkIfTouchIsUndoOrRedo()
       touches = []
-      wasZoomed = false
+      setTimeout(() => {
+        this.$store.dispatch('isTouchScrollingOrPinchZooming', false)
+      }, 400)
+      // wasZoomed = false
     },
     shouldIgnore (event) {
       const element = event.target
@@ -92,20 +99,20 @@ export default {
       const preventInteractions = this.currentUserIsPaintingLocked || this.currentUserIsResizingCard || this.currentUserIsDrawingConnection
       return isDialog || isButton || isDraggingItem || preventInteractions
     },
-    shouldPreventMultiTouchAction (event) {
-      const isMultiTouch = utils.isMultiTouch(event)
-      if (!isMultiTouch) { return }
-      let isDialog, isButton
-      const touchesKeys = Object.keys(event.touches)
-      touchesKeys.forEach(key => touches.push(event.touches[key]))
-      touches.forEach(touch => {
-        const { target } = touch
-        isDialog = target.closest('dialog')
-        isButton = target.closest('button') || target.closest('.button-wrap') || target.closest('.slider')
-      })
+    // shouldPreventMultiTouchAction (event) {
+    //   const isMultiTouch = utils.isMultiTouch(event)
+    //   if (!isMultiTouch) { return }
+    //   let isDialog, isButton
+    //   const touchesKeys = Object.keys(event.touches)
+    //   touchesKeys.forEach(key => touches.push(event.touches[key]))
+    //   touches.forEach(touch => {
+    //     const { target } = touch
+    //     isDialog = target.closest('dialog')
+    //     isButton = target.closest('button') || target.closest('.button-wrap') || target.closest('.slider')
+    //   })
 
-      return isDialog || isButton
-    },
+    //   return isDialog || isButton
+    // },
 
     // Undo and redo
 
@@ -119,68 +126,68 @@ export default {
         this.$store.dispatch('history/redo')
         this.$store.commit('addNotificationWithPosition', { message: 'Redo', position: currentCursor, type: 'success', layer: 'app', icon: 'redo' })
       }
-    },
+    }
 
     // touch scroll
 
-    scroll (event) {
-      scrollDelta = {
-        x: currentCursor.x - prevCursor.x,
-        y: currentCursor.y - prevCursor.y
-      }
-      const prevScrollBy = this.touchScrollOrigin
-      const scrollBy = {
-        x: prevScrollBy.x + scrollDelta.x,
-        y: prevScrollBy.y + scrollDelta.y
-      }
-      this.$store.commit('touchScrollOrigin', scrollBy)
-      prevCursor = currentCursor
-      this.$store.commit('shouldAddCard', false)
-    },
+    // scroll (event) {
+    //   scrollDelta = {
+    //     x: currentCursor.x - prevCursor.x,
+    //     y: currentCursor.y - prevCursor.y
+    //   }
+    //   const prevScrollBy = this.touchScrollOrigin
+    //   const scrollBy = {
+    //     x: prevScrollBy.x + scrollDelta.x,
+    //     y: prevScrollBy.y + scrollDelta.y
+    //   }
+    //   this.$store.commit('touchScrollOrigin', scrollBy)
+    //   prevCursor = currentCursor
+    //   this.$store.commit('shouldAddCard', false)
+    // },
 
     // pinch zoom
 
-    startPinchZoom (event) {
-      wasZoomed = true
-      touchStartZoomValue = this.spaceZoomPercent
-    },
-    pinchZoom (event) {
-      const isPinching = event.touches.length === 2
-      if (!isPinching) { return }
-      this.updateZoom(event)
-    },
-    updateZoom (event) {
-      wasZoomed = true
-      let percent = event.scale * touchStartZoomValue
-      this.$store.dispatch('spaceZoomPercent', percent)
-      const position = this.cursorPositionInPage(event)
-      this.$store.commit('zoomOrigin', position)
-    },
+    // startPinchZoom (event) {
+    //   wasZoomed = true
+    //   touchStartZoomValue = this.spaceZoomPercent
+    // },
+    // pinchZoom (event) {
+    //   const isPinching = event.touches.length === 2
+    //   if (!isPinching) { return }
+    //   this.updateZoom(event)
+    // },
+    // updateZoom (event) {
+    //   wasZoomed = true
+    //   let percent = event.scale * touchStartZoomValue
+    //   this.$store.dispatch('spaceZoomPercent', percent)
+    //   const position = this.cursorPositionInPage(event)
+    //   this.$store.commit('zoomOrigin', position)
+    // },
 
-    startMomentum (event) {
-      if (wasZoomed) { return }
-      const time = Math.round(prevTimeStamp - event.timeStamp)
-      if (!time) { return }
-      velocity = {
-        x: scrollDelta.x / time,
-        y: scrollDelta.y / time
-      }
-      console.log('💦', velocity)
+    // startMomentum (event) {
+    //   if (wasZoomed) { return }
+    //   const time = Math.round(prevTimeStamp - event.timeStamp)
+    //   if (!time) { return }
+    //   velocity = {
+    //     x: scrollDelta.x / time,
+    //     y: scrollDelta.y / time
+    //   }
+    //   console.log('💦', velocity)
 
-      // When the mouse/touch is released, check to see if the last timestamp is recent enough (I use 0.3 seconds).
-      // If so, set a variable inertialVelocity to the last calculated velocity; otherwise set it to 0 to prevent scrolling if the user carefully selected a position.
-      // start RAF momentumScroll: Then on every update (either through a timer, or each render call, depending on how you're rendering),
+    //   // When the mouse/touch is released, check to see if the last timestamp is recent enough (I use 0.3 seconds).
+    //   // If so, set a variable inertialVelocity to the last calculated velocity; otherwise set it to 0 to prevent scrolling if the user carefully selected a position.
+    //   // start RAF momentumScroll: Then on every update (either through a timer, or each render call, depending on how you're rendering),
 
-      //   // velocity is amount of movement divided by the time since the last frame
-      //   // velocity = {
-      //   //   x: delta.x / frameTime,
-      //   //   y: delta.y / frameTime,
-      //   // }
-      // },
-    },
-    momentumFrame () {
-      // scroll by inertialVelocity * INERTIA_SCROLL_FACTOR (I use 0.9) and multiply inertialVelocity by INERTIA_ACCELERATION (I use 0.98).
-    }
+    //   //   // velocity is amount of movement divided by the time since the last frame
+    //   //   // velocity = {
+    //   //   //   x: delta.x / frameTime,
+    //   //   //   y: delta.y / frameTime,
+    //   //   // }
+    //   // },
+    // },
+    // momentumFrame () {
+    //   // scroll by inertialVelocity * INERTIA_SCROLL_FACTOR (I use 0.9) and multiply inertialVelocity by INERTIA_ACCELERATION (I use 0.98).
+    // }
     // cancelMomentum () {
     // },
 

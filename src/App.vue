@@ -32,7 +32,7 @@
   WindowHistoryHandler
   KeyboardShortcutsHandler
   NotificationsWithPosition(layer="app")
-  //- TouchInteractionHandler
+  TouchInteractionHandler
   ScrollHandler
   .preload
     .logo-hover

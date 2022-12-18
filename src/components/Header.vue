@@ -1,5 +1,5 @@
 <template lang="pug">
-header(v-if="isVisible" :class="{'fade-out': isFadingOut, 'hidden': isHidden, 'hidden-by-mindmap': minimapIsVisible }")
+header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hidden': isHidden, 'hidden-by-mindmap': minimapIsVisible }")
   //- embed
   nav.embed-nav(v-if="isEmbed")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
@@ -265,7 +265,8 @@ export default {
       templatesIsVisible: false,
       sidebarIsVisible: false,
       donateIsVisible: false,
-      importIsVisible: false
+      importIsVisible: false,
+      position: {}
     }
   },
   computed: {
@@ -381,6 +382,28 @@ export default {
     }
   },
   methods: {
+    updatePositionInVisualViewport () {
+      const viewport = utils.visualViewport()
+      const layoutViewport = document.getElementById('main')
+      const scale = utils.roundFloat(viewport.scale)
+      const counterScale = utils.roundFloat(1 / viewport.scale)
+      const left = Math.round(viewport.offsetLeft)
+      let offsetTop = 0
+      if (navigator.standalone) {
+        offsetTop = 15
+      }
+      const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height)
+      let style = {
+        transform: `translate(${left}px, ${top + offsetTop}px) scale(${counterScale})`,
+        maxWidth: Math.round(viewport.width * scale) + 'px'
+      }
+      if (utils.isIPhone() && scale <= 1) {
+        style.transform = 'none'
+        style.zoom = counterScale
+        style.marginBottom = offsetTop + 'px'
+      }
+      this.position = style
+    },
     openKinopio () {
       const url = this.currentSpaceUrl
       const title = `${this.currentSpaceName} – Kinopio`
@@ -606,6 +629,8 @@ export default {
       } else {
         shouldCancelFadeOut = true
         this.cancelFadeOut()
+        console.log('🐸')
+        this.updatePositionInVisualViewport()
       }
     }
   }
