@@ -27,6 +27,7 @@ article#card(
 
     :class="cardClasses"
     :style="cardStyle"
+    ref="cardInner"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
@@ -388,7 +389,7 @@ export default {
       const height = this.card.resizeHeight || this.card.height
       const isBottomVisible = utils.isBetween({ value: this.y + height, min, max })
       const isVisible = isTopVisible || isBottomVisible
-      console.log('💐 card is visible', this.card.name, isVisible)
+      // console.log('💐 card is visible', this.card.name, isVisible)
       return isVisible
     },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
@@ -715,12 +716,16 @@ export default {
         z = 0
         pointerEvents = 'none'
       }
+      console.log('🔥', this.stickyTranslateX, this.x)
+      const x = this.x + this.stickyTranslateX
+      const y = this.y + this.stickyTranslateY
+      console.log('🍇', y)
       let styles = {
         zIndex: z,
         width: this.resizeWidth,
         maxWidth: this.resizeWidth,
         pointerEvents,
-        transform: this.transformScrollingAndZoomWithPosition(this.x, this.y)
+        transform: this.transformScrollingAndZoomWithPosition(x, y)
       }
       if (!this.shouldRender) {
         styles.width = this.card.resizeWidth || this.card.width + 'px'
@@ -1042,11 +1047,13 @@ export default {
       const elements = ['button', 'progress', 'iframe']
       const isOverAction = classes.includes(event.target.className) || elements.includes(event.target.nodeName.toLowerCase())
       const isOverTag = event.target.className.includes('button-badge')
+
       if (this.shouldNotStick || isOverAction || isOverTag) {
         this.clearStickyPositionOffsets()
         preventSticking = true
         return
       }
+
       const isButtonHover = event.target.closest('.inline-button-wrap')
       if (isButtonHover) {
         this.clearStickyPositionOffsets()
@@ -1070,14 +1077,16 @@ export default {
       xOffset = Math.round(xOffset)
       let yOffset = (yPercent * halfHeight) / stretchResistance
       yOffset = Math.round(yOffset)
-      this.stickyTranslateX = xOffset + 'px'
-      this.stickyTranslateY = yOffset + 'px'
+      this.stickyTranslateX = xOffset
+      this.stickyTranslateY = yOffset
+
+      console.log('💖💖💖', xOffset)
     },
     unstickToCursor () {
       this.clearStickyTimer()
       this.isAnimationUnsticking = true
-      const xOffset = parseInt(this.stickyTranslateX)
-      const yOffset = parseInt(this.stickyTranslateY)
+      const xOffset = this.stickyTranslateX
+      const yOffset = this.stickyTranslateY
       let timing = {
         duration: 0, // sum of keyframe offsets
         easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
@@ -1085,12 +1094,22 @@ export default {
       }
       const swings = [-0.9, 0.6, -0.4, 0.2, 0] // [-1, 0.75, -0.5, 0.25, 0]
       let keyframes = [
-        { transform: `translate(${xOffset * swings[0]}px,   ${yOffset * swings[0]}px)`, offset: 50 },
-        { transform: `translate(${xOffset * swings[1]}px, ${yOffset * swings[1]}px)`, offset: 75 },
-        { transform: `translate(${xOffset * swings[2]}px, ${yOffset * swings[2]}px)`, offset: 50 },
-        { transform: `translate(${xOffset * swings[3]}px, ${yOffset * swings[3]}px)`, offset: 100 },
-        { transform: `translate(${xOffset * swings[4]}px,    ${yOffset * swings[4]}px)`, offset: 100 }
+        { transform: this.transformScrollingAndZoomWithPosition(xOffset * swings[0], yOffset * swings[0]), offset: 50 },
+        { transform: this.transformScrollingAndZoomWithPosition(xOffset * swings[1], yOffset * swings[1]), offset: 75 },
+        { transform: this.transformScrollingAndZoomWithPosition(xOffset * swings[2], yOffset * swings[2]), offset: 50 },
+        { transform: this.transformScrollingAndZoomWithPosition(xOffset * swings[3], yOffset * swings[3]), offset: 100 },
+        { transform: this.transformScrollingAndZoomWithPosition(xOffset * swings[4], yOffset * swings[4]), offset: 100 }
       ]
+
+      // let keyframes = [
+      //   { transform: `translate(${xOffset * swings[0]}px,   ${yOffset * swings[0]}px)`, offset: 50 },
+      //   { transform: `translate(${xOffset * swings[1]}px, ${yOffset * swings[1]}px)`, offset: 75 },
+      //   { transform: `translate(${xOffset * swings[2]}px, ${yOffset * swings[2]}px)`, offset: 50 },
+      //   { transform: `translate(${xOffset * swings[3]}px, ${yOffset * swings[3]}px)`, offset: 100 },
+      //   { transform: `translate(${xOffset * swings[4]}px,    ${yOffset * swings[4]}px)`, offset: 100 }
+      // ]
+
+      console.log('🌷', keyframes, xOffset, yOffset)
       keyframes.forEach(keyframe => {
         timing.duration = timing.duration + keyframe.offset
       })
@@ -1102,9 +1121,9 @@ export default {
         return keyframe
       })
       // play animation
-      const element = this.$refs.card
+      const element = this.$refs.cardInner
       if (!element) { return }
-      const animation = element.animate(keyframes, timing)
+      const animation = element.animate(keyframes, timing) // TODO replace w raf? only alter stickyTranslateX, go back to ref on card
       animation.onfinish = () => {
         this.clearStickyPositionOffsets()
         this.isAnimationUnsticking = false
