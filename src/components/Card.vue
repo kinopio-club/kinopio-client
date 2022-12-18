@@ -382,13 +382,14 @@ export default {
     ]),
     isVisibleInViewport () {
       if (this.shouldJiggle) { return true }
-      const threshold = 0 // 100 * this.spaceCounterZoomDecimal
+      const threshold = 0 // 100 * this.spaceCounterZoomDecimalc
+      const fallbackHeight = 200
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
       const min = this.currentScrollPosition.y - threshold
       const max = this.currentScrollPosition.y + viewport + threshold
       const y = this.y * this.spaceZoomDecimal
       const isTopVisible = utils.isBetween({ value: y, min, max })
-      let height = this.card.resizeHeight || this.card.height
+      let height = this.card.resizeHeight || this.card.height || fallbackHeight
       height = height * this.spaceZoomDecimal
       const isBottomVisible = utils.isBetween({ value: y + height, min, max })
       // console.log(this.card.name, isTopVisible, isBottomVisible, y, height, this.currentScrollPosition.y)
