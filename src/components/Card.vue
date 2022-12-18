@@ -1914,7 +1914,7 @@ export default {
     isInteractingScrollOrZoom (newValue, prevValue) {
       if (!newValue) {
         this.isPossiblyVisibleInCurrentZoom = null
-      } else if (newValue && newValue !== prevValue) {
+      } else if (newValue && !this.isPossiblyVisibleInCurrentZoom) {
         this.isPossiblyVisibleInCurrentZoom = this['currentCards/isPossiblyVisibleInViewportDuringZoom']
       }
     }
