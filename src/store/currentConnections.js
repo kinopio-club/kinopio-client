@@ -221,6 +221,7 @@ export default {
       connections = utils.clone(connections || context.getters.byCardId(cardId))
       connections.map(connection => {
         connection.path = context.getters.connectionBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
+        if (!connection.path) { return }
         connection.spaceId = currentSpaceId
         if (shouldUpdateApi) {
           context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
@@ -379,8 +380,10 @@ export default {
     },
     connectionBetweenCards: (state, getters) => (startCardId, endCardId, controlPoint) => {
       let start = utils.connectorCoords(startCardId)
+      if (!start) { return }
       start = utils.cursorPositionInSpace({ position: start })
       let end = utils.connectorCoords(endCardId)
+      if (!end) { return }
       end = utils.cursorPositionInSpace({ position: end })
       return getters.connectionPathBetweenCoords(start, end, controlPoint)
     },

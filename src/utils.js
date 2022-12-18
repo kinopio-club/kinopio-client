@@ -764,6 +764,7 @@ export default {
   },
   updateCardDimensions (card) {
     const element = document.querySelector(`article[data-card-id="${card.id}"]`)
+    if (!element) { return }
     let { isVisibleInViewport, shouldReduceDetails } = element.dataset
     isVisibleInViewport = isVisibleInViewport === 'true'
     shouldReduceDetails = shouldReduceDetails === 'true'
@@ -949,6 +950,7 @@ export default {
     return this.integerCoords(coords)
   },
   curveControlPointFromPath (path) {
+    if (!path) { return }
     // https://regexr.com/6mptt
     // matches 'q'-digits-,-digits-space: m295,284 q90,40 87,57 → "q90,40"
     const pathCoordsPattern = new RegExp(/q([\d.]{1,}),([\d.]{1,})/)

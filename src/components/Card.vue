@@ -9,6 +9,7 @@ article#card(
   :key="id"
   ref="card"
   :class="{'is-resizing': currentUserIsResizingCard, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
+  v-if="isVisibleInViewport"
 )
   .card(
     @mousedown.left.prevent="startDraggingCard"
@@ -389,7 +390,6 @@ export default {
       const height = this.card.resizeHeight || this.card.height
       const isBottomVisible = utils.isBetween({ value: this.y + height, min, max })
       const isVisible = isTopVisible || isBottomVisible
-      // console.log('💐 card is visible', this.card.name, isVisible)
       return isVisible
     },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
