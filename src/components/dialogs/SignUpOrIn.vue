@@ -352,4 +352,7 @@ export default {
     .badge
       margin 0
       margin-top 10px
+  button
+    span
+      font-weight normal
 </style>
