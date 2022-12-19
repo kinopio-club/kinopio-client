@@ -22,16 +22,9 @@
   KeyboardShortcutsHandler
   ScrollHandler
   NotificationsWithPosition(layer="app")
-  .preload
-    .logo-hover
-    .logo-active
+  Preload
   .badge.label-badge.development-badge(v-if="isDevelopment && !isAddPage")
     span DEV
-  //- pre-cached icons
-  .icons.hidden
-    img.icon(src="@/assets/offline.svg")
-    img.icon(src="@/assets/center-horizontally.svg")
-    img.icon(src="@/assets/distribute-horizontally.svg")
 </template>
 
 <script>
@@ -49,6 +42,7 @@ import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import SpaceBackground from '@/components/SpaceBackground.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
+import Preload from '@/components/Preload.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -70,7 +64,8 @@ export default {
     UserDetails,
     NotificationsWithPosition,
     SpaceBackground,
-    OutsideSpaceBackground
+    OutsideSpaceBackground,
+    Preload
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
@@ -1017,12 +1012,6 @@ code
   &.active
     .logo-image
       background-image url('assets/logo-active.png')
-
-.preload
-  .logo-hover
-    background-image url('assets/logo-hover.png')
-  .logo-active
-    background-image url('assets/logo-active.png')
 
 .search-wrap
   margin-left 5px
