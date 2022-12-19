@@ -934,6 +934,7 @@ export default {
     },
     isVisibleInViewport () {
       if (this.shouldJiggle) { return true }
+      if (this.$store.state.currentDraggingConnectedCardIds.includes(this.id)) { return true }
       const threshold = 0 // 100 * this.spaceCounterZoomDecimalc
       const fallbackHeight = 200
       const viewport = this.$store.state.viewportHeight * this.$store.getters.spaceCounterZoomDecimal
@@ -1453,6 +1454,8 @@ export default {
       event.preventDefault()
       if (this.$store.state.currentUserIsDrawingConnection) { return }
       this.$store.dispatch('closeAllDialogs', 'Card.startDraggingCard')
+      let connectedCardIds = this.$store.getters['currentCards/cardIdsConnectedToCardId'](this.id)
+      this.$store.commit('currentDraggingConnectedCardIds', connectedCardIds)
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
       const updates = {

@@ -736,7 +736,7 @@ const currentCards = {
           id: nanoid(),
           startCardId,
           endCardId,
-          path: this.$store.getters['currentConnections/connectionBetweenCards'](startCardId, endCardId)
+          path: this.$store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId)
         })
       })
       connections.forEach(connection => {
@@ -853,6 +853,19 @@ const currentCards = {
       let colors = cards.map(card => card.backgroundColor)
       colors = colors.filter(color => Boolean(color))
       return uniq(colors)
+    },
+    cardIdsConnectedToCardId: (state, getters, rootState, rootGetters) => (id) => {
+      const connections = rootGetters['currentConnections/byCardId'](id)
+      let cardIds = []
+      connections.forEach(connection => {
+        if (connection.startCardId !== id) {
+          cardIds.push(connection.startCardId)
+        } else if (connection.endCardId !== id) {
+          cardIds.push(connection.endCardId)
+        }
+      })
+      cardIds = uniq(cardIds)
+      return cardIds
     }
   }
 }

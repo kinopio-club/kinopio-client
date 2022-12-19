@@ -119,12 +119,12 @@ const store = createStore({
     remoteUserResizingCards: [],
     // dragging cards
     currentDraggingCardId: '',
+    currentDraggingConnectedCardIds: [],
     remoteCardsDragging: [],
     remoteUploadDraggedOverCards: [],
     preventDraggedCardFromShowingDetails: false,
     triggeredTouchCardDragPosition: {},
     cardsWereDragged: false,
-
     // user details
     userDetailsIsVisible: false,
     userDetailsPosition: {}, // x, y, shouldIgnoreZoom
@@ -701,6 +701,10 @@ const store = createStore({
     currentDraggingCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'currentDraggingCardId' })
       state.currentDraggingCardId = cardId
+    },
+    currentDraggingConnectedCardIds: (state, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array', origin: 'currentDraggingConnectedCardIds' })
+      state.currentDraggingConnectedCardIds = cardIds
     },
     addToRemoteCardsDragging: (state, update) => {
       utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteCardsDragging' })
