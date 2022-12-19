@@ -106,7 +106,6 @@ export default {
       resultsSectionHeight: null,
       dialogHeight: null,
       journalSpaces: [],
-      tweetSpaces: [],
       normalSpaces: [],
       spaceFiltersIsVisible: false
     }
@@ -127,9 +126,6 @@ export default {
       if (this.dialogSpaceFilters === 'journals') {
         this.updateJournalSpaces()
         spaces = this.journalSpaces
-      } else if (this.dialogSpaceFilters === 'tweets') {
-        this.updateTweetSpaces()
-        spaces = this.tweetSpaces
       } else if (this.dialogSpaceFilters === 'spaces') {
         this.updateNormalSpaces()
         spaces = this.normalSpaces
@@ -334,13 +330,8 @@ export default {
       const journalSpaces = this.spaces.filter(space => space.moonPhase)
       this.journalSpaces = journalSpaces
     },
-    updateTweetSpaces () {
-      const tweetSpaces = this.spaces.filter(space => space.isFromTweet)
-      this.tweetSpaces = tweetSpaces
-    },
     updateNormalSpaces () {
       let normalSpaces = this.spaces.filter(space => !space.moonPhase)
-      normalSpaces = normalSpaces.filter(space => !space.isFromTweet)
       this.normalSpaces = normalSpaces
     },
     updateCachedSpacesDate () {
