@@ -1,37 +1,38 @@
 <template lang="pug">
-g.connection(v-if="isVisibleInViewport")
-  path.connection-path(
-    fill="none"
-    :stroke="typeColor"
-    stroke-width="5"
-    :data-start-card="startCardId"
-    :data-end-card="endCardId"
-    :data-id="id"
-    :data-type-name="typeName"
-    :data-type-id="connectionTypeId"
-    :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
-    :key="id"
-    :d="path"
-    @mousedown.left="startDraggingConnection"
-    @touchstart="startDraggingConnection"
-    @mouseup.left="showConnectionDetails"
-    @touchend.stop="showConnectionDetails"
-    @keyup.stop.backspace="removeConnection"
-    @keyup.stop.enter="showConnectionDetailsOnKeyup"
-    :class="{active: isSelected || detailsIsVisible || remoteDetailsIsVisible || isRemoteSelected || isCurrentCardConnection, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline, 'is-hidden-by-opacity': isHiddenByCommentFilter }"
-    ref="connection"
-    tabindex="0"
-    @dragover.prevent
-    @drop.prevent.stop="addCardsAndUploadFiles"
-  )
+template(v-if="isVisibleInViewport")
+  g.connection
+    path.connection-path(
+      fill="none"
+      :stroke="typeColor"
+      stroke-width="5"
+      :data-start-card="startCardId"
+      :data-end-card="endCardId"
+      :data-id="id"
+      :data-type-name="typeName"
+      :data-type-id="connectionTypeId"
+      :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
+      :key="id"
+      :d="path"
+      @mousedown.left="startDraggingConnection"
+      @touchstart="startDraggingConnection"
+      @mouseup.left="showConnectionDetails"
+      @touchend.stop="showConnectionDetails"
+      @keyup.stop.backspace="removeConnection"
+      @keyup.stop.enter="showConnectionDetailsOnKeyup"
+      :class="{active: isSelected || detailsIsVisible || remoteDetailsIsVisible || isRemoteSelected || isCurrentCardConnection, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline, 'is-hidden-by-opacity': isHiddenByCommentFilter }"
+      ref="connection"
+      tabindex="0"
+      @dragover.prevent
+      @drop.prevent.stop="addCardsAndUploadFiles"
+    )
 
-defs
-  linearGradient(:id="gradientId")
-    stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
-    stop(offset="90%" :stop-color="typeColor")
+  defs
+    linearGradient(:id="gradientId")
+      stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
+      stop(offset="90%" :stop-color="typeColor")
 
-circle(v-if="directionIsVisible && !isUpdatingPath && isVisibleInViewport" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}")
-  animateMotion(dur="3s" repeatCount="indefinite" :path="path" rotate="auto")
+  circle(v-if="directionIsVisible && !isUpdatingPath && isVisibleInViewport" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}")
+    animateMotion(dur="3s" repeatCount="indefinite" :path="path" rotate="auto")
 </template>
 
 <script>
