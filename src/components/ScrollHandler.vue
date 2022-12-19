@@ -8,6 +8,15 @@ import { mapState, mapGetters } from 'vuex'
 
 export default {
   name: 'ScrollHandler',
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'isLoadingSpace') {
+        this.updateCardRectsInViewport()
+      } else if (mutation.type === 'spaceZoomPercent') {
+        this.updateCardRectsInViewport()
+      }
+    })
+  },
   mounted () {
     window.addEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
     window.addEventListener('scroll', this.handleScrollEvents)
@@ -49,6 +58,19 @@ export default {
     },
     handleScrollEvents (event) {
       this.$store.dispatch('updateWindowScroll')
+      this.updateCardRectsInViewport()
+    },
+    updateCardRectsInViewport () {
+      this.$nextTick(() => {
+        let cards = []
+        const elements = document.querySelectorAll('article#card')
+        elements.forEach(element => {
+          if (element.dataset.isLocked === 'true') { return }
+          const card = this.$store.getters['currentCards/byId'](element.dataset.cardId)
+          cards.push(card)
+        })
+        this.$store.commit('currentCards/inViewport', cards)
+      })
     }
   }
 }

@@ -5,6 +5,7 @@ article#card(
   :data-card-id="id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :data-is-visible-in-viewport="isVisibleInViewport"
+  :data-is-locked="isLocked"
   :key="id"
   ref="card"
   :class="{'is-resizing': isResizing, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
@@ -936,7 +937,7 @@ export default {
       if (this.$store.state.disableViewportOptimizations) { return true }
       if (this.shouldJiggle) { return true }
       if (this.$store.state.currentDraggingConnectedCardIds.includes(this.id)) { return true }
-      const threshold = 0 // 100 * this.spaceCounterZoomDecimalc
+      const threshold = 0 // 100 * this.spaceCounterZoomDecimal
       const fallbackHeight = 200
       const viewport = this.$store.state.viewportHeight * this.$store.getters.spaceCounterZoomDecimal
       const min = this.$store.state.windowScroll.y - threshold

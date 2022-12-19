@@ -453,8 +453,7 @@ export default {
         x: Math.round((point.x + window.scrollX) * zoom),
         y: Math.round((point.y + window.scrollY) * zoom)
       }
-      const cards = this.$store.getters['currentCards/isSelectable'](point)
-      if (!cards) { return }
+      const cards = this.$store.state.currentCards.inViewport
       cards.forEach(card => {
         const cardX = card.x
         const cardY = card.y

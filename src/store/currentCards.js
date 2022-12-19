@@ -20,7 +20,8 @@ const currentCards = {
     ids: [],
     cards: {}, // {id, {card}}
     removedCards: [], // denormalized
-    tallestCardHeight: 0
+    tallestCardHeight: 0,
+    inViewport: []
   },
   mutations: {
 
@@ -142,6 +143,9 @@ const currentCards = {
 
     tallestCardHeight: (state, value) => {
       state.tallestCardHeight = value
+    },
+    inViewport: (state, rects) => {
+      state.inViewport = rects
     }
 
   },
