@@ -395,6 +395,7 @@ const currentCards = {
         }
         nextTick(() => {
           card = utils.updateCardDimensions(card)
+          if (!card) { return }
           const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
           if (!dimensionsChanged) { return }
           const body = {

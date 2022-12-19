@@ -37,8 +37,6 @@ const store = createStore({
     isTouchDevice: false,
     cardsCreatedLimit: 100,
     prevCursorPosition: { x: 0, y: 0 },
-    spaceZoomPercent: 100,
-    pinchCounterZoomDecimal: 1,
     currentSpacePath: '/',
     webfontIsLoaded: false,
     userHasScrolled: false,
@@ -48,6 +46,11 @@ const store = createStore({
     isAddPage: false,
     isAppStoreView: false,
     disableViewportOptimizations: false, // for urlbox
+
+    // zoom and scroll
+    spaceZoomPercent: 100,
+    pinchCounterZoomDecimal: 1,
+    windowScroll: {},
 
     // search
     searchIsVisible: false,
@@ -335,6 +338,10 @@ const store = createStore({
     pinchCounterZoomDecimal: (state, value) => {
       utils.typeCheck({ value, type: 'number', origin: 'pinchCounterZoomDecimal' })
       state.pinchCounterZoomDecimal = value
+    },
+    windowScroll: (state, value) => {
+      utils.typeCheck({ value, type: 'object', origin: 'windowScroll' })
+      state.windowScroll = value
     },
     currentSpacePath: (state, value) => {
       utils.typeCheck({ value, type: 'string', origin: 'currentSpacePath' })
@@ -1441,6 +1448,12 @@ const store = createStore({
     spaceDetailsIsPinned: (context, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsIsPinned' })
       context.commit('spaceDetailsIsPinned', value)
+    },
+
+    // scrolling and zoom
+
+    updateWindowScroll: (context) => {
+      context.commit('windowScroll', { x: window.scrollX, y: window.scrollY })
     }
   },
   getters: {

@@ -10,9 +10,12 @@ export default {
   name: 'ScrollHandler',
   mounted () {
     window.addEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
+    window.addEventListener('scroll', this.handleScrollEvents)
+    this.$store.dispatch('updateWindowScroll')
   },
   beforeUnmount () {
     window.removeEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
+    window.removeEventListener('scroll', this.handleScrollEvents)
   },
   data () {
     return {
@@ -43,6 +46,9 @@ export default {
       } else if (shouldZoomOut) {
         this.$store.commit('triggerSpaceZoomOut', { speed })
       }
+    },
+    handleScrollEvents (event) {
+      this.$store.dispatch('updateWindowScroll')
     }
   }
 }
