@@ -220,6 +220,7 @@ export default {
       return shouldHide
     },
     isVisibleInViewport () {
+      if (this.$store.state.disableViewportOptimizations) { return true }
       if (this.isUpdatingPath) { return true }
       const threshold = 0
       const viewport = this.$store.state.viewportHeight * this.$store.getters.spaceCounterZoomDecimal

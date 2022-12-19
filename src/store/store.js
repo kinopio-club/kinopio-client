@@ -376,7 +376,7 @@ const store = createStore({
       state.isAppStoreView = value
     },
     disableViewportOptimizations: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'disableViewportOptimizations' })
+      utils.typeCheck({ value, type: 'boolean', origin: 'disableViewportOptimizations', allowUndefined: true })
       state.disableViewportOptimizations = value
     },
     searchIsVisible: (state, value) => {

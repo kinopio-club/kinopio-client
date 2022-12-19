@@ -933,6 +933,7 @@ export default {
       return user.id === userDetailsUser.id
     },
     isVisibleInViewport () {
+      if (this.$store.state.disableViewportOptimizations) { return true }
       if (this.shouldJiggle) { return true }
       if (this.$store.state.currentDraggingConnectedCardIds.includes(this.id)) { return true }
       const threshold = 0 // 100 * this.spaceCounterZoomDecimalc
