@@ -584,10 +584,6 @@ const currentSpace = {
         if (connection.path) {
           const coords = utils.coordsFromConnectionPath(connection.path)
           connection.distanceFromOrigin = utils.distanceBetweenTwoPoints(coords, origin)
-        } else {
-          const startId = connection.startCardId
-          const endId = connection.endCardId
-          connection.path = context.rootGetters['currentConnections/connectionPathBetweenCards'](startId, endId)
         }
         return connection
       })

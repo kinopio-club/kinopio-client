@@ -39,7 +39,10 @@ export default {
     }
   },
   computed: {
-    visible () { return this.connection.labelIsVisible && !this.isUpdatingPath },
+    visible () {
+      const hasPosition = this.position.left && this.position.top
+      return this.connection.labelIsVisible && hasPosition && !this.isUpdatingPath
+    },
     id () { return this.connection.id },
     connectionTypeId () { return this.connection.connectionTypeId },
     connectionType () { return this.$store.getters['currentConnections/typeByTypeId'](this.connectionTypeId) },
@@ -156,6 +159,7 @@ export default {
     },
     setPosition () {
       if (!this.connectionIsVisible) { return }
+      if (!this.connection.path) { return }
       this.$nextTick(() => {
         const zoom = this.$store.getters.spaceCounterZoomDecimal
         let connection = document.querySelector(`.connection-path[data-id="${this.id}"]`)

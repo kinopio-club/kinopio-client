@@ -222,6 +222,9 @@ export default {
     isVisibleInViewport () {
       if (this.$store.state.disableViewportOptimizations) { return true }
       if (this.isUpdatingPath) { return true }
+      if (!this.connection.path) {
+        return
+      }
       const threshold = 0
       const viewport = this.$store.state.viewportHeight * this.$store.getters.spaceCounterZoomDecimal
       const scroll = this.$store.state.windowScroll.y
