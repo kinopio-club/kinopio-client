@@ -268,6 +268,7 @@ const currentCards = {
     // update
 
     update: (context, card) => {
+      if (!card) { return }
       // prevent null position
       const keys = Object.keys(card)
       if (keys.includes('x') || keys.includes('y')) {
