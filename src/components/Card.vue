@@ -14,9 +14,9 @@ article#card(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
 
-    @mouseenter="initStickToCursor"
+    @mouseenter="handleMouseEnter"
     @mousemove="stickToCursor"
-    @mouseleave="unstickToCursor"
+    @mouseleave="handleMouseLeave"
 
     @touchstart="startLocking"
     @touchmove="updateCurrentTouchPosition"
@@ -516,7 +516,7 @@ export default {
       return utils.colorIsDark(color)
     },
     connectorGlowStyle () {
-      const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor
+      const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor || this.currentUserIsHoveringOverCardIdColor
       if (!color) { return }
       return { background: color }
     },
@@ -553,6 +553,21 @@ export default {
       const visibleCardId = this.$store.state.cardDetailsIsVisibleForCardId
       let connections = this.$store.getters['currentConnections/all']
       connections = connections.filter(connection => connection.startCardId === visibleCardId || connection.endCardId === visibleCardId)
+      connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
+      const connection = connections[0]
+      if (!connection) { return }
+      const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
+      if (!connectionType) {
+        const newType = this.updateTypeForConnection(connection.id)
+        return newType.color
+      }
+      return connectionType.color
+    },
+    currentUserIsHoveringOverCardIdColor () {
+      const hoveringOverCardId = this.$store.state.currentUserIsHoveringOverCardId
+      if (!hoveringOverCardId) { return }
+      let connections = this.$store.getters['currentConnections/all']
+      connections = connections.filter(connection => connection.startCardId === hoveringOverCardId || connection.endCardId === hoveringOverCardId)
       connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
       const connection = connections[0]
       if (!connection) { return }
@@ -952,6 +967,18 @@ export default {
     }
   },
   methods: {
+
+    // mouse handlers
+
+    handleMouseEnter () {
+      this.initStickToCursor()
+      this.$store.commit('currentUserIsHoveringOverCardId', this.card.id)
+    },
+    handleMouseLeave () {
+      this.unstickToCursor()
+      this.$store.commit('currentUserIsHoveringOverCardId', '')
+    },
+
     // sticky
 
     initStickToCursor () {
