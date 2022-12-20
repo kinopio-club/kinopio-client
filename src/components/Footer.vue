@@ -35,7 +35,7 @@
             FavoritesActions(:visible="favoritesActionsIsVisible")
 
   .right(:class="{'is-embed': isEmbed, 'hidden': isHidden}" v-if="!isMobileOrTouch")
-    .button-wrap.minimap-button(v-if="isNotSupportedByDevice" @pointerup="toggleMinimapIsVislble")
+    .button-wrap.minimap-button(v-if="isNotSupportedByDevice" @click="toggleMinimapIsVislble")
       button.small-button.inline-button(:class="{ active: minimapIsVisible }")
         img.icon.minimap(src="@/assets/minimap.svg")
     SpaceZoom
