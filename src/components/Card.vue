@@ -937,7 +937,7 @@ export default {
       if (this.$store.state.disableViewportOptimizations) { return true }
       if (this.shouldJiggle) { return true }
       if (this.$store.state.currentDraggingConnectedCardIds.includes(this.id)) { return true }
-      const threshold = 0 // 100 * this.spaceCounterZoomDecimal
+      const threshold = 400 * this.$store.getters.spaceCounterZoomDecimal
       const fallbackHeight = 200
       const viewport = this.$store.state.viewportHeight * this.$store.getters.spaceCounterZoomDecimal
       const min = this.$store.state.windowScroll.y - threshold

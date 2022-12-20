@@ -225,7 +225,7 @@ export default {
       if (!this.connection.path) {
         return
       }
-      const threshold = 0
+      const threshold = 400 * this.$store.getters.spaceCounterZoomDecimal
       const viewport = this.$store.state.viewportHeight * this.$store.getters.spaceCounterZoomDecimal
       const scroll = this.$store.state.windowScroll.y
       let y1 = utils.coordsFromConnectionPath(this.connection.path).y
