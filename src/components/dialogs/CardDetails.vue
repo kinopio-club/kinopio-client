@@ -201,6 +201,7 @@ import utils from '@/utils.js'
 
 import qs from '@aguezz/qs-parse'
 import { nanoid } from 'nanoid'
+import { mapState, mapGetters } from 'vuex'
 
 let prevCardId, prevCardName
 let previousTags = []
@@ -295,21 +296,49 @@ export default {
     })
   },
   computed: {
+    ...mapState([
+      'cardDetailsIsVisibleForCardId',
+      'currentUser',
+      'currentSpace',
+      'searchResultsCards',
+      'currentSelectedTag',
+      'currentSelectedLink',
+      'shouldPreventNextEnterKey',
+      'upload',
+      'pinchCounterZoomDecimal',
+      'urlPreviewLoadingForCardIds',
+      'preventCardDetailsOpeningAnimation',
+      'shouldPreventNextFocusOnName'
+    ]),
+    ...mapGetters([
+      'spaceCounterZoomDecimal',
+      'currentCards/byId',
+      'currentUser/isSignedIn',
+      'currentSpace/userById',
+      'currentSpace/tagByName',
+      'currentConnections/byCardId',
+      'currentUser/isSpaceMember',
+      'currentSpace/isFavorite',
+      'currentUser/cardIsCreatedByCurrentUser',
+      'currentUser/canEditSpace',
+      'otherSpaceById',
+      'currentUser/isInvitedButCannotEditSpace'
+    ]),
     rowIsBelowStyleActions () { return this.nameMetaRowIsVisible || this.badgesRowIsVisible || this.collaborationInfoIsVisible || this.cardHasMedia || this.cardUrlPreviewIsVisible },
     nameMetaRowIsVisible () { return this.nameSplitIntoCardsCount },
     badgesRowIsVisible () { return this.tagsInCard.length || this.card.linkToSpaceId || this.nameIsComment || this.isInSearchResultsCards },
     parentElement () { return this.$refs.dialog },
     card () {
-      const cardId = this.$store.state.cardDetailsIsVisibleForCardId
-      return this.$store.getters['currentCards/byId'](cardId) || {}
+      const cardId = this.cardDetailsIsVisibleForCardId
+      return this['currentCards/byId'](cardId) || {}
     },
     visible () { return utils.objectHasKeys(this.card) },
-    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    cardIsCreatedByCurrentUser () { return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card) },
-    spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
-    spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
+    isSpaceMember () { return this['currentUser/isSpaceMember']() },
+    cardIsCreatedByCurrentUser () { return this['currentUser/cardIsCreatedByCurrentUser'](this.card) },
+    spacePrivacyIsOpen () { return this.currentSpace.privacy === 'open' },
+    spacePrivacyIsClosed () { return this.currentSpace.privacy === 'closed' },
     isInSearchResultsCards () {
-      const results = this.$store.state.searchResultsCards
+      const results = this.searchResultsCards
       if (!results.length) { return }
       return Boolean(results.find(card => this.card.id === card.id))
     },
@@ -323,7 +352,7 @@ export default {
       return true
     },
     nameIsComment () { return utils.isNameComment(this.name) },
-    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
+    canEditSpace () { return this['currentUser/canEditSpace']() },
     canEditCard () {
       if (this.isSpaceMember) { return true }
       if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
@@ -331,7 +360,7 @@ export default {
     },
     linkToSpace () {
       const spaceId = this.card.linkToSpaceId
-      const space = this.$store.getters.otherSpaceById(spaceId)
+      const space = this.otherSpaceById(spaceId)
       return space
     },
     linkName () {
@@ -342,7 +371,7 @@ export default {
         return 'Space is loading or invalid'
       }
     },
-    isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
+    isInvitedButCannotEditSpace () { return this['currentUser/isInvitedButCannotEditSpace']() },
     maxCardLength () { return utils.maxCardLength() },
     currentCardLength () {
       if (!this.card.name) { return 0 }
@@ -365,25 +394,23 @@ export default {
       if (!tagNames) { return [] }
       let tags = []
       tagNames.forEach(name => {
-        const tag = this.$store.getters['currentSpace/tagByName'](name)
+        const tag = this['currentSpace/tagByName'](name)
         tags.push(tag)
       })
       return tags
     },
-    currentSelectedTag () { return this.$store.state.currentSelectedTag },
-    currentSelectedLink () { return this.$store.state.currentSelectedLink },
     currentSelectedLinkisActive () {
       if (!this.currentSelectedLink.space) { return }
       return this.currentSelectedLink.space.id === this.card.linkToSpaceId
     },
-    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
+    currentUserIsSpaceMember () { return this['currentUser/isSpaceMember']() },
+    isFavoriteSpace () { return this['currentSpace/isFavorite'] },
     name: {
       get () {
         return this.card.name || ''
       },
       set (newName) {
-        if (this.$store.state.shouldPreventNextEnterKey) {
+        if (this.shouldPreventNextEnterKey) {
           this.$store.commit('shouldPreventNextEnterKey', false)
           this.updateCardName(newName.trim())
         } else {
@@ -461,13 +488,13 @@ export default {
       }
     },
     cardPendingUpload () {
-      const pendingUploads = this.$store.state.upload.pendingUploads
+      const pendingUploads = this.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.card.id)
     },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentUserIsSignedIn () { return this['currentUser/isSignedIn'] },
     createdByUser () {
       const userId = this.card.userId
-      let user = this.$store.getters['currentSpace/userById'](userId)
+      let user = this['currentSpace/userById'](userId)
       if (user) {
         return user
       } else {
@@ -479,7 +506,7 @@ export default {
     },
     updatedByUser () {
       const userId = this.card.nameUpdatedByUserId || this.card.userId
-      let user = this.$store.getters['currentSpace/userById'](userId)
+      let user = this['currentSpace/userById'](userId)
       if (user) {
         return user
       } else {
@@ -489,8 +516,6 @@ export default {
         }
       }
     },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
       let zoom = this.spaceCounterZoomDecimal
       const viewport = utils.visualViewport()
@@ -509,8 +534,7 @@ export default {
       return Boolean(this.card.urlPreviewIsVisible && hasPreview && !isErrorUrl)
     },
     isLoadingUrlPreview () {
-      const cardIds = this.$store.state.urlPreviewLoadingForCardIds
-      const isLoading = cardIds.find(cardId => cardId === this.card.id)
+      const isLoading = this.urlPreviewLoadingForCardIds.find(cardId => cardId === this.card.id)
       return Boolean(isLoading)
     },
     cardHasMedia () { return Boolean(this.formats.image || this.formats.video || this.formats.audio) },
@@ -518,7 +542,7 @@ export default {
       const initialPadding = 200
       const initialBorderRadius = 60
       const padding = initialPadding * this.openingPercent
-      const userColor = this.$store.state.currentUser.color
+      const userColor = this.currentUser.color
       const borderRadius = Math.max((this.openingPercent * initialBorderRadius), 5) + 'px'
       const size = `calc(100% + ${padding}px)`
       const position = -(padding / 2) + 'px'
@@ -532,22 +556,22 @@ export default {
         borderRadius: borderRadius
       }
     },
-    collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo },
+    collaborationInfoIsVisible () { return this.currentUser.shouldShowCardCollaborationInfo },
     StyleActionsIsVisible () {
-      return this.$store.state.currentUser.shouldShowStyleActions
+      return this.currentUser.shouldShowStyleActions
     }
   },
   methods: {
     broadcastShowCardDetails () {
       const updates = {
         cardId: this.card.id,
-        userId: this.$store.state.currentUser.id
+        userId: this.currentUser.id
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
     },
     addImageOrFile (file) {
       const cardId = this.card.id
-      const spaceId = this.$store.state.currentSpace.id
+      const spaceId = this.currentSpace.id
       // remove existing image url
       if (this.formats.image) {
         const newName = this.name.replace(this.formats.image, '')
@@ -587,7 +611,7 @@ export default {
       shouldCancelOpening = false
     },
     startOpening () {
-      if (this.$store.state.preventCardDetailsOpeningAnimation || !this.card.name) {
+      if (this.preventCardDetailsOpeningAnimation || !this.card.name) {
         this.$store.commit('preventCardDetailsOpeningAnimation', false)
         return
       }
@@ -793,11 +817,11 @@ export default {
       this.$store.dispatch('currentCards/update', update)
     },
     updateCardName (newName) {
-      const cardId = this.$store.state.cardDetailsIsVisibleForCardId
+      const cardId = this.cardDetailsIsVisibleForCardId
       if (this.card.id !== cardId) {
         return
       }
-      const userId = this.$store.state.currentUser.id
+      const userId = this.currentUser.id
       const card = {
         name: newName,
         id: this.card.id,
@@ -811,7 +835,7 @@ export default {
       this.updateMediaUrls()
       this.updateTags()
       if (this.notifiedMembers) { return }
-      if (this.createdByUser.id !== this.$store.state.currentUser.id) { return }
+      if (this.createdByUser.id !== this.currentUser.id) { return }
       if (card.name) {
         this.$store.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: this.card.id, type: 'updateCard' })
         this.notifiedMembers = true
@@ -845,10 +869,10 @@ export default {
       const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
       const pickersIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
       console.log('🎹 enter', {
-        shouldPreventNextEnterKey: this.$store.state.shouldPreventNextEnterKey,
+        shouldPreventNextEnterKey: this.shouldPreventNextEnterKey,
         pickersIsVisible
       })
-      if (this.$store.state.shouldPreventNextEnterKey) {
+      if (this.shouldPreventNextEnterKey) {
         this.$store.commit('shouldPreventNextEnterKey', false)
       } else if (pickersIsVisible) {
         this.triggerPickerSelectItem(event)
@@ -903,7 +927,7 @@ export default {
     },
     toggleStyleActionsIsVisible () {
       this.closeDialogs()
-      const isVisible = !this.$store.state.currentUser.shouldShowStyleActions
+      const isVisible = !this.currentUser.shouldShowStyleActions
       this.$store.dispatch('currentUser/shouldShowStyleActions', isVisible)
       this.$nextTick(() => {
         this.scrollIntoView()
@@ -911,7 +935,7 @@ export default {
     },
     toggleCollaborationInfoIsVisible () {
       this.closeDialogs()
-      const isVisible = !this.$store.state.currentUser.shouldShowCardCollaborationInfo
+      const isVisible = !this.currentUser.shouldShowCardCollaborationInfo
       this.$store.dispatch('currentUser/shouldShowCardCollaborationInfo', isVisible)
       this.$nextTick(() => {
         this.scrollIntoView()
@@ -919,8 +943,7 @@ export default {
     },
     focusName (position) {
       utils.disablePinchZoom()
-      const shouldPreventFocus = this.$store.state.shouldPreventNextFocusOnName
-      if (shouldPreventFocus) {
+      if (this.shouldPreventNextFocusOnName) {
         this.triggerUpdatePositionInVisualViewport()
         this.$store.commit('shouldPreventNextFocusOnName', false)
         return
@@ -1278,7 +1301,7 @@ export default {
         } else if (this.currentSearchTag.name === tagName) {
           tag = this.currentSearchTag
         } else {
-          tag = this.$store.getters['currentSpace/tagByName'](tagName)
+          tag = this['currentSpace/tagByName'](tagName)
           tag = utils.clone(tag)
           tag.color = this.previousSelectedTag.color || tag.color
         }
@@ -1295,9 +1318,9 @@ export default {
         let tag
         tag = utils.newTag({
           name: tagName,
-          defaultColor: this.newTagColor || this.$store.state.currentUser.color,
+          defaultColor: this.newTagColor || this.currentUser.color,
           cardId: this.card.id,
-          spaceId: this.$store.state.currentSpace.id
+          spaceId: this.currentSpace.id
         })
         if (this.previousSelectedTag.name === tagName) {
           tag.color = this.previousSelectedTag.color
@@ -1401,13 +1424,13 @@ export default {
         this.resetTextareaHeight()
         this.$nextTick(() => {
           this.startOpening()
-          const card = this.$store.getters['currentCards/byId'](cardId)
+          const card = this['currentCards/byId'](cardId)
           this.$store.dispatch('checkIfItemShouldIncreasePageSize', card)
         })
       })
       this.previousSelectedTag = {}
       this.updateMediaUrls()
-      const connections = this.$store.getters['currentConnections/byCardId'](cardId)
+      const connections = this['currentConnections/byCardId'](cardId)
       this.$store.commit('updateCurrentCardConnections', connections)
       prevCardName = this.card.name
       this.$store.dispatch('history/pause')
@@ -1417,7 +1440,7 @@ export default {
       element.blur()
       this.$store.commit('triggerHideTouchInterface')
       const cardId = prevCardId
-      const card = this.$store.getters['currentCards/byId'](cardId)
+      const card = this['currentCards/byId'](cardId)
       this.closeDialogs(true)
       this.cancelOpening()
       this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', cardId)
