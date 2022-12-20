@@ -14,6 +14,10 @@ export default {
         this.updateCardRectsInViewport()
       } else if (mutation.type === 'spaceZoomPercent') {
         this.updateCardRectsInViewport()
+      } else if (mutation.type === 'currentCards/afterMove') {
+        this.updateCardRectsInViewport()
+      } else if (mutation.type === 'currentCards/create') {
+        this.updateCardRectsInViewport()
       }
     })
   },
