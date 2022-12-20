@@ -250,8 +250,8 @@ export default {
       //   ●                │\\\│
       //   y2               │\\\│
       //                    └───┘
-      const y1IsBelow = y1 > scroll + viewport + threshold
-      const y2IsAbove = y2 < scroll + threshold
+      const y1IsBelow = y1 - threshold > scroll + viewport
+      const y2IsAbove = y2 + threshold < scroll
       const isNotInview = y1IsBelow || y2IsAbove
       return !isNotInview
     }
