@@ -20,8 +20,6 @@ dialog.narrow.space-filters(v-if="visible" :open="visible" @click.left.stop ref=
       button(@click="showSpacesOnly" :class="{active: spacesIsActive}") Normal
       button(@click="showJournalsOnly" :class="{active: journalsIsActive}")
         MoonPhase(:moonPhase="moonPhase.name")
-      button(@click="showTweetSpacesOnly" :class="{active: tweetsIsActive}")
-        img.icon.tweet(src="@/assets/twitter.svg")
 
   section.results-section.collaborators
     UserList(:users="spaceUsers" :isClickable="true" @selectUser="filterByUser" :selectedUser="dialogSpaceFilterByUser")
@@ -72,9 +70,6 @@ export default {
     spacesIsActive () {
       return this.dialogSpaceFilters === 'spaces'
     },
-    tweetsIsActive () {
-      return this.dialogSpaceFilters === 'tweets'
-    },
     spaceUsers () {
       const currentUserId = this.$store.state.currentUser.id
       const spaces = this.spaces.filter(space => space.userId !== currentUserId)
@@ -99,9 +94,6 @@ export default {
     },
     showJournalsOnly () {
       this.updateFilter('journals')
-    },
-    showTweetSpacesOnly () {
-      this.updateFilter('tweets')
     },
     showSpacesOnly () {
       this.updateFilter('spaces')
