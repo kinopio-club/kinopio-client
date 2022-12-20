@@ -15,6 +15,13 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
       label.double-line-height(:class="{ active: shouldPauseConnectionDirections }" @click.left.prevent="toggleShouldPauseConnectionDirections" @keydown.stop.enter="toggleShouldPauseConnectionDirections")
         input(type="checkbox" v-model="shouldPauseConnectionDirections")
         span Pause Connection Directions
+  section
+    .row
+      p Debug Options
+    .row
+      label(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
+        input(type="checkbox" v-model="shouldDisableRightClickToPan")
+        span Disable Right Click to Pan
 
 </template>
 
@@ -42,7 +49,8 @@ export default {
     isMobile () { return utils.isMobile() },
     shouldOpenLinksInNewTab () { return this.$store.state.currentUser.shouldOpenLinksInNewTab },
     shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
-    shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections }
+    shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
+    shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan }
   },
   methods: {
     toggleShouldOpenLinksInNewTab () {
@@ -57,6 +65,10 @@ export default {
       const value = !this.shouldPauseConnectionDirections
       this.$store.dispatch('currentUser/update', { shouldPauseConnectionDirections: value })
       this.$store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
+    },
+    toggleShouldDisableRightClickToPan () {
+      const value = !this.shouldDisableRightClickToPan
+      this.$store.dispatch('currentUser/update', { shouldDisableRightClickToPan: value })
     },
     updateDialogHeight () {
       if (!this.visible) { return }

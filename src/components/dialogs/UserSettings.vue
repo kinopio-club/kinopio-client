@@ -12,19 +12,19 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
           span Controls
         ControlsSettings(:visible="controlsSettingsIsVisible")
     //- Integrations
-    .row
-      .button-wrap
-        button(@click.left.stop="toggleIntegrationsSettingsIsVisible" :class="{active: integrationsSettingsIsVisible}")
-          span Integrations
-    .row(v-if="integrationsSettingsIsVisible")
-      .button-wrap
-        button(@click.left.stop="toggleConnectToTwitterIsVisible" :class="{ active: connectToTwitterIsVisible}")
-          img.icon.tweet(src="@/assets/twitter.svg")
-          template(v-if="twitterUsername")
-            span Connected to Twitter
-          template(v-else)
-            span Connect to Twitter
-        ConnectToTwitter(:visible="connectToTwitterIsVisible")
+    //- .row
+    //-   .button-wrap
+    //-     button(@click.left.stop="toggleIntegrationsSettingsIsVisible" :class="{active: integrationsSettingsIsVisible}")
+    //-       span Integrations
+    //- .row(v-if="integrationsSettingsIsVisible")
+    //-   .button-wrap
+    //-     button(@click.left.stop="toggleConnectToTwitterIsVisible" :class="{ active: connectToTwitterIsVisible}")
+    //-       img.icon.tweet(src="@/assets/twitter.svg")
+    //-       template(v-if="twitterUsername")
+    //-         span Connected to Twitter
+    //-       template(v-else)
+    //-         span Connect to Twitter
+    //-     ConnectToTwitter(:visible="connectToTwitterIsVisible")
     //- Notifications
     .row
       .button-wrap

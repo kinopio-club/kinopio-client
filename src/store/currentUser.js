@@ -42,7 +42,7 @@ export default {
     shouldShowStyleActions: false,
     shouldUseLastConnectionType: false,
     shouldOpenLinksInNewTab: false,
-    shouldRightMouseButtonPan: false,
+    shouldDisableRightClickToPan: false,
     shouldShowCurrentSpaceTags: false,
     showInExploreUpdatedAt: null, // date
     dialogFavoritesFilters: null, // null, 'currentUser', 'otherUsers'
@@ -259,9 +259,9 @@ export default {
       state.shouldOpenLinksInNewTab = value
       cache.updateUser('shouldOpenLinksInNewTab', value)
     },
-    shouldRightMouseButtonPan: (state, value) => {
-      state.shouldRightMouseButtonPan = value
-      cache.updateUser('shouldRightMouseButtonPan', value)
+    shouldDisableRightClickToPan: (state, value) => {
+      state.shouldDisableRightClickToPan = value
+      cache.updateUser('shouldDisableRightClickToPan', value)
     },
     shouldShowCurrentSpaceTags: (state, value) => {
       state.shouldShowCurrentSpaceTags = value
@@ -684,12 +684,12 @@ export default {
           shouldOpenLinksInNewTab: value
         } }, { root: true })
     },
-    shouldRightMouseButtonPan: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldRightMouseButtonPan' })
-      context.commit('shouldRightMouseButtonPan', value)
+    shouldDisableRightClickToPan: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldDisableRightClickToPan' })
+      context.commit('shouldDisableRightClickToPan', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
-          shouldRightMouseButtonPan: value
+          shouldDisableRightClickToPan: value
         } }, { root: true })
     },
     shouldUseLastConnectionType: (context, value) => {
