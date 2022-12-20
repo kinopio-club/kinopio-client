@@ -38,6 +38,8 @@ template(v-if="isVisibleInViewport")
 <script>
 import utils from '@/utils.js'
 
+import { mapState, mapGetters } from 'vuex'
+
 let animationTimer, isMultiTouch, startCursor, currentCursor
 
 export default {
@@ -48,8 +50,8 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'clearMultipleSelected') {
-        const selectedIds = this.$store.state.multipleConnectionsSelectedIds
-        const selected = selectedIds.includes(this.id) || this.$store.state.connectionDetailsIsVisibleForConnectionId === this.id
+        const selectedIds = this.multipleConnectionsSelectedIds
+        const selected = selectedIds.includes(this.id) || this.connectionDetailsIsVisibleForConnectionId === this.id
         if (!selected) {
           this.cancelAnimation()
         }
@@ -73,14 +75,44 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'currentUser',
+      'remoteCardsDragging',
+      'remoteCardsSelected',
+      'currentUserIsDraggingCard',
+      'multipleCardsSelectedIds',
+      'currentDraggingCardId',
+      'remoteCardsSelected',
+      'disableViewportOptimizations',
+      'viewportHeight',
+      'windowScroll',
+      'multipleConnectionsSelectedIds',
+      'connectionDetailsIsVisibleForConnectionId',
+      'remoteConnectionDetailsVisible',
+      'remoteConnectionsSelected',
+      'currentUserIsHoveringOverConnectionId',
+      'shouldHideConnectionOutline',
+      'currentCardConnections',
+      'filteredConnectionTypeIds',
+      'filteredFrameIds',
+      'filteredTagNames'
+    ]),
+    ...mapGetters([
+      'currentCards/all',
+      'currentUser/isSpaceMember',
+      'currentUser/canEditSpace',
+      'currentConnections/typeByTypeId',
+      'currentCards/byId',
+      'spaceCounterZoomDecimal'
+    ]),
     cards () {
-      const cards = utils.clone(this.$store.getters['currentCards/all'])
+      const cards = utils.clone(this['currentCards/all'])
       const startCard = cards.find(card => card.id === this.startCardId)
       const endCard = cards.find(card => card.id === this.endCardId)
       return { startCard, endCard }
     },
     isHiddenByCommentFilter () {
-      const filterCommentsIsActive = this.$store.state.currentUser.filterComments
+      const filterCommentsIsActive = this.currentUser.filterComments
       if (!filterCommentsIsActive) { return }
       const startCard = this.cards.startCard
       const endCard = this.cards.endCard
@@ -88,17 +120,17 @@ export default {
       const endCardIsComment = startCard.isComment || utils.isNameComment(endCard.name)
       return startCardIsComment || endCardIsComment
     },
-    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
+    isSpaceMember () { return this['currentUser/isSpaceMember']() },
+    canEditSpace () { return this['currentUser/canEditSpace']() },
     id () { return this.connection.id },
     gradientId () { return `gradient-${this.id}` },
     gradientIdReference () { return `url('#${this.gradientId}')` },
-    connectionType () { return this.$store.getters['currentConnections/typeByTypeId'](this.connectionTypeId) },
+    connectionType () { return this['currentConnections/typeByTypeId'](this.connectionTypeId) },
     connectionTypeId () { return this.connection.connectionTypeId },
     startCardId () { return this.connection.startCardId },
     endCardId () { return this.connection.endCardId },
     connectionPath () { return this.connection.path },
-    remoteCardsIsDragging () { return Boolean(this.$store.state.remoteCardsDragging.length) },
+    remoteCardsIsDragging () { return Boolean(this.remoteCardsDragging.length) },
     path () {
       if (this.controlCurve) {
         const { controlPoint, x, y } = this.controlCurve
@@ -118,45 +150,40 @@ export default {
       return this.connectionType.name
     },
     isSelected () {
-      const selectedIds = this.$store.state.multipleConnectionsSelectedIds
+      const selectedIds = this.multipleConnectionsSelectedIds
       return selectedIds.includes(this.id)
     },
     isRemoteSelected () {
-      const remoteConnections = this.$store.state.remoteConnectionsSelected
-      const isSelected = remoteConnections.find(connection => connection.connectionId === this.id)
+      const isSelected = this.remoteConnectionsSelected.find(connection => connection.connectionId === this.id)
       return isSelected
     },
     isCurrentCardConnection () {
-      const currentCardConnections = this.$store.state.currentCardConnections
-      return currentCardConnections.includes(this.id)
+      return this.currentCardConnections.includes(this.id)
     },
     detailsIsVisible () {
-      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
-      if (!canEditSpace) { return }
-      const detailsId = this.$store.state.connectionDetailsIsVisibleForConnectionId
+      if (!this.canEditSpace) { return }
+      const detailsId = this.connectionDetailsIsVisibleForConnectionId
       return detailsId === this.id
     },
     remoteDetailsIsVisible () {
-      const remoteConnections = this.$store.state.remoteConnectionDetailsVisible
-      const isSelected = remoteConnections.find(connection => connection.connectionId === this.id)
+      const isSelected = this.remoteConnectionDetailsVisible.find(connection => connection.connectionId === this.id)
       return isSelected
     },
     shouldAnimate () {
-      if (this.$store.state.currentUserIsDraggingCard) { return }
+      if (this.currentUserIsDraggingCard) { return }
       return Boolean(this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected)
     },
-    isHovered () { return this.id === this.$store.state.currentUserIsHoveringOverConnectionId },
-    shouldHideConnectionOutline () { return this.$store.state.shouldHideConnectionOutline },
+    isHovered () { return this.id === this.currentUserIsHoveringOverConnectionId },
 
     // filters
     filtersIsActive () {
-      const types = this.$store.state.filteredConnectionTypeIds
-      const frames = this.$store.state.filteredFrameIds
-      const tags = this.$store.state.filteredTagNames
+      const types = this.filteredConnectionTypeIds
+      const frames = this.filteredFrameIds
+      const tags = this.filteredTagNames
       return Boolean(types.length + frames.length + tags.length)
     },
     isCardsFilteredByFrame () {
-      const frameIds = this.$store.state.filteredFrameIds
+      const frameIds = this.filteredFrameIds
       const startCard = this.cards.startCard
       const endCard = this.cards.endCard
       const startCardInFilter = frameIds.includes(startCard.frameId)
@@ -164,7 +191,7 @@ export default {
       return startCardInFilter || endCardInFilter
     },
     isConnectionFilteredByType () {
-      const typeIds = this.$store.state.filteredConnectionTypeIds
+      const typeIds = this.filteredConnectionTypeIds
       if (!this.connectionType) { return }
       return typeIds.includes(this.connectionType.id)
     },
@@ -184,18 +211,18 @@ export default {
     },
     isUpdatingPath () {
       let shouldHide
-      const currentUserIsDragging = this.$store.state.currentUserIsDraggingCard
+      const currentUserIsDragging = this.currentUserIsDraggingCard
       let cards = []
-      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
-      const currentCardId = this.$store.state.currentDraggingCardId
-      const remoteCardsDragging = utils.clone(this.$store.state.remoteCardsDragging)
-      const remoteCardsSelected = utils.clone(this.$store.state.remoteCardsSelected)
+      const multipleCardsSelectedIds = this.multipleCardsSelectedIds
+      const currentCardId = this.currentDraggingCardId
+      const remoteCardsDragging = utils.clone(this.remoteCardsDragging)
+      const remoteCardsSelected = utils.clone(this.remoteCardsSelected)
       // local multiple
       if (multipleCardsSelectedIds.length && currentUserIsDragging) {
-        cards = multipleCardsSelectedIds.map(id => this.$store.getters['currentCards/byId'](id))
+        cards = multipleCardsSelectedIds.map(id => this['currentCards/byId'](id))
       // local single
       } else if (currentCardId && currentUserIsDragging) {
-        const currentCard = this.$store.getters['currentCards/byId'](currentCardId)
+        const currentCard = this['currentCards/byId'](currentCardId)
         cards = [currentCard]
       // remote multiple
       } else if (this.remoteCardsIsDragging && remoteCardsSelected.length) {
@@ -220,14 +247,14 @@ export default {
       return shouldHide
     },
     isVisibleInViewport () {
-      if (this.$store.state.disableViewportOptimizations) { return true }
+      if (this.disableViewportOptimizations) { return true }
       if (this.isUpdatingPath) { return true }
       if (!this.connection.path) {
         return
       }
-      const threshold = 400 * this.$store.getters.spaceCounterZoomDecimal
-      const viewport = this.$store.state.viewportHeight * this.$store.getters.spaceCounterZoomDecimal
-      const scroll = this.$store.state.windowScroll.y
+      const threshold = 400 * this.spaceCounterZoomDecimal
+      const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
+      const scroll = this.windowScroll.y
       let y1 = utils.coordsFromConnectionPath(this.connection.path).y
       let y2 = utils.endCoordsFromConnectionPath(this.connection.path).y + y1
       if (y1 > y2) {
@@ -285,7 +312,7 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Connection.showConnectionDetails')
       if (event.shiftKey) {
         this.$store.dispatch('toggleMultipleConnectionsSelected', this.id)
-        this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.$store.state.multipleConnectionsSelectedIds))
+        this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.multipleConnectionsSelectedIds))
         return
       }
       const dialogPosition = utils.cursorPositionInPage(event)

@@ -1,7 +1,7 @@
 <template lang="pug">
 .preload
-  .logo-hover
-  .logo-active
+  //-   .logo-hover
+  //-   .logo-active
 
   template(v-for="url in imageUrls")
     img.hidden(:src="url")

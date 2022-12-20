@@ -34,8 +34,8 @@ export default {
     ...mapState([
     ]),
     ...mapGetters([
-    ])
-    // kinopioDomain () { return utils.kinopioDomain() },
+    ]),
+    abc () { return 'abc' }
   },
   methods: {
   },
