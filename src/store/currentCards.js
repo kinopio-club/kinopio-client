@@ -20,7 +20,8 @@ const currentCards = {
     ids: [],
     cards: {}, // {id, {card}}
     removedCards: [], // denormalized
-    tallestCardHeight: 0
+    tallestCardHeight: 0,
+    inViewport: []
   },
   mutations: {
 
@@ -142,6 +143,9 @@ const currentCards = {
 
     tallestCardHeight: (state, value) => {
       state.tallestCardHeight = value
+    },
+    inViewport: (state, rects) => {
+      state.inViewport = rects
     }
 
   },
@@ -268,6 +272,7 @@ const currentCards = {
     // update
 
     update: (context, card) => {
+      if (!card) { return }
       // prevent null position
       const keys = Object.keys(card)
       if (keys.includes('x') || keys.includes('y')) {
@@ -395,6 +400,7 @@ const currentCards = {
         }
         nextTick(() => {
           card = utils.updateCardDimensions(card)
+          if (!card) { return }
           const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
           if (!dimensionsChanged) { return }
           const body = {
@@ -556,7 +562,7 @@ const currentCards = {
       })
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
       connections = uniqBy(connections, 'id')
-      context.dispatch('currentConnections/updatePaths', { connections }, { root: true })
+      context.dispatch('currentConnections/updatePaths', { connections, shouldUpdateApi: true }, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
@@ -735,7 +741,7 @@ const currentCards = {
           id: nanoid(),
           startCardId,
           endCardId,
-          path: this.$store.getters['currentConnections/connectionBetweenCards'](startCardId, endCardId)
+          path: this.$store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId)
         })
       })
       connections.forEach(connection => {
@@ -852,6 +858,19 @@ const currentCards = {
       let colors = cards.map(card => card.backgroundColor)
       colors = colors.filter(color => Boolean(color))
       return uniq(colors)
+    },
+    cardIdsConnectedToCardId: (state, getters, rootState, rootGetters) => (id) => {
+      const connections = rootGetters['currentConnections/byCardId'](id)
+      let cardIds = []
+      connections.forEach(connection => {
+        if (connection.startCardId !== id) {
+          cardIds.push(connection.startCardId)
+        } else if (connection.endCardId !== id) {
+          cardIds.push(connection.endCardId)
+        }
+      })
+      cardIds = uniq(cardIds)
+      return cardIds
     }
   }
 }

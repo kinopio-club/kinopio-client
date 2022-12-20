@@ -37,8 +37,6 @@ const store = createStore({
     isTouchDevice: false,
     cardsCreatedLimit: 100,
     prevCursorPosition: { x: 0, y: 0 },
-    spaceZoomPercent: 100,
-    pinchCounterZoomDecimal: 1,
     currentSpacePath: '/',
     webfontIsLoaded: false,
     userHasScrolled: false,
@@ -48,6 +46,11 @@ const store = createStore({
     isAddPage: false,
     isAppStoreView: false,
     disableViewportOptimizations: false, // for urlbox
+
+    // zoom and scroll
+    spaceZoomPercent: 100,
+    pinchCounterZoomDecimal: 1,
+    windowScroll: {},
 
     // search
     searchIsVisible: false,
@@ -117,12 +120,12 @@ const store = createStore({
     remoteUserResizingCards: [],
     // dragging cards
     currentDraggingCardId: '',
+    currentDraggingConnectedCardIds: [],
     remoteCardsDragging: [],
     remoteUploadDraggedOverCards: [],
     preventDraggedCardFromShowingDetails: false,
     triggeredTouchCardDragPosition: {},
     cardsWereDragged: false,
-
     // user details
     userDetailsIsVisible: false,
     userDetailsPosition: {}, // x, y, shouldIgnoreZoom
@@ -337,6 +340,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'number', origin: 'pinchCounterZoomDecimal' })
       state.pinchCounterZoomDecimal = value
     },
+    windowScroll: (state, value) => {
+      utils.typeCheck({ value, type: 'object', origin: 'windowScroll' })
+      state.windowScroll = value
+    },
     currentSpacePath: (state, value) => {
       utils.typeCheck({ value, type: 'string', origin: 'currentSpacePath' })
       state.currentSpacePath = value
@@ -370,7 +377,7 @@ const store = createStore({
       state.isAppStoreView = value
     },
     disableViewportOptimizations: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'disableViewportOptimizations' })
+      utils.typeCheck({ value, type: 'boolean', origin: 'disableViewportOptimizations', allowUndefined: true })
       state.disableViewportOptimizations = value
     },
     searchIsVisible: (state, value) => {
@@ -699,6 +706,10 @@ const store = createStore({
     currentDraggingCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'currentDraggingCardId' })
       state.currentDraggingCardId = cardId
+    },
+    currentDraggingConnectedCardIds: (state, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array', origin: 'currentDraggingConnectedCardIds' })
+      state.currentDraggingConnectedCardIds = cardIds
     },
     addToRemoteCardsDragging: (state, update) => {
       utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteCardsDragging' })
@@ -1446,6 +1457,12 @@ const store = createStore({
     spaceDetailsIsPinned: (context, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsIsPinned' })
       context.commit('spaceDetailsIsPinned', value)
+    },
+
+    // scrolling and zoom
+
+    updateWindowScroll: (context) => {
+      context.commit('windowScroll', { x: window.scrollX, y: window.scrollY })
     }
   },
   getters: {

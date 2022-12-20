@@ -26,15 +26,23 @@ export default {
   },
   mounted () {
     this.setPosition()
+    window.addEventListener('scroll', this.updateConnectionIsVisible)
+  },
+  beforeUnmount () {
+    window.removeEventListener('scroll', this.updateConnectionIsVisible)
   },
   data () {
     return {
       position: {},
-      hover: false
+      hover: false,
+      connectionIsVisible: true
     }
   },
   computed: {
-    visible () { return this.connection.labelIsVisible && !this.isUpdatingPath },
+    visible () {
+      const hasPosition = this.position.left && this.position.top
+      return this.connection.labelIsVisible && hasPosition && !this.isUpdatingPath
+    },
     id () { return this.connection.id },
     connectionTypeId () { return this.connection.connectionTypeId },
     connectionType () { return this.$store.getters['currentConnections/typeByTypeId'](this.connectionTypeId) },
@@ -139,10 +147,23 @@ export default {
         event
       })
     },
+    updateConnectionIsVisible () {
+      const connection = document.querySelector(`.connection-path[data-id="${this.id}"]`)
+      const hasChanged = this.connectionIsVisible !== Boolean(connection)
+      if (connection && hasChanged) {
+        this.connectionIsVisible = true
+        this.setPosition()
+      } else {
+        this.connectionIsVisible = false
+      }
+    },
     setPosition () {
+      if (!this.connectionIsVisible) { return }
+      if (!this.connection.path) { return }
       this.$nextTick(() => {
         const zoom = this.$store.getters.spaceCounterZoomDecimal
         let connection = document.querySelector(`.connection-path[data-id="${this.id}"]`)
+        if (!connection) { return }
         connection = connection.getBoundingClientRect()
         let label = this.$refs.label
         let labelOffset

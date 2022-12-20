@@ -1,8 +1,11 @@
 <template lang="pug">
 article#card(
+  v-if="isVisibleInViewport"
   :style="positionStyle"
   :data-card-id="id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
+  :data-is-visible-in-viewport="isVisibleInViewport"
+  :data-is-locked="isLocked"
   :key="id"
   ref="card"
   :class="{'is-resizing': isResizing, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
@@ -48,7 +51,7 @@ article#card(
     .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
-    template(v-if="!isComment && isVisibleInViewport")
+    template(v-if="!isComment")
       ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" :isVisibleInViewport="isVisibleInViewport")
     .bottom-button-wrap(v-if="resizeIsVisible")
       //- resize
@@ -62,7 +65,7 @@ article#card(
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
-      .card-comment(v-if="isComment && isVisibleInViewport" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-comment(v-if="isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
@@ -82,7 +85,7 @@ article#card(
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" :isVisibleInViewport="isVisibleInViewport")
       //- Not Comment
-      .card-content(v-if="!isComment && isVisibleInViewport" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-content(v-if="!isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -220,8 +223,6 @@ let preventSticking = false
 let stickyTimerComplete = false
 let stickyTimer
 
-let observer
-
 export default {
   components: {
     Frames,
@@ -280,11 +281,6 @@ export default {
       if (!isUpdatedSuccess) { return }
       this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
     }
-    observer = new IntersectionObserver(this.handleIntersect, { threshold: 0, rootMargin: '500px 0px 0px 500px' })
-    this.startObserver()
-  },
-  beforeUnmount () {
-    this.stopObserver()
   },
   data () {
     return {
@@ -315,8 +311,7 @@ export default {
       translateX: 0,
       translateY: 0,
       isAnimationUnsticking: false,
-      stickyStretchResistance: 6,
-      isVisibleInViewport: true
+      stickyStretchResistance: 6
     }
   },
   computed: {
@@ -349,9 +344,6 @@ export default {
     isLocked () {
       if (!this.card) { return }
       const isLocked = this.card.isLocked
-      if (isLocked) {
-        this.stopObserver()
-      }
       return isLocked
     },
     shouldJiggle () {
@@ -955,48 +947,27 @@ export default {
       const user = this.createdByUser
       const userDetailsUser = this.$store.state.userDetailsUser
       return user.id === userDetailsUser.id
+    },
+    isVisibleInViewport () {
+      if (this.$store.state.disableViewportOptimizations) { return true }
+      if (this.shouldJiggle) { return true }
+      if (this.$store.state.currentDraggingConnectedCardIds.includes(this.id)) { return true }
+      if (this.isPlayingAudio) { return true }
+      const threshold = 400 * this.$store.getters.spaceCounterZoomDecimal
+      const fallbackHeight = 200
+      const viewport = this.$store.state.viewportHeight * this.$store.getters.spaceCounterZoomDecimal
+      const min = this.$store.state.windowScroll.y - threshold
+      const max = this.$store.state.windowScroll.y + viewport + threshold
+      const y = this.y * this.$store.getters.spaceZoomDecimal
+      const isTopVisible = utils.isBetween({ value: y, min, max })
+      let height = this.card.height || fallbackHeight
+      height = height * this.$store.getters.spaceZoomDecimal
+      const isBottomVisible = utils.isBetween({ value: y + height, min, max })
+      const isVisible = isTopVisible || isBottomVisible
+      return isVisible
     }
-
   },
   methods: {
-
-    // intersection observer
-
-    stopObserver () {
-      if (!observer) { return }
-      observer.disconnect()
-    },
-    startObserver () {
-      if (this.$store.state.disableViewportOptimizations) { return }
-      if (!this.$refs.card) { return }
-      this.$nextTick(() => {
-        observer.observe(this.$refs.card)
-      })
-    },
-    restartObserver () {
-      this.isVisibleInViewport = true
-      this.stopObserver()
-      this.startObserver()
-    },
-    handleIntersect (entries, observer) {
-      const entry = entries[0]
-      // restart incorrectly triggered observers
-      if (entry.target.dataset.cardId !== this.card.id) {
-        this.restartObserver()
-        return
-      }
-      // keep playing audio cards
-      if (this.isPlayingAudio) { return }
-      console.log('💐 observe card intersect:', this.card.name, this.card.id, entry.target.dataset.cardId, entry.isIntersecting)
-      this.isVisibleInViewport = entry.isIntersecting
-      if (entry.isIntersecting) {
-        this.$nextTick(() => {
-          this.$nextTick(() => {
-            this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id })
-          })
-        })
-      }
-    },
 
     // mouse handlers
 
@@ -1513,6 +1484,8 @@ export default {
       event.preventDefault()
       if (this.$store.state.currentUserIsDrawingConnection) { return }
       this.$store.dispatch('closeAllDialogs', 'Card.startDraggingCard')
+      let connectedCardIds = this.$store.getters['currentCards/cardIdsConnectedToCardId'](this.id)
+      this.$store.commit('currentDraggingConnectedCardIds', connectedCardIds)
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
       const updates = {

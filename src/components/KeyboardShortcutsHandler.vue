@@ -221,7 +221,8 @@ export default {
       const isPanScope = checkIsPanScope(event)
       const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
       const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox
-      const shouldPan = isRightClick && isPanScope && import.meta.env.MODE !== 'development'
+      const userDisablePan = this.$store.state.currentUser.shouldDisableRightClickToPan
+      const shouldPan = isRightClick && isPanScope && !userDisablePan
       const position = utils.cursorPositionInPage(event)
       if (shouldBoxSelect) {
         event.preventDefault()
@@ -436,7 +437,7 @@ export default {
       let connection = {
         startCardId: baseCardId,
         endCardId: currentCardId,
-        path: this.$store.getters['currentConnections/connectionBetweenCards'](baseCardId, currentCardId, controlPoint),
+        path: this.$store.getters['currentConnections/connectionPathBetweenCards'](baseCardId, currentCardId, controlPoint),
         controlPoint
       }
       this.addConnectionType()

@@ -164,7 +164,7 @@ export default {
       this.$nextTick(() => {
         startCardIds.forEach(startCardId => {
           const controlPoint = this.$store.state.currentUser.defaultConnectionControlPoint
-          const path = this.$store.getters['currentConnections/connectionBetweenCards'](startCardId, endCardId, controlPoint)
+          const path = this.$store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId, controlPoint)
           const connection = { startCardId, endCardId, path, controlPoint }
           this.addConnection(connection)
         })
