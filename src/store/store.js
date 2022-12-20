@@ -69,6 +69,7 @@ const store = createStore({
     currentUserIsPaintingLocked: false,
     currentUserIsDraggingCard: false,
     currentUserIsHoveringOverConnectionId: '',
+    currentUserIsHoveringOverCardId: '',
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
@@ -474,6 +475,10 @@ const store = createStore({
     currentUserIsHoveringOverConnectionId: (state, connectionId) => {
       utils.typeCheck({ value: connectionId, type: 'string', origin: 'currentUserIsHoveringOverConnectionId' })
       state.currentUserIsHoveringOverConnectionId = connectionId
+    },
+    currentUserIsHoveringOverCardId: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'currentUserIsHoveringOverCardId' })
+      state.currentUserIsHoveringOverCardId = cardId
     },
     cardDetailsIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'cardDetailsIsVisibleForCardId' })
