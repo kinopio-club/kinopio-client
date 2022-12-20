@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
+dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned}")
   section
     SpaceDetailsInfo(@updateSpaces="updateLocalSpaces" @closeDialogs="closeDialogs")
     .button-wrap(v-if="isSpaceMember")
@@ -58,6 +58,7 @@ import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
 import dayjs from 'dayjs'
+import { mapState, mapGetters } from 'vuex'
 
 let shouldUpdateFavorites = true
 const maxIterations = 30
@@ -111,12 +112,24 @@ export default {
     }
   },
   computed: {
-    currentSpaceIsHidden () { return this.$store.state.currentSpace.isHidden },
+    ...mapState([
+      'currentSpace',
+      'currentUser',
+      'spaceDetailsIsPinned'
+    ]),
+    ...mapGetters([
+      'currentUser/isSignedIn',
+      'currentUser/isSpaceCollaborator',
+      'currentUser/isSpaceMember',
+      'cachedOrOtherSpaceById',
+      'currentUser/canEditSpace'
+    ]),
+    currentSpaceIsHidden () { return this.currentSpace.isHidden },
     style () { return { maxHeight: this.dialogHeight + 'px' } },
-    spaceName () { return this.$store.state.currentSpace.name },
-    spaceFilterShowHiddenIsActive () { return this.$store.state.currentUser.dialogSpaceFilterShowHidden },
-    dialogSpaceFilters () { return this.$store.state.currentUser.dialogSpaceFilters },
-    dialogSpaceFilterByUser () { return this.$store.state.currentUser.dialogSpaceFilterByUser },
+    spaceName () { return this.currentSpace.name },
+    spaceFilterShowHiddenIsActive () { return this.currentUser.dialogSpaceFilterShowHidden },
+    dialogSpaceFilters () { return this.currentUser.dialogSpaceFilters },
+    dialogSpaceFilterByUser () { return this.currentUser.dialogSpaceFilterByUser },
     spaceFiltersIsActive () {
       return Boolean(this.spaceFilterShowHiddenIsActive || this.dialogSpaceFilters || utils.objectHasKeys(this.dialogSpaceFilterByUser))
     },
@@ -144,19 +157,17 @@ export default {
       }
       return spaces
     },
-    currentSpace () { return this.$store.state.currentSpace },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentUserIsSignedIn () { return this['currentUser/isSignedIn'] },
     shouldShowInExplore () {
-      const privacy = this.$store.state.currentSpace.privacy
+      const privacy = this.currentSpace.privacy
       if (privacy === 'private') { return false }
-      return this.$store.state.currentSpace.showInExplore
+      return this.currentSpace.showInExplore
     },
     isSpaceMember () {
-      const currentSpace = this.$store.state.currentSpace
-      return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
+      return this['currentUser/isSpaceMember'](this.currentSpace)
     },
     removeLabel () {
-      const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
+      const currentUserIsSpaceCollaborator = this['currentUser/isSpaceCollaborator']()
       if (currentUserIsSpaceCollaborator) {
         return 'Leave'
       } else {
@@ -164,11 +175,10 @@ export default {
       }
     },
     currentSpaceIsTemplate () {
-      const id = this.$store.state.currentSpace.id
+      const id = this.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
-    },
-    dialogIsPinned () { return this.$store.state.spaceDetailsIsPinned }
+    }
   },
   methods: {
     clearAllFilters () {
@@ -213,21 +223,19 @@ export default {
       this.closeDialogs()
     },
     changeToLastSpace () {
-      const currentSpace = this.$store.state.currentSpace
-      const spaces = this.spaces.filter(space => space.id !== currentSpace.id)
+      const spaces = this.spaces.filter(space => space.id !== this.currentSpace.id)
       if (spaces.length) {
-        const cachedSpace = this.$store.getters.cachedOrOtherSpaceById(this.$store.state.currentUser.prevLastSpaceId)
+        const cachedSpace = this.cachedOrOtherSpaceById(this.currentUser.prevLastSpaceId)
         this.$store.dispatch('currentSpace/changeSpace', { space: cachedSpace || spaces[0] })
       } else {
         this.addSpace()
       }
     },
     removeCurrentSpace () {
-      const currentUser = this.$store.state.currentUser
-      const currentSpaceId = this.$store.state.currentSpace.id
-      const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
+      const currentSpaceId = this.currentSpace.id
+      const currentUserIsSpaceCollaborator = this['currentUser/isSpaceCollaborator']()
       if (currentUserIsSpaceCollaborator) {
-        this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', currentUser)
+        this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', this.currentUser)
       } else {
         this.$store.dispatch('currentSpace/removeCurrentSpace')
         this.$store.commit('notifyCurrentSpaceIsNowRemoved', true)
@@ -250,7 +258,7 @@ export default {
       return favoriteSpaces.concat(spaces)
     },
     updateFavoriteSpaces (spaces) {
-      const userFavoriteSpaces = this.$store.state.currentUser.favoriteSpaces
+      const userFavoriteSpaces = this.currentUser.favoriteSpaces
       const favoriteSpaceIds = userFavoriteSpaces.map(space => space.id)
       spaces = spaces.map(space => {
         if (favoriteSpaceIds.includes(space.id)) {
@@ -273,15 +281,14 @@ export default {
     },
     debouncedUpdateLocalSpaces: debounce(async function () {
       this.$nextTick(() => {
-        const currentUser = this.$store.state.currentUser
         let userSpaces = cache.getAllSpaces().filter(space => {
-          return this.$store.getters['currentUser/canEditSpace'](space)
+          return this['currentUser/canEditSpace'](space)
         })
         userSpaces = this.updateWithExistingRemoteSpaces(userSpaces)
         userSpaces = this.sortSpacesByEditedOrCreatedAt(userSpaces)
         userSpaces = this.updateFavoriteSpaces(userSpaces)
         userSpaces = this.updateInboxSpace(userSpaces)
-        this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
+        this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, this.currentUser)
       })
     }, 350, { leading: true }),
     removeRemovedCachedSpaces (remoteSpaces) {
