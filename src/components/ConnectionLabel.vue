@@ -1,7 +1,7 @@
 <template lang="pug">
 .connection-label.badge(
   v-if="visible"
-  :style="{ background: typeColor, left: position.left + 'px', top: position.top + 'px'}"
+  :style="styles"
   @click.left="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
   @touchstart="checkIsMultiTouch"
@@ -42,6 +42,13 @@ export default {
     visible () {
       const hasPosition = this.position.left && this.position.top
       return this.connection.labelIsVisible && hasPosition && !this.isUpdatingPath
+    },
+    styles () {
+      return {
+        background: this.typeColor,
+        left: this.position.left + 'px',
+        top: this.position.top + 'px'
+      }
     },
     id () { return this.connection.id },
     connectionTypeId () { return this.connection.connectionTypeId },
