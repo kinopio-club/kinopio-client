@@ -235,6 +235,30 @@ export default {
     }
     return { x, y }
   },
+  cursorPositionInSpace (event, position) {
+    position = position || this.cursorPositionInPage(event)
+    // #space
+    const space = document.getElementById('space')
+    let rect = space.getBoundingClientRect()
+    position = {
+      x: position.x - rect.x,
+      y: position.y - rect.y
+    }
+    // #app
+    const app = document.getElementById('app')
+    rect = app.getBoundingClientRect()
+    position = {
+      x: position.x + rect.x,
+      y: position.y + rect.y
+    }
+    // zoom
+    let zoom = this.spaceCounterZoomDecimal() || 1
+    position = {
+      x: Math.round(position.x * zoom),
+      y: Math.round(position.y * zoom)
+    }
+    return position
+  },
   childDialogPositionFromParent ({ element, offsetX, offsetY, shouldIgnoreZoom }) {
     element = element.closest('li') || element.closest('.badge') || element.closest('button') || element
     offsetX = offsetX || 0
