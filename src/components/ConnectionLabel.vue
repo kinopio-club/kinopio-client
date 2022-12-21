@@ -161,7 +161,6 @@ export default {
       const hasChanged = this.connectionIsVisible !== Boolean(connection)
       if (connection && hasChanged) {
         this.connectionIsVisible = true
-        this.setPosition()
       } else {
         this.connectionIsVisible = false
       }
