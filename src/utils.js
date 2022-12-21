@@ -259,6 +259,25 @@ export default {
     }
     return position
   },
+  outsideSpaceOffset () {
+    const space = document.getElementById('space')
+    if (!space) { return }
+    const spaceRect = space.getBoundingClientRect()
+    const app = document.getElementById('app')
+    const appRect = app.getBoundingClientRect()
+    return {
+      x: Math.round(spaceRect.x - appRect.x),
+      y: Math.round(spaceRect.y - appRect.y)
+    }
+  },
+  updatePositionWithSpaceOffset (position) {
+    const spaceOffset = this.outsideSpaceOffset()
+    if (!spaceOffset) { return position }
+    return {
+      x: position.x - spaceOffset.x,
+      y: position.y - spaceOffset.y
+    }
+  },
   childDialogPositionFromParent ({ element, offsetX, offsetY, shouldIgnoreZoom }) {
     element = element.closest('li') || element.closest('.badge') || element.closest('button') || element
     offsetX = offsetX || 0

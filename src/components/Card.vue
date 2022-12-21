@@ -1002,10 +1002,11 @@ export default {
       if (this.isPlayingAudio) { return true }
       const threshold = 400 * this.spaceCounterZoomDecimal
       const fallbackHeight = 200
+      const offset = utils.outsideSpaceOffset().y
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      const min = this.windowScroll.y - threshold
-      const max = this.windowScroll.y + viewport + threshold
-      const y = this.y * this.spaceZoomDecimal
+      const min = this.windowScroll.y - offset - threshold
+      const max = this.windowScroll.y - offset + viewport + threshold
+      let y = this.y
       const isTopVisible = utils.isBetween({ value: y, min, max })
       let height = this.card.height || fallbackHeight
       height = height * this.spaceZoomDecimal
