@@ -4,7 +4,7 @@ export default {
   spaceZoom () {
     return {
       max: 100,
-      min: 40
+      min: 20
     }
   }
 }
