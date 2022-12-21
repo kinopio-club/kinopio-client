@@ -48,10 +48,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
       .row(v-if="spaceUserIsUpgraded")
         .badge.status
           p
-            .badge-wrap
-              .badge.inline-user-badge(:style="{background: spaceUser.color}")
-                User(:user="spaceUser" :detailsOnRight="true" :isClickable="false")
-                span {{spaceUser.name}}
+            UserLabelInline(:user="spaceUser")
             span is upgraded, so cards you create in this space won't change your card count
 
     section(v-if="!isAddPage")
@@ -104,6 +101,7 @@ import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import UserBadges from '@/components/UserBadges.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import { defineAsyncComponent } from 'vue'
@@ -119,7 +117,8 @@ export default {
     User,
     Loader,
     UserBadges,
-    SpacePicker
+    SpacePicker,
+    UserLabelInline
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -365,9 +364,6 @@ export default {
 
   .upgrade-user
     max-height calc(100vh - 175px)
-
-  .inline-user-badge
-    display inline-flex !important
 
   textarea
     margin-bottom 0
