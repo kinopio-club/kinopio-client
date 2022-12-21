@@ -51,6 +51,7 @@ const store = createStore({
     spaceZoomPercent: 100,
     pinchCounterZoomDecimal: 1,
     windowScroll: {},
+    zoomOrigin: {},
 
     // search
     searchIsVisible: false,
@@ -343,6 +344,10 @@ const store = createStore({
     windowScroll: (state, value) => {
       utils.typeCheck({ value, type: 'object', origin: 'windowScroll' })
       state.windowScroll = value
+    },
+    zoomOrigin: (state, value) => {
+      utils.typeCheck({ value, type: 'object', origin: 'zoomOrigin' })
+      state.zoomOrigin = value
     },
     currentSpacePath: (state, value) => {
       utils.typeCheck({ value, type: 'string', origin: 'currentSpacePath' })
