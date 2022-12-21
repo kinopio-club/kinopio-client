@@ -9,7 +9,7 @@
   ref="user"
   :title="title"
 )
-  .user-avatar
+  .user-avatar-inline
     img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
   span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ user.name }}
 </template>
@@ -67,13 +67,13 @@ export default {
   display inline-block
   min-height initial
   padding 0 2px
-  .user-avatar
+  .user-avatar-inline
     width 4px
     margin-right 4px
     display inline-block
     .anon-avatar
       left 4px
-      top 7px
+      top 8px
       width 10.5px
   .user-name
     margin-left 6px

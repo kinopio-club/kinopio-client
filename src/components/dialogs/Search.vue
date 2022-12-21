@@ -23,20 +23,17 @@ dialog.search(@click="closeDialogs" v-if="visible" :open="visible" ref="dialog" 
             img.icon.time(src="@/assets/time.svg")
             span {{ relativeDate(card) }}
 
-          template(v-if="card.user.id")
-            span.badge.user-badge.user-badge(v-if="userIsNotCurrentUser(card.user.id)" :style="{background: card.user.color}")
-              User(:user="card.user" :isClickable="false" :hideYouLabel="true")
-              span {{card.user.name}}
+          UserLabelInline(v-if="userIsNotCurrentUser(card.user.id)" :user="card.user")
+
           span.card-info
             template(v-for="segment in card.nameSegments")
               img.card-image(v-if="segment.isImage" :src="segment.url")
               NameSegment(:segment="segment" :search="search" :isStrikeThrough="isStrikeThrough(card)")
-
 </template>
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
-import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import SearchFilters from '@/components/SearchFilters.vue'
 import utils from '@/utils.js'
@@ -52,7 +49,7 @@ export default {
   name: 'Search',
   components: {
     ResultsFilter,
-    User,
+    UserLabelInline,
     NameSegment,
     SearchFilters
   },
