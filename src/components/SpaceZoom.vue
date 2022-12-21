@@ -2,6 +2,7 @@
 .space-zoom
   Slider(
     @updatePlayhead="updateSpaceZoom"
+    @resetPlayhead="resetZoomOrigin"
     :minValue="min"
     :value="spaceZoomPercent"
     :maxValue="max"
@@ -83,6 +84,9 @@ export default {
     closeAllDialogs () {
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('closeAllDialogs', 'SpaceZoom')
+    },
+    resetZoomOrigin () {
+      this.$store.commit('zoomOrigin', { x: 0, y: 0 })
     }
   }
 }

@@ -106,6 +106,7 @@ export default {
     resetPlayhead () {
       this.playheadIsBeingDragged = false
       this.$emit('updatePlayhead', this.maxValue)
+      this.$emit('resetPlayhead')
       this.$nextTick(() => {
         this.updateButtonPosition()
       })
