@@ -124,7 +124,7 @@ export default {
       return {
         width: `${this.pageWidth * zoom}px`,
         height: `${this.pageHeight * zoom}px`,
-        transform: `scale(${this.spaceZoomDecimal})`
+        transform: this.$store.getters.zoomTransform
       }
     },
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
