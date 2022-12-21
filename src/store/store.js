@@ -1515,12 +1515,8 @@ const store = createStore({
     },
     zoomTransform: (state, getters) => {
       const zoom = getters.spaceZoomDecimal
-      const { x, y } = state.zoomOrigin
-      // x = x * zoom
-      // y = y * zoom
-      // const x = 0
-      // const y = 0
-      const transform = `matrix(${zoom}, 0, 0, ${zoom}, ${x}, ${y})`
+      const origin = state.zoomOrigin
+      const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
       return transform
     }
   },
