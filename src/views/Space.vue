@@ -467,6 +467,7 @@ export default {
   pointer-events none // so that painting can receive events
   position relative // used by svg connections
   transform-origin top left
+  z-index 0
   &.hidden-by-mindmap
     opacity 0.4
   .card-overlap-indicator
