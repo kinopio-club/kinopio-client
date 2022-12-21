@@ -338,6 +338,7 @@ body
 
 .app
   position relative
+  overflow hidden // enforces state.pageHeight/pageWidth
   > .development-badge
     min-height initial
     left initial
