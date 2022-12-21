@@ -1003,9 +1003,10 @@ export default {
       const threshold = 400 * this.spaceCounterZoomDecimal
       const fallbackHeight = 200
       const offset = utils.outsideSpaceOffset().y
+      const scroll = this.windowScroll.y - offset
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      const min = this.windowScroll.y - offset - threshold
-      const max = this.windowScroll.y - offset + viewport + threshold
+      const min = scroll - threshold
+      const max = scroll + viewport + threshold
       let y = this.y
       const isTopVisible = utils.isBetween({ value: y, min, max })
       let height = this.card.height || fallbackHeight

@@ -253,8 +253,9 @@ export default {
         return
       }
       const threshold = 400 * this.spaceCounterZoomDecimal
+      const offset = utils.outsideSpaceOffset().y
+      const scroll = this.windowScroll.y - offset
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      const scroll = this.windowScroll.y
       let y1 = utils.coordsFromConnectionPath(this.connection.path).y
       let y2 = utils.endCoordsFromConnectionPath(this.connection.path).y + y1
       if (y1 > y2) {
