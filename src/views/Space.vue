@@ -393,8 +393,16 @@ export default {
     },
     addOrCloseCard (event) {
       if (this.$store.state.shouldAddCard) {
-        const position = utils.cursorPositionInPage(event)
-        this.addCard(position)
+        let position = utils.cursorPositionInSpace(event)
+        // prevent addCard if position is outside space
+        if (utils.isPositionOutsideOfSpace(position)) {
+          position = utils.cursorPositionInPage(event)
+          this.$store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+          return
+        }
+        // add card
+        this.addCard(event)
+      // close item details
       } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
         this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
       }
