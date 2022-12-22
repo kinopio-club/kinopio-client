@@ -71,6 +71,7 @@ export default {
       this.$store.commit('spaceZoomPercent', percent)
     },
     updateSpaceZoom (percent) {
+      this.centerZoomOrigin()
       this.updateSpaceZoomPercent(percent)
     },
     updateSpaceZoomPercent (percent) {
@@ -88,6 +89,14 @@ export default {
     },
     resetZoomOrigin () {
       this.$store.commit('zoomOrigin', { x: 0, y: 0 })
+    },
+    centerZoomOrigin () {
+      const scroll = this.$store.state.windowScroll
+      const origin = {
+        x: scroll.x + (this.$store.state.viewportWidth / 2),
+        y: scroll.y + (this.$store.state.viewportHeight / 2)
+      }
+      this.$store.commit('zoomOrigin', origin)
     }
   }
 }

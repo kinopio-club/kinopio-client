@@ -57,8 +57,8 @@ export default {
       this.$store.dispatch('updateWindowScroll')
     },
     updateZoomOrigin (event) {
-      console.log(event, utils.cursorPositionInPage(event))
-      this.$store.commit('zoomOrigin', utils.cursorPositionInPage(event))
+      const cursor = utils.cursorPositionInPage(event)
+      this.$store.commit('zoomOrigin', cursor)
     }
   }
 }
