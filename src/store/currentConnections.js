@@ -377,8 +377,9 @@ export default {
     },
     connectionPathBetweenCards: (state, getters) => (startCardId, endCardId, controlPoint) => {
       let start = utils.connectorCoords(startCardId)
-      start = utils.cursorPositionInSpace(null, start)
       let end = utils.connectorCoords(endCardId)
+      if (!start || !end) { return }
+      start = utils.cursorPositionInSpace(null, start)
       end = utils.cursorPositionInSpace(null, end)
       return getters.connectionPathBetweenCoords(start, end, controlPoint)
     },
