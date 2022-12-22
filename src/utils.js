@@ -776,6 +776,10 @@ export default {
   emptyCard () {
     return { width: 76, height: 32 }
   },
+  spaceBetweenCards () {
+    let spaceBetween = 12
+    return this.spaceZoomDecimal() * spaceBetween
+  },
   isItemInViewport (item, zoom) {
     let viewport = this.visualViewport()
     zoom = zoom || 1
