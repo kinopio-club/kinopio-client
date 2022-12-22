@@ -1518,6 +1518,10 @@ const store = createStore({
       const origin = state.zoomOrigin
       const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
       return transform
+    },
+    windowScrollWithSpaceOffset: (state) => {
+      let scroll = state.windowScroll
+      return utils.updatePositionWithSpaceOffset(scroll)
     }
   },
 
