@@ -711,7 +711,7 @@ export default {
         z = 0
         pointerEvents = 'none'
       }
-      return {
+      let styles = {
         left: `${this.x}px`,
         top: `${this.y}px`,
         zIndex: z,
@@ -720,6 +720,13 @@ export default {
         pointerEvents,
         transform: `translate(${this.translateX}, ${this.translateY})`
       }
+      // during drag, use element position to not interfere with currentCards/moveWhileDragging
+      if (this.isBeingDragged) {
+        const { x, y } = utils.cardPositionFromElement(this.card.id)
+        styles.left = x + 'px'
+        styles.top = y + 'px'
+      }
+      return styles
     },
     canEditCard () { return this['currentUser/canEditCard'](this.card) },
     normalizedName () {
