@@ -320,29 +320,37 @@ export default {
       let childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
       const childCardData = this.$store.getters['currentCards/byId'](childCardId)
       const shouldOutdentChildToParent = childCard && !childCardData
-      let initialPosition = {}
+      let position = {}
       let isParentCard = true
       if (shouldOutdentChildToParent) {
         const rect = childCard.getBoundingClientRect()
         const parentRect = parentCard.getBoundingClientRect()
-        initialPosition.x = window.pageXOffset + parentRect.x
-        initialPosition.y = window.pageYOffset + rect.y
+        position = {
+          x: window.pageXOffset + parentRect.x,
+          y: window.pageYOffset + rect.y
+        }
         childCard = false
       } else if (childCard) {
         isParentCard = false
         const rect = childCard.getBoundingClientRect()
-        initialPosition.x = window.pageXOffset + rect.x
-        initialPosition.y = window.pageYOffset + rect.y + rect.height + incrementPosition
+        position = {
+          x: window.pageXOffset + rect.x,
+          y: window.pageYOffset + rect.y + rect.height + incrementPosition
+        }
       } else if (parentCard) {
         const rect = parentCard.getBoundingClientRect()
-        initialPosition.x = window.pageXOffset + rect.x
-        initialPosition.y = window.pageYOffset + rect.y + rect.height + incrementPosition
+        position = {
+          x: window.pageXOffset + rect.x,
+          y: window.pageYOffset + rect.y + rect.height + incrementPosition
+        }
       } else {
-        initialPosition.x = window.pageXOffset + 40
-        initialPosition.y = window.pageYOffset + 80
+        position = {
+          x: window.pageXOffset + 40,
+          y: window.pageYOffset + 80
+        }
       }
-      initialPosition = this.updateWithZoom(initialPosition)
-      const position = this.nonOverlappingCardPosition(initialPosition)
+      position = this.updateWithZoom(position)
+      position = this.nonOverlappingCardPosition(position)
       parentCard = this.$store.getters['currentCards/byId'](parentCardId)
       let backgroundColor
       if (parentCard) {
