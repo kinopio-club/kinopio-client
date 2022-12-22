@@ -128,6 +128,12 @@ const currentCards = {
       state.removedCards = state.removedCards.filter(removedCard => removedCard.id !== cardId)
       cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
     },
+    moveWhileDragging: (state, cards) => {
+      cards.forEach(card => {
+        state.cards[card.id].x = card.x
+        state.cards[card.id].y = card.y
+      })
+    },
 
     // broadcast
 
@@ -453,14 +459,6 @@ const currentCards = {
 
     // move
 
-    moveWhileDragging: (state, cards) => {
-      cards.forEach(card => {
-        const element = document.querySelector(`article[data-card-id="${card.id}"]`)
-        element.style.left = card.x + 'px'
-        element.style.top = card.y + 'px'
-      })
-    },
-
     move: (context, { endCursor, prevCursor, delta }) => {
       const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
@@ -517,7 +515,7 @@ const currentCards = {
         return card
       })
       // update
-      context.dispatch('moveWhileDragging', cards)
+      context.commit('moveWhileDragging', cards)
       connections = uniqBy(connections, 'id')
       context.commit('cardsWereDragged', true, { root: true })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
@@ -625,6 +623,7 @@ const currentCards = {
       const card = context.getters.byId(id)
       if (!card) { return }
       if (card.isLocked) { return }
+      if (id === context.rootState.currentDraggingCardId) { return }
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
       let cards = context.getters.all
       let highestCardZ = utils.highestCardZ(cards)

@@ -711,7 +711,7 @@ export default {
         z = 0
         pointerEvents = 'none'
       }
-      return {
+      let styles = {
         left: `${this.x}px`,
         top: `${this.y}px`,
         zIndex: z,
@@ -720,6 +720,7 @@ export default {
         pointerEvents,
         transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
       }
+      return styles
     },
     canEditCard () { return this['currentUser/canEditCard'](this.card) },
     normalizedName () {
@@ -999,6 +1000,7 @@ export default {
       if (this.disableViewportOptimizations) { return true }
       if (this.shouldJiggle) { return true }
       if (this.currentDraggingConnectedCardIds.includes(this.id)) { return true }
+      if (this.isBeingDragged) { return true }
       if (this.isPlayingAudio) { return true }
       const threshold = 400 * this.spaceCounterZoomDecimal
       const fallbackHeight = 200
