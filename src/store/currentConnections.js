@@ -237,7 +237,8 @@ export default {
     updatePathsWhileDragging: (context, { connections }) => {
       const paths = connections.map(connection => {
         const path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
-        context.commit('updatePath', { connection, path })
+        const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
+        element.setAttribute('d', path)
       })
       context.dispatch('broadcast/update', { updates: { connections, paths }, type: 'updateConnection', handler: 'currentConnections/updatePathsWhileDraggingBroadcast' }, { root: true })
     },
