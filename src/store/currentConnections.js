@@ -79,6 +79,9 @@ export default {
       state.connections[connection.id].spaceId = currentSpaceId
       cache.updateSpaceConnectionsDebounced(state.connections, currentSpaceId)
     },
+    updatePathWhileDragging: (state, { connection, path }) => {
+      state.connections[connection.id].path = path
+    },
     updateType: (state, type) => {
       const keys = Object.keys(type)
       keys.forEach(key => {
@@ -237,8 +240,7 @@ export default {
     updatePathsWhileDragging: (context, { connections }) => {
       const paths = connections.map(connection => {
         const path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
-        const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
-        element.setAttribute('d', path)
+        context.commit('updatePathWhileDragging', { connection, path })
       })
       context.dispatch('broadcast/update', { updates: { connections, paths }, type: 'updateConnection', handler: 'currentConnections/updatePathsWhileDraggingBroadcast' }, { root: true })
     },
