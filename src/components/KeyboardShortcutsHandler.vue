@@ -372,6 +372,8 @@ export default {
     addChildCard () {
       useSiblingConnectionType = false
       const spaceBetweenCards = utils.spaceBetweenCards()
+      let scroll = this.$store.state.windowScroll
+      scroll = utils.updatePositionWithSpaceOffset(scroll)
       const parentCardId = this.$store.state.parentCardId
       const childCardId = this.$store.state.childCardId
       let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
@@ -388,8 +390,8 @@ export default {
       }
       const rect = baseCard.getBoundingClientRect()
       let initialPosition = {
-        x: window.pageXOffset + rect.x + rect.width + spaceBetweenCards,
-        y: window.pageYOffset + rect.y + rect.height + spaceBetweenCards
+        x: scroll.x + rect.x + rect.width + spaceBetweenCards,
+        y: scroll.y + rect.y + rect.height + spaceBetweenCards
       }
       initialPosition = this.updateWithZoom(initialPosition)
       const position = this.nonOverlappingCardPosition(initialPosition)
