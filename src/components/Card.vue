@@ -720,12 +720,6 @@ export default {
         pointerEvents,
         transform: `translate(${this.translateX}, ${this.translateY})`
       }
-      // during drag, use element position to not interfere with currentCards/moveWhileDragging
-      if (this.isBeingDragged) {
-        const { x, y } = utils.cardPositionFromElement(this.card.id)
-        styles.left = x + 'px'
-        styles.top = y + 'px'
-      }
       return styles
     },
     canEditCard () { return this['currentUser/canEditCard'](this.card) },
