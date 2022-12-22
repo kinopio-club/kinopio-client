@@ -133,10 +133,7 @@ export default {
     remoteCardsIsDragging () { return Boolean(this.remoteCardsDragging.length) },
     path () {
       let path
-      if (this.currentUserIsDraggingCard) {
-        const element = this.$refs.connection
-        path = element.getAttribute('d')
-      } else if (this.controlCurve) {
+      if (this.controlCurve) {
         const { controlPoint, x, y } = this.controlCurve
         path = this.curvedPath || this.connection.path
         path = this.updatedPath(path, controlPoint, x, y)
