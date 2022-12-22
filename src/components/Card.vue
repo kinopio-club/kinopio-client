@@ -999,6 +999,7 @@ export default {
       if (this.disableViewportOptimizations) { return true }
       if (this.shouldJiggle) { return true }
       if (this.currentDraggingConnectedCardIds.includes(this.id)) { return true }
+      if (this.isBeingDragged) { return true }
       if (this.isPlayingAudio) { return true }
       const threshold = 400 * this.spaceCounterZoomDecimal
       const fallbackHeight = 200
