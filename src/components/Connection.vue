@@ -132,14 +132,15 @@ export default {
     connectionPath () { return this.connection.path },
     remoteCardsIsDragging () { return Boolean(this.remoteCardsDragging.length) },
     path () {
+      let path
       if (this.controlCurve) {
         const { controlPoint, x, y } = this.controlCurve
-        const path = this.curvedPath || this.connection.path
-        const curvedPath = this.updatedPath(path, controlPoint, x, y)
-        return curvedPath
+        path = this.curvedPath || this.connection.path
+        path = this.updatedPath(path, controlPoint, x, y)
       } else {
-        return this.connection.path
+        path = this.connection.path
       }
+      return path
     },
     typeColor () {
       if (!this.connectionType) { return }
