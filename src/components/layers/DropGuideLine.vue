@@ -5,8 +5,6 @@ aside
 </template>
 
 <script>
-import utils from '@/utils.js'
-
 import { nanoid } from 'nanoid'
 
 let canvas, context, remoteCanvas, remoteContext, paintingGuidesTimer, remotePaintingGuidesTimer
@@ -29,8 +27,10 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUpdateRemoteDropGuideLine') {
-        let curve = mutation.payload
-        this.addRemoteCurve(curve)
+        let update = mutation.payload
+        update.startPoint = this.updateRemotePosition(update.startPoint)
+        update.curve = this.createCurve(update.startPoint)
+        this.addRemoteCurve(update)
         this.remotePainting()
       }
       if (mutation.type === 'triggerUpdateStopRemoteUserDropGuideLine') {
@@ -62,6 +62,16 @@ export default {
 
     // curves
 
+    updateRemotePosition (position) {
+      const zoom = this.$store.getters.spaceZoomDecimal
+      const space = document.getElementById('space')
+      const rect = space.getBoundingClientRect()
+      position = {
+        x: (position.x * zoom) + rect.x,
+        y: (position.y * zoom) + rect.y
+      }
+      return position
+    },
     createCurve (startPoint) {
       const numberOfControlPoints = 4
       const lineSegmentLength = lineWidth / numberOfControlPoints
@@ -154,6 +164,7 @@ export default {
       context.strokeStyle = this.currentUserColor
       context.lineWidth = 4
       context.lineCap = 'round'
+      // paint curve
       let startPoint = {
         x: this.currentCursor.x,
         y: this.currentCursor.y
@@ -161,9 +172,12 @@ export default {
       let curve = this.createCurve(startPoint)
       this.paintCurve(context, curve)
       // broadcast curve
-      startPoint = utils.updatePositionWithSpaceOffset(startPoint)
-      curve = this.createCurve(startPoint)
-      this.broadcastCursorAndCurve({ curve, color: this.currentUserColor })
+      const scroll = this.$store.state.windowScroll
+      startPoint = {
+        x: this.currentCursor.x + scroll.x,
+        y: this.currentCursor.y + scroll.y
+      }
+      this.broadcastCursorAndCurve({ startPoint, color: this.currentUserColor })
       if (paintingGuidesTimer) {
         window.requestAnimationFrame(this.paintGuides)
       } else {
@@ -187,14 +201,13 @@ export default {
       canvas.style.width = this.viewportWidth + 'px'
       canvas.style.height = this.viewportHeight + 'px'
       context.scale(window.devicePixelRatio, window.devicePixelRatio)
-
       remoteCanvas.width = this.viewportWidth * window.devicePixelRatio
       remoteCanvas.height = this.viewportHeight * window.devicePixelRatio
       remoteCanvas.style.width = this.viewportWidth + 'px'
       remoteCanvas.style.height = this.viewportHeight + 'px'
       remoteContext.scale(window.devicePixelRatio, window.devicePixelRatio)
     },
-    broadcastCursorAndCurve ({ curve, color }) {
+    broadcastCursorAndCurve ({ startPoint, color }) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       let updates = {}
@@ -203,7 +216,7 @@ export default {
       updates.color = color
       updates.userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
-      updates.curve = curve
+      updates.startPoint = startPoint
       updates.color = color
       updates.frameId = nanoid()
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserDropGuideLine', handler: 'triggerUpdateRemoteDropGuideLine' })

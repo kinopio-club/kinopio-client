@@ -88,6 +88,9 @@ export default {
       } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
         let circle = mutation.payload
         delete circle.type
+        const position = this.updateRemotePosition(circle)
+        circle.x = position.x
+        circle.y = position.y
         this.createRemotePaintingCircle(circle)
         this.remotePainting()
       }
@@ -151,6 +154,17 @@ export default {
     toolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' }
   },
   methods: {
+    updateRemotePosition (position) {
+      const zoom = this.spaceZoomDecimal
+      const scroll = this.$store.state.windowScroll
+      const space = document.getElementById('space')
+      const rect = space.getBoundingClientRect()
+      position = {
+        x: (position.x * zoom) + rect.x + scroll.x,
+        y: (position.y * zoom) + rect.y + scroll.y
+      }
+      return position
+    },
     userScroll () {
       if (postScrollAnimationTimer) {
         shouldCancelPostScroll = true
