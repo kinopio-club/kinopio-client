@@ -44,12 +44,10 @@ export default {
       return this.connection.labelIsVisible && hasPosition && !this.isUpdatingPath
     },
     styles () {
-      const zoom = this.$store.getters.spaceZoomDecimal
       return {
         background: this.typeColor,
         left: this.position.x + 'px',
-        top: this.position.y + 'px',
-        transform: `scale(${zoom})`
+        top: this.position.y + 'px'
       }
     },
     id () { return this.connection.id },
