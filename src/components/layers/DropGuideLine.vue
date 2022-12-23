@@ -3,7 +3,10 @@ aside
   canvas#drop-guide-line.drop-guide-line
   canvas#remote-drop-guide-line.remote-drop-guide-line
 </template>
+
 <script>
+import utils from '@/utils.js'
+
 import { nanoid } from 'nanoid'
 
 let canvas, context, remoteCanvas, remoteContext, paintingGuidesTimer, remotePaintingGuidesTimer
@@ -57,6 +60,54 @@ export default {
   },
   methods: {
 
+    // curves
+
+    createCurve (startPoint) {
+      const numberOfControlPoints = 4
+      const lineSegmentLength = lineWidth / numberOfControlPoints
+      const lineSegmentIncrement = (lineSegmentLength / 2)
+      if (controlPointEvenY <= lineMaxHeight && controlPointOddY >= 0 && !isReverse) {
+        if (controlPointEvenY <= 0) {
+          controlPointEvenY = 0
+          isReverse = true
+        }
+        controlPointEvenY--
+        controlPointOddY++
+      } else {
+        controlPointEvenY++
+        controlPointOddY--
+        if (controlPointEvenY >= lineMaxHeight) {
+          controlPointEvenY = lineMaxHeight
+          isReverse = false
+        }
+      }
+      // 1
+      const controlPointX1 = startPoint.x + lineSegmentIncrement
+      const endPointX1 = startPoint.x + lineSegmentLength
+      // 2
+      const controlPointX2 = endPointX1 + lineSegmentIncrement
+      const endPointX2 = startPoint.x + (lineSegmentLength * 2)
+      // 3
+      const controlPointX3 = endPointX2 + lineSegmentIncrement
+      const endPointX3 = startPoint.x + (lineSegmentLength * 3)
+      // 4
+      const controlPointX4 = endPointX3 + lineSegmentIncrement
+      const endPointX4 = startPoint.x + (lineSegmentLength * 4)
+      // 5
+      const endPointY = startPoint.y + centerLineY
+      return { startPoint, controlPointEvenY, controlPointOddY, controlPointX1, endPointX1, controlPointX2, endPointX2, controlPointX3, endPointX3, controlPointX4, endPointX4, endPointY }
+    },
+    paintCurve (context, curve) {
+      const { startPoint, controlPointEvenY, controlPointOddY, controlPointX1, endPointX1, controlPointX2, endPointX2, controlPointX3, endPointX3, controlPointX4, endPointX4, endPointY } = curve
+      context.beginPath()
+      context.moveTo(startPoint.x, startPoint.y)
+      context.quadraticCurveTo(controlPointX1, controlPointOddY + startPoint.y, endPointX1, endPointY)
+      context.quadraticCurveTo(controlPointX2, controlPointEvenY + startPoint.y, endPointX2, endPointY)
+      context.quadraticCurveTo(controlPointX3, controlPointOddY + startPoint.y, endPointX3, endPointY)
+      context.quadraticCurveTo(controlPointX4, controlPointEvenY + startPoint.y, endPointX4, endPointY)
+      context.stroke()
+    },
+
     // Remote Painting
 
     addRemoteCurve (curve) {
@@ -81,17 +132,10 @@ export default {
       remoteContext.clearRect(0, 0, remoteCanvas.width, remoteCanvas.height)
       remoteDropGuideLines.forEach(guideLine => {
         this.removeRemoteFrame(guideLine.frameId)
-        const { remoteControlPointEvenY, remoteControlPointOddY, startPointX, startPointY, controlPointX1, endPointX1, controlPointX2, endPointX2, controlPointX3, endPointX3, controlPointX4, endPointX4, endPointY } = guideLine.curve
         remoteContext.lineWidth = 4
         remoteContext.lineCap = 'round'
         remoteContext.strokeStyle = guideLine.color
-        remoteContext.beginPath()
-        remoteContext.moveTo(startPointX, startPointY)
-        remoteContext.quadraticCurveTo(controlPointX1, remoteControlPointOddY + startPointY, endPointX1, endPointY)
-        remoteContext.quadraticCurveTo(controlPointX2, remoteControlPointEvenY + startPointY, endPointX2, endPointY)
-        remoteContext.quadraticCurveTo(controlPointX3, remoteControlPointOddY + startPointY, endPointX3, endPointY)
-        remoteContext.quadraticCurveTo(controlPointX4, remoteControlPointEvenY + startPointY, endPointX4, endPointY)
-        remoteContext.stroke()
+        this.paintCurve(remoteContext, guideLine.curve)
       })
       if (remoteDropGuideLines.length > 0) {
         window.requestAnimationFrame(this.remotePaintGuidesFrame)
@@ -110,77 +154,16 @@ export default {
       context.strokeStyle = this.currentUserColor
       context.lineWidth = 4
       context.lineCap = 'round'
-
-      const numberOfControlPoints = 4
-      const lineSegmentLength = lineWidth / numberOfControlPoints
-      const lineSegmentIncrement = (lineSegmentLength / 2)
-      const currentCursor = {
+      let startPoint = {
         x: this.currentCursor.x,
         y: this.currentCursor.y
       }
-
-      if (controlPointEvenY <= lineMaxHeight && controlPointOddY >= 0 && !isReverse) {
-        if (controlPointEvenY <= 0) {
-          controlPointEvenY = 0
-          isReverse = true
-        }
-        controlPointEvenY--
-        controlPointOddY++
-      } else {
-        controlPointEvenY++
-        controlPointOddY--
-        if (controlPointEvenY >= lineMaxHeight) {
-          controlPointEvenY = lineMaxHeight
-          isReverse = false
-        }
-      }
-
-      // 0
-      const startPointX = currentCursor.x
-      const startPointY = currentCursor.y
-      // 1
-      const controlPointX1 = startPointX + lineSegmentIncrement
-      const endPointX1 = startPointX + lineSegmentLength
-      // 2
-      const controlPointX2 = endPointX1 + lineSegmentIncrement
-      const endPointX2 = startPointX + (lineSegmentLength * 2)
-      // 3
-      const controlPointX3 = endPointX2 + lineSegmentIncrement
-      const endPointX3 = startPointX + (lineSegmentLength * 3)
-      // 4
-      const controlPointX4 = endPointX3 + lineSegmentIncrement
-      const endPointX4 = startPointX + (lineSegmentLength * 4)
-      // 5
-      const endPointY = startPointY + centerLineY
-
-      context.beginPath()
-      context.moveTo(startPointX, startPointY)
-      // quadraticCurveTo(controlPointX, controlPointY, endPointX, endPointY)
-      context.quadraticCurveTo(controlPointX1, controlPointOddY + startPointY, endPointX1, endPointY)
-      context.quadraticCurveTo(controlPointX2, controlPointEvenY + startPointY, endPointX2, endPointY)
-      context.quadraticCurveTo(controlPointX3, controlPointOddY + startPointY, endPointX3, endPointY)
-      context.quadraticCurveTo(controlPointX4, controlPointEvenY + startPointY, endPointX4, endPointY)
-      context.stroke()
-
-      const scroll = this.$store.state.windowScroll
-      this.broadcastCursorAndCurve({
-        curve: {
-          remoteControlPointOddY: controlPointOddY + scroll.y,
-          remoteControlPointEvenY: controlPointEvenY + scroll.y,
-          startPointX: startPointX + scroll.x,
-          startPointY: startPointY + scroll.y,
-          controlPointX1: controlPointX1 + scroll.x,
-          endPointX1: endPointX1 + scroll.x,
-          controlPointX2: controlPointX2 + scroll.x,
-          endPointX2: endPointX2 + scroll.x,
-          controlPointX3: controlPointX3 + scroll.x,
-          endPointX3: endPointX3 + scroll.x,
-          controlPointX4: controlPointX4 + scroll.x,
-          endPointX4: endPointX4 + scroll.x,
-          endPointY: endPointY + scroll.y
-        },
-        color: this.currentUserColor
-      })
+      let curve = this.createCurve(startPoint)
+      this.paintCurve(context, curve)
+      // broadcast curve
+      startPoint = utils.updatePositionWithSpaceOffset(startPoint)
+      curve = this.createCurve(startPoint)
+      this.broadcastCursorAndCurve({ curve, color: this.currentUserColor })
       if (paintingGuidesTimer) {
         window.requestAnimationFrame(this.paintGuides)
       } else {
