@@ -45,6 +45,8 @@ export default {
         }
         percent += speed || increment
         this.updateSpaceZoomFromTrigger(percent)
+      } else if (mutation.type === 'triggerCenterZoomOrigin') {
+        this.centerZoomOrigin()
       }
     })
   },

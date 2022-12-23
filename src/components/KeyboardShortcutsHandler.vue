@@ -184,6 +184,7 @@ export default {
         browserZoomLevel = Math.max(0, browserZoomLevel - 1)
         if (shouldNativeZoom) { return }
         event.preventDefault()
+        this.$store.commit('triggerCenterZoomOrigin')
         this.$store.commit('triggerSpaceZoomOut')
       // Zoom In
       } else if (isMeta && key === '=') {
@@ -193,6 +194,7 @@ export default {
           return
         }
         event.preventDefault()
+        this.$store.commit('triggerCenterZoomOrigin')
         this.$store.commit('triggerSpaceZoomIn')
         // Minimap
       } else if (key === 'z' && isSpaceScope) {

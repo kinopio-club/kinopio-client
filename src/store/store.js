@@ -477,6 +477,7 @@ const store = createStore({
     triggerScrollUserDetailsIntoView: () => {},
     triggerUpdateLockedItemButtonsPositions: () => {},
     triggerLoadBackground: () => {},
+    triggerCenterZoomOrigin: () => {},
 
     // Cards
 
