@@ -1,6 +1,6 @@
 <template lang='pug'>
 .app(
-  @pointermove="broadcastCursor"
+  @pointermove="broadcastUserCursor"
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
   :class="{ 'no-background': isAddPage }"
@@ -216,7 +216,7 @@ export default {
       }
       multiTouchAction = null
     },
-    broadcastCursor (event) {
+    broadcastUserCursor (event) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       let updates = utils.cursorPositionInSpace(event)
