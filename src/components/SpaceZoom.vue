@@ -56,7 +56,7 @@ export default {
   },
   computed: {
     max () { return consts.spaceZoom.max }, // 100
-    min () { return consts.spaceZoom.min }, // 40
+    min () { return consts.spaceZoom.min }, // 20
     spaceZoomPercent () { return this.$store.state.spaceZoomPercent }
   },
   methods: {
