@@ -418,7 +418,7 @@ export default {
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
     isSelectedOrDragging () {
-      return this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor
+      return Boolean(this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor)
     },
     isInSearchResultsCards () {
       const results = this.searchResultsCards

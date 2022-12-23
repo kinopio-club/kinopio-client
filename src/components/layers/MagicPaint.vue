@@ -32,6 +32,7 @@ aside
   )
   DropGuideLine(
     :currentCursor="currentCursor"
+    :currentCursorInSpace="currentCursorInSpace"
     :uploadIsDraggedOver="uploadIsDraggedOver"
   )
 </template>
@@ -127,6 +128,7 @@ export default {
       pinchZoomOffsetTop: 0,
       pinchZoomOffsetLeft: 0,
       currentCursor: {},
+      currentCursorInSpace: {},
       uploadIsDraggedOver: false
     }
   },
@@ -659,6 +661,7 @@ export default {
       const uploadIsFiles = event.dataTransfer.types.find(type => type === 'Files')
       if (!uploadIsFiles) { return }
       this.currentCursor = utils.cursorPositionInViewport(event)
+      this.currentCursorInSpace = utils.cursorPositionInSpace(event)
       this.uploadIsDraggedOver = true
     },
     removeUploadIsDraggedOver () {

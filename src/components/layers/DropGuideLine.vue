@@ -20,6 +20,7 @@ export default {
   name: 'DropGuideLine',
   props: {
     currentCursor: Object,
+    currentCursorInSpace: Object,
     uploadIsDraggedOver: Boolean
   },
   created () {
@@ -161,23 +162,22 @@ export default {
       context.quadraticCurveTo(controlPointX4, controlPointEvenY + startPointY, endPointX4, endPointY)
       context.stroke()
 
-      const scrollX = window.scrollX
-      const scrollY = window.scrollY
+      const scroll = this.$store.state.windowScroll
       this.broadcastCursorAndCurve({
         curve: {
-          remoteControlPointOddY: controlPointOddY + scrollY,
-          remoteControlPointEvenY: controlPointEvenY + scrollY,
-          startPointX: startPointX + scrollX,
-          startPointY: startPointY + scrollY,
-          controlPointX1: controlPointX1 + scrollX,
-          endPointX1: endPointX1 + scrollX,
-          controlPointX2: controlPointX2 + scrollX,
-          endPointX2: endPointX2 + scrollX,
-          controlPointX3: controlPointX3 + scrollX,
-          endPointX3: endPointX3 + scrollX,
-          controlPointX4: controlPointX4 + scrollX,
-          endPointX4: endPointX4 + scrollX,
-          endPointY: endPointY + scrollY
+          remoteControlPointOddY: controlPointOddY + scroll.y,
+          remoteControlPointEvenY: controlPointEvenY + scroll.y,
+          startPointX: startPointX + scroll.x,
+          startPointY: startPointY + scroll.y,
+          controlPointX1: controlPointX1 + scroll.x,
+          endPointX1: endPointX1 + scroll.x,
+          controlPointX2: controlPointX2 + scroll.x,
+          endPointX2: endPointX2 + scroll.x,
+          controlPointX3: controlPointX3 + scroll.x,
+          endPointX3: endPointX3 + scroll.x,
+          controlPointX4: controlPointX4 + scroll.x,
+          endPointX4: endPointX4 + scroll.x,
+          endPointY: endPointY + scroll.y
         },
         color: this.currentUserColor
       })
@@ -215,8 +215,9 @@ export default {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       let updates = {}
-      updates.x = this.currentCursor.x + window.scrollX
-      updates.y = this.currentCursor.y + window.scrollY
+      updates.x = this.currentCursorInSpace.x
+      updates.y = this.currentCursorInSpace.y
+      updates.color = color
       updates.userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
       updates.curve = curve
