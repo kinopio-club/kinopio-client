@@ -242,9 +242,14 @@ export default {
     resizeBoxes () {
       if (!prevCursor) { return }
       const boxIds = this.$store.state.currentUserIsResizingBoxIds
-      const delta = {
-        x: Math.round(endCursor.x - prevCursor.x),
-        y: Math.round(endCursor.y - prevCursor.y)
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
+      let delta = {
+        x: endCursor.x - prevCursor.x,
+        y: endCursor.y - prevCursor.y
+      }
+      delta = {
+        x: Math.round(delta.x * zoom),
+        y: Math.round(delta.y * zoom)
       }
       this.$store.dispatch('currentBoxes/resize', { boxIds, delta })
     },
