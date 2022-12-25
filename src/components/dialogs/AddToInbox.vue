@@ -5,7 +5,10 @@ dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @tou
     Loader(:visible="true")
   section.card-list-section(v-if="isCards && !currentSpaceIsInbox")
     //- p blank slate, no cards
-    p list your recent inbox ccards, instructions to add. click a card to move it to this space
+    p.badge.secondary
+      span Click an inbox card below to move it into this space
+      button.small-button.dismiss-tip
+        img.icon.cancel(src="@/assets/add.svg")
     CardList(:cards="cards" @selectCard="moveCardToSpace")
 </template>
 
@@ -75,7 +78,8 @@ export default {
       }
       this.isLoading = false
     },
-    moveCardToSpace () {
+    moveCardToSpace (card) {
+      console.log('🐸', card)
       // get center vp: half vp + scroll - ~halfcardwidthheight
       // api patch: update id w new card x,y, and spaceid
       // commit the card to state: currentCards/create
@@ -86,13 +90,14 @@ export default {
     visible (value) {
       if (!value) { return }
       this.updateInboxCards()
-      console.log('😅', this.cards)
     }
   }
 }
 
 // qa anon user
-// qa no cards
+// todo no cards
+// todo dismissTips update user attr
+// qa mobile
 </script>
 
 <style lang="stylus">
@@ -102,4 +107,11 @@ dialog.add-to-inbox
   .card-list-section
     max-height 500px
     overflow auto
+    border-top 1px solid black
+    margin-top 4px
+    padding 4px
+    p
+      margin 4px
+  .dismiss-tip
+    margin-left 6px
 </style>
