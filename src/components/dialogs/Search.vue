@@ -15,27 +15,13 @@ dialog.search(@click="closeDialogs" v-if="visible" :open="visible" ref="dialog" 
       @focusPreviousItem="focusPreviousItem"
       @selectItem="selectItem"
     )
-    ul.results-list
-      template(v-for="card in cards")
-        //- card list item
-        li(@click="selectCard(card)" :data-card-id="card.id" :class="{active: cardDetailsIsVisibleForCardId(card), hover: cardIsFocused(card)}")
-          span.badge.status.inline-badge
-            img.icon.time(src="@/assets/time.svg")
-            span {{ relativeDate(card) }}
-
-          UserLabelInline(v-if="userIsNotCurrentUser(card.user.id)" :user="card.user")
-
-          span.card-info
-            template(v-for="segment in card.nameSegments")
-              img.card-image(v-if="segment.isImage" :src="segment.url")
-              NameSegment(:segment="segment" :search="search" :isStrikeThrough="isStrikeThrough(card)")
+    CardList(:cards="cards" :search="search" @selectCard="selectCard")
 </template>
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
-import UserLabelInline from '@/components/UserLabelInline.vue'
-import NameSegment from '@/components/NameSegment.vue'
 import SearchFilters from '@/components/SearchFilters.vue'
+import CardList from '@/components/CardList.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -49,9 +35,8 @@ export default {
   name: 'Search',
   components: {
     ResultsFilter,
-    UserLabelInline,
-    NameSegment,
-    SearchFilters
+    SearchFilters,
+    CardList
   },
   props: {
     visible: Boolean
@@ -117,15 +102,6 @@ export default {
     currentUser () { return this.$store.state.currentUser }
   },
   methods: {
-    isStrikeThrough (card) {
-      return card.name.startsWith('[x]')
-    },
-    cardDetailsIsVisibleForCardId (card) {
-      return this.$store.state.cardDetailsIsVisibleForCardId === card.id
-    },
-    userIsNotCurrentUser (userId) {
-      return this.currentUser.id !== userId
-    },
     segmentTagColor (segment) {
       const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
       const cachedTag = cache.tagByName(segment.name)
@@ -214,19 +190,11 @@ export default {
     focusItem (card) {
       this.$store.commit('previousResultCardId', card.id)
     },
-    cardIsFocused (card) {
-      if (this.previousResultCardId === card.id) {
-        return true
-      }
-    },
     selectItem () {
       const card = this.$store.getters['currentCards/byId'](this.previousResultCardId)
       this.$store.commit('shouldPreventNextEnterKey', true)
       this.$store.dispatch('closeAllDialogs', 'Search.selectItem')
       this.selectCard(card)
-    },
-    relativeDate (card) {
-      return utils.shortRelativeTime(card.nameUpdatedAt || card.updatedAt)
     },
     updateHeights () {
       if (!this.visible) {
@@ -282,21 +250,4 @@ dialog.search
   max-height calc(100vh - 140px)
   @media(max-width 400px)
     left -40px
-  li
-    display block !important
-    .button-badge
-      box-shadow none
-      display initial
-      margin-right 0
-      &:hover,
-      &:active
-        box-shadow none
-    img
-      max-width 48px
-      border-radius 3px
-      vertical-align middle
-  .time
-    vertical-align -1px
-    height 11px
-
 </style>
