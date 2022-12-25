@@ -23,7 +23,6 @@ import ResultsFilter from '@/components/ResultsFilter.vue'
 import SearchFilters from '@/components/SearchFilters.vue'
 import CardList from '@/components/CardList.vue'
 import utils from '@/utils.js'
-import cache from '@/cache.js'
 
 import dayjs from 'dayjs'
 import orderBy from 'lodash-es/orderBy'
@@ -74,18 +73,6 @@ export default {
       }
       cards = utils.clone(cards)
       cards = cards.slice(0, 20)
-      cards.map(card => {
-        card.nameSegments = this.cardNameSegments(card.name)
-        card.user = this.$store.getters['currentSpace/userById'](card.userId)
-        if (!card.user) {
-          card.user = {
-            id: '',
-            name: '',
-            color: undefined
-          }
-        }
-        return card
-      })
       return cards
     },
     recentlyUpdatedCards () {
@@ -102,37 +89,6 @@ export default {
     currentUser () { return this.$store.state.currentUser }
   },
   methods: {
-    segmentTagColor (segment) {
-      const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
-      const cachedTag = cache.tagByName(segment.name)
-      if (spaceTag) {
-        return spaceTag.color
-      } else if (cachedTag) {
-        return cachedTag.color
-      } else {
-        return this.currentUser.color
-      }
-    },
-    cardNameSegments (name) {
-      let url = utils.urlFromString(name)
-      let imageUrl
-      if (utils.urlIsImage(url)) {
-        imageUrl = url
-        name = name.replace(url, '')
-      }
-      let segments = utils.cardNameSegments(name)
-      if (imageUrl) {
-        segments.unshift({
-          isImage: true,
-          url: imageUrl
-        })
-      }
-      return segments.map(segment => {
-        if (!segment.isTag) { return segment }
-        segment.color = this.segmentTagColor(segment)
-        return segment
-      })
-    },
     updateSearch (search) {
       this.$store.commit('search', search)
       if (!search) {

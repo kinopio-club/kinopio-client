@@ -1,6 +1,6 @@
 <template lang="pug">
 ul.results-list.card-list
-  template(v-for="card in cards")
+  template(v-for="card in normalizedCards")
     li(@click="selectCard(card)" :data-card-id="card.id" :class="{active: cardDetailsIsVisible(card), hover: cardIsFocused(card)}")
       span.badge.status.inline-badge
         img.icon.time(src="@/assets/time.svg")
@@ -18,6 +18,7 @@ ul.results-list.card-list
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 import { mapState, mapGetters } from 'vuex'
 
@@ -38,9 +39,55 @@ export default {
       'currentUser'
     ]),
     ...mapGetters([
-    ])
+    ]),
+    normalizedCards () {
+      return this.cards.map(card => {
+        card.nameSegments = this.cardNameSegments(card.name)
+        card.user = this.$store.getters['currentSpace/userById'](card.userId)
+        if (!card.user) {
+          card.user = {
+            id: '',
+            name: '',
+            color: undefined
+          }
+        }
+        return card
+      })
+    }
   },
   methods: {
+    segmentTagColor (segment) {
+      const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
+      const cachedTag = cache.tagByName(segment.name)
+      if (spaceTag) {
+        return spaceTag.color
+      } else if (cachedTag) {
+        return cachedTag.color
+      } else {
+        return this.currentUser.color
+      }
+    },
+    cardNameSegments (name) {
+      let url = utils.urlFromString(name)
+      let imageUrl
+      if (utils.urlIsImage(url)) {
+        imageUrl = url
+        name = name.replace(url, '')
+      }
+      let segments = utils.cardNameSegments(name)
+      if (imageUrl) {
+        segments.unshift({
+          isImage: true,
+          url: imageUrl
+        })
+      }
+      return segments.map(segment => {
+        if (!segment.isTag) { return segment }
+        segment.color = this.segmentTagColor(segment)
+        return segment
+      })
+    },
+
     selectCard (card) {
       this.$emit('selectCard', card)
     },

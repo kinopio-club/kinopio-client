@@ -3,13 +3,15 @@ dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @tou
   AddToInbox(:visible="true")
   section(v-if="isLoading")
     Loader(:visible="true")
-  section(v-if="isCards && !currentSpaceIsInbox")
-    p blank slate, no cards
+  section.card-list-section(v-if="isCards && !currentSpaceIsInbox")
+    //- p blank slate, no cards
     p list your recent inbox ccards, instructions to add. click a card to move it to this space
+    CardList(:cards="cards" @selectCard="moveCardToSpace")
 </template>
 
 <script>
 import AddToInbox from '@/components/AddToInbox.vue'
+import CardList from '@/components/CardList.vue'
 import Loader from '@/components/Loader.vue'
 import inboxSpace from '@/data/inbox.json'
 
@@ -21,7 +23,8 @@ export default {
   name: 'AddToInboxDialog',
   components: {
     AddToInbox,
-    Loader
+    Loader,
+    CardList
   },
   props: {
     visible: Boolean
@@ -95,4 +98,8 @@ export default {
 <style lang="stylus">
 dialog.add-to-inbox
   width 210px
+  overflow hidden
+  .card-list-section
+    max-height 500px
+    overflow auto
 </style>
