@@ -5,6 +5,14 @@ dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.
       button
         //- img.icon.visit(src="@/assets/visit.svg")
         span Move / copy?
+      //- .segmented-buttons.move-or-copy-wrap
+      //-   button(@click.left.stop="toggleCopyCardsIsVisible" :class="{ active: copyCardsIsVisible }")
+      //-     span Copy
+      //-     MoveOrCopyItems(:visible="copyCardsIsVisible" :actionIsMove="false" :exportData="exportData")
+      //-   button(@click.left.stop="toggleMoveCardsIsVisible" :class="{ active: moveCardsIsVisible }" :disabled="!canEditAll.cards")
+      //-     span Move
+      //-     MoveOrCopyItems(:visible="moveCardsIsVisible" :actionIsMove="true" :exportData="exportData")
+
     .row
       button
         //- img.icon.inbox(src="@/assets/inbox.svg")
