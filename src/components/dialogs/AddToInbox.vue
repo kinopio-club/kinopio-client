@@ -49,6 +49,9 @@ export default {
     },
     currentSpaceIsInbox () {
       return this.currentSpace.name === 'Inbox'
+    },
+    secondaryActionLabel () {
+      return 'Move'
     }
   },
   methods: {
@@ -84,6 +87,10 @@ export default {
       // api patch: update id w new card x,y, and spaceid
       // commit the card to state: currentCards/create
       // animate//highlight the card
+    },
+    showCard (card) {
+      console.log('😅', card)
+      // opens the inbox , then opens the card
     }
   },
   watch: {
@@ -110,8 +117,4 @@ dialog.add-to-inbox
     border-top 1px solid black
     margin-top 4px
     padding 4px
-    p
-      margin 4px
-  .dismiss-tip
-    margin-left 6px
 </style>

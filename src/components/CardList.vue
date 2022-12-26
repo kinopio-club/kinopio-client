@@ -12,6 +12,11 @@ ul.results-list.card-list
         template(v-for="segment in card.nameSegments")
           img.card-image(v-if="segment.isImage" :src="segment.url")
           NameSegment(:segment="segment" :search="search" :isStrikeThrough="isStrikeThrough(card)")
+      button.small-button.secondary-action(v-if="secondaryActionLabel" @click.stop="secondaryAction")
+        img.icon.visit(src="@/assets/visit.svg")
+        span {{secondaryActionLabel}}
+
+        //- secondaryActionLabel small-button(@click.stop="cardButtonAction")
 </template>
 
 <script>
@@ -30,7 +35,8 @@ export default {
   },
   props: {
     cards: Array,
-    search: String
+    search: String,
+    secondaryActionLabel: String
   },
   computed: {
     ...mapState([
@@ -91,6 +97,9 @@ export default {
     selectCard (card) {
       this.$emit('selectCard', card)
     },
+    secondaryAction (card) {
+      this.$emit('secondaryAction', card)
+    },
     cardDetailsIsVisible (card) {
       return this.cardDetailsIsVisibleForCardId === card.id
     },
@@ -115,6 +124,7 @@ export default {
 <style lang="stylus">
 .card-list
   li
+    position relative
     display block !important
     .button-badge
       box-shadow none
@@ -130,4 +140,12 @@ export default {
   .time
     vertical-align -1px
     height 11px
+  .inline-badge
+    display inline-block
+  .secondary-action
+    position absolute
+    top 6px
+    right 6px
+  .icon.visit
+    vertical-align 1px
 </style>
