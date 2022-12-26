@@ -15,8 +15,6 @@ ul.results-list.card-list
       button.small-button.secondary-action(v-if="secondaryActionLabel" @click.stop="secondaryAction")
         img.icon.visit(src="@/assets/visit.svg")
         span {{secondaryActionLabel}}
-
-        //- secondaryActionLabel small-button(@click.stop="cardButtonAction")
 </template>
 
 <script>

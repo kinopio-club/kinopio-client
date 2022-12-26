@@ -5,14 +5,17 @@ dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @tou
     Loader(:visible="true")
   section.card-list-section(v-if="isCards && !currentSpaceIsInbox")
     //- p blank slate, no cards
-    p.badge.secondary
-      span Click an inbox card below to move it into this space
-      button.small-button.dismiss-tip
-        img.icon.cancel(src="@/assets/add.svg")
-    CardList(:cards="cards" @selectCard="moveCardToSpace")
+    AddToInboxCardOptions(:visible="addToInboxCardOptionsIsVisible" :card="addToInboxCardOptionsCard")
+    CardList(
+      :cards="cards"
+      :secondaryActionLabel="secondaryActionLabel"
+      @selectCard="moveCardToSpace"
+      @secondaryAction="showCard"
+    )
 </template>
 
 <script>
+import AddToInboxCardOptions from '@/components/dialogs/AddToInboxCardOptions.vue'
 import AddToInbox from '@/components/AddToInbox.vue'
 import CardList from '@/components/CardList.vue'
 import Loader from '@/components/Loader.vue'
@@ -27,7 +30,8 @@ export default {
   components: {
     AddToInbox,
     Loader,
-    CardList
+    CardList,
+    AddToInboxCardOptions
   },
   props: {
     visible: Boolean
@@ -35,7 +39,9 @@ export default {
   data () {
     return {
       cards: [],
-      isLoading: false
+      isLoading: false,
+      addToInboxCardOptionsIsVisible: false,
+      addToInboxCardOptionsCard: {}
     }
   },
   computed: {
@@ -96,6 +102,7 @@ export default {
   watch: {
     visible (value) {
       if (!value) { return }
+      this.addToInboxCardOptionsIsVisible = false
       this.updateInboxCards()
     }
   }
