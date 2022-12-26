@@ -235,7 +235,7 @@ export default {
     }
     return { x, y }
   },
-  childDialogPositionFromParent ({ element, offsetX, offsetY, shouldIgnoreZoom }) {
+  childDialogPositionFromParent ({ element, offsetX, offsetY, shouldIgnoreZoom, isMaxY }) {
     element = element.closest('li') || element.closest('.badge') || element.closest('button') || element
     offsetX = offsetX || 0
     offsetY = offsetY || 0
@@ -246,10 +246,12 @@ export default {
       zoom = 1
     }
     let indent = 8 * zoom
-    const maxY = this.visualViewport().height - 100
-    const x = position.x + offsetX + indent
+    let x = position.x + offsetX + indent
     let y = position.y + rect.height + offsetY - indent
-    y = Math.min(maxY, y)
+    if (isMaxY) {
+      const maxY = this.visualViewport().height - 100 + window.scrollY
+      y = Math.min(maxY, y)
+    }
     return { x, y, shouldIgnoreZoom }
   },
   visualViewport () {
