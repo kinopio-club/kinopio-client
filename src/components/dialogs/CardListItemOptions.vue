@@ -26,19 +26,23 @@ dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.
 
 import { mapState, mapGetters } from 'vuex'
 
+let prevWindowScroll
+
 export default {
   name: 'cardListItemOptions',
-  components: {
+  mounted () {
+    this.updatePrevWindowScroll()
+    window.addEventListener('scroll', this.updatePosition)
   },
-  data () {
-    return {
-    }
+  beforeUnmount () {
+    window.removeEventListener('scroll', this.updatePosition)
   },
   computed: {
     ...mapState([
       'cardListItemOptionsPosition',
       'cardListItemOptionsCard',
-      'cardListItemOptionsIsVisible'
+      'cardListItemOptionsIsVisible',
+      'windowScroll'
     ]),
     ...mapGetters([
     ]),
@@ -58,6 +62,29 @@ export default {
     // api patch: update id w new card x,y, and spaceid
     // commit the card to state: currentCards/create
     // animate//highlight the card
+    },
+    updatePrevWindowScroll () {
+      prevWindowScroll = {
+        x: window.scrollX,
+        y: window.scrollY
+      }
+    },
+    updatePosition () {
+      const delta = {
+        x: this.windowScroll.x - prevWindowScroll.x,
+        y: this.windowScroll.y - prevWindowScroll.y
+      }
+      this.$store.commit('cardListItemOptionsPosition', {
+        x: this.cardListItemOptionsPosition.x + delta.x,
+        y: this.cardListItemOptionsPosition.y + delta.y
+      })
+      this.updatePrevWindowScroll()
+    }
+  },
+  watch: {
+    visible (value) {
+      if (!value) { return }
+      this.updatePrevWindowScroll()
     }
   }
 }
