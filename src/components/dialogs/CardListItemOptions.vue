@@ -3,7 +3,11 @@ dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.
   section
     .row
       button
-        span Move / copy?
+        img.icon.visit(src="@/assets/visit.svg")
+        span Move to This Space
+    //- .row
+    //-   button
+    //-     span Move / copy?
       //- .segmented-buttons.move-or-copy-wrap
       //-   button(@click.left.stop="toggleCopyCardsIsVisible" :class="{ active: copyCardsIsVisible }")
       //-     span Copy

@@ -8,8 +8,6 @@ dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @tou
     CardList(
       :cards="cards"
       :primaryActionIsCardListOptions="primaryActionIsCardListOptions"
-      :secondaryActionLabel="secondaryActionLabel"
-      @secondaryAction="moveCardToSpace"
     )
 </template>
 
@@ -53,9 +51,6 @@ export default {
     },
     currentSpaceIsInbox () {
       return this.currentSpace.name === 'Inbox'
-    },
-    secondaryActionLabel () {
-      return 'Move'
     },
     primaryActionIsCardListOptions () { return true },
     dialogStyles () {
@@ -102,15 +97,15 @@ export default {
       }
       this.isLoading = false
     },
-    moveCardToSpace (card) {
-      // to global dispatch so child dialog can use it
-      // moveCardToCurrentSpace
-      console.log('🐸', card.name)
-      // get center vp: half vp + scroll - ~halfcardwidthheight
-      // api patch: update id w new card x,y, and spaceid
-      // commit the card to state: currentCards/create
-      // animate//highlight the card
-    },
+    // moveCardToSpace (card) {
+    // to global dispatch so child dialog can use it
+    // moveCardToCurrentSpace
+    // console.log('🐸', card.name)
+    // get center vp: half vp + scroll - ~halfcardwidthheight
+    // api patch: update id w new card x,y, and spaceid
+    // commit the card to state: currentCards/create
+    // animate//highlight the card
+    // },
     closeDialogs () {
       this.$store.commit('cardListItemOptionsIsVisible', false)
     }

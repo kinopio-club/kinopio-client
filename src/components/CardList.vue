@@ -11,9 +11,9 @@ span
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")
             NameSegment(:segment="segment" :search="search" :isStrikeThrough="isStrikeThrough(card)")
-        button.small-button.secondary-action(v-if="secondaryActionLabel" @click.stop="secondaryAction")
-          img.icon.visit(src="@/assets/visit.svg")
-          span {{secondaryActionLabel}}
+        //- button.small-button.secondary-action(v-if="secondaryActionLabel" @click.stop="secondaryAction")
+        //-   img.icon.visit(src="@/assets/visit.svg")
+        //-   span {{secondaryActionLabel}}
 </template>
 
 <script>
@@ -33,7 +33,7 @@ export default {
   props: {
     cards: Array,
     search: String,
-    secondaryActionLabel: String,
+    // secondaryActionLabel: String,
     primaryActionIsCardListOptions: Boolean
   },
   computed: {
