@@ -35,28 +35,13 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
     ul.results-list
       template(v-for="group in groupedItems")
-
         //- space
         li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
           BackgroundPreview(v-if="group.space" :space="group.space")
           span.badge.space-badge
             span {{group.spaceName}}
-
         //- cards
-        template(v-for="(card in group.cards")
-          li(:data-card-id="card.id" @click="showCardDetails(card)" :class="{ active: cardIsCurrentCard(card.id) }")
-            p.name.name-segments
-              span.badge.status.inline-badge
-                img.icon.time(src="@/assets/time.svg")
-                span {{ relativeDate(card) }}
-              User(v-if="card.otherUser" :user="card.otherUser" :isClickable="false")
-              User(v-else-if="card.userId !== currentUser.id && userById(card.userId)" :user="userById(card.userId)" :isClickable="false")
-              template(v-for="segment in card.nameSegments")
-                img.card-image(v-if="segment.isImage" :src="segment.url")
-                span(v-if="segment.isText") {{segment.content}}
-                //- Tags
-                template(v-if="segment.isTag")
-                  Tag(:tag="segment" :isActive="currentTag.name === segment.name")
+        CardList(:cards="group.cards" @selectCard="showCardDetails")
 
     Loader(:visible="loading")
 </template>
@@ -64,9 +49,8 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import User from '@/components/User.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
-import Tag from '@/components/Tag.vue'
+import CardList from '@/components/CardList.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -79,9 +63,8 @@ export default {
   name: 'TagDetails',
   components: {
     ColorPicker,
-    User,
     BackgroundPreview,
-    Tag,
+    CardList,
     Loader,
     ResultsFilter
   },
@@ -245,14 +228,6 @@ export default {
       } else {
         this.$store.commit('addToFilteredTagNames', tagName)
       }
-    },
-    userById (userId) {
-      return this.$store.getters['currentSpace/userById'](userId)
-    },
-    cardIsCurrentCard (cardId) {
-      if (this.visibleFromTagList) { return }
-      if (!this.currentCard) { return }
-      return cardId === this.currentCard.id
     },
     sortCurrentSpaceIsFirst (groups) {
       const currentSpaceGroup = groups.find(group => group.spaceId === this.currentSpaceId)
@@ -450,15 +425,6 @@ export default {
     },
     updatePinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
-    },
-    relativeDate (card) {
-      let date = card.nameUpdatedAt || card.updatedAt
-      if (!date) {
-        card = this.$store.getters['currentCards/byId'](card.id)
-        if (!card) { return }
-        date = card.nameUpdatedAt || card.updatedAt
-      }
-      return utils.shortRelativeTime(date)
     }
   },
   watch: {
@@ -507,15 +473,8 @@ export default {
       vertical-align middle
   .space-badge
     background-color var(--secondary-background)
-  .user
-    vertical-align middle
-    margin-right 3px
   .background-preview
     margin-right 3px
-  .card-image
-    width 48px
-    vertical-align middle
-    border-radius 3px
   .tag-title-row
     justify-content space-between
     align-items flex-start
