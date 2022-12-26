@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @touchend.stop.prevent @click.left.stop ref="dialog" :style="dialogStyles")
+dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @touchend.stop.prevent @click.left.stop="closeDialogs" ref="dialog" :style="dialogStyles")
   AddToInbox(:visible="true")
   section(v-if="isLoading")
     Loader(:visible="true")
@@ -103,12 +103,16 @@ export default {
       this.isLoading = false
     },
     moveCardToSpace (card) {
-      // to getter so child dialog can use it
+      // to global dispatch so child dialog can use it
+      // moveCardToCurrentSpace
       console.log('🐸', card.name)
       // get center vp: half vp + scroll - ~halfcardwidthheight
       // api patch: update id w new card x,y, and spaceid
       // commit the card to state: currentCards/create
       // animate//highlight the card
+    },
+    closeDialogs () {
+      this.$store.commit('cardListItemOptionsIsVisible', false)
     }
   },
   watch: {

@@ -246,8 +246,10 @@ export default {
       zoom = 1
     }
     let indent = 8 * zoom
+    const maxY = this.visualViewport().height - 100
     const x = position.x + offsetX + indent
-    const y = position.y + rect.height + offsetY - indent
+    let y = position.y + rect.height + offsetY - indent
+    y = Math.min(maxY, y)
     return { x, y, shouldIgnoreZoom }
   },
   visualViewport () {

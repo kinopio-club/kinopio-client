@@ -17,6 +17,7 @@
   TagDetails
   LinkDetails
   UserDetails
+  CardListItemOptions
   Minimap
   WindowHistoryHandler
   KeyboardShortcutsHandler
@@ -43,6 +44,7 @@ import NotificationsWithPosition from '@/components/NotificationsWithPosition.vu
 import SpaceBackground from '@/components/SpaceBackground.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
+import CardListItemOptions from '@/components/dialogs/CardListItemOptions.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -65,7 +67,8 @@ export default {
     NotificationsWithPosition,
     SpaceBackground,
     OutsideSpaceBackground,
-    Preload
+    Preload,
+    CardListItemOptions
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)

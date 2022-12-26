@@ -27,27 +27,24 @@ export default {
   name: 'cardListItemOptions',
   components: {
   },
-  props: {
-    visible: Boolean,
-    card: Object,
-    cardListItemRect: Object
-  },
   data () {
     return {
     }
   },
   computed: {
     ...mapState([
+      'cardListItemPosition',
+      'cardListItemOptionsCard',
+      'cardListItemOptionsIsVisible'
     ]),
     ...mapGetters([
     ]),
+    visible () { return this.cardListItemOptionsIsVisible },
     positionStyles () {
-      const styles = {
-        left: this.cardListItemRect.x + 'px',
-        bottom: this.cardListItemRect.y + 'px'
+      return {
+        left: this.cardListItemPosition.x + 'px',
+        top: this.cardListItemPosition.y + 'px'
       }
-      console.log(styles)
-      return styles
     }
   },
   methods: {
@@ -58,6 +55,5 @@ export default {
 <style lang="stylus">
 dialog.card-list-item-options
   position absolute
-  // top 130px !important
   width 190px !important
 </style>

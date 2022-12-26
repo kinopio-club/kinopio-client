@@ -1,9 +1,8 @@
 <template lang="pug">
 span
-  CardListItemOptions(:visible="cardListItemOptionsIsVisible" :card="cardListItemOptionsCard" :cardListItemRect="cardListItemRect")
   ul.results-list.card-list(ref="resultsList")
     template(v-for="card in normalizedCards")
-      li(@click.stop="selectCard(card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
+      li(@click.stop="selectCard($event, card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
         span.badge.status.inline-badge
           img.icon.time(src="@/assets/time.svg")
           span {{ relativeDate(card) }}
@@ -18,7 +17,6 @@ span
 </template>
 
 <script>
-import CardListItemOptions from '@/components/dialogs/CardListItemOptions.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
@@ -30,8 +28,7 @@ export default {
   name: 'ComponentName',
   components: {
     UserLabelInline,
-    NameSegment,
-    CardListItemOptions
+    NameSegment
   },
   props: {
     cards: Array,
@@ -39,24 +36,18 @@ export default {
     secondaryActionLabel: String,
     primaryActionIsCardListOptions: Boolean
   },
-  data () {
-    return {
-      cardListItemOptionsIsVisible: false,
-      cardListItemOptionsCard: undefined,
-      activeCardId: '',
-      cardListItemRect: undefined
-    }
-  },
   computed: {
     ...mapState([
       'cardDetailsIsVisibleForCardId',
       'previousResultCardId',
-      'currentUser'
+      'currentUser',
+      'cardListItemOptionsCard'
     ]),
     ...mapGetters([
     ]),
     normalizedCards () {
-      return this.cards.map(card => {
+      const cards = utils.clone(this.cards)
+      return cards.map(card => {
         card.nameSegments = this.cardNameSegments(card.name)
         card.user = this.$store.getters['currentSpace/userById'](card.userId)
         if (!card.user) {
@@ -103,28 +94,32 @@ export default {
       })
     },
 
-    selectCard (card) {
+    selectCard (event, card) {
       this.$emit('selectCard', card)
-      if (this.activeCardId === card.id) {
-        this.activeCardId = ''
-        this.cardListItemOptionsIsVisible = false
+      if (this.cardListItemOptionsCard.id === card.id) {
+        this.$store.commit('cardListItemOptionsCard', '')
+        this.$store.commit('cardListItemOptionsIsVisible', false)
         return
       }
       if (this.primaryActionIsCardListOptions) {
-        let element = this.$refs.resultsList
-        element = element.querySelector(`li[data-card-id="${card.id}"]`)
+        const element = event.target.closest('li')
         const rect = element.getBoundingClientRect()
-        this.cardListItemRect = rect
-        this.activeCardId = card.id
-        this.cardListItemOptionsCard = card
-        this.cardListItemOptionsIsVisible = true
+        let position = utils.childDialogPositionFromParent({
+          element: event.target,
+          shouldIgnoreZoom: true,
+          offsetX: 75,
+          offsetY: -rect.height + 12
+        })
+        this.$store.commit('cardListItemPosition', position)
+        this.$store.commit('cardListItemOptionsCard', card)
+        this.$store.commit('cardListItemOptionsIsVisible', true)
       }
     },
     secondaryAction (card) {
       this.$emit('secondaryAction', card)
     },
     cardIsActive (card) {
-      const isActive = this.activeCardId === card.id
+      const isActive = this.cardListItemOptionsCard.id === card.id
       const isCardDetailsVisible = this.cardDetailsIsVisibleForCardId === card.id
       return isActive || isCardDetailsVisible
     },
