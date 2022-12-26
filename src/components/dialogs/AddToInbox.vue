@@ -5,17 +5,15 @@ dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @tou
     Loader(:visible="true")
   section.card-list-section(v-if="isCards && !currentSpaceIsInbox")
     //- p blank slate, no cards
-    AddToInboxCardOptions(:visible="addToInboxCardOptionsIsVisible" :card="addToInboxCardOptionsCard")
     CardList(
       :cards="cards"
+      :primaryActionIsCardListOptions="primaryActionIsCardListOptions"
       :secondaryActionLabel="secondaryActionLabel"
-      @selectCard="moveCardToSpace"
-      @secondaryAction="showCard"
+      @secondaryAction="moveCardToSpace"
     )
 </template>
 
 <script>
-import AddToInboxCardOptions from '@/components/dialogs/AddToInboxCardOptions.vue'
 import AddToInbox from '@/components/AddToInbox.vue'
 import CardList from '@/components/CardList.vue'
 import Loader from '@/components/Loader.vue'
@@ -30,8 +28,7 @@ export default {
   components: {
     AddToInbox,
     Loader,
-    CardList,
-    AddToInboxCardOptions
+    CardList
   },
   props: {
     visible: Boolean
@@ -39,9 +36,7 @@ export default {
   data () {
     return {
       cards: [],
-      isLoading: false,
-      addToInboxCardOptionsIsVisible: false,
-      addToInboxCardOptionsCard: {}
+      isLoading: false
     }
   },
   computed: {
@@ -58,7 +53,8 @@ export default {
     },
     secondaryActionLabel () {
       return 'Move'
-    }
+    },
+    primaryActionIsCardListOptions () { return true }
   },
   methods: {
     filterCards (cards) {
@@ -88,21 +84,17 @@ export default {
       this.isLoading = false
     },
     moveCardToSpace (card) {
-      console.log('🐸', card)
+      // to getter so child dialog can use it
+      console.log('🐸', card.name)
       // get center vp: half vp + scroll - ~halfcardwidthheight
       // api patch: update id w new card x,y, and spaceid
       // commit the card to state: currentCards/create
       // animate//highlight the card
-    },
-    showCard (card) {
-      console.log('😅', card)
-      // opens the inbox , then opens the card
     }
   },
   watch: {
     visible (value) {
       if (!value) { return }
-      this.addToInboxCardOptionsIsVisible = false
       this.updateInboxCards()
     }
   }

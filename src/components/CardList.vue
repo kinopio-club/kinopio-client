@@ -1,23 +1,24 @@
 <template lang="pug">
-ul.results-list.card-list
-  template(v-for="card in normalizedCards")
-    li(@click="selectCard(card)" :data-card-id="card.id" :class="{active: cardDetailsIsVisible(card), hover: cardIsFocused(card)}")
-      span.badge.status.inline-badge
-        img.icon.time(src="@/assets/time.svg")
-        span {{ relativeDate(card) }}
-
-      UserLabelInline(v-if="userIsNotCurrentUser(card.user.id)" :user="card.user")
-
-      span.card-info
-        template(v-for="segment in card.nameSegments")
-          img.card-image(v-if="segment.isImage" :src="segment.url")
-          NameSegment(:segment="segment" :search="search" :isStrikeThrough="isStrikeThrough(card)")
-      button.small-button.secondary-action(v-if="secondaryActionLabel" @click.stop="secondaryAction")
-        img.icon.visit(src="@/assets/visit.svg")
-        span {{secondaryActionLabel}}
+span
+  CardListItemOptions(:visible="cardListItemOptionsIsVisible" :card="cardListItemOptionsCard")
+  ul.results-list.card-list(ref="ul")
+    template(v-for="card in normalizedCards")
+      li(@click.stop="selectCard(card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
+        span.badge.status.inline-badge
+          img.icon.time(src="@/assets/time.svg")
+          span {{ relativeDate(card) }}
+        UserLabelInline(v-if="userIsNotCurrentUser(card.user.id)" :user="card.user")
+        span.card-info
+          template(v-for="segment in card.nameSegments")
+            img.card-image(v-if="segment.isImage" :src="segment.url")
+            NameSegment(:segment="segment" :search="search" :isStrikeThrough="isStrikeThrough(card)")
+        button.small-button.secondary-action(v-if="secondaryActionLabel" @click.stop="secondaryAction")
+          img.icon.visit(src="@/assets/visit.svg")
+          span {{secondaryActionLabel}}
 </template>
 
 <script>
+import CardListItemOptions from '@/components/dialogs/CardListItemOptions.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
@@ -29,12 +30,21 @@ export default {
   name: 'ComponentName',
   components: {
     UserLabelInline,
-    NameSegment
+    NameSegment,
+    CardListItemOptions
   },
   props: {
     cards: Array,
     search: String,
-    secondaryActionLabel: String
+    secondaryActionLabel: String,
+    primaryActionIsCardListOptions: Boolean
+  },
+  data () {
+    return {
+      cardListItemOptionsIsVisible: false,
+      cardListItemOptionsCard: undefined,
+      activeCardId: ''
+    }
   },
   computed: {
     ...mapState([
@@ -94,12 +104,24 @@ export default {
 
     selectCard (card) {
       this.$emit('selectCard', card)
+      if (this.activeCardId === card.id) {
+        this.activeCardId = ''
+        this.cardListItemOptionsIsVisible = false
+        return
+      }
+      if (this.primaryActionIsCardListOptions) {
+        this.activeCardId = card.id
+        this.cardListItemOptionsCard = card
+        this.cardListItemOptionsIsVisible = true
+      }
     },
     secondaryAction (card) {
       this.$emit('secondaryAction', card)
     },
-    cardDetailsIsVisible (card) {
-      return this.cardDetailsIsVisibleForCardId === card.id
+    cardIsActive (card) {
+      const isActive = this.activeCardId === card.id
+      const isCardDetailsVisible = this.cardDetailsIsVisibleForCardId === card.id
+      return isActive || isCardDetailsVisible
     },
     cardIsFocused (card) {
       if (this.previousResultCardId === card.id) {

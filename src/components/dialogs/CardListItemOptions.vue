@@ -1,10 +1,14 @@
 <template lang="pug">
-dialog.narrow.add-to-inbox-card-options(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
-    button
-      span move card to current space
-    button
-      span open card in inbox
+    .row
+      button
+        //- img.icon.visit(src="@/assets/visit.svg")
+        span Move / copy?
+    .row
+      button
+        //- img.icon.inbox(src="@/assets/inbox.svg")
+        span GoTo Card
 </template>
 
 <script>
@@ -13,11 +17,12 @@ dialog.narrow.add-to-inbox-card-options(v-if="visible" :open="visible" @click.le
 import { mapState, mapGetters } from 'vuex'
 
 export default {
-  name: 'addToInboxCardOptions',
+  name: 'cardListItemOptions',
   components: {
   },
   props: {
-    visible: Boolean
+    visible: Boolean,
+    card: Object
   },
   created () {
   //   this.$store.subscribe((mutation, state) => {
@@ -54,5 +59,8 @@ export default {
 </script>
 
 <style lang="stylus">
-// dialog.dialog-name
+dialog.card-list-item-options
+  position absolute
+  top 130px !important
+  width 190px !important
 </style>
