@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="positionStyles")
   section
-    .row
+    .row(v-if="!cardIsInCurrentSpace")
       button(@click="moveCardToCurrentSpace")
         img.icon.visit(src="@/assets/visit.svg")
         span Move to This Space
@@ -42,7 +42,8 @@ export default {
       'cardListItemOptionsPosition',
       'cardListItemOptionsCard',
       'cardListItemOptionsIsVisible',
-      'windowScroll'
+      'windowScroll',
+      'currentSpace'
     ]),
     ...mapGetters([
     ]),
@@ -52,6 +53,10 @@ export default {
         left: this.cardListItemOptionsPosition.x + 'px',
         top: this.cardListItemOptionsPosition.y + 'px'
       }
+    },
+    cardIsInCurrentSpace () {
+      console.log(this.cardListItemOptionsCard.spaceId, this.currentSpace.id)
+      return this.cardListItemOptionsCard.spaceId === this.currentSpace.id
     }
   },
   methods: {
