@@ -1,7 +1,7 @@
 <template lang="pug">
 span
-  CardListItemOptions(:visible="cardListItemOptionsIsVisible" :card="cardListItemOptionsCard")
-  ul.results-list.card-list(ref="ul")
+  CardListItemOptions(:visible="cardListItemOptionsIsVisible" :card="cardListItemOptionsCard" :cardListItemRect="cardListItemRect")
+  ul.results-list.card-list(ref="resultsList")
     template(v-for="card in normalizedCards")
       li(@click.stop="selectCard(card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
         span.badge.status.inline-badge
@@ -43,7 +43,8 @@ export default {
     return {
       cardListItemOptionsIsVisible: false,
       cardListItemOptionsCard: undefined,
-      activeCardId: ''
+      activeCardId: '',
+      cardListItemRect: undefined
     }
   },
   computed: {
@@ -110,6 +111,10 @@ export default {
         return
       }
       if (this.primaryActionIsCardListOptions) {
+        let element = this.$refs.resultsList
+        element = element.querySelector(`li[data-card-id="${card.id}"]`)
+        const rect = element.getBoundingClientRect()
+        this.cardListItemRect = rect
         this.activeCardId = card.id
         this.cardListItemOptionsCard = card
         this.cardListItemOptionsIsVisible = true

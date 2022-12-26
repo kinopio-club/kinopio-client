@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="positionStyles")
   section
     .row
       button
@@ -15,8 +15,7 @@ dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.
 
     .row
       button
-        //- img.icon.inbox(src="@/assets/inbox.svg")
-        span GoTo Card
+        span Jump to Card
 </template>
 
 <script>
@@ -30,18 +29,8 @@ export default {
   },
   props: {
     visible: Boolean,
-    card: Object
-  },
-  created () {
-  //   this.$store.subscribe((mutation, state) => {
-  //     if (mutation.type === 'closeAllDialogs') {
-  //       this.closeAllDialogs()
-  //     }
-  //   })
-  },
-  mounted () {
-  },
-  beforeUnmount () {
+    card: Object,
+    cardListItemRect: Object
   },
   data () {
     return {
@@ -51,17 +40,17 @@ export default {
     ...mapState([
     ]),
     ...mapGetters([
-    ])
-    // kinopioDomain () { return utils.kinopioDomain() },
+    ]),
+    positionStyles () {
+      const styles = {
+        left: this.cardListItemRect.x + 'px',
+        bottom: this.cardListItemRect.y + 'px'
+      }
+      console.log(styles)
+      return styles
+    }
   },
   methods: {
-  },
-  watch: {
-    // visible (visible) {
-    //   if (visible) {
-    //     this.updateResultsSectionHeight()
-    //   }
-    // }
   }
 }
 </script>
@@ -69,6 +58,6 @@ export default {
 <style lang="stylus">
 dialog.card-list-item-options
   position absolute
-  top 130px !important
+  // top 130px !important
   width 190px !important
 </style>
