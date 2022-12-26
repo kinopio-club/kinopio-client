@@ -41,7 +41,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
           span.badge.space-badge
             span {{group.spaceName}}
         //- cards
-        CardList(:cards="group.cards" @selectCard="showCardDetails")
+        CardList(:cards="group.cards" :primaryActionIsCardListOptions="primaryActionIsCardListOptions")
 
     Loader(:visible="loading")
 </template>
@@ -88,6 +88,7 @@ export default {
   },
   computed: {
     visible () { return this.$store.state.tagDetailsIsVisible },
+    primaryActionIsCardListOptions () { return true },
     visibleFromTagList () { return this.$store.state.tagDetailsIsVisibleFromTagList },
     currentTag () {
       // name, color, cardId
@@ -356,6 +357,7 @@ export default {
     },
     closeDialogs () {
       this.colorPickerIsVisible = false
+      this.$store.commit('cardListItemOptionsIsVisible', false)
     },
     updateCardsWithTagColor (name, newColor) {
       const cards = this.cards.map(card => {
@@ -442,6 +444,7 @@ export default {
     visible (visible) {
       if (!visible) {
         this.$store.commit('tagDetailsPositionShouldUpdate', false)
+        this.closeDialogs()
       }
     }
   }
