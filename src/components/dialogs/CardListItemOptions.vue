@@ -36,7 +36,7 @@ export default {
   },
   computed: {
     ...mapState([
-      'cardListItemPosition',
+      'cardListItemOptionsPosition',
       'cardListItemOptionsCard',
       'cardListItemOptionsIsVisible'
     ]),
@@ -45,8 +45,8 @@ export default {
     visible () { return this.cardListItemOptionsIsVisible },
     positionStyles () {
       return {
-        left: this.cardListItemPosition.x + 'px',
-        top: this.cardListItemPosition.y + 'px'
+        left: this.cardListItemOptionsPosition.x + 'px',
+        top: this.cardListItemOptionsPosition.y + 'px'
       }
     }
   },

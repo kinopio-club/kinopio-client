@@ -35,6 +35,7 @@ export default {
     search: String,
     // secondaryActionLabel: String,
     primaryActionIsCardListOptions: Boolean
+    // cardListItemOptionsPositionShouldBeOnLeftSide: Boolean
   },
   computed: {
     ...mapState([
@@ -111,7 +112,7 @@ export default {
           offsetY: -rect.height + 12,
           isMaxY: true
         })
-        this.$store.commit('cardListItemPosition', position)
+        this.$store.commit('cardListItemOptionsPosition', position)
         this.$store.commit('cardListItemOptionsCard', card)
         this.$store.commit('cardListItemOptionsIsVisible', true)
       }

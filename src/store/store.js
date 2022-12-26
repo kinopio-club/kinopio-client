@@ -214,7 +214,7 @@ const store = createStore({
     filteredTagNames: [],
 
     // card list item options
-    cardListItemPosition: {}, // x, y
+    cardListItemOptionsPosition: {}, // x, y
     cardListItemOptionsCard: {},
     cardListItemOptionsIsVisible: false,
 
@@ -1241,9 +1241,9 @@ const store = createStore({
     },
 
     // Card List Item Options
-    cardListItemPosition: (state, value) => {
-      utils.typeCheck({ value, type: 'object', origin: 'cardListItemPosition' })
-      state.cardListItemPosition = value
+    cardListItemOptionsPosition: (state, value) => {
+      utils.typeCheck({ value, type: 'object', origin: 'cardListItemOptionsPosition' })
+      state.cardListItemOptionsPosition = value
     },
     cardListItemOptionsCard: (state, value) => {
       utils.typeCheck({ value, type: 'object', origin: 'cardListItemOptionsCard' })
