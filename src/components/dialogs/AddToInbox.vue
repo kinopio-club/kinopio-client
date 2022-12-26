@@ -104,6 +104,7 @@ export default {
   watch: {
     visible (value) {
       if (!value) { return }
+      this.$store.commit('cardListItemOptionsCard', {})
       this.updateInboxCards()
     },
     cards (value) {
