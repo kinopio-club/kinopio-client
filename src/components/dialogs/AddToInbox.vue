@@ -97,15 +97,6 @@ export default {
       }
       this.isLoading = false
     },
-    // moveCardToSpace (card) {
-    // to global dispatch so child dialog can use it
-    // moveCardToCurrentSpace
-    // console.log('🐸', card.name)
-    // get center vp: half vp + scroll - ~halfcardwidthheight
-    // api patch: update id w new card x,y, and spaceid
-    // commit the card to state: currentCards/create
-    // animate//highlight the card
-    // },
     closeDialogs () {
       this.$store.commit('cardListItemOptionsIsVisible', false)
     }

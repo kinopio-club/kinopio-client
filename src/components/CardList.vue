@@ -107,7 +107,7 @@ export default {
         let position = utils.childDialogPositionFromParent({
           element: event.target,
           shouldIgnoreZoom: true,
-          offsetX: 75,
+          offsetX: rect.width - 25,
           offsetY: -rect.height + 12,
           isMaxY: true
         })
@@ -151,6 +151,7 @@ export default {
       box-shadow none
       display initial
       margin-right 0
+      pointer-events none
       &:hover,
       &:active
         box-shadow none

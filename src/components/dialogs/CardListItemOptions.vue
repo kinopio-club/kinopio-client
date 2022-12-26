@@ -2,7 +2,7 @@
 dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="positionStyles")
   section
     .row
-      button
+      button(@click="moveCardToCurrentSpace")
         img.icon.visit(src="@/assets/visit.svg")
         span Move to This Space
     //- .row
@@ -51,6 +51,14 @@ export default {
     }
   },
   methods: {
+    moveCardToCurrentSpace () {
+      const card = this.cardListItemOptionsCard
+      console.log('🐸', card.name, card)
+    // get center vp: half vp + scroll - ~halfcardwidthheight
+    // api patch: update id w new card x,y, and spaceid
+    // commit the card to state: currentCards/create
+    // animate//highlight the card
+    }
   }
 }
 </script>
@@ -59,4 +67,8 @@ export default {
 dialog.card-list-item-options
   position absolute
   width 190px !important
+  // .double-line-height
+  //   height 44px
+  .icon.visit
+    vertical-align 2px
 </style>
