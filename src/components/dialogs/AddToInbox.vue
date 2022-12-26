@@ -1,9 +1,9 @@
 <template lang="pug">
-dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @touchend.stop.prevent @click.left.stop ref="dialog")
+dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @touchend.stop.prevent @click.left.stop ref="dialog" :style="dialogStyles")
   AddToInbox(:visible="true")
   section(v-if="isLoading")
     Loader(:visible="true")
-  section.card-list-section(v-if="isCards && !currentSpaceIsInbox")
+  section.card-list-section(v-if="isCards && !currentSpaceIsInbox" :style="{'max-height': resultsSectionHeight + 'px'}" ref="results")
     //- p blank slate, no cards
     CardList(
       :cards="cards"
@@ -18,6 +18,7 @@ import AddToInbox from '@/components/AddToInbox.vue'
 import CardList from '@/components/CardList.vue'
 import Loader from '@/components/Loader.vue'
 import inboxSpace from '@/data/inbox.json'
+import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
@@ -36,7 +37,9 @@ export default {
   data () {
     return {
       cards: [],
-      isLoading: false
+      isLoading: false,
+      resultsSectionHeight: null,
+      dialogHeight: null
     }
   },
   computed: {
@@ -54,9 +57,25 @@ export default {
     secondaryActionLabel () {
       return 'Move'
     },
-    primaryActionIsCardListOptions () { return true }
+    primaryActionIsCardListOptions () { return true },
+    dialogStyles () {
+      return { maxHeight: this.dialogHeight + 'px' }
+    }
   },
   methods: {
+    updateDialogHeight () {
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
+    },
+    updateResultsSectionHeight () {
+      this.$nextTick(() => {
+        let element = this.$refs.results
+        console.log(element)
+        this.resultsSectionHeight = utils.elementHeight(element) - 2
+      })
+    },
     filterCards (cards) {
       const defaultCards = inboxSpace.cards.map(card => card.name)
       cards = cards.filter(card => {
@@ -96,6 +115,11 @@ export default {
     visible (value) {
       if (!value) { return }
       this.updateInboxCards()
+    },
+    cards (value) {
+      if (!value.length) { return }
+      this.updateDialogHeight()
+      this.updateResultsSectionHeight()
     }
   }
 }
@@ -109,7 +133,7 @@ export default {
 <style lang="stylus">
 dialog.add-to-inbox
   width 210px
-  overflow hidden
+  // overflow hidden
   .card-list-section
     max-height 500px
     overflow auto
