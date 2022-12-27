@@ -1,10 +1,15 @@
 <template lang="pug">
 dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="positionStyles")
-  section
-    .row(v-if="!cardIsInCurrentSpace")
+  section(v-if="!cardIsInCurrentSpace")
+    .row
       button(@click="moveCardToCurrentSpace")
-        img.icon.visit(src="@/assets/visit.svg")
+        img.icon.cut(src="@/assets/cut.svg")
         span Move to This Space
+    .row
+      button(@click="copyCardToCurrentSpace")
+        img.icon.copy(src="@/assets/copy.svg")
+        span Copy to This Space
+
     //- .row
     //-   button
     //-     span Move / copy?
@@ -15,7 +20,7 @@ dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.
       //-   button(@click.left.stop="toggleMoveCardsIsVisible" :class="{ active: moveCardsIsVisible }" :disabled="!canEditAll.cards")
       //-     span Move
       //-     MoveOrCopyItems(:visible="moveCardsIsVisible" :actionIsMove="true" :exportData="exportData")
-
+  section
     .row
       button
         span Jump to Card
