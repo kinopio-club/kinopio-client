@@ -931,7 +931,7 @@ code
   vertical-align 1px
 
 .cut
-  vertical-align 0
+  vertical-align 1px
 .copy
   vertical-align -0.5px
 
