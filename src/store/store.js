@@ -1,6 +1,7 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 // store modules
+import themes from '@/store/themes.js'
 import api from '@/store/api.js'
 import broadcast from '@/store/broadcast.js'
 import history from '@/store/history.js'
@@ -1511,6 +1512,7 @@ const store = createStore({
   },
 
   modules: {
+    themes,
     api,
     broadcast,
     history,

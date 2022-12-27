@@ -79,6 +79,7 @@ export default {
     })
   },
   mounted () {
+    this.restoreThemeColors()
     // use timer to prevent being fired from page reload scroll
     // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
     setTimeout(() => {
@@ -148,6 +149,9 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
+    restoreThemeColors () {
+      this.$store.dispatch('themes/update', 'light')
+    },
     toggleIsPinchZooming (event) {
       if (utils.shouldIgnoreTouchInteraction(event)) { return }
       this.isPinchZooming = true
@@ -270,34 +274,7 @@ export default {
 
 <style lang="stylus">
 :root
-  // theme vars
-  --primary black
-  --primary-background white
-  --text-link #143997
-  --primary-transparent rgba(0,0,0,0.5)
-
-  // --secondary #818181
-  --secondary-background #e3e3e3
-  --secondary-hover-background #d8d8d8
-  --secondary-active-background #cdcdcd
-
-  --light-shadow rgba(0,0,0,0.20)
-  --heavy-shadow rgba(0,0,0,0.25)
-
-  --danger-background #ffb8b3
-  --danger-hover-background #ffa49e
-  --danger-active-background #ff928b
-
-  --info-background #90ffff
-  --success-background #67ffbb
-  --search-background yellow
-
-  --button-border #999
-
-  // dark variants
-  --text-link-dark #9ab2ee
-  --secondary-active-background-dark #666
-
+  // theme vars in themes.js
   // non-theme vars
   --max-z 2147483646
   --hover-shadow 3px 3px 0 var(--heavy-shadow)
@@ -306,7 +283,6 @@ export default {
   --button-hover-shadow 2px 2px 0 var(--heavy-shadow)
   --button-active-inset-shadow inset 0 1px 2px var(--heavy-shadow)
   --entity-radius 5px
-
   --serif-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
 

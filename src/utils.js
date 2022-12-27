@@ -702,6 +702,9 @@ export default {
   invertColor (color) {
     return colord(color).invert().toHex()
   },
+  setCssVariable (key, value) {
+    document.documentElement.style.setProperty(`--${key}`, value)
+  },
 
   // normalize items
 
