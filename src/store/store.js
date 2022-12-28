@@ -51,7 +51,7 @@ const store = createStore({
     spaceZoomPercent: 100,
     pinchCounterZoomDecimal: 1,
     windowScroll: {},
-    zoomOrigin: {},
+    zoomOrigin: { x: 0, y: 0 },
 
     // search
     searchIsVisible: false,
@@ -346,7 +346,6 @@ const store = createStore({
       state.windowScroll = value
     },
     zoomOrigin: (state, value) => {
-      utils.typeCheck({ value, type: 'object', origin: 'zoomOrigin' })
       state.zoomOrigin = value
     },
     currentSpacePath: (state, value) => {
@@ -1469,7 +1468,19 @@ const store = createStore({
 
     updateWindowScroll: (context) => {
       context.commit('windowScroll', { x: window.scrollX, y: window.scrollY })
+    },
+    zoomOrigin: (context, origin) => {
+      utils.typeCheck({ value: origin, type: 'object', origin: 'zoomOrigin' })
+      const prevOrigin = context.state.zoomOrigin
+      const zoomOriginIsZero = !utils.objectHasKeys(prevOrigin) || prevOrigin === { x: 0, y: 0 }
+      if (zoomOriginIsZero) {
+        context.commit('zoomOrigin', origin)
+      } else {
+        origin = utils.pointBetweenTwoPoints(prevOrigin, origin)
+        context.commit('zoomOrigin', origin)
+      }
     }
+
   },
   getters: {
     shouldScrollAtEdges: (state, getters) => (event) => {

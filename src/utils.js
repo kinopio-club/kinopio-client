@@ -719,6 +719,15 @@ export default {
     const angleDegrees = angleRadians * 180 / Math.PI
     return Math.round(angleDegrees)
   },
+  pointBetweenTwoPoints (point1, point2) {
+    // https://gamedev.stackexchange.com/questions/23430/get-points-on-a-line-between-two-points
+    const progress = 0.5
+    const point = {
+      x: point1.x + (point2.x - point1.x) * progress,
+      y: point1.y + (point2.y - point1.y) * progress
+    }
+    return point
+  },
   innerHTMLText (htmlString) {
     // https://regexr.com/6olpg
     // from https://stackoverflow.com/a/1736801

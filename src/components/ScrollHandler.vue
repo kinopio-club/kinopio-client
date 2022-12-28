@@ -58,7 +58,7 @@ export default {
     },
     updateZoomOrigin (event) {
       const cursor = utils.cursorPositionInPage(event)
-      this.$store.commit('zoomOrigin', cursor)
+      this.$store.dispatch('zoomOrigin', cursor)
     }
   }
 }

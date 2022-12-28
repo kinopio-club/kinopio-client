@@ -98,7 +98,7 @@ export default {
         x: scroll.x + (this.$store.state.viewportWidth / 2),
         y: scroll.y + (this.$store.state.viewportHeight / 2)
       }
-      this.$store.commit('zoomOrigin', origin)
+      this.$store.dispatch('zoomOrigin', origin)
     }
   }
 }
