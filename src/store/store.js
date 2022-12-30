@@ -44,7 +44,7 @@ const store = createStore({
     shouldPreventNextFocusOnName: false,
     isEmbedMode: false,
     isAddPage: false,
-    isAppStoreView: false,
+    isAppStoreMode: false,
     disableViewportOptimizations: false, // for urlbox
     isPresentationMode: false,
 
@@ -377,9 +377,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'isAddPage' })
       state.isAddPage = value
     },
-    isAppStoreView: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isAppStoreView' })
-      state.isAppStoreView = value
+    isAppStoreMode: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'isAppStoreMode' })
+      state.isAppStoreMode = value
     },
     disableViewportOptimizations: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'disableViewportOptimizations', allowUndefined: true })

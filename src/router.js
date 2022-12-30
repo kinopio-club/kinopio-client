@@ -15,9 +15,9 @@ const router = createRouter({
       component: () => import('./views/Add.vue'),
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
-        const isAppStoreView = urlParams.get('appStoreView')
-        if (isAppStoreView) {
-          store.commit('isAppStoreView', isAppStoreView)
+        const isAppStoreMode = urlParams.get('appStoreView')
+        if (isAppStoreMode) {
+          store.commit('isAppStoreMode', isAppStoreMode)
         }
         store.commit('isAddPage', true)
         next()
