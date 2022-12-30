@@ -46,6 +46,7 @@ const store = createStore({
     isAddPage: false,
     isAppStoreView: false,
     disableViewportOptimizations: false, // for urlbox
+    isPresentationMode: false,
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -383,6 +384,10 @@ const store = createStore({
     disableViewportOptimizations: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'disableViewportOptimizations', allowUndefined: true })
       state.disableViewportOptimizations = value
+    },
+    isPresentationMode: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'isPresentationMode' })
+      state.isPresentationMode = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })

@@ -10,7 +10,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
 
   section
     .row
-      // Import, Export
+      //- Import, Export
       .segmented-buttons(@click.stop)
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
@@ -18,12 +18,16 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
           Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
-
       //- Embed
       .button-wrap
         button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
           span Embed
         Embed(:visible="embedIsVisible")
+    .row
+      //- Presentation Mode
+      button(@click.left.stop="isPresentationMode")
+        img.icon(src="@/assets/view.svg")
+        span Presentation Mode
 
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
@@ -148,6 +152,10 @@ export default {
     }
   },
   methods: {
+    isPresentationMode () {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('isPresentationMode', true)
+    },
     async copyUrl (event) {
       this.$store.commit('clearNotificationsWithPosition')
       const position = utils.cursorPositionInPage(event)
@@ -160,7 +168,7 @@ export default {
       }
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'Share.triggerSignUpOrInIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     shareUrl () {
