@@ -1,6 +1,6 @@
 <template lang="pug">
 .footer-wrap(:style="position" v-if="isVisible" :class="{'fade-out': isFadingOut}")
-  .left(v-if="!isEmbed")
+  .left(v-if="leftIsVisble")
     footer
       Notifications
       .controls(v-if="controlsIsVisible" :class="{'hidden': isHidden}")
@@ -163,7 +163,11 @@ export default {
     },
     isVisible () {
       if (this.isAddPage) { return }
+      return true
+    },
+    leftIsVisble () {
       if (this.isPresentationMode) { return }
+      if (this.isEmbed) { return }
       return true
     },
     controlsIsVisible () {
@@ -420,6 +424,7 @@ export default {
   pointer-events none
   transform-origin left bottom
   .right
+    margin-left auto
     display flex
     align-items center
     pointer-events all
