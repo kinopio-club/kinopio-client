@@ -176,7 +176,7 @@ const router = createRouter({
         zoom = Math.min(zoomLimit.max, zoom)
         store.commit('spaceUrlToLoad', spaceId)
         store.commit('spaceZoomPercent', zoom)
-        store.commit('isEmbed', true)
+        store.commit('isEmbedMode', true)
         next()
       }
     }, {

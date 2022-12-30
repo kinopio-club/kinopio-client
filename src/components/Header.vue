@@ -5,7 +5,7 @@ header.presentation-header(v-if="isPresentationMode")
 
 header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hidden': isHidden, 'hidden-by-mindmap': minimapIsVisible }")
   //- embed
-  nav.embed-nav(v-if="isEmbed")
+  nav.embed-nav(v-if="isEmbedMode")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
       button
         .logo
@@ -16,7 +16,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
       SpaceUsers
 
   //- standard
-  nav(v-if="!isEmbed")
+  nav(v-if="!isEmbedMode")
     .left
       //- About
       .logo-about
@@ -286,7 +286,7 @@ export default {
   computed: {
     ...mapState([
       'minimapIsVisible',
-      'isEmbed',
+      'isEmbedMode',
       'isAddPage',
       'importArenaChannelIsVisible',
       'currentSpace',
@@ -326,7 +326,7 @@ export default {
       }
     },
     isSpace () {
-      const isOther = this.isEmbed || this.isAddPage
+      const isOther = this.isEmbedMode || this.isAddPage
       const isSpace = !isOther
       return isSpace
     },

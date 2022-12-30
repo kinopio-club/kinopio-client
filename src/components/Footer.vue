@@ -35,7 +35,7 @@
             Favorites(:visible="favoritesIsVisible")
             FavoritesActions(:visible="favoritesActionsIsVisible")
 
-  .right(:class="{'is-embed': isEmbed, 'hidden': isHidden}" v-if="!isMobileOrTouch")
+  .right(:class="{'is-embed': isEmbedMode, 'hidden': isHidden}" v-if="!isMobileOrTouch")
     .button-wrap.minimap-button(v-if="isNotSupportedByDevice" @click.stop="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
       button.small-button.inline-button(:class="{ active: minimapIsVisible }")
         img.icon.minimap(src="@/assets/minimap.svg")
@@ -133,7 +133,7 @@ export default {
     ...mapState([
       'minimapIsVisible',
       'isAddPage',
-      'isEmbed',
+      'isEmbedMode',
       'currentUser',
       'shouldExplicitlyHideFooter',
       'cardDetailsIsVisibleForCardId',
@@ -167,7 +167,7 @@ export default {
     },
     leftIsVisble () {
       if (this.isPresentationMode) { return }
-      if (this.isEmbed) { return }
+      if (this.isEmbedMode) { return }
       return true
     },
     controlsIsVisible () {

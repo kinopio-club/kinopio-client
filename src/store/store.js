@@ -42,7 +42,7 @@ const store = createStore({
     userHasScrolled: false,
     shouldPreventNextEnterKey: false,
     shouldPreventNextFocusOnName: false,
-    isEmbed: false,
+    isEmbedMode: false,
     isAddPage: false,
     isAppStoreView: false,
     disableViewportOptimizations: false, // for urlbox
@@ -369,9 +369,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'shouldPreventNextFocusOnName' })
       state.shouldPreventNextFocusOnName = value
     },
-    isEmbed: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isEmbed' })
-      state.isEmbed = value
+    isEmbedMode: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'isEmbedMode' })
+      state.isEmbedMode = value
     },
     isAddPage: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isAddPage' })
