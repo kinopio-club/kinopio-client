@@ -2,7 +2,7 @@
 </template>
 
 <script>
-// import utils from '@/utils.js'
+import utils from '@/utils.js'
 
 import { mapState, mapGetters } from 'vuex'
 
@@ -45,6 +45,8 @@ export default {
         shouldZoomOut = deltaY < 0
       }
       let speed = Math.min(Math.abs(deltaY), 5)
+      speed = speed * 2
+      this.updateZoomOrigin(event)
       if (shouldZoomIn) {
         this.$store.commit('triggerSpaceZoomIn', { speed })
       } else if (shouldZoomOut) {
@@ -53,6 +55,10 @@ export default {
     },
     handleScrollEvents (event) {
       this.$store.dispatch('updateWindowScroll')
+    },
+    updateZoomOrigin (event) {
+      const cursor = utils.cursorPositionInPage(event)
+      this.$store.dispatch('zoomOrigin', cursor)
     }
   }
 }

@@ -254,8 +254,9 @@ export default {
         return
       }
       const threshold = 400 * this.spaceCounterZoomDecimal
+      const offset = utils.outsideSpaceOffset().y
+      const scroll = this.windowScroll.y - offset
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      const scroll = this.windowScroll.y
       let y1 = utils.coordsFromConnectionPath(this.connection.path).y
       let y2 = utils.endCoordsFromConnectionPath(this.connection.path).y + y1
       if (y1 > y2) {
@@ -316,7 +317,7 @@ export default {
         this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.multipleConnectionsSelectedIds))
         return
       }
-      const dialogPosition = utils.cursorPositionInPage(event)
+      const dialogPosition = utils.cursorPositionInSpace(event)
       this.$store.dispatch('connectionDetailsIsVisibleForConnectionId', this.id)
       this.$store.commit('connectionDetailsPosition', dialogPosition)
       this.$store.dispatch('clearMultipleSelected')

@@ -15,7 +15,8 @@
               //- Explore
               button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
                 img.icon.sunglasses(src="@/assets/sunglasses.svg")
-                span(v-if="unreadExploreSpacesLength") {{ unreadExploreSpacesLength }}
+                span Explore
+                span(v-if="unreadExploreSpacesLength") &nbsp;{{ unreadExploreSpacesLength }}
               // Live
               button(@click.left="toggleLiveIsVisible" :class="{ active: liveIsVisible}")
                 img.icon.camera(src="@/assets/camera.svg")
