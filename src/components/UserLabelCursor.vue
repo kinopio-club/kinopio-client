@@ -27,8 +27,8 @@ export default {
       if (mutation.type === 'triggerUpdateRemoteUserCursor') {
         const cursor = mutation.payload
         if (cursor.userId !== this.user.id) { return }
-        this.left = cursor.x
-        this.top = cursor.y
+        this.x = cursor.x
+        this.y = cursor.y
         this.color = this.user.color
         currentIteration = 0
         this.updatePositionWithZoom(cursor)
@@ -40,8 +40,8 @@ export default {
   },
   data () {
     return {
-      left: 0,
-      top: 0,
+      x: 0,
+      y: 0,
       color: '',
       visible: false,
       isOnscreen: true,
@@ -54,8 +54,8 @@ export default {
     minimapIsVisible () { return this.$store.state.minimapIsVisible },
     position () {
       return {
-        left: this.left + 'px',
-        top: this.top + 'px'
+        left: this.x + 'px',
+        top: this.y + 'px'
       }
     },
     backgroundColor () {
@@ -63,7 +63,8 @@ export default {
         background: this.user.color
       }
     },
-    colorIsDark () { return utils.colorIsDark(this.user.color) }
+    colorIsDark () { return utils.colorIsDark(this.user.color) },
+    scroll () { return this.$store.getters.windowScrollWithSpaceOffset }
   },
   methods: {
     updatePositionWithZoom (cursor) {
@@ -71,23 +72,25 @@ export default {
       if (this.scale) {
         scale = this.scale
       } else {
-        const counterZoom = 1 / cursor.zoom
-        scale = counterZoom
+        scale = 1
       }
-      this.left = this.left * scale
-      this.top = this.top * scale
+      this.x = this.x * scale
+      this.y = this.y * scale
     },
     checkIsOnscreen () {
       if (this.minimapIsVisible) { return }
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
+      const viewportWidth = this.$store.state.viewportWidth * zoom
+      const viewportHeight = this.$store.state.viewportHeight * zoom
       const isBetweenX = utils.isBetween({
-        value: this.left,
-        min: window.scrollX,
-        max: window.scrollX + this.$store.state.viewportWidth
+        value: this.x,
+        min: this.scroll.x,
+        max: this.scroll.x + viewportWidth
       })
       const isBetweenY = utils.isBetween({
-        value: this.top,
-        min: window.scrollY,
-        max: window.scrollY + this.$store.state.viewportHeight
+        value: this.y,
+        min: this.scroll.y,
+        max: this.scroll.y + viewportHeight
       })
       this.isOffscreenX = !isBetweenX
       this.isOffscreenY = !isBetweenY
@@ -114,21 +117,21 @@ export default {
     },
     offscreenLabelPosition () {
       if (this.isOnscreen) { return }
-      const minX = window.scrollX
-      const maxX = window.scrollX + this.$store.state.viewportWidth
-      const minY = window.scrollY
-      const maxY = window.scrollY + this.$store.state.viewportHeight
-      if (this.isOffscreenX && this.left < minX) {
-        this.left = minX - 4
+      const minX = this.scroll.x
+      const maxX = this.scroll.x + this.$store.state.viewportWidth
+      const minY = this.scroll.y
+      const maxY = this.scroll.y + this.$store.state.viewportHeight
+      if (this.isOffscreenX && this.x < minX) {
+        this.x = minX - 4
       }
-      if (this.isOffscreenX && this.left > maxX) {
-        this.left = maxX - 22
+      if (this.isOffscreenX && this.x > maxX) {
+        this.x = maxX - 22
       }
-      if (this.isOffscreenY && this.top < minY) {
-        this.top = minY - 2
+      if (this.isOffscreenY && this.y < minY) {
+        this.y = minY - 2
       }
-      if (this.isOffscreenY && this.top > maxY) {
-        this.top = maxY - 16
+      if (this.isOffscreenY && this.y > maxY) {
+        this.y = maxY - 16
       }
     }
   }

@@ -28,13 +28,10 @@ export default {
     },
     currentSpace () { return this.$store.state.currentSpace },
     backgroundStyles () {
-      // const origin = this.$store.state.prevZoomOrigin
-      const spaceZoomDecimal = this.$store.getters.spaceZoomDecimal
       const styles = {
         backgroundImage: `url('${this.imageUrl}')`,
         backgroundSize: this.size,
-        transform: `scale(${spaceZoomDecimal})`
-        // transformOrigin: `${origin.x}px ${origin.y}px`
+        transform: this.$store.getters.zoomTransform
       }
       return styles
     },

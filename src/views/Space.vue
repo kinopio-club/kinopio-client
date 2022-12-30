@@ -242,9 +242,14 @@ export default {
     resizeBoxes () {
       if (!prevCursor) { return }
       const boxIds = this.$store.state.currentUserIsResizingBoxIds
-      const delta = {
-        x: Math.round(endCursor.x - prevCursor.x),
-        y: Math.round(endCursor.y - prevCursor.y)
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
+      let delta = {
+        x: endCursor.x - prevCursor.x,
+        y: endCursor.y - prevCursor.y
+      }
+      delta = {
+        x: Math.round(delta.x * zoom),
+        y: Math.round(delta.y * zoom)
       }
       this.$store.dispatch('currentBoxes/resize', { boxIds, delta })
     },
@@ -331,12 +336,12 @@ export default {
         this.$store.dispatch('currentCards/update', { id: card.id, z: index })
       })
     },
-    addCard (position) {
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
+    addCard (event) {
+      let position = utils.cursorPositionInSpace(event)
       const isParentCard = true
       position = {
-        x: position.x * zoom,
-        y: position.y * zoom
+        x: position.x,
+        y: position.y
       }
       if (this.spaceIsReadOnly) {
         this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
@@ -386,15 +391,23 @@ export default {
       if (this.$store.state.preventMultipleSelectedActionsIsVisible) { return }
       const isMultipleSelected = this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length || this.$store.state.multipleBoxesSelectedIds.length
       if (isMultipleSelected) {
-        const position = utils.cursorPositionInPage(event)
+        const position = utils.cursorPositionInSpace(event)
         this.$store.commit('multipleSelectedActionsPosition', position)
         this.$store.commit('multipleSelectedActionsIsVisible', true)
       }
     },
     addOrCloseCard (event) {
       if (this.$store.state.shouldAddCard) {
-        const position = utils.cursorPositionInPage(event)
-        this.addCard(position)
+        let position = utils.cursorPositionInSpace(event)
+        // prevent addCard if position is outside space
+        if (utils.isPositionOutsideOfSpace(position)) {
+          position = utils.cursorPositionInPage(event)
+          this.$store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+          return
+        }
+        // add card
+        this.addCard(event)
+      // close item details
       } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
         this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
       }
@@ -459,6 +472,7 @@ export default {
   pointer-events none // so that painting can receive events
   position relative // used by svg connections
   transform-origin top left
+  z-index 0
   &.hidden-by-mindmap
     opacity 0.4
   .card-overlap-indicator

@@ -1,10 +1,10 @@
 <template lang="pug">
 //- boxes
-.locked-boxes(:style="zoomScale")
+.locked-boxes(:style="positionStyles")
   template(v-for="box in lockedBoxes")
     Box(:box="box")
 //- cards
-.locked-cards(:style="zoomScale")
+.locked-cards(:style="positionStyles")
   template(v-for="card in lockedCards")
     Card(:card="card")
 </template>
@@ -23,9 +23,9 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     lockedCards () { return this.$store.getters['currentCards/isLocked'] },
     lockedBoxes () { return this.$store.getters['currentBoxes/isLocked'] },
-    zoomScale () {
+    positionStyles () {
       return {
-        transform: `scale(${this.spaceZoomDecimal})`
+        transform: this.$store.getters.zoomTransform
       }
     }
   }
