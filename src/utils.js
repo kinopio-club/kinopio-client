@@ -272,9 +272,7 @@ export default {
     const appRect = app.getBoundingClientRect()
     return {
       x: Math.round(spaceRect.x - appRect.x),
-      y: Math.round(spaceRect.y - appRect.y),
-      width: spaceRect.width,
-      height: spaceRect.height
+      y: Math.round(spaceRect.y - appRect.y)
     }
   },
   updatePositionWithSpaceOffset (position) {

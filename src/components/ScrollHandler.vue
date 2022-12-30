@@ -27,10 +27,8 @@ export default {
   },
   computed: {
     ...mapState([
-      'windowScroll'
     ]),
     ...mapGetters([
-      'spaceZoomDecimal'
     ])
   },
   methods: {
@@ -47,7 +45,7 @@ export default {
         shouldZoomOut = deltaY < 0
       }
       let speed = Math.min(Math.abs(deltaY), 5)
-      // speed = speed * 2
+      speed = speed * 2
       this.updateZoomOrigin(event)
       if (shouldZoomIn) {
         this.$store.commit('triggerSpaceZoomIn', { speed })
@@ -59,30 +57,7 @@ export default {
       this.$store.dispatch('updateWindowScroll')
     },
     updateZoomOrigin (event) {
-      let cursor = utils.cursorPositionInPage(event)
-      const space = document.getElementById('space')
-      if (!space) { return }
-      let spaceRect = space.getBoundingClientRect()
-      const x = spaceRect.x + this.windowScroll.x
-      const y = spaceRect.y + this.windowScroll.y
-      const width = spaceRect.width * this.spaceZoomDecimal
-      const height = spaceRect.height * this.spaceZoomDecimal
-      // x
-      if (cursor.x <= x * 1.25) {
-        // left
-        cursor.x = cursor.x + width / 2
-      } else if (cursor.x >= x + width * 0.75) {
-        // right
-        cursor.x = cursor.x - width / 2
-      }
-      // y
-      if (cursor.y <= y * 1.25) {
-        // top
-        cursor.y = cursor.y + height / 2
-      } else if (cursor.y >= y + height * 0.75) {
-        // bottom
-        cursor.y = cursor.y - height / 2
-      }
+      const cursor = utils.cursorPositionInPage(event)
       this.$store.dispatch('zoomOrigin', cursor)
     }
   }
