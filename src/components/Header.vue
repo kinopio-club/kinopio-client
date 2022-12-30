@@ -1,4 +1,8 @@
 <template lang="pug">
+header.presentation-header(v-if="isPresentationMode")
+  button.active(@click="disablePresentationMode")
+    img.icon(src="@/assets/view-hidden.svg")
+
 header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hidden': isHidden, 'hidden-by-mindmap': minimapIsVisible }")
   //- embed
   nav.embed-nav(v-if="isEmbed")
@@ -299,7 +303,8 @@ export default {
       'spaceDetailsIsPinned',
       'sidebarIsPinned',
       'cardDetailsIsVisibleForCardId',
-      'connectionDetailsIsVisibleForConnectionId'
+      'connectionDetailsIsVisibleForConnectionId',
+      'isPresentationMode'
     ]),
     ...mapGetters([
       'isTouchDevice',
@@ -312,6 +317,7 @@ export default {
     kinopioDomain () { return utils.kinopioDomain() },
     isVisible () {
       const contentDialogIsVisible = this.cardDetailsIsVisibleForCardId || this.connectionDetailsIsVisibleForConnectionId
+      if (this.isPresentationMode) { return }
       if (this.isAddPage) { return }
       if (contentDialogIsVisible && this.isTouchDevice) {
         return false
@@ -644,6 +650,9 @@ export default {
         name: 'updateNotificationsIsRead',
         body: notificationIds
       })
+    },
+    disablePresentationMode () {
+      this.$store.commit('isPresentationMode', false)
     }
   },
   watch: {
@@ -903,4 +912,9 @@ header
     transform rotate(-4deg)
   100%
     transform rotate(0deg)
+
+.presentation-header
+  flex-direction row-reverse
+  button
+    pointer-events all
 </style>

@@ -1,9 +1,9 @@
 <template lang="pug">
-.footer-wrap(:style="position" v-if="!isAddPage" :class="{'fade-out': isFadingOut}")
+.footer-wrap(:style="position" v-if="isVisible" :class="{'fade-out': isFadingOut}")
   .left(v-if="!isEmbed")
     footer
       Notifications
-      .controls(v-if="isVisible" :class="{'hidden': isHidden}")
+      .controls(v-if="controlsIsVisible" :class="{'hidden': isHidden}")
         section
           .button-wrap(v-if="userHasInbox")
             button(@click.left="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
@@ -139,7 +139,8 @@ export default {
       'cardDetailsIsVisibleForCardId',
       'multipleSelectedActionsIsVisible',
       'connectionDetailsIsVisibleForConnectionId',
-      'shouldHideFooter'
+      'shouldHideFooter',
+      'isPresentationMode'
     ]),
     ...mapGetters([
       'currentUser/isSignedIn',
@@ -161,6 +162,11 @@ export default {
       return this.isTouchDevice || isMobile
     },
     isVisible () {
+      if (this.isAddPage) { return }
+      if (this.isPresentationMode) { return }
+      return true
+    },
+    controlsIsVisible () {
       const contentDialogIsVisible = Boolean(this.cardDetailsIsVisibleForCardId || this.multipleSelectedActionsIsVisible || this.connectionDetailsIsVisibleForConnectionId)
       // only hide footer on touch devices
       if (!this.isTouchDevice) { return true }
