@@ -3,10 +3,15 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   section
     .row.title-row
       span Share
-      .button-wrap(v-if="spaceHasUrl")
-        button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: spaceRssFeedIsVisible }")
-          span RSS
-        SpaceRssFeed(:visible="spaceRssFeedIsVisible")
+
+      .row
+        button.small-button(@click.left.stop="isPresentationMode")
+          img.icon(src="@/assets/presentation.svg")
+          span Present
+        .button-wrap(v-if="spaceHasUrl")
+          button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: spaceRssFeedIsVisible }")
+            span RSS
+          SpaceRssFeed(:visible="spaceRssFeedIsVisible")
 
   section
     .row
@@ -23,11 +28,6 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
           span Embed
         Embed(:visible="embedIsVisible")
-    .row
-      //- Presentation Mode
-      button(@click.left.stop="isPresentationMode")
-        img.icon(src="@/assets/view.svg")
-        span Presentation Mode
 
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
@@ -39,7 +39,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         .input-button-wrap(@click.left="copyUrl")
           button.small-button
             img.icon.copy(src="@/assets/copy.svg")
-            span URL
+            span Public URL
 
   //- Invite
   Invite(v-if="spaceHasUrl && isSpaceMember")

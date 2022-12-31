@@ -1,7 +1,7 @@
 <template lang="pug">
 header.presentation-header(v-if="isPresentationMode")
   button.active(@click="disablePresentationMode")
-    img.icon(src="@/assets/view-hidden.svg")
+    img.icon(src="@/assets/presentation.svg")
 
 header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hidden': isHidden, 'hidden-by-mindmap': minimapIsVisible }")
   //- embed
