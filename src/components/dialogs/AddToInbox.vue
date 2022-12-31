@@ -109,6 +109,7 @@ export default {
     },
     cards (value) {
       if (!value.length) { return }
+      if (this.currentSpaceIsInbox) { return }
       this.updateDialogHeight()
       this.updateResultsSectionHeight()
     }
