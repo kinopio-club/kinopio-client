@@ -435,7 +435,7 @@ export default {
           item.x = origin.x
           if (this.shouldDistributeWithAlign) {
             const previousItem = newItems[index - 1]
-            const rect = utils.cardRectFromId(previousItem.id) || previousItem
+            const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
             const previousBottomSide = previousItem.y + rect.height
             item.y = previousBottomSide + spaceBetween
           }
