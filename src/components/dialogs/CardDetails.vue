@@ -518,12 +518,6 @@ export default {
     },
     styles () {
       let zoom = this.spaceCounterZoomDecimal
-      const viewport = utils.visualViewport()
-      const pinchCounterScale = 1 / viewport.scale
-      if (zoom === 1) {
-        zoom = pinchCounterScale
-      }
-      // zoom = utils.roundFloat(zoom)
       const left = `${this.card.x + 8}px`
       const top = `${this.card.y + 8}px`
       return { transform: `scale(${zoom})`, left, top }

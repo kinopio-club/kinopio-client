@@ -2,6 +2,7 @@
 .space-zoom
   Slider(
     @updatePlayhead="updateSpaceZoom"
+    @resetPlayhead="resetZoomOrigin"
     :minValue="min"
     :value="spaceZoomPercent"
     :maxValue="max"
@@ -14,6 +15,7 @@
 
 <script>
 import Slider from '@/components/Slider.vue'
+import consts from '@/consts.js'
 
 const increment = 10
 
@@ -43,18 +45,20 @@ export default {
         }
         percent += speed || increment
         this.updateSpaceZoomFromTrigger(percent)
+      } else if (mutation.type === 'triggerCenterZoomOrigin') {
+        this.centerZoomOrigin()
       }
     })
   },
   data () {
     return {
-      min: 40,
-      max: 100,
       animateJiggleRight: false,
       animateJiggleLeft: false
     }
   },
   computed: {
+    max () { return consts.spaceZoom.max }, // 100
+    min () { return consts.spaceZoom.min }, // 20
     spaceZoomPercent () { return this.$store.state.spaceZoomPercent }
   },
   methods: {
@@ -69,6 +73,7 @@ export default {
       this.$store.commit('spaceZoomPercent', percent)
     },
     updateSpaceZoom (percent) {
+      this.centerZoomOrigin()
       this.updateSpaceZoomPercent(percent)
     },
     updateSpaceZoomPercent (percent) {
@@ -83,6 +88,17 @@ export default {
     closeAllDialogs () {
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('closeAllDialogs', 'SpaceZoom')
+    },
+    resetZoomOrigin () {
+      this.$store.commit('zoomOrigin', { x: 0, y: 0 })
+    },
+    centerZoomOrigin () {
+      const scroll = this.$store.state.windowScroll
+      const origin = {
+        x: scroll.x + (this.$store.state.viewportWidth / 2),
+        y: scroll.y + (this.$store.state.viewportHeight / 2)
+      }
+      this.$store.dispatch('zoomOrigin', origin)
     }
   }
 }

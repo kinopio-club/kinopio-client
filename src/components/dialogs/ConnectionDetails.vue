@@ -122,8 +122,8 @@ export default {
         zoom = this.spaceCounterZoomDecimal
       }
       return {
-        left: `${position.x * this.spaceCounterZoomDecimal}px`,
-        top: `${position.y * this.spaceCounterZoomDecimal}px`,
+        left: `${position.x}px`,
+        top: `${position.y}px`,
         transform: `scale(${zoom})`
       }
     },

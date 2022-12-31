@@ -45,7 +45,7 @@ dialog.narrow.multiple-selected-actions(
     template(v-if="oneCardOrMultipleBoxesIsSelected")
       .row
         //- Align And Distribute
-        AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldAutoDistribute="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
+        AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldDistributeWithAlign="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
         //- Move/Copy
         .segmented-buttons.move-or-copy-wrap(v-if="cardsIsSelected")
           button(@click.left.stop="toggleCopyCardsIsVisible" :class="{ active: copyCardsIsVisible }")
@@ -125,14 +125,6 @@ export default {
       return this.$store.state.multipleSelectedActionsIsVisible && isSelectedItems
     },
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
-    position () {
-      const cursor = this.$store.state.multipleSelectedActionsPosition
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
-      return {
-        left: `${cursor.x * zoom}px`,
-        top: `${cursor.y * zoom}px`
-      }
-    },
     userColor () { return this.$store.state.currentUser.color },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
@@ -313,16 +305,12 @@ export default {
       return { cards, boxes }
     },
     styles () {
-      let zoom
-      if (utils.isSignificantlyPinchZoomed()) {
-        zoom = this.pinchCounterZoomDecimal
-      } else {
-        zoom = this.spaceCounterZoomDecimal
-      }
+      const position = this.$store.state.multipleSelectedActionsPosition
+      let zoom = this.spaceCounterZoomDecimal
       return {
         backgroundColor: this.userColor,
-        left: this.position.left,
-        top: this.position.top,
+        left: position.x + 'px',
+        top: position.y + 'px',
         transform: `scale(${zoom})`
       }
     }

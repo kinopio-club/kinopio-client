@@ -51,6 +51,7 @@ const store = createStore({
     spaceZoomPercent: 100,
     pinchCounterZoomDecimal: 1,
     windowScroll: {},
+    zoomOrigin: { x: 0, y: 0 },
 
     // search
     searchIsVisible: false,
@@ -350,6 +351,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'object', origin: 'windowScroll' })
       state.windowScroll = value
     },
+    zoomOrigin: (state, value) => {
+      state.zoomOrigin = value
+    },
     currentSpacePath: (state, value) => {
       utils.typeCheck({ value, type: 'string', origin: 'currentSpacePath' })
       state.currentSpacePath = value
@@ -478,6 +482,12 @@ const store = createStore({
     triggerScrollUserDetailsIntoView: () => {},
     triggerUpdateLockedItemButtonsPositions: () => {},
     triggerLoadBackground: () => {},
+    triggerCenterZoomOrigin: () => {},
+
+    // Used by extensions only
+
+    triggerSelectedCardsContainInBox: () => {},
+    triggerSelectedItemsAlignLeft: () => {},
 
     // Cards
 
@@ -1483,7 +1493,19 @@ const store = createStore({
 
     updateWindowScroll: (context) => {
       context.commit('windowScroll', { x: window.scrollX, y: window.scrollY })
+    },
+    zoomOrigin: (context, origin) => {
+      utils.typeCheck({ value: origin, type: 'object', origin: 'zoomOrigin' })
+      const prevOrigin = context.state.zoomOrigin
+      const zoomOriginIsZero = !utils.objectHasKeys(prevOrigin) || prevOrigin === { x: 0, y: 0 }
+      if (zoomOriginIsZero) {
+        context.commit('zoomOrigin', origin)
+      } else {
+        origin = utils.pointBetweenTwoPoints(prevOrigin, origin)
+        context.commit('zoomOrigin', origin)
+      }
     }
+
   },
   getters: {
     shouldScrollAtEdges: (state, getters) => (event) => {
@@ -1527,6 +1549,16 @@ const store = createStore({
     },
     isTouchDevice: (state) => {
       return state.isTouchDevice || utils.isMobile()
+    },
+    zoomTransform: (state, getters) => {
+      const zoom = getters.spaceZoomDecimal
+      const origin = state.zoomOrigin
+      const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
+      return transform
+    },
+    windowScrollWithSpaceOffset: (state) => {
+      let scroll = state.windowScroll
+      return utils.updatePositionWithSpaceOffset(scroll)
     }
   },
 
