@@ -2,24 +2,15 @@
 dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="positionStyles")
   section(v-if="!cardIsInCurrentSpace")
     .row
-      button(@click="moveCardToCurrentSpace")
-        img.icon.cut(src="@/assets/cut.svg")
-        span Move to This Space
-    .row
-      button(@click="copyCardToCurrentSpace")
+      button(@click="copyCard" :class="{active: isLoadingCopy}")
         img.icon.copy(src="@/assets/copy.svg")
         span Copy to This Space
-
-    //- .row
-    //-   button
-    //-     span Move / copy?
-      //- .segmented-buttons.move-or-copy-wrap
-      //-   button(@click.left.stop="toggleCopyCardsIsVisible" :class="{ active: copyCardsIsVisible }")
-      //-     span Copy
-      //-     MoveOrCopyItems(:visible="copyCardsIsVisible" :actionIsMove="false" :exportData="exportData")
-      //-   button(@click.left.stop="toggleMoveCardsIsVisible" :class="{ active: moveCardsIsVisible }" :disabled="!canEditAll.cards")
-      //-     span Move
-      //-     MoveOrCopyItems(:visible="moveCardsIsVisible" :actionIsMove="true" :exportData="exportData")
+        Loader(:visible="isLoadingCopy")
+    .row
+      button(@click="moveCard" :class="{active: isLoadingMove}")
+        img.icon.cut(src="@/assets/cut.svg")
+        span Move to This Space
+        Loader(:visible="isLoadingMove")
   section
     .row
       button
@@ -28,6 +19,7 @@ dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.
 
 <script>
 // import utils from '@/utils.js'
+import Loader from '@/components/Loader.vue'
 
 import { mapState, mapGetters } from 'vuex'
 
@@ -35,12 +27,21 @@ let prevWindowScroll
 
 export default {
   name: 'cardListItemOptions',
+  components: {
+    Loader
+  },
   mounted () {
     this.updatePrevWindowScroll()
     window.addEventListener('scroll', this.updatePosition)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updatePosition)
+  },
+  data () {
+    return {
+      isLoadingCopy: false,
+      isLoadingMove: false
+    }
   },
   computed: {
     ...mapState([
@@ -65,13 +66,26 @@ export default {
     }
   },
   methods: {
-    moveCardToCurrentSpace () {
+    async copyCard () {
+      this.isLoadingCopy = true
+      await this.copyCardToCurrentSpace()
+      this.isLoadingCopy = false
+    },
+    async moveCard () {
+      this.isLoadingMove = true
+      await this.copyCardToCurrentSpace()
+      // const card = this.cardListItemOptionsCard
+      // remove original card
+
+      // this.isLoadingMove = false
+    },
+    async copyCardToCurrentSpace () {
       const card = this.cardListItemOptionsCard
       console.log('🐸', card.name, card)
-    // get center vp: half vp + scroll - ~halfcardwidthheight
-    // api patch: update id w new card x,y, and spaceid
-    // commit the card to state: currentCards/create
-    // animate//highlight the card
+      // get center vp: half vp + scroll - ~halfcardwidthheight
+      // api patch: update id w new card x,y, and spaceid
+      // commit the card to state: currentCards/create
+      // animate//highlight the card
     },
     updatePrevWindowScroll () {
       prevWindowScroll = {
@@ -103,9 +117,9 @@ export default {
 <style lang="stylus">
 dialog.card-list-item-options
   position absolute
-  width 190px !important
-  // .double-line-height
-  //   height 44px
   .icon.visit
     vertical-align 2px
+  .loader
+    vertical-align -2px
+    margin-left 5px
 </style>
