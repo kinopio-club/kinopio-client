@@ -13,7 +13,7 @@ dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.
       .badge.info Space is Read Only
   section
     .row
-      button
+      button(@click="jumpToCard")
         span Jump to Card
 </template>
 
@@ -87,6 +87,18 @@ export default {
         position
       })
       this.$store.dispatch('currentCards/showCardDetails', card.id)
+    },
+    jumpToCard () {
+      const card = this.cardListItemOptionsCard
+      if (this.currentSpace.id !== card.spaceId) {
+        this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
+        this.$store.dispatch('currentSpace/changeSpace', {
+          space: { id: card.spaceId },
+          isRemote: true
+        })
+      } else {
+        this.$store.dispatch('currentCards/showCardDetails', card.id)
+      }
     },
 
     // dialog position
