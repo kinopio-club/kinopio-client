@@ -7,7 +7,7 @@ dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @tou
     //- p blank slate, no cards
     CardList(
       :cards="cards"
-      :primaryActionIsCardListOptions="primaryActionIsCardListOptions"
+      :primaryActionIsCardListOptions="true"
     )
 </template>
 
@@ -52,7 +52,6 @@ export default {
     currentSpaceIsInbox () {
       return this.currentSpace.name === 'Inbox'
     },
-    primaryActionIsCardListOptions () { return true },
     dialogStyles () {
       return { maxHeight: this.dialogHeight + 'px' }
     }
