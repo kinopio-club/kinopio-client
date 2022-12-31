@@ -42,10 +42,11 @@
 
 <script>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import uniqBy from 'lodash-es/uniqBy'
 
-const spaceBetween = 12
+const spaceBetween = consts.spaceBetweenCards
 
 export default {
   name: 'AlignAndDistribute',
