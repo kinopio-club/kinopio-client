@@ -483,6 +483,7 @@ const store = createStore({
     triggerUpdateLockedItemButtonsPositions: () => {},
     triggerLoadBackground: () => {},
     triggerCenterZoomOrigin: () => {},
+    triggerRemoveCardFromCardList: (state, card) => {},
 
     // Used by extensions only
 

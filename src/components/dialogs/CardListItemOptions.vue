@@ -69,10 +69,10 @@ export default {
     moveCard () {
       if (this.spaceIsReadOnly) { return }
       this.copyCardToCurrentSpace()
-      // const card = this.cardListItemOptionsCard
-      // remove original card
-      // close options dialog ,
-      // remove from list (via emit)
+      const card = this.cardListItemOptionsCard
+      this.$store.dispatch('api/addToQueue', { name: 'deleteCard', body: card }, { root: true })
+      this.$store.commit('cardListItemOptionsIsVisible', false)
+      this.$store.commit('triggerRemoveCardFromCardList', card)
     },
     copyCardToCurrentSpace () {
       let card = utils.clone(this.cardListItemOptionsCard)

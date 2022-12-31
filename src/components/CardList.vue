@@ -37,6 +37,19 @@ export default {
     primaryActionIsCardListOptions: Boolean
     // cardListItemOptionsPositionShouldBeOnLeftSide: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerRemoveCardFromCardList') {
+        const card = mutation.payload
+        this.removedCardIds.push(card.id)
+      }
+    })
+  },
+  data () {
+    return {
+      removedCardIds: []
+    }
+  },
   computed: {
     ...mapState([
       'cardDetailsIsVisibleForCardId',
@@ -47,7 +60,8 @@ export default {
     ...mapGetters([
     ]),
     normalizedCards () {
-      const cards = utils.clone(this.cards)
+      let cards = utils.clone(this.cards)
+      cards = cards.filter(card => !this.removedCardIds.includes(card.id))
       return cards.map(card => {
         card.nameSegments = this.cardNameSegments(card.name)
         card.user = this.$store.getters['currentSpace/userById'](card.userId)
