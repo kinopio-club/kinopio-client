@@ -851,6 +851,7 @@ export default {
   },
   cardRectFromId (cardId) {
     const element = this.cardElementFromId(cardId)
+    if (!element) { return }
     return element.getBoundingClientRect()
   },
   cardPositionFromElement (cardId) {
@@ -859,8 +860,16 @@ export default {
     const y = parseInt(element.style.top)
     return { x, y }
   },
+  boxElementFromId (boxId) {
+    return document.querySelector(`.box[data-box-id="${boxId}"]`)
+  },
+  boxRectFromId (boxId) {
+    const element = this.boxElementFromId(boxId)
+    if (!element) { return }
+    return element.getBoundingClientRect()
+  },
   boxPositionFromElement (boxId) {
-    const element = document.querySelector(`.box[data-box-id="${boxId}"]`)
+    const element = this.boxElementFromId(boxId)
     const x = parseInt(element.style.left)
     const y = parseInt(element.style.top)
     return { x, y }

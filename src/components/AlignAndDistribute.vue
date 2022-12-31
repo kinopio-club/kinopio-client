@@ -339,7 +339,7 @@ export default {
           item.y = origin.y
           if (this.shouldDistributeWithAlign) {
             const previousItem = newItems[index - 1]
-            const rect = utils.cardRectFromId(previousItem.id) || previousItem
+            const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
             const previousRightSide = previousItem.x + rect.width
             item.x = previousRightSide + spaceBetween
           }
@@ -388,7 +388,7 @@ export default {
           item.x = origin.x + (origin.width * zoom) - (item.width * zoom)
           if (this.shouldDistributeWithAlign) {
             const previousItem = items[index - 1]
-            const rect = utils.cardRectFromId(previousItem.id) || previousItem
+            const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
             const previousBottomSide = previousItem.y + (rect.height * zoom)
             item.y = previousBottomSide + spaceBetween
           }
