@@ -110,7 +110,7 @@ export default {
           shouldIgnoreZoom: true,
           offsetX: rect.width - 25,
           offsetY: -rect.height + 12,
-          maxYOffset: 140
+          maxYOffset: 170
         })
         this.$store.commit('cardListItemOptionsPosition', position)
         this.$store.commit('cardListItemOptionsCard', card)

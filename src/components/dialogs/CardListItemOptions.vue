@@ -2,15 +2,15 @@
 dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="positionStyles")
   section(v-if="!cardIsInCurrentSpace")
     .row
-      button(@click="copyCard" :class="{active: isLoadingCopy}")
+      button(@click="copyCard" :disabled="spaceIsReadOnly")
         img.icon.copy(src="@/assets/copy.svg")
         span Copy to This Space
-        Loader(:visible="isLoadingCopy")
     .row
-      button(@click="moveCard" :class="{active: isLoadingMove}")
+      button(@click="moveCard" :disabled="spaceIsReadOnly")
         img.icon.cut(src="@/assets/cut.svg")
         span Move to This Space
-        Loader(:visible="isLoadingMove")
+    .row(v-if="spaceIsReadOnly")
+      .badge.info Space is Read Only
   section
     .row
       button
@@ -18,9 +18,9 @@ dialog.narrow.card-list-item-options(v-if="visible" :open="visible" @click.left.
 </template>
 
 <script>
-// import utils from '@/utils.js'
-import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
+import { nanoid } from 'nanoid'
 import { mapState, mapGetters } from 'vuex'
 
 let prevWindowScroll
@@ -28,7 +28,6 @@ let prevWindowScroll
 export default {
   name: 'cardListItemOptions',
   components: {
-    Loader
   },
   mounted () {
     this.updatePrevWindowScroll()
@@ -37,19 +36,15 @@ export default {
   beforeUnmount () {
     window.removeEventListener('scroll', this.updatePosition)
   },
-  data () {
-    return {
-      isLoadingCopy: false,
-      isLoadingMove: false
-    }
-  },
   computed: {
     ...mapState([
       'cardListItemOptionsPosition',
       'cardListItemOptionsCard',
       'cardListItemOptionsIsVisible',
       'windowScroll',
-      'currentSpace'
+      'currentSpace',
+      'viewportHeight',
+      'viewportWidth'
     ]),
     ...mapGetters([
     ]),
@@ -63,30 +58,39 @@ export default {
     cardIsInCurrentSpace () {
       console.log(this.cardListItemOptionsCard.spaceId, this.currentSpace.id)
       return this.cardListItemOptionsCard.spaceId === this.currentSpace.id
-    }
+    },
+    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() }
   },
   methods: {
-    async copyCard () {
-      this.isLoadingCopy = true
-      await this.copyCardToCurrentSpace()
-      this.isLoadingCopy = false
+    copyCard () {
+      if (this.spaceIsReadOnly) { return }
+      this.copyCardToCurrentSpace()
     },
-    async moveCard () {
-      this.isLoadingMove = true
-      await this.copyCardToCurrentSpace()
+    moveCard () {
+      if (this.spaceIsReadOnly) { return }
+      this.copyCardToCurrentSpace()
       // const card = this.cardListItemOptionsCard
       // remove original card
+      // close options dialog ,
+      // remove from list (via emit)
+    },
+    copyCardToCurrentSpace () {
+      let card = utils.clone(this.cardListItemOptionsCard)
+      card.id = nanoid()
+      const position = {
+        x: this.windowScroll.x - card.width + (this.viewportWidth / 2),
+        y: this.windowScroll.y - card.height + (this.viewportHeight / 2)
+      }
+      this.$store.dispatch('currentCards/add', {
+        id: card.id,
+        name: card.name,
+        position
+      })
+      this.$store.dispatch('currentCards/showCardDetails', card.id)
+    },
 
-      // this.isLoadingMove = false
-    },
-    async copyCardToCurrentSpace () {
-      const card = this.cardListItemOptionsCard
-      console.log('🐸', card.name, card)
-      // get center vp: half vp + scroll - ~halfcardwidthheight
-      // api patch: update id w new card x,y, and spaceid
-      // commit the card to state: currentCards/create
-      // animate//highlight the card
-    },
+    // dialog position
+
     updatePrevWindowScroll () {
       prevWindowScroll = {
         x: window.scrollX,
@@ -119,7 +123,4 @@ dialog.card-list-item-options
   position absolute
   .icon.visit
     vertical-align 2px
-  .loader
-    vertical-align -2px
-    margin-left 5px
 </style>
