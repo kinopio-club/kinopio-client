@@ -61,6 +61,14 @@ export default {
     boxes: Object,
     editableBoxes: Object
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      const { type } = mutation
+      if (type === 'triggerSelectedItemsAlignLeft') {
+        this.alignLeft()
+      }
+    })
+  },
   computed: {
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },

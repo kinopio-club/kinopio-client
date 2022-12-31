@@ -478,6 +478,11 @@ const store = createStore({
     triggerLoadBackground: () => {},
     triggerCenterZoomOrigin: () => {},
 
+    // Used by extensions only
+
+    triggerSelectedCardsContainInBox: () => {},
+    triggerSelectedItemsAlignLeft: () => {},
+
     // Cards
 
     shouldAddCard: (state, value) => {
