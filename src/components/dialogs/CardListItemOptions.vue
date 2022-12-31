@@ -23,18 +23,9 @@ import utils from '@/utils.js'
 import { nanoid } from 'nanoid'
 import { mapState, mapGetters } from 'vuex'
 
-let prevWindowScroll
-
 export default {
   name: 'cardListItemOptions',
   components: {
-  },
-  mounted () {
-    this.updatePrevWindowScroll()
-    window.addEventListener('scroll', this.updatePosition)
-  },
-  beforeUnmount () {
-    window.removeEventListener('scroll', this.updatePosition)
   },
   computed: {
     ...mapState([
@@ -99,32 +90,6 @@ export default {
       } else {
         this.$store.dispatch('currentCards/showCardDetails', card.id)
       }
-    },
-
-    // dialog position
-
-    updatePrevWindowScroll () {
-      prevWindowScroll = {
-        x: window.scrollX,
-        y: window.scrollY
-      }
-    },
-    updatePosition () {
-      const delta = {
-        x: this.windowScroll.x - prevWindowScroll.x,
-        y: this.windowScroll.y - prevWindowScroll.y
-      }
-      this.$store.commit('cardListItemOptionsPosition', {
-        x: this.cardListItemOptionsPosition.x + delta.x,
-        y: this.cardListItemOptionsPosition.y + delta.y
-      })
-      this.updatePrevWindowScroll()
-    }
-  },
-  watch: {
-    visible (value) {
-      if (!value) { return }
-      this.updatePrevWindowScroll()
     }
   }
 }
