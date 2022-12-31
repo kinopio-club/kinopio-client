@@ -846,8 +846,15 @@ export default {
     })
     return cardElement
   },
+  cardElementFromId (cardId) {
+    return document.querySelector(`article[data-card-id="${cardId}"]`)
+  },
+  cardRectFromId (cardId) {
+    const element = this.cardElementFromId(cardId)
+    return element.getBoundingClientRect()
+  },
   cardPositionFromElement (cardId) {
-    const element = document.querySelector(`article[data-card-id="${cardId}"]`)
+    const element = this.cardElementFromId(cardId)
     const x = parseInt(element.style.left)
     const y = parseInt(element.style.top)
     return { x, y }

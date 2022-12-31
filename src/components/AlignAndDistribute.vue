@@ -54,7 +54,7 @@ export default {
     visible: Boolean,
     numberOfSelectedItemsCreatedByCurrentUser: Object,
     shouldHideMoreOptions: Boolean,
-    shouldAutoDistribute: Boolean,
+    shouldDistributeWithAlign: Boolean,
     canEditAll: Object,
     cards: Object,
     editableCards: Object,
@@ -99,7 +99,7 @@ export default {
       const cards = this.sortedByY.cards
       const zoom = this.spaceCounterZoomDecimal
       let yIsDistributed = true
-      if (this.shouldAutoDistribute) {
+      if (this.shouldDistributeWithAlign) {
         cards.forEach((card, index) => {
           if (index > 0) {
             const previousItem = cards[index - 1]
@@ -123,7 +123,7 @@ export default {
       const cards = this.sortedByX.cards
       const zoom = this.spaceCounterZoomDecimal
       let xIsDistributed = true
-      if (this.shouldAutoDistribute) {
+      if (this.shouldDistributeWithAlign) {
         cards.forEach((card, index) => {
           if (index > 0) {
             const previousItem = cards[index - 1]
@@ -335,11 +335,12 @@ export default {
       const origin = items[0]
       items.forEach((item, index) => {
         if (index > 0) {
-          const previousItem = newItems[index - 1]
-          const previousRightSide = previousItem.x + previousItem.width
           item = utils.clone(item)
           item.y = origin.y
-          if (this.shouldAutoDistribute) {
+          if (this.shouldDistributeWithAlign) {
+            const previousItem = newItems[index - 1]
+            const rect = utils.cardRectFromId(previousItem.id) || previousItem
+            const previousRightSide = previousItem.x + rect.width
             item.x = previousRightSide + spaceBetween
           }
           this.updateItem(item, type)
@@ -363,7 +364,7 @@ export default {
           const previousBottomSide = previousItem.y + previousItem.height
           item = utils.clone(item)
           item.x = origin.x + (origin.width / 2) - (item.width / 2)
-          if (this.shouldAutoDistribute) {
+          if (this.shouldDistributeWithAlign) {
             item.y = previousBottomSide + spaceBetween
           }
           this.updateItem(item, type)
@@ -383,11 +384,12 @@ export default {
       const zoom = this.spaceCounterZoomDecimal
       items.forEach((item, index) => {
         if (index > 0) {
-          const previousItem = items[index - 1]
-          const previousBottomSide = previousItem.y + (previousItem.height * zoom)
           item = utils.clone(item)
           item.x = origin.x + (origin.width * zoom) - (item.width * zoom)
-          if (this.shouldAutoDistribute) {
+          if (this.shouldDistributeWithAlign) {
+            const previousItem = items[index - 1]
+            const rect = utils.cardRectFromId(previousItem.id) || previousItem
+            const previousBottomSide = previousItem.y + (rect.height * zoom)
             item.y = previousBottomSide + spaceBetween
           }
           this.updateItem(item, type)
@@ -429,11 +431,12 @@ export default {
       const origin = items[0]
       items.forEach((item, index) => {
         if (index > 0) {
-          const previousItem = newItems[index - 1]
-          const previousBottomSide = previousItem.y + previousItem.height
           item = utils.clone(item)
           item.x = origin.x
-          if (this.shouldAutoDistribute) {
+          if (this.shouldDistributeWithAlign) {
+            const previousItem = newItems[index - 1]
+            const rect = utils.cardRectFromId(previousItem.id) || previousItem
+            const previousBottomSide = previousItem.y + rect.height
             item.y = previousBottomSide + spaceBetween
           }
           this.updateItem(item, type)
@@ -453,10 +456,10 @@ export default {
       const origin = items[0]
       items.forEach((item, index) => {
         if (index > 0) {
-          const previousItem = items[index - 1]
-          const previousRightSide = previousItem.x + previousItem.width
           item = utils.clone(item)
-          if (this.shouldAutoDistribute) {
+          if (this.shouldDistributeWithAlign) {
+            const previousItem = items[index - 1]
+            const previousRightSide = previousItem.x + previousItem.width
             item.x = previousRightSide + spaceBetween
           }
           item.y = origin.y + (origin.height / 2) - (item.height / 2)
@@ -476,11 +479,11 @@ export default {
       const origin = items[0]
       items.forEach((item, index) => {
         if (index > 0) {
-          const previousItem = items[index - 1]
-          const previousRightSide = previousItem.x + previousItem.width
           item = utils.clone(item)
           item.y = origin.y + origin.height - item.height
-          if (this.shouldAutoDistribute) {
+          if (this.shouldDistributeWithAlign) {
+            const previousItem = items[index - 1]
+            const previousRightSide = previousItem.x + previousItem.width
             item.x = previousRightSide + spaceBetween
           }
           this.updateItem(item, type)
