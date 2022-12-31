@@ -132,6 +132,7 @@ export default {
 
 <style lang="stylus">
 dialog.card-list-item-options
+  width 190px !important
   position absolute
   .icon.visit
     vertical-align 2px
