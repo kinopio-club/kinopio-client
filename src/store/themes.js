@@ -2,6 +2,7 @@ import utils from '@/utils.js'
 
 const themes = {
   light: {
+    name: 'light',
     colors: {
       'primary': 'black',
       'primary-background': 'white',
@@ -24,6 +25,7 @@ const themes = {
     }
   },
   dark: {
+    name: 'dark',
     colors: {
       'primary': 'black',
       'primary-background': 'white',
@@ -49,14 +51,25 @@ const themes = {
 
 export default {
   namespaced: true,
+  state: {
+    currentTheme: {}
+  },
+  mutations: {
+    currentTheme: (state, theme) => {
+      utils.typeCheck({ value: theme, type: 'object' })
+      state.currentTheme = theme
+    }
+  },
   actions: {
-    update: (state, themeName) => {
+    update: (context, themeName) => {
       // colors
-      const colors = state.getters.themeByName(themeName).colors
+      const theme = context.getters.themeByName(themeName)
+      const colors = theme.colors
       let keys = Object.keys(colors)
       keys.forEach(key => {
         utils.setCssVariable(key, colors[key])
       })
+      context.commit('currentTheme', theme)
       // consts
       const consts = {
         'hover-shadow': `3px 3px 0 var(--heavy-shadow)`,
@@ -72,9 +85,6 @@ export default {
     }
   },
   getters: {
-    currentTheme: (state, getters, rootState) => {
-      // return current user theme || 'light'
-    },
     themeByName: () => (themeName) => {
       return themes[themeName]
     }

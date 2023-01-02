@@ -103,6 +103,9 @@ export default {
       const value = !this.colorPickerIsVisible
       this.closeDialogs()
       this.colorPickerIsVisible = value
+    },
+    updateTheme (themeName) {
+      this.$store.dispatch('themes/update', themeName)
     }
   }
 }
