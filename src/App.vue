@@ -277,11 +277,6 @@ export default {
   // theme vars in themes.js
   // non-theme vars
   --max-z 2147483646
-  --hover-shadow 3px 3px 0 var(--heavy-shadow)
-  --active-shadow 5px 5px 0 var(--light-shadow)
-  --active-inset-shadow inset 0 2px 3px var(--light-shadow)
-  --button-hover-shadow 2px 2px 0 var(--heavy-shadow)
-  --button-active-inset-shadow inset 0 1px 2px var(--heavy-shadow)
   --entity-radius 5px
   --serif-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
