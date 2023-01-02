@@ -444,7 +444,7 @@ const self = {
         const response = await utils.timeout(40000, fetch(`${host}/space/inbox`, options))
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getSpace', error)
+        console.error('🚒 getInboxSpace', error)
       }
     },
     createSpaces: async (context) => {

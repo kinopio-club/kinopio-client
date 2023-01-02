@@ -119,10 +119,6 @@ export default {
   }
 }
 
-// qa anon user
-// todo no cards
-// todo dismissTips update user attr
-// qa mobile
 </script>
 
 <style lang="stylus">
