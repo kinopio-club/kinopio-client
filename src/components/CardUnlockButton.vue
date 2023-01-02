@@ -27,7 +27,9 @@ export default {
       'spaceCounterZoomDecimal'
     ]),
     positionStyles () {
-      if (!this.position) { return }
+      if (!this.position) {
+        return { display: 'none' }
+      }
       const position = utils.updatePositionWithSpaceOffset(this.position)
       const x = (position.x + window.scrollX) * this.spaceCounterZoomDecimal
       const y = (position.y + window.scrollY) * this.spaceCounterZoomDecimal

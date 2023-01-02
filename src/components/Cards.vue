@@ -20,7 +20,6 @@ export default {
         this.$store.dispatch('currentCards/checkIfShouldUpdateNewTweetCards')
       } else if (cardRectEvents.includes(mutation.type)) {
         this.updateCardRectsInViewport()
-        this.$store.commit('triggerUpdateLockedItemButtonsPositions')
       }
     })
   },
@@ -35,6 +34,7 @@ export default {
   },
   methods: {
     updateCardRectsInViewport () {
+      this.$store.commit('triggerUpdateLockedItemButtonsPositions')
       this.$nextTick(() => {
         let cards = []
         const elements = document.querySelectorAll('article#card')
