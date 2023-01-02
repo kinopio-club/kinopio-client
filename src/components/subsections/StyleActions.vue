@@ -87,20 +87,23 @@ export default {
       }
     }
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      const { type } = mutation
+      if (type === 'triggerCardDetailsCloseDialogs' && this.visible) {
+        const shouldPreventEmit = true
+        this.closeDialogs(shouldPreventEmit)
+      } else if (type === 'triggerSelectedCardsContainInBox') {
+        this.containCardsInBox()
+      }
+    })
+  },
   data () {
     return {
       framePickerIsVisible: false,
       tagPickerIsVisible: false,
       colorPickerIsVisible: false
     }
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerCardDetailsCloseDialogs' && this.visible) {
-        const shouldPreventEmit = true
-        this.closeDialogs(shouldPreventEmit)
-      }
-    })
   },
   computed: {
     isCards () { return Boolean(this.cards.length) },

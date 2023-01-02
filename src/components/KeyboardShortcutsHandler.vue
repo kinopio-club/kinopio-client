@@ -5,7 +5,6 @@
 import utils from '@/utils.js'
 import { nanoid } from 'nanoid'
 
-const incrementPosition = 12
 let useSiblingConnectionType
 let browserZoomLevel = 0
 let disableContextMenu = false
@@ -185,6 +184,7 @@ export default {
         browserZoomLevel = Math.max(0, browserZoomLevel - 1)
         if (shouldNativeZoom) { return }
         event.preventDefault()
+        this.$store.commit('triggerCenterZoomOrigin')
         this.$store.commit('triggerSpaceZoomOut')
       // Zoom In
       } else if (isMeta && key === '=') {
@@ -194,6 +194,7 @@ export default {
           return
         }
         event.preventDefault()
+        this.$store.commit('triggerCenterZoomOrigin')
         this.$store.commit('triggerSpaceZoomIn')
         // Minimap
       } else if (key === 'z' && isSpaceScope) {
@@ -320,29 +321,40 @@ export default {
       let childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
       const childCardData = this.$store.getters['currentCards/byId'](childCardId)
       const shouldOutdentChildToParent = childCard && !childCardData
-      let initialPosition = {}
+      const scroll = this.$store.getters.windowScrollWithSpaceOffset
+      const spaceBetweenCards = utils.spaceBetweenCards()
+      let position = {}
       let isParentCard = true
+      console.log(scroll.x, parentCard, parentCard.getBoundingClientRect().x)
       if (shouldOutdentChildToParent) {
         const rect = childCard.getBoundingClientRect()
         const parentRect = parentCard.getBoundingClientRect()
-        initialPosition.x = window.pageXOffset + parentRect.x
-        initialPosition.y = window.pageYOffset + rect.y
+        position = {
+          x: scroll.x + parentRect.x,
+          y: scroll.y + rect.y
+        }
         childCard = false
       } else if (childCard) {
         isParentCard = false
         const rect = childCard.getBoundingClientRect()
-        initialPosition.x = window.pageXOffset + rect.x
-        initialPosition.y = window.pageYOffset + rect.y + rect.height + incrementPosition
+        position = {
+          x: scroll.x + rect.x,
+          y: scroll.y + rect.y + rect.height + spaceBetweenCards
+        }
       } else if (parentCard) {
         const rect = parentCard.getBoundingClientRect()
-        initialPosition.x = window.pageXOffset + rect.x
-        initialPosition.y = window.pageYOffset + rect.y + rect.height + incrementPosition
+        position = {
+          x: scroll.x + rect.x,
+          y: scroll.y + rect.y + rect.height + spaceBetweenCards
+        }
       } else {
-        initialPosition.x = window.pageXOffset + 40
-        initialPosition.y = window.pageYOffset + 80
+        position = {
+          x: scroll.x + 40,
+          y: scroll.y + 80
+        }
       }
-      initialPosition = this.updateWithZoom(initialPosition)
-      const position = this.nonOverlappingCardPosition(initialPosition)
+      position = this.updateWithZoom(position)
+      position = this.nonOverlappingCardPosition(position)
       parentCard = this.$store.getters['currentCards/byId'](parentCardId)
       let backgroundColor
       if (parentCard) {
@@ -360,6 +372,8 @@ export default {
 
     addChildCard () {
       useSiblingConnectionType = false
+      const spaceBetweenCards = utils.spaceBetweenCards()
+      const scroll = this.$store.getters.windowScrollWithSpaceOffset
       const parentCardId = this.$store.state.parentCardId
       const childCardId = this.$store.state.childCardId
       let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
@@ -376,8 +390,8 @@ export default {
       }
       const rect = baseCard.getBoundingClientRect()
       let initialPosition = {
-        x: window.pageXOffset + rect.x + rect.width + incrementPosition,
-        y: window.pageYOffset + rect.y + rect.height + incrementPosition
+        x: scroll.x + rect.x + rect.width + spaceBetweenCards,
+        y: scroll.y + rect.y + rect.height + spaceBetweenCards
       }
       initialPosition = this.updateWithZoom(initialPosition)
       const position = this.nonOverlappingCardPosition(initialPosition)
@@ -391,6 +405,7 @@ export default {
 
     // recursive
     nonOverlappingCardPosition (position) {
+      const spaceBetweenCards = utils.spaceBetweenCards()
       const cards = this.$store.getters['currentCards/isSelectable'](position)
       if (!cards) { return position }
       const overlappingCard = cards.find(card => {
@@ -407,7 +422,7 @@ export default {
         return isBetweenX && isBetweenY
       })
       if (overlappingCard) {
-        position.y = position.y + overlappingCard.height + incrementPosition
+        position.y = position.y + overlappingCard.height + spaceBetweenCards
         return this.nonOverlappingCardPosition(position)
       } else {
         return position

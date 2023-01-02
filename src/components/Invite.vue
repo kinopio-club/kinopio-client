@@ -1,42 +1,36 @@
 <template lang="pug">
-dialog.narrow.invite(v-if="visible" :open="visible" @click.left.stop)
+section.invite
+  .row
+    span Invite
+  Loader(:visible="loading")
+  template(v-if="!loading && collaboratorKey")
+    .row
+      .url-textarea {{url}}
+      .input-button-wrap(@click.left="copyUrl")
+        button.small-button
+          img.icon.copy(src="@/assets/copy.svg")
+          span Invite URL
+  //- Error
+  template(v-if="!loading && !collaboratorKey")
+    .row
+      .badge.danger シ_ _)シ Something went wrong
+    .row
+      button(@click="updateCollaboratorKey") Try Again
+  //- View and Edit Permissions
+  .row
+    template(v-if="spaceIsPrivate")
+      span No account needed to view private spaces
+    template(v-if="currentUserIsUpgraded")
+      .badge.success.button-badge(v-if="!freeCardsInfoIsVisible" @click="toggleFreeCardsInfoVisible") Free Cards
+      .badge.success.button-badge(v-if="freeCardsInfoIsVisible" @click="toggleFreeCardsInfoVisible") Because your account is upgraded, others can create cards here for free
 
-  // add by email
-  // share link
-
-  section
-    p Invite
-  section
-    Loader(:visible="loading")
-    template(v-if="!loading && collaboratorKey")
-      .row
-        .url-textarea {{url}}
-        .input-button-wrap(@click.left="copyUrl")
-          button.small-button
-            img.icon.copy(src="@/assets/copy.svg")
-            span Invite URL
-    //- Error
-    template(v-if="!loading && !collaboratorKey")
-      .row
-        .badge.danger シ_ _)シ Something went wrong
-      .row
-        button(@click="updateCollaboratorKey") Try Again
-    //- View and Edit Permissions
-    .row(v-if="spaceIsPrivate")
-      p
-        .badge.info
-          img.icon(src="@/assets/view.svg")
-        span No account needed to view private spaces
-    //- Free Cards
-    .row(v-if="currentUserIsUpgraded")
-      p
-        .badge.success Free Cards
-        span Because your account is upgraded, invitees can create cards here for free
 </template>
 
 <script>
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+
+import { mapState, mapGetters } from 'vuex'
 
 export default {
   name: 'Invite',
@@ -46,14 +40,23 @@ export default {
   components: {
     Loader
   },
+  mounted () {
+    this.updateCollaboratorKey()
+  },
   data () {
     return {
       url: '',
       loading: false,
-      collaboratorKey: ''
+      collaboratorKey: '',
+      freeCardsInfoIsVisible: false
     }
   },
   computed: {
+    ...mapState([
+      'currentUser'
+    ]),
+    ...mapGetters([
+    ]),
     spaceIsPrivate () { return this.$store.state.currentSpace.privacy === 'private' },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
@@ -92,14 +95,14 @@ export default {
       const spaceId = currentSpace.id
       const spaceName = utils.normalizeString(currentSpace.name)
       this.url = `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
+    },
+    toggleFreeCardsInfoVisible () {
+      this.freeCardsInfoIsVisible = !this.freeCardsInfoIsVisible
     }
   },
   watch: {
     visible (visible) {
       this.$store.commit('clearNotificationsWithPosition')
-      if (visible) {
-        this.updateCollaboratorKey()
-      }
     }
   }
 }
@@ -107,10 +110,7 @@ export default {
 
 <style lang="stylus" scoped>
 .invite
-  left initial
-  right 8px
-  max-height calc(100vh - 180px)
-  overflow auto
-  @media(max-height 570px)
-    top -100px
+  user-select text
+  .url-textarea
+    max-height 57px
 </style>

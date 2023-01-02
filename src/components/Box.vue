@@ -560,8 +560,10 @@ export default {
     top 0px
     cursor pointer
     button
+      border-color transparent
       cursor pointer
     .lock-icon
+      opacity 0
       position absolute
       left 5.5px
       top 2px
@@ -576,9 +578,9 @@ export default {
     .resize-button-wrap
       transform translate(10px, 13px)
       z-index 1
-      cursor ew-resize
+      cursor nwse-resize
       button
-        cursor ew-resize
+        cursor nwse-resize
     img
       -webkit-user-drag none
 

@@ -1,7 +1,7 @@
 <template lang="pug">
 .connection-label.badge(
   v-if="visible"
-  :style="{ background: typeColor, left: position.left + 'px', top: position.top + 'px'}"
+  :style="styles"
   @click.left="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
   @touchstart="checkIsMultiTouch"
@@ -40,8 +40,15 @@ export default {
   },
   computed: {
     visible () {
-      const hasPosition = this.position.left && this.position.top
+      const hasPosition = this.position.x && this.position.y
       return this.connection.labelIsVisible && hasPosition && !this.isUpdatingPath
+    },
+    styles () {
+      return {
+        background: this.typeColor,
+        left: this.position.x + 'px',
+        top: this.position.y + 'px'
+      }
     },
     id () { return this.connection.id },
     connectionTypeId () { return this.connection.connectionTypeId },
@@ -152,7 +159,6 @@ export default {
       const hasChanged = this.connectionIsVisible !== Boolean(connection)
       if (connection && hasChanged) {
         this.connectionIsVisible = true
-        this.setPosition()
       } else {
         this.connectionIsVisible = false
       }
@@ -161,7 +167,6 @@ export default {
       if (!this.connectionIsVisible) { return }
       if (!this.connection.path) { return }
       this.$nextTick(() => {
-        const zoom = this.$store.getters.spaceCounterZoomDecimal
         let connection = document.querySelector(`.connection-path[data-id="${this.id}"]`)
         if (!connection) { return }
         connection = connection.getBoundingClientRect()
@@ -170,27 +175,27 @@ export default {
         if (label) {
           label = label.getBoundingClientRect()
           labelOffset = {
-            left: label.width / 4,
-            top: label.height / 4
+            x: label.width / 4,
+            y: label.height / 4
           }
         } else {
-          labelOffset = { left: 0, top: 0 }
+          labelOffset = { x: 0, y: 0 }
         }
         const basePosition = {
-          left: connection.x + window.scrollX,
-          top: connection.y + window.scrollY
+          x: connection.x + window.scrollX,
+          y: connection.y + window.scrollY
         }
         const connectionOffset = {
-          left: connection.width / 2,
-          top: connection.height / 2
+          x: connection.width / 2,
+          y: connection.height / 2
         }
         let position = {
-          left: basePosition.left + connectionOffset.left - labelOffset.left,
-          top: basePosition.top + connectionOffset.top - labelOffset.top
+          x: basePosition.x + connectionOffset.x - labelOffset.x,
+          y: basePosition.y + connectionOffset.y - labelOffset.y
         }
         this.position = {
-          left: position.left * zoom,
-          top: position.top * zoom
+          x: position.x,
+          y: position.y
         }
       })
     }
@@ -216,6 +221,7 @@ export default {
   pointer-events all
   cursor pointer
   position absolute
+  transform-origin top left
   &.cursor-default
     cursor default
   .is-dark

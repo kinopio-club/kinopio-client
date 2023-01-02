@@ -1,6 +1,6 @@
 <template lang='pug'>
 .app(
-  @pointermove="broadcastCursor"
+  @pointermove="broadcastUserCursor"
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
   :class="{ 'no-background': isAddPage }"
@@ -220,10 +220,10 @@ export default {
       }
       multiTouchAction = null
     },
-    broadcastCursor (event) {
+    broadcastUserCursor (event) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
-      let updates = utils.cursorPositionInPage(event)
+      let updates = utils.cursorPositionInSpace(event)
       updates.userId = this.$store.state.currentUser.id
       updates.zoom = this.spaceZoomDecimal
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
@@ -314,6 +314,7 @@ body
 
 .app
   position relative
+  overflow hidden // enforces state.pageHeight/pageWidth
   > .development-badge
     min-height initial
     left initial

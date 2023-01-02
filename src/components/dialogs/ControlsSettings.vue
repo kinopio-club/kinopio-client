@@ -17,7 +17,7 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
         span Pause Connection Directions
   section
     .row
-      p Debug Options
+      p Debug Settings
     .row
       label(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")

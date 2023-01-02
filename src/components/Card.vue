@@ -309,8 +309,8 @@ export default {
       isLocking: true,
       lockingPercent: 0,
       lockingAlpha: 0,
-      translateX: 0,
-      translateY: 0,
+      stickyTranslateX: 0,
+      stickyTranslateY: 0,
       isAnimationUnsticking: false,
       stickyStretchResistance: 6
     }
@@ -418,7 +418,7 @@ export default {
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
     isSelectedOrDragging () {
-      return this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor
+      return Boolean(this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor)
     },
     isInSearchResultsCards () {
       const results = this.searchResultsCards
@@ -551,7 +551,11 @@ export default {
       }
     },
     backgroundColor () {
-      return this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.card.backgroundColor
+      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.card.backgroundColor
+      if (!color && this.nameIsColor) {
+        color = this.card.name
+      }
+      return color
     },
     cardStyle () {
       let backgroundColor
@@ -559,6 +563,9 @@ export default {
         backgroundColor = this.card.backgroundColor
       }
       let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || backgroundColor
+      if (!color && this.nameIsColor) {
+        color = this.card.name
+      }
       let styles = {
         background: color,
         width: this.resizeWidth,
@@ -702,6 +709,9 @@ export default {
         return this.isChecked
       }
     },
+    nameIsColor () {
+      return utils.colorIsValid(this.card.name)
+    },
     positionStyle () {
       let z = this.card.z
       let pointerEvents = 'auto'
@@ -718,7 +728,7 @@ export default {
         width: this.resizeWidth,
         maxWidth: this.resizeWidth,
         pointerEvents,
-        transform: `translate(${this.translateX}, ${this.translateY})`
+        transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
       }
       return styles
     },
@@ -1004,10 +1014,12 @@ export default {
       if (this.isPlayingAudio) { return true }
       const threshold = 400 * this.spaceCounterZoomDecimal
       const fallbackHeight = 200
+      const offset = utils.outsideSpaceOffset().y
+      const scroll = this.windowScroll.y - offset
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      const min = this.windowScroll.y - threshold
-      const max = this.windowScroll.y + viewport + threshold
-      const y = this.y * this.spaceZoomDecimal
+      const min = scroll - threshold
+      const max = scroll + viewport + threshold
+      let y = this.y
       const isTopVisible = utils.isBetween({ value: y, min, max })
       let height = this.card.height || fallbackHeight
       height = height * this.spaceZoomDecimal
@@ -1083,13 +1095,13 @@ export default {
       const isOverAction = classes.includes(event.target.className) || elements.includes(event.target.nodeName.toLowerCase())
       const isOverTag = event.target.className.includes('button-badge')
       if (this.shouldNotStick || isOverAction || isOverTag) {
-        this.clearPositionOffsets()
+        this.clearStickyPositionOffsets()
         preventSticking = true
         return
       }
       const isButtonHover = event.target.closest('.inline-button-wrap')
       if (isButtonHover) {
-        this.clearPositionOffsets()
+        this.clearStickyPositionOffsets()
         return
       }
       const stretchResistance = this.stickyStretchResistance
@@ -1098,11 +1110,7 @@ export default {
       const halfHeight = height / 2
       let centerX = this.x + halfWidth
       let centerY = this.y + halfHeight
-      let position = utils.cursorPositionInPage(event)
-      position = {
-        x: position.x * this.spaceCounterZoomDecimal,
-        y: position.y * this.spaceCounterZoomDecimal
-      }
+      let position = utils.cursorPositionInSpace(event)
       // position from card center
       const xFromCenter = position.x - centerX
       const yFromCenter = position.y - centerY
@@ -1114,14 +1122,14 @@ export default {
       xOffset = Math.round(xOffset)
       let yOffset = (yPercent * halfHeight) / stretchResistance
       yOffset = Math.round(yOffset)
-      this.translateX = xOffset + 'px'
-      this.translateY = yOffset + 'px'
+      this.stickyTranslateX = xOffset + 'px'
+      this.stickyTranslateY = yOffset + 'px'
     },
     unstickToCursor () {
       this.clearStickyTimer()
       this.isAnimationUnsticking = true
-      const xOffset = parseInt(this.translateX)
-      const yOffset = parseInt(this.translateY)
+      const xOffset = parseInt(this.stickyTranslateX)
+      const yOffset = parseInt(this.stickyTranslateY)
       let timing = {
         duration: 0, // sum of keyframe offsets
         easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
@@ -1150,13 +1158,13 @@ export default {
       if (!element) { return }
       const animation = element.animate(keyframes, timing)
       animation.onfinish = () => {
-        this.clearPositionOffsets()
+        this.clearStickyPositionOffsets()
         this.isAnimationUnsticking = false
       }
     },
-    clearPositionOffsets () {
-      this.translateX = 0
-      this.translateY = 0
+    clearStickyPositionOffsets () {
+      this.stickyTranslateX = 0
+      this.stickyTranslateY = 0
     },
 
     updateTypeForConnection (connectionId) {
@@ -1205,7 +1213,7 @@ export default {
       }
       event.stopPropagation()
       if (!this.canEditCard) {
-        const position = utils.cursorPositionInPage(event)
+        const position = utils.cursorPositionInSpace(event)
         this.$store.commit('addNotificationWithPosition', { message: 'Card is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
         return
       }
@@ -1579,7 +1587,7 @@ export default {
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
       this.updatePreviousResultCardId()
-      this.clearPositionOffsets()
+      this.clearStickyPositionOffsets()
     },
     updatePreviousResultCardId () {
       const search = this.search
@@ -2225,6 +2233,7 @@ article
       -webkit-user-drag none
 
   .lock-button-wrap
+    opacity 0
     pointer-events all
     cursor pointer
     position relative

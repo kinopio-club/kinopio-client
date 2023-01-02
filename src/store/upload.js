@@ -119,23 +119,26 @@ export default {
         context.dispatch('addImageDataUrl', { file, cardId, spaceId })
       })
     },
-    addCardsAndUploadFiles: async (context, { files, currentCursor }) => {
-      const zoom = context.rootGetters.spaceCounterZoomDecimal
-      currentCursor = {
-        x: currentCursor.x * zoom,
-        y: currentCursor.y * zoom
-      }
+    addCardsAndUploadFiles: async (context, { files, event }) => {
+      let position = utils.cursorPositionInSpace(event)
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) {
-        context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position: currentCursor, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
+        context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
         context.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })
         return
       }
       let cardIds = []
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       if (!currentUserIsSignedIn) {
-        context.commit('addNotificationWithPosition', { message: 'Sign Up or In', position: currentCursor, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
+        context.commit('addNotificationWithPosition', { message: 'Sign Up or In', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
         context.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' }, { root: true })
+        return
+      }
+      // check if outside space
+      const isOutsideSpace = utils.isPositionOutsideOfSpace(position)
+      if (isOutsideSpace) {
+        position = utils.cursorPositionInPage(event)
+        context.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' }, { root: true })
         return
       }
       // check sizeLimit
@@ -144,7 +147,7 @@ export default {
         return utils.isFileTooBig(file, userIsUpgraded)
       })
       if (filesTooBig) {
-        context.commit('addNotificationWithPosition', { message: 'Too Big', position: currentCursor, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
+        context.commit('addNotificationWithPosition', { message: 'Too Big', position, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
         context.commit('addNotification', { message: 'To upload files over 5mb, upgrade for unlimited size uploads', type: 'danger' }, { root: true })
         return
       }
@@ -156,8 +159,8 @@ export default {
         cardIds.push(cardId)
         context.dispatch('currentCards/add', {
           position: {
-            x: currentCursor.x + (index * positionOffset),
-            y: currentCursor.y + (index * positionOffset)
+            x: position.x + (index * positionOffset),
+            y: position.y + (index * positionOffset)
           },
           name: placeholder,
           id: cardId
@@ -184,7 +187,7 @@ export default {
           await context.dispatch('uploadFile', { file, cardId })
         } catch (error) {
           console.error('🚒', error)
-          context.commit('addNotificationWithPosition', { message: error.message, position: currentCursor, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
+          context.commit('addNotificationWithPosition', { message: error.message, position, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
           context.commit('addNotification', { message: error.message, type: 'danger' }, { root: true })
         }
       }))

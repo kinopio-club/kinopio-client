@@ -235,6 +235,54 @@ export default {
     }
     return { x, y }
   },
+  cursorPositionInSpace (event, position) {
+    position = position || this.cursorPositionInPage(event)
+    // #space
+    const space = document.getElementById('space')
+    let rect = space.getBoundingClientRect()
+    position = {
+      x: position.x - rect.x,
+      y: position.y - rect.y
+    }
+    // #app
+    const app = document.getElementById('app')
+    rect = app.getBoundingClientRect()
+    position = {
+      x: position.x + rect.x,
+      y: position.y + rect.y
+    }
+    // zoom
+    let zoom = this.spaceCounterZoomDecimal() || 1
+    position = {
+      x: Math.round(position.x * zoom),
+      y: Math.round(position.y * zoom)
+    }
+    return position
+  },
+  isPositionOutsideOfSpace (position) {
+    const isOutsideX = position.x < 0
+    const isOutsideY = position.y < 0
+    return isOutsideX || isOutsideY
+  },
+  outsideSpaceOffset () {
+    const space = document.getElementById('space')
+    if (!space) { return }
+    const spaceRect = space.getBoundingClientRect()
+    const app = document.getElementById('app')
+    const appRect = app.getBoundingClientRect()
+    return {
+      x: Math.round(spaceRect.x - appRect.x),
+      y: Math.round(spaceRect.y - appRect.y)
+    }
+  },
+  updatePositionWithSpaceOffset (position) {
+    const spaceOffset = this.outsideSpaceOffset()
+    if (!spaceOffset) { return position }
+    return {
+      x: position.x - spaceOffset.x,
+      y: position.y - spaceOffset.y
+    }
+  },
   childDialogPositionFromParent ({ element, offsetX, offsetY, shouldIgnoreZoom }) {
     element = element.closest('li') || element.closest('.badge') || element.closest('button') || element
     offsetX = offsetX || 0
@@ -671,6 +719,15 @@ export default {
     const angleDegrees = angleRadians * 180 / Math.PI
     return Math.round(angleDegrees)
   },
+  pointBetweenTwoPoints (point1, point2) {
+    // https://gamedev.stackexchange.com/questions/23430/get-points-on-a-line-between-two-points
+    const progress = 0.5
+    const point = {
+      x: point1.x + (point2.x - point1.x) * progress,
+      y: point1.y + (point2.y - point1.y) * progress
+    }
+    return point
+  },
   innerHTMLText (htmlString) {
     // https://regexr.com/6olpg
     // from https://stackoverflow.com/a/1736801
@@ -731,6 +788,10 @@ export default {
   emptyCard () {
     return { width: 76, height: 32 }
   },
+  spaceBetweenCards () {
+    let spaceBetween = 12
+    return this.spaceZoomDecimal() * spaceBetween
+  },
   isItemInViewport (item, zoom) {
     let viewport = this.visualViewport()
     zoom = zoom || 1
@@ -788,14 +849,30 @@ export default {
     })
     return cardElement
   },
+  cardElementFromId (cardId) {
+    return document.querySelector(`article[data-card-id="${cardId}"]`)
+  },
+  cardRectFromId (cardId) {
+    const element = this.cardElementFromId(cardId)
+    if (!element) { return }
+    return element.getBoundingClientRect()
+  },
   cardPositionFromElement (cardId) {
-    const element = document.querySelector(`article[data-card-id="${cardId}"]`)
+    const element = this.cardElementFromId(cardId)
     const x = parseInt(element.style.left)
     const y = parseInt(element.style.top)
     return { x, y }
   },
+  boxElementFromId (boxId) {
+    return document.querySelector(`.box[data-box-id="${boxId}"]`)
+  },
+  boxRectFromId (boxId) {
+    const element = this.boxElementFromId(boxId)
+    if (!element) { return }
+    return element.getBoundingClientRect()
+  },
   boxPositionFromElement (boxId) {
-    const element = document.querySelector(`.box[data-box-id="${boxId}"]`)
+    const element = this.boxElementFromId(boxId)
     const x = parseInt(element.style.left)
     const y = parseInt(element.style.top)
     return { x, y }
@@ -916,7 +993,9 @@ export default {
     const cardUnlockButton = document.querySelector(`.card-unlock-button[data-card-id="${cardId}"] button`)
     const element = cardConnector || cardUnlockButton
     if (!element) { return }
-    const rect = element.getBoundingClientRect()
+    let rect = element.getBoundingClientRect()
+    rect.x = rect.x + window.scrollX
+    rect.y = rect.y + window.scrollY
     return this.rectCenter(rect)
   },
   coordsWithCurrentScrollOffset ({ x, y, shouldIgnoreZoom }) {

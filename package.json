@@ -21,7 +21,6 @@
     "overlap-area": "^1.0.0",
     "randomcolor": "^0.5.4",
     "shader": "^1.0.0",
-    "validate-color": "^2.2.1",
     "vue": "^3.2.6",
     "vue-router": "^4.0.11",
     "vuex": "^4.0.2"

@@ -34,6 +34,7 @@ export default {
   },
   methods: {
     updateCardRectsInViewport () {
+      this.$store.commit('triggerUpdateLockedItemButtonsPositions')
       this.$nextTick(() => {
         let cards = []
         const elements = document.querySelectorAll('article#card')

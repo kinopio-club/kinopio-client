@@ -1,16 +1,21 @@
 <template lang="pug">
-dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
   section
     .row.title-row
       span Share
-      .button-wrap(v-if="spaceHasUrl")
-        button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: spaceRssFeedIsVisible }")
-          span RSS
-        SpaceRssFeed(:visible="spaceRssFeedIsVisible")
+
+      .row
+        button.small-button(@click.left.stop="isPresentationMode")
+          img.icon(src="@/assets/presentation.svg")
+          span Present
+        .button-wrap(v-if="spaceHasUrl")
+          button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: spaceRssFeedIsVisible }")
+            span RSS
+          SpaceRssFeed(:visible="spaceRssFeedIsVisible")
 
   section
     .row
-      // Import, Export
+      //- Import, Export
       .segmented-buttons(@click.stop)
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
@@ -18,7 +23,6 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
           Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
-
       //- Embed
       .button-wrap
         button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
@@ -35,28 +39,11 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         .input-button-wrap(@click.left="copyUrl")
           button.small-button
             img.icon.copy(src="@/assets/copy.svg")
-            span URL
+            span Public URL
 
-    //- Private space
-    template(v-if="spaceIsPrivate")
-      p.share-private
-        span To share this space publically, set the privacy to
-        span.badge.info
-          img.icon.closed(src="@/assets/unlock.svg")
-          span {{privacyName(1)}}
-        span or
-        span.badge.success.last-child
-          img.icon.open(src="@/assets/open.svg")
-          span {{privacyName(0)}}
-
-    //- Invite
-    .row(v-if="spaceHasUrl && isSpaceMember")
-      .button-wrap
-        button(@click.left.stop="toggleInviteIsVisible" :class="{ active: inviteIsVisible }")
-          UserLabelInline(:shouldHideName="true" :user="currentUser")
-          span Invite
-        Invite(:visible="inviteIsVisible")
-
+  //- Invite
+  Invite(v-if="spaceHasUrl && isSpaceMember")
+  //- Collaborators
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
     // collaborators
     template(v-if="spaceHasCollaborators")
@@ -76,13 +63,11 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
 
 <script>
 import PrivacyButton from '@/components/PrivacyButton.vue'
-import Invite from '@/components/dialogs/Invite.vue'
+import Invite from '@/components/Invite.vue'
 import SpaceRssFeed from '@/components/dialogs/SpaceRssFeed.vue'
 import Embed from '@/components/dialogs/Embed.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
-import privacy from '@/data/privacy.js'
-import UserLabelInline from '@/components/UserLabelInline.vue'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 
@@ -94,7 +79,6 @@ export default {
     SpaceRssFeed,
     Embed,
     UserList,
-    UserLabelInline,
     Export,
     Import
   },
@@ -113,7 +97,6 @@ export default {
       urlIsCopied: false,
       spaceHasUrl: false,
       privacyPickerIsVisible: false,
-      inviteIsVisible: false,
       selectedUser: {},
       dialogHeight: null,
       spaceRssFeedIsVisible: false,
@@ -163,13 +146,15 @@ export default {
       return users
     },
     spaceHasOtherCardUsers () { return Boolean(this.spaceOtherCardUsers.length) },
-    exportData () { return this.$store.getters['currentSpace/all'] }
+    exportData () { return this.$store.getters['currentSpace/all'] },
+    dialogIsVisible () {
+      return this.privacyPickerIsVisible || this.spaceRssFeedIsVisible || this.embedIsVisible || this.exportIsVisible || this.importIsVisible
+    }
   },
   methods: {
-    privacyName (number) {
-      const state = privacy.states()[number]
-      const name = state.friendlyName || state.name
-      return utils.capitalizeFirstLetter(name)
+    isPresentationMode () {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('isPresentationMode', true)
     },
     async copyUrl (event) {
       this.$store.commit('clearNotificationsWithPosition')
@@ -183,7 +168,7 @@ export default {
       }
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'Share.triggerSignUpOrInIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     shareUrl () {
@@ -200,11 +185,6 @@ export default {
       const isVisible = this.privacyPickerIsVisible
       this.closeDialogs()
       this.privacyPickerIsVisible = !isVisible
-    },
-    toggleInviteIsVisible () {
-      const isVisible = this.inviteIsVisible
-      this.closeDialogs()
-      this.inviteIsVisible = !isVisible
     },
     toggleSpaceRssFeedIsVisible () {
       const isVisible = this.spaceRssFeedIsVisible
@@ -228,7 +208,6 @@ export default {
     },
     closeDialogs () {
       this.privacyPickerIsVisible = false
-      this.inviteIsVisible = false
       this.spaceRssFeedIsVisible = false
       this.embedIsVisible = false
       this.exportIsVisible = false
@@ -287,6 +266,8 @@ export default {
   left initial
   right 8px
   max-height calc(100vh - 25px)
+  &.overflow
+    overflow auto
   .badge
     display inline-block
     &.danger
