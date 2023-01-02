@@ -560,8 +560,10 @@ export default {
     top 0px
     cursor pointer
     button
+      border-color transparent
       cursor pointer
     .lock-icon
+      opacity 0
       position absolute
       left 5.5px
       top 2px

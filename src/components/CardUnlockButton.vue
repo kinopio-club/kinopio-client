@@ -24,9 +24,8 @@ export default {
     ...mapState([
     ]),
     ...mapGetters([
-      'spaceZoomDecimal'
+      'spaceCounterZoomDecimal'
     ]),
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     positionStyles () {
       if (!this.position) { return }
       const position = utils.updatePositionWithSpaceOffset(this.position)
