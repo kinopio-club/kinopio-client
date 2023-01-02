@@ -5,7 +5,7 @@ span
     template(v-for="user in usersFiltered" :key="user.id")
       li(@click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !isClickable }")
         UserLabelInline(:user="user")
-        button.remove-user(v-if="showRemoveUser" @click.left.stop="removeUser(user)" title="Remove from space")
+        button.remove-user.small-button(v-if="showRemoveUser" @click.left.stop="removeUser(user)" title="Remove from space")
           img.icon.cancel(src="@/assets/add.svg")
 </template>
 

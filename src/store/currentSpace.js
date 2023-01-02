@@ -687,7 +687,7 @@ const currentSpace = {
       context.commit('isLoadingSpace', false, { root: true })
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
-      if (!context.rootState.isEmbed) {
+      if (!context.rootState.isEmbedMode) {
         context.commit('triggerSpaceZoomReset', null, { root: true })
       }
       context.commit('resetPageSizes', null, { root: true })
