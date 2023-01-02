@@ -55,6 +55,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
       .row
         .button-wrap
           button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
+            img.icon.settings(src="@/assets/settings.svg")
             span Settings
           UserSettings(:visible="userSettingsIsVisible" @removeUser="signOut")
         button(v-if="currentUserIsSignedIn" @click.left="signOut")
