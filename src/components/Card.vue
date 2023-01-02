@@ -551,7 +551,11 @@ export default {
       }
     },
     backgroundColor () {
-      return this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.card.backgroundColor
+      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.card.backgroundColor
+      if (!color && this.nameIsColor) {
+        color = this.card.name
+      }
+      return color
     },
     cardStyle () {
       let backgroundColor
@@ -559,6 +563,9 @@ export default {
         backgroundColor = this.card.backgroundColor
       }
       let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || backgroundColor
+      if (!color && this.nameIsColor) {
+        color = this.card.name
+      }
       let styles = {
         background: color,
         width: this.resizeWidth,
@@ -701,6 +708,9 @@ export default {
       get () {
         return this.isChecked
       }
+    },
+    nameIsColor () {
+      return utils.colorIsValid(this.card.name)
     },
     positionStyle () {
       let z = this.card.z
