@@ -78,5 +78,9 @@ export default {
     themeByName: () => (themeName) => {
       return themes[themeName]
     }
+    // defaultLightCardColor
+    // defaultDarkCardColor
+    // defaultLightSpaceBackground
+    // defaultDarkSpaceBackground
   }
 }

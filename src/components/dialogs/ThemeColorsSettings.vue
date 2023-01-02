@@ -1,7 +1,11 @@
 <template lang="pug">
 dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog")
   section
-    p Theme and Colors
+    p Theme Colors
+    .segmented-buttons
+      button.active L
+      button D
+
   section
     .row
       p Color to use as the default for new cards
