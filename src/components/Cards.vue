@@ -20,6 +20,7 @@ export default {
         this.$store.dispatch('currentCards/checkIfShouldUpdateNewTweetCards')
       } else if (cardRectEvents.includes(mutation.type)) {
         this.updateCardRectsInViewport()
+        this.$store.commit('triggerUpdateLockedItemButtonsPositions')
       }
     })
   },

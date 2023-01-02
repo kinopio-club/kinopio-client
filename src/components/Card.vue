@@ -2223,6 +2223,7 @@ article
       -webkit-user-drag none
 
   .lock-button-wrap
+    opacity 0
     pointer-events all
     cursor pointer
     position relative
