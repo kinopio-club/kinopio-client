@@ -578,9 +578,9 @@ export default {
     .resize-button-wrap
       transform translate(10px, 13px)
       z-index 1
-      cursor ew-resize
+      cursor nwse-resize
       button
-        cursor ew-resize
+        cursor nwse-resize
     img
       -webkit-user-drag none
 
