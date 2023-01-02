@@ -83,7 +83,6 @@ export default {
       if (event) {
         rect = event.target.getBoundingClientRect()
       } else {
-        console.log(tag.id, tag)
         const element = document.querySelector(`li[data-tag-id="${tag.id}"]`)
         rect = element.getBoundingClientRect()
       }
@@ -94,12 +93,9 @@ export default {
         pageY: window.scrollY
       }
       if (this.positionTagsOnLeftSide) {
-        const tagDetailsWidth = 50
-        position.x = rect.x - rect.width - tagDetailsWidth + window.scrollX + 20
+        const tagDetailsWidth = 250
+        position.x = rect.x + window.scrollX - tagDetailsWidth
       }
-      // const viewport = utils.visualViewport()
-      // const minY = ((viewport.height * viewport.scale) / 2) + window.scrollY
-      // position.y = Math.min(position.y, minY)
       this.$store.commit('tagDetailsPosition', position)
       this.$store.commit('tagDetailsPositionShouldUpdate', true)
     },
