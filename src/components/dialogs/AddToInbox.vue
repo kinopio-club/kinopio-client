@@ -1,13 +1,12 @@
 <template lang="pug">
 dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @touchend.stop.prevent @click.left.stop="closeDialogs" ref="dialog" :style="dialogStyles")
   AddToInbox(:visible="true")
-  section(v-if="isLoading")
-    Loader(:visible="true")
-  section.card-list-section(v-if="isCards && !currentSpaceIsInbox" :style="{'max-height': resultsSectionHeight + 'px'}" ref="results")
-    //- p blank slate, no cards
-    CardList(
-      :cards="cards"
-      :primaryActionIsCardListOptions="true"
+  section.card-list-section(v-if="!currentSpaceIsInbox" :style="{'max-height': resultsSectionHeight + 'px'}" ref="results")
+    Loader(:visible="isLoading")
+    template(v-if="isCards")
+      CardList(
+        :cards="cards"
+        :primaryActionIsCardListOptions="true"
     )
 </template>
 
@@ -60,14 +59,13 @@ export default {
     updateDialogHeight () {
       this.$nextTick(() => {
         let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
+        this.dialogHeight = utils.elementHeightFromHeader(element)
       })
     },
     updateResultsSectionHeight () {
       this.$nextTick(() => {
         let element = this.$refs.results
-        console.log(element)
-        this.resultsSectionHeight = utils.elementHeight(element) - 2
+        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true) - 2
       })
     },
     filterCards (cards) {
@@ -84,7 +82,9 @@ export default {
       return cards
     },
     async updateInboxCards () {
-      this.isLoading = true
+      if (!this.cards.length) {
+        this.isLoading = true
+      }
       try {
         let space = await this.$store.dispatch('api/getInboxSpace')
         console.log(space)
@@ -102,7 +102,11 @@ export default {
   },
   watch: {
     visible (value) {
-      if (!value) { return }
+      if (!value) {
+        this.resultsSectionHeight = null
+        this.dialogHeight = null
+        return
+      }
       this.$store.commit('cardListItemOptionsCard', {})
       this.updateInboxCards()
     },
@@ -124,9 +128,7 @@ export default {
 <style lang="stylus">
 dialog.add-to-inbox
   width 210px
-  // overflow hidden
   .card-list-section
-    max-height 500px
     overflow auto
     border-top 1px solid black
     margin-top 4px
