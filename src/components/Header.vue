@@ -1,5 +1,5 @@
 <template lang="pug">
-header.presentation-header(v-if="isPresentationMode")
+header.presentation-header(v-if="isPresentationMode" :style="position" :class="{'fade-out': isFadingOut}")
   button.active(@click="disablePresentationMode")
     img.icon(src="@/assets/presentation.svg")
 
