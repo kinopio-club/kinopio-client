@@ -41,8 +41,6 @@ export default {
     },
     backgroundTint () {
       const color = this.currentSpace.backgroundTint
-      const metaThemeColor = document.querySelector('meta[name=theme-color]')
-      metaThemeColor.setAttribute('content', color)
       return color
     }
   },

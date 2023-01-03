@@ -64,15 +64,13 @@ export default {
       g += gi
       b += bi
       this.backgroundColor = `rgb(${r}, ${g}, ${b})`
-      const metaThemeColor = document.querySelector('meta[name=theme-color]')
-      metaThemeColor.setAttribute('content', this.backgroundColor)
+      this.updateMetaThemeColor(this.backgroundColor)
     },
     cancel () {
       window.cancelAnimationFrame(colorCycleTimer)
       colorCycleTimer = undefined
       const color = this.$store.state.currentSpace.backgroundTint || '#ffffff'
-      const metaThemeColor = document.querySelector('meta[name=theme-color]')
-      metaThemeColor.setAttribute('content', color)
+      this.updateMetaThemeColor(color)
     },
     start () {
       this.updateBackgroundColor()
@@ -93,6 +91,10 @@ export default {
         this.updateBackgroundColor()
       }
       window.requestAnimationFrame(this.colorCycleFrame)
+    },
+    updateMetaThemeColor (color) {
+      const metaThemeColor = document.querySelector('meta[name=theme-color]')
+      metaThemeColor.setAttribute('content', color)
     }
   }
 }
