@@ -198,6 +198,7 @@ import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
 import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import qs from '@aguezz/qs-parse'
 import { nanoid } from 'nanoid'
@@ -372,7 +373,7 @@ export default {
       }
     },
     isInvitedButCannotEditSpace () { return this['currentUser/isInvitedButCannotEditSpace']() },
-    maxCardLength () { return utils.maxCardLength() },
+    maxCardLength () { return consts.maxCardLength },
     currentCardLength () {
       if (!this.card.name) { return 0 }
       return this.card.name.length

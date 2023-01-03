@@ -89,6 +89,7 @@ import { nanoid } from 'nanoid'
 import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
 import uniqBy from 'lodash-es/uniqBy'
+import consts from '@/consts.js'
 
 let prevCards, prevBoxes
 
@@ -113,7 +114,7 @@ export default {
     }
   },
   computed: {
-    maxCardLength () { return utils.maxCardLength() },
+    maxCardLength () { return consts.maxCardLength },
     shouldShowStyleActions () { return this.$store.state.currentUser.shouldShowStyleActions },
     styleActionsIsVisible () {
       const noStyleItemsSelected = !this.cardsIsSelected && !this.boxesIsSelected

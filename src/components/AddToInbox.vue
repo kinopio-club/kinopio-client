@@ -62,6 +62,7 @@ import inboxSpace from '@/data/inbox.json'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 
@@ -103,7 +104,7 @@ export default {
   computed: {
     kinopioDomain () { return utils.kinopioDomain() },
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
-    maxCardLength () { return utils.maxCardLength() },
+    maxCardLength () { return consts.maxCardLength },
     currentUser () { return this.$store.state.currentUser },
     isAddPage () { return this.$store.state.isAddPage },
     successSpaceIsCurrentSpace () {

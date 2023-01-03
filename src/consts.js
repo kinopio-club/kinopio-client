@@ -5,5 +5,6 @@ export default {
     max: 100,
     min: 20
   },
-  spaceBetweenCards: 12
+  spaceBetweenCards: 12,
+  maxCardLength: 300
 }
