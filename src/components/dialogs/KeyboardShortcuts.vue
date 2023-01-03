@@ -61,6 +61,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
+            img.icon.presentation(src="@/assets/presentation.svg")
+            span Presentation Mode
+          .badge.keyboard-shortcut P
+      article
+        .row
+          .badge.title
             img.icon.hand(src="@/assets/hand.svg")
             span Drag to Pan
           .badge.keyboard-shortcut Space/Right-Click Drag
@@ -382,4 +388,9 @@ export default {
 
   .inbox-icon
     margin 0
+
+  .icon.minimap,
+  .icon.presentation
+    width 12px
+    vertical-align -1px
 </style>
