@@ -1017,7 +1017,7 @@ export default {
       const threshold = 400 * this.spaceCounterZoomDecimal
       const fallbackHeight = 200
       const offset = utils.outsideSpaceOffset().y
-      const scroll = this.windowScroll.y - offset
+      const scroll = (this.windowScroll.y - offset) * this.spaceCounterZoomDecimal
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
       const min = scroll - threshold
       const max = scroll + viewport + threshold
