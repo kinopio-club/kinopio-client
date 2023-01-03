@@ -42,10 +42,11 @@ const store = createStore({
     userHasScrolled: false,
     shouldPreventNextEnterKey: false,
     shouldPreventNextFocusOnName: false,
-    isEmbed: false,
+    isEmbedMode: false,
     isAddPage: false,
-    isAppStoreView: false,
+    isAppStoreMode: false,
     disableViewportOptimizations: false, // for urlbox
+    isPresentationMode: false,
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -374,21 +375,25 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'shouldPreventNextFocusOnName' })
       state.shouldPreventNextFocusOnName = value
     },
-    isEmbed: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isEmbed' })
-      state.isEmbed = value
+    isEmbedMode: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'isEmbedMode' })
+      state.isEmbedMode = value
     },
     isAddPage: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isAddPage' })
       state.isAddPage = value
     },
-    isAppStoreView: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isAppStoreView' })
-      state.isAppStoreView = value
+    isAppStoreMode: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'isAppStoreMode' })
+      state.isAppStoreMode = value
     },
     disableViewportOptimizations: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'disableViewportOptimizations', allowUndefined: true })
       state.disableViewportOptimizations = value
+    },
+    isPresentationMode: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'isPresentationMode' })
+      state.isPresentationMode = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })

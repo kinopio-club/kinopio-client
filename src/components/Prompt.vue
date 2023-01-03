@@ -21,7 +21,7 @@
       span.badge.button-badge(:style="{background: pack.color}" @click.stop="showPicker")
         span {{name}}
 
-    .button-wrap
+    .button-wrap.remove-button-wrap
       button.remove.small-button(@click.left="removePrompt")
         img.icon(src="@/assets/remove.svg")
         span
@@ -98,7 +98,10 @@ export default {
     margin-left 6px
   .row
     justify-content space-between
+    align-items flex-start
   .random
     margin-right 3px
     vertical-align -1px
+  .remove-button-wrap
+    height 20px
 </style>

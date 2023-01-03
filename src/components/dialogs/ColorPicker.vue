@@ -7,7 +7,7 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
       button(@click="removeColor")
         img.icon(src="@/assets/remove.svg")
   section(v-if="!removeIsVisible")
-    .badge(:style="{backgroundColor: currentColor}")
+    .badge.full-width-color-badge(:style="{backgroundColor: currentColor}")
       input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
   section
     //- Colors
@@ -229,6 +229,8 @@ export default {
     margin-left 6px
   .inline-color-badge
     width 83%
+  .full-width-color-badge
+    margin 0
   input[type="color"]
     width 30px
     height 28px

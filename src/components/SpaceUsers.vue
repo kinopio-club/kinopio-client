@@ -4,7 +4,7 @@
   .users
     User(:user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
 //- Embed
-.space-users(v-else-if="isEmbed")
+.space-users(v-else-if="isEmbedMode")
   .users
     User(v-for="user in members" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
 //- Normal Space
@@ -35,7 +35,7 @@ export default {
     User
   },
   computed: {
-    isEmbed () { return this.$store.state.isEmbed },
+    isEmbedMode () { return this.$store.state.isEmbedMode },
     isAddPage () { return this.$store.state.isAddPage },
     currentUser () { return this.$store.state.currentUser },
     currentSpace () { return this.$store.state.currentSpace },

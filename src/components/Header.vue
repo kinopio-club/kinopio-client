@@ -1,7 +1,11 @@
 <template lang="pug">
+header.presentation-header(v-if="isPresentationMode" :style="position" :class="{'fade-out': isFadingOut}")
+  button.active(@click="disablePresentationMode")
+    img.icon(src="@/assets/presentation.svg")
+
 header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hidden': isHidden, 'hidden-by-mindmap': minimapIsVisible }")
   //- embed
-  nav.embed-nav(v-if="isEmbed")
+  nav.embed-nav(v-if="isEmbedMode")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
       button
         .logo
@@ -12,7 +16,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
       SpaceUsers
 
   //- standard
-  nav(v-if="!isEmbed")
+  nav(v-if="!isEmbedMode")
     .left
       //- About
       .logo-about
@@ -282,7 +286,7 @@ export default {
   computed: {
     ...mapState([
       'minimapIsVisible',
-      'isEmbed',
+      'isEmbedMode',
       'isAddPage',
       'importArenaChannelIsVisible',
       'currentSpace',
@@ -299,7 +303,8 @@ export default {
       'spaceDetailsIsPinned',
       'sidebarIsPinned',
       'cardDetailsIsVisibleForCardId',
-      'connectionDetailsIsVisibleForConnectionId'
+      'connectionDetailsIsVisibleForConnectionId',
+      'isPresentationMode'
     ]),
     ...mapGetters([
       'isTouchDevice',
@@ -312,6 +317,7 @@ export default {
     kinopioDomain () { return utils.kinopioDomain() },
     isVisible () {
       const contentDialogIsVisible = this.cardDetailsIsVisibleForCardId || this.connectionDetailsIsVisibleForConnectionId
+      if (this.isPresentationMode) { return }
       if (this.isAddPage) { return }
       if (contentDialogIsVisible && this.isTouchDevice) {
         return false
@@ -320,7 +326,7 @@ export default {
       }
     },
     isSpace () {
-      const isOther = this.isEmbed || this.isAddPage
+      const isOther = this.isEmbedMode || this.isAddPage
       const isSpace = !isOther
       return isSpace
     },
@@ -644,6 +650,9 @@ export default {
         name: 'updateNotificationsIsRead',
         body: notificationIds
       })
+    },
+    disablePresentationMode () {
+      this.$store.commit('isPresentationMode', false)
     }
   },
   watch: {
@@ -903,4 +912,9 @@ header
     transform rotate(-4deg)
   100%
     transform rotate(0deg)
+
+.presentation-header
+  flex-direction row-reverse
+  button
+    pointer-events all
 </style>
