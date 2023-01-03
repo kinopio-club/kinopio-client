@@ -104,7 +104,7 @@ article#card(
       span.card-buttons-wrap
         //- Lock
         template(v-if="isLocked")
-          // based on CardUnlockButton.vue
+          //- based on CardUnlockButton.vue
           //- .connector maintains connection paths when card is locked
           .lock-button-wrap.inline-button-wrap(@mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="id")
             button.inline-button(tabindex="-1" :style="{background: itemBackground}")
@@ -361,7 +361,8 @@ export default {
       'remoteCurrentConnections',
       'cardsWereDragged',
       'search',
-      'hasNotifiedPressAndHoldToDrag'
+      'hasNotifiedPressAndHoldToDrag',
+      'isPresentationMode'
     ]),
     ...mapGetters([
       'spaceCounterZoomDecimal',
@@ -478,6 +479,7 @@ export default {
       return user
     },
     connectorIsVisible () {
+      if (this.isPresentationMode && !this.hasConnections) { return }
       const spaceIsOpen = this.currentSpace.privacy === 'open' && this['currentUser/isSignedIn']
       let isVisible
       if (this.isRemoteConnecting) {
