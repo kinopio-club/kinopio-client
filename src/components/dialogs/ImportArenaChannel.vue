@@ -43,6 +43,7 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.left.st
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 
@@ -111,7 +112,7 @@ export default {
         return
       }
       let channel = await this.getChannelContents(channelPath)
-      this.createSpace(channel)
+      await this.createSpace(channel)
       this.clearForm()
       this.loading = false
       this.$emit('updateSpaces')
@@ -158,35 +159,42 @@ export default {
         this.loading = false
       }
     },
-    createSpace (channel) {
+    trimName (name) {
+      return name.substring(0, consts.maxCardLength)
+    },
+    async createSpace (channel) {
       let space = utils.emptySpace(nanoid())
       space.cacheDate = new Date().getTime()
-      const meta = {
+      space.name = channel.title
+      const metaCard = {
         id: nanoid(),
         x: 40,
         y: 100,
         z: channel.contents.length + 1,
-        name: this.channelUrl,
+        name: this.trimName(this.channelUrl),
         frameId: 2
       }
-      space.cards.push(meta)
+      space.cards.push(metaCard)
       channel.contents.forEach(block => {
         const currentIndex = space.cards.length
         const lastCard = space.cards[currentIndex - 1]
         const card = this.createCard(block, { currentIndex, lastCard })
         space.cards.push(card)
       })
-      this.importSpace(space)
+      await this.importSpace(space)
     },
-    importSpace (space) {
-      cache.saveSpace(space)
-      this.$store.commit('currentSpace/restoreSpace', space)
-      this.$store.dispatch('currentSpace/saveNewSpace')
-      this.$store.dispatch('currentUser/lastSpaceId', space.id)
-      this.$store.commit('addNotification', { message: 'Are.na channel imported', type: 'success' })
-      this.$emit('updateSpaces')
+    async importSpace (space) {
+      console.log('🌳 importSpace', space)
+      try {
+        cache.saveSpace(space)
+        await this.$store.dispatch('api/createSpace', space)
+        this.$store.dispatch('currentSpace/changeSpace', { space })
+        this.$store.commit('addNotification', { message: 'Are.na channel imported', type: 'success' })
+        this.$store.dispatch('closeAllDialogs')
+      } catch (error) {
+        console.error('🚒 importSpace', error)
+      }
     },
-
     createCard (block, position) {
       let card = { id: nanoid() }
       const type = block.class
@@ -207,6 +215,7 @@ export default {
       } else {
         card.name = `${title} ${type}`
       }
+      card.name = this.trimName(card.name)
       const { x, y, z } = this.cardPositions(position)
       card.x = x
       card.y = y
