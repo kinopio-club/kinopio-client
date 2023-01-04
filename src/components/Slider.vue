@@ -26,9 +26,9 @@
     :min="minValue"
     ref="progress"
   )
-  img.vertical-line.invert.first-child(src="@/assets/vertical-line.svg")
-  img.vertical-line.invert.second-child(src="@/assets/vertical-line.svg")
-  img.vertical-line.invert.last-child(src="@/assets/vertical-line.svg")
+  img.vertical-line.first-child(src="@/assets/vertical-line.svg")
+  img.vertical-line.second-child(src="@/assets/vertical-line.svg")
+  img.vertical-line.last-child(src="@/assets/vertical-line.svg")
   button.slider-button(
     ref="button"
     :style="{left: buttonPosition + 'px'}"
@@ -230,5 +230,10 @@ export default {
     transform translateX(-2px)
   100%
     transform translateX(0)
+
+.is-dark-theme
+  .slider
+    .vertical-line
+      filter invert(1)
 
 </style>
