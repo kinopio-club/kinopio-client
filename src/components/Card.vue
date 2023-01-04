@@ -104,7 +104,7 @@ article#card(
       span.card-buttons-wrap
         //- Lock
         template(v-if="isLocked")
-          // based on CardUnlockButton.vue
+          //- based on CardUnlockButton.vue
           //- .connector maintains connection paths when card is locked
           .lock-button-wrap.inline-button-wrap(@mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="id")
             button.inline-button(tabindex="-1" :style="{background: itemBackground}")
@@ -361,7 +361,8 @@ export default {
       'remoteCurrentConnections',
       'cardsWereDragged',
       'search',
-      'hasNotifiedPressAndHoldToDrag'
+      'hasNotifiedPressAndHoldToDrag',
+      'isPresentationMode'
     ]),
     ...mapGetters([
       'spaceCounterZoomDecimal',
@@ -478,6 +479,7 @@ export default {
       return user
     },
     connectorIsVisible () {
+      if (this.isPresentationMode && !this.hasConnections) { return }
       const spaceIsOpen = this.currentSpace.privacy === 'open' && this['currentUser/isSignedIn']
       let isVisible
       if (this.isRemoteConnecting) {
@@ -551,21 +553,22 @@ export default {
       }
     },
     backgroundColor () {
-      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.card.backgroundColor
-      if (!color && this.nameIsColor) {
-        color = this.card.name
+      let nameColor
+      if (this.nameIsColor) {
+        nameColor = this.card.name
       }
+      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || this.card.backgroundColor
       return color
     },
     cardStyle () {
-      let backgroundColor
+      let backgroundColor, nameColor
       if (!this.isVisualCard) {
         backgroundColor = this.card.backgroundColor
       }
-      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || backgroundColor
-      if (!color && this.nameIsColor) {
-        color = this.card.name
+      if (this.nameIsColor) {
+        nameColor = this.card.name
       }
+      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || backgroundColor
       let styles = {
         background: color,
         width: this.resizeWidth,
@@ -1015,7 +1018,7 @@ export default {
       const threshold = 400 * this.spaceCounterZoomDecimal
       const fallbackHeight = 200
       const offset = utils.outsideSpaceOffset().y
-      const scroll = this.windowScroll.y - offset
+      const scroll = (this.windowScroll.y - offset) * this.spaceCounterZoomDecimal
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
       const min = scroll - threshold
       const max = scroll + viewport + threshold
