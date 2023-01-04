@@ -12,8 +12,8 @@
   MagicPaint
   //- router-view is Space or Add
   router-view
-  Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
-  Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
+  AppHeader(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
+  AppFooter(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
   TagDetails
   LinkDetails
   UserDetails
@@ -28,9 +28,9 @@
 </template>
 
 <script>
-import Header from '@/components/Header.vue'
+import AppHeader from '@/components/AppHeader.vue'
 import MagicPaint from '@/components/layers/MagicPaint.vue'
-import Footer from '@/components/Footer.vue'
+import AppFooter from '@/components/AppFooter.vue'
 import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import ScrollHandler from '@/components/ScrollHandler.vue'
@@ -51,9 +51,9 @@ let inertiaScrollEndIntervalTimer, prevPosition
 
 export default {
   components: {
-    Header,
+    AppHeader,
     MagicPaint,
-    Footer,
+    AppFooter,
     KeyboardShortcutsHandler,
     ScrollHandler,
     WindowHistoryHandler,

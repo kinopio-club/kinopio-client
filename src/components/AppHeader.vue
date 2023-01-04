@@ -172,7 +172,7 @@ const updatePositionDuration = 60
 let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
 
 export default {
-  name: 'Header',
+  name: 'AppHeader',
   components: {
     About,
     SpaceDetails,

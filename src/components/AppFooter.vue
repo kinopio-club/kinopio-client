@@ -65,7 +65,7 @@ const updatePositionDuration = 60
 let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
 
 export default {
-  name: 'Footer',
+  name: 'AppFooter',
   components: {
     Explore,
     Live,
