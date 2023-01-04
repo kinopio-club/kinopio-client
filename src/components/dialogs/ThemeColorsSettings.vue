@@ -3,8 +3,7 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
   section
     p Theme Colors
     .segmented-buttons
-      button.active L
-      button D
+      ThemeToggle
 
   section
     .row
@@ -36,6 +35,7 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
 
 <script>
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
@@ -43,7 +43,8 @@ export default {
   name: 'ColorsAndThemeSettings',
   components: {
     BackgroundPreview,
-    ColorPicker
+    ColorPicker,
+    ThemeToggle
   },
   props: {
     visible: Boolean

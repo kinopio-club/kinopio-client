@@ -37,8 +37,7 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
         .segmented-buttons
           button(@click.left.stop="toggleThemeColorsSettingsIsVisible" :class="{active: themeColorsSettingsIsVisible}")
             span Theme Colors
-          button.active L
-          button D
+          ThemeToggle
         ThemeColorsSettings(:visible="themeColorsSettingsIsVisible")
 
   //- Account Settings
@@ -97,6 +96,7 @@ import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 import ConnectToTwitter from '@/components/dialogs/ConnectToTwitter.vue'
 import ThemeColorsSettings from '@/components/dialogs/ThemeColorsSettings.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -109,7 +109,8 @@ export default {
     NotificationSettings,
     ControlsSettings,
     ConnectToTwitter,
-    ThemeColorsSettings
+    ThemeColorsSettings,
+    ThemeToggle
   },
   props: {
     visible: Boolean
