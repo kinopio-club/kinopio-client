@@ -52,7 +52,8 @@
       "@vue/standard"
     ],
     "rules": {
-      "no-throw-literal": "off"
+      "no-throw-literal": "off",
+      "no-unused-vars": "off"
     },
     "parserOptions": {
       "parser": "babel-eslint"
