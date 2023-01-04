@@ -60,7 +60,7 @@ article#card(
         @touchstart.stop="startResizing"
         @dblclick="removeResize"
       )
-        button.inline-button.resize-button(tabindex="-1")
+        button.inline-button.resize-button(tabindex="-1" :class="{hidden: isPresentationMode}")
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")

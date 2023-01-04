@@ -53,7 +53,9 @@
     ],
     "rules": {
       "no-throw-literal": "off",
-      "no-unused-vars": "off"
+      "no-unused-vars": "off",
+      "vue/multi-word-component-names": "off",
+      "vue/no-reserved-component-names": "off"
     },
     "parserOptions": {
       "parser": "babel-eslint"
