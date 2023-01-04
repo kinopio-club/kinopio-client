@@ -346,7 +346,7 @@ export default {
     position static
     margin-bottom 10px
     padding-bottom 10px
-    border-bottom 1px solid var(--primary)
+    border-bottom 1px solid var(--primary-border)
     &:last-child
       margin-bottom 0
       padding-bottom 0

@@ -331,7 +331,7 @@ textarea,
   min-width 0 // firefox hack
   background transparent
   border 0
-  border-bottom 1px solid var(--primary)
+  border-bottom 1px solid var(--primary-border)
   border-radius 0
   padding 1px
   margin-bottom 10px
@@ -350,7 +350,7 @@ label // used for checkbox buttons
   text-align left
   padding 5px 9px
   margin 0
-  border 1px solid var(--primary)
+  border 1px solid var(--primary-border)
   background-color var(--primary-background)
   border-radius var(--entity-radius)
   cursor pointer
@@ -526,7 +526,7 @@ dialog
   pointer-events all
   z-index var(--max-z)
   background-color var(--primary-background)
-  border 1px solid var(--primary)
+  border 1px solid var(--primary-border)
   box-shadow var(--hover-shadow)
   border-radius var(--entity-radius)
   overscroll-behavior-y contain
@@ -591,7 +591,7 @@ dialog
     padding 5px
     border-radius var(--entity-radius)
   section + section
-    border-top 1px solid var(--primary)
+    border-top 1px solid var(--primary-border)
   section.subsection + section,
   section.subsection + .row
     margin-top 10px
@@ -725,7 +725,7 @@ li
     vertical-align -1px
     cursor pointer
     appearance none
-    border 1px solid var(--primary)
+    border 1px solid var(--primary-border)
     width 12px
     height 12px
     border-radius 3px
@@ -1013,7 +1013,7 @@ progress
   appearance none
   width 100%
   height 8px
-  border 1px solid var(--primary)
+  border 1px solid var(--primary-border)
   border-radius 3px
   background-color var(--secondary-background)
 progress::-webkit-progress-bar

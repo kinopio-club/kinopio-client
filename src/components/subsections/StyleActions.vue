@@ -394,7 +394,7 @@ export default {
   padding-bottom 0
   background-color transparent
   &.subsection
-    border 1px solid var(--primary)
+    border 1px solid var(--primary-border)
     padding 4px
     padding-bottom 0
   .row

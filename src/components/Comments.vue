@@ -105,7 +105,7 @@ export default {
   @media(max-width 350px)
     left -90px
   .results-section
-    border-top 1px solid var(--primary)
+    border-top 1px solid var(--primary-border)
     padding-top 4px
     li
       display block

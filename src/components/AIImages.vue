@@ -105,7 +105,7 @@ export default {
 <style lang="stylus">
 .ai-images
   overflow auto
-  border-top 1px solid var(--primary)
+  border-top 1px solid var(--primary-border)
   .prompt-row
     align-items flex-start
     user-select text

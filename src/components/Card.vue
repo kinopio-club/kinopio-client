@@ -2062,7 +2062,7 @@ article
           min-width 0
           padding 0
           border none
-          border-color var(--primary)
+          border-color var(--primary-border)
       .connector-glow
         position absolute
         width 32px
@@ -2124,7 +2124,7 @@ article
         .connector-button
           background-color transparent
     .connector-button
-      border 1px solid var(--primary)
+      border 1px solid var(--primary-border)
       &.is-dark
         border-color var(--primary-background)
     .connector-icon

@@ -150,7 +150,7 @@ export default {
 <style lang="stylus">
 .tags
   > .results-section
-    border-top 1px solid var(--primary)
+    border-top 1px solid var(--primary-border)
     padding-top 4px
     > .button-wrap
       padding 4px

@@ -126,7 +126,7 @@ export default {
     position static
     margin-bottom 10px
     padding-bottom 10px
-    border-bottom 1px solid var(--primary)
+    border-bottom 1px solid var(--primary-border)
     .media
       margin-top 10px
     &:last-child
