@@ -26,9 +26,9 @@
     :min="minValue"
     ref="progress"
   )
-  img.vertical-line.first-child(src="@/assets/vertical-line.svg")
-  img.vertical-line.second-child(src="@/assets/vertical-line.svg")
-  img.vertical-line.last-child(src="@/assets/vertical-line.svg")
+  img.vertical-line.invert.first-child(src="@/assets/vertical-line.svg")
+  img.vertical-line.invert.second-child(src="@/assets/vertical-line.svg")
+  img.vertical-line.invert.last-child(src="@/assets/vertical-line.svg")
   button.slider-button(
     ref="button"
     :style="{left: buttonPosition + 'px'}"

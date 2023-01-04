@@ -655,7 +655,8 @@ dialog
     margin-left -1px
 
 .is-dark-theme
-  .icon
+  .icon,
+  .invert
     filter invert(1)
 
 .icon
