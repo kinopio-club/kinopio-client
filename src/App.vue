@@ -3,7 +3,7 @@
   @pointermove="broadcastUserCursor"
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
-  :class="{ 'no-background': isAddPage }"
+  :class="{ 'no-background': isAddPage, 'is-dark-theme': isThemeDark }"
 )
   base(v-if="isAddPage" target="_blank")
   OutsideSpaceBackground
@@ -102,6 +102,7 @@ export default {
     }
   },
   computed: {
+    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
     spaceName () { return this.$store.state.currentSpace.name },
     isDevelopment () {
       if (import.meta.env.MODE === 'development') {
@@ -652,6 +653,10 @@ dialog
   button + button,
   label + button
     margin-left -1px
+
+.is-dark-theme
+  .icon
+    filter invert(1)
 
 .icon
   user-drag none
