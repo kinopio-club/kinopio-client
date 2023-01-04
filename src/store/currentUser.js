@@ -352,6 +352,7 @@ export default {
         context.commit('restoreUser', cachedUser)
         context.commit('updateBetaUserId')
         context.dispatch('restoreRemoteUser', cachedUser)
+        context.dispatch('themes/restore', null, { root: true })
       } else {
         console.log('🌸 Create new user')
         context.dispatch('createNewUser')

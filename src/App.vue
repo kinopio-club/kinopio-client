@@ -79,7 +79,6 @@ export default {
     })
   },
   mounted () {
-    this.restoreThemeColors()
     // use timer to prevent being fired from page reload scroll
     // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
     setTimeout(() => {
@@ -149,9 +148,6 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
-    restoreThemeColors () {
-      this.$store.dispatch('themes/update', 'light')
-    },
     toggleIsPinchZooming (event) {
       if (utils.shouldIgnoreTouchInteraction(event)) { return }
       this.isPinchZooming = true

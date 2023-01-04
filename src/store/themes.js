@@ -82,6 +82,10 @@ export default {
       keys.forEach(key => {
         utils.setCssVariable(key, consts[key])
       })
+    },
+    restore: (context) => {
+      const themeName = context.rootState.currentUser.theme
+      context.dispatch('update', themeName)
     }
   },
   getters: {
