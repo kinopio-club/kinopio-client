@@ -89,8 +89,19 @@ export default {
       }
     },
     restore: (context) => {
-      const themeName = context.rootState.currentUser.theme
-      context.dispatch('update', themeName)
+      const theme = context.rootState.currentUser.theme
+      context.dispatch('update', theme)
+    },
+    toggle: (context) => {
+      const prevTheme = context.rootState.currentUser.theme || 'light'
+      let theme
+      if (prevTheme === 'light') {
+        theme = 'dark'
+      } else {
+        theme = 'light'
+      }
+      console.log(prevTheme, theme)
+      context.dispatch('update', theme)
     }
   },
   getters: {
