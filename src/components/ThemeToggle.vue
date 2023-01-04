@@ -8,7 +8,6 @@ const store = useStore()
 
 const themeName = computed(() => store.state.themes.current.name)
 const updateTheme = (themeName) => {
-  console.log('💖', themeName)
   store.dispatch('themes/update', themeName)
 }
 </script>

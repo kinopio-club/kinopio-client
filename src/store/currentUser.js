@@ -17,7 +17,6 @@ export default {
     description: undefined,
     website: undefined,
     lastReadNewStuffId: undefined,
-    prefersDarkTheme: false,
     apiKey: '',
     arenaAccessToken: '',
     favoriteUsers: [],
@@ -63,7 +62,8 @@ export default {
     twitterUsername: '',
     shouldUseDarkColors: false,
     lastUsedImagePickerService: '',
-    AIImages: []
+    AIImages: [],
+    theme: null
   },
   mutations: {
     color: (state, value) => {
@@ -342,6 +342,10 @@ export default {
     AIImages: (state, value) => {
       state.AIImages = value
       cache.updateUser('AIImages', value)
+    },
+    theme: (state, value) => {
+      state.theme = value
+      cache.updateUser('theme', value)
     }
   },
   actions: {

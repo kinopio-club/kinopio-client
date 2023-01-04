@@ -27,8 +27,8 @@ const themes = {
   dark: {
     name: 'dark',
     colors: {
-      'primary': 'black',
-      'primary-background': 'white',
+      'primary': 'white',
+      'primary-background': 'black',
       'text-link': '#143997',
       'primary-transparent': 'rgba(0,0,0,0.5)',
       'secondary-background': '#e3e3e3',
@@ -52,24 +52,25 @@ const themes = {
 export default {
   namespaced: true,
   state: {
-    currentTheme: {}
+    current: {}
   },
   mutations: {
-    currentTheme: (state, theme) => {
+    current: (state, theme) => {
       utils.typeCheck({ value: theme, type: 'object' })
-      state.currentTheme = theme
+      state.current = theme
     }
   },
   actions: {
     update: (context, themeName) => {
+      const normalizedThemeName = themeName || 'light'
       // colors
-      const theme = context.getters.themeByName(themeName)
+      const theme = themes[normalizedThemeName]
       const colors = theme.colors
       let keys = Object.keys(colors)
       keys.forEach(key => {
         utils.setCssVariable(key, colors[key])
       })
-      context.commit('currentTheme', theme)
+      context.commit('current', theme)
       // consts
       const consts = {
         'hover-shadow': `3px 3px 0 var(--heavy-shadow)`,
@@ -82,6 +83,10 @@ export default {
       keys.forEach(key => {
         utils.setCssVariable(key, consts[key])
       })
+      // update user pref
+      if (themeName) {
+        context.dispatch('currentUser/update', { theme: normalizedThemeName }, { root: true })
+      }
     },
     restore: (context) => {
       const themeName = context.rootState.currentUser.theme
@@ -89,9 +94,6 @@ export default {
     }
   },
   getters: {
-    themeByName: () => (themeName) => {
-      return themes[themeName]
-    }
     // defaultLightCardColor
     // defaultDarkCardColor
     // defaultLightSpaceBackground
