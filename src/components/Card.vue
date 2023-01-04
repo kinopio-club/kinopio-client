@@ -553,21 +553,22 @@ export default {
       }
     },
     backgroundColor () {
-      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.card.backgroundColor
-      if (!color && this.nameIsColor) {
-        color = this.card.name
+      let nameColor
+      if (this.nameIsColor) {
+        nameColor = this.card.name
       }
+      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || this.card.backgroundColor
       return color
     },
     cardStyle () {
-      let backgroundColor
+      let backgroundColor, nameColor
       if (!this.isVisualCard) {
         backgroundColor = this.card.backgroundColor
       }
-      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || backgroundColor
-      if (!color && this.nameIsColor) {
-        color = this.card.name
+      if (this.nameIsColor) {
+        nameColor = this.card.name
       }
+      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || backgroundColor
       let styles = {
         background: color,
         width: this.resizeWidth,
