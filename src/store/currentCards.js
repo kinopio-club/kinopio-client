@@ -299,8 +299,6 @@ const currentCards = {
         }
       }
       context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
-      console.error('update')
-
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
       context.dispatch('history/add', { cards: [card] }, { root: true })
       context.commit('update', card)
@@ -445,7 +443,6 @@ const currentCards = {
         width = Math.max(minImageWidth, width)
         const updates = { id: cardId, resizeWidth: width }
         context.dispatch('update', updates)
-        console.error('resize')
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
         context.dispatch('updateDimensions', { cards: [card] })
       })
@@ -454,7 +451,6 @@ const currentCards = {
       cardIds.forEach(cardId => {
         const updates = { id: cardId, resizeWidth: null }
         context.dispatch('update', updates)
-        console.error('removeresize')
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
         const card = context.getters.byId(cardId)
         context.dispatch('updateDimensions', { cards: [card] })
@@ -620,7 +616,6 @@ const currentCards = {
         const body = { id: card.id, z: 0 }
         context.commit('update', body)
         context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
-        console.error('resize')
         context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
       })
     },
@@ -641,7 +636,6 @@ const currentCards = {
       context.commit('update', body)
       if (!userCanEdit) { return }
       context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
-      console.error('incrementZ')
       context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
     },
 
