@@ -215,6 +215,11 @@ const store = createStore({
     filteredFrameIds: [],
     filteredTagNames: [],
 
+    // card list item options
+    cardListItemOptionsPosition: {}, // x, y
+    cardListItemOptionsCard: {},
+    cardListItemOptionsIsVisible: false,
+
     // session data
     otherUsers: [], // { id, name color }
     otherSpaces: [], // { {user}, name, id }
@@ -268,6 +273,7 @@ const store = createStore({
       state.cardsWereDragged = false
       state.boxesWereDragged = false
       state.userDetailsIsVisible = false
+      state.cardListItemOptionsIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isOnline' })
@@ -482,6 +488,7 @@ const store = createStore({
     triggerUpdateLockedItemButtonsPositions: () => {},
     triggerLoadBackground: () => {},
     triggerCenterZoomOrigin: () => {},
+    triggerRemoveCardFromCardList: (state, card) => {},
 
     // Used by extensions only
 
@@ -1247,6 +1254,20 @@ const store = createStore({
     removeFromFilteredTagNames: (state, name) => {
       utils.typeCheck({ value: name, type: 'string', origin: 'removeFromFilteredTagNames' })
       state.filteredTagNames = state.filteredTagNames.filter(tagName => tagName !== name)
+    },
+
+    // Card List Item Options
+    cardListItemOptionsPosition: (state, value) => {
+      utils.typeCheck({ value, type: 'object', origin: 'cardListItemOptionsPosition' })
+      state.cardListItemOptionsPosition = value
+    },
+    cardListItemOptionsCard: (state, value) => {
+      utils.typeCheck({ value, type: 'object', origin: 'cardListItemOptionsCard' })
+      state.cardListItemOptionsCard = value
+    },
+    cardListItemOptionsIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'cardListItemOptionsIsVisible' })
+      state.cardListItemOptionsIsVisible = value
     },
 
     // Session Data

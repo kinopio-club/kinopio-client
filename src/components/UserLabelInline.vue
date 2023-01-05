@@ -67,6 +67,7 @@ export default {
   display inline-block
   min-height initial
   padding 0 2px
+  background var(--secondary-background)
   .user-avatar-inline
     width 4px
     margin-right 4px
