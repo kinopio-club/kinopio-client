@@ -2,6 +2,7 @@
 import cache from '@/cache.js'
 import promptPacks from '@/data/promptPacks.json'
 import moonphase from '@/moonphase.js'
+import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
@@ -547,9 +548,8 @@ export default {
       return 'Ctrl'
     }
   },
-  maxCardLength () { return 300 },
   splitCardNameByParagraphAndSentence (prevName) {
-    const maxCardLength = this.maxCardLength()
+    const maxCardLength = consts.maxCardLength
     const paragraphs = this.splitByParagraphs(prevName) || []
     let cardNames = paragraphs.map(paragraph => {
       let sentences

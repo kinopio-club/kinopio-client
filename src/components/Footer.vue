@@ -1,9 +1,9 @@
 <template lang="pug">
-.footer-wrap(:style="position" v-if="!isAddPage" :class="{'fade-out': isFadingOut}")
-  .left(v-if="!isEmbed")
+.footer-wrap(:style="position" v-if="isVisible" :class="{'fade-out': isFadingOut}")
+  .left(v-if="leftIsVisble")
     footer
       Notifications
-      .controls(v-if="isVisible" :class="{'hidden': isHidden}")
+      .controls(v-if="controlsIsVisible" :class="{'hidden': isHidden}")
         section
           .button-wrap(v-if="userHasInbox")
             button(@click.left="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
@@ -35,7 +35,7 @@
             Favorites(:visible="favoritesIsVisible")
             FavoritesActions(:visible="favoritesActionsIsVisible")
 
-  .right(:class="{'is-embed': isEmbed, 'hidden': isHidden}" v-if="!isMobileOrTouch")
+  .right(:class="{'is-embed': isEmbedMode, 'hidden': isHidden}" v-if="!isMobileOrTouch")
     .button-wrap.minimap-button(v-if="isNotSupportedByDevice" @click.stop="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
       button.small-button.inline-button(:class="{ active: minimapIsVisible }")
         img.icon.minimap(src="@/assets/minimap.svg")
@@ -133,13 +133,14 @@ export default {
     ...mapState([
       'minimapIsVisible',
       'isAddPage',
-      'isEmbed',
+      'isEmbedMode',
       'currentUser',
       'shouldExplicitlyHideFooter',
       'cardDetailsIsVisibleForCardId',
       'multipleSelectedActionsIsVisible',
       'connectionDetailsIsVisibleForConnectionId',
-      'shouldHideFooter'
+      'shouldHideFooter',
+      'isPresentationMode'
     ]),
     ...mapGetters([
       'currentUser/isSignedIn',
@@ -161,6 +162,15 @@ export default {
       return this.isTouchDevice || isMobile
     },
     isVisible () {
+      if (this.isAddPage) { return }
+      return true
+    },
+    leftIsVisble () {
+      if (this.isPresentationMode) { return }
+      if (this.isEmbedMode) { return }
+      return true
+    },
+    controlsIsVisible () {
       const contentDialogIsVisible = Boolean(this.cardDetailsIsVisibleForCardId || this.multipleSelectedActionsIsVisible || this.connectionDetailsIsVisibleForConnectionId)
       // only hide footer on touch devices
       if (!this.isTouchDevice) { return true }
@@ -414,6 +424,7 @@ export default {
   pointer-events none
   transform-origin left bottom
   .right
+    margin-left auto
     display flex
     align-items center
     pointer-events all

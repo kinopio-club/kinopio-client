@@ -7,6 +7,8 @@
 <script>
 import utils from '@/utils.js'
 
+import { mapState, mapGetters } from 'vuex'
+
 export default {
   name: 'BoxUnlockButton',
   components: {
@@ -16,16 +18,19 @@ export default {
     position: Object
   },
   computed: {
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    ...mapState([
+    ]),
+    ...mapGetters([
+      'spaceCounterZoomDecimal'
+    ]),
     positionStyles () {
       if (!this.position) { return }
-      let left = this.position.left
-      let top = this.position.top
-      left = (left + window.scrollX)
-      top = (top + window.scrollY)
+      const position = utils.updatePositionWithSpaceOffset(this.position)
+      const x = (position.x + window.scrollX) * this.spaceCounterZoomDecimal
+      const y = (position.y + window.scrollY) * this.spaceCounterZoomDecimal
       return {
-        left: left + 'px',
-        top: top + 'px'
+        left: x + 'px',
+        top: y + 'px'
       }
     },
     backgroundStyles () {

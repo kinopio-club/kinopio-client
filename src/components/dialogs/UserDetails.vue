@@ -40,7 +40,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
       .button-wrap(v-if="!isAddPage")
         button(@click.left.stop="triggerUpgradeUserIsVisible")
           span Upgrade for Unlimited
-      .row(v-if="!isAppStoreView")
+      .row(v-if="!isAppStoreMode")
         p
           .badge.info $6/mo, $60/yr
         a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
@@ -55,10 +55,11 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
       .row
         .button-wrap
           button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
+            img.icon.settings(src="@/assets/settings.svg")
             span Settings
           UserSettings(:visible="userSettingsIsVisible" @removeUser="signOut")
         button(v-if="currentUserIsSignedIn" @click.left="signOut")
-          img.icon.moon(src="@/assets/moon.svg")
+          img.icon.sign-out(src="@/assets/sign-out.svg")
           span Sign Out
         button(v-else @click.left="triggerSignUpOrInIsVisible")
           span Sign Up or In
@@ -174,7 +175,7 @@ export default {
     spaceUserIsUpgraded () { return this.$store.getters['currentSpace/spaceUserIsUpgraded'] },
     spaceUser () { return this.$store.state.currentSpace.users[0] },
     isAddPage () { return this.$store.state.isAddPage },
-    isAppStoreView () { return this.$store.state.isAppStoreView },
+    isAppStoreMode () { return this.$store.state.isAppStoreMode },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
         return false
