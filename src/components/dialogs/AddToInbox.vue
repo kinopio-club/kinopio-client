@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @touchend.stop.prevent @click.left.stop="closeDialogs" ref="dialog" :style="dialogStyles")
   AddToInbox(:visible="true")
-  section.card-list-section(v-if="!currentSpaceIsInbox" ref="results")
+  section.card-list-section(ref="results")
     Loader(:visible="isLoading")
     template(v-if="isCards")
       CardList(
@@ -47,9 +47,6 @@ export default {
     ]),
     isCards () {
       return Boolean(this.cards.length)
-    },
-    currentSpaceIsInbox () {
-      return this.currentSpace.name === 'Inbox'
     },
     dialogStyles () {
       return { maxHeight: this.dialogHeight + 'px' }
@@ -106,7 +103,6 @@ export default {
     },
     cards (value) {
       if (!value.length) { return }
-      if (this.currentSpaceIsInbox) { return }
       this.$nextTick(() => {
         this.updateDialogHeight()
       })
