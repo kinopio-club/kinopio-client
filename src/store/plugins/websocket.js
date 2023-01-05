@@ -60,7 +60,7 @@ const sendEvent = (store, mutation, type) => {
   const { message, handler, updates } = utils.normalizeBroadcastUpdates(mutation.payload)
   const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible']
   if (showDebugMessages && !hidden.includes(updates.type)) {
-    console.log('🌜 sent', message, handler, updates)
+    console.log('🌜 sent', message, handler, updates, { clientId })
   }
   const space = store.state.currentSpace
   websocket.send(JSON.stringify({
