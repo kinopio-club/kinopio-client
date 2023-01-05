@@ -1,5 +1,5 @@
 <template lang="pug">
-.footer-wrap(:style="position" v-if="isVisible" :class="{'fade-out': isFadingOut}" ref="footer")
+.footer-wrap(:style="position" v-if="isVisible" :class="{'fade-out': isFadingOut}")
   .left(v-if="leftIsVisble")
     footer
       Notifications
@@ -363,25 +363,24 @@ export default {
     },
     updatePositionInVisualViewport () {
       const viewport = utils.visualViewport()
-      const element = this.$refs.footer
-      const rect = element.getBoundingClientRect()
+      const layoutViewport = document.getElementById('layout-viewport')
       const scale = utils.roundFloat(viewport.scale)
       const counterScale = utils.roundFloat(1 / viewport.scale)
       const left = Math.round(viewport.offsetLeft)
-      let offset = 0
-      let style = {
-        transform: `translate(${left}px scale(${counterScale})`
-      }
-      if (scale <= 1) {
-        style = {
-          transform: `translate(${left}px`,
-          zoom: counterScale
-        }
-      }
+      let offsetTop = 0
       if (navigator.standalone) {
-        offset = 15
+        offsetTop = 15
       }
-      style.top = `calc(100dvh - ${rect.height + offset}px)`
+      const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height)
+      let style = {
+        transform: `translate(${left}px, ${top + offsetTop}px) scale(${counterScale})`,
+        maxWidth: Math.round(viewport.width * scale) + 'px'
+      }
+      if (utils.isIPhone() && scale <= 1) {
+        style.transform = 'none'
+        style.zoom = counterScale
+        style.marginBottom = offsetTop + 'px'
+      }
       this.position = style
     }
   },
@@ -418,7 +417,7 @@ export default {
   z-index var(--footer-max-z)
   position fixed
   left 0
-  top calc(100dvh - 58px)
+  bottom 0
   right 0
   padding 8px
   max-width 100%
