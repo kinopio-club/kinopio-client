@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.add-to-inbox(v-if="visible" :open="visible" @touchstart.stop.prevent @touchend.stop.prevent @click.left.stop="closeDialogs" ref="dialog" :style="dialogStyles")
   AddToInbox(:visible="true")
-  section.card-list-section(v-if="!currentSpaceIsInbox" :style="{'max-height': resultsSectionHeight + 'px'}" ref="results")
+  section.card-list-section(v-if="!currentSpaceIsInbox" ref="results")
     Loader(:visible="isLoading")
     template(v-if="isCards")
       CardList(
@@ -62,12 +62,6 @@ export default {
         this.dialogHeight = utils.elementHeightFromHeader(element)
       })
     },
-    updateResultsSectionHeight () {
-      this.$nextTick(() => {
-        let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true) - 2
-      })
-    },
     filterCards (cards) {
       const defaultCards = inboxSpace.cards.map(card => card.name)
       cards = cards.filter(card => {
@@ -113,8 +107,9 @@ export default {
     cards (value) {
       if (!value.length) { return }
       if (this.currentSpaceIsInbox) { return }
-      this.updateDialogHeight()
-      this.updateResultsSectionHeight()
+      this.$nextTick(() => {
+        this.updateDialogHeight()
+      })
     }
   }
 }
@@ -124,8 +119,8 @@ export default {
 <style lang="stylus">
 dialog.add-to-inbox
   width 210px
+  overflow auto
   .card-list-section
-    overflow auto
     border-top 1px solid black
     margin-top 4px
     padding 4px
