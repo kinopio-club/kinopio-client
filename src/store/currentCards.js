@@ -72,8 +72,6 @@ const currentCards = {
         console.warn('🚑 could not update card', card)
         return
       }
-
-      console.error('🍓 TEMP update', state.cards[card.id], card)
       if (card.x) {
         card.x = Math.round(card.x)
       }
@@ -428,7 +426,6 @@ const currentCards = {
             height: Math.ceil(card.height)
           }
           context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
-          // console.error('updateDimensions')
           // context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           context.commit('update', body)
           context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
