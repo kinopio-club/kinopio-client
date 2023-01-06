@@ -197,9 +197,7 @@ export default {
         // Toggle Zoom Out
       } else if (key === 'z' && isSpaceScope) {
         event.preventDefault()
-        // this.$store.commit('minimapIsVisible', value)
-        this.$store.commit('currentUserIsPanningReady', false)
-        this.$store.commit('currentUserIsPanning', false)
+        this.$store.commit('triggerSpaceZoomOutMax')
       } else if (key === 'p' && isSpaceScope) {
         const value = !this.$store.state.isPresentationMode
         this.$store.commit('isPresentationMode', value)

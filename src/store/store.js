@@ -460,6 +460,7 @@ const store = createStore({
     triggerSpaceZoomReset: () => {},
     triggerSpaceZoomOut: (state, options) => {},
     triggerSpaceZoomIn: (state, options) => {},
+    triggerSpaceZoomOutMax: (state, options) => {},
     triggerUnloadPage: () => {},
     triggerShowNextSearchCard: () => {},
     triggerShowPreviousSearchCard: () => {},

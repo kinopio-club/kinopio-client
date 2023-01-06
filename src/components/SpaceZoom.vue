@@ -48,6 +48,8 @@ export default {
         this.updateSpaceZoomFromTrigger(percent)
       } else if (mutation.type === 'triggerCenterZoomOrigin') {
         this.centerZoomOrigin()
+      } else if (mutation.type === 'triggerSpaceZoomOutMax') {
+        this.zoomOutMax()
       }
     })
   },
@@ -101,6 +103,14 @@ export default {
         y: scroll.y + (this.$store.state.viewportHeight / 2)
       }
       this.$store.dispatch('zoomOrigin', origin)
+    },
+    zoomOutMax () {
+      this.centerZoomOrigin()
+      if (this.$store.state.spaceZoomPercent === this.min) {
+        this.$store.commit('spaceZoomPercent', this.max)
+      } else {
+        this.$store.commit('spaceZoomPercent', this.min)
+      }
     }
   }
 }
