@@ -10,6 +10,7 @@
     :animateJiggleLeft="animateJiggleLeft"
     @removeAnimations="removeAnimations"
     @pointerdown="closeAllDialogs"
+    :minKeyboardShortcut="minKeyboardShortcut"
   )
 </template>
 
@@ -59,7 +60,8 @@ export default {
   computed: {
     max () { return consts.spaceZoom.max }, // 100
     min () { return consts.spaceZoom.min }, // 20
-    spaceZoomPercent () { return this.$store.state.spaceZoomPercent }
+    spaceZoomPercent () { return this.$store.state.spaceZoomPercent },
+    minKeyboardShortcut () { return 'Z' }
   },
   methods: {
     updateSpaceZoomFromTrigger (percent) {
