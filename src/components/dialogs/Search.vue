@@ -204,6 +204,7 @@ export default {
 dialog.search
   top 16px
   max-height calc(100vh - 140px)
+  width 252px
   @media(max-width 400px)
     left -40px
 </style>
