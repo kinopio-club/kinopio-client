@@ -51,7 +51,6 @@ export default {
   },
   computed: {
     userHasName () { return Boolean(this.user.name) },
-    minimapIsVisible () { return this.$store.state.minimapIsVisible },
     position () {
       return {
         left: this.x + 'px',
@@ -78,7 +77,6 @@ export default {
       this.y = this.y * scale
     },
     checkIsOnscreen () {
-      if (this.minimapIsVisible) { return }
       const zoom = this.$store.getters.spaceCounterZoomDecimal
       const viewportWidth = this.$store.state.viewportWidth * zoom
       const viewportHeight = this.$store.state.viewportHeight * zoom

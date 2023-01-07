@@ -17,6 +17,8 @@
     :style="{left: zoomPercentBadgePosition + 'px'}"
   )
     span {{ integerValue }}%
+    template(v-if="currentValueIsMin && minKeyboardShortcut")
+      span &nbsp;({{minKeyboardShortcut}})
     button.inline-button(@mousedown.left.stop @click.left.stop="resetPlayhead")
       img.icon.close(src="@/assets/add.svg")
 
@@ -46,7 +48,8 @@ export default {
     maxValue: Number,
     value: Number,
     animateJiggleRight: Boolean,
-    animateJiggleLeft: Boolean
+    animateJiggleLeft: Boolean,
+    minKeyboardShortcut: String
   },
   data () {
     return {
@@ -100,6 +103,9 @@ export default {
         max: this.maxValue
       })
       return value
+    },
+    currentValueIsMin () {
+      return this.integerValue === this.minValue
     }
   },
   methods: {

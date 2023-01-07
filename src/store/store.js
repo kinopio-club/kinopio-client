@@ -79,9 +79,6 @@ const store = createStore({
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
 
-    // minimap
-    minimapIsVisible: false,
-
     // box-selecting
     currentUserIsBoxSelecting: false,
     currentUserBoxSelectStart: {},
@@ -463,6 +460,7 @@ const store = createStore({
     triggerSpaceZoomReset: () => {},
     triggerSpaceZoomOut: (state, options) => {},
     triggerSpaceZoomIn: (state, options) => {},
+    triggerSpaceZoomOutMax: (state, options) => {},
     triggerUnloadPage: () => {},
     triggerShowNextSearchCard: () => {},
     triggerShowPreviousSearchCard: () => {},
@@ -681,13 +679,6 @@ const store = createStore({
     updateRemoteUserResizingBoxes: (state, update) => {
       state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
       state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.concat(update)
-    },
-
-    // Minimap
-
-    minimapIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'minimapIsVisible' })
-      state.minimapIsVisible = value
     },
 
     // Toolbar Mode

@@ -18,7 +18,6 @@
   LinkDetails
   UserDetails
   CardListItemOptions
-  Minimap
   WindowHistoryHandler
   KeyboardShortcutsHandler
   ScrollHandler
@@ -37,7 +36,6 @@ import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import ScrollHandler from '@/components/ScrollHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
-import Minimap from '@/components/Minimap.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
@@ -61,7 +59,6 @@ export default {
     WindowHistoryHandler,
     TagDetails,
     LinkDetails,
-    Minimap,
     ItemsLocked,
     UserDetails,
     NotificationsWithPosition,

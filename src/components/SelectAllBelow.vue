@@ -39,7 +39,6 @@ export default {
     handleMouseMove (event) {
       if (!event.target.closest) { return }
       if (!this.canEditSpace) { return }
-      if (this.$store.state.minimapIsVisible) { return }
       if (this.$store.state.currentUserIsPainting) { return }
       if (this.$store.state.currentUserIsDraggingCard) { return }
       if (this.$store.state.currentUserIsDraggingBox) { return }
