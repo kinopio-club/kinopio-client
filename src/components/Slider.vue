@@ -17,7 +17,8 @@
     :style="{left: zoomPercentBadgePosition + 'px'}"
   )
     span {{ integerValue }}%
-    span(v-if="currentValueIsMin && minKeyboardShortcut") &nbsp;({{minKeyboardShortcut}})
+    template(v-if="currentValueIsMin && minKeyboardShortcut")
+      span &nbsp;({{minKeyboardShortcut}})
     button.inline-button(@mousedown.left.stop @click.left.stop="resetPlayhead")
       img.icon.close(src="@/assets/add.svg")
 
