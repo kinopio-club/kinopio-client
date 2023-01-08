@@ -102,7 +102,6 @@ export default {
       // Escape
       } else if (key === 'Escape') {
         this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
-        this.$store.commit('minimapIsVisible', false)
         this.$store.commit('currentUserToolbar', 'card')
       } else if (key === '1' && isSpaceScope) {
         let value = this.$store.state.currentUser.filterShowUsers
@@ -125,7 +124,6 @@ export default {
       } else if (key === ' ' && isSpaceScope) {
         this.$store.commit('currentUserIsPanning', false)
         this.$store.commit('currentUserIsPanningReady', false)
-        this.$store.commit('minimapIsVisible', false)
         spaceKeyIsDown = false
       } else if (key === 'b' && isSpaceScope) {
         this.$store.commit('currentUserToolbar', 'box')
@@ -200,13 +198,10 @@ export default {
         event.preventDefault()
         this.$store.commit('triggerCenterZoomOrigin')
         this.$store.commit('triggerSpaceZoomIn')
-        // Minimap
+        // Toggle Zoom Out
       } else if (key === 'z' && isSpaceScope) {
         event.preventDefault()
-        const value = !this.$store.state.minimapIsVisible
-        this.$store.commit('minimapIsVisible', value)
-        this.$store.commit('currentUserIsPanningReady', false)
-        this.$store.commit('currentUserIsPanning', false)
+        this.$store.commit('triggerSpaceZoomOutMax')
       } else if (key === 'p' && isSpaceScope) {
         const value = !this.$store.state.isPresentationMode
         this.$store.commit('isPresentationMode', value)

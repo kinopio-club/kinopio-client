@@ -17,7 +17,7 @@
   TagDetails
   LinkDetails
   UserDetails
-  Minimap
+  CardListItemOptions
   WindowHistoryHandler
   KeyboardShortcutsHandler
   ScrollHandler
@@ -36,13 +36,13 @@ import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import ScrollHandler from '@/components/ScrollHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
-import Minimap from '@/components/Minimap.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import SpaceBackground from '@/components/SpaceBackground.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
+import CardListItemOptions from '@/components/dialogs/CardListItemOptions.vue'
 import utils from '@/utils.js'
 
 let multiTouchAction, shouldCancelUndo
@@ -59,13 +59,13 @@ export default {
     WindowHistoryHandler,
     TagDetails,
     LinkDetails,
-    Minimap,
     ItemsLocked,
     UserDetails,
     NotificationsWithPosition,
     SpaceBackground,
     OutsideSpaceBackground,
-    Preload
+    Preload,
+    CardListItemOptions
   },
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
@@ -901,7 +901,7 @@ code
   vertical-align 1px
 
 .cut
-  vertical-align 0
+  vertical-align 1px
 .copy
   vertical-align -0.5px
 

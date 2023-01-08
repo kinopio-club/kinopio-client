@@ -80,9 +80,6 @@ const store = createStore({
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
 
-    // minimap
-    minimapIsVisible: false,
-
     // box-selecting
     currentUserIsBoxSelecting: false,
     currentUserBoxSelectStart: {},
@@ -216,6 +213,11 @@ const store = createStore({
     filteredFrameIds: [],
     filteredTagNames: [],
 
+    // card list item options
+    cardListItemOptionsPosition: {}, // x, y
+    cardListItemOptionsCard: {},
+    cardListItemOptionsIsVisible: false,
+
     // session data
     otherUsers: [], // { id, name color }
     otherSpaces: [], // { {user}, name, id }
@@ -269,6 +271,7 @@ const store = createStore({
       state.cardsWereDragged = false
       state.boxesWereDragged = false
       state.userDetailsIsVisible = false
+      state.cardListItemOptionsIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isOnline' })
@@ -458,6 +461,7 @@ const store = createStore({
     triggerSpaceZoomReset: () => {},
     triggerSpaceZoomOut: (state, options) => {},
     triggerSpaceZoomIn: (state, options) => {},
+    triggerSpaceZoomOutMax: (state, options) => {},
     triggerUnloadPage: () => {},
     triggerShowNextSearchCard: () => {},
     triggerShowPreviousSearchCard: () => {},
@@ -483,6 +487,7 @@ const store = createStore({
     triggerUpdateLockedItemButtonsPositions: () => {},
     triggerLoadBackground: () => {},
     triggerCenterZoomOrigin: () => {},
+    triggerRemoveCardFromCardList: (state, card) => {},
 
     // Used by extensions only
 
@@ -675,13 +680,6 @@ const store = createStore({
     updateRemoteUserResizingBoxes: (state, update) => {
       state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
       state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.concat(update)
-    },
-
-    // Minimap
-
-    minimapIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'minimapIsVisible' })
-      state.minimapIsVisible = value
     },
 
     // Toolbar Mode
@@ -1248,6 +1246,20 @@ const store = createStore({
     removeFromFilteredTagNames: (state, name) => {
       utils.typeCheck({ value: name, type: 'string', origin: 'removeFromFilteredTagNames' })
       state.filteredTagNames = state.filteredTagNames.filter(tagName => tagName !== name)
+    },
+
+    // Card List Item Options
+    cardListItemOptionsPosition: (state, value) => {
+      utils.typeCheck({ value, type: 'object', origin: 'cardListItemOptionsPosition' })
+      state.cardListItemOptionsPosition = value
+    },
+    cardListItemOptionsCard: (state, value) => {
+      utils.typeCheck({ value, type: 'object', origin: 'cardListItemOptionsCard' })
+      state.cardListItemOptionsCard = value
+    },
+    cardListItemOptionsIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'cardListItemOptionsIsVisible' })
+      state.cardListItemOptionsIsVisible = value
     },
 
     // Session Data

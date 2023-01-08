@@ -3,7 +3,7 @@ header.presentation-header(v-if="isPresentationMode" :style="position" :class="{
   button.active(@click="disablePresentationMode")
     img.icon(src="@/assets/presentation.svg")
 
-header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hidden': isHidden, 'hidden-by-mindmap': minimapIsVisible }")
+header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hidden': isHidden}")
   //- embed
   nav.embed-nav(v-if="isEmbedMode")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
@@ -285,7 +285,6 @@ export default {
   },
   computed: {
     ...mapState([
-      'minimapIsVisible',
       'isEmbedMode',
       'isAddPage',
       'importArenaChannelIsVisible',

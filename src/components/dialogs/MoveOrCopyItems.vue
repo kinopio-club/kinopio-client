@@ -21,7 +21,8 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
           img.down-arrow(src="@/assets/down-arrow.svg")
         SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true")
     button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
-      img.icon.visit(src="@/assets/visit.svg")
+      img.icon.cut(v-if="actionIsMove" src="@/assets/cut.svg")
+      img.icon.copy(v-else src="@/assets/copy.svg")
       span {{buttonLabel}}
       Loader(:visible="loading")
 

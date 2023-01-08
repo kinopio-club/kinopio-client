@@ -424,7 +424,7 @@ const currentCards = {
             height: Math.ceil(card.height)
           }
           context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
-          context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
+          // context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           context.commit('update', body)
           context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
           updateTallestCardHeight(card.height)

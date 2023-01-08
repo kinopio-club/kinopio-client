@@ -437,6 +437,16 @@ const self = {
         console.error('🚒 getSpaceAnonymously', error)
       }
     },
+    getInboxSpace: async (context) => {
+      try {
+        console.log('🛬 getting inbox space')
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await utils.timeout(40000, fetch(`${host}/space/inbox`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 getInboxSpace', error)
+      }
+    },
     createSpaces: async (context) => {
       try {
         let spaces = cache.getAllSpaces()

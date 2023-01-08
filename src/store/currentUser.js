@@ -58,6 +58,7 @@ export default {
     weatherUnitIsCelcius: false,
     shouldNotifyUnlockedStickyCards: true,
     shouldUseStickyCards: false,
+    shouldDisableCardJiggle: false,
     shouldPauseConnectionDirections: false,
     twitterUsername: '',
     shouldUseDarkColors: false,
@@ -322,6 +323,10 @@ export default {
     shouldUseStickyCards: (state, value) => {
       state.shouldUseStickyCards = value
       cache.updateUser('shouldUseStickyCards', value)
+    },
+    shouldDisableCardJiggle: (state, value) => {
+      state.shouldDisableCardJiggle = value
+      cache.updateUser('shouldDisableCardJiggle', value)
     },
     shouldPauseConnectionDirections: (state, value) => {
       state.shouldPauseConnectionDirections = value

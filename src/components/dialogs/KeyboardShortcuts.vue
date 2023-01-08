@@ -55,12 +55,6 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
-            img.icon.minimap(src="@/assets/minimap.svg")
-            span Minimap
-          .badge.keyboard-shortcut Z
-      article
-        .row
-          .badge.title
             img.icon.presentation(src="@/assets/presentation.svg")
             span Presentation Mode
           .badge.keyboard-shortcut P
@@ -76,6 +70,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
             img.icon.magnifying-glass(src="@/assets/magnifying-glass.svg")
             span Zoom In or Out
           .badge.keyboard-shortcut {{meta}}-+/-, {{meta}}-Scroll
+      article
+        .row
+          .badge.title
+            img.icon.minimap(src="@/assets/minimap.svg")
+            span Toggle Max Zoom Out
+          .badge.keyboard-shortcut Z
 
     //- Edit
     template(v-if="categoryIsVisible('edit')")

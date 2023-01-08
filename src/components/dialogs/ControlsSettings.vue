@@ -8,16 +8,23 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
         input(type="checkbox" v-model="shouldOpenLinksInNewTab")
         span Open URLs in New Tabs
     .row
-      label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
-        input(type="checkbox" v-model="shouldUseStickyCards")
-        span Use Sticky Cards
-    .row
       label.double-line-height(:class="{ active: shouldPauseConnectionDirections }" @click.left.prevent="toggleShouldPauseConnectionDirections" @keydown.stop.enter="toggleShouldPauseConnectionDirections")
         input(type="checkbox" v-model="shouldPauseConnectionDirections")
         span Pause Connection Directions
   section
     .row
-      p Debug Settings
+      p Cards
+    .row
+      label(:class="{ active: shouldDisableCardJiggle }" @click.left.prevent="toggleShouldDisableCardJiggle" @keydown.stop.enter="toggleShouldDisableCardJiggle")
+        input(type="checkbox" v-model="shouldDisableCardJiggle")
+        span Disable Card Jiggle
+    .row
+      label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
+        input(type="checkbox" v-model="shouldUseStickyCards")
+        span Use Sticky Cards
+  section
+    .row
+      p Debug
     .row
       label(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
@@ -50,9 +57,14 @@ export default {
     shouldOpenLinksInNewTab () { return this.$store.state.currentUser.shouldOpenLinksInNewTab },
     shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
-    shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan }
+    shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
+    shouldDisableCardJiggle () { return this.$store.state.currentUser.shouldDisableCardJiggle }
   },
   methods: {
+    toggleShouldDisableCardJiggle () {
+      const value = !this.shouldDisableCardJiggle
+      this.$store.dispatch('currentUser/update', { shouldDisableCardJiggle: value })
+    },
     toggleShouldOpenLinksInNewTab () {
       const value = !this.shouldOpenLinksInNewTab
       this.$store.dispatch('currentUser/shouldOpenLinksInNewTab', value)
