@@ -472,6 +472,8 @@ const currentCards = {
       }
       let connections = []
       let cards = context.getters.isSelected
+      cards = cards.filter(card => Boolean(card))
+      if (!cards.length) { return }
       cards = cards.filter(card => !card.isLocked)
       // prevent cards bunching up at 0
       cards.forEach(card => {
