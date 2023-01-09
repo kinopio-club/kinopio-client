@@ -5,8 +5,10 @@ dialog.narrow.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialo
     table
       tbody
         tr.table-header
-          td Free
-          td Upgraded
+          td
+            span Free
+          td
+            span.badge.success Upgraded
         tr
           td 100 Cards
           td Unlimited Cards
