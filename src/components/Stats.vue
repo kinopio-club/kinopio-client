@@ -95,12 +95,12 @@ export default {
 </script>
 
 <style lang="stylus">
-.stats
-  table
-    margin-top 10px
-    border-collapse collapse
-    td
-      border 1px solid var(--secondary-active-background)
-      padding 5px
-      user-select text
+// .stats
+//   table
+//     margin-top 10px
+//     border-collapse collapse
+//     td
+//       border 1px solid var(--secondary-active-background)
+//       padding 5px
+//       user-select text
 </style>
