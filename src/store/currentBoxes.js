@@ -206,6 +206,7 @@ export default {
         y: endCursor.y - prevCursor.y
       }
       let boxes = context.getters.isSelected
+      boxes = boxes.filter(box => !box.isLocked)
       // prevent boxes bunching up at 0
       boxes.forEach(box => {
         if (!box) { return }
