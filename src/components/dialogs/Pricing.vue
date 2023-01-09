@@ -10,6 +10,12 @@ dialog.narrow.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialo
         tr
           td 100 Cards
           td Unlimited Cards
+        tr
+          td 5mb file upload size limit
+          td No upload limit
+        tr
+          td 10 AI images
+          td 50 AI images/mo
 
   section
     p Hi, my name is Pirijan and I'm the creator of Kinopio.
