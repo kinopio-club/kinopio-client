@@ -572,7 +572,6 @@ export default {
       let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || backgroundColor
       let styles = {
         background: color,
-        width: this.resizeWidth,
         maxWidth: this.resizeWidth
       }
       if (this.isComment) {
@@ -729,7 +728,6 @@ export default {
         left: `${this.x}px`,
         top: `${this.y}px`,
         zIndex: z,
-        width: this.resizeWidth,
         maxWidth: this.resizeWidth,
         pointerEvents,
         transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
