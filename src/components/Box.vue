@@ -137,6 +137,7 @@ export default {
     isPainting () { return this.$store.state.currentUserIsPainting },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isDragging () {
+      if (this.$store.state.currentUser.shouldDisableCardJiggle) { return }
       const isDragging = this.$store.state.currentUserIsDraggingBox
       const isCurrent = this.$store.state.currentDraggingBoxId === this.box.id
       return isDragging && (isCurrent || this.isSelected)
