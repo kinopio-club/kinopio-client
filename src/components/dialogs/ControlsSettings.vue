@@ -12,8 +12,8 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
         input(type="checkbox" v-model="shouldPauseConnectionDirections")
         span Pause Connection Directions
     .row
-      label(:class="{ active: shouldDisableCardJiggle }" @click.left.prevent="toggleShouldDisableCardJiggle" @keydown.stop.enter="toggleShouldDisableCardJiggle")
-        input(type="checkbox" v-model="shouldDisableCardJiggle")
+      label(:class="{ active: shouldDisableItemJiggle }" @click.left.prevent="toggleshouldDisableItemJiggle" @keydown.stop.enter="toggleshouldDisableItemJiggle")
+        input(type="checkbox" v-model="shouldDisableItemJiggle")
         span Disable Item Jiggle
     .row
       label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
@@ -55,12 +55,12 @@ export default {
     shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
     shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
-    shouldDisableCardJiggle () { return this.$store.state.currentUser.shouldDisableCardJiggle }
+    shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle }
   },
   methods: {
-    toggleShouldDisableCardJiggle () {
-      const value = !this.shouldDisableCardJiggle
-      this.$store.dispatch('currentUser/update', { shouldDisableCardJiggle: value })
+    toggleshouldDisableItemJiggle () {
+      const value = !this.shouldDisableItemJiggle
+      this.$store.dispatch('currentUser/update', { shouldDisableItemJiggle: value })
     },
     toggleShouldOpenLinksInNewTab () {
       const value = !this.shouldOpenLinksInNewTab

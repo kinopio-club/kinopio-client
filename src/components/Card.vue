@@ -414,9 +414,9 @@ export default {
       return isLocked
     },
     shouldJiggle () {
-      const shouldDisableCardJiggle = this.currentUser.shouldDisableCardJiggle
+      const shouldDisableItemJiggle = this.currentUser.shouldDisableItemJiggle
       const isShiftKeyDown = this.currentUserIsBoxSelecting
-      if (isShiftKeyDown || shouldDisableCardJiggle) { return }
+      if (isShiftKeyDown || shouldDisableItemJiggle) { return }
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
     isSelectedOrDragging () {
