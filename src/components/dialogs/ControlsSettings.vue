@@ -11,13 +11,10 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
       label.double-line-height(:class="{ active: shouldPauseConnectionDirections }" @click.left.prevent="toggleShouldPauseConnectionDirections" @keydown.stop.enter="toggleShouldPauseConnectionDirections")
         input(type="checkbox" v-model="shouldPauseConnectionDirections")
         span Pause Connection Directions
-  section
     .row
-      p Cards
-    .row
-      label(:class="{ active: shouldDisableCardJiggle }" @click.left.prevent="toggleShouldDisableCardJiggle" @keydown.stop.enter="toggleShouldDisableCardJiggle")
-        input(type="checkbox" v-model="shouldDisableCardJiggle")
-        span Disable Card Jiggle
+      label(:class="{ active: shouldDisableItemJiggle }" @click.left.prevent="toggleshouldDisableItemJiggle" @keydown.stop.enter="toggleshouldDisableItemJiggle")
+        input(type="checkbox" v-model="shouldDisableItemJiggle")
+        span Disable Item Jiggle
     .row
       label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
         input(type="checkbox" v-model="shouldUseStickyCards")
@@ -58,12 +55,12 @@ export default {
     shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
     shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
-    shouldDisableCardJiggle () { return this.$store.state.currentUser.shouldDisableCardJiggle }
+    shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle }
   },
   methods: {
-    toggleShouldDisableCardJiggle () {
-      const value = !this.shouldDisableCardJiggle
-      this.$store.dispatch('currentUser/update', { shouldDisableCardJiggle: value })
+    toggleshouldDisableItemJiggle () {
+      const value = !this.shouldDisableItemJiggle
+      this.$store.dispatch('currentUser/update', { shouldDisableItemJiggle: value })
     },
     toggleShouldOpenLinksInNewTab () {
       const value = !this.shouldOpenLinksInNewTab

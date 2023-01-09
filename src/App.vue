@@ -412,6 +412,14 @@ label // used for checkbox buttons
 .unselectable
   pointer-events none !important
 
+table
+  margin-top 10px
+  border-collapse collapse
+  td
+    border 1px solid var(--secondary-active-background)
+    padding 5px
+    user-select text
+
 select
   max-width 100%
   -webkit-appearance none

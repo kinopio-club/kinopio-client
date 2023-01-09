@@ -128,6 +128,11 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
               img.icon.right-arrow(src="@/assets/down-arrow.svg")
             Sidebar(:visible="sidebarIsVisible")
+        .row.bottom-controls(v-if="!currentUserIsSignedIn")
+          .button-wrap
+            button(@click.left.stop="togglePricingIsVisible" :class="{active : pricingIsVisible}")
+              span Pricing
+            Pricing(:visible="pricingIsVisible")
 
   Toolbar(:visible="isSpace")
   SelectAllBelow
@@ -161,6 +166,7 @@ import SpaceUsers from '@/components/SpaceUsers.vue'
 import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
 import Import from '@/components/dialogs/Import.vue'
+import Pricing from '@/components/dialogs/Pricing.vue'
 
 import { mapState, mapGetters } from 'vuex'
 
@@ -198,7 +204,8 @@ export default {
     SpaceUsers,
     Donate,
     Toolbar,
-    Import
+    Import,
+    Pricing
   },
   props: {
     isPinchZooming: Boolean,
@@ -227,7 +234,8 @@ export default {
       templatesIsVisible: false,
       sidebarIsVisible: false,
       donateIsVisible: false,
-      importIsVisible: false
+      importIsVisible: false,
+      pricingIsVisible: false
     }
   },
   created () {
@@ -458,6 +466,7 @@ export default {
       this.addSpaceIsVisible = false
       this.templatesIsVisible = false
       this.importIsVisible = false
+      this.pricingIsVisible = false
       if (!this.spaceDetailsIsPinned) {
         this.spaceDetailsIsVisible = false
       }
@@ -465,29 +474,34 @@ export default {
         this.sidebarIsVisible = false
       }
     },
+    togglePricingIsVisible () {
+      const isVisible = this.pricingIsVisible
+      this.$store.dispatch('closeAllDialogs')
+      this.pricingIsVisible = !isVisible
+    },
     toggleAboutIsVisible () {
       const isVisible = this.aboutIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Header.toggleAboutIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.aboutIsVisible = !isVisible
     },
     toggleSpaceDetailsIsVisible () {
       const isVisible = this.spaceDetailsIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Header.toggleSpaceDetailsIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.spaceDetailsIsVisible = !isVisible
     },
     toggleSignUpOrInIsVisible () {
       const isVisible = this.signUpOrInIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Header.toggleSignUpOrInIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.signUpOrInIsVisible = !isVisible
     },
     toggleShareIsVisible () {
       const isVisible = this.shareIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Header.toggleShareIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.shareIsVisible = !isVisible
     },
     toggleNotificationsIsVisible () {
       const isVisible = this.notificationsIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Header.toggleNotificationsIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.notificationsIsVisible = !isVisible
       if (this.notificationsIsVisible) {
         this.updateNotifications()
@@ -495,27 +509,27 @@ export default {
     },
     toggleAddSpaceIsVisible () {
       const isVisible = this.addSpaceIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Header.toggleAddSpaceIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.addSpaceIsVisible = !isVisible
     },
     toggleSidebarIsVisible () {
       const isVisible = this.sidebarIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Header.toggleSidebarIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.sidebarIsVisible = !isVisible
     },
     toggleSpaceStatusIsVisible () {
       const isVisible = this.spaceStatusIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Header.toggleSpaceStatusIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.spaceStatusIsVisible = !isVisible
     },
     toggleOfflineIsVisible () {
       const isVisible = this.offlineIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Header.toggleOfflineIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.offlineIsVisible = !isVisible
     },
     toggleSearchIsVisible () {
       const isVisible = this.searchIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Header.toggleSearchIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('searchIsVisible', !isVisible)
     },
     setLoadingSignUpOrIn (value) {
@@ -523,7 +537,7 @@ export default {
     },
     triggerUpgradeUserIsVisible () {
       const isVisible = this.upgradeUserIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Header.triggerUpgradeUserIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.upgradeUserIsVisible = !isVisible
     },
 

@@ -360,6 +360,19 @@ export default {
         return true
       }
     },
+    footerDialogIsVisible () {
+      const buttons = document.querySelectorAll('footer button')
+      let isVisible
+      buttons.forEach(button => {
+        const classes = button.classList || []
+        if (!classes.length) { return }
+        const isActive = classes.includes('active')
+        if (isActive) {
+          isVisible = true
+        }
+      })
+      return isVisible
+    },
     shouldCancel (event) {
       if (shouldCancel) {
         shouldCancel = false
@@ -379,7 +392,9 @@ export default {
       const node = event.target.nodeName
       const isTextarea = node === 'TEXTAREA'
       const isInput = node === 'INPUT'
-      if (isTextarea || isInput) {
+      if (this.footerDialogIsVisible()) {
+        this.$store.commit('shouldHideFooter', false)
+      } else if (isTextarea || isInput) {
         this.$store.commit('shouldHideFooter', true)
       } else {
         this.$store.commit('shouldHideFooter', false)
