@@ -24,7 +24,7 @@
     //- textarea
     .row
       User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
-      .textarea-wrap(@touchend.stop)
+      .textarea-wrap
         textarea.name(
           ref="name"
           rows="1"
