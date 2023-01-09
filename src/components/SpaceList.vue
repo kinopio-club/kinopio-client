@@ -69,7 +69,7 @@ span.space-list-wrap
               img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
             button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
               img.icon.checkmark(src="@/assets/checkmark.svg")
-        button.duplicate(v-if="spaceIsActive(space) && spaceIsTemplate(space)" @click="duplicateSpace")
+        button.duplicate.small-button(v-if="spaceIsActive(space) && spaceIsTemplate(space)" @click="duplicateSpace")
           img.icon(src="@/assets/add.svg")
           span Duplicate
 
