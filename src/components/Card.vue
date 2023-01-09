@@ -415,8 +415,9 @@ export default {
     },
     shouldJiggle () {
       const shouldDisableItemJiggle = this.currentUser.shouldDisableItemJiggle
+      const manyCardsSelected = this.multipleCardsSelectedIds.length > 10
       const isShiftKeyDown = this.currentUserIsBoxSelecting
-      if (isShiftKeyDown || shouldDisableItemJiggle) { return }
+      if (isShiftKeyDown || shouldDisableItemJiggle || manyCardsSelected) { return }
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
     isSelectedOrDragging () {
