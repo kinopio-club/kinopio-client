@@ -11,13 +11,10 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
       label.double-line-height(:class="{ active: shouldPauseConnectionDirections }" @click.left.prevent="toggleShouldPauseConnectionDirections" @keydown.stop.enter="toggleShouldPauseConnectionDirections")
         input(type="checkbox" v-model="shouldPauseConnectionDirections")
         span Pause Connection Directions
-  section
-    .row
-      p Cards
     .row
       label(:class="{ active: shouldDisableCardJiggle }" @click.left.prevent="toggleShouldDisableCardJiggle" @keydown.stop.enter="toggleShouldDisableCardJiggle")
         input(type="checkbox" v-model="shouldDisableCardJiggle")
-        span Disable Card Jiggle
+        span Disable Item Jiggle
     .row
       label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
         input(type="checkbox" v-model="shouldUseStickyCards")
