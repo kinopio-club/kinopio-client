@@ -97,13 +97,20 @@ export default {
       let { x, y, resizeWidth, resizeHeight } = this.normalizedBox
       const width = resizeWidth
       const height = resizeHeight
-      return {
+      let styles = {
         left: x + 'px',
         top: y + 'px',
         width: width + 'px',
         height: height + 'px',
         border: `${borderWidth}px solid ${this.color}`
       }
+      const otherBoxes = this.otherBoxes
+      styles = this.updateBoxBorderRadiusStyles(styles, otherBoxes)
+      return styles
+    },
+    otherBoxes () {
+      const boxes = this.$store.getters['currentBoxes/all']
+      return boxes.filter(box => box.id !== this.box.id)
     },
     isSelected () {
       const selectedIds = this.$store.state.multipleBoxesSelectedIds
@@ -255,11 +262,63 @@ export default {
 
   },
   methods: {
+    updateBoxBorderRadiusStyles (styles, otherBoxes) {
+      // ┌─────────────┐
+      // │  x is same  │
+      // ├─────────────┤
+      //
+      // ├─────────────┼ ─ ─┌────┐
+      // │             │    │    │
+      // │             │    │    │
+      // │ Current Box │    │y is│
+      // │             │    │same│
+      // │             │    │    │
+      // │             │    │    │
+      // └─────────────┴ ─ ─└────┴
+      const borderWidth = 2
+      const box = this.normalizedBox
+      otherBoxes = utils.clone(otherBoxes)
+      otherBoxes.forEach(otherBox => {
+        otherBox = this.normalizeBox(otherBox)
+        // x
+        const xStartIsSame = otherBox.x === box.x
+        const xEndIsSame = otherBox.x + otherBox.width === box.x + box.width
+        const xIsSame = xStartIsSame && xEndIsSame
+        // y
+        const yStartIsSame = otherBox.y === box.y
+        const yEndIsSame = otherBox.y + otherBox.height === box.y + box.height
+        const yIsSame = yStartIsSame && yEndIsSame
+        // sides
+        const isTop = xIsSame && (box.y === otherBox.y + otherBox.height - borderWidth)
+        const isBottom = xIsSame && (box.y + box.height - borderWidth === otherBox.y)
+        const isLeft = yIsSame && (box.x === otherBox.x + otherBox.width - borderWidth)
+        const isRight = yIsSame && (box.x + box.width - borderWidth === otherBox.x)
+        if (isTop) {
+          styles.borderTopRightRadius = 0
+          styles.borderTopLeftRadius = 0
+        }
+        if (isBottom) {
+          styles.borderBottomRightRadius = 0
+          styles.borderBottomLeftRadius = 0
+        }
+        if (isRight) {
+          styles.borderTopRightRadius = 0
+          styles.borderBottomRightRadius = 0
+        }
+        if (isLeft) {
+          styles.borderTopLeftRadius = 0
+          styles.borderBottomLeftRadius = 0
+        }
+      })
+      return styles
+    },
     normalizeBox (box) {
       const init = 200
       box = utils.clone(box)
       box.resizeWidth = box.resizeWidth || init
       box.resizeHeight = box.resizeHeight || init
+      box.width = box.resizeWidth
+      box.height = box.resizeHeight
       box.color = box.color || randomColor({ luminosity: 'light' })
       box.fill = box.fill || 'filled'
       return box
