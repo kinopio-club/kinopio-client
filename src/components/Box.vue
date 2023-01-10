@@ -56,10 +56,10 @@
   //- fill
   .background.filled(v-if="hasFill" :style="{background: color}")
   //- snap guides
-  .snap-guide.right(v-if="snapGuideBySnapToId === 'right'")
-  .snap-guide.left(v-if="snapGuideBySnapToId === 'left'")
-  .snap-guide.top(v-if="snapGuideBySnapToId === 'top'")
-  .snap-guide.bottom(v-if="snapGuideBySnapToId === 'bottom'")
+  .snap-guide.right(v-if="snapGuideSide === 'right'" :style="snapGuideStyles")
+  .snap-guide.left(v-if="snapGuideSide === 'left'" :style="snapGuideStyles")
+  .snap-guide.top(v-if="snapGuideSide === 'top'" :style="snapGuideStyles")
+  .snap-guide.bottom(v-if="snapGuideSide === 'bottom'" :style="snapGuideStyles")
 
 </template>
 
@@ -95,7 +95,22 @@ export default {
     }
   },
   computed: {
-    snapGuideBySnapToId () {
+    snapGuideStyles () {
+      // gradient colors
+      const startColor = this.box.color
+      let endColor = utils.cssVariable('primary-background')
+      endColor = utils.colorToRGBA(endColor, '0')
+      // angle
+      let angle
+      if (this.snapGuideSide === 'left') { angle = 270 }
+      if (this.snapGuideSide === 'right') { angle = 90 }
+      if (this.snapGuideSide === 'top') { angle = 0 }
+      if (this.snapGuideSide === 'bottom') { angle = 180 }
+      // gradient
+      const gradient = `linear-gradient(${angle}deg, ${startColor} 0%, ${endColor} 100%)`
+      return { background: gradient }
+    },
+    snapGuideSide () {
       const isDragging = this.$store.state.currentUserIsDraggingBox
       if (!isDragging) { return }
       let guides = this.$store.state.currentBoxes.snapGuides
@@ -308,19 +323,19 @@ export default {
         const isBottom = xIsSame && (box.y + box.height - borderWidth === otherBox.y)
         const isLeft = yIsSame && (box.x === otherBox.x + otherBox.width - borderWidth)
         const isRight = yIsSame && (box.x + box.width - borderWidth === otherBox.x)
-        if (isTop) {
+        if (isTop || this.snapGuideSide === 'top') {
           styles.borderTopRightRadius = 0
           styles.borderTopLeftRadius = 0
         }
-        if (isBottom) {
+        if (isBottom || this.snapGuideSide === 'bottom') {
           styles.borderBottomRightRadius = 0
           styles.borderBottomLeftRadius = 0
         }
-        if (isRight) {
+        if (isRight || this.snapGuideSide === 'right') {
           styles.borderTopRightRadius = 0
           styles.borderBottomRightRadius = 0
         }
-        if (isLeft) {
+        if (isLeft || this.snapGuideSide === 'left') {
           styles.borderTopLeftRadius = 0
           styles.borderBottomLeftRadius = 0
         }
@@ -696,6 +711,29 @@ export default {
     img
       width 10px
       height 10px
+
+  .snap-guide
+    --snap-guide-width 20px
+    position absolute
+    background #b4b6f2
+    &.left
+      left calc(-1 * var(--snap-guide-width))
+      width var(--snap-guide-width)
+      height 100%
+    &.right
+      right calc(-1 * var(--snap-guide-width))
+      width var(--snap-guide-width)
+      top -2px
+      height calc(100% + 4px)
+      margin-left -2px
+    &.top
+      top calc(-1 * var(--snap-guide-width))
+      height var(--snap-guide-width)
+      width 100%
+    &.bottom
+      bottom calc(-1 * var(--snap-guide-width))
+      height var(--snap-guide-width)
+      width 100%
 
 .box-jiggle
   animation boxJiggle 0.5s infinite ease-out forwards

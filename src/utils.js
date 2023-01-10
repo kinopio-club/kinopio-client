@@ -763,6 +763,11 @@ export default {
   invertColor (color) {
     return colord(color).invert().toHex()
   },
+  colorToRGBA (color, opacity) {
+    opacity = opacity || '1'
+    const { r, g, b } = colord(color).toRgb()
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`
+  },
 
   // normalize items
 
