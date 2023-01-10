@@ -150,7 +150,7 @@ export default {
     // ignore pinned dialogs
     let pinnedDialogs = []
     dialogs.forEach(dialog => {
-      if (dialog.dataset['is-pinned'] === 'true') {
+      if (dialog.dataset.isPinned === 'true') {
         pinnedDialogs.push(dialog)
       }
     })
