@@ -192,17 +192,18 @@ export default {
 
     // move
 
-    moveWhileDragging: (context, boxes) => {
-      boxes.forEach(box => {
-        const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-        element.style.left = box.x + 'px'
-        element.style.top = box.y + 'px'
-      })
-    },
+    // moveWhileDragging: (context, boxes) => {
+    //   boxes.forEach(box => {
+    //     const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
+    //     element.style.left = box.x + 'px'
+    //     element.style.top = box.y + 'px'
+    //   })
+    // },
     updateSnapGuides: (context, boxes) => {
       const snapThreshold = 20
       const closenessThreshold = 100
       const otherBoxes = utils.clone(context.getters.all)
+      boxes = utils.clone(boxes)
       let snapGuides = []
       boxes.forEach(box => {
         otherBoxes.forEach(otherBox => {
@@ -364,7 +365,7 @@ export default {
         return box
       })
       // update
-      context.dispatch('moveWhileDragging', boxes)
+      context.commit('move', { boxes })
       context.commit('boxesWereDragged', true, { root: true })
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDraggingBroadcast' }, { root: true })
       context.dispatch('updateSnapGuides', boxes)

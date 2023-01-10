@@ -55,6 +55,11 @@
 
   //- fill
   .background.filled(v-if="hasFill" :style="{background: color}")
+  //- snap guides
+  .snap-guide.right(v-if="snapGuideBySnapToId === 'right'")
+  .snap-guide.left(v-if="snapGuideBySnapToId === 'left'")
+  .snap-guide.top(v-if="snapGuideBySnapToId === 'top'")
+  .snap-guide.bottom(v-if="snapGuideBySnapToId === 'bottom'")
 
 </template>
 
@@ -90,6 +95,16 @@ export default {
     }
   },
   computed: {
+    snapGuideBySnapToId () {
+      const isDragging = this.$store.state.currentUserIsDraggingBox
+      if (!isDragging) { return }
+      let guides = this.$store.state.currentBoxes.snapGuides
+      const snapGuide = guides.find(guide => {
+        return guide.snapToBox.id === this.box.id
+      })
+      if (!snapGuide) { return }
+      return snapGuide.side
+    },
     normalizedBox () {
       return this.normalizeBox(this.box)
     },
