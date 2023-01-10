@@ -16,7 +16,8 @@ export default {
   namespaced: true,
   state: {
     ids: [],
-    boxes: {}
+    boxes: {},
+    snapGuides: [] // { side, box, snapToBox }, { ... }
   },
   mutations: {
 
@@ -58,6 +59,10 @@ export default {
         state.boxes[box.id].y = box.y
       })
       cache.updateSpaceBoxesDebounced(state.boxes, currentSpaceId)
+    },
+    snapGuides: (state, value) => {
+      console.log('🌺', value)
+      state.snapGuides = value
     },
 
     // broadcast
@@ -187,12 +192,120 @@ export default {
 
     // move
 
-    moveWhileDragging: (state, boxes) => {
+    moveWhileDragging: (context, boxes) => {
       boxes.forEach(box => {
         const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
         element.style.left = box.x + 'px'
         element.style.top = box.y + 'px'
       })
+    },
+    updateSnapGuides: (context, boxes) => {
+      const snapThreshold = 20
+      const closenessThreshold = 100
+      const otherBoxes = utils.clone(context.getters.all)
+      let snapGuides = []
+      boxes.forEach(box => {
+        otherBoxes.forEach(otherBox => {
+          if (otherBox.id === box.id) { return }
+          otherBox.width = otherBox.resizeWidth
+          otherBox.height = otherBox.resizeHeight
+          // const left = closestBox.distances.left
+          const distances = {
+            // ┌────┐     ┌────┐
+            // │ B  │────▶│ OB │ y + height/2
+            // └────┘     └────┘
+            //  x + w      x
+            left: utils.distanceBetweenTwoPoints(
+              {
+                x: box.x + box.width,
+                y: box.y + (box.height / 2)
+              },
+              {
+                x: otherBox.x,
+                y: otherBox.y + (otherBox.height / 2)
+              }
+            ),
+            // ┌────┐     ┌────┐
+            // │ OB │◀────│ B  │ y + height/2
+            // └────┘     └────┘
+            //  x + w      x
+            right: utils.distanceBetweenTwoPoints(
+              {
+                x: box.x,
+                y: box.y + (box.height / 2)
+              },
+              {
+                x: otherBox.x + otherBox.width,
+                y: otherBox.y + (otherBox.height / 2)
+              }
+            ),
+            // ┌────┐
+            // │ B  │
+            // └────┘ y + height
+            //    │
+            //    ▼
+            // ┌────┐ y
+            // │ OB │
+            // └────┘
+            //    x + width/2
+            top: utils.distanceBetweenTwoPoints(
+              {
+                x: box.x + (box.width / 2),
+                y: box.y + box.height
+              },
+              {
+                x: otherBox.x + (otherBox.width / 2),
+                y: otherBox.y
+              }
+            ),
+            // ┌────┐
+            // │ OB │
+            // └────┘ y
+            //    ▲
+            //    │
+            // ┌────┐ y + height
+            // │ B  │
+            // └────┘
+            //    x + width/2
+            bottom: utils.distanceBetweenTwoPoints(
+              {
+                x: box.x + (box.width / 2),
+                y: box.y
+              },
+              {
+                x: otherBox.x + (otherBox.width / 2),
+                y: otherBox.y + otherBox.height
+              }
+            )
+          }
+          // snap left
+          const isNearLeft = distances.left < closenessThreshold
+          const isSnapLeft = Math.abs((box.x + box.width) - otherBox.x) <= snapThreshold
+          if (isNearLeft && isSnapLeft) {
+            snapGuides.push({ side: 'left', box, snapToBox: otherBox })
+          }
+          // snap right
+          const isNearRight = distances.right < closenessThreshold
+          const isSnapRight = Math.abs(box.x - (otherBox.x + otherBox.width)) <= snapThreshold
+          if (isNearRight && isSnapRight) {
+            snapGuides.push({ side: 'right', box, snapToBox: otherBox })
+          }
+          // snap top
+          const isNearTop = distances.top < closenessThreshold
+          const isSnapTop = Math.abs((box.y + box.height) - otherBox.y) <= snapThreshold
+          if (isNearTop && isSnapTop) {
+            snapGuides.push({ side: 'top', box, snapToBox: otherBox })
+          }
+          // snap bottom
+          const isNearBottom = distances.bottom < closenessThreshold
+          const isSnapBottom = Math.abs(box.y - (otherBox.y + otherBox.height)) <= snapThreshold
+          if (isNearBottom && isSnapBottom) {
+            snapGuides.push({ side: 'bottom', box, snapToBox: otherBox })
+          }
+        })
+      })
+      context.commit('snapGuides', snapGuides)
+      // TODO perform box snapping and reset snapGuides in space.stopInteractions
     },
     move: (context, { endCursor, prevCursor, delta }) => {
       const zoom = context.rootGetters.spaceCounterZoomDecimal
@@ -240,8 +353,11 @@ export default {
           box.y = Math.round(box.y)
         }
         box = {
+          name: box.name,
           x: box.x,
           y: box.y,
+          width: box.resizeWidth,
+          height: box.resizeHeight,
           id: box.id
         }
         prevMovePositions[box.id] = box
@@ -251,6 +367,7 @@ export default {
       context.dispatch('moveWhileDragging', boxes)
       context.commit('boxesWereDragged', true, { root: true })
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDraggingBroadcast' }, { root: true })
+      context.dispatch('updateSnapGuides', boxes)
     },
     afterMove: (context) => {
       prevMovePositions = {}
