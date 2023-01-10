@@ -96,19 +96,7 @@ export default {
   },
   computed: {
     snapGuideStyles () {
-      // gradient colors
-      const startColor = this.box.color
-      let endColor = utils.cssVariable('primary-background')
-      endColor = utils.colorToRGBA(endColor, '0')
-      // angle
-      let angle
-      if (this.snapGuideSide === 'left') { angle = 270 }
-      if (this.snapGuideSide === 'right') { angle = 90 }
-      if (this.snapGuideSide === 'top') { angle = 0 }
-      if (this.snapGuideSide === 'bottom') { angle = 180 }
-      // gradient
-      const gradient = `linear-gradient(${angle}deg, ${startColor} 0%, ${endColor} 100%)`
-      return { background: gradient }
+      return { background: this.box.color }
     },
     snapGuideSide () {
       const isDragging = this.$store.state.currentUserIsDraggingBox
@@ -713,7 +701,7 @@ export default {
       height 10px
 
   .snap-guide
-    --snap-guide-width 20px
+    --snap-guide-width 6px
     position absolute
     background #b4b6f2
     &.left
@@ -725,7 +713,9 @@ export default {
       width var(--snap-guide-width)
       top -2px
       height calc(100% + 4px)
-      margin-left -2px
+      animation guideRight 1s infinite ease-in-out forwards
+      border-top-right-radius 5px
+      border-bottom-right-radius 5px
     &.top
       top calc(-1 * var(--snap-guide-width))
       height var(--snap-guide-width)
@@ -734,6 +724,10 @@ export default {
       bottom calc(-1 * var(--snap-guide-width))
       height var(--snap-guide-width)
       width 100%
+
+@keyframes guideRight
+  50%
+    transform translateX(2px)
 
 .box-jiggle
   animation boxJiggle 0.5s infinite ease-out forwards
