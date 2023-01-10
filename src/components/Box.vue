@@ -703,11 +703,14 @@ export default {
   .snap-guide
     --snap-guide-width 6px
     position absolute
-    background #b4b6f2
     &.left
       left calc(-1 * var(--snap-guide-width))
       width var(--snap-guide-width)
-      height 100%
+      top -2px
+      height calc(100% + 4px)
+      animation guideLeft 1s infinite ease-in-out forwards
+      border-top-left-radius 5px
+      border-bottom-left-radius 5px
     &.right
       right calc(-1 * var(--snap-guide-width))
       width var(--snap-guide-width)
@@ -719,15 +722,33 @@ export default {
     &.top
       top calc(-1 * var(--snap-guide-width))
       height var(--snap-guide-width)
-      width 100%
+      left -2px
+      width calc(100% + 4px)
+      animation guideTop 1s infinite ease-in-out forwards
+      border-top-left-radius 5px
+      border-top-right-radius 5px
+
     &.bottom
       bottom calc(-1 * var(--snap-guide-width))
       height var(--snap-guide-width)
-      width 100%
+      left -2px
+      width calc(100% + 4px)
+      animation guideBottom 1s infinite ease-in-out forwards
+      border-bottom-left-radius 5px
+      border-bottom-right-radius 5px
 
 @keyframes guideRight
   50%
     transform translateX(2px)
+@keyframes guideLeft
+  50%
+    transform translateX(-2px)
+@keyframes guideTop
+  50%
+    transform translateY(-2px)
+@keyframes guideBottom
+  50%
+    transform translateY(2px)
 
 .box-jiggle
   animation boxJiggle 0.5s infinite ease-out forwards

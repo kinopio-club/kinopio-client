@@ -61,7 +61,6 @@ export default {
       cache.updateSpaceBoxesDebounced(state.boxes, currentSpaceId)
     },
     snapGuides: (state, value) => {
-      console.log('🌺', value)
       state.snapGuides = value
     },
 
