@@ -189,15 +189,8 @@ export default {
       })
     },
 
-    // move
+    // snapping
 
-    // moveWhileDragging: (context, boxes) => {
-    //   boxes.forEach(box => {
-    //     const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-    //     element.style.left = box.x + 'px'
-    //     element.style.top = box.y + 'px'
-    //   })
-    // },
     updateSnapGuides: (context, boxes) => {
       const snapThreshold = 20
       const closenessThreshold = 100
@@ -320,6 +313,41 @@ export default {
       snapGuides = normalizedGuideKeys.map(key => normalizedGuides[key])
       context.commit('snapGuides', snapGuides)
     },
+    snap: (context, { side, origin, target }) => {
+      const borderWidth = 2
+      let updated = { id: origin.id }
+      origin = context.getters.byId(origin.id)
+      const alignWithOriginY = side === 'right' || side === 'left'
+      // size
+      if (alignWithOriginY) {
+        updated.y = target.y
+        updated.resizeHeight = Math.max(target.resizeHeight, origin.resizeHeight)
+      } else {
+        updated.x = target.x
+        updated.resizeWidth = Math.max(target.resizeWidth, origin.resizeWidth)
+      }
+      // position
+      if (side === 'right') {
+        updated.x = target.x + target.resizeWidth - borderWidth
+      } else if (side === 'left') {
+        updated.x = target.x - origin.resizeWidth + borderWidth
+      } else if (side === 'top') {
+        updated.y = target.y - origin.resizeHeight + borderWidth
+      } else if (side === 'bottom') {
+        updated.y = target.y + target.resizeHeight - borderWidth
+      }
+      context.dispatch('update', updated)
+    },
+
+    // move
+
+    // moveWhileDragging: (context, boxes) => {
+    //   boxes.forEach(box => {
+    //     const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
+    //     element.style.left = box.x + 'px'
+    //     element.style.top = box.y + 'px'
+    //   })
+    // },
     move: (context, { endCursor, prevCursor, delta }) => {
       const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }

@@ -401,9 +401,10 @@ export default {
       }
     },
     checkIfShouldSnapBoxes () {
+      if (!this.$store.state.boxesWereDragged) { return }
       const snapGuides = this.$store.state.currentBoxes.snapGuides
       if (!snapGuides.length) { return }
-      console.log('🍓', snapGuides)
+      snapGuides.forEach(snapGuide => this.$store.dispatch('currentBoxes/snap', snapGuide))
     },
     showMultipleSelectedActions (event) {
       if (this.spaceIsReadOnly) { return }
