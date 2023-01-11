@@ -282,28 +282,42 @@ export default {
           const isNearLeft = distances.left < closenessThreshold
           const isSnapLeft = Math.abs((box.x + box.width) - targetBox.x) <= snapThreshold
           if (isNearLeft && isSnapLeft) {
-            snapGuides.push({ side: 'left', origin: box, target: targetBox })
+            snapGuides.push({ side: 'left', origin: box, target: targetBox, distance: distances.left })
           }
           // snap right
           const isNearRight = distances.right < closenessThreshold
           const isSnapRight = Math.abs(box.x - (targetBox.x + targetBox.width)) <= snapThreshold
           if (isNearRight && isSnapRight) {
-            snapGuides.push({ side: 'right', origin: box, target: targetBox })
+            snapGuides.push({ side: 'right', origin: box, target: targetBox, distance: distances.right })
           }
           // snap top
           const isNearTop = distances.top < closenessThreshold
           const isSnapTop = Math.abs((box.y + box.height) - targetBox.y) <= snapThreshold
           if (isNearTop && isSnapTop) {
-            snapGuides.push({ side: 'top', origin: box, target: targetBox })
+            snapGuides.push({ side: 'top', origin: box, target: targetBox, distance: distances.top })
           }
           // snap bottom
           const isNearBottom = distances.bottom < closenessThreshold
           const isSnapBottom = Math.abs(box.y - (targetBox.y + targetBox.height)) <= snapThreshold
           if (isNearBottom && isSnapBottom) {
-            snapGuides.push({ side: 'bottom', origin: box, target: targetBox })
+            snapGuides.push({ side: 'bottom', origin: box, target: targetBox, distance: distances.bottom })
           }
         })
       })
+      // limit each origin box to it's closest target
+      let normalizedGuides = {}
+      snapGuides.forEach(snapGuide => {
+        const originGuide = normalizedGuides[snapGuide.origin.id]
+        if (originGuide) {
+          if (snapGuide.distance < originGuide.distance) {
+            normalizedGuides[snapGuide.origin.id] = snapGuide
+          }
+        } else {
+          normalizedGuides[snapGuide.origin.id] = snapGuide
+        }
+      })
+      let normalizedGuideKeys = Object.keys(normalizedGuides)
+      snapGuides = normalizedGuideKeys.map(key => normalizedGuides[key])
       context.commit('snapGuides', snapGuides)
     },
     move: (context, { endCursor, prevCursor, delta }) => {
