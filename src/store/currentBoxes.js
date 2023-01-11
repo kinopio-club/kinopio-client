@@ -17,7 +17,7 @@ export default {
   state: {
     ids: [],
     boxes: {},
-    snapGuides: [] // { side, box, snapToBox }, { ... }
+    snapGuides: [] // { side, box, toBox }, { ... }
   },
   mutations: {
 
@@ -201,14 +201,14 @@ export default {
     updateSnapGuides: (context, boxes) => {
       const snapThreshold = 20
       const closenessThreshold = 100
-      const otherBoxes = utils.clone(context.getters.all)
+      const targetBoxes = utils.clone(context.getters.all)
       boxes = utils.clone(boxes)
       let snapGuides = []
       boxes.forEach(box => {
-        otherBoxes.forEach(otherBox => {
-          if (otherBox.id === box.id) { return }
-          otherBox.width = otherBox.resizeWidth
-          otherBox.height = otherBox.resizeHeight
+        targetBoxes.forEach(targetBox => {
+          if (targetBox.id === box.id) { return }
+          targetBox.width = targetBox.resizeWidth
+          targetBox.height = targetBox.resizeHeight
           // const left = closestBox.distances.left
           const distances = {
             // ┌────┐     ┌────┐
@@ -221,8 +221,8 @@ export default {
                 y: box.y + (box.height / 2)
               },
               {
-                x: otherBox.x,
-                y: otherBox.y + (otherBox.height / 2)
+                x: targetBox.x,
+                y: targetBox.y + (targetBox.height / 2)
               }
             ),
             // ┌────┐     ┌────┐
@@ -235,8 +235,8 @@ export default {
                 y: box.y + (box.height / 2)
               },
               {
-                x: otherBox.x + otherBox.width,
-                y: otherBox.y + (otherBox.height / 2)
+                x: targetBox.x + targetBox.width,
+                y: targetBox.y + (targetBox.height / 2)
               }
             ),
             // ┌────┐
@@ -254,8 +254,8 @@ export default {
                 y: box.y + box.height
               },
               {
-                x: otherBox.x + (otherBox.width / 2),
-                y: otherBox.y
+                x: targetBox.x + (targetBox.width / 2),
+                y: targetBox.y
               }
             ),
             // ┌────┐
@@ -273,34 +273,34 @@ export default {
                 y: box.y
               },
               {
-                x: otherBox.x + (otherBox.width / 2),
-                y: otherBox.y + otherBox.height
+                x: targetBox.x + (targetBox.width / 2),
+                y: targetBox.y + targetBox.height
               }
             )
           }
           // snap left
           const isNearLeft = distances.left < closenessThreshold
-          const isSnapLeft = Math.abs((box.x + box.width) - otherBox.x) <= snapThreshold
+          const isSnapLeft = Math.abs((box.x + box.width) - targetBox.x) <= snapThreshold
           if (isNearLeft && isSnapLeft) {
-            snapGuides.push({ side: 'left', box, snapToBox: otherBox })
+            snapGuides.push({ side: 'left', origin: box, target: targetBox })
           }
           // snap right
           const isNearRight = distances.right < closenessThreshold
-          const isSnapRight = Math.abs(box.x - (otherBox.x + otherBox.width)) <= snapThreshold
+          const isSnapRight = Math.abs(box.x - (targetBox.x + targetBox.width)) <= snapThreshold
           if (isNearRight && isSnapRight) {
-            snapGuides.push({ side: 'right', box, snapToBox: otherBox })
+            snapGuides.push({ side: 'right', origin: box, target: targetBox })
           }
           // snap top
           const isNearTop = distances.top < closenessThreshold
-          const isSnapTop = Math.abs((box.y + box.height) - otherBox.y) <= snapThreshold
+          const isSnapTop = Math.abs((box.y + box.height) - targetBox.y) <= snapThreshold
           if (isNearTop && isSnapTop) {
-            snapGuides.push({ side: 'top', box, snapToBox: otherBox })
+            snapGuides.push({ side: 'top', origin: box, target: targetBox })
           }
           // snap bottom
           const isNearBottom = distances.bottom < closenessThreshold
-          const isSnapBottom = Math.abs(box.y - (otherBox.y + otherBox.height)) <= snapThreshold
+          const isSnapBottom = Math.abs(box.y - (targetBox.y + targetBox.height)) <= snapThreshold
           if (isNearBottom && isSnapBottom) {
-            snapGuides.push({ side: 'bottom', box, snapToBox: otherBox })
+            snapGuides.push({ side: 'bottom', origin: box, target: targetBox })
           }
         })
       })

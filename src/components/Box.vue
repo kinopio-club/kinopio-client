@@ -95,16 +95,30 @@ export default {
     }
   },
   computed: {
-    snapGuideStyles () { return { background: this.box.color } },
+    snapGuideStyles () {
+      if (this.isDragging) {
+        return { background: this.userColor }
+      } else {
+        return { background: this.box.color }
+      }
+    },
     snapGuideSide () {
       const isDragging = this.$store.state.currentUserIsDraggingBox
-      if (!isDragging) { return }
+      if (!isDragging) { return null }
       let guides = this.$store.state.currentBoxes.snapGuides
       const snapGuide = guides.find(guide => {
-        return guide.snapToBox.id === this.box.id
+        const isTarget = guide.target.id === this.box.id
+        const isOrigin = guide.origin.id === this.box.id
+        return isTarget || isOrigin
       })
-      if (!snapGuide) { return }
-      return snapGuide.side
+      if (!snapGuide) { return null }
+      if (snapGuide.target.id === this.box.id) {
+        return snapGuide.side
+      } else if (snapGuide.origin.id === this.box.id) {
+        return this.oppositeSide(snapGuide.side)
+      } else {
+        return null
+      }
     },
     normalizedBox () {
       return this.normalizeBox(this.box)
@@ -278,6 +292,20 @@ export default {
 
   },
   methods: {
+    oppositeSide (side) {
+      if (side === 'left') {
+        return 'right'
+      }
+      if (side === 'right') {
+        return 'left'
+      }
+      if (side === 'top') {
+        return 'bottom'
+      }
+      if (side === 'bottom') {
+        return 'top'
+      }
+    },
     updateBoxBorderRadiusStyles (styles, otherBoxes) {
       // ┌─────────────┐
       // │  x is same  │
@@ -700,13 +728,14 @@ export default {
 
   .snap-guide
     --snap-guide-width 6px
+    --snap-guide-duration 1s
     position absolute
     &.left
       left calc(-1 * var(--snap-guide-width))
       width var(--snap-guide-width)
       top -2px
       height calc(100% + 4px)
-      animation guideLeft 1s infinite ease-in-out forwards
+      animation guideLeft var(--snap-guide-duration) infinite ease-in-out forwards
       border-top-left-radius 5px
       border-bottom-left-radius 5px
     &.right
@@ -714,7 +743,7 @@ export default {
       width var(--snap-guide-width)
       top -2px
       height calc(100% + 4px)
-      animation guideRight 1s infinite ease-in-out forwards
+      animation guideRight var(--snap-guide-duration) infinite ease-in-out forwards
       border-top-right-radius 5px
       border-bottom-right-radius 5px
     &.top
@@ -722,16 +751,15 @@ export default {
       height var(--snap-guide-width)
       left -2px
       width calc(100% + 4px)
-      animation guideTop 1s infinite ease-in-out forwards
+      animation guideTop var(--snap-guide-duration) infinite ease-in-out forwards
       border-top-left-radius 5px
       border-top-right-radius 5px
-
     &.bottom
       bottom calc(-1 * var(--snap-guide-width))
       height var(--snap-guide-width)
       left -2px
       width calc(100% + 4px)
-      animation guideBottom 1s infinite ease-in-out forwards
+      animation guideBottom var(--snap-guide-duration) infinite ease-in-out forwards
       border-bottom-left-radius 5px
       border-bottom-right-radius 5px
 
