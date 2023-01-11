@@ -55,6 +55,11 @@
 
   //- fill
   .background.filled(v-if="hasFill" :style="{background: color}")
+  //- snap guides
+  .snap-guide.right(v-if="snapGuideSide === 'right'" :style="snapGuideStyles")
+  .snap-guide.left(v-if="snapGuideSide === 'left'" :style="snapGuideStyles")
+  .snap-guide.top(v-if="snapGuideSide === 'top'" :style="snapGuideStyles")
+  .snap-guide.bottom(v-if="snapGuideSide === 'bottom'" :style="snapGuideStyles")
 
 </template>
 
@@ -90,6 +95,31 @@ export default {
     }
   },
   computed: {
+    snapGuideStyles () {
+      if (this.isDragging) {
+        return { background: this.userColor }
+      } else {
+        return { background: this.box.color }
+      }
+    },
+    snapGuideSide () {
+      const isDragging = this.$store.state.currentUserIsDraggingBox
+      if (!isDragging) { return null }
+      let guides = this.$store.state.currentBoxes.snapGuides
+      const snapGuide = guides.find(guide => {
+        const isTarget = guide.target.id === this.box.id
+        const isOrigin = guide.origin.id === this.box.id
+        return isTarget || isOrigin
+      })
+      if (!snapGuide) { return null }
+      if (snapGuide.target.id === this.box.id) {
+        return snapGuide.side
+      } else if (snapGuide.origin.id === this.box.id) {
+        return this.oppositeSide(snapGuide.side)
+      } else {
+        return null
+      }
+    },
     normalizedBox () {
       return this.normalizeBox(this.box)
     },
@@ -97,13 +127,20 @@ export default {
       let { x, y, resizeWidth, resizeHeight } = this.normalizedBox
       const width = resizeWidth
       const height = resizeHeight
-      return {
+      let styles = {
         left: x + 'px',
         top: y + 'px',
         width: width + 'px',
         height: height + 'px',
         border: `${borderWidth}px solid ${this.color}`
       }
+      const otherBoxes = this.otherBoxes
+      styles = this.updateBoxBorderRadiusStyles(styles, otherBoxes)
+      return styles
+    },
+    otherBoxes () {
+      const boxes = this.$store.getters['currentBoxes/all']
+      return boxes.filter(box => box.id !== this.box.id)
     },
     isSelected () {
       const selectedIds = this.$store.state.multipleBoxesSelectedIds
@@ -255,11 +292,77 @@ export default {
 
   },
   methods: {
+    oppositeSide (side) {
+      if (side === 'left') {
+        return 'right'
+      }
+      if (side === 'right') {
+        return 'left'
+      }
+      if (side === 'top') {
+        return 'bottom'
+      }
+      if (side === 'bottom') {
+        return 'top'
+      }
+    },
+    updateBoxBorderRadiusStyles (styles, otherBoxes) {
+      // ┌─────────────┐
+      // │  x is same  │
+      // ├─────────────┤
+      //
+      // ├─────────────┼ ─ ─┌────┐
+      // │             │    │    │
+      // │             │    │    │
+      // │ Current Box │    │y is│
+      // │             │    │same│
+      // │             │    │    │
+      // │             │    │    │
+      // └─────────────┴ ─ ─└────┴
+      const borderWidth = 2
+      const box = this.normalizedBox
+      otherBoxes = utils.clone(otherBoxes)
+      otherBoxes.forEach(otherBox => {
+        otherBox = this.normalizeBox(otherBox)
+        // x
+        const xStartIsSame = otherBox.x === box.x
+        const xEndIsSame = otherBox.x + otherBox.width === box.x + box.width
+        const xIsSame = xStartIsSame && xEndIsSame
+        // y
+        const yStartIsSame = otherBox.y === box.y
+        const yEndIsSame = otherBox.y + otherBox.height === box.y + box.height
+        const yIsSame = yStartIsSame && yEndIsSame
+        // sides
+        const isTop = xIsSame && (box.y === otherBox.y + otherBox.height - borderWidth)
+        const isBottom = xIsSame && (box.y + box.height - borderWidth === otherBox.y)
+        const isLeft = yIsSame && (box.x === otherBox.x + otherBox.width - borderWidth)
+        const isRight = yIsSame && (box.x + box.width - borderWidth === otherBox.x)
+        if (isTop || this.snapGuideSide === 'top') {
+          styles.borderTopRightRadius = 0
+          styles.borderTopLeftRadius = 0
+        }
+        if (isBottom || this.snapGuideSide === 'bottom') {
+          styles.borderBottomRightRadius = 0
+          styles.borderBottomLeftRadius = 0
+        }
+        if (isRight || this.snapGuideSide === 'right') {
+          styles.borderTopRightRadius = 0
+          styles.borderBottomRightRadius = 0
+        }
+        if (isLeft || this.snapGuideSide === 'left') {
+          styles.borderTopLeftRadius = 0
+          styles.borderBottomLeftRadius = 0
+        }
+      })
+      return styles
+    },
     normalizeBox (box) {
       const init = 200
       box = utils.clone(box)
       box.resizeWidth = box.resizeWidth || init
       box.resizeHeight = box.resizeHeight || init
+      box.width = box.resizeWidth
+      box.height = box.resizeHeight
       box.color = box.color || randomColor({ luminosity: 'light' })
       box.fill = box.fill || 'filled'
       return box
@@ -622,6 +725,56 @@ export default {
     img
       width 10px
       height 10px
+
+  .snap-guide
+    --snap-guide-width 6px
+    --snap-guide-duration 1s
+    position absolute
+    &.left
+      left calc(-1 * var(--snap-guide-width))
+      width var(--snap-guide-width)
+      top -2px
+      height calc(100% + 4px)
+      animation guideLeft var(--snap-guide-duration) infinite ease-in-out forwards
+      border-top-left-radius 5px
+      border-bottom-left-radius 5px
+    &.right
+      right calc(-1 * var(--snap-guide-width))
+      width var(--snap-guide-width)
+      top -2px
+      height calc(100% + 4px)
+      animation guideRight var(--snap-guide-duration) infinite ease-in-out forwards
+      border-top-right-radius 5px
+      border-bottom-right-radius 5px
+    &.top
+      top calc(-1 * var(--snap-guide-width))
+      height var(--snap-guide-width)
+      left -2px
+      width calc(100% + 4px)
+      animation guideTop var(--snap-guide-duration) infinite ease-in-out forwards
+      border-top-left-radius 5px
+      border-top-right-radius 5px
+    &.bottom
+      bottom calc(-1 * var(--snap-guide-width))
+      height var(--snap-guide-width)
+      left -2px
+      width calc(100% + 4px)
+      animation guideBottom var(--snap-guide-duration) infinite ease-in-out forwards
+      border-bottom-left-radius 5px
+      border-bottom-right-radius 5px
+
+@keyframes guideRight
+  50%
+    transform translateX(2px)
+@keyframes guideLeft
+  50%
+    transform translateX(-2px)
+@keyframes guideTop
+  50%
+    transform translateY(-2px)
+@keyframes guideBottom
+  50%
+    transform translateY(2px)
 
 .box-jiggle
   animation boxJiggle 0.5s infinite ease-out forwards
