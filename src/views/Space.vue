@@ -400,6 +400,11 @@ export default {
         this.$store.commit('shouldHideFooter', false)
       }
     },
+    checkIfShouldSnapBoxes () {
+      const snapGuides = this.$store.state.currentBoxes.snapGuides
+      if (!snapGuides.length) { return }
+      console.log('🍓', snapGuides)
+    },
     showMultipleSelectedActions (event) {
       if (this.spaceIsReadOnly) { return }
       if (this.$store.state.preventMultipleSelectedActionsIsVisible) { return }
@@ -453,6 +458,7 @@ export default {
         this.$store.commit('triggerUpdatePositionInVisualViewport')
       }
       this.checkIfShouldHideFooter(event)
+      this.checkIfShouldSnapBoxes()
       if (this.shouldCancel(event)) { return }
       this.addOrCloseCard(event)
       this.unselectCardsInDraggedBox()

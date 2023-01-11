@@ -95,9 +95,7 @@ export default {
     }
   },
   computed: {
-    snapGuideStyles () {
-      return { background: this.box.color }
-    },
+    snapGuideStyles () { return { background: this.box.color } },
     snapGuideSide () {
       const isDragging = this.$store.state.currentUserIsDraggingBox
       if (!isDragging) { return }

@@ -305,7 +305,6 @@ export default {
         })
       })
       context.commit('snapGuides', snapGuides)
-      // TODO perform box snapping and reset snapGuides in space.stopInteractions
     },
     move: (context, { endCursor, prevCursor, delta }) => {
       const zoom = context.rootGetters.spaceCounterZoomDecimal
