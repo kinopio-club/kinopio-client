@@ -222,7 +222,8 @@ export default {
       const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox
       const userDisablePan = this.$store.state.currentUser.shouldDisableRightClickToPan
       const shouldPan = isRightClick && isPanScope && !userDisablePan
-      const position = utils.cursorPositionInPage(event)
+      let position = utils.cursorPositionInPage(event)
+      position = utils.updatePositionWithSpaceOffset(position)
       if (shouldBoxSelect) {
         event.preventDefault()
         this.$store.commit('currentUserIsBoxSelecting', true)
@@ -245,7 +246,8 @@ export default {
       const position = utils.cursorPositionInPage(event)
       currentCursorPosition = position
       if (this.$store.state.currentUserIsBoxSelecting) {
-        this.$store.commit('currentUserBoxSelectEnd', position)
+        const endPosition = utils.updatePositionWithSpaceOffset(position)
+        this.$store.commit('currentUserBoxSelectEnd', endPosition)
       } else if (this.$store.state.currentUserIsPanning) {
         event.preventDefault()
         if (!prevCursorPosition) {
