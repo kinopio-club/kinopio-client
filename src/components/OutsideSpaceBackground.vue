@@ -6,7 +6,7 @@
 // adapted from https://gist.github.com/pketh/3f62b807db3835d564c1
 let colorCycleTimer
 let colorCycleIteration = 0
-const colorCycleDuration = 10
+const colorCycleDuration = 200
 const max = 239
 const min = 150
 
