@@ -938,8 +938,9 @@ code
 
 .cut
   vertical-align 1px
-.copy
-  vertical-align -0.5px
+.small-button
+  .copy
+    vertical-align -1px
 
 .cancel
   transform rotate(45deg)
@@ -1002,6 +1003,14 @@ code
   min-height 35px
   word-wrap anywhere
   overflow auto
+  &.single-line
+    max-height 35px
+    overflow hidden
+    span
+      width 100000px
+      display inline-block
+      padding-top 5px
+
 .logo-image
   background-image url('assets/logo-base.png')
 .logo

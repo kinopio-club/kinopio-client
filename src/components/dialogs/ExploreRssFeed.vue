@@ -6,11 +6,16 @@ dialog.narrow.explore-rss-feed(v-if="visible" :open="visible" @click.left.stop)
   section
     p Subscribe to new spaces added to Explore
     p.row
-      .url-textarea {{url}}
+      .url-textarea.single-line
+        span {{url}}
       .input-button-wrap(@click.left="copyUrl")
         button.small-button
           img.icon.copy(src="@/assets/copy.svg")
-          span Feed URL
+    .row
+      button(@click.left="copyUrl")
+        img.icon.copy(src="@/assets/copy.svg")
+        span Copy Feed URL
+
 </template>
 
 <script>

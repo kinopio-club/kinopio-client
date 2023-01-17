@@ -11,11 +11,15 @@ dialog.narrow.space-rss-feed(v-if="visible" :open="visible" @click.left.stop)
 
     template(v-if="!spaceIsPrivate")
       p.row
-        .url-textarea {{url}}
+        .url-textarea.single-line
+          span {{url}}
         .input-button-wrap(@click.left="copyUrl")
           button.small-button
             img.icon.copy(src="@/assets/copy.svg")
-            span Feed URL
+      .row
+        button(@click.left="copyUrl")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Feed URL
 
 </template>
 

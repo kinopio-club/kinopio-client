@@ -1,15 +1,21 @@
 <template lang="pug">
 section.invite
   .row
-    span Invite
+    span Invite Collaborators
   Loader(:visible="loading")
   template(v-if="!loading && collaboratorKey")
     .row
-      .url-textarea {{url}}
+      .url-textarea.single-line
+        span {{url}}
       .input-button-wrap(@click.left="copyUrl")
         button.small-button
           img.icon.copy(src="@/assets/copy.svg")
-          span Invite URL
+    .row
+      button(@click.left="copyUrl")
+        img.icon.copy(src="@/assets/copy.svg")
+        span Copy Invite
+      button(v-if="isTips" @click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
+        span Tips
   //- Error
   template(v-if="!loading && !collaboratorKey")
     .row
@@ -17,12 +23,11 @@ section.invite
     .row
       button(@click="updateCollaboratorKey") Try Again
   //- View and Edit Permissions
-  .row
-    template(v-if="spaceIsPrivate")
-      span No account needed to view private spaces
-    template(v-if="currentUserIsUpgraded")
-      .badge.success.button-badge(v-if="!freeCardsInfoIsVisible" @click="toggleFreeCardsInfoVisible") Free Cards
-      .badge.success.button-badge(v-if="freeCardsInfoIsVisible" @click="toggleFreeCardsInfoVisible") Because your account is upgraded, others can create cards here for free
+  section.subsection.more-info(v-if="tipsIsVisible")
+    .row(v-if="spaceIsPrivate")
+      span No account is needed to view private spaces – but editing requires an account.
+    .row(v-if="currentUserIsUpgraded")
+      .badge.success Because your account is upgraded, others can create cards here for free
 
 </template>
 
@@ -48,7 +53,7 @@ export default {
       url: '',
       loading: false,
       collaboratorKey: '',
-      freeCardsInfoIsVisible: false
+      tipsIsVisible: false
     }
   },
   computed: {
@@ -58,7 +63,8 @@ export default {
     ...mapGetters([
     ]),
     spaceIsPrivate () { return this.$store.state.currentSpace.privacy === 'private' },
-    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
+    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
+    isTips () { return this.spaceIsPrivate || this.currentUserIsUpgraded }
   },
   methods: {
     async copyUrl (event) {
@@ -96,8 +102,8 @@ export default {
       const spaceName = utils.normalizeString(currentSpace.name)
       this.url = `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
     },
-    toggleFreeCardsInfoVisible () {
-      this.freeCardsInfoIsVisible = !this.freeCardsInfoIsVisible
+    toggleTipsIsVisible () {
+      this.tipsIsVisible = !this.tipsIsVisible
     }
   },
   watch: {
@@ -111,6 +117,7 @@ export default {
 <style lang="stylus" scoped>
 .invite
   user-select text
-  .url-textarea
-    max-height 57px
+  section.more-info
+    .badge
+      margin 0
 </style>
