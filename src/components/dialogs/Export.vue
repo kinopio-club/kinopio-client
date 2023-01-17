@@ -11,7 +11,10 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
       .input-button-wrap(@click.left="copyText")
         button.small-button
           img.icon.copy(src="@/assets/copy.svg")
-          span Card Names
+    .row
+      button(@click.left="copyText")
+        img.icon.copy(src="@/assets/copy.svg")
+        span Copy Card Names
     //- PDF
     .row
       .button-wrap(v-if="currentUserIsSignedIn")
@@ -29,6 +32,7 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     // anon user
     template(v-if="!currentUserIsSignedIn")
       p
+        span Backup {{' '}}
         span.badge.info json
       button(@click.left="downloadLocalJSON") Download Space
       p
@@ -37,6 +41,7 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     // signed in user
     template(v-if="currentUserIsSignedIn")
       p
+        span Backup {{' '}}
         span.badge.info json and txt
       button(@click.left="downloadCurrentSpaceRemote" :class="{ active: isLoadingCurrentSpace }")
         span Download Space
