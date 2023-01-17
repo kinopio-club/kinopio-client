@@ -1,7 +1,7 @@
 <template lang="pug">
 section.invite
   .row
-    span Invite
+    span Invite Collaborators
   Loader(:visible="loading")
   template(v-if="!loading && collaboratorKey")
     .row
@@ -24,12 +24,10 @@ section.invite
       button(@click="updateCollaboratorKey") Try Again
   //- View and Edit Permissions
   section.subsection.more-info(v-if="tipsIsVisible")
-    .row
-      template(v-if="spaceIsPrivate")
-        span No account is needed to view private spaces – but editing requires an account.
-    .row
-      template(v-if="currentUserIsUpgraded")
-        .badge.success Because your account is upgraded, others can create cards here for free
+    .row(v-if="spaceIsPrivate")
+      span No account is needed to view private spaces – but editing requires an account.
+    .row(v-if="currentUserIsUpgraded")
+      .badge.success Because your account is upgraded, others can create cards here for free
 
 </template>
 
