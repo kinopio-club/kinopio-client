@@ -940,7 +940,7 @@ code
   vertical-align 1px
 .small-button
   .copy
-    vertical-align -0.5px
+    vertical-align -1px
 
 .cancel
   transform rotate(45deg)
