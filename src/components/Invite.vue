@@ -13,7 +13,7 @@ section.invite
     .row
       button(@click.left="copyUrl")
         img.icon.copy(src="@/assets/copy.svg")
-        span Copy Invite
+        span Copy Invite URL
       button(v-if="isTips" @click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
         span Tips
   //- Error
