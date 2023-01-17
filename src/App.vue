@@ -1005,6 +1005,7 @@ code
   overflow auto
   &.single-line
     max-height 35px
+    overflow hidden
     span
       width 100000px
       display inline-block
