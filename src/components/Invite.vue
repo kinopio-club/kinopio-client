@@ -1,7 +1,7 @@
 <template lang="pug">
 section.invite
   .row
-    span Invite Collaborators
+    p Invite Collaborators
   Loader(:visible="loading")
   template(v-if="!loading && collaboratorKey")
     .row

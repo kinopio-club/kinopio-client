@@ -332,7 +332,6 @@ export default {
     &.is-dark
       border-color var(--primary-on-dark-background)
       color var(--primary-on-dark-background)
-
   .edit-message
     button
       margin-top 10px
@@ -342,5 +341,7 @@ export default {
     label
       .badge-in-button
         margin-left 0
+  .name
+    color var(--primary)
 
 </style>

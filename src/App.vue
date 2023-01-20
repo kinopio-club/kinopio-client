@@ -978,6 +978,7 @@ code
     vertical-align 2px
 
 .url-textarea
+  color var(--primary)
   background-color var(--secondary-background)
   border 0
   border-radius 3px
