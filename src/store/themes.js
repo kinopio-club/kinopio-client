@@ -36,15 +36,15 @@ const themes = {
       'secondary-hover-background': '#555',
       'secondary-active-background': '#333',
       'danger-background': '#732b26',
-      'danger-hover-background': '#ffa49e',
-      'danger-active-background': '#ff928b',
+      'danger-hover-background': '#8f3832',
+      'danger-active-background': '#a83730',
       'info-background': '#085353',
       'success-background': '#183f24',
-      'search-background': '#959533',
+      'search-background': '#6f6d01',
       'text-link-dark': '#788cc9',
       'secondary-active-background-dark': '#444',
       'light-shadow': 'rgba(0,0,0,0.25)',
-      'heavy-shadow': 'rgba(0,0,0,0.45)'
+      'heavy-shadow': 'rgba(0,0,0,0.55)'
     }
   }
 }
