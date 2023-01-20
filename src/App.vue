@@ -546,6 +546,10 @@ dialog
   border-radius var(--entity-radius)
   overscroll-behavior-y contain
   cursor auto
+  p,
+  input,
+  textarea
+    color var(--primary)
   &.is-pinnable
     transition left 0.1s, top 0.1s
   &.narrow

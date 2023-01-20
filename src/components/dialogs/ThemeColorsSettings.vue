@@ -12,7 +12,7 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
       .button-wrap
         .segmented-buttons
           button(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-            .icon.current-color(:style="{ 'background-color': defaultCardColor }")
+            .current-color(:style="{ 'background-color': defaultCardColor }")
             span Card Color
           button(@click.left.stop="removeDefaultCardColor")
             img.icon.cancel(src="@/assets/add.svg")
@@ -123,4 +123,5 @@ dialog.theme-and-colors-settings
     border-radius 3px
     display inline-block
     vertical-align -3px
+    margin-right 5px
 </style>

@@ -41,7 +41,7 @@ export default {
 <style lang="stylus">
 .tag
   .tag-name
-    color var(--primary)
+    color var(--primary-on-light-background)
     &.is-dark
-      filter invert(1)
+      color var(--primary-on-dark-background)
 </style>
