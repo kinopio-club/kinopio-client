@@ -71,18 +71,6 @@ export default {
         utils.setCssVariable(key, colors[key])
       })
       context.commit('current', theme)
-      // consts
-      const consts = {
-        'hover-shadow': `3px 3px 0 var(--heavy-shadow)`,
-        'active-shadow': `5px 5px 0 var(--light-shadow)`,
-        'active-inset-shadow': `inset 0 2px 3px var(--light-shadow)`,
-        'button-hover-shadow': `2px 2px 0 var(--heavy-shadow)`,
-        'button-active-inset-shadow': `inset 0 1px 2px var(--heavy-shadow)`
-      }
-      keys = Object.keys(consts)
-      keys.forEach(key => {
-        utils.setCssVariable(key, consts[key])
-      })
       // update user pref
       if (themeName) {
         context.dispatch('currentUser/update', { theme: normalizedThemeName }, { root: true })
@@ -103,11 +91,5 @@ export default {
       console.log(prevTheme, theme)
       context.dispatch('update', theme)
     }
-  },
-  getters: {
-    // defaultLightCardColor
-    // defaultDarkCardColor
-    // defaultLightSpaceBackground
-    // defaultDarkSpaceBackground
   }
 }

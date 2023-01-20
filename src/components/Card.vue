@@ -256,10 +256,13 @@ export default {
           this.updateMediaUrls()
           this.updateUrlPreview()
         }
+      } else if (type === 'themes/current') {
+        this.defaultColor = utils.cssVariable('secondary-background')
       }
     })
   },
   async mounted () {
+    this.defaultColor = utils.cssVariable('secondary-background')
     const cardIsMissingDimensions = Boolean(!this.card.width || !this.card.height)
     if (cardIsMissingDimensions) {
       let card = { id: this.card.id }
@@ -312,7 +315,8 @@ export default {
       stickyTranslateX: 0,
       stickyTranslateY: 0,
       isAnimationUnsticking: false,
-      stickyStretchResistance: 6
+      stickyStretchResistance: 6,
+      defaultColor: '#e3e3e3'
     }
   },
   computed: {
@@ -584,13 +588,13 @@ export default {
         maxWidth: this.resizeWidth
       }
       if (this.isComment) {
-        color = color || utils.cssVariable('secondary-background')
+        color = color || this.defaultColor
         styles.background = hexToRgba(color, 0.5) || color
       }
       return styles
     },
     backgroundColorIsDark () {
-      const color = this.backgroundColor
+      const color = this.backgroundColor || this.defaultColor
       return utils.colorIsDark(color)
     },
     connectorGlowStyle () {
@@ -1971,6 +1975,8 @@ article
     max-width var(--card-width)
     cursor pointer
     touch-action manipulation
+    .name
+      color var(--primary-on-light-background)
     &:hover,
     &.hover
       box-shadow var(--hover-shadow)
@@ -1979,7 +1985,7 @@ article
       box-shadow var(--active-shadow)
     &.is-dark
       .name
-        color var(--primary-background)
+        color var(--primary-on-dark-background)
     .card-comment
       > .badge
         margin 0
