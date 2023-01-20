@@ -78,8 +78,9 @@ export default {
       width 10.5px
   .user-name
     margin-left 6px
+    color var(--primary-on-light-background)
     &.is-dark
-      filter invert(1)
+      color var(--primary-on-dark-background)
 
 .button-badge
   .user-label-inline
