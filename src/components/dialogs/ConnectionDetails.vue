@@ -327,6 +327,12 @@ export default {
   transform-origin top left
   .type-name
     margin-left 6px
+    border-color var(--primary-on-light-background)
+    color var(--primary-on-light-background)
+    &.is-dark
+      border-color var(--primary-on-dark-background)
+      color var(--primary-on-dark-background)
+
   .edit-message
     button
       margin-top 10px
@@ -336,4 +342,5 @@ export default {
     label
       .badge-in-button
         margin-left 0
+
 </style>
