@@ -11,6 +11,8 @@
       img(src="@/assets/frames/dead-to-me/spooky-eyes.png")
     template(v-else-if="frame.id === 5")
       img(src="@/assets/frames/lil-guys/pot-standing-side.png")
+    template(v-else-if="frame.id === 6")
+      img(src="@/assets/frames/pen-pals/icon.png")
 </template>
 
 <script>

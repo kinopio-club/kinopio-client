@@ -28,6 +28,11 @@ aside.frames
     img.pot-hanging(src="@/assets/frames/lil-guys/pot-hanging.png")
     img.flowers-01(src="@/assets/frames/lil-guys/flowers-01.png")
 
+  .pen-pals(v-if="isPenPals")
+    img.dog-1.s-width(src="@/assets/frames/pen-pals/dog-1.png")
+    img.dog-2.m-width(src="@/assets/frames/pen-pals/dog-2.png")
+    img.dog-3.l-width(src="@/assets/frames/pen-pals/dog-3.png")
+
 </template>
 
 <script>
@@ -51,6 +56,9 @@ export default {
     },
     isLilGuys () {
       return Boolean(this.id === 5)
+    },
+    isPenPals () {
+      return Boolean(this.id === 6)
     }
   }
 }
@@ -58,10 +66,33 @@ export default {
 </script>
 
 <style lang="stylus">
+
+.card.s-width
+  .m-width,
+  .l-width
+    display none
+.card.m-width
+  .l-width
+    display none
+
 .frames
   img
     pointer-events none
     position absolute
+
+  .pen-pals
+    .dog-1
+      width 34px
+      left 5px
+      top -21px
+    .dog-2
+      width 34px
+      left calc(50% - 10px)
+      top -21px
+    .dog-3
+      width 50px
+      right -20px
+      top -36px
 
   .dead-to-me
     .tombstone

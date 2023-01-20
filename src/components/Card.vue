@@ -542,7 +542,10 @@ export default {
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
     },
     cardClasses () {
-      return {
+      const width = parseInt(this.resizeWidth || this.card.width)
+      const m = 100
+      const l = 150
+      let classes = {
         'jiggle': this.shouldJiggle,
         'active': this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.uploadIsDraggedOver,
         'filtered': this.isFiltered,
@@ -551,8 +554,12 @@ export default {
         'is-playing-audio': this.isPlayingAudio,
         'is-locked': this.isLocked,
         'has-url-preview': this.cardUrlPreviewIsVisible,
-        'is-dark': this.backgroundColorIsDark
+        'is-dark': this.backgroundColorIsDark,
+        's-width': width < m,
+        'm-width': utils.isBetween({ value: width, min: m, max: l }),
+        'l-width': width > l
       }
+      return classes
     },
     backgroundColor () {
       let nameColor
