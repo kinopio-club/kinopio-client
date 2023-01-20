@@ -260,4 +260,10 @@ export default {
       display inline-block
     .color
       width 26px
+  input
+    border-color var(--primary-on-light-background)
+    color var(--primary-on-light-background)
+    &.is-dark
+      border-color var(--primary-on-dark-background)
+      color var(--primary-on-dark-background)
 </style>
