@@ -11,7 +11,7 @@
   :class="{filtered: isFiltered}"
   ref="label"
 )
-  span(:class="{ 'is-dark': isDark }") {{typeName}}
+  span.name(:class="{ 'is-dark': isDark }") {{typeName}}
 </template>
 
 <script>
@@ -224,6 +224,8 @@ export default {
   transform-origin top left
   &.cursor-default
     cursor default
-  .is-dark
-    filter invert(1)
+  .name
+    color var(--primary-on-light-background)
+    &.is-dark
+      color var(--primary-on-dark-background)
 </style>

@@ -460,7 +460,7 @@ export default {
     connectionTypeColorisDark () {
       const lastType = this.connectionTypes[this.connectionTypes.length - 1]
       if (!lastType) {
-        return utils.colorIsDark(this.backgroundColor)
+        return this.backgroundColorIsDark
       } else {
         return utils.colorIsDark(lastType.color)
       }
@@ -2139,9 +2139,9 @@ article
         .connector-button
           background-color transparent
     .connector-button
-      border 1px solid var(--primary-border)
+      border 1px solid var(--primary-on-light-background)
       &.is-dark
-        border-color var(--primary-background)
+        border-color var(--primary-on-dark-background)
     .connector-icon
       position absolute
       left -1px
