@@ -49,9 +49,21 @@ export default {
   props: {
     visible: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      const { type, payload } = mutation
+      if (type === 'themes/current') {
+        this.defaultColor = utils.cssVariable('secondary-background')
+      }
+    })
+  },
+  mounted () {
+    this.defaultColor = utils.cssVariable('secondary-background')
+  },
   data () {
     return {
-      colorPickerIsVisible: false
+      colorPickerIsVisible: false,
+      defaultColor: '#e3e3e3'
     }
   },
   computed: {
@@ -74,9 +86,8 @@ export default {
       return backgroundIsDefault && backgroundTintIsDefault
     },
     defaultCardColor () {
-      const color = utils.cssVariable('secondary-background')
       const userDefault = this.currentUser.defaultCardBackgroundColor
-      return userDefault || color
+      return userDefault || this.defaultColor
     }
   },
   methods: {
