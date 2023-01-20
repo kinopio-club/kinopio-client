@@ -220,12 +220,14 @@ export default {
     // on mouse down
     handleMouseDownEvents (event) {
       const rightMouseButton = 2
+      const middleMouseButton = 1
       const isRightClick = rightMouseButton === event.button
+      const isMiddleClick = middleMouseButton === event.button
       const isPanScope = checkIsPanScope(event)
       const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
       const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox
       const userDisablePan = this.$store.state.currentUser.shouldDisableRightClickToPan
-      const shouldPan = isRightClick && isPanScope && !userDisablePan
+      const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
       const position = utils.cursorPositionInPage(event)
       if (shouldBoxSelect) {
         event.preventDefault()

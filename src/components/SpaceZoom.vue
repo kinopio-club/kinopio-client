@@ -99,8 +99,8 @@ export default {
     centerZoomOrigin () {
       const scroll = this.$store.state.windowScroll
       const origin = {
-        x: scroll.x + (this.$store.state.viewportWidth / 2),
-        y: scroll.y + (this.$store.state.viewportHeight / 2)
+        x: scroll.x + (this.$store.state.viewportWidth / 6),
+        y: scroll.y + (this.$store.state.viewportHeight / 6)
       }
       this.$store.dispatch('zoomOrigin', origin)
     },

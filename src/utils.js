@@ -150,7 +150,7 @@ export default {
     // ignore pinned dialogs
     let pinnedDialogs = []
     dialogs.forEach(dialog => {
-      if (dialog.dataset['is-pinned'] === 'true') {
+      if (dialog.dataset.isPinned === 'true') {
         pinnedDialogs.push(dialog)
       }
     })
@@ -766,6 +766,11 @@ export default {
   setCssVariable (key, value) {
     document.documentElement.style.setProperty(`--${key}`, value)
   },
+  // colorToRGBA (color, opacity) {
+  //   opacity = opacity || '1'
+  //   const { r, g, b } = colord(color).toRgb()
+  //   return `rgba(${r}, ${g}, ${b}, ${opacity})`
+  // },
 
   // normalize items
 

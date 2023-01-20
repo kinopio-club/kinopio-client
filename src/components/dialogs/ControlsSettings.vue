@@ -23,9 +23,9 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
     .row
       p Debug
     .row
-      label(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
+      label.double-line-height(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
-        span Disable Right Click to Pan
+        span Disable Right/Middle Click to Pan
 
 </template>
 

@@ -26,6 +26,11 @@ const frames = [
     badge: 'frames/magical-helper/hat.png'
   },
   {
+    id: 6,
+    name: 'Pen Pals',
+    badge: 'frames/pen-pals/icon.png'
+  },
+  {
     id: 3,
     name: 'Tea Time',
     badge: 'frames/tea-time/pot.png'

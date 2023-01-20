@@ -64,7 +64,7 @@ export default {
   section
     padding-top 4px
   .badge
-    width 17px
+    width 20px
     height 19px
     display block
     padding 0

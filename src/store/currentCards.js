@@ -449,7 +449,7 @@ const currentCards = {
     },
     removeResize: (context, { cardIds }) => {
       cardIds.forEach(cardId => {
-        const updates = { id: cardId, resizeWidth: null }
+        const updates = { id: cardId, resizeWidth: null, width: null }
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
         const card = context.getters.byId(cardId)

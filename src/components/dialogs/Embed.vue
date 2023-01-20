@@ -37,7 +37,6 @@ dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop)
           .input-button-wrap(@click.left="copy")
             button.small-button
               img.icon.copy(src="@/assets/copy.svg")
-              span Embed Code
       //- Url
       template(v-if="!iframeIsVisible")
         .row
@@ -45,8 +44,6 @@ dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop)
           .input-button-wrap(@click.left="copy")
             button.small-button
               img.icon.copy(src="@/assets/copy.svg")
-              span Embed URL
-
       //- Zoom
       .row
         img.icon.icon-zoom(src="@/assets/search.svg")
@@ -56,6 +53,12 @@ dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop)
           :value="spaceZoomPercent"
           :maxValue="100"
         )
+
+      .row
+        button(@click.left="copy")
+          img.icon.copy(src="@/assets/copy.svg")
+          span(v-if="iframeIsVisible") Copy Embed Code
+          span(v-else) Copy Embed URL
 
 </template>
 
