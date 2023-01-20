@@ -840,7 +840,7 @@ code
   &.success
     background var(--success-background)
   &.status
-    background var(--secondary-background)
+    background var(--secondary-active-background-dark)
   &.secondary
     background var(--secondary-active-background)
   &.search
@@ -848,7 +848,7 @@ code
   &.keyboard-shortcut
     min-height initial
     min-width initial
-    background-color var(--secondary-background)
+    background-color var(--secondary-active-background-dark)
   &.last-child
     margin 0
 

@@ -4,7 +4,7 @@ dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="cl
     p Help and Support
   section
     .row.contact
-      img.email(src="@/assets/email.gif")
+      img.email.icon(src="@/assets/email.gif")
       p For your questions, comments, and requests
     .row
       .button-wrap

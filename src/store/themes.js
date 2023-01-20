@@ -19,7 +19,7 @@ const themes = {
       'success-background': '#67ffbb',
       'search-background': 'yellow',
       'text-link-dark': '#9ab2ee',
-      'secondary-active-background-dark': '#666',
+      'secondary-active-background-dark': '#cdcdcd',
       'light-shadow': 'rgba(0,0,0,0.20)',
       'heavy-shadow': 'rgba(0,0,0,0.25)'
     }
@@ -33,8 +33,8 @@ const themes = {
       'text-link': '#143997',
       'primary-transparent': 'rgba(0,0,0,0.5)',
       'secondary-background': '#222',
-      'secondary-hover-background': '#666',
-      'secondary-active-background': '#444',
+      'secondary-hover-background': '#555',
+      'secondary-active-background': '#333',
       'danger-background': '#ffb8b3',
       'danger-hover-background': '#ffa49e',
       'danger-active-background': '#ff928b',
@@ -44,7 +44,7 @@ const themes = {
       'text-link-dark': '#9ab2ee',
       'secondary-active-background-dark': '#444',
       'light-shadow': 'rgba(0,0,0,0.25)',
-      'heavy-shadow': 'rgba(0,0,0,0.35)'
+      'heavy-shadow': 'rgba(0,0,0,0.45)'
     }
   }
 }

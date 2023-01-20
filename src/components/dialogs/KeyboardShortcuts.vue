@@ -2,7 +2,7 @@
 dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}" @click="closeDialogs")
   section
     .row
-      .badge.title Keyboard Shortcuts
+      p Keyboard Shortcuts
       .badge.keyboard-shortcut ?
     .categories
       template(v-for="category in categories" :key="category.name")
@@ -332,12 +332,17 @@ export default {
 
 <style lang="stylus">
 .keyboard-shortcuts
+  user-select text
   overflow auto
   max-height calc(100vh - 300px)
+  span
+    color var(--primary)
   .title
     padding-left 0
   .badge
     display inline-block
+    color var(--primary)
+
   .badge.info
     img
       margin-left 6px
@@ -378,13 +383,19 @@ export default {
     margin-left 6px
   .section-title
     margin-bottom 10px
+    .badge
+      color var(--primary-on-light-background)
+
   .hand
     vertical-align middle
 
   .categories
     margin-top -6px
+    .button-badge
+      color var(--primary)
     .button-badge + .button-badge
       margin-top 6px
+      color var(--primary-on-light-background)
 
   .inbox-icon
     margin 0
