@@ -734,6 +734,7 @@ dialog
 
 label,
 li
+  color var(--primary)
   &:hover,
   &:focus
     input[type="checkbox"]
@@ -744,7 +745,7 @@ li
     vertical-align -1px
     cursor pointer
     appearance none
-    border 1px solid var(--primary-border)
+    border 1px solid var(--primary)
     width 12px
     height 12px
     border-radius 3px
@@ -759,6 +760,14 @@ li
       background-repeat no-repeat
       background-position center
       background-size 69%
+
+.is-dark-theme
+  label
+    input[type="checkbox"]
+      &:checked
+        background-image url('assets/checkmark-invert.svg')
+      &.add
+        background-image url('assets/add-invert.svg')
 
 li
   input[type="checkbox"]
