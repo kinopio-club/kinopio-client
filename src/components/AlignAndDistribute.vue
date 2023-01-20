@@ -8,7 +8,7 @@
     button(title="Align Top and Distribute" :disabled="!canEditAll.cards" @click.left="alignTop" :class="{active: isTopAligned}")
       img.icon.align-top(src="@/assets/align-left-distributed.svg")
     button(title="More Options" :disabled="!canEditAll.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
-      img.down-arrow(src="@/assets/down-arrow.svg")
+      img.icon.down-arrow(src="@/assets/down-arrow.svg")
 
   //- More Options
   .more-options(v-if="visible && !shouldHideMoreOptions")
@@ -565,6 +565,7 @@ export default {
 .align-and-distribute
   .down-arrow
     padding 0
+    vertical-align 2px
   .up-arrow
     transform rotate(180deg)
 

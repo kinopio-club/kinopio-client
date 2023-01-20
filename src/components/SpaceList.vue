@@ -362,9 +362,6 @@ export default {
   .inline-badge
     margin-left 0
     flex none
-    min-height 15px
-    height 15px
-    padding-top 0
 
   .new-badge
     word-break keep-all
@@ -387,6 +384,7 @@ export default {
 
   .name
     margin 0
+    margin-top 1px
     white-space wrap
     overflow hidden
     .icon
@@ -436,6 +434,7 @@ export default {
   li
     position relative
     width 100%
+    min-height 30px
     .loader
       position absolute
       width 13px
