@@ -1,6 +1,7 @@
 <template lang="pug">
 .space-background(:style="backgroundStyles")
-#layout-viewport(v-if="visible" :style="{ background: backgroundTint }")
+.layout-viewport#layout-viewport(v-if="visible" :style="{ background: backgroundTint }")
+.layout-viewport.dark-theme-tint(v-if="isThemeDark")
 </template>
 
 <script>
@@ -42,7 +43,8 @@ export default {
     backgroundTint () {
       const color = this.currentSpace.backgroundTint
       return color
-    }
+    },
+    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' }
   },
   methods: {
     async loadBackground () {
@@ -99,7 +101,7 @@ export default {
 </script>
 
 <style lang="stylus">
-#layout-viewport
+.layout-viewport
   position fixed
   width 110%
   height 110%
@@ -107,6 +109,8 @@ export default {
   z-index 0
   mix-blend-mode multiply
   transform-origin top left
+.dark-theme-tint
+  background-color rgba(0,0,0,0.3)
 .space-background
   position absolute
   width 100%
