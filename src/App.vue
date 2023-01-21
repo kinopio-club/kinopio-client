@@ -595,6 +595,7 @@ dialog
       align-items flex-start
   section
     padding 8px
+    user-select text
     &:first-child
       border-top-left-radius calc(var(--entity-radius) - 1px)
       border-top-right-radius calc(var(--entity-radius) - 1px)
