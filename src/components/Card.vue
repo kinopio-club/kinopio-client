@@ -66,7 +66,7 @@ article#card(
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
 
       //- Comment
-      .card-comment(v-if="isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-comment(v-if="isComment")
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
@@ -78,7 +78,7 @@ article#card(
           UserLabelInline(:user="createdByUser" :shouldHideName="true")
 
       //- Not Comment
-      .card-content(v-if="!isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-content(v-if="!isComment")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -94,7 +94,7 @@ article#card(
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
-      span.card-buttons-wrap
+      span.card-buttons-wrap(v-if="isLocked || cardButtonUrl && !isComment || connectorIsVisible")
         //- Lock
         template(v-if="isLocked")
           //- based on CardUnlockButton.vue
@@ -487,13 +487,6 @@ export default {
         isVisible = true
       }
       return isVisible
-    },
-    cardButtonsIsVisible () {
-      if (this.connectorIsVisible || this.isLocked || Boolean(this.formats.link || this.formats.file)) {
-        return true
-      } else {
-        return false
-      }
     },
     cardButtonUrl () {
       const link = this.formats.link
@@ -1978,13 +1971,17 @@ article
       display flex
       align-items flex-start
       justify-content space-between
+
     .card-content
       min-width 28px
       width 100%
-    .extra-name-padding
+      margin-right 8px
+    .card-comment
       margin-right 8px
     .card-buttons-wrap
       display flex
+      margin-left -8px // cancels out margin-right in .card-content or .card-comment
+
     .name-wrap,
     .card-comment
       display flex
