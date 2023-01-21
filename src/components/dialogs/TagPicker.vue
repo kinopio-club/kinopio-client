@@ -197,12 +197,20 @@ export default {
     },
     closeDialog () {
       this.$emit('closeDialog')
+    },
+    color () {
+      const isThemeDark = this.$store.getters['themes/isThemeDark']
+      let color = randomColor({ luminosity: 'light' })
+      if (isThemeDark) {
+        color = randomColor({ luminosity: 'dark' })
+      }
+      return color
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
-        this.randomColor = randomColor({ luminosity: 'light' })
+        this.randomColor = this.color()
         this.updateTags()
         this.$nextTick(() => {
           this.scrollIntoView()
