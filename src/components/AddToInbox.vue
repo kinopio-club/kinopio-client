@@ -2,7 +2,7 @@
 .add-to-inbox-page(v-if="visible")
   section(:class="{'margin-bottom': isAddPage}")
     .row.title-row-flex
-      span Add To Inbox
+      span.title Add To Inbox
       .button-wrap
         a(:href="inboxUrl")
           button.small-button(@pointerup="changeToInboxSpace")
@@ -333,6 +333,8 @@ export default {
   .title-row-flex
     display flex
     justify-content space-between
+    .title
+      color var(--primary)
 
   .info-badge
     position static

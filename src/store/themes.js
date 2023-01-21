@@ -32,7 +32,7 @@ const themes = {
       'primary-background': 'black',
       'text-link': '#788cc9',
       'primary-transparent': 'rgba(0,0,0,0.5)',
-      'secondary-background': '#222',
+      'secondary-background': '#262626',
       'secondary-hover-background': '#555',
       'secondary-active-background': '#333',
       'danger-background': '#732b26',
