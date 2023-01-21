@@ -294,7 +294,12 @@ export default {
       this.inputIsFocused = false
     },
     updateNextConnectionColor () {
-      this.nextConnectionTypeColor = randomColor({ luminosity: 'light' })
+      const isThemeDark = this.$store.getters['themes/isThemeDark']
+      let color = randomColor({ luminosity: 'light' })
+      if (isThemeDark) {
+        color = randomColor({ luminosity: 'dark' })
+      }
+      this.nextConnectionTypeColor = color
     }
   },
   watch: {

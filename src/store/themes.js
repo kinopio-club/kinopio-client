@@ -88,5 +88,10 @@ export default {
       }
       context.dispatch('update', theme)
     }
+  },
+  getters: {
+    isThemeDark: (state) => {
+      return state.current.name === 'dark'
+    }
   }
 }

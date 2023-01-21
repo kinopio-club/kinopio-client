@@ -134,6 +134,11 @@ export default {
     add: (context, { box, shouldResize }) => {
       const count = context.state.ids.length
       const minBoxSize = 70
+      const isThemeDark = context.rootGetters['themes/isThemeDark']
+      let color = randomColor({ luminosity: 'light' })
+      if (isThemeDark) {
+        color = randomColor({ luminosity: 'dark' })
+      }
       box = {
         id: box.id || nanoid(),
         spaceId: currentSpaceId,
@@ -142,7 +147,7 @@ export default {
         y: box.y,
         resizeWidth: box.resizeWidth || minBoxSize,
         resizeHeight: box.resizeHeight || minBoxSize,
-        color: box.color || randomColor({ luminosity: 'light' }),
+        color: box.color || color,
         fill: box.fill || 'filled', // empty, filled
         name: box.name || `Box ${count}`
       }

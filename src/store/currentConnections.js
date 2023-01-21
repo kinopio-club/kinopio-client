@@ -195,10 +195,15 @@ export default {
       context.commit('create', connection)
     },
     addType: (context, type) => {
+      const isThemeDark = context.rootGetters['themes/isThemeDark']
+      let color = randomColor({ luminosity: 'light' })
+      if (isThemeDark) {
+        color = randomColor({ luminosity: 'dark' })
+      }
       let connectionType = {
         id: nanoid(),
         name: `Connection Type ${context.state.typeIds.length + 1}`,
-        color: randomColor({ luminosity: 'light' }),
+        color,
         spaceId: context.state.id
       }
       if (type) {
