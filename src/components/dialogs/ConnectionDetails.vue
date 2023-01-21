@@ -1,6 +1,7 @@
 <template lang="pug">
 dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" @click.left="closeColorPicker" ref="dialog")
-  section(:style="{backgroundColor: typeColor}" ref="infoSection")
+  section.info-section(:style="{backgroundColor: typeColor}" ref="infoSection")
+    .dark-theme-background-layer(v-if="isThemeDarkAndTypeColorLight")
     .row
       .button-wrap
         button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
@@ -93,6 +94,11 @@ export default {
     }
   },
   computed: {
+    isThemeDarkAndTypeColorLight () {
+      const isThemeDark = this.$store.state.currentUser.theme === 'dark'
+      const typeColorIsLight = !utils.colorIsDark(this.typeColor)
+      return isThemeDark && typeColorIsLight
+    },
     visible () { return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId) },
     currentConnectionType () {
       const connectionType = this.$store.getters['currentConnections/typeByConnection'](this.currentConnection)
@@ -343,5 +349,9 @@ export default {
         margin-left 0
   .name
     color var(--primary)
+  .info-section
+    position relative
+  .dark-theme-background-layer
+    z-index 0
 
 </style>

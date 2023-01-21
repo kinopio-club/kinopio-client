@@ -275,6 +275,7 @@ export default {
   // non-theme vars
   --primary-on-dark-background white
   --primary-on-light-background black
+  --dark-background-tint-on-light-background rgba(0,0,0,0.3)
   --hover-shadow 3px 3px 0 var(--heavy-shadow)
   --active-shadow 5px 5px 0 var(--light-shadow)
   --active-inset-shadow inset 0 2px 3px var(--light-shadow)
@@ -628,6 +629,16 @@ dialog
     color var(--text-link)
     &:hover
       text-decoration none
+
+  .dark-theme-background-layer
+    position absolute
+    background-color var(--dark-background-tint-on-light-background)
+    top -1px
+    left -1px
+    width calc(100% + 2px)
+    height calc(100% + 2px)
+    border-radius var(--entity-radius)
+    z-index -1
 
 .segmented-buttons
   &.first-row
