@@ -1124,6 +1124,7 @@ const store = createStore({
     // Notifications
 
     addNotification: (state, notification) => {
+      state.notifications = state.notifications.filter(item => item.message !== notification.message)
       notification.id = nanoid()
       state.notifications.push(notification)
     },
