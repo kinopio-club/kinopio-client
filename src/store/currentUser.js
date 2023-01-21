@@ -63,7 +63,8 @@ export default {
     twitterUsername: '',
     lastUsedImagePickerService: '',
     AIImages: [],
-    theme: null
+    theme: null,
+    themeIsSystem: true
   },
   mutations: {
     color: (state, value) => {
@@ -346,6 +347,10 @@ export default {
     theme: (state, value) => {
       state.theme = value
       cache.updateUser('theme', value)
+    },
+    themeIsSystem: (state, value) => {
+      state.themeIsSystem = value
+      cache.updateUser('themeIsSystem', value)
     }
   },
   actions: {
@@ -356,11 +361,11 @@ export default {
         context.commit('restoreUser', cachedUser)
         context.commit('updateBetaUserId')
         context.dispatch('restoreRemoteUser', cachedUser)
-        context.dispatch('themes/restore', null, { root: true })
       } else {
         console.log('🌸 Create new user')
         context.dispatch('createNewUser')
       }
+      context.dispatch('themes/restore', null, { root: true })
     },
     update: (context, updates) => {
       const keys = Object.keys(updates)

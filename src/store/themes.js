@@ -50,15 +50,31 @@ const themes = {
 export default {
   namespaced: true,
   state: {
-    current: {}
+    current: {},
+    isSystem: true
   },
   mutations: {
     current: (state, theme) => {
       utils.typeCheck({ value: theme, type: 'object' })
       state.current = theme
+    },
+    isSystem: (state, value) => {
+      state.isSystem = value
     }
   },
   actions: {
+    isSystem: (context, value) => {
+      context.commit('isSystem', value)
+    },
+    toggleIsSystem: (context) => {
+      const value = !context.state.isSystem
+      context.commit('isSystem', value)
+      context.dispatch('currentUser/update', { themeIsSystem: value }, { root: true })
+      if (value) {
+        const themeName = context.getters.systemThemeName
+        context.dispatch('update', themeName)
+      }
+    },
     update: (context, themeName) => {
       const normalizedThemeName = themeName || 'light'
       // colors
@@ -75,7 +91,10 @@ export default {
       }
     },
     restore: (context) => {
-      const theme = context.rootState.currentUser.theme
+      let theme = context.rootState.currentUser.theme
+      if (context.state.isSystem) {
+        theme = context.getters.systemThemeName
+      }
       context.dispatch('update', theme)
     },
     toggle: (context) => {
@@ -92,6 +111,16 @@ export default {
   getters: {
     isThemeDark: (state) => {
       return state.current.name === 'dark'
+    },
+    systemThemeName: (state) => {
+      const isDarkModeOS = window.matchMedia('(prefers-color-scheme: dark)').matches
+      let themeName
+      if (isDarkModeOS) {
+        themeName = 'dark'
+      } else {
+        themeName = 'light'
+      }
+      return themeName
     }
   }
 }

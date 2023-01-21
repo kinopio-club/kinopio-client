@@ -3,7 +3,7 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
   section
     p Theme Colors
     .segmented-buttons
-      ThemeToggle
+      ThemeToggle(:showSystem="true")
 
   section
     .row

@@ -88,6 +88,7 @@ export default {
     window.addEventListener('touchstart', this.touchStart)
     window.addEventListener('touchmove', this.touchMove)
     window.addEventListener('touchend', this.touchEnd)
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.updateTheme)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateUserHasScrolled)
@@ -149,6 +150,17 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
+    updateTheme (event) {
+      const themeIsSystem = this.$store.state.themes.isSystem
+      if (!themeIsSystem) { return }
+      let themeName
+      if (event.matches) {
+        themeName = 'dark'
+      } else {
+        themeName = 'light'
+      }
+      this.$store.dispatch('themes/update', themeName)
+    },
     toggleIsPinchZooming (event) {
       if (utils.shouldIgnoreTouchInteraction(event)) { return }
       this.isPinchZooming = true
