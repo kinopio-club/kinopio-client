@@ -214,7 +214,6 @@ const currentCards = {
         frameId: 0,
         userId: context.rootState.currentUser.id,
         urlPreviewIsVisible: true,
-        commentIsVisible: true,
         width: utils.emptyCard().width,
         height: utils.emptyCard().height,
         isLocked: false,
@@ -344,15 +343,6 @@ const currentCards = {
         name,
         nameUpdatedAt: new Date()
       })
-    },
-    commentIsVisible: (context, { cardId, value }) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'commentIsVisible' })
-      context.dispatch('update', {
-        id: cardId,
-        commentIsVisible: value
-      })
-      const card = context.getters.byId(cardId)
-      context.dispatch('updateDimensions', { cards: [card] })
     },
     removeTrackingQueryStrings: (context, { cardId }) => {
       setTimeout(() => {
@@ -551,8 +541,8 @@ const currentCards = {
         const position = utils.cardPositionFromElement(id)
         card.x = position.x
         card.y = position.y
-        const { x, y, z, commentIsVisible } = card
-        return { id, x, y, z, commentIsVisible }
+        const { x, y, z } = card
+        return { id, x, y, z }
       })
       cards = cards.filter(card => Boolean(card))
       context.commit('move', { cards, spaceId })
