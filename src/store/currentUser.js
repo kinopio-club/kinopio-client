@@ -61,7 +61,6 @@ export default {
     shouldDisableItemJiggle: false,
     shouldPauseConnectionDirections: false,
     twitterUsername: '',
-    shouldUseDarkColors: false,
     lastUsedImagePickerService: '',
     AIImages: [],
     theme: null
@@ -339,10 +338,6 @@ export default {
     lastUsedImagePickerService: (state, value) => {
       state.lastUsedImagePickerService = value
       cache.updateUser('lastUsedImagePickerService', value)
-    },
-    shouldUseDarkColors: (state, value) => {
-      state.shouldUseDarkColors = value
-      cache.updateUser('shouldUseDarkColors', value)
     },
     AIImages: (state, value) => {
       state.AIImages = value
