@@ -64,28 +64,21 @@ article#card(
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
+
       //- Comment
-      .card-comment(v-if="isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-comment(v-if="isComment")
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(type="checkbox" v-model="checkboxState")
         //- Name
         .badge.comment-badge
-          .toggle-comment-wrap.inline-button-wrap(@mouseup.left="toggleCommentIsVisible" @touchend="toggleCommentIsVisible")
-            button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
-              img.icon.view(src="@/assets/comment.svg")
+          img.icon.view(src="@/assets/comment.svg")
           //- User
-          template(v-if="commentIsVisible")
-            UserLabelInline(:user="createdByUser")
-          template(v-if="!commentIsVisible")
-            UserLabelInline(:user="createdByUser" :shouldHideName="true")
-          p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}")
-            template(v-for="segment in nameSegments")
-              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
-            ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" :isVisibleInViewport="isVisibleInViewport")
+          UserLabelInline(:user="createdByUser" :shouldHideName="true")
+
       //- Not Comment
-      .card-content(v-if="!isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-content(v-if="!isComment")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -101,7 +94,7 @@ article#card(
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
-      span.card-buttons-wrap
+      span.card-buttons-wrap(v-if="isLocked || cardButtonUrl && !isComment || connectorIsVisible")
         //- Lock
         template(v-if="isLocked")
           //- based on CardUnlockButton.vue
@@ -407,7 +400,12 @@ export default {
       tags = utils.arrayToString(tags)
       return tags
     },
+    width () {
+      if (this.isComment) { return }
+      return this.resizeWidth || this.card.width
+    },
     resizeWidth () {
+      if (this.isComment) { return }
       const resizeWidth = this.card.resizeWidth
       if (!resizeWidth) { return }
       return resizeWidth + 'px'
@@ -455,7 +453,6 @@ export default {
         return y
       }
     },
-    commentIsVisible () { return this.card.commentIsVisible },
     connectionTypes () { return this['currentConnections/typesByCardId'](this.id) },
     connectionTypeColorisDark () {
       const lastType = this.connectionTypes[this.connectionTypes.length - 1]
@@ -495,13 +492,6 @@ export default {
       }
       return isVisible
     },
-    cardButtonsIsVisible () {
-      if (this.connectorIsVisible || this.isLocked || Boolean(this.formats.link || this.formats.file)) {
-        return true
-      } else {
-        return false
-      }
-    },
     cardButtonUrl () {
       const link = this.formats.link
       const file = this.formats.file
@@ -529,13 +519,6 @@ export default {
         return null
       }
     },
-    isHiddenInComment () {
-      if (this.isComment && !this.commentIsVisible) {
-        return true
-      } else {
-        return false
-      }
-    },
     currentCardDetailsIsVisible () {
       return this.id === this.cardDetailsIsVisibleForCardId
     },
@@ -546,7 +529,7 @@ export default {
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
     },
     cardClasses () {
-      const width = parseInt(this.resizeWidth || this.card.width)
+      const width = parseInt(this.width)
       const m = 100
       const l = 150
       let classes = {
@@ -584,7 +567,7 @@ export default {
       let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || backgroundColor
       let styles = {
         background: color,
-        width: this.resizeWidth || this.card.width,
+        width: this.width,
         maxWidth: this.resizeWidth
       }
       if (this.isComment) {
@@ -741,7 +724,7 @@ export default {
         left: `${this.x}px`,
         top: `${this.y}px`,
         zIndex: z,
-        width: this.resizeWidth || this.card.width,
+        width: this.width,
         maxWidth: this.resizeWidth,
         pointerEvents,
         transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
@@ -820,7 +803,7 @@ export default {
       url = utils.removeTrailingSlash(url)
       cardHasUrlPreviewInfo = Boolean(cardHasUrlPreviewInfo && url)
       const nameHasUrl = this.card.name.includes(url)
-      return (this.card.urlPreviewIsVisible && cardHasUrlPreviewInfo && nameHasUrl) && !this.isHiddenInComment
+      return (this.card.urlPreviewIsVisible && cardHasUrlPreviewInfo && nameHasUrl) && !this.isComment
       // return Boolean(this.card.urlPreviewIsVisible && this.card.urlPreviewUrl && cardHasUrlPreviewInfo) // && !isErrorUrl
     },
     tags () {
@@ -1106,7 +1089,7 @@ export default {
       if (this.isAnimationUnsticking) { return }
       if (preventSticking) { return }
       if (!stickyTimerComplete) { return }
-      const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap', 'toggle-comment-wrap', 'inline-button', 'badge']
+      const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap', 'inline-button', 'badge']
       const elements = ['button', 'progress', 'iframe']
       const isOverAction = classes.includes(event.target.className) || elements.includes(event.target.nodeName.toLowerCase())
       const isOverTag = event.target.className.includes('button-badge')
@@ -1511,19 +1494,6 @@ export default {
         cardIds = multipleCardsSelectedIds
       }
       this.$store.dispatch('currentCards/removeResize', { cardIds })
-    },
-    toggleCommentIsVisible (event) {
-      if (this.preventDraggedCardFromShowingDetails) { return }
-      if (utils.isMultiTouch(event)) { return }
-      this.$store.dispatch('closeAllDialogs', 'Card.toggleComment')
-      this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      this.$store.dispatch('clearMultipleSelected')
-      const cardId = this.id
-      const value = !this.card.commentIsVisible
-      this.$store.dispatch('history/snapshots')
-      this.$store.dispatch('currentCards/commentIsVisible', { cardId, value })
-      this.$store.dispatch('currentCards/incrementZ', cardId)
-      this.updateCardConnectionPathsIfOpenSpace()
     },
     updateCardConnectionPathsIfOpenSpace () {
       const spaceIsOpen = this.currentSpace.privacy === 'open'
@@ -1995,24 +1965,29 @@ article
       .comment
         &.is-checked
           text-decoration line-through
-        .image
-          margin-top 10px
-          border-radius 3px
       .user-label-inline
         transform translateY(-1px)
         margin 0
+        height 18px
+        min-height 17px
+        img
+          top 6px
 
     .card-content-wrap
       display flex
       align-items flex-start
       justify-content space-between
+
     .card-content
       min-width 28px
       width 100%
-    .extra-name-padding
+      margin-right 8px
+    .card-comment
       margin-right 8px
     .card-buttons-wrap
       display flex
+      margin-left -8px // cancels out margin-right in .card-content or .card-comment
+
     .name-wrap,
     .card-comment
       display flex
@@ -2284,21 +2259,6 @@ article
     .badge-wrap + .badge
       margin-left 6px
 
-  .toggle-comment-wrap
-    display initial
-    cursor pointer
-    padding-left 0
-    padding-right 6px
-    padding-bottom 6px
-    padding-top 6px
-    button
-      cursor pointer
-    .icon
-      width 12px
-      position absolute
-      left 3px
-      top 2px
-
   .comment-user-badge
     display inline
     .user
@@ -2307,6 +2267,8 @@ article
     padding-left 0
     padding-right 0
     padding-bottom 0
+    .icon.view
+      margin-right 6px
     .user-badge,
     .user
       margin-right 0
