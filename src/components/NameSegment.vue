@@ -7,7 +7,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
         template(v-if="markdown.type === 'text'")
           span {{markdown.content}}
         template(v-else-if="markdown.type === 'link'")
-          a(:style="linkSegmentStyle(segment)" @mouseup="updateShouldCancel" @click="openUrl($event, escapedUrl(markdown.result[2]))" :href="escapedUrl(markdown.result[2])") {{markdown.result[1]}}
+          a(@mouseup="updateShouldCancel" @click="openUrl($event, escapedUrl(markdown.result[2]))" :href="escapedUrl(markdown.result[2])") {{markdown.result[1]}}
         template(v-else-if="markdown.type === 'bold'")
           strong {{markdown.content}}
         template(v-else-if="markdown.type === 'h1'")
@@ -21,9 +21,9 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
         template(v-else-if="markdown.type === 'strikethrough'")
           del {{markdown.content}}
         template(v-else-if="markdown.type === 'codeBlock'")
-          pre(:style="codeSegmentStyle(segment)") {{markdown.content}}
+          pre {{markdown.content}}
         template(v-else-if="markdown.type === 'code'")
-          code(:style="codeSegmentStyle(segment)") {{markdown.content}}
+          code {{markdown.content}}
     //- Name results list
     template(v-if="!segment.markdown")
       span(v-if="search")
@@ -99,16 +99,6 @@ export default {
     }
   },
   methods: {
-    codeSegmentStyle (segment) {
-      if (!segment.isDark) { return }
-      const color = utils.cssVariable('secondary-active-background-dark')
-      return { backgroundColor: color }
-    },
-    linkSegmentStyle (segment) {
-      if (!segment.isDark) { return }
-      const color = utils.cssVariable('text-link-dark')
-      return { color }
-    },
     matchIndexes (name) {
       if (!name) { return [] }
       const options = {
@@ -190,6 +180,10 @@ export default {
       border-radius 3px
       margin-right 0
       vertical-align 0
+    pre,
+    code
+      color var(--primary)
+      background-color var(--secondary-active-background)
     h1
       font-family var(--serif-font)
       font-size 22px
