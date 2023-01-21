@@ -331,6 +331,7 @@ video
 input,
 textarea,
 .stripe-element
+  color var(--primary)
   touch-action manipulation
   margin 0
   font-size 1em // required to disable ios input zooming
