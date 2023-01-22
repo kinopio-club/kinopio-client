@@ -565,10 +565,12 @@ export default {
         nameColor = this.card.name
       }
       let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || backgroundColor
+      let width = parseInt(this.width) + 'px'
+      let maxWidth = parseInt(this.resizeWidth) + 'px'
       let styles = {
         background: color,
-        width: this.width,
-        maxWidth: this.resizeWidth
+        width,
+        maxWidth
       }
       if (this.isComment) {
         color = color || this.defaultColor
@@ -720,12 +722,14 @@ export default {
         z = 0
         pointerEvents = 'none'
       }
+      let width = parseInt(this.width) + 'px'
+      let maxWidth = parseInt(this.resizeWidth) + 'px'
       let styles = {
         left: `${this.x}px`,
         top: `${this.y}px`,
         zIndex: z,
-        width: this.width,
-        maxWidth: this.resizeWidth,
+        width,
+        maxWidth,
         pointerEvents,
         transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
       }
