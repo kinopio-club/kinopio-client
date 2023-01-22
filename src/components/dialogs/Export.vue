@@ -26,7 +26,7 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     template(v-if="!currentUserIsSignedIn")
       p
         span Backup {{' '}}
-        span.badge.info json
+        span.badge.info JSON
       button(@click.left="downloadLocalJSON") Download Space
       p
         span Sign Up or In for more export options
@@ -35,7 +35,7 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     template(v-if="currentUserIsSignedIn")
       p
         span Backup {{' '}}
-        span.badge.info json and txt
+        span.badge.info JSON and TXT
       button(@click.left="downloadCurrentSpaceRemote" :class="{ active: isLoadingCurrentSpace }")
         span Download Space
         Loader(:visible="isLoadingCurrentSpace")
