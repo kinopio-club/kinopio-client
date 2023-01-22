@@ -13,9 +13,6 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
       .button-wrap(v-if="currentUserIsSignedIn")
         button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
           span PDF
-      .button-wrap
-        button(@click.left.stop="downloadLocalTXT")
-          span TXT
     Pdf(:visible="pdfIsVisible")
     //- Duplicate
     button(@click.left="duplicateSpace")
@@ -108,14 +105,6 @@ export default {
         console.warn('🚑 copyText', error)
         this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
       }
-    },
-    downloadLocalTXT () {
-      const txt = 'data:application/octet-stream;charset=utf-16,' + encodeURIComponent(this.text)
-      const fileName = this.fileName()
-      const downloadAnchor = document.getElementById('export-downlaod-anchor')
-      downloadAnchor.setAttribute('href', txt)
-      downloadAnchor.setAttribute('download', `${fileName}.txt`)
-      downloadAnchor.click()
     },
     downloadLocalJSON () {
       const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.exportData))
