@@ -244,11 +244,11 @@ const store = createStore({
       state.pageHeight = extraScrollArea
     },
     pageHeight: (state, height) => {
-      utils.typeCheck({ value: height, type: 'number', origin: 'pageHeight' })
+      utils.typeCheck({ value: height, type: 'number' })
       state.pageHeight = height
     },
     pageWidth: (state, width) => {
-      utils.typeCheck({ value: width, type: 'number', origin: 'pageWidth' })
+      utils.typeCheck({ value: width, type: 'number' })
       state.pageWidth = width
     },
     closeAllDialogs: (state) => {
@@ -274,139 +274,139 @@ const store = createStore({
       state.cardListItemOptionsIsVisible = false
     },
     isOnline: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isOnline' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.isOnline = value
     },
     isReconnectingToBroadcast: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isReconnectingToBroadcast' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.isReconnectingToBroadcast = value
     },
     isBeta: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isBeta' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.isBeta = value
     },
     loadJournalSpace: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'loadJournalSpace' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.loadJournalSpace = value
     },
     loadJournalSpaceTomorrow: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'loadJournalSpaceTomorrow' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.loadJournalSpaceTomorrow = value
     },
     loadNewSpace: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'loadNewSpace' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.loadNewSpace = value
     },
     loadInboxSpace: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'loadInboxSpace' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.loadInboxSpace = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'addUrlPreviewLoadingForCardIds' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       state.urlPreviewLoadingForCardIds.push(cardId)
     },
     removeUrlPreviewLoadingForCardIds: (state, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'removeUrlPreviewLoadingForCardIds' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       let cardIds = utils.clone(state.urlPreviewLoadingForCardIds)
       cardIds = cardIds.filter(id => cardId !== id) || []
       state.urlPreviewLoadingForCardIds = cardIds
     },
     shouldHideConnectionOutline: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldHideConnectionOutline' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.shouldHideConnectionOutline = value
     },
     newStuffIsUpdated: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'newStuffIsUpdated' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.newStuffIsUpdated = value
     },
     stripeIsLoaded: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'stripeIsLoaded' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.stripeIsLoaded = value
     },
     shouldHideFooter: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldHideFooter' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.shouldHideFooter = value
     },
     shouldExplicitlyHideFooter: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldExplicitlyHideFooter' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.shouldExplicitlyHideFooter = value
     },
     isTouchDevice: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isTouchDevice' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.isTouchDevice = value
     },
     prevCursorPosition: (state, cursor) => {
       state.prevCursorPosition = cursor
     },
     spaceZoomPercent: (state, value) => {
-      utils.typeCheck({ value, type: 'number', origin: 'spaceZoomPercent' })
+      utils.typeCheck({ value, type: 'number' })
       state.spaceZoomPercent = value
     },
     pinchCounterZoomDecimal: (state, value) => {
-      utils.typeCheck({ value, type: 'number', origin: 'pinchCounterZoomDecimal' })
+      utils.typeCheck({ value, type: 'number' })
       state.pinchCounterZoomDecimal = value
     },
     windowScroll: (state, value) => {
-      utils.typeCheck({ value, type: 'object', origin: 'windowScroll' })
+      utils.typeCheck({ value, type: 'object' })
       state.windowScroll = value
     },
     zoomOrigin: (state, value) => {
       state.zoomOrigin = value
     },
     currentSpacePath: (state, value) => {
-      utils.typeCheck({ value, type: 'string', origin: 'currentSpacePath' })
+      utils.typeCheck({ value, type: 'string' })
       state.currentSpacePath = value
     },
     webfontIsLoaded: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'webfontIsLoaded' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.webfontIsLoaded = value
     },
     userHasScrolled: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'userHasScrolled' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.userHasScrolled = value
     },
     shouldPreventNextEnterKey: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldPreventNextEnterKey' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.shouldPreventNextEnterKey = value
     },
     shouldPreventNextFocusOnName: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldPreventNextFocusOnName' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.shouldPreventNextFocusOnName = value
     },
     isEmbedMode: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isEmbedMode' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.isEmbedMode = value
     },
     isAddPage: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isAddPage' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.isAddPage = value
     },
     isAppStoreMode: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isAppStoreMode' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.isAppStoreMode = value
     },
     disableViewportOptimizations: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'disableViewportOptimizations', allowUndefined: true })
+      utils.typeCheck({ value, type: 'boolean', allowUndefined: true })
       state.disableViewportOptimizations = value
     },
     isPresentationMode: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isPresentationMode' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.isPresentationMode = value
     },
     searchIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.searchIsVisible = value
     },
     search: (state, value) => {
-      utils.typeCheck({ value, type: 'string', origin: 'search' })
+      utils.typeCheck({ value, type: 'string' })
       state.search = value
     },
     searchResultsCards: (state, results) => {
-      utils.typeCheck({ value: results, type: 'array', origin: 'searchResultsCards' })
+      utils.typeCheck({ value: results, type: 'array' })
       state.searchResultsCards = results
     },
     previousResultCardId: (state, value) => {
-      utils.typeCheck({ value, type: 'string', origin: 'previousResultCardId' })
+      utils.typeCheck({ value, type: 'string' })
       state.previousResultCardId = value
     },
     clearSearch: (state) => {
@@ -415,19 +415,19 @@ const store = createStore({
       state.previousResultCardId = ''
     },
     resetPasswordApiKey: (state, apiKey) => {
-      utils.typeCheck({ value: apiKey, type: 'string', origin: 'resetPasswordApiKey' })
+      utils.typeCheck({ value: apiKey, type: 'string' })
       state.resetPasswordApiKey = apiKey
     },
     passwordResetIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'passwordResetIsVisible' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.passwordResetIsVisible = value
     },
     importArenaChannelIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'importArenaChannelIsVisible' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.importArenaChannelIsVisible = value
     },
     isAuthenticatingWithArena: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isAuthenticatingWithArena' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.isAuthenticatingWithArena = value
     },
     triggerSpaceDetailsVisible: () => {},
@@ -498,31 +498,31 @@ const store = createStore({
     // Cards
 
     shouldAddCard: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldAddCard' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.shouldAddCard = value
     },
     currentUserIsHoveringOverConnectionId: (state, connectionId) => {
-      utils.typeCheck({ value: connectionId, type: 'string', origin: 'currentUserIsHoveringOverConnectionId' })
+      utils.typeCheck({ value: connectionId, type: 'string' })
       state.currentUserIsHoveringOverConnectionId = connectionId
     },
     currentUserIsHoveringOverCardId: (state, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'currentUserIsHoveringOverCardId' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       state.currentUserIsHoveringOverCardId = cardId
     },
     cardDetailsIsVisibleForCardId: (state, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'cardDetailsIsVisibleForCardId' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       state.cardDetailsIsVisibleForCardId = cardId
     },
     parentCardId: (state, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'parentCardId' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       state.parentCardId = cardId
     },
     childCardId: (state, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'childCardId' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       state.childCardId = cardId
     },
     updateRemoteCardDetailsVisible: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'updateRemoteCardDetailsVisible' })
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       let cardDetailsVisible = utils.clone(state.remoteCardDetailsVisible)
       cardDetailsVisible = cardDetailsVisible.filter(card => card.id !== update.cardId) || []
@@ -530,34 +530,34 @@ const store = createStore({
       state.remoteCardDetailsVisible = cardDetailsVisible
     },
     clearRemoteCardDetailsVisible: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'clearRemoteCardDetailsVisible' })
+      utils.typeCheck({ value: update, type: 'object' })
       state.remoteCardDetailsVisible = state.remoteCardDetailsVisible.filter(card => card.userId !== update.userId) || []
     },
     preventCardDetailsOpeningAnimation: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'preventCardDetailsOpeningAnimation' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.preventCardDetailsOpeningAnimation = value
     },
 
     // Connecting
 
     currentUserIsDrawingConnection: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsDrawingConnection' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsDrawingConnection = value
     },
     currentConnectionSuccess: (state, object) => {
-      utils.typeCheck({ value: object, type: 'object', allowUndefined: true, origin: 'currentConnectionSuccess' })
+      utils.typeCheck({ value: object, type: 'object', allowUndefined: true })
       state.currentConnectionSuccess = object
     },
     currentConnectionCursorStart: (state, object) => {
-      utils.typeCheck({ value: object, type: 'object', origin: 'currentConnectionCursorStart' })
+      utils.typeCheck({ value: object, type: 'object' })
       state.currentConnectionCursorStart = object
     },
     currentConnectionStartCardIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array', origin: 'currentConnectionStartCardIds' })
+      utils.typeCheck({ value: cardIds, type: 'array' })
       state.currentConnectionStartCardIds = cardIds
     },
     updateRemoteCurrentConnection: (state, updates) => {
-      utils.typeCheck({ value: updates, type: 'object', origin: 'updateRemoteCurrentConnection' })
+      utils.typeCheck({ value: updates, type: 'object' })
       const index = state.remoteCurrentConnections.findIndex(remoteConnection => {
         const isUserId = remoteConnection.userId === updates.userId
         const isStartCardId = remoteConnection.startCardId === updates.startCardId
@@ -586,39 +586,39 @@ const store = createStore({
     // Painting
 
     currentUserIsPainting: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsPainting' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsPainting = value
     },
     currentUserIsPaintingLocked: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsPaintingLocked' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsPaintingLocked = value
     },
 
     // box selecting
 
     currentBoxIsNew: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'currentBoxIsNew' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentBoxIsNew = value
     },
     currentUserIsBoxSelecting: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsBoxSelecting' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsBoxSelecting = value
     },
     currentUserBoxSelectStart: (state, object) => {
-      utils.typeCheck({ value: object, type: 'object', origin: 'currentUserBoxSelectStart' })
+      utils.typeCheck({ value: object, type: 'object' })
       state.currentUserBoxSelectStart = object
     },
     currentUserBoxSelectEnd: (state, object) => {
-      utils.typeCheck({ value: object, type: 'object', origin: 'currentUserBoxSelectEnd' })
+      utils.typeCheck({ value: object, type: 'object' })
       state.currentUserBoxSelectEnd = object
     },
     updateRemoteUserBoxSelectStyles: (state, object) => {
-      utils.typeCheck({ value: object, type: 'object', origin: 'updateRemoteUserBoxSelectStyles' })
+      utils.typeCheck({ value: object, type: 'object' })
       state.remoteUserBoxSelectStyles = state.remoteUserBoxSelectStyles.filter(styles => styles.currentBoxSelectId !== object.currentBoxSelectId)
       state.remoteUserBoxSelectStyles.push(object)
     },
     updateRemotePreviousBoxSelectStyles: (state, object) => {
-      utils.typeCheck({ value: object, type: 'object', origin: 'updateRemotePreviousBoxSelectStyles' })
+      utils.typeCheck({ value: object, type: 'object' })
       state.remoteUserBoxSelectStyles = state.remoteUserBoxSelectStyles.filter(styles => styles.currentBoxSelectId !== object.currentBoxSelectId)
       state.remotePreviousUserBoxSelectStyles = state.remotePreviousUserBoxSelectStyles.filter(styles => styles.currentBoxSelectId !== object.currentBoxSelectId)
       state.remotePreviousUserBoxSelectStyles.push(object)
@@ -630,11 +630,11 @@ const store = createStore({
     // Resizing Cards
 
     currentUserIsResizingCard: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsResizingCard' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsResizingCard = value
     },
     currentUserIsResizingCardIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array', origin: 'currentUserIsResizingCardIds' })
+      utils.typeCheck({ value: cardIds, type: 'array' })
       state.currentUserIsResizingCardIds = cardIds
     },
     removeRemoteUserResizingCards: (state, update) => {
@@ -648,23 +648,23 @@ const store = createStore({
     // Boxes
 
     boxDetailsIsVisibleForBoxId: (state, value) => {
-      utils.typeCheck({ value, type: 'string', origin: 'boxDetailsIsVisibleForBoxId' })
+      utils.typeCheck({ value, type: 'string' })
       state.boxDetailsIsVisibleForBoxId = value
     },
     currentUserIsResizingBox: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsResizingBox' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsResizingBox = value
     },
     currentUserIsResizingBoxIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array', origin: 'currentUserIsResizingBoxIds' })
+      utils.typeCheck({ value: cardIds, type: 'array' })
       state.currentUserIsResizingBoxIds = cardIds
     },
     currentUserIsDraggingBox: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsDraggingBox' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsDraggingBox = value
     },
     updateRemoteBoxDetailsVisible: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'updateRemoteBoxDetailsVisible' })
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       let boxDetailsVisible = utils.clone(state.remoteBoxDetailsVisible)
       boxDetailsVisible = boxDetailsVisible.filter(box => box.id !== update.boxId) || []
@@ -672,7 +672,7 @@ const store = createStore({
       state.remoteBoxDetailsVisible = boxDetailsVisible
     },
     clearRemoteBoxDetailsVisible: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'clearRemoteBoxDetailsVisible' })
+      utils.typeCheck({ value: update, type: 'object' })
       state.remoteBoxDetailsVisible = state.remoteBoxDetailsVisible.filter(box => box.userId !== update.userId) || []
     },
     removeRemoteUserResizingBoxes: (state, update) => {
@@ -686,48 +686,48 @@ const store = createStore({
     // Toolbar Mode
 
     currentUserToolbar: (state, value) => {
-      utils.typeCheck({ value, type: 'string', origin: 'currentUserToolbar' })
+      utils.typeCheck({ value, type: 'string' })
       state.currentUserToolbar = value
     },
 
     // Dragging
 
     currentUserIsPanningReady: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsPanningReady' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsPanningReady = value
     },
     currentUserIsPanning: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsPanning' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsPanning = value
     },
 
     // Dragging Cards
 
     currentUserIsDraggingCard: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsDraggingCard' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsDraggingCard = value
     },
     preventDraggedCardFromShowingDetails: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'preventDraggedCardFromShowingDetails' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.preventDraggedCardFromShowingDetails = value
     },
     triggeredTouchCardDragPosition: (state, cursor) => {
       state.triggeredTouchCardDragPosition = cursor
     },
     cardsWereDragged: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'cardsWereDragged' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.cardsWereDragged = value
     },
     currentDraggingCardId: (state, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'currentDraggingCardId' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       state.currentDraggingCardId = cardId
     },
     currentDraggingConnectedCardIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array', origin: 'currentDraggingConnectedCardIds' })
+      utils.typeCheck({ value: cardIds, type: 'array' })
       state.currentDraggingConnectedCardIds = cardIds
     },
     addToRemoteCardsDragging: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteCardsDragging' })
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       let cards = utils.clone(state.remoteCardsDragging)
       cards = cards.filter(card => card.userId !== update.userId) || []
@@ -735,11 +735,11 @@ const store = createStore({
       state.remoteCardsDragging = cards
     },
     clearRemoteCardsDragging: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'clearRemoteCardsDragging' })
+      utils.typeCheck({ value: update, type: 'object' })
       state.remoteCardsDragging = state.remoteCardsDragging.filter(card => card.userId !== update.userId)
     },
     addToRemoteUploadDraggedOverCards: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteUploadDraggedOverCards' })
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       let cards = utils.clone(state.remoteUploadDraggedOverCards)
       cards = cards.filter(card => card.userId !== update.userId) || []
@@ -747,22 +747,22 @@ const store = createStore({
       state.remoteUploadDraggedOverCards = cards
     },
     clearRemoteUploadDraggedOverCards: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'clearRemoteUploadDraggedOverCards' })
+      utils.typeCheck({ value: update, type: 'object' })
       state.remoteUploadDraggedOverCards = state.remoteUploadDraggedOverCards.filter(card => card.userId !== update.userId)
     },
 
     // Dragging Boxes
 
     currentDraggingBoxId: (state, boxId) => {
-      utils.typeCheck({ value: boxId, type: 'string', origin: 'currentDraggingBoxId' })
+      utils.typeCheck({ value: boxId, type: 'string' })
       state.currentDraggingBoxId = boxId
     },
     boxesWereDragged: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'boxesWereDragged' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.boxesWereDragged = value
     },
     addToRemoteBoxesDragging: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteBoxesDragging' })
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       let boxes = utils.clone(state.remoteBoxesDragging)
       boxes = boxes.filter(box => box.userId !== update.userId) || []
@@ -770,105 +770,105 @@ const store = createStore({
       state.remoteBoxesDragging = boxes
     },
     clearRemoteBoxesDragging: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'clearRemoteBoxesDragging' })
+      utils.typeCheck({ value: update, type: 'object' })
       state.remoteBoxesDragging = state.remoteBoxesDragging.filter(box => box.userId !== update.userId)
     },
     preventDraggedBoxFromShowingDetails: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'preventDraggedBoxFromShowingDetails' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.preventDraggedBoxFromShowingDetails = value
     },
 
     // User Details
 
     userDetailsIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'userDetailsIsVisible' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.userDetailsIsVisible = value
     },
     userDetailsPosition: (state, position) => {
-      utils.typeCheck({ value: position, type: 'object', origin: 'userDetailsPosition' })
+      utils.typeCheck({ value: position, type: 'object' })
       state.userDetailsPosition = position
     },
     userDetailsUser: (state, user) => {
-      utils.typeCheck({ value: user, type: 'object', origin: 'userDetailsUser' })
+      utils.typeCheck({ value: user, type: 'object' })
       state.userDetailsUser = user
     },
 
     // Tag Details
 
     tagDetailsIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'tagDetailsIsVisible' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.tagDetailsIsVisible = value
     },
     tagDetailsIsVisibleFromTagList: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'tagDetailsIsVisibleFromTagList' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.tagDetailsIsVisibleFromTagList = value
     },
     tagDetailsPosition: (state, position) => {
-      utils.typeCheck({ value: position, type: 'object', origin: 'tagDetailsPosition' })
+      utils.typeCheck({ value: position, type: 'object' })
       state.tagDetailsPosition = position
     },
     tagDetailsPositionShouldUpdate: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'tagDetailsPositionShouldUpdate' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.tagDetailsPositionShouldUpdate = value
     },
     currentSelectedTag: (state, tag) => {
-      utils.typeCheck({ value: tag, type: 'object', origin: 'currentSelectedTag' })
+      utils.typeCheck({ value: tag, type: 'object' })
       state.currentSelectedTag = tag
     },
     remoteTags: (state, tags) => {
-      utils.typeCheck({ value: tags, type: 'array', origin: 'remoteTags' })
+      utils.typeCheck({ value: tags, type: 'array' })
       state.remoteTags = tags
     },
     remoteTagsIsFetched: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'remoteTagsIsFetched' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.remoteTagsIsFetched = value
     },
 
     // Link Details
 
     linkDetailsIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'linkDetailsIsVisible' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.linkDetailsIsVisible = value
     },
     linkDetailsPosition: (state, position) => {
-      utils.typeCheck({ value: position, type: 'object', origin: 'linkDetailsPosition' })
+      utils.typeCheck({ value: position, type: 'object' })
       state.linkDetailsPosition = position
     },
     currentSelectedLink: (state, link) => {
-      utils.typeCheck({ value: link, type: 'object', origin: 'currentSelectedLink' })
+      utils.typeCheck({ value: link, type: 'object' })
       state.currentSelectedLink = link
     },
 
     // Pinned Dialogs
 
     sidebarIsPinned: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'sidebarIsPinned' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.sidebarIsPinned = value
     },
     spaceDetailsIsPinned: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsIsPinned' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.spaceDetailsIsPinned = value
     },
 
     // Connection Details
 
     connectionDetailsIsVisibleForConnectionId: (state, connectionId) => {
-      utils.typeCheck({ value: connectionId, type: 'string', origin: 'connectionDetailsIsVisibleForConnectionId' })
+      utils.typeCheck({ value: connectionId, type: 'string' })
       state.connectionDetailsIsVisibleForConnectionId = connectionId
     },
     currentConnectionColor: (state, color) => {
-      utils.typeCheck({ value: color, type: 'string', origin: 'currentConnectionColor' })
+      utils.typeCheck({ value: color, type: 'string' })
       state.currentConnectionColor = color
     },
     connectionDetailsPosition: (state, position) => {
-      utils.typeCheck({ value: position, type: 'object', origin: 'connectionDetailsPosition' })
+      utils.typeCheck({ value: position, type: 'object' })
       state.connectionDetailsPosition = position
     },
     triggeredDrawConnectionFrame: (state, cursor) => {
       state.triggeredDrawConnectionFrame = cursor
     },
     addToRemoteConnectionDetailsVisible: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteConnectionDetailsVisible' })
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       let connections = utils.clone(state.remoteConnectionDetailsVisible)
       connections = connections.filter(connection => connection.userId !== update.userId) || []
@@ -876,22 +876,22 @@ const store = createStore({
       state.remoteConnectionDetailsVisible = connections
     },
     clearRemoteConnectionDetailsVisible: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'clearRemoteConnectionDetailsVisible' })
+      utils.typeCheck({ value: update, type: 'object' })
       state.remoteConnectionDetailsVisible = state.remoteConnectionDetailsVisible.filter(connection => connection.userId !== update.userId)
     },
 
     // Multiple Selection
 
     multipleSelectedActionsIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'multipleSelectedActionsIsVisible' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.multipleSelectedActionsIsVisible = value
     },
     preventMultipleSelectedActionsIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'preventMultipleSelectedActionsIsVisible' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.preventMultipleSelectedActionsIsVisible = value
     },
     multipleSelectedActionsPosition: (state, position) => {
-      utils.typeCheck({ value: position, type: 'object', origin: 'multipleSelectedActionsPosition' })
+      utils.typeCheck({ value: position, type: 'object' })
       state.multipleSelectedActionsPosition = position
     },
     clearMultipleSelected: (state) => {
@@ -904,7 +904,7 @@ const store = createStore({
       state.currentDraggingBoxId = ''
     },
     newTweetCards: (state, cards) => {
-      utils.typeCheck({ value: cards, type: 'array', origin: 'newTweetCards' })
+      utils.typeCheck({ value: cards, type: 'array' })
       state.newTweetCards = cards
     },
     clearNewTweetCards: (state) => {
@@ -915,25 +915,25 @@ const store = createStore({
     // multiple cards
 
     multipleCardsSelectedIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array', origin: 'multipleCardsSelectedIds' })
+      utils.typeCheck({ value: cardIds, type: 'array' })
       state.multipleCardsSelectedIds = cardIds
     },
     addToMultipleCardsSelected: (state, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'addToMultipleCardsSelected' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       state.multipleCardsSelectedIds.push(cardId)
     },
     removeFromMultipleCardsSelected: (state, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'removeFromMultipleCardsSelected' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       state.multipleCardsSelectedIds = state.multipleCardsSelectedIds.filter(id => {
         return id !== cardId
       })
     },
     multipleConnectionsSelectedIds: (state, connectionIds) => {
-      utils.typeCheck({ value: connectionIds, type: 'array', origin: 'multipleConnectionsSelectedIds' })
+      utils.typeCheck({ value: connectionIds, type: 'array' })
       state.multipleConnectionsSelectedIds = connectionIds
     },
     addToRemoteCardsSelected: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteCardsSelected' })
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       const isSelected = state.remoteCardsSelected.find(card => {
         const cardIsSelected = card.cardId === update.cardId
@@ -944,7 +944,7 @@ const store = createStore({
       state.remoteCardsSelected.push(update)
     },
     removeFromRemoteCardsSelected: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'removeFromRemoteCardsSelected' })
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       state.remoteCardsSelected = state.remoteCardsSelected.filter(card => {
         const cardIsSelected = card.cardId === update.cardId
@@ -964,7 +964,7 @@ const store = createStore({
       state.remoteCardsSelected = state.remoteCardsSelected.concat(updates)
     },
     previousMultipleCardsSelectedIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array', origin: 'previousMultipleCardsSelectedIds' })
+      utils.typeCheck({ value: cardIds, type: 'array' })
       state.previousMultipleCardsSelectedIds = cardIds
     },
 
@@ -984,13 +984,13 @@ const store = createStore({
       state.multipleConnectionsSelectedIds.push(connectionId)
     },
     removeFromMultipleConnectionsSelected: (state, connectionId) => {
-      utils.typeCheck({ value: connectionId, type: 'string', origin: 'removeFromMultipleConnectionsSelected' })
+      utils.typeCheck({ value: connectionId, type: 'string' })
       state.multipleConnectionsSelectedIds = state.multipleConnectionsSelectedIds.filter(id => {
         return id !== connectionId
       })
     },
     addToRemoteConnectionsSelected: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteConnectionsSelected' })
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       const isSelected = state.remoteConnectionsSelected.find(connection => {
         const connectionIsSelected = connection.connectionId === update.connectionId
@@ -1001,7 +1001,7 @@ const store = createStore({
       state.remoteConnectionsSelected.push(update)
     },
     removeFromRemoteConnectionsSelected: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'removeFromRemoteConnectionsSelected' })
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       state.remoteConnectionsSelected = state.remoteConnectionsSelected.filter(connection => {
         const connectionIsSelected = connection.connectionId === update.connectionId
@@ -1011,39 +1011,39 @@ const store = createStore({
       })
     },
     clearRemoteMultipleSelected: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'clearRemoteMultipleSelected' })
+      utils.typeCheck({ value: update, type: 'object' })
       const user = update.user || update.updates.user
       state.remoteCardsSelected = state.remoteCardsSelected.filter(card => card.userId !== user.id)
       state.remoteConnectionsSelected = state.remoteConnectionsSelected.filter(connection => connection.userId !== user.id)
       state.remoteBoxesSelected = state.remoteBoxesSelected.filter(box => box.userId !== user.id)
     },
     previousMultipleConnectionsSelectedIds: (state, connectionIds) => {
-      utils.typeCheck({ value: connectionIds, type: 'array', origin: 'previousMultipleConnectionsSelectedIds' })
+      utils.typeCheck({ value: connectionIds, type: 'array' })
       state.previousMultipleConnectionsSelectedIds = connectionIds
     },
 
     // multiple boxes
 
     multipleBoxesSelectedIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array', origin: 'multipleBoxesSelectedIds' })
+      utils.typeCheck({ value: cardIds, type: 'array' })
       state.multipleBoxesSelectedIds = cardIds
     },
     addToMultipleBoxesSelected: (state, boxId) => {
-      utils.typeCheck({ value: boxId, type: 'string', origin: 'addToMultipleBoxesSelected' })
+      utils.typeCheck({ value: boxId, type: 'string' })
       state.multipleBoxesSelectedIds.push(boxId)
     },
     removeFromMultipleBoxesSelected: (state, boxId) => {
-      utils.typeCheck({ value: boxId, type: 'string', origin: 'removeFromMultipleBoxesSelected' })
+      utils.typeCheck({ value: boxId, type: 'string' })
       state.multipleBoxesSelectedIds = state.multipleBoxesSelectedIds.filter(id => {
         return id !== boxId
       })
     },
     previousMultipleBoxesSelectedIds: (state, boxIds) => {
-      utils.typeCheck({ value: boxIds, type: 'array', origin: 'previousMultipleBoxesSelectedIds' })
+      utils.typeCheck({ value: boxIds, type: 'array' })
       state.previousMultipleBoxesSelectedIds = boxIds
     },
     addToRemoteBoxesSelected: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteBoxesSelected' })
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       const isSelected = state.remoteBoxesSelected.find(box => {
         const boxIsSelected = box.boxId === update.boxId
@@ -1054,7 +1054,7 @@ const store = createStore({
       state.remoteBoxesSelected.push(update)
     },
     removeFromRemoteBoxesSelected: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'removeFromRemoteBoxesSelected' })
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       state.remoteBoxesSelected = state.remoteBoxesSelected.filter(box => {
         const boxIsSelected = box.boxId === update.boxId
@@ -1077,19 +1077,19 @@ const store = createStore({
     // Loading
 
     isLoadingSpace: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isLoadingSpace' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.isLoadingSpace = value
     },
     isJoiningSpace: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isJoiningSpace' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.isJoiningSpace = value
     },
     addToSpaceCollaboratorKeys: (state, spaceCollaboratorKey) => {
-      utils.typeCheck({ value: spaceCollaboratorKey, type: 'object', origin: 'addToSpaceCollaboratorKeys' })
+      utils.typeCheck({ value: spaceCollaboratorKey, type: 'object' })
       state.spaceCollaboratorKeys.push(spaceCollaboratorKey) // { spaceId, collaboratorKey }
     },
     updateRemotePendingUploads: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'updateRemotePendingUploads' })
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       const existingUpload = state.remotePendingUploads.find(item => {
         const card = item.cardId === update.cardId
@@ -1110,15 +1110,15 @@ const store = createStore({
       state.remotePendingUploads = state.remotePendingUploads.filter(item => item.percentComplete !== 100)
     },
     hasRestoredFavorites: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'hasRestoredFavorites' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.hasRestoredFavorites = value
     },
     loadSpaceShowDetailsForCardId: (state, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'loadSpaceShowDetailsForCardId' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       state.loadSpaceShowDetailsForCardId = cardId
     },
     spaceUrlToLoad: (state, spaceUrl) => {
-      utils.typeCheck({ value: spaceUrl, type: 'string', origin: 'spaceUrlToLoad' })
+      utils.typeCheck({ value: spaceUrl, type: 'string' })
       state.spaceUrlToLoad = spaceUrl
     },
 
@@ -1142,62 +1142,62 @@ const store = createStore({
       state.notificationsWithPosition = []
     },
     notifySpaceNotFound: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'notifySpaceNotFound' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifySpaceNotFound = value
     },
     notifyConnectionError: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'notifyConnectionError' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifyConnectionError = value
     },
     notifyServerCouldNotSave: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'notifyServerCouldNotSave' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifyServerCouldNotSave = value
     },
     notifySpaceIsRemoved: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'notifySpaceIsRemoved' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifySpaceIsRemoved = value
     },
     notifyCurrentSpaceIsNowRemoved: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'notifyCurrentSpaceIsNowRemoved' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifyCurrentSpaceIsNowRemoved = value
     },
     notifySignUpToEditSpace: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'notifySignUpToEditSpace' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifySignUpToEditSpace = value
     },
     notifyCardsCreatedIsNearLimit: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'notifyCardsCreatedIsNearLimit' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifyCardsCreatedIsNearLimit = value
     },
     notifyCardsCreatedIsOverLimit: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'notifyCardsCreatedIsOverLimit' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifyCardsCreatedIsOverLimit = value
       if (value === true) {
         state.notifyCardsCreatedIsNearLimit = false
       }
     },
     notifyKinopioUpdatesAreAvailable: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'notifyKinopioUpdatesAreAvailable' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifyKinopioUpdatesAreAvailable = value
     },
     notifyMoveOrCopyToSpace: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'notifyMoveOrCopyToSpace' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifyMoveOrCopyToSpace = value
     },
     notifyMoveOrCopyToSpaceDetails: (state, value) => {
-      utils.typeCheck({ value, type: 'object', origin: 'notifyMoveOrCopyToSpaceDetails' })
+      utils.typeCheck({ value, type: 'object' })
       state.notifyMoveOrCopyToSpaceDetails = value
     },
     hasNotifiedPressAndHoldToDrag: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'hasNotifiedPressAndHoldToDrag' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.hasNotifiedPressAndHoldToDrag = value
     },
     notifySpaceIsHidden: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'notifySpaceIsHidden' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifySpaceIsHidden = value
     },
     notifyThanksForDonating: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'notifyThanksForDonating' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifyThanksForDonating = value
     },
 
@@ -1226,41 +1226,41 @@ const store = createStore({
       state.filteredTagNames = []
     },
     addToFilteredConnectionTypeId: (state, id) => {
-      utils.typeCheck({ value: id, type: 'string', origin: 'addToFilteredConnectionTypeId' })
+      utils.typeCheck({ value: id, type: 'string' })
       state.filteredConnectionTypeIds.push(id)
     },
     removeFromFilteredConnectionTypeId: (state, id) => {
-      utils.typeCheck({ value: id, type: 'string', origin: 'addToFilteredConnectionTypeId' })
+      utils.typeCheck({ value: id, type: 'string' })
       state.filteredConnectionTypeIds = state.filteredConnectionTypeIds.filter(typeId => typeId !== id)
     },
     addToFilteredFrameIds: (state, id) => {
-      utils.typeCheck({ value: id, type: 'number', origin: 'addToFilteredFrameIds' })
+      utils.typeCheck({ value: id, type: 'number' })
       state.filteredFrameIds.push(id)
     },
     removeFromFilteredFrameIds: (state, id) => {
-      utils.typeCheck({ value: id, type: 'number', origin: 'removeFromFilteredFrameIds' })
+      utils.typeCheck({ value: id, type: 'number' })
       state.filteredFrameIds = state.filteredFrameIds.filter(frameId => frameId !== id)
     },
     addToFilteredTagNames: (state, name) => {
-      utils.typeCheck({ value: name, type: 'string', origin: 'addToFilteredTagNames' })
+      utils.typeCheck({ value: name, type: 'string' })
       state.filteredTagNames.push(name)
     },
     removeFromFilteredTagNames: (state, name) => {
-      utils.typeCheck({ value: name, type: 'string', origin: 'removeFromFilteredTagNames' })
+      utils.typeCheck({ value: name, type: 'string' })
       state.filteredTagNames = state.filteredTagNames.filter(tagName => tagName !== name)
     },
 
     // Card List Item Options
     cardListItemOptionsPosition: (state, value) => {
-      utils.typeCheck({ value, type: 'object', origin: 'cardListItemOptionsPosition' })
+      utils.typeCheck({ value, type: 'object' })
       state.cardListItemOptionsPosition = value
     },
     cardListItemOptionsCard: (state, value) => {
-      utils.typeCheck({ value, type: 'object', origin: 'cardListItemOptionsCard' })
+      utils.typeCheck({ value, type: 'object' })
       state.cardListItemOptionsCard = value
     },
     cardListItemOptionsIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'cardListItemOptionsIsVisible' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.cardListItemOptionsIsVisible = value
     },
 
@@ -1268,7 +1268,7 @@ const store = createStore({
 
     updateOtherUsers: (state, updatedUser) => {
       if (!updatedUser) { return }
-      utils.typeCheck({ value: updatedUser, type: 'object', origin: 'updateOtherUsers' })
+      utils.typeCheck({ value: updatedUser, type: 'object' })
       let users = utils.clone(state.otherUsers)
       users = users.filter(Boolean)
       users = users.filter(user => {
@@ -1280,7 +1280,7 @@ const store = createStore({
       state.otherUsers = users
     },
     updateOtherSpaces: (state, updatedSpace) => {
-      utils.typeCheck({ value: updatedSpace, type: 'object', origin: 'updateOtherSpaces' })
+      utils.typeCheck({ value: updatedSpace, type: 'object' })
       let spaces = utils.clone(state.otherSpaces)
       spaces = spaces.filter(space => {
         if (space.id !== updatedSpace.id) {
@@ -1365,7 +1365,7 @@ const store = createStore({
       }
     },
     addToMultipleCardsSelected: (context, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'addToMultipleCardsSelected' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       if (context.state.multipleCardsSelectedIds.includes(cardId)) { return }
       context.commit('addToMultipleCardsSelected', cardId)
       const updates = {
@@ -1375,7 +1375,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsSelected' }, { root: true })
     },
     removeFromMultipleCardsSelected: (context, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'removeFromMultipleCardsSelected' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       if (!context.state.multipleCardsSelectedIds.includes(cardId)) { return }
       context.commit('removeFromMultipleCardsSelected', cardId)
       const updates = {
@@ -1385,7 +1385,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteCardsSelected' }, { root: true })
     },
     multipleCardsSelectedIds: (context, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array', origin: 'multipleCardsSelectedIds' })
+      utils.typeCheck({ value: cardIds, type: 'array' })
       context.commit('multipleCardsSelectedIds', cardIds)
       const updates = {
         userId: context.rootState.currentUser.id,
@@ -1394,7 +1394,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' }, { root: true })
     },
     multipleBoxesSelectedIds: (context, boxIds) => {
-      utils.typeCheck({ value: boxIds, type: 'array', origin: 'multipleBoxesSelectedIds' })
+      utils.typeCheck({ value: boxIds, type: 'array' })
       context.commit('multipleBoxesSelectedIds', boxIds)
       const updates = {
         userId: context.rootState.currentUser.id,
@@ -1411,7 +1411,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { user: utils.userMeta(user, space), type: 'clearRemoteMultipleSelected' }, { root: true })
     },
     toggleMultipleConnectionsSelected: (context, connectionId) => {
-      utils.typeCheck({ value: connectionId, type: 'string', origin: 'toggleMultipleConnectionsSelected' })
+      utils.typeCheck({ value: connectionId, type: 'string' })
       const previousMultipleConnectionsSelectedIds = context.state.previousMultipleConnectionsSelectedIds
       const connectionIsSelected = previousMultipleConnectionsSelectedIds.includes(connectionId)
       if (connectionIsSelected) {
@@ -1421,7 +1421,7 @@ const store = createStore({
       }
     },
     addToMultipleConnectionsSelected: (context, connectionId) => {
-      utils.typeCheck({ value: connectionId, type: 'string', origin: 'addToMultipleConnectionsSelected' })
+      utils.typeCheck({ value: connectionId, type: 'string' })
       if (context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
       context.commit('addToMultipleConnectionsSelected', connectionId)
       const updates = {
@@ -1431,7 +1431,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionsSelected' }, { root: true })
     },
     removeFromMultipleConnectionsSelected: (context, connectionId) => {
-      utils.typeCheck({ value: connectionId, type: 'string', origin: 'removeFromMultipleConnectionsSelected' })
+      utils.typeCheck({ value: connectionId, type: 'string' })
       if (!context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
       context.commit('removeFromMultipleConnectionsSelected', connectionId)
       const updates = {
@@ -1441,7 +1441,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteConnectionsSelected' }, { root: true })
     },
     multipleConnectionsSelectedIds: (context, connectionIds) => {
-      utils.typeCheck({ value: connectionIds, type: 'array', origin: 'multipleConnectionsSelectedIds' })
+      utils.typeCheck({ value: connectionIds, type: 'array' })
       context.commit('multipleConnectionsSelectedIds', connectionIds)
       const updates = {
         userId: context.rootState.currentUser.id,
@@ -1458,7 +1458,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionDetailsVisible' }, { root: true })
     },
     addToMultipleBoxesSelected: (context, boxId) => {
-      utils.typeCheck({ value: boxId, type: 'string', origin: 'addToMultipleBoxesSelected' })
+      utils.typeCheck({ value: boxId, type: 'string' })
       if (context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
       context.commit('addToMultipleBoxesSelected', boxId)
       const updates = {
@@ -1468,7 +1468,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesSelected' }, { root: true })
     },
     removeFromMultipleBoxesSelected: (context, boxId) => {
-      utils.typeCheck({ value: boxId, type: 'string', origin: 'removeFromMultipleBoxesSelected' })
+      utils.typeCheck({ value: boxId, type: 'string' })
       if (!context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
       context.commit('removeFromMultipleBoxesSelected', boxId)
       const updates = {
@@ -1481,11 +1481,11 @@ const store = createStore({
     // Pinned Dialogs
 
     sidebarIsPinned: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'sidebarIsPinned' })
+      utils.typeCheck({ value, type: 'boolean' })
       context.commit('sidebarIsPinned', value)
     },
     spaceDetailsIsPinned: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsIsPinned' })
+      utils.typeCheck({ value, type: 'boolean' })
       context.commit('spaceDetailsIsPinned', value)
     },
 
@@ -1495,7 +1495,7 @@ const store = createStore({
       context.commit('windowScroll', { x: window.scrollX, y: window.scrollY })
     },
     zoomOrigin: (context, origin) => {
-      utils.typeCheck({ value: origin, type: 'object', origin: 'zoomOrigin' })
+      utils.typeCheck({ value: origin, type: 'object' })
       const prevOrigin = context.state.zoomOrigin
       const zoomOriginIsZero = !utils.objectHasKeys(prevOrigin) || prevOrigin === { x: 0, y: 0 }
       if (zoomOriginIsZero) {
