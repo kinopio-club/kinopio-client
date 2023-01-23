@@ -15,7 +15,8 @@
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-2x.png",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-preview.svg",
     "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-thumbnail-2.svg",
-    "shouldDarkenInDarkTheme": true
+    "shouldDarkenInDarkTheme": true,
+    "shouldInvertInDarkTheme": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-inverse-2x.png",
