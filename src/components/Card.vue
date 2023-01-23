@@ -194,6 +194,7 @@ import ImageOrVideo from '@/components/ImageOrVideo.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
 import hexToRgba from 'hex-to-rgba'
@@ -401,8 +402,11 @@ export default {
       return tags
     },
     width () {
+      const defaultCardWidth = consts.defaultCardWidth
+      const cardIsNotResized = this.card.width === defaultCardWidth
       if (this.isComment) { return }
-      return this.resizeWidth || this.card.width
+      if (!this.resizeWidth && cardIsNotResized) { return }
+      return this.resizeWidth || (this.card.width + 'px')
     },
     resizeWidth () {
       if (this.isComment) { return }

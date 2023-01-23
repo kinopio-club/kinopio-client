@@ -795,7 +795,7 @@ export default {
   // Cards
 
   emptyCard () {
-    return { width: 76, height: 32 }
+    return { width: consts.defaultCardWidth, height: 32 }
   },
   spaceBetweenCards () {
     let spaceBetween = 12

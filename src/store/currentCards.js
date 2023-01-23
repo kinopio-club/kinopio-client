@@ -1,5 +1,6 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
@@ -439,7 +440,7 @@ const currentCards = {
     },
     removeResize: (context, { cardIds }) => {
       cardIds.forEach(cardId => {
-        const updates = { id: cardId, resizeWidth: null, width: null }
+        const updates = { id: cardId, resizeWidth: null, width: consts.defaultCardWidth }
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
         const card = context.getters.byId(cardId)
