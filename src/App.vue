@@ -151,7 +151,7 @@ export default {
   },
   methods: {
     updateTheme (event) {
-      const themeIsSystem = this.$store.state.themes.isSystem
+      const themeIsSystem = this.$store.state.currentUser.themeIsSystem
       if (!themeIsSystem) { return }
       let themeName
       if (event.matches) {

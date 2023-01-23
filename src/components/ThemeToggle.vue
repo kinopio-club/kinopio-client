@@ -10,8 +10,8 @@ defineProps({
 })
 const store = useStore()
 
-const themeName = computed(() => store.state.themes.current.name)
-const isSystem = computed(() => store.state.themes.isSystem)
+const themeName = computed(() => store.state.currentUser.theme)
+const isSystem = computed(() => store.state.currentUser.themeIsSystem)
 const updateTheme = (themeName) => {
   store.dispatch('themes/update', themeName)
   store.dispatch('themes/isSystem', false)

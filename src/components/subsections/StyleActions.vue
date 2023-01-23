@@ -93,7 +93,7 @@ export default {
         this.closeDialogs(shouldPreventEmit)
       } else if (type === 'triggerSelectedCardsContainInBox') {
         this.containCardsInBox()
-      } else if (type === 'themes/current') {
+      } else if (type === 'triggerUpdateTheme') {
         this.defaultColor = utils.cssVariable('secondary-background')
       }
     })

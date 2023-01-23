@@ -199,7 +199,7 @@ export default {
       this.$emit('closeDialog')
     },
     color () {
-      const isThemeDark = this.$store.getters['themes/isThemeDark']
+      const isThemeDark = this.$store.state.currentUser.theme === 'dark'
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
         color = randomColor({ luminosity: 'dark' })

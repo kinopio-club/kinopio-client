@@ -177,7 +177,7 @@ export default {
       })
     },
     updateLuminosityFromTheme () {
-      const isThemeDark = this.$store.getters['themes/isThemeDark']
+      const isThemeDark = this.$store.state.currentUser.theme === 'dark'
       if (isThemeDark) {
         this.updateLuminosity('dark')
       } else {

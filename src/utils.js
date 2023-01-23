@@ -371,7 +371,7 @@ export default {
       return true
     }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
-      console.warn(`🚑 passed value is not ${type}`, value, origin)
+      console.error(`🚑 passed value is not ${type}`, value, origin)
       return false
     } else {
       return true

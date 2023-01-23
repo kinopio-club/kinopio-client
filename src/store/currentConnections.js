@@ -195,7 +195,7 @@ export default {
       context.commit('create', connection)
     },
     addType: (context, type) => {
-      const isThemeDark = context.rootGetters['themes/isThemeDark']
+      const isThemeDark = this.$store.state.currentUser.theme === 'dark'
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
         color = randomColor({ luminosity: 'dark' })

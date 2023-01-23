@@ -134,7 +134,7 @@ export default {
     add: (context, { box, shouldResize }) => {
       const count = context.state.ids.length
       const minBoxSize = 70
-      const isThemeDark = context.rootGetters['themes/isThemeDark']
+      const isThemeDark = this.$store.state.currentUser.theme === 'dark'
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
         color = randomColor({ luminosity: 'dark' })

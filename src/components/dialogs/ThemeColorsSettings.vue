@@ -52,7 +52,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       const { type, payload } = mutation
-      if (type === 'themes/current') {
+      if (type === 'triggerUpdateTheme') {
         this.defaultColor = utils.cssVariable('secondary-background')
       }
     })

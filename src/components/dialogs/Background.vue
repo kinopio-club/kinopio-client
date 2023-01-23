@@ -114,7 +114,7 @@ export default {
         if (cardId) { return }
         if (spaceId !== this.currentSpace.id) { return }
         this.updateSpaceBackground(url)
-      } else if (mutation.type === 'themes/current') {
+      } else if (mutation.type === 'triggerUpdateTheme') {
         this.defaultColor = utils.cssVariable('secondary-background')
       }
     })

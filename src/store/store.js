@@ -488,6 +488,7 @@ const store = createStore({
     triggerLoadBackground: () => {},
     triggerCenterZoomOrigin: () => {},
     triggerRemoveCardFromCardList: (state, card) => {},
+    triggerUpdateTheme: () => {},
 
     // Used by extensions only
 

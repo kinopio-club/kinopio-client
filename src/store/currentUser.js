@@ -349,6 +349,7 @@ export default {
       cache.updateUser('theme', value)
     },
     themeIsSystem: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
       state.themeIsSystem = value
       cache.updateUser('themeIsSystem', value)
     }

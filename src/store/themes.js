@@ -49,27 +49,15 @@ const themes = {
 
 export default {
   namespaced: true,
-  state: {
-    current: {},
-    isSystem: true
-  },
-  mutations: {
-    current: (state, theme) => {
-      utils.typeCheck({ value: theme, type: 'object' })
-      state.current = theme
-    },
-    isSystem: (state, value) => {
-      state.isSystem = value
-    }
-  },
   actions: {
     isSystem: (context, value) => {
-      context.commit('isSystem', value)
+      utils.typeCheck({ value, type: 'boolean' })
+      context.dispatch('currentUser/update', { themeIsSystem: value }, { root: true })
+      context.commit('triggerUpdateTheme', null, { root: true })
     },
     toggleIsSystem: (context) => {
-      const value = !context.state.isSystem
-      context.commit('isSystem', value)
-      context.dispatch('currentUser/update', { themeIsSystem: value }, { root: true })
+      const value = !context.rootState.currentUser.themeIsSystem
+      context.dispatch('isSystem', value)
       if (value) {
         const themeName = context.getters.systemThemeName
         context.dispatch('update', themeName)
@@ -84,18 +72,16 @@ export default {
       keys.forEach(key => {
         utils.setCssVariable(key, colors[key])
       })
-      context.commit('current', theme)
-      // update user pref
-      if (themeName) {
-        context.dispatch('currentUser/update', { theme: normalizedThemeName }, { root: true })
-      }
+      context.dispatch('currentUser/update', { theme: normalizedThemeName }, { root: true })
+      context.commit('triggerUpdateTheme', null, { root: true })
     },
     restore: (context) => {
-      let theme = context.rootState.currentUser.theme
-      if (context.state.isSystem) {
-        theme = context.getters.systemThemeName
+      let themeName = context.rootState.currentUser.theme
+      const themeIsSystem = context.rootState.currentUser.themeIsSystem
+      if (themeIsSystem) {
+        themeName = context.getters.systemThemeName || themeName
       }
-      context.dispatch('update', theme)
+      context.dispatch('update', themeName)
     },
     toggle: (context) => {
       const prevTheme = context.rootState.currentUser.theme || 'light'
@@ -109,9 +95,6 @@ export default {
     }
   },
   getters: {
-    isThemeDark: (state) => {
-      return state.current.name === 'dark'
-    },
     systemThemeName: (state) => {
       const isDarkModeOS = window.matchMedia('(prefers-color-scheme: dark)').matches
       let themeName

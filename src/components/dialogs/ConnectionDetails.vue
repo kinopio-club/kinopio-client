@@ -294,7 +294,7 @@ export default {
       this.inputIsFocused = false
     },
     updateNextConnectionColor () {
-      const isThemeDark = this.$store.getters['themes/isThemeDark']
+      const isThemeDark = this.$store.state.currentUser.theme === 'dark'
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
         color = randomColor({ luminosity: 'dark' })

@@ -250,7 +250,7 @@ export default {
           this.updateMediaUrls()
           this.updateUrlPreview()
         }
-      } else if (type === 'themes/current') {
+      } else if (type === 'triggerUpdateTheme') {
         this.defaultColor = utils.cssVariable('secondary-background')
       }
     })
