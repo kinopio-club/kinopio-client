@@ -402,11 +402,8 @@ export default {
       return tags
     },
     width () {
-      const defaultCardWidth = consts.defaultCardWidth
-      const cardIsNotResized = this.card.width === defaultCardWidth
       if (this.isComment) { return }
-      if (!this.resizeWidth && cardIsNotResized) { return }
-      return this.resizeWidth || (this.card.width + 'px')
+      return this.resizeWidth
     },
     resizeWidth () {
       if (this.isComment) { return }
