@@ -1,11 +1,12 @@
 <template lang="pug">
-.space-background(:style="backgroundStyles")
+.space-background(:style="backgroundStyles" :class="{invert: shouldInvertInDarkTheme}")
 .layout-viewport#layout-viewport(v-if="visible" :style="{ background: backgroundTint }")
-.layout-viewport.dark-theme-tint(v-if="isThemeDark")
+.layout-viewport.dark-theme-tint(v-if="isThemeDark" :class="{darker: shouldDarkenInDarkTheme}")
 </template>
 
 <script>
 import utils from '@/utils.js'
+import backgroundImages from '@/data/backgroundImages.json'
 
 export default {
   name: 'SpaceBackground',
@@ -44,7 +45,28 @@ export default {
       const color = this.currentSpace.backgroundTint
       return color
     },
-    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' }
+    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
+    kinopioBackgroundImageData () {
+      const data = backgroundImages.find(image => image.url === this.currentSpace.background)
+      return data
+    },
+    backgroundIsDefault () {
+      return !this.currentSpace.background
+    },
+    shouldDarkenInDarkTheme () {
+      if (!this.isThemeDark) { return }
+      if (this.backgroundIsDefault) { return true }
+      const data = this.kinopioBackgroundImageData
+      if (!data) { return }
+      return data.shouldDarkenInDarkTheme
+    },
+    shouldInvertInDarkTheme () {
+      if (!this.isThemeDark) { return }
+      if (this.backgroundIsDefault) { return }
+      const data = this.kinopioBackgroundImageData
+      if (!data) { return }
+      return data.shouldInvertInDarkTheme
+    }
   },
   methods: {
     async loadBackground () {
@@ -111,6 +133,8 @@ export default {
   transform-origin top left
 .dark-theme-tint
   background-color rgba(0,0,0,0.3)
+  &.darker
+    background-color rgba(0,0,0,0.7)
 .space-background
   position absolute
   width 100%
@@ -119,5 +143,7 @@ export default {
   z-index 0
   transform-origin top left
   background var(--primary-background)
+  &.invert
+    filter invert()
 
 </style>
