@@ -438,6 +438,7 @@ table
   border-collapse collapse
   td
     border 1px solid var(--secondary-active-background)
+    color var(--primary)
     padding 5px
     user-select text
 
