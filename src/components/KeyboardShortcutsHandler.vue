@@ -96,6 +96,7 @@ export default {
       } else if (key === 't' && isSpaceScope) {
         this.$store.commit('addNotification', { message: 'Theme toggled', type: 'info', label: 'T' })
         this.$store.dispatch('themes/toggle')
+        this.$store.dispatch('themes/isSystem', false)
       // Backspace, Clear, Delete
       } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
         this.remove()

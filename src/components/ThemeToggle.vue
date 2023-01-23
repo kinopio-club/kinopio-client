@@ -27,7 +27,7 @@ button(:class="{active: themeName === 'light'}" @click="updateTheme('light')")
 button(:class="{active: themeName === 'dark'}" @click="updateTheme('dark')")
   img.icon.dark(src="@/assets/dark.svg")
 button(v-if="showSystem" @click="toggleSystem" :class="{active: isSystem}")
-  span Use System
+  span Use System Theme
 </template>
 
 <style lang="stylus">
