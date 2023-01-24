@@ -655,12 +655,13 @@ export default {
     padding-right 10px
     border-bottom-right-radius 5px
     word-break break-word
+    color var(--primary-on-light-background)
     &:hover
       box-shadow var(--hover-shadow)
     &:active
       box-shadow var(--active-shadow)
     &.is-dark
-      color var(--primary-background)
+      color var(--primary-on-dark-background)
 
   .lock-button-wrap
     pointer-events all

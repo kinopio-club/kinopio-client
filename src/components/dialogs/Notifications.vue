@@ -222,7 +222,7 @@ export default {
   section
     width 100%
   .results-section
-    border-top 1px solid var(--primary)
+    border-top 1px solid var(--primary-border)
     padding-top 4px
     li
       display block
@@ -264,7 +264,7 @@ export default {
     hr:first-child
       display none
     hr
-      border-top 1px solid var(--primary)
+      border-top 1px solid var(--primary-border)
       border-bottom none
       margin 8px 0
       margin-left -4px

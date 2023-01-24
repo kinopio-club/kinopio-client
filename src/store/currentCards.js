@@ -1,5 +1,6 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
@@ -197,7 +198,7 @@ const currentCards = {
     // create
 
     add: (context, { position, isParentCard, name, id, backgroundColor }) => {
-      utils.typeCheck({ value: position, type: 'object', origin: 'addCard' })
+      utils.typeCheck({ value: position, type: 'object' })
       if (context.rootGetters['currentSpace/shouldPreventAddCard']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
@@ -257,7 +258,7 @@ const currentCards = {
       }, { root: true })
     },
     paste: (context, { card, cardId }) => {
-      utils.typeCheck({ value: card, type: 'object', origin: 'pasteCard' })
+      utils.typeCheck({ value: card, type: 'object' })
       card.id = cardId || nanoid()
       card.spaceId = currentSpaceId
       const prevCards = context.getters.all
@@ -316,8 +317,8 @@ const currentCards = {
       context.dispatch('updateDimensions', { cards: [card] })
     },
     toggleChecked (context, { cardId, value }) {
-      utils.typeCheck({ value, type: 'boolean', origin: 'toggleChecked' })
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleChecked' })
+      utils.typeCheck({ value, type: 'boolean' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       const card = context.getters.byId(cardId)
       let name = card.name
       const checkbox = utils.checkboxFromString(name)
@@ -334,7 +335,7 @@ const currentCards = {
       })
     },
     removeChecked: (context, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'removeChecked' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       const card = context.getters.byId(cardId)
       let name = card.name
       name = name.replace('[x]', '').trim()
@@ -386,10 +387,10 @@ const currentCards = {
     updateDimensions: (context, { cards, cardId }) => {
       let newCards = []
       if (cards) {
-        utils.typeCheck({ value: cards, type: 'array', origin: 'updateDimensions cards' })
+        utils.typeCheck({ value: cards, type: 'array' })
         newCards = cards
       } else if (cardId) {
-        utils.typeCheck({ value: cardId, type: 'string', origin: 'updateDimensions cardId' })
+        utils.typeCheck({ value: cardId, type: 'string' })
         const card = context.getters.byId(cardId)
         if (!card) { return }
         newCards.push(card)
@@ -439,7 +440,7 @@ const currentCards = {
     },
     removeResize: (context, { cardIds }) => {
       cardIds.forEach(cardId => {
-        const updates = { id: cardId, resizeWidth: null, width: null }
+        const updates = { id: cardId, resizeWidth: null, width: consts.defaultCardWidth }
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
         const card = context.getters.byId(cardId)

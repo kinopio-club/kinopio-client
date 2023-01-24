@@ -121,6 +121,7 @@ export default {
 main.add-page
   padding 8px
   margin-top 2px
+  height 100vh
   section
     position relative
     display block

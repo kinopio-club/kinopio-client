@@ -813,7 +813,7 @@ header
           > button
             border-top-right-radius var(--entity-radius)
             border-bottom-right-radius var(--entity-radius)
-            border-right 1px solid var(--primary)
+            border-right 1px solid var(--primary-border)
 
   .left,
   .right

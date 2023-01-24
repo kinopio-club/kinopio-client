@@ -178,6 +178,7 @@ export default {
   .vertical-line
     position absolute
     top 23px
+    z-index -1
     &.first-child
       left 3px
     &.second-child
@@ -235,5 +236,10 @@ export default {
     transform translateX(-2px)
   100%
     transform translateX(0)
+
+.is-dark-theme
+  .slider
+    .vertical-line
+      filter invert(1)
 
 </style>

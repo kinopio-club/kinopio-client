@@ -6,6 +6,7 @@ dialog.narrow.multiple-selected-actions(
   @click.left="closeDialogs"
   :style="styles"
 )
+  .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
   section(v-if="cardsIsSelected || connectionsIsSelected || boxesIsSelected")
     //- Edit Cards
     .row(v-if="cardsIsSelected || boxesIsSelected")
@@ -114,6 +115,11 @@ export default {
     }
   },
   computed: {
+    isThemeDarkAndUserColorLight () {
+      const isThemeDark = this.$store.state.currentUser.theme === 'dark'
+      const userColorIsLight = !utils.colorIsDark(this.userColor)
+      return isThemeDark && userColorIsLight
+    },
     maxCardLength () { return consts.maxCardLength },
     shouldShowStyleActions () { return this.$store.state.currentUser.shouldShowStyleActions },
     styleActionsIsVisible () {

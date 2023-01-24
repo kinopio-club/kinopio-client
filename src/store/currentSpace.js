@@ -33,14 +33,14 @@ const currentSpace = {
     // Users
 
     addUserToSpace: (state, newUser) => {
-      utils.typeCheck({ value: newUser, type: 'object', origin: 'addUserToSpace' })
+      utils.typeCheck({ value: newUser, type: 'object' })
       const userExists = state.users.find(user => user.id === newUser.id)
       if (userExists) { return }
       state.users.push(newUser)
       cache.updateSpace('users', state.users, state.id)
     },
     addCollaboratorToSpace: (state, newUser) => {
-      utils.typeCheck({ value: newUser, type: 'object', origin: 'addCollaboratorToSpace' })
+      utils.typeCheck({ value: newUser, type: 'object' })
       const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
       if (collaboratorExists) { return }
       state.collaborators.push(newUser)
@@ -53,28 +53,28 @@ const currentSpace = {
       state.spectators = uniqBy(state.spectators, 'id')
     },
     updateSpaceClients: (state, updates) => {
-      utils.typeCheck({ value: updates, type: 'array', origin: 'updateSpaceClients' })
+      utils.typeCheck({ value: updates, type: 'array' })
       state.clients = state.clients.concat(updates)
     },
     removeClientsFromSpace: (state) => {
       state.clients = []
     },
     removeSpectatorFromSpace: (state, oldUser) => {
-      utils.typeCheck({ value: oldUser, type: 'object', origin: 'removeSpectatorFromSpace' })
+      utils.typeCheck({ value: oldUser, type: 'object' })
       if (!state.spectators) { return }
       state.spectators = state.spectators.filter(user => {
         return user.id !== oldUser.id
       })
     },
     removeUserFromSpace: (state, oldUser) => {
-      utils.typeCheck({ value: oldUser, type: 'object', origin: 'removeUserFromSpace' })
+      utils.typeCheck({ value: oldUser, type: 'object' })
       state.users = state.users.filter(user => {
         return user.id !== oldUser.id
       })
       cache.updateSpace('users', state.users, state.id)
     },
     removeCollaboratorFromSpace: (state, oldUser) => {
-      utils.typeCheck({ value: oldUser, type: 'object', origin: 'removeCollaboratorFromSpace' })
+      utils.typeCheck({ value: oldUser, type: 'object' })
       state.collaborators = state.collaborators.filter(user => {
         return user.id !== oldUser.id
       })
@@ -189,7 +189,7 @@ const currentSpace = {
     // Users and otherSpaces
 
     updateUserPresence: (context, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'updateUserPresence' })
+      utils.typeCheck({ value: update, type: 'object' })
       const newUser = update.user || update
       const member = context.getters.memberById(newUser.id)
       if (member) {

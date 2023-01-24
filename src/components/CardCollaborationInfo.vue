@@ -129,4 +129,7 @@ export default {
     flex-wrap wrap
   .system-badge
     margin-top 1px
+  .name
+    color var(--primary)
+
 </style>

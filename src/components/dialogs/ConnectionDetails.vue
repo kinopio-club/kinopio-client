@@ -1,6 +1,7 @@
 <template lang="pug">
 dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" @click.left="closeColorPicker" ref="dialog")
-  section(:style="{backgroundColor: typeColor}" ref="infoSection")
+  section.info-section(:style="{backgroundColor: typeColor}" ref="infoSection")
+    .dark-theme-background-layer(v-if="isThemeDarkAndTypeColorLight")
     .row
       .button-wrap
         button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
@@ -93,6 +94,11 @@ export default {
     }
   },
   computed: {
+    isThemeDarkAndTypeColorLight () {
+      const isThemeDark = this.$store.state.currentUser.theme === 'dark'
+      const typeColorIsLight = !utils.colorIsDark(this.typeColor)
+      return isThemeDark && typeColorIsLight
+    },
     visible () { return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId) },
     currentConnectionType () {
       const connectionType = this.$store.getters['currentConnections/typeByConnection'](this.currentConnection)
@@ -288,7 +294,12 @@ export default {
       this.inputIsFocused = false
     },
     updateNextConnectionColor () {
-      this.nextConnectionTypeColor = randomColor({ luminosity: 'light' })
+      const isThemeDark = this.$store.state.currentUser.theme === 'dark'
+      let color = randomColor({ luminosity: 'light' })
+      if (isThemeDark) {
+        color = randomColor({ luminosity: 'dark' })
+      }
+      this.nextConnectionTypeColor = color
     }
   },
   watch: {
@@ -327,6 +338,11 @@ export default {
   transform-origin top left
   .type-name
     margin-left 6px
+    border-color var(--primary-on-light-background)
+    color var(--primary-on-light-background)
+    &.is-dark
+      border-color var(--primary-on-dark-background)
+      color var(--primary-on-dark-background)
   .edit-message
     button
       margin-top 10px
@@ -336,4 +352,11 @@ export default {
     label
       .badge-in-button
         margin-left 0
+  .name
+    color var(--primary)
+  .info-section
+    position relative
+  .dark-theme-background-layer
+    z-index 0
+
 </style>

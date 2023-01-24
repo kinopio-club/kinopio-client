@@ -1,7 +1,10 @@
 <template lang="pug">
 dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog")
   section
-    p Theme and Colors
+    p Theme Colors
+    .segmented-buttons
+      ThemeToggle(:showSystem="true")
+
   section
     .row
       p Color to use as the default for new cards
@@ -9,7 +12,7 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
       .button-wrap
         .segmented-buttons
           button(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-            .icon.current-color(:style="{ 'background-color': defaultCardColor }")
+            .current-color(:style="{ 'background-color': defaultCardColor }")
             span Card Color
           button(@click.left.stop="removeDefaultCardColor")
             img.icon.cancel(src="@/assets/add.svg")
@@ -32,6 +35,7 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
 
 <script>
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
@@ -39,14 +43,27 @@ export default {
   name: 'ColorsAndThemeSettings',
   components: {
     BackgroundPreview,
-    ColorPicker
+    ColorPicker,
+    ThemeToggle
   },
   props: {
     visible: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      const { type, payload } = mutation
+      if (type === 'triggerUpdateTheme') {
+        this.defaultColor = utils.cssVariable('secondary-background')
+      }
+    })
+  },
+  mounted () {
+    this.defaultColor = utils.cssVariable('secondary-background')
+  },
   data () {
     return {
-      colorPickerIsVisible: false
+      colorPickerIsVisible: false,
+      defaultColor: '#e3e3e3'
     }
   },
   computed: {
@@ -69,9 +86,8 @@ export default {
       return backgroundIsDefault && backgroundTintIsDefault
     },
     defaultCardColor () {
-      const color = utils.cssVariable('secondary-background')
       const userDefault = this.currentUser.defaultCardBackgroundColor
-      return userDefault || color
+      return userDefault || this.defaultColor
     }
   },
   methods: {
@@ -99,6 +115,9 @@ export default {
       const value = !this.colorPickerIsVisible
       this.closeDialogs()
       this.colorPickerIsVisible = value
+    },
+    updateTheme (themeName) {
+      this.$store.dispatch('themes/update', themeName)
     }
   }
 }
@@ -115,4 +134,5 @@ dialog.theme-and-colors-settings
     border-radius 3px
     display inline-block
     vertical-align -3px
+    margin-right 5px
 </style>

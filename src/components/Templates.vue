@@ -1,5 +1,5 @@
 <template lang="pug">
-section.templates-component(v-if="visible" :open="visible" @click.left.stop)
+section.templates(v-if="visible" :open="visible" @click.left.stop)
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     // Add to Templates
     .button-wrap(@click.left.prevent="toggleCurrentSpaceIsTemplate" @keydown.stop.enter="toggleCurrentSpaceIsTemplate")
@@ -19,7 +19,7 @@ import cache from '@/cache.js'
 import dayjs from 'dayjs'
 
 export default {
-  name: 'TemplatesComponent',
+  name: 'Templates',
   components: {
     SpaceList
   },
@@ -108,7 +108,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.templates-component
+.templates
   padding 0
   padding-top 4px
   .button-wrap
@@ -116,10 +116,14 @@ export default {
   .inline-badge
     &.learning
       background-color #f0e68c
+      color var(--primary-on-light-background)
     &.life
       background-color #b9a8ff
+      color var(--primary-on-light-background)
     &.work-school
       background-color #ffc0cb
+      color var(--primary-on-light-background)
     &.product
       background-color #ee83ee
+      color var(--primary-on-light-background)
 </style>

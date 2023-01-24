@@ -62,8 +62,6 @@ import utils from '@/utils.js'
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
-const defaultCardColor = '#c9c9c9'
-
 export default {
   name: 'StyleActions',
   components: {
@@ -95,14 +93,20 @@ export default {
         this.closeDialogs(shouldPreventEmit)
       } else if (type === 'triggerSelectedCardsContainInBox') {
         this.containCardsInBox()
+      } else if (type === 'triggerUpdateTheme') {
+        this.defaultColor = utils.cssVariable('secondary-background')
       }
     })
+  },
+  mounted () {
+    this.defaultColor = utils.cssVariable('secondary-background')
   },
   data () {
     return {
       framePickerIsVisible: false,
       tagPickerIsVisible: false,
-      colorPickerIsVisible: false
+      colorPickerIsVisible: false,
+      defaultColor: '#e3e3e3'
     }
   },
   computed: {
@@ -140,7 +144,7 @@ export default {
       if (itemsHaveColors && colorsAreEqual) {
         return colors[0]
       } else {
-        return defaultCardColor
+        return this.defaultColor
       }
     },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
@@ -393,7 +397,7 @@ export default {
   padding-bottom 0
   background-color transparent
   &.subsection
-    border 1px solid var(--primary)
+    border 1px solid var(--primary-border)
     padding 4px
     padding-bottom 0
   .row

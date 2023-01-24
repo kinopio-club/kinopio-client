@@ -1,7 +1,7 @@
 <template lang="pug">
 section.invite
   .row
-    span Invite Collaborators
+    p Invite Collaborators
   Loader(:visible="loading")
   template(v-if="!loading && collaboratorKey")
     .row
@@ -25,9 +25,10 @@ section.invite
   //- View and Edit Permissions
   section.subsection.more-info(v-if="tipsIsVisible")
     .row(v-if="spaceIsPrivate")
-      span No account is needed to view private spaces – but editing requires an account.
+      p No account is needed to view private spaces – but editing requires an account.
     .row(v-if="currentUserIsUpgraded")
-      .badge.success Because your account is upgraded, others can create cards here for free
+      .badge.success
+        span Because your account is upgraded, others can create cards here for free
 
 </template>
 
@@ -120,4 +121,5 @@ export default {
   section.more-info
     .badge
       margin 0
+      color var(--primary)
 </style>

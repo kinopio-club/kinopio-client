@@ -6,5 +6,6 @@ export default {
     min: 20
   },
   spaceBetweenCards: 12,
-  maxCardLength: 300
+  maxCardLength: 300,
+  defaultCardWidth: 76
 }

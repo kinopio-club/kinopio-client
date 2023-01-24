@@ -87,6 +87,8 @@ export default {
   .preview-button
     position relative
     cursor pointer
+    border-radius 5px
+    background-color white
     &:hover,
     &:active,
     &.active

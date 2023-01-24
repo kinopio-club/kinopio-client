@@ -2,7 +2,7 @@
 dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}" @click="closeDialogs")
   section
     .row
-      .badge.title Keyboard Shortcuts
+      p Keyboard Shortcuts
       .badge.keyboard-shortcut ?
     .categories
       template(v-for="category in categories" :key="category.name")
@@ -27,6 +27,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
+            img.icon.dark(src="@/assets/dark.svg")
+            span Toggle Dark Theme
+          .badge.keyboard-shortcut T
+      article
+        .row
+          .badge.title
             img.icon.cancel(src="@/assets/add.svg")
             span Close Dialogs
           .badge.keyboard-shortcut Escape
@@ -35,12 +41,6 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
     template(v-if="categoryIsVisible('toolbar')")
       .section-title
         .badge.info(:style="{ 'background-color': categoryColor('toolbar') }") Toolbar
-      //- article
-      //-   .row
-      //-     .badge.title
-      //-       img.icon.card-icon(src="@/assets/card.svg")
-      //-       span Card Mode
-      //-     .badge.keyboard-shortcut C
       article
         .row
           .badge.title
@@ -332,12 +332,17 @@ export default {
 
 <style lang="stylus">
 .keyboard-shortcuts
+  user-select text
   overflow auto
   max-height calc(100vh - 300px)
+  span
+    color var(--primary)
   .title
     padding-left 0
   .badge
     display inline-block
+    color var(--primary)
+
   .badge.info
     img
       margin-left 6px
@@ -346,7 +351,7 @@ export default {
     position static
     margin-bottom 10px
     padding-bottom 10px
-    border-bottom 1px solid var(--primary)
+    border-bottom 1px solid var(--primary-border)
     &:last-child
       margin-bottom 0
       padding-bottom 0
@@ -378,13 +383,19 @@ export default {
     margin-left 6px
   .section-title
     margin-bottom 10px
+    .badge
+      color var(--primary-on-light-background)
+
   .hand
     vertical-align middle
 
   .categories
     margin-top -6px
+    .button-badge
+      color var(--primary)
     .button-badge + .button-badge
       margin-top 6px
+      color var(--primary-on-light-background)
 
   .inbox-icon
     margin 0

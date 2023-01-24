@@ -60,7 +60,7 @@ article#card(
         @touchstart.stop="startResizing"
         @dblclick="removeResize"
       )
-        button.inline-button.resize-button(tabindex="-1")
+        button.inline-button.resize-button(tabindex="-1" :class="{hidden: isPresentationMode}")
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
@@ -106,7 +106,7 @@ article#card(
           //- Url →
           a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
             .url.inline-button-wrap
-              button.inline-button(:style="{background: itemBackground}" :class="{'is-dark': backgroundColorIsDark}" tabindex="-1")
+              button.inline-button(:style="{background: itemBackground}" :class="{'is-dark': backgroundColorIsDark, 'is-light-in-dark-theme': !backgroundColorIsDark && isThemeDark}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
           //- Connector
           .connector.inline-button-wrap(
@@ -194,6 +194,7 @@ import ImageOrVideo from '@/components/ImageOrVideo.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
 import hexToRgba from 'hex-to-rgba'
@@ -249,10 +250,13 @@ export default {
           this.updateMediaUrls()
           this.updateUrlPreview()
         }
+      } else if (type === 'triggerUpdateTheme') {
+        this.defaultColor = utils.cssVariable('secondary-background')
       }
     })
   },
   async mounted () {
+    this.defaultColor = utils.cssVariable('secondary-background')
     const cardIsMissingDimensions = Boolean(!this.card.width || !this.card.height)
     if (cardIsMissingDimensions) {
       let card = { id: this.card.id }
@@ -305,7 +309,8 @@ export default {
       stickyTranslateX: 0,
       stickyTranslateY: 0,
       isAnimationUnsticking: false,
-      stickyStretchResistance: 6
+      stickyStretchResistance: 6,
+      defaultColor: '#e3e3e3'
     }
   },
   computed: {
@@ -377,6 +382,7 @@ export default {
       'spaceCounterZoomDecimal',
       'spaceZoomDecimal'
     ]),
+    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
     itemBackground () {
       let background = 'transparent'
@@ -398,7 +404,7 @@ export default {
     },
     width () {
       if (this.isComment) { return }
-      return this.resizeWidth || this.card.width
+      return this.resizeWidth
     },
     resizeWidth () {
       if (this.isComment) { return }
@@ -453,7 +459,7 @@ export default {
     connectionTypeColorisDark () {
       const lastType = this.connectionTypes[this.connectionTypes.length - 1]
       if (!lastType) {
-        return utils.colorIsDark(this.backgroundColor)
+        return this.backgroundColorIsDark
       } else {
         return utils.colorIsDark(lastType.color)
       }
@@ -567,13 +573,13 @@ export default {
         maxWidth: this.resizeWidth
       }
       if (this.isComment) {
-        color = color || utils.cssVariable('secondary-background')
+        color = color || this.defaultColor
         styles.background = hexToRgba(color, 0.5) || color
       }
       return styles
     },
     backgroundColorIsDark () {
-      const color = this.backgroundColor
+      const color = this.backgroundColor || this.defaultColor
       return utils.colorIsDark(color)
     },
     connectorGlowStyle () {
@@ -1941,6 +1947,8 @@ article
     max-width var(--card-width)
     cursor pointer
     touch-action manipulation
+    .name
+      color var(--primary-on-light-background)
     &:hover,
     &.hover
       box-shadow var(--hover-shadow)
@@ -1949,7 +1957,7 @@ article
       box-shadow var(--active-shadow)
     &.is-dark
       .name
-        color var(--primary-background)
+        color var(--primary-on-dark-background)
     .card-comment
       > .badge
         margin 0
@@ -2046,7 +2054,7 @@ article
           min-width 0
           padding 0
           border none
-          border-color var(--primary)
+          border-color var(--primary-border)
       .connector-glow
         position absolute
         width 32px
@@ -2108,9 +2116,9 @@ article
         .connector-button
           background-color transparent
     .connector-button
-      border 1px solid var(--primary)
+      border 1px solid var(--primary-on-light-background)
       &.is-dark
-        border-color var(--primary-background)
+        border-color var(--primary-border)
     .connector-icon
       position absolute
       left -1px
@@ -2144,6 +2152,12 @@ article
       padding-right 8px
       &.connector-is-visible
         padding-right 0
+      .is-dark
+        border-color var(--primary-border)
+      .is-light-in-dark-theme
+        border-color var(--primary-on-light-background)
+        .icon
+          filter none
 
     .uploading-container
       position absolute

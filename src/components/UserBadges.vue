@@ -17,7 +17,8 @@
     span Guide Maker
 
 .row(v-if="description")
-  .badge.status(v-html="description")
+  .badge.status
+    span {{description}}
 </template>
 
 <script>
@@ -60,4 +61,9 @@ export default {
   flex-wrap wrap
   .badge
     margin-top 10px
+    span
+      color var(--primary)
+.status
+  span
+    color var(--primary)
 </style>

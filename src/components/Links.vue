@@ -134,7 +134,7 @@ export default {
 <style lang="stylus">
 .links
   section
-    border-top 1px solid var(--primary)
+    border-top 1px solid var(--primary-border)
   .results-section
     padding-top 4px
   .button-wrap

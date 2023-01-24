@@ -34,9 +34,11 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
     //- Theme and Colors
     .row
       .button-wrap
-        button(@click.left.stop="toggleThemeAndColorsSettingsIsVisible" :class="{active: themeAndColorsSettingsIsVisible}")
-          span Theme and Colors
-        ThemeAndColorsSettings(:visible="themeAndColorsSettingsIsVisible")
+        .segmented-buttons
+          button(@click.left.stop="toggleThemeColorsSettingsIsVisible" :class="{active: themeColorsSettingsIsVisible}")
+            span Theme Colors
+          ThemeToggle
+        ThemeColorsSettings(:visible="themeColorsSettingsIsVisible")
 
   //- Account Settings
   section
@@ -93,7 +95,8 @@ import ApiKey from '@/components/dialogs/ApiKey.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 import ConnectToTwitter from '@/components/dialogs/ConnectToTwitter.vue'
-import ThemeAndColorsSettings from '@/components/dialogs/ThemeAndColorsSettings.vue'
+import ThemeColorsSettings from '@/components/dialogs/ThemeColorsSettings.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -106,7 +109,8 @@ export default {
     NotificationSettings,
     ControlsSettings,
     ConnectToTwitter,
-    ThemeAndColorsSettings
+    ThemeColorsSettings,
+    ThemeToggle
   },
   props: {
     visible: Boolean
@@ -124,7 +128,7 @@ export default {
       controlsSettingsIsVisible: false,
       connectToTwitterIsVisible: false,
       integrationsSettingsIsVisible: false,
-      themeAndColorsSettingsIsVisible: false
+      themeColorsSettingsIsVisible: false
     }
   },
   computed: {
@@ -140,7 +144,7 @@ export default {
       this.notificationSettingsIsVisible = false
       this.controlsSettingsIsVisible = false
       this.connectToTwitterIsVisible = false
-      this.themeAndColorsSettingsIsVisible = false
+      this.themeColorsSettingsIsVisible = false
     },
     toggleConnectToTwitterIsVisible () {
       const isVisible = this.connectToTwitterIsVisible
@@ -196,11 +200,11 @@ export default {
       this.closeDialogs()
       this.integrationsSettingsIsVisible = !this.integrationsSettingsIsVisible
     },
-    toggleThemeAndColorsSettingsIsVisible () {
-      const isVisible = this.themeAndColorsSettingsIsVisible
+    toggleThemeColorsSettingsIsVisible () {
+      const isVisible = this.themeColorsSettingsIsVisible
       this.closeDialogs()
       this.deleteAllConfirmationVisible = false
-      this.themeAndColorsSettingsIsVisible = !isVisible
+      this.themeColorsSettingsIsVisible = !isVisible
     }
 
   },

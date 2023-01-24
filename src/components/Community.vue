@@ -1,7 +1,7 @@
 <template lang="pug">
 section.community(v-if="visible" :open="visible" @click.left.stop='closeDialogs')
   .row.title-row
-    span Explore Community Spaces
+    span.title Explore Community Spaces
     .button-wrap
       button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
         span RSS
@@ -113,4 +113,6 @@ export default {
     display flex
   button + a
     margin-left 6px
+  .title
+    color var(--primary)
 </style>

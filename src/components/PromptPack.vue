@@ -1,9 +1,9 @@
 <template lang="pug">
 li.prompt-pack(@click.left="select(pack)" v-on:keyup.enter="select(pack)" :class="{ active: isInUserJournalPrompts }" tabindex="0")
   .name-wrap
-    .badge.button-badge(:style="{background: pack.color}")
-      img.icon.minus(v-if="isInUserJournalPrompts" src="@/assets/minus.svg")
-      span {{pack.name}}
+    .badge.button-badge(:style="{background: pack.color, active: isInUserJournalPrompts}")
+      img.icon.cancel(v-if="isInUserJournalPrompts" src="@/assets/add.svg")
+      span.name {{pack.name}}
     button.small-button(@click.stop="toggleViewAllIsActive" :class="{active: viewAllIsActive}" tabindex="0" ref="button")
       img.icon(v-if="viewAllIsActive" src="@/assets/view-hidden.svg")
       img.icon(v-else src="@/assets/view.svg")
@@ -75,6 +75,11 @@ export default {
     margin-right 3px
     background-color var(--secondary-background)
     span
-      color var(--primary)
+      color var(--primary-on-light-background)
       vertical-align 1px
+  .name
+    color var(--primary-on-light-background)
+  .cancel
+    filter none
+    vertical-align 1px
 </style>

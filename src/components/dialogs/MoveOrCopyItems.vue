@@ -2,14 +2,9 @@
 dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
   section(v-if="!actionIsMove")
     //- Copy Card Names
-    .row
-      .url-textarea
-        p(v-for="name in names")
-          span {{name}}
-      .input-button-wrap(@click.left="copyText")
-        button.small-button
-          img.icon.copy(src="@/assets/copy.svg")
-          span Card Names
+    button(@click.left="copyText")
+      img.icon.copy(src="@/assets/copy.svg")
+      span Copy Card Names
 
   section
     .row

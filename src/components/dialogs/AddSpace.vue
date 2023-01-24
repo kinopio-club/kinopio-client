@@ -16,7 +16,7 @@ dialog.add-space.narrow(
           img.icon(src="@/assets/add.svg")
           span New Space
         button(@click.left.stop="toggleEditNewSpaceIsVisible" :class="{ active: editNewSpaceIsVisible }")
-          img.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+          img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
     //- Space Settings
     .row(v-if="editNewSpaceIsVisible")
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
@@ -30,7 +30,7 @@ dialog.add-space.narrow(
           MoonPhase(:moonPhase="moonPhase.name")
           span Daily Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
-          img.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+          img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
     //- Journal Settings
     template(v-if="editPromptsIsVisible")
       Weather
@@ -247,5 +247,7 @@ export default {
   .inbox-icon
     margin 0
     margin-left 5px
+  .moon-phase
+    vertical-align -1px
 
 </style>
