@@ -106,7 +106,7 @@ article#card(
           //- Url →
           a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
             .url.inline-button-wrap
-              button.inline-button(:style="{background: itemBackground}" :class="{'is-dark': backgroundColorIsDark}" tabindex="-1")
+              button.inline-button(:style="{background: itemBackground}" :class="{'is-dark': backgroundColorIsDark, 'is-light-in-dark-theme': !backgroundColorIsDark && isThemeDark}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
           //- Connector
           .connector.inline-button-wrap(
@@ -382,6 +382,7 @@ export default {
       'spaceCounterZoomDecimal',
       'spaceZoomDecimal'
     ]),
+    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
     itemBackground () {
       let background = 'transparent'
@@ -2117,7 +2118,7 @@ article
     .connector-button
       border 1px solid var(--primary-on-light-background)
       &.is-dark
-        border-color var(--primary-on-dark-background)
+        border-color var(--primary-border)
     .connector-icon
       position absolute
       left -1px
@@ -2151,6 +2152,12 @@ article
       padding-right 8px
       &.connector-is-visible
         padding-right 0
+      .is-dark
+        border-color var(--primary-border)
+      .is-light-in-dark-theme
+        border-color var(--primary-on-light-background)
+        .icon
+          filter none
 
     .uploading-container
       position absolute
