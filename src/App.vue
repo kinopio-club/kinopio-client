@@ -701,7 +701,7 @@ dialog
 
 .is-dark-theme
   .icon
-    filter invert(1)
+    filter invert()
 
 .icon
   user-drag none

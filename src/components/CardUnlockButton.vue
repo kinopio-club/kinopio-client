@@ -1,6 +1,6 @@
 <template lang="pug">
-.card-unlock-button.inline-button-wrap(:style="positionStyles" @mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id")
-  button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{ 'is-dark': isDark }")
+.card-unlock-button.inline-button-wrap(:style="positionStyles" @mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id" :class="{invert: shouldInvert}")
+  button.inline-button(tabindex="-1" :style="backgroundStyles")
     .connected-colors
       template(v-for="type in connectionTypes")
         .color(:style="{ background: type.color}")
@@ -18,7 +18,8 @@ export default {
   },
   props: {
     card: Object,
-    position: Object
+    position: Object,
+    shouldInvert: Boolean
   },
   computed: {
     ...mapState([
@@ -43,15 +44,7 @@ export default {
     },
     canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
-    connectionTypes () { return this.$store.getters['currentConnections/typesByCardId'](this.card.id) },
-    isDark () {
-      const type = this.connectionTypes[0]
-      if (!type) {
-        return utils.colorIsDark(this.card.backgroundColor)
-      } else {
-        return utils.colorIsDark(type.color)
-      }
-    }
+    connectionTypes () { return this.$store.getters['currentConnections/typesByCardId'](this.card.id) }
   },
   methods: {
     unlockCard (event) {
@@ -99,5 +92,9 @@ export default {
     overflow hidden
     .color
       width 100%
-
+  &.invert
+    button
+      border-color var(--primary-on-light-background)
+      .icon
+        filter none
 </style>
