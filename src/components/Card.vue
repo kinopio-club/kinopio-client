@@ -1499,17 +1499,21 @@ export default {
         cardIds = multipleCardsSelectedIds
       }
       this.$store.dispatch('currentCards/removeResize', { cardIds })
+      this.updateCardConnectionPaths()
     },
     updateCardConnectionPathsIfOpenSpace () {
       const spaceIsOpen = this.currentSpace.privacy === 'open'
       const isSpaceMember = this['currentUser/isSpaceMember']()
       if (spaceIsOpen && !isSpaceMember) {
-        this.$nextTick(() => {
-          this.$nextTick(() => {
-            this.$store.dispatch('currentConnections/updatePaths', { cardId: this.id, shouldUpdateApi: true })
-          })
-        })
+        this.updateCardConnectionPaths()
       }
+    },
+    updateCardConnectionPaths () {
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.$store.dispatch('currentConnections/updatePaths', { cardId: this.id, shouldUpdateApi: true })
+        })
+      })
     },
     checkIfShouldDragMultipleCards (event) {
       if (event.shiftKey) { return }
