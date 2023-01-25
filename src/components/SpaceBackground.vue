@@ -1,7 +1,7 @@
 <template lang="pug">
 .space-background(:style="backgroundStyles" :class="{invert: shouldInvertInDarkTheme}")
 .layout-viewport#layout-viewport(v-if="visible" :style="{ background: backgroundTint }")
-.layout-viewport.dark-theme-tint(v-if="isThemeDark" :class="{darker: shouldDarkenInDarkTheme}")
+.layout-viewport.dark-theme-tint(v-if="isThemeDark && !spaceBackgroundTintIsDark" :class="{darker: shouldDarkenInDarkTheme}")
 </template>
 
 <script>
@@ -53,6 +53,9 @@ export default {
     backgroundIsDefault () {
       return !this.currentSpace.background
     },
+    spaceBackgroundTintIsDark () {
+      return utils.colorIsDark(this.backgroundTint)
+    },
     shouldDarkenInDarkTheme () {
       if (!this.isThemeDark) { return }
       if (this.backgroundIsDefault) { return true }
@@ -63,6 +66,7 @@ export default {
     shouldInvertInDarkTheme () {
       if (!this.isThemeDark) { return }
       if (this.backgroundIsDefault) { return }
+      if (this.spaceBackgroundTintIsDark) { return }
       const data = this.kinopioBackgroundImageData
       if (!data) { return }
       return data.shouldInvertInDarkTheme
