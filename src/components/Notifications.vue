@@ -127,7 +127,7 @@ aside.notifications(@click.left="closeAllDialogs")
     p {{notifyMoveOrCopyToSpaceDetails.message}}
     .row
       a(:href="notifyMoveOrCopyToSpaceDetails.id")
-        button(@click.left.prevent.stop="changeSpace(notifyMoveOrCopyToSpaceDetails.id)") {{notifyMoveOrCopyToSpaceDetails.name}} →
+        button.variable-length-content(@click.left.prevent.stop="changeSpace(notifyMoveOrCopyToSpaceDetails.id)") {{notifyMoveOrCopyToSpaceDetails.name}} →
 
 </template>
 
