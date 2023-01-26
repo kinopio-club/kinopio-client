@@ -404,7 +404,7 @@ export default {
     },
     width () {
       if (this.isComment) { return }
-      if (this.isSelectedOrDragging || this.currentCardDetailsIsVisible) { return this.card.resizeWidth + 'px' }
+      if (this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible) { return }
       const width = this.card.resizeWidth || this.card.width
       if (!width) { return }
       return width + 'px'
