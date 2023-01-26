@@ -63,7 +63,7 @@ article#card(
         button.inline-button.resize-button(tabindex="-1" :class="{hidden: isPresentationMode}")
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
-    span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
+    span.card-content-wrap(:style="cardContentWrapStyles")
 
       //- Comment
       .card-comment(v-if="isComment")
@@ -407,13 +407,13 @@ export default {
       if (this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible) { return }
       const width = this.card.resizeWidth || this.card.width
       if (!width) { return }
-      return width + 'px'
+      return width
     },
     resizeWidth () {
       if (this.isComment) { return }
       const resizeWidth = this.card.resizeWidth
       if (!resizeWidth) { return }
-      return resizeWidth + 'px'
+      return resizeWidth
     },
     isLocked () {
       if (!this.card) { return }
@@ -534,7 +534,6 @@ export default {
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
     },
     cardClasses () {
-      const width = parseInt(this.width)
       const m = 100
       const l = 150
       let classes = {
@@ -547,9 +546,9 @@ export default {
         'is-locked': this.isLocked,
         'has-url-preview': this.cardUrlPreviewIsVisible,
         'is-dark': this.backgroundColorIsDark,
-        's-width': width < m,
-        'm-width': utils.isBetween({ value: width, min: m, max: l }),
-        'l-width': width > l
+        's-width': this.width < m,
+        'm-width': utils.isBetween({ value: this.width, min: m, max: l }),
+        'l-width': this.width > l
       }
       return classes
     },
@@ -561,6 +560,25 @@ export default {
       let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || this.card.backgroundColor
       return color
     },
+    positionStyle () {
+      let z = this.card.z
+      let pointerEvents = 'auto'
+      if (this.currentCardDetailsIsVisible) {
+        z = 2147483646 // max z
+      } else if (this.isLocked) {
+        z = 0
+        pointerEvents = 'none'
+      }
+      let styles = {
+        left: `${this.x}px`,
+        top: `${this.y}px`,
+        zIndex: z,
+        pointerEvents,
+        transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
+      }
+      styles = this.updateStylesWithWidth(styles)
+      return styles
+    },
     cardStyle () {
       let backgroundColor, nameColor
       if (!this.isVisualCard) {
@@ -571,14 +589,18 @@ export default {
       }
       let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || backgroundColor
       let styles = {
-        background: color,
-        width: this.width,
-        maxWidth: this.resizeWidth
+        background: color
       }
       if (this.isComment) {
         color = color || this.defaultColor
         styles.background = hexToRgba(color, 0.5) || color
       }
+      styles = this.updateStylesWithWidth(styles)
+      return styles
+    },
+    cardContentWrapStyles () {
+      let styles = {}
+      styles = this.updateStylesWithWidth(styles)
       return styles
     },
     backgroundColorIsDark () {
@@ -715,26 +737,6 @@ export default {
     },
     nameIsColor () {
       return utils.colorIsValid(this.card.name)
-    },
-    positionStyle () {
-      let z = this.card.z
-      let pointerEvents = 'auto'
-      if (this.currentCardDetailsIsVisible) {
-        z = 2147483646 // max z
-      } else if (this.isLocked) {
-        z = 0
-        pointerEvents = 'none'
-      }
-      let styles = {
-        left: `${this.x}px`,
-        top: `${this.y}px`,
-        zIndex: z,
-        width: this.width,
-        maxWidth: this.resizeWidth,
-        pointerEvents,
-        transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
-      }
-      return styles
     },
     canEditCard () { return this['currentUser/canEditCard'](this.card) },
     normalizedName () {
@@ -1499,7 +1501,15 @@ export default {
         cardIds = multipleCardsSelectedIds
       }
       this.$store.dispatch('currentCards/removeResize', { cardIds })
-      this.updateCardConnectionPaths()
+    },
+    updateStylesWithWidth (styles) {
+      if (this.width) {
+        styles.width = this.width + 'px'
+      }
+      if (this.resizeWidth) {
+        styles.maxWidth = this.resizeWidth + 'px'
+      }
+      return styles
     },
     updateCardConnectionPathsIfOpenSpace () {
       const spaceIsOpen = this.currentSpace.privacy === 'open'
