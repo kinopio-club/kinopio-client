@@ -429,6 +429,8 @@ label // used for checkbox buttons
   &.small-button
     height 20px
     padding 0px 4px
+  &.variable-length-content
+    height fit-content
 
 .unselectable
   pointer-events none !important
