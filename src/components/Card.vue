@@ -94,7 +94,7 @@ article#card(
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
-      span.card-buttons-wrap(v-if="isLocked || cardButtonUrl && !isComment || connectorIsVisible")
+      span.card-buttons-wrap(v-if="isCardButtonsVisible")
         //- Lock
         template(v-if="isLocked")
           //- based on CardUnlockButton.vue
@@ -485,6 +485,9 @@ export default {
         }
       }
       return user
+    },
+    isCardButtonsVisible () {
+      return this.isLocked || (this.cardButtonUrl && !this.isComment) || this.connectorIsVisible
     },
     connectorIsVisible () {
       if (this.isPresentationMode && !this.hasConnections) { return }
@@ -1503,11 +1506,15 @@ export default {
       this.$store.dispatch('currentCards/removeResize', { cardIds })
     },
     updateStylesWithWidth (styles) {
+      const connectorIsNotVisibleToReadOnlyUser = (!this.connectorIsVisible && !this.isLocked) || this.isComment
       if (this.width) {
         styles.width = this.width + 'px'
       }
       if (this.resizeWidth) {
         styles.maxWidth = this.resizeWidth + 'px'
+      } else if (connectorIsNotVisibleToReadOnlyUser && this.width) {
+        const connectorIconWidth = 10
+        styles.width = this.width - connectorIconWidth + 'px'
       }
       return styles
     },
