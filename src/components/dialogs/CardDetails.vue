@@ -961,6 +961,7 @@ export default {
       })
     },
     scrollIntoView (behavior) {
+      if (utils.isIPhone()) { return }
       const element = this.$refs.dialog
       utils.scrollIntoView(element, behavior)
     },
