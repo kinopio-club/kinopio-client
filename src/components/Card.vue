@@ -106,7 +106,7 @@ article#card(
           //- Url →
           a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
             .url.inline-button-wrap
-              button.inline-button(:style="{background: itemBackground}" :class="{'is-dark': backgroundColorIsDark, 'is-light-in-dark-theme': !backgroundColorIsDark && isThemeDark}" tabindex="-1")
+              button.inline-button(:style="{background: itemBackground}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
           //- Connector
           .connector.inline-button-wrap(
@@ -124,7 +124,12 @@ article#card(
               template(v-else v-for="type in connectionTypes")
                 .color(:style="{ background: type.color}")
 
-            button.inline-button.connector-button(:class="{ active: isConnectingTo || isConnectingFrom, 'is-dark': connectionTypeColorisDark}" :style="{background: connectorButtonBackground }" tabindex="-1" @keyup.stop.enter="showCardDetails")
+            button.inline-button.connector-button(
+              :class="{ active: isConnectingTo || isConnectingFrom, 'is-light-in-dark-theme': isConnectorLightInDarkTheme, 'is-dark-in-light-theme': isConnectorDarkInLightTheme}"
+              :style="{background: connectorButtonBackground }"
+              tabindex="-1"
+              @keyup.stop.enter="showCardDetails"
+            )
               template(v-if="hasConnections || isConnectingFrom || isConnectingTo")
                 img.connector-icon(src="@/assets/connector-closed-in-card.svg")
               //- template(v-else)
@@ -384,6 +389,16 @@ export default {
     ]),
     isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
+    isDarkInLightTheme () { return this.backgroundColorIsDark && !this.isThemeDark },
+    isLightInDarkTheme () { return !this.backgroundColorIsDark && this.isThemeDark },
+    isConnectorDarkInLightTheme () {
+      if (this.connectionTypeColorisDark) { return this.connectionTypeColorisDark }
+      return this.isDarkInLightTheme
+    },
+    isConnectorLightInDarkTheme () {
+      if (this.connectionTypeColorisDark) { return !this.connectionTypeColorisDark }
+      return this.isLightInDarkTheme
+    },
     itemBackground () {
       let background = 'transparent'
       if (this.isImageCard) {
@@ -461,11 +476,8 @@ export default {
     connectionTypes () { return this['currentConnections/typesByCardId'](this.id) },
     connectionTypeColorisDark () {
       const lastType = this.connectionTypes[this.connectionTypes.length - 1]
-      if (!lastType) {
-        return this.backgroundColorIsDark
-      } else {
-        return utils.colorIsDark(lastType.color)
-      }
+      if (!lastType) { return }
+      return utils.colorIsDark(lastType.color)
     },
     name () {
       this.updateMediaUrls()
@@ -2140,9 +2152,7 @@ article
         .connector-button
           background-color transparent
     .connector-button
-      border 1px solid var(--primary-on-light-background)
-      &.is-dark
-        border-color var(--primary-border)
+      border 1px solid var(--primary-border)
     .connector-icon
       position absolute
       left -1px
@@ -2176,12 +2186,17 @@ article
       padding-right 8px
       &.connector-is-visible
         padding-right 0
-      .is-dark
-        border-color var(--primary-border)
-      .is-light-in-dark-theme
-        border-color var(--primary-on-light-background)
-        .icon
-          filter none
+
+    .is-light-in-dark-theme
+      border-color var(--primary-on-light-background)
+      .icon,
+      .connector-icon
+        filter none
+    .is-dark-in-light-theme
+      border-color var(--primary-on-dark-background)
+      .icon,
+      .connector-icon
+        filter invert()
 
     .uploading-container
       position absolute
