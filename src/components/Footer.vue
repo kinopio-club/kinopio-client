@@ -362,7 +362,7 @@ export default {
         offsetTop = 15
       }
       let style = {
-        transform: `translate(${left}px) scale(${counterScale})`,
+        transform: `translateX(${left}px) scale(${counterScale})`,
         maxWidth: Math.round(viewport.width * scale) + 'px'
       }
       if (utils.isIPhone() && scale <= 1) {
