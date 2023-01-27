@@ -66,7 +66,6 @@ export default {
     shouldInvertInDarkTheme () {
       if (!this.isThemeDark) { return }
       if (this.backgroundIsDefault) { return }
-      if (this.spaceBackgroundTintIsDark) { return }
       const data = this.kinopioBackgroundImageData
       if (!data) { return }
       return data.shouldInvertInDarkTheme
