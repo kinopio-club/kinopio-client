@@ -168,7 +168,7 @@ export default {
     controlsIsVisible () {
       const contentDialogIsVisible = Boolean(this.cardDetailsIsVisibleForCardId || this.multipleSelectedActionsIsVisible || this.connectionDetailsIsVisibleForConnectionId)
       // only hide footer on touch devices
-      if (!this.isTouchDevice) { return true }
+      if (!this.isMobileOrTouch) { return true }
       if (this.shouldExplicitlyHideFooter) { return }
       let isVisible = true
       if (contentDialogIsVisible) { isVisible = false }
@@ -353,7 +353,6 @@ export default {
     },
     updatePositionInVisualViewport () {
       const viewport = utils.visualViewport()
-      const layoutViewport = document.getElementById('layout-viewport')
       const scale = utils.roundFloat(viewport.scale)
       const counterScale = utils.roundFloat(1 / viewport.scale)
       const left = Math.round(viewport.offsetLeft)
