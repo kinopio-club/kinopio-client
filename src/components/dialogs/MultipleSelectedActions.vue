@@ -314,6 +314,9 @@ export default {
     styles () {
       const position = this.$store.state.multipleSelectedActionsPosition
       let zoom = this.spaceCounterZoomDecimal
+      if (this.$store.state.isTouchDevice) {
+        zoom = 1 / utils.visualViewport().scale
+      }
       return {
         backgroundColor: this.userColor,
         left: position.x + 'px',
