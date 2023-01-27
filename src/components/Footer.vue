@@ -363,7 +363,7 @@ export default {
       }
       const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height)
       let style = {
-        transform: `translate(${left}px, ${top + offsetTop}px) scale(${counterScale})`,
+        transform: `translate(${left}px) scale(${counterScale})`,
         maxWidth: Math.round(viewport.width * scale) + 'px'
       }
       if (utils.isIPhone() && scale <= 1) {

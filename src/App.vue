@@ -325,6 +325,7 @@ body
   overflow auto // enables window.scrollBy support
 
 .app
+  height calc(100vh - env(safe-area-inset-bottom)) // safari mobile fix to keep footer visible
   position relative
   overflow hidden // enforces state.pageHeight/pageWidth
   > .development-badge
