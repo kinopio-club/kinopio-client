@@ -11,6 +11,7 @@ template(v-for="card in lockedCards")
 <script>
 import BoxUnlockButton from '@/components/BoxUnlockButton.vue'
 import CardUnlockButton from '@/components/CardUnlockButton.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'LockedItemButtons',
@@ -30,7 +31,8 @@ export default {
   },
   computed: {
     lockedBoxes () { return this.$store.getters['currentBoxes/isLocked'] },
-    lockedCards () { return this.$store.getters['currentCards/isLocked'] }
+    lockedCards () { return this.$store.getters['currentCards/isLocked'] },
+    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' }
   },
   methods: {
     boxButtonPosition (box) {

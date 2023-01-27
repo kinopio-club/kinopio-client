@@ -464,7 +464,7 @@ export default {
       vertical-align -3px
       margin-right 4px
   .results-section
-    border-top 1px solid var(--primary)
+    border-top 1px solid var(--primary-border)
     padding-top 3px
   .loader
     margin-left 6px

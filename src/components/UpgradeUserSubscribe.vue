@@ -35,15 +35,19 @@
   div(ref="cardExpiry")
   div(ref="cardCvc")
 
-  .badge.danger(v-if="error.allFieldsAreRequired") All fields are required
-  .badge.danger(v-if="error.stripeError") {{error.stripeErrorMessage}}
-  .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+  .badge.danger(v-if="error.allFieldsAreRequired")
+    span All fields are required
+  .badge.danger(v-if="error.stripeError")
+    span {{error.stripeErrorMessage}}
+  .badge.danger(v-if="error.unknownServerError")
+    span (シ_ _)シ Something went wrong, Please try again or contact support
 
   .summary
     User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
     .badge.info
       span {{price.amount}}/{{price.period}}
-    .badge.secondary Tax included
+    .badge.secondary
+      span Tax included
 
   button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
     span Upgrade Account
@@ -154,7 +158,8 @@ export default {
       ]
       const country = codes.find(code => code.name === this.currentCountryName)
       return country.code
-    }
+    },
+    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' }
   },
   methods: {
     async updateCountries () {
@@ -178,9 +183,19 @@ export default {
     mountStripeElements () {
       if (this.loading.stripeIsLoading) { return }
       elements = stripe.elements()
+
+      let placeholderColor = '#767676'
+      if (this.isThemeDark) {
+        placeholderColor = '#898989'
+      }
+      // https://stripe.com/docs/js/appendix/style
       let options = {
         style: {
-          base: { fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" },
+          base: {
+            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+            color: utils.cssVariable('primary'),
+            '::placeholder': { color: placeholderColor }
+          },
           invalid: { color: utils.cssVariable('primary') } // change if dark theme
         },
         classes: {
@@ -188,6 +203,7 @@ export default {
           invalid: 'stripe-element-invalid'
         }
       }
+
       // card number
       options.placeholder = 'Card Number'
       cardNumber = elements.create('cardNumber', options)
@@ -384,4 +400,7 @@ export default {
   .subsection
     margin-bottom 10px
     padding-bottom 0
+  .badge
+    span
+      color var(--primary)
 </style>

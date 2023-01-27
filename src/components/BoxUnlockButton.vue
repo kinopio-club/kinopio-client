@@ -1,6 +1,6 @@
 <template lang="pug">
 .box-unlock-button.inline-button-wrap(:style="positionStyles" @mouseup.left="unlockBox" @touchend="unlockBox")
-  button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{ 'is-dark': isDark }")
+  button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
     img.icon.lock-icon(src="@/assets/lock.svg")
 </template>
 
@@ -38,10 +38,15 @@ export default {
     },
     canEditBox () { return this.$store.getters['currentUser/canEditBox'](this.box) },
     connectionTypes () { return this.$store.getters['currentConnections/typesByBoxId'](this.box.id) },
-    isDark () {
+    // theme
+    backgroundColorIsDark () {
       const color = this.box.color
       return utils.colorIsDark(color)
-    }
+    },
+    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
+    isDarkInLightTheme () { return this.backgroundColorIsDark && !this.isThemeDark },
+    isLightInDarkTheme () { return !this.backgroundColorIsDark && this.isThemeDark }
+
   },
   methods: {
     unlockBox (event) {
@@ -76,5 +81,13 @@ export default {
     left 5.5px
     top 2px
     height 10px
+  .is-light-in-dark-theme
+    border-color var(--primary-on-light-background)
+    .icon
+      filter none
+  .is-dark-in-light-theme
+    border-color var(--primary-on-dark-background)
+    .icon
+      filter invert()
 
 </style>

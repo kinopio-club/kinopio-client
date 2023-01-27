@@ -19,14 +19,18 @@
       "x": 70,
       "y": 100,
       "z": 0,
-      "name": "Get your thoughts, ideas and feelings out"
+      "name": "Get your thoughts, ideas and feelings out",
+      "width": 235,
+      "height": 49
     },
     {
       "id": "wQ9-NzxQyWoIGGKEgHRMF",
       "x": 81,
       "y": 164,
       "name": "Connect them together\n\n[More Help](https://help.kinopio.club)",
-      "z": 3
+      "z": 3,
+      "width": 184,
+      "height": 65
     }
   ],
   "connections": [

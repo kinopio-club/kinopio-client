@@ -289,7 +289,7 @@ export default {
 <style lang="stylus">
 .removed
   overflow auto
-  border-top 1px solid var(--primary)
+  border-top 1px solid var(--primary-border)
   .results-section
     max-height initial
     .button-wrap

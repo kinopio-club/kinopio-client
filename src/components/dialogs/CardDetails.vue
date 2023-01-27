@@ -519,6 +519,9 @@ export default {
     },
     styles () {
       let zoom = this.spaceCounterZoomDecimal
+      if (this.$store.state.isTouchDevice) {
+        zoom = 1 / utils.visualViewport().scale
+      }
       const left = `${this.card.x + 8}px`
       const top = `${this.card.y + 8}px`
       return { transform: `scale(${zoom})`, left, top }
@@ -968,8 +971,10 @@ export default {
       }
       utils.disablePinchZoom()
       this.$nextTick(() => {
-        this.scrollIntoView(behavior)
-        this.focusName()
+        if (!utils.isIPhone()) {
+          this.scrollIntoView(behavior)
+          this.focusName()
+        }
         this.triggerUpdateMagicPaintPositionOffset()
         this.triggerUpdatePositionInVisualViewport()
       })

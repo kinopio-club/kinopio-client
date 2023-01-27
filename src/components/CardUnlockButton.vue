@@ -1,6 +1,6 @@
 <template lang="pug">
 .card-unlock-button.inline-button-wrap(:style="positionStyles" @mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id")
-  button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{ 'is-dark': isDark }")
+  button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
     .connected-colors
       template(v-for="type in connectionTypes")
         .color(:style="{ background: type.color}")
@@ -19,6 +19,22 @@ export default {
   props: {
     card: Object,
     position: Object
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      const { type, payload } = mutation
+      if (type === 'triggerUpdateTheme') {
+        this.defaultColor = utils.cssVariable('secondary-background')
+      }
+    })
+  },
+  mounted () {
+    this.defaultColor = utils.cssVariable('secondary-background')
+  },
+  data () {
+    return {
+      defaultColor: '#e3e3e3'
+    }
   },
   computed: {
     ...mapState([
@@ -44,14 +60,14 @@ export default {
     canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     connectionTypes () { return this.$store.getters['currentConnections/typesByCardId'](this.card.id) },
-    isDark () {
-      const type = this.connectionTypes[0]
-      if (!type) {
-        return utils.colorIsDark(this.card.backgroundColor)
-      } else {
-        return utils.colorIsDark(type.color)
-      }
-    }
+    // theme
+    backgroundColorIsDark () {
+      const color = this.card.backgroundColor || this.defaultColor
+      return utils.colorIsDark(color)
+    },
+    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
+    isDarkInLightTheme () { return this.backgroundColorIsDark && !this.isThemeDark },
+    isLightInDarkTheme () { return !this.backgroundColorIsDark && this.isThemeDark }
   },
   methods: {
     unlockCard (event) {
@@ -99,5 +115,13 @@ export default {
     overflow hidden
     .color
       width 100%
+  .is-light-in-dark-theme
+    border-color var(--primary-on-light-background)
+    .icon
+      filter none
+  .is-dark-in-light-theme
+    border-color var(--primary-on-dark-background)
+    .icon
+      filter invert()
 
 </style>

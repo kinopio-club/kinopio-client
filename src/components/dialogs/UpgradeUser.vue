@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keydown.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop @keydown.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     .row
       p Upgrade your account for unlimited cards and uploads
@@ -13,8 +13,9 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
     UpgradeUserSubscribe(:visible="currentUserIsSignedIn" :priceIsMonthly="priceIsMonthly" :price="price")
   section(v-if="currentUserIsSignedIn")
-    img.icon(src="@/assets/lock.svg")
-    span Payments securely processed by Stripe. Card info is not sent to Kinopio.
+    p
+      img.icon(src="@/assets/lock.svg")
+      span Payments securely processed by Stripe. Card info is not sent to Kinopio.
 
 </template>
 
@@ -117,4 +118,7 @@ export default {
     right -15px
     top -6px
     margin 0
+  p
+    color var(--primary)
+
 </style>

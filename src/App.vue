@@ -3,7 +3,7 @@
   @pointermove="broadcastUserCursor"
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
-  :class="{ 'no-background': isAddPage }"
+  :class="{ 'no-background': isAddPage, 'is-dark-theme': isThemeDark }"
 )
   base(v-if="isAddPage" target="_blank")
   OutsideSpaceBackground
@@ -18,7 +18,6 @@
   LinkDetails
   UserDetails
   CardListItemOptions
-  Minimap
   WindowHistoryHandler
   KeyboardShortcutsHandler
   ScrollHandler
@@ -37,7 +36,6 @@ import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import ScrollHandler from '@/components/ScrollHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
-import Minimap from '@/components/Minimap.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
@@ -61,7 +59,6 @@ export default {
     WindowHistoryHandler,
     TagDetails,
     LinkDetails,
-    Minimap,
     ItemsLocked,
     UserDetails,
     NotificationsWithPosition,
@@ -91,6 +88,7 @@ export default {
     window.addEventListener('touchstart', this.touchStart)
     window.addEventListener('touchmove', this.touchMove)
     window.addEventListener('touchend', this.touchEnd)
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.updateTheme)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateUserHasScrolled)
@@ -105,6 +103,7 @@ export default {
     }
   },
   computed: {
+    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
     spaceName () { return this.$store.state.currentSpace.name },
     isDevelopment () {
       if (import.meta.env.MODE === 'development') {
@@ -151,6 +150,17 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
+    updateTheme (event) {
+      const themeIsSystem = this.$store.state.currentUser.themeIsSystem
+      if (!themeIsSystem) { return }
+      let themeName
+      if (event.matches) {
+        themeName = 'dark'
+      } else {
+        themeName = 'light'
+      }
+      this.$store.dispatch('themes/update', themeName)
+    },
     toggleIsPinchZooming (event) {
       if (utils.shouldIgnoreTouchInteraction(event)) { return }
       this.isPinchZooming = true
@@ -273,43 +283,18 @@ export default {
 
 <style lang="stylus">
 :root
-  // theme vars
-  --primary black
-  --primary-background white
-  --text-link #143997
-  --primary-transparent rgba(0,0,0,0.5)
-
-  // --secondary #818181
-  --secondary-background #e3e3e3
-  --secondary-hover-background #d8d8d8
-  --secondary-active-background #cdcdcd
-
-  --light-shadow rgba(0,0,0,0.20)
-  --heavy-shadow rgba(0,0,0,0.25)
-
-  --danger-background #ffb8b3
-  --danger-hover-background #ffa49e
-  --danger-active-background #ff928b
-
-  --info-background #90ffff
-  --success-background #67ffbb
-  --search-background yellow
-
-  --button-border #999
-
-  // dark variants
-  --text-link-dark #9ab2ee
-  --secondary-active-background-dark #666
-
+  // theme vars in themes.js
   // non-theme vars
-  --max-z 2147483646
+  --primary-on-dark-background white
+  --primary-on-light-background black
+  --dark-background-tint-on-light-background rgba(0,0,0,0.3)
   --hover-shadow 3px 3px 0 var(--heavy-shadow)
   --active-shadow 5px 5px 0 var(--light-shadow)
   --active-inset-shadow inset 0 2px 3px var(--light-shadow)
   --button-hover-shadow 2px 2px 0 var(--heavy-shadow)
   --button-active-inset-shadow inset 0 1px 2px var(--heavy-shadow)
+  --max-z 2147483646
   --entity-radius 5px
-
   --serif-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
 
@@ -358,6 +343,7 @@ video
 input,
 textarea,
 .stripe-element
+  color var(--primary)
   touch-action manipulation
   margin 0
   font-size 1em // required to disable ios input zooming
@@ -366,7 +352,7 @@ textarea,
   min-width 0 // firefox hack
   background transparent
   border 0
-  border-bottom 1px solid var(--primary)
+  border-bottom 1px solid var(--primary-border)
   border-radius 0
   padding 1px
   margin-bottom 10px
@@ -385,7 +371,7 @@ label // used for checkbox buttons
   text-align left
   padding 5px 9px
   margin 0
-  border 1px solid var(--primary)
+  border 1px solid var(--primary-border)
   background-color var(--primary-background)
   border-radius var(--entity-radius)
   cursor pointer
@@ -443,9 +429,20 @@ label // used for checkbox buttons
   &.small-button
     height 20px
     padding 0px 4px
+  &.variable-length-content
+    height fit-content
 
 .unselectable
   pointer-events none !important
+
+table
+  margin-top 10px
+  border-collapse collapse
+  td
+    border 1px solid var(--secondary-active-background)
+    color var(--primary)
+    padding 5px
+    user-select text
 
 select
   max-width 100%
@@ -561,11 +558,15 @@ dialog
   pointer-events all
   z-index var(--max-z)
   background-color var(--primary-background)
-  border 1px solid var(--primary)
+  border 1px solid var(--primary-border)
   box-shadow var(--hover-shadow)
   border-radius var(--entity-radius)
   overscroll-behavior-y contain
   cursor auto
+  p,
+  input,
+  textarea
+    color var(--primary)
   &.is-pinnable
     transition left 0.1s, top 0.1s
   &.narrow
@@ -611,6 +612,7 @@ dialog
       align-items flex-start
   section
     padding 8px
+    user-select text
     &:first-child
       border-top-left-radius calc(var(--entity-radius) - 1px)
       border-top-right-radius calc(var(--entity-radius) - 1px)
@@ -626,7 +628,7 @@ dialog
     padding 5px
     border-radius var(--entity-radius)
   section + section
-    border-top 1px solid var(--primary)
+    border-top 1px solid var(--primary-border)
   section.subsection + section,
   section.subsection + .row
     margin-top 10px
@@ -643,6 +645,16 @@ dialog
     color var(--text-link)
     &:hover
       text-decoration none
+
+  .dark-theme-background-layer
+    position absolute
+    background-color var(--dark-background-tint-on-light-background)
+    top -1px
+    left -1px
+    width calc(100% + 2px)
+    height calc(100% + 2px)
+    border-radius var(--entity-radius)
+    z-index -1
 
 .segmented-buttons
   &.first-row
@@ -688,6 +700,10 @@ dialog
   button + button,
   label + button
     margin-left -1px
+
+.is-dark-theme
+  .icon
+    filter invert()
 
 .icon
   user-drag none
@@ -746,6 +762,7 @@ dialog
 
 label,
 li
+  color var(--primary)
   &:hover,
   &:focus
     input[type="checkbox"]
@@ -771,6 +788,14 @@ li
       background-repeat no-repeat
       background-position center
       background-size 69%
+
+.is-dark-theme
+  label
+    input[type="checkbox"]
+      &:checked
+        background-image url('assets/checkmark-invert.svg')
+      &.add
+        background-image url('assets/add-invert.svg')
 
 li
   input[type="checkbox"]
@@ -843,7 +868,7 @@ code
   &.success
     background var(--success-background)
   &.status
-    background var(--secondary-background)
+    background var(--secondary-active-background-dark)
   &.secondary
     background var(--secondary-active-background)
   &.search
@@ -851,7 +876,7 @@ code
   &.keyboard-shortcut
     min-height initial
     min-width initial
-    background-color var(--secondary-background)
+    background-color var(--secondary-active-background-dark)
   &.last-child
     margin 0
 
@@ -933,8 +958,9 @@ code
 
 .cut
   vertical-align 1px
-.copy
-  vertical-align -0.5px
+.small-button
+  .copy
+    vertical-align -1px
 
 .cancel
   transform rotate(45deg)
@@ -989,6 +1015,7 @@ code
     vertical-align 2px
 
 .url-textarea
+  color var(--primary)
   background-color var(--secondary-background)
   border 0
   border-radius 3px
@@ -997,6 +1024,14 @@ code
   min-height 35px
   word-wrap anywhere
   overflow auto
+  &.single-line
+    max-height 35px
+    overflow hidden
+    span
+      width 100000px
+      display inline-block
+      padding-top 5px
+
 .logo-image
   background-image url('assets/logo-base.png')
 .logo
@@ -1044,7 +1079,7 @@ progress
   appearance none
   width 100%
   height 8px
-  border 1px solid var(--primary)
+  border 1px solid var(--primary-border)
   border-radius 3px
   background-color var(--secondary-background)
 progress::-webkit-progress-bar

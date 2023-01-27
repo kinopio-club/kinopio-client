@@ -203,6 +203,7 @@ export default {
         const currentSpace = this.$store.state.currentSpace
         this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
         this.$store.commit('triggerCheckIfUseHasInboxSpace')
+        this.$store.dispatch('themes/restore')
       } else {
         await this.handleErrors(result)
       }
@@ -236,6 +237,7 @@ export default {
         this.$store.commit('hasRestoredFavorites', false)
         this.$store.dispatch('currentUser/restoreUserFavorites')
         this.$store.commit('triggerUpdateNotifications')
+        this.$store.dispatch('themes/restore')
         if (shouldLoadLastSpace) {
           this.$store.dispatch('currentSpace/loadLastSpace')
           this.$store.commit('triggerUpdateWindowHistory', { space: this.$store.state.currentSpace })

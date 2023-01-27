@@ -150,7 +150,7 @@ export default {
     // ignore pinned dialogs
     let pinnedDialogs = []
     dialogs.forEach(dialog => {
-      if (dialog.dataset['is-pinned'] === 'true') {
+      if (dialog.dataset.isPinned === 'true') {
         pinnedDialogs.push(dialog)
       }
     })
@@ -371,7 +371,7 @@ export default {
       return true
     }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
-      console.warn(`🚑 passed value is not ${type}`, value, origin)
+      console.error(`🚑 passed value is not ${type}`, value, origin)
       return false
     } else {
       return true
@@ -763,6 +763,14 @@ export default {
   invertColor (color) {
     return colord(color).invert().toHex()
   },
+  setCssVariable (key, value) {
+    document.documentElement.style.setProperty(`--${key}`, value)
+  },
+  // colorToRGBA (color, opacity) {
+  //   opacity = opacity || '1'
+  //   const { r, g, b } = colord(color).toRgb()
+  //   return `rgba(${r}, ${g}, ${b}, ${opacity})`
+  // },
 
   // normalize items
 
@@ -787,7 +795,7 @@ export default {
   // Cards
 
   emptyCard () {
-    return { width: 76, height: 32 }
+    return { width: consts.defaultCardWidth, height: 32 }
   },
   spaceBetweenCards () {
     let spaceBetween = 12

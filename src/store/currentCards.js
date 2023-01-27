@@ -1,5 +1,6 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
@@ -197,7 +198,7 @@ const currentCards = {
     // create
 
     add: (context, { position, isParentCard, name, id, backgroundColor }) => {
-      utils.typeCheck({ value: position, type: 'object', origin: 'addCard' })
+      utils.typeCheck({ value: position, type: 'object' })
       if (context.rootGetters['currentSpace/shouldPreventAddCard']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
@@ -214,7 +215,6 @@ const currentCards = {
         frameId: 0,
         userId: context.rootState.currentUser.id,
         urlPreviewIsVisible: true,
-        commentIsVisible: true,
         width: utils.emptyCard().width,
         height: utils.emptyCard().height,
         isLocked: false,
@@ -242,8 +242,8 @@ const currentCards = {
           z: card.z || context.state.ids.length + 1,
           name: card.name,
           frameId: card.frameId || 0,
-          width: card.width || utils.emptyCard().width,
-          height: card.height || utils.emptyCard().height,
+          width: card.width,
+          height: card.height,
           userId: context.rootState.currentUser.id,
           backgroundColor: card.backgroundColor,
           shouldUpdateUrlPreview: true,
@@ -258,7 +258,7 @@ const currentCards = {
       }, { root: true })
     },
     paste: (context, { card, cardId }) => {
-      utils.typeCheck({ value: card, type: 'object', origin: 'pasteCard' })
+      utils.typeCheck({ value: card, type: 'object' })
       card.id = cardId || nanoid()
       card.spaceId = currentSpaceId
       const prevCards = context.getters.all
@@ -317,8 +317,8 @@ const currentCards = {
       context.dispatch('updateDimensions', { cards: [card] })
     },
     toggleChecked (context, { cardId, value }) {
-      utils.typeCheck({ value, type: 'boolean', origin: 'toggleChecked' })
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleChecked' })
+      utils.typeCheck({ value, type: 'boolean' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       const card = context.getters.byId(cardId)
       let name = card.name
       const checkbox = utils.checkboxFromString(name)
@@ -335,7 +335,7 @@ const currentCards = {
       })
     },
     removeChecked: (context, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'removeChecked' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       const card = context.getters.byId(cardId)
       let name = card.name
       name = name.replace('[x]', '').trim()
@@ -344,15 +344,6 @@ const currentCards = {
         name,
         nameUpdatedAt: new Date()
       })
-    },
-    commentIsVisible: (context, { cardId, value }) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'commentIsVisible' })
-      context.dispatch('update', {
-        id: cardId,
-        commentIsVisible: value
-      })
-      const card = context.getters.byId(cardId)
-      context.dispatch('updateDimensions', { cards: [card] })
     },
     removeTrackingQueryStrings: (context, { cardId }) => {
       setTimeout(() => {
@@ -396,10 +387,10 @@ const currentCards = {
     updateDimensions: (context, { cards, cardId }) => {
       let newCards = []
       if (cards) {
-        utils.typeCheck({ value: cards, type: 'array', origin: 'updateDimensions cards' })
+        utils.typeCheck({ value: cards, type: 'array' })
         newCards = cards
       } else if (cardId) {
-        utils.typeCheck({ value: cardId, type: 'string', origin: 'updateDimensions cardId' })
+        utils.typeCheck({ value: cardId, type: 'string' })
         const card = context.getters.byId(cardId)
         if (!card) { return }
         newCards.push(card)
@@ -424,7 +415,7 @@ const currentCards = {
             height: Math.ceil(card.height)
           }
           context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
-          // context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
+          context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           context.commit('update', body)
           context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
           updateTallestCardHeight(card.height)
@@ -449,11 +440,9 @@ const currentCards = {
     },
     removeResize: (context, { cardIds }) => {
       cardIds.forEach(cardId => {
-        const updates = { id: cardId, resizeWidth: null }
-        context.dispatch('update', updates)
-        context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
-        const card = context.getters.byId(cardId)
-        context.dispatch('updateDimensions', { cards: [card] })
+        const body = { id: cardId, resizeWidth: null, width: null }
+        context.dispatch('update', body)
+        context.dispatch('updateDimensions', { cardId })
       })
     },
 
@@ -472,6 +461,9 @@ const currentCards = {
       }
       let connections = []
       let cards = context.getters.isSelected
+      cards = cards.filter(card => Boolean(card))
+      if (!cards.length) { return }
+      cards = cards.filter(card => !card.isLocked)
       // prevent cards bunching up at 0
       cards.forEach(card => {
         if (!card) { return }
@@ -548,8 +540,8 @@ const currentCards = {
         const position = utils.cardPositionFromElement(id)
         card.x = position.x
         card.y = position.y
-        const { x, y, z, commentIsVisible } = card
-        return { id, x, y, z, commentIsVisible }
+        const { x, y, z } = card
+        return { id, x, y, z }
       })
       cards = cards.filter(card => Boolean(card))
       context.commit('move', { cards, spaceId })

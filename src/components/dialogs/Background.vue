@@ -2,7 +2,7 @@
 dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
     BackgroundPreview(:space="currentSpace")
-    span Background
+    span.title Background
 
   section(@mouseup.stop @touchend.stop)
     textarea(
@@ -103,7 +103,8 @@ export default {
         sizeLimit: false,
         unknownUploadError: false
       },
-      backgroundTint: ''
+      backgroundTint: '',
+      defaultColor: '#e3e3e3'
     }
   },
   created () {
@@ -113,10 +114,14 @@ export default {
         if (cardId) { return }
         if (spaceId !== this.currentSpace.id) { return }
         this.updateSpaceBackground(url)
+      } else if (mutation.type === 'triggerUpdateTheme') {
+        this.defaultColor = utils.cssVariable('secondary-background')
       }
     })
   },
-
+  mounted () {
+    this.defaultColor = utils.cssVariable('secondary-background')
+  },
   updated () {
     this.$nextTick(() => {
       if (this.visible) {
@@ -156,8 +161,8 @@ export default {
       })
     },
     backgroundTintBadgeColor () {
-      if (!this.backgroundTint || this.backgroundTint === '#fff') {
-        return '#e3e3e3' // --secondary-background
+      if (!this.backgroundTint || this.backgroundTint === '#fff' || this.backgroundTint === '#000') {
+        return this.defaultColor
       }
       return this.backgroundTint
     }
@@ -291,6 +296,8 @@ export default {
     width 215px
   .background-preview
     margin-right 6px
+  .title
+    color var(--primary)
   section
     position relative
   textarea

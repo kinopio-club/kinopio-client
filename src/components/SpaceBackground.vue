@@ -1,10 +1,12 @@
 <template lang="pug">
-.space-background(:style="backgroundStyles")
-#layout-viewport(v-if="visible" :style="{ background: backgroundTint }")
+.space-background(:style="backgroundStyles" :class="{invert: shouldInvertInDarkTheme}")
+.layout-viewport#layout-viewport(v-if="visible" :style="{ background: backgroundTint }")
+.layout-viewport.dark-theme-tint(v-if="isThemeDark && !spaceBackgroundTintIsDark" :class="{darker: shouldDarkenInDarkTheme}")
 </template>
 
 <script>
 import utils from '@/utils.js'
+import backgroundImages from '@/data/backgroundImages.json'
 
 export default {
   name: 'SpaceBackground',
@@ -42,6 +44,32 @@ export default {
     backgroundTint () {
       const color = this.currentSpace.backgroundTint
       return color
+    },
+    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
+    kinopioBackgroundImageData () {
+      const data = backgroundImages.find(image => image.url === this.currentSpace.background)
+      return data
+    },
+    backgroundIsDefault () {
+      return !this.currentSpace.background
+    },
+    spaceBackgroundTintIsDark () {
+      return utils.colorIsDark(this.backgroundTint)
+    },
+    shouldDarkenInDarkTheme () {
+      if (!this.isThemeDark) { return }
+      if (this.backgroundIsDefault) { return true }
+      const data = this.kinopioBackgroundImageData
+      if (!data) { return }
+      return data.shouldDarkenInDarkTheme
+    },
+    shouldInvertInDarkTheme () {
+      if (!this.isThemeDark) { return }
+      if (this.backgroundIsDefault) { return }
+      if (this.spaceBackgroundTintIsDark) { return }
+      const data = this.kinopioBackgroundImageData
+      if (!data) { return }
+      return data.shouldInvertInDarkTheme
     }
   },
   methods: {
@@ -99,7 +127,7 @@ export default {
 </script>
 
 <style lang="stylus">
-#layout-viewport
+.layout-viewport
   position fixed
   width 110%
   height 110%
@@ -107,6 +135,10 @@ export default {
   z-index 0
   mix-blend-mode multiply
   transform-origin top left
+.dark-theme-tint
+  background-color rgba(0,0,0,0.3)
+  &.darker
+    background-color rgba(0,0,0,0.7)
 .space-background
   position absolute
   width 100%
@@ -115,5 +147,7 @@ export default {
   z-index 0
   transform-origin top left
   background var(--primary-background)
+  &.invert
+    filter invert()
 
 </style>

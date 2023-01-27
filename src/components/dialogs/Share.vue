@@ -2,7 +2,7 @@
 dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
   section
     .row.title-row
-      span Share
+      p Share
 
       .row
         button.small-button(@click.left.stop="isPresentationMode")
@@ -35,11 +35,16 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     //- Public space
     template(v-if="!spaceIsPrivate")
       p.row
-        .url-textarea {{url}}
+        .url-textarea.single-line
+          span {{url}}
         .input-button-wrap(@click.left="copyUrl")
           button.small-button
             img.icon.copy(src="@/assets/copy.svg")
-            span Public URL
+            //- span Public URL
+      .row
+        button(@click.left="copyUrl")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Public URL
 
   //- Invite
   Invite(v-if="spaceHasUrl && isSpaceMember")

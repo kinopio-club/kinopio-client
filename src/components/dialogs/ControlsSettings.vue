@@ -8,20 +8,24 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
         input(type="checkbox" v-model="shouldOpenLinksInNewTab")
         span Open URLs in New Tabs
     .row
-      label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
-        input(type="checkbox" v-model="shouldUseStickyCards")
-        span Use Sticky Cards
-    .row
       label.double-line-height(:class="{ active: shouldPauseConnectionDirections }" @click.left.prevent="toggleShouldPauseConnectionDirections" @keydown.stop.enter="toggleShouldPauseConnectionDirections")
         input(type="checkbox" v-model="shouldPauseConnectionDirections")
         span Pause Connection Directions
+    .row
+      label(:class="{ active: shouldDisableItemJiggle }" @click.left.prevent="toggleshouldDisableItemJiggle" @keydown.stop.enter="toggleshouldDisableItemJiggle")
+        input(type="checkbox" v-model="shouldDisableItemJiggle")
+        span Disable Item Jiggle
+    .row
+      label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
+        input(type="checkbox" v-model="shouldUseStickyCards")
+        span Use Sticky Cards
   section
     .row
-      p Debug Settings
+      p Debug
     .row
-      label(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
+      label.double-line-height(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
-        span Disable Right Click to Pan
+        span Disable Right/Middle Click to Pan
 
 </template>
 
@@ -50,9 +54,14 @@ export default {
     shouldOpenLinksInNewTab () { return this.$store.state.currentUser.shouldOpenLinksInNewTab },
     shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
-    shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan }
+    shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
+    shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle }
   },
   methods: {
+    toggleshouldDisableItemJiggle () {
+      const value = !this.shouldDisableItemJiggle
+      this.$store.dispatch('currentUser/update', { shouldDisableItemJiggle: value })
+    },
     toggleShouldOpenLinksInNewTab () {
       const value = !this.shouldOpenLinksInNewTab
       this.$store.dispatch('currentUser/shouldOpenLinksInNewTab', value)

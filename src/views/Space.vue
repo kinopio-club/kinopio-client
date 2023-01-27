@@ -1,6 +1,6 @@
 <template lang="pug">
 main#space.space(
-  :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady, 'hidden-by-mindmap': minimapIsVisible}"
+  :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
   @mousedown.left="initInteractions"
   @touchstart="initInteractions"
   :style="styles"
@@ -127,7 +127,6 @@ export default {
         transform: this.$store.getters.zoomTransform
       }
     },
-    minimapIsVisible () { return this.$store.state.minimapIsVisible },
     unlockedCards () { return this.$store.getters['currentCards/isNotLocked'] },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
@@ -361,6 +360,19 @@ export default {
         return true
       }
     },
+    footerDialogIsVisible () {
+      const buttons = document.querySelectorAll('footer button')
+      let isVisible
+      buttons.forEach(button => {
+        const classes = button.classList || []
+        if (!classes.length) { return }
+        const isActive = classes.includes('active')
+        if (isActive) {
+          isVisible = true
+        }
+      })
+      return isVisible
+    },
     shouldCancel (event) {
       if (shouldCancel) {
         shouldCancel = false
@@ -380,11 +392,19 @@ export default {
       const node = event.target.nodeName
       const isTextarea = node === 'TEXTAREA'
       const isInput = node === 'INPUT'
-      if (isTextarea || isInput) {
+      if (this.footerDialogIsVisible()) {
+        this.$store.commit('shouldHideFooter', false)
+      } else if (isTextarea || isInput) {
         this.$store.commit('shouldHideFooter', true)
       } else {
         this.$store.commit('shouldHideFooter', false)
       }
+    },
+    checkIfShouldSnapBoxes () {
+      if (!this.$store.state.boxesWereDragged) { return }
+      const snapGuides = this.$store.state.currentBoxes.snapGuides
+      if (!snapGuides.length) { return }
+      snapGuides.forEach(snapGuide => this.$store.dispatch('currentBoxes/snap', snapGuide))
     },
     showMultipleSelectedActions (event) {
       if (this.spaceIsReadOnly) { return }
@@ -439,6 +459,7 @@ export default {
         this.$store.commit('triggerUpdatePositionInVisualViewport')
       }
       this.checkIfShouldHideFooter(event)
+      this.checkIfShouldSnapBoxes()
       if (this.shouldCancel(event)) { return }
       this.addOrCloseCard(event)
       this.unselectCardsInDraggedBox()

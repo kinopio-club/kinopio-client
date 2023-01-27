@@ -10,11 +10,15 @@ dialog.narrow.api-key(v-if="visible" :open="visible" @click.left.stop ref="dialo
       span Reveal API Key
     template(v-if="keyIsRevealed")
       p.row
-        .url-textarea {{key}}
+        .url-textarea.single-line
+          span {{key}}
         .input-button-wrap(@click.left="copyKey")
           button.small-button
             img.icon.copy(src="@/assets/copy.svg")
-            span API Key
+      .row
+        button(@click.left="copyKey")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy API Key
 
   section(v-if="!currentUserIsSignedIn")
     p After you sign up you'll be able to access your API Key here

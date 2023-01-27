@@ -17,7 +17,6 @@ export default {
     description: undefined,
     website: undefined,
     lastReadNewStuffId: undefined,
-    prefersDarkTheme: false,
     apiKey: '',
     arenaAccessToken: '',
     favoriteUsers: [],
@@ -59,11 +58,13 @@ export default {
     weatherUnitIsCelcius: false,
     shouldNotifyUnlockedStickyCards: true,
     shouldUseStickyCards: false,
+    shouldDisableItemJiggle: false,
     shouldPauseConnectionDirections: false,
     twitterUsername: '',
-    shouldUseDarkColors: false,
     lastUsedImagePickerService: '',
-    AIImages: []
+    AIImages: [],
+    theme: null,
+    themeIsSystem: true
   },
   mutations: {
     color: (state, value) => {
@@ -110,22 +111,22 @@ export default {
       cache.updateUser('apiKey', apiKey)
     },
     favoriteUsers: (state, users) => {
-      utils.typeCheck({ value: users, type: 'array', origin: 'favoriteUsers' })
+      utils.typeCheck({ value: users, type: 'array' })
       state.favoriteUsers = users
       cache.updateUser('favoriteUsers', users)
     },
     favoriteSpaces: (state, spaces) => {
-      utils.typeCheck({ value: spaces, type: 'array', origin: 'favoriteSpaces' })
+      utils.typeCheck({ value: spaces, type: 'array' })
       state.favoriteSpaces = spaces
       cache.updateUser('favoriteSpaces', spaces)
     },
     favoriteColors: (state, spaces) => {
-      utils.typeCheck({ value: spaces, type: 'array', origin: 'favoriteColors' })
+      utils.typeCheck({ value: spaces, type: 'array' })
       state.favoriteColors = spaces
       cache.updateUser('favoriteColors', spaces)
     },
     updateFavoriteSpaceIsEdited: (state, spaceId) => {
-      utils.typeCheck({ value: spaceId, type: 'string', origin: 'updateFavoriteSpaceIsEdited' })
+      utils.typeCheck({ value: spaceId, type: 'string' })
       const spaces = state.favoriteSpaces.map(space => {
         if (space.id === spaceId) {
           space.isEdited = false
@@ -165,37 +166,37 @@ export default {
       cache.updateUser('arenaAccessToken', token)
     },
     cardsCreatedCount: (state, count) => {
-      utils.typeCheck({ value: count, type: 'number', origin: 'cardsCreatedCount' })
+      utils.typeCheck({ value: count, type: 'number' })
       state.cardsCreatedCount = count
       cache.updateUser('cardsCreatedCount', count)
     },
     isUpgraded: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isUpgraded' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.isUpgraded = value
       cache.updateUser('isUpgraded', value)
     },
     filterShowUsers: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'filterShowUsers' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.filterShowUsers = value
       cache.updateUser('filterShowUsers', value)
     },
     filterShowDateUpdated: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'filterShowDateUpdated' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.filterShowDateUpdated = value
       cache.updateUser('filterShowDateUpdated', value)
     },
     filterShowAbsoluteDates: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'filterShowAbsoluteDates' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.filterShowAbsoluteDates = value
       cache.updateUser('filterShowAbsoluteDates', value)
     },
     filterUnchecked: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'filterUnchecked' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.filterUnchecked = value
       cache.updateUser('filterUnchecked', value)
     },
     filterComments: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'filterComments' })
+      utils.typeCheck({ value, type: 'boolean' })
       state.filterComments = value
       cache.updateUser('filterComments', value)
     },
@@ -323,6 +324,10 @@ export default {
       state.shouldUseStickyCards = value
       cache.updateUser('shouldUseStickyCards', value)
     },
+    shouldDisableItemJiggle: (state, value) => {
+      state.shouldDisableItemJiggle = value
+      cache.updateUser('shouldDisableItemJiggle', value)
+    },
     shouldPauseConnectionDirections: (state, value) => {
       state.shouldPauseConnectionDirections = value
       cache.updateUser('shouldPauseConnectionDirections', value)
@@ -335,13 +340,18 @@ export default {
       state.lastUsedImagePickerService = value
       cache.updateUser('lastUsedImagePickerService', value)
     },
-    shouldUseDarkColors: (state, value) => {
-      state.shouldUseDarkColors = value
-      cache.updateUser('shouldUseDarkColors', value)
-    },
     AIImages: (state, value) => {
       state.AIImages = value
       cache.updateUser('AIImages', value)
+    },
+    theme: (state, value) => {
+      state.theme = value
+      cache.updateUser('theme', value)
+    },
+    themeIsSystem: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.themeIsSystem = value
+      cache.updateUser('themeIsSystem', value)
     }
   },
   actions: {
@@ -356,6 +366,7 @@ export default {
         console.log('🌸 Create new user')
         context.dispatch('createNewUser')
       }
+      context.dispatch('themes/restore', null, { root: true })
     },
     update: (context, updates) => {
       const keys = Object.keys(updates)
@@ -598,22 +609,22 @@ export default {
       context.dispatch('updatePathsAndPositions')
     },
     addJournalPrompt: (context, prompt) => {
-      utils.typeCheck({ value: prompt, type: 'object', origin: 'addJournalPrompt' })
+      utils.typeCheck({ value: prompt, type: 'object' })
       context.dispatch('api/addToQueue', { name: 'addJournalPrompt', body: prompt }, { root: true })
       context.commit('addJournalPrompt', prompt)
     },
     removeJournalPrompt: (context, prompt) => {
-      utils.typeCheck({ value: prompt, type: 'object', origin: 'removeJournalPrompt' })
+      utils.typeCheck({ value: prompt, type: 'object' })
       context.dispatch('api/addToQueue', { name: 'removeJournalPrompt', body: prompt }, { root: true })
       context.commit('removeJournalPrompt', prompt)
     },
     updateJournalPrompt: (context, prompt) => {
-      utils.typeCheck({ value: prompt, type: 'object', origin: 'updateJournalPrompt' })
+      utils.typeCheck({ value: prompt, type: 'object' })
       context.dispatch('api/addToQueue', { name: 'updateJournalPrompt', body: prompt }, { root: true })
       context.commit('updateJournalPrompt', prompt)
     },
     newSpacesAreBlank: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'newSpacesAreBlank' })
+      utils.typeCheck({ value, type: 'boolean' })
       context.commit('newSpacesAreBlank', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
@@ -621,7 +632,7 @@ export default {
         } }, { root: true })
     },
     shouldEmailNotifications: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldEmailNotifications' })
+      utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldEmailNotifications', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
@@ -629,7 +640,7 @@ export default {
         } }, { root: true })
     },
     shouldEmailBulletin: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldEmailBulletin' })
+      utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldEmailBulletin', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
@@ -637,7 +648,7 @@ export default {
         } }, { root: true })
     },
     shouldEmailWeeklyReview: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldEmailWeeklyReview' })
+      utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldEmailWeeklyReview', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
@@ -645,7 +656,7 @@ export default {
         } }, { root: true })
     },
     shouldShowMoreAlignOptions: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowMoreAlignOptions' })
+      utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldShowMoreAlignOptions', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
@@ -653,7 +664,7 @@ export default {
         } }, { root: true })
     },
     shouldShowCardCollaborationInfo: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowCardCollaborationInfo' })
+      utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldShowCardCollaborationInfo', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
@@ -661,7 +672,7 @@ export default {
         } }, { root: true })
     },
     shouldShowStyleActions: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowStyleActions' })
+      utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldShowStyleActions', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
@@ -669,7 +680,7 @@ export default {
         } }, { root: true })
     },
     showInExploreUpdatedAt: (context, value) => {
-      utils.typeCheck({ value, type: 'string', origin: 'showInExploreUpdatedAt' })
+      utils.typeCheck({ value, type: 'string' })
       context.commit('showInExploreUpdatedAt', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
@@ -677,7 +688,7 @@ export default {
         } }, { root: true })
     },
     shouldOpenLinksInNewTab: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldOpenLinksInNewTab' })
+      utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldOpenLinksInNewTab', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
@@ -685,7 +696,7 @@ export default {
         } }, { root: true })
     },
     shouldDisableRightClickToPan: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldDisableRightClickToPan' })
+      utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldDisableRightClickToPan', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
@@ -693,7 +704,7 @@ export default {
         } }, { root: true })
     },
     shouldUseLastConnectionType: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldUseLastConnectionType' })
+      utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldUseLastConnectionType', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {

@@ -351,8 +351,6 @@ export default {
     margin-left 6px
   .error-message
     margin-top 10px
-  .moon
-    vertical-align -2px
   .upgrade
     progress
       margin-top 2px

@@ -85,20 +85,24 @@ export default {
       } else if (key === 'n' && isSpaceScope) {
         if (this.$store.state.isAddPage) { return }
         this.$store.dispatch('currentSpace/addSpace')
-        this.$store.commit('addNotification', { message: 'New space created', icon: 'add', type: 'success', label: 'n' })
+        this.$store.commit('addNotification', { message: 'New space created', icon: 'add', type: 'success', label: 'N' })
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
       // i
       } else if (key === 'i' && isSpaceScope) {
         if (this.$store.state.isAddPage) { return }
         this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler')
         this.$store.commit('triggerAddToInboxIsVisible')
+      // t
+      } else if (key === 't' && isSpaceScope) {
+        this.$store.commit('addNotification', { message: 'Theme toggled', type: 'info', label: 'T' })
+        this.$store.dispatch('themes/toggle')
+        this.$store.dispatch('themes/isSystem', false)
       // Backspace, Clear, Delete
       } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
         this.remove()
       // Escape
       } else if (key === 'Escape') {
         this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
-        this.$store.commit('minimapIsVisible', false)
         this.$store.commit('currentUserToolbar', 'card')
       } else if (key === '1' && isSpaceScope) {
         let value = this.$store.state.currentUser.filterShowUsers
@@ -121,7 +125,6 @@ export default {
       } else if (key === ' ' && isSpaceScope) {
         this.$store.commit('currentUserIsPanning', false)
         this.$store.commit('currentUserIsPanningReady', false)
-        this.$store.commit('minimapIsVisible', false)
         spaceKeyIsDown = false
       } else if (key === 'b' && isSpaceScope) {
         this.$store.commit('currentUserToolbar', 'box')
@@ -196,13 +199,10 @@ export default {
         event.preventDefault()
         this.$store.commit('triggerCenterZoomOrigin')
         this.$store.commit('triggerSpaceZoomIn')
-        // Minimap
+        // Toggle Zoom Out
       } else if (key === 'z' && isSpaceScope) {
         event.preventDefault()
-        const value = !this.$store.state.minimapIsVisible
-        this.$store.commit('minimapIsVisible', value)
-        this.$store.commit('currentUserIsPanningReady', false)
-        this.$store.commit('currentUserIsPanning', false)
+        this.$store.commit('triggerSpaceZoomOutMax')
       } else if (key === 'p' && isSpaceScope) {
         const value = !this.$store.state.isPresentationMode
         this.$store.commit('isPresentationMode', value)
@@ -221,12 +221,14 @@ export default {
     // on mouse down
     handleMouseDownEvents (event) {
       const rightMouseButton = 2
+      const middleMouseButton = 1
       const isRightClick = rightMouseButton === event.button
+      const isMiddleClick = middleMouseButton === event.button
       const isPanScope = checkIsPanScope(event)
       const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
       const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox
       const userDisablePan = this.$store.state.currentUser.shouldDisableRightClickToPan
-      const shouldPan = isRightClick && isPanScope && !userDisablePan
+      const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
       const position = utils.cursorPositionInPage(event)
       if (shouldBoxSelect) {
         event.preventDefault()
@@ -234,6 +236,7 @@ export default {
         this.$store.commit('currentUserBoxSelectEnd', position)
         this.$store.commit('currentUserBoxSelectStart', position)
       } else if (shouldPan) {
+        if (utils.isDevelopment()) { return }
         prevRightClickPosition = utils.cursorPositionInPage(event)
         event.preventDefault()
         this.$store.commit('currentUserIsPanning', true)

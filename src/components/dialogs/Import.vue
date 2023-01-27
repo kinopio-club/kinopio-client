@@ -3,7 +3,7 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialo
   section
     p Import Space
   section
-    p From an exported space
+    p From a backup space
     button(@click.left="selectFile")
       span.badge.info json
       span Select File

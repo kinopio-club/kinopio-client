@@ -36,9 +36,6 @@
             FavoritesActions(:visible="favoritesActionsIsVisible")
 
   .right(:class="{'is-embed': isEmbedMode, 'hidden': isHidden}" v-if="!isMobileOrTouch")
-    .button-wrap.minimap-button(v-if="isNotSupportedByDevice" @click.stop="toggleMinimapIsVislble" :class="{ active: minimapIsVisible }")
-      button.small-button.inline-button(:class="{ active: minimapIsVisible }")
-        img.icon.minimap(src="@/assets/minimap.svg")
     SpaceZoom
 </template>
 
@@ -131,7 +128,6 @@ export default {
   },
   computed: {
     ...mapState([
-      'minimapIsVisible',
       'isAddPage',
       'isEmbedMode',
       'currentUser',
@@ -147,7 +143,6 @@ export default {
       'isTouchDevice',
       'currentSpace/isFavorite'
     ]),
-    isNotSupportedByDevice () { return !utils.isAndroid() },
     favoriteSpacesEditedCount () {
       let favoriteSpaces = utils.clone(this.currentUser.favoriteSpaces)
       favoriteSpaces = favoriteSpaces.filter(space => {
@@ -198,11 +193,6 @@ export default {
     }
   },
   methods: {
-    toggleMinimapIsVislble (event) {
-      this.closeDialogs()
-      const value = !this.minimapIsVisible
-      this.$store.commit('minimapIsVisible', value)
-    },
     closeDialogs (exclude) {
       this.favoritesActionsIsVisible = false
       this.favoritesIsVisible = false
@@ -438,27 +428,6 @@ export default {
     margin-bottom 10px
   &.is-mobile-standalone
     margin-bottom 20px
-
-  .minimap-button
-    padding 6px
-    margin-top 8px
-    cursor pointer
-    pointer-events all
-    button
-      background-color var(--primary-background)
-      cursor inherit
-    &:hover
-      button
-        box-shadow var(--button-hover-shadow)
-        background-color var(--secondary-hover-background)
-    &:active,
-    &.active
-      button
-        box-shadow var(--button-active-inset-shadow)
-        background-color var(--secondary-active-background)
-
-  .icon.minimap
-    vertical-align 0
 
   .left,
   .right

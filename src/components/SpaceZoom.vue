@@ -10,6 +10,7 @@
     :animateJiggleLeft="animateJiggleLeft"
     @removeAnimations="removeAnimations"
     @pointerdown="closeAllDialogs"
+    :minKeyboardShortcut="minKeyboardShortcut"
   )
 </template>
 
@@ -47,6 +48,8 @@ export default {
         this.updateSpaceZoomFromTrigger(percent)
       } else if (mutation.type === 'triggerCenterZoomOrigin') {
         this.centerZoomOrigin()
+      } else if (mutation.type === 'triggerSpaceZoomOutMax') {
+        this.zoomOutMax()
       }
     })
   },
@@ -59,7 +62,8 @@ export default {
   computed: {
     max () { return consts.spaceZoom.max }, // 100
     min () { return consts.spaceZoom.min }, // 20
-    spaceZoomPercent () { return this.$store.state.spaceZoomPercent }
+    spaceZoomPercent () { return this.$store.state.spaceZoomPercent },
+    minKeyboardShortcut () { return 'Z' }
   },
   methods: {
     updateSpaceZoomFromTrigger (percent) {
@@ -95,10 +99,18 @@ export default {
     centerZoomOrigin () {
       const scroll = this.$store.state.windowScroll
       const origin = {
-        x: scroll.x + (this.$store.state.viewportWidth / 2),
-        y: scroll.y + (this.$store.state.viewportHeight / 2)
+        x: scroll.x + (this.$store.state.viewportWidth / 6),
+        y: scroll.y + (this.$store.state.viewportHeight / 6)
       }
       this.$store.dispatch('zoomOrigin', origin)
+    },
+    zoomOutMax () {
+      this.centerZoomOrigin()
+      if (this.$store.state.spaceZoomPercent === this.min) {
+        this.$store.commit('spaceZoomPercent', this.max)
+      } else {
+        this.$store.commit('spaceZoomPercent', this.min)
+      }
     }
   }
 }

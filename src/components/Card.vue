@@ -60,32 +60,25 @@ article#card(
         @touchstart.stop="startResizing"
         @dblclick="removeResize"
       )
-        button.inline-button.resize-button(tabindex="-1")
+        button.inline-button.resize-button(tabindex="-1" :class="{hidden: isPresentationMode}")
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
-    span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
+    span.card-content-wrap(:style="cardContentWrapStyles")
+
       //- Comment
-      .card-comment(v-if="isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-comment(v-if="isComment")
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(type="checkbox" v-model="checkboxState")
         //- Name
         .badge.comment-badge
-          .toggle-comment-wrap.inline-button-wrap(@mouseup.left="toggleCommentIsVisible" @touchend="toggleCommentIsVisible")
-            button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
-              img.icon.view(src="@/assets/comment.svg")
+          img.icon.view(src="@/assets/comment.svg")
           //- User
-          template(v-if="commentIsVisible")
-            UserLabelInline(:user="createdByUser")
-          template(v-if="!commentIsVisible")
-            UserLabelInline(:user="createdByUser" :shouldHideName="true")
-          p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}")
-            template(v-for="segment in nameSegments")
-              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
-            ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" :isVisibleInViewport="isVisibleInViewport")
+          UserLabelInline(:user="createdByUser" :shouldHideName="true")
+
       //- Not Comment
-      .card-content(v-if="!isComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
+      .card-content(v-if="!isComment" :style="cardContentStyles")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -101,7 +94,7 @@ article#card(
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
-      span.card-buttons-wrap
+      span.card-buttons-wrap(v-if="isCardButtonsVisible")
         //- Lock
         template(v-if="isLocked")
           //- based on CardUnlockButton.vue
@@ -113,7 +106,7 @@ article#card(
           //- Url →
           a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
             .url.inline-button-wrap
-              button.inline-button(:style="{background: itemBackground}" :class="{'is-dark': backgroundColorIsDark}" tabindex="-1")
+              button.inline-button(:style="{background: itemBackground}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
           //- Connector
           .connector.inline-button-wrap(
@@ -131,7 +124,12 @@ article#card(
               template(v-else v-for="type in connectionTypes")
                 .color(:style="{ background: type.color}")
 
-            button.inline-button.connector-button(:class="{ active: isConnectingTo || isConnectingFrom, 'is-dark': connectionTypeColorisDark}" :style="{background: connectorButtonBackground }" tabindex="-1" @keyup.stop.enter="showCardDetails")
+            button.inline-button.connector-button(
+              :class="{ active: isConnectingTo || isConnectingFrom, 'is-light-in-dark-theme': isConnectorLightInDarkTheme, 'is-dark-in-light-theme': isConnectorDarkInLightTheme}"
+              :style="{background: connectorButtonBackground }"
+              tabindex="-1"
+              @keyup.stop.enter="showCardDetails"
+            )
               template(v-if="hasConnections || isConnectingFrom || isConnectingTo")
                 img.connector-icon(src="@/assets/connector-closed-in-card.svg")
               //- template(v-else)
@@ -201,6 +199,7 @@ import ImageOrVideo from '@/components/ImageOrVideo.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
 import hexToRgba from 'hex-to-rgba'
@@ -256,10 +255,13 @@ export default {
           this.updateMediaUrls()
           this.updateUrlPreview()
         }
+      } else if (type === 'triggerUpdateTheme') {
+        this.defaultColor = utils.cssVariable('secondary-background')
       }
     })
   },
   async mounted () {
+    this.defaultColor = utils.cssVariable('secondary-background')
     const cardIsMissingDimensions = Boolean(!this.card.width || !this.card.height)
     if (cardIsMissingDimensions) {
       let card = { id: this.card.id }
@@ -312,7 +314,8 @@ export default {
       stickyTranslateX: 0,
       stickyTranslateY: 0,
       isAnimationUnsticking: false,
-      stickyStretchResistance: 6
+      stickyStretchResistance: 6,
+      defaultColor: '#e3e3e3'
     }
   },
   computed: {
@@ -384,7 +387,18 @@ export default {
       'spaceCounterZoomDecimal',
       'spaceZoomDecimal'
     ]),
+    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
+    isDarkInLightTheme () { return this.backgroundColorIsDark && !this.isThemeDark },
+    isLightInDarkTheme () { return !this.backgroundColorIsDark && this.isThemeDark },
+    isConnectorDarkInLightTheme () {
+      if (this.connectionTypeColorisDark) { return this.connectionTypeColorisDark }
+      return this.isDarkInLightTheme
+    },
+    isConnectorLightInDarkTheme () {
+      if (this.connectionTypeColorisDark) { return !this.connectionTypeColorisDark }
+      return this.isLightInDarkTheme
+    },
     itemBackground () {
       let background = 'transparent'
       if (this.isImageCard) {
@@ -403,10 +417,18 @@ export default {
       tags = utils.arrayToString(tags)
       return tags
     },
+    width () {
+      if (this.isComment) { return }
+      if (this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible) { return }
+      const width = this.card.resizeWidth || this.card.width
+      if (!width) { return }
+      return width
+    },
     resizeWidth () {
+      if (this.isComment) { return }
       const resizeWidth = this.card.resizeWidth
       if (!resizeWidth) { return }
-      return resizeWidth + 'px'
+      return resizeWidth
     },
     isLocked () {
       if (!this.card) { return }
@@ -414,8 +436,10 @@ export default {
       return isLocked
     },
     shouldJiggle () {
+      const shouldDisableItemJiggle = this.currentUser.shouldDisableItemJiggle
+      const manyCardsSelected = this.multipleCardsSelectedIds.length > 10
       const isShiftKeyDown = this.currentUserIsBoxSelecting
-      if (isShiftKeyDown) { return }
+      if (isShiftKeyDown || shouldDisableItemJiggle || manyCardsSelected) { return }
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
     isSelectedOrDragging () {
@@ -449,15 +473,11 @@ export default {
         return y
       }
     },
-    commentIsVisible () { return this.card.commentIsVisible },
     connectionTypes () { return this['currentConnections/typesByCardId'](this.id) },
     connectionTypeColorisDark () {
       const lastType = this.connectionTypes[this.connectionTypes.length - 1]
-      if (!lastType) {
-        return utils.colorIsDark(this.backgroundColor)
-      } else {
-        return utils.colorIsDark(lastType.color)
-      }
+      if (!lastType) { return }
+      return utils.colorIsDark(lastType.color)
     },
     name () {
       this.updateMediaUrls()
@@ -478,6 +498,9 @@ export default {
       }
       return user
     },
+    isCardButtonsVisible () {
+      return this.isLocked || (this.cardButtonUrl && !this.isComment) || this.connectorIsVisible
+    },
     connectorIsVisible () {
       if (this.isPresentationMode && !this.hasConnections) { return }
       const spaceIsOpen = this.currentSpace.privacy === 'open' && this['currentUser/isSignedIn']
@@ -488,13 +511,6 @@ export default {
         isVisible = true
       }
       return isVisible
-    },
-    cardButtonsIsVisible () {
-      if (this.connectorIsVisible || this.isLocked || Boolean(this.formats.link || this.formats.file)) {
-        return true
-      } else {
-        return false
-      }
     },
     cardButtonUrl () {
       const link = this.formats.link
@@ -523,13 +539,6 @@ export default {
         return null
       }
     },
-    isHiddenInComment () {
-      if (this.isComment && !this.commentIsVisible) {
-        return true
-      } else {
-        return false
-      }
-    },
     currentCardDetailsIsVisible () {
       return this.id === this.cardDetailsIsVisibleForCardId
     },
@@ -540,7 +549,9 @@ export default {
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
     },
     cardClasses () {
-      return {
+      const m = 100
+      const l = 150
+      let classes = {
         'jiggle': this.shouldJiggle,
         'active': this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.uploadIsDraggedOver,
         'filtered': this.isFiltered,
@@ -549,8 +560,12 @@ export default {
         'is-playing-audio': this.isPlayingAudio,
         'is-locked': this.isLocked,
         'has-url-preview': this.cardUrlPreviewIsVisible,
-        'is-dark': this.backgroundColorIsDark
+        'is-dark': this.backgroundColorIsDark,
+        's-width': this.width < m,
+        'm-width': utils.isBetween({ value: this.width, min: m, max: l }),
+        'l-width': this.width > l
       }
+      return classes
     },
     backgroundColor () {
       let nameColor
@@ -559,6 +574,25 @@ export default {
       }
       let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || this.card.backgroundColor
       return color
+    },
+    positionStyle () {
+      let z = this.card.z
+      let pointerEvents = 'auto'
+      if (this.currentCardDetailsIsVisible) {
+        z = 2147483646 // max z
+      } else if (this.isLocked) {
+        z = 0
+        pointerEvents = 'none'
+      }
+      let styles = {
+        left: `${this.x}px`,
+        top: `${this.y}px`,
+        zIndex: z,
+        pointerEvents,
+        transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
+      }
+      styles = this.updateStylesWithWidth(styles)
+      return styles
     },
     cardStyle () {
       let backgroundColor, nameColor
@@ -570,18 +604,29 @@ export default {
       }
       let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || backgroundColor
       let styles = {
-        background: color,
-        width: this.resizeWidth,
-        maxWidth: this.resizeWidth
+        background: color
       }
       if (this.isComment) {
-        color = color || utils.cssVariable('secondary-background')
+        color = color || this.defaultColor
         styles.background = hexToRgba(color, 0.5) || color
+      }
+      styles = this.updateStylesWithWidth(styles)
+      return styles
+    },
+    cardContentWrapStyles () {
+      let styles = {}
+      styles = this.updateStylesWithWidth(styles)
+      return styles
+    },
+    cardContentStyles () {
+      let styles = {}
+      if (this.isLocked) {
+        styles = { marginRight: '2px' }
       }
       return styles
     },
     backgroundColorIsDark () {
-      const color = this.backgroundColor
+      const color = this.backgroundColor || this.defaultColor
       return utils.colorIsDark(color)
     },
     connectorGlowStyle () {
@@ -715,26 +760,6 @@ export default {
     nameIsColor () {
       return utils.colorIsValid(this.card.name)
     },
-    positionStyle () {
-      let z = this.card.z
-      let pointerEvents = 'auto'
-      if (this.currentCardDetailsIsVisible) {
-        z = 2147483646 // max z
-      } else if (this.isLocked) {
-        z = 0
-        pointerEvents = 'none'
-      }
-      let styles = {
-        left: `${this.x}px`,
-        top: `${this.y}px`,
-        zIndex: z,
-        width: this.resizeWidth,
-        maxWidth: this.resizeWidth,
-        pointerEvents,
-        transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
-      }
-      return styles
-    },
     canEditCard () { return this['currentUser/canEditCard'](this.card) },
     normalizedName () {
       // name without urls and checkbox text
@@ -807,7 +832,7 @@ export default {
       url = utils.removeTrailingSlash(url)
       cardHasUrlPreviewInfo = Boolean(cardHasUrlPreviewInfo && url)
       const nameHasUrl = this.card.name.includes(url)
-      return (this.card.urlPreviewIsVisible && cardHasUrlPreviewInfo && nameHasUrl) && !this.isHiddenInComment
+      return (this.card.urlPreviewIsVisible && cardHasUrlPreviewInfo && nameHasUrl) && !this.isComment
       // return Boolean(this.card.urlPreviewIsVisible && this.card.urlPreviewUrl && cardHasUrlPreviewInfo) // && !isErrorUrl
     },
     tags () {
@@ -1093,7 +1118,7 @@ export default {
       if (this.isAnimationUnsticking) { return }
       if (preventSticking) { return }
       if (!stickyTimerComplete) { return }
-      const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap', 'toggle-comment-wrap', 'inline-button', 'badge']
+      const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap', 'inline-button', 'badge']
       const elements = ['button', 'progress', 'iframe']
       const isOverAction = classes.includes(event.target.className) || elements.includes(event.target.nodeName.toLowerCase())
       const isOverTag = event.target.className.includes('button-badge')
@@ -1499,29 +1524,32 @@ export default {
       }
       this.$store.dispatch('currentCards/removeResize', { cardIds })
     },
-    toggleCommentIsVisible (event) {
-      if (this.preventDraggedCardFromShowingDetails) { return }
-      if (utils.isMultiTouch(event)) { return }
-      this.$store.dispatch('closeAllDialogs', 'Card.toggleComment')
-      this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      this.$store.dispatch('clearMultipleSelected')
-      const cardId = this.id
-      const value = !this.card.commentIsVisible
-      this.$store.dispatch('history/snapshots')
-      this.$store.dispatch('currentCards/commentIsVisible', { cardId, value })
-      this.$store.dispatch('currentCards/incrementZ', cardId)
-      this.updateCardConnectionPathsIfOpenSpace()
+    updateStylesWithWidth (styles) {
+      const connectorIsNotVisibleToReadOnlyUser = (!this.connectorIsVisible && !this.isLocked) || this.isComment
+      if (this.width) {
+        styles.width = this.width + 'px'
+      }
+      if (this.resizeWidth) {
+        styles.maxWidth = this.resizeWidth + 'px'
+      } else if (connectorIsNotVisibleToReadOnlyUser && this.width) {
+        const connectorIconWidth = 10
+        styles.width = this.width - connectorIconWidth + 'px'
+      }
+      return styles
     },
     updateCardConnectionPathsIfOpenSpace () {
       const spaceIsOpen = this.currentSpace.privacy === 'open'
       const isSpaceMember = this['currentUser/isSpaceMember']()
       if (spaceIsOpen && !isSpaceMember) {
-        this.$nextTick(() => {
-          this.$nextTick(() => {
-            this.$store.dispatch('currentConnections/updatePaths', { cardId: this.id, shouldUpdateApi: true })
-          })
-        })
+        this.updateCardConnectionPaths()
       }
+    },
+    updateCardConnectionPaths () {
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.$store.dispatch('currentConnections/updatePaths', { cardId: this.id, shouldUpdateApi: true })
+        })
+      })
     },
     checkIfShouldDragMultipleCards (event) {
       if (event.shiftKey) { return }
@@ -1962,6 +1990,8 @@ article
     max-width var(--card-width)
     cursor pointer
     touch-action manipulation
+    .name
+      color var(--primary-on-light-background)
     &:hover,
     &.hover
       box-shadow var(--hover-shadow)
@@ -1970,7 +2000,7 @@ article
       box-shadow var(--active-shadow)
     &.is-dark
       .name
-        color var(--primary-background)
+        color var(--primary-on-dark-background)
     .card-comment
       > .badge
         margin 0
@@ -1980,24 +2010,29 @@ article
       .comment
         &.is-checked
           text-decoration line-through
-        .image
-          margin-top 10px
-          border-radius 3px
       .user-label-inline
         transform translateY(-1px)
         margin 0
+        height 18px
+        min-height 17px
+        img
+          top 6px
 
     .card-content-wrap
       display flex
       align-items flex-start
       justify-content space-between
+
     .card-content
       min-width 28px
       width 100%
-    .extra-name-padding
+      margin-right 8px
+    .card-comment
       margin-right 8px
     .card-buttons-wrap
       display flex
+      margin-left -8px // cancels out margin-right in .card-content or .card-comment
+
     .name-wrap,
     .card-comment
       display flex
@@ -2062,7 +2097,7 @@ article
           min-width 0
           padding 0
           border none
-          border-color var(--primary)
+          border-color var(--primary-border)
       .connector-glow
         position absolute
         width 32px
@@ -2124,9 +2159,7 @@ article
         .connector-button
           background-color transparent
     .connector-button
-      border 1px solid var(--primary)
-      &.is-dark
-        border-color var(--primary-background)
+      border 1px solid var(--primary-border)
     .connector-icon
       position absolute
       left -1px
@@ -2160,6 +2193,17 @@ article
       padding-right 8px
       &.connector-is-visible
         padding-right 0
+
+    .is-light-in-dark-theme
+      border-color var(--primary-on-light-background)
+      .icon,
+      .connector-icon
+        filter none
+    .is-dark-in-light-theme
+      border-color var(--primary-on-dark-background)
+      .icon,
+      .connector-icon
+        filter invert()
 
     .uploading-container
       position absolute
@@ -2269,21 +2313,6 @@ article
     .badge-wrap + .badge
       margin-left 6px
 
-  .toggle-comment-wrap
-    display initial
-    cursor pointer
-    padding-left 0
-    padding-right 6px
-    padding-bottom 6px
-    padding-top 6px
-    button
-      cursor pointer
-    .icon
-      width 12px
-      position absolute
-      left 3px
-      top 2px
-
   .comment-user-badge
     display inline
     .user
@@ -2292,6 +2321,8 @@ article
     padding-left 0
     padding-right 0
     padding-bottom 0
+    .icon.view
+      margin-right 6px
     .user-badge,
     .user
       margin-right 0
