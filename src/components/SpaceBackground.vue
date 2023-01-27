@@ -29,8 +29,12 @@ export default {
       return !isAddPage
     },
     currentSpace () { return this.$store.state.currentSpace },
+    pageHeight () { return this.$store.state.pageHeight },
+    pageWidth () { return this.$store.state.pageWidth },
     backgroundStyles () {
       const styles = {
+        width: `${this.pageWidth}px`,
+        height: `${this.pageHeight}px`,
         backgroundImage: `url('${this.imageUrl}')`,
         backgroundSize: this.size,
         transform: this.$store.getters.zoomTransform

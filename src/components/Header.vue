@@ -699,6 +699,7 @@ header
   user-select none
   z-index var(--max-z - 1)
   width 100%
+  max-width 100dvw
   padding 8px
   display flex
   justify-content space-between

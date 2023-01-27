@@ -409,7 +409,7 @@ export default {
   bottom 0
   right 0
   padding 8px
-  max-width 100%
+  max-width 100dvw
   pointer-events none
   transform-origin left bottom
   .right

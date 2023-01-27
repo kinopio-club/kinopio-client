@@ -2,7 +2,7 @@
 .app(
   @pointermove="broadcastUserCursor"
   @touchstart="isTouchDevice"
-  :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
+  :style="{ cursor: pageCursor }"
   :class="{ 'no-background': isAddPage, 'is-dark-theme': isThemeDark }"
 )
   base(v-if="isAddPage" target="_blank")
@@ -327,7 +327,6 @@ body
 .app
   height calc(100vh - env(safe-area-inset-bottom)) // safari mobile fix to keep footer visible
   position relative
-  overflow hidden // enforces state.pageHeight/pageWidth
   > .development-badge
     min-height initial
     left initial
