@@ -78,7 +78,7 @@ article#card(
           UserLabelInline(:user="createdByUser" :shouldHideName="true")
 
       //- Not Comment
-      .card-content(v-if="!isComment")
+      .card-content(v-if="!isComment" :style="cardContentStyles")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -616,6 +616,13 @@ export default {
     cardContentWrapStyles () {
       let styles = {}
       styles = this.updateStylesWithWidth(styles)
+      return styles
+    },
+    cardContentStyles () {
+      let styles = {}
+      if (this.isLocked) {
+        styles = { marginRight: '2px' }
+      }
       return styles
     },
     backgroundColorIsDark () {
