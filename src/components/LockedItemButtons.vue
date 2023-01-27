@@ -1,10 +1,10 @@
 <template lang="pug">
 //- boxes
 template(v-for="box in lockedBoxes")
-  BoxUnlockButton(:box="box" :position="boxButtonPosition(box)" :shouldInvert="shouldInvert(box)")
+  BoxUnlockButton(:box="box" :position="boxButtonPosition(box)")
 //- boxes
 template(v-for="card in lockedCards")
-  CardUnlockButton(:card="card" :position="cardButtonPosition(card)" :shouldInvert="shouldInvert(card)")
+  CardUnlockButton(:card="card" :position="cardButtonPosition(card)")
 
 </template>
 
@@ -46,15 +46,6 @@ export default {
       if (!element) { return }
       const rect = element.getBoundingClientRect()
       return rect
-    },
-    shouldInvert (item) {
-      const color = item.backgroundColor || item.color
-      if (!color) { return }
-      if (this.isThemeDark) {
-        return !utils.colorIsDark(color)
-      } else {
-        return utils.colorIsDark(color)
-      }
     }
   }
 }
