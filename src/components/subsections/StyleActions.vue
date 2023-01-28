@@ -241,6 +241,7 @@ export default {
       }
     },
     toggleHeader (pattern) {
+      this.updateCardDimensions()
       let items = this.itemsWithPattern(pattern)
       const shouldPrepend = items.length < this.items.length
       if (shouldPrepend) {
@@ -252,6 +253,7 @@ export default {
       }
     },
     toggleIsLocked () {
+      this.updateCardDimensions()
       let isLocked = true
       if (this.isLocked) {
         isLocked = false
@@ -316,6 +318,11 @@ export default {
 
     // cards only
 
+    updateCardDimensions () {
+      const cards = utils.clone(this.cards)
+      const cardIds = cards.map(card => card.id)
+      this.$store.dispatch('currentCards/removeResize', { cardIds })
+    },
     updateCard (card, updates) {
       const keys = Object.keys(updates)
       card = { id: card.id }
@@ -335,6 +342,7 @@ export default {
       this.tagPickerIsVisible = !isVisible
     },
     toggleIsComment () {
+      this.updateCardDimensions()
       let isComment = true
       if (this.isComment) {
         isComment = false

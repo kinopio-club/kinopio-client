@@ -181,6 +181,7 @@ export default {
             this.$store.dispatch('currentCards/toggleChecked', { cardId: card.id, value })
           })
         }
+        this.updateCardDimensions()
         this.checkCardsHaveCheckboxes()
         this.checkCardsCheckboxIsChecked()
       }
@@ -485,6 +486,12 @@ export default {
         }
       })
       this.cardsHaveCheckboxes = true
+      this.updateCardDimensions()
+    },
+    updateCardDimensions () {
+      const cards = utils.clone(this.cards)
+      const cardIds = cards.map(card => card.id)
+      this.$store.dispatch('currentCards/removeResize', { cardIds })
     },
     checkIsCardsConnected () {
       const selectedCards = this.multipleCardsSelectedIds

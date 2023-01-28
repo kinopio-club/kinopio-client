@@ -94,6 +94,7 @@ export default {
         if (newName === card.name) { return }
         this.$store.dispatch('currentCards/updateName', { card, newName })
       })
+      this.updateCardDimensions()
     },
     addToCards (tagString) {
       this.cards.forEach(card => {
@@ -101,6 +102,12 @@ export default {
         if (newName === card.name) { return }
         this.$store.dispatch('currentCards/updateName', { card, newName })
       })
+      this.updateCardDimensions()
+    },
+    updateCardDimensions () {
+      const cards = utils.clone(this.cards)
+      const cardIds = cards.map(card => card.id)
+      this.$store.dispatch('currentCards/removeResize', { cardIds })
     },
     createNewTag () {
       this.errorNewTagNameIsBlank = false
