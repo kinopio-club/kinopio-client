@@ -13,65 +13,66 @@ span.space-list-wrap
     @focusPreviousItem="focusPreviousItemFromFilter"
     @selectItem="selectItemFromFilter"
   )
-  ul.results-list.space-list(@wheel="showCompleteSpacesList" @touchmove="showCompleteSpacesList")
-    template(v-for="space in spacesFiltered" :key="space.id")
-      .space-wrap
-        a(:href="space.url")
-          li(
-            @click.left="selectSpace($event, space)"
-            :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
-            tabindex="0"
-            @keyup.enter="selectSpace(null, space)"
-          )
-            Loader(:visible="isLoadingSpace(space)")
+  ul.results-list.space-list
+    template(v-for="spaceChunk in spaceChunks")
+      template(v-for="space in spaceChunk" :key="space.id")
+        .space-wrap
+          a(:href="space.url")
+            li(
+              @click.left="selectSpace($event, space)"
+              :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
+              tabindex="0"
+              @keyup.enter="selectSpace(null, space)"
+            )
+              Loader(:visible="isLoadingSpace(space)")
 
-            //- User(s)
-            template(v-if="showOtherUsers")
-              .users
+              //- User(s)
+              template(v-if="showOtherUsers")
+                .users
+                  User(:user="user(space)" :isClickable="false" :key="user(space).id")
+                  template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
+                    User(:user="otherUser" :isClickable="false")
+              template(v-else-if="showUser")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id")
-                template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
-                  User(:user="otherUser" :isClickable="false")
-            template(v-else-if="showUser")
-              User(:user="user(space)" :isClickable="false" :key="user(space).id")
-            template(v-else-if="showCollaborator(space)")
-              User(:user="user(space)" :isClickable="false" :key="user(space).id")
-            //- NEW badge
-            span(v-if="isNew(space)")
-              .badge.info.inline-badge.new-badge New
-            //- today journal badge
-            span.badge.info.inline-badge(v-if="isTodayJournal(space)" title="Today's journal")
-              img.icon.today-icon(src="@/assets/today.svg")
-            //- space meta
-            span(v-if="space.isFavorite")
-              img.icon.favorite-icon(src="@/assets/heart.svg")
-            span(v-if="space.name === 'Inbox'")
-              img.icon.inbox-icon(src="@/assets/inbox.svg")
+              template(v-else-if="showCollaborator(space)")
+                User(:user="user(space)" :isClickable="false" :key="user(space).id")
+              //- NEW badge
+              span(v-if="isNew(space)")
+                .badge.info.inline-badge.new-badge New
+              //- today journal badge
+              span.badge.info.inline-badge(v-if="isTodayJournal(space)" title="Today's journal")
+                img.icon.today-icon(src="@/assets/today.svg")
+              //- space meta
+              span(v-if="space.isFavorite")
+                img.icon.favorite-icon(src="@/assets/heart.svg")
+              span(v-if="space.name === 'Inbox'")
+                img.icon.inbox-icon(src="@/assets/inbox.svg")
 
-            //- span(v-if="space.backgroundTint")
-            //-   .badge.inline-badge.color-only-badge(:style="{ background: space.backgroundTint }")
-            MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-            //- template
-            span(v-if="space.isTemplate")
-              img.icon.templates(src="@/assets/templates.svg" title="Template")
-            .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
-            //- tweet space
-            span(v-if="space.isFromTweet" title="Tweet space")
-              img.icon.tweet(src="@/assets/twitter.svg")
+              //- span(v-if="space.backgroundTint")
+              //-   .badge.inline-badge.color-only-badge(:style="{ background: space.backgroundTint }")
+              MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
+              //- template
+              span(v-if="space.isTemplate")
+                img.icon.templates(src="@/assets/templates.svg" title="Template")
+              .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
+              //- tweet space
+              span(v-if="space.isFromTweet" title="Tweet space")
+                img.icon.tweet(src="@/assets/twitter.svg")
 
-            //- space details
-            .name
-              span(v-if="this.filter")
-                NameMatch(:name="space.name" :indexes="space.matchIndexes")
-              span(v-else)
-                span {{space.name}}
-              template(v-if='space.privacy')
-                PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
-              img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
-            button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
-              img.icon.checkmark(src="@/assets/checkmark.svg")
-        button.duplicate.small-button(v-if="spaceIsActive(space) && spaceIsTemplate(space)" @click="duplicateSpace")
-          img.icon(src="@/assets/add.svg")
-          span Duplicate
+              //- space details
+              .name
+                span(v-if="this.filter")
+                  NameMatch(:name="space.name" :indexes="space.matchIndexes")
+                span(v-else)
+                  span {{space.name}}
+                template(v-if='space.privacy')
+                  PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
+                img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
+              button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
+                img.icon.checkmark(src="@/assets/checkmark.svg")
+          button.duplicate.small-button(v-if="spaceIsActive(space) && spaceIsTemplate(space)" @click="duplicateSpace")
+            img.icon(src="@/assets/add.svg")
+            span Duplicate
 
 </template>
 
@@ -124,7 +125,7 @@ export default {
       filter: '',
       filteredSpaces: [],
       focusOnId: '',
-      shouldShowCompleteSpacesList: false
+      spaceChunks: []
     }
   },
   mounted () {
@@ -136,10 +137,8 @@ export default {
         if (!utils.arrayHasItems(spaces)) {
           this.closeDialog()
         } else if (key === 'ArrowUp') {
-          this.showCompleteSpacesList()
           this.focusPreviousItem(currentIndex)
         } else if (key === 'ArrowDown') {
-          this.showCompleteSpacesList()
           this.focusNextItem(currentIndex)
         }
       }
@@ -166,26 +165,25 @@ export default {
     },
     spacesFiltered () {
       if (this.filter) {
-        return this.truncateSpaces(this.filteredSpaces)
+        return this.filteredSpaces
       } else {
-        return this.truncateSpaces(this.spaces)
+        return this.spaces
       }
     }
   },
   methods: {
+    updateSpaceChunks () {
+      const chunkSize = 50
+      const spaces = this.spacesFiltered
+      const chunks = utils.splitArrayIntoChunks(spaces, chunkSize)
+      this.spaceChunks = []
+      chunks.forEach(chunk => {
+        this.spaceChunks.push(chunk)
+      })
+    },
     duplicateSpace () {
       this.$store.dispatch('currentSpace/duplicateSpace')
       this.$store.dispatch('closeAllDialogs', 'spaceList.duplicateSpace')
-    },
-    truncateSpaces (spaces) {
-      if (this.shouldShowCompleteSpacesList) {
-        return spaces
-      }
-      const truncate = 25
-      return spaces.slice(0, truncate)
-    },
-    showCompleteSpacesList () {
-      this.shouldShowCompleteSpacesList = true
     },
     isNew (space) {
       if (this.userShowInExploreDate) {
@@ -221,6 +219,7 @@ export default {
     },
     updateFilteredSpaces (spaces) {
       this.filteredSpaces = spaces
+      this.updateSpaceChunks()
     },
     updateFilter (filter) {
       this.filter = filter
@@ -259,14 +258,12 @@ export default {
     },
     user (space) {
       let users = []
-
       if (utils.arrayExists(space.users)) {
         users = space.users
       }
       return space.user || users[0]
     },
     focusPreviousItem (currentIndex) {
-      // this.showCompleteSpacesList()
       const spaces = this.spacesFiltered
       const focusedSpaceName = this.spaces.find(space => space.id === this.focusOnId)
       const firstItemIsFocused = this.search === focusedSpaceName
@@ -282,7 +279,6 @@ export default {
       }
     },
     focusNextItem (currentIndex) {
-      // this.showCompleteSpacesList()
       const spaces = this.spacesFiltered
       const lastItem = last(spaces)
       const lastItemIsFocused = lastItem.name === this.focusOnId
@@ -343,6 +339,7 @@ export default {
   watch: {
     spaces: {
       handler (spaces) {
+        this.updateSpaceChunks()
         const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
         if (spaces && cardDetailsIsVisible) {
           this.focusOnId = spaces[0].id
