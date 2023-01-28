@@ -1,14 +1,12 @@
 <script setup>
-// import utils from '@/utils.js'
-
-import { reactive, computed, onMounted } from 'vue'
+import { reactive, computed, onMounted, defineProps } from 'vue'
 // https://vuex.vuejs.org/guide/composition-api.html#accessing-state-and-getters
 import { useStore } from 'vuex'
+const store = useStore()
 
 defineProps({
   showSystem: Boolean
 })
-const store = useStore()
 
 const themeName = computed(() => store.state.currentUser.theme)
 const isSystem = computed(() => store.state.currentUser.themeIsSystem)
