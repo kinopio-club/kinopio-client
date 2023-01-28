@@ -60,10 +60,10 @@ export default {
   .background-tint
     mix-blend-mode multiply
   .preview-wrap
-    height 15px
-    width 15px
+    height 18px
+    width 18px
     position relative
-    border-radius 3px
+    border-radius var(--entity-radius)
     overflow hidden
     display inline-block
     vertical-align -3px
@@ -75,7 +75,7 @@ export default {
     top 0
     left 0
     mix-blend-mode multiply
-    border-radius 3px
+    border-radius calc(var(--entity-radius) + 1)
   .background-image
     height 100%
     width 100%
@@ -87,7 +87,8 @@ export default {
   .preview-button
     position relative
     cursor pointer
-    border-radius 5px
+    border-radius var(--entity-radius)
+    overflow hidden
     background-color white
     &:hover,
     &:active,

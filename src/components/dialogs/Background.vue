@@ -1,11 +1,16 @@
 <template lang="pug">
-dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
+dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
-    BackgroundPreview(:space="currentSpace")
-    span.title Background
+    .row.title-row
+      div
+        BackgroundPreview(:space="currentSpace")
+        span.title Background
+      .row
+        button.small-button(:disabled="!canEditSpace" @click.left="removeBackgroundAll")
+          img.icon(src="@/assets/remove.svg")
 
   section(@mouseup.stop @touchend.stop)
-    textarea(
+    input(
       v-if="canEditSpace"
       ref="background"
       rows="1"
@@ -57,24 +62,26 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
     //- buttons
     .row
       .button-wrap
-        button(:disabled="!canEditSpace" @click.left="removeBackgroundAll")
-          img.icon(src="@/assets/remove.svg")
-      .button-wrap
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{ background: backgroundTintBadgeColor }")
         ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
-      .button-wrap
-        button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
+      //- .button-wrap
+      //-   button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
+      //-     img.icon.flower(src="@/assets/flower.svg")
+      //-   ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch" :removeIsVisible="true" @removeImage="removeBackground")
+      .segmented-buttons
+        button.active(:disabled="!canEditSpace")
           img.icon.flower(src="@/assets/flower.svg")
-        ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch" :removeIsVisible="true" @removeImage="removeBackground")
+        button
+          span Recent
       .button-wrap
-        button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
+        button(:disabled="!canEditSpace" @click.left.stop="selectFile")
+          span Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
 
 </template>
 
 <script>
-import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -83,7 +90,6 @@ import BackgroundPreview from '@/components/BackgroundPreview.vue'
 export default {
   name: 'Background',
   components: {
-    ImagePicker,
     ColorPicker,
     Loader,
     BackgroundPreview
@@ -93,7 +99,6 @@ export default {
   },
   data () {
     return {
-      imagePickerIsVisible: false,
       colorPickerIsVisible: false,
       initialSearch: '',
       error: {
@@ -125,7 +130,6 @@ export default {
   updated () {
     this.$nextTick(() => {
       if (this.visible) {
-        this.textareaSize()
         this.checkIfImageIsUrl()
       }
     })
@@ -178,14 +182,7 @@ export default {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     closeDialogs () {
-      this.imagePickerIsVisible = false
       this.colorPickerIsVisible = false
-    },
-    toggleImagePickerIsVisible () {
-      const isVisible = this.imagePickerIsVisible
-      this.closeDialogs()
-      this.imagePickerIsVisible = !isVisible
-      this.initialSearch = this.currentSpace.name
     },
     removeBackgroundAll () {
       this.removeBackground()
@@ -233,11 +230,6 @@ export default {
       } else {
         this.error.isNotImageUrl = true
       }
-    },
-    textareaSize () {
-      if (!this.canEditSpace) { return }
-      const textarea = this.$refs.background
-      textarea.style.height = textarea.scrollHeight + 1 + 'px'
     },
     selectFile (event) {
       if (!this.currentUserIsSignedIn) {
@@ -294,6 +286,8 @@ export default {
 .background
   &.narrow
     width 215px
+  .title-row
+    margin-left 0 !important
   .background-preview
     margin-right 6px
   .title
