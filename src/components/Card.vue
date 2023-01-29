@@ -1675,7 +1675,6 @@ export default {
           url: spaceId
         }
       }
-      this.updateDimensions()
       return space
     },
     openUrl (event, url) {
@@ -1949,10 +1948,6 @@ export default {
         urlPreviewFavicon: this.previewFavicon(links)
       }
       this.$store.dispatch('currentCards/update', update)
-      this.updateDimensions()
-    },
-    updateDimensions () {
-      this.$store.dispatch('currentCards/updateDimensions', { cards: [this.card] })
     },
     updateUrlPreviewErrorUrl (url) {
       const cardId = this.card.id
