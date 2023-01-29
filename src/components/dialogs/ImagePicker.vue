@@ -4,12 +4,11 @@ dialog.image-picker(
   :open="visible"
   @click.left.stop
   ref="dialog"
-  :class="{'background-image-picker' : isBackgroundImage }"
   :style="{'max-height': dialogHeight + 'px', 'min-height': minDialogHeight + 'px'}"
 )
 
   //- card options
-  section(v-if="!isBackgroundImage" ref="cardImageServiceSection")
+  section(ref="cardImageServiceSection")
     .row.title-row-flex
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
@@ -34,7 +33,8 @@ dialog.image-picker(
     .error-container-top(v-if="error.signUpToUpload")
       p
         span To upload files,
-        span.badge.info you need to Sign Up or In
+        span.badge.info
+          span you need to Sign Up or In
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
     .error-container-top(v-if="error.sizeLimit")
       p
@@ -46,27 +46,14 @@ dialog.image-picker(
         span.badge.info upgrade for unlimited
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     .error-container-top(v-if="error.unknownUploadError")
-      .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-
-  //- background options
-  section(v-if="isBackgroundImage" ref="serviceSection")
-    .row.title-row-flex
-      .segmented-buttons
-        button(@click.left.stop="toggleServiceIsBackgrounds" :class="{active : serviceIsBackgrounds}")
-          span Backgrounds
-        button(@click.left.stop="toggleServiceIsRecent" :class="{active : serviceIsRecent}")
-          span Recent
-        button(@click.left.stop="toggleServiceIsBing" :class="{active : serviceIsBing}")
-          img.icon(src="@/assets/search.svg")
-      .button-wrap(v-if="removeIsVisible")
-        button(@click="removeImage")
-          img.icon(src="@/assets/remove.svg")
+      .badge.danger
+        span (シ_ _)シ Something went wrong, Please try again or contact support
 
   AIImageGeneration(@selectImage="selectImage" :visible="serviceIsAI" :initialPrompt="search" :cardUrl="cardUrl")
   template(v-if="!serviceIsAI")
     //- search box
     section.results-section.search-input-wrap(ref="searchSection")
-      .search-wrap(v-if="serviceHasSearch")
+      .search-wrap
         img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
         Loader(:visible="loading")
         input(
@@ -105,11 +92,9 @@ dialog.image-picker(
 import Loader from '@/components/Loader.vue'
 import AIImageGeneration from '@/components/AIImageGeneration.vue'
 import utils from '@/utils.js'
-import backgroundImages from '@/data/backgroundImages.json'
 import cache from '@/cache.js'
 
 import debounce from 'lodash-es/debounce'
-import uniq from 'lodash-es/uniq'
 import sample from 'lodash-es/sample'
 
 const numberOfImages = 25
@@ -125,18 +110,13 @@ export default {
     initialSearch: String,
     cardUrl: String,
     cardId: String,
-    isBackgroundImage: Boolean,
     removeIsVisible: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updatePageSizes') {
         this.clearHeights()
-        if (this.isBackgroundImage) {
-          this.updateHeightFromFooter()
-        } else {
-          this.updateHeightFromDialog()
-        }
+        this.updateHeightFromDialog()
       }
     })
   },
@@ -144,7 +124,7 @@ export default {
     return {
       images: [],
       search: '',
-      service: 'stickers', // 'stickers', 'gifs', 'bing', 'backgrounds', 'recent', 'ai'
+      service: 'stickers', // 'stickers', 'gifs', 'bing', 'ai'
       loading: false,
       minDialogHeight: 400,
       dialogHeight: null,
@@ -155,8 +135,7 @@ export default {
         signUpToUpload: false,
         sizeLimit: false,
         unknownUploadError: false
-      },
-      backgroundsIsStatic: true
+      }
     }
   },
   computed: {
@@ -202,15 +181,6 @@ export default {
     serviceIsGifs () {
       return this.service === 'gifs'
     },
-    serviceIsBackgrounds () {
-      return this.service === 'backgrounds'
-    },
-    serviceIsRecent () {
-      return this.service === 'recent'
-    },
-    serviceHasSearch () {
-      return !this.serviceIsBackgrounds && !this.serviceIsRecent
-    },
     isNoSearchResults () {
       if (this.error.unknownServerError || this.error.userIsOffline) {
         return false
@@ -235,16 +205,6 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'ImagePicker.triggerUpgradeUserIsVisible')
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
-    toggleServiceIsBackgrounds () {
-      this.service = 'backgrounds'
-      this.searchAgainBackgrounds()
-      this.updateLastUsedImagePickerService()
-    },
-    toggleServiceIsRecent () {
-      this.service = 'recent'
-      this.updateImagesFromCachedSpace()
-      this.updateLastUsedImagePickerService()
-    },
     toggleServiceIsBing () {
       this.service = 'bing'
       this.searchAgain()
@@ -264,33 +224,6 @@ export default {
       this.searchAgain()
       this.updateLastUsedImagePickerService()
     },
-    updateImagesFromCachedSpace () {
-      let spaces = cache.getAllSpaces()
-      spaces = spaces.filter(space => space.id !== this.$store.state.currentSpace.id)
-      let images = []
-      spaces.forEach(space => {
-        if (!space.background) { return }
-        images.push(space.background)
-      })
-      images = uniq(images)
-      images = images.map(url => {
-        const backgroundImage = backgroundImages.find(item => item.url === url)
-        if (backgroundImage) { return }
-        return {
-          url,
-          previewUrl: url
-        }
-      })
-      images = images.filter(image => Boolean(image))
-      const max = 30
-      images = images.slice(0, max)
-      this.images = images
-    },
-    searchAgainBackgrounds () {
-      let images
-      images = backgroundImages
-      this.normalizeResults(images, 'backgrounds')
-    },
     searchAgain () {
       this.images = []
       this.loading = true
@@ -304,12 +237,7 @@ export default {
       const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
       const defaultSearch = sample(defaultSearches)
       let params = { q: this.search || defaultSearch }
-      if (this.isBackgroundImage) {
-        params.size = 'large'
-        params.maxWidth = 1800
-      } else {
-        params.maxWidth = 600
-      }
+      params.maxWidth = 600
       url.search = new URLSearchParams(params).toString()
       const response = await fetch(url, { method: 'GET', headers })
       const data = await response.json()
@@ -378,7 +306,6 @@ export default {
     normalizeResults (data, service) {
       const bing = service === 'bing' && this.serviceIsBing
       const giphy = service === 'giphy' && (this.serviceIsStickers || this.serviceIsGifs)
-      const backgrounds = service === 'backgrounds' && this.serviceIsBackgrounds
       // bing
       if (bing) {
         data = data.value
@@ -413,14 +340,6 @@ export default {
             }
           }
         })
-      // backgrounds
-      } else if (backgrounds) {
-        this.images = data.map(image => {
-          image.previewUrl = image.previewUrl || image.url
-          return image
-        })
-      }
-      if (!this.isBackgroundImage) {
         this.$nextTick(() => {
           this.updateHeightFromDialog()
           this.scrollIntoView()
@@ -446,10 +365,6 @@ export default {
     },
     scrollIntoView () {
       if (!this.visible) { return }
-      if (this.isBackgroundImage) {
-        this.updateHeightFromFooter()
-        return
-      }
       const element = this.$refs.dialog
       if (!element) { return }
       utils.scrollIntoView(element)
@@ -513,11 +428,7 @@ export default {
           if (!this.visible) { return }
           let resultsSection = this.$refs.results
           let serviceSection
-          if (this.isBackgroundImage) {
-            serviceSection = this.$refs.serviceSection
-          } else {
-            serviceSection = this.$refs.cardImageServiceSection
-          }
+          serviceSection = this.$refs.cardImageServiceSection
           let searchSection = this.$refs.searchSection
           if (!serviceSection) { return }
           serviceSection = serviceSection.getBoundingClientRect().height
@@ -531,11 +442,9 @@ export default {
       this.$store.commit('pinchCounterZoomDecimal', 1)
     },
     updateLastUsedImagePickerService () {
-      if (this.isBackgroundImage) { return }
       this.$store.dispatch('currentUser/update', { lastUsedImagePickerService: this.service })
     },
     updateServiceFromLastUsedService () {
-      if (this.isBackgroundImage) { return }
       if (!this.lastUsedImagePickerService) { return }
       this.service = this.lastUsedImagePickerService
     }
@@ -546,13 +455,7 @@ export default {
         if (visible) {
           this.updateServiceFromLastUsedService()
           this.search = this.initialSearch
-          if (this.isBackgroundImage) {
-            this.toggleServiceIsBackgrounds()
-            this.updateHeightFromFooter()
-            return
-          } else {
-            this.scrollIntoView()
-          }
+          this.scrollIntoView()
           this.searchService()
           this.focusSearchInput()
         }
@@ -601,9 +504,6 @@ export default {
         position absolute
         top 6px
         left 6px
-
-  &.background-image-picker
-    padding-top 4px
 
   .sticker
     vertical-align -2px
