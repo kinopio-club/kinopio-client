@@ -83,8 +83,10 @@ dialog.image-picker(
           img.icon.cancel(src="@/assets/add.svg")
       .error-container(v-if="isNoSearchResults || error.unknownServerError || error.userIsOffline")
         p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
-        .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-        .badge.danger(v-if="error.userIsOffline") Can't search {{service}} while offline, Please try again later
+        .badge.danger(v-if="error.unknownServerError")
+          span (シ_ _)シ Something went wrong, Please try again or contact support
+        .badge.danger(v-if="error.userIsOffline")
+          span Can't search {{service}} while offline, Please try again later
 
     //- search results
     section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")

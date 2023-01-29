@@ -78,6 +78,8 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
         button(:disabled="!canEditSpace" @click.left.stop="selectFile")
           span Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
+  section.results-section
+    ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
 
 </template>
 
@@ -86,13 +88,16 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import ImageList from '@/components/ImageList.vue'
+import backgroundImages from '@/data/backgroundImages.json'
 
 export default {
   name: 'Background',
   components: {
     ColorPicker,
     Loader,
-    BackgroundPreview
+    BackgroundPreview,
+    ImageList
   },
   props: {
     visible: Boolean
@@ -109,7 +114,8 @@ export default {
         unknownUploadError: false
       },
       backgroundTint: '',
-      defaultColor: '#e3e3e3'
+      defaultColor: '#e3e3e3',
+      selectedImages: backgroundImages
     }
   },
   created () {
