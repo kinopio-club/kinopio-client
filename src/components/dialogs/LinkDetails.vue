@@ -9,7 +9,7 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="styles" re
           BackgroundPreview(:space="space" :isButton="true" :buttonIsActive="linkIsCurrentSpace")
       .meta-wrap
         a(:href="space.url")
-          button(@click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace" :class="{active: linkIsCurrentSpace}")
+          button.variable-length-content(@click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace" :class="{active: linkIsCurrentSpace}")
             MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
             span {{space.name}} →
 

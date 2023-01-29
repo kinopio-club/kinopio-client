@@ -70,10 +70,6 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{ background: backgroundTintBadgeColor }")
         ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
-      //- .button-wrap
-      //-   button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
-      //-     img.icon.flower(src="@/assets/flower.svg")
-      //-   ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch" :removeIsVisible="true" @removeImage="removeBackground")
       .segmented-buttons
         button(:disabled="!canEditSpace" @click.left.stop="updateSelectedImagesType('background')" :class="{ active: selectedImagesType === 'background'}")
           img.icon.flower(src="@/assets/flower.svg")
