@@ -1,19 +1,29 @@
 <template lang="pug">
-dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
+dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
-    BackgroundPreview(:space="currentSpace")
-    span.title Background
+    .row.title-row
+      div
+        BackgroundPreview(:space="currentSpace")
+        span.title Background
+      .row
+        button.small-button(:disabled="!canEditSpace" @click.left="removeBackgroundAll")
+          img.icon(src="@/assets/remove.svg")
 
   section(@mouseup.stop @touchend.stop)
-    textarea(
-      v-if="canEditSpace"
-      ref="background"
-      rows="1"
-      placeholder="Paste an image URL or upload"
-      v-model="background"
-      data-type="name"
-      maxlength="250"
-    )
+    .row
+      input(
+        v-if="canEditSpace"
+        ref="background"
+        rows="1"
+        placeholder="Paste an image URL or upload"
+        v-model="background"
+        data-type="name"
+        maxlength="250"
+      )
+      .input-button-wrap(@click.left="copyUrl")
+        button.small-button
+          img.icon.copy(src="@/assets/copy.svg")
+
     p.read-only-url(v-if="!canEditSpace && background")
       span {{background}}
     .row(v-if="!canEditSpace")
@@ -57,43 +67,47 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
     //- buttons
     .row
       .button-wrap
-        button(:disabled="!canEditSpace" @click.left="removeBackgroundAll")
-          img.icon(src="@/assets/remove.svg")
-      .button-wrap
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{ background: backgroundTintBadgeColor }")
         ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
-      .button-wrap
-        button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
+      .segmented-buttons
+        button(:disabled="!canEditSpace" @click.left.stop="updateSelectedImagesType('background')" :class="{ active: selectedImagesType === 'background'}")
           img.icon.flower(src="@/assets/flower.svg")
-        ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch" :removeIsVisible="true" @removeImage="removeBackground")
+        button(:disabled="!canEditSpace" @click.left.stop="updateSelectedImagesType('recent')" :class="{ active: selectedImagesType === 'recent'}")
+          span Recent
       .button-wrap
-        button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
+        button(:disabled="!canEditSpace" @click.left.stop="selectFile")
+          span Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
+  section.results-section
+    ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
 
 </template>
 
 <script>
-import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import ImageList from '@/components/ImageList.vue'
+import backgroundImages from '@/data/backgroundImages.json'
+import cache from '@/cache.js'
+
+import uniq from 'lodash-es/uniq'
 
 export default {
   name: 'Background',
   components: {
-    ImagePicker,
     ColorPicker,
     Loader,
-    BackgroundPreview
+    BackgroundPreview,
+    ImageList
   },
   props: {
     visible: Boolean
   },
   data () {
     return {
-      imagePickerIsVisible: false,
       colorPickerIsVisible: false,
       initialSearch: '',
       error: {
@@ -104,7 +118,9 @@ export default {
         unknownUploadError: false
       },
       backgroundTint: '',
-      defaultColor: '#e3e3e3'
+      defaultColor: '#e3e3e3',
+      selectedImages: backgroundImages,
+      selectedImagesType: 'background'
     }
   },
   created () {
@@ -125,7 +141,6 @@ export default {
   updated () {
     this.$nextTick(() => {
       if (this.visible) {
-        this.textareaSize()
         this.checkIfImageIsUrl()
       }
     })
@@ -168,6 +183,46 @@ export default {
     }
   },
   methods: {
+    updateSelectedImagesType (type) {
+      this.selectedImagesType = type
+      if (type === 'background') {
+        this.selectedImages = backgroundImages
+      } else if (type === 'recent') {
+        const images = this.recentImagesFromCacheSpaces()
+        this.selectedImages = images
+      }
+    },
+    recentImagesFromCacheSpaces () {
+      let spaces = cache.getAllSpaces()
+      let images = []
+      spaces.forEach(space => {
+        if (!space.background) { return }
+        images.push(space.background)
+      })
+      images = uniq(images)
+      images = images.map(image => {
+        const backgroundImage = backgroundImages.find(item => item.url === image)
+        if (backgroundImage) {
+          return backgroundImage
+        }
+        return { url: image }
+      })
+      images = images.filter(image => Boolean(image))
+      const max = 30
+      images = images.slice(0, max)
+      return images
+    },
+    async copyUrl (event) {
+      this.$store.commit('clearNotificationsWithPosition')
+      const position = utils.cursorPositionInPage(event)
+      try {
+        await navigator.clipboard.writeText(this.background)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+      } catch (error) {
+        console.warn('🚑 copyText', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      }
+    },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
       this.closeDialogs()
@@ -178,14 +233,7 @@ export default {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     closeDialogs () {
-      this.imagePickerIsVisible = false
       this.colorPickerIsVisible = false
-    },
-    toggleImagePickerIsVisible () {
-      const isVisible = this.imagePickerIsVisible
-      this.closeDialogs()
-      this.imagePickerIsVisible = !isVisible
-      this.initialSearch = this.currentSpace.name
     },
     removeBackgroundAll () {
       this.removeBackground()
@@ -234,11 +282,6 @@ export default {
         this.error.isNotImageUrl = true
       }
     },
-    textareaSize () {
-      if (!this.canEditSpace) { return }
-      const textarea = this.$refs.background
-      textarea.style.height = textarea.scrollHeight + 1 + 'px'
-    },
     selectFile (event) {
       if (!this.currentUserIsSignedIn) {
         this.error.signUpToUpload = true
@@ -284,6 +327,7 @@ export default {
         if (this.error.isNotImageUrl) {
           this.removeBackground()
         }
+        this.$store.commit('clearNotificationsWithPosition')
       }
     }
   }
@@ -294,6 +338,8 @@ export default {
 .background
   &.narrow
     width 215px
+  .title-row
+    margin-left 0 !important
   .background-preview
     margin-right 6px
   .title
@@ -338,4 +384,8 @@ export default {
   @media(max-width 500px)
     .image-picker
       left -68px
+
+  .input-button-wrap
+    margin-top -10px
+    margin-right -8px
 </style>
