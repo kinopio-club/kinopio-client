@@ -10,15 +10,20 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
           img.icon(src="@/assets/remove.svg")
 
   section(@mouseup.stop @touchend.stop)
-    input(
-      v-if="canEditSpace"
-      ref="background"
-      rows="1"
-      placeholder="Paste an image URL or upload"
-      v-model="background"
-      data-type="name"
-      maxlength="250"
-    )
+    .row
+      input(
+        v-if="canEditSpace"
+        ref="background"
+        rows="1"
+        placeholder="Paste an image URL or upload"
+        v-model="background"
+        data-type="name"
+        maxlength="250"
+      )
+      .input-button-wrap(@click.left="copyUrl")
+        button.small-button
+          img.icon.copy(src="@/assets/copy.svg")
+
     p.read-only-url(v-if="!canEditSpace && background")
       span {{background}}
     .row(v-if="!canEditSpace")
@@ -178,6 +183,17 @@ export default {
     }
   },
   methods: {
+    async copyUrl (event) {
+      this.$store.commit('clearNotificationsWithPosition')
+      const position = utils.cursorPositionInPage(event)
+      try {
+        await navigator.clipboard.writeText(this.background)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+      } catch (error) {
+        console.warn('🚑 copyText', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      }
+    },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
       this.closeDialogs()
@@ -282,6 +298,7 @@ export default {
         if (this.error.isNotImageUrl) {
           this.removeBackground()
         }
+        this.$store.commit('clearNotificationsWithPosition')
       }
     }
   }
@@ -338,4 +355,8 @@ export default {
   @media(max-width 500px)
     .image-picker
       left -68px
+
+  .input-button-wrap
+    margin-top -10px
+    margin-right -8px
 </style>
