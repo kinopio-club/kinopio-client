@@ -75,9 +75,9 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
       //-     img.icon.flower(src="@/assets/flower.svg")
       //-   ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch" :removeIsVisible="true" @removeImage="removeBackground")
       .segmented-buttons
-        button.active(:disabled="!canEditSpace")
+        button(:disabled="!canEditSpace" @click.left.stop="updateSelectedImagesType('background')" :class="{ active: selectedImagesType === 'background'}")
           img.icon.flower(src="@/assets/flower.svg")
-        button
+        button(:disabled="!canEditSpace" @click.left.stop="updateSelectedImagesType('recent')" :class="{ active: selectedImagesType === 'recent'}")
           span Recent
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="selectFile")
@@ -95,6 +95,9 @@ import utils from '@/utils.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import ImageList from '@/components/ImageList.vue'
 import backgroundImages from '@/data/backgroundImages.json'
+import cache from '@/cache.js'
+
+import uniq from 'lodash-es/uniq'
 
 export default {
   name: 'Background',
@@ -120,7 +123,8 @@ export default {
       },
       backgroundTint: '',
       defaultColor: '#e3e3e3',
-      selectedImages: backgroundImages
+      selectedImages: backgroundImages,
+      selectedImagesType: 'background'
     }
   },
   created () {
@@ -183,6 +187,35 @@ export default {
     }
   },
   methods: {
+    updateSelectedImagesType (type) {
+      this.selectedImagesType = type
+      if (type === 'background') {
+        this.selectedImages = backgroundImages
+      } else if (type === 'recent') {
+        const images = this.recentImagesFromCacheSpaces()
+        this.selectedImages = images
+      }
+    },
+    recentImagesFromCacheSpaces () {
+      let spaces = cache.getAllSpaces()
+      let images = []
+      spaces.forEach(space => {
+        if (!space.background) { return }
+        images.push(space.background)
+      })
+      images = uniq(images)
+      images = images.map(image => {
+        const backgroundImage = backgroundImages.find(item => item.url === image)
+        if (backgroundImage) {
+          return backgroundImage
+        }
+        return { url: image }
+      })
+      images = images.filter(image => Boolean(image))
+      const max = 30
+      images = images.slice(0, max)
+      return images
+    },
     async copyUrl (event) {
       this.$store.commit('clearNotificationsWithPosition')
       const position = utils.cursorPositionInPage(event)
