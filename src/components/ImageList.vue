@@ -24,11 +24,17 @@ ul.results-list.image-list
     li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isActiveUrl(image)}")
       img(:src="image.previewUrl || image.url")
       a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
-        button.small-button
-          span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
-          span →
 </template>
 
-<style lang="stylus">
-// .image-list
+<style lang="stylus" scoped>
+.image-list
+  li
+    width 33% !important
+    padding 3px
+    padding-right 2px
+    padding-bottom 2px
+    align-items center
+    img
+      min-height 80px !important
+      border-radius var(--entity-radius) !important
 </style>
