@@ -8,20 +8,17 @@
     span(v-if="showInExplore") In Explore
 
   template(v-if="error.userNeedsToSignUpOrIn")
-    p
-      span.badge.info Sign Up or In
-      span for your spaces to be accessible to others
+    .badge.info
+      span Sign Up or In for your spaces to be accessible to others
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
   template(v-else-if="error.spaceMustBeEdited")
-    p
-      span.badge.info Edit and rename this space
-      span to add to explore
+    .badge.info
+      span Edit and rename this space to add to explore
 
   template(v-else-if="error.spaceCardsMinimum")
-    p
-      span.badge.info Space needs more than 10 cards
-      span to add to explore
+    .badge.info
+      span Space needs more than 10 cards to add to explore
 
 </template>
 
@@ -137,4 +134,6 @@ export default {
     vertical-align -1px !important
   .icon.add
     margin-right 4px
+  .badge
+    margin-top 10px
 </style>
