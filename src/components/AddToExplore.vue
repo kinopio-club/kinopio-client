@@ -4,7 +4,7 @@
     span(v-if="!showInExplore")
       img.icon.add(src="@/assets/add.svg")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
-    span(v-if="!showInExplore") Explore
+    span(v-if="!showInExplore") Share In Explore
     span(v-if="showInExplore") In Explore
 
   template(v-if="error.userNeedsToSignUpOrIn")
@@ -133,7 +133,6 @@ export default {
 
 <style lang="stylus">
 .add-to-explore
-  max-width 60%
   input
     vertical-align -1px !important
   .icon.add

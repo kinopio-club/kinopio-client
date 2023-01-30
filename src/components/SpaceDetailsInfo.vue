@@ -18,7 +18,7 @@
           span {{remotePendingUpload.percentComplete}}%
       Background(:visible="backgroundIsVisible" @updateSpaces="updateSpaces")
     //- Name
-    .textarea-wrap
+    .textarea-wrap(:class="{'full-width': shouldHidePin}")
       textarea.name(
         :disabled="!isSpaceMember"
         ref="name"
@@ -46,11 +46,46 @@
 .row.align-items-top(v-if="isSpaceMember")
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
+
+  .button-wrap
+    button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
+      img.icon.settings(src="@/assets/settings.svg")
+      span Settings
+
+//- .row.align-items-top(v-if="!isSpaceMember && !showInExplore")
+//-   //- Explore Ask
+//-   AskToAddToExplore
+
+//- Space Settings
+section.subsection.space-settings(v-if="settingsIsVisible")
+  //- Background
+  .row
+    button(@click.left.stop="toggleBackgroundIsVisible")
+      BackgroundPreview(:space="currentSpace")
+      span Background
   //- Explore
-  AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
-.row.align-items-top(v-if="!isSpaceMember && !showInExplore")
-  //- Explore Ask
-  AskToAddToExplore
+  .row
+    AddToExplore(@updateSpaces="updateSpaces")
+  .row
+    .button-wrap(v-if="isSpaceMember")
+      .segmented-buttons
+        //- Remove
+        button.danger(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
+          template(v-if="currentUserIsSpaceCollaborator")
+            img.icon.cancel(src="@/assets/add.svg")
+            span Leave
+          template(v-else)
+            img.icon.remove(src="@/assets/remove.svg")
+            span Remove
+        //- Hide Space
+        button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
+          img.icon(v-if="!currentSpaceIsHidden" src="@/assets/view.svg")
+          img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
+          span Hide
+    .button-wrap(v-if="!isSpaceMember")
+      button(@click.left="duplicateSpace")
+        img.icon.add(src="@/assets/add.svg")
+        span Duplicate
 
 </template>
 
@@ -61,10 +96,11 @@ import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
+import templates from '@/data/templates.js'
 
 export default {
   name: 'SpaceDetailsInfo',
-  emits: ['updateSpaces', 'closeDialogs'],
+  emits: ['updateSpaces', 'closeDialogs', 'updateDialogHeight'],
   components: {
     Background,
     BackgroundPreview,
@@ -74,8 +110,8 @@ export default {
     AskToAddToExplore
   },
   props: {
-    shouldHideExplore: Boolean,
-    shouldHidePin: Boolean
+    shouldHidePin: Boolean,
+    currentSpaceIsHidden: Boolean
   },
   mounted () {
     this.textareaSize()
@@ -108,10 +144,16 @@ export default {
   data () {
     return {
       backgroundIsVisible: false,
-      privacyPickerIsVisible: false
+      privacyPickerIsVisible: false,
+      settingsIsVisible: false
     }
   },
   computed: {
+    currentSpaceIsTemplate () {
+      const id = this.currentSpace.id
+      const templateSpaceIds = templates.spaces().map(space => space.id)
+      return templateSpaceIds.includes(id)
+    },
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     spaceName: {
@@ -147,7 +189,9 @@ export default {
         return inProgress && isSpace
       })
     },
-    dialogIsPinned () { return this.$store.state.spaceDetailsIsPinned }
+    dialogIsPinned () { return this.$store.state.spaceDetailsIsPinned },
+    currentUserIsSpaceCollaborator () { return this.$store.getters['currentUser/isSpaceCollaborator']() }
+
   },
   methods: {
     textareaSize () {
@@ -168,6 +212,12 @@ export default {
       const isVisible = this.privacyPickerIsVisible
       this.closeDialogsAndEmit()
       this.privacyPickerIsVisible = !isVisible
+    },
+    toggleSettingsIsVisible () {
+      const isVisible = this.settingsIsVisible
+      this.closeDialogsAndEmit()
+      this.settingsIsVisible = !isVisible
+      this.$emit('updateDialogHeight')
     },
     closeDialogs () {
       this.backgroundIsVisible = false
@@ -196,6 +246,8 @@ export default {
     margin 0
     .textarea-wrap
       width 145px
+      &.full-width
+        width 170px
     textarea.name
       margin 0
       width 100%
@@ -233,5 +285,17 @@ export default {
   align-items flex-start
   .privacy-button
     min-width 28px
+
+.space-settings
+  .background-preview
+    vertical-align middle
+    margin-right 5px
+    .preview-wrap
+      height 16px
+      width 16px
+      vertical-align 0px
+      border-radius 4px
+  .sunglasses
+    margin-left 1px
 
 </style>
