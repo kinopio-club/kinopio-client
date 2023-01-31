@@ -28,10 +28,10 @@ dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
 
   section.results-section(v-if="!isEmpty")
     //- Spaces
-    template(v-if="spacesIsVisible")
+    div(v-show="spacesIsVisible")
       SpaceList(:spaces="favoriteSpacesOrderedByEdited" :showUser="true" @selectSpace="changeSpace")
     //- People
-    template(v-if="!spacesIsVisible")
+    div(v-show="!spacesIsVisible")
       UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 
 </template>
