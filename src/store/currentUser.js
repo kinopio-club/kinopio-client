@@ -120,10 +120,11 @@ export default {
       state.favoriteSpaces = spaces
       cache.updateUser('favoriteSpaces', spaces)
     },
-    favoriteColors: (state, spaces) => {
-      utils.typeCheck({ value: spaces, type: 'array' })
-      state.favoriteColors = spaces
-      cache.updateUser('favoriteColors', spaces)
+    favoriteColors: (state, colors) => {
+      console.log('🌻', colors)
+      utils.typeCheck({ value: colors, type: 'array' })
+      state.favoriteColors = colors
+      cache.updateUser('favoriteColors', colors)
     },
     updateFavoriteSpaceIsEdited: (state, spaceId) => {
       utils.typeCheck({ value: spaceId, type: 'string' })
@@ -456,7 +457,8 @@ export default {
       }
       let favorites = {
         favoriteUsers: [],
-        favoriteSpaces: []
+        favoriteSpaces: [],
+        favoriteColors: []
       }
       favorites = await context.dispatch('api/getUserFavorites', null, { root: true }) || favorites
       context.commit('favoriteUsers', favorites.favoriteUsers)
