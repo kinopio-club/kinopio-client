@@ -180,7 +180,7 @@ const store = createStore({
     spaceUrlToLoad: '',
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
-    hasRestoredFavorites: false,
+    isLoadingFavorites: false,
     loadSpaceShowDetailsForCardId: '',
     loadJournalSpace: false,
     loadJournalSpaceTomorrow: false,
@@ -1109,9 +1109,9 @@ const store = createStore({
       }
       state.remotePendingUploads = state.remotePendingUploads.filter(item => item.percentComplete !== 100)
     },
-    hasRestoredFavorites: (state, value) => {
+    isLoadingFavorites: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.hasRestoredFavorites = value
+      state.isLoadingFavorites = value
     },
     loadSpaceShowDetailsForCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })

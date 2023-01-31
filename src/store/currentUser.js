@@ -449,8 +449,9 @@ export default {
       context.commit('otherTags', remoteTags, { root: true })
     },
     restoreUserFavorites: async (context) => {
+      context.commit('isLoadingFavorites', true, { root: true })
       if (!context.getters.isSignedIn) {
-        context.commit('hasRestoredFavorites', true, { root: true })
+        context.commit('isLoadingFavorites', false, { root: true })
         return
       }
       let favorites = {
@@ -461,7 +462,7 @@ export default {
       context.commit('favoriteUsers', favorites.favoriteUsers)
       context.commit('favoriteSpaces', favorites.favoriteSpaces)
       context.commit('favoriteColors', favorites.favoriteColors)
-      context.commit('hasRestoredFavorites', true, { root: true })
+      context.commit('isLoadingFavorites', false, { root: true })
     },
     addFavorite: (context, { type, item }) => {
       let color

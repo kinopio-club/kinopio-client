@@ -43,8 +43,7 @@ export default {
     spaceMembers () {
       const excludeCurrentUser = true
       return this.$store.getters['currentSpace/members'](excludeCurrentUser)
-    },
-    hasRestoredFavorites () { return this.$store.state.hasRestoredFavorites }
+    }
   },
   methods: {
     toggleIsFavoriteSpace () {

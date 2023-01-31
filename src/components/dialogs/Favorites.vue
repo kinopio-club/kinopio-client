@@ -27,8 +27,10 @@ dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
         Loader(:visible="loading")
 
   section.results-section(v-if="!isEmpty")
+    //- Spaces
     template(v-if="spacesIsVisible")
       SpaceList(:spaces="favoriteSpacesOrderedByEdited" :showUser="true" @selectSpace="changeSpace")
+    //- People
     template(v-if="!spacesIsVisible")
       UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 
@@ -77,7 +79,7 @@ export default {
       }
       return spaces
     },
-    loading () { return !this.$store.state.hasRestoredFavorites },
+    loading () { return this.$store.state.isLoadingFavorites },
     isEmpty () {
       const noSpaces = this.spacesIsVisible && !this.favoriteSpaces.length
       const noPeople = !this.spacesIsVisible && !this.favoriteUsers.length

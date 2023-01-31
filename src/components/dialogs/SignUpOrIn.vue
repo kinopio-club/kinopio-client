@@ -234,7 +234,7 @@ export default {
         this.$store.commit('clearAllNotifications', false)
         this.addCollaboratorToInvitedSpaces()
         this.$store.commit('triggerSpaceDetailsVisible')
-        this.$store.commit('hasRestoredFavorites', false)
+        this.$store.commit('isLoadingFavorites', true)
         this.$store.dispatch('currentUser/restoreUserFavorites')
         this.$store.commit('triggerUpdateNotifications')
         this.$store.dispatch('themes/restore')
