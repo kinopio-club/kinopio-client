@@ -3,9 +3,9 @@ section.templates(v-if="visible" :open="visible" @click.left.stop)
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     // Add to Templates
     .button-wrap(@click.left.prevent="toggleCurrentSpaceIsTemplate" @keydown.stop.enter="toggleCurrentSpaceIsTemplate")
-      button(:class="{ active: currentSpaceIsTemplate }")
+      button.variable-length-content(:class="{ active: currentSpaceIsTemplate }")
         img.icon.templates(src="@/assets/templates.svg")
-        span(v-if="!currentSpaceIsTemplate") Add Template
+        span(v-if="!currentSpaceIsTemplate") Turn Current Space Into Template
         span(v-if="currentSpaceIsTemplate") Is Template
 
     SpaceList(:spaces="templates" :showCategory="true" @selectSpace="changeSpace" :isLoading="isLoadingRemoteSpaces")
