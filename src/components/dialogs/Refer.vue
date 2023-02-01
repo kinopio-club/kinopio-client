@@ -36,26 +36,29 @@ const copyUrl = async (event) => {
 </script>
 
 <template lang="pug">
-section.component-name(v-if="visible")
-  .row
-    div
-      p Refer a Friend
-      p.badge.info You get +20 extra free cards when they sign up
-  .row
-    CardsCreatedProgress
-  .row
-    .url-textarea.single-line
-      span {{url}}
-    .input-button-wrap(@click.left="copyUrl")
-      button.small-button
+dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+  section(v-if="visible")
+    p Refer a Friend
+  section
+    p.badge.info You get +20 extra free cards when they sign up
+    .row
+      CardsCreatedProgress
+    .row
+      .url-textarea.single-line
+        span {{url}}
+      .input-button-wrap(@click.left="copyUrl")
+        button.small-button
+          img.icon.copy(src="@/assets/copy.svg")
+    .row
+      button(@click.left="copyUrl")
         img.icon.copy(src="@/assets/copy.svg")
-  .row
-    button(@click.left="copyUrl")
-      img.icon.copy(src="@/assets/copy.svg")
-      span Copy Refer URL
+        span Copy Refer URL
 
 </template>
 
 <style lang="stylus">
-// .component-name
+.refer
+  top calc(100% - 8px)
+  left initial
+  right 8px
 </style>

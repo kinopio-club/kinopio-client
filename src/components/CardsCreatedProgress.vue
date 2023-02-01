@@ -13,8 +13,9 @@ defineProps({
 const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCount || 0)
 const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
 
-const showShare = () => {
-
+const triggerReferIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerReferIsVisible')
 }
 
 </script>
@@ -26,7 +27,7 @@ const showShare = () => {
     .extra-cards
       .badge.secondary
         span +0
-      button.small-button(v-if="showReferButton" @click="showShare")
+      button.small-button(v-if="showReferButton" @click="triggerReferIsVisible")
         span Refer
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
 

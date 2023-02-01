@@ -106,6 +106,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
               span Share
             Share(:visible="shareIsVisible")
+            Refer(:visible="referIsVisible")
           //- Notifications
           .button-wrap
             button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
@@ -167,6 +168,7 @@ import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
 import Import from '@/components/dialogs/Import.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
+import Refer from '@/components/dialogs/Refer.vue'
 
 import { mapState, mapGetters } from 'vuex'
 
@@ -205,7 +207,8 @@ export default {
     Donate,
     Toolbar,
     Import,
-    Pricing
+    Pricing,
+    Refer
   },
   props: {
     isPinchZooming: Boolean,
@@ -235,7 +238,8 @@ export default {
       sidebarIsVisible: false,
       donateIsVisible: false,
       importIsVisible: false,
-      pricingIsVisible: false
+      pricingIsVisible: false,
+      referIsVisible: false
     }
   },
   created () {
@@ -272,6 +276,8 @@ export default {
         this.hidden()
       } else if (mutation.type === 'triggerTemplatesIsVisible') {
         this.templatesIsVisible = true
+      } else if (mutation.type === 'triggerReferIsVisible') {
+        this.referIsVisible = true
       } else if (mutation.type === 'triggerRemovedIsVisible' || mutation.type === 'triggerAIImagesIsVisible') {
         this.sidebarIsVisible = true
       } else if (mutation.type === 'triggerImportIsVisible') {
@@ -465,6 +471,7 @@ export default {
       this.notificationsIsVisible = false
       this.addSpaceIsVisible = false
       this.templatesIsVisible = false
+      this.referIsVisible = false
       this.importIsVisible = false
       this.pricingIsVisible = false
       if (!this.spaceDetailsIsPinned) {
