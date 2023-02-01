@@ -35,8 +35,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
 
     //- Unlimited cards from member
     section.upgrade(v-if="!currentUserIsUpgraded")
-      p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
-      progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
+      CardsCreatedProgress
       .button-wrap(v-if="!isAddPage")
         button(@click.left.stop="triggerUpgradeUserIsVisible")
           span Upgrade for Unlimited
@@ -103,6 +102,7 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import UserBadges from '@/components/UserBadges.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import { defineAsyncComponent } from 'vue'
@@ -119,7 +119,8 @@ export default {
     Loader,
     UserBadges,
     SpacePicker,
-    UserLabelInline
+    UserLabelInline,
+    CardsCreatedProgress
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -163,7 +164,6 @@ export default {
       }
       return styles
     },
-    cardsCreatedCount () { return this.$store.state.currentUser.cardsCreatedCount || 0 },
     userColor () { return this.user.color },
     userIsMember () { return Boolean(this.$store.getters['currentSpace/memberById'](this.user.id)) },
     userIsUpgraded () { return this.user.isUpgraded },
@@ -171,7 +171,6 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     isLoadingFavorites () { return this.$store.state.isLoadingFavorites },
-    cardsCreatedLimit () { return this.$store.state.cardsCreatedLimit },
     spaceUserIsUpgraded () { return this.$store.getters['currentSpace/spaceUserIsUpgraded'] },
     spaceUser () { return this.$store.state.currentSpace.users[0] },
     isAddPage () { return this.$store.state.isAddPage },
@@ -352,9 +351,6 @@ export default {
   .error-message
     margin-top 10px
   .upgrade
-    progress
-      margin-top 2px
-      margin-bottom 10px
     .button-wrap + .row,
     .row + .button-wrap
       margin-top 10px
