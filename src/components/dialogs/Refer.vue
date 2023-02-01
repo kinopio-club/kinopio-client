@@ -40,9 +40,9 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
   section(v-if="visible")
     p Refer a Friend
   section
-    p.badge.info You get +20 extra free cards when they sign up
+    p.badge.info Get +20 extra free cards when they sign up
     .row
-      CardsCreatedProgress
+      CardsCreatedProgress()
     .row
       .url-textarea.single-line
         span {{url}}
@@ -61,4 +61,6 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
   top calc(100% - 8px)
   left initial
   right 8px
+  .cards-created-progress
+    margin-top 10px
 </style>
