@@ -414,8 +414,8 @@ label // used for checkbox buttons
   .loader
     height 14px
     width 14px
-    vertical-align -3px
-    margin-left 3px
+    vertical-align -2px
+    margin-left 5px
   &:disabled,
   .disabled
     cursor default
