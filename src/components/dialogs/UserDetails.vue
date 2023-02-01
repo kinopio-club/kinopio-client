@@ -36,7 +36,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
     //- Unlimited cards from member
     section.upgrade(v-if="!currentUserIsUpgraded")
       .row
-        CardsCreatedProgress(:showReferButton="true")
+        CardsCreatedProgress
       .row
         .button-wrap(v-if="!isAddPage")
           button(@click.left.stop="triggerUpgradeUserIsVisible")
@@ -51,6 +51,10 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
           p
             UserLabelInline(:user="spaceUser")
             span is upgraded, so cards you create in this space won't change your card count
+      .row
+        .button-wrap
+          button.variable-length-content(@click="triggerReferIsVisible")
+            span Refer a Friend To Get More Free Cards
 
     section(v-if="!isAddPage")
       .row
@@ -231,6 +235,10 @@ export default {
     currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() }
   },
   methods: {
+    triggerReferIsVisible () {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('triggerReferIsVisible')
+    },
     toggleIsFavoriteUser () {
       if (this.isFavoriteUser) {
         this.$store.dispatch('currentUser/removeFavorite', { type: 'user', item: this.user })

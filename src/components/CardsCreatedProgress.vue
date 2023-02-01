@@ -13,11 +13,6 @@ defineProps({
 const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCount || 0)
 const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
 
-const triggerReferIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerReferIsVisible')
-}
-
 </script>
 
 <template lang="pug">
@@ -27,8 +22,6 @@ const triggerReferIsVisible = () => {
     .extra-cards
       .badge.secondary
         span +0
-      button.small-button(v-if="showReferButton" @click="triggerReferIsVisible")
-        span Refer
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
 
 </template>
@@ -40,9 +33,6 @@ const triggerReferIsVisible = () => {
     display flex
     justify-content space-between
     align-items center
-    flex-shrink -1
-  .extra-cards
-    flex-shrink 0
-  .small-button
-    margin-top 1px
+  .badge
+    margin 0
 </style>

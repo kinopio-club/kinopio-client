@@ -1,21 +1,14 @@
 <template lang="pug">
-section.invite
+section.subsection.invite
   .row
     p Invite Collaborators
   Loader(:visible="loading")
   template(v-if="!loading && collaboratorKey")
     .row
-      .url-textarea.single-line
-        span {{url}}
-      .input-button-wrap(@click.left="copyUrl")
-        button.small-button
-          img.icon.copy(src="@/assets/copy.svg")
-    .row
       button(@click.left="copyUrl")
         img.icon.copy(src="@/assets/copy.svg")
-        span Copy Invite URL
-        .badge.label-badge.button-tip-badge
-          span Allows Editing
+        span Copy Edit URL
+      //- .row
       button(v-if="isTips" @click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
         span Tips
   //- Error
@@ -25,7 +18,7 @@ section.invite
     .row
       button(@click="updateCollaboratorKey") Try Again
   //- View and Edit Permissions
-  section.subsection.more-info(v-if="tipsIsVisible")
+  section.subsection.more-info(v-if="tipsIsVisible && spaceIsPrivate")
     .row(v-if="spaceIsPrivate")
       p No account is needed to view private spaces – but editing requires an account.
     .row(v-if="currentUserIsUpgraded")

@@ -3,7 +3,6 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   section
     .row.title-row
       p Share
-
       .row
         button.small-button(@click.left.stop="isPresentationMode")
           img.icon(src="@/assets/presentation.svg")
@@ -14,25 +13,16 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           SpaceRssFeed(:visible="spaceRssFeedIsVisible")
 
   section(v-if="spaceHasUrl")
+    p Space Privacy
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
-
-    //- Public space
-    template(v-if="!spaceIsPrivate")
-      p.row
-        .url-textarea.single-line
-          span {{url}}
-        .input-button-wrap(@click.left="copyUrl")
-          button.small-button
-            img.icon.copy(src="@/assets/copy.svg")
-      .row
-        button(@click.left="copyUrl")
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy Public URL
-          .badge.label-badge.button-tip-badge(v-if="spaceIsOpen")
-            span Allows Editing
-
-  //- Invite
-  Invite(v-if="spaceHasUrl && isSpaceMember")
+    //- Share Link
+    section.subsection.share-link-subsection(v-if="!spaceIsPrivate")
+      p Share With the World
+      button(@click.left="copyUrl")
+        img.icon.copy(src="@/assets/copy.svg")
+        span Copy Public Link
+    //- Invite Link
+    Invite(v-if="isSpaceMember")
   //- Collaborators
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
     // collaborators
@@ -67,7 +57,8 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
 
   section
     .button-wrap
-      button(@click="triggerReferIsVisible") Refer a Friend
+      button.variable-length-content(@click="triggerReferIsVisible")
+        span Refer a Friend
 
 </template>
 
@@ -131,9 +122,6 @@ export default {
     },
     spaceIsPrivate () {
       return this.spacePrivacy === 'private'
-    },
-    spaceIsOpen () {
-      return this.spacePrivacy === 'open'
     },
     isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
@@ -321,5 +309,10 @@ export default {
   .button-tip-badge
     top -12px
     pointer-events none
-
+  .subsection
+    margin-top 10px
+  .share-link-subsection
+    margin-top 0
+    border-top-left-radius 0
+    border-top-right-radius 0
 </style>
