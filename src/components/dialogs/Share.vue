@@ -13,22 +13,6 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
             span RSS
           SpaceRssFeed(:visible="spaceRssFeedIsVisible")
 
-  section
-    .row
-      //- Import, Export
-      .segmented-buttons(@click.stop)
-        button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
-          span Import
-          Import(:visible="importIsVisible" @closeDialog="closeDialogs")
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-          span Export
-          Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
-      //- Embed
-      .button-wrap
-        button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
-          span Embed
-        Embed(:visible="embedIsVisible")
-
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
@@ -40,11 +24,12 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         .input-button-wrap(@click.left="copyUrl")
           button.small-button
             img.icon.copy(src="@/assets/copy.svg")
-            //- span Public URL
       .row
         button(@click.left="copyUrl")
           img.icon.copy(src="@/assets/copy.svg")
           span Copy Public URL
+          .badge.label-badge.button-tip-badge(v-if="spaceIsOpen")
+            span Allows Editing
 
   //- Invite
   Invite(v-if="spaceHasUrl && isSpaceMember")
@@ -63,6 +48,22 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
       span.badge.info you need to Sign Up or In
       span for your spaces to be synced and accessible anywhere.
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+
+  section
+    .row
+      //- Import, Export
+      .segmented-buttons(@click.stop)
+        button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+          span Import
+          Import(:visible="importIsVisible" @closeDialog="closeDialogs")
+        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+          span Export
+          Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
+      //- Embed
+      .button-wrap
+        button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
+          span Embed
+        Embed(:visible="embedIsVisible")
 
   section
     .button-wrap
@@ -130,6 +131,9 @@ export default {
     },
     spaceIsPrivate () {
       return this.spacePrivacy === 'private'
+    },
+    spaceIsOpen () {
+      return this.spacePrivacy === 'open'
     },
     isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
@@ -314,4 +318,8 @@ export default {
       padding-top 8px
   .user
     vertical-align -3px
+  .button-tip-badge
+    top -12px
+    pointer-events none
+
 </style>

@@ -14,6 +14,8 @@ section.invite
       button(@click.left="copyUrl")
         img.icon.copy(src="@/assets/copy.svg")
         span Copy Invite URL
+        .badge.label-badge.button-tip-badge
+          span Allows Editing
       button(v-if="isTips" @click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
         span Tips
   //- Error
