@@ -6,21 +6,42 @@ import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
+defineProps({
+  showReferButton: Boolean
+})
+
 const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCount || 0)
 const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
+
+const showShare = () => {
+
+}
 
 </script>
 
 <template lang="pug">
 .cards-created-progress
-  p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
+  .info
+    p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
+    .extra-cards
+      .badge.secondary
+        span +0
+      button.small-button(v-if="showReferButton" @click="showShare")
+        span Refer
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
 
 </template>
 
 <style lang="stylus">
 .cards-created-progress
-  progress
-    margin-top 2px
-    margin-bottom 10px
+  width 100%
+  .info
+    display flex
+    justify-content space-between
+    align-items center
+    flex-shrink -1
+  .extra-cards
+    flex-shrink 0
+  .small-button
+    margin-top 1px
 </style>

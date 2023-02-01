@@ -35,10 +35,12 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
 
     //- Unlimited cards from member
     section.upgrade(v-if="!currentUserIsUpgraded")
-      CardsCreatedProgress
-      .button-wrap(v-if="!isAddPage")
-        button(@click.left.stop="triggerUpgradeUserIsVisible")
-          span Upgrade for Unlimited
+      .row
+        CardsCreatedProgress(:showReferButton="true")
+      .row
+        .button-wrap(v-if="!isAddPage")
+          button(@click.left.stop="triggerUpgradeUserIsVisible")
+            span Upgrade for Unlimited
       .row(v-if="!isAppStoreMode")
         p
           .badge.info $6/mo, $60/yr
@@ -351,9 +353,6 @@ export default {
   .error-message
     margin-top 10px
   .upgrade
-    .button-wrap + .row,
-    .row + .button-wrap
-      margin-top 10px
     .badge
       display inline-block
 
