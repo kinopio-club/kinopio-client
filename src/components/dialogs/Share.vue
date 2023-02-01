@@ -64,6 +64,8 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
       span for your spaces to be synced and accessible anywhere.
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
+  Refer(:visible="true")
+
 </template>
 
 <script>
@@ -75,6 +77,7 @@ import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
+import Refer from '@/components/Refer.vue'
 
 export default {
   name: 'Share',
@@ -85,7 +88,8 @@ export default {
     Embed,
     UserList,
     Export,
-    Import
+    Import,
+    Refer
   },
   props: {
     visible: Boolean
