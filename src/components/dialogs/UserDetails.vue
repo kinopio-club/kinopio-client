@@ -54,7 +54,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
       .row
         .button-wrap
           button.variable-length-content(@click="triggerReferIsVisible")
-            span Refer a Friend To Get More Free Cards
+            span Earn Credits
 
     section(v-if="!isAddPage")
       .row

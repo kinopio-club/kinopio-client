@@ -19,9 +19,6 @@ const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
 .cards-created-progress
   .info
     p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
-    .extra-cards
-      .badge.secondary
-        span +0
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
 
 </template>
@@ -33,6 +30,4 @@ const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
     display flex
     justify-content space-between
     align-items center
-  .badge
-    margin 0
 </style>

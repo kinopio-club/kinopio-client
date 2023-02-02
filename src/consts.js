@@ -7,5 +7,6 @@ export default {
   },
   spaceBetweenCards: 12,
   maxCardLength: 300,
-  defaultCardWidth: 76
+  defaultCardWidth: 76,
+  referralCreditAmount: 6
 }

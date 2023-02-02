@@ -58,7 +58,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   section
     .button-wrap
       button.variable-length-content(@click="triggerReferIsVisible")
-        span Refer a Friend
+        span Earn Credits
 
 </template>
 
