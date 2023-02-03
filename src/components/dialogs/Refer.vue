@@ -11,9 +11,12 @@ defineProps({
   visible: Boolean
 })
 const state = reactive({
-  unusedCredit: 0,
+  creditsUsed: 0,
+  creditsEarned: 0,
   usersReferred: 0
 })
+
+const creditsUnused = computed(() => state.creditsEarned - state.creditsUsed)
 
 const url = computed(() => utils.kinopioDomain() + '/refer/' + store.state.currentUser.id)
 const copyUrl = async (event) => {
@@ -28,42 +31,38 @@ const copyUrl = async (event) => {
   }
 }
 
-const creditBadgeClass = computed(() => {
-  if (state.unusedCredit) {
-    return 'success'
-  } else {
-    return 'secondary'
-  }
-})
-const usersReferredBadgeClass = computed(() => {
-  if (state.usersReferred) {
-    return 'success'
-  } else {
-    return 'secondary'
-  }
-})
-
 </script>
 
 <template lang="pug">
 dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section(v-if="visible")
-    p Earn Credits by Sharing Kinopio With Your Friends
+    p Earn Credits
   section
+    .row
+      p
+        span You'll both get a
+        span.badge.success ${{consts.referralCreditAmount}} credit
+        span when someone you refer signs up.
+    .row
+      p There's no limit on the amount of credits you can earn.
+
     section.subsection
-      p You'll both get ${{consts.referralCreditAmount}} in credit when they sign up. There's no limit to the number of people you can refer
+
+      p Share Kinopio with your friends
       button(@click.left="copyUrl")
         img.icon.copy(src="@/assets/copy.svg")
         span Copy Referral URL
+
   section
     .row
-      p You have
-        span.badge(:class="creditBadgeClass") ${{state.unusedCredit}}
-        span credit, which will be applied to your next payment
-    .row
-      p
-        span.badge(:class="usersReferredBadgeClass") {{state.usersReferred}}
-        span people referred so far
+      p Your Credits
+    section.subsection.table-subsection
+      section
+        p {{state.usersReferred}} people referred so far
+      section
+        p ${{state.creditsEarned}} total credit earned
+      section
+        .badge.success ${{creditsUnused}} credit remaining for future payments
 
 </template>
 
@@ -74,4 +73,15 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
   right 8px
   .badge
     vertical-align 0
+    color var(--primary)
+  span + .badge
+    margin-left 6px
+    word-break break-all
+  .subsection.table-subsection
+    padding 0 8px
+    section
+      padding-left 0
+      padding-right 0
+    .badge
+      margin 0
 </style>
