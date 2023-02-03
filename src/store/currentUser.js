@@ -64,7 +64,8 @@ export default {
     lastUsedImagePickerService: '',
     AIImages: [],
     theme: null,
-    themeIsSystem: true
+    themeIsSystem: true,
+    referredByUserId: ''
   },
   mutations: {
     color: (state, value) => {
@@ -353,6 +354,10 @@ export default {
       utils.typeCheck({ value, type: 'boolean' })
       state.themeIsSystem = value
       cache.updateUser('themeIsSystem', value)
+    },
+    referredByUserId: (state, value) => {
+      state.referredByUserId = value
+      cache.updateUser('referredByUserId', value)
     }
   },
   actions: {
