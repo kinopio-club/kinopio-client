@@ -46,11 +46,13 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
               img.icon(src="@/assets/remove.svg")
               span Downgrade
               Loader(:visible="loading.isCancelling")
+    UserCredits(:showEarnCreditsButton="true")
 </template>
 
 <script>
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
+import UserCredits from '@/components/UserCredits.vue'
 import { defineAsyncComponent } from 'vue'
 
 import dayjs from 'dayjs'
@@ -62,7 +64,8 @@ export default {
   name: 'UserBilling',
   components: {
     User,
-    Loader
+    Loader,
+    UserCredits
   },
   props: {
     visible: Boolean
