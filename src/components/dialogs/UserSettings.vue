@@ -35,10 +35,10 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
     .row
       .button-wrap
         .segmented-buttons
-          button(@click.left.stop="toggleThemeColorsSettingsIsVisible" :class="{active: themeColorsSettingsIsVisible}")
-            span Theme Colors
+          button(@click.left.stop="toggleThemeSettingsIsVisible" :class="{active: themeSettingsIsVisible}")
+            span Theme
           ThemeToggle
-        ThemeColorsSettings(:visible="themeColorsSettingsIsVisible")
+        ThemeSettings(:visible="themeSettingsIsVisible")
 
   //- Account Settings
   section
@@ -95,7 +95,7 @@ import ApiKey from '@/components/dialogs/ApiKey.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 import ConnectToTwitter from '@/components/dialogs/ConnectToTwitter.vue'
-import ThemeColorsSettings from '@/components/dialogs/ThemeColorsSettings.vue'
+import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import Loader from '@/components/Loader.vue'
 
@@ -109,7 +109,7 @@ export default {
     NotificationSettings,
     ControlsSettings,
     ConnectToTwitter,
-    ThemeColorsSettings,
+    ThemeSettings,
     ThemeToggle
   },
   props: {
@@ -128,7 +128,7 @@ export default {
       controlsSettingsIsVisible: false,
       connectToTwitterIsVisible: false,
       integrationsSettingsIsVisible: false,
-      themeColorsSettingsIsVisible: false
+      themeSettingsIsVisible: false
     }
   },
   computed: {
@@ -144,7 +144,7 @@ export default {
       this.notificationSettingsIsVisible = false
       this.controlsSettingsIsVisible = false
       this.connectToTwitterIsVisible = false
-      this.themeColorsSettingsIsVisible = false
+      this.themeSettingsIsVisible = false
     },
     toggleConnectToTwitterIsVisible () {
       const isVisible = this.connectToTwitterIsVisible
@@ -200,11 +200,11 @@ export default {
       this.closeDialogs()
       this.integrationsSettingsIsVisible = !this.integrationsSettingsIsVisible
     },
-    toggleThemeColorsSettingsIsVisible () {
-      const isVisible = this.themeColorsSettingsIsVisible
+    toggleThemeSettingsIsVisible () {
+      const isVisible = this.themeSettingsIsVisible
       this.closeDialogs()
       this.deleteAllConfirmationVisible = false
-      this.themeColorsSettingsIsVisible = !isVisible
+      this.themeSettingsIsVisible = !isVisible
     }
 
   },
