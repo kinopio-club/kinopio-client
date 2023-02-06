@@ -1,10 +1,15 @@
 <template lang="pug">
 dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog")
   section
-    p Theme Colors
-    .segmented-buttons
-      ThemeToggle(:showSystem="true")
-
+    .row
+      p Theme Colors
+    .row
+      .segmented-buttons
+        ThemeToggle
+      .button-wrap
+        label(:class="{active: themeIsSystem}" @click.left.prevent="toggleThemeIsSystem" @keydown.stop.enter="toggleThemeIsSystem")
+          input(type="checkbox" v-model="themeIsSystem")
+          span Use System
   section
     .row
       p Color to use as the default for new cards
@@ -88,9 +93,13 @@ export default {
     defaultCardColor () {
       const userDefault = this.currentUser.defaultCardBackgroundColor
       return userDefault || this.defaultColor
-    }
+    },
+    themeIsSystem () { return this.$store.state.currentUser.themeIsSystem }
   },
   methods: {
+    toggleThemeIsSystem () {
+      this.$store.dispatch('themes/toggleIsSystem')
+    },
     closeDialogs () {
       this.colorPickerIsVisible = false
     },
