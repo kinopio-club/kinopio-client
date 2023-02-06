@@ -201,12 +201,21 @@ const self = {
       }
     },
 
+    // Session Token (sign up spam mitigation)
+
+    createSessionToken: async (context, token) => {
+      const body = { token }
+      const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+      return fetch(`${host}/session-token/create`, options)
+    },
+
     // Sign Up or In
 
-    signUp: async (context, { email, password, currentUser }) => {
+    signUp: async (context, { email, password, currentUser, sessionToken }) => {
       const body = currentUser
       body.email = email
       body.password = password
+      body.sessionToken = sessionToken
       const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
       return fetch(`${host}/user/sign-up`, options)
     },
