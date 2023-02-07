@@ -66,13 +66,14 @@
 section.subsection.space-settings(v-if="settingsIsVisible")
   //- Background
   .row
-    button(@click.left.stop="toggleBackgroundIsVisible")
-      BackgroundPreview(:space="currentSpace")
-      span Background
-  .row
-    button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-      span Export
-      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
+    .button-wrap
+      button(@click.left.stop="toggleBackgroundIsVisible")
+        BackgroundPreview(:space="currentSpace")
+        span Background
+    .button-wrap
+      button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+        span Export
+        Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
 
   .row
     .button-wrap(v-if="isSpaceMember")
