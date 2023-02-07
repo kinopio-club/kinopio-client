@@ -16,11 +16,15 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     p Space Privacy
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     //- Share Link
-    section.subsection.share-link-subsection(v-if="!spaceIsPrivate")
+    section.subsection(v-if="!spaceIsPrivate" :class="{'share-link-subsection': isSpaceMember}")
       p Share With the World
       button(@click.left="copyUrl")
         img.icon.copy(src="@/assets/copy.svg")
         span Copy Public Link
+      p Share with the Community
+      AddToExplore
+      AskToAddToExplore
+
     //- Invite Link
     Invite(v-if="isSpaceMember")
   //- Collaborators
@@ -71,6 +75,8 @@ import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
+import AddToExplore from '@/components/AddToExplore.vue'
+import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 
 export default {
   name: 'Share',
@@ -81,7 +87,9 @@ export default {
     Embed,
     UserList,
     Export,
-    Import
+    Import,
+    AddToExplore,
+    AskToAddToExplore
   },
   props: {
     visible: Boolean

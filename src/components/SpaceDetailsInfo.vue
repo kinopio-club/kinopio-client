@@ -69,9 +69,6 @@ section.subsection.space-settings(v-if="settingsIsVisible")
     button(@click.left.stop="toggleBackgroundIsVisible")
       BackgroundPreview(:space="currentSpace")
       span Background
-  //- Explore
-  .row
-    AddToExplore(@updateLocalSpaces="updateLocalSpaces")
   .row
     button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
       span Export
@@ -100,7 +97,6 @@ import Background from '@/components/dialogs/Background.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
-import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import templates from '@/data/templates.js'
 import Export from '@/components/dialogs/Export.vue'
@@ -114,7 +110,6 @@ export default {
     BackgroundPreview,
     Loader,
     PrivacyButton,
-    AddToExplore,
     AskToAddToExplore,
     Export
   },

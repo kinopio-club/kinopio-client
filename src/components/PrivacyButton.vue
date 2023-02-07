@@ -68,9 +68,11 @@ export default {
 .privacy-button
   button
     height initial
-  &.open,
-  &.closed
-    button
-      border-bottom-left-radius 0
-      border-bottom-right-radius 0
+dialog.share
+  .privacy-button
+    &.open,
+    &.closed
+      button
+        border-bottom-left-radius 0
+        border-bottom-right-radius 0
 </style>

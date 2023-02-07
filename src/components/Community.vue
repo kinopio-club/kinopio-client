@@ -6,9 +6,11 @@ section.community(v-if="visible" :open="visible" @click.left.stop='closeDialogs'
       button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
         span RSS
       ExploreRssFeed(:visible="exploreRssFeedIsVisible")
-  .row
-    AddToExplore(@updateSpaces="updateSpaces")
-    AskToAddToExplore
+  section.subsection
+    p Share this space with the community
+    p
+      AddToExplore(@updateLocalSpaces="updateLocalSpaces")
+      AskToAddToExplore
 
   p(v-if="loading")
     Loader(:visible="loading")
@@ -62,7 +64,7 @@ export default {
     exploreSpaces () { return this.filteredSpaces || this.spaces }
   },
   methods: {
-    updateSpaces () {
+    updateLocalSpaces () {
       if (this.currentSpaceInExplore) {
         this.removeCurrentSpaceFromFilteredSpaces()
         this.filteredSpaces.unshift(this.currentSpace)
