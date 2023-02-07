@@ -121,7 +121,7 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="template" :class="{'notification-jiggle': readOnlyJiggle}")
     button(@click.left="duplicateSpace")
       img.icon(src="@/assets/add.svg")
-      span Duplicate to Edit
+      span Make a Copy to Edit
 
   .item.success(v-if="notifyMoveOrCopyToSpace" @animationend="resetNotifyMoveOrCopyToSpace")
     p {{notifyMoveOrCopyToSpaceDetails.message}}

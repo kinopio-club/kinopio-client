@@ -57,7 +57,7 @@
   .button-wrap
     button(@click.left="duplicateSpace")
       img.icon.add(src="@/assets/add.svg")
-      span Duplicate
+      span Make a Copy
 //- Explore Ask
 .row(v-if="!isSpaceMember && !showInExplore")
   AskToAddToExplore(@updateDialogHeight="updateDialogHeight")

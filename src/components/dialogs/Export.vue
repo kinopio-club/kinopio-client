@@ -17,9 +17,9 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     //- Duplicate
     button(@click.left="duplicateSpace")
       img.icon(src="@/assets/add.svg")
-      span Duplicate Space
+      span Make a Copy
     .row(v-if="spaceIsDuplicated")
-      span.badge.success Space duplicated
+      span.badge.success Space copied
 
   section
     // anon user
