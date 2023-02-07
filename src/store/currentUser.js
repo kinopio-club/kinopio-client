@@ -373,6 +373,7 @@ export default {
         context.dispatch('createNewUser')
       }
       context.dispatch('themes/restore', null, { root: true })
+      context.commit('triggerUserIsLoaded', null, { root: true })
     },
     update: (context, updates) => {
       const keys = Object.keys(updates)

@@ -6,11 +6,9 @@ section.community(v-if="visible" :open="visible" @click.left.stop='closeDialogs'
       button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
         span RSS
       ExploreRssFeed(:visible="exploreRssFeedIsVisible")
-  section.subsection
-    p Share this space with the community
-    p
-      AddToExplore(@updateSpaces="updateSpaces")
-      AskToAddToExplore
+  .row
+    AddToExplore(@updateSpaces="updateSpaces")
+    AskToAddToExplore
 
   p(v-if="loading")
     Loader(:visible="loading")

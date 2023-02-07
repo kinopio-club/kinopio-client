@@ -72,9 +72,10 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentSpace/restoreSpace') {
         this.updateMetaDescription()
-      }
-      if (mutation.type === 'broadcast/joinSpaceRoom') {
+      } else if (mutation.type === 'broadcast/joinSpaceRoom') {
         this.updateMetaRSSFeed()
+      } else if (mutation.type === 'triggerUserIsLoaded') {
+        this.updateThemeFromSystem()
       }
     })
   },
@@ -88,7 +89,7 @@ export default {
     window.addEventListener('touchstart', this.touchStart)
     window.addEventListener('touchmove', this.touchMove)
     window.addEventListener('touchend', this.touchEnd)
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.updateTheme)
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.updateThemeFromSystem)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateUserHasScrolled)
@@ -150,7 +151,8 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
-    updateTheme (event) {
+    updateThemeFromSystem (event) {
+      event = event || window.matchMedia('(prefers-color-scheme: dark)')
       const themeIsSystem = this.$store.state.currentUser.themeIsSystem
       if (!themeIsSystem) { return }
       let themeName

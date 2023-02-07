@@ -1,27 +1,24 @@
 <template lang="pug">
 .button-wrap.add-to-explore(v-if="isSpaceMember")
-  button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
+  button.variable-length-content(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
     span(v-if="!showInExplore")
       img.icon.add(src="@/assets/add.svg")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
-    span(v-if="!showInExplore") Explore
+    span(v-if="!showInExplore") Share This Space With the Community
     span(v-if="showInExplore") In Explore
 
   template(v-if="error.userNeedsToSignUpOrIn")
-    p
-      span.badge.info Sign Up or In
-      span for your spaces to be accessible to others
+    .badge.info
+      span Sign Up or In for your spaces to be accessible to others
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
   template(v-else-if="error.spaceMustBeEdited")
-    p
-      span.badge.info Edit and rename this space
-      span to add to explore
+    .badge.info
+      span Edit and rename this space to add to explore
 
   template(v-else-if="error.spaceCardsMinimum")
-    p
-      span.badge.info Space needs more than 10 cards
-      span to add to explore
+    .badge.info
+      span Space needs more than 10 cards to add to explore
 
 </template>
 
@@ -32,7 +29,7 @@ let prevPrivacy = ''
 
 export default {
   name: 'ShowInExploreButton',
-  emits: ['updateSpaces'],
+  emits: ['updateLocalSpaces'],
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentSpace/restoreSpace') {
@@ -88,7 +85,7 @@ export default {
       if (shouldPrevent) { return }
       this.updateSpacePrivacy(event)
       this.updateShowInExplore()
-      this.$emit('updateSpaces')
+      this.$emit('updateLocalSpaces')
     },
     updateShowInExplore () {
       const shouldShow = !this.showInExplore
@@ -133,9 +130,13 @@ export default {
 
 <style lang="stylus">
 .add-to-explore
-  max-width 60%
   input
     vertical-align -1px !important
   .icon.add
     margin-right 4px
+  .badge
+    margin-top 10px
+  button
+    white-space initial !important
+
 </style>

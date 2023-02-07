@@ -868,6 +868,7 @@ export default {
   },
   cardPositionFromElement (cardId) {
     const element = this.cardElementFromId(cardId)
+    if (!element) { return }
     const x = parseInt(element.style.left)
     const y = parseInt(element.style.top)
     return { x, y }

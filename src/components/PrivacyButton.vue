@@ -9,7 +9,7 @@
         PrivacyIcon(:privacy="privacyState.name")
         span {{name}}
     p.description(v-if="showDescription") {{description}}
-  PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
+  PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
 </template>
 
 <script>
@@ -57,8 +57,8 @@ export default {
     closeDialogs () {
       this.$emit('closeDialogs')
     },
-    updateSpaces () {
-      this.$emit('updateSpaces')
+    updateLocalSpaces () {
+      this.$emit('updateLocalSpaces')
     }
   }
 }

@@ -1,10 +1,11 @@
 <template lang="pug">
 dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog")
   section
-    p Theme Colors
-    .segmented-buttons
-      ThemeToggle(:showSystem="true")
-
+    p Theme
+    .button-wrap
+      label(:class="{active: themeIsSystem}" @click.left.prevent="toggleThemeIsSystem" @keydown.stop.enter="toggleThemeIsSystem")
+        input(type="checkbox" v-model="themeIsSystem")
+        span Use System Theme
   section
     .row
       p Color to use as the default for new cards
@@ -35,7 +36,6 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
 
 <script>
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
-import ThemeToggle from '@/components/ThemeToggle.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
@@ -43,8 +43,7 @@ export default {
   name: 'ColorsAndThemeSettings',
   components: {
     BackgroundPreview,
-    ColorPicker,
-    ThemeToggle
+    ColorPicker
   },
   props: {
     visible: Boolean
@@ -88,9 +87,13 @@ export default {
     defaultCardColor () {
       const userDefault = this.currentUser.defaultCardBackgroundColor
       return userDefault || this.defaultColor
-    }
+    },
+    themeIsSystem () { return this.$store.state.currentUser.themeIsSystem }
   },
   methods: {
+    toggleThemeIsSystem () {
+      this.$store.dispatch('themes/toggleIsSystem')
+    },
     closeDialogs () {
       this.colorPickerIsVisible = false
     },

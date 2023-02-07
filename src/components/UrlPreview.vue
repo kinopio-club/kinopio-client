@@ -33,13 +33,6 @@
               span Text
             button(@click="showNone" :class="{active : isShowNone}" :disabled="!canEditCard")
               span None
-        // twitter thread
-        .row(v-if="tweetIdFromTwitterUrl")
-          button(@click="addTwitterThreadCards" :class="{active: isLoadingTwitterThread}")
-            img.icon.add-icon(src="@/assets/add.svg")
-            img.icon.tweet(src="@/assets/twitter.svg")
-            span Thread
-            Loader(:visible="isLoadingTwitterThread")
 
       // preview
       template(v-if="!shouldDisplayEmbed")
@@ -89,10 +82,8 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUpdateUrlPreviewComplete') {
-        if (!this.isLoadingTwitterThread) { return }
         const cards = this.$store.state.prevNewTweetCards
         this.$store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
-        this.isLoadingTwitterThread = false
       }
     })
   },
@@ -100,8 +91,7 @@ export default {
     return {
       imageCanLoad: false,
       shouldDisplayEmbed: false,
-      embedUrl: '',
-      isLoadingTwitterThread: false
+      embedUrl: ''
     }
   },
   computed: {
@@ -124,7 +114,7 @@ export default {
     },
     shouldShowDescription () {
       if (this.isTextOnly) { return true }
-      return this.isTwitterUrl || this.parentIsCardDetails
+      return this.parentIsCardDetails
     },
     selectedColor () {
       if (!this.isSelected) { return }
@@ -135,15 +125,6 @@ export default {
       if (!title) { return }
       title = title.replace('on Twitter', '')
       return title
-    },
-    isTwitterUrl () {
-      const url = this.card.urlPreviewUrl
-      return url.includes('https://twitter.com') || url.includes('https://mobile.twitter.com/')
-    },
-    tweetIdFromTwitterUrl () {
-      if (!this.isTwitterUrl) { return }
-      const url = this.card.urlPreviewUrl
-      return utils.tweetIdFromTwitterUrl(url)
     },
     isYoutubeShortenedUrl () {
       const url = this.card.urlPreviewUrl
@@ -187,20 +168,9 @@ export default {
       const url = `https://www.youtube-nocookie.com/embed/${this.youtubeUrlVideoId}?autoplay=1`
       return url
     },
-    twitterDescription () {
-      if (!this.isTwitterUrl) { return }
-      const image = this.card.urlPreviewImage
-      let description = this.card.urlPreviewDescription
-      if (image || this.isImageCard) {
-        return utils.truncated(description)
-      } else {
-        return description
-      }
-    },
     description () {
       let description = this.card.urlPreviewDescription
       const isCardView = !this.parentIsCardDetails
-      if (this.twitterDescription) { return this.twitterDescription }
       if (this.isYoutubeUrl) { return }
       if (isCardView) {
         description = utils.truncated(description, 200)
@@ -233,48 +203,6 @@ export default {
     }
   },
   methods: {
-    async addTwitterThreadCards (event) {
-      if (this.isLoadingTwitterThread) { return }
-      position = utils.cursorPositionInPage(event)
-      const spaceBetweenCards = 12
-      const origin = {
-        x: this.card.x,
-        y: this.card.y + this.card.height + spaceBetweenCards
-      }
-      this.isLoadingTwitterThread = true
-      const tweetId = this.tweetIdFromTwitterUrl
-
-      try {
-        const result = await this.$store.dispatch('api/twitterThread', tweetId)
-        const tweets = result.data
-        console.log('🕊', tweetId, tweets)
-        if (tweets.length) {
-          this.addTweetCards(tweets, origin)
-        } else {
-          this.$store.commit('addNotificationWithPosition', { message: 'Tweet Not Found', position, type: 'danger', layer: 'app', icon: 'cancel' })
-          this.isLoadingTwitterThread = false
-        }
-      } catch (error) {
-        console.error('🚒 addTwitterThreadCards', error)
-        this.$store.commit('addNotificationWithPosition', { message: 'Tweet Not Found', position, type: 'danger', layer: 'app', icon: 'cancel' })
-        this.isLoadingTwitterThread = false
-      }
-    },
-    addTweetCards (tweets, origin) {
-      this.$store.dispatch('history/pause')
-      // add
-      let cards = tweets.map(tweet => {
-        return {
-          id: nanoid(),
-          name: tweet.text,
-          x: origin.x,
-          y: origin.y
-        }
-      })
-      this.$store.dispatch('currentCards/addMultiple', cards)
-      this.$store.commit('newTweetCards', cards)
-      // wait for triggerUpdateUrlPreviewComplete to checkIfShouldUpdateNewTweetCards
-    },
     toggleShouldDisplayEmbed () {
       this.$store.dispatch('closeAllDialogs', 'UrlPreview')
       if (this.shouldDisplayEmbed) {
