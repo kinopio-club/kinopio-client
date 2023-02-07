@@ -1,10 +1,10 @@
 <template lang="pug">
 .button-wrap.add-to-explore(v-if="isSpaceMember")
-  button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
+  button.variable-length-content(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
     span(v-if="!showInExplore")
       img.icon.add(src="@/assets/add.svg")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
-    span(v-if="!showInExplore") Share In Explore
+    span(v-if="!showInExplore") Share This Space With the Community
     span(v-if="showInExplore") In Explore
 
   template(v-if="error.userNeedsToSignUpOrIn")
@@ -136,4 +136,7 @@ export default {
     margin-right 4px
   .badge
     margin-top 10px
+  button
+    white-space initial !important
+
 </style>
