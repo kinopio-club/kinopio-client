@@ -97,6 +97,7 @@ import PrivacyButton from '@/components/PrivacyButton.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import templates from '@/data/templates.js'
+import cache from '@/cache.js'
 
 export default {
   name: 'SpaceDetailsInfo',
@@ -167,6 +168,7 @@ export default {
       }
     },
     currentSpace () { return this.$store.state.currentSpace },
+    currentUser () { return this.$store.state.currentUser },
     isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
       return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
@@ -194,6 +196,31 @@ export default {
 
   },
   methods: {
+    removeCurrentSpace () {
+      const currentSpaceId = this.$store.state.currentSpace.id
+      const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
+      if (currentUserIsSpaceCollaborator) {
+        this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', this.this.$store.state.currentUser)
+      } else {
+        this.$store.dispatch('currentSpace/removeCurrentSpace')
+        this.$store.commit('notifyCurrentSpaceIsNowRemoved', true)
+      }
+      this.updateSpaces()
+      this.changeToLastSpace()
+    },
+    changeToLastSpace () {
+      let spaces = cache.getAllSpaces().filter(space => {
+        return this.$store.getters['currentUser/canEditSpace'](space)
+      })
+
+      spaces = spaces.filter(space => space.id !== this.currentSpace.id)
+      if (spaces.length) {
+        const cachedSpace = this.$store.getters.cachedOrOtherSpaceById(this.currentUser.prevLastSpaceId)
+        this.$store.dispatch('currentSpace/changeSpace', { space: cachedSpace || spaces[0] })
+      } else {
+        this.addSpace()
+      }
+    },
     textareaSize () {
       const element = this.$refs.name
       const modifier = 1

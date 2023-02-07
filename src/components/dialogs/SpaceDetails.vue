@@ -2,23 +2,6 @@
 dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned}")
   section
     SpaceDetailsInfo(@updateSpaces="updateLocalSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden")
-    //- .button-wrap(v-if="isSpaceMember")
-    //-   .segmented-buttons
-        //- Remove
-        //- button.danger(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
-        //-   img.icon.remove(src="@/assets/remove.svg")
-        //-   span {{removeLabel}}
-        //- // Hide Space
-        //- button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
-        //-   img.icon(v-if="!currentSpaceIsHidden" src="@/assets/view.svg")
-        //-   img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
-        //-   span Hide
-    //-  Duplicate
-    //- .button-wrap(v-if="!isSpaceMember")
-    //-   button(@click.left="duplicateSpace")
-    //-     img.icon.add(src="@/assets/add.svg")
-    //-     span Duplicate
-
   section.results-actions
     .row
       //- Add Space
