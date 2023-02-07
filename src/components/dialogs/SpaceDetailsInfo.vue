@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog")
   section
-    SpaceDetailsInfo(:shouldHideExplore="true" :shouldHidePin="true" @closeDialogs="closeDialogs")
+    SpaceDetailsInfo(:shouldHidePin="true" @closeDialogs="closeDialogs")
 </template>
 
 <script>

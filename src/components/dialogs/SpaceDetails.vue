@@ -1,23 +1,23 @@
 <template lang="pug">
 dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned}")
   section
-    SpaceDetailsInfo(@updateSpaces="updateLocalSpaces" @closeDialogs="closeDialogs")
-    .button-wrap(v-if="isSpaceMember")
-      .segmented-buttons
+    SpaceDetailsInfo(@updateSpaces="updateLocalSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden")
+    //- .button-wrap(v-if="isSpaceMember")
+    //-   .segmented-buttons
         //- Remove
-        button.danger(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
-          img.icon.remove(src="@/assets/remove.svg")
-          span {{removeLabel}}
-        // Hide Space
-        button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
-          img.icon(v-if="!currentSpaceIsHidden" src="@/assets/view.svg")
-          img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
-          span Hide
+        //- button.danger(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
+        //-   img.icon.remove(src="@/assets/remove.svg")
+        //-   span {{removeLabel}}
+        //- // Hide Space
+        //- button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
+        //-   img.icon(v-if="!currentSpaceIsHidden" src="@/assets/view.svg")
+        //-   img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
+        //-   span Hide
     //-  Duplicate
-    .button-wrap(v-if="!isSpaceMember")
-      button(@click.left="duplicateSpace")
-        img.icon.add(src="@/assets/add.svg")
-        span Duplicate
+    //- .button-wrap(v-if="!isSpaceMember")
+    //-   button(@click.left="duplicateSpace")
+    //-     img.icon.add(src="@/assets/add.svg")
+    //-     span Duplicate
 
   section.results-actions
     .row
@@ -54,7 +54,6 @@ import SpaceDetailsInfo from '@/components/SpaceDetailsInfo.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
 import SpaceFilters from '@/components/dialogs/SpaceFilters.vue'
 import SpaceList from '@/components/SpaceList.vue'
-import templates from '@/data/templates.js'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 
@@ -177,11 +176,6 @@ export default {
       } else {
         return 'Remove'
       }
-    },
-    currentSpaceIsTemplate () {
-      const id = this.currentSpace.id
-      const templateSpaceIds = templates.spaces().map(space => space.id)
-      return templateSpaceIds.includes(id)
     }
   },
   methods: {
@@ -225,30 +219,6 @@ export default {
       this.$store.dispatch('currentSpace/changeSpace', { space })
       this.$store.dispatch('closeAllDialogs', 'spaceDetails.changeSpace')
       this.closeDialogs()
-    },
-    changeToLastSpace () {
-      const spaces = this.spaces.filter(space => space.id !== this.currentSpace.id)
-      if (spaces.length) {
-        const cachedSpace = this.cachedOrOtherSpaceById(this.currentUser.prevLastSpaceId)
-        this.$store.dispatch('currentSpace/changeSpace', { space: cachedSpace || spaces[0] })
-      } else {
-        this.addSpace()
-      }
-    },
-    removeCurrentSpace () {
-      const currentSpaceId = this.currentSpace.id
-      const currentUserIsSpaceCollaborator = this['currentUser/isSpaceCollaborator']()
-      if (currentUserIsSpaceCollaborator) {
-        this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', this.currentUser)
-      } else {
-        this.$store.dispatch('currentSpace/removeCurrentSpace')
-        this.$store.commit('notifyCurrentSpaceIsNowRemoved', true)
-      }
-      if (utils.arrayExists(this.remoteSpaces)) {
-        this.remoteSpaces = this.remoteSpaces.filter(space => space.id !== currentSpaceId)
-      }
-      this.updateLocalSpaces()
-      this.changeToLastSpace()
     },
     orderByFavoriteSpaces (spaces) {
       let favoriteSpaces = []

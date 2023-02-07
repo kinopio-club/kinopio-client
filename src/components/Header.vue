@@ -30,6 +30,36 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
 
       .space-meta-rows
+        .space-functions-row
+          .segmented-buttons.add-space-functions
+            //- Add Space
+            .button-wrap
+              button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
+                img.icon.add(src="@/assets/add.svg")
+                span New
+              AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
+              Templates(:visible="templatesIsVisible")
+          //- Search
+          .segmented-buttons
+            .button-wrap
+              button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible || totalFiltersActive || searchResultsCount}")
+                template(v-if="!searchResultsCount")
+                  img.icon.search(src="@/assets/search.svg")
+                  img.icon.time(src="@/assets/time.svg")
+                .badge.search.search-count-badge(v-if="searchResultsCount")
+                  img.icon.search(src="@/assets/search.svg")
+                  span {{searchResultsCount}}
+                span.badge.info(v-if="totalFiltersActive")
+                  img.icon(src="@/assets/filter.svg")
+                  span {{totalFiltersActive}}
+              Search(:visible="searchIsVisible")
+            button(@click="showPreviousSearchCard" v-if="searchResultsCount")
+              img.icon.left-arrow(src="@/assets/down-arrow.svg")
+            button(@click="showNextSearchCard" v-if="searchResultsCount")
+              img.icon.right-arrow(src="@/assets/down-arrow.svg")
+            button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
+              img.icon.cancel(src="@/assets/add.svg")
+
         .space-details-row.segmented-buttons
           //- Current Space
           .button-wrap
@@ -66,35 +96,6 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               img.icon.offline(src="@/assets/offline.svg")
             Offline(:visible="offlineIsVisible")
 
-        .space-functions-row
-          .segmented-buttons.add-space-functions
-            //- Add Space
-            .button-wrap
-              button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
-                img.icon.add(src="@/assets/add.svg")
-                span New
-              AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
-              Templates(:visible="templatesIsVisible")
-          //- Search
-          .segmented-buttons
-            .button-wrap
-              button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible || totalFiltersActive || searchResultsCount}")
-                template(v-if="!searchResultsCount")
-                  img.icon.search(src="@/assets/search.svg")
-                  img.icon.time(src="@/assets/time.svg")
-                .badge.search.search-count-badge(v-if="searchResultsCount")
-                  img.icon.search(src="@/assets/search.svg")
-                  span {{searchResultsCount}}
-                span.badge.info(v-if="totalFiltersActive")
-                  img.icon(src="@/assets/filter.svg")
-                  span {{totalFiltersActive}}
-              Search(:visible="searchIsVisible")
-            button(@click="showPreviousSearchCard" v-if="searchResultsCount")
-              img.icon.left-arrow(src="@/assets/down-arrow.svg")
-            button(@click="showNextSearchCard" v-if="searchResultsCount")
-              img.icon.right-arrow(src="@/assets/down-arrow.svg")
-            button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
-              img.icon.cancel(src="@/assets/add.svg")
     .right
       .controls(v-if="isSpace")
         .top-controls
@@ -824,7 +825,7 @@ header
       pointer-events auto
 
   .space-functions-row
-    margin-top 5px
+    margin-bottom 6px
     position relative
     .search-count-badge
       margin 0
@@ -855,7 +856,7 @@ header
     justify-content flex-end
 
   .bottom-controls
-    margin-top 5px
+    margin-top 6px
     display flex
     justify-content flex-end
     > .button-wrap

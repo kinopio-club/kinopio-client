@@ -2,9 +2,8 @@
 .button-wrap.ask-to-add-to-explore(v-if="isVisible")
   template(v-if="!isAsked")
     button(@click.left.prevent="askToAddToExplore" @keydown.stop.enter="askToAddToExplore")
-      img.icon.add(src="@/assets/add.svg")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
-      span Ask to Add To Explore
+      span Ask to Share On Explore
     template(v-if="error.userNeedsToSignUpOrIn")
       p
         span.badge.info Sign Up or In
