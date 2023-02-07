@@ -46,14 +46,20 @@
 .row.align-items-top(v-if="isSpaceMember")
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-
+  //- Settings
   .button-wrap
     button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
       img.icon.settings(src="@/assets/settings.svg")
       span Settings
 
-.row.align-items-top(v-if="!isSpaceMember && !showInExplore")
-  //- Explore Ask
+//- Duplicate
+.row(v-if="!isSpaceMember")
+  .button-wrap
+    button(@click.left="duplicateSpace")
+      img.icon.add(src="@/assets/add.svg")
+      span Duplicate
+//- Explore Ask
+.row(v-if="!isSpaceMember && !showInExplore")
   AskToAddToExplore(@updateDialogHeight="updateDialogHeight")
 
 //- Space Settings
@@ -82,11 +88,6 @@ section.subsection.space-settings(v-if="settingsIsVisible")
           img.icon(v-if="!currentSpaceIsHidden" src="@/assets/view.svg")
           img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
           span Hide
-    .button-wrap(v-if="!isSpaceMember")
-      button(@click.left="duplicateSpace")
-        img.icon.add(src="@/assets/add.svg")
-        span Duplicate
-
 </template>
 
 <script>
@@ -196,6 +197,10 @@ export default {
 
   },
   methods: {
+    duplicateSpace () {
+      this.$store.dispatch('currentSpace/duplicateSpace')
+      this.updateLocalSpaces()
+    },
     updateDialogHeight () {
       this.$emit('updateDialogHeight')
     },

@@ -307,11 +307,6 @@ export default {
       shouldUpdateFavorites = false
       await this.$store.dispatch('currentUser/restoreUserFavorites')
     },
-    duplicateSpace () {
-      this.$store.dispatch('currentSpace/duplicateSpace')
-      this.updateLocalSpaces()
-      this.updateWithRemoteSpaces()
-    },
     updateHeights () {
       if (!this.visible) {
         window.cancelAnimationFrame(updatePositionTimer)
