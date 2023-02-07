@@ -14,11 +14,11 @@
 
   template(v-else-if="error.spaceMustBeEdited")
     .badge.info
-      span Edit and rename this space to add to explore
+      span Edit and rename this space to add to Explore
 
   template(v-else-if="error.spaceCardsMinimum")
     .badge.info
-      span Space needs more than 10 cards to add to explore
+      span Space needs more than 10 cards to add to Explore
 
 </template>
 
