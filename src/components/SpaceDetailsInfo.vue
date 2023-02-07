@@ -52,9 +52,9 @@
       img.icon.settings(src="@/assets/settings.svg")
       span Settings
 
-//- .row.align-items-top(v-if="!isSpaceMember && !showInExplore")
-//-   //- Explore Ask
-//-   AskToAddToExplore
+.row.align-items-top(v-if="!isSpaceMember && !showInExplore")
+  //- Explore Ask
+  AskToAddToExplore(@updateDialogHeight="updateDialogHeight")
 
 //- Space Settings
 section.subsection.space-settings(v-if="settingsIsVisible")
@@ -196,6 +196,9 @@ export default {
 
   },
   methods: {
+    updateDialogHeight () {
+      this.$emit('updateDialogHeight')
+    },
     toggleHideSpace () {
       const value = !this.currentSpaceIsHidden
       this.$store.dispatch('currentSpace/updateSpace', { isHidden: value })

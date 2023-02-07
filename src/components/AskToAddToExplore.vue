@@ -18,6 +18,7 @@
 <script>
 export default {
   name: 'AskToAddToExploreButton',
+  emits: ['updateDialogHeight'],
   data () {
     return {
       error: {
@@ -53,6 +54,7 @@ export default {
       }
       this.$store.dispatch('api/addToQueue', { name: 'createAskToAddToExploreNotification', body: notification })
       this.isAsked = true
+      this.$emit('updateDialogHeight')
     },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'askToAddToExplore.triggerSignUpOrInIsVisible')
