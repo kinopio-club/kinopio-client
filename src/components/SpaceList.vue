@@ -28,7 +28,7 @@ span.space-list-wrap
 
               //- User(s)
               template(v-if="showOtherUsers")
-                .users
+                .users(:class="{'multiple-users': space.otherUsers.length > 1}")
                   User(:user="user(space)" :isClickable="false" :key="user(space).id")
                   template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
                     User(:user="otherUser" :isClickable="false")
