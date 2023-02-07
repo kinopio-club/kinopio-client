@@ -78,6 +78,11 @@ export default {
       } else if (mutation.type === 'currentUser/favoriteSpaces') {
         if (!this.visible) { return }
         this.updateLocalSpaces()
+      } else if (mutation.type === 'isLoadingSpace') {
+        const isLoading = mutation.payload
+        if (!this.visible) { return }
+        if (isLoading) { return }
+        this.updateLocalSpaces()
       }
     })
   },
