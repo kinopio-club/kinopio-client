@@ -121,7 +121,8 @@ export default {
 main.add-page
   padding 8px
   margin-top 2px
-  height 100vh
+  min-height 100vh
+  height 100%
   section
     position relative
     display block
@@ -155,4 +156,6 @@ main.add-page
   .button-wrap + .button-wrap
     margin-left 6px
 
+.app
+  overflow initial
 </style>

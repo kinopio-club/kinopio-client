@@ -16,9 +16,9 @@
         .badge.info
           Loader(:visible="true")
           span {{remotePendingUpload.percentComplete}}%
-      Background(:visible="backgroundIsVisible" @updateSpaces="updateSpaces")
+      Background(:visible="backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
     //- Name
-    .textarea-wrap
+    .textarea-wrap(:class="{'full-width': shouldHidePin}")
       textarea.name(
         :disabled="!isSpaceMember"
         ref="name"
@@ -45,13 +45,49 @@
 
 .row.align-items-top(v-if="isSpaceMember")
   //- Privacy
-  PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
-  //- Explore
-  AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
-.row.align-items-top(v-if="!isSpaceMember && !showInExplore")
-  //- Explore Ask
-  AskToAddToExplore
+  PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
+  //- Settings
+  .button-wrap
+    button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
+      img.icon.settings(src="@/assets/settings.svg")
+      span Settings
 
+//- Duplicate
+.row(v-if="!isSpaceMember")
+  .button-wrap
+    button(@click.left="duplicateSpace")
+      img.icon.add(src="@/assets/add.svg")
+      span Duplicate
+//- Explore Ask
+.row(v-if="!isSpaceMember && !showInExplore")
+  AskToAddToExplore(@updateDialogHeight="updateDialogHeight")
+
+//- Space Settings
+section.subsection.space-settings(v-if="settingsIsVisible")
+  //- Background
+  .row
+    button(@click.left.stop="toggleBackgroundIsVisible")
+      BackgroundPreview(:space="currentSpace")
+      span Background
+  //- Explore
+  .row
+    AddToExplore(@updateLocalSpaces="updateLocalSpaces")
+  .row
+    .button-wrap(v-if="isSpaceMember")
+      .segmented-buttons
+        //- Remove
+        button.danger(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
+          template(v-if="currentUserIsSpaceCollaborator")
+            img.icon.cancel(src="@/assets/add.svg")
+            span Leave
+          template(v-else)
+            img.icon.remove(src="@/assets/remove.svg")
+            span Remove
+        //- Hide Space
+        button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
+          img.icon(v-if="!currentSpaceIsHidden" src="@/assets/view.svg")
+          img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
+          span Hide
 </template>
 
 <script>
@@ -61,10 +97,12 @@ import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
+import templates from '@/data/templates.js'
+import cache from '@/cache.js'
 
 export default {
   name: 'SpaceDetailsInfo',
-  emits: ['updateSpaces', 'closeDialogs'],
+  emits: ['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight'],
   components: {
     Background,
     BackgroundPreview,
@@ -74,8 +112,8 @@ export default {
     AskToAddToExplore
   },
   props: {
-    shouldHideExplore: Boolean,
-    shouldHidePin: Boolean
+    shouldHidePin: Boolean,
+    currentSpaceIsHidden: Boolean
   },
   mounted () {
     this.textareaSize()
@@ -108,10 +146,16 @@ export default {
   data () {
     return {
       backgroundIsVisible: false,
-      privacyPickerIsVisible: false
+      privacyPickerIsVisible: false,
+      settingsIsVisible: false
     }
   },
   computed: {
+    currentSpaceIsTemplate () {
+      const id = this.currentSpace.id
+      const templateSpaceIds = templates.spaces().map(space => space.id)
+      return templateSpaceIds.includes(id)
+    },
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     spaceName: {
@@ -121,10 +165,11 @@ export default {
       set (newName) {
         this.textareaSize()
         this.$store.dispatch('currentSpace/updateSpace', { name: newName })
-        this.updateSpaces()
+        this.updateLocalSpaces()
       }
     },
     currentSpace () { return this.$store.state.currentSpace },
+    currentUser () { return this.$store.state.currentUser },
     isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
       return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
@@ -147,9 +192,49 @@ export default {
         return inProgress && isSpace
       })
     },
-    dialogIsPinned () { return this.$store.state.spaceDetailsIsPinned }
+    dialogIsPinned () { return this.$store.state.spaceDetailsIsPinned },
+    currentUserIsSpaceCollaborator () { return this.$store.getters['currentUser/isSpaceCollaborator']() }
+
   },
   methods: {
+    duplicateSpace () {
+      this.$store.dispatch('currentSpace/duplicateSpace')
+      this.updateLocalSpaces()
+    },
+    updateDialogHeight () {
+      this.$emit('updateDialogHeight')
+    },
+    toggleHideSpace () {
+      const value = !this.currentSpaceIsHidden
+      this.$store.dispatch('currentSpace/updateSpace', { isHidden: value })
+      this.updateLocalSpaces()
+      this.$store.commit('notifySpaceIsHidden', value)
+    },
+    removeCurrentSpace () {
+      const currentSpaceId = this.$store.state.currentSpace.id
+      const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
+      if (currentUserIsSpaceCollaborator) {
+        this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', this.$store.state.currentUser)
+      } else {
+        this.$store.dispatch('currentSpace/removeCurrentSpace')
+        this.$store.commit('notifyCurrentSpaceIsNowRemoved', true)
+      }
+      this.updateLocalSpaces()
+      this.changeToLastSpace()
+    },
+    changeToLastSpace () {
+      let spaces = cache.getAllSpaces().filter(space => {
+        return this.$store.getters['currentUser/canEditSpace'](space)
+      })
+
+      spaces = spaces.filter(space => space.id !== this.currentSpace.id)
+      if (spaces.length) {
+        const cachedSpace = this.$store.getters.cachedOrOtherSpaceById(this.currentUser.prevLastSpaceId)
+        this.$store.dispatch('currentSpace/changeSpace', { space: cachedSpace || spaces[0] })
+      } else {
+        this.addSpace()
+      }
+    },
     textareaSize () {
       const element = this.$refs.name
       const modifier = 1
@@ -169,6 +254,12 @@ export default {
       this.closeDialogsAndEmit()
       this.privacyPickerIsVisible = !isVisible
     },
+    toggleSettingsIsVisible () {
+      const isVisible = this.settingsIsVisible
+      this.closeDialogsAndEmit()
+      this.settingsIsVisible = !isVisible
+      this.$emit('updateDialogHeight')
+    },
     closeDialogs () {
       this.backgroundIsVisible = false
       this.privacyPickerIsVisible = false
@@ -177,8 +268,8 @@ export default {
       this.closeDialogs()
       this.$emit('closeDialogs')
     },
-    updateSpaces () {
-      this.$emit('updateSpaces')
+    updateLocalSpaces () {
+      this.$emit('updateLocalSpaces')
     },
     closeAllDialogs () {
       this.$store.dispatch('closeAllDialogs', 'SpaceDetailsInfo')
@@ -196,6 +287,8 @@ export default {
     margin 0
     .textarea-wrap
       width 145px
+      &.full-width
+        width 170px
     textarea.name
       margin 0
       width 100%
@@ -233,5 +326,17 @@ export default {
   align-items flex-start
   .privacy-button
     min-width 28px
+
+.space-settings
+  .background-preview
+    vertical-align middle
+    margin-right 5px
+    .preview-wrap
+      height 16px
+      width 16px
+      vertical-align 0px
+      border-radius 4px
+  .sunglasses
+    margin-left 1px
 
 </style>

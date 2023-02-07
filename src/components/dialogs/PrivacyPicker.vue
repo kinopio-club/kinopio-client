@@ -53,11 +53,11 @@ export default {
     },
     select (privacyState) {
       this.$store.dispatch('currentSpace/updateSpace', { privacy: privacyState.name })
-      this.updateSpaces()
+      this.updateLocalSpaces()
       this.$emit('closeDialogs')
     },
-    updateSpaces () {
-      this.$emit('updateSpaces')
+    updateLocalSpaces () {
+      this.$emit('updateLocalSpaces')
     }
   }
 }

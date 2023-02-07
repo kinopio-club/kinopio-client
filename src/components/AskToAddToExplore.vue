@@ -2,9 +2,8 @@
 .button-wrap.ask-to-add-to-explore(v-if="isVisible")
   template(v-if="!isAsked")
     button(@click.left.prevent="askToAddToExplore" @keydown.stop.enter="askToAddToExplore")
-      img.icon.add(src="@/assets/add.svg")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
-      span Ask to Add To Explore
+      span Recommend for Explore
     template(v-if="error.userNeedsToSignUpOrIn")
       p
         span.badge.info Sign Up or In
@@ -19,6 +18,7 @@
 <script>
 export default {
   name: 'AskToAddToExploreButton',
+  emits: ['updateDialogHeight'],
   data () {
     return {
       error: {
@@ -54,6 +54,7 @@ export default {
       }
       this.$store.dispatch('api/addToQueue', { name: 'createAskToAddToExploreNotification', body: notification })
       this.isAsked = true
+      this.$emit('updateDialogHeight')
     },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'askToAddToExplore.triggerSignUpOrInIsVisible')

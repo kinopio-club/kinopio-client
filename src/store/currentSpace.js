@@ -363,6 +363,9 @@ const currentSpace = {
         isLoadingRemoteSpace = false
         context.dispatch('restoreSpaceInChunks', { space })
         context.commit('triggerLoadBackground', null, { root: true })
+        nextTick(() => {
+          context.dispatch('currentCards/updateDimensions', {}, { root: true })
+        })
       }
     },
     saveNewSpace: (context) => {
@@ -791,6 +794,7 @@ const currentSpace = {
       console.log('🚟 Change space', { space, isRemote })
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('notifySpaceNotFound', false, { root: true })
+      context.commit('notifySpaceIsRemoved', false, { root: true })
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })
