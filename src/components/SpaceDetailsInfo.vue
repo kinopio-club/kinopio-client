@@ -73,6 +73,11 @@ section.subsection.space-settings(v-if="settingsIsVisible")
   .row
     AddToExplore(@updateLocalSpaces="updateLocalSpaces")
   .row
+    button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+      span Export
+      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
+
+  .row
     .button-wrap(v-if="isSpaceMember")
       .segmented-buttons
         //- Remove
@@ -98,6 +103,7 @@ import PrivacyButton from '@/components/PrivacyButton.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import templates from '@/data/templates.js'
+import Export from '@/components/dialogs/Export.vue'
 import cache from '@/cache.js'
 
 export default {
@@ -109,7 +115,8 @@ export default {
     Loader,
     PrivacyButton,
     AddToExplore,
-    AskToAddToExplore
+    AskToAddToExplore,
+    Export
   },
   props: {
     shouldHidePin: Boolean,
@@ -147,7 +154,8 @@ export default {
     return {
       backgroundIsVisible: false,
       privacyPickerIsVisible: false,
-      settingsIsVisible: false
+      settingsIsVisible: false,
+      exportIsVisible: false
     }
   },
   computed: {
@@ -260,9 +268,16 @@ export default {
       this.settingsIsVisible = !isVisible
       this.$emit('updateDialogHeight')
     },
+    toggleExportIsVisible () {
+      const isVisible = this.exportIsVisible
+      this.closeDialogsAndEmit()
+      this.exportIsVisible = !isVisible
+      this.$emit('updateDialogHeight')
+    },
     closeDialogs () {
       this.backgroundIsVisible = false
       this.privacyPickerIsVisible = false
+      this.exportIsVisible = false
     },
     closeDialogsAndEmit () {
       this.closeDialogs()
@@ -338,5 +353,7 @@ export default {
       border-radius 4px
   .sunglasses
     margin-left 1px
+  p
+    white-space normal
 
 </style>

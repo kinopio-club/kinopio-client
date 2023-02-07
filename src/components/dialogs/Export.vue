@@ -9,8 +9,8 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
         img.icon.copy(src="@/assets/copy.svg")
         span Copy All Card Names
     //- PDF
-    .row
-      .button-wrap(v-if="currentUserIsSignedIn")
+    .row(v-if="currentUserIsSignedIn")
+      .button-wrap
         button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
           span PDF
     Pdf(:visible="pdfIsVisible")
