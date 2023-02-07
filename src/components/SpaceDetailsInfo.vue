@@ -206,7 +206,7 @@ export default {
       const currentSpaceId = this.$store.state.currentSpace.id
       const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
       if (currentUserIsSpaceCollaborator) {
-        this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', this.this.$store.state.currentUser)
+        this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', this.$store.state.currentUser)
       } else {
         this.$store.dispatch('currentSpace/removeCurrentSpace')
         this.$store.commit('notifyCurrentSpaceIsNowRemoved', true)
