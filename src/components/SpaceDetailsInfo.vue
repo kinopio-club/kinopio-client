@@ -16,7 +16,7 @@
         .badge.info
           Loader(:visible="true")
           span {{remotePendingUpload.percentComplete}}%
-      Background(:visible="backgroundIsVisible" @updateSpaces="updateSpaces")
+      Background(:visible="backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
     //- Name
     .textarea-wrap(:class="{'full-width': shouldHidePin}")
       textarea.name(
@@ -45,7 +45,7 @@
 
 .row.align-items-top(v-if="isSpaceMember")
   //- Privacy
-  PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
+  PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
 
   .button-wrap
     button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
@@ -65,7 +65,7 @@ section.subsection.space-settings(v-if="settingsIsVisible")
       span Background
   //- Explore
   .row
-    AddToExplore(@updateSpaces="updateSpaces")
+    AddToExplore(@updateLocalSpaces="updateLocalSpaces")
   .row
     .button-wrap(v-if="isSpaceMember")
       .segmented-buttons
@@ -101,7 +101,7 @@ import cache from '@/cache.js'
 
 export default {
   name: 'SpaceDetailsInfo',
-  emits: ['updateSpaces', 'closeDialogs', 'updateDialogHeight'],
+  emits: ['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight'],
   components: {
     Background,
     BackgroundPreview,
@@ -164,7 +164,7 @@ export default {
       set (newName) {
         this.textareaSize()
         this.$store.dispatch('currentSpace/updateSpace', { name: newName })
-        this.updateSpaces()
+        this.updateLocalSpaces()
       }
     },
     currentSpace () { return this.$store.state.currentSpace },
@@ -196,6 +196,12 @@ export default {
 
   },
   methods: {
+    toggleHideSpace () {
+      const value = !this.currentSpaceIsHidden
+      this.$store.dispatch('currentSpace/updateSpace', { isHidden: value })
+      this.updateLocalSpaces()
+      this.$store.commit('notifySpaceIsHidden', value)
+    },
     removeCurrentSpace () {
       const currentSpaceId = this.$store.state.currentSpace.id
       const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
@@ -205,7 +211,7 @@ export default {
         this.$store.dispatch('currentSpace/removeCurrentSpace')
         this.$store.commit('notifyCurrentSpaceIsNowRemoved', true)
       }
-      this.updateSpaces()
+      this.updateLocalSpaces()
       this.changeToLastSpace()
     },
     changeToLastSpace () {
@@ -254,8 +260,8 @@ export default {
       this.closeDialogs()
       this.$emit('closeDialogs')
     },
-    updateSpaces () {
-      this.$emit('updateSpaces')
+    updateLocalSpaces () {
+      this.$emit('updateLocalSpaces')
     },
     closeAllDialogs () {
       this.$store.dispatch('closeAllDialogs', 'SpaceDetailsInfo')

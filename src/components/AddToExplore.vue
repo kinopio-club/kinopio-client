@@ -29,7 +29,7 @@ let prevPrivacy = ''
 
 export default {
   name: 'ShowInExploreButton',
-  emits: ['updateSpaces'],
+  emits: ['updateLocalSpaces'],
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentSpace/restoreSpace') {
@@ -85,7 +85,7 @@ export default {
       if (shouldPrevent) { return }
       this.updateSpacePrivacy(event)
       this.updateShowInExplore()
-      this.$emit('updateSpaces')
+      this.$emit('updateLocalSpaces')
     },
     updateShowInExplore () {
       const shouldShow = !this.showInExplore

@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned}")
   section
-    SpaceDetailsInfo(@updateSpaces="updateLocalSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden")
+    SpaceDetailsInfo(@updateLocalSpaces="updateLocalSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden")
   section.results-actions
     .row
       //- Add Space
@@ -165,12 +165,6 @@ export default {
     clearAllFilters () {
       this.closeDialogs()
       this.$store.commit('triggerClearAllSpaceFilters')
-    },
-    toggleHideSpace () {
-      const value = !this.currentSpaceIsHidden
-      this.$store.dispatch('currentSpace/updateSpace', { isHidden: value })
-      this.updateLocalSpaces()
-      this.$store.commit('notifySpaceIsHidden', value)
     },
     toggleSpaceFiltersIsVisible () {
       const isVisible = this.spaceFiltersIsVisible
