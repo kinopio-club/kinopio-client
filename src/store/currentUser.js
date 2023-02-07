@@ -120,10 +120,11 @@ export default {
       state.favoriteSpaces = spaces
       cache.updateUser('favoriteSpaces', spaces)
     },
-    favoriteColors: (state, spaces) => {
-      utils.typeCheck({ value: spaces, type: 'array' })
-      state.favoriteColors = spaces
-      cache.updateUser('favoriteColors', spaces)
+    favoriteColors: (state, colors) => {
+      console.log('🌻', colors)
+      utils.typeCheck({ value: colors, type: 'array' })
+      state.favoriteColors = colors
+      cache.updateUser('favoriteColors', colors)
     },
     updateFavoriteSpaceIsEdited: (state, spaceId) => {
       utils.typeCheck({ value: spaceId, type: 'string' })
@@ -367,6 +368,7 @@ export default {
         context.dispatch('createNewUser')
       }
       context.dispatch('themes/restore', null, { root: true })
+      context.commit('triggerUserIsLoaded', null, { root: true })
     },
     update: (context, updates) => {
       const keys = Object.keys(updates)
@@ -449,19 +451,21 @@ export default {
       context.commit('otherTags', remoteTags, { root: true })
     },
     restoreUserFavorites: async (context) => {
+      context.commit('isLoadingFavorites', true, { root: true })
       if (!context.getters.isSignedIn) {
-        context.commit('hasRestoredFavorites', true, { root: true })
+        context.commit('isLoadingFavorites', false, { root: true })
         return
       }
       let favorites = {
         favoriteUsers: [],
-        favoriteSpaces: []
+        favoriteSpaces: [],
+        favoriteColors: []
       }
       favorites = await context.dispatch('api/getUserFavorites', null, { root: true }) || favorites
       context.commit('favoriteUsers', favorites.favoriteUsers)
       context.commit('favoriteSpaces', favorites.favoriteSpaces)
       context.commit('favoriteColors', favorites.favoriteColors)
-      context.commit('hasRestoredFavorites', true, { root: true })
+      context.commit('isLoadingFavorites', false, { root: true })
     },
     addFavorite: (context, { type, item }) => {
       let color

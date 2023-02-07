@@ -62,7 +62,10 @@ import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 
+import { nanoid } from 'nanoid'
+
 let shouldLoadLastSpace
+let sessionToken
 
 export default {
   name: 'SignUpOrIn',
@@ -191,7 +194,7 @@ export default {
       if (!this.isSignUpPasswordTooShort(password)) { return }
       if (!this.isSignUpPasswordsMatch(password, confirmPassword)) { return }
       this.loading.signUpOrIn = true
-      const response = await this.$store.dispatch('api/signUp', { email, password, currentUser })
+      const response = await this.$store.dispatch('api/signUp', { email, password, currentUser, sessionToken })
       const result = await response.json()
       if (this.isSuccess(response)) {
         this.$store.commit('clearAllNotifications', false)
@@ -234,7 +237,7 @@ export default {
         this.$store.commit('clearAllNotifications', false)
         this.addCollaboratorToInvitedSpaces()
         this.$store.commit('triggerSpaceDetailsVisible')
-        this.$store.commit('hasRestoredFavorites', false)
+        this.$store.commit('isLoadingFavorites', true)
         this.$store.dispatch('currentUser/restoreUserFavorites')
         this.$store.commit('triggerUpdateNotifications')
         this.$store.dispatch('themes/restore')
@@ -322,12 +325,18 @@ export default {
       } else {
         this.resetSuccess = true
       }
+    },
+
+    createSessionToken () {
+      sessionToken = nanoid()
+      this.$store.dispatch('api/createSessionToken', sessionToken)
     }
   },
   watch: {
     visible (value) {
       if (value) {
         this.clearErrors()
+        this.createSessionToken()
       }
     },
     'loading.signUpOrIn' (value) {

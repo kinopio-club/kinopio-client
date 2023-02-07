@@ -26,6 +26,7 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
         button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
           img.icon.add(src="@/assets/add.svg")
           span New
+          Loader(:visible="isLoadingSpace")
         AddSpace(:visible="addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace" @addJournalSpace="addJournalSpace")
       //- Filters
       .button-wrap
@@ -54,6 +55,7 @@ import AddSpace from '@/components/dialogs/AddSpace.vue'
 import SpaceFilters from '@/components/dialogs/SpaceFilters.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import utils from '@/utils.js'
+import Loader from '@/components/Loader.vue'
 
 import debounce from 'lodash-es/debounce'
 import dayjs from 'dayjs'
@@ -69,7 +71,8 @@ export default {
     SpaceDetailsInfo,
     AddSpace,
     SpaceFilters,
-    SpaceList
+    SpaceList,
+    Loader
   },
   props: {
     visible: Boolean
@@ -114,7 +117,8 @@ export default {
     ...mapState([
       'currentSpace',
       'currentUser',
-      'spaceDetailsIsPinned'
+      'spaceDetailsIsPinned',
+      'isLoadingSpace'
     ]),
     ...mapGetters([
       'currentUser/isSignedIn',

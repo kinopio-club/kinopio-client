@@ -422,6 +422,9 @@ const currentCards = {
         })
       })
     },
+    resetDimensions: (context, { cardId }) => {
+      context.dispatch('removeResize', { cardIds: [cardId] })
+    },
 
     // resize
 

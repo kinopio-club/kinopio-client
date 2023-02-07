@@ -81,7 +81,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
       button(:class="{active: isFavoriteUser}" @click.left.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
         img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
         img.icon(v-else src="@/assets/heart-empty.svg")
-        Loader(:visible="!hasRestoredFavorites")
+        Loader(:visible="isLoadingFavorites")
     .badge.danger.error-message(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
   //- Collaborator
@@ -170,7 +170,7 @@ export default {
     isCurrentUser () { return this.$store.getters['currentUser/isCurrentUser'](this.user) },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
-    hasRestoredFavorites () { return this.$store.state.hasRestoredFavorites },
+    isLoadingFavorites () { return this.$store.state.isLoadingFavorites },
     cardsCreatedLimit () { return this.$store.state.cardsCreatedLimit },
     spaceUserIsUpgraded () { return this.$store.getters['currentSpace/spaceUserIsUpgraded'] },
     spaceUser () { return this.$store.state.currentSpace.users[0] },
