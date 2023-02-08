@@ -122,7 +122,7 @@ export default {
       this.$store.commit('shouldExplicitlyHideFooter', value)
     },
     async addJournalSpace () {
-      this.$store.commit('spaceIsLoading', true)
+      this.$store.commit('isLoadingSpace', true)
       this.$emit('closeDialogs')
       window.scrollTo(0, 0)
       this.$emit('addJournalSpace')
@@ -134,7 +134,7 @@ export default {
       }
     },
     addSpace () {
-      this.$store.commit('spaceIsLoading', true)
+      this.$store.commit('isLoadingSpace', true)
       const noUserSpaces = !cache.getAllSpaces().length
       window.scrollTo(0, 0)
       if (noUserSpaces) {
@@ -151,7 +151,7 @@ export default {
       }
     },
     addInboxSpace () {
-      this.$store.commit('spaceIsLoading', true)
+      this.$store.commit('isLoadingSpace', true)
       this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
       window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addInboxSpace')
