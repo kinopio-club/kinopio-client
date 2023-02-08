@@ -184,7 +184,7 @@ const router = createRouter({
       component: Space,
       beforeEnter: (to, from, next) => {
         const userId = window.location.pathname
-        console.log('🌷', window.location, userId)
+        console.log('🌷🌷🌷', to.params.userId)
         // if (utils.idIsValid(userid))
         // store.commit.shouldValidateNewUserIsRefferred(userId)
 
