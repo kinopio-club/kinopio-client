@@ -27,6 +27,8 @@
         v-model="spaceName"
         @keydown.enter.stop.prevent="closeAllDialogs"
       )
+      .textarea-loader(v-if="isLoadingSpace")
+        Loader(:visible="true")
 
   //- Pin Dialog
   .title-row(v-if="!shouldHidePin")
@@ -151,6 +153,7 @@ export default {
     }
   },
   computed: {
+    isLoadingSpace () { return this.$store.state.isLoadingSpace },
     currentSpaceIsTemplate () {
       const id = this.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.id)
@@ -289,6 +292,13 @@ export default {
       width 145px
       &.full-width
         width 170px
+      .textarea-loader
+        position absolute
+        right 0
+        top 4px
+        .loader
+          width 14px
+          height 14px
     textarea.name
       margin 0
       width 100%
