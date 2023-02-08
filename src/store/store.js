@@ -187,6 +187,7 @@ const store = createStore({
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
+    shouldResetDimensionsOnLoad: false,
 
     // notifications
     notifications: [],
@@ -300,6 +301,10 @@ const store = createStore({
     loadInboxSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.loadInboxSpace = value
+    },
+    shouldResetDimensionsOnLoad: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.shouldResetDimensionsOnLoad = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })

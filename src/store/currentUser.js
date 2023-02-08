@@ -122,7 +122,6 @@ export default {
       cache.updateUser('favoriteSpaces', spaces)
     },
     favoriteColors: (state, colors) => {
-      console.log('🌻', colors)
       utils.typeCheck({ value: colors, type: 'array' })
       state.favoriteColors = colors
       cache.updateUser('favoriteColors', colors)

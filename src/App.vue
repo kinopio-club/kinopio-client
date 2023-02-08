@@ -104,7 +104,15 @@ export default {
     }
   },
   computed: {
-    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
+    isThemeDark () {
+      const systemTheme = this.themeFromSystem()
+      const userTheme = this.$store.state.currentUser.theme
+      if (systemTheme) {
+        return systemTheme === 'dark'
+      } else {
+        return userTheme === 'dark'
+      }
+    },
     spaceName () { return this.$store.state.currentSpace.name },
     isDevelopment () {
       if (import.meta.env.MODE === 'development') {
@@ -151,16 +159,21 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
-    updateThemeFromSystem (event) {
-      event = event || window.matchMedia('(prefers-color-scheme: dark)')
+    themeFromSystem () {
       const themeIsSystem = this.$store.state.currentUser.themeIsSystem
       if (!themeIsSystem) { return }
+      let theme = window.matchMedia('(prefers-color-scheme: dark)')
       let themeName
-      if (event.matches) {
+      if (theme.matches) {
         themeName = 'dark'
       } else {
         themeName = 'light'
       }
+      return themeName
+    },
+    updateThemeFromSystem () {
+      const themeName = this.themeFromSystem()
+      if (!themeName) { return }
       this.$store.dispatch('themes/update', themeName)
     },
     toggleIsPinchZooming (event) {

@@ -422,8 +422,12 @@ const currentCards = {
         })
       })
     },
-    resetDimensions: (context, { cardId }) => {
-      context.dispatch('removeResize', { cardIds: [cardId] })
+    resetDimensions: (context, { cardIds, cardId }) => {
+      if (cardId) {
+        context.dispatch('removeResize', { cardIds: [cardId] })
+      } else if (cardIds) {
+        context.dispatch('removeResize', { cardIds: cardIds })
+      }
     },
 
     // resize
