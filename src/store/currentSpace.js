@@ -339,6 +339,7 @@ const currentSpace = {
       const weather = await context.dispatch('api/weather', null, { root: true })
       const space = utils.journalSpace(currentUser, isTomorrow, weather)
       context.commit('clearSearch', null, { root: true })
+      context.commit('shouldResetDimensionsOnLoad', true, { root: true })
       isLoadingRemoteSpace = false
       context.dispatch('restoreSpaceInChunks', { space })
       context.commit('triggerLoadBackground', null, { root: true })
@@ -526,6 +527,13 @@ const currentSpace = {
         }
       })
     },
+    checkIfShouldResetDimensions: (context) => {
+      const shouldReset = context.rootState.shouldResetDimensionsOnLoad
+      if (!shouldReset) { return }
+      const cardIds = context.rootState.currentCards.ids
+      context.dispatch('currentCards/resetDimensions', { cardIds }, { root: true })
+      context.commit('shouldResetDimensionsOnLoad', false, { root: true })
+    },
     loadJournalSpace: async (context) => {
       const spaces = cache.getAllSpaces()
       const journalName = utils.journalSpaceName(context.rootState.loadJournalSpaceTomorrow)
@@ -681,6 +689,7 @@ const currentSpace = {
         context.dispatch('updateOtherSpaces')
         context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
+        context.dispatch('checkIfShouldResetDimensions')
         nextTick(() => {
           context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
           context.dispatch('checkIfShouldPauseConnectionDirections')

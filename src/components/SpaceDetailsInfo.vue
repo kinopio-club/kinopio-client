@@ -295,7 +295,7 @@ export default {
       .textarea-loader
         position absolute
         right 0
-        top 4px
+        top 5px
         .loader
           width 14px
           height 14px
