@@ -155,7 +155,7 @@ export default {
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     todayJournalSpace () {
-      const today = utils.journalSpaceName()
+      const today = utils.journalSpaceName({})
       const todaySpace = this.spaces.find(space => {
         if (space.moonPhase) {
           const createdAt = utils.journalSpaceDateFromName(space.name)

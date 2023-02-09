@@ -70,6 +70,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
                 img.icon.templates(src="@/assets/templates.svg")
               span(v-if="currentSpaceIsFromTweet")
                 img.icon.tweet(src="@/assets/twitter.svg")
+              SpaceTodayJournalBadge(:space="currentSpace")
               MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
               span {{currentSpaceName}}
               PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
@@ -168,6 +169,7 @@ import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
 import Import from '@/components/dialogs/Import.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
+import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 
 import { mapState, mapGetters } from 'vuex'
 
@@ -206,7 +208,8 @@ export default {
     Donate,
     Toolbar,
     Import,
-    Pricing
+    Pricing,
+    SpaceTodayJournalBadge
   },
   props: {
     isPinchZooming: Boolean,
