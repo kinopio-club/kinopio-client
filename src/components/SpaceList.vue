@@ -39,17 +39,12 @@ span.space-list-wrap
               //- NEW badge
               span(v-if="isNew(space)")
                 .badge.info.inline-badge.new-badge New
-              //- today journal badge
-              span.badge.info.inline-badge(v-if="isTodayJournal(space)" title="Today's journal")
-                img.icon.today-icon(src="@/assets/today.svg")
               //- space meta
               span(v-if="space.isFavorite")
                 img.icon.favorite-icon(src="@/assets/heart.svg")
               span(v-if="space.name === 'Inbox'")
                 img.icon.inbox-icon(src="@/assets/inbox.svg")
-
-              //- span(v-if="space.backgroundTint")
-              //-   .badge.inline-badge.color-only-badge(:style="{ background: space.backgroundTint }")
+              SpaceTodayJournalBadge(:space="space")
               MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
               //- template
               span(v-if="space.isTemplate")
@@ -85,6 +80,7 @@ import { defineAsyncComponent } from 'vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import Loader from '@/components/Loader.vue'
 import NameMatch from '@/components/NameMatch.vue'
+import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 
 import dayjs from 'dayjs'
 import last from 'lodash-es/last'
@@ -102,7 +98,8 @@ export default {
     MoonPhase,
     PrivacyIcon,
     Loader,
-    NameMatch
+    NameMatch,
+    SpaceTodayJournalBadge
   },
   props: {
     spaces: Array,
@@ -195,16 +192,6 @@ export default {
       const isEditedByOtherUser = space.editedByUserId !== this.currentUser.id
       if (isEditedByOtherUser) {
         return space.isEdited
-      } else {
-        return false
-      }
-    },
-    isTodayJournal (space) {
-      if (space.moonPhase) {
-        const createdAt = utils.journalSpaceDateFromName(space.name)
-        if (!createdAt) { return }
-        const today = utils.journalSpaceName()
-        return createdAt === today
       } else {
         return false
       }
@@ -368,11 +355,6 @@ export default {
 
   .sunglasses
     width 16px
-
-  .today-icon
-    width 12px
-    height 12px
-    vertical-align -1px
 
   .icon.tweet
     min-width 12px
