@@ -257,9 +257,11 @@ export default {
     updateWithExistingRemoteSpaces (userSpaces) {
       if (!utils.arrayExists(this.remoteSpaces)) { return userSpaces }
       let spaces = userSpaces
+      const removedSpaces = cache.getAllRemovedSpaces()
       this.remoteSpaces.forEach(space => {
         const spaceExists = userSpaces.find(userSpace => userSpace.id === space.id)
-        if (!spaceExists) {
+        const spaceIsRemoved = removedSpaces.find(removedSpace => removedSpace.id === space.id)
+        if (!spaceExists && !spaceIsRemoved) {
           spaces.push(space)
         }
       })
