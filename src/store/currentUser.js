@@ -373,6 +373,7 @@ export default {
       }
       context.dispatch('themes/restore', null, { root: true })
       context.commit('triggerUserIsLoaded', null, { root: true })
+      context.dispatch('validateReferral')
     },
     update: (context, updates) => {
       const keys = Object.keys(updates)
@@ -744,6 +745,18 @@ export default {
         }
       }
       return space
+    },
+    validateReferral: (context) => {
+      const referralUserId = context.rootState.validateUserReferral
+      const canBeReferred = context.getters.canBeReferred
+      if (!referralUserId) { return }
+      if (canBeReferred) {
+        // success notification
+        // update user.referredByUserId
+      } else {
+        // show referral error notification: only for new users who haven't already been referred
+        context.commit('addNotification', { message: "Referals can only by used by new users who haven't already already been referred", type: 'danger', isPersistentItem: true }, { root: true })
+      }
     }
   },
   getters: {
@@ -874,6 +887,11 @@ export default {
       const connections = rootState.filteredConnectionTypeIds
       const frames = rootState.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
+    },
+    canBeReferred: (state, getters) => {
+      if (getters.isSignedIn) { return }
+      if (state.referredByUserId) { return }
+      return true
     },
 
     // AI Images

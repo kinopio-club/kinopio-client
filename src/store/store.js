@@ -188,6 +188,7 @@ const store = createStore({
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
     shouldResetDimensionsOnLoad: false,
+    validateUserReferral: '',
 
     // notifications
     notifications: [],
@@ -305,6 +306,10 @@ const store = createStore({
     shouldResetDimensionsOnLoad: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldResetDimensionsOnLoad = value
+    },
+    validateUserReferral: (state, userId) => {
+      utils.typeCheck({ value: userId, type: 'string' })
+      state.validateUserReferral = userId
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })

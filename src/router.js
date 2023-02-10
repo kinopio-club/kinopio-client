@@ -183,22 +183,9 @@ const router = createRouter({
       path: '/refer/:userId',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const userId = window.location.pathname
-        console.log('🌷🌷🌷', to.params.userId)
-        // if (utils.idIsValid(userid))
-        // store.commit.shouldValidateNewUserIsRefferred(userId)
-
+        const userId = to.params.userId
+        store.commit('validateUserReferral', userId)
         next()
-
-        // TODO in CurrentUser.js:
-
-        // After user loads, if store.state.shouldValidateNewUserIsRefferred,
-        // utils.validate referral() ,
-        // if valid:
-        // update user.referredByUserId
-        // store.commit triggerNotifyReferredUserSignInToEarnCredits, userid
-        // else:
-        // show referral error notification: only for new users , or you've already been referred
       }
     }, {
       path: '/notify-donation-success',
