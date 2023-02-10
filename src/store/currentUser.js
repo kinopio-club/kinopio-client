@@ -754,8 +754,7 @@ export default {
         // success notification
         // update user.referredByUserId
       } else {
-        // show referral error notification: only for new users who haven't already been referred
-        context.commit('addNotification', { message: "Referals can only by used by new users who haven't already already been referred", type: 'danger', isPersistentItem: true }, { root: true })
+        context.commit('addNotification', { message: "Referrals can only be used by new users who haven't already already been referred", type: 'danger', isPersistentItem: true }, { root: true })
       }
     }
   },

@@ -1,6 +1,6 @@
 <template lang="pug">
 aside.notifications(@click.left="closeAllDialogs")
-  .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type" :style="notificationStyle(item.type)")
+  .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :data-is-persistent-item="item.isPersistentItem" :class="notifificationClasses(item)" :style="notificationStyle(item.type)")
     p
       span.label-badge(v-if="item.label") {{item.label}}
       template(v-if="item.icon")
@@ -13,6 +13,10 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'brush-y'" src="@/assets/brush-y.svg" class="brush-y")
         img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
       span {{item.message}}
+    .row(v-if="item.isPersistentItem")
+      button(@click="removeById(item)")
+        img.icon.cancel(src="@/assets/add.svg")
+        span Got It
 
   .persistent-item.success(v-if="notifyUnlockedStickyCards")
     video(autoplay loop muted playsinline width="244" height="94")
@@ -236,6 +240,15 @@ export default {
     shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards }
   },
   methods: {
+    notifificationClasses (item) {
+      let classes = {
+        'danger': item.type === 'danger',
+        'success': item.type === 'success',
+        'info': item.type === 'info',
+        'persistent-item': item.isPersistentItem
+      }
+      return classes
+    },
     toggleShouldUseStickyCards () {
       const value = !this.shouldUseStickyCards
       this.$store.dispatch('currentUser/update', { shouldUseStickyCards: value })
@@ -272,12 +285,16 @@ export default {
       notifications.forEach(item => {
         this.$nextTick(() => {
           const element = document.querySelector(`.notifications .item[data-notification-id="${item.id}"]`)
-          element.addEventListener('animationend', this.remove, false)
+          if (element.dataset.isPersistentItem) { return }
+          element.addEventListener('animationend', this.removePrevious, false)
         })
       })
     },
-    remove () {
-      this.$store.commit('removeNotification')
+    removePrevious () {
+      this.$store.commit('removePreviousNotification')
+    },
+    removeById (item) {
+      this.$store.commit('removeNotificationById', item.id)
     },
     addReadOnlyJiggle () {
       const element = this.$refs.readOnly || this.$refs.template

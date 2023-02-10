@@ -1141,8 +1141,11 @@ const store = createStore({
       notification.id = nanoid()
       state.notifications.push(notification)
     },
-    removeNotification: (state) => {
+    removePreviousNotification: (state) => {
       state.notifications.shift()
+    },
+    removeNotificationById: (state, id) => {
+      state.notifications = state.notifications.filter(notification => notification.id !== id)
     },
     clearAllNotifications: (state) => {
       state.notifyConnectionError = false
