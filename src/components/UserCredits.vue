@@ -19,6 +19,7 @@ const state = reactive({
   isLoading: true,
   creditsUsed: 0,
   creditsEarned: 0,
+  creditsUnused: 0,
   usersReferred: 0
 })
 
@@ -26,16 +27,16 @@ const updateCredits = async () => {
   state.isLoading = true
   try {
     const data = await store.dispatch('api/getReferralsByUser')
+    console.log('🫧', data)
     state.usersReferred = data.referrals.length
     state.creditsEarned = data.creditsEarned
     state.creditsUsed = data.creditsUsed
+    state.creditsUnused = data.creditsUnused
   } catch (error) {
     console.error('🚒', error)
   }
   state.isLoading = false
 }
-
-const creditsUnused = computed(() => state.creditsEarned - state.creditsUsed)
 
 const triggerEarnCreditsIsVisible = () => {
   store.dispatch('closeAllDialogs')
@@ -53,7 +54,7 @@ section.user-credits
     section
       p ${{state.creditsEarned}} total credit earned
     section
-      .badge.success ${{creditsUnused}} credit remaining for future payments
+      .badge.success ${{state.creditsUnused}} credit remaining for future payments
   .row(v-if="showEarnCreditsButton")
     .button-wrap
       button(@click="triggerEarnCreditsIsVisible")
