@@ -726,6 +726,27 @@ const self = {
     //   }
     // },
 
+    // Referral
+
+    createReferral: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/referral`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 createReferral', error)
+      }
+    },
+    getReferralsByUser: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/referral`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 getReferralsByUser', error)
+      }
+    },
+
     // Billing
 
     createCustomer: async (context, body) => {

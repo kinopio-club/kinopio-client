@@ -214,6 +214,7 @@ export default {
         this.$store.commit('triggerCheckIfUseHasInboxSpace')
         this.$store.dispatch('themes/restore')
         this.$store.commit('notifyReferralSuccessUser', null)
+        this.checkIfShouldAddReferral()
       } else {
         await this.handleErrors(result)
       }
@@ -257,6 +258,17 @@ export default {
       } else {
         await this.handleErrors(result)
       }
+    },
+
+    async checkIfShouldAddReferral () {
+      const referredByUserId = this.$store.state.currentUser.referredByUserId
+      if (!referredByUserId) { return }
+      const body = {
+        userId: referredByUserId,
+        referredUserId: this.$store.state.currentUser.id
+      }
+      const referral = await this.$store.dispatch('api/createReferral', body)
+      console.log('🫧 referral created', referral)
     },
 
     updateLocalSpacesWithNewUserId () {
