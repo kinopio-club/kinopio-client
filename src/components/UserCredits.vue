@@ -1,19 +1,39 @@
 <script setup>
+import Loader from '@/components/Loader.vue'
+import consts from '@/consts.js'
 import utils from '@/utils.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
+onMounted(() => {
+  updateCredits()
+})
+
 defineProps({
   showEarnCreditsButton: Boolean
 })
 
 const state = reactive({
+  isLoading: true,
   creditsUsed: 0,
   creditsEarned: 0,
   usersReferred: 0
 })
+
+const updateCredits = async () => {
+  state.isLoading = true
+  try {
+    const data = await store.dispatch('api/getReferralsByUser')
+    state.usersReferred = data.referrals.length
+    state.creditsEarned = data.referrals.length * consts.referralCreditAmount
+    state.creditsUsed = data.creditsUsed
+  } catch (error) {
+    console.error('🚒', error)
+  }
+  state.isLoading = false
+}
 
 const creditsUnused = computed(() => state.creditsEarned - state.creditsUsed)
 
@@ -26,7 +46,8 @@ const triggerEarnCreditsIsVisible = () => {
 <template lang="pug">
 section.user-credits
   p.section-title Your Credits
-  section.subsection.table-subsection
+  Loader(:visible="state.isLoading")
+  section.subsection.table-subsection(v-if="!state.isLoading")
     section
       p {{state.usersReferred}} people referred so far
     section
