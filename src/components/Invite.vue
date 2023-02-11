@@ -18,7 +18,7 @@ section.subsection.invite
     .row
       button(@click="updateCollaboratorKey") Try Again
   //- View and Edit Permissions
-  section.subsection.more-info(v-if="tipsIsVisible && spaceIsPrivate")
+  .more-info(v-if="tipsIsVisible && spaceIsPrivate")
     .row(v-if="spaceIsPrivate")
       p No account is needed to view private spaces – but editing requires an account.
     .row(v-if="currentUserIsUpgraded")
