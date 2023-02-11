@@ -25,8 +25,7 @@ const triggerEarnCreditsIsVisible = () => {
 
 <template lang="pug">
 section.user-credits
-  .row
-    p Your Credits
+  p.section-title Your Credits
   section.subsection.table-subsection
     section
       p {{state.usersReferred}} people referred so far
@@ -49,4 +48,6 @@ section.user-credits
       padding-right 0
     .badge
       margin 0
+  .section-title
+    margin-bottom 10px
 </style>

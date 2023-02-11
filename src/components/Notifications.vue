@@ -143,6 +143,16 @@ aside.notifications(@click.left="closeAllDialogs")
       button(@click="resetNotifyReferralSuccessUser")
         img.icon.cancel(src="@/assets/add.svg")
 
+  .persistent-item.success(v-if="notifyEarnedCredits")
+    p You've earned ${{referralCreditAmount}} in referral credits, which will be used when you upgrade
+    .row
+      button(@click.left.stop="triggerUpgradeUserIsVisible")
+        span Upgrade
+      button(@click.left.stop="triggerEarnCreditsIsVisible")
+        span Earn Credits
+      button(@click.left="removeNotifyEarnedCredits")
+        img.icon.cancel(src="@/assets/add.svg")
+
 </template>
 
 <script>
@@ -167,7 +177,8 @@ export default {
       readOnlyJiggle: false,
       notifyCardsCreatedIsOverLimitJiggle: false,
       notifySpaceOutOfSync: false,
-      notifyUnlockedStickyCards: false
+      notifyUnlockedStickyCards: false,
+      notifyEarnedCredits: false
     }
   },
   created () {
@@ -196,6 +207,8 @@ export default {
         this.notifySpaceOutOfSync = false
       } else if (mutation.type === 'triggerNotifyUnlockedStickyCards') {
         this.notifyUnlockedStickyCards = true
+      } else if (mutation.type === 'triggerNotifyEarnedCredits') {
+        this.notifyEarnedCredits = true
       }
     })
   },
@@ -366,6 +379,10 @@ export default {
       this.closeAllDialogs()
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
+    triggerEarnCreditsIsVisible () {
+      this.closeAllDialogs()
+      this.$store.commit('triggerEarnCreditsIsVisible')
+    },
     async checkIfShouldNotifySpaceOutOfSync () {
       const space = utils.clone(this.$store.state.currentSpace)
       const canEditSpace = this.$store.getters['currentUser/canEditSpace'](space)
@@ -403,6 +420,9 @@ export default {
     },
     removeNotifyUnlockedStickyCards () {
       this.notifyUnlockedStickyCards = false
+    },
+    removeNotifyEarnedCredits () {
+      this.notifyEarnedCredits = false
     }
   }
 }
