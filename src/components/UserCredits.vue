@@ -5,10 +5,6 @@ import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
-onMounted(() => {
-  console.log(`🍇 TODO LOADER usercredits/referrals info from api. component is now mounted.`, store.state.currentSpace)
-})
-
 defineProps({
   showEarnCreditsButton: Boolean
 })
@@ -21,9 +17,9 @@ const state = reactive({
 
 const creditsUnused = computed(() => state.creditsEarned - state.creditsUsed)
 
-const triggerReferIsVisible = () => {
+const triggerEarnCreditsIsVisible = () => {
   store.dispatch('closeAllDialogs')
-  store.commit('triggerReferIsVisible')
+  store.commit('triggerEarnCreditsIsVisible')
 }
 </script>
 
@@ -40,7 +36,7 @@ section.user-credits
       .badge.success ${{creditsUnused}} credit remaining for future payments
   .row(v-if="showEarnCreditsButton")
     .button-wrap
-      button(@click="triggerReferIsVisible")
+      button(@click="triggerEarnCreditsIsVisible")
         span Earn Credits
 </template>
 

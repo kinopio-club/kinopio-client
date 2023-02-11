@@ -53,7 +53,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
             span is upgraded, so cards you create in this space won't change your card count
       .row
         .button-wrap
-          button.variable-length-content(@click="triggerReferIsVisible")
+          button.variable-length-content(@click="triggerEarnCreditsIsVisible")
             span Earn Credits
 
     section(v-if="!isAddPage")
@@ -235,9 +235,9 @@ export default {
     currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() }
   },
   methods: {
-    triggerReferIsVisible () {
+    triggerEarnCreditsIsVisible () {
       this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerReferIsVisible')
+      this.$store.commit('triggerEarnCreditsIsVisible')
     },
     toggleIsFavoriteUser () {
       if (this.isFavoriteUser) {

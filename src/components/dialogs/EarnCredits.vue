@@ -12,6 +12,8 @@ defineProps({
 })
 
 const url = computed(() => utils.kinopioDomain() + '/refer/' + store.state.currentUser.id)
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+
 const copyUrl = async (event) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
@@ -22,6 +24,10 @@ const copyUrl = async (event) => {
     console.warn('🚑 copyText', error)
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
+}
+const triggerSignUpOrInIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerSignUpOrInIsVisible')
 }
 
 </script>
@@ -38,12 +44,19 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
         span when someone you refer signs up.
     .row
       p There's no limit on the amount of credits you can earn.
-    section.subsection
-      p Share Kinopio with your friends
-      button(@click.left="copyUrl")
-        img.icon.copy(src="@/assets/copy.svg")
-        span Copy Referral URL
-  UserCredits
+    template(v-if="currentUserIsSignedIn")
+      section.subsection
+        p Share Kinopio with your friends
+        button(@click.left="copyUrl")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Referral URL
+  template(v-if="currentUserIsSignedIn")
+    UserCredits
+  template(v-else)
+    section
+      p.badge.info
+        span Sign Up or In to earn credits by referring your friends to Kinopio
+      button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 </template>
 
 <style lang="stylus">
@@ -57,4 +70,7 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
   span + .badge
     margin-left 6px
     word-break break-all
+  p
+    &.badge
+      margin-right 0
 </style>

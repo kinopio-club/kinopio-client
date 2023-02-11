@@ -61,7 +61,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
 
   section
     .button-wrap
-      button(@click="triggerReferIsVisible")
+      button(@click="triggerEarnCreditsIsVisible")
         span Earn Credits
 
 </template>
@@ -161,9 +161,9 @@ export default {
     }
   },
   methods: {
-    triggerReferIsVisible () {
+    triggerEarnCreditsIsVisible () {
       this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerReferIsVisible')
+      this.$store.commit('triggerEarnCreditsIsVisible')
     },
     isPresentationMode () {
       this.$store.dispatch('closeAllDialogs')
