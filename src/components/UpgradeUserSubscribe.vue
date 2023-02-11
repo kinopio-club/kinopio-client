@@ -141,12 +141,6 @@ export default {
         return 0
       }
     },
-    actionLabel () {
-      if (this.isAccountUpgrade) {
-        return 'Upgrade Account'
-      }
-      return 'Donate'
-    },
     user () { return this.$store.state.currentUser },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentCountryEmoji () {
