@@ -27,7 +27,7 @@ const updateCredits = async () => {
   try {
     const data = await store.dispatch('api/getReferralsByUser')
     state.usersReferred = data.referrals.length
-    state.creditsEarned = data.referrals.length * consts.referralCreditAmount
+    state.creditsEarned = data.creditsEarned
     state.creditsUsed = data.creditsUsed
   } catch (error) {
     console.error('🚒', error)
