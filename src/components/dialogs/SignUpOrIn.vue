@@ -8,6 +8,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   //- Sign Up
   section(v-if="signUpVisible")
     p Create an account to share your spaces and access them anywhere
+    p.badge.success(v-if="referredByUserId") Signing up will also earn you ${{referralCreditAmount}} in referral credits
     form(@submit.prevent="signUp")
       input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
       .badge.info(v-if="error.accountAlreadyExists") An account with this email already exists, Sign In instead
@@ -61,6 +62,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 
@@ -97,6 +99,10 @@ export default {
       },
       resetSuccess: false
     }
+  },
+  computed: {
+    referralCreditAmount () { return consts.referralCreditAmount },
+    referredByUserId () { return this.$store.state.currentUser.referredByUserId }
   },
   methods: {
     clearErrors () {
@@ -207,6 +213,7 @@ export default {
         this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
         this.$store.commit('triggerCheckIfUseHasInboxSpace')
         this.$store.dispatch('themes/restore')
+        this.$store.commit('notifyReferralSuccessUser', null)
       } else {
         await this.handleErrors(result)
       }
@@ -241,6 +248,7 @@ export default {
         this.$store.dispatch('currentUser/restoreUserFavorites')
         this.$store.commit('triggerUpdateNotifications')
         this.$store.dispatch('themes/restore')
+        this.$store.commit('notifyReferralSuccessUser', null)
         if (shouldLoadLastSpace) {
           this.$store.dispatch('currentSpace/loadLastSpace')
           this.$store.commit('triggerUpdateWindowHistory', { space: this.$store.state.currentSpace })

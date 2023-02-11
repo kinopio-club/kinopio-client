@@ -206,6 +206,7 @@ const store = createStore({
     hasNotifiedPressAndHoldToDrag: false,
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
+    notifyReferralSuccessUser: null,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -1214,6 +1215,10 @@ const store = createStore({
     notifyThanksForDonating: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyThanksForDonating = value
+    },
+    notifyReferralSuccessUser: (state, user) => {
+      utils.typeCheck({ value: user, type: 'object' })
+      state.notifyReferralSuccessUser = user
     },
 
     // Notifications with Position

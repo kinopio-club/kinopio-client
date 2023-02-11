@@ -746,15 +746,20 @@ export default {
       }
       return space
     },
-    validateReferral: (context) => {
+    validateReferral: async (context) => {
       const referralUserId = context.rootState.validateUserReferral
       const canBeReferred = context.getters.canBeReferred
       if (!referralUserId) { return }
+      const publicUser = await context.dispatch('api/getPublicUser', { id: referralUserId }, { root: true })
+      if (!publicUser) {
+        context.commit('addNotification', { message: 'Invalid referral, referring user not found', type: 'danger' }, { root: true })
+        return
+      }
       if (canBeReferred) {
-        // success notification
-        // update user.referredByUserId
+        context.commit('notifyReferralSuccessUser', publicUser, { root: true })
+        context.dispatch('update', { referredByUserId: publicUser.id })
       } else {
-        context.commit('addNotification', { message: "Referrals can only be used by new users who haven't already already been referred", type: 'danger', isPersistentItem: true }, { root: true })
+        context.commit('addNotification', { message: 'Only new users can be referred', type: 'danger' }, { root: true })
       }
     }
   },
@@ -889,7 +894,6 @@ export default {
     },
     canBeReferred: (state, getters) => {
       if (getters.isSignedIn) { return }
-      if (state.referredByUserId) { return }
       return true
     },
 
