@@ -44,16 +44,24 @@
 
   .summary
     User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
-    .badge.info
-      span {{price.amount}}/{{price.period}}
-    .badge.secondary
-      span Tax included
+    .row.row-wrap
+      .badge.info
+        span ${{price.amount}}/{{price.period}}
+      .badge.secondary
+        span Tax included
+      Loader(:visible="loading.credits")
+      .badge.success.credits(v-if="credits")
+        span -${{credits}} Credits
 
   button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
     span Upgrade Account
     Loader(:visible="loading.subscriptionIsBeingCreated")
 
-  p You'll be billed {{price.amount}} immediately and then each {{price.period}}. You can cancel anytime.
+  p
+    span You'll be billed ${{initialPaymentAfterCredits}} immediately and then
+    span(v-if="credits") {{' '}}${{price.amount}}
+    span {{' '}}each {{price.period}}. You can cancel anytime.
+  p.badge.success.credits-badge(v-if="credits") Remaining credits will be applied to your next payments
 
 </template>
 
@@ -91,6 +99,7 @@ export default {
     price: Object
   },
   mounted () {
+    this.updateCredits()
     this.loadStripe()
     this.updateCountries()
   },
@@ -98,10 +107,12 @@ export default {
     return {
       name: '',
       email: '',
+      credits: 0,
       loading: {
         subscriptionIsBeingCreated: false,
         stripeIsLoading: true,
-        stripeElementsIsMounted: false
+        stripeElementsIsMounted: false,
+        credits: false
       },
       error: {
         unknownServerError: false,
@@ -121,6 +132,15 @@ export default {
     }
   },
   computed: {
+    initialPaymentAfterCredits () {
+      const credits = this.credits
+      const price = this.price.amount
+      if (price > credits) {
+        return price - credits
+      } else {
+        return 0
+      }
+    },
     actionLabel () {
       if (this.isAccountUpgrade) {
         return 'Upgrade Account'
@@ -162,6 +182,17 @@ export default {
     isThemeDark () { return this.$store.state.currentUser.theme === 'dark' }
   },
   methods: {
+    async updateCredits () {
+      this.loading.credits = true
+      try {
+        const data = await this.$store.dispatch('api/getReferralsByUser')
+        console.log('🫧', data)
+        this.credits = data.creditsUnused
+      } catch (error) {
+        console.error('🚒', error)
+      }
+      this.loading.credits = false
+    },
     async updateCountries () {
       this.countries = await this.$store.dispatch('api/getCountries')
       this.countryNames = this.countries.map(country => country.name)
@@ -389,6 +420,7 @@ export default {
   .summary
     margin-top 10px
     margin-bottom 10px
+    display flex
   .badge
     display inline-block
   .loading-stripe,
@@ -403,4 +435,11 @@ export default {
   .badge
     span
       color var(--primary)
+    &.credits
+      margin-top 5px
+  .row-wrap
+    flex-wrap wrap
+    .loader
+      height 24px
+      width 24px
 </style>
