@@ -51,7 +51,7 @@
         span Tax included
       Loader(:visible="loading.credits")
       .badge.success.credits(v-if="credits")
-        span ${{credits}} Credits
+        span ${{credits}} credit
 
   button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
     span Upgrade Account
@@ -140,6 +140,15 @@ export default {
         return price - credits
       } else {
         return 0
+      }
+    },
+    creditsUsedForInitialPayment () {
+      const credits = this.credits
+      const price = this.price.amount
+      if (price > credits) {
+        return credits
+      } else {
+        return price
       }
     },
     user () { return this.$store.state.currentUser },
@@ -265,6 +274,7 @@ export default {
       const result = await this.$store.dispatch('api/createCustomer', {
         email: this.email,
         name: this.name,
+        creditsUsedForInitialPayment: this.creditsUsedForInitialPayment(),
         metadata: {
           userId: this.$store.state.currentUser.id,
           userName: this.$store.state.currentUser.name
@@ -328,7 +338,8 @@ export default {
         stripeCustomerId: customer.id,
         stripeSubscriptionId: subscription.id,
         stripePriceId: subscription.items.data[0].price.id,
-        stripePaymentMethodId: paymentMethod.id
+        stripePaymentMethodId: paymentMethod.id,
+        creditsUsed: this.creditsUsedForInitialPayment()
       }
       const result = await this.$store.dispatch('api/updateSubscription', stripeIds)
       console.log('🎡 subscribed', result)
@@ -337,7 +348,7 @@ export default {
       this.$store.commit('currentUser/isUpgraded', true)
       this.$store.commit('notifyCardsCreatedIsOverLimit', false)
       this.$store.commit('addNotification', { message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software', type: 'success' })
-      this.$store.dispatch('closeAllDialogs', 'Subscribe')
+      this.$store.dispatch('closeAllDialogs')
     },
     paymentIntent () {
       if (invoice) {
