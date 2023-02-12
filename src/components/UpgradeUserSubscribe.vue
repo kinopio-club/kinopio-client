@@ -51,10 +51,11 @@
         span Tax included
       Loader(:visible="loading.credits")
       .badge.success.credits(v-if="credits")
-        span -${{credits}} Credits
+        span ${{credits}} Credits
 
   button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
     span Upgrade Account
+    span(v-if="initialPaymentAfterCredits === 0") {{' '}}For Free
     Loader(:visible="loading.subscriptionIsBeingCreated")
 
   p
