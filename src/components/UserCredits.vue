@@ -20,7 +20,8 @@ const state = reactive({
   creditsUsed: 0,
   creditsEarned: 0,
   creditsUnused: 0,
-  usersReferred: 0
+  usersReferred: 0,
+  moreInfoIsVisible: false
 })
 
 const updateCredits = async () => {
@@ -42,19 +43,32 @@ const triggerEarnCreditsIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerEarnCreditsIsVisible')
 }
+const toggleMoreInfoIsVisible = () => {
+  state.moreInfoIsVisible = !state.moreInfoIsVisible
+  console.log(state.moreInfoIsVisible)
+}
+
 </script>
 
 <template lang="pug">
 section.user-credits
-  p.section-title Your Credits
+  .row.title-row-flex
+    p.section-title Your Credits
+    button.small-button(@click="toggleMoreInfoIsVisible" :class="{active: state.moreInfoIsVisible}")
+      span More Info
   Loader(:visible="state.isLoading")
-  section.subsection.table-subsection(v-if="!state.isLoading")
-    section
-      p {{state.usersReferred}} people referred so far
-    section
-      p ${{state.creditsEarned}} total credit earned
-    section
-      .badge.success ${{state.creditsUnused}} credit remaining for future payments
+
+  template(v-if="!state.isLoading")
+    p.badge.success(v-if="!state.moreInfoIsVisible")
+      span ${{state.creditsUnused}} credit remaining for future payments
+    section.subsection.table-subsection(v-if="state.moreInfoIsVisible")
+      section
+        p {{state.usersReferred}} people referred so far
+      section
+        p ${{state.creditsEarned}} total credit earned
+      section
+        .badge.success ${{state.creditsUnused}} credit remaining for future payments
+
   .row(v-if="showEarnCreditsButton")
     .button-wrap
       button(@click="triggerEarnCreditsIsVisible")
@@ -72,4 +86,12 @@ section.user-credits
       margin 0
   .section-title
     margin-bottom 10px
+  .title-row-flex
+    margin-top 0 !important
+    display flex
+    justify-content space-between
+    p,
+    button
+      margin 0
+
 </style>
