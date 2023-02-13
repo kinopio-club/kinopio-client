@@ -1376,7 +1376,7 @@ export default {
     // meta
     const spaceId = nanoid()
     let space = this.emptySpace(spaceId)
-    space.name = this.journalSpaceName(isTomorrow)
+    space.name = this.journalSpaceName({ isTomorrow })
     space.privacy = 'private'
     space.moonPhase = moonPhase.name
     space.removedCards = []
@@ -1412,10 +1412,12 @@ export default {
     return space
   },
 
-  journalSpaceName (isTomorrow) {
+  journalSpaceName ({ isTomorrow, isYesterday }) {
     let date = dayjs(new Date())
     if (isTomorrow) {
       date = date.add(1, 'day')
+    } else if (isYesterday) {
+      date = date.subtract(1, 'day')
     }
     return `${date.format('ddd MMM D/YY')}` // Thu Oct 8/20
   },

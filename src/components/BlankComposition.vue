@@ -10,7 +10,7 @@ onMounted(() => {
   console.log(`the component is now mounted.`, store.state.currentSpace)
 })
 
-defineProps({
+const props = defineProps({
   visible: Boolean
 })
 const emit = defineEmits(['updateCount'])
