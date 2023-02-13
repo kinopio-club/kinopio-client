@@ -37,8 +37,10 @@
         img.icon.pin(src="@/assets/pin.svg")
 
 .row.align-items-top(v-if="!isSpaceMember")
-  .badge.info(v-if="!spacePrivacyIsOpen") Read Only
-  .badge.success(v-if="spacePrivacyIsOpen") Open to All
+  .badge.info(v-if="!spacePrivacyIsOpen")
+    span Read Only
+  .badge.success(v-if="spacePrivacyIsOpen")
+    span Open to All
   .badge.status(v-if="showInExplore")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
     span Explore

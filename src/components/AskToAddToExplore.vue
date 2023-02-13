@@ -11,7 +11,8 @@
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
   template(v-else)
-    .badge.success Space Creator Notified – Thank You for Sharing the Love
+    .badge.success
+      span Space Creator Notified – Thank You for Sharing the Love
 
 </template>
 
