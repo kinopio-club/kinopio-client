@@ -11,20 +11,6 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
         button(@click.left.stop="toggleControlsSettingsIsVisible" :class="{active: controlsSettingsIsVisible}")
           span Controls
         ControlsSettings(:visible="controlsSettingsIsVisible")
-    //- Integrations
-    //- .row
-    //-   .button-wrap
-    //-     button(@click.left.stop="toggleIntegrationsSettingsIsVisible" :class="{active: integrationsSettingsIsVisible}")
-    //-       span Integrations
-    //- .row(v-if="integrationsSettingsIsVisible")
-    //-   .button-wrap
-    //-     button(@click.left.stop="toggleConnectToTwitterIsVisible" :class="{ active: connectToTwitterIsVisible}")
-    //-       img.icon.tweet(src="@/assets/twitter.svg")
-    //-       template(v-if="twitterUsername")
-    //-         span Connected to Twitter
-    //-       template(v-else)
-    //-         span Connect to Twitter
-    //-     ConnectToTwitter(:visible="connectToTwitterIsVisible")
     //- Notifications
     .row
       .button-wrap
@@ -94,7 +80,6 @@ import UpdateEmail from '@/components/dialogs/UpdateEmail.vue'
 import ApiKey from '@/components/dialogs/ApiKey.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
-import ConnectToTwitter from '@/components/dialogs/ConnectToTwitter.vue'
 import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import Loader from '@/components/Loader.vue'
@@ -108,7 +93,6 @@ export default {
     ApiKey,
     NotificationSettings,
     ControlsSettings,
-    ConnectToTwitter,
     ThemeSettings,
     ThemeToggle
   },
@@ -126,15 +110,12 @@ export default {
       },
       notificationSettingsIsVisible: false,
       controlsSettingsIsVisible: false,
-      connectToTwitterIsVisible: false,
-      integrationsSettingsIsVisible: false,
       themeSettingsIsVisible: false
     }
   },
   computed: {
     isSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    isUpgraded () { return this.$store.state.currentUser.isUpgraded },
-    twitterUsername () { return this.$store.state.currentUser.twitterUsername }
+    isUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
   methods: {
     closeDialogs () {
@@ -143,13 +124,7 @@ export default {
       this.apiKeyIsVisible = false
       this.notificationSettingsIsVisible = false
       this.controlsSettingsIsVisible = false
-      this.connectToTwitterIsVisible = false
       this.themeSettingsIsVisible = false
-    },
-    toggleConnectToTwitterIsVisible () {
-      const isVisible = this.connectToTwitterIsVisible
-      this.closeDialogs()
-      this.connectToTwitterIsVisible = !isVisible
     },
     toggleDeleteAllConfirmationVisible () {
       this.deleteAllConfirmationVisible = !this.deleteAllConfirmationVisible
@@ -194,11 +169,6 @@ export default {
       this.closeDialogs()
       this.deleteAllConfirmationVisible = false
       this.apiKeyIsVisible = !isVisible
-    },
-    toggleIntegrationsSettingsIsVisible () {
-      this.deleteAllConfirmationVisible = false
-      this.closeDialogs()
-      this.integrationsSettingsIsVisible = !this.integrationsSettingsIsVisible
     },
     toggleThemeSettingsIsVisible () {
       const isVisible = this.themeSettingsIsVisible

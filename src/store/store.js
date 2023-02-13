@@ -193,6 +193,7 @@ const store = createStore({
     notifications: [],
     notifySpaceNotFound: false,
     notifyConnectionError: false,
+    notifyConnectionErrorName: '',
     notifyServerCouldNotSave: false,
     notifySpaceIsRemoved: false,
     notifyCurrentSpaceIsNowRemoved: false,
@@ -1154,6 +1155,10 @@ const store = createStore({
     notifyConnectionError: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyConnectionError = value
+    },
+    notifyConnectionErrorName: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.notifyConnectionErrorName = value
     },
     notifyServerCouldNotSave: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
