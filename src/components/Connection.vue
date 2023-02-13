@@ -19,7 +19,7 @@ template(v-if="isVisibleInViewport")
       @touchend.stop="showConnectionDetails"
       @keyup.stop.backspace="removeConnection"
       @keyup.stop.enter="showConnectionDetailsOnKeyup"
-      :class="{active: isSelected || detailsIsVisible || remoteDetailsIsVisible || isRemoteSelected || isCurrentCardConnection, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline, 'is-hidden-by-opacity': isHiddenByCommentFilter }"
+      :class="connectionClasses"
       ref="connection"
       tabindex="0"
       @dragover.prevent
@@ -105,11 +105,25 @@ export default {
       'currentCards/byId',
       'spaceCounterZoomDecimal'
     ]),
+    connectionClasses () {
+      return {
+        active: this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected || this.isCurrentCardConnection,
+        filtered: this.isFiltered,
+        hover: this.isHovered,
+        'hide-connection-outline': this.shouldHideConnectionOutline,
+        'is-hidden-by-opacity': this.isHiddenByCommentFilter,
+        'is-connected-to-comment': this.isConnectedToCommentCard
+      }
+    },
     cards () {
       const cards = utils.clone(this['currentCards/all'])
       const startCard = cards.find(card => card.id === this.startCardId)
       const endCard = cards.find(card => card.id === this.endCardId)
       return { startCard, endCard }
+    },
+    isConnectedToCommentCard () {
+      const { startCard, endCard } = this.cards
+      return startCard.isComment || endCard.isComment
     },
     isHiddenByCommentFilter () {
       const filterCommentsIsActive = this.currentUser.filterComments
@@ -420,4 +434,6 @@ export default {
     stroke-width 7
   &.hide-connection-outline
     outline none
+  &.is-connected-to-comment
+    opacity 0.5
 </style>
