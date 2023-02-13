@@ -58,11 +58,15 @@
     span(v-if="initialPaymentAfterCredits === 0") {{' '}}For Free
     Loader(:visible="loading.subscriptionIsBeingCreated")
 
-  p
-    span You'll be billed ${{initialPaymentAfterCredits}} immediately and then
-    span(v-if="credits") {{' '}}${{price.amount}}
-    span {{' '}}each {{price.period}}. You can cancel anytime.
-  p.badge.success.credits-badge(v-if="credits") Remaining credits will be applied to your next payments
+  p(v-if="credits")
+    span You'll be billed ${{initialPaymentAfterCredits}} immediately.
+    span(v-if="isCreditsRemainingAfterInitialPayment") {{' '}}Your remaining credits will be applied to future bills.
+    span {{' '}}Then you'll be billed ${{price.amount}} each {{price.period}}.
+  p(v-else)
+    span You'll be billed ${{price.amount}} immediately, and then ${{price.amount}} each {{price.period}}.
+
+  p You can cancel anytime.
+  //- p.badge.success.credits-badge(v-if="credits") Remaining credits will be applied to your next payments
 
 </template>
 
@@ -150,6 +154,11 @@ export default {
       } else {
         return price
       }
+    },
+    isCreditsRemainingAfterInitialPayment () {
+      const credits = this.credits
+      const price = this.price.amount
+      return (credits - price) > 0
     },
     user () { return this.$store.state.currentUser },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
