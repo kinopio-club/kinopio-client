@@ -264,8 +264,6 @@ export default {
     hr:first-child
       display none
     hr
-      border-top 1px solid var(--primary-border)
-      border-bottom none
       margin 8px 0
       margin-left -4px
       width calc(100% + 8px)

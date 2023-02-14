@@ -9,7 +9,7 @@ section.subsection.invite
         img.icon.copy(src="@/assets/copy.svg")
         span Copy Edit URL
       //- .row
-      button(v-if="isTips" @click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
+      button(@click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
         span Tips
   //- Error
   template(v-if="!loading && !collaboratorKey")
@@ -18,12 +18,22 @@ section.subsection.invite
     .row
       button(@click="updateCollaboratorKey") Try Again
   //- View and Edit Permissions
-  .more-info(v-if="tipsIsVisible && spaceIsPrivate")
+  .more-info(v-if="tipsIsVisible")
     .row(v-if="spaceIsPrivate")
-      p No account is needed to view private spaces – but editing requires an account.
-    .row(v-if="currentUserIsUpgraded")
-      .badge.success
-        span Because your account is upgraded, others can create cards here for free
+      p
+        span No account is needed to view{{' '}}
+        span.badge.danger private spaces
+        span {{' '}}– but editing requires an account.
+    hr
+    .row
+      p You'll both earn a{{' '}}
+        span.badge.success $6 credit
+        span when someone you invite signs up for a Kinopio account
+    template(v-if="currentUserIsUpgraded")
+      hr
+      .row
+        .badge.success
+          span Because your account is upgraded, others can create cards here for free
 
 </template>
 
@@ -59,8 +69,7 @@ export default {
     ...mapGetters([
     ]),
     spaceIsPrivate () { return this.$store.state.currentSpace.privacy === 'private' },
-    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
-    isTips () { return this.spaceIsPrivate || this.currentUserIsUpgraded }
+    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
   methods: {
     async copyUrl (event) {
@@ -113,8 +122,8 @@ export default {
 <style lang="stylus" scoped>
 .invite
   user-select text
-  section.more-info
-    .badge
-      margin 0
-      color var(--primary)
+  .badge
+    margin 0
+    color var(--primary)
+    vertical-align 0
 </style>

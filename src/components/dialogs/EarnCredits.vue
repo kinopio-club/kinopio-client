@@ -39,7 +39,7 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
   section
     .row
       p
-        span You'll both get a
+        span You'll both earn a
         span.badge.success ${{consts.referralCreditAmount}} credit
         span when someone you refer signs up.
     .row
