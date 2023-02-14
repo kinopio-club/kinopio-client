@@ -113,7 +113,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           .button-wrap
             button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
               span {{notificationsUnreadCount}}
-            Notifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
+            UserNotifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
         .bottom-controls
           ResetPassword
           //- Sign Up or In
@@ -152,7 +152,7 @@ import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
 import ResetPassword from '@/components/dialogs/ResetPassword.vue'
 import Share from '@/components/dialogs/Share.vue'
-import Notifications from '@/components/dialogs/Notifications.vue'
+import UserNotifications from '@/components/dialogs/UserNotifications.vue'
 import Loader from '@/components/Loader.vue'
 import templates from '@/data/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
@@ -194,7 +194,7 @@ export default {
     SignUpOrIn,
     ResetPassword,
     Share,
-    Notifications,
+    UserNotifications,
     Loader,
     ImportArenaChannel,
     KeyboardShortcuts,
