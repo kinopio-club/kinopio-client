@@ -17,13 +17,18 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     //- Share Link
     section.subsection(v-if="!spaceIsPrivate" :class="{'share-link-subsection': isSpaceMember}")
-      p Share With the World
-      button(@click.left="copyUrl")
-        img.icon.copy(src="@/assets/copy.svg")
-        span Copy Public Link
-      p Share with the Community
-      AddToExplore
-      AskToAddToExplore
+      .row
+        p Share With the World
+      .row
+        button(@click.left="copyUrl")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Public Link
+      hr
+      .row
+        p Share with the Community
+      .row
+        AddToExplore
+        AskToAddToExplore
 
     //- Invite Link
     Invite(v-if="isSpaceMember")
