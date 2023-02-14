@@ -106,6 +106,9 @@ export default {
       const spaceId = currentSpace.id
       const spaceName = utils.normalizeString(currentSpace.name)
       this.url = `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
+      if (utils.isDevelopment()) {
+        console.log('🍇 invite url', this.url)
+      }
     },
     toggleTipsIsVisible () {
       this.tipsIsVisible = !this.tipsIsVisible

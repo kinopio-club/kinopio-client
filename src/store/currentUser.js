@@ -373,7 +373,6 @@ export default {
       }
       context.dispatch('themes/restore', null, { root: true })
       context.commit('triggerUserIsLoaded', null, { root: true })
-      context.dispatch('validateReferral')
     },
     update: (context, updates) => {
       const keys = Object.keys(updates)
@@ -747,9 +746,15 @@ export default {
       return space
     },
     validateReferral: async (context) => {
-      const referralUserId = context.rootState.validateUserReferral
-      const canBeReferred = context.getters.canBeReferred
+      let referralUserId
+      if (context.rootState.validateUserReferralBySpaceUser) {
+        const referralUsers = context.rootGetters['currentSpace/members']()
+        referralUserId = referralUsers[0].id
+      } else {
+        referralUserId = context.rootState.validateUserReferral
+      }
       if (!referralUserId) { return }
+      const canBeReferred = context.getters.canBeReferred(referralUserId)
       const publicUser = await context.dispatch('api/getPublicUser', { id: referralUserId }, { root: true })
       if (!publicUser) {
         context.commit('addNotification', { message: 'Invalid referral, referring user not found', type: 'danger' }, { root: true })
@@ -761,6 +766,8 @@ export default {
       } else {
         context.commit('addNotification', { message: 'Only new users can be referred', type: 'danger' }, { root: true })
       }
+      context.commit('validateUserReferralBySpaceUser', false, { root: true })
+      context.commit('validateUserReferral', '', { root: true })
     }
   },
   getters: {
@@ -892,8 +899,9 @@ export default {
       const frames = rootState.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
     },
-    canBeReferred: (state, getters) => {
+    canBeReferred: (state, getters) => (referralUserId) => {
       if (getters.isSignedIn) { return }
+      if (referralUserId === state.id) { return }
       return true
     },
 

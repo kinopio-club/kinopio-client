@@ -189,6 +189,7 @@ const store = createStore({
     loadInboxSpace: false,
     shouldResetDimensionsOnLoad: false,
     validateUserReferral: '',
+    validateUserReferralBySpaceUser: false,
 
     // notifications
     notifications: [],
@@ -311,6 +312,10 @@ const store = createStore({
     validateUserReferral: (state, userId) => {
       utils.typeCheck({ value: userId, type: 'string' })
       state.validateUserReferral = userId
+    },
+    validateUserReferralBySpaceUser: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.validateUserReferralBySpaceUser = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
@@ -1097,6 +1102,9 @@ const store = createStore({
     isJoiningSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.isJoiningSpace = value
+    },
+    clearSpaceCollaboratorKeys: (state) => {
+      state.spaceCollaboratorKeys = []
     },
     addToSpaceCollaboratorKeys: (state, spaceCollaboratorKey) => {
       utils.typeCheck({ value: spaceCollaboratorKey, type: 'object' })

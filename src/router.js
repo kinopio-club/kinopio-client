@@ -86,6 +86,7 @@ const router = createRouter({
         const spaceId = urlParams.get('spaceId')
         const collaboratorKey = urlParams.get('collaboratorKey')
         const disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        store.commit('validateUserReferralBySpaceUser', true)
         store.commit('disableViewportOptimizations', disableViewportOptimizations)
         if (!spaceId || !collaboratorKey) { return }
         store.commit('isLoadingSpace', true)

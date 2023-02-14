@@ -462,7 +462,7 @@ const currentSpace = {
           space.collaboratorKey = collaboratorKey
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
           cache.saveInvitedSpace(remoteSpace)
-          context.commit('collaboratorKey', '', { root: true })
+          context.commit('clearSpaceCollaboratorKeys', null, { root: true })
         } else if (currentSpaceIsRemote) {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
@@ -662,6 +662,7 @@ const currentSpace = {
       let emoji = '🌳'
       if (isRemote) {
         emoji = '🌳🌏'
+        context.dispatch('currentUser/validateReferral', null, { root: true })
       }
       let cards = context.rootState.currentCards.ids.length
       let connections = context.rootState.currentConnections.ids.length
