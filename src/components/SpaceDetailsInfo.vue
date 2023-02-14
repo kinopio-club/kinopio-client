@@ -75,8 +75,7 @@ section.subsection.space-settings(v-if="settingsIsVisible")
     .button-wrap
       button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
-        Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
-
+        Export(:visible="exportIsVisible")
   .row
     .button-wrap(v-if="isSpaceMember")
       .segmented-buttons

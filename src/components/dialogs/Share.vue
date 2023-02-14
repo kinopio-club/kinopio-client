@@ -57,7 +57,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           Import(:visible="importIsVisible" @closeDialog="closeDialogs")
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
-          Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
+          Export(:visible="exportIsVisible")
       //- Embed
       .button-wrap
         button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
@@ -160,7 +160,6 @@ export default {
       return users
     },
     spaceHasOtherCardUsers () { return Boolean(this.spaceOtherCardUsers.length) },
-    exportData () { return this.$store.getters['currentSpace/all'] },
     dialogIsVisible () {
       return this.privacyPickerIsVisible || this.spaceRssFeedIsVisible || this.embedIsVisible || this.exportIsVisible || this.importIsVisible
     }

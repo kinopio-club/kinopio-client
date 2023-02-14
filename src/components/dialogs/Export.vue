@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p Export {{exportTitle}}
+    p Export
   section
     //- Card Names
     .row
@@ -62,9 +62,7 @@ export default {
     Pdf
   },
   props: {
-    visible: Boolean,
-    exportTitle: String, // space-name, 3 Cards
-    exportData: Object
+    visible: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -85,8 +83,8 @@ export default {
   },
   computed: {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    names () { return this.exportData.cards.map(card => card.name) },
-    text () { return utils.textFromCardNames(this.exportData.cards) }
+    text () { return utils.textFromCardNames(this.currentSpace.cards) },
+    currentSpace () { return this.$store.getters['currentSpace/all'] }
   },
   methods: {
     fileName () {
@@ -107,7 +105,7 @@ export default {
       }
     },
     downloadLocalJSON () {
-      const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.exportData))
+      const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.currentSpace))
       const fileName = this.fileName()
       const downloadAnchor = document.getElementById('export-downlaod-anchor')
       downloadAnchor.setAttribute('href', json)
