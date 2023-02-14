@@ -280,10 +280,11 @@ export default {
       this.mountStripeElements()
     },
     async createCustomer () {
+      const creditsUsedForInitialPayment = this.creditsUsedForInitialPayment
       const result = await this.$store.dispatch('api/createCustomer', {
         email: this.email,
         name: this.name,
-        creditsUsedForInitialPayment: this.creditsUsedForInitialPayment(),
+        creditsUsedForInitialPayment,
         metadata: {
           userId: this.$store.state.currentUser.id,
           userName: this.$store.state.currentUser.name
@@ -343,20 +344,24 @@ export default {
       return result
     },
     async handleSubscriptionSuccess () {
-      const stripeIds = {
+      const data = {
         stripeCustomerId: customer.id,
         stripeSubscriptionId: subscription.id,
         stripePriceId: subscription.items.data[0].price.id,
         stripePaymentMethodId: paymentMethod.id,
-        creditsUsed: this.creditsUsedForInitialPayment()
+        creditsUsed: this.creditsUsedForInitialPayment
       }
-      const result = await this.$store.dispatch('api/updateSubscription', stripeIds)
+      const result = await this.$store.dispatch('api/updateSubscription', data)
       console.log('🎡 subscribed', result)
-      cache.saveStripeIds(stripeIds)
+      cache.saveStripeIds(data)
       this.loading.subscriptionIsBeingCreated = false
       this.$store.commit('currentUser/isUpgraded', true)
       this.$store.commit('notifyCardsCreatedIsOverLimit', false)
-      this.$store.commit('addNotification', { message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software', type: 'success' })
+      this.$store.commit('addNotification', {
+        message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software',
+        type: 'success',
+        isPersistentItem: true
+      })
       this.$store.dispatch('closeAllDialogs')
     },
     paymentIntent () {
@@ -367,7 +372,12 @@ export default {
       }
     },
     async handleCustomerActionRequired () {
-      if (paymentIntent.status === 'requires_action') {
+      // success $0 bill from credits
+      if (paymentIntent === null) {
+        this.$store.commit('addNotification', { message: 'Credits used', type: 'success' })
+        await this.handleSubscriptionSuccess()
+      // failed payment
+      } else if (paymentIntent.status === 'requires_action') {
         const result = await stripe.confirmCardPayment(paymentIntent.client_secret, { payment_method: paymentMethod.id })
         if (result.error) {
           console.log('🎡 confirm card payment', result)
@@ -375,6 +385,7 @@ export default {
           this.error.stripeError = true
           this.error.stripeErrorMessage = utils.removeTrailingPeriod(result.error.message)
           throw result
+        // success
         } else if (result.paymentIntent.status === 'succeeded') {
           await this.handleSubscriptionSuccess()
         }

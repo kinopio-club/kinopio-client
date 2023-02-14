@@ -25,7 +25,7 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
       .summary
         User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
         p
-          span You are paying
+          span You are paying{{' '}}
             .badge.info ${{info.price}}/{{info.period}}
       p(v-if="info.nextBillingDate") Next payment: {{info.nextBillingDate}}
       p(v-if="info.cardType") {{info.cardType}} ••{{info.cardLast4}} – {{info.cardExpMonth}}/{{info.cardExpYear}}
