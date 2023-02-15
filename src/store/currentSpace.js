@@ -288,16 +288,31 @@ const currentSpace = {
 
     // Space
 
-    createNewHelloSpace: (context) => {
+    checkIfShouldCreateNewUserSpaces: (context) => {
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const spaces = cache.getAllSpaces()
+      if (currentUserIsSignedIn) { return }
+      if (spaces.length) { return }
+      const shouldCreateWithoutLoading = true
+      context.dispatch('createNewInboxSpace', shouldCreateWithoutLoading)
+      context.dispatch('createNewHelloSpace', shouldCreateWithoutLoading)
+    },
+    createNewHelloSpace: (context, shouldCreateWithoutLoading) => {
       const user = context.rootState.currentUser
       let space = utils.clone(helloSpace)
       space.id = nanoid()
-      space = cache.updateIdsInSpace(space)
-      context.commit('clearSearch', null, { root: true })
-      context.dispatch('restoreSpaceInChunks', { space })
-      context.commit('addUserToSpace', user)
-      context.dispatch('updateOtherUsers')
-      context.dispatch('updateOtherSpaces')
+      if (shouldCreateWithoutLoading) {
+        space.users = [context.rootState.currentUser]
+        const nullCardUsers = true
+        cache.updateIdsInSpace(space, nullCardUsers)
+      } else {
+        space = cache.updateIdsInSpace(space)
+        context.commit('clearSearch', null, { root: true })
+        context.dispatch('restoreSpaceInChunks', { space })
+        context.commit('addUserToSpace', user)
+        context.dispatch('updateOtherUsers')
+        context.dispatch('updateOtherSpaces')
+      }
     },
     createNewSpace: (context, space) => {
       context.commit('triggerSpaceZoomReset', null, { root: true })
