@@ -2,7 +2,7 @@
 .row.url-preview(v-if="visible")
   Loader(:visible="loading")
   template(v-if="!loading")
-    .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': shouldHideInfo && !shouldHideImage}")
+    .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': shouldHideInfo && !shouldHideImage, 'is-no-info': !previewHasInfo}")
       //- youtube
       .content-buttons.card-inline-buttons(v-if="!parentIsCardDetails && isYoutubeUrl")
         .button-wrap.inline-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
@@ -23,7 +23,7 @@
               button
                 span →
         //- all, image, text, none
-        .row
+        .row(v-if="previewHasInfo")
           .segmented-buttons
             button(v-if="previewHasImage && previewHasInfo" @click="showAll" :class="{active : isShowAll}" :disabled="!canEditCard")
               span All
@@ -294,6 +294,8 @@ export default {
       min-height 114px
     &.no-padding
       padding 0
+    &.is-no-info
+      min-height initial !important
   .preview-image
     width 100%
     border-radius 3px
