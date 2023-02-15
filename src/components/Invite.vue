@@ -1,14 +1,13 @@
 <template lang="pug">
 section.subsection.invite
   .row
-    p Invite Collaborators
+    p Invite Collaborators to Edit
   Loader(:visible="loading")
   template(v-if="!loading && collaboratorKey")
     .row
       button(@click.left="copyUrl")
         img.icon.copy(src="@/assets/copy.svg")
-        span Copy Edit URL
-      //- .row
+        span Copy Invite URL
       button(@click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
         span Tips
   //- Error

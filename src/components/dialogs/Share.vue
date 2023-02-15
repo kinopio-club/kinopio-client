@@ -13,24 +13,23 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           SpaceRssFeed(:visible="spaceRssFeedIsVisible")
 
   section(v-if="spaceHasUrl")
-    p Space Privacy
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
-    //- Share Link
-    section.subsection(v-if="!spaceIsPrivate" :class="{'share-link-subsection': isSpaceMember}")
-      .row
-        p Share With the World
-      .row
-        button(@click.left="copyUrl")
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy Public Link
-      hr
+    //- Share URL
+    section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
       .row
         p Share with the Community
       .row
         AddToExplore
         AskToAddToExplore
+      hr
+      .row
+        p Share With the World
+      .row
+        button(@click.left="copyUrl")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Public URL
 
-    //- Invite Link
+    //- Invite
     Invite(v-if="isSpaceMember")
   //- Collaborators
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
@@ -323,7 +322,7 @@ export default {
     pointer-events none
   .subsection
     margin-top 10px
-  .share-link-subsection
+  .share-url-subsection
     margin-top 0
     border-top-left-radius 0
     border-top-right-radius 0
