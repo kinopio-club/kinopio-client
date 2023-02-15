@@ -66,12 +66,15 @@
 
 //- Space Settings
 section.subsection.space-settings(v-if="settingsIsVisible")
-  //- Background
   .row
+    PrivacyButton(:privacyPickerIsVisible="settingsPrivacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="toggleSettingsPrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
+  .row
+    //- Background
     .button-wrap
       button(@click.left.stop="toggleBackgroundIsVisible")
         BackgroundPreview(:space="currentSpace")
         span Background
+    //- Export
     .button-wrap
       button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
@@ -151,6 +154,7 @@ export default {
     return {
       backgroundIsVisible: false,
       privacyPickerIsVisible: false,
+      settingsPrivacyPickerIsVisible: false,
       settingsIsVisible: false,
       exportIsVisible: false
     }
@@ -260,6 +264,11 @@ export default {
       this.closeDialogsAndEmit()
       this.privacyPickerIsVisible = !isVisible
     },
+    toggleSettingsPrivacyPickerIsVisible () {
+      const isVisible = this.settingsPrivacyPickerIsVisible
+      this.closeDialogsAndEmit()
+      this.settingsPrivacyPickerIsVisible = !isVisible
+    },
     toggleSettingsIsVisible () {
       const isVisible = this.settingsIsVisible
       this.closeDialogsAndEmit()
@@ -276,6 +285,7 @@ export default {
       this.backgroundIsVisible = false
       this.privacyPickerIsVisible = false
       this.exportIsVisible = false
+      this.settingsPrivacyPickerIsVisible = false
     },
     closeDialogsAndEmit () {
       this.closeDialogs()
