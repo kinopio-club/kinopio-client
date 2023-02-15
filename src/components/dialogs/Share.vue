@@ -15,13 +15,14 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     //- Share URL
-    section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
-      .row
-        p Share with the Community
-      .row
-        AddToExplore
-        AskToAddToExplore
-      hr
+    section.subsection.share-options(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
+      template(v-if="exploreSectionIsVisible")
+        .row
+          p Share with the Community
+        .row
+          AddToExplore
+          AskToAddToExplore
+        hr
       .row
         p Share With the World
       .row
@@ -119,6 +120,11 @@ export default {
     }
   },
   computed: {
+    showInExplore () { return this.$store.state.currentSpace.showInExplore },
+    exploreSectionIsVisible () {
+      const shouldShowAskToAddToExplore = !this.isSpaceMember && !this.showInExplore
+      return this.isSpaceMember || shouldShowAskToAddToExplore
+    },
     userDetailsIsVisible () { return this.$store.state.userDetailsIsVisible },
     userDetailsSelectedUser () {
       if (!this.userDetailsIsVisible) { return }
@@ -136,8 +142,7 @@ export default {
       return this.spacePrivacy === 'private'
     },
     isSpaceMember () {
-      const currentSpace = this.$store.state.currentSpace
-      return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
+      return this.$store.getters['currentUser/isSpaceMember']()
     },
     spaceCollaborators () { return this.$store.state.currentSpace.collaborators },
     spaceHasCollaborators () {
@@ -326,4 +331,6 @@ export default {
     margin-top 0
     border-top-left-radius 0
     border-top-right-radius 0
+  .share-options
+    margin-top 0
 </style>
