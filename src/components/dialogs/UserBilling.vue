@@ -15,9 +15,11 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
 
     //- free
     section(v-if="!isUpgraded")
-      p(v-if="isAwaitingDowngrade")
-        span You can upgrade your account again whenever you're ready
-      p(v-else) After you upgrade your account you'll be able to manage your payment details here
+      template(v-if="isAwaitingDowngrade")
+        p You can upgrade your account again whenever you're ready
+      template(v-else)
+        ReferredNewUserCredits
+        p After you upgrade your account you'll be able to manage your payment details here
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade
 
     //- upgraded
@@ -53,6 +55,8 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import UserCredits from '@/components/UserCredits.vue'
+import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
+
 import { defineAsyncComponent } from 'vue'
 
 import dayjs from 'dayjs'
@@ -65,7 +69,8 @@ export default {
   components: {
     User,
     Loader,
-    UserCredits
+    UserCredits,
+    ReferredNewUserCredits
   },
   props: {
     visible: Boolean

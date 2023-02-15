@@ -1,7 +1,21 @@
+<script setup>
+import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
+
+import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
+import { useStore } from 'vuex'
+const store = useStore()
+
+const props = defineProps({
+  visible: Boolean
+})
+
+</script>
+
 <template lang="pug">
 dialog.narrow.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     p Kinopio is free for 100 cards, afterwards it's $6/month or $60/year
+    ReferredNewUserCredits()
     table
       tbody
         tr.table-header
@@ -27,15 +41,6 @@ dialog.narrow.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialo
       span {{' '}}
       span that's designed by artists, built by craftspeople, and funded by the people who enjoy it.
 </template>
-
-<script>
-export default {
-  name: 'Pricing',
-  props: {
-    visible: Boolean
-  }
-}
-</script>
 
 <style lang="stylus">
 .pricing

@@ -8,7 +8,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   //- Sign Up
   section(v-if="signUpVisible")
     p Create an account to share your spaces and access them anywhere
-    p.badge.success(v-if="referredByUserId") Signing up will also earn you ${{referralCreditAmount}} in referral credits
+    ReferredNewUserCredits
     form(@submit.prevent="signUp")
       input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
       .badge.info(v-if="error.accountAlreadyExists") An account with this email already exists, Sign In instead
@@ -62,7 +62,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
-import consts from '@/consts.js'
+import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
 
 import { nanoid } from 'nanoid'
 
@@ -72,7 +72,8 @@ let sessionToken
 export default {
   name: 'SignUpOrIn',
   components: {
-    Loader
+    Loader,
+    ReferredNewUserCredits
   },
   props: {
     visible: Boolean
@@ -99,10 +100,6 @@ export default {
       },
       resetSuccess: false
     }
-  },
-  computed: {
-    referralCreditAmount () { return consts.referralCreditAmount },
-    referredByUserId () { return this.$store.state.currentUser.referredByUserId }
   },
   methods: {
     clearErrors () {

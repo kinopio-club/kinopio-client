@@ -13,6 +13,8 @@ defineProps({
 
 const url = computed(() => utils.kinopioDomain() + '/refer/' + store.state.currentUser.id)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const referralCreditAmount = computed(() => consts.referralCreditAmount)
+const referredByUserId = computed(() => store.state.currentUser.referredByUserId)
 
 const copyUrl = async (event) => {
   store.commit('clearNotificationsWithPosition')
@@ -54,6 +56,7 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
     UserCredits
   template(v-else)
     section
+      p.badge.success(v-if="referredByUserId") Signing up will earn you ${{referralCreditAmount}} in referral credits
       p.badge.info
         span Sign Up or In to earn credits by referring your friends to Kinopio
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In

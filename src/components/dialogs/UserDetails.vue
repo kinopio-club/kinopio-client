@@ -46,11 +46,11 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
           .badge.info $6/mo, $60/yr
         a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
           button Help →
-      .row(v-if="spaceUserIsUpgraded")
+      .row(v-if="spaceUserIsUpgraded && !currentUserIsUpgraded")
         .badge.status
           p
             UserLabelInline(:user="spaceUser")
-            span is upgraded, so cards you create in this space won't change your card count
+            span is upgraded, so cards you create in this space won't increase your free card count
       .row
         .button-wrap
           button.variable-length-content(@click="triggerEarnCreditsIsVisible")
