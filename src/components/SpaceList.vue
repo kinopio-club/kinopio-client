@@ -67,7 +67,7 @@ span.space-list-wrap
                 img.icon.checkmark(src="@/assets/checkmark.svg")
           button.duplicate.small-button(v-if="spaceIsActive(space) && spaceIsTemplate(space)" @click="duplicateSpace")
             img.icon(src="@/assets/add.svg")
-            span Duplicate
+            span Copy
 
 </template>
 

@@ -72,24 +72,38 @@ section.subsection.space-settings(v-if="!isSpaceMember")
 //- Space Settings
 section.subsection.space-settings(v-if="settingsIsVisible")
   .row
-    PrivacyButton(:showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-  .row
     //- Background
     .button-wrap
       button(@click.left.stop="toggleBackgroundIsVisible")
         BackgroundPreview(:space="currentSpace")
         span Background
-  .row
+
     //- Favorite
-    button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-      img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-      img.icon(v-else src="@/assets/heart-empty.svg")
-      span Pin Space
+    .button-wrap
+      button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+        img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+        img.icon(v-else src="@/assets/heart-empty.svg")
+        span Pin
+
+  .row
+    //- Template
+    .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
+      button.variable-length-content(:class="{ active: currentSpaceIsUserTemplate }")
+        img.icon.templates(src="@/assets/templates.svg")
+        span Template
     //- Export
     .button-wrap
       button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
         Export(:visible="exportIsVisible")
+
+  .row(v-if="currentSpaceIsUserTemplate")
+    //- Duplicate
+    .button-wrap
+      button(@click.left="duplicateSpace")
+        img.icon.add(src="@/assets/add.svg")
+        span Make a Copy
+
   .row
     .button-wrap(v-if="isSpaceMember")
       .segmented-buttons
@@ -101,7 +115,7 @@ section.subsection.space-settings(v-if="settingsIsVisible")
           template(v-else)
             img.icon.remove(src="@/assets/remove.svg")
             span Remove
-        //- Hide Space
+        //- Hide
         button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
           img.icon(v-if="!currentSpaceIsHidden" src="@/assets/view.svg")
           img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
@@ -174,6 +188,7 @@ export default {
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
     },
+    currentSpaceIsUserTemplate () { return this.currentSpace.isTemplate },
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     spaceName: {
@@ -216,6 +231,11 @@ export default {
 
   },
   methods: {
+    toggleCurrentSpaceIsUserTemplate () {
+      const value = !this.currentSpaceIsUserTemplate
+      this.$store.dispatch('currentSpace/updateSpace', { isTemplate: value })
+      this.updateLocalSpaces()
+    },
     toggleIsFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
       if (this.isFavoriteSpace) {
