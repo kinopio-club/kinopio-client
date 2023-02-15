@@ -74,6 +74,12 @@ section.subsection.space-settings(v-if="settingsIsVisible")
       button(@click.left.stop="toggleBackgroundIsVisible")
         BackgroundPreview(:space="currentSpace")
         span Background
+  .row
+    //- Favorite
+    button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+      img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+      img.icon(v-else src="@/assets/heart-empty.svg")
+      span Pin Space
     //- Export
     .button-wrap
       button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
@@ -202,10 +208,21 @@ export default {
       })
     },
     dialogIsPinned () { return this.$store.state.spaceDetailsIsPinned },
-    currentUserIsSpaceCollaborator () { return this.$store.getters['currentUser/isSpaceCollaborator']() }
+    currentUserIsSpaceCollaborator () { return this.$store.getters['currentUser/isSpaceCollaborator']() },
+    isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] }
 
   },
   methods: {
+    toggleIsFavoriteSpace () {
+      const currentSpace = this.$store.state.currentSpace
+      if (this.isFavoriteSpace) {
+        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
+      } else {
+        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
+      }
+      this.updateLocalSpaces()
+    },
+
     duplicateSpace () {
       this.$store.dispatch('currentSpace/duplicateSpace')
       this.updateLocalSpaces()
