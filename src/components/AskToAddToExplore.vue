@@ -3,7 +3,7 @@
   template(v-if="!isAsked")
     button.variable-length-content(@click.left.prevent="askToAddToExplore" @keydown.stop.enter="askToAddToExplore")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
-      span Recommend to Explore
+      span Ask to Add to Explore
     template(v-if="error.userNeedsToSignUpOrIn")
       p
         span.badge.info Sign Up or In

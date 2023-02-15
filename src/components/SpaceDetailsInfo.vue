@@ -55,14 +55,19 @@
       span Settings
 
 //- Duplicate
-.row(v-if="!isSpaceMember")
-  .button-wrap
-    button(@click.left="duplicateSpace")
-      img.icon.add(src="@/assets/add.svg")
-      span Make a Copy
-//- Explore Ask
-.row(v-if="!isSpaceMember && !showInExplore")
-  AskToAddToExplore(@updateDialogHeight="updateDialogHeight")
+section.subsection.space-settings(v-if="!isSpaceMember")
+  .row
+    //- Duplicate
+    .button-wrap
+      button(@click.left="duplicateSpace")
+        img.icon.add(src="@/assets/add.svg")
+        span Make a Copy
+  .row
+    //- Favorite
+    button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+      img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+      img.icon(v-else src="@/assets/heart-empty.svg")
+      span Follow updates
 
 //- Space Settings
 section.subsection.space-settings(v-if="settingsIsVisible")
@@ -108,7 +113,6 @@ import Background from '@/components/dialogs/Background.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
-import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import templates from '@/data/templates.js'
 import Export from '@/components/dialogs/Export.vue'
 import cache from '@/cache.js'
@@ -121,7 +125,6 @@ export default {
     BackgroundPreview,
     Loader,
     PrivacyButton,
-    AskToAddToExplore,
     Export
   },
   props: {
