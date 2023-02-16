@@ -15,7 +15,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     //- Share URL
-    section.subsection.share-options(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
+    section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
       template(v-if="exploreSectionIsVisible")
         .row
           p Share with the Community
@@ -326,14 +326,12 @@ export default {
   .button-tip-badge
     top -12px
     pointer-events none
-  .subsection
+  p + .subsection
     margin-top 10px
   .share-url-subsection
     margin-top 0
     border-top-left-radius 0
     border-top-right-radius 0
-  .share-options
-    margin-top 0
 
   @media(max-height 670px)
     dialog.import,
