@@ -17,6 +17,7 @@ import websocket from '@/store/plugins/websocket.js'
 import { createStore } from 'vuex'
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
+import last from 'lodash-es/last'
 
 const store = createStore({
   strict: import.meta.env.MODE !== 'production',
@@ -1152,7 +1153,9 @@ const store = createStore({
       state.notifications.push(notification)
     },
     removePreviousNotification: (state) => {
-      state.notifications.shift()
+      const removableNotifications = state.notifications.filter(notification => notification.isPersistentItem === false)
+      const prevNotification = last(removableNotifications)
+      state.notifications = state.notifications.filter(notification => notification.id !== prevNotification.id)
     },
     removeNotificationById: (state, id) => {
       state.notifications = state.notifications.filter(notification => notification.id !== id)
