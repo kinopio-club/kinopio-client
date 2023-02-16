@@ -97,7 +97,10 @@ aside.notifications(@click.left="closeAllDialogs")
         span Permanently Delete
 
   .persistent-item.danger(v-if="notifyConnectionError")
-    p A connection error has occured, please refresh
+    .row
+      p A server connection error has occured, please refresh
+    .row
+      p 🚒 Code: {{notifyConnectionErrorName}}
     .row
       .button-wrap
         a(href="mailto:support@kinopio.club?subject=Connection Error")
@@ -223,6 +226,7 @@ export default {
     items () { return this.$store.state.notifications },
     notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
+    notifyConnectionErrorName () { return this.$store.state.notifyConnectionErrorName },
     notifyServerCouldNotSave () { return this.$store.state.notifyServerCouldNotSave },
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
     notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },

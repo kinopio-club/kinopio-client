@@ -60,7 +60,6 @@ export default {
     shouldUseStickyCards: false,
     shouldDisableItemJiggle: false,
     shouldPauseConnectionDirections: false,
-    twitterUsername: '',
     lastUsedImagePickerService: '',
     AIImages: [],
     theme: null,
@@ -332,10 +331,6 @@ export default {
     shouldPauseConnectionDirections: (state, value) => {
       state.shouldPauseConnectionDirections = value
       cache.updateUser('shouldPauseConnectionDirections', value)
-    },
-    twitterUsername: (state, value) => {
-      state.twitterUsername = value
-      cache.updateUser('twitterUsername', value)
     },
     lastUsedImagePickerService: (state, value) => {
       state.lastUsedImagePickerService = value

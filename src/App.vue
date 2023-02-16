@@ -882,6 +882,7 @@ code
   margin-right 6px
   vertical-align -1px
   position relative
+  color var(--primary)
   &.info
     background var(--info-background)
   &.success

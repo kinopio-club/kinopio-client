@@ -1,5 +1,6 @@
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import debounce from 'lodash-es/debounce'
 import merge from 'lodash-es/merge'
@@ -88,6 +89,12 @@ const self = {
   state: {},
   mutations: {},
   actions: {
+
+    handleServerError: (context, { name, error }) => {
+      console.error('🚒', name, error)
+      context.commit('notifyConnectionError', true, { root: true })
+      context.commit('notifyConnectionErrorName', name, { root: true })
+    },
 
     requestOptions: (context, options) => {
       const headers = new Headers({
@@ -181,7 +188,7 @@ const self = {
         const response = await fetch(`${host}/meta/date`)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getDate', error)
+        context.dispatch('handleServerError', { name: 'getDate', error })
       }
     },
     getCountries: async (context) => {
@@ -189,7 +196,7 @@ const self = {
         const response = await fetch(`${host}/meta/countries`)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getDate', error)
+        context.dispatch('handleServerError', { name: 'getCountries', error })
       }
     },
     getNewStuff: async (context) => {
@@ -197,7 +204,7 @@ const self = {
         const response = await fetch(`${host}/meta/new-stuff`)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getNewStuff', error)
+        context.dispatch('handleServerError', { name: 'getNewStuff', error })
       }
     },
 
@@ -253,7 +260,7 @@ const self = {
         const response = await fetch(`${host}/user`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getUser', error)
+        context.dispatch('handleServerError', { name: 'getUser', error })
       }
     },
     getUserAIImages: async (context, limit) => {
@@ -265,7 +272,7 @@ const self = {
         const response = await fetch(`${host}/user/ai-images?limit=${limit}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getUserAIImages', error)
+        context.dispatch('handleServerError', { name: 'getUserAIImages', error })
       }
     },
     getUserFavorites: async (context) => {
@@ -276,7 +283,7 @@ const self = {
         const response = await fetch(`${host}/user/favorites`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getUserFavorites', error)
+        context.dispatch('handleServerError', { name: 'getUserFavorites', error })
       }
     },
     getUserSpaces: async (context) => {
@@ -289,7 +296,7 @@ const self = {
         let spaces = await normalizeResponse(response)
         return utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
-        console.error('🚒 getUserSpaces', error)
+        context.dispatch('handleServerError', { name: 'getUserSpaces', error })
       }
     },
     getUserRemovedSpaces: async (context) => {
@@ -300,7 +307,7 @@ const self = {
         const response = await fetch(`${host}/user/removed-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getUserRemovedSpaces', error)
+        context.dispatch('handleServerError', { name: 'getUserRemovedSpaces', error })
       }
     },
     getUserInboxSpace: async (context) => {
@@ -311,7 +318,7 @@ const self = {
         const response = await fetch(`${host}/user/inbox-space`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getUserInboxSpace', error)
+        context.dispatch('handleServerError', { name: 'getUserInboxSpace', error })
       }
     },
     getSpacesNotificationUnsubscribed: async (context) => {
@@ -322,7 +329,7 @@ const self = {
         const response = await fetch(`${host}/user/spaces-notification-unsubscribed`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getSpacesNotificationUnsubscribed', error)
+        context.dispatch('handleServerError', { name: 'getSpacesNotificationUnsubscribed', error })
       }
     },
     spaceNotificationResubscribe: async (context, space) => {
@@ -334,7 +341,7 @@ const self = {
         const response = await fetch(`${host}/space/${space.id}/notification-resubscribe?userId=${user.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 spaceNotificationResubscribe', error)
+        context.dispatch('handleServerError', { name: 'spaceNotificationResubscribe', error })
       }
     },
     deleteUserPermanent: async (context) => {
@@ -345,7 +352,7 @@ const self = {
         const response = await fetch(`${host}/user/permanent`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 deleteUserPermanent', error)
+        context.dispatch('handleServerError', { name: 'deleteUserPermanent', error })
       }
     },
     getPublicUser: async (context, user) => {
@@ -354,7 +361,7 @@ const self = {
         const response = await fetch(`${host}/user/public/${user.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getPublicUser', error)
+        context.dispatch('handleServerError', { name: 'getPublicUser', error })
       }
     },
     getPublicUsers: async (context, userIds) => {
@@ -364,10 +371,11 @@ const self = {
         userIds = userIds.join(',')
         console.log('🛬🛬 getting remote public users', userIds)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await utils.timeout(40000, fetch(`${host}/user/public/multiple?userIds=${userIds}`, options))
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/user/public/multiple?userIds=${userIds}`, options))
+        // notifyConnectionError
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getPublicUsers', error)
+        context.dispatch('handleServerError', { name: 'getPublicUsers', error })
       }
     },
     updateUserFavorites: async (context, body) => {
@@ -378,7 +386,7 @@ const self = {
         const response = await fetch(`${host}/user/favorites`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 updateUserFavorites', error)
+        context.dispatch('handleServerError', { name: 'updateUserFavorites', error })
       }
     },
 
@@ -388,20 +396,20 @@ const self = {
       try {
         console.log('🛬 getting new spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await utils.timeout(40000, fetch(`${host}/space/explore-spaces`, options))
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/explore-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getExploreSpaces', error)
+        context.dispatch('handleServerError', { name: 'getExploreSpaces', error })
       }
     },
     getLiveSpaces: async (context) => {
       try {
         console.log('🛬 getting live spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await utils.timeout(40000, fetch(`${host}/space/live-spaces`, options))
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/live-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getLiveSpaces', error)
+        context.dispatch('handleServerError', { name: 'getLiveSpaces', error })
       }
     },
     getSpace: async (context, { space, shouldRequestRemote }) => {
@@ -410,10 +418,10 @@ const self = {
         if (!shouldRequest({ shouldRequestRemote, apiKey })) { return }
         console.log('🛬 getting remote space', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getSpace', error)
+        context.dispatch('handleServerError', { name: 'getSpace', error })
       }
     },
     getSpaces: async (context, { spaceIds, shouldRequestRemote }) => {
@@ -426,10 +434,10 @@ const self = {
         if (!spaceIds.length) { return }
         spaceIds = spaceIds.join(',')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await utils.timeout(40000, fetch(`${host}/space/multiple?spaceIds=${spaceIds}`, options))
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/multiple?spaceIds=${spaceIds}`, options))
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getSpaces', error)
+        context.dispatch('handleServerError', { name: 'getSpaces', error })
       }
     },
     getSpaceAnonymously: async (context, space) => {
@@ -440,20 +448,20 @@ const self = {
       try {
         console.log('🛬 getting remote space anonymously', space.id, space.collaboratorKey)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: space })
-        const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getSpaceAnonymously', error)
+        context.dispatch('handleServerError', { name: 'getSpaceAnonymously', error })
       }
     },
     getInboxSpace: async (context) => {
       try {
         console.log('🛬 getting inbox space')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await utils.timeout(40000, fetch(`${host}/space/inbox`, options))
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/inbox`, options))
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getInboxSpace', error)
+        context.dispatch('handleServerError', { name: 'getInboxSpace', error })
       }
     },
     createSpaces: async (context) => {
@@ -474,8 +482,7 @@ const self = {
         const response = await fetch(`${host}/space/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 createSpaces', error)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        context.dispatch('handleServerError', { name: 'createSpaces', error })
       }
     },
     createSpace: async (context, space) => {
@@ -486,8 +493,7 @@ const self = {
         const response = await fetch(`${host}/space`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 createSpace', error)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        context.dispatch('handleServerError', { name: 'createSpace', error })
       }
     },
     getSpaceRemovedCards: async (context, space) => {
@@ -498,7 +504,7 @@ const self = {
         const response = await fetch(`${host}/space/${space.id}/removed-cards`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getSpaceRemovedCards', error)
+        context.dispatch('handleServerError', { name: 'getSpaceRemovedCards', error })
       }
     },
     getSpaceCollaboratorKey: async (context, space) => {
@@ -509,7 +515,7 @@ const self = {
         const response = await fetch(`${host}/space/${space.id}/collaborator-key`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getSpaceCollaboratorKey', error)
+        context.dispatch('handleServerError', { name: 'getSpaceCollaboratorKey', error })
       }
     },
     addSpaceCollaborator: async (context, { spaceId, collaboratorKey }) => {
@@ -523,7 +529,7 @@ const self = {
         const response = await fetch(`${host}/space/collaborator`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 addSpaceCollaborator', error)
+        context.dispatch('handleServerError', { name: 'addSpaceCollaborator', error })
       }
     },
     removeSpaceCollaborator: async (context, { space, user }) => {
@@ -538,7 +544,7 @@ const self = {
         const response = await fetch(`${host}/space/collaborator`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 removeSpaceCollaborator', error)
+        context.dispatch('handleServerError', { name: 'removeSpaceCollaborator', error })
       }
     },
     restoreRemovedSpace: async (context, space) => {
@@ -549,8 +555,7 @@ const self = {
         const response = await fetch(`${host}/space/restore/${space.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 restoreRemovedSpace', error)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        context.dispatch('handleServerError', { name: 'restoreRemovedSpace', error })
       }
     },
 
@@ -564,7 +569,7 @@ const self = {
         const response = await fetch(`${host}/card/by-link-to-space/${spaceId}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getCardsWithLinkToSpaceId', error)
+        context.dispatch('handleServerError', { name: 'getCardsWithLinkToSpaceId', error })
       }
     },
     updateCards: async (context, body) => {
@@ -575,8 +580,7 @@ const self = {
         const response = await fetch(`${host}/card/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 updateCards', error)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        context.dispatch('handleServerError', { name: 'updateCards', error })
       }
     },
     createCards: async (context, body) => {
@@ -587,8 +591,7 @@ const self = {
         const response = await fetch(`${host}/card/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 createCards', error)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        context.dispatch('handleServerError', { name: 'createCards', error })
       }
     },
     createCard: async (context, body) => {
@@ -599,8 +602,7 @@ const self = {
         const response = await fetch(`${host}/card`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 createCard', error)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        context.dispatch('handleServerError', { name: 'createCard', error })
       }
     },
     createCardInInbox: async (context, body) => {
@@ -611,8 +613,7 @@ const self = {
         const response = await fetch(`${host}/card/to-inbox`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 createCard', error)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        context.dispatch('handleServerError', { name: 'createCardInInbox', error })
       }
     },
 
@@ -626,8 +627,7 @@ const self = {
         const response = await fetch(`${host}/connection-type/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 updateConnectionTypes', error)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        context.dispatch('handleServerError', { name: 'updateConnectionTypes', error })
       }
     },
     createConnectionTypes: async (context, body) => {
@@ -638,8 +638,7 @@ const self = {
         const response = await fetch(`${host}/connection-type/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 createConnectionTypes', error)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        context.dispatch('handleServerError', { name: 'createConnectionTypes', error })
       }
     },
 
@@ -653,8 +652,7 @@ const self = {
         const response = await fetch(`${host}/connection/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 updateConnections', error)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        context.dispatch('handleServerError', { name: 'updateConnections', error })
       }
     },
     createConnections: async (context, body) => {
@@ -665,8 +663,7 @@ const self = {
         const response = await fetch(`${host}/connection/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 createConnections', error)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        context.dispatch('handleServerError', { name: 'createConnections', error })
       }
     },
 
@@ -680,8 +677,7 @@ const self = {
         const response = await fetch(`${host}/box/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 createBoxes', error)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        context.dispatch('handleServerError', { name: 'createBoxes', error })
       }
     },
 
@@ -696,7 +692,7 @@ const self = {
         const response = await fetch(`${host}/card/by-tag-name/${name}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getCardsWithTag', error)
+        context.dispatch('handleServerError', { name: 'getCardsWithTag', error })
       }
     },
     getUserTags: async (context, removeUnusedTags) => {
@@ -711,7 +707,7 @@ const self = {
         const response = await fetch(`${host}/user/tags${params}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getUserTags', error)
+        context.dispatch('handleServerError', { name: 'getUserTags', error })
       }
     },
     // updateUserTagsColor: async (context, tag) => {
@@ -755,7 +751,7 @@ const self = {
         const response = await fetch(`${host}/billing/create-customer`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 createCustomer', error)
+        context.dispatch('handleServerError', { name: 'createCustomer', error })
       }
     },
     createSubscription: async (context, body) => {
@@ -764,7 +760,7 @@ const self = {
         const response = await fetch(`${host}/billing/create-subscription`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 createSubscription', error)
+        context.dispatch('handleServerError', { name: 'createSubscription', error })
       }
     },
     updateSubscription: async (context, body) => {
@@ -773,7 +769,7 @@ const self = {
         const response = await fetch(`${host}/billing/update-subscription`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 updateSubscription', error)
+        context.dispatch('handleServerError', { name: 'updateSubscription', error })
       }
     },
     cancelSubscription: async (context, body) => {
@@ -782,7 +778,7 @@ const self = {
         const response = await fetch(`${host}/billing/cancel-subscription`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 cancelSubscription', error)
+        context.dispatch('handleServerError', { name: 'cancelSubscription', error })
       }
     },
     subscriptionInfo: async (context, body) => {
@@ -791,7 +787,7 @@ const self = {
         const response = await fetch(`${host}/billing/retrieve-subscription-info`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 subscriptionInfo', error)
+        context.dispatch('handleServerError', { name: 'subscriptionInfo', error })
       }
     },
     donationUrl: async (context, body) => {
@@ -800,7 +796,7 @@ const self = {
         const response = await fetch(`${host}/billing/donation-url`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 subscriptionInfo', error)
+        context.dispatch('handleServerError', { name: 'donationUrl', error })
       }
     },
 
@@ -812,7 +808,7 @@ const self = {
         const response = await fetch(`${host}/upload/presigned-post`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 createPresignedPost', error)
+        context.dispatch('handleServerError', { name: 'createPresignedPost', error })
       }
     },
     createMultiplePresignedPosts: async (context, body) => {
@@ -821,7 +817,7 @@ const self = {
         const response = await fetch(`${host}/upload/presigned-post/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 createMultiplePresignedPosts', error)
+        context.dispatch('handleServerError', { name: 'createMultiplePresignedPosts', error })
       }
     },
     pdf: async (context) => {
@@ -833,7 +829,7 @@ const self = {
         url = url.url
         return url
       } catch (error) {
-        console.error('🚒 pdf', error)
+        context.dispatch('handleServerError', { name: 'pdf', error })
       }
     },
 
@@ -847,7 +843,7 @@ const self = {
         const response = await fetch(`${host}/notification`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getNotifications', error)
+        context.dispatch('handleServerError', { name: 'getNotifications', error })
       }
     },
 
@@ -884,7 +880,7 @@ const self = {
         const data = await normalizeResponse(response)
         return { url, data, response, host }
       } catch (error) {
-        console.error('🚒 urlPreview', error)
+        context.dispatch('handleServerError', { name: 'urlPreview', error })
       }
     },
     weather: async (context) => {
@@ -929,27 +925,7 @@ const self = {
         }
         return weather
       } catch (error) {
-        console.error('🚒 weather', error)
-      }
-    },
-    twitterThread: async (context, tweetId) => {
-      try {
-        const url = `${host}/services/twitter-thread?tweetId=${tweetId}`
-        const response = await fetch(url)
-        const data = await normalizeResponse(response)
-        return data
-      } catch (error) {
-        console.error('🚒 twitterThread', error)
-      }
-    },
-    twitterUser: async (context, username) => {
-      try {
-        const url = `${host}/services/twitter-user?username=${username}`
-        const response = await fetch(url)
-        const data = await normalizeResponse(response)
-        return data
-      } catch (error) {
-        console.error('🚒 twitterUser', error)
+        context.dispatch('handleServerError', { name: 'weather', error })
       }
     },
     createAIImage: async (context, body) => {
@@ -975,7 +951,7 @@ const self = {
         const response = await fetch(`${host}/space/download/${spaceId}`, options)
         return response.blob()
       } catch (error) {
-        console.error('🚒 downloadCurrentSpace', error)
+        context.dispatch('handleServerError', { name: 'downloadCurrentSpace', error })
       }
     },
 
@@ -987,7 +963,7 @@ const self = {
         const response = await fetch(`${host}/space/download-all`, options)
         return response.blob()
       } catch (error) {
-        console.error('🚒 downloadCurrentSpace', error)
+        context.dispatch('handleServerError', { name: 'downloadAllSpaces', error })
       }
     }
 

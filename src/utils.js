@@ -1747,24 +1747,6 @@ export default {
       return 'link'
     }
   },
-  tweetIdFromTwitterUrl (url) {
-    url = this.urlWithoutQueryString(url)
-    // https://regexr.com/6vlno
-    // matches /status/ and the subsequent tweet id number
-    // https://mobile.twitter.com/YORIYUKIII/status/1577603265084395520 → 1577603265084395520
-    let tweetIdPattern = new RegExp(/\/status\/[0-9]*$/gm)
-    let match = url.match(tweetIdPattern)
-    if (!match) { return }
-    // match again to extract just the id number
-    tweetIdPattern = new RegExp(/[0-9]*$/gm)
-    match = match[0].match(tweetIdPattern)
-    if (!match) { return }
-    match = match[0]
-    // check that id is number
-    if (parseInt(match)) {
-      return match
-    }
-  },
 
   // Checkbox ✅
 
