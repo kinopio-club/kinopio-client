@@ -20,14 +20,15 @@ section.subsection.invite
       .badge.danger シ_ _)シ Something went wrong
     .row
       button(@click="updateCollaboratorKey") Try Again
-  //- View and Edit Permissions
+  //- Tips
   .more-info(v-if="tipsIsVisible")
-    .row(v-if="spaceIsPrivate")
-      p
-        span No account is needed to view{{' '}}
-        span.badge.danger private spaces
-        span {{' '}}– but editing requires an account.
-    hr
+    template(v-if="spaceIsPrivate")
+      .row
+        p
+          span No account is needed to view{{' '}}
+          span.badge.danger private spaces
+          span {{' '}}– but editing requires an account.
+      hr
     .row
       p You'll both earn a{{' '}}
         span.badge.success $6 credit
