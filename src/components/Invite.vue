@@ -1,7 +1,11 @@
 <template lang="pug">
 section.subsection.invite
   .row
-    p Invite Collaborators to Edit
+    p
+      .users
+        User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+        User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+      span Invite to Edit
   Loader(:visible="loading")
   template(v-if="!loading && collaboratorKey")
     .row
@@ -38,8 +42,10 @@ section.subsection.invite
 
 <script>
 import Loader from '@/components/Loader.vue'
+import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
+import randomColor from 'randomcolor'
 import { mapState, mapGetters } from 'vuex'
 
 export default {
@@ -48,7 +54,8 @@ export default {
     visible: Boolean
   },
   components: {
-    Loader
+    Loader,
+    User
   },
   mounted () {
     this.updateCollaboratorKey()
@@ -68,7 +75,12 @@ export default {
     ...mapGetters([
     ]),
     spaceIsPrivate () { return this.$store.state.currentSpace.privacy === 'private' },
-    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
+    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
+    randomUser () {
+      const luminosity = this.$store.state.currentUser.theme
+      const color = randomColor({ luminosity })
+      return { color }
+    }
   },
   methods: {
     async copyUrl (event) {
@@ -128,4 +140,6 @@ export default {
     margin 0
     color var(--primary)
     vertical-align 0
+  .users
+    margin-right 5px
 </style>
