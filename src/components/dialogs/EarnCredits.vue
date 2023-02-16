@@ -43,7 +43,7 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
       p
         span You'll both earn a
         span.badge.success ${{consts.referralCreditAmount}} credit
-        span when someone you refer signs up.
+        span when someone you refer, or invite to edit, signs up.
     .row
       p There's no limit on the amount of credits you can earn.
     template(v-if="currentUserIsSignedIn")
