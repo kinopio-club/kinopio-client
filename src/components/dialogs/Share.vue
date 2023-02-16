@@ -31,7 +31,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           span Copy Public URL
 
   //- Invite
-  Invite(v-if="isSpaceMember")
+  Invite(v-if="isSpaceMember && currentUserIsSignedIn")
   //- Collaborators
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
     // collaborators
@@ -120,6 +120,7 @@ export default {
     }
   },
   computed: {
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     exploreSectionIsVisible () {
       const shouldShowAskToAddToExplore = !this.isSpaceMember && !this.showInExplore
