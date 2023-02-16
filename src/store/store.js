@@ -208,6 +208,7 @@ const store = createStore({
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
     notifyReferralSuccessUser: null,
+    notifyEarnedCredits: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -498,7 +499,6 @@ const store = createStore({
     triggerAIImagesIsVisible: () => {},
     triggerClearAllSpaceFilters: () => {},
     triggerNotifyUnlockedStickyCards: () => {},
-    triggerNotifyEarnedCredits: () => {},
     triggerAddToInboxIsVisible: () => {},
     triggerCheckIfUseHasInboxSpace: () => {},
     triggerScrollUserDetailsIntoView: () => {},
@@ -1228,6 +1228,10 @@ const store = createStore({
     notifyReferralSuccessUser: (state, user) => {
       utils.typeCheck({ value: user, type: 'object' })
       state.notifyReferralSuccessUser = user
+    },
+    notifyEarnedCredits: (state, user) => {
+      utils.typeCheck({ value: user, type: 'object' })
+      state.notifyEarnedCredits = user
     },
 
     // Notifications with Position

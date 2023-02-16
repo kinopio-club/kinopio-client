@@ -266,7 +266,7 @@ export default {
       }
       const referral = await this.$store.dispatch('api/createReferral', body)
       console.log('🫧 referral created', referral)
-      this.$store.commit('triggerNotifyEarnedCredits')
+      this.$store.commit('notifyEarnedCredits', true)
     },
 
     updateLocalSpacesWithNewUserId () {

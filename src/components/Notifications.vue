@@ -149,7 +149,7 @@ aside.notifications(@click.left="closeAllDialogs")
       button(@click.left.stop="triggerUpgradeUserIsVisible")
         span Upgrade
       button(@click.left.stop="triggerEarnCreditsIsVisible")
-        span Earn Credits
+        span Earn More
       button(@click.left="removeNotifyEarnedCredits")
         img.icon.cancel(src="@/assets/add.svg")
 
@@ -177,8 +177,7 @@ export default {
       readOnlyJiggle: false,
       notifyCardsCreatedIsOverLimitJiggle: false,
       notifySpaceOutOfSync: false,
-      notifyUnlockedStickyCards: false,
-      notifyEarnedCredits: false
+      notifyUnlockedStickyCards: false
     }
   },
   created () {
@@ -207,8 +206,6 @@ export default {
         this.notifySpaceOutOfSync = false
       } else if (mutation.type === 'triggerNotifyUnlockedStickyCards') {
         this.notifyUnlockedStickyCards = true
-      } else if (mutation.type === 'triggerNotifyEarnedCredits') {
-        this.notifyEarnedCredits = true
       }
     })
   },
@@ -241,6 +238,7 @@ export default {
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
     notifyReferralSuccessUser () { return this.$store.state.notifyReferralSuccessUser },
+    notifyEarnedCredits () { return this.$store.state.notifyEarnedCredits },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
@@ -422,7 +420,7 @@ export default {
       this.notifyUnlockedStickyCards = false
     },
     removeNotifyEarnedCredits () {
-      this.notifyEarnedCredits = false
+      this.$store.commit('notifyEarnedCredits', false)
     }
   }
 }
