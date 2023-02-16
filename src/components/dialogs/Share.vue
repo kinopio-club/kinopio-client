@@ -333,4 +333,16 @@ export default {
     border-top-right-radius 0
   .share-options
     margin-top 0
+
+  @media(max-height 670px)
+    dialog.import,
+    dialog.export,
+    dialog.embed
+      top -50px
+  @media(max-height 500px)
+    dialog.import,
+    dialog.export,
+    dialog.embed
+      top -200px
+
 </style>
