@@ -66,7 +66,6 @@
     span You'll be billed ${{price.amount}} immediately, and then ${{price.amount}} each {{price.period}}.
 
   p You can cancel anytime.
-  //- p.badge.success.credits-badge(v-if="credits") Remaining credits will be applied to your next payments
 
 </template>
 
