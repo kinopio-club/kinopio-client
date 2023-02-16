@@ -184,6 +184,7 @@ const currentSpace = {
       context.dispatch('updateModulesSpaceId')
       context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
       context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
+      context.dispatch('currentUser/validateReferral', null, { root: true })
     },
 
     // Users and otherSpaces
@@ -677,7 +678,6 @@ const currentSpace = {
       let emoji = '🌳'
       if (isRemote) {
         emoji = '🌳🌏'
-        context.dispatch('currentUser/validateReferral', null, { root: true })
       }
       let cards = context.rootState.currentCards.ids.length
       let connections = context.rootState.currentConnections.ids.length
