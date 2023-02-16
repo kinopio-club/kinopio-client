@@ -43,8 +43,6 @@
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
     span Explore
 
-//- Space Privacy and Explore
-
 .row.align-items-top(v-if="isSpaceMember")
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
@@ -54,7 +52,9 @@
       img.icon.settings(src="@/assets/settings.svg")
       span Settings
 
-//- Duplicate
+//- Space Settings
+
+//- read only space settings
 section.subsection.space-settings(v-if="!isSpaceMember")
   .row
     //- Duplicate
@@ -69,7 +69,7 @@ section.subsection.space-settings(v-if="!isSpaceMember")
       img.icon(v-else src="@/assets/heart-empty.svg")
       span Follow updates
 
-//- Space Settings
+//- member space settings
 section.subsection.space-settings(v-if="settingsIsVisible")
   .row
     //- Background
