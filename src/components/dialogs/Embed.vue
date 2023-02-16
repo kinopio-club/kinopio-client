@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop)
+dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     p Embed
   section
@@ -75,11 +75,19 @@ export default {
   props: {
     visible: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+      }
+    })
+  },
   data () {
     return {
       iframeIsVisible: true,
       min: 40,
-      max: 100
+      max: 100,
+      dialogHeight: null
     }
   },
   computed: {
@@ -143,6 +151,13 @@ export default {
       const state = privacy.states()[number]
       const name = state.friendlyName || state.name
       return utils.capitalizeFirstLetter(name)
+    },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
     }
   },
   watch: {
@@ -150,6 +165,7 @@ export default {
       this.$store.commit('clearNotificationsWithPosition')
       if (visible) {
         this.toggleIframeIsVisible()
+        this.updateDialogHeight()
       }
     }
   }
