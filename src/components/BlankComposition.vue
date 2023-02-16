@@ -2,6 +2,7 @@
 // import utils from '@/utils.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
+// https://vuex.vuejs.org/guide/composition-api.html#accessing-state-and-getters
 import { useStore } from 'vuex'
 const store = useStore()
 
