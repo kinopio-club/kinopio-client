@@ -546,6 +546,10 @@ label
       background-color transparent
       opacity 0.3
 
+hr
+  border-top 1px solid var(--primary-border)
+  border-bottom none
+
 code,
 pre
   font-family var(--mono-font)

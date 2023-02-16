@@ -1,6 +1,6 @@
 <template lang="pug">
 aside.notifications(@click.left="closeAllDialogs")
-  .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type" :style="notificationStyle(item.type)")
+  .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :data-is-persistent-item="item.isPersistentItem" :class="notifificationClasses(item)" :style="notificationStyle(item.type)")
     p
       span.label-badge(v-if="item.label") {{item.label}}
       template(v-if="item.icon")
@@ -13,6 +13,9 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'brush-y'" src="@/assets/brush-y.svg" class="brush-y")
         img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
       span {{item.message}}
+    .row(v-if="item.isPersistentItem")
+      button(@click="removeById(item)")
+        img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item.success(v-if="notifyUnlockedStickyCards")
     video(autoplay loop muted playsinline width="244" height="94")
@@ -132,10 +135,32 @@ aside.notifications(@click.left="closeAllDialogs")
       a(:href="notifyMoveOrCopyToSpaceDetails.id")
         button.variable-length-content(@click.left.prevent.stop="changeSpace(notifyMoveOrCopyToSpaceDetails.id)") {{notifyMoveOrCopyToSpaceDetails.name}} →
 
+  .persistent-item.success(v-if="notifyReferralSuccessUser")
+    p
+      span Because you were referred
+      span(v-if="notifyReferralSuccessUser.name") {{' '}}by {{notifyReferralSuccessUser.name}},
+      span {{' '}}you'll earn ${{referralCreditAmount}} in credits when you sign up
+    .row
+      button(@click.left.stop="triggerSignUpOrInIsVisible")
+        span Sign Up to Earn Credits
+      button(@click="resetNotifyReferralSuccessUser")
+        img.icon.cancel(src="@/assets/add.svg")
+
+  .persistent-item.success(v-if="notifyEarnedCredits")
+    p You've earned ${{referralCreditAmount}} in referral credits, which will be used when you upgrade
+    .row
+      button(@click.left.stop="triggerUpgradeUserIsVisible")
+        span Upgrade
+      button(@click.left.stop="triggerEarnCreditsIsVisible")
+        span Earn More
+      button(@click.left="removeNotifyEarnedCredits")
+        img.icon.cancel(src="@/assets/add.svg")
+
 </template>
 
 <script>
 import cache from '@/cache.js'
+import consts from '@/consts.js'
 import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 import templates from '@/data/templates.js'
@@ -216,6 +241,8 @@ export default {
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
+    notifyReferralSuccessUser () { return this.$store.state.notifyReferralSuccessUser },
+    notifyEarnedCredits () { return this.$store.state.notifyEarnedCredits },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
@@ -237,9 +264,19 @@ export default {
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(currentSpace.id)
     },
-    shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards }
+    shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
+    referralCreditAmount () { return consts.referralCreditAmount }
   },
   methods: {
+    notifificationClasses (item) {
+      let classes = {
+        'danger': item.type === 'danger',
+        'success': item.type === 'success',
+        'info': item.type === 'info',
+        'persistent-item': item.isPersistentItem
+      }
+      return classes
+    },
     toggleShouldUseStickyCards () {
       const value = !this.shouldUseStickyCards
       this.$store.dispatch('currentUser/update', { shouldUseStickyCards: value })
@@ -276,12 +313,16 @@ export default {
       notifications.forEach(item => {
         this.$nextTick(() => {
           const element = document.querySelector(`.notifications .item[data-notification-id="${item.id}"]`)
-          element.addEventListener('animationend', this.remove, false)
+          if (element.dataset.isPersistentItem) { return }
+          element.addEventListener('animationend', this.removePrevious, false)
         })
       })
     },
-    remove () {
-      this.$store.commit('removeNotification')
+    removePrevious () {
+      this.$store.commit('removePreviousNotification')
+    },
+    removeById (item) {
+      this.$store.commit('removeNotificationById', item.id)
     },
     addReadOnlyJiggle () {
       const element = this.$refs.readOnly || this.$refs.template
@@ -300,6 +341,7 @@ export default {
     },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
+      this.resetNotifyReferralSuccessUser()
     },
     restoreSpace () {
       const space = this.$store.state.currentSpace
@@ -332,9 +374,16 @@ export default {
     resetNotifyCardsCreatedIsOverLimitJiggle () {
       this.notifyCardsCreatedIsOverLimitJiggle = false
     },
+    resetNotifyReferralSuccessUser () {
+      this.$store.commit('notifyReferralSuccessUser', null)
+    },
     triggerUpgradeUserIsVisible () {
       this.closeAllDialogs()
       this.$store.commit('triggerUpgradeUserIsVisible')
+    },
+    triggerEarnCreditsIsVisible () {
+      this.closeAllDialogs()
+      this.$store.commit('triggerEarnCreditsIsVisible')
     },
     async checkIfShouldNotifySpaceOutOfSync () {
       const space = utils.clone(this.$store.state.currentSpace)
@@ -373,6 +422,9 @@ export default {
     },
     removeNotifyUnlockedStickyCards () {
       this.notifyUnlockedStickyCards = false
+    },
+    removeNotifyEarnedCredits () {
+      this.$store.commit('notifyEarnedCredits', false)
     }
   }
 }

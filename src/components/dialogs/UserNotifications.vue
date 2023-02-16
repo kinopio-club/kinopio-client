@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight -50 + 'px'}")
+dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight -50 + 'px'}")
   section
     p
       span.badge.info(v-if="unreadCount") {{unreadCount}}
@@ -48,7 +48,7 @@ import cache from '@/cache.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 
 export default {
-  name: 'Notifications',
+  name: 'UserNotifications',
   components: {
     Loader,
     UserLabelInline,
@@ -214,7 +214,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.notifications
+.user-notifications
   top calc(100% - 8px)
   left initial
   right 8px
@@ -264,8 +264,6 @@ export default {
     hr:first-child
       display none
     hr
-      border-top 1px solid var(--primary-border)
-      border-bottom none
       margin 8px 0
       margin-left -4px
       width calc(100% + 8px)

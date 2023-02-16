@@ -44,16 +44,28 @@
 
   .summary
     User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
-    .badge.info
-      span {{price.amount}}/{{price.period}}
-    .badge.secondary
-      span Tax included
+    .row.row-wrap
+      .badge.info
+        span ${{price.amount}}/{{price.period}}
+      .badge.secondary
+        span Tax included
+      Loader(:visible="loading.credits")
+      .badge.success.credits(v-if="credits")
+        span ${{credits}} credit
 
   button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
     span Upgrade Account
+    span(v-if="initialPaymentAfterCredits === 0") {{' '}}For Free
     Loader(:visible="loading.subscriptionIsBeingCreated")
 
-  p You'll be billed {{price.amount}} immediately and then each {{price.period}}. You can cancel anytime.
+  p(v-if="credits")
+    span You'll be billed ${{initialPaymentAfterCredits}} immediately.
+    span(v-if="isCreditsRemainingAfterInitialPayment") {{' '}}Your remaining credits will be applied to future bills.
+    span {{' '}}Then you'll be billed ${{price.amount}} each {{price.period}}.
+  p(v-else)
+    span You'll be billed ${{price.amount}} immediately, and then ${{price.amount}} each {{price.period}}.
+
+  p You can cancel anytime.
 
 </template>
 
@@ -91,6 +103,7 @@ export default {
     price: Object
   },
   mounted () {
+    this.updateCredits()
     this.loadStripe()
     this.updateCountries()
   },
@@ -98,10 +111,12 @@ export default {
     return {
       name: '',
       email: '',
+      credits: 0,
       loading: {
         subscriptionIsBeingCreated: false,
         stripeIsLoading: true,
-        stripeElementsIsMounted: false
+        stripeElementsIsMounted: false,
+        credits: false
       },
       error: {
         unknownServerError: false,
@@ -121,11 +136,28 @@ export default {
     }
   },
   computed: {
-    actionLabel () {
-      if (this.isAccountUpgrade) {
-        return 'Upgrade Account'
+    initialPaymentAfterCredits () {
+      const credits = this.credits
+      const price = this.price.amount
+      if (price > credits) {
+        return price - credits
+      } else {
+        return 0
       }
-      return 'Donate'
+    },
+    creditsUsedForInitialPayment () {
+      const credits = this.credits
+      const price = this.price.amount
+      if (price > credits) {
+        return credits
+      } else {
+        return price
+      }
+    },
+    isCreditsRemainingAfterInitialPayment () {
+      const credits = this.credits
+      const price = this.price.amount
+      return (credits - price) > 0
     },
     user () { return this.$store.state.currentUser },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
@@ -162,6 +194,17 @@ export default {
     isThemeDark () { return this.$store.state.currentUser.theme === 'dark' }
   },
   methods: {
+    async updateCredits () {
+      this.loading.credits = true
+      try {
+        const data = await this.$store.dispatch('api/getReferralsByUser')
+        console.log('🫧', data)
+        this.credits = data.creditsUnused
+      } catch (error) {
+        console.error('🚒', error)
+      }
+      this.loading.credits = false
+    },
     async updateCountries () {
       this.countries = await this.$store.dispatch('api/getCountries')
       this.countryNames = this.countries.map(country => country.name)
@@ -236,9 +279,11 @@ export default {
       this.mountStripeElements()
     },
     async createCustomer () {
+      const creditsUsedForInitialPayment = this.creditsUsedForInitialPayment
       const result = await this.$store.dispatch('api/createCustomer', {
         email: this.email,
         name: this.name,
+        creditsUsedForInitialPayment,
         metadata: {
           userId: this.$store.state.currentUser.id,
           userName: this.$store.state.currentUser.name
@@ -298,20 +343,26 @@ export default {
       return result
     },
     async handleSubscriptionSuccess () {
-      const stripeIds = {
+      const data = {
         stripeCustomerId: customer.id,
         stripeSubscriptionId: subscription.id,
         stripePriceId: subscription.items.data[0].price.id,
-        stripePaymentMethodId: paymentMethod.id
+        stripePaymentMethodId: paymentMethod.id,
+        creditsUsed: this.creditsUsedForInitialPayment
       }
-      const result = await this.$store.dispatch('api/updateSubscription', stripeIds)
+      const result = await this.$store.dispatch('api/updateSubscription', data)
       console.log('🎡 subscribed', result)
-      cache.saveStripeIds(stripeIds)
+      cache.saveStripeIds(data)
       this.loading.subscriptionIsBeingCreated = false
       this.$store.commit('currentUser/isUpgraded', true)
       this.$store.commit('notifyCardsCreatedIsOverLimit', false)
-      this.$store.commit('addNotification', { message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software', type: 'success' })
-      this.$store.dispatch('closeAllDialogs', 'Subscribe')
+      this.$store.commit('notifyEarnedCredits', false)
+      this.$store.commit('addNotification', {
+        message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software',
+        type: 'success',
+        isPersistentItem: true
+      })
+      this.$store.dispatch('closeAllDialogs')
     },
     paymentIntent () {
       if (invoice) {
@@ -321,7 +372,12 @@ export default {
       }
     },
     async handleCustomerActionRequired () {
-      if (paymentIntent.status === 'requires_action') {
+      // success $0 bill from credits
+      if (paymentIntent === null) {
+        this.$store.commit('addNotification', { message: 'Credits used', type: 'success' })
+        await this.handleSubscriptionSuccess()
+      // failed payment
+      } else if (paymentIntent.status === 'requires_action') {
         const result = await stripe.confirmCardPayment(paymentIntent.client_secret, { payment_method: paymentMethod.id })
         if (result.error) {
           console.log('🎡 confirm card payment', result)
@@ -329,6 +385,7 @@ export default {
           this.error.stripeError = true
           this.error.stripeErrorMessage = utils.removeTrailingPeriod(result.error.message)
           throw result
+        // success
         } else if (result.paymentIntent.status === 'succeeded') {
           await this.handleSubscriptionSuccess()
         }
@@ -389,6 +446,7 @@ export default {
   .summary
     margin-top 10px
     margin-bottom 10px
+    display flex
   .badge
     display inline-block
   .loading-stripe,
@@ -403,4 +461,11 @@ export default {
   .badge
     span
       color var(--primary)
+    &.credits
+      margin-top 5px
+  .row-wrap
+    flex-wrap wrap
+    .loader
+      height 24px
+      width 24px
 </style>

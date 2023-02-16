@@ -52,13 +52,13 @@ export default {
       let price
       if (this.priceIsMonthly) {
         price = {
-          amount: '$6',
+          amount: 6,
           period: 'month',
           id: 'price_1L2GvBDFIr5ywhwobbE35dhA'
         }
       } else {
         price = {
-          amount: '$60',
+          amount: 60,
           period: 'year',
           id: 'price_1L2ErWDFIr5ywhwodsKxEEAq'
         }

@@ -45,8 +45,6 @@
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
     span Explore
 
-//- Space Privacy and Explore
-
 .row.align-items-top(v-if="isSpaceMember")
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
@@ -56,26 +54,58 @@
       img.icon.settings(src="@/assets/settings.svg")
       span Settings
 
-//- Duplicate
-.row(v-if="!isSpaceMember")
-  .button-wrap
-    button(@click.left="duplicateSpace")
-      img.icon.add(src="@/assets/add.svg")
-      span Make a Copy
-//- Explore Ask
-.row(v-if="!isSpaceMember && !showInExplore")
-  AskToAddToExplore(@updateDialogHeight="updateDialogHeight")
-
 //- Space Settings
+
+//- read only space settings
+section.subsection.space-settings(v-if="!isSpaceMember")
+  .row
+    //- Duplicate
+    .button-wrap
+      button(@click.left="duplicateSpace")
+        img.icon.add(src="@/assets/add.svg")
+        span Make a Copy
+  .row
+    //- Favorite
+    button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+      img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+      img.icon(v-else src="@/assets/heart-empty.svg")
+      span Follow updates
+
+//- member space settings
 section.subsection.space-settings(v-if="settingsIsVisible")
-  //- Background
   .row
-    button(@click.left.stop="toggleBackgroundIsVisible")
-      BackgroundPreview(:space="currentSpace")
-      span Background
-  //- Explore
+    //- Background
+    .button-wrap
+      button(@click.left.stop="toggleBackgroundIsVisible")
+        BackgroundPreview(:space="currentSpace")
+        span Background
+
+    //- Favorite
+    .button-wrap
+      button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+        img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+        img.icon(v-else src="@/assets/heart-empty.svg")
+        span Pin
+
   .row
-    AddToExplore(@updateLocalSpaces="updateLocalSpaces")
+    //- Template
+    .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
+      button.variable-length-content(:class="{ active: currentSpaceIsUserTemplate }")
+        img.icon.templates(src="@/assets/templates.svg")
+        span Template
+    //- Export
+    .button-wrap
+      button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+        span Export
+        Export(:visible="exportIsVisible")
+
+  .row(v-if="currentSpaceIsUserTemplate")
+    //- Duplicate
+    .button-wrap
+      button(@click.left="duplicateSpace")
+        img.icon.add(src="@/assets/add.svg")
+        span Make a Copy
+
   .row
     .button-wrap(v-if="isSpaceMember")
       .segmented-buttons
@@ -87,7 +117,7 @@ section.subsection.space-settings(v-if="settingsIsVisible")
           template(v-else)
             img.icon.remove(src="@/assets/remove.svg")
             span Remove
-        //- Hide Space
+        //- Hide
         button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
           img.icon(v-if="!currentSpaceIsHidden" src="@/assets/view.svg")
           img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
@@ -99,9 +129,8 @@ import Background from '@/components/dialogs/Background.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
-import AddToExplore from '@/components/AddToExplore.vue'
-import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import templates from '@/data/templates.js'
+import Export from '@/components/dialogs/Export.vue'
 import cache from '@/cache.js'
 
 export default {
@@ -112,8 +141,7 @@ export default {
     BackgroundPreview,
     Loader,
     PrivacyButton,
-    AddToExplore,
-    AskToAddToExplore
+    Export
   },
   props: {
     shouldHidePin: Boolean,
@@ -151,7 +179,8 @@ export default {
     return {
       backgroundIsVisible: false,
       privacyPickerIsVisible: false,
-      settingsIsVisible: false
+      settingsIsVisible: false,
+      exportIsVisible: false
     }
   },
   computed: {
@@ -161,6 +190,7 @@ export default {
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
     },
+    currentSpaceIsUserTemplate () { return this.currentSpace.isTemplate },
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     spaceName: {
@@ -198,10 +228,26 @@ export default {
       })
     },
     dialogIsPinned () { return this.$store.state.spaceDetailsIsPinned },
-    currentUserIsSpaceCollaborator () { return this.$store.getters['currentUser/isSpaceCollaborator']() }
+    currentUserIsSpaceCollaborator () { return this.$store.getters['currentUser/isSpaceCollaborator']() },
+    isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] }
 
   },
   methods: {
+    toggleCurrentSpaceIsUserTemplate () {
+      const value = !this.currentSpaceIsUserTemplate
+      this.$store.dispatch('currentSpace/updateSpace', { isTemplate: value })
+      this.updateLocalSpaces()
+    },
+    toggleIsFavoriteSpace () {
+      const currentSpace = this.$store.state.currentSpace
+      if (this.isFavoriteSpace) {
+        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
+      } else {
+        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
+      }
+      this.updateLocalSpaces()
+    },
+
     duplicateSpace () {
       this.$store.dispatch('currentSpace/duplicateSpace')
       this.updateLocalSpaces()
@@ -265,9 +311,16 @@ export default {
       this.settingsIsVisible = !isVisible
       this.$emit('updateDialogHeight')
     },
+    toggleExportIsVisible () {
+      const isVisible = this.exportIsVisible
+      this.closeDialogsAndEmit()
+      this.exportIsVisible = !isVisible
+      this.$emit('updateDialogHeight')
+    },
     closeDialogs () {
       this.backgroundIsVisible = false
       this.privacyPickerIsVisible = false
+      this.exportIsVisible = false
     },
     closeDialogsAndEmit () {
       this.closeDialogs()
@@ -350,5 +403,7 @@ export default {
       border-radius 4px
   .sunglasses
     margin-left 1px
+  p
+    white-space normal
 
 </style>

@@ -1,5 +1,5 @@
 <template lang="pug">
-.button-wrap.privacy-button(v-if="isSpaceMember || isInvitedButCannotEditSpace")
+.button-wrap.privacy-button(v-if="isSpaceMember || isInvitedButCannotEditSpace" :class="privacyState.name")
   button(@click.left.stop="togglePrivacyPickerIsVisible" :disabled="isInvitedButCannotEditSpace" :class="{ active: privacyPickerIsVisible }")
     template(v-if="showShortName")
       PrivacyIcon(:privacy="privacyState.name")
@@ -68,4 +68,11 @@ export default {
 .privacy-button
   button
     height initial
+dialog.share
+  .privacy-button
+    &.open,
+    &.closed
+      button
+        border-bottom-left-radius 0
+        border-bottom-right-radius 0
 </style>

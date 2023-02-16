@@ -3,7 +3,6 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   section
     .row.title-row
       p Share
-
       .row
         button.small-button(@click.left.stop="isPresentationMode")
           img.icon(src="@/assets/presentation.svg")
@@ -13,41 +12,26 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
             span RSS
           SpaceRssFeed(:visible="spaceRssFeedIsVisible")
 
-  section
-    .row
-      //- Import, Export
-      .segmented-buttons(@click.stop)
-        button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
-          span Import
-          Import(:visible="importIsVisible" @closeDialog="closeDialogs")
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-          span Export
-          Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData")
-      //- Embed
-      .button-wrap
-        button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
-          span Embed
-        Embed(:visible="embedIsVisible")
-
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
-
-    //- Public space
-    template(v-if="!spaceIsPrivate")
-      p.row
-        .url-textarea.single-line
-          span {{url}}
-        .input-button-wrap(@click.left="copyUrl")
-          button.small-button
-            img.icon.copy(src="@/assets/copy.svg")
-            //- span Public URL
+    //- Share URL
+    section.subsection.share-options(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
+      template(v-if="exploreSectionIsVisible")
+        .row
+          p Share with the Community
+        .row
+          AddToExplore
+          AskToAddToExplore
+        hr
+      .row
+        p Share With the World
       .row
         button(@click.left="copyUrl")
           img.icon.copy(src="@/assets/copy.svg")
           span Copy Public URL
 
   //- Invite
-  Invite(v-if="spaceHasUrl && isSpaceMember")
+  Invite(v-if="isSpaceMember && currentUserIsSignedIn")
   //- Collaborators
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
     // collaborators
@@ -64,6 +48,27 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
       span for your spaces to be synced and accessible anywhere.
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
+  section
+    .row
+      //- Import, Export
+      .segmented-buttons(@click.stop)
+        button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+          span Import
+          Import(:visible="importIsVisible" @closeDialog="closeDialogs")
+        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+          span Export
+          Export(:visible="exportIsVisible")
+      //- Embed
+      .button-wrap
+        button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
+          span Embed
+        Embed(:visible="embedIsVisible")
+
+  section
+    .button-wrap
+      button(@click="triggerEarnCreditsIsVisible")
+        span Earn Credits
+
 </template>
 
 <script>
@@ -75,6 +80,8 @@ import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
+import AddToExplore from '@/components/AddToExplore.vue'
+import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 
 export default {
   name: 'Share',
@@ -85,7 +92,9 @@ export default {
     Embed,
     UserList,
     Export,
-    Import
+    Import,
+    AddToExplore,
+    AskToAddToExplore
   },
   props: {
     visible: Boolean
@@ -111,6 +120,12 @@ export default {
     }
   },
   computed: {
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    showInExplore () { return this.$store.state.currentSpace.showInExplore },
+    exploreSectionIsVisible () {
+      const shouldShowAskToAddToExplore = !this.isSpaceMember && !this.showInExplore
+      return this.isSpaceMember || shouldShowAskToAddToExplore
+    },
     userDetailsIsVisible () { return this.$store.state.userDetailsIsVisible },
     userDetailsSelectedUser () {
       if (!this.userDetailsIsVisible) { return }
@@ -128,8 +143,7 @@ export default {
       return this.spacePrivacy === 'private'
     },
     isSpaceMember () {
-      const currentSpace = this.$store.state.currentSpace
-      return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
+      return this.$store.getters['currentUser/isSpaceMember']()
     },
     spaceCollaborators () { return this.$store.state.currentSpace.collaborators },
     spaceHasCollaborators () {
@@ -151,12 +165,15 @@ export default {
       return users
     },
     spaceHasOtherCardUsers () { return Boolean(this.spaceOtherCardUsers.length) },
-    exportData () { return this.$store.getters['currentSpace/all'] },
     dialogIsVisible () {
       return this.privacyPickerIsVisible || this.spaceRssFeedIsVisible || this.embedIsVisible || this.exportIsVisible || this.importIsVisible
     }
   },
   methods: {
+    triggerEarnCreditsIsVisible () {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('triggerEarnCreditsIsVisible')
+    },
     isPresentationMode () {
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('isPresentationMode', true)
@@ -306,4 +323,27 @@ export default {
       padding-top 8px
   .user
     vertical-align -3px
+  .button-tip-badge
+    top -12px
+    pointer-events none
+  .subsection
+    margin-top 10px
+  .share-url-subsection
+    margin-top 0
+    border-top-left-radius 0
+    border-top-right-radius 0
+  .share-options
+    margin-top 0
+
+  @media(max-height 670px)
+    dialog.import,
+    dialog.export,
+    dialog.embed
+      top -50px
+  @media(max-height 500px)
+    dialog.import,
+    dialog.export,
+    dialog.embed
+      top -200px
+
 </style>

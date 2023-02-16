@@ -17,6 +17,7 @@ import websocket from '@/store/plugins/websocket.js'
 import { createStore } from 'vuex'
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
+import last from 'lodash-es/last'
 
 const store = createStore({
   strict: import.meta.env.MODE !== 'production',
@@ -188,6 +189,8 @@ const store = createStore({
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
     shouldResetDimensionsOnLoad: false,
+    validateUserReferral: '',
+    validateUserReferralBySpaceUser: false,
 
     // notifications
     notifications: [],
@@ -206,6 +209,8 @@ const store = createStore({
     hasNotifiedPressAndHoldToDrag: false,
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
+    notifyReferralSuccessUser: null,
+    notifyEarnedCredits: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -306,6 +311,14 @@ const store = createStore({
     shouldResetDimensionsOnLoad: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldResetDimensionsOnLoad = value
+    },
+    validateUserReferral: (state, userId) => {
+      utils.typeCheck({ value: userId, type: 'string' })
+      state.validateUserReferral = userId
+    },
+    validateUserReferralBySpaceUser: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.validateUserReferralBySpaceUser = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
@@ -478,6 +491,7 @@ const store = createStore({
     triggerCardDetailsCloseDialogs: () => {},
     triggerSpaceDetailsCloseDialogs: () => {},
     triggerTemplatesIsVisible: () => {},
+    triggerEarnCreditsIsVisible: () => {},
     triggerImportIsVisible: () => {},
     triggerSelectAllItemsBelowCursor: (state, position) => {},
     triggerSplitCard: (state, cardId) => {},
@@ -1091,6 +1105,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.isJoiningSpace = value
     },
+    clearSpaceCollaboratorKeys: (state) => {
+      state.spaceCollaboratorKeys = []
+    },
     addToSpaceCollaboratorKeys: (state, spaceCollaboratorKey) => {
       utils.typeCheck({ value: spaceCollaboratorKey, type: 'object' })
       state.spaceCollaboratorKeys.push(spaceCollaboratorKey) // { spaceId, collaboratorKey }
@@ -1136,8 +1153,13 @@ const store = createStore({
       notification.id = nanoid()
       state.notifications.push(notification)
     },
-    removeNotification: (state) => {
-      state.notifications.shift()
+    removePreviousNotification: (state) => {
+      const removableNotifications = state.notifications.filter(notification => notification.isPersistentItem === false)
+      const prevNotification = last(removableNotifications)
+      state.notifications = state.notifications.filter(notification => notification.id !== prevNotification.id)
+    },
+    removeNotificationById: (state, id) => {
+      state.notifications = state.notifications.filter(notification => notification.id !== id)
     },
     clearAllNotifications: (state) => {
       state.notifyConnectionError = false
@@ -1210,6 +1232,14 @@ const store = createStore({
     notifyThanksForDonating: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyThanksForDonating = value
+    },
+    notifyReferralSuccessUser: (state, user) => {
+      utils.typeCheck({ value: user, type: 'object' })
+      state.notifyReferralSuccessUser = user
+    },
+    notifyEarnedCredits: (state, user) => {
+      utils.typeCheck({ value: user, type: 'object' })
+      state.notifyEarnedCredits = user
     },
 
     // Notifications with Position

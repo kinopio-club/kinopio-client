@@ -190,9 +190,9 @@ export default {
 </script>
 
 <style lang="stylus">
-  @media(max-height 600px)
+  @media(max-height 670px)
     .user-settings
-      top -100px !important
+      top -150px !important
   .billing-cancel
     margin-top 2px
     padding-bottom 2px

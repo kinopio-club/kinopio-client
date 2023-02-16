@@ -208,12 +208,12 @@ export default {
     },
     triggerTemplatesIsVisible () {
       this.closeAll()
-      this.$store.dispatch('closeAllDialogs', 'addSpace.triggerTemplatesIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerTemplatesIsVisible')
     },
     triggerImportIsVisible () {
       this.closeAll()
-      this.$store.dispatch('closeAllDialogs', 'addSpace.triggerImportIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerImportIsVisible')
     },
     async checkIfUserHasInboxSpace () {

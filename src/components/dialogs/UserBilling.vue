@@ -15,9 +15,11 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
 
     //- free
     section(v-if="!isUpgraded")
-      p(v-if="isAwaitingDowngrade")
-        span You can upgrade your account again whenever you're ready
-      p(v-else) After you upgrade your account you'll be able to manage your payment details here
+      template(v-if="isAwaitingDowngrade")
+        p You can upgrade your account again whenever you're ready
+      template(v-else)
+        ReferredNewUserCredits
+        p After you upgrade your account you'll be able to manage your payment details here
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade
 
     //- upgraded
@@ -25,7 +27,7 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
       .summary
         User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
         p
-          span You are paying
+          span You are paying{{' '}}
             .badge.info ${{info.price}}/{{info.period}}
       p(v-if="info.nextBillingDate") Next payment: {{info.nextBillingDate}}
       p(v-if="info.cardType") {{info.cardType}} ••{{info.cardLast4}} – {{info.cardExpMonth}}/{{info.cardExpYear}}
@@ -46,11 +48,15 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
               img.icon(src="@/assets/remove.svg")
               span Downgrade
               Loader(:visible="loading.isCancelling")
+    UserCredits(:showEarnCreditsButton="true")
 </template>
 
 <script>
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
+import UserCredits from '@/components/UserCredits.vue'
+import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
+
 import { defineAsyncComponent } from 'vue'
 
 import dayjs from 'dayjs'
@@ -62,7 +68,9 @@ export default {
   name: 'UserBilling',
   components: {
     User,
-    Loader
+    Loader,
+    UserCredits,
+    ReferredNewUserCredits
   },
   props: {
     visible: Boolean

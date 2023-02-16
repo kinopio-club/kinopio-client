@@ -1,7 +1,7 @@
 <script setup>
 // import utils from '@/utils.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
 // https://vuex.vuejs.org/guide/composition-api.html#accessing-state-and-getters
 import { useStore } from 'vuex'
 const store = useStore()
@@ -15,9 +15,16 @@ const props = defineProps({
 })
 const emit = defineEmits(['updateCount'])
 
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    console.log('💁‍♀️', value)
+  }
+})
+
 const state = reactive({
   count: 0
 })
+
 const themeName = computed(() => store.state.currentUser.theme)
 const incrementBy = () => {
   state.count = state.count + 1

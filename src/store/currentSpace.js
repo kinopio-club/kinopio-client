@@ -184,6 +184,7 @@ const currentSpace = {
       context.dispatch('updateModulesSpaceId')
       context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
       context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
+      context.dispatch('currentUser/validateReferral', null, { root: true })
     },
 
     // Users and otherSpaces
@@ -288,16 +289,31 @@ const currentSpace = {
 
     // Space
 
-    createNewHelloSpace: (context) => {
+    checkIfShouldCreateNewUserSpaces: (context) => {
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const spaces = cache.getAllSpaces()
+      if (currentUserIsSignedIn) { return }
+      if (spaces.length) { return }
+      const shouldCreateWithoutLoading = true
+      context.dispatch('createNewInboxSpace', shouldCreateWithoutLoading)
+      context.dispatch('createNewHelloSpace', shouldCreateWithoutLoading)
+    },
+    createNewHelloSpace: (context, shouldCreateWithoutLoading) => {
       const user = context.rootState.currentUser
       let space = utils.clone(helloSpace)
       space.id = nanoid()
-      space = cache.updateIdsInSpace(space)
-      context.commit('clearSearch', null, { root: true })
-      context.dispatch('restoreSpaceInChunks', { space })
-      context.commit('addUserToSpace', user)
-      context.dispatch('updateOtherUsers')
-      context.dispatch('updateOtherSpaces')
+      if (shouldCreateWithoutLoading) {
+        space.users = [context.rootState.currentUser]
+        const nullCardUsers = true
+        cache.updateIdsInSpace(space, nullCardUsers)
+      } else {
+        space = cache.updateIdsInSpace(space)
+        context.commit('clearSearch', null, { root: true })
+        context.dispatch('restoreSpaceInChunks', { space })
+        context.commit('addUserToSpace', user)
+        context.dispatch('updateOtherUsers')
+        context.dispatch('updateOtherSpaces')
+      }
     },
     createNewSpace: (context, space) => {
       context.commit('triggerSpaceZoomReset', null, { root: true })
@@ -462,7 +478,7 @@ const currentSpace = {
           space.collaboratorKey = collaboratorKey
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
           cache.saveInvitedSpace(remoteSpace)
-          context.commit('collaboratorKey', '', { root: true })
+          context.commit('clearSpaceCollaboratorKeys', null, { root: true })
         } else if (currentSpaceIsRemote) {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }

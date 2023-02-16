@@ -108,11 +108,12 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
               span Share
             Share(:visible="shareIsVisible")
+            EarnCredits(:visible="earnCreditsIsVisible")
           //- Notifications
           .button-wrap
             button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
               span {{notificationsUnreadCount}}
-            Notifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
+            UserNotifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
         .bottom-controls
           ResetPassword
           //- Sign Up or In
@@ -151,7 +152,7 @@ import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
 import ResetPassword from '@/components/dialogs/ResetPassword.vue'
 import Share from '@/components/dialogs/Share.vue'
-import Notifications from '@/components/dialogs/Notifications.vue'
+import UserNotifications from '@/components/dialogs/UserNotifications.vue'
 import Loader from '@/components/Loader.vue'
 import templates from '@/data/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
@@ -169,6 +170,7 @@ import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
 import Import from '@/components/dialogs/Import.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
+import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 
 import { mapState, mapGetters } from 'vuex'
@@ -192,7 +194,7 @@ export default {
     SignUpOrIn,
     ResetPassword,
     Share,
-    Notifications,
+    UserNotifications,
     Loader,
     ImportArenaChannel,
     KeyboardShortcuts,
@@ -209,6 +211,7 @@ export default {
     Toolbar,
     Import,
     Pricing,
+    EarnCredits,
     SpaceTodayJournalBadge
   },
   props: {
@@ -239,7 +242,8 @@ export default {
       sidebarIsVisible: false,
       donateIsVisible: false,
       importIsVisible: false,
-      pricingIsVisible: false
+      pricingIsVisible: false,
+      earnCreditsIsVisible: false
     }
   },
   created () {
@@ -276,6 +280,8 @@ export default {
         this.hidden()
       } else if (mutation.type === 'triggerTemplatesIsVisible') {
         this.templatesIsVisible = true
+      } else if (mutation.type === 'triggerEarnCreditsIsVisible') {
+        this.earnCreditsIsVisible = true
       } else if (mutation.type === 'triggerRemovedIsVisible' || mutation.type === 'triggerAIImagesIsVisible') {
         this.sidebarIsVisible = true
       } else if (mutation.type === 'triggerImportIsVisible') {
@@ -469,6 +475,7 @@ export default {
       this.notificationsIsVisible = false
       this.addSpaceIsVisible = false
       this.templatesIsVisible = false
+      this.earnCreditsIsVisible = false
       this.importIsVisible = false
       this.pricingIsVisible = false
       if (!this.spaceDetailsIsPinned) {

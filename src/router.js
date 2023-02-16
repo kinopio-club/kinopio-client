@@ -86,6 +86,7 @@ const router = createRouter({
         const spaceId = urlParams.get('spaceId')
         const collaboratorKey = urlParams.get('collaboratorKey')
         const disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        store.commit('validateUserReferralBySpaceUser', true)
         store.commit('disableViewportOptimizations', disableViewportOptimizations)
         if (!spaceId || !collaboratorKey) { return }
         store.commit('isLoadingSpace', true)
@@ -177,6 +178,14 @@ const router = createRouter({
         store.commit('spaceUrlToLoad', spaceId)
         store.commit('spaceZoomPercent', zoom)
         store.commit('isEmbedMode', true)
+        next()
+      }
+    }, {
+      path: '/refer/:userId',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const userId = to.params.userId
+        store.commit('validateUserReferral', userId)
         next()
       }
     }, {

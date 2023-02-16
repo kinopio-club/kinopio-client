@@ -4,7 +4,7 @@
     span(v-if="!showInExplore")
       img.icon.add(src="@/assets/add.svg")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
-    span(v-if="!showInExplore") Share This Space With the Community
+    span(v-if="!showInExplore") Add to Explore
     span(v-if="showInExplore") In Explore
 
   template(v-if="error.userNeedsToSignUpOrIn")
@@ -14,11 +14,11 @@
 
   template(v-else-if="error.spaceMustBeEdited")
     .badge.info
-      span Edit and rename this space to add to explore
+      span Edit and rename this space to add to Explore
 
   template(v-else-if="error.spaceCardsMinimum")
     .badge.info
-      span Space needs more than 10 cards to add to explore
+      span Space needs more than 10 cards to add to Explore
 
 </template>
 

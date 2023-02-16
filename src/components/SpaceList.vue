@@ -28,7 +28,7 @@ span.space-list-wrap
 
               //- User(s)
               template(v-if="showOtherUsers")
-                .users
+                .users(:class="{'multiple-users': space.otherUsers.length > 1}")
                   User(:user="user(space)" :isClickable="false" :key="user(space).id")
                   template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
                     User(:user="otherUser" :isClickable="false")
@@ -67,7 +67,7 @@ span.space-list-wrap
                 img.icon.checkmark(src="@/assets/checkmark.svg")
           button.duplicate.small-button(v-if="spaceIsActive(space) && spaceIsTemplate(space)" @click="duplicateSpace")
             img.icon(src="@/assets/add.svg")
-            span Duplicate
+            span Copy
 
 </template>
 

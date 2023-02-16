@@ -63,7 +63,8 @@ export default {
     lastUsedImagePickerService: '',
     AIImages: [],
     theme: null,
-    themeIsSystem: true
+    themeIsSystem: true,
+    referredByUserId: ''
   },
   mutations: {
     color: (state, value) => {
@@ -347,6 +348,10 @@ export default {
       utils.typeCheck({ value, type: 'boolean' })
       state.themeIsSystem = value
       cache.updateUser('themeIsSystem', value)
+    },
+    referredByUserId: (state, value) => {
+      state.referredByUserId = value
+      cache.updateUser('referredByUserId', value)
     }
   },
   actions: {
@@ -361,6 +366,7 @@ export default {
         console.log('🌸 Create new user')
         context.dispatch('createNewUser')
       }
+      context.dispatch('currentSpace/checkIfShouldCreateNewUserSpaces', null, { root: true })
       context.dispatch('themes/restore', null, { root: true })
       context.commit('triggerUserIsLoaded', null, { root: true })
     },
@@ -734,6 +740,30 @@ export default {
         }
       }
       return space
+    },
+    validateReferral: async (context) => {
+      let referralUserId
+      if (context.rootState.validateUserReferralBySpaceUser) {
+        const referralUsers = context.rootGetters['currentSpace/members']()
+        referralUserId = referralUsers[0].id
+      } else {
+        referralUserId = context.rootState.validateUserReferral
+      }
+      if (!referralUserId) { return }
+      const canBeReferred = context.getters.canBeReferred(referralUserId)
+      const publicUser = await context.dispatch('api/getPublicUser', { id: referralUserId }, { root: true })
+      if (!publicUser) {
+        context.commit('addNotification', { message: 'Invalid referral, referring user not found', type: 'danger' }, { root: true })
+        return
+      }
+      if (canBeReferred) {
+        context.commit('notifyReferralSuccessUser', publicUser, { root: true })
+        context.dispatch('update', { referredByUserId: publicUser.id })
+      } else {
+        context.commit('addNotification', { message: 'Only new users can be referred', type: 'danger' }, { root: true })
+      }
+      context.commit('validateUserReferralBySpaceUser', false, { root: true })
+      context.commit('validateUserReferral', '', { root: true })
     }
   },
   getters: {
@@ -864,6 +894,11 @@ export default {
       const connections = rootState.filteredConnectionTypeIds
       const frames = rootState.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
+    },
+    canBeReferred: (state, getters) => (referralUserId) => {
+      if (getters.isSignedIn) { return }
+      if (referralUserId === state.id) { return }
+      return true
     },
 
     // AI Images

@@ -1,41 +1,54 @@
 <template lang="pug">
 section.invite
-  .row
-    p Invite Collaborators
-  Loader(:visible="loading")
-  template(v-if="!loading && collaboratorKey")
+  p Invite Collaborators
+  section.subsection
     .row
-      .url-textarea.single-line
-        span {{url}}
-      .input-button-wrap(@click.left="copyUrl")
-        button.small-button
+      p
+        .users
+          User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+          User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+        span Invite to Edit
+    Loader(:visible="loading")
+    template(v-if="!loading && collaboratorKey")
+      .row
+        button(@click.left="copyUrl")
           img.icon.copy(src="@/assets/copy.svg")
-    .row
-      button(@click.left="copyUrl")
-        img.icon.copy(src="@/assets/copy.svg")
-        span Copy Invite URL
-      button(v-if="isTips" @click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
-        span Tips
-  //- Error
-  template(v-if="!loading && !collaboratorKey")
-    .row
-      .badge.danger シ_ _)シ Something went wrong
-    .row
-      button(@click="updateCollaboratorKey") Try Again
-  //- View and Edit Permissions
-  section.subsection.more-info(v-if="tipsIsVisible")
-    .row(v-if="spaceIsPrivate")
-      p No account is needed to view private spaces – but editing requires an account.
-    .row(v-if="currentUserIsUpgraded")
-      .badge.success
-        span Because your account is upgraded, others can create cards here for free
+          span Copy Invite URL
+        button(@click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
+          span Tips
+    //- Error
+    template(v-if="!loading && !collaboratorKey")
+      .row
+        .badge.danger シ_ _)シ Something went wrong
+      .row
+        button(@click="updateCollaboratorKey") Try Again
+    //- Tips
+    .more-info(v-if="tipsIsVisible")
+      template(v-if="spaceIsPrivate")
+        .row
+          p
+            span No account is needed to view{{' '}}
+            span.badge.danger private spaces
+            span {{' '}}– but editing requires an account.
+        hr
+      .row
+        p You'll both earn a{{' '}}
+          span.badge.success $6 credit
+          span when someone you invite signs up for a Kinopio account
+      template(v-if="currentUserIsUpgraded")
+        hr
+        .row
+          .badge.success
+            span Because your account is upgraded, others can create cards here for free
 
 </template>
 
 <script>
 import Loader from '@/components/Loader.vue'
+import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
+import randomColor from 'randomcolor'
 import { mapState, mapGetters } from 'vuex'
 
 export default {
@@ -44,7 +57,8 @@ export default {
     visible: Boolean
   },
   components: {
-    Loader
+    Loader,
+    User
   },
   mounted () {
     this.updateCollaboratorKey()
@@ -65,7 +79,11 @@ export default {
     ]),
     spaceIsPrivate () { return this.$store.state.currentSpace.privacy === 'private' },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
-    isTips () { return this.spaceIsPrivate || this.currentUserIsUpgraded }
+    randomUser () {
+      const luminosity = this.$store.state.currentUser.theme
+      const color = randomColor({ luminosity })
+      return { color }
+    }
   },
   methods: {
     async copyUrl (event) {
@@ -102,6 +120,9 @@ export default {
       const spaceId = currentSpace.id
       const spaceName = utils.normalizeString(currentSpace.name)
       this.url = `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
+      if (utils.isDevelopment()) {
+        console.log('🍇 invite url', this.url)
+      }
     },
     toggleTipsIsVisible () {
       this.tipsIsVisible = !this.tipsIsVisible
@@ -118,8 +139,10 @@ export default {
 <style lang="stylus" scoped>
 .invite
   user-select text
-  section.more-info
-    .badge
-      margin 0
-      color var(--primary)
+  .badge
+    margin 0
+    color var(--primary)
+    vertical-align 0
+  .users
+    margin-right 5px
 </style>
