@@ -7,6 +7,12 @@ import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
+onMounted(() => {
+  if (utils.isDevelopment()) {
+    console.log('🍇 referral url', url.value)
+  }
+})
+
 defineProps({
   visible: Boolean
 })
