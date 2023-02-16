@@ -30,8 +30,8 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           img.icon.copy(src="@/assets/copy.svg")
           span Copy Public URL
 
-    //- Invite
-    Invite(v-if="isSpaceMember")
+  //- Invite
+  Invite(v-if="isSpaceMember")
   //- Collaborators
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
     // collaborators

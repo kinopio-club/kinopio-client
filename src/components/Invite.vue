@@ -1,43 +1,45 @@
 <template lang="pug">
-section.subsection.invite
-  .row
-    p
-      .users
-        User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-        User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-      span Invite to Edit
-  Loader(:visible="loading")
-  template(v-if="!loading && collaboratorKey")
+section.invite
+  p Invite Collaborators
+  section.subsection
     .row
-      button(@click.left="copyUrl")
-        img.icon.copy(src="@/assets/copy.svg")
-        span Copy Invite URL
-      button(@click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
-        span Tips
-  //- Error
-  template(v-if="!loading && !collaboratorKey")
-    .row
-      .badge.danger シ_ _)シ Something went wrong
-    .row
-      button(@click="updateCollaboratorKey") Try Again
-  //- Tips
-  .more-info(v-if="tipsIsVisible")
-    template(v-if="spaceIsPrivate")
+      p
+        .users
+          User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+          User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+        span Invite to Edit
+    Loader(:visible="loading")
+    template(v-if="!loading && collaboratorKey")
       .row
-        p
-          span No account is needed to view{{' '}}
-          span.badge.danger private spaces
-          span {{' '}}– but editing requires an account.
-      hr
-    .row
-      p You'll both earn a{{' '}}
-        span.badge.success $6 credit
-        span when someone you invite signs up for a Kinopio account
-    template(v-if="currentUserIsUpgraded")
-      hr
+        button(@click.left="copyUrl")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Invite URL
+        button(@click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
+          span Tips
+    //- Error
+    template(v-if="!loading && !collaboratorKey")
       .row
-        .badge.success
-          span Because your account is upgraded, others can create cards here for free
+        .badge.danger シ_ _)シ Something went wrong
+      .row
+        button(@click="updateCollaboratorKey") Try Again
+    //- Tips
+    .more-info(v-if="tipsIsVisible")
+      template(v-if="spaceIsPrivate")
+        .row
+          p
+            span No account is needed to view{{' '}}
+            span.badge.danger private spaces
+            span {{' '}}– but editing requires an account.
+        hr
+      .row
+        p You'll both earn a{{' '}}
+          span.badge.success $6 credit
+          span when someone you invite signs up for a Kinopio account
+      template(v-if="currentUserIsUpgraded")
+        hr
+        .row
+          .badge.success
+            span Because your account is upgraded, others can create cards here for free
 
 </template>
 
