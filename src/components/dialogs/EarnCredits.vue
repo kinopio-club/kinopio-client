@@ -3,12 +3,20 @@ import UserCredits from '@/components/UserCredits.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
-defineProps({
+const props = defineProps({
   visible: Boolean
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    if (utils.isDevelopment()) {
+      console.log('🍇 referral url', url.value)
+    }
+  }
 })
 
 const url = computed(() => utils.kinopioDomain() + '/refer/' + store.state.currentUser.id)
