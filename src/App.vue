@@ -400,10 +400,12 @@ label // used for checkbox buttons
     border-color transparent
     background-color transparent
   &:hover,
-  &.hover,
-  &:focus
+  &.hover
     box-shadow var(--button-hover-shadow)
     background-color var(--secondary-hover-background)
+    outline none
+  &:focus
+    box-shadow var(--button-hover-shadow)
     outline none
   &:active,
   &.active
