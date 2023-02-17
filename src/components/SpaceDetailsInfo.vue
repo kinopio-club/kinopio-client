@@ -277,13 +277,12 @@ export default {
       let spaces = cache.getAllSpaces().filter(space => {
         return this.$store.getters['currentUser/canEditSpace'](space)
       })
-
       spaces = spaces.filter(space => space.id !== this.currentSpace.id)
       if (spaces.length) {
         const cachedSpace = this.$store.getters.cachedOrOtherSpaceById(this.currentUser.prevLastSpaceId)
         this.$store.dispatch('currentSpace/changeSpace', { space: cachedSpace || spaces[0] })
       } else {
-        this.addSpace()
+        this.$emit('addSpace')
       }
     },
     textareaSize () {
