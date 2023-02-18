@@ -400,10 +400,12 @@ label // used for checkbox buttons
     border-color transparent
     background-color transparent
   &:hover,
-  &.hover,
-  &:focus
+  &.hover
     box-shadow var(--button-hover-shadow)
     background-color var(--secondary-hover-background)
+    outline none
+  &:focus
+    box-shadow var(--button-hover-shadow)
     outline none
   &:active,
   &.active
@@ -778,6 +780,10 @@ dialog
 
 .icon.stats
   vertical-align -1px
+
+.icon.button-down-arrow
+  padding 0
+  vertical-align 2px
 
 label,
 li

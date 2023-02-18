@@ -94,14 +94,11 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImageOrFile")
       //- Toggle Style Actions
       .button-wrap
-        button(:disabled="!canEditCard" @click.left.stop="toggleStyleActionsIsVisible" :class="{active : StyleActionsIsVisible}")
-          span Style
-      //- Toggle Collaboration Info
-      .button-wrap
-        button.toggle-collaboration-info(@click.left.stop="toggleCollaborationInfoIsVisible" :class="{active : collaborationInfoIsVisible}")
-          img.icon.time(src="@/assets/time.svg")
-    StyleActions(:visible="StyleActionsIsVisible" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowStyleActions }")
-    CardCollaborationInfo(:visible="collaborationInfoIsVisible" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
+        button(:disabled="!canEditCard" @click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}")
+          img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+
+    CardBoxActions(:visible="shouldShowItemActions" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }")
+    CardCollaborationInfo(:visible="shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
     .row(v-if="nameMetaRowIsVisible")
       //- Split by Line Breaks
@@ -186,7 +183,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 </template>
 
 <script>
-import StyleActions from '@/components/subsections/StyleActions.vue'
+import CardBoxActions from '@/components/subsections/CardBoxActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
@@ -215,7 +212,7 @@ let openingAnimationTimer, openingStartTime, shouldCancelOpening
 export default {
   name: 'CardDetails',
   components: {
-    StyleActions,
+    CardBoxActions,
     ImagePicker,
     CardTips,
     TagPicker,
@@ -325,7 +322,7 @@ export default {
       'otherSpaceById',
       'currentUser/isInvitedButCannotEditSpace'
     ]),
-    rowIsBelowStyleActions () { return this.nameMetaRowIsVisible || this.badgesRowIsVisible || this.collaborationInfoIsVisible || this.cardHasMedia || this.cardUrlPreviewIsVisible },
+    rowIsBelowItemActions () { return this.nameMetaRowIsVisible || this.badgesRowIsVisible || this.shouldShowItemActions || this.cardHasMedia || this.cardUrlPreviewIsVisible },
     nameMetaRowIsVisible () { return this.nameSplitIntoCardsCount },
     badgesRowIsVisible () { return this.tagsInCard.length || this.card.linkToSpaceId || this.nameIsComment || this.isInSearchResultsCards },
     parentElement () { return this.$refs.dialog },
@@ -554,10 +551,7 @@ export default {
         borderRadius: borderRadius
       }
     },
-    collaborationInfoIsVisible () { return this.currentUser.shouldShowCardCollaborationInfo },
-    StyleActionsIsVisible () {
-      return this.currentUser.shouldShowStyleActions
-    }
+    shouldShowItemActions () { return this.currentUser.shouldShowItemActions }
   },
   methods: {
     broadcastShowCardDetails () {
@@ -923,22 +917,15 @@ export default {
       this.imagePickerIsVisible = !isVisible
       this.initialSearch = this.normalizedName
     },
-    toggleStyleActionsIsVisible () {
+    toggleShouldShowItemActions () {
       this.closeDialogs()
-      const isVisible = !this.currentUser.shouldShowStyleActions
-      this.$store.dispatch('currentUser/shouldShowStyleActions', isVisible)
+      const isVisible = !this.shouldShowItemActions
+      this.$store.dispatch('currentUser/shouldShowItemActions', isVisible)
       this.$nextTick(() => {
         this.scrollIntoView()
       })
     },
-    toggleCollaborationInfoIsVisible () {
-      this.closeDialogs()
-      const isVisible = !this.currentUser.shouldShowCardCollaborationInfo
-      this.$store.dispatch('currentUser/shouldShowCardCollaborationInfo', isVisible)
-      this.$nextTick(() => {
-        this.scrollIntoView()
-      })
-    },
+
     focusName (position) {
       utils.disablePinchZoom()
       if (this.shouldPreventNextFocusOnName) {
@@ -1511,12 +1498,6 @@ export default {
     position absolute
     z-index -1
     pointer-events none
-  .toggle-collaboration-info
-    .down-arrow
-      padding 0
-  button
-    .icon.time
-      vertical-align -1px
 
   dialog.image-picker
     left -100px

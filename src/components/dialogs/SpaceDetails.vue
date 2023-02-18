@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned}")
   section
-    SpaceDetailsInfo(@updateLocalSpaces="updateLocalSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden")
+    SpaceDetailsInfo(@updateLocalSpaces="updateLocalSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden" @addSpace="addSpace")
   section.results-actions
     .row
       //- Add Space
@@ -376,6 +376,4 @@ export default {
   &.is-pinned
     left -65px
     top -13px
-  .button-down-arrow
-    padding 0
 </style>

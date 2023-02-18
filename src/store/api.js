@@ -90,8 +90,9 @@ const self = {
   mutations: {},
   actions: {
 
-    handleServerError: (context, { name, error }) => {
+    handleServerError: (context, { name, error, shouldNotNotifyUser }) => {
       console.error('🚒', name, error)
+      if (!shouldNotNotifyUser) { return }
       context.commit('notifyConnectionError', true, { root: true })
       context.commit('notifyConnectionErrorName', name, { root: true })
     },
@@ -386,7 +387,7 @@ const self = {
         const response = await fetch(`${host}/user/favorites`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'updateUserFavorites', error })
+        context.dispatch('handleServerError', { name: 'updateUserFavorites', error, shouldNotNotifyUser: true })
       }
     },
 
@@ -409,7 +410,7 @@ const self = {
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/live-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getLiveSpaces', error })
+        context.dispatch('handleServerError', { name: 'getLiveSpaces', error, shouldNotNotifyUser: true })
       }
     },
     getSpace: async (context, { space, shouldRequestRemote }) => {

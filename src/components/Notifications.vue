@@ -104,8 +104,14 @@ aside.notifications(@click.left="closeAllDialogs")
     .row
       .button-wrap
         a(href="mailto:support@kinopio.club?subject=Connection Error")
-          button Email Support
-        button(@click.left="refreshBrowser") Refresh
+          button
+            span Email Support
+      .button-wrap
+        button(@click.left="refreshBrowser")
+          span Refresh
+      .button-wrap
+        button(@click="removeNotifyConnectionError")
+          img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item(v-if="notifyKinopioUpdatesAreAvailable")
     p
@@ -425,6 +431,9 @@ export default {
     },
     removeNotifyEarnedCredits () {
       this.$store.commit('notifyEarnedCredits', false)
+    },
+    removeNotifyConnectionError () {
+      this.$store.commit('notifyConnectionError', false)
     }
   }
 }
