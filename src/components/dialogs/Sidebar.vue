@@ -29,7 +29,11 @@ dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="clos
             img.icon.stats(src="@/assets/stats.svg")
           //- Stats
           button(@click.left="toggleFavoritesIsVisible" :class="{active: favoritesIsVisible}")
-            img.icon(src="@/assets/heart-empty.svg")
+            template(v-if="favoriteSpacesEditedCount")
+              img.icon(src="@/assets/heart.svg")
+              span {{favoriteSpacesEditedCount}}
+            template(v-else)
+              img.icon(src="@/assets/heart-empty.svg")
 
       //- Pin
       .title-row
@@ -99,9 +103,22 @@ export default {
     })
   },
   computed: {
-    dialogIsPinned () { return this.$store.state.sidebarIsPinned }
+    dialogIsPinned () { return this.$store.state.sidebarIsPinned },
+    favoriteSpacesEditedCount () {
+      const currentUser = this.$store.state.currentUser
+      let favoriteSpaces = utils.clone(currentUser.favoriteSpaces)
+      favoriteSpaces = favoriteSpaces.filter(space => {
+        const isEditedByOtherUser = space.editedByUserId !== currentUser.id
+        const isEditedAndNotVisited = space.isEdited && space.userId !== currentUser.id
+        return isEditedByOtherUser && isEditedAndNotVisited
+      })
+      return favoriteSpaces.length
+    }
   },
   methods: {
+    async updateFavorites () {
+      await this.$store.dispatch('currentUser/restoreUserFavorites')
+    },
     toggleDialogIsPinned () {
       const isPinned = !this.dialogIsPinned
       this.$store.dispatch('sidebarIsPinned', isPinned)
@@ -172,6 +189,7 @@ export default {
     visible (visible) {
       if (visible) {
         this.updateDialogHeight()
+        this.updateFavorites()
       }
     }
   }
