@@ -27,6 +27,13 @@ dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="clos
           //- Stats
           button(@click.left="toggleStatsIsVisible" :class="{active: statsIsVisible}")
             img.icon.stats(src="@/assets/stats.svg")
+          //- Stats
+          button(@click.left="toggleFavoritesIsVisible" :class="{active: favoritesIsVisible}")
+            template(v-if="favoriteSpacesEditedCount")
+              img.icon(src="@/assets/heart.svg")
+              span {{favoriteSpacesEditedCount}}
+            template(v-else)
+              img.icon(src="@/assets/heart-empty.svg")
 
       //- Pin
       .title-row
@@ -40,6 +47,7 @@ dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="clos
   Removed(:visible="removedIsVisible")
   AIImages(:visible="AIImagesIsVisible")
   Stats(:visible="statsIsVisible")
+  Favorites(:visible="favoritesIsVisible")
 
 </template>
 
@@ -51,6 +59,7 @@ import Comments from '@/components/Comments.vue'
 import Removed from '@/components/Removed.vue'
 import AIImages from '@/components/AIImages.vue'
 import Stats from '@/components/Stats.vue'
+import Favorites from '@/components/dialogs/Favorites.vue'
 
 export default {
   name: 'Sidebar',
@@ -60,7 +69,8 @@ export default {
     Comments,
     Removed,
     AIImages,
-    Stats
+    Stats,
+    Favorites
   },
   props: {
     visible: Boolean
@@ -73,7 +83,8 @@ export default {
       commentsIsVisible: false,
       removedIsVisible: false,
       AIImagesIsVisible: false,
-      statsIsVisible: false
+      statsIsVisible: false,
+      favoritesIsVisible: false
     }
   },
   created () {
@@ -92,9 +103,22 @@ export default {
     })
   },
   computed: {
-    dialogIsPinned () { return this.$store.state.sidebarIsPinned }
+    dialogIsPinned () { return this.$store.state.sidebarIsPinned },
+    favoriteSpacesEditedCount () {
+      const currentUser = this.$store.state.currentUser
+      let favoriteSpaces = utils.clone(currentUser.favoriteSpaces)
+      favoriteSpaces = favoriteSpaces.filter(space => {
+        const isEditedByOtherUser = space.editedByUserId !== currentUser.id
+        const isEditedAndNotVisited = space.isEdited && space.userId !== currentUser.id
+        return isEditedByOtherUser && isEditedAndNotVisited
+      })
+      return favoriteSpaces.length
+    }
   },
   methods: {
+    async updateFavorites () {
+      await this.$store.dispatch('currentUser/restoreUserFavorites')
+    },
     toggleDialogIsPinned () {
       const isPinned = !this.dialogIsPinned
       this.$store.dispatch('sidebarIsPinned', isPinned)
@@ -109,6 +133,7 @@ export default {
       this.removedIsVisible = false
       this.AIImagesIsVisible = false
       this.statsIsVisible = false
+      this.favoritesIsVisible = false
     },
     toggleTagsIsVisible () {
       const value = !this.tagsIsVisible
@@ -146,6 +171,12 @@ export default {
       this.clearIsVisible()
       this.statsIsVisible = value
     },
+    toggleFavoritesIsVisible () {
+      const value = !this.favoritesIsVisible
+      if (!value) { return }
+      this.clearIsVisible()
+      this.favoritesIsVisible = value
+    },
     updateDialogHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
@@ -158,6 +189,7 @@ export default {
     visible (visible) {
       if (visible) {
         this.updateDialogHeight()
+        this.updateFavorites()
       }
     }
   }
@@ -175,6 +207,7 @@ export default {
   .title-row-flex
     display flex
     justify-content space-between
+    align-items flex-start
     .comment-icon
       vertical-align -2px
   .right-pin

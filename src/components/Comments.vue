@@ -15,7 +15,9 @@
   section.no-comments-section(v-if="!comments.length")
     p No comment cards in this space yet
     p
-      span.badge.secondary Card → Style →
+      span.badge.secondary Card →{{' '}}
+        img.icon.down-arrow.down-arrow-inline(src="@/assets/down-arrow.svg")
+        span →
         img.icon.comment-icon(src="@/assets/comment.svg")
 </template>
 
@@ -122,4 +124,6 @@ export default {
     .comment-icon
       margin-left 4px
       vertical-align -2px
+  .down-arrow-inline
+    vertical-align 2px
 </style>

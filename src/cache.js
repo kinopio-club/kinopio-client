@@ -251,9 +251,10 @@ export default {
     const spaces = spaceKeys.map(key => {
       return this.getLocal(key)
     })
-    const sortedSpaces = spaces.sort((a, b) => {
+    let sortedSpaces = spaces.sort((a, b) => {
       return b.removeDate - a.removeDate
     })
+    sortedSpaces = sortedSpaces.filter(space => Boolean(space))
     return sortedSpaces
   },
 
