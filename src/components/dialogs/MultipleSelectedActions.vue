@@ -28,21 +28,7 @@ dialog.narrow.multiple-selected-actions(
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
     CardBoxActions(:visible="shouldShowItemActions && (cardsIsSelected || boxesIsSelected)" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }")
-    //- Connection Actions
-    section.subsection.connection-actions(v-if="shouldShowItemActions && connectionsIsSelected")
-      //- Edit Connections
-      .row.edit-connection-types
-        //- Type Color
-        .button-wrap
-          button.change-color(:disabled="!canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: multipleConnectionsPickerVisible}")
-            //- img.icon.connection-path(src="@/assets/connection-path.svg")
-            .segmented-colors.icon
-              template(v-for="type in connectionTypes")
-                .current-color(:style="{ background: type.color }")
-            span Type
-          MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible" :selectedConnections="editableConnections" :selectedConnectionTypes="editableConnectionTypes")
-        //- Arrows or Label
-        ConnectionDecorators(:connections="editableConnections")
+    ConnectionActions(:visible="shouldShowItemActions && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll")
 
   section
     template(v-if="oneCardOrMultipleBoxesIsSelected")
@@ -83,15 +69,12 @@ dialog.narrow.multiple-selected-actions(
 <script>
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
-import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import CardBoxActions from '@/components/subsections/CardBoxActions.vue'
+import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
-import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
 
 import { nanoid } from 'nanoid'
 import last from 'lodash-es/last'
-import uniq from 'lodash-es/uniq'
-import uniqBy from 'lodash-es/uniqBy'
 import consts from '@/consts.js'
 
 let prevCards, prevBoxes
@@ -100,16 +83,14 @@ export default {
   name: 'MultipleSelectedActions',
   components: {
     MoveOrCopyItems,
-    MultipleConnectionsPicker,
     CardBoxActions,
-    AlignAndDistribute,
-    ConnectionDecorators
+    ConnectionActions,
+    AlignAndDistribute
   },
   data () {
     return {
       copyCardsIsVisible: false,
       moveCardsIsVisible: false,
-      multipleConnectionsPickerVisible: false,
       cardsIsConnected: false,
       cardsHaveCheckboxes: false,
       cardsCheckboxIsChecked: false,
@@ -204,23 +185,6 @@ export default {
           return this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
         })
       }
-    },
-    connectionTypes () {
-      let types = uniq(this.multipleConnectionsSelectedIds)
-      types = types.map(id => {
-        const connection = this.$store.getters['currentConnections/byId'](id)
-        if (!connection) { return }
-        return this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
-      })
-      types = types.filter(type => Boolean(type))
-      types = uniqBy(types, 'id')
-      types = uniqBy(types, 'color')
-      return types
-    },
-    editableConnectionTypes () {
-      return uniq(this.editableConnections.map(connection => {
-        return this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
-      }))
     },
 
     // boxes
@@ -422,11 +386,6 @@ export default {
       this.closeDialogs()
       this.moveCardsIsVisible = !isVisible
     },
-    toggleMultipleConnectionsPickerVisible () {
-      const isVisible = this.multipleConnectionsPickerVisible
-      this.closeDialogs()
-      this.multipleConnectionsPickerVisible = !isVisible
-    },
     toggleShouldShowItemActions () {
       this.closeDialogs()
       const isVisible = !this.shouldShowItemActions
@@ -438,7 +397,6 @@ export default {
     closeDialogs () {
       this.copyCardsIsVisible = false
       this.moveCardsIsVisible = false
-      this.multipleConnectionsPickerVisible = false
       this.$store.commit('triggerCardDetailsCloseDialogs')
     },
     connectionType (event) {
@@ -624,19 +582,6 @@ export default {
   .button-wrap.disabled
     opacity 0.5
     pointer-events none
-
-  .connection-actions
-    padding 4px
-    padding-bottom 0
-    background-color transparent
-    border 1px solid var(--primary-border)
-    padding 4px
-    padding-bottom 0
-    .button-wrap
-      margin-left 0
-      margin-right 4px
-      vertical-align middle
-      margin-bottom 10px
 
   .style-actions + .connection-actions
     border-top 1px solid var(--primary-border)
