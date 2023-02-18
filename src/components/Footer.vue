@@ -23,17 +23,6 @@
                 span(v-if="liveSpaces.length") {{ liveSpaces.length }}
             Explore(:visible="exploreIsVisible" @preloadedSpaces="exploreSpaces")
             Live(:visible="liveIsVisible" :spaces="liveSpaces" :loading="isLoadingLiveSpaces")
-          //- Favorites
-          .button-wrap
-            .segmented-buttons
-              button(:class="{active: favoritesActionsIsVisible}" @click.left.prevent="toggleFavoritesActionsIsVisible" @keydown.stop.enter="toggleFavoritesActionsIsVisible")
-                img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-                img.icon(v-else src="@/assets/heart-empty.svg")
-              button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
-                img.icon.down-arrow(src="@/assets/down-arrow.svg" :class="{ 'is-mobile-icon': isMobile }")
-                span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
-            Favorites(:visible="favoritesIsVisible")
-            FavoritesActions(:visible="favoritesActionsIsVisible")
 
   .right(:class="{'is-embed': isEmbedMode, 'hidden': isHidden}" v-if="!isMobileOrTouch")
     SpaceZoom
@@ -42,8 +31,6 @@
 <script>
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
-import Favorites from '@/components/dialogs/Favorites.vue'
-import FavoritesActions from '@/components/dialogs/FavoritesActions.vue'
 import AddToInbox from '@/components/dialogs/AddToInbox.vue'
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
@@ -54,7 +41,7 @@ import { mapState, mapGetters } from 'vuex'
 
 import dayjs from 'dayjs'
 
-let updateFavoritesIntervalTimer, updateLiveSpacesIntervalTimer
+let updateLiveSpacesIntervalTimer
 
 const fadeOutDuration = 10
 const hiddenDuration = 20
@@ -67,8 +54,6 @@ export default {
     Explore,
     Live,
     Notifications,
-    Favorites,
-    FavoritesActions,
     Loader,
     SpaceZoom,
     AddToInbox
@@ -79,8 +64,6 @@ export default {
   },
   data () {
     return {
-      favoritesActionsIsVisible: false,
-      favoritesIsVisible: false,
       exploreIsVisible: false,
       liveIsVisible: false,
       position: {},
@@ -110,11 +93,7 @@ export default {
     window.addEventListener('scroll', this.updatePosition)
     window.addEventListener('online', this.updateLiveSpaces)
     this.updatePosition()
-    this.updateFavorites()
     this.updateLiveSpaces()
-    updateFavoritesIntervalTimer = setInterval(() => {
-      this.updateFavorites()
-    }, 1000 * 60 * 10) // 10 minutes
     updateLiveSpacesIntervalTimer = setInterval(() => {
       this.updateLiveSpaces()
     }, 1000 * 60 * 5) // 5 minutes
@@ -123,7 +102,6 @@ export default {
   beforeUnmount () {
     window.removeEventListener('scroll', this.updatePosition)
     window.removeEventListener('online', this.updateLiveSpaces)
-    clearInterval(updateFavoritesIntervalTimer)
     clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
@@ -140,18 +118,8 @@ export default {
     ]),
     ...mapGetters([
       'currentUser/isSignedIn',
-      'isTouchDevice',
-      'currentSpace/isFavorite'
+      'isTouchDevice'
     ]),
-    favoriteSpacesEditedCount () {
-      let favoriteSpaces = utils.clone(this.currentUser.favoriteSpaces)
-      favoriteSpaces = favoriteSpaces.filter(space => {
-        const isEditedByOtherUser = space.editedByUserId !== this.currentUser.id
-        const isEditedAndNotVisited = space.isEdited && space.userId !== this.currentUser.id
-        return isEditedByOtherUser && isEditedAndNotVisited
-      })
-      return favoriteSpaces.length
-    },
     isMobileOrTouch () {
       const isMobile = utils.isMobile()
       return this.isTouchDevice || isMobile
@@ -175,7 +143,6 @@ export default {
       if (this.shouldHideFooter) { isVisible = false }
       return isVisible
     },
-    isFavoriteSpace () { return this['currentSpace/isFavorite'] },
     isMobile () { return utils.isMobile() },
     isMobileStandalone () {
       return utils.isMobile() && navigator.standalone // is homescreen app
@@ -194,21 +161,9 @@ export default {
   },
   methods: {
     closeDialogs (exclude) {
-      this.favoritesActionsIsVisible = false
-      this.favoritesIsVisible = false
       this.exploreIsVisible = false
       this.liveIsVisible = false
       this.addToInboxIsVisible = false
-    },
-    toggleFavoritesActionsIsVisible () {
-      const isVisible = this.favoritesActionsIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleFavoritesActionsIsVisible')
-      this.favoritesActionsIsVisible = !isVisible
-    },
-    toggleFavoritesIsVisible () {
-      const isVisible = this.favoritesIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleFavoritesIsVisible')
-      this.favoritesIsVisible = !isVisible
     },
     toggleExploreIsVisible () {
       const isVisible = this.exploreIsVisible
@@ -227,9 +182,6 @@ export default {
       const isVisible = this.addToInboxIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleAddToInboxIsVisible')
       this.addToInboxIsVisible = !isVisible
-    },
-    async updateFavorites () {
-      await this.$store.dispatch('currentUser/restoreUserFavorites')
     },
     async updateLiveSpaces () {
       this.isLoadingLiveSpaces = true

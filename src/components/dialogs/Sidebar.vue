@@ -27,6 +27,9 @@ dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="clos
           //- Stats
           button(@click.left="toggleStatsIsVisible" :class="{active: statsIsVisible}")
             img.icon.stats(src="@/assets/stats.svg")
+          //- Stats
+          button(@click.left="toggleFavoritesIsVisible" :class="{active: favoritesIsVisible}")
+            img.icon(src="@/assets/heart-empty.svg")
 
       //- Pin
       .title-row
@@ -40,6 +43,7 @@ dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="clos
   Removed(:visible="removedIsVisible")
   AIImages(:visible="AIImagesIsVisible")
   Stats(:visible="statsIsVisible")
+  Favorites(:visible="favoritesIsVisible")
 
 </template>
 
@@ -51,6 +55,7 @@ import Comments from '@/components/Comments.vue'
 import Removed from '@/components/Removed.vue'
 import AIImages from '@/components/AIImages.vue'
 import Stats from '@/components/Stats.vue'
+import Favorites from '@/components/dialogs/Favorites.vue'
 
 export default {
   name: 'Sidebar',
@@ -60,7 +65,8 @@ export default {
     Comments,
     Removed,
     AIImages,
-    Stats
+    Stats,
+    Favorites
   },
   props: {
     visible: Boolean
@@ -73,7 +79,8 @@ export default {
       commentsIsVisible: false,
       removedIsVisible: false,
       AIImagesIsVisible: false,
-      statsIsVisible: false
+      statsIsVisible: false,
+      favoritesIsVisible: false
     }
   },
   created () {
@@ -109,6 +116,7 @@ export default {
       this.removedIsVisible = false
       this.AIImagesIsVisible = false
       this.statsIsVisible = false
+      this.favoritesIsVisible = false
     },
     toggleTagsIsVisible () {
       const value = !this.tagsIsVisible
@@ -146,6 +154,12 @@ export default {
       this.clearIsVisible()
       this.statsIsVisible = value
     },
+    toggleFavoritesIsVisible () {
+      const value = !this.favoritesIsVisible
+      if (!value) { return }
+      this.clearIsVisible()
+      this.favoritesIsVisible = value
+    },
     updateDialogHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
@@ -175,6 +189,7 @@ export default {
   .title-row-flex
     display flex
     justify-content space-between
+    align-items flex-start
     .comment-icon
       vertical-align -2px
   .right-pin

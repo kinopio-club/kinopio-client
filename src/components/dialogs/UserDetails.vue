@@ -322,9 +322,6 @@ export default {
       this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
       this.$store.commit('closeAllDialogs', 'UserDetails.removeCollaborator')
     },
-    async updateFavorites () {
-      await this.$store.dispatch('currentUser/restoreUserFavorites')
-    },
     scrollUserDetailsIntoView () {
       this.$nextTick(() => {
         const element = this.$refs.dialog
@@ -336,7 +333,6 @@ export default {
     visible (visible) {
       this.closeDialogs()
       this.clearUserSpaces()
-      this.updateFavorites()
       if (visible) {
         this.updateTextareaSize()
       }

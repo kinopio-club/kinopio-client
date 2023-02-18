@@ -44,7 +44,6 @@ export default {
     shouldDisableRightClickToPan: false,
     shouldShowCurrentSpaceTags: false,
     showInExploreUpdatedAt: null, // date
-    dialogFavoritesFilters: null, // null, 'currentUser', 'otherUsers'
     dialogSpaceFilters: null, // null, journals, spaces
     dialogSpaceFilterByUser: {},
     dialogSpaceFilterShowHidden: false,
@@ -271,10 +270,6 @@ export default {
     shouldUseLastConnectionType: (state, value) => {
       state.shouldUseLastConnectionType = value
       cache.updateUser('shouldUseLastConnectionType', value)
-    },
-    dialogFavoritesFilters: (state, value) => {
-      state.dialogFavoritesFilters = value
-      cache.updateUser('dialogFavoritesFilters', value)
     },
     dialogSpaceFilters: (state, value) => {
       state.dialogSpaceFilters = value

@@ -1,38 +1,32 @@
 <template lang="pug">
-dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog")
-  section
-    .row
-      .segmented-buttons
-        button(@click.left.stop="showSpaces" :class="{ active: spacesIsVisible }")
-          span Spaces
-          Loader(:visible="loading")
-        button(@click.left.stop="hideSpaces" :class="{ active: !spacesIsVisible }")
-          span People
-          Loader(:visible="loading")
-      //- Filter
-      .button-wrap
-        button(v-if="spacesIsVisible" @click.left.stop="toggleFavoritesFiltersIsVisible" :class="{ active: favoritesFiltersIsVisible || dialogFavoritesFilters }")
-          img.icon(src="@/assets/filter.svg")
-        FavoritesFilters(:visible="favoritesFiltersIsVisible")
-
-    template(v-if="isEmpty")
-      p Spaces and people you {{' '}}
-        img.icon(src="@/assets/heart.svg")
-        span can be found here.
-      p
-        img.icon(src="@/assets/heart.svg")
-        span Spaces to know when they've been updated
-
-      p(v-if="loading")
+section.favorites(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog")
+  .row
+    .segmented-buttons
+      button(@click.left.stop="showSpaces" :class="{ active: spacesIsVisible }")
+        span Spaces
+        Loader(:visible="loading")
+      button(@click.left.stop="hideSpaces" :class="{ active: !spacesIsVisible }")
+        span People
         Loader(:visible="loading")
 
-  section.results-section(v-if="!isEmpty")
-    //- Spaces
-    div(v-show="spacesIsVisible")
-      SpaceList(:spaces="favoriteSpacesOrderedByEdited" :showUser="true" @selectSpace="changeSpace")
-    //- People
-    div(v-show="!spacesIsVisible")
-      UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
+  template(v-if="isEmpty")
+    p Spaces and people you {{' '}}
+      img.icon(src="@/assets/heart.svg")
+      span can be found here.
+    p
+      img.icon(src="@/assets/heart.svg")
+      span Spaces to know when they've been updated
+
+    p(v-if="loading")
+      Loader(:visible="loading")
+
+section.results-section(v-if="!isEmpty")
+  //- Spaces
+  div(v-show="spacesIsVisible")
+    SpaceList(:spaces="favoriteSpacesOrderedByEdited" :showUser="true" @selectSpace="changeSpace")
+  //- People
+  div(v-show="!spacesIsVisible")
+    UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 
 </template>
 
@@ -40,7 +34,6 @@ dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import UserList from '@/components/UserList.vue'
-import FavoritesFilters from '@/components/dialogs/FavoritesFilters.vue'
 import utils from '@/utils.js'
 
 export default {
@@ -48,8 +41,7 @@ export default {
   components: {
     Loader,
     SpaceList,
-    UserList,
-    FavoritesFilters
+    UserList
   },
   props: {
     visible: Boolean
@@ -57,8 +49,7 @@ export default {
   data () {
     return {
       spacesIsVisible: true,
-      userDetailsPosition: {},
-      favoritesFiltersIsVisible: false
+      userDetailsPosition: {}
     }
   },
   computed: {
@@ -67,18 +58,9 @@ export default {
       if (!this.userDetailsIsVisible) { return }
       return this.$store.state.userDetailsUser
     },
-    dialogFavoritesFilters () { return this.$store.state.currentUser.dialogFavoritesFilters },
     currentUser () { return this.$store.state.currentUser },
     favoriteUsers () { return this.$store.state.currentUser.favoriteUsers },
-    favoriteSpaces () {
-      let spaces = this.$store.state.currentUser.favoriteSpaces
-      if (this.dialogFavoritesFilters === 'currentUser') {
-        spaces = spaces.filter(space => space.userId === this.currentUser.id)
-      } else if (this.dialogFavoritesFilters === 'otherUsers') {
-        spaces = spaces.filter(space => space.userId !== this.currentUser.id)
-      }
-      return spaces
-    },
+    favoriteSpaces () { return this.$store.state.currentUser.favoriteSpaces },
     loading () { return this.$store.state.isLoadingFavorites },
     isEmpty () {
       const noSpaces = this.spacesIsVisible && !this.favoriteSpaces.length
@@ -98,11 +80,6 @@ export default {
     }
   },
   methods: {
-    toggleFavoritesFiltersIsVisible () {
-      const isVisible = this.favoritesFiltersIsVisible
-      this.closeDialogs()
-      this.favoritesFiltersIsVisible = !isVisible
-    },
     showSpaces () {
       this.spacesIsVisible = true
       this.closeDialogs()
@@ -138,11 +115,12 @@ export default {
         const rect = child.getBoundingClientRect()
         options = { element, offsetX: 100, offsetY: -(rect.height + 8), shouldIgnoreZoom: true }
         position = utils.childDialogPositionFromParent(options)
+        const userDetailsDialogWidth = 225
+        position.x = position.x - userDetailsDialogWidth
         this.$store.commit('userDetailsPosition', position)
       })
     },
     closeDialogs () {
-      this.favoritesFiltersIsVisible = false
       this.$store.commit('userDetailsIsVisible', false)
     },
     async updateFavorites () {
