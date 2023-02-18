@@ -5,7 +5,7 @@ const themes = {
     name: 'light',
     colors: {
       'primary': 'black',
-      'primary-border': 'black',
+      'primary-border': 'rgba(0,0,0,1)',
       'primary-background': 'white',
       'text-link': '#143997',
       'primary-transparent': 'rgba(0,0,0,0.5)',
