@@ -135,7 +135,7 @@ import cache from '@/cache.js'
 
 export default {
   name: 'SpaceDetailsInfo',
-  emits: ['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight'],
+  emits: ['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace'],
   components: {
     Background,
     BackgroundPreview,
