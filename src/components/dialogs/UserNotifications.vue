@@ -219,6 +219,7 @@ export default {
   left initial
   right 8px
   max-height calc(100vh - 25px)
+  overflow auto
   section
     width 100%
   .results-section
