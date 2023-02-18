@@ -20,7 +20,7 @@ section.favorites(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
     p(v-if="loading")
       Loader(:visible="loading")
 
-section.results-section(v-if="!isEmpty")
+section.results-section(v-if="!isEmpty && visible")
   //- Spaces
   div(v-show="spacesIsVisible")
     SpaceList(:spaces="favoriteSpacesOrderedByEdited" :showUser="true" @selectSpace="changeSpace")
