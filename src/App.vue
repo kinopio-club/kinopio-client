@@ -781,6 +781,10 @@ dialog
 .icon.stats
   vertical-align -1px
 
+.icon.button-down-arrow
+  padding 0
+  vertical-align 2px
+
 label,
 li
   color var(--primary)

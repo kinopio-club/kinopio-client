@@ -7,9 +7,9 @@ dialog.narrow.multiple-selected-actions(
   :style="styles"
 )
   .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
-  section(v-if="cardsIsSelected || connectionsIsSelected || boxesIsSelected")
+  section
     //- Edit Cards
-    .row(v-if="cardsIsSelected || boxesIsSelected")
+    .row
       //- [·]
       .button-wrap.cards-checkboxes(v-if="cardsIsSelected" :class="{ disabled: !canEditAll.cards }")
         label(v-if="cardsHaveCheckboxes" :class="{active: cardsCheckboxIsChecked}" tabindex="0")
@@ -21,26 +21,28 @@ dialog.narrow.multiple-selected-actions(
         img.icon.connector-icon(v-if="cardsIsConnected" src="@/assets/connector-closed.svg")
         img.icon.connector-icon(v-else src="@/assets/connector-open.svg")
         span Connect
-      //- Style
-      .button-wrap
-        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleStyleActionsIsVisible" :class="{active : styleActionsIsVisible}")
-          span Style
 
-    StyleActions(:visible="styleActionsIsVisible" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }")
-
-    //- Edit Connections
-    .row.edit-connection-types(v-if="connectionsIsSelected")
-      //- Type Color
+      //- More Options
       .button-wrap
-        button.change-color(:disabled="!canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: multipleConnectionsPickerVisible}")
-          //- img.icon.connection-path(src="@/assets/connection-path.svg")
-          .segmented-colors.icon
-            template(v-for="type in connectionTypes")
-              .current-color(:style="{ background: type.color }")
-          span Type
-        MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible" :selectedConnections="editableConnections" :selectedConnectionTypes="editableConnectionTypes")
-      //- Arrows or Label
-      ConnectionDecorators(:connections="editableConnections")
+        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}")
+          img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+
+    CardBoxActions(:visible="shouldShowItemActions && (cardsIsSelected || boxesIsSelected)" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }")
+    //- Connection Actions
+    section.subsection.connection-actions(v-if="shouldShowItemActions && connectionsIsSelected")
+      //- Edit Connections
+      .row.edit-connection-types
+        //- Type Color
+        .button-wrap
+          button.change-color(:disabled="!canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: multipleConnectionsPickerVisible}")
+            //- img.icon.connection-path(src="@/assets/connection-path.svg")
+            .segmented-colors.icon
+              template(v-for="type in connectionTypes")
+                .current-color(:style="{ background: type.color }")
+            span Type
+          MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible" :selectedConnections="editableConnections" :selectedConnectionTypes="editableConnectionTypes")
+        //- Arrows or Label
+        ConnectionDecorators(:connections="editableConnections")
 
   section
     template(v-if="oneCardOrMultipleBoxesIsSelected")
@@ -82,7 +84,7 @@ dialog.narrow.multiple-selected-actions(
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
-import StyleActions from '@/components/subsections/StyleActions.vue'
+import CardBoxActions from '@/components/subsections/CardBoxActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
 
@@ -99,7 +101,7 @@ export default {
   components: {
     MoveOrCopyItems,
     MultipleConnectionsPicker,
-    StyleActions,
+    CardBoxActions,
     AlignAndDistribute,
     ConnectionDecorators
   },
@@ -121,12 +123,7 @@ export default {
       return isThemeDark && userColorIsLight
     },
     maxCardLength () { return consts.maxCardLength },
-    shouldShowStyleActions () { return this.$store.state.currentUser.shouldShowStyleActions },
-    styleActionsIsVisible () {
-      const noStyleItemsSelected = !this.cardsIsSelected && !this.boxesIsSelected
-      if (noStyleItemsSelected) { return }
-      return this.shouldShowStyleActions
-    },
+    shouldShowItemActions () { return this.$store.state.currentUser.shouldShowItemActions },
     visible () {
       const isSelectedItems = this.multipleConnectionsSelectedIds.length || this.multipleCardsSelectedIds.length || this.multipleBoxesSelectedIds.length
       return this.$store.state.multipleSelectedActionsIsVisible && isSelectedItems
@@ -430,10 +427,10 @@ export default {
       this.closeDialogs()
       this.multipleConnectionsPickerVisible = !isVisible
     },
-    toggleStyleActionsIsVisible () {
+    toggleShouldShowItemActions () {
       this.closeDialogs()
-      const isVisible = !this.shouldShowStyleActions
-      this.$store.dispatch('currentUser/shouldShowStyleActions', isVisible)
+      const isVisible = !this.shouldShowItemActions
+      this.$store.dispatch('currentUser/shouldShowItemActions', isVisible)
       this.$nextTick(() => {
         this.scrollIntoView()
       })
@@ -614,9 +611,7 @@ export default {
     margin-bottom 10px
   .edit-connection-types
     flex-wrap wrap
-    .path-curve-options
-      margin-left 0
-      margin-top 10px
+    align-items flex-start
     .change-color
       display flex
       overflow hidden
@@ -629,5 +624,21 @@ export default {
   .button-wrap.disabled
     opacity 0.5
     pointer-events none
+
+  .connection-actions
+    padding 4px
+    padding-bottom 0
+    background-color transparent
+    border 1px solid var(--primary-border)
+    padding 4px
+    padding-bottom 0
+    .button-wrap
+      margin-left 0
+      margin-right 4px
+      vertical-align middle
+      margin-bottom 10px
+
+  .style-actions + .connection-actions
+    border-top 1px solid var(--primary-border)
 
 </style>

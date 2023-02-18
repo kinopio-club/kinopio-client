@@ -1,23 +1,27 @@
 <template lang="pug">
 //- Label
-button(@click.left="showLabelsIsVisible" :class="{ active: isSomeLabelsVisible }" :disabled="!canEditAll")
-  span Label
+.button-wrap
+  button(@click.left="showLabelsIsVisible" :class="{ active: isSomeLabelsVisible }" :disabled="!canEditAll")
+    span Label
 //- Arrow
-button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsIsVisible }" :disabled="!canEditAll")
-  svg.icon.arrow(width="20px" height="12px" viewBox="0 0 20 2")
-    g(stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round")
-      path(:d="path" stroke="#000000")
-      defs
-        linearGradient(id="gradient")
-          stop(offset="0%" stop-color="#000000" stop-opacity="0" fill-opacity="0")
-          stop(offset="90%" stop-color="#000000")
-    circle(r="5" :fill="gradientIdReference")
-      animateMotion(dur="3s" repeatCount="indefinite" :path="path" rotate="auto")
+.button-wrap
+  button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsIsVisible }" :disabled="!canEditAll")
+    svg.icon.arrow(width="20px" height="12px" viewBox="0 0 20 2")
+      g(stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round")
+        path(:d="path" stroke="#000000")
+        defs
+          linearGradient(id="gradient")
+            stop(offset="0%" stop-color="#000000" stop-opacity="0" fill-opacity="0")
+            stop(offset="90%" stop-color="#000000")
+      circle(r="5" :fill="gradientIdReference")
+        animateMotion(dur="3s" repeatCount="indefinite" :path="path" rotate="auto")
 
 //- Reverse
-button(@click.left="reverseConnections" :disabled="!canEditAll")
-  img.icon.reverse(src="@/assets/connection-reverse.svg")
+.button-wrap
+  button(@click.left="reverseConnections" :disabled="!canEditAll")
+    img.icon.reverse(src="@/assets/connection-reverse.svg")
 
+//- Curved or Straight
 .button-wrap.path-curve-options
   .segmented-buttons
     button(:class="{active: allPathsIsCurved}" @click="togglePathIsStraight(false)")
@@ -142,4 +146,7 @@ button
     &.reverse,
     &.connection-path
       vertical-align 0
+.subsection
+  .button-wrap
+    margin-bottom 4px !important
 </style>

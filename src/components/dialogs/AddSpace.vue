@@ -245,8 +245,6 @@ export default {
     border 0
     border-radius 3px
     padding 4px
-  .button-down-arrow
-    padding 0
   .inbox-icon
     margin 0
     margin-left 5px

@@ -376,6 +376,4 @@ export default {
   &.is-pinned
     left -65px
     top -13px
-  .button-down-arrow
-    padding 0
 </style>

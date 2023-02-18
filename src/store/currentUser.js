@@ -37,10 +37,9 @@ export default {
     shouldEmailBulletin: true,
     shouldEmailWeeklyReview: true,
     shouldShowMoreAlignOptions: false,
-    shouldShowCardCollaborationInfo: false,
-    shouldShowStyleActions: false,
     shouldUseLastConnectionType: false,
     shouldOpenLinksInNewTab: false,
+    shouldShowItemActions: false,
     shouldDisableRightClickToPan: false,
     shouldShowCurrentSpaceTags: false,
     showInExploreUpdatedAt: null, // date
@@ -244,13 +243,9 @@ export default {
       state.shouldShowMoreAlignOptions = value
       cache.updateUser('shouldShowMoreAlignOptions', value)
     },
-    shouldShowCardCollaborationInfo: (state, value) => {
-      state.shouldShowCardCollaborationInfo = value
-      cache.updateUser('shouldShowCardCollaborationInfo', value)
-    },
-    shouldShowStyleActions: (state, value) => {
-      state.shouldShowStyleActions = value
-      cache.updateUser('shouldShowStyleActions', value)
+    shouldShowItemActions: (state, value) => {
+      state.shouldShowItemActions = value
+      cache.updateUser('shouldShowItemActions', value)
     },
     showInExploreUpdatedAt: (state, value) => {
       state.showInExploreUpdatedAt = value
@@ -667,20 +662,12 @@ export default {
           shouldShowMoreAlignOptions: value
         } }, { root: true })
     },
-    shouldShowCardCollaborationInfo: (context, value) => {
+    shouldShowItemActions: (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      context.commit('shouldShowCardCollaborationInfo', value)
+      context.commit('shouldShowItemActions', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
-          shouldShowCardCollaborationInfo: value
-        } }, { root: true })
-    },
-    shouldShowStyleActions: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      context.commit('shouldShowStyleActions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          shouldShowStyleActions: value
+          shouldShowItemActions: value
         } }, { root: true })
     },
     showInExploreUpdatedAt: (context, value) => {
