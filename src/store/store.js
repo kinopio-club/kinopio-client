@@ -193,7 +193,7 @@ const store = createStore({
     // referral
     validateUserReferral: '',
     validateUserReferralBySpaceUser: false,
-    validateReferralByName: false,
+    validateReferralByName: '',
 
     // notifications
     notifications: [],
@@ -324,7 +324,7 @@ const store = createStore({
       state.validateUserReferralBySpaceUser = value
     },
     validateReferralByName: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
+      utils.typeCheck({ value, type: 'string' })
       state.validateReferralByName = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
@@ -1163,6 +1163,7 @@ const store = createStore({
     removePreviousNotification: (state) => {
       const removableNotifications = state.notifications.filter(notification => notification.isPersistentItem === false)
       const prevNotification = last(removableNotifications)
+      if (!prevNotification) { return }
       state.notifications = state.notifications.filter(notification => notification.id !== prevNotification.id)
     },
     removeNotificationById: (state, id) => {

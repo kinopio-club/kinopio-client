@@ -726,7 +726,7 @@ export default {
     validateReferral: async (context) => {
       let referralUserId
       if (context.rootState.validateReferralByName) {
-        context.dispatch('validateReferralByName')
+        await context.dispatch('validateReferralByName')
         return
       } else if (context.rootState.validateUserReferralBySpaceUser) {
         const referralUsers = context.rootGetters['currentSpace/members']()
@@ -751,15 +751,19 @@ export default {
       context.commit('validateUserReferral', '', { root: true })
     },
     validateReferralByName: async (context) => {
-      const referrerName = context.rootState.validateReferralByName
-
-      const isValidReferralName = true
-      if (isValidReferralName) {
-        context.commit('addNotification', { message: 'welcome username, once you sign up your account will be upgraded to free', type: 'success', isPersistent: true }, { root: true })
+      const referrerName = context.rootState.validateReferralByName.trim()
+      const response = await context.dispatch('api/getReferralsByReferrerName', { referrerName }, { root: true })
+      const isValid = response.isValid
+      const isSignedIn = context.getters.isSignedIn
+      if (isSignedIn) {
+        context.commit('addNotification', { message: 'Only new users can be referred', type: 'danger' }, { root: true })
+      } else if (isValid) {
+        context.commit('addNotification', { message: `welcome ${referrerName}, once you sign up your account will be upgraded to free`, type: 'success', isPersistent: true }, { root: true })
+        context.dispatch('update', { referrerName })
       } else {
         context.commit('addNotification', { message: 'Invalid referral, refferer name not found', type: 'danger' }, { root: true })
       }
-      context.commit('validateReferralByName', false, { root: true })
+      context.commit('validateReferralByName', '', { root: true })
     }
   },
   getters: {
