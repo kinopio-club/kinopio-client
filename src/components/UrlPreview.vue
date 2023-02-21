@@ -291,7 +291,6 @@ export default {
       border-top-right-radius 0
     &.is-card-details
       padding 4px
-      min-height 114px
     &.no-padding
       padding 0
     &.is-no-info
