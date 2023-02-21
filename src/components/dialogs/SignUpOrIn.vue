@@ -192,11 +192,12 @@ export default {
       const email = event.target[0].value.toLowerCase()
       const password = event.target[1].value
       const confirmPassword = event.target[2].value
-      const currentUser = utils.clone(this.$store.state.currentUser)
+      let currentUser = utils.clone(this.$store.state.currentUser)
       if (!this.isPasswordMatchesEmail(email, password)) { return }
       if (!this.isSignUpPasswordTooShort(password)) { return }
       if (!this.isSignUpPasswordsMatch(password, confirmPassword)) { return }
       this.loading.signUpOrIn = true
+      currentUser = await this.validateReferrerName(currentUser)
       const response = await this.$store.dispatch('api/signUp', { email, password, currentUser, sessionToken })
       const result = await response.json()
       if (this.isSuccess(response)) {
@@ -348,6 +349,17 @@ export default {
     createSessionToken () {
       sessionToken = nanoid()
       this.$store.dispatch('api/createSessionToken', sessionToken)
+    },
+
+    async validateReferrerName (currentUser) {
+      const referrerName = currentUser.referrerName
+      if (!referrerName) { return currentUser }
+      const response = await this.$store.dispatch('api/getReferralsByReferrerName', { referrerName })
+      const isValid = response.isValid
+      if (!isValid) {
+        delete currentUser.referrerName
+      }
+      return currentUser
     }
   },
   watch: {
