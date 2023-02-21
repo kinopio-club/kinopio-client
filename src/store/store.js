@@ -1238,7 +1238,7 @@ const store = createStore({
       state.notifyReferralSuccessUser = user
     },
     notifyEarnedCredits: (state, user) => {
-      utils.typeCheck({ value: user, type: 'object' })
+      utils.typeCheck({ value: user, type: 'boolean' })
       state.notifyEarnedCredits = user
     },
 

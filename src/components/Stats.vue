@@ -7,6 +7,14 @@ section.stats(v-if="visible" @click.stop="clear")
     Loader(:visible="true")
 
   template(v-if="!isLoadingSpace")
+
+    table
+      tbody
+        tr.table-header
+          td Visits
+        tr
+          td {{visits}}
+
     table
       tbody
         tr.table-header
@@ -40,6 +48,7 @@ section.stats(v-if="visible" @click.stop="clear")
           td Word Count
         tr
           td {{wordCount}}
+
 </template>
 
 <script>
@@ -63,6 +72,7 @@ export default {
     cards () { return this.$store.getters['currentCards/all'] },
     connections () { return this.$store.getters['currentConnections/all'] },
     boxes () { return this.$store.getters['currentBoxes/all'] },
+    visits () { return this.$store.state.currentSpace.visits + 1 },
     wordCount () {
       let words = ''
       this.cards.forEach(card => {
