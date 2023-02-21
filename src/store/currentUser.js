@@ -725,7 +725,10 @@ export default {
     },
     validateReferral: async (context) => {
       let referralUserId
-      if (context.rootState.validateUserReferralBySpaceUser) {
+      if (context.rootState.validateReferralByName) {
+        context.dispatch('validateReferralByName')
+        return
+      } else if (context.rootState.validateUserReferralBySpaceUser) {
         const referralUsers = context.rootGetters['currentSpace/members']()
         referralUserId = referralUsers[0].id
       } else {
@@ -746,6 +749,17 @@ export default {
       }
       context.commit('validateUserReferralBySpaceUser', false, { root: true })
       context.commit('validateUserReferral', '', { root: true })
+    },
+    validateReferralByName: async (context) => {
+      const referrerName = context.rootState.validateReferralByName
+
+      const isValidReferralName = true
+      if (isValidReferralName) {
+        context.commit('addNotification', { message: 'welcome username, once you sign up your account will be upgraded to free', type: 'success', isPersistent: true }, { root: true })
+      } else {
+        context.commit('addNotification', { message: 'Invalid referral, refferer name not found', type: 'danger' }, { root: true })
+      }
+      context.commit('validateReferralByName', false, { root: true })
     }
   },
   getters: {

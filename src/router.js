@@ -196,6 +196,14 @@ const router = createRouter({
         store.commit('notifyThanksForDonating', true)
         next()
       }
+    }, {
+      path: '/for/:referrerName',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const referrerName = to.params.referrerName
+        store.commit('validateReferralByName', referrerName)
+        next()
+      }
     }
   ]
 })

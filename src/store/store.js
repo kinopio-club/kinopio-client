@@ -189,8 +189,11 @@ const store = createStore({
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
     shouldResetDimensionsOnLoad: false,
+
+    // referral
     validateUserReferral: '',
     validateUserReferralBySpaceUser: false,
+    validateReferralByName: false,
 
     // notifications
     notifications: [],
@@ -319,6 +322,10 @@ const store = createStore({
     validateUserReferralBySpaceUser: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.validateUserReferralBySpaceUser = value
+    },
+    validateReferralByName: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.validateReferralByName = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
