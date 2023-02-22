@@ -78,6 +78,7 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
 
 <style lang="stylus">
 .refer
+  overflow auto
   top calc(100% - 8px)
   left initial
   right 8px

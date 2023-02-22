@@ -211,8 +211,9 @@ export default {
         this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
         this.$store.commit('triggerCheckIfUseHasInboxSpace')
         this.$store.dispatch('themes/restore')
-        this.$store.commit('notifyReferralSuccessUser', null)
+        this.clearNotifications()
         this.checkIfShouldAddReferral()
+        this.checkIfShouldUpgradeReferral()
       } else {
         await this.handleErrors(result)
       }
@@ -247,7 +248,7 @@ export default {
         this.$store.dispatch('currentUser/restoreUserFavorites')
         this.$store.commit('triggerUpdateNotifications')
         this.$store.dispatch('themes/restore')
-        this.$store.commit('notifyReferralSuccessUser', null)
+        this.clearNotifications()
         if (shouldLoadLastSpace) {
           this.$store.dispatch('currentSpace/loadLastSpace')
           this.$store.commit('triggerUpdateWindowHistory', { space: this.$store.state.currentSpace })
@@ -256,6 +257,13 @@ export default {
       } else {
         await this.handleErrors(result)
       }
+    },
+
+    async checkIfShouldUpgradeReferral () {
+      const referrerName = this.$store.state.currentUser.referrerName
+      if (!referrerName) { return }
+      this.$store.commit('currentUser/isUpgraded', true, { root: true })
+      this.$store.commit('addNotification', { message: `Your account has been upgraded to free`, type: 'success', isPersistentItem: true })
     },
 
     async checkIfShouldAddReferral () {
@@ -360,6 +368,11 @@ export default {
         delete currentUser.referrerName
       }
       return currentUser
+    },
+
+    clearNotifications () {
+      this.$store.commit('notifyReferralSuccessUser', null)
+      this.$store.commit('notifyReferralSuccessReferrerName', false)
     }
   },
   watch: {

@@ -215,6 +215,7 @@ const store = createStore({
     notifyThanksForDonating: false,
     notifyReferralSuccessUser: null,
     notifyEarnedCredits: false,
+    notifyReferralSuccessReferrerName: null,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -1253,6 +1254,10 @@ const store = createStore({
     notifyEarnedCredits: (state, user) => {
       utils.typeCheck({ value: user, type: 'boolean' })
       state.notifyEarnedCredits = user
+    },
+    notifyReferralSuccessReferrerName: (state, user) => {
+      utils.typeCheck({ value: user, type: 'boolean' })
+      state.notifyReferralSuccessReferrerName = user
     },
 
     // Notifications with Position

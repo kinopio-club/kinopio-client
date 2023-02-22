@@ -62,7 +62,8 @@ export default {
     AIImages: [],
     theme: null,
     themeIsSystem: true,
-    referredByUserId: ''
+    referredByUserId: '',
+    referrerName: ''
   },
   mutations: {
     color: (state, value) => {
@@ -342,6 +343,10 @@ export default {
     referredByUserId: (state, value) => {
       state.referredByUserId = value
       cache.updateUser('referredByUserId', value)
+    },
+    referrerName: (state, value) => {
+      state.referrerName = value
+      cache.updateUser('referrerName', value)
     }
   },
   actions: {
@@ -742,7 +747,9 @@ export default {
         context.commit('addNotification', { message: 'Invalid referral, referring user not found', type: 'danger' }, { root: true })
         return
       }
-      if (canBeReferred) {
+      if (referrerName && canBeReferred) {
+        context.dispatch('update', { referrerName })
+      } else if (canBeReferred) {
         context.commit('notifyReferralSuccessUser', publicUser, { root: true })
         context.dispatch('update', { referredByUserId: publicUser.id })
       } else {
@@ -760,7 +767,7 @@ export default {
       if (isSignedIn) {
         context.commit('addNotification', { message: 'Only new users can be referred', type: 'danger' }, { root: true })
       } else if (isValid) {
-        context.commit('addNotification', { message: `welcome ${referrerName}, once you sign up your account will be upgraded to free`, type: 'success', isPersistent: true }, { root: true })
+        context.commit('notifyReferralSuccessReferrerName', true, { root: true })
         context.dispatch('update', { referrerName })
       } else {
         context.commit('addNotification', { message: 'Invalid referral, refferer name not found', type: 'danger' }, { root: true })

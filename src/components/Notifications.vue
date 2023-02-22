@@ -149,7 +149,15 @@ aside.notifications(@click.left="closeAllDialogs")
     .row
       button(@click.left.stop="triggerSignUpOrInIsVisible")
         span Sign Up to Earn Credits
-      button(@click="resetNotifyReferralSuccessUser")
+      button(@click="resetNotifyReferralSuccess")
+        img.icon.cancel(src="@/assets/add.svg")
+
+  .persistent-item.success(v-if="notifyReferralSuccessReferrerName")
+    p welcome {{referrerName}}, once you sign up your account will be upgraded to free
+    .row
+      button(@click.left.stop="triggerSignUpOrInIsVisible")
+        span Sign Up for Your Free Account
+      button(@click="resetNotifyReferralSuccess")
         img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item.success(v-if="notifyEarnedCredits")
@@ -248,6 +256,8 @@ export default {
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
     notifyReferralSuccessUser () { return this.$store.state.notifyReferralSuccessUser },
+    notifyReferralSuccessReferrerName () { return this.$store.state.notifyReferralSuccessReferrerName },
+    referrerName () { return this.$store.state.currentUser.referrerName },
     notifyEarnedCredits () { return this.$store.state.notifyEarnedCredits },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
@@ -347,7 +357,7 @@ export default {
     },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
-      this.resetNotifyReferralSuccessUser()
+      this.resetNotifyReferralSuccess()
     },
     restoreSpace () {
       const space = this.$store.state.currentSpace
@@ -380,8 +390,9 @@ export default {
     resetNotifyCardsCreatedIsOverLimitJiggle () {
       this.notifyCardsCreatedIsOverLimitJiggle = false
     },
-    resetNotifyReferralSuccessUser () {
+    resetNotifyReferralSuccess () {
       this.$store.commit('notifyReferralSuccessUser', null)
+      this.$store.commit('notifyReferralSuccessReferrerName', false)
     },
     triggerUpgradeUserIsVisible () {
       this.closeAllDialogs()
