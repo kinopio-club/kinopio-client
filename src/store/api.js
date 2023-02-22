@@ -410,7 +410,7 @@ const self = {
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/live-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getLiveSpaces', error, shouldNotNotifyUser: true })
+        context.dispatch('handleServerError', { name: 'getLiveSpaces', error, shouldNotNotifyUser: false })
       }
     },
     getSpace: async (context, { space, shouldRequestRemote }) => {
