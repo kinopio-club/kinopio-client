@@ -730,7 +730,7 @@ export default {
     },
     validateReferral: async (context) => {
       let referralUserId
-      const referrerName = context.rootState.validateReferralByReferrerName
+      const referrerName = context.rootState.validateReferralFromReferrerName
       if (referrerName) {
         const response = await context.dispatch('api/getPublicUserByReferrerName', { referrerName }, { root: true })
         referralUserId = response.id
