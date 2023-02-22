@@ -379,6 +379,15 @@ const self = {
         context.dispatch('handleServerError', { name: 'getPublicUsers', error })
       }
     },
+    getPublicUserByReferrerName: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/referrer-name/${body.referrerName}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getPublicUser', error })
+      }
+    },
     updateUserFavorites: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }

@@ -204,6 +204,16 @@ const router = createRouter({
         store.commit('validateReferralByName', referrerName)
         next()
       }
+    }, {
+      path: '/from/:referrerName',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const referrerName = to.params.referrerName
+        store.commit('validateReferralByReferrerName', referrerName)
+        next()
+      }
+
+      // from/:referrerName
     }
   ]
 })

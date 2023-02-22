@@ -725,9 +725,10 @@ export default {
     },
     validateReferral: async (context) => {
       let referralUserId
-      if (context.rootState.validateReferralByName) {
-        await context.dispatch('validateReferralByName')
-        return
+      const referrerName = context.rootState.validateReferralByReferrerName
+      if (referrerName) {
+        const response = await context.dispatch('api/getPublicUserByReferrerName', { referrerName }, { root: true })
+        referralUserId = response.id
       } else if (context.rootState.validateUserReferralBySpaceUser) {
         const referralUsers = context.rootGetters['currentSpace/members']()
         referralUserId = referralUsers[0].id
@@ -751,6 +752,7 @@ export default {
       context.commit('validateUserReferral', '', { root: true })
     },
     validateReferralByName: async (context) => {
+      if (!context.rootState.validateReferralByName) { return }
       const referrerName = context.rootState.validateReferralByName.trim()
       const response = await context.dispatch('api/getReferralsByReferrerName', { referrerName }, { root: true })
       const isValid = response.isValid

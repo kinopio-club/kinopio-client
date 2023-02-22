@@ -194,6 +194,7 @@ const store = createStore({
     validateUserReferral: '',
     validateUserReferralBySpaceUser: false,
     validateReferralByName: '',
+    validateReferralByReferrerName: '',
 
     // notifications
     notifications: [],
@@ -326,6 +327,10 @@ const store = createStore({
     validateReferralByName: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.validateReferralByName = value
+    },
+    validateReferralByReferrerName: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.validateReferralByReferrerName = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
