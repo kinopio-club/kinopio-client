@@ -747,9 +747,7 @@ export default {
         context.commit('addNotification', { message: 'Invalid referral, referring user not found', type: 'danger' }, { root: true })
         return
       }
-      if (referrerName && canBeReferred) {
-        context.dispatch('update', { referrerName })
-      } else if (canBeReferred) {
+      if (canBeReferred) {
         context.commit('notifyReferralSuccessUser', publicUser, { root: true })
         context.dispatch('update', { referredByUserId: publicUser.id })
       } else {
