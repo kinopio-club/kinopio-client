@@ -263,7 +263,7 @@ export default {
       const referrerName = this.$store.state.currentUser.referrerName
       if (!referrerName) { return }
       this.$store.commit('currentUser/isUpgraded', true, { root: true })
-      this.$store.commit('addNotification', { message: `Your account has been upgraded to free`, type: 'success', isPersistentItem: true })
+      this.$store.commit('addNotification', { message: `Your account has been upgraded to free. Thanks for helping share Kinopio`, type: 'success', isPersistentItem: true })
     },
 
     async checkIfShouldAddReferral () {
