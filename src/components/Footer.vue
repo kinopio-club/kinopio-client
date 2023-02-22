@@ -94,9 +94,6 @@ export default {
     window.addEventListener('online', this.updateLiveSpaces)
     this.updatePosition()
     this.updateLiveSpaces()
-    updateLiveSpacesIntervalTimer = setInterval(() => {
-      this.updateLiveSpaces()
-    }, 1000 * 60 * 5) // 5 minutes
     this.updateExploreSpaces()
   },
   beforeUnmount () {

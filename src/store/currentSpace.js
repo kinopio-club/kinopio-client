@@ -185,6 +185,7 @@ const currentSpace = {
       context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
       context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
       context.dispatch('currentUser/validateReferral', null, { root: true })
+      context.dispatch('currentUser/validateReferralByName', null, { root: true })
     },
 
     // Users and otherSpaces

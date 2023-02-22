@@ -192,11 +192,12 @@ export default {
       const email = event.target[0].value.toLowerCase()
       const password = event.target[1].value
       const confirmPassword = event.target[2].value
-      const currentUser = utils.clone(this.$store.state.currentUser)
+      let currentUser = utils.clone(this.$store.state.currentUser)
       if (!this.isPasswordMatchesEmail(email, password)) { return }
       if (!this.isSignUpPasswordTooShort(password)) { return }
       if (!this.isSignUpPasswordsMatch(password, confirmPassword)) { return }
       this.loading.signUpOrIn = true
+      currentUser = await this.validateReferrerName(currentUser)
       const response = await this.$store.dispatch('api/signUp', { email, password, currentUser, sessionToken })
       const result = await response.json()
       if (this.isSuccess(response)) {
@@ -210,8 +211,9 @@ export default {
         this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
         this.$store.commit('triggerCheckIfUseHasInboxSpace')
         this.$store.dispatch('themes/restore')
-        this.$store.commit('notifyReferralSuccessUser', null)
+        this.clearNotifications()
         this.checkIfShouldAddReferral()
+        this.checkIfShouldUpgradeReferral()
       } else {
         await this.handleErrors(result)
       }
@@ -246,7 +248,7 @@ export default {
         this.$store.dispatch('currentUser/restoreUserFavorites')
         this.$store.commit('triggerUpdateNotifications')
         this.$store.dispatch('themes/restore')
-        this.$store.commit('notifyReferralSuccessUser', null)
+        this.clearNotifications()
         if (shouldLoadLastSpace) {
           this.$store.dispatch('currentSpace/loadLastSpace')
           this.$store.commit('triggerUpdateWindowHistory', { space: this.$store.state.currentSpace })
@@ -255,6 +257,13 @@ export default {
       } else {
         await this.handleErrors(result)
       }
+    },
+
+    async checkIfShouldUpgradeReferral () {
+      const referrerName = this.$store.state.currentUser.referrerName
+      if (!referrerName) { return }
+      this.$store.commit('currentUser/isUpgraded', true, { root: true })
+      this.$store.commit('addNotification', { message: `Your account has been upgraded to free. Thanks for helping share Kinopio`, type: 'success', isPersistentItem: true })
     },
 
     async checkIfShouldAddReferral () {
@@ -348,6 +357,22 @@ export default {
     createSessionToken () {
       sessionToken = nanoid()
       this.$store.dispatch('api/createSessionToken', sessionToken)
+    },
+
+    async validateReferrerName (currentUser) {
+      const referrerName = currentUser.referrerName
+      if (!referrerName) { return currentUser }
+      const response = await this.$store.dispatch('api/getReferralsByReferrerName', { referrerName })
+      const isValid = response.isValid
+      if (!isValid) {
+        delete currentUser.referrerName
+      }
+      return currentUser
+    },
+
+    clearNotifications () {
+      this.$store.commit('notifyReferralSuccessUser', null)
+      this.$store.commit('notifyReferralSuccessReferrerName', false)
     }
   },
   watch: {
