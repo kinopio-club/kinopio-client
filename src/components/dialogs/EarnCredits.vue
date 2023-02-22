@@ -19,7 +19,13 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
-const url = computed(() => utils.kinopioDomain() + '/refer/' + (store.state.currentUser.referrerName || store.state.currentUser.id))
+const url = computed(() => {
+  if (store.state.currentUser.referrerName) {
+    return utils.kinopioDomain() + '/from/' + store.state.currentUser.referrerName
+  } else {
+    return utils.kinopioDomain() + '/refer/' + store.state.currentUser.id
+  }
+})
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const referralCreditAmount = computed(() => consts.referralCreditAmount)
 const referredByUserId = computed(() => store.state.currentUser.referredByUserId)
