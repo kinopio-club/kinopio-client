@@ -212,8 +212,6 @@ const router = createRouter({
         store.commit('validateReferralFromReferrerName', referrerName)
         next()
       }
-
-      // from/:referrerName
     }
   ]
 })
