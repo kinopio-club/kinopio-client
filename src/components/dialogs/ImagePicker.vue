@@ -161,7 +161,7 @@ export default {
     placeholder () {
       let label = this.provider
       if (label === 'bing') {
-        label = 'images'
+        label = 'images on Pexel'
       }
       return `Search ${utils.capitalizeFirstLetter(label)}`
     },
@@ -229,19 +229,18 @@ export default {
       this.loading = true
       this.searchService()
     },
-    async searchBing () {
-      let url = new URL('https://api.bing.microsoft.com/v7.0/images/search')
+    async searchPexels () {
+      let url = new URL('https://api.pexels.com/v1/search')
       const headers = new Headers({
-        'Ocp-Apim-Subscription-Key': '1b8fd229ada041c59701469809a34bf4'
+        'Authorization': '4kZOQl4a0OjcWLrMHzj6sEJMarmlZzJiP6P67lqZpOrxbtITfwpKyC4j'
       })
       const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
       const defaultSearch = sample(defaultSearches)
-      let params = { q: this.search || defaultSearch }
-      params.maxWidth = 600
+      let params = { query: this.search || defaultSearch }
       url.search = new URLSearchParams(params).toString()
       const response = await fetch(url, { method: 'GET', headers })
       const data = await response.json()
-      this.normalizeResults(data, 'bing')
+      this.normalizeResults(data, 'pexels')
     },
     async searchGiphy (isStickers) {
       let resource = 'gifs'
@@ -277,7 +276,7 @@ export default {
       }
       try {
         if (this.serviceIsBing) {
-          await this.searchBing()
+          await this.searchPexels()
         } else if (this.serviceIsStickers) {
           const isStickers = true
           await this.searchGiphy(isStickers)
@@ -304,22 +303,17 @@ export default {
       this.resultsSectionHeight = null
     },
     normalizeResults (data, service) {
-      const bing = service === 'bing' && this.serviceIsBing
+      const pexels = service === 'pexels' && this.serviceIsPexels
       const giphy = service === 'giphy' && (this.serviceIsStickers || this.serviceIsGifs)
-      // bing
-      if (bing) {
-        data = data.value
-        this.images = data.map(image => {
-          const isImage = utils.urlIsImage(image.contentUrl)
-          if (!isImage) { return }
+      // giphy
+      if (pexels) {
+        this.images = data.photos.map(image => {
           return {
-            id: image.imageid,
-            previewUrl: image.thumbnailUrl,
-            url: image.contentUrl
+            id: image.id,
+            previewUrl: image.src.tiny,
+            url: image.src.large
           }
         })
-        this.images = this.images.filter(image => Boolean(image))
-      // giphy
       } else if (giphy) {
         this.images = data.map(image => {
           // stickers
