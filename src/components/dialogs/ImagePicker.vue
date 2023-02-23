@@ -93,6 +93,7 @@ import Loader from '@/components/Loader.vue'
 import AIImageGeneration from '@/components/AIImageGeneration.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
 
 import debounce from 'lodash-es/debounce'
 import sample from 'lodash-es/sample'
@@ -232,7 +233,7 @@ export default {
     async searchPexels () {
       let url = new URL('https://api.pexels.com/v1/search')
       const headers = new Headers({
-        'Authorization': '4kZOQl4a0OjcWLrMHzj6sEJMarmlZzJiP6P67lqZpOrxbtITfwpKyC4j'
+        'Authorization': consts.pexelsApiKey
       })
       const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
       const defaultSearch = sample(defaultSearches)
