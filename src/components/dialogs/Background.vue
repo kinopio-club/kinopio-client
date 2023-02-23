@@ -71,15 +71,49 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
           .current-color(:style="{ background: backgroundTintBadgeColor }")
         ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
       .segmented-buttons
-        button(:disabled="!canEditSpace" @click.left.stop="updateSelectedImagesType('background')" :class="{ active: selectedImagesType === 'background'}")
+        button(:disabled="!canEditSpace" @click.left.stop="updateService('background')" :class="{ active: service === 'background'}")
           img.icon.flower(src="@/assets/flower.svg")
-        button(:disabled="!canEditSpace" @click.left.stop="updateSelectedImagesType('recent')" :class="{ active: selectedImagesType === 'recent'}")
+        button(:disabled="!canEditSpace" @click.left.stop="updateService('pexels')" :class="{ active: serviceIsPexels}")
+          img.icon(src="@/assets/search.svg")
+
+        button(:disabled="!canEditSpace" @click.left.stop="updateService('recent')" :class="{ active: service === 'recent'}")
           span Recent
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="selectFile")
           span Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
-  section.results-section
+
+  //- results
+  section.results-section.search-input-wrap(v-if="serviceIsPexels")
+    .search-wrap
+      img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
+      Loader(:visible="loading")
+      input(
+        placeholder="Search Images on Pexels"
+        v-model="searchInput"
+        ref="searchInput"
+        @focus="resetPinchCounterZoomDecimal"
+        @keyup.stop.backspace
+        @keyup.stop.enter
+        @mouseup.stop
+        @touchend.stop
+      )
+      button.borderless.clear-input-wrap(@click.left="clearSearch")
+        img.icon.cancel(src="@/assets/add.svg")
+    .error-container(v-if="error.isNoSearchResults")
+      .badge.danger Nothing found on Pexels for {{search}}
+    .error-container(v-if="error.unknownServerError")
+      .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+    ul.results-list.image-list
+      template(v-for="image in images" :key="image.id")
+        li(@click.left="updateSpaceBackground(image.url)" tabindex="0" v-on:keydown.enter="updateSpaceBackground(image.url)" :class="{ active: isSpaceUrl(image)}")
+          img(:src="image.previewUrl")
+          a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
+            button.small-button
+              span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
+              span →
+
+  section.results-section(v-else)
     ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
 
 </template>
@@ -92,8 +126,11 @@ import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import ImageList from '@/components/ImageList.vue'
 import backgroundImages from '@/data/backgroundImages.json'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
+import sample from 'lodash-es/sample'
 
 import uniq from 'lodash-es/uniq'
+import debounce from 'lodash-es/debounce'
 
 export default {
   name: 'Background',
@@ -115,12 +152,17 @@ export default {
         signUpToUpload: false,
         userIsOffline: false,
         sizeLimit: false,
-        unknownUploadError: false
+        unknownUploadError: false,
+        isNoSearchResults: false,
+        unknownServerError: false
       },
       backgroundTint: '',
       defaultColor: '#e3e3e3',
+      search: '',
+      loading: false,
       selectedImages: backgroundImages,
-      selectedImagesType: 'background'
+      images: [],
+      service: 'background' // background, recent, pexels
     }
   },
   created () {
@@ -146,6 +188,18 @@ export default {
     })
   },
   computed: {
+    searchInput: {
+      get () {
+        return this.search
+      },
+      set (newValue) {
+        this.search = newValue
+        if (newValue) {
+          this.loading = true
+          this.searchService()
+        }
+      }
+    },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     currentSpace () { return this.$store.state.currentSpace },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
@@ -180,18 +234,54 @@ export default {
         return this.defaultColor
       }
       return this.backgroundTint
-    }
+    },
+    serviceIsPexels () { return this.service === 'pexels' }
   },
   methods: {
-    updateSelectedImagesType (type) {
-      this.selectedImagesType = type
+    isSpaceUrl (image) {
+      return image.url === this.background
+    },
+    updateService (type) {
+      this.service = type
       if (type === 'background') {
         this.selectedImages = backgroundImages
       } else if (type === 'recent') {
         const images = this.recentImagesFromCacheSpaces()
         this.selectedImages = images
+      } else if (type === 'pexels') {
+        this.searchService()
       }
     },
+    searchService: debounce(async function () {
+      this.error.isNoSearchResults = false
+      this.error.unknownServerError = false
+      try {
+        let url = new URL('https://api.pexels.com/v1/search')
+        const headers = new Headers({
+          'Authorization': consts.pexelsApiKey
+        })
+        const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
+        const defaultSearch = sample(defaultSearches)
+        let params = { query: this.search || defaultSearch }
+        url.search = new URLSearchParams(params).toString()
+        const response = await fetch(url, { method: 'GET', headers })
+        const data = await response.json()
+        this.images = data.photos.map(image => {
+          return {
+            id: image.id,
+            previewUrl: image.src.tiny,
+            url: image.src.large
+          }
+        })
+        if (!this.images.length) {
+          this.error.isNoSearchResults = true
+        }
+      } catch (error) {
+        console.error('🚒 searchService', error)
+        this.error.unknownServerError = true
+      }
+      this.loading = false
+    }, 350),
     recentImagesFromCacheSpaces () {
       let spaces = cache.getAllSpaces()
       let images = []
@@ -315,6 +405,14 @@ export default {
           this.error.unknownUploadError = true
         }
       }
+    },
+    clearSearch () {
+      this.search = ''
+      this.loading = false
+      this.images = []
+    },
+    resetPinchCounterZoomDecimal () {
+      this.$store.commit('pinchCounterZoomDecimal', 1)
     }
   },
   watch: {
@@ -336,8 +434,7 @@ export default {
 
 <style lang="stylus">
 .background
-  &.narrow
-    width 215px
+  width 255px
   .title-row
     margin-left 0 !important
   .background-preview
@@ -388,4 +485,17 @@ export default {
   .input-button-wrap
     margin-top -10px
     margin-right -8px
+
+  .search-wrap
+    .loader
+      width 13px
+      height 14px
+      margin-right 3px
+      flex-shrink 0
+      margin-top 2px
+  .results-section
+    .error-container
+      margin 0
+      margin-left 4px
+      // margin-right 4px
 </style>
