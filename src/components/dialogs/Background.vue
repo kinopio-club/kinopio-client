@@ -195,7 +195,6 @@ export default {
       set (newValue) {
         this.search = newValue
         if (newValue) {
-          this.loading = true
           this.searchService()
         }
       }
@@ -249,10 +248,14 @@ export default {
         const images = this.recentImagesFromCacheSpaces()
         this.selectedImages = images
       } else if (type === 'pexels') {
-        this.searchService()
+        this.searchPexels()
       }
     },
     searchService: debounce(async function () {
+      this.searchPexels()
+    }, 350),
+    async searchPexels () {
+      this.loading = true
       this.error.isNoSearchResults = false
       this.error.unknownServerError = false
       try {
@@ -281,7 +284,7 @@ export default {
         this.error.unknownServerError = true
       }
       this.loading = false
-    }, 350),
+    },
     recentImagesFromCacheSpaces () {
       let spaces = cache.getAllSpaces()
       let images = []
