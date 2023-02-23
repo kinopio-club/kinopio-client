@@ -15,7 +15,7 @@ dialog.image-picker(
           img.icon.sticker(src="@/assets/sticker.svg")
         button(@click.left.stop="toggleServiceIsAI" :class="{active : serviceIsAI}" title="AI")
           span AI
-        button(@click.left.stop="toggleServiceIsBing" :class="{active : serviceIsBing}" title="bing")
+        button(@click.left.stop="toggleServiceIsPexels" :class="{active : serviceIsPexels}" title="pexels")
           img.icon(src="@/assets/search.svg")
         button(@click.left.stop="toggleServiceIsGifs" :class="{active : serviceIsGifs}" title="gifs")
           span GIF
@@ -93,6 +93,7 @@ import Loader from '@/components/Loader.vue'
 import AIImageGeneration from '@/components/AIImageGeneration.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
 
 import debounce from 'lodash-es/debounce'
 import sample from 'lodash-es/sample'
@@ -124,7 +125,7 @@ export default {
     return {
       images: [],
       search: '',
-      service: 'stickers', // 'stickers', 'gifs', 'bing', 'ai'
+      service: 'stickers', // 'stickers', 'gifs', 'pexels', 'ai'
       loading: false,
       minDialogHeight: 400,
       dialogHeight: null,
@@ -155,13 +156,13 @@ export default {
       if (this.service === 'stickers' || this.service === 'gifs') {
         return 'giphy'
       } else {
-        return 'bing'
+        return 'pexels'
       }
     },
     placeholder () {
       let label = this.provider
-      if (label === 'bing') {
-        label = 'images'
+      if (label === 'pexels') {
+        label = 'images on Pexel'
       }
       return `Search ${utils.capitalizeFirstLetter(label)}`
     },
@@ -169,8 +170,8 @@ export default {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.cardId)
     },
-    serviceIsBing () {
-      return this.service === 'bing'
+    serviceIsPexels () {
+      return this.service === 'pexels'
     },
     serviceIsStickers () {
       return this.service === 'stickers'
@@ -205,8 +206,8 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'ImagePicker.triggerUpgradeUserIsVisible')
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
-    toggleServiceIsBing () {
-      this.service = 'bing'
+    toggleServiceIsPexels () {
+      this.service = 'pexels'
       this.searchAgain()
       this.updateLastUsedImagePickerService()
     },
@@ -229,19 +230,18 @@ export default {
       this.loading = true
       this.searchService()
     },
-    async searchBing () {
-      let url = new URL('https://api.bing.microsoft.com/v7.0/images/search')
+    async searchPexels () {
+      let url = new URL('https://api.pexels.com/v1/search')
       const headers = new Headers({
-        'Ocp-Apim-Subscription-Key': '1b8fd229ada041c59701469809a34bf4'
+        'Authorization': consts.pexelsApiKey
       })
       const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
       const defaultSearch = sample(defaultSearches)
-      let params = { q: this.search || defaultSearch }
-      params.maxWidth = 600
+      let params = { query: this.search || defaultSearch }
       url.search = new URLSearchParams(params).toString()
       const response = await fetch(url, { method: 'GET', headers })
       const data = await response.json()
-      this.normalizeResults(data, 'bing')
+      this.normalizeResults(data, 'pexels')
     },
     async searchGiphy (isStickers) {
       let resource = 'gifs'
@@ -276,8 +276,8 @@ export default {
         return
       }
       try {
-        if (this.serviceIsBing) {
-          await this.searchBing()
+        if (this.serviceIsPexels) {
+          await this.searchPexels()
         } else if (this.serviceIsStickers) {
           const isStickers = true
           await this.searchGiphy(isStickers)
@@ -304,22 +304,17 @@ export default {
       this.resultsSectionHeight = null
     },
     normalizeResults (data, service) {
-      const bing = service === 'bing' && this.serviceIsBing
+      const pexels = service === 'pexels' && this.serviceIsPexels
       const giphy = service === 'giphy' && (this.serviceIsStickers || this.serviceIsGifs)
-      // bing
-      if (bing) {
-        data = data.value
-        this.images = data.map(image => {
-          const isImage = utils.urlIsImage(image.contentUrl)
-          if (!isImage) { return }
+      // giphy
+      if (pexels) {
+        this.images = data.photos.map(image => {
           return {
-            id: image.imageid,
-            previewUrl: image.thumbnailUrl,
-            url: image.contentUrl
+            id: image.id,
+            previewUrl: image.src.tiny,
+            url: image.src.large
           }
         })
-        this.images = this.images.filter(image => Boolean(image))
-      // giphy
       } else if (giphy) {
         this.images = data.map(image => {
           // stickers
