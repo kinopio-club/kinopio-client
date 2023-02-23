@@ -15,7 +15,7 @@ dialog.image-picker(
           img.icon.sticker(src="@/assets/sticker.svg")
         button(@click.left.stop="toggleServiceIsAI" :class="{active : serviceIsAI}" title="AI")
           span AI
-        button(@click.left.stop="toggleServiceIsBing" :class="{active : serviceIsBing}" title="bing")
+        button(@click.left.stop="toggleServiceIsPexels" :class="{active : serviceIsPexels}" title="pexels")
           img.icon(src="@/assets/search.svg")
         button(@click.left.stop="toggleServiceIsGifs" :class="{active : serviceIsGifs}" title="gifs")
           span GIF
@@ -124,7 +124,7 @@ export default {
     return {
       images: [],
       search: '',
-      service: 'stickers', // 'stickers', 'gifs', 'bing', 'ai'
+      service: 'stickers', // 'stickers', 'gifs', 'pexels', 'ai'
       loading: false,
       minDialogHeight: 400,
       dialogHeight: null,
@@ -155,12 +155,12 @@ export default {
       if (this.service === 'stickers' || this.service === 'gifs') {
         return 'giphy'
       } else {
-        return 'bing'
+        return 'pexels'
       }
     },
     placeholder () {
       let label = this.provider
-      if (label === 'bing') {
+      if (label === 'pexels') {
         label = 'images on Pexel'
       }
       return `Search ${utils.capitalizeFirstLetter(label)}`
@@ -169,8 +169,8 @@ export default {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.cardId)
     },
-    serviceIsBing () {
-      return this.service === 'bing'
+    serviceIsPexels () {
+      return this.service === 'pexels'
     },
     serviceIsStickers () {
       return this.service === 'stickers'
@@ -205,8 +205,8 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'ImagePicker.triggerUpgradeUserIsVisible')
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
-    toggleServiceIsBing () {
-      this.service = 'bing'
+    toggleServiceIsPexels () {
+      this.service = 'pexels'
       this.searchAgain()
       this.updateLastUsedImagePickerService()
     },
@@ -275,7 +275,7 @@ export default {
         return
       }
       try {
-        if (this.serviceIsBing) {
+        if (this.serviceIsPexels) {
           await this.searchPexels()
         } else if (this.serviceIsStickers) {
           const isStickers = true
