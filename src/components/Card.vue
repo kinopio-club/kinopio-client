@@ -1561,6 +1561,7 @@ export default {
     },
     startDraggingCard (event) {
       isMultiTouch = false
+      if (event.ctrlKey) { return }
       if (this.isLocked) { return }
       if (this.currentUserIsPanningReady) { return }
       if (!this.canEditCard) { return }
