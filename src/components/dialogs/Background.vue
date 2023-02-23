@@ -273,7 +273,7 @@ export default {
           return {
             id: image.id,
             previewUrl: image.src.tiny,
-            url: image.src.large
+            url: image.src.large2x
           }
         })
         if (!this.images.length) {
