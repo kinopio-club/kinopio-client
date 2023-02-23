@@ -622,7 +622,6 @@ const currentCards = {
       const card = context.getters.byId(id)
       if (!card) { return }
       if (card.isLocked) { return }
-      if (id === context.rootState.currentDraggingCardId) { return }
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
       let cards = context.getters.all
       let highestCardZ = utils.highestCardZ(cards)
