@@ -65,56 +65,58 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
     //- buttons
-    .row
-      .button-wrap
-        button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-          .current-color(:style="{ background: backgroundTintBadgeColor }")
-        ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
-      .segmented-buttons
-        button(:disabled="!canEditSpace" @click.left.stop="updateService('background')" :class="{ active: service === 'background'}")
-          img.icon.flower(src="@/assets/flower.svg")
-        button(:disabled="!canEditSpace" @click.left.stop="updateService('pexels')" :class="{ active: serviceIsPexels}")
-          img.icon(src="@/assets/search.svg")
+    template(v-if="canEditSpace")
+      .row
+        .button-wrap
+          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+            .current-color(:style="{ background: backgroundTintBadgeColor }")
+          ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
+        .segmented-buttons
+          button(@click.left.stop="updateService('background')" :class="{ active: service === 'background'}")
+            img.icon.flower(src="@/assets/flower.svg")
+          button(@click.left.stop="updateService('pexels')" :class="{ active: serviceIsPexels}")
+            img.icon(src="@/assets/search.svg")
 
-        button(:disabled="!canEditSpace" @click.left.stop="updateService('recent')" :class="{ active: service === 'recent'}")
-          span Recent
-      .button-wrap
-        button(:disabled="!canEditSpace" @click.left.stop="selectFile")
-          span Upload
-        input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
+          button(@click.left.stop="updateService('recent')" :class="{ active: service === 'recent'}")
+            span Recent
+        .button-wrap
+          button(@click.left.stop="selectFile")
+            span Upload
+          input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
 
   //- results
-  section.results-section.search-input-wrap(v-if="serviceIsPexels")
-    .search-wrap
-      img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
-      Loader(:visible="loading")
-      input(
-        placeholder="Search Images on Pexels"
-        v-model="searchInput"
-        ref="searchInput"
-        @focus="resetPinchCounterZoomDecimal"
-        @keyup.stop.backspace
-        @keyup.stop.enter
-        @mouseup.stop
-        @touchend.stop
-      )
-      button.borderless.clear-input-wrap(@click.left="clearSearch")
-        img.icon.cancel(src="@/assets/add.svg")
-    .error-container(v-if="error.isNoSearchResults")
-      .badge.danger Nothing found on Pexels for {{search}}
-    .error-container(v-if="error.unknownServerError")
-      .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-    ul.results-list.image-list
-      template(v-for="image in images" :key="image.id")
-        li(@click.left="updateSpaceBackground(image.url)" tabindex="0" v-on:keydown.enter="updateSpaceBackground(image.url)" :class="{ active: isSpaceUrl(image)}")
-          img(:src="image.previewUrl")
-          a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
-            button.small-button
-              span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
-              span →
+  template(v-if="canEditSpace")
+    section.results-section.search-input-wrap(v-if="serviceIsPexels")
+      .search-wrap
+        img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
+        Loader(:visible="loading")
+        input(
+          placeholder="Search Images on Pexels"
+          v-model="searchInput"
+          ref="searchInput"
+          @focus="resetPinchCounterZoomDecimal"
+          @keyup.stop.backspace
+          @keyup.stop.enter
+          @mouseup.stop
+          @touchend.stop
+        )
+        button.borderless.clear-input-wrap(@click.left="clearSearch")
+          img.icon.cancel(src="@/assets/add.svg")
+      .error-container(v-if="error.isNoSearchResults")
+        .badge.danger Nothing found on Pexels for {{search}}
+      .error-container(v-if="error.unknownServerError")
+        .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+      ul.results-list.image-list
+        template(v-for="image in images" :key="image.id")
+          li(@click.left="updateSpaceBackground(image.url)" tabindex="0" v-on:keydown.enter="updateSpaceBackground(image.url)" :class="{ active: isSpaceUrl(image)}")
+            img(:src="image.previewUrl")
+            a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
+              button.small-button
+                span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
+                span →
 
-  section.results-section(v-else)
-    ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+    section.results-section(v-else)
+      ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
 
 </template>
 

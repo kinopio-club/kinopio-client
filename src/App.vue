@@ -387,7 +387,7 @@ label // used for checkbox buttons
   padding 5px 9px
   margin 0
   border 1px solid var(--primary-border)
-  background-color var(--primary-background)
+  background-color var(--button-background)
   border-radius var(--entity-radius)
   cursor pointer
   user-select none
