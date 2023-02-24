@@ -731,10 +731,11 @@ export default {
     validateReferral: async (context) => {
       let referralUserId
       const referrerName = context.rootState.validateReferralFromReferrerName
+      const isFromSpaceInvite = Boolean(context.rootState.validateUserReferralBySpaceUser)
       if (referrerName) {
         const response = await context.dispatch('api/getPublicUserByReferrerName', { referrerName }, { root: true })
         referralUserId = response.id
-      } else if (context.rootState.validateUserReferralBySpaceUser) {
+      } else if (isFromSpaceInvite) {
         const referralUsers = context.rootGetters['currentSpace/members']()
         referralUserId = referralUsers[0].id
       } else {
@@ -750,7 +751,7 @@ export default {
       if (canBeReferred) {
         context.commit('notifyReferralSuccessUser', publicUser, { root: true })
         context.dispatch('update', { referredByUserId: publicUser.id })
-      } else {
+      } else if (!isFromSpaceInvite) {
         context.commit('addNotification', { message: 'Only new users can be referred', type: 'danger' }, { root: true })
       }
       context.commit('validateUserReferralBySpaceUser', false, { root: true })
