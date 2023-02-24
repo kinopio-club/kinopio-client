@@ -76,9 +76,8 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
             img.icon.flower(src="@/assets/flower.svg")
           button(@click.left.stop="updateService('pexels')" :class="{ active: serviceIsPexels}")
             img.icon(src="@/assets/search.svg")
-
-          button(@click.left.stop="updateService('recent')" :class="{ active: service === 'recent'}")
-            span Recent
+          button(@click.left.stop="updateService('recent')" :class="{ active: serviceIsRecent}")
+            img.icon.time(src="@/assets/time.svg")
         .button-wrap
           button(@click.left.stop="selectFile")
             span Upload
@@ -116,6 +115,8 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
                 span →
 
     section.results-section(v-else)
+      .row(v-if="serviceIsRecent")
+        p Recently Used
       ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
 
 </template>
@@ -236,7 +237,8 @@ export default {
       }
       return this.backgroundTint
     },
-    serviceIsPexels () { return this.service === 'pexels' }
+    serviceIsPexels () { return this.service === 'pexels' },
+    serviceIsRecent () { return this.service === 'recent' }
   },
   methods: {
     isSpaceUrl (image) {
