@@ -832,13 +832,23 @@ export default {
     if (!card) { return }
     const element = document.querySelector(`article [data-card-id="${card.id}"]`)
     if (!element) { return }
-    element.style.width = 'initial'
-    element.style.height = 'initial'
+    this.removeCardDimensions(card)
     const rect = element.getBoundingClientRect()
     const zoom = this.spaceCounterZoomDecimal()
     card.width = Math.ceil(rect.width * zoom)
     card.height = Math.ceil(rect.height * zoom)
     return card
+  },
+  removeCardDimensions (card) {
+    const cardElement = document.querySelector(`#card[data-card-id="${card.id}"]`)
+    const articleElement = document.querySelector(`article [data-card-id="${card.id}"]`)
+    const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
+    cardElement.style.width = 'initial'
+    cardElement.style.height = 'initial'
+    articleElement.style.width = 'initial'
+    articleElement.style.height = 'initial'
+    contentWrapElement.style.width = 'initial'
+    contentWrapElement.style.height = 'initial'
   },
   topLeftItem (items) {
     items = this.clone(items)
