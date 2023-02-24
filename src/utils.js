@@ -832,6 +832,8 @@ export default {
     if (!card) { return }
     const element = document.querySelector(`article [data-card-id="${card.id}"]`)
     if (!element) { return }
+    element.style.width = 'initial'
+    element.style.height = 'initial'
     const rect = element.getBoundingClientRect()
     const zoom = this.spaceCounterZoomDecimal()
     card.width = Math.ceil(rect.width * zoom)
