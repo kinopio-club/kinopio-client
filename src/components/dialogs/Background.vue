@@ -244,6 +244,17 @@ export default {
     isSpaceUrl (image) {
       return image.url === this.background
     },
+    focusAndSelectSearchInput () {
+      this.$nextTick(() => {
+        if (utils.isMobile()) { return }
+        const element = this.$refs.searchInput
+        if (!element) { return }
+        element.focus()
+        const length = element.value.length
+        if (!length) { return }
+        element.setSelectionRange(0, length)
+      })
+    },
     updateService (type) {
       this.service = type
       if (type === 'background') {
@@ -253,6 +264,7 @@ export default {
         this.selectedImages = images
       } else if (type === 'pexels') {
         this.searchPexels()
+        this.focusAndSelectSearchInput()
       }
     },
     searchService: debounce(async function () {
