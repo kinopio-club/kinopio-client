@@ -393,6 +393,7 @@ label // used for checkbox buttons
   user-select none
   color var(--primary)
   height 28px
+  backdrop-filter blur(10px)
   .down-arrow
     padding-left 4px
     vertical-align 1px
