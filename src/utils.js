@@ -830,7 +830,7 @@ export default {
   },
   updateCardDimensions (card) {
     if (!card) { return }
-    const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+    const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     if (!element) { return }
     this.removeCardDimensions(card)
     const rect = element.getBoundingClientRect()
@@ -840,14 +840,15 @@ export default {
     return card
   },
   removeCardDimensions (card) {
-    const cardElement = document.querySelector(`#card[data-card-id="${card.id}"]`)
-    const articleElement = document.querySelector(`article [data-card-id="${card.id}"]`)
-    const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
-    cardElement.style.width = 'initial'
+    const cardElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+    const contentWrapElement = cardElement.querySelector(`.card-content-wrap`)
+    let width = 'initial'
+    if (cardElement.dataset.resizeWidth) {
+      width = cardElement.dataset.resizeWidth + 'px'
+    }
+    cardElement.style.width = width
     cardElement.style.height = 'initial'
-    articleElement.style.width = 'initial'
-    articleElement.style.height = 'initial'
-    contentWrapElement.style.width = 'initial'
+    contentWrapElement.style.width = width
     contentWrapElement.style.height = 'initial'
   },
   topLeftItem (items) {

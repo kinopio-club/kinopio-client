@@ -361,7 +361,6 @@ export default {
         console.log('🌸 Create new user')
         context.dispatch('createNewUser')
       }
-      context.dispatch('currentSpace/checkIfShouldCreateNewUserSpaces', null, { root: true })
       context.dispatch('themes/restore', null, { root: true })
       context.commit('triggerUserIsLoaded', null, { root: true })
     },

@@ -6,6 +6,7 @@ article#card(
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :data-is-visible-in-viewport="isVisibleInViewport"
   :data-is-locked="isLocked"
+  :data-resize-width="resizeWidth"
   :key="id"
   ref="card"
   :class="{'is-resizing': currentUserIsResizingCard, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
@@ -1531,6 +1532,7 @@ export default {
       }
       if (this.resizeWidth) {
         styles.maxWidth = this.resizeWidth + 'px'
+        styles.width = this.resizeWidth + 'px'
       } else if (connectorIsNotVisibleToReadOnlyUser && this.width) {
         const connectorIconWidth = 10
         styles.width = this.width - connectorIconWidth + 'px'
