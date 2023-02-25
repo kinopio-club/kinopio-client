@@ -743,7 +743,7 @@ header
     > .logo-image
       min-width 45px
       .label-badge
-        bottom 0
+        bottom -2px
     img
       vertical-align middle
     .down-arrow

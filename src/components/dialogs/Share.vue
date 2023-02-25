@@ -344,4 +344,6 @@ export default {
     dialog.embed
       top -200px
 
+  .segmented-buttons
+    z-index 1
 </style>

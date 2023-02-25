@@ -83,9 +83,9 @@ export default {
   &.active
     outline none
   .user-avatar
-    width 24px
-    height 24px
-    border-radius 3px
+    width 28px
+    height 28px
+    border-radius var(--entity-radius)
     pointer-events none
     background-color var(--secondary-active-background)
     &:hover,
