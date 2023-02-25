@@ -18,7 +18,7 @@ import defer from 'lodash-es/defer'
 let otherSpacesQueue = [] // id
 let spectatorIdleTimers = []
 let notifiedCardAdded = []
-let isLoadingRemoteSpace
+let isLoadingRemoteSpace, shouldLoadNewHelloSpace
 
 const currentSpace = {
   namespaced: true,
@@ -176,11 +176,10 @@ const currentSpace = {
         await context.dispatch('loadLastSpace')
       // hello kinopio
       } else {
-        console.log('🚃 Create new Hello Kinopio space')
-        context.dispatch('createNewInboxSpace', true)
-        context.dispatch('createNewHelloSpace')
-        context.dispatch('updateUserLastSpaceId')
+        console.log('🚃 Create and restore hello space')
+        shouldLoadNewHelloSpace = true
       }
+      context.dispatch('checkIfShouldCreateNewUserSpaces')
       context.dispatch('updateModulesSpaceId')
       context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
       context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
@@ -294,25 +293,25 @@ const currentSpace = {
       const spaces = cache.getAllSpaces()
       if (currentUserIsSignedIn) { return }
       if (spaces.length) { return }
-      const shouldCreateWithoutLoading = true
-      context.dispatch('createNewInboxSpace', shouldCreateWithoutLoading)
-      context.dispatch('createNewHelloSpace', shouldCreateWithoutLoading)
+      context.dispatch('createNewInboxSpace', true)
+      context.dispatch('createNewHelloSpace')
+      context.dispatch('updateUserLastSpaceId')
     },
-    createNewHelloSpace: (context, shouldCreateWithoutLoading) => {
+    createNewHelloSpace: (context) => {
       const user = context.rootState.currentUser
       let space = utils.clone(helloSpace)
       space.id = nanoid()
-      if (shouldCreateWithoutLoading) {
-        space.users = [context.rootState.currentUser]
-        const nullCardUsers = true
-        cache.updateIdsInSpace(space, nullCardUsers)
-      } else {
+      if (shouldLoadNewHelloSpace) {
         space = cache.updateIdsInSpace(space)
         context.commit('clearSearch', null, { root: true })
         context.dispatch('restoreSpaceInChunks', { space })
         context.commit('addUserToSpace', user)
         context.dispatch('updateOtherUsers')
         context.dispatch('updateOtherSpaces')
+      } else {
+        space.users = [context.rootState.currentUser]
+        const nullCardUsers = true
+        cache.updateIdsInSpace(space, nullCardUsers)
       }
     },
     createNewSpace: (context, space) => {
