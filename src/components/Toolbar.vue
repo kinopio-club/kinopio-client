@@ -61,6 +61,7 @@ export default {
     bottom -8px
     left 5px
     z-index 1
+    width 77px
     span
       width 100%
       color var(--primary)

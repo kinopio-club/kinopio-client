@@ -309,7 +309,7 @@ export default {
   --button-hover-shadow 2px 2px 0 var(--heavy-shadow)
   --button-active-inset-shadow inset 0 1px 2px var(--heavy-shadow)
   --max-z 2147483646
-  --entity-radius 5px
+  --entity-radius 6px
   --serif-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
 
@@ -330,7 +330,7 @@ export default {
   -webkit-tap-highlight-color transparent
   box-sizing border-box
   font-family "Helvetica Neue", Helvetica, Arial, sans-serif
-  font-size 14px
+  font-size 15px
   line-height 1.2
 
 body
@@ -385,6 +385,7 @@ label // used for checkbox buttons
   touch-action manipulation
   text-align left
   padding 5px 9px
+  height 30px
   margin 0
   border 1px solid var(--primary-border)
   background-color var(--button-background)
@@ -392,7 +393,6 @@ label // used for checkbox buttons
   cursor pointer
   user-select none
   color var(--primary)
-  height 28px
   backdrop-filter blur(10px)
   .down-arrow
     padding-left 4px
@@ -592,7 +592,7 @@ dialog
   &.is-pinnable
     transition left 0.1s, top 0.1s
   &.narrow
-    width 224px
+    width 230px
   button,
   label
     background-color var(--primary-background)
@@ -842,10 +842,9 @@ ul.results-list
   padding 0
   li
     display flex
-    padding 6px 7px
-    padding-bottom 5px
+    padding 7px 7px
     align-items flex-start
-    border-radius 3px
+    border-radius var(--entity-radius)
     user-select none
     cursor pointer
     word-break break-word
@@ -869,7 +868,7 @@ ul.results-list
       position relative
       width 50%
       img
-        border-radius 3px
+        border-radius var(--entity-radius)
         min-height 100px
     .small-button
       position absolute
@@ -938,7 +937,7 @@ code
 .label-badge
   position absolute
   padding 0 3px
-  height 12px
+  height 14px
   border-radius 3px
   left 0
   bottom 9px
@@ -967,8 +966,8 @@ code
 
 .anon-avatar
   position absolute
-  top 9px
-  left 4px
+  top 11px
+  left 6px
   width 16px
   &.is-dark
     filter invert(1)
@@ -1020,12 +1019,12 @@ code
       border-radius 0
     &:first-child
       > .user-avatar
-        border-top-left-radius 3px
-        border-bottom-left-radius 3px
+        border-top-left-radius var(--entity-radius)
+        border-bottom-left-radius var(--entity-radius)
     &:last-child
       > .user-avatar
-        border-top-right-radius 3px
-        border-bottom-right-radius 3px
+        border-top-right-radius var(--entity-radius)
+        border-bottom-right-radius var(--entity-radius)
 
 .filtered
   opacity 0.3
