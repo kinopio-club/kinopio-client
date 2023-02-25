@@ -748,6 +748,7 @@ header
       vertical-align middle
     .down-arrow
       padding-left 4px
+      opacity 0.4
     &:hover,
     &:focus
       .label-badge
