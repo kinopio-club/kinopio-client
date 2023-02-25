@@ -142,7 +142,7 @@ export default {
   position absolute
   z-index calc(var(--max-z) - 50)
   display inline-block
-  border-radius 3px
+  border-radius var(--small-entity-radius)
   .pointer
     width 15px
     height 15px

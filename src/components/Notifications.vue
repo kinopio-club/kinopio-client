@@ -461,7 +461,7 @@ export default {
   .persistent-item
     pointer-events all
     box-shadow 3px 3px 0 var(--heavy-shadow)
-    border-radius 3px
+    border-radius var(--small-entity-radius)
     margin-bottom 10px
     margin-right 0
     background-color var(--info-background)
@@ -483,7 +483,7 @@ export default {
       margin 0
       user-select text
     video
-      border-radius 3px
+      border-radius var(--small-entity-radius)
       margin-bottom 5px
       background-color var(--primary-background)
   .persistent-item

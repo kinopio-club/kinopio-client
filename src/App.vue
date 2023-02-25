@@ -310,6 +310,7 @@ export default {
   --button-active-inset-shadow inset 0 1px 2px var(--heavy-shadow)
   --max-z 2147483646
   --entity-radius 6px
+  --small-entity-radius 3px
   --serif-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
 
@@ -661,7 +662,7 @@ dialog
     .current-color
       height 14px
       width 14px
-      border-radius 3px
+      border-radius var(--small-entity-radius)
   a
     text-decoration-thickness 1px
     color var(--text-link)
@@ -712,12 +713,12 @@ dialog
   //       margin-bottom -1px
   //     &:first-child
   //       button
-  //         border-top-left-radius 3px
-  //         border-top-right-radius 3px
+  //         border-top-left-radius var(--small-entity-radius)
+  //         border-top-right-radius var(--small-entity-radius)
   //     &:last-child
   //       button
-  //         border-bottom-left-radius 3px
-  //         border-bottom-right-radius 3px
+  //         border-bottom-left-radius var(--small-entity-radius)
+  //         border-bottom-right-radius var(--small-entity-radius)
 
   button + button,
   label + button
@@ -802,7 +803,7 @@ li
     border 1px solid var(--primary)
     width 12px
     height 12px
-    border-radius 3px
+    border-radius var(--small-entity-radius)
     background-color var(--primary-background)
     &:checked
       background-color var(--secondary-active-background)
@@ -938,7 +939,7 @@ code
   position absolute
   padding 0 3px
   height 14px
-  border-radius 3px
+  border-radius var(--small-entity-radius)
   left 0
   bottom 9px
   background-color var(--primary)
@@ -1031,7 +1032,7 @@ code
 
 .clear-input-wrap
   cursor pointer
-  border-radius 3px
+  border-radius var(--small-entity-radius)
   padding-left 5px
   padding-right 5px
   margin-top -2px
@@ -1044,7 +1045,7 @@ code
   color var(--primary)
   background-color var(--secondary-background)
   border 0
-  border-radius 3px
+  border-radius var(--small-entity-radius)
   padding 4px
   max-width 100%
   min-height 35px
@@ -1106,11 +1107,11 @@ progress
   width 100%
   height 8px
   border 1px solid var(--primary-border)
-  border-radius 3px
+  border-radius var(--small-entity-radius)
   background-color var(--secondary-background)
 progress::-webkit-progress-bar
   background-color var(--secondary-background)
-  border-radius 3px
+  border-radius var(--small-entity-radius)
 progress::-webkit-progress-value
   background-color var(--primary)
   border-radius 2px

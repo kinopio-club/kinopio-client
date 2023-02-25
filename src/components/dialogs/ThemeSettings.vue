@@ -134,7 +134,7 @@ dialog.theme-and-colors-settings
     height 14px
     width 14px
     margin-bottom 1px
-    border-radius 3px
+    border-radius var(--small-entity-radius)
     display inline-block
     vertical-align -3px
     margin-right 5px

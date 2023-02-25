@@ -284,7 +284,7 @@ export default {
     text-decoration none
     word-break break-word
     background var(--secondary-hover-background)
-    border-radius 3px
+    border-radius var(--small-entity-radius)
     &.image-card
       padding 4px
       border-top-left-radius 0
@@ -297,7 +297,7 @@ export default {
       min-height initial !important
   .preview-image
     width 100%
-    border-radius 3px
+    border-radius var(--small-entity-radius)
     background var(--primary-background)
     pointer-events none
     -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
@@ -322,11 +322,11 @@ export default {
     background var(--secondary-hover-background)
     user-select text
     &.text-with-image
-      border-radius 3px
+      border-radius var(--small-entity-radius)
     &.text-only
       position relative
       margin 0
-      border-radius 3px
+      border-radius var(--small-entity-radius)
 
   .side-text
     max-width calc(100% - 24px)
@@ -335,7 +335,7 @@ export default {
     padding 4px
 
   .favicon
-    border-radius 3px
+    border-radius var(--small-entity-radius)
     width 14px
     vertical-align -3px
     display inline

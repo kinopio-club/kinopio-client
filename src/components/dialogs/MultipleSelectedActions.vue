@@ -552,11 +552,11 @@ export default {
       vertical-align bottom
       border-radius 0
       &:first-child
-        border-top-left-radius 3px
-        border-bottom-left-radius 3px
+        border-top-left-radius var(--small-entity-radius)
+        border-bottom-left-radius var(--small-entity-radius)
       &:last-child
-        border-top-right-radius 3px
-        border-bottom-right-radius 3px
+        border-top-right-radius var(--small-entity-radius)
+        border-bottom-right-radius var(--small-entity-radius)
         margin-right 0
   .cards-checkboxes
     input

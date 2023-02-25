@@ -170,14 +170,14 @@ export default {
     pre
       font-weight normal
       background-color var(--secondary-active-background)
-      border-radius 3px
+      border-radius var(--small-entity-radius)
       margin 0
       white-space pre-wrap
       vertical-align 0
     code
       font-weight normal
       background-color var(--secondary-active-background)
-      border-radius 3px
+      border-radius var(--small-entity-radius)
       margin-right 0
       vertical-align 0
     pre,

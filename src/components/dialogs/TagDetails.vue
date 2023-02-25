@@ -471,7 +471,7 @@ export default {
     img
       display inline
       max-height 30px
-      border-radius 3px
+      border-radius var(--small-entity-radius)
       margin-right 5px
       vertical-align middle
   .space-badge
