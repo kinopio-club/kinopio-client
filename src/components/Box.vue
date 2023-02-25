@@ -204,7 +204,7 @@ export default {
     h2Name () {
       return this.box.name.replace('## ', '')
     },
-    canEditBox () { return this.$store.getters['currentUser/canEditBox']() },
+    canEditBox () { return this.$store.getters['currentUser/canEditBox'](this.box) },
     lockingFrameStyle () {
       const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
       const initialBorderRadius = 50

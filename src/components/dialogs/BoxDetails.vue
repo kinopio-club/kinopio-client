@@ -23,7 +23,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         maxLength="600"
         :class="{'is-dark': colorisDark}"
       )
-    CardBoxActions(:visible="true" :boxes="[box]" @closeDialogs="closeDialogs" :colorIsHidden="true")
+    CardBoxActions(:visible="true" :boxes="[box]" @closeDialogs="closeDialogs" :colorIsHidden="true" :isDisabled="!canEditBox")
     .row
       //- remove
       .button-wrap
@@ -82,7 +82,7 @@ export default {
         this.update({ name })
       }
     },
-    canEditBox () { return this.$store.getters['currentUser/canEditBox']() },
+    canEditBox () { return this.$store.getters['currentUser/canEditBox'](this.box) },
     itemColors () { return this.$store.getters['currentSpace/itemColors'] },
     colorisDark () {
       const color = this.box.color

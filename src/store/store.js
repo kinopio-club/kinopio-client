@@ -189,8 +189,12 @@ const store = createStore({
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
     shouldResetDimensionsOnLoad: false,
+
+    // referral
     validateUserReferral: '',
     validateUserReferralBySpaceUser: false,
+    validateReferralByName: '',
+    validateReferralFromReferrerName: '',
 
     // notifications
     notifications: [],
@@ -211,6 +215,7 @@ const store = createStore({
     notifyThanksForDonating: false,
     notifyReferralSuccessUser: null,
     notifyEarnedCredits: false,
+    notifyReferralSuccessReferrerName: null,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -319,6 +324,14 @@ const store = createStore({
     validateUserReferralBySpaceUser: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.validateUserReferralBySpaceUser = value
+    },
+    validateReferralByName: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.validateReferralByName = value
+    },
+    validateReferralFromReferrerName: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.validateReferralFromReferrerName = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
@@ -1156,6 +1169,7 @@ const store = createStore({
     removePreviousNotification: (state) => {
       const removableNotifications = state.notifications.filter(notification => notification.isPersistentItem === false)
       const prevNotification = last(removableNotifications)
+      if (!prevNotification) { return }
       state.notifications = state.notifications.filter(notification => notification.id !== prevNotification.id)
     },
     removeNotificationById: (state, id) => {
@@ -1240,6 +1254,10 @@ const store = createStore({
     notifyEarnedCredits: (state, user) => {
       utils.typeCheck({ value: user, type: 'boolean' })
       state.notifyEarnedCredits = user
+    },
+    notifyReferralSuccessReferrerName: (state, user) => {
+      utils.typeCheck({ value: user, type: 'boolean' })
+      state.notifyReferralSuccessReferrerName = user
     },
 
     // Notifications with Position

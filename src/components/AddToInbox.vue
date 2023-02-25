@@ -194,6 +194,7 @@ export default {
       element.focus()
     },
     focusAndSelectName () {
+      if (utils.isMobile()) { return }
       const element = this.$refs.name
       if (!element) { return }
       const length = element.value.length

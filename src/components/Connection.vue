@@ -123,6 +123,7 @@ export default {
     },
     isConnectedToCommentCard () {
       const { startCard, endCard } = this.cards
+      if (!startCard || !endCard) { return }
       return startCard.isComment || endCard.isComment
     },
     isHiddenByCommentFilter () {

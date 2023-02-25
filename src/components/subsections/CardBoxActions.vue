@@ -33,9 +33,9 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       )
     //- Box Fill
     .segmented-buttons(v-if="isBoxes")
-      button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')")
+      button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')" :disabled="isDisabled")
         img.icon.box-icon(src="@/assets/box-filled.svg")
-      button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')")
+      button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')" :disabled="isDisabled")
         img.icon.box-icon(src="@/assets/box-empty.svg")
 
     //- Lock
@@ -71,6 +71,7 @@ export default {
   },
   props: {
     visible: Boolean,
+    isDisabled: Boolean,
     colorIsHidden: Boolean,
     cards: {
       type: Array,

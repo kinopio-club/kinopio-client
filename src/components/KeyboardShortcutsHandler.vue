@@ -277,7 +277,7 @@ export default {
       }
       const position = utils.cursorPositionInPage(event)
       let isNearPrevRightClickPosition
-      if (isRightClick) {
+      if (isRightClick && prevRightClickPosition) {
         isNearPrevRightClickPosition = utils.distanceBetweenTwoPoints(prevRightClickPosition, position) <= 5
       }
       prevCursorPosition = undefined

@@ -19,7 +19,13 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
-const url = computed(() => utils.kinopioDomain() + '/refer/' + store.state.currentUser.id)
+const url = computed(() => {
+  if (store.state.currentUser.referrerName) {
+    return utils.kinopioDomain() + '/from/' + store.state.currentUser.referrerName
+  } else {
+    return utils.kinopioDomain() + '/refer/' + store.state.currentUser.id
+  }
+})
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const referralCreditAmount = computed(() => consts.referralCreditAmount)
 const referredByUserId = computed(() => store.state.currentUser.referredByUserId)
@@ -72,6 +78,7 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
 
 <style lang="stylus">
 .refer
+  overflow auto
   top calc(100% - 8px)
   left initial
   right 8px
