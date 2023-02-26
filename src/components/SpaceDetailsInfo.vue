@@ -36,14 +36,7 @@
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
 
-.row.align-items-top(v-if="!isSpaceMember")
-  .badge.info(v-if="!spacePrivacyIsOpen")
-    span Read Only
-  .badge.success(v-if="spacePrivacyIsOpen")
-    span Open to All
-  .badge.status(v-if="showInExplore")
-    img.icon.sunglasses(src="@/assets/sunglasses.svg")
-    span Explore
+ReadOnlySpaceInfoBadges
 
 .row.align-items-top(v-if="isSpaceMember")
   //- Privacy
@@ -131,6 +124,7 @@ import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import templates from '@/data/templates.js'
 import Export from '@/components/dialogs/Export.vue'
+import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
 import cache from '@/cache.js'
 
 export default {
@@ -141,7 +135,8 @@ export default {
     BackgroundPreview,
     Loader,
     PrivacyButton,
-    Export
+    Export,
+    ReadOnlySpaceInfoBadges
   },
   props: {
     shouldHidePin: Boolean,
@@ -191,7 +186,6 @@ export default {
       return templateSpaceIds.includes(id)
     },
     currentSpaceIsUserTemplate () { return this.currentSpace.isTemplate },
-    spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     spaceName: {
       get () {
@@ -400,8 +394,6 @@ export default {
       width 16px
       vertical-align 0px
       border-radius 4px
-  .sunglasses
-    margin-left 1px
   p
     white-space normal
 

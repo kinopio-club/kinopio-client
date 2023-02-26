@@ -13,6 +13,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           SpaceRssFeed(:visible="spaceRssFeedIsVisible")
 
   section(v-if="spaceHasUrl")
+    ReadOnlySpaceInfoBadges
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     //- Share URL
     section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
@@ -82,6 +83,7 @@ import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
+import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
 
 export default {
   name: 'Share',
@@ -94,7 +96,8 @@ export default {
     Export,
     Import,
     AddToExplore,
-    AskToAddToExplore
+    AskToAddToExplore,
+    ReadOnlySpaceInfoBadges
   },
   props: {
     visible: Boolean
