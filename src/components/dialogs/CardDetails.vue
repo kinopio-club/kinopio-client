@@ -1491,7 +1491,7 @@ export default {
     .inline-button
       cursor pointer
       padding 2px 6px
-      padding-top 1px
+      padding-top 0
   .media-preview + .url-preview
     margin-top 10px
   .opening-frame

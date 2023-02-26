@@ -492,7 +492,7 @@ export default {
   .uploading-container
     position relative
     img
-      border-radius 3px
+      border-radius var(--small-entity-radius)
     .badge
       display inline-block
       &.absolute

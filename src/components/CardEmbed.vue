@@ -27,7 +27,7 @@ export default {
   width 100%
   iframe
     border none
-    border-radius 3px
+    border-radius var(--small-entity-radius)
     max-width 100%
     width 100%
     height 100%

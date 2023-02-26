@@ -141,7 +141,7 @@ export default {
   img,
   video
     max-width 100%
-    border-radius 3px
+    border-radius var(--small-entity-radius)
   ul,
   ol
     margin 0

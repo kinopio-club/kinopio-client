@@ -81,7 +81,7 @@ export default {
     border-top 0
     padding-top 4px
   .placeholder
-    border-radius 3px
+    border-radius var(--small-entity-radius)
     margin-top 10px
   .loader
     height 14px

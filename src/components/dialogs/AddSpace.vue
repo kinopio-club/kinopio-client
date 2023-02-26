@@ -243,7 +243,7 @@ export default {
   .textarea
     background-color var(--secondary-background)
     border 0
-    border-radius 3px
+    border-radius var(--small-entity-radius)
     padding 4px
   .inbox-icon
     margin 0

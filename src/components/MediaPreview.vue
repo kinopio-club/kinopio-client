@@ -62,7 +62,7 @@ export default {
     align-items flex-start
     .image,
     .video
-      border-radius 3px
+      border-radius var(--small-entity-radius)
       &:hover
         box-shadow var(--button-hover-shadow)
       &:active

@@ -251,7 +251,7 @@ export default {
     .current-color
       height 14px
       width 14px
-      border-radius 3px
+      border-radius var(--small-entity-radius)
       display inline-block
     .color
       width 26px

@@ -717,7 +717,7 @@ export default {
   // same as Card.vue
   .selected-user-avatar
     padding 0 3px
-    border-radius 3px
+    border-radius var(--small-entity-radius)
     position absolute
     top -5px
     left -5px

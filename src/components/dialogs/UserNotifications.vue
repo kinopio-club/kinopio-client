@@ -249,7 +249,7 @@ export default {
   .card-image
     width 48px
     vertical-align middle
-    border-radius 3px
+    border-radius var(--small-entity-radius)
   .icon + .card-image
   .card-image + span
     margin-left 5px

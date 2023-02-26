@@ -172,7 +172,7 @@ export default {
         box-shadow none
     img
       max-width 48px
-      border-radius 3px
+      border-radius var(--small-entity-radius)
       vertical-align middle
   .time
     vertical-align -1px
