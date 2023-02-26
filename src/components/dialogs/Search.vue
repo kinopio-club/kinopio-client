@@ -2,6 +2,9 @@
 dialog.search(@click="closeDialogs" v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   SearchFilters
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+    .segmented-buttons
+      button.active Here
+      button All Spaces
     ResultsFilter(
       :showFilter="true"
       :filterIsPersistent="true"
@@ -207,4 +210,9 @@ dialog.search
   width 252px
   @media(max-width 400px)
     left -40px
+  .results-section
+    border-top 1px solid var(--primary-border)
+    padding-top 4px
+    .segmented-buttons
+      margin 4px
 </style>

@@ -175,7 +175,7 @@ export default {
       border-radius var(--small-entity-radius)
       vertical-align middle
   .time
-    vertical-align -1px
+    vertical-align 0
     height 11px
   .inline-badge
     display inline-block
