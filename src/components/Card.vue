@@ -1533,9 +1533,6 @@ export default {
       if (this.resizeWidth) {
         styles.maxWidth = this.resizeWidth + 'px'
         styles.width = this.resizeWidth + 'px'
-      } else if (connectorIsNotVisibleToReadOnlyUser && this.width) {
-        const connectorIconWidth = 10
-        styles.width = this.width - connectorIconWidth + 'px'
       }
       return styles
     },
