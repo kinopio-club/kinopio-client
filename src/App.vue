@@ -394,7 +394,6 @@ label // used for checkbox buttons
   cursor pointer
   user-select none
   color var(--primary)
-  backdrop-filter blur(10px)
   .down-arrow
     padding-left 4px
     vertical-align 1px
