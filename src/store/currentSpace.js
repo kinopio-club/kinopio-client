@@ -263,6 +263,7 @@ const currentSpace = {
         if (!linkedCard) { return }
         nextTick(() => {
           context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace }, { root: true })
+          context.dispatch('currentCards/updateDimensions', { cardId: linkedCard.id }, { root: true })
         })
       })
       otherSpacesQueue = []
