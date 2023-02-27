@@ -753,7 +753,7 @@ export default {
     return getComputedStyle(document.documentElement).getPropertyValue(`--${name}`)
   },
   colorIsValid (color) {
-    return colord(color).isValid()
+    return color === colord(color).toName()
   },
   colorIsDark (color) {
     if (!color) { return }
