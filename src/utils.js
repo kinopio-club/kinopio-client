@@ -840,14 +840,16 @@ export default {
     return card
   },
   removeCardDimensions (card) {
-    const cardElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
-    const contentWrapElement = cardElement.querySelector(`.card-content-wrap`)
+    const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+    const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
+    const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
     let width = 'initial'
-    if (cardElement.dataset.resizeWidth) {
-      width = cardElement.dataset.resizeWidth + 'px'
+    if (articleElement.dataset.resizeWidth) {
+      width = articleElement.dataset.resizeWidth + 'px'
     }
+    articleElement.style.width = width
+    articleElement.style.height = 'initial'
     cardElement.style.width = width
-    cardElement.style.height = 'initial'
     contentWrapElement.style.width = width
     contentWrapElement.style.height = 'initial'
   },

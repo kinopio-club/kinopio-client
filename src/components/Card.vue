@@ -263,12 +263,6 @@ export default {
   },
   async mounted () {
     this.defaultColor = utils.cssVariable('secondary-background')
-    const cardIsMissingDimensions = Boolean(!this.card.width || !this.card.height)
-    if (cardIsMissingDimensions) {
-      let card = { id: this.card.id }
-      card = utils.updateCardDimensions(card)
-      this.$store.dispatch('currentCards/update', card)
-    }
     const shouldShowDetails = this.loadSpaceShowDetailsForCardId === this.card.id
     if (shouldShowDetails) {
       this.$store.dispatch('closeAllDialogs', 'card.mounted')
