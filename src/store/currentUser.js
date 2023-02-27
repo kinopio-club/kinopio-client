@@ -61,7 +61,7 @@ export default {
     lastUsedImagePickerService: '',
     AIImages: [],
     theme: null,
-    themeIsSystem: true,
+    themeIsSystem: false,
     referredByUserId: '',
     referrerName: ''
   },
@@ -399,6 +399,7 @@ export default {
       })
     },
     createNewUser: (context) => {
+      context.commit('themeIsSystem', true)
       cache.saveUser(context.state)
       context.dispatch('createNewUserJournalPrompts')
     },
