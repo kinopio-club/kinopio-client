@@ -57,6 +57,11 @@ section.subsection.space-settings(v-if="!isSpaceMember")
       button(@click.left="duplicateSpace")
         img.icon.add(src="@/assets/add.svg")
         span Make a Copy
+    //- Export
+    .button-wrap
+      button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+        span Export
+      Export(:visible="exportIsVisible")
   .row
     //- Favorite
     button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
