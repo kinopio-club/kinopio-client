@@ -456,7 +456,7 @@ export default {
   display flex
   flex-direction column
   align-items flex-start
-  max-width 264px
+  max-width 276px
   .item,
   .persistent-item
     pointer-events all
