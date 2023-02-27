@@ -752,8 +752,11 @@ export default {
   cssVariable (name) {
     return getComputedStyle(document.documentElement).getPropertyValue(`--${name}`)
   },
-  colorIsValid (color) {
+  colorNameIsValid (color) {
     return color === colord(color).toName()
+  },
+  colorIsValid (color) {
+    return colord(color).isValid()
   },
   colorIsDark (color) {
     if (!color) { return }
