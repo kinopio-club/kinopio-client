@@ -73,14 +73,15 @@ const currentCards = {
         console.warn('🚑 could not update card', card)
         return
       }
-      const integerKeys = ['x', 'y', 'width', 'height']
+      if (card.x) {
+        card.x = Math.round(card.x)
+      }
+      if (card.y) {
+        card.y = Math.round(card.y)
+      }
       const keys = Object.keys(card)
       keys.forEach(key => {
-        let value = card[key]
-        if (integerKeys.includes(key)) {
-          value = Math.round(value)
-        }
-        state.cards[card.id][key] = value
+        state.cards[card.id][key] = card[key]
       })
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
