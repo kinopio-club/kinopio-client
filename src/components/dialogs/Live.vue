@@ -90,7 +90,7 @@ export default {
     margin-left 3px
   .space-list
     .users
-      max-width 50px
+      max-width 56px
       flex-wrap wrap
       justify-content flex-start
     &.multiple-users

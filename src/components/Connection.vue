@@ -116,7 +116,7 @@ export default {
       }
     },
     cards () {
-      const cards = utils.clone(this['currentCards/all'])
+      const cards = this['currentCards/all']
       const startCard = cards.find(card => card.id === this.startCardId)
       const endCard = cards.find(card => card.id === this.endCardId)
       return { startCard, endCard }

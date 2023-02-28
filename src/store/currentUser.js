@@ -61,7 +61,7 @@ export default {
     lastUsedImagePickerService: '',
     AIImages: [],
     theme: null,
-    themeIsSystem: true,
+    themeIsSystem: false,
     referredByUserId: '',
     referrerName: ''
   },
@@ -399,6 +399,7 @@ export default {
       })
     },
     createNewUser: (context) => {
+      context.commit('themeIsSystem', true)
       cache.saveUser(context.state)
       context.dispatch('createNewUserJournalPrompts')
     },
@@ -751,7 +752,7 @@ export default {
         context.commit('notifyReferralSuccessUser', publicUser, { root: true })
         context.dispatch('update', { referredByUserId: publicUser.id })
       } else if (!isFromSpaceInvite) {
-        context.commit('addNotification', { message: 'Only new users can be referred', type: 'danger' }, { root: true })
+        context.commit('addNotification', { message: 'Only new users can be referred', type: 'danger', isPersistentItem: true }, { root: true })
       }
       context.commit('validateUserReferralBySpaceUser', false, { root: true })
       context.commit('validateUserReferral', '', { root: true })
@@ -763,12 +764,12 @@ export default {
       const isValid = response.isValid
       const isSignedIn = context.getters.isSignedIn
       if (isSignedIn) {
-        context.commit('addNotification', { message: 'Only new users can be referred', type: 'danger' }, { root: true })
+        context.commit('addNotification', { message: 'Only new users can be referred', type: 'danger', isPersistentItem: true }, { root: true })
       } else if (isValid) {
         context.commit('notifyReferralSuccessReferrerName', true, { root: true })
         context.dispatch('update', { referrerName })
       } else {
-        context.commit('addNotification', { message: 'Invalid referral, refferer name not found', type: 'danger' }, { root: true })
+        context.commit('addNotification', { message: 'Invalid referral, refferer name not found', type: 'danger', isPersistentItem: true }, { root: true })
       }
       context.commit('validateReferralByName', '', { root: true })
     }

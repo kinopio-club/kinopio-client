@@ -759,7 +759,7 @@ export default {
       }
     },
     nameIsColor () {
-      return utils.colorIsValid(this.card.name)
+      return utils.colorNameIsValid(this.card.name)
     },
     canEditCard () { return this['currentUser/canEditCard'](this.card) },
     normalizedName () {
