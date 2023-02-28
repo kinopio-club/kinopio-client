@@ -249,7 +249,7 @@ export default {
     },
     // on mouse move
     handleMouseMoveEvents (event) {
-      const speed = 2
+      const speed = 6
       const position = utils.cursorPositionInPage(event)
       currentCursorPosition = position
       if (this.$store.state.currentUserIsBoxSelecting) {
