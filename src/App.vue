@@ -613,6 +613,9 @@ dialog
     display flex
     justify-content space-between
     align-items center
+  .title-row-flex
+    display flex
+    justify-content space-between
 
   p + button,
   button + p,
@@ -720,8 +723,26 @@ dialog
   //         border-bottom-right-radius var(--small-entity-radius)
 
   button + button,
-  label + button
+  label + button,
+  button + label,
+  label + label
     margin-left -1px
+
+.segmented-buttons-wrap
+  .segmented-buttons
+    &:first-child
+      button,
+      label
+        &:first-child
+          border-bottom-left-radius 0
+    &:last-child
+      margin-top -1px
+      button,
+      label
+        &:first-child
+          border-top-left-radius 0
+        &:last-child
+          border-top-right-radius 0
 
 .is-dark-theme
   .icon

@@ -332,8 +332,6 @@ export default {
     &.row
       justify-content space-between
   .title-row-flex
-    display flex
-    justify-content space-between
     .title
       color var(--primary)
 

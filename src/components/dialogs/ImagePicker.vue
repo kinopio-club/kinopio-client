@@ -503,8 +503,4 @@ export default {
   .sticker
     vertical-align -2px
 
-  .title-row-flex
-    display flex
-    justify-content space-between
-
 </style>
