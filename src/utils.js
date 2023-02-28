@@ -1206,6 +1206,10 @@ export default {
   },
   updateSpaceUserId (space, userId) {
     space.cards = space.cards.map(card => {
+      if (card.userId === consts.rootUserId) {
+        card.userId = null
+        return card
+      }
       if (card.userId === null) { return card }
       if (card.nameUpdatedByUserId) {
         card.nameUpdatedByUserId = userId
