@@ -530,11 +530,6 @@ const currentSpace = {
       cache.removeSpace(space)
       context.commit('addNotification', { message: `You were removed as a collaborator from ${name}`, type: 'info' }, { root: true })
     },
-    updateSpacePageSize: (context) => {
-      nextTick(() => {
-        context.commit('updateSpacePageSize', null, { root: true })
-      })
-    },
     removeEmptyCards: (context) => {
       let cards = context.rootGetters['currentCards/all']
       cards.forEach(card => {
@@ -690,7 +685,6 @@ const currentSpace = {
         isRemote,
         cardUsers: context.rootGetters['currentCards/userIds']
       })
-      context.dispatch('updateSpacePageSize')
       if (isRemote) {
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', space)
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', space)
