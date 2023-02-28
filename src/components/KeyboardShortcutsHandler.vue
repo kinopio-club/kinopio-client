@@ -784,8 +784,14 @@ export default {
 
     selectAllItemsBelowCursor (position) {
       const preventMultipleSelectedActionsIsVisible = this.$store.state.preventMultipleSelectedActionsIsVisible
-      position = position || currentCursorPosition
-      const zoom = this.$store.getters.spaceZoomDecimal
+      let zoom
+      if (position) {
+        zoom = 1
+      } else {
+        // is from keyboard shortcut
+        position = currentCursorPosition
+        zoom = this.$store.getters.spaceZoomDecimal
+      }
       // cards
       let cards = utils.clone(this.$store.getters['currentCards/all'])
       cards = cards.filter(card => (card.y * zoom) > position.y)
