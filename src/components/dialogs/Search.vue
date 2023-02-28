@@ -2,9 +2,6 @@
 dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   SearchFilters
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    .segmented-buttons
-      button.active Here
-      button All Spaces
     ResultsFilter(
       :showFilter="true"
       :filterIsPersistent="true"
@@ -18,6 +15,9 @@ dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" r
       @focusPreviousItem="focusPreviousItem"
       @selectItem="selectItem"
     )
+    .segmented-buttons
+      button.active Current Space
+      button All Spaces
     CardList(:cards="cards" :search="search" @selectCard="selectCard")
 </template>
 
