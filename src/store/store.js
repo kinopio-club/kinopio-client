@@ -174,6 +174,7 @@ const store = createStore({
     // pinned dialogs
     spaceDetailsIsPinned: false,
     sidebarIsPinned: false,
+    searchIsPinned: false,
 
     // loading
     isLoadingSpace: false,
@@ -270,6 +271,9 @@ const store = createStore({
       if (utils.unpinnedDialogIsVisible()) {
         state.shouldAddCard = false
       }
+      if (!state.searchIsPinned) {
+        state.searchIsVisible = false
+      }
       state.multipleSelectedActionsIsVisible = false
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
@@ -279,7 +283,6 @@ const store = createStore({
       state.currentSelectedTag = {}
       state.linkDetailsIsVisible = false
       state.currentSelectedLink = {}
-      state.searchIsVisible = false
       state.cardsWereDragged = false
       state.boxesWereDragged = false
       state.userDetailsIsVisible = false
@@ -882,6 +885,10 @@ const store = createStore({
     spaceDetailsIsPinned: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.spaceDetailsIsPinned = value
+    },
+    searchIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.searchIsPinned = value
     },
 
     // Connection Details
@@ -1546,6 +1553,10 @@ const store = createStore({
     spaceDetailsIsPinned: (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('spaceDetailsIsPinned', value)
+    },
+    searchIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      context.commit('searchIsPinned', value)
     },
 
     // scrolling and zoom

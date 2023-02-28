@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.search(@click="closeDialogs" v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   SearchFilters
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     .segmented-buttons
@@ -57,6 +57,7 @@ export default {
     }
   },
   computed: {
+    dialogIsPinned () { return this.$store.state.searchIsPinned },
     placeholder () {
       let placeholder = 'Search Cards'
       if (!utils.isMobile()) {
@@ -208,6 +209,8 @@ dialog.search
   top 16px
   max-height calc(100vh - 140px)
   width 252px
+  &.is-pinned
+    left -80px
   @media(max-width 400px)
     left -40px
   .results-section

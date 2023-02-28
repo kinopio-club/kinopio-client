@@ -76,9 +76,14 @@ export default {
     filterShowUsers () { return this.currentUser.filterShowUsers },
     filterShowDateUpdated () { return this.currentUser.filterShowDateUpdated },
     filterUnchecked () { return this.currentUser.filterUnchecked },
-    filterComments () { return this.currentUser.filterComments }
+    filterComments () { return this.currentUser.filterComments },
+    dialogIsPinned () { return this.$store.state.searchIsPinned }
   },
   methods: {
+    toggleDialogIsPinned () {
+      const isPinned = !this.dialogIsPinned
+      this.$store.dispatch('searchIsPinned', isPinned)
+    },
     toggleMoreSearchFiltersVisible () {
       this.moreSearchFiltersVisible = !this.moreSearchFiltersVisible
     },
