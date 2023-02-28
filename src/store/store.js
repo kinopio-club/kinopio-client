@@ -1368,11 +1368,14 @@ const store = createStore({
       const padding = 250
       const cards = context.getters['currentCards/all']
       const boxes = context.getters['currentBoxes/all']
-      const items = cards.concat(boxes)
+      let items = cards.concat(boxes)
+      items.shift({
+        x: 0, y: 0, width: 500, height: 500
+      })
       let itemsRect = utils.boundaryRectFromItems(items)
       itemsRect = {
-        width: itemsRect.x + itemsRect.width + padding,
-        height: itemsRect.y + itemsRect.height + padding
+        width: itemsRect.width + padding,
+        height: itemsRect.height + padding
       }
       context.commit('updatePageSizes', itemsRect)
     },

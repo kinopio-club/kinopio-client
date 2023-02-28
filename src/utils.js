@@ -959,13 +959,13 @@ export default {
     if (!items.length) {
       return { x: 0, y: 0, width: 0, height: 0 }
     }
-    // x,y
-    // ┌────────┐
+    const defaultSize = 200
+    // i────────┐
     // │        │
     // │        h
     // │        │
     // └───w────┘
-    // initial rect size
+    // initial
     items = this.clone(items)
     const initial = items[0]
     let rect = {
@@ -974,34 +974,25 @@ export default {
       width: initial.resizeWidth || initial.width,
       height: initial.resizeHeight || initial.height
     }
-    // size rect around items
-
-    // rect x, width
+    // size rect around farthest items
+    // x, width
     let sortedItems = sortBy(items, ['x'])
     sortedItems.forEach(item => {
       let { x, width, resizeWidth } = item
-      width = resizeWidth || width
-      // x
-      if (x < rect.x) { rect.x = x }
-      // width
-      let xEnd = x + width
-      const xDelta = xEnd - rect.x
-      if (xDelta > rect.width) {
-        rect.width = xDelta
+      width = resizeWidth || width || defaultSize
+      if (x > rect.x) {
+        rect.x = x
+        rect.width = initial.x + x + width
       }
     })
-    // rect y, height
+    // y, height
     sortedItems = sortBy(items, ['y'])
     sortedItems.forEach(item => {
       let { y, height, resizeHeight } = item
-      height = resizeHeight || height
-      // y
-      if (y < rect.y) { rect.y = y }
-      // height
-      let yEnd = y + height
-      const yDelta = yEnd - rect.y
-      if (yDelta > rect.height) {
-        rect.height = yDelta
+      height = resizeHeight || height || defaultSize
+      if (y > rect.y) {
+        rect.y = y
+        rect.height = initial.y + y + height
       }
     })
     return rect
