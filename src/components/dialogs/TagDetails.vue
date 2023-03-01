@@ -33,13 +33,13 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
   //- cards found, or loading with cached cards
   section.results-section(v-if="cards.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
-    CardListBySpace(:groupedItems="groupedItems" :isLoading="loading" @selectSpace="changeSpace" :primaryActionIsCardListOptions="primaryActionIsCardListOptions")
+    SpaceCardList(:groupedItems="groupedItems" :isLoading="loading" @selectSpace="changeSpace" :primaryActionIsCardListOptions="primaryActionIsCardListOptions")
 </template>
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import CardListBySpace from '@/components/CardListBySpace.vue'
+import SpaceCardList from '@/components/SpaceCardList.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -52,7 +52,7 @@ export default {
   name: 'TagDetails',
   components: {
     ColorPicker,
-    CardListBySpace,
+    SpaceCardList,
     Loader,
     ResultsFilter
   },
