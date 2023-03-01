@@ -197,7 +197,7 @@ export default {
     // snapping
 
     updateSnapGuides: (context, boxes) => {
-      const snapThreshold = 20
+      const snapThreshold = 25
       const closenessThreshold = 100
       const targetBoxes = utils.clone(context.getters.all)
       boxes = utils.clone(boxes)
@@ -279,25 +279,29 @@ export default {
           // snap left
           const isNearLeft = distances.left < closenessThreshold
           const isSnapLeft = Math.abs((box.x + box.width) - targetBox.x) <= snapThreshold
-          if (isNearLeft && isSnapLeft) {
+          const isLeftOf = (box.x + box.width) < targetBox.x
+          if (isNearLeft && isSnapLeft && isLeftOf) {
             snapGuides.push({ side: 'left', origin: box, target: targetBox, distance: distances.left })
           }
           // snap right
           const isNearRight = distances.right < closenessThreshold
           const isSnapRight = Math.abs(box.x - (targetBox.x + targetBox.width)) <= snapThreshold
-          if (isNearRight && isSnapRight) {
+          const isRightOf = box.x > (targetBox.x + targetBox.width)
+          if (isNearRight && isSnapRight && isRightOf) {
             snapGuides.push({ side: 'right', origin: box, target: targetBox, distance: distances.right })
           }
           // snap top
           const isNearTop = distances.top < closenessThreshold
           const isSnapTop = Math.abs((box.y + box.height) - targetBox.y) <= snapThreshold
-          if (isNearTop && isSnapTop) {
+          const isTopOf = (box.y + box.height) < targetBox.y
+          if (isNearTop && isSnapTop && isTopOf) {
             snapGuides.push({ side: 'top', origin: box, target: targetBox, distance: distances.top })
           }
           // snap bottom
           const isNearBottom = distances.bottom < closenessThreshold
           const isSnapBottom = Math.abs(box.y - (targetBox.y + targetBox.height)) <= snapThreshold
-          if (isNearBottom && isSnapBottom) {
+          const isBottomOf = box.y > (targetBox.y + targetBox.height)
+          if (isNearBottom && isSnapBottom && isBottomOf) {
             snapGuides.push({ side: 'bottom', origin: box, target: targetBox, distance: distances.bottom })
           }
         })

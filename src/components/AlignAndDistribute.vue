@@ -46,8 +46,6 @@ import consts from '@/consts.js'
 
 import uniqBy from 'lodash-es/uniqBy'
 
-const spaceBetween = consts.spaceBetweenCards
-
 export default {
   name: 'AlignAndDistribute',
   props: {
@@ -76,6 +74,7 @@ export default {
     multipleConnectionsSelectedIds () { return this.$store.state.multipleConnectionsSelectedIds },
     multipleBoxesSelectedIds () { return this.$store.state.multipleBoxesSelectedIds },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    spaceBetween () { return consts.spaceBetweenCards * this.spaceCounterZoomDecimal },
     canDistribute () {
       const minimumRequiredToDistribute = 3
       let cards, boxes
@@ -108,8 +107,8 @@ export default {
             const yDelta = card.y - previousBottomSide
             const isNotEquallyDistributed = !utils.isBetween({
               value: Math.abs(yDelta),
-              min: spaceBetween - 1,
-              max: spaceBetween + 1
+              min: this.spaceBetween - 1,
+              max: this.spaceBetween + 1
             })
             if (isNotEquallyDistributed) {
               yIsDistributed = false
@@ -132,8 +131,8 @@ export default {
             const xDelta = card.x - previousRightSide
             const isNotEquallyDistributed = !utils.isBetween({
               value: Math.abs(xDelta),
-              min: spaceBetween - 1,
-              max: spaceBetween + 1
+              min: this.spaceBetween - 1,
+              max: this.spaceBetween + 1
             })
             if (isNotEquallyDistributed) {
               xIsDistributed = false
@@ -341,7 +340,7 @@ export default {
             const previousItem = newItems[index - 1]
             const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
             const previousRightSide = previousItem.x + rect.width
-            item.x = previousRightSide + spaceBetween
+            item.x = previousRightSide + this.spaceBetween
           }
           this.updateItem(item, type)
         }
@@ -365,7 +364,7 @@ export default {
           item = utils.clone(item)
           item.x = origin.x + (origin.width / 2) - (item.width / 2)
           if (this.shouldDistributeWithAlign) {
-            item.y = previousBottomSide + spaceBetween
+            item.y = previousBottomSide + this.spaceBetween
           }
           this.updateItem(item, type)
         }
@@ -390,7 +389,7 @@ export default {
             const previousItem = items[index - 1]
             const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
             const previousBottomSide = previousItem.y + (rect.height * zoom)
-            item.y = previousBottomSide + spaceBetween
+            item.y = previousBottomSide + this.spaceBetween
           }
           this.updateItem(item, type)
         }
@@ -437,7 +436,7 @@ export default {
             const previousItem = newItems[index - 1]
             const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
             const previousBottomSide = previousItem.y + rect.height
-            item.y = previousBottomSide + spaceBetween
+            item.y = previousBottomSide + this.spaceBetween
           }
           this.updateItem(item, type)
         }
@@ -460,7 +459,7 @@ export default {
           if (this.shouldDistributeWithAlign) {
             const previousItem = items[index - 1]
             const previousRightSide = previousItem.x + previousItem.width
-            item.x = previousRightSide + spaceBetween
+            item.x = previousRightSide + this.spaceBetween
           }
           item.y = origin.y + (origin.height / 2) - (item.height / 2)
           this.updateItem(item, type)
@@ -484,7 +483,7 @@ export default {
           if (this.shouldDistributeWithAlign) {
             const previousItem = items[index - 1]
             const previousRightSide = previousItem.x + previousItem.width
-            item.x = previousRightSide + spaceBetween
+            item.x = previousRightSide + this.spaceBetween
           }
           this.updateItem(item, type)
         }

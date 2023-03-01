@@ -267,7 +267,7 @@ export default {
     if (cardIsMissingDimensions) {
       let card = { id: this.card.id }
       card = utils.updateCardDimensions(card)
-      this.$store.dispatch('currentCards/update', card)
+      this.$store.commit('currentCards/update', card)
     }
     const shouldShowDetails = this.loadSpaceShowDetailsForCardId === this.card.id
     if (shouldShowDetails) {
