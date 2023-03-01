@@ -33,24 +33,13 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
   //- cards found, or loading with cached cards
   section.results-section(v-if="cards.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
-    ul.results-list
-      template(v-for="group in groupedItems")
-        //- space
-        li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
-          BackgroundPreview(v-if="group.space" :space="group.space")
-          span.badge.space-badge
-            span {{group.spaceName}}
-        //- cards
-        CardList(:cards="group.cards" :primaryActionIsCardListOptions="primaryActionIsCardListOptions")
-
-    Loader(:visible="loading")
+    CardListBySpace(:groupedItems="groupedItems" :isLoading="loading" @selectSpace="changeSpace" :primaryActionIsCardListOptions="primaryActionIsCardListOptions")
 </template>
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import BackgroundPreview from '@/components/BackgroundPreview.vue'
-import CardList from '@/components/CardList.vue'
+import CardListBySpace from '@/components/CardListBySpace.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -63,8 +52,7 @@ export default {
   name: 'TagDetails',
   components: {
     ColorPicker,
-    BackgroundPreview,
-    CardList,
+    CardListBySpace,
     Loader,
     ResultsFilter
   },
