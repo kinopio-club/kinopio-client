@@ -60,8 +60,8 @@ export default {
   .background-tint
     mix-blend-mode multiply
   .preview-wrap
-    height 18px
-    width 18px
+    height 22px
+    width 22px
     position relative
     border-radius var(--entity-radius)
     overflow hidden

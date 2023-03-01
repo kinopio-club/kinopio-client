@@ -464,8 +464,6 @@ export default {
       vertical-align middle
   .space-badge
     background-color var(--secondary-background)
-  .background-preview
-    margin-right 3px
   .tag-title-row
     justify-content space-between
     align-items flex-start

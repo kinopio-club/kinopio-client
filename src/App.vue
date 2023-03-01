@@ -899,6 +899,8 @@ ul.results-list
       padding-left 4px
       padding-right 3px
       max-width 80%
+  .space-name
+    align-items center
 
 .badge,
 code

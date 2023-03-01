@@ -131,9 +131,9 @@ export default {
         this.$store.commit('cardListItemOptionsIsVisible', true)
       }
     },
-    secondaryAction (card) {
-      this.$emit('secondaryAction', card)
-    },
+    // secondaryAction (card) {
+    //   this.$emit('secondaryAction', card)
+    // },
     cardIsActive (card) {
       const isActive = this.cardListItemOptionsCard.id === card.id
       const isCardDetailsVisible = this.cardDetailsIsVisibleForCardId === card.id

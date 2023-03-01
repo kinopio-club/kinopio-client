@@ -16,8 +16,7 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
         hr
         li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
           BackgroundPreview(v-if="group.space" :space="group.space")
-          span.badge.space-badge
-            span {{group.spaceName}}
+          span {{group.spaceName}}
         //- notifications
         template(v-for="(notification in group.notifications")
           li(@click="click(notification)" :class="{ active: isActive(notification) }" :data-notification-id="notification.id")
@@ -241,9 +240,7 @@ export default {
 
   .background-preview
     .preview-wrap
-      margin-right 4px
-      height 19px
-      width 19px
+      margin-right 6px
       vertical-align middle
 
   .card-image
@@ -265,7 +262,7 @@ export default {
     hr:first-child
       display none
     hr
-      margin 8px 0
+      margin 4px 0
       margin-left -4px
       width calc(100% + 8px)
     .tag
