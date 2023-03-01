@@ -4,20 +4,23 @@ dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" r
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(
       :showFilter="true"
+      :isLoading="isLoading"
       :filterIsPersistent="true"
-      :items="recentlyUpdatedCards"
+      :items="cardsToSearch"
       :placeholder="placeholder"
       :initialValue="search"
       @updateFilter="updateSearch"
-      @updateFilteredItems="updateSearchResultsCards"
+      @updateFilteredItems="updateResultsFromResultsFilter"
       @clearFilter="clearSearch"
       @focusNextItem="focusNextItem"
       @focusPreviousItem="focusPreviousItem"
       @selectItem="selectItem"
     )
     .segmented-buttons
-      button.active Current Space
-      button All Spaces
+      button(@click="updateScope('local')" :class="{ active: isScopeLocal }")
+        span Current Space
+      button(@click="updateScope('remote')" :class="{ active: isScopeRemote }")
+        span All Spaces
     CardList(:cards="cards" :search="search" @selectCard="selectCard")
 </template>
 
@@ -53,10 +56,14 @@ export default {
   data () {
     return {
       dialogHeight: null,
-      resultsSectionHeight: null
+      resultsSectionHeight: null,
+      isLoading: false,
+      scope: 'local' // 'local', 'remote'
     }
   },
   computed: {
+    isScopeRemote () { return this.scope === 'remote' },
+    isScopeLocal () { return this.scope === 'local' },
     dialogIsPinned () { return this.$store.state.searchIsPinned },
     placeholder () {
       let placeholder = 'Search Cards'
@@ -71,13 +78,17 @@ export default {
     cards () {
       let cards
       if (this.search) {
-        cards = this.searchResultsCards
+        return this.searchResultsCards
       } else {
-        cards = this.recentlyUpdatedCards
+        return this.cardsToSearch
       }
-      cards = utils.clone(cards)
-      cards = cards.slice(0, 20)
-      return cards
+    },
+    cardsToSearch () {
+      if (this.isScopeLocal) {
+        return this.recentlyUpdatedCards
+      } else {
+        return this.searchResultsCards
+      }
     },
     recentlyUpdatedCards () {
       let cards = utils.clone(this.$store.getters['currentCards/all'])
@@ -93,10 +104,17 @@ export default {
     currentUser () { return this.$store.state.currentUser }
   },
   methods: {
-    updateSearch (search) {
+    updateScope (scope) {
+      this.scope = scope
+      this.updateSearch(this.search)
+    },
+    async updateSearch (search) {
       this.$store.commit('search', search)
       if (!search) {
         this.clearSearch()
+      }
+      if (search && this.isScopeRemote) {
+        await this.searchRemoteCards(search)
       }
       this.$nextTick(() => {
         if (this.cards.length && this.search) {
@@ -104,7 +122,13 @@ export default {
         }
       })
     },
-    updateSearchResultsCards (cards) {
+    async searchRemoteCards (search) {
+      this.isLoading = true
+      const results = await this.$store.dispatch('api/searchCards', { query: search })
+      this.$store.commit('searchResultsCards', results.cards)
+      this.isLoading = false
+    },
+    updateResultsFromResultsFilter (cards) {
       this.$store.commit('previousResultCardId', '')
       this.$store.commit('searchResultsCards', cards)
     },
