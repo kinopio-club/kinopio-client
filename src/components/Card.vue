@@ -263,12 +263,7 @@ export default {
   },
   async mounted () {
     this.defaultColor = utils.cssVariable('secondary-background')
-    const cardIsMissingDimensions = Boolean(!this.card.width || !this.card.height)
-    if (cardIsMissingDimensions) {
-      let card = { id: this.card.id }
-      card = utils.updateCardDimensions(card)
-      this.$store.commit('currentCards/update', card)
-    }
+    this.updateCardDimensions()
     const shouldShowDetails = this.loadSpaceShowDetailsForCardId === this.card.id
     if (shouldShowDetails) {
       this.$store.dispatch('closeAllDialogs', 'card.mounted')
@@ -1058,6 +1053,12 @@ export default {
     }
   },
   methods: {
+    updateCardDimensions () {
+      let card = { id: this.card.id }
+      card = utils.updateCardDimensions(card)
+      if (!card) { return }
+      this.$store.commit('currentCards/update', card)
+    },
 
     // mouse handlers
 
@@ -1963,6 +1964,12 @@ export default {
   watch: {
     linkToPreview (value) {
       this.updateUrlData()
+    },
+    isVisibleInViewport (value) {
+      if (!value) { return }
+      this.$nextTick(() => {
+        this.updateCardDimensions()
+      })
     }
   }
 }
