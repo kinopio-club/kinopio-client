@@ -205,17 +205,17 @@ export default {
     changeSpace (spaceId) {
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
-      this.$store.dispatch('closeAllDialogs')
       this.closeDialogs()
+      this.$store.dispatch('closeAllDialogs')
     },
     selectSpaceCard (card) {
+      this.$store.dispatch('closeAllDialogs')
       const isCardInCurrentSpace = card.spaceId === this.$store.state.currentSpace.id
-      console.log('🌙 selectSpaceCard', card, isCardInCurrentSpace)
       if (isCardInCurrentSpace) {
         this.selectCard(card)
       } else {
-        console.log('🍇🍇🍇', card)
-        // change to space, then to card
+        this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
+        this.changeSpace(card.spaceId)
       }
     },
 
