@@ -57,6 +57,10 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updatePageSizes') {
         this.updateHeights()
+      } else if (mutation.type === 'triggerSearchScopeIsRemote') {
+        this.updateScopeIsLocal(false)
+      } else if (mutation.type === 'triggerSearchScopeIsLocal') {
+        this.updateScopeIsLocal(true)
       }
     })
   },

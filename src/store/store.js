@@ -526,6 +526,8 @@ const store = createStore({
     triggerRemoveCardFromCardList: (state, card) => {},
     triggerUpdateTheme: () => {},
     triggerUserIsLoaded: () => {},
+    triggerSearchScopeIsRemote: () => {},
+    triggerSearchScopeIsLocal: () => {},
 
     // Used by extensions only
 

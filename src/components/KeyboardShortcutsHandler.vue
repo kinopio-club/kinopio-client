@@ -168,7 +168,7 @@ export default {
       // Search/Jump-to Card
       } else if (isMeta && key === 'f') {
         event.preventDefault()
-        this.focusOnSearchCardFilter()
+        this.focusOnSearchCardFilter(event)
       // Show previous search card
       } else if (isMeta && event.shiftKey && key === 'g') {
         event.preventDefault()
@@ -850,9 +850,14 @@ export default {
         })
       })
     },
-    focusOnSearchCardFilter () {
+    focusOnSearchCardFilter (event) {
       this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.focusOnSearchCardFilter')
       this.$store.commit('searchIsVisible', true)
+      if (event.shiftKey) {
+        this.$store.commit('triggerSearchScopeIsRemote')
+      } else {
+        this.$store.commit('triggerSearchScopeIsLocal')
+      }
       this.$nextTick(() => {
         this.$nextTick(() => {
           this.$nextTick(() => {
