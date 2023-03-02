@@ -322,7 +322,7 @@ export default {
       }
     },
     closeAllDialogs () {
-      this.$store.dispatch('closeAllDialogs', 'Notifications.closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
     },
     update () {
       const notifications = this.$store.state.notifications
@@ -435,7 +435,7 @@ export default {
     changeSpace (spaceId) {
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', { space })
-      this.$store.dispatch('closeAllDialogs', 'notifications.changeSpace')
+      this.$store.dispatch('closeAllDialogs')
     },
     removeNotifyUnlockedStickyCards () {
       this.notifyUnlockedStickyCards = false

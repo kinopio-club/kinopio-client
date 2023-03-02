@@ -328,7 +328,7 @@ export default {
       this.$emit('updateLocalSpaces')
     },
     closeAllDialogs () {
-      this.$store.dispatch('closeAllDialogs', 'SpaceDetailsInfo')
+      this.$store.dispatch('closeAllDialogs')
     }
   }
 }

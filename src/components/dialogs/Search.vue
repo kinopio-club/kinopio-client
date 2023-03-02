@@ -201,7 +201,7 @@ export default {
       console.log('🍋 changeSpace', space)
     },
     selectCard (card) {
-      this.$store.dispatch('closeAllDialogs', 'Search.selectCard')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('currentCards/showCardDetails', card.id)
       this.focusItem(card)
     },

@@ -306,7 +306,7 @@ export default {
 
     async changeToInboxSpace (event) {
       if (this.isAddPage) { return }
-      this.$store.dispatch('closeAllDialogs', 'AddToInbox')
+      this.$store.dispatch('closeAllDialogs')
       event.preventDefault()
       event.stopPropagation()
       let space

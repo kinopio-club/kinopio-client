@@ -255,7 +255,7 @@ export default {
       this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
       const isCurrentUser = this.$store.state.currentUser.id === user.id
       if (isCurrentUser) {
-        this.$store.dispatch('closeAllDialogs', 'Share.removeCollaborator')
+        this.$store.dispatch('closeAllDialogs')
       }
       this.closeDialogs()
     },

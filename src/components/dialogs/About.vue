@@ -153,7 +153,7 @@ export default {
       this.$store.commit('newStuffIsUpdated', false)
     },
     toggleKeyboardShortcutsIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'About.toggleKeyboardShortcutsIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerKeyboardShortcutsIsVisible')
     },
     toggleAppsIsVisible () {

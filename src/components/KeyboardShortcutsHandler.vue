@@ -90,7 +90,7 @@ export default {
       // i
       } else if (key === 'i' && isSpaceScope) {
         if (this.$store.state.isAddPage) { return }
-        this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler')
+        this.$store.dispatch('closeAllDialogs')
         this.$store.commit('triggerAddToInboxIsVisible')
       // t
       } else if (key === 't' && isSpaceScope) {
@@ -102,7 +102,7 @@ export default {
         this.remove()
       // Escape
       } else if (key === 'Escape') {
-        this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
+        this.$store.dispatch('closeAllDialogs')
         this.$store.commit('currentUserToolbar', 'card')
       } else if (key === '1' && isSpaceScope) {
         let value = this.$store.state.currentUser.filterShowUsers
@@ -527,7 +527,7 @@ export default {
       })
       this.$store.dispatch('currentConnections/removeUnusedTypes')
       this.clearAllSelectedCards()
-      this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.remove')
+      this.$store.dispatch('closeAllDialogs')
     },
 
     // Copy, Cut
@@ -840,7 +840,7 @@ export default {
     // Search/Jump-to
 
     focusOnSpaceDetailsFilter () {
-      this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.focusOnSpaceDetailsFilter')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSpaceDetailsVisible')
       this.$nextTick(() => {
         this.$nextTick(() => {
@@ -851,7 +851,7 @@ export default {
       })
     },
     focusOnSearchCardFilter (event) {
-      this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.focusOnSearchCardFilter')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('searchIsVisible', true)
       if (event.shiftKey) {
         this.$store.commit('triggerSearchScopeIsRemote')

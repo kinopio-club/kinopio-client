@@ -75,7 +75,7 @@ export default {
   },
   methods: {
     triggerSignUpOrInIsVisible () {
-      this.$store.commit('closeAllDialogs', 'UpgradeUser.triggerSignUpOrInIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     updateDialogHeight () {

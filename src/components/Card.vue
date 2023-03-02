@@ -271,7 +271,7 @@ export default {
     }
     const shouldShowDetails = this.loadSpaceShowDetailsForCardId === this.card.id
     if (shouldShowDetails) {
-      this.$store.dispatch('closeAllDialogs', 'card.mounted')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('preventCardDetailsOpeningAnimation', false)
       this.$store.dispatch('currentCards/showCardDetails', this.card.id)
     }
@@ -1272,7 +1272,7 @@ export default {
       const isMeta = event.metaKey || event.ctrlKey
       if (!isMeta) { return }
       if (!this.canEditSpace) { return }
-      this.$store.dispatch('closeAllDialogs', 'Card.selectAllConnectedCards')
+      this.$store.dispatch('closeAllDialogs')
       const connections = this['currentConnections/all']
       let selectedCards = [this.card.id]
       let shouldSearch = true
@@ -1380,7 +1380,7 @@ export default {
       if (this.preventDraggedCardFromShowingDetails) { return }
       if (!this.canEditSpace) { return }
       const value = !this.isChecked
-      this.$store.dispatch('closeAllDialogs', 'Card.toggleCardChecked')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('currentCards/toggleChecked', { cardId: this.id, value })
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
@@ -1390,7 +1390,7 @@ export default {
     },
     toggleUserDetailsIsVisible (event) {
       if (isMultiTouch) { return }
-      this.$store.dispatch('closeAllDialogs', 'Card.toggleUserDetailsIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.commit('currentUserIsDraggingCard', false)
       const user = this.createdByUser
@@ -1404,7 +1404,7 @@ export default {
     },
     toggleFilterShowAbsoluteDates () {
       this.$store.dispatch('currentCards/incrementZ', this.id)
-      this.$store.dispatch('closeAllDialogs', 'Card.toggleFilterShowAbsoluteDates')
+      this.$store.dispatch('closeAllDialogs')
       const value = !this.currentUser.filterShowAbsoluteDates
       this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
     },
@@ -1458,7 +1458,7 @@ export default {
       }
     },
     closeAllDialogs () {
-      this.$store.dispatch('closeAllDialogs', 'Card.closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
     },
     createCurrentConnection (event) {
       const cursor = utils.cursorPositionInViewport(event)
@@ -1489,7 +1489,7 @@ export default {
     startConnecting (event) {
       if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
-      this.$store.dispatch('closeAllDialogs', 'Card.startConnecting')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       if (!this.currentUserIsDrawingConnection) {
         this.addConnectionType(event)
@@ -1501,7 +1501,7 @@ export default {
       if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
       this.$store.dispatch('history/pause')
-      this.$store.dispatch('closeAllDialogs', 'Card.startResizing')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.commit('currentUserIsResizingCard', true)
@@ -1570,7 +1570,7 @@ export default {
       }
       event.preventDefault()
       if (this.currentUserIsDrawingConnection) { return }
-      this.$store.dispatch('closeAllDialogs', 'Card.startDraggingCard')
+      this.$store.dispatch('closeAllDialogs')
       let connectedCardIds = this['currentCards/cardIdsConnectedToCardId'](this.id)
       this.$store.commit('currentDraggingConnectedCardIds', connectedCardIds)
       this.$store.commit('currentUserIsDraggingCard', true)
@@ -1604,7 +1604,7 @@ export default {
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       this.preventDraggedButtonBadgeFromShowingDetails = this.preventDraggedCardFromShowingDetails
       if (this.preventDraggedCardFromShowingDetails) { return }
-      this.$store.dispatch('closeAllDialogs', 'Card.showCardDetails')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('clearMultipleSelected')
       const nodeName = event.target.nodeName
       if (nodeName === 'LABEL') { return } // checkbox
@@ -1634,7 +1634,7 @@ export default {
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
       this.$store.dispatch('currentCards/incrementZ', this.id)
-      this.$store.dispatch('closeAllDialogs', 'Card.showTagDetailsIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingCard', false)
       const tagRect = event.target.getBoundingClientRect()
       this.$store.commit('tagDetailsPosition', {
@@ -1653,7 +1653,7 @@ export default {
       if (isMultiTouch) { return }
       if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
       this.$store.dispatch('currentCards/incrementZ', this.id)
-      this.$store.dispatch('closeAllDialogs', 'Card.showLinkDetailsIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingCard', false)
       const linkRect = event.target.getBoundingClientRect()
       this.$store.commit('linkDetailsPosition', {
@@ -1678,7 +1678,7 @@ export default {
       return space
     },
     openUrl (event, url) {
-      this.$store.dispatch('closeAllDialogs', 'Card.openUrl')
+      this.$store.dispatch('closeAllDialogs')
       const shouldOpenInNewTab = this.currentUser.shouldOpenLinksInNewTab
       if (shouldOpenInNewTab) {
         event.preventDefault()
@@ -1697,7 +1697,7 @@ export default {
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
-      this.$store.dispatch('closeAllDialogs', 'spaceDetails.changeSpace')
+      this.$store.dispatch('closeAllDialogs')
     },
     removeCommentBrackets (name) {
       if (!this.isComment) { return name }

@@ -448,7 +448,7 @@ export default {
       this.showCardDetails(cards[index])
     },
     clearSearchAndFilters () {
-      this.$store.dispatch('closeAllDialogs', 'Header.clearSearch')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('clearSearch')
       this.$store.dispatch('clearAllFilters')
     },

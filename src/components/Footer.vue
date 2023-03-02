@@ -164,12 +164,12 @@ export default {
     },
     toggleExploreIsVisible () {
       const isVisible = this.exploreIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleExploreIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.exploreIsVisible = !isVisible
     },
     toggleLiveIsVisible () {
       const isVisible = this.liveIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleLiveIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.liveIsVisible = !isVisible
       if (this.liveIsVisible) {
         this.updateLiveSpaces()
@@ -177,7 +177,7 @@ export default {
     },
     toggleAddToInboxIsVisible () {
       const isVisible = this.addToInboxIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleAddToInboxIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.addToInboxIsVisible = !isVisible
     },
     async updateLiveSpaces () {

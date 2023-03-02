@@ -179,7 +179,7 @@ export default {
       this.textareaSize()
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'AIImageGeneration')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     clear () {

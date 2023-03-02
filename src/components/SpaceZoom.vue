@@ -91,7 +91,7 @@ export default {
     },
     closeAllDialogs () {
       this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('closeAllDialogs', 'SpaceZoom')
+      this.$store.dispatch('closeAllDialogs')
     },
     resetZoomOrigin () {
       this.$store.commit('zoomOrigin', { x: 0, y: 0 })

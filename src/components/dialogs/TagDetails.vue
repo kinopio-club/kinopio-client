@@ -196,7 +196,7 @@ export default {
       cards = cards.filter(card => Boolean(card))
       if (!cards.length) { return }
       const cardIds = cards.map(card => card.id)
-      this.$store.dispatch('closeAllDialogs', 'TagDetails.selectCardsWithTag')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('multipleCardsSelectedIds', cardIds)
     },
     updatePosition () {
@@ -319,14 +319,14 @@ export default {
       })
     },
     changeSpace (spaceId) {
-      this.$store.dispatch('closeAllDialogs', 'TagDetails.changeSpace')
+      this.$store.dispatch('closeAllDialogs')
       if (this.spaceIsCurrentSpace(spaceId)) { return }
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     },
     showCardDetails (card) {
       card = card || this.currentCard
-      this.$store.dispatch('closeAllDialogs', 'TagDetails.showCardDetails')
+      this.$store.dispatch('closeAllDialogs')
       if (this.currentSpaceId !== card.spaceId) {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
         let space

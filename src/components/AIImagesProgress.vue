@@ -36,16 +36,16 @@ export default {
   },
   methods: {
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'AIImageGeneration')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     triggerUpgradeUserIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'AIImageGeneration')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
 
     triggerAIImagesIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'AIImageGeneration')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerAIImagesIsVisible')
     }
   }

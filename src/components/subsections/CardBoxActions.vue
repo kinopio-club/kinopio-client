@@ -373,7 +373,7 @@ export default {
         resizeHeight: box.height + (margin * 3.5)
       }
       this.$store.dispatch('currentBoxes/add', { box })
-      this.$store.dispatch('closeAllDialogs', 'containCardsInBox')
+      this.$store.dispatch('closeAllDialogs')
       this.$nextTick(() => {
         this.$nextTick(() => {
           this.$store.commit('boxDetailsIsVisibleForBoxId', box.id)
