@@ -17,12 +17,12 @@ dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" r
       @selectItem="selectItem"
     )
     .segmented-buttons
-      button(@click="updateScope('local')" :class="{ active: isScopeLocal }")
+      button(@click="updateScopeIsLocal(true)" :class="{ active: scopeIsLocal }")
         span Current Space
-      button(@click="updateScope('remote')" :class="{ active: isScopeRemote }")
+      button(@click="updateScopeIsLocal(false)" :class="{ active: !scopeIsLocal }")
         span All Spaces
 
-    template(v-if="isScopeLocal")
+    template(v-if="scopeIsLocal")
       CardList(:cards="cards" :search="search" @selectCard="selectCard")
     template(v-else)
       SpaceCardList(:groupedItems="cardsBySpace" :search="search" :isLoading="isLoading" @selectSpace="changeSpace" @selectCard="selectSpaceCard")
@@ -65,19 +65,17 @@ export default {
       dialogHeight: null,
       resultsSectionHeight: null,
       isLoading: false,
-      scope: 'local', // 'local', 'remote'
-      cardsBySpace: []
+      cardsBySpace: [],
+      scopeIsLocal: true
     }
   },
   computed: {
-    isScopeRemote () { return this.scope === 'remote' },
-    isScopeLocal () { return this.scope === 'local' },
     dialogIsPinned () { return this.$store.state.searchIsPinned },
     placeholder () {
       let placeholder = 'Search Cards'
       let shift = ''
       if (!utils.isMobile()) {
-        if (this.isScopeRemote) {
+        if (!this.scopeIsLocal) {
           shift = 'Shift-'
         }
         placeholder = placeholder + ` (${utils.metaKey()}-${shift}F)`
@@ -96,7 +94,7 @@ export default {
       }
     },
     cardsToSearch () {
-      if (this.isScopeLocal) {
+      if (this.scopeIsLocal) {
         return this.recentlyUpdatedCards
       } else {
         return this.searchResultsCards
@@ -116,8 +114,8 @@ export default {
     currentUser () { return this.$store.state.currentUser }
   },
   methods: {
-    updateScope (scope) {
-      this.scope = scope
+    updateScopeIsLocal (value) {
+      this.scopeIsLocal = value
       this.updateSearch(this.search)
     },
 
@@ -128,7 +126,7 @@ export default {
       if (!search) {
         this.clearSearch()
       }
-      if (search && this.isScopeRemote) {
+      if (search && !this.scopeIsLocal) {
         await this.searchRemoteCards(search)
       }
       this.$nextTick(() => {
@@ -183,7 +181,7 @@ export default {
       this.focusItem(card)
     },
     selectSpaceCard (card) {
-      const isCardInCurrentSpace = card.spaceId === this.$stores.state.currentSpace.id
+      const isCardInCurrentSpace = card.spaceId === this.$store.state.currentSpace.id
       console.log('🌙 selectSpaceCard', card, isCardInCurrentSpace)
       if (isCardInCurrentSpace) {
         this.selectCard(card)
