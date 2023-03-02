@@ -139,19 +139,21 @@ export default {
         if (groupIndex !== -1) {
           groups[groupIndex].cards.push(item)
         } else {
-          let background, spaceName
+          let spaceName, background, backgroundTint
           const spaceId = item.spaceId || this.currentSpaceId
           const space = this.$store.getters.cachedOrOtherSpaceById(spaceId)
           if (space) {
-            background = space.background
             spaceName = space.name
+            background = space.background
+            backgroundTint = space.backgroundTint
           }
           groups.push({
             spaceName: spaceName || item.spaceName,
             spaceId: spaceId,
             cards: [item],
             space,
-            background
+            background,
+            backgroundTint
           })
         }
       })

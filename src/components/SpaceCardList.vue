@@ -10,7 +10,8 @@ const store = useStore()
 const props = defineProps({
   groupedItems: Array,
   primaryActionIsCardListOptions: Boolean,
-  isLoading: Boolean
+  isLoading: Boolean,
+  search: String
 })
 const emit = defineEmits(['selectSpace', 'selectCard'])
 
@@ -35,7 +36,7 @@ ul.results-list
       BackgroundPreview(v-if="group.space" :space="group.space")
       span {{group.spaceName}}
     //- cards
-    CardList(:cards="group.cards" :primaryActionIsCardListOptions="primaryActionIsCardListOptions" @selectCard="selectCard")
+    CardList(:cards="group.cards" :search="search" :primaryActionIsCardListOptions="primaryActionIsCardListOptions" @selectCard="selectCard")
 Loader(:visible="isLoading")
 </template>
 

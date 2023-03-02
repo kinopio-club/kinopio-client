@@ -21,13 +21,19 @@ dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" r
         span Current Space
       button(@click="updateScope('remote')" :class="{ active: isScopeRemote }")
         span All Spaces
-    CardList(:cards="cards" :search="search" @selectCard="selectCard")
+
+    template(v-if="isScopeLocal")
+      CardList(:cards="cards" :search="search" @selectCard="selectCard")
+    template(v-else)
+      SpaceCardList(:groupedItems="cardsBySpace" :search="search" :isLoading="isLoading" @selectSpace="changeSpace" @selectCard="selectSpaceCard")
+
 </template>
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import SearchFilters from '@/components/SearchFilters.vue'
 import CardList from '@/components/CardList.vue'
+import SpaceCardList from '@/components/SpaceCardList.vue'
 import utils from '@/utils.js'
 
 import dayjs from 'dayjs'
@@ -41,7 +47,8 @@ export default {
   components: {
     ResultsFilter,
     SearchFilters,
-    CardList
+    CardList,
+    SpaceCardList
   },
   props: {
     visible: Boolean
@@ -58,7 +65,8 @@ export default {
       dialogHeight: null,
       resultsSectionHeight: null,
       isLoading: false,
-      scope: 'local' // 'local', 'remote'
+      scope: 'local', // 'local', 'remote'
+      cardsBySpace: []
     }
   },
   computed: {
@@ -67,8 +75,12 @@ export default {
     dialogIsPinned () { return this.$store.state.searchIsPinned },
     placeholder () {
       let placeholder = 'Search Cards'
+      let shift = ''
       if (!utils.isMobile()) {
-        placeholder = placeholder + ` (${utils.metaKey()}-F)`
+        if (this.isScopeRemote) {
+          shift = 'Shift-'
+        }
+        placeholder = placeholder + ` (${utils.metaKey()}-${shift}F)`
       }
       return placeholder
     },
@@ -108,6 +120,9 @@ export default {
       this.scope = scope
       this.updateSearch(this.search)
     },
+
+    // search
+
     async updateSearch (search) {
       this.$store.commit('search', search)
       if (!search) {
@@ -125,7 +140,24 @@ export default {
     async searchRemoteCards (search) {
       this.isLoading = true
       const results = await this.$store.dispatch('api/searchCards', { query: search })
-      this.$store.commit('searchResultsCards', results.cards)
+      let groups = results.spaces.map(space => {
+        return {
+          spaceName: space.name,
+          spaceId: space.id,
+          space: space,
+          background: space.background,
+          backgroundTint: space.backgroundTint,
+          cards: []
+        }
+      })
+      results.cards.forEach(card => {
+        const index = groups.findIndex(group => group.spaceId === card.spaceId)
+        groups[index].cards.push(card)
+      })
+      const cardsInCurrentSpace = results.cards.filter(card => card.spaceId === this.$store.state.currentSpace.id)
+      this.cardsBySpace = groups
+      this.cardsInAllSpaces = results.cards
+      this.$store.commit('searchResultsCards', cardsInCurrentSpace)
       this.isLoading = false
     },
     updateResultsFromResultsFilter (cards) {
@@ -134,17 +166,41 @@ export default {
     },
     clearSearch () {
       this.$nextTick(() => {
+        this.cardsBySpace = []
+        this.cardsInCurrentSpace = []
         this.$store.commit('clearSearch')
       })
+    },
+
+    // select items
+
+    changeSpace (space) {
+      console.log('🍋 changeSpace', space)
     },
     selectCard (card) {
       this.$store.dispatch('closeAllDialogs', 'Search.selectCard')
       this.$store.dispatch('currentCards/showCardDetails', card.id)
       this.focusItem(card)
     },
-    closeDialogs () {
-      this.$store.commit('triggerMoreFiltersIsNotVisible')
+    selectSpaceCard (card) {
+      const isCardInCurrentSpace = card.spaceId === this.$stores.state.currentSpace.id
+      console.log('🌙 selectSpaceCard', card, isCardInCurrentSpace)
+      if (isCardInCurrentSpace) {
+        this.selectCard(card)
+      } else {
+        console.log('🍇🍇🍇', card)
+        // change to space, then to card
+      }
     },
+    selectItem () {
+      const card = this.$store.getters['currentCards/byId'](this.previousResultCardId)
+      this.$store.commit('shouldPreventNextEnterKey', true)
+      this.$store.dispatch('closeAllDialogs', 'Search.selectItem')
+      this.selectCard(card)
+    },
+
+    // keyboard nav
+
     focusNextItem () {
       const cards = this.cards
       if (!this.previousResultCardId) {
@@ -174,11 +230,11 @@ export default {
     focusItem (card) {
       this.$store.commit('previousResultCardId', card.id)
     },
-    selectItem () {
-      const card = this.$store.getters['currentCards/byId'](this.previousResultCardId)
-      this.$store.commit('shouldPreventNextEnterKey', true)
-      this.$store.dispatch('closeAllDialogs', 'Search.selectItem')
-      this.selectCard(card)
+
+    // dialog
+
+    closeDialogs () {
+      this.$store.commit('triggerMoreFiltersIsNotVisible')
     },
     updateHeights () {
       if (!this.visible) {
@@ -242,4 +298,6 @@ dialog.search
     padding-top 4px
     .segmented-buttons
       margin 4px
+      button
+        position relative
 </style>
