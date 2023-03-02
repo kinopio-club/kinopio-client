@@ -197,13 +197,16 @@ export default {
 
     // select items
 
-    changeSpace (space) {
-      console.log('🍋 changeSpace', space)
-    },
     selectCard (card) {
       this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('currentCards/showCardDetails', card.id)
       this.focusItem(card)
+    },
+    changeSpace (spaceId) {
+      const space = { id: spaceId }
+      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('closeAllDialogs')
+      this.closeDialogs()
     },
     selectSpaceCard (card) {
       const isCardInCurrentSpace = card.spaceId === this.$store.state.currentSpace.id
