@@ -14,7 +14,7 @@ dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" r
       @clearFilter="clearSearch"
       @focusNextItem="focusNextItem"
       @focusPreviousItem="focusPreviousItem"
-      @selectItem="selectItem"
+      @selectItem="selectCurrentFocusedItem"
     )
     .segmented-buttons
       button(@click="updateScopeIsLocal(true)" :class="{ active: scopeIsLocal }")
@@ -66,6 +66,7 @@ export default {
       resultsSectionHeight: null,
       isLoading: false,
       cardsBySpace: [],
+      cardsBySpaceFlattened: [],
       scopeIsLocal: true
     }
   },
@@ -84,7 +85,7 @@ export default {
     },
     search () { return this.$store.state.search },
     searchResultsCards () { return this.$store.state.searchResultsCards },
-    previousResultCardId () { return this.$store.state.previousResultCardId },
+    previousResultItemId () { return this.$store.state.previousResultItemId },
     cards () {
       let cards
       if (this.search) {
@@ -98,6 +99,13 @@ export default {
         return this.recentlyUpdatedCards
       } else {
         return this.searchResultsCards
+      }
+    },
+    itemsToFocus () {
+      if (this.scopeIsLocal) {
+        return this.cards
+      } else {
+        return this.cardsBySpaceFlattened
       }
     },
     recentlyUpdatedCards () {
@@ -131,7 +139,7 @@ export default {
       }
       this.$nextTick(() => {
         if (this.cards.length && this.search) {
-          this.focusItem(this.cards[0])
+          this.focusFirstItem()
         }
       })
     },
@@ -154,17 +162,30 @@ export default {
       })
       const cardsInCurrentSpace = results.cards.filter(card => card.spaceId === this.$store.state.currentSpace.id)
       this.cardsBySpace = groups
+      this.updateCardsBySpaceFlattened(groups)
       this.cardsInAllSpaces = results.cards
       this.$store.commit('searchResultsCards', cardsInCurrentSpace)
       this.isLoading = false
     },
+    updateCardsBySpaceFlattened (groups) {
+      let items = []
+      groups.forEach(group => {
+        group.space.isSpace = true
+        items.push(group.space)
+        group.cards.forEach(card => {
+          items.push(card)
+        })
+      })
+      this.cardsBySpaceFlattened = items
+    },
     updateResultsFromResultsFilter (cards) {
-      this.$store.commit('previousResultCardId', '')
+      this.$store.commit('previousResultItemId', '')
       this.$store.commit('searchResultsCards', cards)
     },
     clearSearch () {
       this.$nextTick(() => {
         this.cardsBySpace = []
+        this.cardsBySpaceFlattened = []
         this.cardsInCurrentSpace = []
         this.$store.commit('clearSearch')
       })
@@ -190,43 +211,53 @@ export default {
         // change to space, then to card
       }
     },
-    selectItem () {
-      const card = this.$store.getters['currentCards/byId'](this.previousResultCardId)
-      this.$store.commit('shouldPreventNextEnterKey', true)
-      this.$store.dispatch('closeAllDialogs', 'Search.selectItem')
-      this.selectCard(card)
-    },
 
     // keyboard nav
 
+    selectCurrentFocusedItem () {
+      this.$store.commit('shouldPreventNextEnterKey', true)
+      this.$store.dispatch('closeAllDialogs')
+      if (this.scopeIsLocal) {
+        const card = this.$store.getters['currentCards/byId'](this.previousResultItemId)
+        this.selectCard(card)
+      } else {
+        console.log('🐣 selectCurrentFocusedItem', this.previousResultItemId)
+        // selectSpaceCard or changespace
+      }
+    },
     focusNextItem () {
-      const cards = this.cards
-      if (!this.previousResultCardId) {
-        this.focusItem(cards[0])
+      const items = this.itemsToFocus
+      console.log(items)
+      if (!this.previousResultItemId) {
+        this.focusFirstItem()
         return
       }
-      const currentIndex = cards.findIndex(card => card.id === this.previousResultCardId)
+      const currentIndex = items.findIndex(card => card.id === this.previousResultItemId)
       let index = currentIndex + 1
-      if (cards.length === index) {
+      if (items.length === index) {
         return
       }
-      this.focusItem(cards[index])
+      this.focusItem(items[index])
     },
     focusPreviousItem () {
-      const cards = this.cards
-      if (!this.previousResultCardId) {
-        this.focusItem(cards[0])
+      const items = this.itemsToFocus
+      if (!this.previousResultItemId) {
+        this.focusItem(items[0])
         return
       }
-      const currentIndex = cards.findIndex(card => card.id === this.previousResultCardId)
+      const currentIndex = items.findIndex(card => card.id === this.previousResultItemId)
       let index = currentIndex - 1
       if (index < 0) {
         index = 0
       }
-      this.focusItem(cards[index])
+      this.focusItem(items[index])
     },
-    focusItem (card) {
-      this.$store.commit('previousResultCardId', card.id)
+    focusFirstItem () {
+      const items = this.itemsToFocus
+      this.focusItem(items[0])
+    },
+    focusItem (item) {
+      this.$store.commit('previousResultItemId', item.id)
     },
 
     // dialog

@@ -18,6 +18,9 @@ const emit = defineEmits(['selectSpace', 'selectCard'])
 const spaceIsCurrentSpace = (spaceId) => {
   return spaceId === store.state.currentSpace.id
 }
+const spaceIsFocused = (spaceId) => {
+  return store.state.previousResultItemId === spaceId
+}
 
 const selectSpace = (spaceId) => {
   emit('selectSpace', spaceId)
@@ -25,6 +28,7 @@ const selectSpace = (spaceId) => {
 const selectCard = (card) => {
   emit('selectCard', card)
 }
+
 </script>
 
 <template lang="pug">
@@ -32,7 +36,7 @@ ul.results-list
   template(v-for="group in groupedItems")
     //- space
     hr
-    li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="selectSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
+    li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="selectSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId), hover: spaceIsFocused(group.spaceId) }")
       BackgroundPreview(v-if="group.space" :space="group.space")
       span {{group.spaceName}}
     //- cards

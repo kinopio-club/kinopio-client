@@ -1617,16 +1617,16 @@ export default {
       this.$store.commit('parentCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
-      this.updatePreviousResultCardId()
+      this.updatePreviousResultItemId()
       this.clearStickyPositionOffsets()
     },
-    updatePreviousResultCardId () {
+    updatePreviousResultItemId () {
       const search = this.search
       const searchResultsCards = this.searchResultsCards
       if (!search) { return }
       if (!searchResultsCards.length) { return }
       if (searchResultsCards.find(card => card.id === this.card.id)) {
-        this.$store.commit('previousResultCardId', this.card.id)
+        this.$store.commit('previousResultItemId', this.card.id)
       }
     },
     showTagDetailsIsVisible ({ event, tag }) {
