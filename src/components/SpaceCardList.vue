@@ -19,7 +19,7 @@ const spaceIsCurrentSpace = (spaceId) => {
   return spaceId === store.state.currentSpace.id
 }
 const spaceIsFocused = (spaceId) => {
-  return store.state.previousResultItemId === spaceId
+  return store.state.previousResultItem.id === spaceId
 }
 
 const selectSpace = (spaceId) => {

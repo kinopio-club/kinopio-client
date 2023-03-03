@@ -53,7 +53,7 @@ export default {
   computed: {
     ...mapState([
       'cardDetailsIsVisibleForCardId',
-      'previousResultItemId',
+      'previousResultItem',
       'currentUser',
       'cardListItemOptionsCard'
     ]),
@@ -140,7 +140,7 @@ export default {
       return isActive || isCardDetailsVisible
     },
     cardIsFocused (card) {
-      return this.previousResultItemId === card.id
+      return this.previousResultItem.id === card.id
     },
     relativeDate (card) {
       return utils.shortRelativeTime(card.nameUpdatedAt || card.updatedAt)

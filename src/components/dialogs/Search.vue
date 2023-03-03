@@ -89,7 +89,7 @@ export default {
     },
     search () { return this.$store.state.search },
     searchResultsCards () { return this.$store.state.searchResultsCards },
-    previousResultItemId () { return this.$store.state.previousResultItemId },
+    previousResultItem () { return this.$store.state.previousResultItem },
     cards () {
       let cards
       if (this.search) {
@@ -183,7 +183,7 @@ export default {
       this.cardsBySpaceFlattened = items
     },
     updateResultsFromResultsFilter (cards) {
-      this.$store.commit('previousResultItemId', '')
+      this.$store.commit('previousResultItem', {})
       this.$store.commit('searchResultsCards', cards)
     },
     clearSearch () {
@@ -203,6 +203,7 @@ export default {
       this.focusItem(card)
     },
     changeSpace (spaceId) {
+      if (this.$store.state.currentSpace.id === spaceId) { return }
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       this.closeDialogs()
@@ -221,25 +222,27 @@ export default {
 
     // keyboard nav
 
-    selectCurrentFocusedItem () {
+    selectCurrentFocusedItem (event) {
       this.$store.commit('shouldPreventNextEnterKey', true)
       this.$store.dispatch('closeAllDialogs')
       if (this.scopeIsLocal) {
-        const card = this.$store.getters['currentCards/byId'](this.previousResultItemId)
-        this.selectCard(card)
+        this.selectCard(this.previousResultItem)
       } else {
-        console.log('🐣 selectCurrentFocusedItem', this.previousResultItemId)
-        // selectSpaceCard or changespace
+        if (this.previousResultItem.isSpace) {
+          this.changeSpace(this.previousResultItem.id)
+        } else {
+          this.selectSpaceCard(this.previousResultItem)
+        }
       }
     },
     focusNextItem () {
       const items = this.itemsToFocus
       console.log(items)
-      if (!this.previousResultItemId) {
+      if (!this.previousResultItem.id) {
         this.focusFirstItem()
         return
       }
-      const currentIndex = items.findIndex(card => card.id === this.previousResultItemId)
+      const currentIndex = items.findIndex(card => card.id === this.previousResultItem.id)
       let index = currentIndex + 1
       if (items.length === index) {
         return
@@ -248,11 +251,11 @@ export default {
     },
     focusPreviousItem () {
       const items = this.itemsToFocus
-      if (!this.previousResultItemId) {
+      if (!this.previousResultItem.id) {
         this.focusItem(items[0])
         return
       }
-      const currentIndex = items.findIndex(card => card.id === this.previousResultItemId)
+      const currentIndex = items.findIndex(card => card.id === this.previousResultItem.id)
       let index = currentIndex - 1
       if (index < 0) {
         index = 0
@@ -264,7 +267,7 @@ export default {
       this.focusItem(items[0])
     },
     focusItem (item) {
-      this.$store.commit('previousResultItemId', item.id)
+      this.$store.commit('previousResultItem', item)
     },
 
     // dialog

@@ -315,7 +315,7 @@ export default {
       'searchIsVisible',
       'searchResultsCards',
       'search',
-      'previousResultItemId',
+      'previousResultItem',
       'spaceDetailsIsPinned',
       'sidebarIsPinned',
       'cardDetailsIsVisibleForCardId',
@@ -417,16 +417,16 @@ export default {
     },
     showCardDetails (card) {
       this.$store.dispatch('currentCards/showCardDetails', card.id)
-      this.$store.commit('previousResultItemId', card.id)
+      this.$store.commit('previousResultItem', card)
     },
     showNextSearchCard () {
       if (!this.search) { return }
       const cards = this.searchResultsCards
-      if (!this.previousResultItemId) {
+      if (!this.previousResultItem.id) {
         this.showCardDetails(cards[0])
         return
       }
-      const currentIndex = cards.findIndex(card => card.id === this.previousResultItemId)
+      const currentIndex = cards.findIndex(card => card.id === this.previousResultItem.id)
       let index = currentIndex + 1
       if (cards.length === index) {
         index = 0
@@ -436,11 +436,11 @@ export default {
     showPreviousSearchCard () {
       if (!this.search) { return }
       const cards = this.searchResultsCards
-      if (!this.previousResultItemId) {
+      if (!this.previousResultItem.id) {
         this.showCardDetails(cards[0])
         return
       }
-      const currentIndex = cards.findIndex(card => card.id === this.previousResultItemId)
+      const currentIndex = cards.findIndex(card => card.id === this.previousResultItem.id)
       let index = currentIndex - 1
       if (index < 0) {
         index = cards.length - 1

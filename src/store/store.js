@@ -60,7 +60,7 @@ const store = createStore({
     searchIsVisible: false,
     search: '',
     searchResultsCards: [],
-    previousResultItemId: '',
+    previousResultItem: {},
 
     // reset password
     resetPasswordApiKey: '',
@@ -440,14 +440,14 @@ const store = createStore({
       utils.typeCheck({ value: results, type: 'array' })
       state.searchResultsCards = results
     },
-    previousResultItemId: (state, value) => {
-      utils.typeCheck({ value, type: 'string' })
-      state.previousResultItemId = value
+    previousResultItem: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
+      state.previousResultItem = value
     },
     clearSearch: (state) => {
       state.search = ''
       state.searchResultsCards = []
-      state.previousResultItemId = ''
+      state.previousResultItem = {}
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck({ value: apiKey, type: 'string' })
