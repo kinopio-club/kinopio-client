@@ -26,6 +26,8 @@ dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" r
       CardList(:cards="cards" :search="search" @selectCard="selectCard")
     template(v-else)
       SpaceCardList(:groupedItems="cardsBySpace" :search="search" :isLoading="isLoading" @selectSpace="changeSpace" @selectCard="selectSpaceCard")
+      p.description(v-if="noResults")
+        span No matches found
 
   section(v-if="!currentUserIsSignedIn")
     .row.badge.info
@@ -76,10 +78,12 @@ export default {
       isLoading: false,
       cardsBySpace: [],
       cardsBySpaceFlattened: [],
-      scopeIsLocal: true
+      scopeIsLocal: true,
+      hasSearched: false
     }
   },
   computed: {
+    noResults () { return this.hasSearched && !this.cardsBySpace.length },
     dialogIsPinned () { return this.$store.state.searchIsPinned },
     placeholder () {
       let placeholder = 'Search Cards'
@@ -176,6 +180,7 @@ export default {
       this.cardsInAllSpaces = results.cards
       this.$store.commit('searchResultsCards', cardsInCurrentSpace)
       this.isLoading = false
+      this.hasSearched = true
     },
     updateCardsBySpaceFlattened (groups) {
       let items = []
@@ -198,6 +203,7 @@ export default {
         this.cardsBySpaceFlattened = []
         this.cardsInCurrentSpace = []
         this.$store.commit('clearSearch')
+        this.hasSearched = false
       })
     },
 
@@ -323,6 +329,7 @@ export default {
     visible (visible) {
       this.updateHeights()
       if (visible) {
+        this.hasSearched = false
         if (utils.isMobile()) { return }
         this.$nextTick(() => {
           this.$store.commit('triggerFocusResultsFilter')
@@ -349,4 +356,7 @@ dialog.search
       margin 4px
       button
         position relative
+  .description
+    padding 4px
+    padding-top 0
 </style>
