@@ -253,11 +253,11 @@ export default {
       this.userSettingsIsVisible = !isVisible
     },
     triggerUpgradeUserIsVisible () {
-      this.$store.commit('closeAllDialogs', 'UserDetails.triggerUpgradeUserIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
     triggerDonateIsVisible () {
-      this.$store.commit('closeAllDialogs', 'UserDetails.triggerDonateIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerDonateIsVisible')
     },
     toggleColorPicker () {
@@ -290,7 +290,7 @@ export default {
       location.reload()
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.commit('closeAllDialogs', 'UserDetails.triggerSignUpOrInIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     async getUserSpaces () {
@@ -321,7 +321,7 @@ export default {
     async removeCollaborator () {
       const user = this.user
       this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
-      this.$store.commit('closeAllDialogs', 'UserDetails.removeCollaborator')
+      this.$store.dispatch('closeAllDialogs')
     },
     scrollUserDetailsIntoView () {
       this.$nextTick(() => {

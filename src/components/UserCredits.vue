@@ -88,8 +88,6 @@ section.user-credits
     margin-bottom 10px
   .title-row-flex
     margin-top 0 !important
-    display flex
-    justify-content space-between
     p,
     button
       margin 0

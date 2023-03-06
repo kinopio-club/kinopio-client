@@ -23,6 +23,10 @@
                 span(v-if="liveSpaces.length") {{ liveSpaces.length }}
             Explore(:visible="exploreIsVisible" @preloadedSpaces="exploreSpaces")
             Live(:visible="liveIsVisible" :spaces="liveSpaces" :loading="isLoadingLiveSpaces")
+          .button-wrap
+            button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+              img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+              img.icon(v-else src="@/assets/heart-empty.svg")
 
   .right(:class="{'is-embed': isEmbedMode, 'hidden': isHidden}" v-if="!isMobileOrTouch")
     SpaceZoom
@@ -154,9 +158,19 @@ export default {
         return delta < 0
       })
       return unreadSpaces.length
-    }
+    },
+    isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] }
   },
   methods: {
+    toggleIsFavoriteSpace () {
+      const currentSpace = this.$store.state.currentSpace
+      if (this.isFavoriteSpace) {
+        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
+      } else {
+        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
+      }
+      this.updateLocalSpaces()
+    },
     closeDialogs (exclude) {
       this.exploreIsVisible = false
       this.liveIsVisible = false
@@ -164,12 +178,12 @@ export default {
     },
     toggleExploreIsVisible () {
       const isVisible = this.exploreIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleExploreIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.exploreIsVisible = !isVisible
     },
     toggleLiveIsVisible () {
       const isVisible = this.liveIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleLiveIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.liveIsVisible = !isVisible
       if (this.liveIsVisible) {
         this.updateLiveSpaces()
@@ -177,7 +191,7 @@ export default {
     },
     toggleAddToInboxIsVisible () {
       const isVisible = this.addToInboxIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleAddToInboxIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.addToInboxIsVisible = !isVisible
     },
     async updateLiveSpaces () {

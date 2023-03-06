@@ -93,7 +93,7 @@ export default {
   },
   methods: {
     triggerUpgradeUserIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'MoveOrCopyToSpace')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
     capitalize (value) {
@@ -202,7 +202,7 @@ export default {
       }
       this.$store.dispatch('currentConnections/removeUnusedTypes')
       this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('closeAllDialogs', 'MoveOrCopyToSpace.moveOrCopyToSpace')
+      this.$store.dispatch('closeAllDialogs')
     },
     mapRemoteItems (items) {
       const spaceId = this.selectedSpace.id

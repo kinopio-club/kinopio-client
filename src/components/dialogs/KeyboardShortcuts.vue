@@ -239,8 +239,14 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         .row
           .badge.title
             img.icon(src="@/assets/search.svg")
-            span Search/Jump-to Cards
+            span Search/Jump-to Cards in Current Space
           .badge.keyboard-shortcut {{meta}}–F
+      article
+        .row
+          .badge.title
+            img.icon(src="@/assets/search.svg")
+            span Search/Jump-to Cards in All Spaces
+          .badge.keyboard-shortcut {{meta}}–Shift–F
 
 </template>
 

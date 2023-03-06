@@ -199,7 +199,7 @@ export default {
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })
-      this.$store.dispatch('closeAllDialogs', 'spaceDetails.changeSpace')
+      this.$store.dispatch('closeAllDialogs')
       this.closeDialogs()
     },
     orderByFavoriteSpaces (spaces) {

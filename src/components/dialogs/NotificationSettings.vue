@@ -83,7 +83,7 @@ export default {
       this.$store.dispatch('currentUser/shouldEmailWeeklyReview', value)
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'UserSettings.triggerSignUpOrInIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     updateDialogHeight () {

@@ -626,6 +626,17 @@ const self = {
         context.dispatch('handleServerError', { name: 'createCardInInbox', error })
       }
     },
+    searchCards: async (context, body) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/card/search`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'search', error })
+      }
+    },
 
     // ConnectionType
 

@@ -219,6 +219,10 @@ export default {
 
 <style lang="stylus">
 dialog.more-filters
+  @media(max-width 630px)
+    left -100px
+  @media(max-width 510px)
+    left -150px
   .badge
     display inline-block
     vertical-align middle

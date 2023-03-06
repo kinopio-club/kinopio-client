@@ -120,7 +120,7 @@ export default {
       this.colorPickerIsVisible = false
     },
     closeAllDialogs () {
-      this.$store.dispatch('closeAllDialogs', 'boxDetails')
+      this.$store.dispatch('closeAllDialogs')
     },
     focusName () {
       this.$nextTick(() => {

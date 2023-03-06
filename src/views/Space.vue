@@ -429,7 +429,7 @@ export default {
         this.addCard(event)
       // close item details
       } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
-        this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
+        this.$store.dispatch('closeAllDialogs')
       }
     },
     unselectCardsInDraggedBox () {

@@ -292,7 +292,7 @@ export default {
       // open card details and trigger the split from there
       const cardId = this.cards[0].id
       this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.splitCard')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('preventCardDetailsOpeningAnimation', true)
       this.$store.commit('cardDetailsIsVisibleForCardId', cardId)
       this.$store.commit('triggerSplitCard', cardId)
@@ -319,7 +319,7 @@ export default {
           })
           return card
         })
-        this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.positionNewCards')
+        this.$store.dispatch('closeAllDialogs')
       })
     },
     cardsSortedByY () {
@@ -508,7 +508,7 @@ export default {
       if (!shouldRemoveCardsOnly) {
         this.editableBoxes.forEach(box => this.$store.dispatch('currentBoxes/remove', box))
       }
-      this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.remove')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('clearMultipleSelected')
     },
     scrollIntoView () {

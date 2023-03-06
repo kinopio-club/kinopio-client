@@ -205,8 +205,6 @@ export default {
   &.is-pinned
     top -13px
   .title-row-flex
-    display flex
-    justify-content space-between
     align-items flex-start
     .comment-icon
       vertical-align -2px
@@ -222,18 +220,5 @@ export default {
       &:first-child
         border-top-left-radius 0
         border-top-right-radius 0
-  .segmented-buttons-wrap
-    .segmented-buttons
-      &:first-child
-        button
-          &:first-child
-            border-bottom-left-radius 0
-      &:last-child
-        margin-top -1px
-        button
-          &:first-child
-            border-top-left-radius 0
-          &:last-child
-            border-top-right-radius 0
 
 </style>

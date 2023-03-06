@@ -163,14 +163,14 @@ export default {
         this.$store.dispatch('currentSpace/changeSpace', { space })
       } else {
         const cardId = card.id || this.currentTag.cardId
-        this.$store.dispatch('closeAllDialogs', 'showCardDetails')
+        this.$store.dispatch('closeAllDialogs')
         this.$store.dispatch('currentCards/showCardDetails', cardId)
       }
     },
     changeSpace () {
       if (this.space.id) {
         this.$store.dispatch('currentSpace/changeSpace', { space: this.space, isRemote: true })
-        this.$store.dispatch('closeAllDialogs', 'linkDetails.changeSpace')
+        this.$store.dispatch('closeAllDialogs')
       } else {
         window.location.href = this.space.url
       }

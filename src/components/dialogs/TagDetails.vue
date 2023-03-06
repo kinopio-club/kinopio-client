@@ -33,24 +33,13 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
   //- cards found, or loading with cached cards
   section.results-section(v-if="cards.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
-    ul.results-list
-      template(v-for="group in groupedItems")
-        //- space
-        li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
-          BackgroundPreview(v-if="group.space" :space="group.space")
-          span.badge.space-badge
-            span {{group.spaceName}}
-        //- cards
-        CardList(:cards="group.cards" :primaryActionIsCardListOptions="primaryActionIsCardListOptions")
-
-    Loader(:visible="loading")
+    SpaceCardList(:groupedItems="groupedItems" :isLoading="loading" @selectSpace="changeSpace" :primaryActionIsCardListOptions="primaryActionIsCardListOptions")
 </template>
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import BackgroundPreview from '@/components/BackgroundPreview.vue'
-import CardList from '@/components/CardList.vue'
+import SpaceCardList from '@/components/SpaceCardList.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -63,8 +52,7 @@ export default {
   name: 'TagDetails',
   components: {
     ColorPicker,
-    BackgroundPreview,
-    CardList,
+    SpaceCardList,
     Loader,
     ResultsFilter
   },
@@ -151,19 +139,21 @@ export default {
         if (groupIndex !== -1) {
           groups[groupIndex].cards.push(item)
         } else {
-          let background, spaceName
+          let spaceName, background, backgroundTint
           const spaceId = item.spaceId || this.currentSpaceId
           const space = this.$store.getters.cachedOrOtherSpaceById(spaceId)
           if (space) {
-            background = space.background
             spaceName = space.name
+            background = space.background
+            backgroundTint = space.backgroundTint
           }
           groups.push({
             spaceName: spaceName || item.spaceName,
             spaceId: spaceId,
             cards: [item],
             space,
-            background
+            background,
+            backgroundTint
           })
         }
       })
@@ -206,7 +196,7 @@ export default {
       cards = cards.filter(card => Boolean(card))
       if (!cards.length) { return }
       const cardIds = cards.map(card => card.id)
-      this.$store.dispatch('closeAllDialogs', 'TagDetails.selectCardsWithTag')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('multipleCardsSelectedIds', cardIds)
     },
     updatePosition () {
@@ -329,14 +319,14 @@ export default {
       })
     },
     changeSpace (spaceId) {
-      this.$store.dispatch('closeAllDialogs', 'TagDetails.changeSpace')
+      this.$store.dispatch('closeAllDialogs')
       if (this.spaceIsCurrentSpace(spaceId)) { return }
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     },
     showCardDetails (card) {
       card = card || this.currentCard
-      this.$store.dispatch('closeAllDialogs', 'TagDetails.showCardDetails')
+      this.$store.dispatch('closeAllDialogs')
       if (this.currentSpaceId !== card.spaceId) {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
         let space
@@ -476,8 +466,6 @@ export default {
       vertical-align middle
   .space-badge
     background-color var(--secondary-background)
-  .background-preview
-    margin-right 3px
   .tag-title-row
     justify-content space-between
     align-items flex-start

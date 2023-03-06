@@ -199,11 +199,11 @@ export default {
       this.$emit('removeImage')
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'ImagePicker.triggerSignUpOrInIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     triggerUpgradeUserIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'ImagePicker.triggerUpgradeUserIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
     toggleServiceIsPexels () {
@@ -502,9 +502,5 @@ export default {
 
   .sticker
     vertical-align -2px
-
-  .title-row-flex
-    display flex
-    justify-content space-between
 
 </style>

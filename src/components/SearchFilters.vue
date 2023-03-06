@@ -1,35 +1,40 @@
 <template lang="pug">
 section.filters
-  .row
-    //- Users
-    .button-wrap
-      label.show-users(:class="{active: filterShowUsers}" @click.left.prevent="toggleFilterShowUsers" @keydown.stop.enter="toggleFilterShowUsers")
-        input(type="checkbox" v-model="filterShowUsers")
-        UserLabelInline(:user="currentUser" :shouldHideName="true")
+  .row.title-row-flex
+    .button-wrap.segmented-buttons-wrap
+      //- first row
+      .segmented-buttons
+        //- Users
+        label.show-users(:class="{active: filterShowUsers}" @click.left.prevent="toggleFilterShowUsers" @keydown.stop.enter="toggleFilterShowUsers")
+          input(type="checkbox" v-model="filterShowUsers")
+          UserLabelInline(:user="currentUser" :shouldHideName="true")
+        //- Time
+        label(:class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
+          input(type="checkbox" v-model="filterShowDateUpdated")
+          img.icon.time(src="@/assets/time.svg")
+        //- Todo
+        label(:class="{active: filterUnchecked}" @click.left.prevent="toggleFilterUnchecked" @keydown.stop.enter="toggleFilterUnchecked")
+          input(type="checkbox" v-model="filterUnchecked")
+          span Todo
+      .segmented-buttons
+        //- Comments Hide
+        label(:class="{active: filterComments}" @click.left.prevent="toggleFilterComments" @keydown.stop.enter="toggleFilterComments")
+          input(type="checkbox" v-model="filterComments")
+          img.icon.comment-icon(src="@/assets/comment.svg")
+          span Hide
 
-    //- Time
-    .button-wrap
-      label(:class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
-        input(type="checkbox" v-model="filterShowDateUpdated")
-        img.icon.time(src="@/assets/time.svg")
-    //- Todo
-    .button-wrap
-      label(:class="{active: filterUnchecked}" @click.left.prevent="toggleFilterUnchecked" @keydown.stop.enter="toggleFilterUnchecked")
-        input(type="checkbox" v-model="filterUnchecked")
-        span Todo
-    //- More Filters
-    .button-wrap
-      button(:class="{active: moreSearchFiltersVisible || totalFiltersActive, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
-        img.icon(src="@/assets/filter.svg")
-        span.badge.info.filter-is-active(v-if="totalFiltersActive")
-      MoreSearchFilters(:visible="moreSearchFiltersVisible")
-  .row
-    //- Comments Hide
-    .button-wrap
-      label(:class="{active: filterComments}" @click.left.prevent="toggleFilterComments" @keydown.stop.enter="toggleFilterComments")
-        input(type="checkbox" v-model="filterComments")
-        img.icon.comment-icon(src="@/assets/comment.svg")
-        span Hide
+    //- Pin
+    .title-row.title-row-vertical
+      //- Pin
+      .button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
+        button.small-button(:class="{active: dialogIsPinned}")
+          img.icon.pin.right-pin(src="@/assets/pin.svg")
+      //- More Filters
+      .button-wrap
+        button(:class="{active: moreSearchFiltersVisible || totalFiltersActive, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
+          img.icon(src="@/assets/filter.svg")
+          span.badge.info.filter-is-active(v-if="totalFiltersActive")
+        MoreSearchFilters(:visible="moreSearchFiltersVisible")
 
 </template>
 
@@ -71,9 +76,14 @@ export default {
     filterShowUsers () { return this.currentUser.filterShowUsers },
     filterShowDateUpdated () { return this.currentUser.filterShowDateUpdated },
     filterUnchecked () { return this.currentUser.filterUnchecked },
-    filterComments () { return this.currentUser.filterComments }
+    filterComments () { return this.currentUser.filterComments },
+    dialogIsPinned () { return this.$store.state.searchIsPinned }
   },
   methods: {
+    toggleDialogIsPinned () {
+      const isPinned = !this.dialogIsPinned
+      this.$store.dispatch('searchIsPinned', isPinned)
+    },
     toggleMoreSearchFiltersVisible () {
       this.moreSearchFiltersVisible = !this.moreSearchFiltersVisible
     },
@@ -123,4 +133,13 @@ export default {
     height 16px
     min-width initial
     min-height initial
+  .title-row-flex
+    align-items flex-start
+  .title-row-vertical
+    flex-direction column
+    align-items end
+    .button-wrap:first-child
+      margin-bottom 9px
+    .button-wrap:last-child
+      margin 0
 </style>

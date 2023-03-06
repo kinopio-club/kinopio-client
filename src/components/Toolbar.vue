@@ -43,7 +43,7 @@ export default {
   },
   watch: {
     currentUserToolbar (value) {
-      this.$store.dispatch('closeAllDialogs', 'Toolbar')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('clearMultipleSelected')
     }
   }

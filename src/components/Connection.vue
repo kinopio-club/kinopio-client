@@ -326,7 +326,7 @@ export default {
         currentCursor = utils.cursorPositionInViewport(event)
         if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
       }
-      this.$store.dispatch('closeAllDialogs', 'Connection.showConnectionDetails')
+      this.$store.dispatch('closeAllDialogs')
       if (event.shiftKey) {
         this.$store.dispatch('toggleMultipleConnectionsSelected', this.id)
         this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.multipleConnectionsSelectedIds))

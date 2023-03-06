@@ -60,7 +60,7 @@ const store = createStore({
     searchIsVisible: false,
     search: '',
     searchResultsCards: [],
-    previousResultCardId: '',
+    previousResultItem: {},
 
     // reset password
     resetPasswordApiKey: '',
@@ -174,6 +174,7 @@ const store = createStore({
     // pinned dialogs
     spaceDetailsIsPinned: false,
     sidebarIsPinned: false,
+    searchIsPinned: false,
 
     // loading
     isLoadingSpace: false,
@@ -270,6 +271,9 @@ const store = createStore({
       if (utils.unpinnedDialogIsVisible()) {
         state.shouldAddCard = false
       }
+      if (!state.searchIsPinned) {
+        state.searchIsVisible = false
+      }
       state.multipleSelectedActionsIsVisible = false
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
@@ -279,7 +283,6 @@ const store = createStore({
       state.currentSelectedTag = {}
       state.linkDetailsIsVisible = false
       state.currentSelectedLink = {}
-      state.searchIsVisible = false
       state.cardsWereDragged = false
       state.boxesWereDragged = false
       state.userDetailsIsVisible = false
@@ -437,14 +440,14 @@ const store = createStore({
       utils.typeCheck({ value: results, type: 'array' })
       state.searchResultsCards = results
     },
-    previousResultCardId: (state, value) => {
-      utils.typeCheck({ value, type: 'string' })
-      state.previousResultCardId = value
+    previousResultItem: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
+      state.previousResultItem = value
     },
     clearSearch: (state) => {
       state.search = ''
       state.searchResultsCards = []
-      state.previousResultCardId = ''
+      state.previousResultItem = {}
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck({ value: apiKey, type: 'string' })
@@ -523,6 +526,8 @@ const store = createStore({
     triggerRemoveCardFromCardList: (state, card) => {},
     triggerUpdateTheme: () => {},
     triggerUserIsLoaded: () => {},
+    triggerSearchScopeIsRemote: () => {},
+    triggerSearchScopeIsLocal: () => {},
 
     // Used by extensions only
 
@@ -882,6 +887,10 @@ const store = createStore({
     spaceDetailsIsPinned: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.spaceDetailsIsPinned = value
+    },
+    searchIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.searchIsPinned = value
     },
 
     // Connection Details
@@ -1549,6 +1558,10 @@ const store = createStore({
     spaceDetailsIsPinned: (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('spaceDetailsIsPinned', value)
+    },
+    searchIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      context.commit('searchIsPinned', value)
     },
 
     // scrolling and zoom

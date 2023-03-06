@@ -389,7 +389,7 @@ export default {
       }
       this.$store.commit('previousMultipleCardsSelectedIds', utils.clone(this.$store.state.multipleCardsSelectedIds))
       this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.$store.state.multipleConnectionsSelectedIds))
-      this.$store.dispatch('closeAllDialogs', 'MagicPaint.startPainting')
+      this.$store.dispatch('closeAllDialogs')
     },
     paintCirclesAnimationFrame () {
       paintingCircles = utils.filterCircles(paintingCircles, maxIterations)

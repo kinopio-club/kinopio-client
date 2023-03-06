@@ -204,7 +204,7 @@ export default {
   },
   methods: {
     toggleShouldDisplayEmbed () {
-      this.$store.dispatch('closeAllDialogs', 'UrlPreview')
+      this.$store.dispatch('closeAllDialogs')
       if (this.shouldDisplayEmbed) {
         this.embedUrl = ''
         this.shouldDisplayEmbed = false

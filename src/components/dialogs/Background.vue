@@ -338,7 +338,7 @@ export default {
       this.colorPickerIsVisible = !isVisible
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'Background.triggerSignUpOrInIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     closeDialogs () {

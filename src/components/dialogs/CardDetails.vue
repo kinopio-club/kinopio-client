@@ -769,7 +769,7 @@ export default {
           this.$store.dispatch('currentCards/update', card)
           this.$store.commit('triggerUpdateUrlPreview', card.id)
         })
-        this.$store.dispatch('closeAllDialogs', 'CardDetails.addSplitCards')
+        this.$store.dispatch('closeAllDialogs')
       })
     },
     async uploadFile (file) {
@@ -875,7 +875,7 @@ export default {
 
       } else {
         this.closeCard()
-        this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
+        this.$store.dispatch('closeAllDialogs')
         this.$store.commit('shouldPreventNextEnterKey', false)
         this.$store.commit('triggerAddCard')
       }
@@ -886,7 +886,7 @@ export default {
         this.hidePickers()
         return
       }
-      this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCardAndFocus')
+      this.$store.dispatch('closeAllDialogs')
       document.querySelector(`.card[data-card-id="${prevCardId}"]`).focus()
     },
     removeCard () {
