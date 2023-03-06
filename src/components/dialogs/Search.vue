@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   SearchFilters
-  section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+  section.results-section(v-if="currentUserIsSignedIn" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(
       :showFilter="true"
       :isLoading="isLoading"
@@ -26,6 +26,11 @@ dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" r
       CardList(:cards="cards" :search="search" @selectCard="selectCard")
     template(v-else)
       SpaceCardList(:groupedItems="cardsBySpace" :search="search" :isLoading="isLoading" @selectSpace="changeSpace" @selectCard="selectSpaceCard")
+
+  section(v-if="!currentUserIsSignedIn")
+    .row.badge.info
+      span Sign Up or In to search your spaces
+    button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
 </template>
 
@@ -123,7 +128,8 @@ export default {
       cards = orderBy(cards, (a) => new Date(a.date), ['desc'])
       return cards
     },
-    currentUser () { return this.$store.state.currentUser }
+    currentUser () { return this.$store.state.currentUser },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
     updateScopeIsLocal (value) {
@@ -307,6 +313,10 @@ export default {
         let element = this.$refs.results
         this.resultsSectionHeight = utils.elementHeight(element) - 2 - 100
       })
+    },
+    triggerSignUpOrInIsVisible () {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('triggerSignUpOrInIsVisible')
     }
   },
   watch: {
