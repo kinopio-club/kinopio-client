@@ -474,7 +474,7 @@ export default {
     > .row
       margin 0
   .toggle-filter
-    min-width 45px
+    min-width 49px
   .is-dark
     .tag-name,
     .no-cards
