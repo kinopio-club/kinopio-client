@@ -306,7 +306,7 @@ export default {
 
     async changeToInboxSpace (event) {
       if (this.isAddPage) { return }
-      this.$store.dispatch('closeAllDialogs', 'AddToInbox')
+      this.$store.dispatch('closeAllDialogs')
       event.preventDefault()
       event.stopPropagation()
       let space
@@ -332,8 +332,6 @@ export default {
     &.row
       justify-content space-between
   .title-row-flex
-    display flex
-    justify-content space-between
     .title
       color var(--primary)
 

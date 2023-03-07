@@ -127,7 +127,7 @@ export default {
       window.scrollTo(0, 0)
       this.$emit('addJournalSpace')
       if (this.shouldAddSpaceDirectly) {
-        this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
+        this.$store.dispatch('closeAllDialogs')
         this.$store.dispatch('currentSpace/loadJournalSpace')
         this.$store.dispatch('currentSpace/updateSpacePageSize')
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
@@ -144,7 +144,7 @@ export default {
         this.$emit('addSpace')
       }
       if (this.shouldAddSpaceDirectly) {
-        this.$store.dispatch('closeAllDialogs', 'addSpace.addSpace')
+        this.$store.dispatch('closeAllDialogs')
         this.$store.dispatch('currentSpace/addSpace')
         this.$store.dispatch('currentSpace/updateSpacePageSize')
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
@@ -152,7 +152,7 @@ export default {
     },
     addInboxSpace () {
       this.$store.commit('isLoadingSpace', true)
-      this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
+      this.$store.dispatch('closeAllDialogs')
       window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addInboxSpace')
       this.$store.dispatch('currentSpace/updateSpacePageSize')

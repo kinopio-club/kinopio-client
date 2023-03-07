@@ -57,7 +57,7 @@ export default {
       this.$emit('updateDialogHeight')
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs', 'askToAddToExplore.triggerSignUpOrInIsVisible')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
     }
   }

@@ -89,7 +89,7 @@ export default {
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
-      this.$store.dispatch('closeAllDialogs', 'Links.closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
     },
     async updateLinks () {
       const spaceId = this.$store.state.currentSpace.id

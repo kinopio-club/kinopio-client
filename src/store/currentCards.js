@@ -703,7 +703,7 @@ const currentCards = {
     },
     addTweetCardsComplete: (context, cards) => {
       context.dispatch('history/pause', null, { root: true })
-      context.dispatch('closeAllDialogs', 'addTweetCardsComplete', { root: true })
+      context.dispatch('closeAllDialogs', null, { root: true })
       // position cards
       context.dispatch('currentCards/distributeVertically', cards, { root: true })
       nextTick(() => {

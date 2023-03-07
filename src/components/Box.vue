@@ -371,7 +371,7 @@ export default {
       if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
       this.$store.dispatch('history/pause')
-      this.$store.dispatch('closeAllDialogs', 'Card.startResizing')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('currentUserIsResizingBox', true)
       this.$store.commit('preventMultipleSelectedActionsIsVisible', true)
       let boxIds = [this.box.id]
@@ -392,7 +392,7 @@ export default {
         this.$store.dispatch('clearMultipleSelected')
       }
       this.$store.commit('currentDraggingBoxId', '')
-      this.$store.dispatch('closeAllDialogs', 'Box.startBoxInfoInteraction')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingBox', true)
       this.$store.commit('currentDraggingBoxId', this.box.id)
       const updates = {
@@ -494,7 +494,7 @@ export default {
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
       if (!this.canEditBox) { this.$store.commit('triggerReadOnlyJiggle') }
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
-      this.$store.dispatch('closeAllDialogs', 'Box.endBoxInfoInteraction')
+      this.$store.dispatch('closeAllDialogs')
       if (isMeta) {
         this.$store.dispatch('multipleBoxesSelectedIds', [])
       } else {

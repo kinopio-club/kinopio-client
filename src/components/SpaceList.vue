@@ -180,7 +180,7 @@ export default {
     },
     duplicateSpace () {
       this.$store.dispatch('currentSpace/duplicateSpace')
-      this.$store.dispatch('closeAllDialogs', 'spaceList.duplicateSpace')
+      this.$store.dispatch('closeAllDialogs')
     },
     isNew (space) {
       if (this.userShowInExploreDate) {

@@ -53,7 +53,7 @@ export default {
   computed: {
     ...mapState([
       'cardDetailsIsVisibleForCardId',
-      'previousResultCardId',
+      'previousResultItem',
       'currentUser',
       'cardListItemOptionsCard'
     ]),
@@ -131,18 +131,16 @@ export default {
         this.$store.commit('cardListItemOptionsIsVisible', true)
       }
     },
-    secondaryAction (card) {
-      this.$emit('secondaryAction', card)
-    },
+    // secondaryAction (card) {
+    //   this.$emit('secondaryAction', card)
+    // },
     cardIsActive (card) {
       const isActive = this.cardListItemOptionsCard.id === card.id
       const isCardDetailsVisible = this.cardDetailsIsVisibleForCardId === card.id
       return isActive || isCardDetailsVisible
     },
     cardIsFocused (card) {
-      if (this.previousResultCardId === card.id) {
-        return true
-      }
+      return this.previousResultItem.id === card.id
     },
     relativeDate (card) {
       return utils.shortRelativeTime(card.nameUpdatedAt || card.updatedAt)
@@ -175,7 +173,7 @@ export default {
       border-radius var(--small-entity-radius)
       vertical-align middle
   .time
-    vertical-align -1px
+    vertical-align 0
     height 11px
   .inline-badge
     display inline-block

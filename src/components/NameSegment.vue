@@ -138,7 +138,7 @@ export default {
       shouldCancel = this.$store.state.preventDraggedCardFromShowingDetails
     },
     openUrl (event, url) {
-      this.$store.dispatch('closeAllDialogs', 'NameSegment.openUrl')
+      this.$store.dispatch('closeAllDialogs')
       if (this.$store.state.currentUser.shouldOpenLinksInNewTab) {
         window.open(url) // opens url in new tab
         event.preventDefault()
