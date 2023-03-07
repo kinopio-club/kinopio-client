@@ -24,6 +24,13 @@ export default {
   props: {
     connection: Object
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'spaceZoomPercent') {
+        this.setPosition()
+      }
+    })
+  },
   mounted () {
     this.setPosition()
     window.addEventListener('scroll', this.updateConnectionIsVisible)
