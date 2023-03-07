@@ -89,6 +89,7 @@ export default {
     window.addEventListener('touchstart', this.touchStart)
     window.addEventListener('touchmove', this.touchMove)
     window.addEventListener('touchend', this.touchEnd)
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.logMatchMediaChange)
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.updateThemeFromSystem)
   },
   beforeUnmount () {
@@ -170,6 +171,10 @@ export default {
         themeName = 'light'
       }
       return themeName
+    },
+    logMatchMediaChange (event) {
+      const themeIsSystem = this.$store.state.currentUser.themeIsSystem
+      console.warn('🌓 logMatchMediaChange', window.matchMedia('(prefers-color-scheme: dark)'), event, { themeIsSystem })
     },
     updateThemeFromSystem () {
       const themeName = this.themeFromSystem()
