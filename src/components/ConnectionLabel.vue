@@ -176,7 +176,27 @@ export default {
       this.$nextTick(() => {
         let connection = document.querySelector(`.connection-path[data-id="${this.id}"]`)
         if (!connection) { return }
-        connection = connection.getBoundingClientRect()
+        const zoom = utils.spaceCounterZoomDecimal() || 1
+        let rect = connection.getBoundingClientRect()
+        rect.x = rect.x + window.scrollX
+        rect.y = rect.y + window.scrollY
+        const rectPosition = utils.updatePositionWithSpaceOffset(rect)
+        rect = {
+          x: Math.round(rectPosition.x * zoom),
+          y: Math.round(rectPosition.y * zoom),
+          width: Math.round(rect.width * zoom),
+          height: Math.round(rect.height * zoom)
+        }
+        // position in center of connection element
+        const connectionOffset = {
+          x: rect.width / 2,
+          y: rect.height / 2
+        }
+        let position = {
+          x: rect.x + connectionOffset.x,
+          y: rect.y + connectionOffset.y
+        }
+        // offset by label size
         let label = this.$refs.label
         let labelOffset
         if (label) {
@@ -188,21 +208,9 @@ export default {
         } else {
           labelOffset = { x: 0, y: 0 }
         }
-        const basePosition = {
-          x: connection.x + window.scrollX,
-          y: connection.y + window.scrollY
-        }
-        const connectionOffset = {
-          x: connection.width / 2,
-          y: connection.height / 2
-        }
-        let position = {
-          x: basePosition.x + connectionOffset.x - labelOffset.x,
-          y: basePosition.y + connectionOffset.y - labelOffset.y
-        }
         this.position = {
-          x: position.x,
-          y: position.y
+          x: position.x - labelOffset.x,
+          y: position.y - labelOffset.y
         }
       })
     }
