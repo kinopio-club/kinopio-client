@@ -58,7 +58,7 @@ section.subsection.space-settings(v-if="!isSpaceMember")
         img.icon.add(src="@/assets/add.svg")
         span Make a Copy
     //- Export
-    .button-wrap
+    .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
       button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
       Export(:visible="exportIsVisible")
@@ -92,7 +92,7 @@ section.subsection.space-settings(v-if="settingsIsVisible")
         img.icon.templates(src="@/assets/templates.svg")
         span Template
     //- Export
-    .button-wrap
+    .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
       button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
         Export(:visible="exportIsVisible")
@@ -401,5 +401,9 @@ export default {
       border-radius 4px
   p
     white-space normal
+
+.dialog-is-pinned
+  dialog.export
+    right -50px
 
 </style>
