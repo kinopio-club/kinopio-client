@@ -295,13 +295,12 @@ export default {
       const y1IsBelow = y1 - threshold > scroll + viewport
       const y2IsAbove = y2 + threshold < scroll
       let isTallerThanViewport = Math.abs(y2 - y1) > viewport
-      let isNotInView
       if (isTallerThanViewport) {
         return true
       } else {
-        isNotInView = y1IsBelow || y2IsAbove
+        const isNotInView = y1IsBelow || y2IsAbove
+        return !isNotInView
       }
-      return !isNotInView
     }
   },
   methods: {
