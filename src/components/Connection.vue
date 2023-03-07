@@ -296,8 +296,15 @@ export default {
       //                    └───┘
       const y1IsBelow = y1 - threshold > scroll + viewport
       const y2IsAbove = y2 + threshold < scroll
-      const isNotInview = y1IsBelow || y2IsAbove
-      return !isNotInview
+      let isTallerThanViewport = (y2 - y1) > viewport
+      let isNotInView
+      if (isTallerThanViewport) {
+        isNotInView = false
+      } else {
+        isNotInView = y1IsBelow || y2IsAbove
+      }
+
+      return !isNotInView
     }
 
   },
