@@ -265,9 +265,7 @@ export default {
     isVisibleInViewport () {
       if (this.disableViewportOptimizations) { return true }
       if (this.isUpdatingPath) { return true }
-      if (!this.connection.path) {
-        return
-      }
+      if (!this.connection.path) { return }
       const threshold = 400 * this.spaceCounterZoomDecimal
       const offset = utils.outsideSpaceOffset().y
       const scroll = this.windowScroll.y - offset
@@ -299,14 +297,12 @@ export default {
       let isTallerThanViewport = Math.abs(y2 - y1) > viewport
       let isNotInView
       if (isTallerThanViewport) {
-        isNotInView = false
+        return true
       } else {
         isNotInView = y1IsBelow || y2IsAbove
       }
-
       return !isNotInView
     }
-
   },
   methods: {
     checkIfShouldPauseConnectionDirections () {
@@ -332,6 +328,10 @@ export default {
       if (!isFromStore) {
         currentCursor = utils.cursorPositionInViewport(event)
         if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
+      }
+      if (!this.connection.path) {
+        console.error('🚒 no connection path', this.connection.path)
+        return
       }
       this.$store.dispatch('closeAllDialogs')
       if (event.shiftKey) {
