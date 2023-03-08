@@ -5,9 +5,9 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
       .badge.inline-color-badge(:style="{backgroundColor: currentColor}")
         input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
       .row
-        button.transparent-button(v-if="transparentIsVisible" :class="{ active: isTransparent }" @click="select('transparent')")
+        button.transparent-button(title="transparent" v-if="transparentIsVisible" :class="{ active: isTransparent }" @click="select('transparent')")
           img.icon(src="@/assets/transparent.svg")
-        button.remove-button(@click="removeColor")
+        button.remove-button(title="remove" @click="removeColor")
           img.icon(src="@/assets/remove.svg")
   section(v-if="!removeIsVisible")
     .badge.full-width-color-badge(:style="{backgroundColor: currentColor}")
@@ -17,21 +17,23 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
     .recent-colors(v-if="recentColors")
       template(v-for="color in recentColors")
         button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)")
+          img.icon.transparent-swatch(v-if="colorIsTransparent(color)" src="@/assets/transparent.svg")
     .colors
       template(v-for="color in colors")
         button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)")
+          img.icon.transparent-swatch(v-if="colorIsTransparent(color)" src="@/assets/transparent.svg")
 
     //- Current Color Modifiers
 
     .row
       // shuffle
-      button(@click.left="shuffleColors")
+      button(title="shuffle colors" @click.left="shuffleColors")
         img.refresh.icon(src="@/assets/refresh.svg")
       // luminosity
       .segmented-buttons.luminosity-picker
-        button(:class="{active: luminosity === 'light'}" @click="updateLuminosity('light')")
+        button(title="light colors" :class="{active: luminosity === 'light'}" @click="updateLuminosity('light')")
           img.icon(src="@/assets/light.svg")
-        button(:class="{active: luminosity === 'dark'}" @click="updateLuminosity('dark')")
+        button(title="dark colors" :class="{active: luminosity === 'dark'}" @click="updateLuminosity('dark')")
           img.icon(src="@/assets/dark.svg")
     .row
       // hue
@@ -118,6 +120,9 @@ export default {
     }
   },
   methods: {
+    colorIsTransparent (color) {
+      return color === 'transparent'
+    },
     colorIsCurrent (color) {
       return color === this.currentColor
     },
@@ -223,6 +228,7 @@ export default {
     height 22px
     margin-bottom 5px
     margin-right 5px
+    position relative
   button + button
     margin 0
   .refresh
@@ -275,6 +281,9 @@ export default {
   .transparent-button
     min-width 30px
     margin-right 6px
+  .transparent-swatch
+    position absolute
+    top 4.5px
   .remove-button
     min-width 30px
 </style>
