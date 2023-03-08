@@ -4,8 +4,11 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
     .row
       .badge.inline-color-badge(:style="{backgroundColor: currentColor}")
         input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
-      button(@click="removeColor")
-        img.icon(src="@/assets/remove.svg")
+      .row
+        button.transparent-button(v-if="transparentIsVisible" :class="{ active: isTransparent }" @click="select('transparent')")
+          img.icon(src="@/assets/transparent.svg")
+        button.remove-button(@click="removeColor")
+          img.icon(src="@/assets/remove.svg")
   section(v-if="!removeIsVisible")
     .badge.full-width-color-badge(:style="{backgroundColor: currentColor}")
       input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
@@ -71,7 +74,8 @@ export default {
     visible: Boolean,
     removeIsVisible: Boolean,
     shouldLightenColors: Boolean,
-    recentColors: Array
+    recentColors: Array,
+    transparentIsVisible: Boolean
   },
   data () {
     return {
@@ -104,7 +108,14 @@ export default {
     hueIsBlue () { return this.currentHue === 'blue' },
     favoriteColors () { return this.$store.state.currentUser.favoriteColors || [] },
     currentColorIsUserColor () { return this.favoriteColors.includes(this.currentColor) },
-    isDark () { return utils.colorIsDark(this.currentColor) }
+    isTransparent () { return this.currentColor === 'transparent' },
+    isDark () {
+      const isThemeDark = this.$store.state.currentUser.theme === 'dark'
+      if (this.isTransparent && isThemeDark) {
+        return utils.cssVariable('primary')
+      }
+      return utils.colorIsDark(this.currentColor)
+    }
   },
   methods: {
     colorIsCurrent (color) {
@@ -261,4 +272,9 @@ export default {
     &.is-dark
       border-color var(--primary-on-dark-background)
       color var(--primary-on-dark-background)
+  .transparent-button
+    min-width 30px
+    margin-right 6px
+  .remove-button
+    min-width 30px
 </style>

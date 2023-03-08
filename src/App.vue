@@ -613,7 +613,7 @@ dialog
   .button-wrap + label,
   .segmented-buttons + .button-wrap,
   .button-wrap + .segmented-buttons
-    margin-left 4px
+    margin-left 6px
   .title-row
     display flex
     justify-content space-between
