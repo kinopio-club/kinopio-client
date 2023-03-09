@@ -219,6 +219,11 @@ export default {
     },
     resetOpacity () {
       this.updateOpacity(100)
+    },
+    updateOpacityFromCurrentColor () {
+      const alpha = colord(this.currentColor).alpha()
+      const opacity = alpha * 100
+      this.updateOpacity(opacity)
     }
   },
   watch: {
@@ -227,6 +232,7 @@ export default {
       this.shuffleColors()
       this.updateButtonHues()
       this.scrollIntoView()
+      this.updateOpacityFromCurrentColor()
     }
   }
 }
