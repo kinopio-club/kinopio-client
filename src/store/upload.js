@@ -1,6 +1,7 @@
 import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
+import { nextTick } from 'vue'
 
 const placeholder = '⬬⬭'
 
@@ -110,7 +111,11 @@ export default {
           }, { root: true })
           context.commit('removePendingUpload', { cardId, spaceId })
           resolve(request.response)
-          context.dispatch('currentCards/updateDimensions', { cardId }, { root: true })
+          nextTick(() => {
+            nextTick(() => {
+              context.dispatch('currentCards/updateDimensions', { cardId }, { root: true })
+            })
+          })
         }
         // start
         request.open('POST', presignedPostData.url)
