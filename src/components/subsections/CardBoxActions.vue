@@ -23,13 +23,11 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
     .button-wrap(v-if="!colorIsHidden" @click.left.stop="toggleColorPickerIsVisible")
       button.change-color(:disabled="!canEditAll" :class="{active: colorPickerIsVisible}")
         .current-color(:style="{ background: color }")
-          img.icon.transparent-swatch(v-if="colorIsTransparent" src="@/assets/transparent.svg")
       ColorPicker(
         :currentColor="color"
         :visible="colorPickerIsVisible"
         :removeIsVisible="isCards"
         :recentColors="itemColors"
-        :transparentIsVisible="isCards"
         @selectedColor="updateColor"
         @removeColor="removeColor"
       )
@@ -150,7 +148,6 @@ export default {
         return this.defaultColor
       }
     },
-    colorIsTransparent () { return this.color === 'transparent' },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     itemColors () { return this.$store.getters['currentSpace/itemColors'] },
@@ -425,9 +422,4 @@ export default {
     margin-bottom 10px
   .segmented-buttons
     display inline-flex
-  .transparent-swatch
-    position absolute
-    top 10px
-    left 12px
-
 </style>

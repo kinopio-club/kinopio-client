@@ -1,42 +1,47 @@
 <template lang="pug">
 dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.left.stop)
-  section(v-if="removeIsVisible")
+  section
     .row
-      .badge.inline-color-badge(:style="{backgroundColor: currentColor}")
+      .badge.full-width-color-badge(:style="{backgroundColor: currentColor}")
+        //- Input
         input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
-      .row
-        button.transparent-button(title="transparent" v-if="transparentIsVisible" :class="{ active: isTransparent }" @click="select('transparent')")
-          img.icon(src="@/assets/transparent.svg")
-        button.remove-button(title="remove" @click="removeColor")
+          //- Remove
+        button.small-button.remove-button(v-if="removeIsVisible" title="remove" @click="removeColor")
           img.icon(src="@/assets/remove.svg")
-  section(v-if="!removeIsVisible")
-    .badge.full-width-color-badge(:style="{backgroundColor: currentColor}")
-      input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
   section
     //- Colors
     .recent-colors(v-if="recentColors")
       template(v-for="color in recentColors")
         button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)")
-          img.icon.transparent-swatch(v-if="colorIsTransparent(color)" src="@/assets/transparent.svg")
     .colors
       template(v-for="color in colors")
         button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)")
-          img.icon.transparent-swatch(v-if="colorIsTransparent(color)" src="@/assets/transparent.svg")
 
     //- Current Color Modifiers
 
+    //- Opacity
     .row
-      // shuffle
+      img.icon.transparent(src="@/assets/transparent.svg")
+      Slider(
+        @updatePlayhead="updateOpacity"
+        @resetPlayhead="resetOpacity"
+        :minValue="0"
+        :value="opacity"
+        :maxValue="100"
+      )
+
+    .row
+      //- shuffle
       button(title="shuffle colors" @click.left="shuffleColors")
         img.refresh.icon(src="@/assets/refresh.svg")
-      // luminosity
+      //- luminosity
       .segmented-buttons.luminosity-picker
         button(title="light colors" :class="{active: luminosity === 'light'}" @click="updateLuminosity('light')")
           img.icon(src="@/assets/light.svg")
         button(title="dark colors" :class="{active: luminosity === 'dark'}" @click="updateLuminosity('dark')")
           img.icon(src="@/assets/dark.svg")
     .row
-      // hue
+      //- hue
       .segmented-buttons
         button(@click="resetHue" :class="{active: hueIsAll}")
           span All
@@ -46,38 +51,41 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
           span G
         button(@click="updateHue('blue')" :class="{active: hueIsBlue}")
           span B
-      // spectrum
+      //- spectrum
       .button-wrap
         input(type="color" v-model="color")
         img.spectrum.icon(src="@/assets/spectrum.png")
 
   //- Favorite Colors
-
   section.favorite-colors
     button.toggle-favorite-color(@click="toggleFavoriteColor")
       img.icon(v-if="!currentColorIsUserColor" src="@/assets/heart-empty.svg")
       img.icon(v-if="currentColorIsUserColor" src="@/assets/heart.svg")
       span.current-color(:style="{ background: currentColor }")
     template(v-for="color in favoriteColors")
-      button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)")
+      button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color, 'isFavorite')")
 
 </template>
 
 <script>
+import Slider from '@/components/Slider.vue'
 import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
 import shader from 'shader'
+import { colord } from 'colord'
 
 export default {
   name: 'ColorPicker',
+  components: {
+    Slider
+  },
   props: {
     currentColor: String,
     visible: Boolean,
     removeIsVisible: Boolean,
     shouldLightenColors: Boolean,
-    recentColors: Array,
-    transparentIsVisible: Boolean
+    recentColors: Array
   },
   data () {
     return {
@@ -88,7 +96,8 @@ export default {
         green: [],
         blue: []
       },
-      luminosity: 'light'
+      luminosity: 'light',
+      opacity: 100
     }
   },
   computed: {
@@ -110,7 +119,11 @@ export default {
     hueIsBlue () { return this.currentHue === 'blue' },
     favoriteColors () { return this.$store.state.currentUser.favoriteColors || [] },
     currentColorIsUserColor () { return this.favoriteColors.includes(this.currentColor) },
-    isTransparent () { return this.currentColor === 'transparent' },
+    isTransparent () {
+      const isLabelled = this.currentColor === 'transparent'
+      const isOpacity = this.opacity === 0
+      return isLabelled || isOpacity
+    },
     isDark () {
       const isThemeDark = this.$store.state.currentUser.theme === 'dark'
       if (this.isTransparent && isThemeDark) {
@@ -120,9 +133,6 @@ export default {
     }
   },
   methods: {
-    colorIsTransparent (color) {
-      return color === 'transparent'
-    },
     colorIsCurrent (color) {
       return color === this.currentColor
     },
@@ -151,7 +161,10 @@ export default {
       }
       this.colors.unshift(this.currentColor)
     },
-    select (color) {
+    select (color, isFavorite) {
+      if (!isFavorite) {
+        color = colord(color).alpha(this.opacity / 100).toRgbString()
+      }
       this.$emit('selectedColor', color)
     },
     updateColorFromInput (color) {
@@ -199,6 +212,13 @@ export default {
       } else {
         this.updateLuminosity('light')
       }
+    },
+    updateOpacity (value) {
+      this.opacity = Math.round(value)
+      this.select(this.color)
+    },
+    resetOpacity () {
+      this.updateOpacity(100)
     }
   },
   watch: {
@@ -219,7 +239,7 @@ export default {
     display flex
     flex-wrap wrap
     justify-content space-evenly
-    margin-bottom 8px
+    margin-bottom 6px
   .recent-colors
     margin-bottom 8px
     margin-left 2px
@@ -239,18 +259,17 @@ export default {
     margin-top 0
   .luminosity-picker
     margin-left 6px
-  .inline-color-badge
-    width 83%
   .full-width-color-badge
+    width 100%
     margin 0
   input[type="color"]
-    width 30px
-    height 28px
+    width 32px
+    height 30px
     &::-moz-color-swatch
       display none
   .spectrum
-    top 7px
-    left 8px
+    top 8px
+    left 9px
     position absolute
     width 14px
     height 14px
@@ -278,12 +297,13 @@ export default {
     &.is-dark
       border-color var(--primary-on-dark-background)
       color var(--primary-on-dark-background)
-  .transparent-button
-    min-width 30px
-    margin-right 6px
-  .transparent-swatch
-    position absolute
-    top 4.5px
   .remove-button
-    min-width 30px
+    position absolute
+    right 4px
+  .icon.transparent
+    margin-right 6px
+    margin-top -1px
+  .slider
+    transform translateY(-10px)
+    padding-bottom 0
 </style>
