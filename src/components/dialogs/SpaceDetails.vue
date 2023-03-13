@@ -28,8 +28,7 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
         SpaceFilters(:visible="spaceFiltersIsVisible" :spaces="filteredSpaces")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" :showCreateNewSpaceFromSearch="true" @selectSpace="changeSpace" @addSpace="addSpace" :scrollEvent="scrollEvent")
-      //- :parentElement="resultsElement"
+    SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" :showCreateNewSpaceFromSearch="true" @selectSpace="changeSpace" @addSpace="addSpace")
 </template>
 
 <script>
@@ -99,9 +98,7 @@ export default {
       dialogHeight: null,
       journalSpaces: [],
       normalSpaces: [],
-      spaceFiltersIsVisible: false,
-      scrollEvent: null
-      // resultsElement: null
+      spaceFiltersIsVisible: false
     }
   },
   computed: {
@@ -349,9 +346,6 @@ export default {
         let element = this.$refs.results
         this.resultsSectionHeight = utils.elementHeight(element) - 2
       })
-    },
-    handleScroll (event) {
-      this.scrollEvent = event
     }
   },
   watch: {
@@ -363,12 +357,6 @@ export default {
         this.closeDialogs()
         this.updateFavorites()
         this.updateHeights()
-        this.$nextTick(() => {
-          // this.resultsElement = this.$refs.results
-          this.$refs.results.addEventListener('scroll', this.handleScroll)
-        })
-      } else {
-        this.$refs.results.removeEventListener('scroll', this.handleScroll)
       }
     }
   }

@@ -13,9 +13,8 @@ span.space-list-wrap
     @focusPreviousItem="focusPreviousItemFromFilter"
     @selectItem="selectItemFromFilter"
   )
-  ul.results-list.space-list
+  ul.results-list.space-list(ref="spaceList")
     template(v-for="(space, index) in spacesFiltered" :key="space.id")
-      //- TODO data-item-is-visible is temp , remove before?
       .space-wrap(:data-item-is-visible="itemIsVisible(index)")
         a(:href="space.url")
           li(
@@ -116,9 +115,7 @@ export default {
     parentIsPinned: Boolean,
     showCheckmarkSpace: Boolean,
     userShowInExploreDate: String,
-    showCreateNewSpaceFromSearch: Boolean,
-    scrollEvent: Object
-    // parentElement: Object
+    showCreateNewSpaceFromSearch: Boolean
   },
   data () {
     return {
@@ -150,9 +147,12 @@ export default {
         this.$store.commit('shouldPreventNextEnterKey', true)
       }
     })
+    console.log('spaceList')
+    this.$refs.spaceList.closest('section').addEventListener('scroll', this.updateScroll)
   },
   beforeUnmount () {
     unsubscribe()
+    this.$refs.spaceList.closest('section').removeEventListener('scroll', this.updateScroll)
   },
   computed: {
     currentUser () { return this.$store.state.currentUser },
@@ -173,31 +173,22 @@ export default {
     }
   },
   methods: {
+    updateScroll () {
+      const element = this.$refs.spaceList.closest('section')
+      if (!element) { return }
+      this.scrollY = element.scrollTop
+      this.scrollHeight = element.getBoundingClientRect().height
+    },
     itemIsVisible (index) {
-      // console.log(this.parentElement)
-      // if (!this.parentElement) { return }
-
-      //   const parentElement = document.querySelector('.results-section')
-      //   console.log('☔️',parentElement)
-      //   // return true // tODO manually set this.scrollheight w parent element prop calc
-      //   this.scrollY = parentElement.scrollTop
-      //   this.scrollHeight = parentElement.getBoundingClientRect().height
-      //           console.log('☔️☔️',this.scrollY, this.scrollHeight)
-
-      // }
-
-      const height = 51
+      if (!this.scrollY) {
+        this.updateScroll()
+      }
+      const height = 33
       const yStart = index * height
       const yEnd = yStart + height
       const isAboveScroll = yEnd < this.scrollY
-
-      const isBelowScroll = yStart > (this.scrollHeight - this.scrollY)
-
-      // 700 - 200 = 500
-      console.log('🌻🌻🌻🌻', index, isAboveScroll || isBelowScroll, this.spaces[index].name, yStart, yEnd, '🌷', (this.scrollHeight - this.scrollY), this.scrollY, this.scrollHeight)
-
+      const isBelowScroll = yStart > (this.scrollHeight + this.scrollY)
       if (isAboveScroll || isBelowScroll) { return }
-
       return true
     },
     duplicateSpace () {
@@ -357,19 +348,6 @@ export default {
     scrollEvent (event) {
       this.scrollY = event.target.scrollTop
       this.scrollHeight = event.target.getBoundingClientRect().height
-      // this.scro
-      // this.scrollHeight = scrollHeight
-
-      // this.$refs.results.scrollTop
-      //
-
-      // if scrollvalue = 100
-
-      // before
-      // then < indexes < (100 / 20) is not vis (eg 0,1,2,3,4)
-
-      // after
-      //
     }
   }
 }
