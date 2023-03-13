@@ -28,7 +28,7 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
         SpaceFilters(:visible="spaceFiltersIsVisible" :spaces="filteredSpaces")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" :showCreateNewSpaceFromSearch="true" @selectSpace="changeSpace" @addSpace="addSpace" :scrollY="scrollY")
+    SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" :showCreateNewSpaceFromSearch="true" @selectSpace="changeSpace" @addSpace="addSpace" :scrollEvent="scrollEvent")
 </template>
 
 <script>
@@ -99,7 +99,7 @@ export default {
       journalSpaces: [],
       normalSpaces: [],
       spaceFiltersIsVisible: false,
-      scrollY: 0
+      scrollEvent: null
     }
   },
   computed: {
@@ -349,7 +349,7 @@ export default {
       })
     },
     handleScroll (event) {
-      this.scrollY = this.$refs.results.scrollTop
+      this.scrollEvent = event
     }
   },
   watch: {
