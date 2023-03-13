@@ -115,7 +115,8 @@ export default {
     parentIsPinned: Boolean,
     showCheckmarkSpace: Boolean,
     userShowInExploreDate: String,
-    showCreateNewSpaceFromSearch: Boolean
+    showCreateNewSpaceFromSearch: Boolean,
+    scrollY: Number
   },
   data () {
     return {
@@ -333,6 +334,9 @@ export default {
         }
       },
       deep: true
+    },
+    scrollY (value) {
+      console.log('🌻🌻🌻🌻', value)
     }
   }
 }
