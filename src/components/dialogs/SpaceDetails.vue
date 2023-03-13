@@ -29,6 +29,7 @@ dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.le
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" :showCreateNewSpaceFromSearch="true" @selectSpace="changeSpace" @addSpace="addSpace" :scrollEvent="scrollEvent")
+      //- :parentElement="resultsElement"
 </template>
 
 <script>
@@ -100,6 +101,7 @@ export default {
       normalSpaces: [],
       spaceFiltersIsVisible: false,
       scrollEvent: null
+      // resultsElement: null
     }
   },
   computed: {
@@ -362,6 +364,7 @@ export default {
         this.updateFavorites()
         this.updateHeights()
         this.$nextTick(() => {
+          // this.resultsElement = this.$refs.results
           this.$refs.results.addEventListener('scroll', this.handleScroll)
         })
       } else {

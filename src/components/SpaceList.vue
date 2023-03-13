@@ -14,16 +14,17 @@ span.space-list-wrap
     @selectItem="selectItemFromFilter"
   )
   ul.results-list.space-list
-    template(v-for="spaceChunk in spaceChunks")
-      template(v-for="space in spaceChunk" :key="space.id")
-        .space-wrap
-          a(:href="space.url")
-            li(
-              @click.left="selectSpace($event, space)"
-              :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
-              tabindex="0"
-              @keyup.enter="selectSpace(null, space)"
-            )
+    template(v-for="(space, index) in spacesFiltered" :key="space.id")
+      //- TODO data-item-is-visible is temp , remove before?
+      .space-wrap(:data-item-is-visible="itemIsVisible(index)")
+        a(:href="space.url")
+          li(
+            @click.left="selectSpace($event, space)"
+            :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
+            tabindex="0"
+            @keyup.enter="selectSpace(null, space)"
+          )
+            template(v-if="itemIsVisible(index)")
               Loader(:visible="isLoadingSpace(space)")
 
               //- User(s)
@@ -116,14 +117,16 @@ export default {
     showCheckmarkSpace: Boolean,
     userShowInExploreDate: String,
     showCreateNewSpaceFromSearch: Boolean,
-    scrollY: Number
+    scrollEvent: Object
+    // parentElement: Object
   },
   data () {
     return {
       filter: '',
       filteredSpaces: [],
       focusOnId: '',
-      spaceChunks: []
+      scrollY: 0,
+      scrollHeight: null
     }
   },
   mounted () {
@@ -170,14 +173,32 @@ export default {
     }
   },
   methods: {
-    updateSpaceChunks () {
-      const chunkSize = 50
-      const spaces = this.spacesFiltered
-      const chunks = utils.splitArrayIntoChunks(spaces, chunkSize)
-      this.spaceChunks = []
-      chunks.forEach(chunk => {
-        this.spaceChunks.push(chunk)
-      })
+    itemIsVisible (index) {
+      // console.log(this.parentElement)
+      // if (!this.parentElement) { return }
+
+      //   const parentElement = document.querySelector('.results-section')
+      //   console.log('☔️',parentElement)
+      //   // return true // tODO manually set this.scrollheight w parent element prop calc
+      //   this.scrollY = parentElement.scrollTop
+      //   this.scrollHeight = parentElement.getBoundingClientRect().height
+      //           console.log('☔️☔️',this.scrollY, this.scrollHeight)
+
+      // }
+
+      const height = 51
+      const yStart = index * height
+      const yEnd = yStart + height
+      const isAboveScroll = yEnd < this.scrollY
+
+      const isBelowScroll = yStart > (this.scrollHeight - this.scrollY)
+
+      // 700 - 200 = 500
+      console.log('🌻🌻🌻🌻', index, isAboveScroll || isBelowScroll, this.spaces[index].name, yStart, yEnd, '🌷', (this.scrollHeight - this.scrollY), this.scrollY, this.scrollHeight)
+
+      if (isAboveScroll || isBelowScroll) { return }
+
+      return true
     },
     duplicateSpace () {
       this.$store.dispatch('currentSpace/duplicateSpace')
@@ -207,7 +228,6 @@ export default {
     },
     updateFilteredSpaces (spaces) {
       this.filteredSpaces = spaces
-      this.updateSpaceChunks()
     },
     updateFilter (filter) {
       this.filter = filter
@@ -327,7 +347,6 @@ export default {
   watch: {
     spaces: {
       handler (spaces) {
-        this.updateSpaceChunks()
         const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
         if (spaces && cardDetailsIsVisible) {
           this.focusOnId = spaces[0].id
@@ -335,8 +354,22 @@ export default {
       },
       deep: true
     },
-    scrollY (value) {
-      console.log('🌻🌻🌻🌻', value)
+    scrollEvent (event) {
+      this.scrollY = event.target.scrollTop
+      this.scrollHeight = event.target.getBoundingClientRect().height
+      // this.scro
+      // this.scrollHeight = scrollHeight
+
+      // this.$refs.results.scrollTop
+      //
+
+      // if scrollvalue = 100
+
+      // before
+      // then < indexes < (100 / 20) is not vis (eg 0,1,2,3,4)
+
+      // after
+      //
     }
   }
 }
