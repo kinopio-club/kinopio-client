@@ -67,10 +67,6 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
     //- buttons
     template(v-if="canEditSpace")
       .row
-        .button-wrap
-          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-            .current-color(:style="{ background: backgroundTintBadgeColor }")
-          ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
         .segmented-buttons
           button(@click.left.stop="updateService('background')" :class="{ active: service === 'background'}")
             img.icon.flower(src="@/assets/flower.svg")
@@ -78,10 +74,18 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
             img.icon(src="@/assets/search.svg")
           button(@click.left.stop="updateService('recent')" :class="{ active: serviceIsRecent}")
             img.icon.time(src="@/assets/time.svg")
+        //- Upload
         .button-wrap
           button(@click.left.stop="selectFile")
             span Upload
           input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
+      //- Tint
+      .row
+        .button-wrap
+          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+            span.current-color(:style="{ background: backgroundTintBadgeColor }")
+            span Background Tint
+          ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
 
   //- results
   template(v-if="canEditSpace")
@@ -116,7 +120,7 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
 
     section.results-section(v-else)
       .row(v-if="serviceIsRecent")
-        p Recently Used
+        p.row-title Recently Used
       ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
 
 </template>
@@ -516,5 +520,11 @@ export default {
     .error-container
       margin 0
       margin-left 4px
-      // margin-right 4px
+      margin-bottom 4px
+  .current-color
+    display inline-block
+    margin-right 6px
+    vertical-align -1px
+  .row-title
+    margin-left 4px
 </style>
