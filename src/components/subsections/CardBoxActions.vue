@@ -49,7 +49,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
 
     //- Surround with Box
     .button-wrap(v-if="isCards")
-      button(:disabled="!canEditSpace" @click="containCardsInBox")
+      button(:disabled="!canEditSpace" @click="containItemsInNewBox")
         img.icon.box-icon(src="@/assets/box.svg")
 </template>
 
@@ -93,7 +93,7 @@ export default {
         const shouldPreventEmit = true
         this.closeDialogs(shouldPreventEmit)
       } else if (type === 'triggerSelectedCardsContainInBox') {
-        this.containCardsInBox()
+        this.containItemsInNewBox()
       } else if (type === 'triggerUpdateTheme') {
         this.defaultColor = utils.cssVariable('secondary-background')
       }
@@ -362,8 +362,8 @@ export default {
         this.$store.dispatch('currentCards/updateDimensions', { cards: [card] })
       })
     },
-    containCardsInBox () {
-      let box = utils.boundaryRectFromItems(this.cards)
+    containItemsInNewBox () {
+      let box = utils.boundaryRectFromItems(this.items)
       // add box margins
       const margin = 20
       box = {

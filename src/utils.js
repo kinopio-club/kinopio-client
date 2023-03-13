@@ -959,42 +959,23 @@ export default {
     if (!items.length) {
       return { x: 0, y: 0, width: 0, height: 0 }
     }
-    const defaultSize = 200
-    // i────────┐
-    // │        │
-    // │        h
-    // │        │
-    // └───w────┘
-    // initial
     items = this.clone(items)
-    const initial = items[0]
-    let rect = {
-      x: initial.x,
-      y: initial.y,
-      width: initial.resizeWidth || initial.width,
-      height: initial.resizeHeight || initial.height
-    }
-    // size rect around farthest items
+    const defaultSize = 200
+    let rect = {}
     // x, width
     let sortedItems = sortBy(items, ['x'])
-    sortedItems.forEach(item => {
-      let { x, width, resizeWidth } = item
-      width = resizeWidth || width || defaultSize
-      if (x > rect.x) {
-        rect.x = x
-        rect.width = initial.x + x + width
-      }
-    })
+    const xStart = sortedItems[0]
+    let xEnd = last(sortedItems)
+    xEnd.width = xEnd.resizeWidth || xEnd.width || defaultSize
+    rect.x = xStart.x
+    rect.width = xEnd.x + xEnd.width - xStart.x
     // y, height
     sortedItems = sortBy(items, ['y'])
-    sortedItems.forEach(item => {
-      let { y, height, resizeHeight } = item
-      height = resizeHeight || height || defaultSize
-      if (y > rect.y) {
-        rect.y = y
-        rect.height = initial.y + y + height
-      }
-    })
+    const yStart = sortedItems[0]
+    let yEnd = last(sortedItems)
+    yEnd.height = xEnd.resizeHeight || xEnd.height || defaultSize
+    rect.y = yStart.y
+    rect.height = yEnd.y + yEnd.height - yStart.y
     return rect
   },
 
