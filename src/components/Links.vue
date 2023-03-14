@@ -4,7 +4,7 @@
     .button-wrap(v-if="userSpacesToggleShouldBeVisible" @click.left.prevent="toggleCurrentUserSpacesIsVisibleOnly" @keydown.stop.enter="toggleCurrentUserSpacesIsVisibleOnly")
       label(:class="{ active: currentUserSpacesIsVisibleOnly }")
         input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
-        User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
+        User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true")
     SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="parentIsPinned" :resultsSectionHeight="resultsSectionHeight")
 
   section(v-else-if="loading")
