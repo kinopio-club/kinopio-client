@@ -45,9 +45,17 @@ export default {
       }
     })
   },
+  mounted () {
+    this.$refs.resultsList.closest('section').addEventListener('scroll', this.updateScroll)
+  },
+  beforeUnmount () {
+    this.$refs.resultsList.closest('section').removeEventListener('scroll', this.updateScroll)
+  },
   data () {
     return {
-      removedCardIds: []
+      removedCardIds: [],
+      scrollY: 0,
+      scrollHeight: null
     }
   },
   computed: {
@@ -77,6 +85,17 @@ export default {
     }
   },
   methods: {
+    updateScroll () {
+      let element = this.$refs.resultsList
+      if (!element) { return }
+      element = element.closest('section')
+      if (!element) {
+        console.error('scroll element not found', element)
+      }
+      this.scrollY = element.scrollTop
+      this.scrollHeight = element.getBoundingClientRect().height
+      console.log('🌺', this.scrollY, this.scrollHeight)
+    },
     segmentTagColor (segment) {
       const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
       const cachedTag = cache.tagByName(segment.name)
