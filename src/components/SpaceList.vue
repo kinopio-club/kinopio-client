@@ -357,6 +357,11 @@ export default {
       this.$nextTick(() => {
         this.updateScroll()
       })
+    },
+    isLoading (value) {
+      this.$nextTick(() => {
+        this.updateScroll()
+      })
     }
   }
 }
