@@ -602,7 +602,7 @@ export default {
       let styles = {
         background: color
       }
-      if (this.isComment) {
+      if (this.isComment && !this.isSelected) {
         color = color || this.defaultColor
         styles.background = hexToRgba(color, 0.5) || color
       }
