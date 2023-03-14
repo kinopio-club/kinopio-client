@@ -175,7 +175,10 @@ export default {
   methods: {
     updateScroll () {
       const element = this.$refs.spaceList.closest('section')
-      if (!element) { return }
+      if (!element) {
+        console.error('scroll element not found', element)
+        return
+      }
       this.scrollY = element.scrollTop
       this.scrollHeight = element.getBoundingClientRect().height
     },
