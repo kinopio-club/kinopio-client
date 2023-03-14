@@ -352,10 +352,6 @@ export default {
         }
       },
       deep: true
-    },
-    scrollEvent (event) {
-      this.scrollY = event.target.scrollTop
-      this.scrollHeight = event.target.getBoundingClientRect().height
     }
   }
 }
