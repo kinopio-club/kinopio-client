@@ -30,7 +30,7 @@ dialog.narrow.notification-settings(v-if="visible" :open="visible" @click.left.s
 
       template(v-if="unsubscribedSpaces.length")
         .row Resubscribe to:
-        SpaceList(:spaces="unsubscribedSpaces" :showUser="true" @selectSpace="changeSpace" :showCheckmarkSpace="true" @checkmarkSpace="resubscribeToSpace")
+        SpaceList(:spaces="unsubscribedSpaces" :showUser="true" @selectSpace="changeSpace" :showCheckmarkSpace="true" @checkmarkSpace="resubscribeToSpace" :isLoading="isLoading")
 
 </template>
 
