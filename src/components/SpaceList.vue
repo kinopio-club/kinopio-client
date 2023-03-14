@@ -115,7 +115,8 @@ export default {
     parentIsPinned: Boolean,
     showCheckmarkSpace: Boolean,
     userShowInExploreDate: String,
-    showCreateNewSpaceFromSearch: Boolean
+    showCreateNewSpaceFromSearch: Boolean,
+    resultsSectionHeight: Number
   },
   data () {
     return {
@@ -147,7 +148,6 @@ export default {
         this.$store.commit('shouldPreventNextEnterKey', true)
       }
     })
-    console.log('spaceList')
     this.$refs.spaceList.closest('section').addEventListener('scroll', this.updateScroll)
   },
   beforeUnmount () {
@@ -352,6 +352,11 @@ export default {
         }
       },
       deep: true
+    },
+    resultsSectionHeight (value) {
+      this.$nextTick(() => {
+        this.updateScroll()
+      })
     }
   }
 }

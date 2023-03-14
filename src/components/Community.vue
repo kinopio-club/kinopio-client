@@ -15,7 +15,7 @@ section.community(v-if="visible" :open="visible" @click.left.stop='closeDialogs'
   p(v-if="loading")
     Loader(:visible="loading")
 section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-  SpaceList(:spaces="exploreSpaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace" :userShowInExploreDate="userShowInExploreDate")
+  SpaceList(:spaces="exploreSpaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace" :userShowInExploreDate="userShowInExploreDate" :resultsSectionHeight="resultsSectionHeight")
 </template>
 
 <script>
