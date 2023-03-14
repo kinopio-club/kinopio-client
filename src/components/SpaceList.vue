@@ -174,10 +174,11 @@ export default {
   },
   methods: {
     updateScroll () {
-      const element = this.$refs.spaceList.closest('section')
+      let element = this.$refs.spaceList
+      if (!element) { return }
+      element = element.closest('section')
       if (!element) {
         console.error('scroll element not found', element)
-        return
       }
       this.scrollY = element.scrollTop
       this.scrollHeight = element.getBoundingClientRect().height
@@ -186,11 +187,15 @@ export default {
       if (!this.scrollY) {
         this.updateScroll()
       }
+      let threshold = 0
+      if (this.scrollY) {
+        threshold = this.scrollHeight / 2
+      }
       const height = 33
       const yStart = index * height
       const yEnd = yStart + height
-      const isAboveScroll = yEnd < this.scrollY
-      const isBelowScroll = yStart > (this.scrollHeight + this.scrollY)
+      const isAboveScroll = (yEnd + threshold) < this.scrollY
+      const isBelowScroll = (yStart - threshold) > (this.scrollHeight + this.scrollY)
       if (isAboveScroll || isBelowScroll) { return }
       return true
     },
