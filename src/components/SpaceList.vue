@@ -116,7 +116,8 @@ export default {
     showCheckmarkSpace: Boolean,
     userShowInExploreDate: String,
     showCreateNewSpaceFromSearch: Boolean,
-    resultsSectionHeight: Number
+    resultsSectionHeight: Number,
+    disableListOptimizations: Boolean
   },
   data () {
     return {
@@ -184,6 +185,7 @@ export default {
       this.scrollHeight = element.getBoundingClientRect().height
     },
     itemIsVisible (index) {
+      if (this.disableListOptimizations) { return true }
       if (!this.scrollY) {
         this.updateScroll()
       }

@@ -28,9 +28,9 @@ dialog.narrow.notification-settings(v-if="visible" :open="visible" @click.left.s
           span Email Notifications
       Loader(:visible="isLoading")
 
-    section.results-section(v-if="unsubscribedSpaces.length")
-      .row Resubscribe to:
-      SpaceList(:spaces="unsubscribedSpaces" :showUser="true" @selectSpace="changeSpace" :showCheckmarkSpace="true" @checkmarkSpace="resubscribeToSpace" :isLoading="isLoading")
+      template(v-if="unsubscribedSpaces.length")
+        .row Resubscribe to:
+        SpaceList(:spaces="unsubscribedSpaces" :showUser="true" @selectSpace="changeSpace" :showCheckmarkSpace="true" @checkmarkSpace="resubscribeToSpace" :disableListOptimizations="true")
 
 </template>
 
