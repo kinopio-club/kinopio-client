@@ -5,7 +5,7 @@
       label(:class="{ active: currentUserSpacesIsVisibleOnly }")
         input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
         User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
-    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="parentIsPinned")
+    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="parentIsPinned" :resultsSectionHeight="resultsSectionHeight")
 
   section(v-else-if="loading")
     Loader(:visible="loading")
