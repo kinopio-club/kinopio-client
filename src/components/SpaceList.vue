@@ -15,7 +15,7 @@ span.space-list-wrap
   )
   ul.results-list.space-list(ref="spaceList")
     template(v-for="(space, index) in spacesFiltered" :key="space.id")
-      .space-wrap(:data-item-is-visible="itemIsVisible(index)")
+      .space-wrap(:data-item-is-visible="itemIsVisible(index)" :style="{height: heightByIndex[index] + 'px'}")
         a(:href="space.url")
           li(
             @click.left="selectSpace($event, space)"
@@ -125,7 +125,8 @@ export default {
       filteredSpaces: [],
       focusOnId: '',
       scrollY: 0,
-      scrollHeight: null
+      scrollHeight: null,
+      heightByIndex: {}
     }
   },
   mounted () {
@@ -193,13 +194,30 @@ export default {
       if (this.scrollY) {
         threshold = this.scrollHeight / 2
       }
-      const height = 33
-      const yStart = index * height
-      const yEnd = yStart + height
+      const defaultHeight = 33
+      let yStart = index * defaultHeight
+      const prevHeight = this.heightByIndex[index - 1]
+      if (prevHeight) {
+        let yStart = 0
+        for (let i = 0; i - 1 < index; i++) {
+          yStart = yStart + this.heightByIndex[i]
+        }
+      }
+      const yEnd = yStart + defaultHeight
       const isAboveScroll = (yEnd + threshold) < this.scrollY
       const isBelowScroll = (yStart - threshold) > (this.scrollHeight + this.scrollY)
       if (isAboveScroll || isBelowScroll) { return }
+      this.updateItemHeight(index)
       return true
+    },
+    updateItemHeight (index) {
+      let element = this.$refs.spaceList
+      if (!element) { return }
+      const elements = element.getElementsByClassName('.space-wrap')
+      if (!elements.length) { return }
+      const offset = 3
+      let height = elements[index].getBoundingClientRect().height
+      this.heightByIndex[index] = height
     },
     duplicateSpace () {
       this.$store.dispatch('currentSpace/duplicateSpace')
