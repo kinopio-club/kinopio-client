@@ -13,17 +13,17 @@ span.space-list-wrap
     @focusPreviousItem="focusPreviousItemFromFilter"
     @selectItem="selectItemFromFilter"
   )
-  ul.results-list.space-list
-    template(v-for="spaceChunk in spaceChunks")
-      template(v-for="space in spaceChunk" :key="space.id")
-        .space-wrap
-          a(:href="space.url")
-            li(
-              @click.left="selectSpace($event, space)"
-              :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
-              tabindex="0"
-              @keyup.enter="selectSpace(null, space)"
-            )
+  ul.results-list.space-list(ref="spaceList")
+    template(v-for="(space, index) in spacesFiltered" :key="space.id")
+      .space-wrap(:data-item-is-visible="itemIsVisible(index)")
+        a(:href="space.url")
+          li(
+            @click.left="selectSpace($event, space)"
+            :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
+            tabindex="0"
+            @keyup.enter="selectSpace(null, space)"
+          )
+            template(v-if="itemIsVisible(index)")
               Loader(:visible="isLoadingSpace(space)")
 
               //- User(s)
@@ -115,14 +115,17 @@ export default {
     parentIsPinned: Boolean,
     showCheckmarkSpace: Boolean,
     userShowInExploreDate: String,
-    showCreateNewSpaceFromSearch: Boolean
+    showCreateNewSpaceFromSearch: Boolean,
+    resultsSectionHeight: Number,
+    disableListOptimizations: Boolean
   },
   data () {
     return {
       filter: '',
       filteredSpaces: [],
       focusOnId: '',
-      spaceChunks: []
+      scrollY: 0,
+      scrollHeight: null
     }
   },
   mounted () {
@@ -146,9 +149,11 @@ export default {
         this.$store.commit('shouldPreventNextEnterKey', true)
       }
     })
+    this.$refs.spaceList.closest('section').addEventListener('scroll', this.updateScroll)
   },
   beforeUnmount () {
     unsubscribe()
+    this.$refs.spaceList.closest('section').removeEventListener('scroll', this.updateScroll)
   },
   computed: {
     currentUser () { return this.$store.state.currentUser },
@@ -169,14 +174,32 @@ export default {
     }
   },
   methods: {
-    updateSpaceChunks () {
-      const chunkSize = 50
-      const spaces = this.spacesFiltered
-      const chunks = utils.splitArrayIntoChunks(spaces, chunkSize)
-      this.spaceChunks = []
-      chunks.forEach(chunk => {
-        this.spaceChunks.push(chunk)
-      })
+    updateScroll () {
+      let element = this.$refs.spaceList
+      if (!element) { return }
+      element = element.closest('section')
+      if (!element) {
+        console.error('scroll element not found', element)
+      }
+      this.scrollY = element.scrollTop
+      this.scrollHeight = element.getBoundingClientRect().height
+    },
+    itemIsVisible (index) {
+      if (this.disableListOptimizations) { return true }
+      if (!this.scrollY) {
+        this.updateScroll()
+      }
+      let threshold = 0
+      if (this.scrollY) {
+        threshold = this.scrollHeight / 2
+      }
+      const height = 33
+      const yStart = index * height
+      const yEnd = yStart + height
+      const isAboveScroll = (yEnd + threshold) < this.scrollY
+      const isBelowScroll = (yStart - threshold) > (this.scrollHeight + this.scrollY)
+      if (isAboveScroll || isBelowScroll) { return }
+      return true
     },
     duplicateSpace () {
       this.$store.dispatch('currentSpace/duplicateSpace')
@@ -206,7 +229,6 @@ export default {
     },
     updateFilteredSpaces (spaces) {
       this.filteredSpaces = spaces
-      this.updateSpaceChunks()
     },
     updateFilter (filter) {
       this.filter = filter
@@ -326,13 +348,22 @@ export default {
   watch: {
     spaces: {
       handler (spaces) {
-        this.updateSpaceChunks()
         const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
         if (spaces && cardDetailsIsVisible) {
           this.focusOnId = spaces[0].id
         }
       },
       deep: true
+    },
+    resultsSectionHeight (value) {
+      this.$nextTick(() => {
+        this.updateScroll()
+      })
+    },
+    isLoading (value) {
+      this.$nextTick(() => {
+        this.updateScroll()
+      })
     }
   }
 }
