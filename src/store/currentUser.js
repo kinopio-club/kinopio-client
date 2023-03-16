@@ -58,6 +58,7 @@ export default {
     shouldUseStickyCards: false,
     shouldDisableItemJiggle: false,
     shouldPauseConnectionDirections: false,
+    shouldHideURLsInCardsByDefault: false,
     lastUsedImagePickerService: '',
     AIImages: [],
     theme: null,
@@ -323,6 +324,10 @@ export default {
     shouldPauseConnectionDirections: (state, value) => {
       state.shouldPauseConnectionDirections = value
       cache.updateUser('shouldPauseConnectionDirections', value)
+    },
+    shouldHideURLsInCardsByDefault: (state, value) => {
+      state.shouldHideURLsInCardsByDefault = value
+      cache.updateUser('shouldHideURLsInCardsByDefault', value)
     },
     lastUsedImagePickerService: (state, value) => {
       state.lastUsedImagePickerService = value
