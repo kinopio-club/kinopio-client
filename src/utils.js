@@ -1898,6 +1898,7 @@ export default {
     const prevSearch = search
     search = search.replaceAll('?', '\\?')
     search = search.replaceAll('$', '\\$')
+    search = search.replaceAll('+', '\\+')
     const extraCharacters = 2 + (search.length - prevSearch.length)
     const searchPattern = new RegExp(search, 'gim')
     let results = []
