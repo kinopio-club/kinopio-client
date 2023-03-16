@@ -8,6 +8,10 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
         input(type="checkbox" v-model="shouldDisableItemJiggle")
         span Disable Jiggle While Dragging
     .row
+      label.variable-length-content
+        input(type="checkbox")
+        span Hide URLs in Cards by Default
+    .row
       label(:class="{active: shouldOpenLinksInNewTab}" @click.left.prevent="toggleShouldOpenLinksInNewTab" @keydown.stop.enter="toggleShouldOpenLinksInNewTab")
         input(type="checkbox" v-model="shouldOpenLinksInNewTab")
         span Open URLs in New Tabs
