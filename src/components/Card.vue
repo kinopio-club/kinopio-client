@@ -2290,18 +2290,18 @@ article
       cursor pointer
 
   .meta-container
-    margin-top -6px
-    display flex
+    transform translateY(-6px)
+    display ruby
     padding 8px
     padding-top 0
+    position absolute
+    .user-label-inline
+      margin-right 0
     .user-badge
       display flex
       margin 0
       .label-badge
         padding 0 10px
-        left -2px
-        bottom initial
-        top 12px
     .badge
       &.secondary
         display flex
