@@ -600,6 +600,9 @@ const currentSpace = {
         return card
       })
       cards = sortBy(cards, ['distanceFromOrigin'])
+      // page size
+      const itemsRect = utils.boundaryRectFromItems(cards)
+      context.commit('updatePageSizes', itemsRect, { root: true })
       // sort connections
       const connectionIds = Object.keys(connections)
       connections = connectionIds.map(id => {
