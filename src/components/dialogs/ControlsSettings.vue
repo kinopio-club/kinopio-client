@@ -4,6 +4,10 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
     p Controls
   section
     .row
+      label.variable-length-content(:class="{ active: shouldDisableItemJiggle }" @click.left.prevent="toggleshouldDisableItemJiggle" @keydown.stop.enter="toggleshouldDisableItemJiggle")
+        input(type="checkbox" v-model="shouldDisableItemJiggle")
+        span Disable Jiggle While Dragging
+    .row
       label(:class="{active: shouldOpenLinksInNewTab}" @click.left.prevent="toggleShouldOpenLinksInNewTab" @keydown.stop.enter="toggleShouldOpenLinksInNewTab")
         input(type="checkbox" v-model="shouldOpenLinksInNewTab")
         span Open URLs in New Tabs
@@ -11,10 +15,6 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
       label.variable-length-content(:class="{ active: shouldPauseConnectionDirections }" @click.left.prevent="toggleShouldPauseConnectionDirections" @keydown.stop.enter="toggleShouldPauseConnectionDirections")
         input(type="checkbox" v-model="shouldPauseConnectionDirections")
         span Pause Connection Directions
-    .row
-      label(:class="{ active: shouldDisableItemJiggle }" @click.left.prevent="toggleshouldDisableItemJiggle" @keydown.stop.enter="toggleshouldDisableItemJiggle")
-        input(type="checkbox" v-model="shouldDisableItemJiggle")
-        span Disable Item Jiggle
     .row
       label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
         input(type="checkbox" v-model="shouldUseStickyCards")
