@@ -63,7 +63,8 @@ export default {
     theme: null,
     themeIsSystem: false,
     referredByUserId: '',
-    referrerName: ''
+    referrerName: '',
+    weather: ''
   },
   mutations: {
     color: (state, value) => {
@@ -347,6 +348,9 @@ export default {
     referrerName: (state, value) => {
       state.referrerName = value
       cache.updateUser('referrerName', value)
+    },
+    weather: (state, value) => {
+      state.weather = value
     }
   },
   actions: {
@@ -363,6 +367,12 @@ export default {
       }
       context.dispatch('themes/restore', null, { root: true })
       context.commit('triggerUserIsLoaded', null, { root: true })
+      context.dispatch('updateWeather')
+    },
+    updateWeather: async (context) => {
+      const weather = await context.dispatch('api/weather', null, { root: true })
+      if (!weather) { return }
+      context.commit('weather', weather)
     },
     update: (context, updates) => {
       const keys = Object.keys(updates)

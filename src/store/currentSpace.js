@@ -353,7 +353,10 @@ const currentSpace = {
       const isTomorrow = context.rootState.loadJournalSpaceTomorrow
       const currentUser = utils.clone(context.rootState.currentUser)
       context.commit('isLoadingSpace', true, { root: true })
-      const weather = await context.dispatch('api/weather', null, { root: true })
+      let weather = context.rootState.currentUser.weather
+      if (!weather) {
+        weather = await context.dispatch('api/weather', null, { root: true })
+      }
       const space = utils.journalSpace(currentUser, isTomorrow, weather)
       context.commit('clearSearch', null, { root: true })
       context.commit('shouldResetDimensionsOnLoad', true, { root: true })

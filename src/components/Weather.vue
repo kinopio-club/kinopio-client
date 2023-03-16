@@ -41,6 +41,7 @@ export default {
       const value = !this.showWeather
       if (value) {
         this.location()
+        this.$store.dispatch('currentUser/updateWeather')
       } else {
         this.removeWeather()
       }
