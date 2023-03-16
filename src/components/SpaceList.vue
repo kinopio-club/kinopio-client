@@ -150,6 +150,7 @@ export default {
         this.$store.commit('shouldPreventNextEnterKey', true)
       }
     })
+    this.updateScroll()
     this.$refs.spaceList.closest('section').addEventListener('scroll', this.updateScroll)
   },
   beforeUnmount () {
