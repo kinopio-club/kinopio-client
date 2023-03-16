@@ -7,9 +7,9 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
   section.results-section
     ul.results-list
       li(v-if="search" @click="selectTag(null, true)" @touchend.stop :class="{hover: focusOnName === search}")
-        Tag(:tag="searchTag" :tagBadgeLabel="tagBadgeLabel")
+        Tag(:tag="searchTag" :tagBadgeLabel="tagBadgeLabel" @clickTag="clickTag")
       li(v-for="tag in filteredTags" @click="selectTag(tag, true)" @touchend.stop :class="{hover: focusOnName === tag.name}")
-        Tag(:tag="tag")
+        Tag(:tag="tag" @clickTag="clickTag")
     Loader(:visible="loading")
 </template>
 
@@ -160,6 +160,9 @@ export default {
       }
       const mergedTags = utils.mergeArrays({ previous: this.tags, updated: remoteTags, key: 'name' })
       this.tags = mergedTags
+    },
+    clickTag (event, tag) {
+      this.selectTag(tag, true)
     },
     selectTag (tag, shouldCloseDialog) {
       const searchTag = {
