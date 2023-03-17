@@ -604,7 +604,7 @@ const currentSpace = {
       })
       cards = sortBy(cards, ['distanceFromOrigin'])
       // page size
-      const itemsRect = utils.boundaryRectFromItems(cards)
+      const itemsRect = utils.pageSizeFromItems(cards)
       context.commit('updatePageSizes', itemsRect, { root: true })
       // sort connections
       const connectionIds = Object.keys(connections)
@@ -700,7 +700,6 @@ const currentSpace = {
       context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
       nextTick(() => {
         context.dispatch('scrollCardsIntoView')
-        context.dispatch('updatePageSizes', null, { root: true })
         // deferrable async tasks
         context.dispatch('updateOtherUsers')
         context.dispatch('updateOtherSpaces')

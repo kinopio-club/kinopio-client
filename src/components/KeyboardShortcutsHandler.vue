@@ -700,7 +700,7 @@ export default {
     afterPaste ({ cards, boxes }) {
       cards.forEach(card => {
         this.$store.dispatch('checkIfItemShouldIncreasePageSize', card)
-        this.$store.dispatch('currentCards/removeTrackingQueryStrings', { cardId: card.id })
+        this.$store.dispatch('currentCards/updateURLQueryStrings', { cardId: card.id })
       })
       boxes.forEach(box => {
         this.$store.dispatch('checkIfItemShouldIncreasePageSize', box)

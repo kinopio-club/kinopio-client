@@ -14,6 +14,7 @@ import join from 'lodash-es/join'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { colord, extend } from 'colord'
+import qs from '@aguezz/qs-parse'
 import namesPlugin from 'colord/plugins/names'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
@@ -963,20 +964,28 @@ export default {
     const defaultSize = 200
     let rect = {}
     // x, width
-    let sortedItems = sortBy(items, ['x'])
+    let sortedItems = sortBy(items, ['x', 'width'])
     const xStart = sortedItems[0]
     let xEnd = last(sortedItems)
     xEnd.width = xEnd.resizeWidth || xEnd.width || defaultSize
     rect.x = xStart.x
     rect.width = xEnd.x + xEnd.width - xStart.x
     // y, height
-    sortedItems = sortBy(items, ['y'])
+    sortedItems = sortBy(items, ['y', 'height'])
     const yStart = sortedItems[0]
     let yEnd = last(sortedItems)
     yEnd.height = xEnd.resizeHeight || xEnd.height || defaultSize
     rect.y = yStart.y
     rect.height = yEnd.y + yEnd.height - yStart.y
     return rect
+  },
+  pageSizeFromItems (items) {
+    const rect = this.boundaryRectFromItems(items)
+    const padding = 200
+    return {
+      width: rect.x + rect.width + padding,
+      height: rect.y + rect.height + padding
+    }
   },
 
   // Connection Path Utils 🐙
@@ -1696,6 +1705,14 @@ export default {
     const isSpaceUrl = url.match(spaceUrlPattern)
     return Boolean(isSpaceUrl)
   },
+  urlIsWebsite (url) {
+    const isImage = this.urlIsImage(url)
+    const isVideo = this.urlIsVideo(url)
+    const isAudio = this.urlIsAudio(url)
+    const isFile = this.urlIsFile(url)
+    const isSpace = this.urlIsSpace(url)
+    return !isImage && !isVideo && !isAudio && !isFile && !isSpace
+  },
   fileNameFromUrl (url) {
     if (!url) { return }
     if (!this.urlIsFile(url)) { return }
@@ -1740,6 +1757,53 @@ export default {
     } else {
       return 'link'
     }
+  },
+  removeTrackingQueryStringsFromURLs (name) {
+    const urls = this.urlsFromString(name)
+    // https://www.bleepingcomputer.com/PoC/qs.html
+    // https://www.bleepingcomputer.com/news/security/new-firefox-privacy-feature-strips-urls-of-tracking-parameters
+    const trackingKeys = ['is_copy_url', 'is_from_webapp', 'utm_', 'oly_enc_id', 'oly_anon_id', '__s', 'vero_id', '_hsenc', 'mkt_tok', 'fbclid', 'mc_eid', 'pf_', 'pd_']
+    urls.forEach(url => {
+      url = url.trim()
+      url = this.removeTrailingSlash(url)
+      const queryString = this.queryString(url)
+      const domain = this.urlWithoutQueryString(url)
+      if (!queryString) { return }
+      let queryObject = qs.decode(queryString)
+      let keys = Object.keys(queryObject)
+      let keysToRemove = []
+      trackingKeys.forEach(trackingKey => {
+        keys.forEach(key => {
+          if (key.startsWith(trackingKey)) {
+            keysToRemove.push(key)
+          }
+        })
+      })
+      if (!keysToRemove.length) { return }
+      console.log('🫧 trackingKeysToRemove', keysToRemove)
+      keysToRemove.forEach(key => delete queryObject[key])
+      const newUrl = qs.encode(domain, queryObject)
+      name = name.replace(url, newUrl)
+    })
+    return name
+  },
+  addHiddenQueryStringToURLs (name) {
+    const urls = this.urlsFromString(name)
+    urls.forEach(url => {
+      url = url.trim()
+      url = this.removeTrailingSlash(url)
+      if (!this.urlIsWebsite(url)) { return }
+      const queryString = this.queryString(url) || ''
+      const domain = this.urlWithoutQueryString(url)
+      let queryObject = {}
+      if (queryString) {
+        queryObject = qs.decode(queryString)
+      }
+      queryObject.hidden = 'true'
+      const newUrl = qs.encode(domain, queryObject)
+      name = name.replace(url, newUrl)
+    })
+    return name
   },
 
   // Checkbox ✅

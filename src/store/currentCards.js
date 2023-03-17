@@ -7,7 +7,6 @@ import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
 import { nextTick } from 'vue'
-import qs from '@aguezz/qs-parse'
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
@@ -345,39 +344,17 @@ const currentCards = {
         nameUpdatedAt: new Date()
       })
     },
-    removeTrackingQueryStrings: (context, { cardId }) => {
+    updateURLQueryStrings: (context, { cardId }) => {
       setTimeout(() => {
         const card = context.getters.byId(cardId)
         const urls = utils.urlsFromString(card.name)
         if (!urls) { return }
-        // https://www.bleepingcomputer.com/PoC/qs.html
-        // https://www.bleepingcomputer.com/news/security/new-firefox-privacy-feature-strips-urls-of-tracking-parameters
-        const trackingKeys = ['is_copy_url', 'is_from_webapp', 'utm_', 'oly_enc_id', 'oly_anon_id', '__s', 'vero_id', '_hsenc', 'mkt_tok', 'fbclid', 'mc_eid', 'pf_', 'pd_']
-        urls.forEach(url => {
-          url = url.trim()
-          url = utils.removeTrailingSlash(url)
-          const queryString = utils.queryString(url)
-          const domain = utils.urlWithoutQueryString(url)
-          if (!queryString) { return }
-          let queryObject = qs.decode(queryString)
-          let keys = Object.keys(queryObject)
-          let keysToRemove = []
-          trackingKeys.forEach(trackingKey => {
-            keys.forEach(key => {
-              if (key.startsWith(trackingKey)) {
-                keysToRemove.push(key)
-              }
-            })
-          })
-          if (!keysToRemove.length) { return }
-          console.log('🫧 trackingKeysToRemove', keysToRemove)
-          keysToRemove.forEach(key => delete queryObject[key])
-          const newUrl = qs.encode(domain, queryObject)
-          const newName = card.name.replace(url, newUrl)
-          context.dispatch('update', {
-            id: card.id,
-            name: newName
-          })
+        let name = card.name
+        name = utils.removeTrackingQueryStringsFromURLs(name)
+        name = utils.addHiddenQueryStringToURLs(name)
+        context.dispatch('update', {
+          id: cardId,
+          name
         })
       }, 100)
     },

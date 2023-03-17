@@ -796,7 +796,7 @@ export default {
       const text = event.clipboardData.getData('text')
       this.pastedName = text
       this.wasPasted = true
-      this.$store.dispatch('currentCards/removeTrackingQueryStrings', { cardId: this.card.id })
+      this.$store.dispatch('currentCards/updateURLQueryStrings', { cardId: this.card.id })
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
