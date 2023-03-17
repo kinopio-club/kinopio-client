@@ -1381,7 +1381,7 @@ const store = createStore({
       items.shift({
         x: 0, y: 0, width: 500, height: 500
       })
-      let itemsRect = utils.boundaryRectFromItems(items)
+      let itemsRect = utils.pageSizeFromItems(items)
       itemsRect = {
         width: itemsRect.width + padding,
         height: itemsRect.height + padding
