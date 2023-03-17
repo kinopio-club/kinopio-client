@@ -700,6 +700,8 @@ const currentSpace = {
       context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
       nextTick(() => {
         context.dispatch('scrollCardsIntoView')
+        const itemsRect = utils.pageSizeFromItems(context.rootState.currentCards.cards)
+        context.commit('updatePageSizes', itemsRect, { root: true })
         // deferrable async tasks
         context.dispatch('updateOtherUsers')
         context.dispatch('updateOtherSpaces')
