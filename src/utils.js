@@ -14,6 +14,7 @@ import join from 'lodash-es/join'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { colord, extend } from 'colord'
+import qs from '@aguezz/qs-parse'
 import namesPlugin from 'colord/plugins/names'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
@@ -1740,6 +1741,52 @@ export default {
     } else {
       return 'link'
     }
+  },
+  removeTrackingQueryStringsFromURLs (name) {
+    const urls = this.urlsFromString(name)
+    // https://www.bleepingcomputer.com/PoC/qs.html
+    // https://www.bleepingcomputer.com/news/security/new-firefox-privacy-feature-strips-urls-of-tracking-parameters
+    const trackingKeys = ['is_copy_url', 'is_from_webapp', 'utm_', 'oly_enc_id', 'oly_anon_id', '__s', 'vero_id', '_hsenc', 'mkt_tok', 'fbclid', 'mc_eid', 'pf_', 'pd_']
+    urls.forEach(url => {
+      url = url.trim()
+      url = this.removeTrailingSlash(url)
+      const queryString = this.queryString(url)
+      const domain = this.urlWithoutQueryString(url)
+      if (!queryString) { return }
+      let queryObject = qs.decode(queryString)
+      let keys = Object.keys(queryObject)
+      let keysToRemove = []
+      trackingKeys.forEach(trackingKey => {
+        keys.forEach(key => {
+          if (key.startsWith(trackingKey)) {
+            keysToRemove.push(key)
+          }
+        })
+      })
+      if (!keysToRemove.length) { return }
+      console.log('🫧 trackingKeysToRemove', keysToRemove)
+      keysToRemove.forEach(key => delete queryObject[key])
+      const newUrl = qs.encode(domain, queryObject)
+      name = name.replace(url, newUrl)
+    })
+    return name
+  },
+  addHiddenQueryStringToURLs (name) {
+    const urls = this.urlsFromString(name)
+    urls.forEach(url => {
+      url = url.trim()
+      url = this.removeTrailingSlash(url)
+      const queryString = this.queryString(url) || ''
+      const domain = this.urlWithoutQueryString(url)
+      let queryObject = {}
+      if (queryString) {
+        queryObject = qs.decode(queryString)
+      }
+      queryObject.hidden = 'true'
+      const newUrl = qs.encode(domain, queryObject)
+      name = name.replace(url, newUrl)
+    })
+    return name
   },
 
   // Checkbox ✅
