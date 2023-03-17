@@ -8,10 +8,6 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
         input(type="checkbox" v-model="shouldDisableItemJiggle")
         span Disable Jiggle While Dragging
     .row
-      label.variable-length-content(:class="{active: shouldHideURLsInCardsByDefault}" @click.left.prevent="toggleShouldHideURLsInCardsByDefault" @keydown.stop.enter="toggleShouldHideURLsInCardsByDefault")
-        input(type="checkbox" v-model="shouldHideURLsInCardsByDefault")
-        span Hide URLs in Cards by Default
-    .row
       label(:class="{active: shouldOpenLinksInNewTab}" @click.left.prevent="toggleShouldOpenLinksInNewTab" @keydown.stop.enter="toggleShouldOpenLinksInNewTab")
         input(type="checkbox" v-model="shouldOpenLinksInNewTab")
         span Open URLs in New Tabs
@@ -56,17 +52,12 @@ export default {
   computed: {
     isMobile () { return utils.isMobile() },
     shouldOpenLinksInNewTab () { return this.$store.state.currentUser.shouldOpenLinksInNewTab },
-    shouldHideURLsInCardsByDefault () { return this.$store.state.currentUser.shouldHideURLsInCardsByDefault },
     shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
     shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
     shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle }
   },
   methods: {
-    toggleShouldHideURLsInCardsByDefault () {
-      const value = !this.shouldHideURLsInCardsByDefault
-      this.$store.dispatch('currentUser/update', { shouldHideURLsInCardsByDefault: value })
-    },
     toggleshouldDisableItemJiggle () {
       const value = !this.shouldDisableItemJiggle
       this.$store.dispatch('currentUser/update', { shouldDisableItemJiggle: value })
