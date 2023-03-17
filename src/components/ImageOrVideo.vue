@@ -23,6 +23,7 @@ export default {
     image: String,
     video: String
   },
+  emits: ['updateCardDimensions'],
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerOptimizePerformanceDuringScrollOrZoom') {
@@ -47,7 +48,7 @@ export default {
   },
   methods: {
     updateDimensions () {
-      this.$store.dispatch('currentCards/updateDimensions', { cards: [this.card] })
+      this.$emit('updateCardDimensions')
     },
     checkIfShouldPauseVideo (value) {
       if (!this.video) { return }
