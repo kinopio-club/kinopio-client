@@ -973,19 +973,6 @@ const self = {
 
     // Downloads
 
-    downloadCurrentSpace: async (context) => {
-      const apiKey = context.rootState.currentUser.apiKey
-      const spaceId = context.rootState.currentSpace.id
-      if (!shouldRequest({ apiKey })) { return }
-      try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/space/download/${spaceId}`, options)
-        return response.blob()
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'downloadCurrentSpace', error })
-      }
-    },
-
     downloadAllSpaces: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }

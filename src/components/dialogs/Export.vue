@@ -9,10 +9,14 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
         img.icon.copy(src="@/assets/copy.svg")
         span Copy All Card Names
     //- PDF
-    .row(v-if="currentUserIsSignedIn")
-      .button-wrap
+    .row
+      .button-wrap(v-if="currentUserIsSignedIn")
         button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
           span PDF
+      .button-wrap
+        button(@click.left="downloadLocalJSON")
+          span JSON
+
     Pdf(:visible="pdfIsVisible")
     //- Duplicate
     button(@click.left="duplicateSpace")
@@ -25,22 +29,14 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     // anon user
     template(v-if="!currentUserIsSignedIn")
       p
-        span Backup {{' '}}
-        span.badge.info JSON
-      button(@click.left="downloadLocalJSON") Download Space
-      p
         span Sign Up or In for more export options
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
     // signed in user
     template(v-if="currentUserIsSignedIn")
       p
-        span Backup {{' '}}
-        span.badge.info JSON and TXT
-      button(@click.left="downloadCurrentSpaceRemote" :class="{ active: isLoadingCurrentSpace }")
-        span Download Space
-        Loader(:visible="isLoadingCurrentSpace")
+        span Backup
       button(@click.left="downloadAllSpacesRemote" :class="{ active: isLoadingAllSpaces }")
-        span Download All Spaces
+        span All Spaces (JSON and TXT)
         Loader(:visible="isLoadingAllSpaces")
     a#export-downlaod-anchor.hidden
     .info-container(v-if="isLoadingAllSpaces")
@@ -75,7 +71,6 @@ export default {
     return {
       spaceIsDuplicated: false,
       dialogHeight: null,
-      isLoadingCurrentSpace: false,
       isLoadingAllSpaces: false,
       unknownServerError: false,
       pdfIsVisible: false
@@ -119,19 +114,6 @@ export default {
       downloadAnchor.setAttribute('href', blobUrl)
       downloadAnchor.setAttribute('download', `${fileName}.zip`)
       downloadAnchor.click()
-    },
-    async downloadCurrentSpaceRemote () {
-      if (this.isLoadingCurrentSpace) { return }
-      this.unknownServerError = false
-      this.isLoadingCurrentSpace = true
-      try {
-        const blob = await this.$store.dispatch('api/downloadCurrentSpace')
-        this.downloadBlob(blob)
-      } catch (error) {
-        console.error('🚒', error)
-        this.unknownServerError = true
-      }
-      this.isLoadingCurrentSpace = false
     },
     async downloadAllSpacesRemote () {
       if (this.isLoadingAllSpaces) { return }
