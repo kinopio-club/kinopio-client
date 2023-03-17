@@ -343,7 +343,7 @@ export default {
     margin-left 6px
   .success
     .row
-      margin-bottom 4px
+      margin-bottom 8px
       &:last-child
         margin-bottom 0
 
