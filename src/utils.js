@@ -979,6 +979,13 @@ export default {
     rect.height = yEnd.y + yEnd.height - yStart.y
     return rect
   },
+  pageSizeFromItems (items) {
+    const rect = this.boundaryRectFromItems(items)
+    return {
+      width: rect.x + rect.width,
+      height: rect.y + rect.height
+    }
+  },
 
   // Connection Path Utils 🐙
 
