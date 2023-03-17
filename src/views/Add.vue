@@ -120,7 +120,6 @@ export default {
 <style lang="stylus">
 main.add-page
   padding 8px
-  margin-top 2px
   min-height 100vh
   height 100%
   section
@@ -158,4 +157,9 @@ main.add-page
 
 .app
   overflow initial
+.title-row-flex
+  display flex
+  justify-content space-between
+  align-items center
+
 </style>

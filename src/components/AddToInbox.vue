@@ -338,10 +338,9 @@ export default {
   .info-badge
     position static
     display inline-block
-    min-height 16px
-    padding 0px 3px
+    padding 0px 5px
     vertical-align 0
-    margin-left 4px
+    margin-left 6px
   .success
     .row
       margin-bottom 4px
@@ -359,7 +358,7 @@ export default {
 
   .inbox-icon,
   .add-icon
-    vertical-align 0
+    vertical-align 1px
     margin 0
 
   a
