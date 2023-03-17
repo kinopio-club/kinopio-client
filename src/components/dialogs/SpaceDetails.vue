@@ -257,14 +257,13 @@ export default {
     updateWithExistingRemoteSpaces (userSpaces) {
       if (!utils.arrayExists(this.remoteSpaces)) { return userSpaces }
       let spaces = userSpaces
-      const removedSpaces = cache.getAllRemovedSpaces()
       this.remoteSpaces.forEach(space => {
         const spaceExists = userSpaces.find(userSpace => userSpace.id === space.id)
-        const spaceIsRemoved = removedSpaces.find(removedSpace => removedSpace.id === space.id)
-        if (!spaceExists && !spaceIsRemoved) {
+        if (!spaceExists) {
           spaces.push(space)
         }
       })
+      this.updateCachedSpaces()
       return spaces
     },
     sortSpacesByEditedOrCreatedAt (spaces) {
@@ -289,7 +288,7 @@ export default {
       let spaces = this.updateFavoriteSpaces(this.remoteSpaces)
       spaces = this.updateInboxSpace(spaces)
       this.spaces = spaces
-      this.updateCachedSpacesDate()
+      this.updateCachedSpaces()
     },
     updateJournalSpaces () {
       const journalSpaces = this.spaces.filter(space => space.moonPhase)
@@ -299,13 +298,12 @@ export default {
       let normalSpaces = this.spaces.filter(space => !space.moonPhase)
       this.normalSpaces = normalSpaces
     },
-    updateCachedSpacesDate () {
+    updateCachedSpaces () {
       this.spaces.forEach(space => {
         const cachedSpace = cache.space(space.id)
         const isCachedSpace = utils.objectHasKeys(cachedSpace)
-        const shouldUpdate = space.editedAt !== cachedSpace.editedAt
-        if (isCachedSpace && shouldUpdate) {
-          cache.updateSpace('editedAt', space.editedAt, space.id)
+        if (!isCachedSpace) {
+          this.storeLocal(`space-${space.id}`, space)
         }
       })
     },
