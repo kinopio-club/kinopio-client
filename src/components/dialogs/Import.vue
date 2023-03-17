@@ -3,10 +3,8 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialo
   section
     p Import Space
   section
-    p From a backup space
     button(@click.left="selectFile")
-      span.badge.info json
-      span Select File
+      span Select Space JSON File
     Loader(:visible="loading")
     input.hidden(type="file" ref="input" accept=".json" @change="readFile")
 
