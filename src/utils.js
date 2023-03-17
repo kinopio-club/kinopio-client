@@ -964,14 +964,14 @@ export default {
     const defaultSize = 200
     let rect = {}
     // x, width
-    let sortedItems = sortBy(items, ['x'])
+    let sortedItems = sortBy(items, ['x', 'width'])
     const xStart = sortedItems[0]
     let xEnd = last(sortedItems)
     xEnd.width = xEnd.resizeWidth || xEnd.width || defaultSize
     rect.x = xStart.x
     rect.width = xEnd.x + xEnd.width - xStart.x
     // y, height
-    sortedItems = sortBy(items, ['y'])
+    sortedItems = sortBy(items, ['y', 'height'])
     const yStart = sortedItems[0]
     let yEnd = last(sortedItems)
     yEnd.height = xEnd.resizeHeight || xEnd.height || defaultSize
