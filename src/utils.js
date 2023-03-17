@@ -981,9 +981,10 @@ export default {
   },
   pageSizeFromItems (items) {
     const rect = this.boundaryRectFromItems(items)
+    const padding = 200
     return {
-      width: rect.x + rect.width,
-      height: rect.y + rect.height
+      width: rect.x + rect.width + padding,
+      height: rect.y + rect.height + padding
     }
   },
 
