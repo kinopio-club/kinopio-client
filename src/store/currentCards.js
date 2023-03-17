@@ -351,9 +351,7 @@ const currentCards = {
         if (!urls) { return }
         let name = card.name
         name = utils.removeTrackingQueryStringsFromURLs(name)
-        if (context.rootState.currentUser.shouldHideURLsInCardsByDefault) {
-          name = utils.addHiddenQueryStringToURLs(name)
-        }
+        name = utils.addHiddenQueryStringToURLs(name)
         context.dispatch('update', {
           id: cardId,
           name
