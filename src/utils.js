@@ -1705,6 +1705,14 @@ export default {
     const isSpaceUrl = url.match(spaceUrlPattern)
     return Boolean(isSpaceUrl)
   },
+  urlIsWebsite (url) {
+    const isImage = this.urlIsImage(url)
+    const isVideo = this.urlIsVideo(url)
+    const isAudio = this.urlIsAudio(url)
+    const isFile = this.urlIsFile(url)
+    const isSpace = this.urlIsSpace(url)
+    return !isImage && !isVideo && !isAudio && !isFile && !isSpace
+  },
   fileNameFromUrl (url) {
     if (!url) { return }
     if (!this.urlIsFile(url)) { return }
@@ -1784,6 +1792,7 @@ export default {
     urls.forEach(url => {
       url = url.trim()
       url = this.removeTrailingSlash(url)
+      if (!this.urlIsWebsite(url)) { return }
       const queryString = this.queryString(url) || ''
       const domain = this.urlWithoutQueryString(url)
       let queryObject = {}
