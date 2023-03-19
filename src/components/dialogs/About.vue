@@ -1,24 +1,22 @@
 <template lang="pug">
-dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.about(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p About
+    p About Kinopio
   section
     .row
       p Spatial thinking for building ideas and solving problems
     .row
       .button-wrap
-        a(href="https://help.kinopio.club/about/")
-          button About Kinopio →
+        a(href="https://help.kinopio.club/about")
+          button About →
       .button-wrap
-        button(@click.left.stop="toggleBlogsIsVisible" :class="{active: blogsIsVisible}")
-          span Blogs
-        Blogs(:visible="blogsIsVisible")
+        a(href="https://blog.kinopio.club")
+          button Blog →
+      .button-wrap
+        a(href="https://help.kinopio.club")
+          button Help →
 
     .row
-      .button-wrap
-        button(@click.left.stop="toggleHelpIsVisible" :class="{active: helpIsVisible}")
-          span Help
-        Help(:visible="helpIsVisible")
       .button-wrap
         button(@click.left.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
           span What's New
@@ -64,14 +62,13 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         a(href="https://help.kinopio.club/api/")
           button API →
 
-    //- img(src="https://us-east-1.linodeobjects.com/kinopio-uploads/I6_0lhntYrv5i1-Rky61H/image.gif")
+    video.about-video(autoplay loop muted playsinline)
+      source(src="https://kinopio-updates.us-east-1.linodeobjects.com/anime-typing.mp4")
 
 </template>
 
 <script>
 import WhatsNew from '@/components/dialogs/WhatsNew.vue'
-import Help from '@/components/dialogs/Help.vue'
-import Blogs from '@/components/dialogs/Blogs.vue'
 import Apps from '@/components/dialogs/Apps.vue'
 import utils from '@/utils.js'
 
@@ -84,9 +81,7 @@ export default {
   name: 'About',
   components: {
     WhatsNew,
-    Help,
-    Apps,
-    Blogs
+    Apps
   },
   props: {
     visible: Boolean
@@ -103,15 +98,13 @@ export default {
   },
   data () {
     return {
-      helpIsVisible: false,
       whatsNewIsVisible: false,
       appsIsVisible: false,
       newStuff: [],
       isIPhone: false,
       isAndroid: false,
       isMobile: false,
-      dialogHeight: null,
-      blogsIsVisible: false
+      dialogHeight: null
     }
   },
   async mounted () {
@@ -136,16 +129,6 @@ export default {
     isAddPage () { return this.$store.state.isAddPage }
   },
   methods: {
-    toggleBlogsIsVisible () {
-      const isVisible = this.blogsIsVisible
-      this.closeDialogs()
-      this.blogsIsVisible = !isVisible
-    },
-    toggleHelpIsVisible () {
-      const isVisible = this.helpIsVisible
-      this.closeDialogs()
-      this.helpIsVisible = !isVisible
-    },
     toggleWhatsNewIsVisible () {
       const isVisible = this.whatsNewIsVisible
       this.closeDialogs()
@@ -181,10 +164,8 @@ export default {
       }
     },
     closeDialogs () {
-      this.helpIsVisible = false
       this.whatsNewIsVisible = false
       this.appsIsVisible = false
-      this.blogsIsVisible = false
     },
     updateDialogHeight () {
       if (!this.visible) { return }
@@ -216,4 +197,6 @@ export default {
     margin-left 3px
   .keyboard-shortcut
     padding 0 4px !important
+  .about-video
+    border-radius var(--entity-radius)
 </style>
