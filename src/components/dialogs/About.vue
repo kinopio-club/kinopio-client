@@ -4,7 +4,7 @@ dialog.about(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dial
     p About Kinopio
   section
     .row
-      p Spatial thinking for building ideas and solving problems
+      p Thinking canvas for building ideas and solving problems
     .row
       .button-wrap
         a(href="https://help.kinopio.club/about")
