@@ -1634,9 +1634,6 @@ const store = createStore({
     windowScrollWithSpaceOffset: (state) => {
       let scroll = state.windowScroll
       return utils.updatePositionWithSpaceOffset(scroll)
-    },
-    isInteractingWithItem: (state) => {
-      return state.currentUserIsDraggingCard || state.currentUserIsDrawingConnection || state.currentUserIsResizingCard || state.currentUserIsResizingBox || state.currentUserIsDraggingBox
     }
   },
 

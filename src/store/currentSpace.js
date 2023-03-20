@@ -886,8 +886,7 @@ const currentSpace = {
     checkIfShouldPauseConnectionDirections: (context) => {
       const prefersReducedMotion = utils.userPrefersReducedMotion()
       const userSetting = context.rootState.currentUser.shouldPauseConnectionDirections
-      const isInteracting = context.rootGetters.isInteractingWithItem
-      const shouldPause = prefersReducedMotion || userSetting || isInteracting
+      const shouldPause = prefersReducedMotion || userSetting
       if (shouldPause) {
         context.dispatch('pauseConnectionDirections')
       } else {

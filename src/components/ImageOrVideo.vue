@@ -10,41 +10,61 @@ img.image(v-else-if="Boolean(image)" :src="image" :class="{selected: isSelectedO
 <script>
 // import utils from '@/utils.js'
 
+import { mapState, mapGetters } from 'vuex'
+
 export default {
   name: 'ImageOrVideo',
   components: {
   },
   props: {
+    isVisibleInViewport: Boolean,
     isSelectedOrDragging: Boolean,
     pendingUploadDataUrl: String,
     image: String,
     video: String
   },
   emits: ['updateCardDimensions'],
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerOptimizePerformanceDuringScrollOrZoom') {
+        this.checkIfShouldPauseVideo()
+      }
+    })
+  },
+  mounted () {
+  },
+  beforeUnmount () {
+  },
+  data () {
+    return {
+    }
+  },
   computed: {
-    isInteractingWithItem () { return this.$store.getters.isInteractingWithItem }
+    ...mapState([
+      'isTouchScrollingOrPinchZooming'
+    ]),
+    ...mapGetters([
+    ])
   },
   methods: {
     updateDimensions () {
       this.$emit('updateCardDimensions')
     },
-    pause () {
+    checkIfShouldPauseVideo (value) {
       if (!this.video) { return }
       const element = this.$refs.video
-      element.pause()
-    },
-    play () {
-      if (!this.video) { return }
-      const element = this.$refs.video
-      element.play()
+      if (this.isTouchScrollingOrPinchZooming) {
+        element.pause()
+      } else {
+        element.play()
+      }
     }
   },
   watch: {
-    isInteractingWithItem (value) {
-      if (value) {
-        this.pause()
-      } else {
-        this.play()
+    isVisibleInViewport (newValue, prevValue) {
+      const isChanged = newValue !== prevValue
+      if (newValue && isChanged) {
+        this.checkIfShouldPauseVideo()
       }
     }
   }

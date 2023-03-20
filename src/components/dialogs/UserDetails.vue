@@ -154,25 +154,20 @@ export default {
     userDetailsPosition () { return this.$store.state.userDetailsPosition },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     styles () {
-      let { x, y, shouldIgnoreZoom, transformOriginIsTopRight } = this.userDetailsPosition
+      const position = this.userDetailsPosition
       let zoom = this.spaceCounterZoomDecimal
-      if (shouldIgnoreZoom) {
+      if (position.shouldIgnoreZoom) {
         zoom = 1
       }
-      if (this.$store.state.isTouchDevice) {
-        zoom = utils.pinchCounterZoomDecimal()
-        if (zoom > 1) {
-          x = x * zoom
-          y = y * zoom
-        }
+      const viewport = utils.visualViewport()
+      const pinchCounterScale = utils.roundFloat(1 / viewport.scale)
+      if (zoom === 1) {
+        zoom = pinchCounterScale
       }
       const styles = {
         transform: `scale(${zoom})`,
-        left: x + 'px',
-        top: y + 'px'
-      }
-      if (transformOriginIsTopRight) {
-        styles.transformOrigin = 'top right'
+        left: position.x + 'px',
+        top: position.y + 'px'
       }
       return styles
     },
