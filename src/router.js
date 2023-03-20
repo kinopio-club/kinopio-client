@@ -111,6 +111,13 @@ const router = createRouter({
         store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
       }
     }, {
+      path: '/explore',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        store.commit('shouldShowExploreOnLoad', true)
+        next()
+      }
+    }, {
       path: '/journal',
       component: Space,
       beforeEnter: (to, from, next) => {

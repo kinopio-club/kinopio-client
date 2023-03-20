@@ -190,6 +190,7 @@ const store = createStore({
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
     shouldResetDimensionsOnLoad: false,
+    shouldShowExploreOnLoad: false,
 
     // referral
     validateUserReferral: '',
@@ -319,6 +320,10 @@ const store = createStore({
     shouldResetDimensionsOnLoad: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldResetDimensionsOnLoad = value
+    },
+    shouldShowExploreOnLoad: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.shouldShowExploreOnLoad = value
     },
     validateUserReferral: (state, userId) => {
       utils.typeCheck({ value: userId, type: 'string' })
@@ -528,6 +533,7 @@ const store = createStore({
     triggerUserIsLoaded: () => {},
     triggerSearchScopeIsRemote: () => {},
     triggerSearchScopeIsLocal: () => {},
+    triggerShowExplore: () => {},
 
     // Used by extensions only
 
