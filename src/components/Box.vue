@@ -788,11 +788,11 @@ export default {
   0%
     transform rotate(0deg)
   25%
-    transform rotate(-0.5deg)
+    transform rotate(-1deg)
   50%
-    transform rotate(0.5deg)
+    transform rotate(1deg)
   75%
-    transform rotate(-0.5deg)
+    transform rotate(-1deg)
   100%
     transform rotate(0deg)
 
