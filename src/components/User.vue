@@ -63,6 +63,7 @@ export default {
       let options = { element, shouldIgnoreZoom: true }
       if (this.detailsOnRight) {
         options.offsetX = -190
+        options.transformOriginIsTopRight = true
       }
       const position = utils.childDialogPositionFromParent(options)
       this.$store.commit('userDetailsUser', this.user)
