@@ -33,7 +33,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
   //- cards found, or loading with cached cards
   section.results-section(v-if="cards.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
-    SpaceCardList(:groupedItems="groupedItems" :isLoading="loading" @selectSpace="changeSpace" :primaryActionIsCardListOptions="primaryActionIsCardListOptions")
+    SpaceCardList(:groupedItems="groupedItems" :isLoading="loading" @selectSpace="changeSpace" @selectCard="showCardDetails")
 </template>
 
 <script>
