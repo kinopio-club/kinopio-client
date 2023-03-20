@@ -365,6 +365,8 @@ export default {
       let isVisible
       buttons.forEach(button => {
         const classes = button.classList || []
+        console.log('🚗', classes)
+        if (!classes) { return }
         if (!classes.length) { return }
         const isActive = classes.includes('active')
         if (isActive) {
