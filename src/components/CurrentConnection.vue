@@ -138,7 +138,8 @@ export default {
       } else {
         // create card
         endCardId = nanoid()
-        this.$store.dispatch('currentCards/add', { position, id: endCardId })
+        this.$store.dispatch('currentCards/add', { position, id: endCardId, isParentCard: true })
+        this.$store.commit('childCardId', '')
       }
       // create connections to endCardId
       this.$nextTick(() => {
