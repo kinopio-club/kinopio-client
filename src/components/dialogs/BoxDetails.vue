@@ -61,10 +61,8 @@ export default {
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     styles () {
       let zoom = this.spaceCounterZoomDecimal
-      const viewport = utils.visualViewport()
-      const pinchCounterScale = utils.roundFloat(1 / viewport.scale)
-      if (zoom === 1) {
-        zoom = pinchCounterScale
+      if (this.$store.state.isTouchDevice) {
+        zoom = utils.pinchCounterZoomDecimal()
       }
       const styles = {
         transform: `scale(${zoom})`,
@@ -190,6 +188,7 @@ export default {
 
 <style lang="stylus">
 .box-details
+  transform-origin top left
   input.name
     margin-left 6px
     &.is-dark
