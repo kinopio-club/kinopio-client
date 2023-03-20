@@ -533,6 +533,7 @@ const store = createStore({
     triggerUserIsLoaded: () => {},
     triggerSearchScopeIsRemote: () => {},
     triggerSearchScopeIsLocal: () => {},
+    triggerShowExplore: () => {},
 
     // Used by extensions only
 

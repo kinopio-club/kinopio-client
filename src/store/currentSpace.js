@@ -185,6 +185,7 @@ const currentSpace = {
       context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
       context.dispatch('currentUser/validateReferral', null, { root: true })
       context.dispatch('currentUser/validateReferralByName', null, { root: true })
+      context.dispatch('checkIfShouldShowExploreOnLoad')
     },
 
     // Users and otherSpaces
@@ -892,6 +893,13 @@ const currentSpace = {
       } else {
         context.dispatch('unpauseConnectionDirections')
       }
+    },
+    checkIfShouldShowExploreOnLoad: (context) => {
+      const shouldShow = context.rootState.shouldShowExploreOnLoad
+      if (shouldShow) {
+        context.commit('triggerShowExplore', null, { root: true })
+      }
+      context.commit('shouldShowExploreOnLoad', false, { root: true })
     },
     checkIfShouldUpdateNewTweetCards: (context, space) => {
       if (!space.isFromTweet) { return }
