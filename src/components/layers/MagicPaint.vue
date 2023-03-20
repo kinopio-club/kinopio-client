@@ -419,7 +419,10 @@ export default {
         return
       }
       const shouldPrevent = this.checkIfShouldPreventInteraction(position)
-      if (shouldPrevent) { return }
+      if (shouldPrevent) {
+        this.$store.commit('currentUserToolbar', 'card')
+        return
+      }
       this.$store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
       this.$store.commit('currentBoxIsNew', true)
       event.preventDefault() // allows dragging boxes without scrolling on touch
