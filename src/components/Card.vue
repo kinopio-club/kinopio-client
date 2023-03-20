@@ -53,7 +53,7 @@ article#card(
     Frames(:card="card")
 
     template(v-if="!isComment")
-      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" @updateCardDimensions="updateCardDimensions")
+      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" :isVisibleInViewport="isVisibleInViewport" @updateCardDimensions="updateCardDimensions")
     .bottom-button-wrap(v-if="resizeIsVisible")
       //- resize
       .resize-button-wrap.inline-button-wrap(
