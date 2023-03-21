@@ -92,6 +92,8 @@ export default {
         this.addToInboxIsVisible = true
       } else if (mutation.type === 'triggerCheckIfUseHasInboxSpace') {
         this.updateUserHasInbox()
+      } else if (mutation.type === 'triggerShowExplore') {
+        this.exploreIsVisible = true
       }
     })
     window.addEventListener('scroll', this.updatePosition)

@@ -361,17 +361,8 @@ export default {
       }
     },
     footerDialogIsVisible () {
-      const buttons = document.querySelectorAll('footer button')
-      let isVisible
-      buttons.forEach(button => {
-        const classes = button.classList || []
-        if (!classes.length) { return }
-        const isActive = classes.includes('active')
-        if (isActive) {
-          isVisible = true
-        }
-      })
-      return isVisible
+      const activeFooterButton = document.querySelector('footer button.active')
+      return Boolean(activeFooterButton)
     },
     shouldCancel (event) {
       if (shouldCancel) {

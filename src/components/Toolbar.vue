@@ -2,7 +2,7 @@
 nav.toolbar(v-if="visible")
   //- Box
   .segmented-buttons
-    button(:class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')" :title="boxBadgeLabel")
+    button(v-if="canEditSpace" :class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')" :title="boxBadgeLabel")
       img.icon.box-icon(src="@/assets/box.svg")
       .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsBox")
         span {{boxBadgeLabel}}
@@ -15,6 +15,7 @@ export default {
     visible: Boolean
   },
   computed: {
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isTouchDevice () { return this.$store.state.isTouchDevice },
     currentUserToolbar () { return this.$store.state.currentUserToolbar },
     // currentUserToolbarIsCard () { return this.currentUserToolbar === 'card' },

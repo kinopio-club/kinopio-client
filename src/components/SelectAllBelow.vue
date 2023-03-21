@@ -45,9 +45,17 @@ export default {
       if (this.$store.state.isEmbedMode) { return }
       const edgeThreshold = 30
       let header = document.querySelector('header').getBoundingClientRect().height
-      const toolbar = document.querySelector('nav.toolbar').getBoundingClientRect().height
-      header = header + toolbar + 5
-      const footer = document.querySelector('.footer-wrap footer').getBoundingClientRect().height + 20
+      let toolbar = document.querySelector('nav.toolbar')
+      if (toolbar) {
+        toolbar = toolbar.getBoundingClientRect().height
+        header = header + toolbar + 5
+      }
+      let footer = document.querySelector('.footer-wrap footer')
+      if (footer) {
+        footer = footer.getBoundingClientRect().height + 20
+      } else {
+        footer = 0
+      }
       const position = utils.cursorPositionInViewport(event)
       const viewport = utils.visualViewport()
       const isInThreshold = position.x <= edgeThreshold

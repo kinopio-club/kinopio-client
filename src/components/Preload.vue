@@ -10,6 +10,10 @@
     img.icon(src="@/assets/offline.svg")
     img.icon(src="@/assets/center-horizontally.svg")
     img.icon(src="@/assets/distribute-horizontally.svg")
+    img.icon(src="@/assets/brush.svg")
+    //- logo
+    img.icon(src="@/assets/logo-hover.png")
+    img.icon(src="@/assets/logo-active.png")
 
 </template>
 
@@ -51,10 +55,4 @@ export default {
 </script>
 
 <style lang="stylus">
-.preload
-  .logo-hover
-    background-image url('assets/logo-hover.png')
-  .logo-active
-    background-image url('assets/logo-active.png')
-
 </style>

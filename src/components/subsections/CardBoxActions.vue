@@ -255,7 +255,6 @@ export default {
       }
     },
     toggleIsLocked () {
-      this.updateCardDimensions()
       let isLocked = true
       if (this.isLocked) {
         isLocked = false

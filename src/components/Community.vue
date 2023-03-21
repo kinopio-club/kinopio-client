@@ -6,10 +6,14 @@ section.community(v-if="visible" :open="visible" @click.left.stop='closeDialogs'
       button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
         span RSS
       ExploreRssFeed(:visible="exploreRssFeedIsVisible")
-  section.subsection
+  //- Add to Explore
+  section.subsection(v-if="isSpaceMember")
     p Share this space with the community
     p
       AddToExplore(@updateLocalSpaces="updateLocalSpaces")
+  section.subsection(v-else-if="!isSpaceMember && !currentSpaceInExplore")
+    p Share this space with the community
+    p
       AskToAddToExplore
 
   p(v-if="loading")
@@ -61,7 +65,8 @@ export default {
     },
     currentSpace () { return this.$store.state.currentSpace },
     currentSpaceInExplore () { return this.currentSpace.showInExplore },
-    exploreSpaces () { return this.filteredSpaces || this.spaces }
+    exploreSpaces () { return this.filteredSpaces || this.spaces },
+    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() }
   },
   methods: {
     updateLocalSpaces () {

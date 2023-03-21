@@ -2295,7 +2295,7 @@ article
 
   .meta-container
     transform translateY(-6px)
-    display ruby
+    display -webkit-box
     padding 8px
     padding-top 0
     position absolute
