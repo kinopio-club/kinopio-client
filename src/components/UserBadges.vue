@@ -18,7 +18,7 @@
 
 .row(v-if="description")
   .badge.status
-    span {{description}}
+    span(v-html="description")
 </template>
 
 <script>
