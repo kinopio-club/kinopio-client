@@ -2,6 +2,7 @@
 header.presentation-header(v-if="isPresentationMode" :style="position" :class="{'fade-out': isFadingOut}")
   button.active(@click="disablePresentationMode")
     img.icon(src="@/assets/presentation.svg")
+  SelectAllBelow
 
 header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hidden': isHidden}")
   //- embed

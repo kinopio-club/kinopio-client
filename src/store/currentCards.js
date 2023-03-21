@@ -520,9 +520,6 @@ const currentCards = {
         if (!card) { return }
         card = utils.clone(card)
         if (!card) { return }
-        const position = utils.cardPositionFromElement(id)
-        card.x = position.x
-        card.y = position.y
         const { x, y, z } = card
         return { id, x, y, z }
       })
