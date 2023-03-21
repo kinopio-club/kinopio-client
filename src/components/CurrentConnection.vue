@@ -137,8 +137,9 @@ export default {
         endCardId = currentConnectionSuccess.id
       } else {
         // create card
+        const startCard = this.$store.getters['currentCards/byId'](startCardIds[0])
         endCardId = nanoid()
-        this.$store.dispatch('currentCards/add', { position, id: endCardId, isParentCard: true })
+        this.$store.dispatch('currentCards/add', { position, id: endCardId, isParentCard: true, backgroundColor: startCard.backgroundColor })
         this.$store.commit('childCardId', '')
       }
       // create connections to endCardId
