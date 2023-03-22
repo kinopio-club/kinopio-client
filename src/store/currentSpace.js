@@ -589,20 +589,27 @@ const currentSpace = {
       const timeStart = utils.normalizeToUnixTime(new Date())
       const origin = { x: window.scrollX, y: window.scrollY }
       // init items
+      console.log('🌻')
       let cards = addCards || space.cards || []
       let connectionTypes = addConnectionTypes || space.connectionTypes || []
       connectionTypes = connectionTypes.filter(type => Boolean(type))
       let connections = addConnections || space.connections || []
       cards = utils.normalizeItems(cards)
       connections = utils.normalizeItems(connections)
+      console.log('🌻🌻', cards)
+
       let boxes = addBoxes || space.boxes || []
       // sort cards
       const cardIds = Object.keys(cards)
+      console.log('🌻🌻', cards)
+
       cards = cardIds.map(id => {
         const card = cards[id]
         card.distanceFromOrigin = utils.distanceBetweenTwoPoints(card, origin)
         return card
       })
+      console.log('🌻🌻🌻', cards)
+
       cards = sortBy(cards, ['distanceFromOrigin'])
       // page size
       const itemsRect = utils.pageSizeFromItems(cards)
