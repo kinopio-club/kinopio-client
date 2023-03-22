@@ -991,6 +991,7 @@ export default {
     }
   },
   pageSizeFromItemsWithoutDimensions (items) {
+    console.log('☔️ pageSizeFromItemsWithoutDimensions', items.length, items)
     if (!items.length) {
       return { x: 0, y: 0, width: 0, height: 0 }
     }
@@ -1005,7 +1006,7 @@ export default {
     sortedItems = sortBy(items, ['y'])
     let yEnd = last(sortedItems)
     const height = xEnd.y + defaultSize
-    console.log('🌻 pageSizeFromItemsWithoutDimensions', xEnd, yEnd, xEnd.x, yEnd.y, width, height)
+    console.log('🌻 pageSizeFromItemsWithoutDimensions', items, xEnd, yEnd, xEnd.x, yEnd.y, width, height)
     console.timeEnd('🌺pageSizeFromItemsWithoutDimensions')
 
     return { width, height }
