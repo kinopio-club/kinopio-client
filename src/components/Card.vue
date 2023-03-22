@@ -1056,6 +1056,7 @@ export default {
     updateCardDimensions () {
       let card = { id: this.card.id }
       card = utils.updateCardDimensions(card)
+      console.error('🔋🔋🔋 updateCardDimensions', this.card.name, card)
       if (!card) { return }
       this.$store.commit('currentCards/update', card)
     },
@@ -1528,6 +1529,7 @@ export default {
     },
     updateStylesWithWidth (styles) {
       const connectorIsNotVisibleToReadOnlyUser = (!this.connectorIsVisible && !this.isLocked) || this.isComment
+      console.log('🧲🧲🧲', this.card.name, connectorIsNotVisibleToReadOnlyUser, this.width, this.resizeWidth)
       if (this.width) {
         styles.width = this.width + 'px'
       }
@@ -1972,6 +1974,7 @@ export default {
     isVisibleInViewport (value) {
       if (!value) { return }
       this.$nextTick(() => {
+        console.log('🖲🖲 isVisibleInViewport', this.card.name)
         this.updateCardDimensions()
       })
     }
