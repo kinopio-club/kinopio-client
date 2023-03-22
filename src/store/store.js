@@ -24,8 +24,6 @@ const store = createStore({
   state: {
     pageHeight: 0,
     pageWidth: 0,
-    maxPageSizeHeight: 0,
-    maxPageSizeWidth: 0,
     viewportHeight: 0,
     viewportWidth: 0,
     isOnline: true,
