@@ -995,8 +995,14 @@ export default {
     if (!items.length) {
       return { x: 0, y: 0, width: 0, height: 0 }
     }
+
     console.time('🌺pageSizeFromItemsWithoutDimensions')
     items = this.clone(items)
+    items = items.filter(item => item.x && item.y)
+    // if (!items.length) {
+    //   return { x: 0, y: 0, width: 0, height: 0 }
+    // }
+
     const defaultSize = 500
     let sortedItems = sortBy(items, ['x'])
     // width
