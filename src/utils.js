@@ -994,6 +994,7 @@ export default {
     if (!items.length) {
       return { x: 0, y: 0, width: 0, height: 0 }
     }
+    console.time('🌺pageSizeFromItemsWithoutDimensions')
     items = this.clone(items)
     const defaultSize = 500
     let sortedItems = sortBy(items, ['x'])
@@ -1005,6 +1006,7 @@ export default {
     let yEnd = last(sortedItems)
     const height = xEnd.y + defaultSize
     console.log('🌻 pageSizeFromItemsWithoutDimensions', xEnd, yEnd, xEnd.x, yEnd.y, width, height)
+    console.timeEnd('🌺pageSizeFromItemsWithoutDimensions')
 
     return { width, height }
   },
