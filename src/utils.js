@@ -960,10 +960,11 @@ export default {
     return string.split(blankPattern)
   },
   boundaryRectFromItems (items) {
+    items = this.clone(items)
+    items = items.filter(item => item.x && item.y)
     if (!items.length) {
       return { x: 0, y: 0, width: 0, height: 0 }
     }
-    items = this.clone(items)
     const defaultSize = 200
     let rect = {}
     // x, width
@@ -992,16 +993,13 @@ export default {
   },
   pageSizeFromItemsWithoutDimensions (items) {
     console.log('☔️ pageSizeFromItemsWithoutDimensions', items.length, items)
-    if (!items.length) {
-      return { x: 0, y: 0, width: 0, height: 0 }
-    }
 
     console.time('🌺pageSizeFromItemsWithoutDimensions')
     items = this.clone(items)
     items = items.filter(item => item.x && item.y)
-    // if (!items.length) {
-    //   return { x: 0, y: 0, width: 0, height: 0 }
-    // }
+    if (!items.length) {
+      return { x: 0, y: 0, width: 0, height: 0 }
+    }
 
     const defaultSize = 500
     let sortedItems = sortBy(items, ['x'])
