@@ -994,23 +994,35 @@ export default {
   pageSizeFromItemsWithoutDimensions (items) {
     console.log('☔️ pageSizeFromItemsWithoutDimensions', items.length, items)
 
-    console.time('🌺pageSizeFromItemsWithoutDimensions')
     items = this.clone(items)
     items = items.filter(item => item.x && item.y)
     if (!items.length) {
-      return { x: 0, y: 0, width: 0, height: 0 }
+      return { width: 0, height: 0 }
     }
+    console.time('🌺pageSizeFromItemsWithoutDimensions')
 
     const defaultSize = 500
-    let sortedItems = sortBy(items, ['x'])
+
+    let x = 0
+    let y = 0
+    items.forEach(item => {
+      if (item.x > x) {
+        x = item.x
+      }
+      if (item.y > y) {
+        y = item.y
+      }
+    })
+
+    // let sortedItems = sortBy(items, ['x'])
     // width
-    let xEnd = last(sortedItems)
-    const width = xEnd.x + defaultSize
+    // let xEnd = last(sortedItems)
+    const width = x + defaultSize
     // height
-    sortedItems = sortBy(items, ['y'])
-    let yEnd = last(sortedItems)
-    const height = yEnd.y + defaultSize
-    console.log('🌻 pageSizeFromItemsWithoutDimensions', items, xEnd, yEnd, xEnd.x, yEnd.y, width, height)
+    // sortedItems = sortBy(items, ['y'])
+    // let yEnd = last(sortedItems)
+    const height = y + defaultSize
+    console.log('🌻 pageSizeFromItemsWithoutDimensions', items, x, y, width, height)
     console.timeEnd('🌺pageSizeFromItemsWithoutDimensions')
 
     return { width, height }
