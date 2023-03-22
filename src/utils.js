@@ -990,6 +990,22 @@ export default {
       height: rect.y + rect.height + padding
     }
   },
+  pageSizeFromItemsWithoutDimensions (items) {
+    if (!items.length) {
+      return { x: 0, y: 0, width: 0, height: 0 }
+    }
+    items = this.clone(items)
+    const defaultSize = 500
+    let sortedItems = sortBy(items, ['x'])
+    // width
+    let xEnd = last(sortedItems)
+    const width = xEnd.x + defaultSize
+    // height
+    sortedItems = sortBy(items, ['y'])
+    let yEnd = last(sortedItems)
+    const height = xEnd.y + defaultSize
+    return { width, height }
+  },
 
   // Connection Path Utils 🐙
 

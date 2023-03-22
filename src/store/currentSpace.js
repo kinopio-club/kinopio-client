@@ -612,7 +612,7 @@ const currentSpace = {
 
       cards = sortBy(cards, ['distanceFromOrigin'])
       // page size
-      const itemsRect = utils.pageSizeFromItems(cards)
+      const itemsRect = utils.pageSizeFromItemsWithoutDimensions(cards)
       console.log('🌻🌻🌻🌻currentspace utils.pageSizeFromItems', cards, itemsRect)
       context.commit('updatePageSizes', itemsRect, { root: true })
       // sort connections
