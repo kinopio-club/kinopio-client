@@ -1009,7 +1009,7 @@ export default {
     // height
     sortedItems = sortBy(items, ['y'])
     let yEnd = last(sortedItems)
-    const height = xEnd.y + defaultSize
+    const height = yEnd.y + defaultSize
     console.log('🌻 pageSizeFromItemsWithoutDimensions', items, xEnd, yEnd, xEnd.x, yEnd.y, width, height)
     console.timeEnd('🌺pageSizeFromItemsWithoutDimensions')
 
