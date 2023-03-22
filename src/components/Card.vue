@@ -280,11 +280,7 @@ export default {
         this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
       }
     }
-    this.$nextTick(() => {
-      this.$nextTick(() => {
-        this.updateCardDimensions()
-      })
-    })
+    this.updateCardDimensions()
   },
   data () {
     return {
@@ -1062,8 +1058,6 @@ export default {
       let card = { id: this.card.id }
       card = utils.updateCardDimensions(card)
       if (!card) { return }
-      console.error('🔋🔋🔋 updateCardDimensions', this.card.name, card, card.width, window.innerWidth, window.visualViewport.width, this.$store.state.pageWidth)
-
       this.$store.commit('currentCards/update', card)
     },
 
@@ -1535,7 +1529,6 @@ export default {
     },
     updateStylesWithWidth (styles) {
       const connectorIsNotVisibleToReadOnlyUser = (!this.connectorIsVisible && !this.isLocked) || this.isComment
-      console.log('🧲🧲🧲', this.card.name, connectorIsNotVisibleToReadOnlyUser, this.width, this.resizeWidth)
       if (this.width) {
         styles.width = this.width + 'px'
       }
@@ -1980,7 +1973,6 @@ export default {
     isVisibleInViewport (value) {
       if (!value) { return }
       this.$nextTick(() => {
-        console.log('🖲🖲 isVisibleInViewport', this.card.name)
         this.updateCardDimensions()
       })
     }

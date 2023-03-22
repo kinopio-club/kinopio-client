@@ -833,14 +833,11 @@ export default {
     return isInViewportX && isInViewportY
   },
   updateCardDimensions (card) {
-    console.log('utils.updateCardDimensions', card.name, card, window.innerWidth)
     if (!card) { return }
-    // if (!card.name) { return }
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     if (!element) { return }
     this.removeCardDimensions(card)
     const rect = element.getBoundingClientRect()
-    console.log('🧯🧯 util removeCardDimensions', card.name, card, rect, element, window.innerWidth)
     const zoom = this.spaceCounterZoomDecimal()
     card.width = Math.ceil(rect.width * zoom)
     card.height = Math.ceil(rect.height * zoom)
@@ -984,25 +981,12 @@ export default {
     return rect
   },
   pageSizeFromItems (items) {
-    const rect = this.boundaryRectFromItems(items)
-    const padding = 200
-    return {
-      width: rect.x + rect.width + padding,
-      height: rect.y + rect.height + padding
-    }
-  },
-  pageSizeFromItemsWithoutDimensions (items) {
-    console.log('☔️ pageSizeFromItemsWithoutDimensions', items.length, items)
-
     items = this.clone(items)
     items = items.filter(item => item.x && item.y)
     if (!items.length) {
       return { width: 0, height: 0 }
     }
-    console.time('🌺pageSizeFromItemsWithoutDimensions')
-
     const defaultSize = 500
-
     let x = 0
     let y = 0
     items.forEach(item => {
@@ -1013,18 +997,8 @@ export default {
         y = item.y
       }
     })
-
-    // let sortedItems = sortBy(items, ['x'])
-    // width
-    // let xEnd = last(sortedItems)
     const width = x + defaultSize
-    // height
-    // sortedItems = sortBy(items, ['y'])
-    // let yEnd = last(sortedItems)
     const height = y + defaultSize
-    console.log('🌻 pageSizeFromItemsWithoutDimensions', items, x, y, width, height)
-    console.timeEnd('🌺pageSizeFromItemsWithoutDimensions')
-
     return { width, height }
   },
 
