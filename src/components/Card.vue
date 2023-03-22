@@ -1061,8 +1061,9 @@ export default {
     updateCardDimensions () {
       let card = { id: this.card.id }
       card = utils.updateCardDimensions(card)
-      console.error('🔋🔋🔋 updateCardDimensions', this.card.name, card)
       if (!card) { return }
+      console.error('🔋🔋🔋 updateCardDimensions', this.card.name, card, card.width, window.innerWidth, window.visualViewport.width, this.$store.state.pageWidth)
+
       this.$store.commit('currentCards/update', card)
     },
 

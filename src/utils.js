@@ -833,14 +833,14 @@ export default {
     return isInViewportX && isInViewportY
   },
   updateCardDimensions (card) {
-    console.log('utils.updateCardDimensions', card.name, card)
+    console.log('utils.updateCardDimensions', card.name, card, window.innerWidth)
     if (!card) { return }
-    if (!card.name) { return }
+    // if (!card.name) { return }
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     if (!element) { return }
     this.removeCardDimensions(card)
     const rect = element.getBoundingClientRect()
-    console.log('🧯🧯 util removeCardDimensions', card.name, card, rect, element)
+    console.log('🧯🧯 util removeCardDimensions', card.name, card, rect, element, window.innerWidth)
     const zoom = this.spaceCounterZoomDecimal()
     card.width = Math.ceil(rect.width * zoom)
     card.height = Math.ceil(rect.height * zoom)
