@@ -1004,6 +1004,8 @@ export default {
     sortedItems = sortBy(items, ['y'])
     let yEnd = last(sortedItems)
     const height = xEnd.y + defaultSize
+    console.log('🌻 pageSizeFromItemsWithoutDimensions', xEnd, yEnd, xEnd.x, yEnd.y, width, height)
+
     return { width, height }
   },
 
