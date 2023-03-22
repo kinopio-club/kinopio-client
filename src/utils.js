@@ -838,6 +838,7 @@ export default {
     if (!element) { return }
     this.removeCardDimensions(card)
     const rect = element.getBoundingClientRect()
+    console.log('🧯🧯 util removeCardDimensions', card.name, card, rect, element)
     const zoom = this.spaceCounterZoomDecimal()
     card.width = Math.ceil(rect.width * zoom)
     card.height = Math.ceil(rect.height * zoom)
