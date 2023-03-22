@@ -281,7 +281,9 @@ export default {
       }
     }
     this.$nextTick(() => {
-      this.updateCardDimensions()
+      this.$nextTick(() => {
+        this.updateCardDimensions()
+      })
     })
   },
   data () {
