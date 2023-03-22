@@ -833,6 +833,7 @@ export default {
     return isInViewportX && isInViewportY
   },
   updateCardDimensions (card) {
+    console.log('utils.updateCardDimensions', card.name, card)
     if (!card) { return }
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     if (!element) { return }
