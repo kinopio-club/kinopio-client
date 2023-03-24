@@ -473,71 +473,78 @@ export default {
       context.commit('isLoadingFavorites', false, { root: true })
     },
     addFavorite: (context, { type, item }) => {
-      let color
+      let color, notification
+      // user
       if (type === 'user') {
-        let favorites = utils.clone(context.state.favoriteUsers)
-        let favorite = {
+        let favoriteUsers = utils.clone(context.state.favoriteUsers)
+        let user = {
           id: item.id,
           name: item.name,
           color: item.color
         }
-        favorites.push(favorite)
-        context.commit('favoriteUsers', favorites)
+        favoriteUsers.push(user)
+        context.commit('favoriteUsers', favoriteUsers)
+        context.dispatch('userNotifications/addFavoriteUser', user, { root: true })
+      // space
       } else if (type === 'space') {
-        let favorites = utils.clone(context.state.favoriteSpaces)
-        let favorite = {
+        let favoriteSpaces = utils.clone(context.state.favoriteSpaces)
+        let space = {
           id: item.id,
           name: item.name,
           privacy: item.privacy,
           showInExplore: item.showInExplore,
           users: item.users
         }
-        favorites.push(favorite)
-        context.commit('favoriteSpaces', favorites)
+        favoriteSpaces.push(space)
+        context.commit('favoriteSpaces', favoriteSpaces)
+        context.dispatch('userNotifications/addFavoriteSpace', space, { root: true })
+      // color
       } else if (type === 'color') {
         color = item.color
-        let favorites = utils.clone(context.state.favoriteColors)
-        let favorite = color
-        favorites.push(favorite)
-        context.commit('favoriteColors', favorites)
+        let favoriteColors = utils.clone(context.state.favoriteColors)
+        favoriteColors.push(color)
+        context.commit('favoriteColors', favoriteColors)
       }
+      // update api
       let body = { type, id: item.id }
       if (color) {
         body.color = color
       }
-      context.dispatch('api/addToQueue', { name: 'addOrRemoveFavorite',
-        body
-      }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'addOrRemoveFavorite', body }, { root: true })
     },
     removeFavorite: (context, { type, item }) => {
       let color
+      // user
       if (type === 'user') {
-        let favorites = utils.clone(context.state.favoriteUsers)
-        favorites = favorites.filter(favorite => {
+        let favoriteUsers = utils.clone(context.state.favoriteUsers)
+        favoriteUsers = favoriteUsers.filter(favorite => {
           return favorite.id !== item.id
         })
-        context.commit('favoriteUsers', favorites)
+        context.commit('favoriteUsers', favoriteUsers)
+        context.dispatch('userNotifications/removeFavoriteUser', item, { root: true })
+      // space
       } else if (type === 'space') {
-        let favorites = utils.clone(context.state.favoriteSpaces)
-        favorites = favorites.filter(favorite => {
-          return favorite.id !== item.id
+        let favoriteSpaces = utils.clone(context.state.favoriteSpaces)
+        favoriteSpaces = favoriteSpaces.filter(space => {
+          return space.id !== item.id
         })
-        context.commit('favoriteSpaces', favorites)
+        context.commit('favoriteSpaces', favoriteSpaces)
+        context.dispatch('userNotifications/removeFavoriteSpace', item, { root: true })
+      // color
       } else if (type === 'color') {
         color = item.color
-        let favorites = utils.clone(context.state.favoriteColors)
-        favorites = favorites.filter(favoriteColor => {
+        let favoriteColors = utils.clone(context.state.favoriteColors)
+        favoriteColors = favoriteColors.filter(favoriteColor => {
           return favoriteColor !== color
         })
-        context.commit('favoriteColors', favorites)
+        context.commit('favoriteColors', favoriteColors)
       }
+      // update api
       let body = { type, id: item.id }
       if (color) {
         body.color = color
       }
-      context.dispatch('api/addToQueue', { name: 'addOrRemoveFavorite',
-        body
-      }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'addOrRemoveFavorite', body }, { root: true })
     },
     confirmEmail: (context) => {
       context.dispatch('api/addToQueue', { name: 'updateUser',
