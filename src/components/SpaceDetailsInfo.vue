@@ -418,6 +418,17 @@ export default {
         right -50px
 
 .segmented-buttons.vertical
+  .background-preview
+    .preview-button,
+    button,
+    .background-tint
+      border-bottom-left-radius 0
+      border-bottom-right-radius 0
+  .background-preview-wrap + .button-wrap
+    button
+      border-top-left-radius 0
+      border-top-right-radius 0
+      margin-top -4px
   button
     width 31px
 
