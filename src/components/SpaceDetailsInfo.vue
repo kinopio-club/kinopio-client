@@ -56,7 +56,7 @@ ReadOnlySpaceInfoBadges
 //- Space Settings
 
 //- read only space settings
-section.subsection.space-settings(v-if="!isSpaceMember")
+section.subsection.space-settings.read-only-space-settings(v-if="!isSpaceMember")
   .row
     //- Duplicate
     .button-wrap
@@ -76,7 +76,7 @@ section.subsection.space-settings(v-if="!isSpaceMember")
       span Follow updates
 
 //- member space settings
-section.subsection.space-settings(v-if="settingsIsVisible")
+section.subsection.space-settings.member-space-settings(v-if="settingsIsVisible")
   .row
     //- Background
     //- .button-wrap
@@ -90,13 +90,13 @@ section.subsection.space-settings(v-if="settingsIsVisible")
         img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
         img.icon(v-else src="@/assets/heart-empty.svg")
         span Pin
-
-  .row
     //- Template
     .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
       button.variable-length-content(:class="{ active: currentSpaceIsUserTemplate }")
         img.icon.templates(src="@/assets/templates.svg")
         span Template
+
+  .row
     //- Export
     .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
       button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
@@ -408,10 +408,14 @@ export default {
       border-radius 4px
   p
     white-space normal
-
-.dialog-is-pinned
-  dialog.export
-    right -50px
+  &.member-space-settings
+    dialog.export
+      left 8px
+      right initial
+  &.read-only-space-settings
+    .dialog-is-pinned
+      dialog.export
+        right -50px
 
 .segmented-buttons.vertical
   button
