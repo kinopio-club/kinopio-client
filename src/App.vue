@@ -710,22 +710,31 @@ dialog
     &:last-child
       border-top-right-radius var(--entity-radius)
       border-bottom-right-radius var(--entity-radius)
-  // &.vertical
-  //   display flex
-  //   flex-direction column
-  //   .button-wrap
-  //     button
-  //       min-width 24px
-  //       border-radius 0
-  //       margin-bottom -1px
-  //     &:first-child
-  //       button
-  //         border-top-left-radius var(--small-entity-radius)
-  //         border-top-right-radius var(--small-entity-radius)
-  //     &:last-child
-  //       button
-  //         border-bottom-left-radius var(--small-entity-radius)
-  //         border-bottom-right-radius var(--small-entity-radius)
+  &.vertical
+    display flex
+    flex-direction column
+    .background-preview
+      .preview-button,
+      button
+        border-bottom-left-radius 0
+        border-bottom-right-radius 0
+    .background-preview-wrap + .button-wrap
+      button
+        border-top-left-radius 0
+        border-top-right-radius 0
+        margin-top -4px
+    .button-wrap
+      margin 0
+      button
+        margin-bottom -1px
+      &:first-child
+        button
+          border-top-left-radius var(--entity-radius)
+          border-top-right-radius var(--entity-radius)
+      &:last-child
+        button
+          border-bottom-left-radius var(--entity-radius)
+          border-bottom-right-radius var(--entity-radius)
 
   button + button,
   label + button,

@@ -3,7 +3,7 @@
   //- button
   .preview-button(v-if="isButton")
     .background-tint(:style="backgroundTintStyles")
-    button.background-button(:style="backgroundStyles" :class="{ active: buttonIsActive }")
+    button(:style="backgroundStyles" :class="{ active: buttonIsActive }")
   //- thumbnail
   .preview-wrap(v-else)
     .background-tint(:style="backgroundTintStyles")

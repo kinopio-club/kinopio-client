@@ -4,8 +4,13 @@
   //- Space Meta
 
   .row.space-info-wrap
-    .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-      BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
+    .button-wrap
+      .segmented-buttons.vertical
+        .button-wrap.background-preview-wrap(@click.left.stop="toggleBackgroundIsVisible")
+          BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
+        .button-wrap
+          button
+            span A
       //- Background Upload Progress
       .uploading-container-footer(v-if="pendingUpload")
         .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
@@ -17,6 +22,7 @@
           Loader(:visible="true")
           span {{remotePendingUpload.percentComplete}}%
       Background(:visible="backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
+
     //- Name
     .textarea-wrap(:class="{'full-width': shouldHidePin}")
       textarea.name(
@@ -341,6 +347,7 @@ export default {
 
   .space-info-wrap
     margin 0
+    align-items flex-start
     .textarea-wrap
       width 145px
       &.full-width
@@ -405,5 +412,9 @@ export default {
 .dialog-is-pinned
   dialog.export
     right -50px
+
+.segmented-buttons.vertical
+  button
+    width 31px
 
 </style>
