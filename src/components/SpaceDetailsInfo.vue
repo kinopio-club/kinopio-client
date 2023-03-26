@@ -9,7 +9,8 @@
         .button-wrap.background-preview-wrap(@click.left.stop="toggleBackgroundIsVisible")
           BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
         .button-wrap
-          button
+          //- toggleFontIsVisible
+          button(@click.left.stop="toggleFontIsVisible" :class="{ active: fontIsVisible }")
             span A
       //- Background Upload Progress
       .uploading-container-footer(v-if="pendingUpload")
@@ -22,6 +23,7 @@
           Loader(:visible="true")
           span {{remotePendingUpload.percentComplete}}%
       Background(:visible="backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
+      Font(:visible="fontIsVisible")
 
     //- Name
     .textarea-wrap(:class="{'full-width': shouldHidePin}")
@@ -130,6 +132,7 @@ section.subsection.space-settings.member-space-settings(v-if="settingsIsVisible"
 
 <script>
 import Background from '@/components/dialogs/Background.vue'
+import Font from '@/components/dialogs/Font.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
@@ -143,6 +146,7 @@ export default {
   emits: ['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace'],
   components: {
     Background,
+    Font,
     BackgroundPreview,
     Loader,
     PrivacyButton,
@@ -186,7 +190,8 @@ export default {
       backgroundIsVisible: false,
       privacyPickerIsVisible: false,
       settingsIsVisible: false,
-      exportIsVisible: false
+      exportIsVisible: false,
+      fontIsVisible: false
     }
   },
   computed: {
@@ -321,10 +326,17 @@ export default {
       this.exportIsVisible = !isVisible
       this.$emit('updateDialogHeight')
     },
+    toggleFontIsVisible () {
+      const isVisible = this.fontIsVisible
+      this.closeDialogsAndEmit()
+      this.fontIsVisible = !isVisible
+      this.$emit('updateDialogHeight')
+    },
     closeDialogs () {
       this.backgroundIsVisible = false
       this.privacyPickerIsVisible = false
       this.exportIsVisible = false
+      this.fontIsVisible = false
     },
     closeDialogsAndEmit () {
       this.closeDialogs()

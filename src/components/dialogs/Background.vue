@@ -462,6 +462,7 @@ export default {
     margin-left 0 !important
   .background-preview
     margin-right 6px
+    vertical-align -2px
   .title
     color var(--primary)
   section
