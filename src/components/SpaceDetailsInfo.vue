@@ -79,10 +79,10 @@ section.subsection.space-settings(v-if="!isSpaceMember")
 section.subsection.space-settings(v-if="settingsIsVisible")
   .row
     //- Background
-    .button-wrap
-      button(@click.left.stop="toggleBackgroundIsVisible")
-        BackgroundPreview(:space="currentSpace")
-        span Background
+    //- .button-wrap
+    //-   button(@click.left.stop="toggleBackgroundIsVisible")
+    //-     BackgroundPreview(:space="currentSpace")
+    //-     span Background
 
     //- Favorite
     .button-wrap
