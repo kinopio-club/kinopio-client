@@ -8,6 +8,7 @@
       .segmented-buttons.vertical
         .button-wrap.background-preview-wrap(@click.left.stop="toggleBackgroundIsVisible")
           BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
+          Background(:visible="backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
         .button-wrap
           button
             span A
@@ -21,7 +22,6 @@
         .badge.info
           Loader(:visible="true")
           span {{remotePendingUpload.percentComplete}}%
-      Background(:visible="backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
 
     //- Name
     .textarea-wrap(:class="{'full-width': shouldHidePin}")
