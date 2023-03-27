@@ -35,7 +35,7 @@ export default {
 
     addFavoriteSpace: (context, favoriteSpace) => {
       const userId = context.rootState.currentUser.id
-      const recipientUserIds = favoriteSpace.users
+      const recipientUserIds = context.getters.recipientUserIds
       const notification = {
         type: 'addFavoriteSpace',
         userId,
@@ -46,7 +46,7 @@ export default {
     },
     removeFavoriteSpace: (context, favoriteSpace) => {
       const userId = context.rootState.currentUser.id
-      const recipientUserIds = favoriteSpace.users
+      const recipientUserIds = context.getters.recipientUserIds
       const notification = {
         type: 'removeFavoriteSpace',
         userId,
