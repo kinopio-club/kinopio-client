@@ -11,30 +11,41 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
     p(v-if="!loading && !notifications.length")
       span Cards added to your spaces by collaborators can be found here
     ul.results-list(v-if="notifications.length")
-      template(v-for="group in groupedItems")
-        //- space
-        hr
-        li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
-          BackgroundPreview(v-if="group.space" :space="group.space")
-          span {{group.spaceName}}
-        //- notifications
-        template(v-for="(notification in group.notifications")
-          li(@click="click(notification)" :class="{ active: isActive(notification) }" :data-notification-id="notification.id")
-            p
-              span.badge.info(v-if="!notification.isRead") New
-              img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="isAskToAddToExplore(notification)")
-              UserLabelInline(:user="notification.user")
-              template(v-if="isAskToAddToExplore(notification)")
-                span asked to add
-                span.badge.space-badge
-                  span {{group.spaceName}}
-                span to Explore
+      template(v-for="notification in notifications")
+        li(@click="click(notification)" :class="{ active: isActive(notification), 'add-favorite-user': notification.type === 'addFavoriteUser' }" :data-notification-id="notification.id")
+          //- message
+          .row(:class="{ 'row-align-items-start': notification.type === 'askToAddToExplore' }")
+            span.badge.info.new-unread-badge(v-if="!notification.isRead")
+            img.icon.add(v-if="notification.iconClass === 'add'" src="@/assets/add.svg")
+            img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
+            img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
+            span {{notification.message}}
 
-            .notification-info(v-if="isCard(notification)")
-              img.icon(src="@/assets/add.svg")
-              template(v-for="segment in notification.card.nameSegments")
-                img.card-image(v-if="segment.isImage" :src="segment.url")
-                NameSegment(:segment="segment")
+          //- meta
+          .row.row-align-items-start
+            //- user
+            .user-wrap
+              UserLabelInline(:user="notification.user")
+            //- space
+            .space-name-wrap.badge.secondary(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click="changeSpace(notification.spaceId)" :class="{ active: spaceIsCurrentSpace(notification.spaceId) }")
+              BackgroundPreview(v-if="notification.space" :space="notification.space")
+              span.space-name {{notification.space.name}}
+
+          //- p
+
+            //- img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="isAskToAddToExplore(notification)")
+            //- template(v-if="isAskToAddToExplore(notification)")
+            //-   span asked to add
+            //-   span.badge.space-badge
+            //-     span {{notification.space.name}}
+            //-   span to Explore
+
+          //- cardname
+          .notification-info(v-if="isCard(notification)")
+            //- img.icon(src="@/assets/add.svg")
+            template(v-for="segment in cardNameSegments(notification.card.name)")
+              img.card-image(v-if="segment.isImage" :src="segment.url")
+              NameSegment(:segment="segment")
 
 </template>
 
@@ -74,34 +85,14 @@ export default {
   },
   computed: {
     currentSpaceId () { return this.$store.state.currentSpace.id },
-    currentUser () { return this.$store.state.currentUser },
-    groupedItems () {
-      let groups = []
-      this.notifications.forEach(item => {
-        if (item.card) {
-          item.card.nameSegments = this.cardNameSegments(item.card.name)
-        }
-        const groupIndex = groups.findIndex(group => group.spaceId === item.spaceId)
-        if (groupIndex !== -1) {
-          groups[groupIndex].notifications.push(item)
-        } else {
-          groups.push({
-            spaceName: item.space.name,
-            spaceId: item.spaceId,
-            space: item.space,
-            notifications: [item]
-          })
-        }
-      })
-      return groups
-    }
+    currentUser () { return this.$store.state.currentUser }
   },
   methods: {
     isAskToAddToExplore (notification) {
       return notification.type === 'askToAddToExplore'
     },
     isCard (notification) {
-      return (notification.type === 'createCard' || notification.type === 'updateCard') && notification.card
+      return notification.type === 'createCard' || notification.type === 'updateCard'
     },
     isActive (notification) {
       const isCard = this.isCard(notification)
@@ -240,8 +231,10 @@ export default {
 
   .background-preview
     .preview-wrap
-      margin-right 6px
-      vertical-align middle
+      vertical-align -2px
+      width 14px
+      height 14px
+      border-radius var(--small-entity-radius)
 
   .card-image
     width 48px
@@ -268,4 +261,32 @@ export default {
     .tag
       display inline-block
       margin-right 0
+  .space-name-wrap
+    display flex
+    // flex-shrink 10
+    margin-right 0
+    .space-name
+      white-space nowrap
+      overflow hidden
+      text-overflow ellipsis
+  .user-wrap
+    max-width 40%
+    .user-label-inline
+      max-width 94%
+      white-space nowrap
+      overflow hidden
+      text-overflow ellipsis
+  .row-align-items-start
+    align-items flex-start !important
+    .sunglasses
+      margin-top 2px
+
+  // notification types
+
+  li.add-favorite-user
+    .user-wrap
+      max-width initial
+      .user-label-inline
+        max-width initial
+
 </style>
