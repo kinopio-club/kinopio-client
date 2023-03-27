@@ -281,6 +281,9 @@ export default {
     .sunglasses
       margin-top 2px
 
+  .inline-badge
+    vertical-align 0
+
   // notification types
 
   li.add-favorite-user
