@@ -391,10 +391,10 @@ const currentCards = {
             height: Math.ceil(card.height)
           }
           context.commit('update', body)
+          updateTallestCardHeight(card.height)
           if (!dimensionsChanged) { return }
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
-          updateTallestCardHeight(card.height)
         })
       })
     },
