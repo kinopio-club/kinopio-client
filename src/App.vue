@@ -933,6 +933,10 @@ code
     background-color var(--secondary-active-background-dark)
   &.last-child
     margin 0
+  &.new-unread-badge
+    border-radius 100px
+    min-width 12px
+    min-height 12px
 
   input
     margin 0

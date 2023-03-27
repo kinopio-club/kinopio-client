@@ -38,7 +38,7 @@ span.space-list-wrap
                 User(:user="user(space)" :isClickable="false" :key="user(space).id")
               //- NEW badge
               span(v-if="isNew(space)")
-                .badge.info.inline-badge.new-badge New
+                .badge.info.inline-badge.new-unread-badge
               //- space meta
               span(v-if="space.isFavorite")
                 img.icon.favorite-icon(src="@/assets/heart.svg")
@@ -397,8 +397,8 @@ export default {
     margin-left 0
     flex none
 
-  .new-badge
-    word-break keep-all
+  .new-unread-badge
+    margin-top 4px
 
   .badge
     margin-left 0
