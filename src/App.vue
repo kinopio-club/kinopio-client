@@ -937,6 +937,7 @@ code
     border-radius 100px
     min-width 12px
     min-height 12px
+    display inline-block
 
   input
     margin 0

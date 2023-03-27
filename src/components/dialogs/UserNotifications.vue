@@ -2,9 +2,9 @@
 dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight -50 + 'px'}")
   section
     p
-      span.badge.info(v-if="unreadCount") {{unreadCount}}
+      span.badge.info.inline-badge(v-if="unreadCount") {{unreadCount}}
       span(v-else) {{unreadCount}}{{' '}}
-      span Notifications
+      span New Notifications
       Loader(:visible="loading")
 
   section.results-section(v-if="notifications.length" :style="{'max-height': dialogHeight + 'px'}")
@@ -15,11 +15,12 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
         li(@click="click(notification)" :class="{ active: isActive(notification), 'add-favorite-user': notification.type === 'addFavoriteUser' }" :data-notification-id="notification.id")
           //- message
           .row(:class="{ 'row-align-items-start': notification.type === 'askToAddToExplore' }")
-            span.badge.info.new-unread-badge(v-if="!notification.isRead")
-            img.icon.add(v-if="notification.iconClass === 'add'" src="@/assets/add.svg")
-            img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
-            img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
-            span {{notification.message}}
+            div
+              span.badge.info.new-unread-badge(v-if="!notification.isRead")
+              img.icon.add(v-if="notification.iconClass === 'add'" src="@/assets/add.svg")
+              img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
+              img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
+              span {{notification.message}}
 
           //- meta
           .row.row-align-items-start
@@ -40,12 +41,11 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
             //-     span {{notification.space.name}}
             //-   span to Explore
 
-          //- cardname
-          .notification-info(v-if="isCard(notification)")
-            //- img.icon(src="@/assets/add.svg")
+          //- details
+          div(v-if="notification.card")
             template(v-for="segment in cardNameSegments(notification.card.name)")
-              img.card-image(v-if="segment.isImage" :src="segment.url")
               NameSegment(:segment="segment")
+            img.card-image(v-if="notification.detailsImage" :src="notification.detailsImage")
 
 </template>
 
@@ -217,6 +217,15 @@ export default {
     padding-top 4px
     li
       display block
+      border-bottom-left-radius 0
+      border-bottom-right-radius 0
+      border-bottom 1px solid var(--primary-border)
+      &:hover,
+      &:active,
+      &:focus
+        border-radius var(--entity-radius)
+        border-bottom 1px solid transparent
+
   .notification-info
     margin-top 4px
     .button-badge
@@ -237,9 +246,8 @@ export default {
       border-radius var(--small-entity-radius)
 
   .card-image
-    width 48px
     vertical-align middle
-    border-radius var(--small-entity-radius)
+    border-radius var(--entity-radius)
   .icon + .card-image
   .card-image + span
     margin-left 5px
@@ -278,8 +286,6 @@ export default {
       text-overflow ellipsis
   .row-align-items-start
     align-items flex-start !important
-    .sunglasses
-      margin-top 2px
 
   .inline-badge
     vertical-align 0
