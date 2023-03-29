@@ -6,6 +6,7 @@ const themes = {
     colors: {
       'primary': 'black',
       'primary-border': 'rgba(0,0,0,0.4)',
+      'secondary-border': 'rgba(0,0,0,0.15)',
       'primary-background': 'white',
       'text-link': '#143997',
       'primary-transparent': 'rgba(0,0,0,0.5)',
@@ -30,6 +31,7 @@ const themes = {
     colors: {
       'primary': 'white',
       'primary-border': 'rgba(255,255,255,0.3)',
+      'secondary-border': 'rgba(255,255,255,0.2)',
       'primary-background': 'black',
       'text-link': '#788cc9',
       'primary-transparent': 'rgba(0,0,0,0.5)',
