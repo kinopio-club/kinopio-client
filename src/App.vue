@@ -935,21 +935,14 @@ code
   &.last-child
     margin 0
   &.new-unread-badge
-    // border-radius 100px
-    border-radius 0
-    border-top-right-radius var(--small-entity-radius)
-    border-bottom-right-radius var(--small-entity-radius)
+    border-radius 100px
     min-width initial
     min-height initial
     width 6px
-    height 10px
-    position absolute
-    left -5px
-    top 12px
-    background var(--new-unread-background)
-    margin 0
+    height 6px
     padding 0
-
+    vertical-align 2px
+    background var(--new-unread-background)
   input
     margin 0
   .user

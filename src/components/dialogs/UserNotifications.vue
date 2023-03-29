@@ -13,7 +13,9 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
         //- TODO wrap in <a> for middle click
         li(@click="click(notification)" :class="{ active: isActive(notification) }" :data-notification-id="notification.id")
           div
+            //- new
             .badge.info.new-unread-badge(v-if="!notification.isRead")
+            //- icon
             img.icon.add(v-if="notification.iconClass === 'add'" src="@/assets/add.svg")
             img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
             img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
@@ -277,5 +279,6 @@ export default {
     margin-right 3px
   .space-name-wrap
     margin-left 3px
-
+  .new-unread-badge
+    display inline-block
 </style>
