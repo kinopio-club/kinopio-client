@@ -993,6 +993,11 @@ code
       height 10px
   > .icon.private
     margin-left 3px
+  .user-label-inline
+    display inline-block
+    min-height initial
+    height 17px
+    vertical-align -3px
 
 .danger
   background-color var(--danger-background)
