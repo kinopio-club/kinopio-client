@@ -175,6 +175,7 @@ import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 
 import { mapState, mapGetters } from 'vuex'
+import sortBy from 'lodash-es/sortBy'
 
 let updateNotificationsIntervalTimer
 
@@ -643,7 +644,8 @@ export default {
 
     async updateNotifications () {
       this.notificationsIsLoading = true
-      this.notifications = await this.$store.dispatch('api/getNotifications') || []
+      const notifications = await this.$store.dispatch('api/getNotifications') || []
+      this.notifications = sortBy(notifications, 'isRead')
       this.notificationsIsLoading = false
     },
     markAllAsRead () {
