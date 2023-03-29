@@ -217,7 +217,7 @@ export default {
       display block
       border-bottom-left-radius 0
       border-bottom-right-radius 0
-      border-bottom 1px solid var(--secondary-border)
+      border-bottom 1px solid var(--primary-border)
       &:hover,
       &:active,
       &:focus
