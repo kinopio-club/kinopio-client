@@ -1039,7 +1039,6 @@ export default {
       x: coords[1],
       y: coords[2]
     }
-    console.log('🌷🌷', coords, path)
     return this.integerCoords(coords)
   },
   curveControlPointFromPath (path) {
