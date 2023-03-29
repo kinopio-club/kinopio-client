@@ -95,18 +95,19 @@ export default {
     isAskToAddToExplore (notification) {
       return notification.type === 'askToAddToExplore'
     },
-    primaryAction (notification) {
-      if (notification.space) {
-        this.changeSpace(notification.spaceId)
-      }
-    },
     cardDetailsIsVisible (cardId) {
       return this.$store.state.cardDetailsIsVisibleForCardId === cardId
     },
     isCurrentSpace (spaceId) {
       return spaceId === this.currentSpaceId
     },
+    primaryAction (notification) {
+      if (notification.space) {
+        this.changeSpace(notification.spaceId)
+      }
+    },
     changeSpace (spaceId) {
+      this.$store.commit('cardDetailsIsVisibleForCardId', null)
       if (this.isCurrentSpace(spaceId)) { return }
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
