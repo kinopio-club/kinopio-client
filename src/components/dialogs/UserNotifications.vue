@@ -28,17 +28,10 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
             span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click="changeSpace(notification.spaceId)" :class="{ active: spaceIsCurrentSpace(notification.spaceId) }")
               BackgroundPreview(v-if="notification.space" :space="notification.space")
               span.space-name {{notification.space.name}}
-
-          //- p
-
-            //- img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="isAskToAddToExplore(notification)")
-            //- template(v-if="isAskToAddToExplore(notification)")
-            //-   span asked to add
-            //-   span.badge.space-badge
-            //-     span {{notification.space.name}}
-            //-   span to Explore
-
-          //- details
+          //- add to explore button
+          .row(v-if="notification.type === 'askToAddToExplore'")
+            AddToExplore(:space="notifications.space" :visible="true" @updateAddToExplore="updateAddToExplore")
+          //- card details
           .row(v-if="notification.card")
             .card-details.badge.button-badge
               template(v-for="segment in cardNameSegments(notification.card.name)")
@@ -54,6 +47,7 @@ import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import AddToExplore from '@/components/AddToExplore.vue'
 
 export default {
   name: 'UserNotifications',
@@ -61,7 +55,8 @@ export default {
     Loader,
     UserLabelInline,
     NameSegment,
-    BackgroundPreview
+    BackgroundPreview,
+    AddToExplore
   },
   props: {
     visible: Boolean,
@@ -242,6 +237,8 @@ export default {
       width 14px
       height 14px
       border-radius var(--small-entity-radius)
+  .row
+    margin-top 10px
   .card-details
     background-color var(--secondary-background)
     border-radius var(--entity-radius)
@@ -249,7 +246,6 @@ export default {
     width fit-content
     max-width 100%
     margin 0
-    margin-top 5px
 
   .card-image
     vertical-align middle

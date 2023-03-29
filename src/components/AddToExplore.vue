@@ -1,5 +1,5 @@
 <template lang="pug">
-.button-wrap.add-to-explore(v-if="isSpaceMember")
+.button-wrap.add-to-explore(v-if="isVisible")
   button.variable-length-content(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
     span(v-if="!showInExplore")
       img.icon.add(src="@/assets/add.svg")
@@ -29,13 +29,17 @@ let prevPrivacy = ''
 
 export default {
   name: 'ShowInExploreButton',
-  emits: ['updateLocalSpaces'],
+  emits: ['updateLocalSpaces', 'updateAskToAddToExplore'],
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentSpace/restoreSpace') {
         this.clearErrors()
       }
     })
+  },
+  props: {
+    space: Object,
+    visible: Boolean
   },
   data () {
     return {
@@ -47,10 +51,13 @@ export default {
     }
   },
   computed: {
-    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    isVisible () {
+      return this.visible || this.$store.getters['currentUser/isSpaceMember']()
+    },
     showInExplore () {
-      const showInExplore = this.$store.state.currentSpace.showInExplore
-      const isNotPrivate = this.$store.state.currentSpace.privacy !== 'private'
+      const space = this.space || this.$store.state.currentSpace
+      const showInExplore = space.showInExplore
+      const isNotPrivate = space.privacy !== 'private'
       return showInExplore && isNotPrivate
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
