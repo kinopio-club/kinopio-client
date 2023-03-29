@@ -2,9 +2,7 @@
 dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight -50 + 'px'}")
   section
     p
-      span.badge.info.inline-badge(v-if="unreadCount") {{unreadCount}}
-      span(v-else) {{unreadCount}}{{' '}}
-      span New Notifications
+      span Notifications
       Loader(:visible="loading")
 
   section.results-section(v-if="notifications.length" :style="{'max-height': dialogHeight + 'px'}")
@@ -12,23 +10,20 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
       span Cards added to your spaces by collaborators can be found here
     ul.results-list(v-if="notifications.length")
       template(v-for="notification in notifications")
-        li(@click="click(notification)" :class="{ active: isActive(notification), 'add-favorite-user': notification.type === 'addFavoriteUser' }" :data-notification-id="notification.id")
-          //- message
-          .row(:class="{ 'row-align-items-start': notification.type === 'askToAddToExplore' }")
-            div
-              span.badge.info.new-unread-badge(v-if="!notification.isRead")
-              img.icon.add(v-if="notification.iconClass === 'add'" src="@/assets/add.svg")
-              img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
-              img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
-              span {{notification.message}}
-
-          //- meta
-          .row.row-align-items-start
+        //- TODO wrap in <a> for middle click
+        li(@click="click(notification)" :class="{ active: isActive(notification) }" :data-notification-id="notification.id")
+          div
+            //- span.badge.info.new-unread-badge(v-if="!notification.isRead")
+            img.icon.add(v-if="notification.iconClass === 'add'" src="@/assets/add.svg")
+            img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
+            img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
             //- user
-            .user-wrap
+            span.user-wrap
               UserLabelInline(:user="notification.user")
+            //- message
+            span {{notification.message}}
             //- space
-            .space-name-wrap.badge.secondary(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click="changeSpace(notification.spaceId)" :class="{ active: spaceIsCurrentSpace(notification.spaceId) }")
+            span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click="changeSpace(notification.spaceId)" :class="{ active: spaceIsCurrentSpace(notification.spaceId) }")
               BackgroundPreview(v-if="notification.space" :space="notification.space")
               span.space-name {{notification.space.name}}
 
@@ -42,10 +37,11 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
             //-   span to Explore
 
           //- details
-          div(v-if="notification.card")
-            template(v-for="segment in cardNameSegments(notification.card.name)")
-              NameSegment(:segment="segment")
-            img.card-image(v-if="notification.detailsImage" :src="notification.detailsImage")
+          .row(v-if="notification.card")
+            .card-details.badge.button-badge
+              template(v-for="segment in cardNameSegments(notification.card.name)")
+                NameSegment(:segment="segment")
+              img.card-image(v-if="notification.detailsImage" :src="notification.detailsImage")
 
 </template>
 
@@ -224,7 +220,6 @@ export default {
       &:active,
       &:focus
         border-radius var(--entity-radius)
-        border-bottom 1px solid transparent
 
   .notification-info
     margin-top 4px
@@ -239,18 +234,27 @@ export default {
     margin-left 4px
 
   .background-preview
+    margin-right 3px !important
     .preview-wrap
       vertical-align -2px
       width 14px
       height 14px
       border-radius var(--small-entity-radius)
+  .card-details
+    background-color var(--secondary-background)
+    border-radius var(--entity-radius)
+    display inline-block
+    width fit-content
+    max-width 100%
+    margin 0
+    margin-top 5px
 
   .card-image
     vertical-align middle
     border-radius var(--entity-radius)
-  .icon + .card-image
-  .card-image + span
-    margin-left 5px
+    max-height 100px
+    display block
+    margin 4px 0px
   .loader
     width 14px
     height 14px
@@ -269,33 +273,9 @@ export default {
     .tag
       display inline-block
       margin-right 0
+  .user-label-inline
+    margin-right 3px
   .space-name-wrap
-    display flex
-    // flex-shrink 10
-    margin-right 0
-    .space-name
-      white-space nowrap
-      overflow hidden
-      text-overflow ellipsis
-  .user-wrap
-    max-width 40%
-    .user-label-inline
-      max-width 94%
-      white-space nowrap
-      overflow hidden
-      text-overflow ellipsis
-  .row-align-items-start
-    align-items flex-start !important
-
-  .inline-badge
-    vertical-align 0
-
-  // notification types
-
-  li.add-favorite-user
-    .user-wrap
-      max-width initial
-      .user-label-inline
-        max-width initial
+    margin-left 3px
 
 </style>
