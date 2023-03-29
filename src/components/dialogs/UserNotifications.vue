@@ -11,32 +11,34 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
     ul.results-list(v-if="filteredNotifications.length")
       template(v-for="notification in filteredNotifications")
         //- TODO wrap in <a> for middle click
-        li(@click="primaryAction(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }" :data-notification-id="notification.id")
-          div
-            //- new
-            .badge.info.new-unread-badge(v-if="!notification.isRead")
-            //- icon
-            img.icon.add(v-if="notification.iconClass === 'add'" src="@/assets/add.svg")
-            img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
-            img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
-            //- user
-            span.user-wrap
-              UserLabelInline(:user="notification.user")
-            //- message
-            span {{notification.message}}
-            //- space
-            span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click="changeSpace(notification.spaceId)" :class="{ active: isCurrentSpace(notification.spaceId) }")
-              BackgroundPreview(v-if="notification.space" :space="notification.space")
-              span.space-name {{notification.space.name}}
-          //- add to explore button
-          .row(v-if="notification.type === 'askToAddToExplore'")
-            AddToExplore(:space="notification.space" :visible="true" @updateAddToExplore="updateAddToExplore")
-          //- card details
-          .row(v-if="notification.card")
-            .card-details.badge.button-badge(@click.stop="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }")
-              template(v-for="segment in cardNameSegments(notification.card.name)")
-                NameSegment(:segment="segment" @showTagDetailsIsVisible="showCardDetails(notification)" @showLinkDetailsIsVisible="showCardDetails(notification)")
-              img.card-image(v-if="notification.detailsImage" :src="notification.detailsImage")
+        a(:href="spaceUrl(notification)")
+          li(@click.stop.prevent="primaryAction(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }" :data-notification-id="notification.id")
+            div
+              //- new
+              .badge.info.new-unread-badge(v-if="!notification.isRead")
+              //- icon
+              img.icon.add(v-if="notification.iconClass === 'add'" src="@/assets/add.svg")
+              img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
+              img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
+              //- user
+              span.user-wrap
+                UserLabelInline(:user="notification.user")
+              //- message
+              span {{notification.message}}
+              //- space
+              span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification.spaceId)" :class="{ active: isCurrentSpace(notification.spaceId) }")
+                BackgroundPreview(v-if="notification.space" :space="notification.space")
+                span.space-name {{notification.space.name}}
+            //- add to explore button
+            .row(v-if="notification.type === 'askToAddToExplore'")
+              AddToExplore(:space="notification.space" :visible="true" @updateAddToExplore="updateAddToExplore")
+            //- card details
+            .row(v-if="notification.card")
+              a(:href="cardUrl(notification)")
+                .card-details.badge.button-badge(@click.stop.prevent="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }")
+                  template(v-for="segment in cardNameSegments(notification.card.name)")
+                    NameSegment(:segment="segment" @showTagDetailsIsVisible="showCardDetails(notification)" @showLinkDetailsIsVisible="showCardDetails(notification)")
+                  img.card-image(v-if="notification.detailsImage" :src="notification.detailsImage")
 
 </template>
 
@@ -82,6 +84,14 @@ export default {
     currentUser () { return this.$store.state.currentUser }
   },
   methods: {
+    spaceUrl (notification) {
+      if (!notification.space) { return }
+      return `${utils.kinopioDomain()}/${notification.space.id}`
+    },
+    cardUrl (notification) {
+      if (!notification.card) { return }
+      return `${utils.kinopioDomain()}/${notification.space.id}/${notification.card.id}`
+    },
     isAskToAddToExplore (notification) {
       return notification.type === 'askToAddToExplore'
     },
@@ -268,6 +278,8 @@ export default {
     vertical-align -2px
 
   .results-list
+    a
+      text-decoration none
     hr:first-child
       display none
     hr
