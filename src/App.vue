@@ -814,6 +814,7 @@ dialog
 
 label,
 li
+  position relative
   color var(--primary)
   &:hover,
   &:focus
@@ -934,10 +935,20 @@ code
   &.last-child
     margin 0
   &.new-unread-badge
-    border-radius 100px
-    min-width 12px
-    min-height 12px
-    display inline-block
+    // border-radius 100px
+    border-radius 0
+    border-top-right-radius var(--small-entity-radius)
+    border-bottom-right-radius var(--small-entity-radius)
+    min-width initial
+    min-height initial
+    width 6px
+    height 10px
+    position absolute
+    left -5px
+    top 12px
+    background var(--new-unread-background)
+    margin 0
+    padding 0
 
   input
     margin 0
