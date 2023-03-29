@@ -5,13 +5,13 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
       span Notifications
       Loader(:visible="loading")
 
-  section.results-section(v-if="notifications.length" :style="{'max-height': dialogHeight + 'px'}")
-    p(v-if="!loading && !notifications.length")
+  section.results-section(v-if="filteredNotifications.length" :style="{'max-height': dialogHeight + 'px'}")
+    p(v-if="!loading && !filteredNotifications.length")
       span Cards added to your spaces by collaborators can be found here
-    ul.results-list(v-if="notifications.length")
-      template(v-for="notification in notifications")
+    ul.results-list(v-if="filteredNotifications.length")
+      template(v-for="notification in filteredNotifications")
         //- TODO wrap in <a> for middle click
-        li(@click="click(notification)" :class="{ active: isActive(notification) }" :data-notification-id="notification.id")
+        li(@click="primaryAction(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }" :data-notification-id="notification.id")
           div
             //- new
             .badge.info.new-unread-badge(v-if="!notification.isRead")
@@ -25,15 +25,15 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
             //- message
             span {{notification.message}}
             //- space
-            span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click="changeSpace(notification.spaceId)" :class="{ active: spaceIsCurrentSpace(notification.spaceId) }")
+            span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click="changeSpace(notification.spaceId)" :class="{ active: isCurrentSpace(notification.spaceId) }")
               BackgroundPreview(v-if="notification.space" :space="notification.space")
               span.space-name {{notification.space.name}}
           //- add to explore button
           .row(v-if="notification.type === 'askToAddToExplore'")
-            AddToExplore(:space="notifications.space" :visible="true" @updateAddToExplore="updateAddToExplore")
+            AddToExplore(:space="notification.space" :visible="true" @updateAddToExplore="updateAddToExplore")
           //- card details
           .row(v-if="notification.card")
-            .card-details.badge.button-badge
+            .card-details.badge.button-badge(@click.stop="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }")
               template(v-for="segment in cardNameSegments(notification.card.name)")
                 NameSegment(:segment="segment")
               img.card-image(v-if="notification.detailsImage" :src="notification.detailsImage")
@@ -73,7 +73,8 @@ export default {
   },
   data () {
     return {
-      dialogHeight: null
+      dialogHeight: null,
+      filteredNotifications: null
     }
   },
   computed: {
@@ -84,37 +85,32 @@ export default {
     isAskToAddToExplore (notification) {
       return notification.type === 'askToAddToExplore'
     },
-    isCard (notification) {
-      return notification.type === 'createCard' || notification.type === 'updateCard'
-    },
-    isActive (notification) {
-      const isCard = this.isCard(notification)
-      const isAskToAddToExplore = this.isAskToAddToExplore(notification)
-      if (isCard) {
-        return this.cardDetailsIsVisible(notification.card.id)
-      } else if (isAskToAddToExplore) {
-        return this.spaceIsCurrentSpace(notification.spaceId)
-      }
-    },
-    click (notification) {
-      const isCard = this.isCard(notification)
-      const isAskToAddToExplore = this.isAskToAddToExplore(notification)
-      if (isCard) {
-        this.showCardDetails(notification)
-      } else if (isAskToAddToExplore) {
+    primaryAction (notification) {
+      if (notification.space) {
         this.changeSpace(notification.spaceId)
       }
     },
     cardDetailsIsVisible (cardId) {
       return this.$store.state.cardDetailsIsVisibleForCardId === cardId
     },
-    spaceIsCurrentSpace (spaceId) {
+    isCurrentSpace (spaceId) {
       return spaceId === this.currentSpaceId
     },
     changeSpace (spaceId) {
-      if (this.spaceIsCurrentSpace(spaceId)) { return }
+      if (this.isCurrentSpace(spaceId)) { return }
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+    },
+    showCardDetails (notification) {
+      let space = utils.clone(notification.space)
+      const card = utils.clone(notification.card)
+      if (this.currentSpaceId !== space.id) {
+        this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
+        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      } else {
+        this.$store.dispatch('currentCards/showCardDetails', card.id)
+      }
+      this.$emit('markAsRead', notification.id)
     },
     segmentTagColor (segment) {
       const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
@@ -150,17 +146,6 @@ export default {
     markAllAsRead () {
       this.$emit('markAllAsRead')
     },
-    showCardDetails (notification) {
-      let space = utils.clone(notification.space)
-      const card = utils.clone(notification.card)
-      if (this.currentSpaceId !== space.id) {
-        this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
-        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
-      } else {
-        this.$store.dispatch('currentCards/showCardDetails', card.id)
-      }
-      this.$emit('markAsRead', notification.id)
-    },
     updateDialogHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
@@ -177,16 +162,36 @@ export default {
       if (notification.user) {
         return notification.user.name
       }
+    },
+    updateAddToExplore (space) {
+      const isCurrentSpace = space.id === this.$store.state.currentSpace.id
+      this.filteredNotifications = this.filteredNotifications.map(notification => {
+        if (!notification.space) {
+          return notification
+        }
+        if (notification.space.id === space.id) {
+          notification.space.showInExplore = space.showInExplore
+        }
+        return notification
+      })
+      if (isCurrentSpace) {
+        this.$store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
+      } else {
+        space = { id: space.id, showInExplore: space.showInExplore }
+        this.$store.dispatch('api/updateSpace', space)
+      }
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
+        this.filteredNotifications = this.notifications
         this.updateDialogHeight()
         this.$emit('updateNotifications')
       }
       if (!visible) {
         this.markAllAsRead()
+        this.filteredNotifications = null
       }
     },
     loading (loading) {
@@ -215,6 +220,7 @@ export default {
       border-bottom 1px solid var(--primary-border)
       &:hover,
       &:active,
+      &.active,
       &:focus
         border-radius var(--entity-radius)
 
