@@ -611,7 +611,6 @@ const currentSpace = {
       connections = connectionIds.map(id => {
         const connection = connections[id]
         const pathIsEmpty = connection.path === 'm0,0 q00,00 0,0'
-        console.log('🌷', connection.path, connection)
         if (connection.path && !pathIsEmpty) {
           const coords = utils.coordsFromConnectionPath(connection.path)
           connection.distanceFromOrigin = utils.distanceBetweenTwoPoints(coords, origin)
