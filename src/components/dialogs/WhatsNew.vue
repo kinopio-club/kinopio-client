@@ -26,7 +26,7 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
             video(autoplay loop muted playsinline)
               source(:src="item._meta.video")
           //- title
-          p.title {{item.title}}
+          h1 {{item.title}}
           //- summary
           p.summary {{item.summary}}
     .button-wrap
@@ -99,7 +99,6 @@ export default {
   @media(max-height 500px)
     top -100px !important
   a
-    color var(--primary)
     text-decoration none
   article
     padding 8px
@@ -107,12 +106,17 @@ export default {
     margin 0
     margin-bottom 10px
     padding-bottom 10px
-    p
-      color var(--primary-on-light-background)
-  .title
-    text-decoration underline
     &:hover
-      text-decoration none
+      box-shadow 4px 4px 0 var(--heavy-shadow) !important
+    &:active
+      box-shadow var(--button-active-inset-shadow) !important
+  h1
+    font-family var(--serif-font)
+    font-size 18px
+    font-weight normal
+    text-decoration underline
+    margin-top 10px
+    margin-bottom 10px
   img,
   video
     max-width 100%
