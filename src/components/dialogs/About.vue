@@ -165,7 +165,6 @@ export default {
       console.log('🌺', data)
       this.newStuff = data
     },
-
     checkNewStuffIsUpdated (latestUpdateId) {
       if (this.isAddPage) { return }
       const userlastReadId = parseInt(this.$store.state.currentUser.lastReadNewStuffId)
