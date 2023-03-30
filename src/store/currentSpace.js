@@ -17,7 +17,6 @@ import defer from 'lodash-es/defer'
 
 let otherSpacesQueue = [] // id
 let spectatorIdleTimers = []
-let notifiedCardAdded = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
 
 const currentSpace = {
@@ -611,7 +610,8 @@ const currentSpace = {
       const connectionIds = Object.keys(connections)
       connections = connectionIds.map(id => {
         const connection = connections[id]
-        if (connection.path) {
+        const pathIsEmpty = connection.path === 'm0,0 q00,00 0,0'
+        if (connection.path && !pathIsEmpty) {
           const coords = utils.coordsFromConnectionPath(connection.path)
           connection.distanceFromOrigin = utils.distanceBetweenTwoPoints(coords, origin)
         }
@@ -1010,27 +1010,6 @@ const currentSpace = {
       }, { root: true })
     },
 
-    notifyCollaboratorsCardUpdated: (context, { cardId, type }) => {
-      if (context.state.name === 'Hello Kinopio') { return }
-      if (notifiedCardAdded.includes(cardId)) { return }
-      const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
-      if (!userCanEdit) { return }
-      const userId = context.rootState.currentUser.id
-      let recipientUserIds = context.getters.userIdsToNotify
-      recipientUserIds = recipientUserIds.filter(recipientUserId => recipientUserId !== userId)
-      recipientUserIds = recipientUserIds.filter(id => Boolean(id))
-      if (!recipientUserIds.length) { return }
-      const notification = {
-        type, // 'createCard' or 'updateCard'
-        cardId,
-        userId,
-        recipientUserIds,
-        spaceId: context.state.id
-      }
-      context.dispatch('api/addToQueue', { name: 'createCardNotifications', body: notification }, { root: true })
-      notifiedCardAdded.push(cardId)
-    },
-
     // Tags
 
     addTag: (context, tag) => {
@@ -1192,18 +1171,6 @@ const currentSpace = {
       const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
       const spaceUserIsUpgraded = getters.spaceUserIsUpgraded
       return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
-    },
-    userIdsToNotify: (state, getters, rootState, rootGetters) => {
-      let clients = state.clients.map(client => client.id)
-      let members = getters.members(true)
-      let contributors = [] // for open spaces
-      members = members.map(member => member.id)
-      contributors = state.cards.map(card => card.userId)
-      let userIds = members.concat(contributors)
-      userIds = uniq(userIds)
-      // exclude currently connected userIds
-      userIds = userIds.filter(userId => !clients.includes(userId))
-      return userIds
     }
   }
 }

@@ -11,6 +11,7 @@ import currentCards from '@/store/currentCards.js'
 import currentConnections from '@/store/currentConnections.js'
 import currentBoxes from '@/store/currentBoxes.js'
 import upload from '@/store/upload.js'
+import userNotifications from '@/store/userNotifications.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
@@ -24,8 +25,6 @@ const store = createStore({
   state: {
     pageHeight: 0,
     pageWidth: 0,
-    maxPageSizeHeight: 0,
-    maxPageSizeWidth: 0,
     viewportHeight: 0,
     viewportWidth: 0,
     isOnline: true,
@@ -1656,7 +1655,8 @@ const store = createStore({
     currentCards,
     currentConnections,
     currentBoxes,
-    upload
+    upload,
+    userNotifications
   },
   plugins: [websocket()]
 })

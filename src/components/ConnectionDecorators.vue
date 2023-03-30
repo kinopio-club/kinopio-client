@@ -71,6 +71,8 @@ export default {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     allPathsIsCurved () {
       const curvedConnections = this.connections.filter(connection => {
+        if (!connection) { return }
+        if (!connection.path) { return }
         const controlPoint = utils.curveControlPointFromPath(connection.path)
         const isCurved = controlPoint.x && controlPoint.y
         return isCurved
@@ -79,6 +81,8 @@ export default {
     },
     allPathsIsStraight () {
       const curvedConnections = this.connections.filter(connection => {
+        if (!connection) { return }
+        if (!connection.path) { return }
         const controlPoint = utils.curveControlPointFromPath(connection.path)
         const isCurved = !controlPoint.x && !controlPoint.y
         return isCurved

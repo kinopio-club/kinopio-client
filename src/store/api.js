@@ -506,6 +506,16 @@ const self = {
         context.dispatch('handleServerError', { name: 'createSpace', error })
       }
     },
+    updateSpace: async (context, space) => {
+      try {
+        const body = space
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space })
+        const response = await fetch(`${host}/space`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'updateSpace', error })
+      }
+    },
     getSpaceRemovedCards: async (context, space) => {
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }

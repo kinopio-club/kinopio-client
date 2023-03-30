@@ -957,10 +957,11 @@ export default {
     return string.split(blankPattern)
   },
   boundaryRectFromItems (items) {
+    items = this.clone(items)
+    items = items.filter(item => item.x && item.y)
     if (!items.length) {
       return { x: 0, y: 0, width: 0, height: 0 }
     }
-    items = this.clone(items)
     const defaultSize = 200
     let rect = {}
     // x, width
@@ -980,12 +981,25 @@ export default {
     return rect
   },
   pageSizeFromItems (items) {
-    const rect = this.boundaryRectFromItems(items)
-    const padding = 200
-    return {
-      width: rect.x + rect.width + padding,
-      height: rect.y + rect.height + padding
+    items = this.clone(items)
+    items = items.filter(item => item.x && item.y)
+    if (!items.length) {
+      return { width: 0, height: 0 }
     }
+    const defaultSize = 500
+    let x = 0
+    let y = 0
+    items.forEach(item => {
+      if (item.x > x) {
+        x = item.x
+      }
+      if (item.y > y) {
+        y = item.y
+      }
+    })
+    const width = x + defaultSize
+    const height = y + defaultSize
+    return { width, height }
   },
 
   // Connection Path Utils 🐙
@@ -1019,7 +1033,7 @@ export default {
   coordsFromConnectionPath (path) {
     // https://regexr.com/66idp
     // matches first 2 digit groups in path: m295,284 q90,40 87,57 → [295, 284]
-    const pathCoordsPattern = new RegExp(/m([\d.]{1,}),([\d.]{1,})/)
+    const pathCoordsPattern = new RegExp(/m([\d.-]{1,}),([\d-.]{1,})/)
     let coords = path.match(pathCoordsPattern)
     coords = {
       x: coords[1],

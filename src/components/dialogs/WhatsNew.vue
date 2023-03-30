@@ -16,17 +16,21 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
     Loader(:visible="true")
 
   section
-    template(v-for="post in newStuffWithUserHasRead" :key="post.id")
-      article(v-if="newStuff.length")
-        .title.badge.info
-          span {{post.title}}
-          img.icon(src="@/assets/new.gif" v-if="!post.userHasRead")
-        span(v-html="post.content_html")
-        .media(v-html="media(post.description)")
-
-  section
+    template(v-for="item in newStuff" :key="item.id")
+      a(:href="item.url")
+        article.badge.button-badge(:style="{ backgroundColor: item._meta.color }")
+          //- media
+          template(v-if="item._meta.image")
+            img(:src="item._meta.image")
+          template(v-else-if="item._meta.video")
+            video(autoplay loop muted playsinline)
+              source(:src="item._meta.video")
+          //- title
+          p.title {{item.title}}
+          //- summary
+          p.summary {{item.summary}}
     .button-wrap
-      a(href="https://www.are.na/kinopio/kinopio-what-s-new")
+      a(href="https://blog.kinopio.club")
         button Read All →
 </template>
 
@@ -58,40 +62,11 @@ export default {
       dialogHeight: null
     }
   },
-  computed: {
-    newStuffWithUserHasRead () {
-      let userHasRead
-      const userlastReadId = parseInt(this.$store.state.currentUser.lastReadNewStuffId)
-      return this.newStuff.map(update => {
-        if (userlastReadId === update.id) {
-          userHasRead = true
-        }
-        if (userHasRead) {
-          update.userHasRead = true
-        }
-        return update
-      })
-    }
-  },
   methods: {
     updateUserLastRead () {
       if (!this.newStuff.length) { return }
       const lastReadNewStuffId = this.newStuff[0].id
       this.$store.dispatch('currentUser/lastReadNewStuffId', lastReadNewStuffId)
-    },
-    // checkNewStuffIsUpdated () {
-    //   const lastReadNewStuffId = this.newStuff[0].id
-    //   const userlastReadId = parseInt(this.$store.state.currentUser.lastReadNewStuffId)
-    //   this.newStuffIsUpdated = Boolean(userlastReadId !== lastReadNewStuffId)
-    // },
-    media (description) {
-      if (!description) { return }
-      const isImage = utils.urlIsImage(description)
-      if (isImage) {
-        return `<img src="${description}"/>`
-      } else {
-        return `<video autoplay loop muted playsinline><source src="${description}"></video>`
-      }
     },
     updateDialogHeight () {
       if (!this.visible) { return }
@@ -107,7 +82,6 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        // this.checkNewStuffIsUpdated()
         this.updateDialogHeight()
       }
       if (!visible) {
@@ -122,50 +96,28 @@ export default {
 .whats-new
   overflow auto
   max-height calc(100vh - 210px)
+  @media(max-height 500px)
+    top -100px !important
+  a
+    color var(--primary)
+    text-decoration none
   article
-    position static
+    padding 8px
+    border-radius var(--entity-radius)
+    margin 0
     margin-bottom 10px
     padding-bottom 10px
-    border-bottom 1px solid var(--primary-border)
-    .media
-      margin-top 10px
-    &:last-child
-      margin-bottom 0
-      padding-bottom 0
-      border-bottom 0
-  .icon
-    margin-left 3px
   .title
-    margin-bottom 10px
-    display inline-block
+    text-decoration underline
   img,
   video
     max-width 100%
-    border-radius var(--small-entity-radius)
-  ul,
-  ol
-    margin 0
-    margin-top 2px
-    padding-left 15px
-    li
-      padding-top 10px
-      margin-left 5px
-      user-select text
-  ul
-    list-style-type square
-  @media(max-width 340px)
-    max-height calc(100vh - 200px)
-  code
-    background-color var(--secondary-background)
-    margin 0
-  blockquote
-    background-color var(--secondary-background)
-    padding 5px
     border-radius var(--entity-radius)
-    margin 10px 0
-  .refresh
+  .icon.refresh
     margin 0
     height 11px
     vertical-align 0
 
+  // .new-unread-badge
+  //   display inline-block
 </style>

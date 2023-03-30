@@ -263,10 +263,9 @@ export default {
   },
   async mounted () {
     this.defaultColor = utils.cssVariable('secondary-background')
-    this.updateCardDimensions()
     const shouldShowDetails = this.loadSpaceShowDetailsForCardId === this.card.id
     if (shouldShowDetails) {
-      this.$store.dispatch('closeAllDialogs')
+      // this.$store.dispatch('closeAllDialogs')
       this.$store.commit('preventCardDetailsOpeningAnimation', false)
       this.$store.dispatch('currentCards/showCardDetails', this.card.id)
     }
@@ -277,9 +276,11 @@ export default {
         id: this.card.id,
         shouldUpdateUrlPreview: false
       })
-      if (!isUpdatedSuccess) { return }
-      this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
+      if (isUpdatedSuccess) {
+        this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
+      }
     }
+    this.updateCardDimensions()
   },
   data () {
     return {

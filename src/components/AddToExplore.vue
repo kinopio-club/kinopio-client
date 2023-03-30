@@ -1,5 +1,5 @@
 <template lang="pug">
-.button-wrap.add-to-explore(v-if="isSpaceMember")
+.button-wrap.add-to-explore(@click.stop v-if="isVisible")
   button.variable-length-content(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
     span(v-if="!showInExplore")
       img.icon.add(src="@/assets/add.svg")
@@ -29,13 +29,17 @@ let prevPrivacy = ''
 
 export default {
   name: 'ShowInExploreButton',
-  emits: ['updateLocalSpaces'],
+  emits: ['updateLocalSpaces', 'updateAddToExplore'],
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentSpace/restoreSpace') {
         this.clearErrors()
       }
     })
+  },
+  props: {
+    space: Object,
+    visible: Boolean
   },
   data () {
     return {
@@ -47,10 +51,13 @@ export default {
     }
   },
   computed: {
-    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    isVisible () {
+      return this.visible || this.$store.getters['currentUser/isSpaceMember']()
+    },
     showInExplore () {
-      const showInExplore = this.$store.state.currentSpace.showInExplore
-      const isNotPrivate = this.$store.state.currentSpace.privacy !== 'private'
+      const space = this.space || this.$store.state.currentSpace
+      const showInExplore = space.showInExplore
+      const isNotPrivate = space.privacy !== 'private'
       return showInExplore && isNotPrivate
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
@@ -59,6 +66,7 @@ export default {
   },
   methods: {
     checkIfShouldPrevent (event) {
+      if (this.space) { return }
       let shouldPrevent
       if (this.showInExplore) { return }
       if (!this.currentUserIsSignedIn) {
@@ -83,21 +91,34 @@ export default {
       this.$store.commit('clearNotificationsWithPosition')
       const shouldPrevent = this.checkIfShouldPrevent(event)
       if (shouldPrevent) { return }
-      this.updateSpacePrivacy(event)
-      this.updateShowInExplore()
-      this.$emit('updateLocalSpaces')
+      if (this.space) {
+        this.emitUpdateShowInExplore()
+      } else {
+        this.updateShowInExplore()
+      }
+      this.notifyShowInExplore(event)
     },
-    updateShowInExplore () {
-      const shouldShow = !this.showInExplore
+    notifyShowInExplore (event) {
+      const shouldShow = this.showInExplore
       const position = utils.cursorPositionInPage(event)
-      this.$store.dispatch('currentSpace/updateSpace', { showInExplore: shouldShow })
       if (shouldShow) {
         this.$store.commit('addNotificationWithPosition', { message: 'Added to Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
       } else {
         this.$store.commit('addNotificationWithPosition', { message: 'Removed from Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
       }
     },
-    updateSpacePrivacy (event) {
+    emitUpdateShowInExplore () {
+      let space = this.space
+      space.showInExplore = !space.showInExplore
+      this.$emit('updateAddToExplore', space)
+    },
+    updateShowInExplore () {
+      this.updateSpacePrivacy()
+      const shouldShow = !this.showInExplore
+      this.$store.dispatch('currentSpace/updateSpace', { showInExplore: shouldShow })
+      this.$emit('updateLocalSpaces')
+    },
+    updateSpacePrivacy () {
       const shouldShow = !this.showInExplore
       const currentPrivacy = this.$store.state.currentSpace.privacy
       if (shouldShow) {
