@@ -120,10 +120,8 @@ export default {
     this.isMobile = utils.isMobile()
     this.isIPhone = utils.isIPhone()
     this.isAndroid = utils.isAndroid()
-    const data = await this.getNewStuff()
-    const newStuff = data.contents
-    this.newStuff = newStuff.slice(0, 5)
-    this.checkNewStuffIsUpdated(newStuff[0].id)
+    await this.updateNewStuff()
+    this.checkNewStuffIsUpdated(this.newStuff[0].id)
     checkKinopioUpdatesIntervalTimer = setInterval(() => {
       this.checkIfKinopioUpdatesAreAvailable()
     }, 1000 * 60 * 60 * 1) // 1 hour
@@ -161,10 +159,13 @@ export default {
       this.closeDialogs()
       this.appsIsVisible = !isVisible
     },
-    async getNewStuff () {
-      const data = await this.$store.dispatch('api/getNewStuff')
-      return data
+    async updateNewStuff () {
+      let data = await this.$store.dispatch('api/getNewStuff')
+      data = data.items.slice(0, 20)
+      console.log('🌺', data)
+      this.newStuff = data
     },
+
     checkNewStuffIsUpdated (latestUpdateId) {
       if (this.isAddPage) { return }
       const userlastReadId = parseInt(this.$store.state.currentUser.lastReadNewStuffId)
@@ -172,9 +173,9 @@ export default {
       this.$store.commit('newStuffIsUpdated', newStuffIsUpdated)
     },
     async checkIfKinopioUpdatesAreAvailable () {
-      const data = await this.getNewStuff()
-      let newest = data.contents[0]
-      newest = dayjs(newest.updated_at)
+      await this.updateNewStuff()
+      let newest = this.newStuff[0]
+      newest = dayjs(newest.date_published)
       const timeSinceNewest = initTime.diff(newest, 'minute')
       if (timeSinceNewest < 0) {
         this.$store.commit('notifyKinopioUpdatesAreAvailable', true)
