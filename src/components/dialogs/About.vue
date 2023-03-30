@@ -145,6 +145,10 @@ export default {
     async updateNewStuff () {
       let data = await this.$store.dispatch('api/getNewStuff')
       data = data.items.slice(0, 20)
+      data = data.map(item => {
+        item.summary = utils.convertHTMLEntities(item.summary)
+        return item
+      })
       this.newStuff = data
     },
     checkNewStuffIsUpdated (latestUpdateId) {
