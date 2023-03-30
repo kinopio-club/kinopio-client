@@ -59,8 +59,8 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         a(href="https://help.kinopio.club/api/")
           button API →
 
-    video.about-video(autoplay loop muted playsinline)
-      source(src="https://kinopio-updates.us-east-1.linodeobjects.com/anime-typing.mp4")
+    //- video.about-video(autoplay loop muted playsinline)
+    //-   source(src="https://kinopio-updates.us-east-1.linodeobjects.com/anime-typing.mp4")
 
 </template>
 
