@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.about(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :class="{ overflow: !childDialogIsVisible }")
   section
     p About Kinopio
   section
@@ -9,9 +9,6 @@ dialog.about(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dial
       .button-wrap
         a(href="https://help.kinopio.club/about")
           button About →
-      .button-wrap
-        a(href="https://blog.kinopio.club")
-          button Blog →
       .button-wrap
         a(href="https://help.kinopio.club")
           button Help →
@@ -124,7 +121,10 @@ export default {
   },
   computed: {
     newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated },
-    isAddPage () { return this.$store.state.isAddPage }
+    isAddPage () { return this.$store.state.isAddPage },
+    childDialogIsVisible () {
+      return this.whatsNewIsVisible || this.appsIsVisible
+    }
   },
   methods: {
     toggleWhatsNewIsVisible () {
@@ -191,6 +191,8 @@ export default {
 <style lang="stylus">
 .about
   top calc(100% - 6px) !important
+  &.overflow
+    overflow auto
   .updated
     margin 0
     margin-left 3px
