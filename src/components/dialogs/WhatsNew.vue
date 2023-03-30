@@ -18,9 +18,9 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
   section
     template(v-for="post in newStuffWithUserHasRead" :key="post.id")
       article(v-if="newStuff.length")
+        .badge.info.new-unread-badge(v-if="!post.userHasRead")
         .title.badge.info
           span {{post.title}}
-          img.icon(src="@/assets/new.gif" v-if="!post.userHasRead")
         span(v-html="post.content_html")
         .media(v-html="media(post.description)")
 
@@ -168,4 +168,6 @@ export default {
     height 11px
     vertical-align 0
 
+  .new-unread-badge
+    display inline-block
 </style>

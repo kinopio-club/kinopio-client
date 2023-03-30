@@ -265,7 +265,7 @@ export default {
     this.defaultColor = utils.cssVariable('secondary-background')
     const shouldShowDetails = this.loadSpaceShowDetailsForCardId === this.card.id
     if (shouldShowDetails) {
-      this.$store.dispatch('closeAllDialogs')
+      // this.$store.dispatch('closeAllDialogs')
       this.$store.commit('preventCardDetailsOpeningAnimation', false)
       this.$store.dispatch('currentCards/showCardDetails', this.card.id)
     }

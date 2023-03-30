@@ -25,8 +25,10 @@ span.space-list-wrap
           )
             template(v-if="itemIsVisible(index)")
               Loader(:visible="isLoadingSpace(space)")
-
-              //- User(s)
+              //- new
+              span(v-if="isNew(space)")
+                .badge.info.inline-badge.new-unread-badge
+              //- user(s)
               template(v-if="showOtherUsers")
                 .users(:class="{'multiple-users': space.otherUsers.length > 1}")
                   User(:user="user(space)" :isClickable="false" :key="user(space).id")
@@ -36,9 +38,6 @@ span.space-list-wrap
                 User(:user="user(space)" :isClickable="false" :key="user(space).id")
               template(v-else-if="showCollaborator(space)")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id")
-              //- NEW badge
-              span(v-if="isNew(space)")
-                .badge.info.inline-badge.new-badge New
               //- space meta
               span(v-if="space.isFavorite")
                 img.icon.favorite-icon(src="@/assets/heart.svg")
@@ -397,8 +396,8 @@ export default {
     margin-left 0
     flex none
 
-  .new-badge
-    word-break keep-all
+  .new-unread-badge
+    margin-top 7px
 
   .badge
     margin-left 0

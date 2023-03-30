@@ -42,17 +42,7 @@ export default {
         this.error.userNeedsToSignUpOrIn = true
         return
       }
-      const userId = this.$store.state.currentUser.id
-      const spaceId = this.$store.state.currentSpace.id
-      let recipientUserIds = this.$store.getters['currentSpace/userIdsToNotify']
-      recipientUserIds = recipientUserIds.filter(id => Boolean(id))
-      const notification = {
-        type: 'askToAddToExplore',
-        userId,
-        spaceId,
-        recipientUserIds
-      }
-      this.$store.dispatch('api/addToQueue', { name: 'createAskToAddToExploreNotification', body: notification })
+      this.$store.dispatch('userNotifications/addAskToAddToExplore')
       this.isAsked = true
       this.$emit('updateDialogHeight')
     },

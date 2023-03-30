@@ -229,7 +229,7 @@ const currentCards = {
         delta: 1
       }, { root: true })
       context.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
-      context.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
+      context.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
       context.dispatch('currentUser/checkIfShouldUnlockStickyCards', null, { root: true })
     },
     addMultiple: (context, newCards) => {
@@ -391,10 +391,10 @@ const currentCards = {
             height: Math.ceil(card.height)
           }
           context.commit('update', body)
+          updateTallestCardHeight(card.height)
           if (!dimensionsChanged) { return }
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
-          updateTallestCardHeight(card.height)
         })
       })
     },
