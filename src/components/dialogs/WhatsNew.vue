@@ -107,8 +107,12 @@ export default {
     margin 0
     margin-bottom 10px
     padding-bottom 10px
+    p
+      color var(--primary-on-light-background)
   .title
     text-decoration underline
+    &:hover
+      text-decoration none
   img,
   video
     max-width 100%

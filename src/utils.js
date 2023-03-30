@@ -633,6 +633,19 @@ export default {
     // 'Dreams' -> 'dreams'
     return string.charAt(0).toLowerCase() + string.slice(1)
   },
+  convertHTMLEntities (string) {
+    const entities = [
+      { code: '&#60;', result: '<' },
+      { code: '&#62;', result: '>' },
+      { code: '&#38;', result: '&' },
+      { code: '&#34;', result: '"' },
+      { code: '&#39;', result: "'" }
+    ]
+    entities.forEach(entity => {
+      string = string.replace(entity.code, entity.result)
+    })
+    return string
+  },
   updateAllIds (object, key, idDeltas) {
     const index = idDeltas.findIndex(id => object[key] === id.prevId)
     if (index >= 0) {
