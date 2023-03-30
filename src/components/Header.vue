@@ -175,6 +175,7 @@ import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 
 import { mapState, mapGetters } from 'vuex'
+import sortBy from 'lodash-es/sortBy'
 
 let updateNotificationsIntervalTimer
 
@@ -271,7 +272,7 @@ export default {
         }
       } else if (mutation.type === 'triggerReadOnlyJiggle') {
         this.addReadOnlyJiggle()
-      } else if (mutation.type === 'triggerUpdateNotifications') {
+      } else if (mutation.type === 'triggerUpdateNotifications' || mutation.type === 'triggerUserIsLoaded') {
         this.updateNotifications()
       } else if (mutation.type === 'triggerShowNextSearchCard') {
         this.showNextSearchCard()
@@ -643,18 +644,9 @@ export default {
 
     async updateNotifications () {
       this.notificationsIsLoading = true
-      let notifications = await this.$store.dispatch('api/getNotifications') || []
-      this.notifications = this.normalizeCardNotifications(notifications)
+      const notifications = await this.$store.dispatch('api/getNotifications') || []
+      this.notifications = sortBy(notifications, 'isRead')
       this.notificationsIsLoading = false
-    },
-    normalizeCardNotifications (notifications) {
-      return notifications.filter(notification => {
-        const { type } = notification
-        const typeIsCard = type === 'createCard' || type === 'updateCard'
-        if (!typeIsCard) { return true }
-        if (!notification.card) { return }
-        return !notification.card.isRemoved
-      })
     },
     markAllAsRead () {
       const notifications = this.notifications.filter(notification => !notification.isRead)

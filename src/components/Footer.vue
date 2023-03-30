@@ -171,7 +171,6 @@ export default {
       } else {
         this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
       }
-      this.updateLocalSpaces()
     },
     closeDialogs (exclude) {
       this.exploreIsVisible = false
