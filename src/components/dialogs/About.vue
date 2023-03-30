@@ -162,13 +162,12 @@ export default {
     async updateNewStuff () {
       let data = await this.$store.dispatch('api/getNewStuff')
       data = data.items.slice(0, 20)
-      console.log('🌺', data)
       this.newStuff = data
     },
     checkNewStuffIsUpdated (latestUpdateId) {
       if (this.isAddPage) { return }
-      const userlastReadId = parseInt(this.$store.state.currentUser.lastReadNewStuffId)
-      const newStuffIsUpdated = Boolean(userlastReadId !== latestUpdateId)
+      const userlastReadId = this.$store.state.currentUser.lastReadNewStuffId
+      const newStuffIsUpdated = userlastReadId !== latestUpdateId
       this.$store.commit('newStuffIsUpdated', newStuffIsUpdated)
     },
     async checkIfKinopioUpdatesAreAvailable () {
