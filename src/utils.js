@@ -723,6 +723,7 @@ export default {
     return total / numbers.length
   },
   distanceBetweenTwoPoints (point1, point2) {
+    if (!point1 || !point2) { return }
     // https://www.mathwarehouse.com/algebra/distance_formula/index.php
     const xDelta = Math.abs(point1.x - point2.x)
     const yDelta = Math.abs(point1.y - point2.y)
