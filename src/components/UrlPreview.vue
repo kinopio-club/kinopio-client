@@ -205,17 +205,17 @@ export default {
   methods: {
     toggleShouldDisplayEmbed () {
       this.$store.dispatch('closeAllDialogs')
-      if (this.shouldDisplayEmbed) {
-        this.embedUrl = ''
-        this.shouldDisplayEmbed = false
-      } else {
+      const value = !this.shouldDisplayEmbed
+      if (value) {
         this.embedUrl = this.youtubeEmbedUrl
         if (!this.embedUrl) {
           this.$store.commit('addNotification', { message: 'Could not get embed URL', type: 'danger' })
           return
         }
-        this.shouldDisplayEmbed = true
+      } else {
+        this.embedUrl = ''
       }
+      this.shouldDisplayEmbed = value
     },
     toggleUrlsIsVisible () {
       this.$emit('toggleUrlsIsVisible')
