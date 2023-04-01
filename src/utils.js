@@ -723,6 +723,7 @@ export default {
     return total / numbers.length
   },
   distanceBetweenTwoPoints (point1, point2) {
+    if (!point1 || !point2) { return }
     // https://www.mathwarehouse.com/algebra/distance_formula/index.php
     const xDelta = Math.abs(point1.x - point2.x)
     const yDelta = Math.abs(point1.y - point2.y)
@@ -1048,6 +1049,7 @@ export default {
     // matches first 2 digit groups in path: m295,284 q90,40 87,57 → [295, 284]
     const pathCoordsPattern = new RegExp(/m([\d.-]{1,}),([\d-.]{1,})/)
     let coords = path.match(pathCoordsPattern)
+    if (!coords) { return }
     coords = {
       x: coords[1],
       y: coords[2]
