@@ -100,9 +100,6 @@ export default {
     top -100px !important
   a
     text-decoration none
-    &:hover
-      h1
-        text-decoration none
   article
     padding 8px
     border-radius var(--entity-radius)
@@ -120,6 +117,8 @@ export default {
     text-decoration underline
     margin-top 10px
     margin-bottom 10px
+    &:hover
+      text-decoration none
   img,
   video
     max-width 100%
