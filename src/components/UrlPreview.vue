@@ -280,15 +280,6 @@ export default {
         this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
     }
-  },
-  watch: {
-    shouldDisplayEmbed (value) {
-      if (value) {
-        this.$store.commit('embedIsVisibleForCardId', this.card.id)
-      } else {
-        this.$store.commit('embedIsVisibleForCardId', '')
-      }
-    }
   }
 }
 </script>
