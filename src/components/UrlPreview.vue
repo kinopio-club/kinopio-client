@@ -5,10 +5,6 @@
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': shouldHideInfo && !shouldHideImage, 'is-no-info': !previewHasInfo}")
       //- youtube
       .content-buttons.card-inline-buttons(v-if="!parentIsCardDetails && isYoutubeUrl")
-        .button-wrap.inline-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
-          button.inline-button
-            img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
-            img.icon.play(v-else src="@/assets/play.svg")
       //- card details buttons
       .content-buttons(v-if="parentIsCardDetails")
         .row
@@ -22,10 +18,19 @@
             a(:href="card.urlPreviewUrl")
               button
                 span →
-        //- all, image, text, none
+
         .row(v-if="previewHasInfo")
-          .segmented-buttons
-            button(v-if="previewHasImage && previewHasInfo" @click="showAll" :class="{active : isShowAll}" :disabled="!canEditCard")
+          //- preview, embed, none
+          .segmented-buttons(v-if="isUrlEmbed")
+            button(v-if="previewIsAll" @click="showAllPreview" :class="{active : isShowAll}" :disabled="!canEditCard")
+              span Preview
+            button(@click="showEmbed" :class="{active : isShowEmbed}" :disabled="!canEditCard")
+              span Embed
+            button(@click="showNone" :class="{active : isShowNone}" :disabled="!canEditCard")
+              span None
+          //- all, image, text, none
+          .segmented-buttons(v-else)
+            button(v-if="previewIsAll" @click="showAllPreview" :class="{active : isShowAll}" :disabled="!canEditCard")
               span All
             button(v-if="previewHasImage" @click="showImage" :class="{active : isShowImage}" :disabled="!canEditCard")
               span Image
@@ -35,7 +40,7 @@
               span None
 
       //- preview
-      template(v-if="!shouldDisplayEmbed")
+      template(v-if="!isShowEmbed")
         //- url preview image
         img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
         template(v-if="shouldLoadUrlPreviewImage")
@@ -51,7 +56,7 @@
           .title {{filteredTitle}}
           .description(v-if="description && shouldShowDescription") {{description}}
       //- embed playback
-      CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
+      CardEmbed(:visible="isShowEmbed" :url="youtubeEmbedUrl" :card="card")
 </template>
 
 <script>
@@ -89,9 +94,7 @@ export default {
   },
   data () {
     return {
-      imageCanLoad: false,
-      shouldDisplayEmbed: false,
-      embedUrl: ''
+      imageCanLoad: false
     }
   },
   computed: {
@@ -125,6 +128,9 @@ export default {
       if (!title) { return }
       title = title.replace('on Twitter', '')
       return title
+    },
+    isUrlEmbed () {
+      return this.isYoutubeUrl // other embed types in the future
     },
     isYoutubeShortenedUrl () {
       const url = this.card.urlPreviewUrl
@@ -165,7 +171,7 @@ export default {
     },
     youtubeEmbedUrl () {
       if (!this.youtubeUrlVideoId) { return }
-      const url = `https://www.youtube-nocookie.com/embed/${this.youtubeUrlVideoId}?autoplay=1`
+      const url = `https://www.youtube-nocookie.com/embed/${this.youtubeUrlVideoId}?autoplay=0`
       return url
     },
     description () {
@@ -186,8 +192,14 @@ export default {
     previewHasImage () {
       return Boolean(this.card.urlPreviewImage)
     },
+    previewIsAll () {
+      return this.previewHasImage && this.previewHasInfo
+    },
     isShowAll () {
       if (this.isShowNone) { return }
+      if (this.isUrlEmbed) {
+        return !this.card.shouldShowUrlPreviewEmbed
+      }
       return !this.shouldHideImage && !this.shouldHideInfo
     },
     isShowImage () {
@@ -200,23 +212,13 @@ export default {
     },
     isShowNone () {
       return !this.card.urlPreviewIsVisible
+    },
+    isShowEmbed () {
+      console.log('☔️', this.card.name, this.card.shouldShowUrlPreviewEmbed, this.isUrlEmbed)
+      return this.card.shouldShowUrlPreviewEmbed && this.isUrlEmbed
     }
   },
   methods: {
-    toggleShouldDisplayEmbed () {
-      this.$store.dispatch('closeAllDialogs')
-      const value = !this.shouldDisplayEmbed
-      if (value) {
-        this.embedUrl = this.youtubeEmbedUrl
-        if (!this.embedUrl) {
-          this.$store.commit('addNotification', { message: 'Could not get embed URL', type: 'danger' })
-          return
-        }
-      } else {
-        this.embedUrl = ''
-      }
-      this.shouldDisplayEmbed = value
-    },
     toggleUrlsIsVisible () {
       this.$emit('toggleUrlsIsVisible')
     },
@@ -226,12 +228,13 @@ export default {
     updateDimensions () {
       this.$store.dispatch('currentCards/updateDimensions', { cards: [this.card] })
     },
-    showAll () {
+    showAllPreview () {
       const card = {
         id: this.card.id,
         urlPreviewIsVisible: true,
         shouldHideUrlPreviewInfo: false,
-        shouldHideUrlPreviewImage: false
+        shouldHideUrlPreviewImage: false,
+        shouldShowUrlPreviewEmbed: false
       }
       this.$store.dispatch('currentCards/update', card)
     },
@@ -241,6 +244,16 @@ export default {
         urlPreviewIsVisible: true,
         shouldHideUrlPreviewInfo: true,
         shouldHideUrlPreviewImage: false
+      }
+      this.$store.dispatch('currentCards/update', card)
+    },
+    showEmbed () {
+      const card = {
+        id: this.card.id,
+        urlPreviewIsVisible: true,
+        shouldShowUrlPreviewEmbed: true,
+        shouldHideUrlPreviewInfo: true,
+        shouldHideUrlPreviewImage: true
       }
       this.$store.dispatch('currentCards/update', card)
     },
@@ -258,7 +271,8 @@ export default {
         id: this.card.id,
         urlPreviewIsVisible: false,
         shouldHideUrlPreviewInfo: false,
-        shouldHideUrlPreviewImage: false
+        shouldHideUrlPreviewImage: false,
+        shouldShowUrlPreviewEmbed: false
       }
       this.$store.dispatch('currentCards/update', card)
       this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)

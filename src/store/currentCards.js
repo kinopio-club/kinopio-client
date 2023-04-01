@@ -214,6 +214,7 @@ const currentCards = {
         frameId: 0,
         userId: context.rootState.currentUser.id,
         urlPreviewIsVisible: true,
+        shouldShowUrlPreviewEmbed: true,
         width: utils.emptyCard().width,
         height: utils.emptyCard().height,
         isLocked: false,
@@ -246,7 +247,8 @@ const currentCards = {
           userId: context.rootState.currentUser.id,
           backgroundColor: card.backgroundColor,
           shouldUpdateUrlPreview: true,
-          urlPreviewIsVisible: true
+          urlPreviewIsVisible: true,
+          shouldShowUrlPreviewEmbed: true
         }
         context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
         context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
