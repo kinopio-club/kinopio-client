@@ -1031,12 +1031,16 @@ export default {
       const user = this.createdByUser
       return user.id === this.userDetailsUser.id
     },
+    isPlayingEmbed () {
+      return this.$store.state.embedIsVisibleForCardId === this.card.id
+    },
     isVisibleInViewport () {
       if (this.disableViewportOptimizations) { return true }
       if (this.shouldJiggle) { return true }
       if (this.currentDraggingConnectedCardIds.includes(this.id)) { return true }
       if (this.isBeingDragged) { return true }
       if (this.isPlayingAudio) { return true }
+      if (this.isPlayingEmbed) { return true }
       const threshold = 400 * this.spaceCounterZoomDecimal
       const fallbackHeight = 200
       const offset = utils.outsideSpaceOffset().y
