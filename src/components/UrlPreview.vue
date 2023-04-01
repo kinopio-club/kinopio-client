@@ -34,7 +34,7 @@
             button(@click="showNone" :class="{active : isShowNone}" :disabled="!canEditCard")
               span None
 
-      // preview
+      //- preview
       template(v-if="!shouldDisplayEmbed")
         //- url preview image
         img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
@@ -299,6 +299,7 @@ export default {
       border-top-right-radius 0
     &.is-card-details
       padding 4px
+      min-height 80px
     &.no-padding
       padding 0
     &.is-no-info
