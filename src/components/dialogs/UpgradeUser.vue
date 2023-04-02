@@ -8,6 +8,7 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop @keydown.sto
         button(:class="{active: priceIsMonthly}" @click.left="updatePriceType('monthly')") ${{consts.priceMonthly}}/month
         button(:class="{active: priceIsYearly}" @click.left="updatePriceType('yearly')") ${{consts.priceYearly}}/year
           .badge.label-badge -17%
+        button(:class="{active: priceIsLife}" @click.left="updatePriceType('life')") ${{consts.priceLife}}/life
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
@@ -93,6 +94,7 @@ export default {
     },
     updatePriceType (value) {
       this.priceType = value
+      this.updateDialogHeight()
     }
   },
   watch: {
@@ -111,6 +113,7 @@ export default {
   max-height calc(100vh - 210px)
   left initial
   right 8px
+  width 260px
   .badge
     display inline-block
   button
@@ -121,9 +124,10 @@ export default {
     min-height initial
     position absolute
     left initial
-    right -15px
-    top -6px
+    right -8px
+    top -8px
     margin 0
+    z-index 1
   p
     color var(--primary)
 
