@@ -99,7 +99,6 @@ export default {
   },
   props: {
     visible: Boolean,
-    priceIsMonthly: Boolean,
     price: Object
   },
   mounted () {

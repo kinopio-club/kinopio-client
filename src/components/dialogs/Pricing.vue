@@ -1,5 +1,6 @@
 <script setup>
 import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
+import consts from '@/consts.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
 import { useStore } from 'vuex'
@@ -14,7 +15,7 @@ const props = defineProps({
 <template lang="pug">
 dialog.narrow.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
-    p Kinopio is free for 100 cards, afterwards it's $6/month or $60/year
+    p Kinopio is free for 100 cards, afterwards it's ${{consts.priceMonthly}}/month, ${{consts.priceYearly}}/year, or ${{consts.priceLife}}/life
     ReferredNewUserCredits()
     table
       tbody

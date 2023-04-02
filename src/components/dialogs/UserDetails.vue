@@ -43,7 +43,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
             span Upgrade for Unlimited
       .row(v-if="!isAppStoreMode")
         p
-          .badge.info $6/mo, $60/yr
+          .badge.info ${{consts.priceMonthly}}/mo, ${{consts.priceYearly}}/yr
         a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
           button Help →
       .row(v-if="spaceUserIsUpgraded && !currentUserIsUpgraded")
@@ -112,6 +112,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import { defineAsyncComponent } from 'vue'
 const User = defineAsyncComponent({
   loader: () => import('@/components/User.vue')
@@ -149,6 +150,7 @@ export default {
     }
   },
   computed: {
+    consts () { return consts },
     visible () { return this.$store.state.userDetailsIsVisible },
     user () { return this.$store.state.userDetailsUser },
     userDetailsPosition () { return this.$store.state.userDetailsPosition },

@@ -5,13 +5,13 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop @keydown.sto
       p Upgrade your account for unlimited cards and uploads
     .row
       .segmented-buttons
-        button(:class="{active: priceIsMonthly}" @click.left="togglePriceIsMonthly(true)") $6/month
-        button(:class="{active: !priceIsMonthly}" @click.left="togglePriceIsMonthly(false)") $60/year
+        button(:class="{active: priceIsMonthly}" @click.left="updatePriceType('monthly')") ${{consts.priceMonthly}}/month
+        button(:class="{active: priceIsYearly}" @click.left="updatePriceType('yearly')") ${{consts.priceYearly}}/year
           .badge.label-badge -17%
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-    UpgradeUserSubscribe(:visible="currentUserIsSignedIn" :priceIsMonthly="priceIsMonthly" :price="price")
+    UpgradeUserSubscribe(:visible="currentUserIsSignedIn" :price="price")
   section(v-if="currentUserIsSignedIn")
     p
       img.icon(src="@/assets/lock.svg")
@@ -23,6 +23,7 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop @keydown.sto
 import UpgradeUserSubscribe from '@/components/UpgradeUserSubscribe.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 export default {
   name: 'UpgradeUser',
@@ -43,30 +44,35 @@ export default {
   data () {
     return {
       dialogHeight: null,
-      priceIsMonthly: true
+      priceType: 'monthly' // monthly, yearly, life
     }
   },
   computed: {
+    consts () { return consts },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    priceIsMonthly () { return this.priceType === 'monthly' },
+    priceIsYearly () { return this.priceType === 'yearly' },
+    priceIsLife () { return this.priceType === 'life' },
     price () {
       let price
       if (this.priceIsMonthly) {
         price = {
-          amount: 6,
+          amount: consts.priceMonthly,
           period: 'month',
           id: 'price_1L2GvBDFIr5ywhwobbE35dhA'
         }
-      } else {
+      } else if (this.priceIsYearly) {
         price = {
-          amount: 60,
+          amount: consts.priceYearly,
           period: 'year',
           id: 'price_1L2ErWDFIr5ywhwodsKxEEAq'
         }
       }
+      // dev
       if (import.meta.env.MODE === 'development') {
         if (this.priceIsMonthly) {
           price.id = 'price_1L7200DFIr5ywhwoAJGkA7yK'
-        } else {
+        } else if (this.priceIsYearly) {
           price.id = 'price_1L720NDFIr5ywhwo0wS5PWAv'
         }
       }
@@ -85,8 +91,8 @@ export default {
         this.dialogHeight = utils.elementHeight(element)
       })
     },
-    togglePriceIsMonthly (value) {
-      this.priceIsMonthly = value
+    updatePriceType (value) {
+      this.priceType = value
     }
   },
   watch: {

@@ -33,7 +33,7 @@ section.invite
         hr
       .row
         p You'll both earn a{{' '}}
-          span.badge.success $6 credit
+          span.badge.success ${{consts.referralCreditAmount}} credit
           span when someone you invite signs up for a Kinopio account
       template(v-if="currentUserIsUpgraded")
         hr
@@ -47,6 +47,7 @@ section.invite
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import randomColor from 'randomcolor'
 import { mapState, mapGetters } from 'vuex'

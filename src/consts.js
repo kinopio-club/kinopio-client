@@ -11,5 +11,8 @@ export default {
   referralCreditAmount: 6,
   defaultTimeout: 40000,
   pexelsApiKey: '4kZOQl4a0OjcWLrMHzj6sEJMarmlZzJiP6P67lqZpOrxbtITfwpKyC4j',
-  rootUserId: 'euGhpBrR9eBcjKnK16C_g'
+  rootUserId: 'euGhpBrR9eBcjKnK16C_g',
+  priceMonthly: 6,
+  priceYearly: 60,
+  priceLife: 600
 }
