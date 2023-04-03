@@ -68,6 +68,12 @@ export default {
           period: 'year',
           id: 'price_1L2ErWDFIr5ywhwodsKxEEAq'
         }
+      } else {
+        price = {
+          amount: consts.priceLife,
+          period: 'life',
+          id: 'ABC'
+        }
       }
       // dev
       if (import.meta.env.MODE === 'development') {
@@ -75,6 +81,8 @@ export default {
           price.id = 'price_1L7200DFIr5ywhwoAJGkA7yK'
         } else if (this.priceIsYearly) {
           price.id = 'price_1L720NDFIr5ywhwo0wS5PWAv'
+        } else {
+          price.id = 'XYZ'
         }
       }
       return price

@@ -45,8 +45,11 @@
   .summary
     User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
     .row.row-wrap
-      .badge.info
+      .badge.info(v-if="priceIsLife")
+        span ${{price.amount}}
+      .badge.info(v-else)
         span ${{price.amount}}/{{price.period}}
+
       .badge.secondary
         span Tax included
       Loader(:visible="loading.credits")
@@ -58,14 +61,17 @@
     span(v-if="initialPaymentAfterCredits === 0") {{' '}}For Free
     Loader(:visible="loading.subscriptionIsBeingCreated")
 
-  p(v-if="credits")
+  p(v-if="credits && !priceIsLife")
     span You'll be billed ${{initialPaymentAfterCredits}} immediately.
     span(v-if="isCreditsRemainingAfterInitialPayment") {{' '}}Your remaining credits will be applied to future bills.
     span {{' '}}Then you'll be billed ${{price.amount}} each {{price.period}}.
+  p(v-else-if="priceIsLife")
+    span You'll be billed ${{price.amount}} immediately, and will not be charged again.
   p(v-else)
     span You'll be billed ${{price.amount}} immediately, and then ${{price.amount}} each {{price.period}}.
 
-  p You can cancel anytime.
+  p(v-if="priceIsLife") You can request a full refund within the first six months.
+  p(v-if="!priceIsLife") You can cancel anytime.
 
 </template>
 
@@ -153,6 +159,9 @@ export default {
         return price
       }
     },
+    priceIsMonthly () { return this.price.period === 'month' },
+    priceIsYearly () { return this.price.period === 'year' },
+    priceIsLife () { return this.price.period === 'life' },
     isCreditsRemainingAfterInitialPayment () {
       const credits = this.credits
       const price = this.price.amount
