@@ -65,7 +65,7 @@ export default {
     referredByUserId: '',
     referrerName: '',
     weather: '',
-    panSpeedPercent: 100
+    panSpeedPercent: 0
   },
   mutations: {
     color: (state, value) => {
