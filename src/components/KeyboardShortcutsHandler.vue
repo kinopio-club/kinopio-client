@@ -249,7 +249,7 @@ export default {
     // on mouse move
     handleMouseMoveEvents (event) {
       const panSpeedPercent = this.$store.state.currentUser.panSpeedPercent
-      const max = 6
+      const max = 5
       let speed = max * (panSpeedPercent / 100)
       speed = Math.max(1, speed)
       const position = utils.cursorPositionInPage(event)
