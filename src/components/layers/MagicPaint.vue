@@ -51,6 +51,7 @@ const rateOfIterationDecay = 0.03 // higher is faster tail decay
 let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
 let prevScroll
+let prevPosition
 
 // remote painting
 let remotePaintingCircles = []
@@ -356,7 +357,9 @@ export default {
       let color = this.$store.state.currentUser.color
       this.currentCursor = utils.cursorPositionInViewport(event)
       let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
-      this.selectItems(event)
+      const position = utils.cursorPositionInSpace(event)
+      this.selectItems(position)
+      this.selectItemsBetweenCurrentAndPrevPosition(position)
       paintingCircles.push(circle)
       this.broadcastCircle(event, circle)
     },
@@ -387,6 +390,7 @@ export default {
       if (!event.shiftKey) {
         this.$store.dispatch('clearMultipleSelected')
       }
+      prevPosition = null
       this.$store.commit('previousMultipleCardsSelectedIds', utils.clone(this.$store.state.multipleCardsSelectedIds))
       this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.$store.state.multipleConnectionsSelectedIds))
       this.$store.dispatch('closeAllDialogs')
@@ -444,13 +448,23 @@ export default {
       const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
       return isMobile && !isPaintingLocked
     },
-    selectItems (event) {
+    selectItems (position) {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCannotEditSpace) { return }
-      const position = utils.cursorPositionInSpace(event)
       this.selectCards(position)
       this.selectConnectionPaths(position)
       this.selectBoxes(position)
+    },
+    selectItemsBetweenCurrentAndPrevPosition (position) {
+      if (!prevPosition) {
+        prevPosition = position
+        return
+      }
+      const points = utils.pointsBetweenTwoPoints(prevPosition, position)
+      points.forEach(point => {
+        this.selectItems(point)
+      })
+      prevPosition = position
     },
     selectCards (position) {
       if (this.shouldPreventSelectionOnMobile()) { return }

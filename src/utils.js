@@ -747,6 +747,38 @@ export default {
     }
     return point
   },
+  pointsBetweenTwoPoints (point1, point2) {
+    // https://stackoverflow.com/questions/4672279/bresenham-algorithm-in-javascript
+    let points = []
+    // Translate coordinates
+    let x1 = point1.x
+    let y1 = point1.y
+    let x2 = point2.x
+    let y2 = point2.y
+    // Define differences and error check
+    let dx = Math.abs(x2 - x1)
+    let dy = Math.abs(y2 - y1)
+    let sx = (x1 < x2) ? 1 : -1
+    let sy = (y1 < y2) ? 1 : -1
+    let err = dx - dy
+    // Set first coordinates
+    points.push({ x: x1, y: y1 })
+    // Main loop
+    while (!((x1 === x2) && (y1 === y2))) {
+      let e2 = err << 1
+      if (e2 > -dy) {
+        err -= dy
+        x1 += sx
+      }
+      if (e2 < dx) {
+        err += dx
+        y1 += sy
+      }
+      // Add coordinates
+      points.push({ x: x1, y: y1 })
+    }
+    return points
+  },
   innerHTMLText (htmlString) {
     // https://regexr.com/6olpg
     // from https://stackoverflow.com/a/1736801
