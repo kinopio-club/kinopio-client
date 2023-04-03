@@ -27,9 +27,10 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
       Slider(
         @updatePlayhead="updatePanSpeedPercent"
         @resetPlayhead="resetPanSpeedPercent"
-        :minValue="min"
+        :minValue="1"
         :value="panSpeedPercent"
         :maxValue="100"
+        :shouldHideZoomPercentBadge="true"
       )
       span R
 
@@ -72,10 +73,7 @@ export default {
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
     shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
     shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle },
-    panSpeedPercent () { return this.$store.state.currentUser.panSpeedPercent },
-    max () { return 100 },
-    min () { return 1 }
-
+    panSpeedPercent () { return this.$store.state.currentUser.panSpeedPercent }
   },
   methods: {
     updatePanSpeedPercent (value) {
@@ -129,4 +127,7 @@ export default {
 .controls-settings
   overflow auto
   width 222px
+  .slider
+    margin-left 5px
+    margin-top -10px
 </style>

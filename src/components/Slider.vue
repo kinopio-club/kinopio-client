@@ -49,7 +49,8 @@ export default {
     value: Number,
     animateJiggleRight: Boolean,
     animateJiggleLeft: Boolean,
-    minKeyboardShortcut: String
+    minKeyboardShortcut: String,
+    shouldHideZoomPercentBadge: Boolean
   },
   data () {
     return {
@@ -83,6 +84,7 @@ export default {
       return Math.round(this.value)
     },
     zoomPercentBadgeIsVisible () {
+      if (this.shouldHideZoomPercentBadge) { return }
       if (this.value !== this.maxValue) {
         return true
       } else {
