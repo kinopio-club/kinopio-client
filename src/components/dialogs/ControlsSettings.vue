@@ -24,19 +24,14 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
         span Use Sticky Cards
   section
     .row
-      p Panning
-    .row
-      span T
-      Slider(
-        @updatePlayhead="updatePanSpeedPercent"
-        @resetPlayhead="resetPanSpeedPercent"
-        :minValue="1"
-        :value="panSpeedPercent"
-        :maxValue="100"
-        :shouldHideZoomPercentBadge="true"
-      )
-      span R
-
+      span Panning Speed
+      .segmented-buttons.panning-speed-buttons
+        button(title="slow" @click="updatePanSpeedPercent(0)" :class="{active: panSpeedPercent === 0}")
+          span 0
+        button(title="medium" @click="updatePanSpeedPercent(50)" :class="{active: panSpeedPercent === 50}")
+          span 1
+        button(title="fast" @click="updatePanSpeedPercent(100)" :class="{active: panSpeedPercent === 100}")
+          span 2
     .row
       label.variable-length-content(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
@@ -47,13 +42,9 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
 <script>
 import utils from '@/utils.js'
 import consts from '@/consts.js'
-import Slider from '@/components/Slider.vue'
 
 export default {
   name: 'ControlsSettings',
-  components: {
-    Slider
-  },
   props: {
     visible: Boolean
   },
@@ -138,9 +129,8 @@ export default {
   &.is-pinned
     left initial
     right 8px
-  .slider
-    margin-left 5px
-    margin-top -10px
   .pin-button
     margin 0
+  .panning-speed-buttons
+    margin-left 6px
 </style>
