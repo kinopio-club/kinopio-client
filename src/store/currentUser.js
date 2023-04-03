@@ -64,7 +64,8 @@ export default {
     themeIsSystem: false,
     referredByUserId: '',
     referrerName: '',
-    weather: ''
+    weather: '',
+    panSpeedPercent: 100
   },
   mutations: {
     color: (state, value) => {
@@ -351,6 +352,9 @@ export default {
     },
     weather: (state, value) => {
       state.weather = value
+    },
+    panSpeedPercent: (state, value) => {
+      state.panSpeedPercent = value
     }
   },
   actions: {

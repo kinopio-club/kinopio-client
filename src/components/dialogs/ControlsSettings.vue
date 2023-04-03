@@ -21,7 +21,18 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
         span Use Sticky Cards
   section
     .row
-      p Debug
+      p Panning
+    .row
+      span T
+      Slider(
+        @updatePlayhead="updatePanSpeedPercent"
+        @resetPlayhead="resetPanSpeedPercent"
+        :minValue="min"
+        :value="panSpeedPercent"
+        :maxValue="100"
+      )
+      span R
+
     .row
       label.variable-length-content(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
@@ -31,9 +42,14 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
 
 <script>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
+import Slider from '@/components/Slider.vue'
 
 export default {
   name: 'ControlsSettings',
+  components: {
+    Slider
+  },
   props: {
     visible: Boolean
   },
@@ -55,9 +71,21 @@ export default {
     shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
     shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
-    shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle }
+    shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle },
+    panSpeedPercent () { return this.$store.state.currentUser.panSpeedPercent },
+    max () { return 100 },
+    min () { return 1 }
+
   },
   methods: {
+    updatePanSpeedPercent (value) {
+      value = Math.round(value)
+      // console.log(value)
+      this.$store.dispatch('currentUser/update', { panSpeedPercent: value })
+    },
+    resetPanSpeedPercent () {
+      this.updatePanSpeedPercent(100)
+    },
     toggleshouldDisableItemJiggle () {
       const value = !this.shouldDisableItemJiggle
       this.$store.dispatch('currentUser/update', { shouldDisableItemJiggle: value })

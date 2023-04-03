@@ -209,7 +209,6 @@ export default {
       // Pan
       } else if (key === ' ' && isSpaceScope) {
         event.preventDefault()
-        if (spaceKeyIsDown) { return }
         spaceKeyIsDown = true
         this.$store.commit('currentUserIsPanningReady', true)
       // Lock Cards
@@ -249,7 +248,10 @@ export default {
     },
     // on mouse move
     handleMouseMoveEvents (event) {
-      const speed = 6
+      const panSpeedPercent = this.$store.state.currentUser.panSpeedPercent
+      const max = 6
+      let speed = max * (panSpeedPercent / 100)
+      speed = Math.max(1, speed)
       const position = utils.cursorPositionInPage(event)
       currentCursorPosition = position
       if (this.$store.state.currentUserIsBoxSelecting) {
