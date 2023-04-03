@@ -14,5 +14,5 @@ export default {
   rootUserId: 'euGhpBrR9eBcjKnK16C_g',
   priceMonthly: 6,
   priceYearly: 60,
-  priceLife: 420
+  priceLife: 300
 }
