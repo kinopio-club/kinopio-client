@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="controlsSettingsIsPinned")
+dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="controlsSettingsIsPinned" :class="{'is-pinned': controlsSettingsIsPinned}")
   section.title-row
     p Controls
     button.pin-button.small-button(:class="{active: controlsSettingsIsPinned}" @click.left="toggleDialogIsPinned" title="Pin dialog")
@@ -111,7 +111,7 @@ export default {
     toggleDialogIsPinned () {
       this.$store.dispatch('closeAllDialogs')
       const value = !this.controlsSettingsIsPinned
-      this.$store.dispatch('spaceDetailsIsPinned', value)
+      this.$store.dispatch('controlsSettingsIsPinned', value)
     },
     updateDialogHeight () {
       if (!this.visible) { return }
@@ -135,6 +135,9 @@ export default {
 .controls-settings
   overflow auto
   width 222px
+  &.is-pinned
+    left initial
+    right 8px
   .slider
     margin-left 5px
     margin-top -10px

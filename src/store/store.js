@@ -1578,6 +1578,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('searchIsPinned', value)
     },
+    controlsSettingsIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      context.commit('controlsSettingsIsPinned', value)
+    },
 
     // scrolling and zoom
 
