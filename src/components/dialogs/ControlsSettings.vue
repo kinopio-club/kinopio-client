@@ -24,14 +24,14 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
         span Use Sticky Cards
   section
     .row
-      span Panning Speed
+      span Pan Speed
       .segmented-buttons.panning-speed-buttons
         button(title="slow" @click="updatePanSpeedPercent(0)" :class="{active: panSpeedPercent === 0}")
-          span 0
+          span 1×
         button(title="medium" @click="updatePanSpeedPercent(50)" :class="{active: panSpeedPercent === 50}")
-          span 1
+          span 2×
         button(title="fast" @click="updatePanSpeedPercent(100)" :class="{active: panSpeedPercent === 100}")
-          span 2
+          span 3×
     .row
       label.variable-length-content(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
