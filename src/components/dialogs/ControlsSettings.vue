@@ -1,7 +1,10 @@
 <template lang="pug">
-dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
-  section
+dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="controlsSettingsIsPinned")
+  section.title-row
     p Controls
+    button.pin-button.small-button(:class="{active: controlsSettingsIsPinned}" @click.left="toggleDialogIsPinned" title="Pin dialog")
+      img.icon.pin(src="@/assets/pin.svg")
+
   section
     .row
       label.variable-length-content(:class="{ active: shouldDisableItemJiggle }" @click.left.prevent="toggleshouldDisableItemJiggle" @keydown.stop.enter="toggleshouldDisableItemJiggle")
@@ -73,12 +76,12 @@ export default {
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
     shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
     shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle },
-    panSpeedPercent () { return this.$store.state.currentUser.panSpeedPercent }
+    panSpeedPercent () { return this.$store.state.currentUser.panSpeedPercent },
+    controlsSettingsIsPinned () { return this.$store.state.controlsSettingsIsPinned }
   },
   methods: {
     updatePanSpeedPercent (value) {
       value = Math.round(value)
-      // console.log(value)
       this.$store.dispatch('currentUser/update', { panSpeedPercent: value })
     },
     resetPanSpeedPercent () {
@@ -105,6 +108,11 @@ export default {
       const value = !this.shouldDisableRightClickToPan
       this.$store.dispatch('currentUser/update', { shouldDisableRightClickToPan: value })
     },
+    toggleDialogIsPinned () {
+      this.$store.dispatch('closeAllDialogs')
+      const value = !this.controlsSettingsIsPinned
+      this.$store.dispatch('spaceDetailsIsPinned', value)
+    },
     updateDialogHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
@@ -130,4 +138,6 @@ export default {
   .slider
     margin-left 5px
     margin-top -10px
+  .pin-button
+    margin 0
 </style>

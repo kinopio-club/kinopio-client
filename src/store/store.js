@@ -175,6 +175,7 @@ const store = createStore({
     spaceDetailsIsPinned: false,
     sidebarIsPinned: false,
     searchIsPinned: false,
+    controlsSettingsIsPinned: false,
 
     // loading
     isLoadingSpace: false,
@@ -901,6 +902,10 @@ const store = createStore({
     searchIsPinned: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.searchIsPinned = value
+    },
+    controlsSettingsIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.controlsSettingsIsPinned = value
     },
 
     // Connection Details
