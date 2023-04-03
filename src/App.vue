@@ -9,7 +9,8 @@
   OutsideSpaceBackground
   SpaceBackground
   ItemsLocked
-  MagicPaint
+  //- MagicPaint
+  PaintSelect
   //- router-view is Space or Add
   router-view
   Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
@@ -29,7 +30,8 @@
 
 <script>
 import Header from '@/components/Header.vue'
-import MagicPaint from '@/components/layers/MagicPaint.vue'
+// import MagicPaint from '@/components/layers/MagicPaint.vue'
+import PaintSelect from '@/components/layers/PaintSelect.vue'
 import Footer from '@/components/Footer.vue'
 import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
@@ -52,7 +54,8 @@ let inertiaScrollEndIntervalTimer, prevPosition
 export default {
   components: {
     Header,
-    MagicPaint,
+    // MagicPaint,
+    PaintSelect,
     Footer,
     KeyboardShortcutsHandler,
     ScrollHandler,

@@ -2,10 +2,6 @@
 aside
   //- Magic painting is ephemeral brush strokes that select items
   canvas#magic-painting(
-    @mousedown.left="startPainting"
-    @touchstart="startPainting"
-    @mousemove="painting"
-    @touchmove="painting"
     :width="viewportWidth"
     :height="viewportHeight"
     :style="canvasStyles"
@@ -83,10 +79,10 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggeredPaintFramePosition') {
         const position = this.$store.state.triggeredPaintFramePosition
-        // this.createSinglePaintingCircle(event)
-        // const circle = { x: position.x, y: position.y, color, iteration: 0 }
-        // this.drawCircle(circle, paintingContext)
-        // this.selectItems(position)
+        const color = this.$store.state.currentUser.color
+        const circle = { x: position.x, y: position.y, color, iteration: 0 }
+        this.drawCircle(circle, paintingContext)
+        this.selectItems(position)
       } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
         this.updateCirclesWithScroll()
       } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
