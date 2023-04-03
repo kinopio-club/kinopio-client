@@ -19,16 +19,19 @@ aside
     :width="viewportWidth"
     :height="viewportHeight"
     :style="canvasStyles"
+    :data-should-decay-slow="true"
   )
   canvas#locking.locking(
     :width="viewportWidth"
     :height="viewportHeight"
     :style="canvasStyles"
+    :data-should-decay-slow="true"
   )
   canvas#initial-circle.initial-circle(
     :width="viewportWidth"
     :height="viewportHeight"
     :style="canvasStyles"
+    :data-should-decay-slow="true"
   )
   DropGuideLine(
     :currentCursor="currentCursor"
@@ -48,6 +51,7 @@ const circleSelectionRadius = circleRadius - 10 // magnitude of sensitivity
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
 const maxIterations = 200 // higher is longer paint fade time
 const rateOfIterationDecay = 0.08 // higher is faster tail decay
+const rateOfIterationDecaySlow = 0.03
 let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
 let prevScroll
@@ -253,7 +257,12 @@ export default {
       if (!isCircleVisible && shouldDrawOffscreen) { circle = this.offscreenCircle(circle) }
       let { x, y, color, iteration, radius, alpha } = circle
       radius = radius || circleRadius
-      alpha = alpha || utils.exponentialDecay(iteration, rateOfIterationDecay)
+      let decay = rateOfIterationDecay
+      const isSlow = context.canvas.dataset.shouldDecaySlow
+      if (isSlow) {
+        decay = rateOfIterationDecaySlow
+      }
+      alpha = alpha || utils.exponentialDecay(iteration, decay)
       context.beginPath()
       context.arc(x, y, radius, 0, 2 * Math.PI)
       context.closePath()
