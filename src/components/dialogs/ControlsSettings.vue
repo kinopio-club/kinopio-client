@@ -24,7 +24,9 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
         span Use Sticky Cards
   section
     .row
-      span Pan Speed
+      p
+        //- img.icon.hand(src="@/assets/hand.svg")
+        span Pan Speed
       .segmented-buttons.panning-speed-buttons
         button(title="slow" @click="updatePanSpeedPercent(0)" :class="{active: panSpeedPercent === 0}")
           span 1×
@@ -133,4 +135,5 @@ export default {
     margin 0
   .panning-speed-buttons
     margin-left 6px
+    margin-top 0
 </style>
