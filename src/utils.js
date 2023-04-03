@@ -1148,6 +1148,11 @@ export default {
     return Math.exp(-(rateOfIterationDecay * iteration))
   },
   filterCircles (circles, maxIterationsToPaint) {
+    const max = 300
+    const startIndex = circles.length - max
+    if (startIndex > 0) {
+      circles = circles.slice(startIndex, circles.length)
+    }
     return circles.filter(circle => circle.iteration < maxIterationsToPaint)
   },
   easeOut (percentComplete, elaspedTime, duration) {

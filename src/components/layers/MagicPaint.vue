@@ -47,11 +47,11 @@ const circleSelectionRadius = circleRadius - 10 // magnitude of sensitivity
 // painting
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
 const maxIterations = 200 // higher is longer paint fade time
-const rateOfIterationDecay = 0.03 // higher is faster tail decay
+const rateOfIterationDecay = 0.08 // higher is faster tail decay
 let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
 let prevScroll
-let prevPosition
+let prevPosition, prevCursor
 
 // remote painting
 let remotePaintingCircles = []
@@ -82,8 +82,11 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggeredPaintFramePosition') {
-        const event = this.$store.state.triggeredPaintFramePosition
-        this.createPaintingCircle(event)
+        const position = this.$store.state.triggeredPaintFramePosition
+        // this.createSinglePaintingCircle(event)
+        // const circle = { x: position.x, y: position.y, color, iteration: 0 }
+        // this.drawCircle(circle, paintingContext)
+        // this.selectItems(position)
       } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
         this.updateCirclesWithScroll()
       } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
@@ -347,21 +350,50 @@ export default {
       if (!this.$store.state.currentUserIsPaintingLocked) { return }
       this.$store.commit('triggerHideTouchInterface')
     },
+    // createSinglePaintingCircle (position) {
+    //   // const isTouch = Boolean(event.touches)
+    //   // const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
+    //   // if (isTouch && !isPaintingLocked) { return }
+    //   // if (this.isBoxSelecting) { return }
+    //   // const currentUserIsPaintingLocked = this.$store.state.currentUserIsPaintingLocked
+    //   // if (isTouch && !currentUserIsPaintingLocked) { return }
+    //   // this.createPaintingCircles(event)
+    //   // const position = utils.cursorPositionInSpace(event)
+    //       const circle = { x: position.x, y: position.y, color, iteration: 0 }
+    //   this.broadcastCircle(position, circle)
+
+    //   // console.error('🚗',position, event, event.x, event.y)
+    //   this.selectItems(position)
+
+    // },
     createPaintingCircle (event) {
       const isTouch = Boolean(event.touches)
       const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
       if (isTouch && !isPaintingLocked) { return }
       if (this.isBoxSelecting) { return }
       const currentUserIsPaintingLocked = this.$store.state.currentUserIsPaintingLocked
-      if (event.touches && !currentUserIsPaintingLocked) { return }
-      let color = this.$store.state.currentUser.color
-      this.currentCursor = utils.cursorPositionInViewport(event)
-      let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
+      if (isTouch && !currentUserIsPaintingLocked) { return }
+      this.createPaintingCircles(event)
       const position = utils.cursorPositionInSpace(event)
+      // console.error('🚗',position, event, event.x, event.y)
       this.selectItems(position)
       this.selectItemsBetweenCurrentAndPrevPosition(position)
-      paintingCircles.push(circle)
+    },
+    createPaintingCircles (event) {
+      this.currentCursor = utils.cursorPositionInViewport(event)
+      if (!prevCursor) {
+        prevCursor = this.currentCursor
+        return
+      }
+      const color = this.$store.state.currentUser.color
+      const points = utils.pointsBetweenTwoPoints(prevCursor, this.currentCursor)
+      points.forEach(point => {
+        const circle = { x: point.x, y: point.y, color, iteration: 0 }
+        paintingCircles.push(circle)
+      })
+      const circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
       this.broadcastCircle(event, circle)
+      prevCursor = this.currentCursor
     },
     startPainting (event) {
       if (this.isPanning) { return }
@@ -391,6 +423,7 @@ export default {
         this.$store.dispatch('clearMultipleSelected')
       }
       prevPosition = null
+      prevCursor = null
       this.$store.commit('previousMultipleCardsSelectedIds', utils.clone(this.$store.state.multipleCardsSelectedIds))
       this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.$store.state.multipleConnectionsSelectedIds))
       this.$store.dispatch('closeAllDialogs')
