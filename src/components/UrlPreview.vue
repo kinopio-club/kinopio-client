@@ -43,9 +43,9 @@
           .description(v-if="description && shouldShowDescription") {{description}}
       //- card
       template(v-else)
-        CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
+        CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card" :shouldHideInfo="shouldHideInfo")
         //- image
-        img.preview-image(v-if="card.urlPreviewImage && !shouldDisplayEmbed && !shouldHideImage" :src="card.urlPreviewImage" :class="{selected: isSelected}" @load="updateDimensions")
+        img.preview-image(v-if="card.urlPreviewImage && !shouldDisplayEmbed && !shouldHideImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'info-is-visible': !shouldHideInfo}" @load="updateDimensions")
         .row.preview-text-row
           //- play
           .button-wrap.embed-button-wrap(v-if="!parentIsCardDetails && isYoutubeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
@@ -321,6 +321,9 @@ export default {
     -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
     &.selected
       mix-blend-mode color-burn
+    &.info-is-visible
+      border-bottom-left-radius 0
+      border-bottom-right-radius 0
 
   a.preview-image-wrap
     &:hover
@@ -359,12 +362,12 @@ export default {
   .favicon
     border-radius var(--small-entity-radius)
     width 14px
-    vertical-align -3px
+    vertical-align -2px
     display inline
     margin-right 5px
     &.open
       width 12px
-      vertical-align -2px
+      vertical-align 0
   .title
     display inline
   .description
@@ -394,10 +397,10 @@ export default {
 
   .embed-button-wrap
     flex-shrink 0
+    padding var(--subsection-padding)
     padding-top 8px
+    padding-right 2px
     cursor pointer
-    margin-right 3px
-    margin-left var(--subsection-padding)
     button
       background transparent
       .play
