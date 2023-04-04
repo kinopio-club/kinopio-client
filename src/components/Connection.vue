@@ -368,7 +368,7 @@ export default {
       }
     },
     controlPointPosition ({ x, y }) {
-      const framesPerDirection = 12
+      const framesPerDirection = 24
       const completedCycles = Math.floor(this.frameCount / framesPerDirection)
       const cycleProgress = (this.frameCount - completedCycles * framesPerDirection) / framesPerDirection
       const isForwardCycle = utils.isEvenNumber(completedCycles)
