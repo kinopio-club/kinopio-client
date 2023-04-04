@@ -32,12 +32,12 @@
       template(v-if="!shouldDisplayEmbed")
         //- url preview image
         img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
-        template(v-if="shouldLoadUrlPreviewImage")
-        //- on card
-        img.preview-image(v-if="!parentIsCardDetails && card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensions")
-        //- in carddetails
-        a.preview-image-wrap(v-if="parentIsCardDetails && !shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
-          img.preview-image(:src="card.urlPreviewImage" @load="updateDimensions")
+        //- image
+        template(v-if="parentIsCardDetails")
+          a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
+            img.preview-image(:src="card.urlPreviewImage" @load="updateDimensions")
+        template(v-else)
+          img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensions")
         //- info
         .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, hidden: shouldHideInfo, transparent: isShowNone, 'text-only': isTextOnly }" :style="{background: selectedColor}")
           img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
@@ -46,6 +46,8 @@
           .description(v-if="description && shouldShowDescription") {{description}}
       //- embed playback
       CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
+
+    //- play embed
     .row(v-if="!parentIsCardDetails && isYoutubeUrl")
       //- youtube
       .button-wrap.embed-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
