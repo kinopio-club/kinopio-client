@@ -16,6 +16,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { colord, extend } from 'colord'
 import qs from '@aguezz/qs-parse'
 import namesPlugin from 'colord/plugins/names'
+import getCurvePoints from '@/libs/curve_calc.js'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
@@ -748,35 +749,21 @@ export default {
     return point
   },
   pointsBetweenTwoPoints (point1, point2) {
-    // https://stackoverflow.com/questions/4672279/bresenham-algorithm-in-javascript
-    let points = []
-    // Translate coordinates
-    let x1 = point1.x
-    let y1 = point1.y
-    let x2 = point2.x
-    let y2 = point2.y
-    // Define differences and error check
-    let dx = Math.abs(x2 - x1)
-    let dy = Math.abs(y2 - y1)
-    let sx = (x1 < x2) ? 1 : -1
-    let sy = (y1 < y2) ? 1 : -1
-    let err = dx - dy
-    // Set first coordinates
-    points.push({ x: x1, y: y1 })
-    // Main loop
-    while (!((x1 === x2) && (y1 === y2))) {
-      let e2 = err << 1
-      if (e2 > -dy) {
-        err -= dy
-        x1 += sx
+    // [x1, y1, x2, y2, ...]
+    const splinePoints = getCurvePoints([point1.x, point1.y, point2.x, point2.y])
+    // [{x1, y2}, {x2, y2}, ...]
+    const points = []
+    let prevX
+    splinePoints.forEach((value, index) => {
+      value = Math.round(value)
+      const isX = this.isEvenNumber(index)
+      if (isX) {
+        prevX = value
+      } else {
+        const point = { x: prevX, y: value }
+        points.push(point)
       }
-      if (e2 < dx) {
-        err += dx
-        y1 += sy
-      }
-      // Add coordinates
-      points.push({ x: x1, y: y1 })
-    }
+    })
     return points
   },
   innerHTMLText (htmlString) {
