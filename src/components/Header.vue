@@ -104,6 +104,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           SpaceUsers
           UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
           Donate(:visible="donateIsVisible")
+          ControlsSettings(:visible="controlsSettingsIsVisible")
           //- Share
           .button-wrap
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
@@ -173,6 +174,7 @@ import Import from '@/components/dialogs/Import.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
 import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
+import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 
 import { mapState, mapGetters } from 'vuex'
 import sortBy from 'lodash-es/sortBy'
@@ -214,7 +216,8 @@ export default {
     Import,
     Pricing,
     EarnCredits,
-    SpaceTodayJournalBadge
+    SpaceTodayJournalBadge,
+    ControlsSettings
   },
   props: {
     isPinchZooming: Boolean,
@@ -410,6 +413,9 @@ export default {
       } else {
         return false
       }
+    },
+    controlsSettingsIsVisible () {
+      return this.$store.state.controlsSettingsIsPinned
     }
   },
   methods: {

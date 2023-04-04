@@ -209,7 +209,6 @@ export default {
       // Pan
       } else if (key === ' ' && isSpaceScope) {
         event.preventDefault()
-        if (spaceKeyIsDown) { return }
         spaceKeyIsDown = true
         this.$store.commit('currentUserIsPanningReady', true)
       // Lock Cards
@@ -249,7 +248,6 @@ export default {
     },
     // on mouse move
     handleMouseMoveEvents (event) {
-      const speed = 6
       const position = utils.cursorPositionInPage(event)
       currentCursorPosition = position
       if (this.$store.state.currentUserIsBoxSelecting) {
@@ -259,11 +257,11 @@ export default {
         if (!prevCursorPosition) {
           prevCursorPosition = position
         }
-        const delta = {
-          x: Math.ceil((prevCursorPosition.x - position.x) * speed),
-          y: Math.ceil((prevCursorPosition.y - position.y) * speed)
+        let delta = {
+          x: Math.round(prevCursorPosition.x - position.x),
+          y: Math.round(prevCursorPosition.y - position.y)
         }
-        window.scrollBy(delta.x, delta.y)
+        window.scrollBy(delta.x, delta.y, 'instant')
       }
     },
     // on mouse up

@@ -175,6 +175,7 @@ const store = createStore({
     spaceDetailsIsPinned: false,
     sidebarIsPinned: false,
     searchIsPinned: false,
+    controlsSettingsIsPinned: false,
 
     // loading
     isLoadingSpace: false,
@@ -902,6 +903,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.searchIsPinned = value
     },
+    controlsSettingsIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.controlsSettingsIsPinned = value
+    },
 
     // Connection Details
 
@@ -1572,6 +1577,10 @@ const store = createStore({
     searchIsPinned: (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('searchIsPinned', value)
+    },
+    controlsSettingsIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      context.commit('controlsSettingsIsPinned', value)
     },
 
     // scrolling and zoom

@@ -1,7 +1,10 @@
 <template lang="pug">
-dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
-  section
+dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="controlsSettingsIsPinned" :class="{'is-pinned': controlsSettingsIsPinned}")
+  section.title-row
     p Controls
+    button.pin-button.small-button(:class="{active: controlsSettingsIsPinned}" @click.left="toggleDialogIsPinned" title="Pin dialog")
+      img.icon.pin(src="@/assets/pin.svg")
+
   section
     .row
       label.variable-length-content(:class="{ active: shouldDisableItemJiggle }" @click.left.prevent="toggleshouldDisableItemJiggle" @keydown.stop.enter="toggleshouldDisableItemJiggle")
@@ -21,8 +24,6 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
         span Use Sticky Cards
   section
     .row
-      p Debug
-    .row
       label.variable-length-content(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
         span Disable Right/Middle Click to Pan
@@ -31,6 +32,7 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
 
 <script>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 export default {
   name: 'ControlsSettings',
@@ -55,7 +57,8 @@ export default {
     shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
     shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
-    shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle }
+    shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle },
+    controlsSettingsIsPinned () { return this.$store.state.controlsSettingsIsPinned }
   },
   methods: {
     toggleshouldDisableItemJiggle () {
@@ -79,6 +82,11 @@ export default {
       const value = !this.shouldDisableRightClickToPan
       this.$store.dispatch('currentUser/update', { shouldDisableRightClickToPan: value })
     },
+    toggleDialogIsPinned () {
+      this.$store.dispatch('closeAllDialogs')
+      const value = !this.controlsSettingsIsPinned
+      this.$store.dispatch('controlsSettingsIsPinned', value)
+    },
     updateDialogHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
@@ -101,4 +109,12 @@ export default {
 .controls-settings
   overflow auto
   width 222px
+  &.is-pinned
+    left initial
+    right 8px
+  .pin-button
+    margin 0
+  .panning-speed-buttons
+    margin-left 6px
+    margin-top 0
 </style>
