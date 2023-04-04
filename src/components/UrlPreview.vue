@@ -3,12 +3,6 @@
   Loader(:visible="loading")
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': shouldHideInfo && !shouldHideImage, 'is-no-info': !previewHasInfo}")
-      //- youtube
-      .content-buttons.card-inline-buttons(v-if="!parentIsCardDetails && isYoutubeUrl")
-        .button-wrap.inline-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
-          button.inline-button
-            img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
-            img.icon.play(v-else src="@/assets/play.svg")
       //- card details buttons
       .content-buttons(v-if="parentIsCardDetails")
         .row
@@ -52,6 +46,14 @@
           .description(v-if="description && shouldShowDescription") {{description}}
       //- embed playback
       CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
+    .row(v-if="!parentIsCardDetails && isYoutubeUrl")
+      //- youtube
+      .button-wrap.embed-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
+        button.small-button
+          img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
+          img.icon.play(v-else src="@/assets/play.svg")
+          span Video
+
 </template>
 
 <script>
@@ -281,6 +283,7 @@ export default {
 
 <style lang="stylus">
 .url-preview
+  flex-wrap wrap
   &.row
     display flex
   .preview-content
@@ -378,15 +381,15 @@ export default {
     cursor pointer
     button
       cursor pointer
-    .icon
-      &.play,
-      &.stop
-        position absolute
-        left 6px
-        top 3px
-      &.stop
-        left 4px
-        top 2px
+
+  .embed-button-wrap
+    padding-top 8px
+    cursor pointer
+    button
+      background transparent
+      .play
+        vertical-align 1px
+        margin-left 4px
 
   button
     &:disabled

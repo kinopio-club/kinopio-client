@@ -1134,7 +1134,7 @@ export default {
         preventSticking = true
         return
       }
-      const isButtonHover = event.target.closest('.inline-button-wrap')
+      const isButtonHover = event.target.closest('.inline-button-wrap') || event.target.closest('.button-wrap')
       if (isButtonHover) {
         this.clearStickyPositionOffsets()
         return
