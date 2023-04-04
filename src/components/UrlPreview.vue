@@ -1,5 +1,5 @@
 <template lang="pug">
-.row.url-preview(v-if="visible")
+.row.url-preview(v-if="visible" :class="{'parent-is-card-details': parentIsCardDetails}")
   Loader(:visible="loading")
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': shouldHideInfo && !shouldHideImage, 'is-no-info': !previewHasInfo}")
@@ -28,33 +28,37 @@
             button(@click="showNone" :class="{active : isShowNone}" :disabled="!canEditCard")
               span None
 
-      //- preview
-      template(v-if="!shouldDisplayEmbed")
-        //- url preview image
-        img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
+      //- url preview image
+      img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
+      //- card details
+      template(v-if="parentIsCardDetails")
         //- image
-        template(v-if="parentIsCardDetails")
-          a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
-            img.preview-image(:src="card.urlPreviewImage" @load="updateDimensions")
-        template(v-else)
-          img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensions")
-        //- info
-        .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, hidden: shouldHideInfo, transparent: isShowNone, 'text-only': isTextOnly }" :style="{background: selectedColor}")
+        a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
+          img.preview-image(:src="card.urlPreviewImage" @load="updateDimensions")
+        //- text
+        .card-details-text.badge(v-if="!shouldHideInfo" :class="{'side-text': shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, transparent: isShowNone, 'text-only': isTextOnly }" :style="{background: selectedColor}")
           img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
           .title {{filteredTitle}}
           .description(v-if="description && shouldShowDescription") {{description}}
-      //- embed playback
-      CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
-
-    //- play embed
-    .row(v-if="!parentIsCardDetails && isYoutubeUrl")
-      //- youtube
-      .button-wrap.embed-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
-        button.small-button
-          img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
-          img.icon.play(v-else src="@/assets/play.svg")
-          span Video
+      //- card
+      template(v-else)
+        CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
+        //- image
+        img.preview-image(v-if="card.urlPreviewImage && !shouldDisplayEmbed" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage}" @load="updateDimensions")
+        //- text
+        .text(v-if="!shouldHideInfo" :class="{'text-only': isTextOnly }" :style="{background: selectedColor}")
+          img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+          img.icon.favicon.open(v-else src="@/assets/open.svg")
+          .title {{filteredTitle}}
+          .description(v-if="description && shouldShowDescription") {{description}}
+          //- play embed
+          .row(v-if="!parentIsCardDetails && isYoutubeUrl")
+            .button-wrap.embed-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
+              button.small-button
+                img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
+                img.icon.play(v-else src="@/assets/play.svg")
+                span Video
 
 </template>
 
@@ -167,7 +171,8 @@ export default {
     },
     youtubeEmbedUrl () {
       if (!this.youtubeUrlVideoId) { return }
-      const url = `https://www.youtube-nocookie.com/embed/${this.youtubeUrlVideoId}?autoplay=1`
+      // https://developers.google.com/youtube/player_parameters
+      const url = `https://www.youtube-nocookie.com/embed/${this.youtubeUrlVideoId}?autoplay=1&color=white&playsinline=1&modestbranding=1`
       return url
     },
     description () {
@@ -296,6 +301,7 @@ export default {
     word-break break-word
     background var(--secondary-hover-background)
     border-radius var(--small-entity-radius)
+    flex-wrap wrap
     &.image-card
       padding 4px
       border-top-left-radius 0
@@ -303,6 +309,7 @@ export default {
     &.is-card-details
       padding 4px
       min-height 80px
+      flex-wrap nowrap
     &.no-padding
       padding 0
     &.is-no-info
@@ -329,16 +336,20 @@ export default {
     margin-right 6px
 
   .text
-    position absolute
-    margin 8px
-    background var(--secondary-hover-background)
-    user-select text
-    &.text-with-image
-      border-radius var(--small-entity-radius)
-    &.text-only
-      position relative
-      margin 0
-      border-radius var(--small-entity-radius)
+    margin 4px
+
+  &.parent-is-card-details
+    .text
+      position absolute
+      margin 8px
+      background var(--secondary-hover-background)
+      user-select text
+      &.text-with-image
+        border-radius var(--small-entity-radius)
+      &.text-only
+        position relative
+        margin 0
+        border-radius var(--small-entity-radius)
 
   .side-text
     max-width calc(100% - 24px)
