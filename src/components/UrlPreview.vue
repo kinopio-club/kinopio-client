@@ -90,15 +90,17 @@ export default {
         if (!this.visible) { return }
         if (mutation.payload !== this.card.id) { return }
         const urls = utils.urlsFromString(this.card.name)
-
         if (!urls.length) { return }
         let shouldShowImage
         urls.forEach(url => {
           const isYoutube = utils.urlIsYoutube(url)
           if (isYoutube) { shouldShowImage = true }
         })
-        if (shouldShowImage) {
-          this.showImage()
+        if (!shouldShowImage) { return }
+        this.showImage()
+        // update card width
+        if (!this.card.resizeWidth) {
+          this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth: 235 })
         }
       }
     })
