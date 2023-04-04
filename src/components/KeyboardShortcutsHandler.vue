@@ -265,6 +265,7 @@ export default {
           x: Math.ceil((prevCursorPosition.x - position.x) * speed),
           y: Math.ceil((prevCursorPosition.y - position.y) * speed)
         }
+        console.log('🍇', delta.x, prevCursorPosition.x, position.x, speed) // temp
         window.scrollBy(delta.x, delta.y)
       }
     },
