@@ -797,6 +797,11 @@ export default {
       this.pastedName = text
       this.wasPasted = true
       this.$store.dispatch('currentCards/updateURLQueryStrings', { cardId: this.card.id })
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.$store.commit('triggerCardIdUpdatePastedName', this.card.id)
+        })
+      })
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')

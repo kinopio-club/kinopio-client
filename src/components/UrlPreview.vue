@@ -86,6 +86,20 @@ export default {
       if (mutation.type === 'triggerUpdateUrlPreviewComplete') {
         const cards = this.$store.state.prevNewTweetCards
         this.$store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
+      } else if (mutation.type === 'triggerCardIdUpdatePastedName') {
+        if (!this.visible) { return }
+        if (mutation.payload !== this.card.id) { return }
+        const urls = utils.urlsFromString(this.card.name)
+
+        if (!urls.length) { return }
+        let shouldShowImage
+        urls.forEach(url => {
+          const isYoutube = utils.urlIsYoutube(url)
+          if (isYoutube) { shouldShowImage = true }
+        })
+        if (shouldShowImage) {
+          this.showImage()
+        }
       }
     })
   },
@@ -134,18 +148,7 @@ export default {
     },
     isYoutubeUrl () {
       const url = this.card.urlPreviewUrl
-      if (url.includes('/channel/')) { return }
-      const domains = ['https://youtube.com', 'https://www.youtube.com', 'https://m.youtube.com', 'https://youtu.be']
-      let isRoot, isVideo
-      domains.forEach(domain => {
-        if (url === domain) { isRoot = true }
-        if (url === domain + '/') { isRoot = true }
-      })
-      if (isRoot) { return }
-      domains.forEach(domain => {
-        if (url.includes(domain)) { isVideo = true }
-      })
-      return isVideo
+      return utils.urlIsYoutube(url)
     },
     youtubeUrlVideoId () {
       if (!this.isYoutubeUrl) { return }

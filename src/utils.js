@@ -1742,6 +1742,20 @@ export default {
     const isSpace = this.urlIsSpace(url)
     return !isImage && !isVideo && !isAudio && !isFile && !isSpace
   },
+  urlIsYoutube (url) {
+    if (url.includes('/channel/')) { return }
+    const domains = ['https://youtube.com', 'https://www.youtube.com', 'https://m.youtube.com', 'https://youtu.be']
+    let isRoot, isVideo
+    domains.forEach(domain => {
+      if (url === domain) { isRoot = true }
+      if (url === domain + '/') { isRoot = true }
+    })
+    if (isRoot) { return }
+    domains.forEach(domain => {
+      if (url.includes(domain)) { isVideo = true }
+    })
+    return isVideo
+  },
   fileNameFromUrl (url) {
     if (!url) { return }
     if (!this.urlIsFile(url)) { return }
