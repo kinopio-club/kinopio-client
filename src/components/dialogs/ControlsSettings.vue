@@ -24,17 +24,6 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
         span Use Sticky Cards
   section
     .row
-      p
-        //- img.icon.hand(src="@/assets/hand.svg")
-        span Pan Speed
-      .segmented-buttons.panning-speed-buttons
-        button(title="slow" @click="updatePanSpeedPercent(0)" :class="{active: panSpeedPercent === 0}")
-          span 1×
-        button(title="medium" @click="updatePanSpeedPercent(50)" :class="{active: panSpeedPercent === 50}")
-          span 2×
-        button(title="fast" @click="updatePanSpeedPercent(100)" :class="{active: panSpeedPercent === 100}")
-          span 3×
-    .row
       label.variable-length-content(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
         span Disable Right/Middle Click to Pan
@@ -69,17 +58,9 @@ export default {
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
     shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
     shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle },
-    panSpeedPercent () { return this.$store.state.currentUser.panSpeedPercent },
     controlsSettingsIsPinned () { return this.$store.state.controlsSettingsIsPinned }
   },
   methods: {
-    updatePanSpeedPercent (value) {
-      value = Math.round(value)
-      this.$store.dispatch('currentUser/update', { panSpeedPercent: value })
-    },
-    resetPanSpeedPercent () {
-      this.updatePanSpeedPercent(100)
-    },
     toggleshouldDisableItemJiggle () {
       const value = !this.shouldDisableItemJiggle
       this.$store.dispatch('currentUser/update', { shouldDisableItemJiggle: value })

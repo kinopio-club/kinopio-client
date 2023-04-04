@@ -248,10 +248,6 @@ export default {
     },
     // on mouse move
     handleMouseMoveEvents (event) {
-      const panSpeedPercent = this.$store.state.currentUser.panSpeedPercent
-      const max = 5
-      let speed = max * (panSpeedPercent / 100)
-      speed = Math.max(1, speed)
       const position = utils.cursorPositionInPage(event)
       currentCursorPosition = position
       if (this.$store.state.currentUserIsBoxSelecting) {
@@ -261,12 +257,11 @@ export default {
         if (!prevCursorPosition) {
           prevCursorPosition = position
         }
-        const delta = {
-          x: Math.ceil((prevCursorPosition.x - position.x) * speed),
-          y: Math.ceil((prevCursorPosition.y - position.y) * speed)
+        let delta = {
+          x: Math.round(prevCursorPosition.x - position.x),
+          y: Math.round(prevCursorPosition.y - position.y)
         }
-        console.log('🍇', delta.x, prevCursorPosition.x, position.x, speed) // temp
-        window.scrollBy(delta.x, delta.y)
+        window.scrollBy(delta.x, delta.y, 'instant')
       }
     },
     // on mouse up
