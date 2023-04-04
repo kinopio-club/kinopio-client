@@ -45,20 +45,19 @@
       template(v-else)
         CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
         //- image
-        img.preview-image(v-if="card.urlPreviewImage && !shouldDisplayEmbed" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage}" @load="updateDimensions")
-        //- text
-        .text(v-if="!shouldHideInfo" :class="{'text-only': isTextOnly }" :style="{background: selectedColor}")
-          img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
-          img.icon.favicon.open(v-else src="@/assets/open.svg")
-          .title {{filteredTitle}}
-          .description(v-if="description && shouldShowDescription") {{description}}
-          //- play embed
-          .row(v-if="!parentIsCardDetails && isYoutubeUrl")
-            .button-wrap.embed-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
-              button.small-button
-                img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
-                img.icon.play(v-else src="@/assets/play.svg")
-                span Video
+        img.preview-image(v-if="card.urlPreviewImage && !shouldDisplayEmbed && !shouldHideImage" :src="card.urlPreviewImage" :class="{selected: isSelected}" @load="updateDimensions")
+        .row.preview-text-row
+          //- play
+          .button-wrap.embed-button-wrap(v-if="!parentIsCardDetails && isYoutubeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
+            button
+              img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
+              img.icon.play(v-else src="@/assets/play.svg")
+          //- text
+          .text(v-if="!shouldHideInfo" :class="{'text-only': isTextOnly }" :style="{background: selectedColor}")
+            img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+            img.icon.favicon.open(v-else src="@/assets/open.svg")
+            .title {{filteredTitle}}
+            .description(v-if="description && shouldShowDescription") {{description}}
 
 </template>
 
@@ -303,11 +302,11 @@ export default {
     border-radius var(--small-entity-radius)
     flex-wrap wrap
     &.image-card
-      padding 4px
+      padding var(--subsection-padding)
       border-top-left-radius 0
       border-top-right-radius 0
     &.is-card-details
-      padding 4px
+      padding var(--subsection-padding)
       min-height 80px
       flex-wrap nowrap
     &.no-padding
@@ -336,7 +335,7 @@ export default {
     margin-right 6px
 
   .text
-    margin 4px
+    margin var(--subsection-padding)
 
   &.parent-is-card-details
     .text
@@ -394,13 +393,17 @@ export default {
       cursor pointer
 
   .embed-button-wrap
+    flex-shrink 0
     padding-top 8px
     cursor pointer
+    margin-right 3px
+    margin-left var(--subsection-padding)
     button
       background transparent
       .play
+        width 8px
         vertical-align 1px
-        margin-left 4px
+        margin-left 2px
 
   button
     &:disabled
@@ -417,5 +420,8 @@ export default {
   .add-icon
     margin-right 4px
     vertical-align 0
+
+  .preview-text-row
+    display flex
 
 </style>
