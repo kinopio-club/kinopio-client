@@ -1,6 +1,6 @@
 <template lang="pug">
 .card-embed(v-if="visible" :style="{'height': heightFromWidth}")
-  iframe(allowfullscreen :src="url" :class="{'info-is-visible': !shouldHideInfo}")
+  iframe(allowfullscreen :src="url")
 </template>
 
 <script>
@@ -31,8 +31,5 @@ export default {
     max-width 100%
     width 100%
     height 100%
-    &.info-is-visible
-      border-bottom-left-radius 0
-      border-bottom-right-radius 0
 
 </style>

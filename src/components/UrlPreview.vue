@@ -43,9 +43,9 @@
           .description(v-if="description && shouldShowDescription") {{description}}
       //- card
       template(v-else)
-        CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card" :shouldHideInfo="shouldHideInfo")
+        CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
         //- image
-        img.preview-image(v-if="card.urlPreviewImage && !shouldDisplayEmbed && !shouldHideImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'info-is-visible': !shouldHideInfo}" @load="updateDimensions")
+        img.preview-image(v-if="card.urlPreviewImage && !shouldDisplayEmbed && !shouldHideImage" :src="card.urlPreviewImage" :class="{selected: isSelected}" @load="updateDimensions")
         .row.preview-text-row
           //- play
           .button-wrap.embed-button-wrap(v-if="!parentIsCardDetails && isYoutubeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
@@ -321,9 +321,6 @@ export default {
     -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
     &.selected
       mix-blend-mode color-burn
-    &.info-is-visible
-      border-bottom-left-radius 0
-      border-bottom-right-radius 0
 
   a.preview-image-wrap
     &:hover
