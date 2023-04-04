@@ -87,18 +87,11 @@ export default {
         const cards = this.$store.state.prevNewTweetCards
         this.$store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
       } else if (mutation.type === 'triggerCardIdUpdatePastedName') {
+        // handle pasted urls
         if (!this.visible) { return }
         if (mutation.payload !== this.card.id) { return }
         const urls = utils.urlsFromString(this.card.name)
         if (!urls.length) { return }
-        let shouldShowImage
-        urls.forEach(url => {
-          const isYoutube = utils.urlIsYoutube(url)
-          if (isYoutube) { shouldShowImage = true }
-        })
-        if (!shouldShowImage) { return }
-        this.showImage()
-        // update card width
         if (!this.card.resizeWidth) {
           this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth: 235 })
         }
