@@ -38,23 +38,19 @@
             img.preview-image(:src="card.urlPreviewImage" @load="updateDimensions")
         template(v-else)
           img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensions")
-        //- info
         .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, hidden: shouldHideInfo, transparent: isShowNone, 'text-only': isTextOnly }" :style="{background: selectedColor}")
-          img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
-          img.icon.favicon.open(v-else src="@/assets/open.svg")
-          .title {{filteredTitle}}
-          .description(v-if="description && shouldShowDescription") {{description}}
+          //- play embed
+          .button-wrap.embed-button-wrap(v-if="!parentIsCardDetails && isYoutubeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
+            button.small-button
+              img.icon.play(src="@/assets/play.svg")
+          //- info
+          div
+            img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+            img.icon.favicon.open(v-else src="@/assets/open.svg")
+            .title {{filteredTitle}}
+            .description(v-if="description && shouldShowDescription") {{description}}
       //- embed playback
       CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
-
-    //- play embed
-    .row(v-if="!parentIsCardDetails && isYoutubeUrl")
-      //- youtube
-      .button-wrap.embed-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
-        button.small-button
-          img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
-          img.icon.play(v-else src="@/assets/play.svg")
-          span Video
 
 </template>
 
@@ -333,6 +329,7 @@ export default {
     margin 8px
     background var(--secondary-hover-background)
     user-select text
+    display flex
     &.text-with-image
       border-radius var(--small-entity-radius)
       bottom 0
@@ -384,13 +381,15 @@ export default {
       cursor pointer
 
   .embed-button-wrap
-    padding-top 8px
-    cursor pointer
+    flex-shrink 0
+    padding-right var(--subsection-padding)
+    padding-top 2px
     button
       background transparent
       .play
         vertical-align 1px
         margin-left 4px
+        margin-right 2px
 
   button
     &:disabled
