@@ -598,9 +598,7 @@ export default {
     },
     cardStyle () {
       let backgroundColor, nameColor
-      if (!this.isVisualCard) {
-        backgroundColor = this.card.backgroundColor
-      }
+      backgroundColor = this.card.backgroundColor
       if (this.nameIsColor) {
         nameColor = this.card.name
       }
