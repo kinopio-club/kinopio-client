@@ -41,23 +41,24 @@
           img.icon.favicon.open(v-else src="@/assets/open.svg")
           .title {{filteredTitle}}
           .description(v-if="description && shouldShowDescription") {{description}}
+
       //- card
       template(v-else)
-        CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
-        //- image
-        img.preview-image(v-if="card.urlPreviewImage && !shouldDisplayEmbed && !shouldHideImage" :src="card.urlPreviewImage" :class="{selected: isSelected}" @load="updateDimensions")
-        .row.preview-text-row
-          //- play
-          .button-wrap.embed-button-wrap(v-if="!parentIsCardDetails && isYoutubeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
-            button
-              img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
-              img.icon.play(v-else src="@/assets/play.svg")
-          //- text
-          .text(v-if="!shouldHideInfo" :class="{'text-only': isTextOnly }" :style="{background: selectedColor}")
-            img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
-            img.icon.favicon.open(v-else src="@/assets/open.svg")
-            .title {{filteredTitle}}
-            .description(v-if="description && shouldShowDescription") {{description}}
+        //- CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
+        //- //- image
+        //- img.preview-image(v-if="card.urlPreviewImage && !shouldDisplayEmbed && !shouldHideImage" :src="card.urlPreviewImage" :class="{selected: isSelected}" @load="updateDimensions")
+        //- .row.preview-text-row
+        //-   //- play
+        //-   .button-wrap.embed-button-wrap(v-if="!parentIsCardDetails && isYoutubeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
+        //-     button
+        //-       img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
+        //-       img.icon.play(v-else src="@/assets/play.svg")
+        //-   //- text
+        //-   .text(v-if="!shouldHideInfo" :class="{'text-only': isTextOnly }" :style="{background: selectedColor}")
+        //-     img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+        //-     img.icon.favicon.open(v-else src="@/assets/open.svg")
+        //-     .title {{filteredTitle}}
+        //-     .description(v-if="description && shouldShowDescription") {{description}}
 
 </template>
 

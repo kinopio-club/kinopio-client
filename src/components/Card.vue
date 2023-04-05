@@ -53,7 +53,15 @@ article#card(
     Frames(:card="card")
 
     template(v-if="!isComment")
-      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" @updateCardDimensions="updateCardDimensions")
+      ImageOrVideo(
+        :isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" @updateCardDimensions="updateCardDimensions")
+      UrlPreviewImage(
+        :visible="cardUrlPreviewIsVisible"
+        :card="card"
+        :user="createdByUser"
+        :isSelected="isSelectedOrDragging"
+      )
+
     .bottom-button-wrap(v-if="resizeIsVisible")
       //- resize
       .resize-button-wrap.inline-button-wrap(
@@ -89,7 +97,7 @@ article#card(
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
           //- Name
-          p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
+          p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video || urlPreviewImageIsVisible)}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             Loader(:visible="isLoadingUrlPreview")
@@ -135,14 +143,14 @@ article#card(
                 img.connector-icon(src="@/assets/connector-closed-in-card.svg")
               //- template(v-else)
               //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible")
-      UrlPreview(
-        :visible="cardUrlPreviewIsVisible"
-        :card="card"
-        :user="createdByUser"
-        :isImageCard="isImageCard"
-        :isSelected="isSelectedOrDragging"
-      )
+
+    UrlPreviewText(
+      :visible="cardUrlPreviewIsVisible"
+      :card="card"
+      :user="createdByUser"
+      :isSelected="isSelectedOrDragging"
+      :isImageCard="isImageCard"
+    )
 
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
@@ -198,7 +206,8 @@ import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
 import ImageOrVideo from '@/components/ImageOrVideo.vue'
 import NameSegment from '@/components/NameSegment.vue'
-import UrlPreview from '@/components/UrlPreview.vue'
+import UrlPreviewImage from '@/components/UrlPreviewImage.vue'
+import UrlPreviewText from '@/components/UrlPreviewText.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import consts from '@/consts.js'
 
@@ -231,7 +240,8 @@ export default {
     Audio,
     ImageOrVideo,
     NameSegment,
-    UrlPreview,
+    UrlPreviewImage,
+    UrlPreviewText,
     UserLabelInline
   },
   props: {
@@ -385,7 +395,7 @@ export default {
       'spaceZoomDecimal'
     ]),
     isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
-    isImageCard () { return Boolean(this.formats.image || this.formats.video) },
+    isImageCard () { return Boolean(this.formats.image || this.formats.video || this.urlPreviewImageIsVisible) },
     isDarkInLightTheme () { return this.backgroundColorIsDark && !this.isThemeDark },
     isLightInDarkTheme () { return !this.backgroundColorIsDark && this.isThemeDark },
     isConnectorDarkInLightTheme () {
@@ -545,6 +555,7 @@ export default {
       const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
     },
+    urlPreviewImageIsVisible () { return this.cardUrlPreviewIsVisible && this.card.urlPreviewImage && !this.card.shouldHideUrlPreviewImage },
     cardClasses () {
       const m = 100
       const l = 150
@@ -552,11 +563,10 @@ export default {
         'jiggle': this.shouldJiggle,
         'active': this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.uploadIsDraggedOver,
         'filtered': this.isFiltered,
-        'media-card': this.isVisualCard || this.pendingUploadDataUrl,
+        'media-card': this.isVisualCard || this.pendingUploadDataUrl || this.urlPreviewImageIsVisible,
         'audio-card': this.isAudioCard,
         'is-playing-audio': this.isPlayingAudio,
         'is-locked': this.isLocked,
-        'has-url-preview': this.cardUrlPreviewIsVisible,
         'is-dark': this.backgroundColorIsDark,
         's-width': this.width < m,
         'm-width': utils.isBetween({ value: this.width, min: m, max: l }),
@@ -2220,9 +2230,6 @@ article
       position absolute
       top 6px
       left 6px
-
-    &.has-url-preview
-      width var(--card-width)
 
     &.media-card
       width var(--card-width)
