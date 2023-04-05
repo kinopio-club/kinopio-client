@@ -37,8 +37,8 @@
           a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
             img.preview-image(:src="card.urlPreviewImage" @load="updateDimensions")
         template(v-else)
-          img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensions")
-        .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, hidden: shouldHideInfo, transparent: isShowNone, 'text-only': isTextOnly }" :style="{background: selectedColor}")
+          img.preview-image(v-if="card.urlPreviewImage && !shouldHideImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'side-image': isImageCard}" @load="updateDimensions")
+        .text.badge(v-if="!shouldHideInfo" :class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, transparent: isShowNone, 'text-only': isTextOnly }" :style="{background: selectedColor}")
           //- play embed
           .button-wrap.embed-button-wrap(v-if="!parentIsCardDetails && isYoutubeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
             button.small-button
@@ -377,10 +377,6 @@ export default {
       pointer-events all
     .row
       justify-content flex-end
-
-  .no-padding
-    .card-inline-buttons
-      padding 0
 
   .inline-button-wrap
     cursor pointer
