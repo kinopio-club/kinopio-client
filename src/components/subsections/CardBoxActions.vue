@@ -402,12 +402,12 @@ export default {
 
 <style lang="stylus" scoped>
 .style-actions
-  padding 4px
+  padding var(--subsection-padding)
   padding-bottom 0
   background-color transparent
   &.subsection
     border 1px solid var(--primary-border)
-    padding 4px
+    padding var(--subsection-padding)
     padding-bottom 0
   .row
     max-width 203px

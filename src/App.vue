@@ -316,6 +316,7 @@ export default {
   --max-z 2147483646
   --entity-radius 6px
   --small-entity-radius 3px
+  --subsection-padding 5px
   --serif-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
 
@@ -464,7 +465,7 @@ table
   td
     border 1px solid var(--secondary-active-background)
     color var(--primary)
-    padding 5px
+    padding var(--subsection-padding)
     user-select text
 
 select
@@ -655,7 +656,7 @@ dialog
         margin-top 0
   section.subsection
     background-color var(--secondary-background)
-    padding 5px
+    padding var(--subsection-padding)
     border-radius var(--entity-radius)
   section + section
     border-top 1px solid var(--primary-border)
