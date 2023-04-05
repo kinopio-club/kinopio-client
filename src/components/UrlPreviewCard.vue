@@ -134,8 +134,9 @@ const description = computed(() => {
     //- text
     .text(v-if="!shouldHideInfo")
       .row
-        img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
-        img.icon.favicon.open(v-else src="@/assets/open.svg")
+        template(v-if="!isYoutubeUrl")
+          img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+          img.icon.favicon.open(v-else src="@/assets/open.svg")
         .title {{title}}
       .description(v-if="description") {{description}}
 
@@ -188,8 +189,8 @@ const description = computed(() => {
 
   .embed-button-wrap
     flex-shrink 0
-    padding-right 8px
-    padding-left 4px
+    padding-right 6px
+    padding-left 2px
     button
       width 23px
       background transparent
