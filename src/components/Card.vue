@@ -546,6 +546,7 @@ export default {
     },
     shouldNotStick () {
       if (!this.currentUser.shouldUseStickyCards) { return true }
+      if (this.$store.state.embedIsVisibleForCardId === this.card.id) { return true }
       const userIsConnecting = this.currentConnectionStartCardIds.length
       const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked

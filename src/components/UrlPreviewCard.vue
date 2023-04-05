@@ -64,7 +64,8 @@ const youtubeUrlVideoId = computed(() => {
 })
 const youtubeEmbedUrl = computed(() => {
   if (!youtubeUrlVideoId.value) { return }
-  const url = `https://www.youtube-nocookie.com/embed/${youtubeUrlVideoId.value}?autoplay=1`
+  // https://developers.google.com/youtube/player_parameters
+  const url = `https://www.youtube-nocookie.com/embed/${youtubeUrlVideoId.value}?autoplay=1&color=white&playsinline=1&modestbranding=1`
   return url
 })
 const toggleShouldDisplayEmbed = () => {
