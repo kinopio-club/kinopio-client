@@ -45,9 +45,10 @@
               img.icon.play(src="@/assets/play.svg")
           //- info
           div
-            img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
-            img.icon.favicon.open(v-else src="@/assets/open.svg")
-            .title {{filteredTitle}}
+            .row.info-row
+              img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+              img.icon.favicon.open(v-else src="@/assets/open.svg")
+              .title {{filteredTitle}}
             .description(v-if="description && shouldShowDescription") {{description}}
       //- embed playback
       CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
@@ -135,6 +136,7 @@ export default {
       title = title.replace('on Twitter', '')
       return title
     },
+    // TODO embed/remove yt
     isYoutubeShortenedUrl () {
       const url = this.card.urlPreviewUrl
       return url.includes('https://youtu.be')
@@ -282,6 +284,8 @@ export default {
   flex-wrap wrap
   &.row
     display flex
+  .info-row
+    align-items flex-start
   .preview-content
     width 100%
     position relative
@@ -330,6 +334,8 @@ export default {
     background var(--secondary-hover-background)
     user-select text
     display flex
+    top 0
+    overflow hidden
     &.text-with-image
       border-radius var(--small-entity-radius)
       bottom 0
@@ -350,6 +356,7 @@ export default {
     vertical-align -3px
     display inline
     margin-right 5px
+    margin-top 3px
     &.open
       width 12px
       vertical-align -2px

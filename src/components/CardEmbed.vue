@@ -1,5 +1,5 @@
 <template lang="pug">
-.card-embed(v-if="visible" :style="{'height': heightFromWidth}")
+.card-embed(v-if="visible" :style="{'height': heightFromWidth, maxHeight: embedHeight}")
   iframe(allowfullscreen :src="url")
 </template>
 
@@ -9,7 +9,8 @@ export default {
   props: {
     visible: Boolean,
     url: String,
-    card: Object
+    card: Object,
+    embedHeight: String
   },
   computed: {
     heightFromWidth () {
@@ -27,7 +28,7 @@ export default {
   width 100%
   iframe
     border none
-    border-radius var(--small-entity-radius)
+    border-radius var(--entity-radius)
     max-width 100%
     width 100%
     height 100%

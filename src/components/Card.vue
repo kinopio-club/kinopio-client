@@ -136,12 +136,14 @@ article#card(
               //- template(v-else)
               //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible")
-      UrlPreview(
+      UrlPreviewCard(
         :visible="cardUrlPreviewIsVisible"
         :card="card"
         :user="createdByUser"
         :isImageCard="isImageCard"
         :isSelected="isSelectedOrDragging"
+        :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
+        :isLoadingUrlPreview="isLoadingUrlPreview"
       )
 
     //- Upload Progress
@@ -198,7 +200,7 @@ import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
 import ImageOrVideo from '@/components/ImageOrVideo.vue'
 import NameSegment from '@/components/NameSegment.vue'
-import UrlPreview from '@/components/UrlPreview.vue'
+import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import consts from '@/consts.js'
 
@@ -231,7 +233,7 @@ export default {
     Audio,
     ImageOrVideo,
     NameSegment,
-    UrlPreview,
+    UrlPreviewCard,
     UserLabelInline
   },
   props: {
@@ -388,6 +390,9 @@ export default {
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
     isDarkInLightTheme () { return this.backgroundColorIsDark && !this.isThemeDark },
     isLightInDarkTheme () { return !this.backgroundColorIsDark && this.isThemeDark },
+    urlPreviewImageIsVisible () {
+      return Boolean(this.cardUrlPreviewIsVisible && this.card.urlPreviewImage && !this.card.shouldHideUrlPreviewImage)
+    },
     isConnectorDarkInLightTheme () {
       if (this.connectionTypeColorisDark) { return this.connectionTypeColorisDark }
       return this.isDarkInLightTheme
@@ -998,10 +1003,10 @@ export default {
     },
     isLoadingUrlPreview () {
       let isLoading = this.urlPreviewLoadingForCardIds.find(cardId => cardId === this.card.id)
-      isLoading = Boolean(isLoading)
-      if (!isLoading) { return }
-      const isErrorUrl = this.card.urlPreviewErrorUrl && (this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl)
-      return isLoading && !isErrorUrl
+      return Boolean(isLoading)
+      // if (!isLoading) { return }
+      // const isErrorUrl = this.card.urlPreviewErrorUrl && (this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl)
+      // return isLoading && !isErrorUrl
     },
     lockingFrameStyle () {
       const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
