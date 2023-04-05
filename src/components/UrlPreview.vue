@@ -32,27 +32,25 @@
       template(v-if="!shouldDisplayEmbed")
         //- url preview image
         img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
-        template(v-if="shouldLoadUrlPreviewImage")
-        //- on card
-        img.preview-image(v-if="!parentIsCardDetails && card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensions")
-        //- in carddetails
-        a.preview-image-wrap(v-if="parentIsCardDetails && !shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
-          img.preview-image(:src="card.urlPreviewImage" @load="updateDimensions")
-        //- info
+        //- image
+        template(v-if="parentIsCardDetails")
+          a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
+            img.preview-image(:src="card.urlPreviewImage" @load="updateDimensions")
+        template(v-else)
+          img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensions")
         .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, hidden: shouldHideInfo, transparent: isShowNone, 'text-only': isTextOnly }" :style="{background: selectedColor}")
-          img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
-          img.icon.favicon.open(v-else src="@/assets/open.svg")
-          .title {{filteredTitle}}
-          .description(v-if="description && shouldShowDescription") {{description}}
+          //- play embed
+          .button-wrap.embed-button-wrap(v-if="!parentIsCardDetails && isYoutubeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
+            button.small-button
+              img.icon.play(src="@/assets/play.svg")
+          //- info
+          div
+            img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+            img.icon.favicon.open(v-else src="@/assets/open.svg")
+            .title {{filteredTitle}}
+            .description(v-if="description && shouldShowDescription") {{description}}
       //- embed playback
       CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
-    .row(v-if="!parentIsCardDetails && isYoutubeUrl")
-      //- youtube
-      .button-wrap.embed-button-wrap(@mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
-        button.small-button
-          img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
-          img.icon.play(v-else src="@/assets/play.svg")
-          span Video
 
 </template>
 
@@ -87,18 +85,11 @@ export default {
         const cards = this.$store.state.prevNewTweetCards
         this.$store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
       } else if (mutation.type === 'triggerCardIdUpdatePastedName') {
+        // handle pasted urls
         if (!this.visible) { return }
         if (mutation.payload !== this.card.id) { return }
         const urls = utils.urlsFromString(this.card.name)
         if (!urls.length) { return }
-        let shouldShowImage
-        urls.forEach(url => {
-          const isYoutube = utils.urlIsYoutube(url)
-          if (isYoutube) { shouldShowImage = true }
-        })
-        if (!shouldShowImage) { return }
-        this.showImage()
-        // update card width
         if (!this.card.resizeWidth) {
           this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth: 235 })
         }
@@ -338,8 +329,10 @@ export default {
     margin 8px
     background var(--secondary-hover-background)
     user-select text
+    display flex
     &.text-with-image
       border-radius var(--small-entity-radius)
+      bottom 0
     &.text-only
       position relative
       margin 0
@@ -388,13 +381,15 @@ export default {
       cursor pointer
 
   .embed-button-wrap
-    padding-top 8px
-    cursor pointer
+    flex-shrink 0
+    padding-right var(--subsection-padding)
+    padding-top 2px
     button
       background transparent
       .play
         vertical-align 1px
         margin-left 4px
+        margin-right 2px
 
   button
     &:disabled
