@@ -2,9 +2,9 @@
 .row.url-preview(v-if="visible")
   Loader(:visible="loading")
   template(v-if="!loading")
-    .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails, 'no-padding': shouldHideInfo && !shouldHideImage, 'is-no-info': !previewHasInfo}")
+    .preview-content(:style="{background: selectedColor}" :class="{'no-padding': shouldHideInfo && !shouldHideImage, 'is-no-info': !previewHasInfo}")
       //- card details buttons
-      .content-buttons(v-if="parentIsCardDetails")
+      .content-buttons
         .row
           //- hide url
           .button-wrap
@@ -28,34 +28,22 @@
             button(@click="showNone" :class="{active : isShowNone}" :disabled="!canEditCard")
               span None
 
-      //- preview
-      template(v-if="!shouldDisplayEmbed")
-        //- url preview image
-        img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
-        //- image
-        template(v-if="parentIsCardDetails")
-          a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': isImageCard || (parentIsCardDetails && !shouldHideInfo), transparent: isShowNone}")
-            img.preview-image(:src="card.urlPreviewImage" @load="updateDimensions")
-        template(v-else)
-          img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, hidden: shouldHideImage, 'side-image': isImageCard}" @load="updateDimensions")
-        .text.badge(:class="{'side-text': parentIsCardDetails && shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, hidden: shouldHideInfo, transparent: isShowNone, 'text-only': isTextOnly }" :style="{background: selectedColor}")
-          //- play embed
-          .button-wrap.embed-button-wrap(v-if="!parentIsCardDetails && isYoutubeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
-            button.small-button
-              img.icon.play(src="@/assets/play.svg")
-          //- info
-          div
+      //- image
+      img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
+      a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': !shouldHideInfo, transparent: isShowNone}")
+        img.preview-image(:src="card.urlPreviewImage" @load="updateDimensions")
+      .text.badge(v-if="!shouldHideInfo" :class="{'side-text': shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, transparent: isShowNone, 'text-only': isTextOnly }" :style="{background: selectedColor}")
+        //- text
+        div
+          .row.info-row
             img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
             img.icon.favicon.open(v-else src="@/assets/open.svg")
             .title {{filteredTitle}}
-            .description(v-if="description && shouldShowDescription") {{description}}
-      //- embed playback
-      CardEmbed(:visible="shouldDisplayEmbed" :url="embedUrl" :card="card")
+          .description(v-if="description") {{description}}
 
 </template>
 
 <script>
-import CardEmbed from '@/components/CardEmbed.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
@@ -66,17 +54,14 @@ let position
 export default {
   name: 'UrlPreview',
   components: {
-    CardEmbed,
     Loader
   },
   props: {
     visible: Boolean,
     loading: Boolean,
     card: Object,
-    parentIsCardDetails: Boolean,
     isSelected: Boolean,
     user: Object,
-    isImageCard: Boolean,
     urlsIsVisibleInName: Boolean
   },
   created () {
@@ -98,9 +83,7 @@ export default {
   },
   data () {
     return {
-      imageCanLoad: false,
-      shouldDisplayEmbed: false,
-      embedUrl: ''
+      imageCanLoad: false
     }
   },
   computed: {
@@ -121,10 +104,6 @@ export default {
     isTextOnly () {
       return this.shouldHideImage || !this.card.urlPreviewImage
     },
-    shouldShowDescription () {
-      if (this.isTextOnly) { return true }
-      return this.parentIsCardDetails
-    },
     selectedColor () {
       if (!this.isSelected) { return }
       return this.user.color
@@ -135,45 +114,9 @@ export default {
       title = title.replace('on Twitter', '')
       return title
     },
-    isYoutubeShortenedUrl () {
-      const url = this.card.urlPreviewUrl
-      return url.includes('https://youtu.be')
-    },
-    isYoutubeUrl () {
-      const url = this.card.urlPreviewUrl
-      return utils.urlIsYoutube(url)
-    },
-    youtubeUrlVideoId () {
-      if (!this.isYoutubeUrl) { return }
-      const url = this.card.urlPreviewUrl
-      let id
-      if (this.isYoutubeShortenedUrl) {
-        const idPattern = new RegExp(/([-a-zA-Z0-9])+$/g)
-        // matches end from last '/'
-        // https://youtu.be/-abABC123 → -abABC123
-        id = url.match(idPattern)[0]
-      } else {
-        // matches 'v=' until next qs '&'
-        // www.youtube.com/watch?v=PYeY8fWUyO8 → "v=PYeY8fWUyO8"
-        const idPattern = new RegExp(/v=([^&]+)/g)
-        id = url.match(idPattern)[0]
-        id = id.slice(2, id.length)
-      }
-      return id
-    },
-    youtubeEmbedUrl () {
-      if (!this.youtubeUrlVideoId) { return }
-      const url = `https://www.youtube-nocookie.com/embed/${this.youtubeUrlVideoId}?autoplay=1`
-      return url
-    },
     description () {
       let description = this.card.urlPreviewDescription
-      const isCardView = !this.parentIsCardDetails
-      if (this.isYoutubeUrl) { return }
-      if (isCardView) {
-        description = utils.truncated(description, 200)
-      }
-      return description
+      return utils.truncated(description, 100)
     },
     shouldLoadUrlPreviewImage () {
       return this.card.urlPreviewImage && this.imageCanLoad
@@ -201,20 +144,6 @@ export default {
     }
   },
   methods: {
-    toggleShouldDisplayEmbed () {
-      this.$store.dispatch('closeAllDialogs')
-      const value = !this.shouldDisplayEmbed
-      if (value) {
-        this.embedUrl = this.youtubeEmbedUrl
-        if (!this.embedUrl) {
-          this.$store.commit('addNotification', { message: 'Could not get embed URL', type: 'danger' })
-          return
-        }
-      } else {
-        this.embedUrl = ''
-      }
-      this.shouldDisplayEmbed = value
-    },
     toggleUrlsIsVisible () {
       this.$emit('toggleUrlsIsVisible')
     },
@@ -264,15 +193,6 @@ export default {
         this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
     }
-  },
-  watch: {
-    shouldDisplayEmbed (value) {
-      if (value) {
-        this.$store.commit('embedIsVisibleForCardId', this.card.id)
-      } else {
-        this.$store.commit('embedIsVisibleForCardId', '')
-      }
-    }
   }
 }
 </script>
@@ -282,6 +202,8 @@ export default {
   flex-wrap wrap
   &.row
     display flex
+  .info-row
+    align-items flex-start
   .preview-content
     width 100%
     position relative
@@ -291,26 +213,20 @@ export default {
     text-decoration none
     word-break break-word
     background var(--secondary-hover-background)
-    border-radius var(--small-entity-radius)
-    &.image-card
-      padding 4px
-      border-top-left-radius 0
-      border-top-right-radius 0
-    &.is-card-details
-      padding 4px
-      min-height 80px
+    border-radius var(--entity-radius)
+    padding var(--subsection-padding)
+    min-height 80px
     &.no-padding
       padding 0
     &.is-no-info
       min-height initial !important
   .preview-image
+    display block
     width 100%
-    border-radius var(--small-entity-radius)
+    border-radius var(--entity-radius)
     background var(--primary-background)
     pointer-events none
     -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
-    &.selected
-      mix-blend-mode color-burn
 
   a.preview-image-wrap
     &:hover
@@ -323,6 +239,7 @@ export default {
   .side-image
     max-width 40%
     margin-right 6px
+    display block
 
   .text
     position absolute
@@ -330,26 +247,30 @@ export default {
     background var(--secondary-hover-background)
     user-select text
     display flex
+    top 0
+    overflow hidden
     &.text-with-image
-      border-radius var(--small-entity-radius)
+      border-radius var(--entity-radius)
       bottom 0
     &.text-only
       position relative
       margin 0
-      border-radius var(--small-entity-radius)
+      border-radius var(--entity-radius)
 
   .side-text
     max-width calc(100% - 24px)
     position static
     margin 0
     padding 4px
+    display block
 
   .favicon
-    border-radius var(--small-entity-radius)
+    border-radius var(--entity-radius)
     width 14px
     vertical-align -3px
     display inline
     margin-right 5px
+    margin-top 3px
     &.open
       width 12px
       vertical-align -2px
@@ -371,25 +292,10 @@ export default {
     .row
       justify-content flex-end
 
-  .no-padding
-    .card-inline-buttons
-      padding 0
-
   .inline-button-wrap
     cursor pointer
     button
       cursor pointer
-
-  .embed-button-wrap
-    flex-shrink 0
-    padding-right var(--subsection-padding)
-    padding-top 2px
-    button
-      background transparent
-      .play
-        vertical-align 1px
-        margin-left 4px
-        margin-right 2px
 
   button
     &:disabled
@@ -402,9 +308,5 @@ export default {
 
   .transparent
     opacity 0.5
-
-  .add-icon
-    margin-right 4px
-    vertical-align 0
 
 </style>
