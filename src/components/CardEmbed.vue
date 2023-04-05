@@ -1,5 +1,5 @@
 <template lang="pug">
-.card-embed(v-if="visible" :style="{'height': heightFromWidth, maxHeight: embedHeight}")
+.card-embed(v-if="visible" :style="{'height': heightFromWidth}")
   iframe(allowfullscreen :src="url")
 </template>
 
@@ -9,13 +9,12 @@ export default {
   props: {
     visible: Boolean,
     url: String,
-    card: Object,
-    embedHeight: String
+    card: Object
   },
   computed: {
     heightFromWidth () {
-      const width = this.card.width
-      const aspectRatio = 9 / 16
+      const width = this.card.resizeWidth || this.card.width
+      const aspectRatio = 9 / 16.7
       const height = Math.round(width * aspectRatio)
       return height + 'px'
     }
@@ -29,6 +28,8 @@ export default {
   iframe
     border none
     border-radius var(--entity-radius)
+    border-bottom-left-radius 0
+    border-bottom-right-radius 0
     max-width 100%
     width 100%
     height 100%

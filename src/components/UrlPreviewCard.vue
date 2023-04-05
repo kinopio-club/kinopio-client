@@ -20,8 +20,7 @@ const props = defineProps({
 
 const state = reactive({
   shouldDisplayEmbed: false,
-  embedUrl: '',
-  embedHeight: ''
+  embedUrl: ''
 })
 
 const shouldHideImage = computed(() => props.card.shouldHideUrlPreviewImage)
@@ -34,7 +33,6 @@ const selectedColor = computed(() => {
   if (!props.isSelected) { return }
   return props.user.color
 })
-const image = ref(null)
 
 // youtube
 
@@ -69,16 +67,10 @@ const youtubeEmbedUrl = computed(() => {
   const url = `https://www.youtube-nocookie.com/embed/${youtubeUrlVideoId.value}?autoplay=1`
   return url
 })
-const updateEmbedHeight = () => {
-  console.log(image.value, image)
-  const rect = image.value.getBoundingClientRect()
-  state.embedHeight = rect.height + 'px'
-}
 const toggleShouldDisplayEmbed = () => {
   store.dispatch('closeAllDialogs')
   const value = !state.shouldDisplayEmbed
   if (value) {
-    updateEmbedHeight()
     state.embedUrl = youtubeEmbedUrl.value
     if (!state.embedUrl) {
       store.commit('addNotification', { message: 'Could not get embed URL', type: 'danger' })
@@ -129,7 +121,7 @@ const description = computed(() => {
 .url-preview-card(v-if="visible" :style="{background: selectedColor}" :class="{'border-top-radius': isImageCard}")
   //- TODO LOADer fix
   Loader(:visible="isLoadingUrlPreview")
-  CardEmbed(:visible="state.shouldDisplayEmbed" :url="state.embedUrl" :card="card" :embedHeight="state.embedHeight")
+  CardEmbed(:visible="state.shouldDisplayEmbed" :url="state.embedUrl" :card="card")
   .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage && !state.shouldDisplayEmbed")
     img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" @load="updateDimensions" ref="image")
   .row.info.badge.secondary(v-if="!shouldHideInfo" :style="{background: selectedColor}")
