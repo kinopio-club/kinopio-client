@@ -335,6 +335,7 @@ export default {
     user-select text
     &.text-with-image
       border-radius var(--small-entity-radius)
+      bottom 0
     &.text-only
       position relative
       margin 0
