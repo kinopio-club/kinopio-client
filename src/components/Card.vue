@@ -136,12 +136,14 @@ article#card(
               //- template(v-else)
               //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible")
-      UrlPreview(
+      UrlPreviewCard(
         :visible="cardUrlPreviewIsVisible"
         :card="card"
         :user="createdByUser"
         :isImageCard="isImageCard"
         :isSelected="isSelectedOrDragging"
+        :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
+        :isLoadingUrlPreview="isLoadingUrlPreview"
       )
 
     //- Upload Progress
@@ -198,7 +200,7 @@ import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
 import ImageOrVideo from '@/components/ImageOrVideo.vue'
 import NameSegment from '@/components/NameSegment.vue'
-import UrlPreview from '@/components/UrlPreview.vue'
+import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import consts from '@/consts.js'
 
@@ -231,7 +233,7 @@ export default {
     Audio,
     ImageOrVideo,
     NameSegment,
-    UrlPreview,
+    UrlPreviewCard,
     UserLabelInline
   },
   props: {
@@ -388,6 +390,9 @@ export default {
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
     isDarkInLightTheme () { return this.backgroundColorIsDark && !this.isThemeDark },
     isLightInDarkTheme () { return !this.backgroundColorIsDark && this.isThemeDark },
+    urlPreviewImageIsVisible () {
+      return Boolean(this.cardUrlPreviewIsVisible && this.card.urlPreviewImage && !this.card.shouldHideUrlPreviewImage)
+    },
     isConnectorDarkInLightTheme () {
       if (this.connectionTypeColorisDark) { return this.connectionTypeColorisDark }
       return this.isDarkInLightTheme
@@ -541,6 +546,7 @@ export default {
     },
     shouldNotStick () {
       if (!this.currentUser.shouldUseStickyCards) { return true }
+      if (this.$store.state.embedIsVisibleForCardId === this.card.id) { return true }
       const userIsConnecting = this.currentConnectionStartCardIds.length
       const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
@@ -593,9 +599,7 @@ export default {
     },
     cardStyle () {
       let backgroundColor, nameColor
-      if (!this.isVisualCard) {
-        backgroundColor = this.card.backgroundColor
-      }
+      backgroundColor = this.card.backgroundColor
       if (this.nameIsColor) {
         nameColor = this.card.name
       }
@@ -998,10 +1002,10 @@ export default {
     },
     isLoadingUrlPreview () {
       let isLoading = this.urlPreviewLoadingForCardIds.find(cardId => cardId === this.card.id)
-      isLoading = Boolean(isLoading)
-      if (!isLoading) { return }
-      const isErrorUrl = this.card.urlPreviewErrorUrl && (this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl)
-      return isLoading && !isErrorUrl
+      return Boolean(isLoading)
+      // if (!isLoading) { return }
+      // const isErrorUrl = this.card.urlPreviewErrorUrl && (this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl)
+      // return isLoading && !isErrorUrl
     },
     lockingFrameStyle () {
       const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
@@ -2341,6 +2345,7 @@ article
   .url-preview-wrap
     padding 8px
     padding-top 0
+    border-radius var(--entity-radius)
 
   .locking-frame
     position absolute

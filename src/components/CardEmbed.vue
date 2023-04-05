@@ -13,8 +13,8 @@ export default {
   },
   computed: {
     heightFromWidth () {
-      const width = this.card.width
-      const aspectRatio = 9 / 16
+      const width = this.card.resizeWidth || this.card.width
+      const aspectRatio = 9 / 16.7
       const height = Math.round(width * aspectRatio)
       return height + 'px'
     }
@@ -27,7 +27,9 @@ export default {
   width 100%
   iframe
     border none
-    border-radius var(--small-entity-radius)
+    border-radius var(--entity-radius)
+    border-bottom-left-radius 0
+    border-bottom-right-radius 0
     max-width 100%
     width 100%
     height 100%
