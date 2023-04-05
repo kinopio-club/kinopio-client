@@ -126,13 +126,13 @@ const description = computed(() => {
 
 <template lang="pug">
 //- image
-.url-preview-card(:style="{background: selectedColor}")
+.url-preview-card(v-if="visible" :style="{background: selectedColor}" :class="{'border-top-radius': isImageCard}")
   //- TODO LOADer fix
   Loader(:visible="isLoadingUrlPreview")
   CardEmbed(:visible="state.shouldDisplayEmbed" :url="state.embedUrl" :card="card" :embedHeight="state.embedHeight")
-  .url-preview-image(v-if="visible && card.urlPreviewImage && !shouldHideImage && !state.shouldDisplayEmbed")
-    img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected}" @load="updateDimensions" ref="image")
-  .row.info.badge.secondary(v-if="visible && !shouldHideInfo" :style="{background: selectedColor}")
+  .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage && !state.shouldDisplayEmbed")
+    img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" @load="updateDimensions" ref="image")
+  .row.info.badge.secondary(v-if="!shouldHideInfo" :style="{background: selectedColor}")
     //- play
     .button-wrap.embed-button-wrap(v-if="isYoutubeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
       button.small-button
@@ -150,7 +150,6 @@ const description = computed(() => {
 
 <style lang="stylus">
 .url-preview-card
-  margin-top -2px
   flex-wrap wrap
   background var(--secondary-active-background)
   border-radius var(--entity-radius)
@@ -165,7 +164,14 @@ const description = computed(() => {
     &.selected
       mix-blend-mode color-burn
 
-  .url-preview-image
+  &.border-top-radius
+    border-top-left-radius 0
+    border-top-right-radius 0
+  .border-bottom-radius
+    border-bottom-left-radius 0
+    border-bottom-right-radius 0
+
+  .preview-image-wrap
     display flex
 
   .info
@@ -189,8 +195,9 @@ const description = computed(() => {
 
   .embed-button-wrap
     flex-shrink 0
-    padding-right var(--subsection-padding)
+    padding-right 8px
     padding-top 2px
+    padding-left 5px
     button
       width 23px
       background transparent
