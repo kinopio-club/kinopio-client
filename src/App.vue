@@ -543,7 +543,7 @@ label
 
 .bottom-button-wrap
   .resize-button-wrap
-    transform translate(8px, 11.5px)
+    transform translate(8px, 13px)
     &:hover
       .resize-button
         opacity 1

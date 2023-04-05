@@ -131,7 +131,13 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span ((comment))
 
     MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats")
-    UrlPreview(:visible="Boolean(card.urlPreviewUrl) || isLoadingUrlPreview" :loading="isLoadingUrlPreview" :card="card" :parentIsCardDetails="true" :urlsIsVisibleInName="urlsIsVisible" @toggleUrlsIsVisible="toggleUrlsIsVisible")
+    UrlPreview(
+      :visible="Boolean(card.urlPreviewUrl) || isLoadingUrlPreview"
+      :loading="isLoadingUrlPreview"
+      :card="card"
+      :urlsIsVisibleInName="urlsIsVisible"
+      @toggleUrlsIsVisible="toggleUrlsIsVisible"
+    )
 
     //- Read Only
     p.row.edit-message(v-if="!canEditCard")

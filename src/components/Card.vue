@@ -2346,6 +2346,8 @@ article
   .url-preview-wrap
     padding 8px
     padding-top 0
+    background var(--secondary-background)
+    border-radius var(--entity-radius)
 
   .locking-frame
     position absolute

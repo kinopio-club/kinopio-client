@@ -84,8 +84,10 @@ const toggleShouldDisplayEmbed = () => {
       store.commit('addNotification', { message: 'Could not get embed URL', type: 'danger' })
       return
     }
+    store.commit('embedIsVisibleForCardId', props.card.id)
   } else {
     state.embedUrl = ''
+    store.commit('embedIsVisibleForCardId', '')
   }
   state.shouldDisplayEmbed = value
 }
