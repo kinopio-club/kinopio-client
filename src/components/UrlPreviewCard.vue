@@ -120,7 +120,6 @@ const description = computed(() => {
 <template lang="pug">
 //- image
 .url-preview-card(v-if="visible" :style="{background: selectedColor}" :class="{'border-top-radius': isImageCard}")
-  //- TODO LOADer fix
   Loader(:visible="isLoadingUrlPreview")
   CardEmbed(:visible="state.shouldDisplayEmbed" :url="state.embedUrl" :card="card")
   .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage && !state.shouldDisplayEmbed")
