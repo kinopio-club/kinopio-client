@@ -73,10 +73,11 @@ export default {
         // handle pasted urls
         const { cardId, name } = mutation.payload
         if (cardId !== this.card.id) { return }
-        const urls = utils.urlsFromString(name)
-        if (!urls.length) { return }
+        const url = utils.urlFromString(name)
+        if (!url) { return }
+        if (utils.urlIsSpace(url)) { return }
         if (!this.card.resizeWidth) {
-          this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth: 235 })
+          this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth: 190 })
         }
       }
     })
