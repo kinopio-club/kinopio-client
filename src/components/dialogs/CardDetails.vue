@@ -805,7 +805,7 @@ export default {
       this.$store.dispatch('currentCards/updateURLQueryStrings', { cardId: this.card.id })
       this.$nextTick(() => {
         this.$nextTick(() => {
-          this.$store.commit('triggerCardIdUpdatePastedName', this.card.id)
+          this.$store.commit('triggerCardIdUpdatePastedName', { cardId: this.card.id, name: text })
         })
       })
     },
