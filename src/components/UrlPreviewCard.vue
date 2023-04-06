@@ -49,7 +49,7 @@ const youtubeUrlVideoId = () => {
   const url = props.card.urlPreviewUrl
   let id
   if (isYoutubeShortenedUrl.value) {
-    const idPattern = new RegExp(/([-a-zA-Z0-9])+$/g)
+    const idPattern = new RegExp(/([-a-zA-Z0-9_-])+$/g)
     // matches end from last '/'
     // https://youtu.be/-abABC123 → -abABC123
     id = url.match(idPattern)[0]
@@ -68,7 +68,7 @@ const youtubeUrlPlaylistId = () => {
   if (!isYoutubeUrl.value) { return }
   const url = props.card.urlPreviewUrl
   let id
-  const idPattern = new RegExp(/list=([-a-zA-Z0-9])+$/g)
+  const idPattern = new RegExp(/list=([-a-zA-Z0-9_-])+$/g)
   // https://regexr.com/7bk6t
   // matches end from last 'list='
   // https://youtu.be/playlist?list=abABC123 → list=abABC123
@@ -78,24 +78,24 @@ const youtubeUrlPlaylistId = () => {
   id = id.slice(5, id.length)
   return id
 }
-const youtubeEmbedUrl = computed(() => {
-  let url
+const youtubeEmbedUrl = () => {
   const videoId = youtubeUrlVideoId()
   const playlistId = youtubeUrlPlaylistId()
   // https://developers.google.com/youtube/player_parameters
   const params = 'autoplay=1&color=white&playsinline=1&modestbranding=1'
+  let url
   if (videoId) {
     url = `https://www.youtube-nocookie.com/embed/${videoId}?${params}`
   } else if (playlistId) {
     url = `https://www.youtube-nocookie.com/embed/videoseries?list=${playlistId}&${params}`
   }
   return url
-})
+}
 const toggleShouldDisplayEmbed = () => {
   store.dispatch('closeAllDialogs')
   const value = !state.shouldDisplayEmbed
   if (value) {
-    state.embedUrl = youtubeEmbedUrl.value
+    state.embedUrl = youtubeEmbedUrl()
     if (!state.embedUrl) {
       store.commit('addNotification', { message: 'Could not get embed URL', type: 'danger' })
       return
