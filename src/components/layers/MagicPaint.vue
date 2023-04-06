@@ -49,7 +49,7 @@ const circleSelectionRadius = circleRadius - 10 // magnitude of sensitivity
 
 // painting
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
-const maxIterations = 200 // higher is longer paint fade time
+const maxIterations = 300 // higher is longer paint fade time
 const rateOfIterationDecay = 0.08 // higher is faster tail decay
 const rateOfIterationDecaySlow = 0.03
 let paintingCircles = []
@@ -599,7 +599,18 @@ export default {
       })
     },
     createRemotePaintingCircle (circle) {
-      remotePaintingCircles.push(circle)
+      const { color, zoom } = circle
+      const prevCircle = remotePaintingCircles.findLast(item => item.userId === circle.userId)
+      if (prevCircle) {
+        const points = utils.pointsBetweenTwoPoints(prevCircle, circle)
+        points.forEach(point => {
+          point = { x: point.x, y: point.y, color, zoom, iteration: 0 }
+          remotePaintingCircles.push(point)
+        })
+        remotePaintingCircles.push(circle)
+      } else {
+        remotePaintingCircles.push(circle)
+      }
     },
     remotePainting () {
       if (!remotePaintingCirclesTimer) {
