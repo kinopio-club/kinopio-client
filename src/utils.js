@@ -2112,10 +2112,14 @@ export default {
           name: tag.substring(2, tag.length - 2)
         })
       } else if (segment.isLink) {
-        const link = segment.link
+        let link = segment.link
+        const { spaceId, spaceUrl, cardId } = this.spaceAndCardIdFromUrl(link)
+        link = `${this.kinopioDomain()}/${spaceUrl}`
         segments.push({
           isLink: true,
-          name: link
+          name: link,
+          cardId,
+          spaceId
         })
       } else if (segment.isFile) {
         segments.push({
