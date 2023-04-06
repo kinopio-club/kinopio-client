@@ -229,6 +229,8 @@ export default {
     -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
 
   a.preview-image-wrap
+    max-height 120px
+    overflow hidden
     &:hover
       .preview-image
         box-shadow var(--button-hover-shadow)
