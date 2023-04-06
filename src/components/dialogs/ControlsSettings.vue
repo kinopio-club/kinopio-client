@@ -30,7 +30,7 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
         button(:class="{ active: panSpeedIsFast }" @click="updatePanSpeedIsFast(true)")
           span Pan Fast
     .row(v-if="panSpeedIsFast")
-      .badge.danger Fast panning is experimental. If you experience jerkiness while hold and drag panning with space, or right/middle mouse buttons, the switch back to slow panning
+      .badge.danger Fast panning is experimental. If panning is not smooth for you then switch back to slow
     .row
       label.variable-length-content(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
