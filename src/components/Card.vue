@@ -1863,15 +1863,16 @@ export default {
         return
       }
       if (!url) { return }
-      const linkToSpaceId = utils.spaceIdFromUrl(url) || null
-      const linkExists = linkToSpaceId === this.card.linkToSpaceId
+      url = new URL(url)
+      const { spaceId, cardId } = utils.spaceAndCardIdFromPath(url.pathname)
+      const linkExists = spaceId === this.card.linkToSpaceId
       if (linkExists) { return }
       const update = {
         id: this.card.id,
-        linkToSpaceId
+        spaceId
       }
       this.$store.dispatch('currentCards/update', update)
-      this.$store.dispatch('currentSpace/saveOtherSpace', { spaceId: linkToSpaceId })
+      this.$store.dispatch('currentSpace/saveOtherSpace', { spaceId: spaceId })
     },
 
     // url preview

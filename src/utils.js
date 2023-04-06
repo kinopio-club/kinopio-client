@@ -26,6 +26,8 @@ tlds = String.raw`(\.` + tlds + ')'
 dayjs.extend(relativeTime)
 extend([namesPlugin]) // colord
 
+const uuidLength = 21
+
 export default {
   userPrefersReducedMotion () {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -1542,22 +1544,25 @@ export default {
   spaceHasUrl () {
     return window.location.href !== (window.location.origin + '/')
   },
-  spaceAndCardIdFromUrl (path) {
+  spaceAndCardIdFromPath (path) {
     // https://regexr.com/5kr4g
     // matches (text after /) twice
     const urlPattern = new RegExp(/\/([^?\s/]+)\/{0,1}([^?\s/]+){0,1}/i)
     let matches = path.match(urlPattern)
     if (!matches) { return }
+    const spaceUrl = matches[1]
+    const spaceId = spaceUrl.substring(spaceUrl.length - uuidLength, spaceUrl.length)
     matches = {
-      spaceUrl: matches[1],
-      cardId: matches[2]
+      spaceUrl,
+      cardId: matches[2],
+      spaceId
     }
     return matches
   },
   spaceIdFromUrl (url) {
     url = url || window.location.href
     url = url.replaceAll('?hidden=true', '')
-    const id = url.substring(url.length - 21, url.length)
+    const id = url.substring(url.length - uuidLength, url.length)
     if (this.idIsValid(id)) { return id }
   },
   idIsValid (id) {
