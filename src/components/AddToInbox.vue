@@ -325,7 +325,6 @@ export default {
 <style lang="stylus">
 
 .add-to-inbox-page
-  max-width 250px
   position relative
   display block
   section
