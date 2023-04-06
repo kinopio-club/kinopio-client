@@ -189,7 +189,6 @@ const description = computed(() => {
   .embed-button-wrap
     flex-shrink 0
     padding-right 6px
-    padding-left 2px
     button
       width 23px
       background transparent
