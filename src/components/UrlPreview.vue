@@ -76,7 +76,7 @@ export default {
         const urls = utils.urlsFromString(this.card.name)
         if (!urls.length) { return }
         if (!this.card.resizeWidth) {
-          this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth: 190 })
+          this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth: 235 })
         }
       }
     })
