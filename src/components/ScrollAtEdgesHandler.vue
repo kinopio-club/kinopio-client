@@ -13,9 +13,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentUserIsPaintingLocked' && mutation.payload) {
-        const event = mutation.payload
         this.stopScrollTimer()
-        this.initInteractions(event)
       }
       if (mutation.type === 'triggeredTouchCardDragPosition') {
         const position = this.$store.state.triggeredTouchCardDragPosition
