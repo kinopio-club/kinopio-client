@@ -248,6 +248,11 @@ export default {
     },
     // on mouse move
     handleMouseMoveEvents (event) {
+      const panSpeedIsFast = this.$store.state.currentUser.panSpeedIsFast
+      let speed = 1
+      if (panSpeedIsFast) {
+        speed = 5
+      }
       const position = utils.cursorPositionInPage(event)
       currentCursorPosition = position
       if (this.$store.state.currentUserIsBoxSelecting) {
@@ -258,8 +263,8 @@ export default {
           prevCursorPosition = position
         }
         let delta = {
-          x: Math.round(prevCursorPosition.x - position.x),
-          y: Math.round(prevCursorPosition.y - position.y)
+          x: Math.round((prevCursorPosition.x - position.x) * speed),
+          y: Math.round((prevCursorPosition.y - position.y) * speed)
         }
         window.scrollBy(delta.x, delta.y, 'instant')
       }

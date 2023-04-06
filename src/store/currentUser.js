@@ -64,7 +64,8 @@ export default {
     themeIsSystem: false,
     referredByUserId: '',
     referrerName: '',
-    weather: ''
+    weather: '',
+    panSpeedIsFast: false
   },
   mutations: {
     color: (state, value) => {
@@ -295,6 +296,10 @@ export default {
     defaultConnectionControlPoint: (state, value) => {
       state.defaultConnectionControlPoint = value
       cache.updateUser('defaultConnectionControlPoint', value)
+    },
+    panSpeedIsFast: (state, value) => {
+      state.panSpeedIsFast = value
+      cache.updateUser('panSpeedIsFast', value)
     },
     showWeather: (state, value) => {
       state.showWeather = value

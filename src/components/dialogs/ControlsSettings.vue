@@ -24,6 +24,14 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
         span Use Sticky Cards
   section
     .row
+      .segmented-buttons
+        button(:class="{ active: !panSpeedIsFast }" @click="updatePanSpeedIsFast(false)")
+          span Pan Slow
+        button(:class="{ active: panSpeedIsFast }" @click="updatePanSpeedIsFast(true)")
+          span Pan Fast
+    .row(v-if="panSpeedIsFast")
+      .badge.danger Fast panning is experimental. If you experience jerkiness while hold and drag panning with space, or right/middle mouse buttons, the switch back to slow panning
+    .row
       label.variable-length-content(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
         span Disable Right/Middle Click to Pan
@@ -58,9 +66,13 @@ export default {
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
     shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
     shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle },
-    controlsSettingsIsPinned () { return this.$store.state.controlsSettingsIsPinned }
+    controlsSettingsIsPinned () { return this.$store.state.controlsSettingsIsPinned },
+    panSpeedIsFast () { return this.$store.state.currentUser.panSpeedIsFast }
   },
   methods: {
+    updatePanSpeedIsFast (value) {
+      this.$store.dispatch('currentUser/update', { panSpeedIsFast: value })
+    },
     toggleshouldDisableItemJiggle () {
       const value = !this.shouldDisableItemJiggle
       this.$store.dispatch('currentUser/update', { shouldDisableItemJiggle: value })
