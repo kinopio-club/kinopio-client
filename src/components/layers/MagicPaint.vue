@@ -85,12 +85,11 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggeredPaintFramePosition') {
-        const position = this.$store.state.triggeredPaintFramePosition
-        // this.createSinglePaintingCircle(event)
-        // const circle = { x: position.x, y: position.y, color, iteration: 0 }
-        // this.drawCircle(circle, paintingContext)
-        // this.selectItems(position)
+      if (mutation.type === 'triggerPaintFramePosition') {
+        const event = mutation.payload
+        const position = utils.cursorPositionInSpace(event)
+        this.createPaintingCircle(event)
+        this.selectItems(position)
       } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
         this.updateCirclesWithScroll()
       } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
@@ -359,22 +358,6 @@ export default {
       if (!this.$store.state.currentUserIsPaintingLocked) { return }
       this.$store.commit('triggerHideTouchInterface')
     },
-    // createSinglePaintingCircle (position) {
-    //   // const isTouch = Boolean(event.touches)
-    //   // const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
-    //   // if (isTouch && !isPaintingLocked) { return }
-    //   // if (this.isBoxSelecting) { return }
-    //   // const currentUserIsPaintingLocked = this.$store.state.currentUserIsPaintingLocked
-    //   // if (isTouch && !currentUserIsPaintingLocked) { return }
-    //   // this.createPaintingCircles(event)
-    //   // const position = utils.cursorPositionInSpace(event)
-    //       const circle = { x: position.x, y: position.y, color, iteration: 0 }
-    //   this.broadcastCircle(position, circle)
-
-    //   // console.error('🚗',position, event, event.x, event.y)
-    //   this.selectItems(position)
-
-    // },
     createPaintingCircle (event) {
       const isTouch = Boolean(event.touches)
       const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
@@ -384,7 +367,6 @@ export default {
       if (isTouch && !currentUserIsPaintingLocked) { return }
       this.createPaintingCircles(event)
       const position = utils.cursorPositionInSpace(event)
-      // console.error('🚗',position, event, event.x, event.y)
       this.selectItems(position)
       this.selectItemsBetweenCurrentAndPrevPosition(position)
     },
@@ -692,7 +674,6 @@ export default {
       if (currentUserIsLocking && percentComplete > 1) {
         this.$store.commit('currentUserIsPainting', true)
         this.$store.commit('currentUserIsPaintingLocked', true)
-        this.$store.commit('triggeredPaintFramePosition', { x: startCursor.x, y: startCursor.y })
         console.log('🔒 lockingAnimationFrame locked')
         lockingStartTime = undefined
       }

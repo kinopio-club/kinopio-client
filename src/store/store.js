@@ -142,7 +142,6 @@ const store = createStore({
     remoteConnectionsSelected: [], // [{ connectionId, userId }, …]
     remoteBoxesSelected: [], // [{ boxId, userId }, …]
     multipleConnectionsSelectedIds: [],
-    triggeredPaintFramePosition: {},
     previousMultipleBoxesSelectedIds: [],
 
     // connecting
@@ -152,7 +151,6 @@ const store = createStore({
     connectionDetailsPosition: {}, // x, y, pageX, pageY
     connectionDetailsIsVisibleForConnectionId: '',
     currentConnectionColor: '',
-    triggeredDrawConnectionFrame: {},
     remoteConnectionDetailsVisible: [],
     remoteCurrentConnections: [],
     currentCardConnections: [],
@@ -482,9 +480,7 @@ const store = createStore({
     triggerReadOnlyJiggle: () => {},
     triggerSelectTemplateCategory: () => {},
     triggerUpdateMagicPaintPositionOffset: () => {},
-    triggeredPaintFramePosition: (state, cursor) => {
-      state.triggeredPaintFramePosition = cursor
-    },
+    triggerPaintFramePosition: (state, event) => {},
     triggerAddRemotePaintingCircle: () => {},
     triggerUpdateRemoteUserCursor: () => {},
     triggerUpdateRemoteDropGuideLine: () => {},
@@ -536,6 +532,7 @@ const store = createStore({
     triggerSearchScopeIsLocal: () => {},
     triggerShowExplore: () => {},
     triggerCardIdUpdatePastedName: (state, cardId) => {},
+    triggerDrawConnectionFrame: (state, event) => {},
 
     // Used by extensions only
 
@@ -922,9 +919,6 @@ const store = createStore({
     connectionDetailsPosition: (state, position) => {
       utils.typeCheck({ value: position, type: 'object' })
       state.connectionDetailsPosition = position
-    },
-    triggeredDrawConnectionFrame: (state, cursor) => {
-      state.triggeredDrawConnectionFrame = cursor
     },
     addToRemoteConnectionDetailsVisible: (state, update) => {
       utils.typeCheck({ value: update, type: 'object' })

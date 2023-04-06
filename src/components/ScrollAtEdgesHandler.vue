@@ -13,11 +13,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentUserIsPaintingLocked' && mutation.payload) {
-        const position = this.$store.state.triggeredPaintFramePosition
-        const event = {
-          clientX: position.x,
-          clientY: position.y
-        }
+        const event = mutation.payload
         this.stopScrollTimer()
         this.initInteractions(event)
       }
@@ -211,10 +207,10 @@ export default {
         }
       }
       if (this.isDrawingConnection) {
-        this.$store.commit('triggeredDrawConnectionFrame', currentEvent)
+        this.$store.commit('triggerDrawConnectionFrame', currentEvent)
       }
       if (this.currentUserIsPainting && !currentUserIsBoxSelecting) {
-        this.$store.commit('triggeredPaintFramePosition', currentEvent)
+        this.$store.commit('triggerPaintFramePosition', currentEvent)
       }
       window.scrollBy(delta)
     },
