@@ -2343,6 +2343,7 @@ article
       margin-right 0
 
   .url-preview-wrap
+    margin-top -2px
     padding 8px
     padding-top 0
     border-radius var(--entity-radius)

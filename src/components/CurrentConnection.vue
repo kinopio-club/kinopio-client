@@ -24,8 +24,8 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggeredDrawConnectionFrame') {
-        const event = this.$store.state.triggeredDrawConnectionFrame
+      if (mutation.type === 'triggerDrawConnectionFrame') {
+        const event = mutation.payload
         this.drawConnection(event)
       }
     })

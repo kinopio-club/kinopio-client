@@ -71,12 +71,12 @@ export default {
         this.$store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
       } else if (mutation.type === 'triggerCardIdUpdatePastedName') {
         // handle pasted urls
-        if (!this.visible) { return }
-        if (mutation.payload !== this.card.id) { return }
-        const urls = utils.urlsFromString(this.card.name)
+        const { cardId, name } = mutation.payload
+        if (cardId !== this.card.id) { return }
+        const urls = utils.urlsFromString(name)
         if (!urls.length) { return }
         if (!this.card.resizeWidth) {
-          this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth: 235 })
+          this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth: 190 })
         }
       }
     })
@@ -229,6 +229,8 @@ export default {
     -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
 
   a.preview-image-wrap
+    max-height 120px
+    overflow hidden
     &:hover
       .preview-image
         box-shadow var(--button-hover-shadow)

@@ -16,6 +16,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { colord, extend } from 'colord'
 import qs from '@aguezz/qs-parse'
 import namesPlugin from 'colord/plugins/names'
+import getCurvePoints from '@/libs/curve_calc.js'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
@@ -747,6 +748,24 @@ export default {
     }
     return point
   },
+  pointsBetweenTwoPoints (point1, point2) {
+    // [x1, y1, x2, y2, ...]
+    const splinePoints = getCurvePoints([point1.x, point1.y, point2.x, point2.y])
+    // [{x1, y2}, {x2, y2}, ...]
+    const points = []
+    let prevX
+    splinePoints.forEach((value, index) => {
+      value = Math.round(value)
+      const isX = this.isEvenNumber(index)
+      if (isX) {
+        prevX = value
+      } else {
+        const point = { x: prevX, y: value }
+        points.push(point)
+      }
+    })
+    return points
+  },
   innerHTMLText (htmlString) {
     // https://regexr.com/6olpg
     // from https://stackoverflow.com/a/1736801
@@ -1116,6 +1135,11 @@ export default {
     return Math.exp(-(rateOfIterationDecay * iteration))
   },
   filterCircles (circles, maxIterationsToPaint) {
+    const max = 300
+    const startIndex = circles.length - max
+    if (startIndex > 0) {
+      circles = circles.slice(startIndex, circles.length)
+    }
     return circles.filter(circle => circle.iteration < maxIterationsToPaint)
   },
   easeOut (percentComplete, elaspedTime, duration) {

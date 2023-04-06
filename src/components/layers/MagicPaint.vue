@@ -19,16 +19,19 @@ aside
     :width="viewportWidth"
     :height="viewportHeight"
     :style="canvasStyles"
+    :data-should-decay-slow="true"
   )
   canvas#locking.locking(
     :width="viewportWidth"
     :height="viewportHeight"
     :style="canvasStyles"
+    :data-should-decay-slow="true"
   )
   canvas#initial-circle.initial-circle(
     :width="viewportWidth"
     :height="viewportHeight"
     :style="canvasStyles"
+    :data-should-decay-slow="true"
   )
   DropGuideLine(
     :currentCursor="currentCursor"
@@ -46,11 +49,13 @@ const circleSelectionRadius = circleRadius - 10 // magnitude of sensitivity
 
 // painting
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
-const maxIterations = 200 // higher is longer paint fade time
-const rateOfIterationDecay = 0.03 // higher is faster tail decay
+const maxIterations = 300 // higher is longer tail
+const rateOfIterationDecay = 0.08 // higher is faster tail decay
+const rateOfIterationDecaySlow = 0.03
 let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
 let prevScroll
+let prevPosition, prevCursor
 
 // remote painting
 let remotePaintingCircles = []
@@ -80,9 +85,11 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggeredPaintFramePosition') {
-        const event = this.$store.state.triggeredPaintFramePosition
+      if (mutation.type === 'triggerPaintFramePosition') {
+        const event = mutation.payload
+        const position = utils.cursorPositionInSpace(event)
         this.createPaintingCircle(event)
+        this.selectItems(position)
       } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
         this.updateCirclesWithScroll()
       } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
@@ -249,7 +256,12 @@ export default {
       if (!isCircleVisible && shouldDrawOffscreen) { circle = this.offscreenCircle(circle) }
       let { x, y, color, iteration, radius, alpha } = circle
       radius = radius || circleRadius
-      alpha = alpha || utils.exponentialDecay(iteration, rateOfIterationDecay)
+      let decay = rateOfIterationDecay
+      const isSlow = context.canvas.dataset.shouldDecaySlow
+      if (isSlow) {
+        decay = rateOfIterationDecaySlow
+      }
+      alpha = alpha || utils.exponentialDecay(iteration, decay)
       context.beginPath()
       context.arc(x, y, radius, 0, 2 * Math.PI)
       context.closePath()
@@ -352,13 +364,27 @@ export default {
       if (isTouch && !isPaintingLocked) { return }
       if (this.isBoxSelecting) { return }
       const currentUserIsPaintingLocked = this.$store.state.currentUserIsPaintingLocked
-      if (event.touches && !currentUserIsPaintingLocked) { return }
-      let color = this.$store.state.currentUser.color
+      if (isTouch && !currentUserIsPaintingLocked) { return }
+      this.createPaintingCircles(event)
+      const position = utils.cursorPositionInSpace(event)
+      this.selectItems(position)
+      this.selectItemsBetweenCurrentAndPrevPosition(position)
+    },
+    createPaintingCircles (event) {
       this.currentCursor = utils.cursorPositionInViewport(event)
-      let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
-      this.selectItems(event)
-      paintingCircles.push(circle)
+      if (!prevCursor) {
+        prevCursor = this.currentCursor
+        return
+      }
+      const color = this.$store.state.currentUser.color
+      const points = utils.pointsBetweenTwoPoints(prevCursor, this.currentCursor)
+      points.forEach(point => {
+        const circle = { x: point.x, y: point.y, color, iteration: 0 }
+        paintingCircles.push(circle)
+      })
+      const circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
       this.broadcastCircle(event, circle)
+      prevCursor = this.currentCursor
     },
     startPainting (event) {
       if (this.isPanning) { return }
@@ -387,6 +413,8 @@ export default {
       if (!event.shiftKey) {
         this.$store.dispatch('clearMultipleSelected')
       }
+      prevPosition = null
+      prevCursor = null
       this.$store.commit('previousMultipleCardsSelectedIds', utils.clone(this.$store.state.multipleCardsSelectedIds))
       this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.$store.state.multipleConnectionsSelectedIds))
       this.$store.dispatch('closeAllDialogs')
@@ -444,13 +472,23 @@ export default {
       const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
       return isMobile && !isPaintingLocked
     },
-    selectItems (event) {
+    selectItems (position) {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCannotEditSpace) { return }
-      const position = utils.cursorPositionInSpace(event)
       this.selectCards(position)
       this.selectConnectionPaths(position)
       this.selectBoxes(position)
+    },
+    selectItemsBetweenCurrentAndPrevPosition (position) {
+      if (!prevPosition) {
+        prevPosition = position
+        return
+      }
+      const points = utils.pointsBetweenTwoPoints(prevPosition, position)
+      points.forEach(point => {
+        this.selectItems(point)
+      })
+      prevPosition = position
     },
     selectCards (position) {
       if (this.shouldPreventSelectionOnMobile()) { return }
@@ -543,7 +581,18 @@ export default {
       })
     },
     createRemotePaintingCircle (circle) {
-      remotePaintingCircles.push(circle)
+      const { color, zoom } = circle
+      const prevCircle = remotePaintingCircles.findLast(item => item.userId === circle.userId)
+      if (prevCircle) {
+        const points = utils.pointsBetweenTwoPoints(prevCircle, circle)
+        points.forEach(point => {
+          point = { x: point.x, y: point.y, color, zoom, iteration: 0 }
+          remotePaintingCircles.push(point)
+        })
+        remotePaintingCircles.push(circle)
+      } else {
+        remotePaintingCircles.push(circle)
+      }
     },
     remotePainting () {
       if (!remotePaintingCirclesTimer) {
@@ -625,7 +674,6 @@ export default {
       if (currentUserIsLocking && percentComplete > 1) {
         this.$store.commit('currentUserIsPainting', true)
         this.$store.commit('currentUserIsPaintingLocked', true)
-        this.$store.commit('triggeredPaintFramePosition', { x: startCursor.x, y: startCursor.y })
         console.log('🔒 lockingAnimationFrame locked')
         lockingStartTime = undefined
       }

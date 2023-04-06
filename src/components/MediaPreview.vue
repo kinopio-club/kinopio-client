@@ -82,7 +82,7 @@ export default {
   // similar to UrlPreview
   .image-preview,
   .video-preview
-    max-height 160px
+    max-height 120px
     overflow clip
     .content-buttons
       padding 4px
