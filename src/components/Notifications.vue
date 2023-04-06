@@ -17,17 +17,6 @@ aside.notifications(@click.left="closeAllDialogs")
       button(@click="removeById(item)")
         img.icon.cancel(src="@/assets/add.svg")
 
-  .persistent-item.success(v-if="notifyUnlockedStickyCards")
-    video(autoplay loop muted playsinline width="244" height="94")
-      source(src="@/assets/sticky-cards-demo.mp4")
-    p You've unlocked sticky cards. Set this later in User → Settings → Controls. Nice!
-    .row
-      label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
-        input(type="checkbox" v-model="shouldUseStickyCards")
-        span Use Sticky Cards
-      button(@click.left="removeNotifyUnlockedStickyCards")
-        img.icon.cancel(src="@/assets/add.svg")
-
   .persistent-item.danger.hidden#notify-local-storage-is-full
     p Local storage error has occured, please refresh
     .row
@@ -193,8 +182,7 @@ export default {
     return {
       readOnlyJiggle: false,
       notifyCardsCreatedIsOverLimitJiggle: false,
-      notifySpaceOutOfSync: false,
-      notifyUnlockedStickyCards: false
+      notifySpaceOutOfSync: false
     }
   },
   created () {
@@ -221,8 +209,6 @@ export default {
         }
       } else if (mutation.type === 'currentSpace/restoreSpace') {
         this.notifySpaceOutOfSync = false
-      } else if (mutation.type === 'triggerNotifyUnlockedStickyCards') {
-        this.notifyUnlockedStickyCards = true
       }
     })
   },
@@ -280,7 +266,6 @@ export default {
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(currentSpace.id)
     },
-    shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
     referralCreditAmount () { return consts.referralCreditAmount }
   },
   methods: {
@@ -292,10 +277,6 @@ export default {
         'persistent-item': item.isPersistentItem
       }
       return classes
-    },
-    toggleShouldUseStickyCards () {
-      const value = !this.shouldUseStickyCards
-      this.$store.dispatch('currentUser/update', { shouldUseStickyCards: value })
     },
     removeNotifyThanksForDonating () {
       this.$store.commit('notifyThanksForDonating', false)
@@ -436,9 +417,6 @@ export default {
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', { space })
       this.$store.dispatch('closeAllDialogs')
-    },
-    removeNotifyUnlockedStickyCards () {
-      this.notifyUnlockedStickyCards = false
     },
     removeNotifyEarnedCredits () {
       this.$store.commit('notifyEarnedCredits', false)

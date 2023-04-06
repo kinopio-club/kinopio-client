@@ -522,7 +522,6 @@ const store = createStore({
     triggerRemovedIsVisible: () => {},
     triggerAIImagesIsVisible: () => {},
     triggerClearAllSpaceFilters: () => {},
-    triggerNotifyUnlockedStickyCards: () => {},
     triggerAddToInboxIsVisible: () => {},
     triggerCheckIfUseHasInboxSpace: () => {},
     triggerScrollUserDetailsIntoView: () => {},

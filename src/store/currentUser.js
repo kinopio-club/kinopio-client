@@ -54,8 +54,7 @@ export default {
     showWeather: false,
     weatherLocation: undefined,
     weatherUnitIsCelcius: false,
-    shouldNotifyUnlockedStickyCards: true,
-    shouldUseStickyCards: false,
+    shouldUseStickyCards: true,
     shouldDisableItemJiggle: false,
     shouldPauseConnectionDirections: false,
     lastUsedImagePickerService: '',
@@ -312,10 +311,6 @@ export default {
     weatherUnitIsCelcius: (state, value) => {
       state.weatherUnitIsCelcius = value
       cache.updateUser('weatherUnitIsCelcius', value)
-    },
-    shouldNotifyUnlockedStickyCards: (state, value) => {
-      state.shouldNotifyUnlockedStickyCards = value
-      cache.updateUser('shouldNotifyUnlockedStickyCards', value)
     },
     shouldUseStickyCards: (state, value) => {
       state.shouldUseStickyCards = value
@@ -723,21 +718,6 @@ export default {
         body: {
           shouldUseLastConnectionType: value
         } }, { root: true })
-    },
-    checkIfShouldUnlockStickyCards: (context, value) => {
-      const count = 20
-      const isTouchDevice = context.rootState.isTouchDevice
-      const shouldUnlock = context.state.cardsCreatedCount >= count
-      const shouldNotify = context.state.shouldNotifyUnlockedStickyCards
-      const usesStickyCards = context.state.shouldUseStickyCards
-      if (isTouchDevice) { return }
-      if (usesStickyCards) {
-
-      } else if (shouldUnlock && shouldNotify) {
-        const updates = { shouldUseStickyCards: true, shouldNotifyUnlockedStickyCards: false }
-        context.dispatch('update', updates)
-        context.commit('triggerNotifyUnlockedStickyCards', null, { root: true })
-      }
     },
     inboxSpace: async (context) => {
       let space = cache.getInboxSpace()
