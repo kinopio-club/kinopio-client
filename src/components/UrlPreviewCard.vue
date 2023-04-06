@@ -44,12 +44,12 @@ const isYoutubeShortenedUrl = computed(() => {
   const url = props.card.urlPreviewUrl
   return url.includes('https://youtu.be')
 })
-const youtubeUrlVideoId = computed(() => {
+const youtubeUrlVideoId = () => {
   if (!isYoutubeUrl.value) { return }
   const url = props.card.urlPreviewUrl
   let id
   if (isYoutubeShortenedUrl.value) {
-    const idPattern = new RegExp(/([-a-zA-Z0-9])+$/g)
+    const idPattern = new RegExp(/([-a-zA-Z0-9_-])+$/g)
     // matches end from last '/'
     // https://youtu.be/-abABC123 → -abABC123
     id = url.match(idPattern)[0]
@@ -57,22 +57,45 @@ const youtubeUrlVideoId = computed(() => {
     // matches 'v=' until next qs '&'
     // www.youtube.com/watch?v=PYeY8fWUyO8 → "v=PYeY8fWUyO8"
     const idPattern = new RegExp(/v=([^&]+)/g)
-    id = url.match(idPattern)[0]
+    id = url.match(idPattern)
+    if (!id) { return }
+    id = id[0]
     id = id.slice(2, id.length)
   }
   return id
-})
-const youtubeEmbedUrl = computed(() => {
-  if (!youtubeUrlVideoId.value) { return }
+}
+const youtubeUrlPlaylistId = () => {
+  if (!isYoutubeUrl.value) { return }
+  const url = props.card.urlPreviewUrl
+  let id
+  const idPattern = new RegExp(/list=([-a-zA-Z0-9_-])+$/g)
+  // https://regexr.com/7bk6t
+  // matches end from last 'list='
+  // https://youtu.be/playlist?list=abABC123 → list=abABC123
+  id = url.match(idPattern)
+  if (!id) { return }
+  id = id[0]
+  id = id.slice(5, id.length)
+  return id
+}
+const youtubeEmbedUrl = () => {
+  const videoId = youtubeUrlVideoId()
+  const playlistId = youtubeUrlPlaylistId()
   // https://developers.google.com/youtube/player_parameters
-  const url = `https://www.youtube-nocookie.com/embed/${youtubeUrlVideoId.value}?autoplay=1&color=white&playsinline=1&modestbranding=1`
+  const params = 'autoplay=1&color=white&playsinline=1&modestbranding=1'
+  let url
+  if (videoId) {
+    url = `https://www.youtube-nocookie.com/embed/${videoId}?${params}`
+  } else if (playlistId) {
+    url = `https://www.youtube-nocookie.com/embed/videoseries?list=${playlistId}&${params}`
+  }
   return url
-})
+}
 const toggleShouldDisplayEmbed = () => {
   store.dispatch('closeAllDialogs')
   const value = !state.shouldDisplayEmbed
   if (value) {
-    state.embedUrl = youtubeEmbedUrl.value
+    state.embedUrl = youtubeEmbedUrl()
     if (!state.embedUrl) {
       store.commit('addNotification', { message: 'Could not get embed URL', type: 'danger' })
       return
