@@ -49,7 +49,7 @@ const circleSelectionRadius = circleRadius - 10 // magnitude of sensitivity
 
 // painting
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
-const maxIterations = 300 // higher is longer paint fade time
+const maxIterations = 300 // higher is longer tail
 const rateOfIterationDecay = 0.08 // higher is faster tail decay
 const rateOfIterationDecaySlow = 0.03
 let paintingCircles = []
