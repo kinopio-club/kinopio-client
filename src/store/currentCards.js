@@ -230,7 +230,6 @@ const currentCards = {
       }, { root: true })
       context.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
       context.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
-      context.dispatch('currentUser/checkIfShouldUnlockStickyCards', null, { root: true })
     },
     addMultiple: (context, newCards) => {
       newCards.forEach(card => {
