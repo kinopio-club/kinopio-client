@@ -1544,6 +1544,10 @@ export default {
   spaceHasUrl () {
     return window.location.href !== (window.location.origin + '/')
   },
+  spaceAndCardIdFromUrl (url) {
+    url = new URL(url)
+    return this.spaceAndCardIdFromPath(url.pathname)
+  },
   spaceAndCardIdFromPath (path) {
     // https://regexr.com/5kr4g
     // matches (text after /) twice
