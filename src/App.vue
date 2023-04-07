@@ -939,8 +939,8 @@ code
     border-radius 100px
     min-width initial
     min-height initial
-    width 6px
-    height 6px
+    width 8px
+    height 8px
     padding 0
     vertical-align 2px
     background var(--new-unread-background)
