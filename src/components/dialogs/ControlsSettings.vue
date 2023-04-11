@@ -20,6 +20,8 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
         span Pause Connection Directions
   section
     .row
+      p Hold and Drag to Pan
+    .row
       .segmented-buttons
         button(:class="{ active: !panSpeedIsFast }" @click="updatePanSpeedIsFast(false)")
           span Pan Slow
