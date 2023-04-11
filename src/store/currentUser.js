@@ -38,7 +38,6 @@ export default {
     shouldEmailWeeklyReview: true,
     shouldShowMoreAlignOptions: false,
     shouldUseLastConnectionType: false,
-    shouldOpenLinksInNewTab: false,
     shouldShowItemActions: false,
     shouldDisableRightClickToPan: false,
     shouldShowCurrentSpaceTags: false,
@@ -251,10 +250,6 @@ export default {
     showInExploreUpdatedAt: (state, value) => {
       state.showInExploreUpdatedAt = value
       cache.updateUser('showInExploreUpdatedAt', value)
-    },
-    shouldOpenLinksInNewTab: (state, value) => {
-      state.shouldOpenLinksInNewTab = value
-      cache.updateUser('shouldOpenLinksInNewTab', value)
     },
     shouldDisableRightClickToPan: (state, value) => {
       state.shouldDisableRightClickToPan = value
@@ -693,14 +688,6 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           showInExploreUpdatedAt: value
-        } }, { root: true })
-    },
-    shouldOpenLinksInNewTab: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      context.commit('shouldOpenLinksInNewTab', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          shouldOpenLinksInNewTab: value
         } }, { root: true })
     },
     shouldDisableRightClickToPan: (context, value) => {

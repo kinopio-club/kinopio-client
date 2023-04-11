@@ -11,10 +11,6 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
         input(type="checkbox" v-model="shouldDisableItemJiggle")
         span Disable Jiggle While Dragging
     .row
-      label(:class="{active: shouldOpenLinksInNewTab}" @click.left.prevent="toggleShouldOpenLinksInNewTab" @keydown.stop.enter="toggleShouldOpenLinksInNewTab")
-        input(type="checkbox" v-model="shouldOpenLinksInNewTab")
-        span Open URLs in New Tabs
-    .row
       label.variable-length-content(:class="{ active: shouldPauseConnectionDirections }" @click.left.prevent="toggleShouldPauseConnectionDirections" @keydown.stop.enter="toggleShouldPauseConnectionDirections")
         input(type="checkbox" v-model="shouldPauseConnectionDirections")
         span Pause Connection Directions
@@ -61,7 +57,6 @@ export default {
   },
   computed: {
     isMobile () { return utils.isMobile() },
-    shouldOpenLinksInNewTab () { return this.$store.state.currentUser.shouldOpenLinksInNewTab },
     shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
     shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
@@ -76,10 +71,6 @@ export default {
     toggleshouldDisableItemJiggle () {
       const value = !this.shouldDisableItemJiggle
       this.$store.dispatch('currentUser/update', { shouldDisableItemJiggle: value })
-    },
-    toggleShouldOpenLinksInNewTab () {
-      const value = !this.shouldOpenLinksInNewTab
-      this.$store.dispatch('currentUser/shouldOpenLinksInNewTab', value)
     },
     toggleShouldUseStickyCards () {
       const value = !this.shouldUseStickyCards
