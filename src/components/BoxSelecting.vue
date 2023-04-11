@@ -69,8 +69,8 @@ export default {
   },
   computed: {
     currentUserIsBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
-    start () { return this.zoom(this.$store.state.currentUserBoxSelectStart) },
-    end () { return this.zoom(this.$store.state.currentUserBoxSelectEnd) },
+    start () { return this.positionInSpace(this.$store.state.currentUserBoxSelectStart) },
+    end () { return this.positionInSpace(this.$store.state.currentUserBoxSelectEnd) },
     userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
     shouldPreventBoxSelecting () {
       const isDraggingItem = this.$store.state.currentUserIsDraggingCard || this.$store.state.currentUserIsDraggingBox
@@ -109,12 +109,8 @@ export default {
     removePreviousRemoteBoxStyle () {
       this.$store.commit('removeRemotePreviousBoxSelectStyle')
     },
-    zoom (point) {
-      const zoom = this.spaceCounterZoomDecimal
-      return {
-        x: Math.ceil(point.x * zoom),
-        y: Math.ceil(point.y * zoom)
-      }
+    positionInSpace (point) {
+      return utils.cursorPositionInSpace(null, point)
     },
     updatePreviouslySelectedItems () {
       previouslySelectedCardIds = this.$store.state.multipleCardsSelectedIds
