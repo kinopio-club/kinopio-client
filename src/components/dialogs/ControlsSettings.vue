@@ -11,13 +11,13 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
         input(type="checkbox" v-model="shouldDisableItemJiggle")
         span Disable Jiggle While Dragging
     .row
+      label(:class="{ active: shouldDisableStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
+        input(type="checkbox" v-model="shouldDisableStickyCards")
+        span Disable Sticky Cards
+    .row
       label.variable-length-content(:class="{ active: shouldPauseConnectionDirections }" @click.left.prevent="toggleShouldPauseConnectionDirections" @keydown.stop.enter="toggleShouldPauseConnectionDirections")
         input(type="checkbox" v-model="shouldPauseConnectionDirections")
         span Pause Connection Directions
-    .row
-      label(:class="{ active: shouldUseStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
-        input(type="checkbox" v-model="shouldUseStickyCards")
-        span Use Sticky Cards
   section
     .row
       .segmented-buttons
@@ -57,7 +57,7 @@ export default {
   },
   computed: {
     isMobile () { return utils.isMobile() },
-    shouldUseStickyCards () { return this.$store.state.currentUser.shouldUseStickyCards },
+    shouldDisableStickyCards () { return !this.$store.state.currentUser.shouldUseStickyCards },
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
     shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
     shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle },
@@ -73,7 +73,8 @@ export default {
       this.$store.dispatch('currentUser/update', { shouldDisableItemJiggle: value })
     },
     toggleShouldUseStickyCards () {
-      const value = !this.shouldUseStickyCards
+      let value = this.$store.state.currentUser.shouldUseStickyCards
+      value = !value
       this.$store.dispatch('currentUser/update', { shouldUseStickyCards: value })
     },
     toggleShouldPauseConnectionDirections () {
