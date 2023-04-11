@@ -135,7 +135,7 @@ article#card(
                 img.connector-icon(src="@/assets/connector-closed-in-card.svg")
               //- template(v-else)
               //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible")
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible" :class="{'is-image-card': isImageCard}")
       UrlPreviewCard(
         :visible="cardUrlPreviewIsVisible"
         :card="card"
@@ -2347,6 +2347,10 @@ article
     padding 8px
     padding-top 0
     border-radius var(--entity-radius)
+    &.is-image-card
+      margin-top 0
+      border-top-left-radius 0
+      border-top-right-radius 0
 
   .locking-frame
     position absolute
