@@ -105,7 +105,7 @@ article#card(
               img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
           //- Url →
-          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
+          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent @click.left.stop.prevent="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
             .url.inline-button-wrap
               button.inline-button(:style="{background: itemBackground}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -1688,25 +1688,18 @@ export default {
       return space
     },
     openUrl (event, url) {
+      event.preventDefault()
       this.$store.dispatch('closeAllDialogs')
-      const shouldOpenInNewTab = this.currentUser.shouldOpenLinksInNewTab
       if (this.$store.state.cardsWereDragged) {
-        event.preventDefault()
         return
       }
-      if (shouldOpenInNewTab) {
-        event.preventDefault()
-        window.open(url) // opens url in new tab
+      if (utils.urlIsSpace(url)) {
+        const spaceId = utils.spaceIdFromUrl(url)
+        this.changeSpace({ id: spaceId })
+      } else if (event.type === 'touchend') {
+        window.location = url
       } else {
-        if (utils.urlIsSpace(url)) {
-          event.preventDefault()
-          const spaceId = utils.spaceIdFromUrl(url)
-          this.changeSpace({ id: spaceId })
-        } else if (event.type === 'touchend') {
-          window.location = url
-        } else {
-          // open url natively
-        }
+        window.open(url) // opens url in new tab
       }
     },
     changeSpace (space) {
