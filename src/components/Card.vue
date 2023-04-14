@@ -609,7 +609,7 @@ export default {
       }
       if (this.isComment && !this.isSelected) {
         color = color || this.defaultColor
-        styles.background = hexToRgba(color, 0.5) || color
+        styles.background = color
       }
       styles = this.updateStylesWithWidth(styles)
       return styles
