@@ -138,16 +138,13 @@ export default {
       shouldCancel = this.$store.state.preventDraggedCardFromShowingDetails
     },
     openUrl (event, url) {
+      event.preventDefault()
       this.$store.dispatch('closeAllDialogs')
-      if (this.$store.state.currentUser.shouldOpenLinksInNewTab) {
-        window.open(url) // opens url in new tab
-        event.preventDefault()
-      }
       if (shouldCancel) {
-        event.preventDefault()
         shouldCancel = false
+      } else {
+        window.open(url) // opens url in new tab
       }
-      // open url natively
     }
   }
 }

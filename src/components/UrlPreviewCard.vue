@@ -142,7 +142,7 @@ const description = computed(() => {
 
 <template lang="pug">
 //- image
-.url-preview-card(v-if="visible" :style="{background: selectedColor}" :class="{'border-top-radius': isImageCard}")
+.url-preview-card(v-if="visible" :style="{background: selectedColor}" :class="{'is-image-card': props.isImageCard}")
   Loader(:visible="isLoadingUrlPreview")
   CardEmbed(:visible="state.shouldDisplayEmbed" :url="state.embedUrl" :card="card")
   .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage && !state.shouldDisplayEmbed")
@@ -180,9 +180,12 @@ const description = computed(() => {
     &.selected
       mix-blend-mode color-burn
 
-  &.border-top-radius
+  &.is-image-card
     border-top-left-radius 0
     border-top-right-radius 0
+    .preview-image
+      border-top-left-radius 0
+      border-top-right-radius 0
   .border-bottom-radius
     border-bottom-left-radius 0
     border-bottom-right-radius 0
