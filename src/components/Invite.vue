@@ -8,14 +8,15 @@ section.invite
           User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
           User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
         span Invite to Edit
+      button.small-button.tips-button.inline-button(@click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
+        span Tips
+
     Loader(:visible="loading")
     template(v-if="!loading && collaboratorKey")
       .row
         button(@click.left="copyUrl")
           img.icon.copy(src="@/assets/copy.svg")
           span Copy Invite URL
-        button(@click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
-          span Tips
     //- Error
     template(v-if="!loading && !collaboratorKey")
       .row
@@ -145,4 +146,9 @@ export default {
     vertical-align 0
   .users
     margin-right 5px
+  .tips-button
+    margin-left auto
+    margin-top 0
+    width auto
+    cursor pointer
 </style>
