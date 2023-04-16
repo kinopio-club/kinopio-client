@@ -14,9 +14,12 @@ section.invite
     Loader(:visible="loading")
     template(v-if="!loading && collaboratorKey")
       .row
-        button(@click.left="copyUrl")
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy Invite URL
+        .segmented-buttons
+          button(@click.left="copyUrl")
+            img.icon.copy(src="@/assets/copy.svg")
+            span Copy Invite URL
+          button(v-if="webShareIsSupported" @click="webShare")
+            img.icon.share(src="@/assets/share.svg")
     //- Error
     template(v-if="!loading && !collaboratorKey")
       .row
@@ -84,7 +87,8 @@ export default {
       const luminosity = this.$store.state.currentUser.theme
       const color = randomColor({ luminosity })
       return { color }
-    }
+    },
+    webShareIsSupported () { return navigator.share }
   },
   methods: {
     async copyUrl (event) {
@@ -98,9 +102,9 @@ export default {
         this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
       }
     },
-    shareUrl () {
+    webShare () {
       const data = {
-        title: 'Kinopio Invite',
+        title: `Invite to Edit`,
         text: this.spaceName,
         url: this.url
       }

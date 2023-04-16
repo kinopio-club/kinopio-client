@@ -12,6 +12,7 @@ const props = defineProps({
   card: Object
 })
 
+// scroll into view
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     scrollIntoView()
@@ -39,6 +40,17 @@ const copyUrl = async (event) => {
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
+
+// web share
+const webShareIsSupported = computed(() => navigator.share)
+const webShare = () => {
+  const data = {
+    title: props.card.name,
+    text: store.state.currentSpace.name,
+    url: cardUrl()
+  }
+  navigator.share(data)
+}
 </script>
 
 <template lang="pug">
@@ -50,9 +62,12 @@ dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="di
       .row
         p Share With the World, or Paste in Another Space
       .row
-        button(@click.left="copyUrl")
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy Public URL
+        .segmented-buttons
+          button(@click.left="copyUrl")
+            img.icon.copy(src="@/assets/copy.svg")
+            span Copy Card URL
+          button(v-if="webShareIsSupported" @click="webShare")
+            img.icon.share(src="@/assets/share.svg")
 </template>
 
 <style lang="stylus">
