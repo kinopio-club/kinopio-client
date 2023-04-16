@@ -52,10 +52,12 @@ const circleSelectionRadius = circleRadius - 10 // magnitude of sensitivity
 const maxIterations = 300 // higher is longer tail
 const rateOfIterationDecay = 0.08 // higher is faster tail decay
 const rateOfIterationDecaySlow = 0.03
+const paintFrameTime = 16 // 60 fps
 let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
 let prevScroll
 let prevPosition, prevCursor
+let prevPaintFrameTime // ms
 
 // remote painting
 let remotePaintingCircles = []
@@ -420,6 +422,13 @@ export default {
       this.$store.dispatch('closeAllDialogs')
     },
     paintCirclesAnimationFrame () {
+      const currentFrameTime = new Date().getTime()
+      const timeSincePrevFrame = currentFrameTime - prevPaintFrameTime
+      if (timeSincePrevFrame < paintFrameTime) {
+        window.requestAnimationFrame(this.paintCirclesAnimationFrame)
+        return
+      }
+      prevPaintFrameTime = new Date().getTime()
       paintingCircles = utils.filterCircles(paintingCircles, maxIterations)
       paintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       paintingCircles.forEach(item => {
@@ -433,6 +442,7 @@ export default {
         setTimeout(() => {
           window.cancelAnimationFrame(paintingCirclesTimer)
           paintingCirclesTimer = undefined
+          prevPaintFrameTime = null
         }, 0)
       }
     },
