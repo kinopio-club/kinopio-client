@@ -7,7 +7,7 @@ import { useStore } from 'vuex'
 const store = useStore()
 
 onMounted(() => {
-  console.log(`the dialog is now mounted.`, store.state.currentSpace)
+  console.log(`🍆 the dialog is now mounted.`, store.state.currentSpace)
 })
 
 const props = defineProps({
