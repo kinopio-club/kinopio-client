@@ -125,7 +125,6 @@ main.add-page
   section
     position relative
     display block
-    max-width 250px
   .loader
     margin-left 5px
   .badge

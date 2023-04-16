@@ -38,7 +38,6 @@ export default {
     shouldEmailWeeklyReview: true,
     shouldShowMoreAlignOptions: false,
     shouldUseLastConnectionType: false,
-    shouldOpenLinksInNewTab: false,
     shouldShowItemActions: false,
     shouldDisableRightClickToPan: false,
     shouldShowCurrentSpaceTags: false,
@@ -54,8 +53,7 @@ export default {
     showWeather: false,
     weatherLocation: undefined,
     weatherUnitIsCelcius: false,
-    shouldNotifyUnlockedStickyCards: true,
-    shouldUseStickyCards: false,
+    shouldUseStickyCards: true,
     shouldDisableItemJiggle: false,
     shouldPauseConnectionDirections: false,
     lastUsedImagePickerService: '',
@@ -64,7 +62,8 @@ export default {
     themeIsSystem: false,
     referredByUserId: '',
     referrerName: '',
-    weather: ''
+    weather: '',
+    panSpeedIsFast: false
   },
   mutations: {
     color: (state, value) => {
@@ -252,10 +251,6 @@ export default {
       state.showInExploreUpdatedAt = value
       cache.updateUser('showInExploreUpdatedAt', value)
     },
-    shouldOpenLinksInNewTab: (state, value) => {
-      state.shouldOpenLinksInNewTab = value
-      cache.updateUser('shouldOpenLinksInNewTab', value)
-    },
     shouldDisableRightClickToPan: (state, value) => {
       state.shouldDisableRightClickToPan = value
       cache.updateUser('shouldDisableRightClickToPan', value)
@@ -296,6 +291,10 @@ export default {
       state.defaultConnectionControlPoint = value
       cache.updateUser('defaultConnectionControlPoint', value)
     },
+    panSpeedIsFast: (state, value) => {
+      state.panSpeedIsFast = value
+      cache.updateUser('panSpeedIsFast', value)
+    },
     showWeather: (state, value) => {
       state.showWeather = value
       cache.updateUser('showWeather', value)
@@ -307,10 +306,6 @@ export default {
     weatherUnitIsCelcius: (state, value) => {
       state.weatherUnitIsCelcius = value
       cache.updateUser('weatherUnitIsCelcius', value)
-    },
-    shouldNotifyUnlockedStickyCards: (state, value) => {
-      state.shouldNotifyUnlockedStickyCards = value
-      cache.updateUser('shouldNotifyUnlockedStickyCards', value)
     },
     shouldUseStickyCards: (state, value) => {
       state.shouldUseStickyCards = value
@@ -695,14 +690,6 @@ export default {
           showInExploreUpdatedAt: value
         } }, { root: true })
     },
-    shouldOpenLinksInNewTab: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      context.commit('shouldOpenLinksInNewTab', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          shouldOpenLinksInNewTab: value
-        } }, { root: true })
-    },
     shouldDisableRightClickToPan: (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldDisableRightClickToPan', value)
@@ -718,21 +705,6 @@ export default {
         body: {
           shouldUseLastConnectionType: value
         } }, { root: true })
-    },
-    checkIfShouldUnlockStickyCards: (context, value) => {
-      const count = 20
-      const isTouchDevice = context.rootState.isTouchDevice
-      const shouldUnlock = context.state.cardsCreatedCount >= count
-      const shouldNotify = context.state.shouldNotifyUnlockedStickyCards
-      const usesStickyCards = context.state.shouldUseStickyCards
-      if (isTouchDevice) { return }
-      if (usesStickyCards) {
-
-      } else if (shouldUnlock && shouldNotify) {
-        const updates = { shouldUseStickyCards: true, shouldNotifyUnlockedStickyCards: false }
-        context.dispatch('update', updates)
-        context.commit('triggerNotifyUnlockedStickyCards', null, { root: true })
-      }
     },
     inboxSpace: async (context) => {
       let space = cache.getInboxSpace()
