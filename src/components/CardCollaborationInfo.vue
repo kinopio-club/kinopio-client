@@ -1,9 +1,16 @@
 <template lang="pug">
 .row.collaboration-info(v-if="visible" @click.left.stop="closeDialogs")
+  //- Share Card
+  .button-wrap.share-button-wrap(@click.left.stop="toggleShareCardIsVisible" )
+    button.small-button(:class="{active: shareCardIsVisible}")
+      //- img.icon.share(src="@/assets/share.svg")
+      span Share
+    ShareCard(:visible="shareCardIsVisible" :card="card")
+
   .badge.secondary.button-badge(@click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
     img.icon.time(src="@/assets/time.svg")
     span.name {{dateUpdatedAt}}
-  .users(@click.stop)
+  .users(@click.stop="closeChildDialogs")
     //- created by
     template(v-if="createdByUserIsNotEmpty")
       UserLabelInline(:user="createdByUser" :isClickable="true" :title="'Created by'")
@@ -13,10 +20,12 @@
     //- created through api
     .badge.secondary.system-badge(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
+
 </template>
 
 <script>
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import ShareCard from '@/components/dialogs/ShareCard.vue'
 import utils from '@/utils.js'
 
 let dateIsUpdated
@@ -25,7 +34,8 @@ let updatedAbsoluteDate
 export default {
   name: 'CardCollaborationInfo',
   components: {
-    UserLabelInline
+    UserLabelInline,
+    ShareCard
   },
   props: {
     visible: Boolean,
@@ -37,13 +47,18 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerCardDetailsCloseDialogs' && this.visible) {
-        this.$store.commit('userDetailsIsVisible', false)
+        this.closeDialogsFromParent()
       }
     })
   },
   mounted () {
     dateIsUpdated = false
     updatedAbsoluteDate = ''
+  },
+  data () {
+    return {
+      shareCardIsVisible: false
+    }
   },
   computed: {
     createdByUserIsNotEmpty () { return utils.objectHasKeys(this.createdByUser) },
@@ -84,25 +99,27 @@ export default {
       dateIsUpdated = true
       return utils.shortRelativeTime(date)
     },
+    closeDialogsFromParent () {
+      this.shareCardIsVisible = false
+      this.$store.commit('userDetailsIsVisible', false)
+    },
     closeDialogs () {
       this.$store.commit('userDetailsIsVisible', false)
+      this.shareCardIsVisible = false
       this.$emit('closeDialogs')
+    },
+    closeChildDialogs () {
+      this.shareCardIsVisible = false
     },
     toggleFilterShowAbsoluteDates () {
       this.closeDialogs()
       const value = !this.$store.state.currentUser.filterShowAbsoluteDates
       this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
     },
-    toggleUserDetails (event, user) {
-      if (this.userDetailsIsVisible) {
-        this.closeDialogs()
-        return
-      }
-      let position = utils.childDialogPositionFromParent({ element: event.target, shouldIgnoreZoom: true })
-      this.$store.commit('userDetailsUser', user)
-      this.$store.commit('userDetailsPosition', position)
-      this.$store.commit('userDetailsIsVisible', true)
-      this.$store.commit('triggerScrollUserDetailsIntoView')
+    toggleShareCardIsVisible () {
+      const isVisible = this.shareCardIsVisible
+      this.$emit('closeDialogs')
+      this.shareCardIsVisible = !isVisible
     },
     scrollParentIntoView () {
       const element = this.parentElement
@@ -131,5 +148,9 @@ export default {
     margin-top 1px
   .name
     color var(--primary)
-
+  .share-button-wrap
+    padding-right 6px
+    padding-top 1px
+    padding-bottom 1px
+    cursor pointer
 </style>
