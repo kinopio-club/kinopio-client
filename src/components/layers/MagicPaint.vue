@@ -46,13 +46,13 @@ import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
 const circleRadius = 20
 const circleSelectionRadius = circleRadius - 10 // magnitude of sensitivity
+const paintFrameTime = 16 // 60 fps
 
 // painting
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
 const maxIterations = 300 // higher is longer tail
 const rateOfIterationDecay = 0.08 // higher is faster tail decay
 const rateOfIterationDecaySlow = 0.03
-const paintFrameTime = 16 // 60 fps
 let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
 let prevScroll
@@ -62,6 +62,7 @@ let prevPaintFrameTime // ms
 // remote painting
 let remotePaintingCircles = []
 let remotePaintingCanvas, remotePaintingContext, remotePaintingCirclesTimer
+let prevRemotePaintFrameTime
 
 // locking
 // long press to lock scrolling
@@ -610,6 +611,12 @@ export default {
       }
     },
     remotePaintCirclesAnimationFrame () {
+      const currentFrameTime = new Date().getTime()
+      const timeSincePrevFrame = currentFrameTime - prevRemotePaintFrameTime
+      if (timeSincePrevFrame < paintFrameTime) {
+        window.requestAnimationFrame(this.remotePaintCirclesAnimationFrame)
+        return
+      }
       remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
       remotePaintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       remotePaintingCircles.forEach(item => {
@@ -626,6 +633,7 @@ export default {
         setTimeout(() => {
           window.cancelAnimationFrame(remotePaintingCirclesTimer)
           remotePaintingCirclesTimer = undefined
+          prevRemotePaintFrameTime = null
         }, 0)
       }
     },
