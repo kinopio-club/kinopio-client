@@ -425,15 +425,14 @@ export default {
     paintCirclesAnimationFrame () {
       const currentFrameTime = new Date().getTime()
       const timeSincePrevFrame = currentFrameTime - prevPaintFrameTime
-      if (timeSincePrevFrame < paintFrameTime) {
-        window.requestAnimationFrame(this.paintCirclesAnimationFrame)
-        return
-      }
+      let shouldNotIterate = timeSincePrevFrame < paintFrameTime
       prevPaintFrameTime = new Date().getTime()
       paintingCircles = utils.filterCircles(paintingCircles, maxIterations)
       paintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       paintingCircles.forEach(item => {
-        item.iteration++
+        if (!shouldNotIterate) {
+          item.iteration++
+        }
         let circle = JSON.parse(JSON.stringify(item))
         this.drawCircle(circle, paintingContext)
       })
@@ -613,14 +612,13 @@ export default {
     remotePaintCirclesAnimationFrame () {
       const currentFrameTime = new Date().getTime()
       const timeSincePrevFrame = currentFrameTime - prevRemotePaintFrameTime
-      if (timeSincePrevFrame < paintFrameTime) {
-        window.requestAnimationFrame(this.remotePaintCirclesAnimationFrame)
-        return
-      }
+      let shouldNotIterate = timeSincePrevFrame < paintFrameTime
       remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
       remotePaintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       remotePaintingCircles.forEach(item => {
-        item.iteration++
+        if (!shouldNotIterate) {
+          item.iteration++
+        }
         let circle = JSON.parse(JSON.stringify(item))
         circle.x = circle.x - window.scrollX
         circle.y = circle.y - window.scrollY
