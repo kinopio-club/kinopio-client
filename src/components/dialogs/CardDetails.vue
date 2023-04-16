@@ -96,6 +96,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .button-wrap
         button(:disabled="!canEditCard" @click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}")
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+      //- Share Card
+      .button-wrap
+        button
+          span Share
 
     CardBoxActions(:visible="shouldShowItemActions" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }")
     CardCollaborationInfo(:visible="shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
@@ -1474,7 +1478,7 @@ export default {
 
 <style lang="stylus">
 .card-details
-  width 278px
+  width 286px
   transform-origin top left
   > section
     background-color var(--secondary-background)
