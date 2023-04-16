@@ -1,15 +1,28 @@
 <script setup>
 import utils from '@/utils.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
+
+const dialog = ref(null)
 
 const props = defineProps({
   visible: Boolean,
   card: Object
 })
 
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    scrollIntoView()
+  }
+})
+const scrollIntoView = async () => {
+  await nextTick()
+  utils.scrollIntoView(dialog.value)
+}
+
+// copy url
 const cardUrl = () => {
   return store.getters['currentSpace/cardUrl'](props.card)
 }
