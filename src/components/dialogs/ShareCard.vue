@@ -1,35 +1,30 @@
 <script setup>
-// import utils from '@/utils.js'
+import utils from '@/utils.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
-// https://vuex.vuejs.org/guide/composition-api.html#accessing-state-and-getters
 import { useStore } from 'vuex'
 const store = useStore()
 
-onMounted(() => {
-  console.log(`the dialog is now mounted.`, store.state.currentSpace)
-})
-
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  card: Object
 })
-const emit = defineEmits(['updateCount'])
 
-watch(() => props.visible, (value, prevValue) => {
-  if (value) {
-    console.log('💁‍♀️', value)
+const cardUrl = () => {
+  return store.getters['currentSpace/cardUrl'](props.card)
+}
+const copyUrl = async (event) => {
+  store.commit('clearNotificationsWithPosition')
+  const position = utils.cursorPositionInPage(event)
+  const url = cardUrl()
+  try {
+    console.log(url)
+    await navigator.clipboard.writeText(url)
+    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
-})
-
-const state = reactive({
-  count: 0
-})
-
-const themeName = computed(() => store.state.currentUser.theme)
-const incrementBy = () => {
-  state.count = state.count + 1
-  emit('updateCount', state.count)
-  // store.dispatch('themes/isSystem', false)
 }
 </script>
 
@@ -38,11 +33,14 @@ dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="di
   section
     p Share
   section
-    button(@click="incrementBy")
-      span Count is: {{ state.count }}
-    p Current theme is: {{ themeName }}
+    section.subsection
+      .row
+        p Share With the World, or Paste in Another Space
+      .row
+        button(@click.left="copyUrl")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Public URL
 </template>
 
 <style lang="stylus">
-// .dialog-name
 </style>
