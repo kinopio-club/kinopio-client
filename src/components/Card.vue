@@ -854,21 +854,10 @@ export default {
       })
     },
     isConnectingTo () {
-      const currentConnectionSuccess = this.currentConnectionSuccess
-      if (utils.objectHasKeys(currentConnectionSuccess)) {
-        return currentConnectionSuccess.id === this.id
-      } else {
-        return false
-      }
+      return this.currentConnectionSuccess.id === this.id
     },
     isConnectingFrom () {
-      const currentConnectionSuccess = this.currentConnectionSuccess
-      const currentConnectionStartCardIds = this.currentConnectionStartCardIds
-      if (utils.objectHasKeys(currentConnectionSuccess)) {
-        return currentConnectionStartCardIds.find(cardId => cardId === this.id)
-      } else {
-        return false
-      }
+      return this.currentConnectionStartCardIds.find(cardId => cardId === this.id)
     },
     isBeingDragged () {
       let isCardId
