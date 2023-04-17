@@ -178,6 +178,7 @@ const store = createStore({
     // loading
     isLoadingSpace: false,
     isJoiningSpace: false, // broadcast
+    isLoadingOtherSpaces: false,
     spaceUrlToLoad: '',
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
@@ -1135,6 +1136,10 @@ const store = createStore({
     isJoiningSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.isJoiningSpace = value
+    },
+    isLoadingOtherSpaces: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.isLoadingOtherSpaces = value
     },
     clearSpaceCollaboratorKeys: (state) => {
       state.spaceCollaboratorKeys = []

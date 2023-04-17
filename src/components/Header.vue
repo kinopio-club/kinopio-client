@@ -315,6 +315,7 @@ export default {
       'currentUser',
       'newStuffIsUpdated',
       'isLoadingSpace',
+      'isLoadingOtherSpaces',
       'isJoiningSpace',
       'isReconnectingToBroadcast',
       'isOnline',
@@ -373,7 +374,7 @@ export default {
     },
     spaceHasStatus () {
       if (!this.isOnline) { return }
-      return this.isLoadingSpace || this.isJoiningSpace || this.isReconnectingToBroadcast
+      return this.isLoadingSpace || this.isJoiningSpace || this.isReconnectingToBroadcast || this.isLoadingOtherSpaces
     },
     spaceHasStatusAndStatusDialogIsNotVisible () {
       if (this.spaceHasStatus) {

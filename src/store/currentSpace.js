@@ -248,14 +248,19 @@ const currentSpace = {
         links = context.rootGetters['currentCards/withSpaceLinks']
       }
       if (!links.length) { return }
+      context.commit('isLoadingOtherSpaces', true, { root: true })
       links.forEach(link => {
         const spaceId = link.linkToSpaceId
         context.dispatch('saveOtherSpace', { spaceId, shouldAddToQueue: true })
       })
       otherSpacesQueue = uniq(otherSpacesQueue)
       let spaces = await context.dispatch('api/getSpaces', { spaceIds: otherSpacesQueue, shouldRequestRemote: true }, { root: true })
-      if (!spaces) { return }
+      if (!spaces) {
+        context.commit('isLoadingOtherSpaces', false, { root: true })
+        return
+      }
       spaces = spaces.filter(space => space.id)
+      context.commit('isLoadingOtherSpaces', false, { root: true })
       spaces.forEach(space => {
         space = utils.normalizeSpaceMetaOnly(space)
         context.commit('updateOtherSpaces', space, { root: true })

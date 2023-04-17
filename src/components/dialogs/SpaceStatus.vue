@@ -3,14 +3,14 @@ dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog" :class="{
   section
     p(v-if="!isConnected")
       Loader(:visible="true")
-      span(v-if="isLoadingSpace") Downloading
+      span(v-if="isLoadingSpace || isLoadingOtherSpaces") Downloading
       span(v-else-if="isJoiningSpace") Connecting to Broadcast
       span(v-else-if="isReconnectingToBroadcast") Reconnecting
     p.badge.success(v-if="isConnected") Connected
 
   template(v-if="!isConnected")
     section
-      p(v-if="isLoadingSpace && spaceIsCached")
+      p(v-if="(isLoadingSpace || isLoadingOtherSpaces) && spaceIsCached")
         span.badge.info You can edit right now
         span and your changes will sync once connected
       p(v-else-if="isJoiningSpace || isReconnectingToBroadcast")
@@ -50,6 +50,7 @@ export default {
   computed: {
     currentSpace () { return this.$store.state.currentSpace },
     isLoadingSpace () { return this.$store.state.isLoadingSpace },
+    isLoadingOtherSpaces () { return this.$store.state.isLoadingOtherSpaces },
     isJoiningSpace () { return this.$store.state.isJoiningSpace },
     isReconnectingToBroadcast () { return this.$store.state.isReconnectingToBroadcast },
     isConnected () { return !this.isLoadingSpace && !this.isJoiningSpace && !this.isReconnectingToBroadcast }
