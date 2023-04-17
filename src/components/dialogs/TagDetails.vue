@@ -5,7 +5,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
       span Edit Card
     button.change-color.select-all(@click="selectCardsWithTag")
       .current-color(:style="{backgroundColor: color}")
-      span Select
+      span Select All
   section(:style="{backgroundColor: color}" :class="{'is-dark': isDark}")
     .row.tag-title-row
       .row
