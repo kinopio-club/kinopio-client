@@ -48,7 +48,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       template(v-else)
         span {{segment.name}}
   //- File
-  span.badge.secondary(v-if="segment.isFile")
+  span.badge.secondary-on-dark-background(v-if="segment.isFile")
     img.icon(src="@/assets/file.svg")
     span {{segment.name}}
 </template>

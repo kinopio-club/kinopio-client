@@ -13,10 +13,10 @@
   .users(@click.stop="closeChildDialogs")
     //- created by
     template(v-if="createdByUserIsNotEmpty")
-      UserLabelInline(:user="createdByUser" :isClickable="true" :title="'Created by'")
+      UserLabelInline(:user="createdByUser" :isClickable="true" :title="'Created by'" :isOnDarkBackground="true")
     //- updated by
     template(v-if="isUpdatedByDifferentUser")
-      UserLabelInline(:user="updatedByUser" :isClickable="true" :title="'Updated by'")
+      UserLabelInline(:user="updatedByUser" :isClickable="true" :title="'Updated by'" :isOnDarkBackground="true")
     //- created through api
     .badge.secondary.system-badge(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")

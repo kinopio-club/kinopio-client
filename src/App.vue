@@ -926,6 +926,8 @@ code
   &.status
     background var(--secondary-active-background-dark)
   &.secondary
+    background var(--secondary-background)
+  &.secondary-on-dark-background
     background var(--secondary-active-background)
   &.search
     background var(--search-background)

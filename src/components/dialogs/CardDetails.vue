@@ -160,7 +160,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
     //- Info
     template(v-if="showCurrentCardLength")
       .row
-        span.badge.secondary
+        span.badge.secondary-on-dark-background
           span {{currentCardLength}} / {{maxCardLength}}
 
     //- Errors
