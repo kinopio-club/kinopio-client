@@ -32,4 +32,5 @@ const showCardLinkDetailsIsVisible = () => {
 <style lang="stylus">
 .card-link-preview
   background var(--secondary-active-background)
+  margin-right 0 !important
 </style>

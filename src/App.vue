@@ -1139,6 +1139,7 @@ code
       margin-right 2px
   .badge,
   a
+    display inline-block
     margin-right 3px
   .badge + .badge,
   a + a
