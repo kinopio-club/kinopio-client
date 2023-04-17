@@ -105,8 +105,8 @@ article#card(
               img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
           //- Url →
-          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent @click.left.stop.prevent="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
-            .url.inline-button-wrap
+          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent :class="{'connector-is-visible': connectorIsVisible}")
+            .url.inline-button-wrap(@click.left="openUrl($event, cardButtonUrl)")
               button.inline-button(:style="{background: itemBackground}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
           //- Connector
@@ -1690,23 +1690,45 @@ export default {
       return space
     },
     openUrl (event, url) {
-      event.preventDefault()
+      if (event) {
+        if (event.metaKey || event.ctrlKey) {
+          return
+        } else {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+      }
       this.$store.dispatch('closeAllDialogs')
       if (this.$store.state.cardsWereDragged) {
         return
       }
       if (utils.urlIsSpace(url)) {
-        const spaceId = utils.spaceIdFromUrl(url)
-        this.changeSpace({ id: spaceId })
+        this.changeSpace(url)
       } else if (event.type === 'touchend') {
         window.location = url
       } else {
         window.open(url) // opens url in new tab
       }
     },
-    changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+    changeSpace (url) {
+      const { spaceId, spaceUrl, cardId } = utils.spaceAndCardIdFromUrl(url)
+      if (cardId) {
+        this.changeSpaceAndCard(spaceId, cardId)
+      } else {
+        const space = { id: spaceId }
+        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      }
       this.$store.dispatch('closeAllDialogs')
+    },
+    changeSpaceAndCard (spaceId, cardId) {
+      const currentSpaceId = this.$store.state.currentSpace.id
+      if (currentSpaceId !== spaceId) {
+        this.$store.commit('loadSpaceShowDetailsForCardId', cardId)
+        const space = { id: spaceId }
+        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      } else {
+        this.$store.dispatch('currentCards/showCardDetails', cardId)
+      }
     },
     removeCommentBrackets (name) {
       if (!this.isComment) { return name }
