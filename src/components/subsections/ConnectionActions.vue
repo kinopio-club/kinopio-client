@@ -18,9 +18,17 @@ const state = reactive({
   multipleConnectionsPickerVisible: false
 })
 
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerCardDetailsCloseDialogs' && props.visible) {
+      closeDialogs()
+    }
+  })
+})
+
 const toggleMultipleConnectionsPickerVisible = () => {
   const isVisible = state.multipleConnectionsPickerVisible
-  closeDialogs()
+  closeDialogsAndEmit()
   state.multipleConnectionsPickerVisible = !isVisible
 }
 
@@ -46,9 +54,12 @@ const editableConnectionTypes = computed(() => {
 
 // utils
 
+const closeDialogsAndEmit = () => {
+  closeDialogs()
+  emit('closeDialogs')
+}
 const closeDialogs = () => {
   state.multipleConnectionsPickerVisible = false
-  emit('closeDialogs')
 }
 
 </script>
