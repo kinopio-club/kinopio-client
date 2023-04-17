@@ -1,5 +1,6 @@
 <script setup>
 import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
+import EducationDiscount from '@/components/EducationDiscount.vue'
 
 import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
 import { useStore } from 'vuex'
@@ -15,6 +16,7 @@ const props = defineProps({
 dialog.narrow.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     p Kinopio is free for 100 cards, afterwards it's $6/month or $60/year
+    EducationDiscount()
     ReferredNewUserCredits()
     table
       tbody
@@ -34,12 +36,13 @@ dialog.narrow.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialo
           td 50 AI images/mo
 
   section
-    p Hi, my name is Pirijan and I'm the creator of Kinopio.
-    p I believe in building ethical, economically-sustainable,
-      span {{' '}}
-      a(href="https://pketh.org/organic-software.html") organic software
-      span {{' '}}
-      span that's designed by artists, built by craftspeople, and funded by the people who enjoy it.
+    section.subsection
+      p Hi, my name is Pirijan and I'm the creator of Kinopio.
+      p I believe in building ethical, economically-sustainable,
+        span {{' '}}
+        a(href="https://pketh.org/organic-software.html") organic software
+        span {{' '}}
+        span that's designed by artists, built by craftspeople, and funded by the people who enjoy it.
 </template>
 
 <style lang="stylus">
