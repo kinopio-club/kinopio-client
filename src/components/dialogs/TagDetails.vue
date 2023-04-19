@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @click.left.stop="closeDialogs" :class="{narrow: !visibleFromTagList}")
+dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @click.left.stop="closeDialogs")
   section.edit-card(v-if="showEditCard")
     button(@click="showCardDetails(null)")
       span Edit Card
@@ -451,7 +451,7 @@ export default {
     width initial
     .current-color
       display inline-block
-      vertical-align -3px
+      vertical-align -2px
       margin-right 4px
   .results-section
     border-top 1px solid var(--primary-border)
