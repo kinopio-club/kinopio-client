@@ -97,7 +97,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         button(:disabled="!canEditCard" @click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}")
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
-    CardBoxActions(:visible="shouldShowItemActions" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }")
+    CardBoxActions(:visible="shouldShowItemActions" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
     CardCollaborationInfo(:visible="shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
     .row(v-if="nameMetaRowIsVisible")
