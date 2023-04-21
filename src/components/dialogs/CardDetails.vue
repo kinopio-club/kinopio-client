@@ -959,8 +959,14 @@ export default {
       })
     },
     scrollIntoView (behavior) {
-      const element = this.$refs.dialog
-      utils.scrollIntoView(element, behavior)
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            const element = this.$refs.dialog
+            utils.scrollIntoView(element, behavior)
+          })
+        })
+      })
     },
     scrollIntoViewAndFocus () {
       let behavior
