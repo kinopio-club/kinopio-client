@@ -959,6 +959,7 @@ export default {
       })
     },
     scrollIntoView (behavior) {
+      // wait for element to be rendered before getting position
       this.$nextTick(() => {
         this.$nextTick(() => {
           this.$nextTick(() => {
