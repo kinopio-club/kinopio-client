@@ -15,7 +15,6 @@
     "adaptive-quadratic-curve": "^1.0.2",
     "colord": "^2.9.3",
     "dayjs": "^1.9.1",
-    "hex-to-rgba": "^2.0.1",
     "lodash-es": "^4.17.15",
     "nanoid": "^3.1.31",
     "overlap-area": "^1.0.0",

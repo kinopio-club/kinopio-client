@@ -16,8 +16,8 @@ import utils from '@/utils.js'
 import { getOverlapSize } from 'overlap-area'
 import uniqBy from 'lodash-es/uniqBy'
 import quadratic from 'adaptive-quadratic-curve'
-import hexToRgba from 'hex-to-rgba'
 import { nanoid } from 'nanoid'
+import { colord } from 'colord'
 
 let shouldSelect, currentBoxSelectId
 let selectableItems = {}
@@ -81,8 +81,8 @@ export default {
       const { start, end } = this.orderedPoints(this.start, this.end)
       const { left, top, width, height } = this.boxSelection(start, end)
       const color = this.$store.state.currentUser.color
-      const color1 = hexToRgba(color, 0.5)
-      const color2 = hexToRgba(color, 1)
+      const color1 = colord(color).alpha(0.5).toRgbString()
+      const color2 = colord(color).alpha(1).toRgbString()
       const gradient = `radial-gradient(farthest-corner at ${this.direction}, ${color1}, ${color2})`
       let styles = {
         left: left + 'px',

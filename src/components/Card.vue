@@ -205,7 +205,6 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
-import hexToRgba from 'hex-to-rgba'
 import { mapState, mapGetters } from 'vuex'
 
 let isMultiTouch
