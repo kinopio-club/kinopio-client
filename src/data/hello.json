@@ -18,6 +18,25 @@
   "cards":
   [
     {
+      "id": "z3gD2cgi0S322Ly2NRRpQ",
+      "x": 922,
+      "y": 1820,
+      "z": 5181,
+      "name": "This example is from the School of Poetic Computation in NYC, who use Kinopio for lectures and assignments. \n\nTeaching collaboratively blurs the line between professor and student, and between lecture and art",
+      "frameId": 0,
+      "userId": "euGhpBrR9eBcjKnK16C_g",
+      "urlPreviewIsVisible": true,
+      "width": 74,
+      "height": 33,
+      "isLocked": false,
+      "backgroundColor": null,
+      "spaceId": "xNHa754zrJ46R1sAR5D5u",
+      "nameUpdatedAt": "2023-04-22T06:55:44.222Z",
+      "nameUpdatedByUserId": "euGhpBrR9eBcjKnK16C_g",
+      "resizeWidth": null,
+      "isComment": true
+    },
+    {
       "id": "9frIffW6SM4R0mY4iomEs",
       "x": 78,
       "y": 157,

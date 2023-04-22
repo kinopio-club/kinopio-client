@@ -190,6 +190,8 @@ export default {
 
 <style lang="stylus">
 .url-preview
+  max-height 148px
+  overflow hidden
   flex-wrap wrap
   &.row
     display flex
