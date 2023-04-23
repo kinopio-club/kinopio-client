@@ -65,6 +65,11 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )
+
+      .inline-button-wrap.font-button-wrap(v-if="showCardFonts" @click.left.stop="toggleCardFontsIsVisible" :class="{ active: cardFontsIsVisible }")
+        button.inline-button(tabindex="-1" :class="{ active: cardFontsIsVisible }")
+          span Aa
+      //- CardFonts(:visible="cardFontsIsVisible" :card="card")
       .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: cardTipsIsVisible }")
         button.inline-button(tabindex="-1" :class="{ active: cardTipsIsVisible }")
           span ?
@@ -235,6 +240,7 @@ export default {
       lastSelectionStartPosition: 0,
       imagePickerIsVisible: false,
       cardTipsIsVisible: false,
+      cardFontsIsVisible: false,
       initialSearch: '',
       pastedName: '',
       wasPasted: false,
@@ -354,6 +360,13 @@ export default {
     showCardTips () {
       if (this.name) { return }
       return true
+    },
+    showCardFonts () {
+      if (this.showCardTips) { return }
+      const name = this.normalizedName
+      const isH1 = utils.markdown()['h1Pattern'].exec(name)
+      const isH2 = utils.markdown()['h2Pattern'].exec(name)
+      return isH1 || isH2
     },
     nameIsComment () { return utils.isNameComment(this.name) },
     canEditSpace () { return this['currentUser/canEditSpace']() },
@@ -922,6 +935,11 @@ export default {
       this.closeDialogs()
       this.cardTipsIsVisible = !isVisible
     },
+    toggleCardFontsIsVisible () {
+      const isVisible = this.cardFontsIsVisible
+      this.closeDialogs()
+      this.cardFontsIsVisible = !isVisible
+    },
     toggleImagePickerIsVisible () {
       const isVisible = this.imagePickerIsVisible
       this.closeDialogs()
@@ -992,6 +1010,7 @@ export default {
       this.$store.commit('triggerCardDetailsCloseDialogs')
       this.imagePickerIsVisible = false
       this.cardTipsIsVisible = false
+      this.cardFontsIsVisible = false
       this.hidePickers()
       if (shouldSkipGlobalDialogs === true) { return }
       this.hideTagDetailsIsVisible()
@@ -1516,6 +1535,13 @@ export default {
     position absolute
     z-index -1
     pointer-events none
+  .font-button-wrap
+    position absolute
+    padding 8px
+    right 0
+    top 2px
+    .inline-button
+      padding 0 2px
 
   dialog.image-picker
     left -100px
