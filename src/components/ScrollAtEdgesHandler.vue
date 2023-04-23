@@ -52,9 +52,10 @@ export default {
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
     isResizingCard () { return this.$store.state.currentUserIsResizingCard },
+    isScalingCard () { return this.$store.state.currentUserIsScalingCard },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
-    shouldPreventResize () { return this.currentUserIsPainting || this.isDrawingConnection || this.isResizingCard }
+    shouldPreventResize () { return this.currentUserIsPainting || this.isDrawingConnection || this.isResizingCard || this.isScalingCard }
   },
   methods: {
     initInteractions (event) {

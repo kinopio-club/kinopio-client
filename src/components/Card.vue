@@ -9,7 +9,7 @@ article#card(
   :data-resize-width="resizeWidth"
   :key="id"
   ref="card"
-  :class="{'is-resizing': currentUserIsResizingCard, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
+  :class="{'outline-none': currentUserIsResizingCard || currentUserIsScalingCard, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
 )
   .card(
     @mousedown.left.prevent="startDraggingCard"
@@ -57,8 +57,8 @@ article#card(
     .bottom-button-wrap(v-if="resizeIsVisible")
       //- resize
       .resize-button-wrap.inline-button-wrap(
-        @mousedown.left.stop="startResizing"
-        @touchstart.stop="startResizing"
+        @mousedown.left.stop="startResizingOrScaling"
+        @touchstart.stop="startResizingOrScaling"
         @dblclick="removeResize"
       )
         button.inline-button.resize-button(tabindex="-1" :class="{hidden: isPresentationMode}")
@@ -322,6 +322,7 @@ export default {
       'currentSelectedLink',
       'loadSpaceShowDetailsForCardId',
       'currentUserIsResizingCard',
+      'currentUserIsScalingCard',
       'currentUserIsBoxSelecting',
       'searchResultsCards',
       'currentConnectionColor',
@@ -391,6 +392,9 @@ export default {
     isLightInDarkTheme () { return !this.backgroundColorIsDark && this.isThemeDark },
     urlPreviewImageIsVisible () {
       return Boolean(this.cardUrlPreviewIsVisible && this.card.urlPreviewImage && !this.card.shouldHideUrlPreviewImage)
+    },
+    scale () {
+      return this.card.scale / 100
     },
     isConnectorDarkInLightTheme () {
       if (this.connectionTypeColorisDark) { return this.connectionTypeColorisDark }
@@ -548,7 +552,8 @@ export default {
       if (this.$store.state.embedIsVisibleForCardId === this.card.id) { return true }
       const userIsConnecting = this.currentConnectionStartCardIds.length
       const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
-      return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
+      console.log('🪲🪲', this.currentUserIsScalingCard)
+      return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.currentUserIsScalingCard || this.isLocked
     },
     cardClasses () {
       const m = 100
@@ -591,7 +596,7 @@ export default {
         top: `${this.y}px`,
         zIndex: z,
         pointerEvents,
-        transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
+        transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY}) scale(${this.scale})` // also updated in unstickToCursor()
       }
       styles = this.updateStylesWithWidth(styles)
       return styles
@@ -1175,11 +1180,11 @@ export default {
       }
       const swings = [-0.9, 0.6, -0.4, 0.2, 0] // [-1, 0.75, -0.5, 0.25, 0]
       let keyframes = [
-        { transform: `translate(${xOffset * swings[0]}px,   ${yOffset * swings[0]}px)`, offset: 50 },
-        { transform: `translate(${xOffset * swings[1]}px, ${yOffset * swings[1]}px)`, offset: 75 },
-        { transform: `translate(${xOffset * swings[2]}px, ${yOffset * swings[2]}px)`, offset: 50 },
-        { transform: `translate(${xOffset * swings[3]}px, ${yOffset * swings[3]}px)`, offset: 100 },
-        { transform: `translate(${xOffset * swings[4]}px,    ${yOffset * swings[4]}px)`, offset: 100 }
+        { transform: `translate(${xOffset * swings[0]}px,   ${yOffset * swings[0]}px) scale(${this.scale})`, offset: 50 },
+        { transform: `translate(${xOffset * swings[1]}px, ${yOffset * swings[1]}px) scale(${this.scale})`, offset: 75 },
+        { transform: `translate(${xOffset * swings[2]}px, ${yOffset * swings[2]}px) scale(${this.scale})`, offset: 50 },
+        { transform: `translate(${xOffset * swings[3]}px, ${yOffset * swings[3]}px) scale(${this.scale})`, offset: 100 },
+        { transform: `translate(${xOffset * swings[4]}px,    ${yOffset * swings[4]}px) scale(${this.scale})`, offset: 100 }
       ]
       keyframes.forEach(keyframe => {
         timing.duration = timing.duration + keyframe.offset
@@ -1506,25 +1511,45 @@ export default {
       }
       this.$store.commit('currentUserIsDrawingConnection', true)
     },
-    startResizing (event) {
+    startResizingOrScaling (event) {
       if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
+      const isMeta = event.metaKey || event.ctrlKey
+      console.log(isMeta)
+      // if release mouse befoore meta, then it goes into
+      // mouse up is scaled
       this.$store.dispatch('history/pause')
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('currentCards/incrementZ', this.id)
-      this.$store.commit('currentUserIsResizingCard', true)
       let cardIds = [this.id]
       const multipleCardsSelectedIds = this.multipleCardsSelectedIds
       if (multipleCardsSelectedIds.length) {
         cardIds = multipleCardsSelectedIds
       }
+      if (isMeta) {
+        this.startScaling(cardIds)
+      } else {
+        this.startResizing(cardIds)
+      }
+    },
+    startResizing (cardIds) {
+      this.$store.commit('currentUserIsResizingCard', true)
       this.$store.commit('currentUserIsResizingCardIds', cardIds)
       const updates = {
         userId: this.currentUser.id,
-        cardIds: cardIds
+        cardIds
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
+    },
+    startScaling (cardIds) {
+      this.$store.commit('currentUserIsScalingCard', true)
+      this.$store.commit('currentUserIsScalingCardIds', cardIds)
+      const updates = {
+        userId: this.currentUser.id,
+        cardIds
+      }
+      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserScalingCards' })
     },
     removeResize () {
       let cardIds = [this.id]
@@ -1791,7 +1816,7 @@ export default {
     },
     updateCurrentTouchPosition (event) {
       currentTouchPosition = utils.cursorPositionInViewport(event)
-      if (this.isBeingDragged || this.currentUserIsResizingCard) {
+      if (this.isBeingDragged || this.currentUserIsResizingCard || this.currentUserIsScalingCard) {
         event.preventDefault() // allows dragging cards without scrolling
       }
     },
@@ -1987,7 +2012,8 @@ article
   position absolute
   max-width var(--card-width)
   -webkit-touch-callout none
-  &.is-resizing
+  transform-origin top left
+  &.outline-none
     *
       outline none
   .card

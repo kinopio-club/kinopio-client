@@ -119,6 +119,10 @@ const store = createStore({
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
     remoteUserResizingCards: [],
+    // scaling card
+    currentUserIsScalingCard: false,
+    currentUserIsScalingCardIds: [],
+    remoteUserScalingCards: [],
     // dragging cards
     currentDraggingCardId: '',
     currentDraggingConnectedCardIds: [],
@@ -690,6 +694,24 @@ const store = createStore({
     updateRemoteUserResizingCards: (state, update) => {
       state.remoteUserResizingCards = state.remoteUserResizingCards.filter(remoteUser => remoteUser.userId !== update.userId)
       state.remoteUserResizingCards = state.remoteUserResizingCards.concat(update)
+    },
+
+    // Scaling cards
+
+    currentUserIsScalingCard: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.currentUserIsScalingCard = value
+    },
+    currentUserIsScalingCardIds: (state, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array' })
+      state.currentUserIsScalingCardIds = cardIds
+    },
+    removeRemoteUserScalingCards: (state, update) => {
+      state.remoteUserScalingCards = state.remoteUserScalingCards.filter(remoteUser => remoteUser.userId !== update.userId)
+    },
+    updateRemoteUserScalingCards: (state, update) => {
+      state.remoteUserScalingCards = state.remoteUserScalingCards.filter(remoteUser => remoteUser.userId !== update.userId)
+      state.remoteUserScalingCards = state.remoteUserScalingCards.concat(update)
     },
 
     // Boxes
@@ -1649,7 +1671,7 @@ const store = createStore({
       return utils.updatePositionWithSpaceOffset(scroll)
     },
     isInteractingWithItem: (state) => {
-      return state.currentUserIsDraggingCard || state.currentUserIsDrawingConnection || state.currentUserIsResizingCard || state.currentUserIsResizingBox || state.currentUserIsDraggingBox
+      return state.currentUserIsDraggingCard || state.currentUserIsDrawingConnection || state.currentUserIsResizingCard || state.updateRemoteUserScalingCard || state.currentUserIsResizingBox || state.currentUserIsDraggingBox
     }
   },
 

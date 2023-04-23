@@ -217,7 +217,8 @@ const currentCards = {
         width: utils.emptyCard().width,
         height: utils.emptyCard().height,
         isLocked: false,
-        backgroundColor: backgroundColor || defaultBackgroundColor
+        backgroundColor: backgroundColor || defaultBackgroundColor,
+        scale: 100
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       card.spaceId = currentSpaceId
@@ -245,7 +246,8 @@ const currentCards = {
           userId: context.rootState.currentUser.id,
           backgroundColor: card.backgroundColor,
           shouldUpdateUrlPreview: true,
-          urlPreviewIsVisible: true
+          urlPreviewIsVisible: true,
+          scale: 100
         }
         context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
         context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
@@ -382,6 +384,7 @@ const currentCards = {
         }
         nextTick(() => {
           card = utils.updateCardDimensions(card)
+          console.log(card)
           if (!card) { return }
           const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
           const body = {
@@ -400,8 +403,10 @@ const currentCards = {
     resetDimensions: (context, { cardIds, cardId }) => {
       if (cardId) {
         context.dispatch('removeResize', { cardIds: [cardId] })
+        context.dispatch('removeScale', { cardIds: [cardId] })
       } else if (cardIds) {
         context.dispatch('removeResize', { cardIds: cardIds })
+        context.dispatch('removeScale', { cardIds: cardIds })
       }
     },
 
@@ -423,6 +428,39 @@ const currentCards = {
     removeResize: (context, { cardIds }) => {
       cardIds.forEach(cardId => {
         const body = { id: cardId, resizeWidth: null, width: null }
+        context.dispatch('update', body)
+        context.dispatch('updateDimensions', { cardId })
+      })
+    },
+
+    // scale
+
+    scale: (context, { cardIds, deltaX }) => {
+      const minScale = 40
+      cardIds.forEach(cardId => {
+        const card = context.getters.byId(cardId)
+        let scale = card.scale
+        scale = scale + deltaX
+        scale = Math.max(minScale, scale)
+        scale = Math.min(100, scale)
+
+        console.log('🐸🐸🐸🐸', deltaX, card.scale, scale, card)
+
+        const updates = { id: cardId, scale }
+        context.dispatch('update', updates)
+        context.dispatch('broadcast/update', { updates, type: 'scaleCard', handler: 'currentCards/update' }, { root: true })
+        // context.dispatch('updateDimensions', { cards: [card] })
+        let connections = []
+        cardIds.forEach(id => {
+          connections = connections.concat(context.rootGetters['currentConnections/byCardId'](id))
+        })
+        context.dispatch('currentConnections/updatePaths', { connections, shouldUpdateApi: true }, { root: true })
+        context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
+      })
+    },
+    removeScale: (context, { cardIds }) => {
+      cardIds.forEach(cardId => {
+        const body = { id: cardId, scale: 1 }
         context.dispatch('update', body)
         context.dispatch('updateDimensions', { cardId })
       })

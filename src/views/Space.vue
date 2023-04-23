@@ -134,6 +134,7 @@ export default {
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
     isResizingCard () { return this.$store.state.currentUserIsResizingCard },
+    isScalingCard () { return this.$store.state.currentUserIsScalingCard },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     isResizingBox () { return this.$store.state.currentUserIsResizingBox },
     isDraggingBox () { return this.$store.state.currentUserIsDraggingBox },
@@ -143,7 +144,7 @@ export default {
     pageWidth () { return this.$store.state.pageWidth },
     currentUser () { return this.$store.state.currentUser },
     isInteracting () {
-      if (this.isDraggingCard || this.isDrawingConnection || this.isResizingCard || this.isResizingBox || this.isDraggingBox) {
+      if (this.isDraggingCard || this.isDrawingConnection || this.isResizingCard || this.isScalingCard || this.isResizingBox || this.isDraggingBox) {
         return true
       } else { return false }
     },
@@ -235,6 +236,21 @@ export default {
       this.$store.commit('currentUserIsResizingCard', false)
       this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserResizingCards' })
     },
+    scaleCards () {
+      if (!prevCursor) { return }
+      const cardIds = this.$store.state.currentUserIsScalingCardIds
+      const deltaX = endCursor.x - prevCursor.x
+      this.$store.dispatch('currentCards/scale', { cardIds, deltaX })
+    },
+    stopScalingCards () {
+      if (!this.$store.state.currentUserIsScalingCard) { return }
+      this.$store.dispatch('history/resume')
+      const cardIds = this.$store.state.currentUserIsScalingCardIds
+      const cards = cardIds.map(id => this.$store.getters['currentCards/byId'](id))
+      this.$store.dispatch('history/add', { cards, useSnapshot: true })
+      this.$store.commit('currentUserIsScalingCard', false)
+      this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserScalingCards' })
+    },
 
     // boxes
 
@@ -287,6 +303,9 @@ export default {
       }
       if (this.isResizingCard) {
         this.resizeCards()
+      }
+      if (this.isScalingCard) {
+        this.scaleCards()
       }
       if (this.isResizingBox) {
         this.resizeBoxes()
@@ -462,6 +481,7 @@ export default {
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
       this.$store.commit('preventDraggedBoxFromShowingDetails', false)
       this.stopResizingCards()
+      this.stopScalingCards()
       this.stopResizingBoxes()
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
