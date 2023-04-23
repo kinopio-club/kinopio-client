@@ -66,7 +66,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )
 
-      .inline-button-wrap.font-button-wrap(v-if="showCardFonts" @click.left.stop="toggleCardFontsIsVisible" :class="{ active: cardFontsIsVisible }")
+      .inline-button-wrap.font-button-wrap(v-if="showCardFonts" @click.left.stop="toggleCardFontsIsVisible" :class="{ active: cardFontsIsVisible }" :disabled="!canEditCard")
         button.inline-button(tabindex="-1" :class="{ active: cardFontsIsVisible }")
           span Aa
       //- CardFonts(:visible="cardFontsIsVisible" :card="card")
@@ -936,6 +936,7 @@ export default {
       this.cardTipsIsVisible = !isVisible
     },
     toggleCardFontsIsVisible () {
+      if (!this.canEditCard) { return }
       const isVisible = this.cardFontsIsVisible
       this.closeDialogs()
       this.cardFontsIsVisible = !isVisible
