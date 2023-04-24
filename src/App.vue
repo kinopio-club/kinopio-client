@@ -547,6 +547,7 @@ label
     &:hover
       .resize-button
         opacity 1
+        box-shadow none
     .resize-button
       border 0
       width 12px

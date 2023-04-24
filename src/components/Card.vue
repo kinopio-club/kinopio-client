@@ -54,18 +54,27 @@ article#card(
 
     template(v-if="!isComment")
       ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" @updateCardDimensions="updateCardDimensions")
-    .bottom-button-wrap(v-if="resizeIsVisible")
+    template(v-if="resizeIsVisible")
       //- resize
-      .resize-button-wrap.inline-button-wrap(
-        @mousedown.left.stop="startResizingOrScaling"
-        @touchstart.stop="startResizingOrScaling"
-        @dblclick="removeResize"
-      )
-        button.inline-button.resize-button(tabindex="-1" :class="{hidden: isPresentationMode}")
-          img.resize-icon.icon(src="@/assets/resize-corner.svg")
+      .bottom-button-wrap
+        .resize-button-wrap.inline-button-wrap(
+          @mousedown.left.stop="startResizing"
+          @touchstart.stop="startResizing"
+          @dblclick="removeResize"
+        )
+          button.inline-button.resize-button(tabindex="-1" :class="{hidden: isPresentationMode}")
+            img.resize-icon.icon(src="@/assets/resize-corner.svg")
+      //- scale
+      .bottom-button-wrap.bottom-left-button-wrap
+        .resize-button-wrap.inline-button-wrap.scale-button-wrap(
+          @mousedown.left.stop="startScaling"
+          @touchstart.stop="startScaling"
+          @dblclick="removeScale"
+        )
+          button.inline-button.resize-button(tabindex="-1" :class="{hidden: isPresentationMode}")
+            img.resize-icon.scale-icon.icon(src="@/assets/resize-corner.svg")
 
     span.card-content-wrap(:style="cardContentWrapStyles")
-
       //- Comment
       .card-comment(v-if="isComment")
         //- [·]
@@ -1511,13 +1520,7 @@ export default {
       }
       this.$store.commit('currentUserIsDrawingConnection', true)
     },
-    startResizingOrScaling (event) {
-      if (!this.canEditSpace) { return }
-      if (utils.isMultiTouch(event)) { return }
-      const isMeta = event.metaKey || event.ctrlKey
-      console.log(isMeta)
-      // if release mouse befoore meta, then it goes into
-      // mouse up is scaled
+    resizingScalingCardIds (event) {
       this.$store.dispatch('history/pause')
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
@@ -1527,13 +1530,12 @@ export default {
       if (multipleCardsSelectedIds.length) {
         cardIds = multipleCardsSelectedIds
       }
-      if (isMeta) {
-        this.startScaling(cardIds)
-      } else {
-        this.startResizing(cardIds)
-      }
+      return cardIds
     },
-    startResizing (cardIds) {
+    startResizing (event) {
+      if (!this.canEditSpace) { return }
+      if (utils.isMultiTouch(event)) { return }
+      const cardIds = this.resizingScalingCardIds()
       this.$store.commit('currentUserIsResizingCard', true)
       this.$store.commit('currentUserIsResizingCardIds', cardIds)
       const updates = {
@@ -1542,7 +1544,10 @@ export default {
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
     },
-    startScaling (cardIds) {
+    startScaling (event) {
+      if (!this.canEditSpace) { return }
+      if (utils.isMultiTouch(event)) { return }
+      const cardIds = this.resizingScalingCardIds()
       this.$store.commit('currentUserIsScalingCard', true)
       this.$store.commit('currentUserIsScalingCardIds', cardIds)
       const updates = {
@@ -1558,6 +1563,14 @@ export default {
         cardIds = multipleCardsSelectedIds
       }
       this.$store.dispatch('currentCards/removeResize', { cardIds })
+    },
+    removeScale () {
+      let cardIds = [this.id]
+      const multipleCardsSelectedIds = this.multipleCardsSelectedIds
+      if (multipleCardsSelectedIds.length) {
+        cardIds = multipleCardsSelectedIds
+      }
+      this.$store.dispatch('currentCards/removeScale', { cardIds })
     },
     updateStylesWithWidth (styles) {
       const connectorIsNotVisibleToReadOnlyUser = (!this.connectorIsVisible && !this.isLocked) || this.isComment
@@ -2012,7 +2025,7 @@ article
   position absolute
   max-width var(--card-width)
   -webkit-touch-callout none
-  transform-origin top left
+  transform-origin top right
   &.outline-none
     *
       outline none
@@ -2302,8 +2315,8 @@ article
 
   .bottom-button-wrap
     position absolute
-    right 0px
-    bottom 0px
+    right 0
+    bottom 0
     display flex
     .resize-button-wrap
       z-index 1
@@ -2312,6 +2325,14 @@ article
         cursor ew-resize
     img
       -webkit-user-drag none
+
+  .bottom-left-button-wrap
+    right initial
+    left 0
+    .scale-button-wrap
+      transform translate(-12px, 13px)
+      .scale-icon
+        transform rotate(90deg)
 
   .lock-button-wrap
     opacity 0

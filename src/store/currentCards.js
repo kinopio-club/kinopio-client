@@ -436,13 +436,17 @@ const currentCards = {
     // scale
 
     scale: (context, { cardIds, deltaX }) => {
-      const minScale = 40
+      const minScale = 20
+      const maxScale = 200
       cardIds.forEach(cardId => {
         const card = context.getters.byId(cardId)
+        if (card.scale === undefined) {
+          card.scale = 100
+        }
         let scale = card.scale
-        scale = scale + deltaX
+        scale = scale - deltaX
         scale = Math.max(minScale, scale)
-        scale = Math.min(100, scale)
+        scale = Math.min(maxScale, scale)
 
         console.log('🐸🐸🐸🐸', deltaX, card.scale, scale, card)
 
@@ -460,7 +464,7 @@ const currentCards = {
     },
     removeScale: (context, { cardIds }) => {
       cardIds.forEach(cardId => {
-        const body = { id: cardId, scale: 1 }
+        const body = { id: cardId, scale: 100 }
         context.dispatch('update', body)
         context.dispatch('updateDimensions', { cardId })
       })
