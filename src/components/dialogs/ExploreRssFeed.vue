@@ -60,6 +60,8 @@ export default {
 
 <style lang="stylus" scoped>
 .explore-rss-feed
+  left initial
+  right 0
   top calc(100% - 12px) !important
   bottom initial !important
 

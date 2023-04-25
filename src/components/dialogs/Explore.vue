@@ -118,6 +118,8 @@ export default {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
         this.updateUserShowInExploreUpdatedAt()
+      } else {
+        this.exploreRssFeedIsVisible = false
       }
     },
     loading (value) {
