@@ -49,7 +49,7 @@ export default {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeightFromHeader(element)
+        this.dialogHeight = utils.elementHeight(element)
       })
     },
     async updateUserShowInExploreUpdatedAt () {

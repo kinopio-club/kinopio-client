@@ -18,8 +18,8 @@ section.community(v-if="visible" :open="visible" @click.left.stop='closeDialogs'
 
   p(v-if="loading")
     Loader(:visible="loading")
-section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-  SpaceList(:spaces="exploreSpaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace" :userShowInExploreDate="userShowInExploreDate" :resultsSectionHeight="resultsSectionHeight")
+section.results-section(ref="results")
+  SpaceList(:spaces="exploreSpaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace" :userShowInExploreDate="userShowInExploreDate")
 </template>
 
 <script>
@@ -45,16 +45,8 @@ export default {
     spaces: Array,
     userShowInExploreDate: String
   },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateResultsSectionHeight()
-      }
-    })
-  },
   data () {
     return {
-      resultsSectionHeight: null,
       exploreRssFeedIsVisible: false,
       filteredSpaces: undefined
     }
@@ -88,25 +80,8 @@ export default {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     },
-    updateResultsSectionHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
-      })
-    },
     toggleExploreRssFeedIsVisible () {
       this.exploreRssFeedIsVisible = !this.exploreRssFeedIsVisible
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.updateResultsSectionHeight()
-      }
-    },
-    loading (loading) {
-      this.updateResultsSectionHeight()
     }
   }
 }
