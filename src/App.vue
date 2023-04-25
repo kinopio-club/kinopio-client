@@ -453,6 +453,10 @@ label // used for checkbox buttons
   &.small-button
     height 20px
     padding 0px 4px
+    input[type="checkbox"]
+      width 10px
+      height 10px
+      vertical-align 0
   &.variable-length-content
     height fit-content
 
