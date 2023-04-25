@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned}")
+dialog.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned}")
   section
     SpaceDetailsInfo(@updateLocalSpaces="updateLocalSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden" @addSpace="addSpace")
   section.results-actions
@@ -363,7 +363,6 @@ export default {
 
 <style lang="stylus">
 dialog.space-details
-  width 234px !important
   button.disabled
     opacity 0.5
     pointer-events none

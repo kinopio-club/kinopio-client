@@ -88,7 +88,7 @@ template(v-if="settingsIsVisible")
       .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
         button.variable-length-content(:class="{ active: currentSpaceIsUserTemplate }")
           img.icon.templates(src="@/assets/templates.svg")
-          span Template
+          span Make Template
       //- Export
       .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
