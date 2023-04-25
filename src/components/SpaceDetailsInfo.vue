@@ -338,7 +338,7 @@ export default {
   .space-info-wrap
     margin 0
     .textarea-wrap
-      width 145px
+      width 170px
       &.full-width
         width 170px
       .textarea-loader
