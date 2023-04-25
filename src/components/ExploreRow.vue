@@ -40,7 +40,7 @@ const state = reactive({
 
 const unreadExploreSpacesLength = computed(() => {
   let readDate = store.state.currentUser.showInExploreUpdatedAt
-  if (!readDate) { return '20+' }
+  if (!readDate) { return 'Explore' }
   readDate = dayjs(readDate)
   const unreadSpaces = state.exploreSpaces.filter(space => {
     const spaceDate = dayjs(space.showInExploreUpdatedAt)
@@ -118,12 +118,12 @@ const updateExploreSpaces = async () => {
 </script>
 
 <template lang="pug">
-.explore-row
+.explore-row.button-wrap
   .segmented-buttons
     //- Explore
     button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible}")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
-      span Explore
+      //- span Explore
       span(v-if="unreadExploreSpacesLength") &nbsp;{{ unreadExploreSpacesLength }}
     //- Live
     button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible}")
@@ -135,5 +135,6 @@ const updateExploreSpaces = async () => {
 
 <style lang="stylus">
 .explore-row
-  margin-top 6px
+  // margin-top 6px
+  position relative
 </style>

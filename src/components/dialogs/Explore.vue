@@ -74,5 +74,7 @@ export default {
 
 <style lang="stylus">
 .explore
+  left initial
+  right 8px
   max-height calc(100vh - 100px)
 </style>

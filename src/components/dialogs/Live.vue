@@ -74,6 +74,8 @@ export default {
 
 <style lang="stylus">
 .live
+  left initial
+  right 8px
   max-height calc(100vh - 100px)
   .camera
     vertical-align baseline

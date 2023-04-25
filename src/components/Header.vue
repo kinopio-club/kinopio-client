@@ -98,8 +98,6 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               img.icon.offline(src="@/assets/offline.svg")
             Offline(:visible="offlineIsVisible")
 
-        ExploreRow
-
     .right
       .controls(v-if="isSpace")
         .top-controls
@@ -135,8 +133,9 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
               img.icon.right-arrow(src="@/assets/down-arrow.svg")
             Sidebar(:visible="sidebarIsVisible")
-        .row.bottom-controls(v-if="!currentUserIsSignedIn")
-          .button-wrap
+        .row.bottom-controls
+          ExploreRow
+          .button-wrap(v-if="!currentUserIsSignedIn")
             button(@click.left.stop="togglePricingIsVisible" :class="{active : pricingIsVisible}")
               span Pricing
             Pricing(:visible="pricingIsVisible")
