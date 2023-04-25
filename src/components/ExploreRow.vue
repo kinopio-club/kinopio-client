@@ -1,10 +1,8 @@
 <script setup>
-// import utils from '@/utils.js'
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
 
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref } from 'vue'
-// https://vuex.vuejs.org/guide/composition-api.html#accessing-state-and-getters
 import { useStore } from 'vuex'
 
 import dayjs from 'dayjs'
@@ -24,7 +22,6 @@ onMounted(() => {
     }
   })
 })
-
 onUnmounted(() => {
   window.removeEventListener('online', updateLiveSpaces)
   clearInterval(updateLiveSpacesIntervalTimer)
@@ -38,6 +35,18 @@ const state = reactive({
   exploreSpaces: []
 })
 
+const closeDialogs = () => {
+  state.exploreIsVisible = false
+  state.liveIsVisible = false
+}
+
+// Explore
+
+const toggleExploreIsVisible = () => {
+  const isVisible = state.exploreIsVisible
+  store.dispatch('closeAllDialogs')
+  state.exploreIsVisible = !isVisible
+}
 const unreadExploreSpacesLength = computed(() => {
   let readDate = store.state.currentUser.showInExploreUpdatedAt
   if (!readDate) { return 'Explore' }
@@ -49,17 +58,16 @@ const unreadExploreSpacesLength = computed(() => {
   })
   return unreadSpaces.length
 })
-
-const closeDialogs = () => {
-  state.exploreIsVisible = false
-  state.liveIsVisible = false
+const updateExploreSpaces = async () => {
+  try {
+    state.exploreSpaces = await store.dispatch('api/getExploreSpaces')
+  } catch (error) {
+    console.warn('🚑 updateExploreSpaces', error)
+  }
 }
 
-const toggleExploreIsVisible = () => {
-  const isVisible = state.exploreIsVisible
-  store.dispatch('closeAllDialogs')
-  state.exploreIsVisible = !isVisible
-}
+// Live
+
 const toggleLiveIsVisible = () => {
   const isVisible = state.liveIsVisible
   store.dispatch('closeAllDialogs')
@@ -68,7 +76,6 @@ const toggleLiveIsVisible = () => {
     updateLiveSpaces()
   }
 }
-
 const updateLiveSpaces = async () => {
   state.isLoadingLiveSpaces = true
   let spaces = await store.dispatch('api/getLiveSpaces')
@@ -81,7 +88,6 @@ const updateLiveSpaces = async () => {
   state.liveSpaces = spaces
   state.isLoadingLiveSpaces = false
 }
-
 const normalizeLiveSpaces = (spaces) => {
   let normalizedSpaces = []
   spaces = spaces.map(space => {
@@ -103,16 +109,6 @@ const normalizeLiveSpaces = (spaces) => {
     }
   })
   return normalizedSpaces
-}
-
-// preload explore spaces
-
-const updateExploreSpaces = async () => {
-  try {
-    state.exploreSpaces = await store.dispatch('api/getExploreSpaces')
-  } catch (error) {
-    console.warn('🚑 updateExploreSpaces', error)
-  }
 }
 
 </script>
