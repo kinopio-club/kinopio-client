@@ -31,7 +31,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
           span To edit closed spaces, you'll need to be invited
     .row
       //- Remove
-      button(:disabled="!canEditConnection" @click.left="removeConnection")
+      button.danger(:disabled="!canEditConnection" @click.left="removeConnection")
         img.icon(src="@/assets/remove.svg")
         span Remove
   section.results-actions(ref="resultsActions")
