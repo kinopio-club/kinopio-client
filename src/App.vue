@@ -463,6 +463,18 @@ label // used for checkbox buttons
 .unselectable
   pointer-events none !important
 
+.clickable-item
+  box-shadow var(--button-hover-shadow)
+  cursor pointer
+  max-width calc(100% - 4px) !important
+  user-select none
+  user-drag none
+  &:hover
+    box-shadow var(--hover-shadow)
+  &:active,
+  &.active
+    box-shadow var(--active-shadow)
+
 table
   margin-top 10px
   border-collapse collapse
