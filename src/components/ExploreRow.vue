@@ -121,10 +121,10 @@ const updateExploreSpaces = async () => {
 .explore-row.button-wrap
   .segmented-buttons
     //- Explore
-    button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible}")
+    button.explore-button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible}")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
       //- span Explore
-      span(v-if="unreadExploreSpacesLength") &nbsp;{{ unreadExploreSpacesLength }}
+      span.explore-button-label(v-if="unreadExploreSpacesLength") &nbsp;{{ unreadExploreSpacesLength }}
     //- Live
     button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible}")
       img.icon.camera(src="@/assets/camera.svg")
@@ -135,6 +135,8 @@ const updateExploreSpaces = async () => {
 
 <style lang="stylus">
 .explore-row
-  // margin-top 6px
   position relative
+  .explore-button
+    .explore-button-label
+      margin-left 0
 </style>
