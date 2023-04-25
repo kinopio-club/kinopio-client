@@ -260,7 +260,7 @@ export default {
     display block
 
   .favicon
-    border-radius var(--entity-radius)
+    border-radius var(--small-entity-radius)
     width 14px
     vertical-align -3px
     display inline
