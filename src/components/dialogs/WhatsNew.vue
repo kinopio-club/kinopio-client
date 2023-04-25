@@ -13,9 +13,6 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
         button
           span Blog{{' '}}
           img.icon.visit(src="@/assets/visit.svg")
-    .button-wrap
-      button(@click.left="refreshBrowser")
-        img.refresh.icon(src="@/assets/refresh.svg")
 
   section(v-if="!newStuff.length")
     Loader(:visible="true")
@@ -81,9 +78,6 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
-    },
-    refreshBrowser () {
-      window.location.reload()
     }
   },
   watch: {

@@ -1,7 +1,12 @@
 <template lang="pug">
 dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :class="{ overflow: !childDialogIsVisible }")
   section
-    p About Kinopio
+    .row.title-row
+      p About Kinopio
+      .row
+        button.small-button(@click.left="refreshBrowser" title="Refresh")
+          img.refresh.icon(src="@/assets/refresh.svg")
+
   section
     .row
       p Thinking canvas for building ideas and solving problems
@@ -140,6 +145,9 @@ export default {
     }
   },
   methods: {
+    refreshBrowser () {
+      window.location.reload()
+    },
     toggleWhatsNewIsVisible () {
       const isVisible = this.whatsNewIsVisible
       this.closeDialogs()
