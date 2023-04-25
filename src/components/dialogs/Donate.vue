@@ -35,7 +35,8 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
             span /once
 
       button(@click="donate" :class="{ active: isLoading }")
-        span Donation Checkout →
+        span Donation Checkout{{' '}}
+        img.icon.visit(src="@/assets/visit.svg")
         Loader(:visible="isLoading")
 
       p(v-if="error.unknownServerError")

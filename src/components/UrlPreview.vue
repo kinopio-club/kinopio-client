@@ -11,11 +11,11 @@
             button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}" :disabled="!canEditCard")
               img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
               img.icon(v-else src="@/assets/view.svg")
-              span URL
+              span Hide URL
           .button-wrap
             a(:href="card.urlPreviewUrl")
               button
-                span →
+                img.icon.visit(src="@/assets/visit.svg")
         //- all, image, text, none
         .row(v-if="previewHasInfo")
           .segmented-buttons

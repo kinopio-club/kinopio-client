@@ -84,7 +84,7 @@ dialog.image-picker(
             a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
               button.small-button
                 span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
-                span →
+                img.icon.visit(src="@/assets/visit.svg")
 
 </template>
 

@@ -12,7 +12,8 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
         .logo
           .logo-image
         MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-        span {{currentSpaceName}} →
+        span {{currentSpaceName}}{{' '}}
+        img.icon.visit(src="@/assets/visit.svg")
     .right
       SpaceUsers
 

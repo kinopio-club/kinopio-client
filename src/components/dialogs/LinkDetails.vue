@@ -11,7 +11,8 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="styles" re
         a(:href="space.url")
           button.variable-length-content(@click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace" :class="{active: linkIsCurrentSpace}")
             MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-            span {{space.name}} →
+            span {{space.name}}{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
 
     template(v-if="isSpace")
       .row.badges-wrap(v-if="space.isLoadingOrInvalid")

@@ -4,10 +4,15 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
     p What's New
     .button-wrap
       a(href="https://kinopio.club/-kinopio-roadmap-6TRE21gchHI7alHLuwzd5")
-        button Roadmap →
+        button
+          span Roadmap{{' '}}
+          img.icon.visit(src="@/assets/visit.svg")
+
     .button-wrap
       a(href="https://blog.kinopio.club")
-        button Blog →
+        button
+          span Blog{{' '}}
+          img.icon.visit(src="@/assets/visit.svg")
     .button-wrap
       button(@click.left="refreshBrowser")
         img.refresh.icon(src="@/assets/refresh.svg")
@@ -31,7 +36,9 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
           p.summary {{item.summary}}
     .button-wrap
       a(href="https://blog.kinopio.club")
-        button Read All →
+        button
+          span Read All{{' '}}
+          img.icon.visit(src="@/assets/visit.svg")
 </template>
 
 <script>
