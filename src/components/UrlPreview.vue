@@ -7,17 +7,16 @@
       .content-buttons
         .row
           //- hide url
-          .button-wrap
+          .button-wrap(v-if="moreOptionsIsVisible")
             button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}" :disabled="!canEditCard")
               img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
               img.icon(v-else src="@/assets/view.svg")
               span Hide URL
           .button-wrap
-            a(:href="card.urlPreviewUrl")
-              button
-                img.icon.visit(src="@/assets/visit.svg")
+            button.icon-only-button(@click.stop="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
+              img.icon.down-arrow(src="@/assets/down-arrow.svg")
         //- all, image, text, none
-        .row(v-if="previewHasInfo")
+        .row(v-if="previewHasInfo && moreOptionsIsVisible")
           .segmented-buttons
             button(v-if="previewHasImage && previewHasInfo" @click="showAll" :class="{active : isShowAll}" :disabled="!canEditCard")
               span All
@@ -74,7 +73,8 @@ export default {
   },
   data () {
     return {
-      imageCanLoad: false
+      imageCanLoad: false,
+      moreOptionsIsVisible: false
     }
   },
   computed: {
@@ -135,6 +135,10 @@ export default {
     }
   },
   methods: {
+    toggleMoreOptionsIsVisible () {
+      const value = !this.moreOptionsIsVisible
+      this.moreOptionsIsVisible = value
+    },
     toggleUrlsIsVisible () {
       this.$emit('toggleUrlsIsVisible')
     },
@@ -224,12 +228,7 @@ export default {
   a.preview-image-wrap
     max-height 120px
     overflow hidden
-    &:hover
-      .preview-image
-        box-shadow var(--button-hover-shadow)
-    &:active
-      .preview-image
-        box-shadow var(--hover-shadow)
+    padding-bottom 4px
 
   .side-image
     max-width 40%
@@ -304,4 +303,7 @@ export default {
   .transparent
     opacity 0.5
 
+  .icon-only-button
+    img
+      padding 0
 </style>
