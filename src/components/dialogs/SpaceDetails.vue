@@ -362,7 +362,8 @@ export default {
 </script>
 
 <style lang="stylus">
-.space-details
+dialog.space-details
+  width 234px !important
   button.disabled
     opacity 0.5
     pointer-events none
