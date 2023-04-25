@@ -67,35 +67,29 @@ section.subsection.space-settings(v-if="!isSpaceMember")
     button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
       img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
       img.icon(v-else src="@/assets/heart-empty.svg")
-      span Follow updates
+      span Follow Updates
 
 //- member space settings
 section.subsection.space-settings(v-if="settingsIsVisible")
   .row
-    //- Background
-    .button-wrap
-      button(@click.left.stop="toggleBackgroundIsVisible")
-        BackgroundPreview(:space="currentSpace")
-        span Background
-
     //- Favorite
     .button-wrap
       button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
         img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
         img.icon(v-else src="@/assets/heart-empty.svg")
         span Pin
+    //- Export
+    .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
+      button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+        span Export
+        Export(:visible="exportIsVisible")
 
   .row
     //- Template
     .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
       button.variable-length-content(:class="{ active: currentSpaceIsUserTemplate }")
         img.icon.templates(src="@/assets/templates.svg")
-        span Template
-    //- Export
-    .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
-      button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-        span Export
-        Export(:visible="exportIsVisible")
+        span Make Template
 
   .row(v-if="currentSpaceIsUserTemplate")
     //- Duplicate
