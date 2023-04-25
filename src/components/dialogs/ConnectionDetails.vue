@@ -36,13 +36,13 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         span Remove
   section.results-actions(ref="resultsActions")
     //- Use Last Type
-    .row
+    .row.title-row
       label(:class="{active: shouldUseLastConnectionType, disabled: !canEditConnection}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
         input(type="checkbox" v-model="shouldUseLastConnectionType")
         .badge.badge-in-button(:style="{backgroundColor: typeColor}")
         span Use Last Type
       //- Filter
-      button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+      button.small-button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
         img.icon(src="@/assets/filter.svg")
 
     .row

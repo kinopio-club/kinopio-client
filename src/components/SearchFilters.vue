@@ -31,7 +31,7 @@ section.filters
           img.icon.pin.right-pin(src="@/assets/pin.svg")
       //- More Filters
       .button-wrap
-        button(:class="{active: moreSearchFiltersVisible || totalFiltersActive, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
+        button.small-button(:class="{active: moreSearchFiltersVisible || totalFiltersActive, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
           img.icon(src="@/assets/filter.svg")
           span.badge.info.filter-is-active(v-if="totalFiltersActive")
         MoreSearchFilters(:visible="moreSearchFiltersVisible")

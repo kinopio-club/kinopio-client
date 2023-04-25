@@ -15,9 +15,9 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
           ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagNameColor")
         .tag-name {{name}}
       //- Filter
-      label.toggle-filter(@@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
-        input(type="checkbox" v-model="isFilteredInSpace")
-        img.icon(src="@/assets/filter.svg")
+      .button-wrap
+        button.small-button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+          img.icon(src="@/assets/filter.svg")
 
     //- no cards found
     template(v-if="!cards.length && !loading")
@@ -469,7 +469,7 @@ export default {
     background-color var(--secondary-background)
   .tag-title-row
     justify-content space-between
-    align-items flex-start
+    align-items center
     .tag-name
       margin-left 6px
     > .row
