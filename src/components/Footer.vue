@@ -10,10 +10,6 @@
               img.icon(src="@/assets/add.svg")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
             AddToInbox(:visible="addToInboxIsVisible")
-          .button-wrap
-            button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-              img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-              img.icon(v-else src="@/assets/heart-empty.svg")
 
   .right(:class="{'is-embed': isEmbedMode, 'hidden': isHidden}" v-if="!isMobileOrTouch")
     SpaceZoom
@@ -120,14 +116,6 @@ export default {
     isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] }
   },
   methods: {
-    toggleIsFavoriteSpace () {
-      const currentSpace = this.$store.state.currentSpace
-      if (this.isFavoriteSpace) {
-        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
-      } else {
-        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
-      }
-    },
     closeDialogs () {
       this.addToInboxIsVisible = false
     },
