@@ -98,6 +98,8 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               img.icon.offline(src="@/assets/offline.svg")
             Offline(:visible="offlineIsVisible")
 
+        ExploreRow
+
     .right
       .controls(v-if="isSpace")
         .top-controls
@@ -175,6 +177,7 @@ import Pricing from '@/components/dialogs/Pricing.vue'
 import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
+import ExploreRow from '@/components/ExploreRow.vue'
 
 import { mapState, mapGetters } from 'vuex'
 import sortBy from 'lodash-es/sortBy'
@@ -217,7 +220,8 @@ export default {
     Pricing,
     EarnCredits,
     SpaceTodayJournalBadge,
-    ControlsSettings
+    ControlsSettings,
+    ExploreRow
   },
   props: {
     isPinchZooming: Boolean,
