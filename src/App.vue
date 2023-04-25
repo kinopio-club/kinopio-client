@@ -763,7 +763,8 @@ dialog
   -webkit-user-drag none
   pointer-events none
 
-.icon + span
+.icon + span,
+.icon + .icon
   margin-left 5px
 
 .time

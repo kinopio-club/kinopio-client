@@ -76,6 +76,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               span {{currentSpaceName}}
               PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
               img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
+              img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
             SpaceDetails(:visible="spaceDetailsIsVisible")
             ImportArenaChannel(:visible="importArenaChannelIsVisible")
             SpaceDetailsInfo(:visible="spaceDetailsInfoIsVisible")
@@ -339,6 +340,7 @@ export default {
       'currentUser/isSignedIn',
       'currentUser/totalFiltersActive'
     ]),
+    currentSpaceIsHidden () { return this.$store.state.currentSpace.isHidden },
     kinopioDomain () { return utils.kinopioDomain() },
     isVisible () {
       const contentDialogIsVisible = this.cardDetailsIsVisibleForCardId || this.connectionDetailsIsVisibleForConnectionId
