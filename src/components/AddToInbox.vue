@@ -15,7 +15,8 @@
       template(v-if="cardsCreatedIsOverLimit")
         a(:href="kinopioDomain" v-if="isAddPage")
           .badge.danger.button-badge
-            span Upgrade for more →
+            span Upgrade for more{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
         .badge.danger(v-else)
           span Upgrade for more cards
       //- error: connection

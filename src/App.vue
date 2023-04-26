@@ -453,11 +453,27 @@ label // used for checkbox buttons
   &.small-button
     height 20px
     padding 0px 4px
+    input[type="checkbox"]
+      width 10px
+      height 10px
+      vertical-align 0
   &.variable-length-content
     height fit-content
 
 .unselectable
   pointer-events none !important
+
+.clickable-item
+  box-shadow var(--button-hover-shadow)
+  cursor pointer
+  max-width calc(100% - 4px) !important
+  user-select none
+  user-drag none
+  &:hover
+    box-shadow var(--hover-shadow)
+  &:active,
+  &.active
+    box-shadow var(--active-shadow)
 
 table
   margin-top 10px
@@ -759,7 +775,8 @@ dialog
   -webkit-user-drag none
   pointer-events none
 
-.icon + span
+.icon + span,
+.icon + .icon
   margin-left 5px
 
 .time

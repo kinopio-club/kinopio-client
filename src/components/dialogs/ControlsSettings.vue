@@ -7,6 +7,13 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
 
   section
     .row
+      label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
+        input(type="checkbox" v-model="newSpacesAreBlank")
+        span New Spaces Are Blank
+  section
+    .row
+      p Motion
+    .row
       label.variable-length-content(:class="{ active: shouldDisableItemJiggle }" @click.left.prevent="toggleshouldDisableItemJiggle" @keydown.stop.enter="toggleshouldDisableItemJiggle")
         input(type="checkbox" v-model="shouldDisableItemJiggle")
         span Disable Jiggle While Dragging
@@ -33,7 +40,6 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
       label.variable-length-content(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
         span Disable Right/Middle Click to Pan
-
 </template>
 
 <script>
@@ -64,9 +70,14 @@ export default {
     shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
     shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle },
     controlsSettingsIsPinned () { return this.$store.state.controlsSettingsIsPinned },
-    panSpeedIsFast () { return this.$store.state.currentUser.panSpeedIsFast }
+    panSpeedIsFast () { return this.$store.state.currentUser.panSpeedIsFast },
+    newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank }
   },
   methods: {
+    toggleNewSpacesAreBlank () {
+      const value = !this.newSpacesAreBlank
+      this.$store.dispatch('currentUser/newSpacesAreBlank', value)
+    },
     updatePanSpeedIsFast (value) {
       this.$store.dispatch('currentUser/update', { panSpeedIsFast: value })
     },

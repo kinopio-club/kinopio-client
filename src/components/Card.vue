@@ -105,8 +105,8 @@ article#card(
               img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
           //- Url →
-          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent :class="{'connector-is-visible': connectorIsVisible}")
-            .url.inline-button-wrap(@click.left="openUrl($event, cardButtonUrl)")
+          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent @click.left.stop.prevent="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible, 'is-hidden-by-opacity': isPresentationMode}")
+            .url.inline-button-wrap
               button.inline-button(:style="{background: itemBackground}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
           //- Connector
@@ -213,7 +213,6 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
-import hexToRgba from 'hex-to-rgba'
 import { mapState, mapGetters } from 'vuex'
 
 let isMultiTouch
@@ -2066,6 +2065,7 @@ article
     .card-buttons-wrap
       display flex
       margin-left -8px // cancels out margin-right in .card-content or .card-comment
+      height 32px
 
     .name-wrap,
     .card-comment

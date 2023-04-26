@@ -107,7 +107,7 @@ export default {
     },
     iframe () {
       return `<div class="kinopio-embed" style="height: 420px; width: 100%;">
-  <iframe src="${this.url}" style="height: 100%; width: 100%; border: 0; border-radius: 5px;">
+  <iframe src="${this.url}" style="height: 100%; width: 100%; border: 0; border-radius: 6px;">
   </iframe>
 </div>`
     }

@@ -1,43 +1,25 @@
 <template lang="pug">
-dialog.narrow.tag-picker-style-actions(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs" :style="{'max-height': dialogHeight + 'px'}")
-  section
-    .row
-      button(@click="toggleNewTagIsVisible" :class="{ active: newTagIsVisible }")
-        img.icon(src="@/assets/add.svg")
-        span New Tag
-    template(v-if="newTagIsVisible")
-      .row
-        .button-wrap
-          button.change-color(@click.stop="toggleColorPickerIsVisible")
-            .current-color(:style="{ background: newTagColor }")
-          ColorPicker(:currentColor="newTagColor" :visible="colorPickerIsVisible" @selectedColor="updateNewTagColor")
-        input(placeholder="name" ref="newTagName" v-model="newTagName" @keyup.space.prevent @keyup.escape.stop="toggleNewTagIsVisible" @keyup.stop @keyup.enter.exact="createNewTag")
-      .row
-        button(@click="createNewTag")
-          span Create New Tag
-      .row(v-if="errorNewTagNameIsBlank")
-        .badge.danger Tag name cannot be blank
-  section.results-section(v-if="tags.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    TagList(:tags="tags" :isLoading="loading" :shouldEmitSelectTag="true" :currentTags="currentTags" @selectTag="selectTag")
+dialog.narrow.tag-picker-style-actions(v-if="visible" :open="visible" ref="dialog" @click.stop :style="{'max-height': dialogHeight + 'px'}")
+  section.results-section(v-if="tags.length" ref="results")
+    TagList(:tags="tags" :isLoading="loading" :canAddTag="true" :shouldEmitSelectTag="true" :currentTags="currentTags" @selectTag="selectTag" @addTag="addTag")
 </template>
 
 <script>
 import TagList from '@/components/TagList.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
-import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 
 import randomColor from 'randomcolor'
 
 export default {
   name: 'TagPickerStyleActions',
   components: {
-    TagList,
-    ColorPicker
+    TagList
   },
   props: {
     visible: Boolean,
-    cards: Array
+    cards: Array,
+    tagNamesInCard: Array
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -52,35 +34,30 @@ export default {
       resultsSectionHeight: null,
       dialogHeight: null,
       tags: [],
-      loading: false,
-      newTagIsVisible: false,
-      colorPickerIsVisible: false,
-      newTagName: '',
-      newTagColor: '',
-      errorNewTagNameIsBlank: false
+      loading: false
     }
   },
   computed: {
-    currentTags () { return this.$store.getters['currentSpace/tags'] || [] }
+    currentTags () {
+      return this.tagNamesInCard || this.$store.getters['currentSpace/tags'] || []
+    },
+    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' }
   },
   methods: {
+    newTagColor () {
+      if (this.isThemeDark) {
+        return randomColor({ luminosity: 'dark' })
+      } else {
+        return randomColor({ luminosity: 'light' })
+      }
+    },
     scrollIntoView () {
       this.$nextTick(() => {
         const element = this.$refs.dialog
         utils.scrollIntoView(element)
       })
     },
-    updateTagColor (tag) {
-      this.$store.dispatch('currentSpace/updateTagNameColor', tag)
-      this.tags = this.tags.map(item => {
-        if (item.tagName === tag.name) {
-          item.color = tag.color
-        }
-        return item
-      })
-    },
     selectTag (tag) {
-      this.closeDialogs()
       const tagString = `[[${tag.name}]]`
       const cardsWithTag = this.cards.filter(card => card.name.includes(tagString))
       const shouldRemove = this.cards.length === cardsWithTag.length
@@ -109,57 +86,14 @@ export default {
       const cardIds = cards.map(card => card.id)
       this.$store.dispatch('currentCards/removeResize', { cardIds })
     },
-    createNewTag () {
-      this.errorNewTagNameIsBlank = false
-      if (!this.newTagName) {
-        this.errorNewTagNameIsBlank = true
-        return
-      }
-      let tag = this.tags.find(item => item.name === this.newTagName)
-      if (tag) {
-        tag.color = this.newTagColor
-        this.updateTagColor(tag)
-      } else {
-        tag = {
-          name: this.newTagName,
-          color: this.newTagColor
-        }
-        this.$store.dispatch('currentSpace/addTag', tag)
-        this.tags.unshift(tag)
-      }
-      this.clearState()
+
+    addTag (name) {
+      let tag = this.tags.find(item => item.name === name)
+      const color = this.newTagColor()
+      tag = { name, color }
+      this.$store.dispatch('currentSpace/addTag', tag)
+      this.tags.unshift(tag)
       this.selectTag(tag)
-    },
-    toggleNewTagIsVisible () {
-      this.newTagIsVisible = !this.newTagIsVisible
-      this.newTagColor = randomColor({ luminosity: 'light' })
-      this.updateDialogHeight()
-      this.updateResultsSectionHeight()
-      if (this.newTagIsVisible) {
-        this.$nextTick(() => {
-          this.focusNewTagNameInput()
-        })
-      }
-    },
-    toggleColorPickerIsVisible () {
-      this.colorPickerIsVisible = !this.colorPickerIsVisible
-    },
-    updateNewTagColor (color) {
-      this.newTagColor = color
-    },
-    closeDialogs () {
-      this.colorPickerIsVisible = false
-    },
-    clearState () {
-      this.newTagIsVisible = false
-      this.errorNewTagNameIsBlank = false
-      this.newTagName = ''
-    },
-    focusNewTagNameInput () {
-      const element = this.$refs.newTagName
-      if (!element) { return }
-      element.focus()
-      element.setSelectionRange(0, 99999)
     },
 
     // same as Tags
@@ -214,12 +148,7 @@ export default {
         this.updateTags()
         this.updateResultsSectionHeight()
         this.scrollIntoView()
-        this.clearState()
-        this.closeDialogs()
       }
-    },
-    newTagName (value) {
-      this.errorNewTagNameIsBlank = false
     }
   }
 }
@@ -228,8 +157,7 @@ export default {
 <style lang="stylus">
 .tag-picker-style-actions
   min-height 200px
+  overflow auto
   .results-section
     min-height 158px
-  .change-color
-    margin-right 6px
 </style>

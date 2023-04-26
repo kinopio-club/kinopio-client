@@ -87,7 +87,12 @@ To update it, create the space and export it's json. Replace `hello.json` with t
 | `createdAt` | remove |
 | `updatedAt` | remove |
 | `updateHash` | remove |
+| `visits` | `0` |
+| `showInExplore` | `false` |
+| `showInExploreUpdatedAt` | `null` |
+| `isTemplate` | `false` |
 
+item `userId`s should be `euGhpBrR9eBcjKnK16C_g`
 
 ## See Also
 

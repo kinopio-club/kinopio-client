@@ -279,7 +279,8 @@ export default {
   .progress-wrap
     height 100%
     width 100%
-    padding-bottom 11px
+    padding-bottom 10px
+    margin-top -6px
     progress
       background-color var(--secondary-background)
     progress::-webkit-progress-bar

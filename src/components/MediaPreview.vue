@@ -3,29 +3,19 @@
   //- Image
   .image-preview.row(v-if="formats.image")
     a(:href="formats.image")
-      img.image(:src="formats.image")
-      .content-buttons
-        .button-wrap
-          a(:href="formats.image")
-            button
-              img.icon.visit(src="@/assets/visit.svg")
+      img.image.clickable-item(:src="formats.image" draggable="false")
   //- Video
   .video-preview.row(v-if="formats.video")
     a(:href="formats.video")
-      video.video(autoplay loop muted playsinline)
+      video.video.clickable-item(autoplay loop muted playsinline draggable="false")
         source(:src="formats.video")
-    .content-buttons
-      .button-wrap
-        a(:href="formats.video")
-          button
-            img.icon.visit(src="@/assets/visit.svg")
   //- Audio
   .row(v-if="formats.audio")
     Audio(:visible="Boolean(formats.audio)" :url="formats.audio" :normalizedName="this.card.name" :parentIsCardDetails="true")
     .content-buttons
       .button-wrap
         a(:href="formats.audio")
-          button
+          button.small-button
             img.icon.visit(src="@/assets/visit.svg")
 </template>
 
@@ -62,11 +52,7 @@ export default {
     align-items flex-start
     .image,
     .video
-      border-radius var(--small-entity-radius)
-      &:hover
-        box-shadow var(--button-hover-shadow)
-      &:active
-        box-shadow var(--hover-shadow)
+      border-radius var(--entity-radius)
 
     .audio
       width 203px
@@ -95,4 +81,6 @@ export default {
       width 100%
       position relative
 
+  .visit
+    vertical-align 2px
 </style>

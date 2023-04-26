@@ -11,6 +11,11 @@ span.tag-list(@click.left="closeDialogs")
       @selectItem="selectItem"
       :isLoading="isLoading"
     )
+    .row(v-if="addTagIsVisible")
+      button.small-button(tabindex="0" @click.stop="addTag" @touchend.stop="addTag" @keyup.enter="addTag")
+        img.icon(src="@/assets/add.svg")
+        span New Tag
+
     ul.results-list
       template(v-for="tag in tagsFiltered" :key="tag.id")
         li(
@@ -45,7 +50,8 @@ export default {
     parentIsPinned: Boolean,
     shouldEmitSelectTag: Boolean,
     currentTags: Array,
-    positionTagsOnLeftSide: Boolean
+    positionTagsOnLeftSide: Boolean,
+    canAddTag: Boolean
   },
   data () {
     return {
@@ -64,9 +70,22 @@ export default {
       } else {
         return this.tags
       }
+    },
+    firstResultName () {
+      if (!this.tagsFiltered.length) { return }
+      return this.tagsFiltered[0].name
+    },
+    addTagIsVisible () {
+      if (!this.canAddTag) { return }
+      if (this.filter === this.firstResultName) { return }
+      return Boolean(this.filter)
     }
   },
   methods: {
+    addTag () {
+      this.$emit('addTag', this.filter)
+      this.updateFilter('')
+    },
     tagIsActive (tag) {
       const isTagDetails = this.tagDetailsTag.name === tag.name
       let isCurrentTag

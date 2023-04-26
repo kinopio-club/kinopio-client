@@ -10,31 +10,12 @@
               img.icon(src="@/assets/add.svg")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
             AddToInbox(:visible="addToInboxIsVisible")
-          .button-wrap
-            .segmented-buttons
-              //- Explore
-              button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
-                img.icon.sunglasses(src="@/assets/sunglasses.svg")
-                span Explore
-                span(v-if="unreadExploreSpacesLength") &nbsp;{{ unreadExploreSpacesLength }}
-              // Live
-              button(@click.left="toggleLiveIsVisible" :class="{ active: liveIsVisible}")
-                img.icon.camera(src="@/assets/camera.svg")
-                span(v-if="liveSpaces.length") {{ liveSpaces.length }}
-            Explore(:visible="exploreIsVisible" @preloadedSpaces="exploreSpaces")
-            Live(:visible="liveIsVisible" :spaces="liveSpaces" :loading="isLoadingLiveSpaces")
-          .button-wrap
-            button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-              img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-              img.icon(v-else src="@/assets/heart-empty.svg")
 
   .right(:class="{'is-embed': isEmbedMode, 'hidden': isHidden}" v-if="!isMobileOrTouch")
     SpaceZoom
 </template>
 
 <script>
-import Explore from '@/components/dialogs/Explore.vue'
-import Live from '@/components/dialogs/Live.vue'
 import AddToInbox from '@/components/dialogs/AddToInbox.vue'
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
@@ -42,10 +23,6 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 import { mapState, mapGetters } from 'vuex'
-
-import dayjs from 'dayjs'
-
-let updateLiveSpacesIntervalTimer
 
 const fadeOutDuration = 10
 const hiddenDuration = 20
@@ -55,8 +32,6 @@ let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePosition
 export default {
   name: 'Footer',
   components: {
-    Explore,
-    Live,
     Notifications,
     Loader,
     SpaceZoom,
@@ -68,14 +43,9 @@ export default {
   },
   data () {
     return {
-      exploreIsVisible: false,
-      liveIsVisible: false,
       position: {},
-      liveSpaces: [],
-      isLoadingLiveSpaces: true,
       isFadingOut: false,
       isHidden: false,
-      exploreSpaces: [],
       addToInboxIsVisible: false,
       userHasInbox: false
     }
@@ -92,20 +62,13 @@ export default {
         this.addToInboxIsVisible = true
       } else if (mutation.type === 'triggerCheckIfUseHasInboxSpace') {
         this.updateUserHasInbox()
-      } else if (mutation.type === 'triggerShowExplore') {
-        this.exploreIsVisible = true
       }
     })
     window.addEventListener('scroll', this.updatePosition)
-    window.addEventListener('online', this.updateLiveSpaces)
     this.updatePosition()
-    this.updateLiveSpaces()
-    this.updateExploreSpaces()
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updatePosition)
-    window.removeEventListener('online', this.updateLiveSpaces)
-    clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
     ...mapState([
@@ -150,100 +113,22 @@ export default {
     isMobileStandalone () {
       return utils.isMobile() && navigator.standalone // is homescreen app
     },
-    unreadExploreSpacesLength () {
-      let readDate = this.currentUser.showInExploreUpdatedAt
-      if (!readDate) { return '20+' }
-      readDate = dayjs(readDate)
-      const unreadSpaces = this.exploreSpaces.filter(space => {
-        const spaceDate = dayjs(space.showInExploreUpdatedAt)
-        const delta = readDate.diff(spaceDate, 'second')
-        return delta < 0
-      })
-      return unreadSpaces.length
-    },
     isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] }
   },
   methods: {
-    toggleIsFavoriteSpace () {
-      const currentSpace = this.$store.state.currentSpace
-      if (this.isFavoriteSpace) {
-        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
-      } else {
-        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
-      }
-    },
-    closeDialogs (exclude) {
-      this.exploreIsVisible = false
-      this.liveIsVisible = false
+    closeDialogs () {
       this.addToInboxIsVisible = false
-    },
-    toggleExploreIsVisible () {
-      const isVisible = this.exploreIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.exploreIsVisible = !isVisible
-    },
-    toggleLiveIsVisible () {
-      const isVisible = this.liveIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.liveIsVisible = !isVisible
-      if (this.liveIsVisible) {
-        this.updateLiveSpaces()
-      }
     },
     toggleAddToInboxIsVisible () {
       const isVisible = this.addToInboxIsVisible
       this.$store.dispatch('closeAllDialogs')
       this.addToInboxIsVisible = !isVisible
     },
-    async updateLiveSpaces () {
-      this.isLoadingLiveSpaces = true
-      let spaces = await this.$store.dispatch('api/getLiveSpaces')
-      if (!spaces || !spaces.length) {
-        this.isLoadingLiveSpaces = false
-        return
-      }
-      spaces = spaces.filter(space => space.user.id !== this.currentUser.id)
-      spaces = this.normalizeLiveSpaces(spaces)
-      this.liveSpaces = spaces
-      this.isLoadingLiveSpaces = false
-    },
-    normalizeLiveSpaces (spaces) {
-      let normalizedSpaces = []
-      spaces = spaces.map(space => {
-        space.otherUsers = []
-        return space
-      })
-      spaces.forEach(space => {
-        const spaceExists = normalizedSpaces.find(normalizedSpace => normalizedSpace.id === space.id)
-        if (spaceExists) {
-          // update otherUsers
-          normalizedSpaces = normalizedSpaces.map(normalizedSpace => {
-            if (normalizedSpace.id === space.id) {
-              normalizedSpace.otherUsers.push(space.user)
-            }
-            return normalizedSpace
-          })
-        } else {
-          normalizedSpaces.push(space)
-        }
-      })
-      return normalizedSpaces
-    },
     async updateUserHasInbox () {
       const currentUserIsSignedIn = this['currentUser/isSignedIn']
       if (!currentUserIsSignedIn) { return }
       const inboxSpace = await this.$store.dispatch('currentUser/inboxSpace')
       this.userHasInbox = Boolean(inboxSpace)
-    },
-
-    // preload explore spaces
-
-    async updateExploreSpaces () {
-      try {
-        this.exploreSpaces = await this.$store.dispatch('api/getExploreSpaces')
-      } catch (error) {
-        console.warn('🚑 updateExploreSpaces', error)
-      }
     },
 
     // hide

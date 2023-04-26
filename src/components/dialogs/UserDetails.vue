@@ -45,7 +45,10 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
         p
           .badge.info $6/mo, $60/yr
         a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
-          button Help →
+          button
+            span Help{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
+
       .row(v-if="spaceUserIsUpgraded && !currentUserIsUpgraded")
         .badge.status
           p

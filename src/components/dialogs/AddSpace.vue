@@ -15,13 +15,6 @@ dialog.add-space.narrow(
         button.success(@click="addSpace")
           img.icon(src="@/assets/add.svg")
           span New Space
-        button(@click.left.stop="toggleEditNewSpaceIsVisible" :class="{ active: editNewSpaceIsVisible }")
-          img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
-    //- Space Settings
-    .row(v-if="editNewSpaceIsVisible")
-      label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
-        input(type="checkbox" v-model="newSpacesAreBlank")
-        span New Spaces Are Blank
     //- Add Journal
     .row
       .segmented-buttons
@@ -96,7 +89,6 @@ export default {
     return {
       moonPhase: {},
       editPromptsIsVisible: false,
-      editNewSpaceIsVisible: false,
       urlIsCopied: false,
       promptPickerPosition: {
         left: 80,
@@ -109,8 +101,7 @@ export default {
   },
   computed: {
     userPrompts () { return this.$store.state.currentUser.journalPrompts },
-    currentUserId () { return this.$store.state.currentUser.id },
-    newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank }
+    currentUserId () { return this.$store.state.currentUser.id }
   },
   methods: {
     showScreenIsShort (value) {
@@ -157,22 +148,12 @@ export default {
       this.$store.dispatch('currentSpace/addInboxSpace')
       this.$store.dispatch('currentSpace/updateSpacePageSize')
     },
-    toggleNewSpacesAreBlank () {
-      const value = !this.newSpacesAreBlank
-      this.$store.dispatch('currentUser/newSpacesAreBlank', value)
-    },
-    toggleEditNewSpaceIsVisible () {
-      const value = !this.editNewSpaceIsVisible
-      this.closeAll()
-      this.editNewSpaceIsVisible = value
-    },
     toggleEditPromptsIsVisible () {
       const value = !this.editPromptsIsVisible
       this.closeAll()
       this.editPromptsIsVisible = value
     },
     closeAll () {
-      this.editNewSpaceIsVisible = false
       this.editPromptsIsVisible = false
       this.urlIsCopied = false
     },

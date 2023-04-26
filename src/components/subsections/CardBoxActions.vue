@@ -13,7 +13,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
     .button-wrap(v-if="isCards")
       button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: tagPickerIsVisible }")
         span Tag
-      TagPickerStyleActions(:visible="tagPickerIsVisible" :cards="cards")
+      TagPickerStyleActions(:visible="tagPickerIsVisible" :cards="cards" :tagNamesInCard="tagNamesInCard")
     //- Frame
     .button-wrap(v-if="isCards")
       button(:disabled="!canEditAll" @click.left.stop="toggleFramePickerIsVisible" :class="{ active : framePickerIsVisible || isFrames }")
@@ -73,6 +73,7 @@ export default {
     visible: Boolean,
     isDisabled: Boolean,
     colorIsHidden: Boolean,
+    tagsInCard: Array,
     cards: {
       type: Array,
       default (value) {
@@ -111,6 +112,10 @@ export default {
     }
   },
   computed: {
+    tagNamesInCard () {
+      if (!this.tagsInCard) { return }
+      return this.tagsInCard.map(tag => tag.name)
+    },
     isCards () { return Boolean(this.cards.length) },
     isSingleCard () { return this.cards.length === 1 && !this.isBoxes },
     isBoxes () { return Boolean(this.boxes.length) },

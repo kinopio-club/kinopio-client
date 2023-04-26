@@ -40,7 +40,9 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   section(v-if="signUpVisible")
     .button-wrap
       a(href="https://help.kinopio.club/posts/privacy-policy")
-        button Privacy Policy and TOS →
+        button
+          span Privacy Policy and TOS{{' '}}
+          img.icon.visit(src="@/assets/visit.svg")
 
   //- Forgot Password
   section.forgot-password(v-else)
