@@ -41,9 +41,6 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
         .button-wrap
           button(@click="togglePricingIsVisible")
             span Pricing
-        .button-wrap
-          button.variable-length-content(@click="triggerEarnCreditsIsVisible")
-            span Earn Credits
 
       //- Unlimited cards from member
       .row(v-if="spaceUserIsUpgraded && !currentUserIsUpgraded")
@@ -244,10 +241,6 @@ export default {
       const value = !this.pricingIsVisible
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('pricingIsVisible', value)
-    },
-    triggerEarnCreditsIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerEarnCreditsIsVisible')
     },
     toggleIsFavoriteUser () {
       if (this.isFavoriteUser) {

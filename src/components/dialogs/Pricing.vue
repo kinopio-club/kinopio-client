@@ -1,6 +1,6 @@
 <script setup>
 import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
-import EducationDiscount from '@/components/EducationDiscount.vue'
+import DiscountRow from '@/components/DiscountRow.vue'
 
 import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
 import { useStore } from 'vuex'
@@ -16,7 +16,7 @@ const props = defineProps({
 dialog.narrow.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     p Kinopio is free for 100 cards, afterwards it's $6/month or $60/year
-    EducationDiscount()
+    DiscountRow()
     ReferredNewUserCredits()
     table
       tbody

@@ -3,20 +3,35 @@ import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, ne
 import { useStore } from 'vuex'
 const store = useStore()
 
+// earn credits
+
+const props = defineProps({
+  earnCreditsIsVisible: Boolean
+})
+const triggerEarnCreditsIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerEarnCreditsIsVisible')
+}
+
+// student info
+
 const state = reactive({
   descriptionIsVisible: false
 })
-
 const toggleDescriptionIsVisible = () => {
   state.descriptionIsVisible = !state.descriptionIsVisible
 }
+
 </script>
 
 <template lang="pug">
-.row.education-discount
+.row.discount-row
+  .button-wrap
+    button(@click="triggerEarnCreditsIsVisible")
+      span Earn Credits
   .button-wrap
     button(@click="toggleDescriptionIsVisible" :class="{ active: state.descriptionIsVisible }")
-      span Student Discount
+      span Student Info
 .row.badge.secondary(v-if="state.descriptionIsVisible")
   p If you're a student or teacher,{{' '}}
     a(href="mailto:hi@kinopioclub?subject=Education Discount") email me
@@ -24,7 +39,7 @@ const toggleDescriptionIsVisible = () => {
 </template>
 
 <style lang="stylus">
-.education-discount
+.discount-row
   margin-top 10px
   display inline-block
 </style>

@@ -8,7 +8,7 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop @keydown.sto
         button(:class="{active: priceIsMonthly}" @click.left="togglePriceIsMonthly(true)") $6/month
         button(:class="{active: !priceIsMonthly}" @click.left="togglePriceIsMonthly(false)") $60/year
           .badge.label-badge -17%
-    EducationDiscount
+    DiscountRow
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
@@ -22,7 +22,7 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop @keydown.sto
 
 <script>
 import UpgradeUserSubscribe from '@/components/UpgradeUserSubscribe.vue'
-import EducationDiscount from '@/components/EducationDiscount.vue'
+import DiscountRow from '@/components/DiscountRow.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
@@ -31,7 +31,7 @@ export default {
   components: {
     Loader,
     UpgradeUserSubscribe,
-    EducationDiscount
+    DiscountRow
   },
   props: {
     visible: Boolean
