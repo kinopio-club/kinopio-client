@@ -13,17 +13,18 @@ defineProps({
 const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCount || 0)
 const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
 
-const triggerUpgradeUserIsVisible = () => {
+const togglePricingIsVisible = () => {
+  const value = !store.state.pricingIsVisible
   store.dispatch('closeAllDialogs')
-  store.commit('triggerUpgradeUserIsVisible')
+  store.commit('pricingIsVisible', value)
 }
 </script>
 
 <template lang="pug">
 .cards-created-progress
   .info
-    p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards added
-    button.small-button(@click="triggerUpgradeUserIsVisible") Upgrade
+    p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
+    button.small-button(@click="togglePricingIsVisible") Pricing
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
 
 </template>

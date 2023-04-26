@@ -53,10 +53,9 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
   section(v-if="visible")
     p Earn Credits
   section
-    .row
-      p
-        span when someone you refer, or invite to edit, signs up. You'll both earn a{{' '}}
-        span.badge.success ${{consts.referralCreditAmount}} credit
+    p
+      span when someone you refer, or invite to edit, signs up. You'll both earn a{{' '}}
+      span.badge.success ${{consts.referralCreditAmount}} credit
     .row
       p There's no limit on the amount of credits you can earn.
     template(v-if="currentUserIsSignedIn")

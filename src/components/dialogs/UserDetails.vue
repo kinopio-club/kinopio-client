@@ -39,8 +39,8 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
         CardsCreatedProgress
       .row(v-if="!isAppStoreMode")
         .button-wrap
-          button(@click="togglePricingIsVisible")
-            span Pricing
+          button(@click="triggerUpgradeUserIsVisible")
+            span Upgrade for Unlimited
 
       //- Unlimited cards from member
       .row(v-if="spaceUserIsUpgraded && !currentUserIsUpgraded")
@@ -56,7 +56,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
             img.icon.settings(src="@/assets/settings.svg")
             span Settings
           UserSettings(:visible="userSettingsIsVisible" @removeUser="signOut")
-        button(v-if="currentUserIsSignedIn" @click.left="signOut")
+        button.danger(v-if="currentUserIsSignedIn" @click.left="signOut")
           img.icon.sign-out(src="@/assets/sign-out.svg")
           span Sign Out
         button(v-else @click.left="triggerSignUpOrInIsVisible")
@@ -231,16 +231,12 @@ export default {
         return collaborator.id === this.user.id
       }))
     },
-    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    pricingIsVisible () {
-      return this.$store.state.pricingIsVisible
-    }
+    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() }
   },
   methods: {
-    togglePricingIsVisible () {
-      const value = !this.pricingIsVisible
+    triggerUpgradeUserIsVisible () {
       this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('pricingIsVisible', value)
+      this.$store.commit('triggerUpgradeUserIsVisible')
     },
     toggleIsFavoriteUser () {
       if (this.isFavoriteUser) {
