@@ -33,31 +33,24 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       UserBadges(:user="user")
 
-    //- Unlimited cards from member
+    //- n cards created
     section.upgrade(v-if="!currentUserIsUpgraded")
       .row
         CardsCreatedProgress
-      .row
-        .button-wrap(v-if="!isAddPage")
-          button(@click.left.stop="triggerUpgradeUserIsVisible")
-            span Upgrade for Unlimited
       .row(v-if="!isAppStoreMode")
-        p
-          .badge.info $6/mo, $60/yr
-        a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
-          button
-            span Help{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
+        .button-wrap
+          button(@click="togglePricingIsVisible")
+            span Pricing
+        .button-wrap
+          button.variable-length-content(@click="triggerEarnCreditsIsVisible")
+            span Earn Credits
 
+      //- Unlimited cards from member
       .row(v-if="spaceUserIsUpgraded && !currentUserIsUpgraded")
         .badge.status
           p
             UserLabelInline(:user="spaceUser")
             span is upgraded, so cards you create in this space won't increase your free card count
-      .row
-        .button-wrap
-          button.variable-length-content(@click="triggerEarnCreditsIsVisible")
-            span Earn Credits
 
     section(v-if="!isAddPage")
       .row
@@ -241,9 +234,17 @@ export default {
         return collaborator.id === this.user.id
       }))
     },
-    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() }
+    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    pricingIsVisible () {
+      return this.$store.state.pricingIsVisible
+    }
   },
   methods: {
+    togglePricingIsVisible () {
+      const value = !this.pricingIsVisible
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('pricingIsVisible', value)
+    },
     triggerEarnCreditsIsVisible () {
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerEarnCreditsIsVisible')
@@ -259,10 +260,6 @@ export default {
       const isVisible = this.userSettingsIsVisible
       this.closeDialogs()
       this.userSettingsIsVisible = !isVisible
-    },
-    triggerUpgradeUserIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerUpgradeUserIsVisible')
     },
     triggerDonateIsVisible () {
       this.$store.dispatch('closeAllDialogs')

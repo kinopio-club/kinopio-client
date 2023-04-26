@@ -48,6 +48,7 @@ const store = createStore({
     isAppStoreMode: false,
     disableViewportOptimizations: false, // for urlbox
     isPresentationMode: false,
+    pricingIsVisible: false,
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -288,6 +289,7 @@ const store = createStore({
       state.boxesWereDragged = false
       state.userDetailsIsVisible = false
       state.cardListItemOptionsIsVisible = false
+      state.pricingIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -432,6 +434,10 @@ const store = createStore({
     isPresentationMode: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.isPresentationMode = value
+    },
+    pricingIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.pricingIsVisible = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

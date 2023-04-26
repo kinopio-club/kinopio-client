@@ -47,7 +47,6 @@ dialog.narrow.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialo
 
 <style lang="stylus">
 .pricing
-  top calc(100% - 8px)
   left initial
   right 8px
   max-height calc(100vh - 25px)

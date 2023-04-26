@@ -105,6 +105,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
         .top-controls
           SpaceUsers
           UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
+          Pricing(:visible="pricingIsVisible")
           Donate(:visible="donateIsVisible")
           ControlsSettings(:visible="controlsSettingsIsVisible")
           //- Share
@@ -140,7 +141,6 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           .button-wrap(v-if="!currentUserIsSignedIn")
             button(@click.left.stop="togglePricingIsVisible" :class="{active : pricingIsVisible}")
               span Pricing
-            Pricing(:visible="pricingIsVisible")
 
   Toolbar(:visible="isSpace")
   SelectAllBelow
@@ -252,7 +252,6 @@ export default {
       sidebarIsVisible: false,
       donateIsVisible: false,
       importIsVisible: false,
-      pricingIsVisible: false,
       earnCreditsIsVisible: false
     }
   },
@@ -423,6 +422,9 @@ export default {
     },
     controlsSettingsIsVisible () {
       return this.$store.state.controlsSettingsIsPinned
+    },
+    pricingIsVisible () {
+      return this.$store.state.pricingIsVisible
     }
   },
   methods: {
@@ -492,7 +494,6 @@ export default {
       this.templatesIsVisible = false
       this.earnCreditsIsVisible = false
       this.importIsVisible = false
-      this.pricingIsVisible = false
       if (!this.spaceDetailsIsPinned) {
         this.spaceDetailsIsVisible = false
       }
@@ -501,9 +502,9 @@ export default {
       }
     },
     togglePricingIsVisible () {
-      const isVisible = this.pricingIsVisible
+      const value = !this.pricingIsVisible
       this.$store.dispatch('closeAllDialogs')
-      this.pricingIsVisible = !isVisible
+      this.$store.commit('pricingIsVisible', value)
     },
     toggleAboutIsVisible () {
       const isVisible = this.aboutIsVisible

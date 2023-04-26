@@ -13,6 +13,8 @@
     img.icon(src="@/assets/brush.svg")
     img.icon(src="@/assets/heart.svg")
     img.icon(src="@/assets/heart-empty.svg")
+    img.icon(src="@/assets/light.svg")
+    img.icon(src="@/assets/dark.svg")
 
     //- logo
     img.icon(src="@/assets/logo-hover.png")
