@@ -107,6 +107,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
           Donate(:visible="donateIsVisible")
           ControlsSettings(:visible="controlsSettingsIsVisible")
+          UserSettings
           //- Share
           .button-wrap
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
@@ -179,6 +180,7 @@ import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 import ExploreRow from '@/components/ExploreRow.vue'
+import UserSettings from '@/components/dialogs/UserSettings.vue'
 
 import { mapState, mapGetters } from 'vuex'
 import sortBy from 'lodash-es/sortBy'
@@ -222,7 +224,8 @@ export default {
     EarnCredits,
     SpaceTodayJournalBadge,
     ControlsSettings,
-    ExploreRow
+    ExploreRow,
+    UserSettings
   },
   props: {
     isPinchZooming: Boolean,
@@ -343,6 +346,7 @@ export default {
     ]),
     currentSpaceIsHidden () { return this.$store.state.currentSpace.isHidden },
     kinopioDomain () { return utils.kinopioDomain() },
+    userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible },
     isVisible () {
       const contentDialogIsVisible = this.cardDetailsIsVisibleForCardId || this.connectionDetailsIsVisibleForConnectionId
       if (this.isPresentationMode) { return }

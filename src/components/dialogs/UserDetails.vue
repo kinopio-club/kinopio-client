@@ -65,7 +65,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
           button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
             img.icon.settings(src="@/assets/settings.svg")
             span Settings
-          UserSettings(:visible="userSettingsIsVisible" @removeUser="signOut")
+
         button(v-if="currentUserIsSignedIn" @click.left="signOut")
           img.icon.sign-out(src="@/assets/sign-out.svg")
           span Sign Out
@@ -107,7 +107,6 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
 
 <script>
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import UserBadges from '@/components/UserBadges.vue'
@@ -124,7 +123,6 @@ export default {
   name: 'UserDetails',
   components: {
     ColorPicker,
-    UserSettings,
     User,
     Loader,
     UserBadges,
@@ -142,7 +140,6 @@ export default {
   data () {
     return {
       colorPickerIsVisible: false,
-      userSettingsIsVisible: false,
       loadingUserspaces: false,
       spacePickerIsVisible: false,
       userSpaces: [],
@@ -241,7 +238,8 @@ export default {
         return collaborator.id === this.user.id
       }))
     },
-    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() }
+    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible }
   },
   methods: {
     triggerEarnCreditsIsVisible () {
@@ -256,9 +254,9 @@ export default {
       }
     },
     toggleUserSettingsIsVisible () {
-      const isVisible = this.userSettingsIsVisible
-      this.closeDialogs()
-      this.userSettingsIsVisible = !isVisible
+      const value = !this.$store.state.userSettingsIsVisible
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('userSettingsIsVisible', value)
     },
     triggerUpgradeUserIsVisible () {
       this.$store.dispatch('closeAllDialogs')
@@ -275,7 +273,6 @@ export default {
     },
     closeDialogs () {
       this.colorPickerIsVisible = false
-      this.userSettingsIsVisible = false
       this.spacePickerIsVisible = false
     },
     updateUserColor (newValue) {
