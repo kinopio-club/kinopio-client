@@ -30,8 +30,8 @@ section.filters
         button.small-button(:class="{active: dialogIsPinned}")
           img.icon.pin.right-pin(src="@/assets/pin.svg")
       //- More Filters
-      .button-wrap
-        button(:class="{active: moreSearchFiltersVisible || totalFiltersActive, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
+      .button-wrap.more-filters-button-wrap
+        button.small-button(:class="{active: moreSearchFiltersVisible || totalFiltersActive, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
           img.icon(src="@/assets/filter.svg")
           span.badge.info.filter-is-active(v-if="totalFiltersActive")
         MoreSearchFilters(:visible="moreSearchFiltersVisible")
@@ -142,4 +142,6 @@ export default {
       margin-bottom 9px
     .button-wrap:last-child
       margin 0
+  .more-filters-button-wrap
+    margin-top 5px !important
 </style>

@@ -11,6 +11,9 @@
     img.icon(src="@/assets/center-horizontally.svg")
     img.icon(src="@/assets/distribute-horizontally.svg")
     img.icon(src="@/assets/brush.svg")
+    img.icon(src="@/assets/heart.svg")
+    img.icon(src="@/assets/heart-empty.svg")
+
     //- logo
     img.icon(src="@/assets/logo-hover.png")
     img.icon(src="@/assets/logo-active.png")

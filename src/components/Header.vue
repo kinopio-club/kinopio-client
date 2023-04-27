@@ -12,7 +12,8 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
         .logo
           .logo-image
         MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-        span {{currentSpaceName}} →
+        span {{currentSpaceName}}{{' '}}
+        img.icon.visit(src="@/assets/visit.svg")
     .right
       SpaceUsers
 
@@ -76,6 +77,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               span {{currentSpaceName}}
               PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
               img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
+              img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
             SpaceDetails(:visible="spaceDetailsIsVisible")
             ImportArenaChannel(:visible="importArenaChannelIsVisible")
             SpaceDetailsInfo(:visible="spaceDetailsInfoIsVisible")
@@ -133,8 +135,9 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
               img.icon.right-arrow(src="@/assets/down-arrow.svg")
             Sidebar(:visible="sidebarIsVisible")
-        .row.bottom-controls(v-if="!currentUserIsSignedIn")
-          .button-wrap
+        .row.bottom-controls
+          ExploreRow
+          .button-wrap(v-if="!currentUserIsSignedIn")
             button(@click.left.stop="togglePricingIsVisible" :class="{active : pricingIsVisible}")
               span Pricing
             Pricing(:visible="pricingIsVisible")
@@ -175,6 +178,7 @@ import Pricing from '@/components/dialogs/Pricing.vue'
 import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
+import ExploreRow from '@/components/ExploreRow.vue'
 
 import { mapState, mapGetters } from 'vuex'
 import sortBy from 'lodash-es/sortBy'
@@ -217,7 +221,8 @@ export default {
     Pricing,
     EarnCredits,
     SpaceTodayJournalBadge,
-    ControlsSettings
+    ControlsSettings,
+    ExploreRow
   },
   props: {
     isPinchZooming: Boolean,
@@ -336,6 +341,7 @@ export default {
       'currentUser/isSignedIn',
       'currentUser/totalFiltersActive'
     ]),
+    currentSpaceIsHidden () { return this.$store.state.currentSpace.isHidden },
     kinopioDomain () { return utils.kinopioDomain() },
     isVisible () {
       const contentDialogIsVisible = this.cardDetailsIsVisibleForCardId || this.connectionDetailsIsVisibleForConnectionId

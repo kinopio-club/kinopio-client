@@ -50,14 +50,14 @@ export default {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeightFromHeader(element)
+        this.dialogHeight = utils.elementHeight(element)
       })
     },
     updateResultsSectionHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+        this.resultsSectionHeight = utils.elementHeight(element, true)
       })
     }
   },
@@ -74,6 +74,8 @@ export default {
 
 <style lang="stylus">
 .live
+  left initial
+  right 8px
   max-height calc(100vh - 100px)
   .camera
     vertical-align baseline

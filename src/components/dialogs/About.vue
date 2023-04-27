@@ -1,17 +1,26 @@
 <template lang="pug">
 dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :class="{ overflow: !childDialogIsVisible }")
   section
-    p About Kinopio
+    .row.title-row
+      p About Kinopio
+      .row
+        button.small-button(@click.left="refreshBrowser" title="Refresh")
+          img.refresh.icon(src="@/assets/refresh.svg")
+
   section
     .row
       p Thinking canvas for building ideas and solving problems
     .row
       .button-wrap
         a(href="https://help.kinopio.club/about")
-          button About →
+          button
+            span About{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
         a(href="https://help.kinopio.club")
-          button Help →
+          button
+            span Help{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
 
     .row
       .button-wrap
@@ -23,7 +32,8 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
     //-   a(href="https://kinopio.club/pop-up-shop-u9XxpuIzz2_LvQUAayl65")
     //-     button
     //-       img.icon(src="@/assets/sticker.svg")
-    //-       span Pop Up Shop →
+    //-       span Pop Up Shop{{' '}}
+              //- img.icon.visit(src="@/assets/visit.svg")
   section(v-if="!isAddPage")
     .row
       .button-wrap
@@ -38,7 +48,8 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
     .row
       a(href="https://help.kinopio.club/posts/extensions/")
         button
-          span Browser Extensions →
+          span Browser Extensions{{' '}}
+          img.icon.visit(src="@/assets/visit.svg")
 
   section
     .row
@@ -46,18 +57,25 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
     .row
       .button-wrap
         a(href="https://discord.gg/h2sR45Nby8")
-          button Discord →
+          button
+            span Discord{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
         a(href="https://club.kinopio.club")
           button
-            span Forum →
+            span Forum{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
     .row
       .button-wrap
         a(href="https://twitter.com/kinopioclub")
-          button Twitter →
+          button
+            span Twitter{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
         a(href="https://help.kinopio.club/api/")
-          button API →
+          button
+            span API{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
 
     //- video.about-video(autoplay loop muted playsinline)
     //-   source(src="https://kinopio-updates.us-east-1.linodeobjects.com/anime-typing.mp4")
@@ -127,6 +145,9 @@ export default {
     }
   },
   methods: {
+    refreshBrowser () {
+      window.location.reload()
+    },
     toggleWhatsNewIsVisible () {
       const isVisible = this.whatsNewIsVisible
       this.closeDialogs()
