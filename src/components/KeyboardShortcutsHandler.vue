@@ -206,6 +206,7 @@ export default {
       } else if (key === 'p' && isSpaceScope) {
         const value = !this.$store.state.isPresentationMode
         this.$store.commit('isPresentationMode', value)
+        event.preventDefault()
       // Pan
       } else if (key === ' ' && isSpaceScope) {
         event.preventDefault()
