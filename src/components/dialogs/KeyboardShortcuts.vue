@@ -108,10 +108,10 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
             img.icon(src="@/assets/constrain-axis.svg")
             span Constrain Card Move to Axis
           .badge.keyboard-shortcut Shift-Drag Card
-      article
-        .row
-          .badge.title Focus Nearest Card
-          .badge.keyboard-shortcut Arrow(→↑←↓)
+      //- article
+      //-   .row
+      //-     .badge.title Focus Nearest Card
+      //-     .badge.keyboard-shortcut Arrow(→↑←↓)
       article
         .row
           .badge.title
