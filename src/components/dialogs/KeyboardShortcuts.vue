@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}" @click="closeDialogs")
+dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="dialog" @click="closeDialogs")
   section
     .row
       p Keyboard Shortcuts
@@ -263,16 +263,8 @@ export default {
   components: {
     UserLabelInline
   },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
-      }
-    })
-  },
   data () {
     return {
-      dialogHeight: null,
       selectedCategory: 'all'
     }
   },
@@ -314,13 +306,6 @@ export default {
       const color = this.categoryByName(categoryName).color
       return color
     },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeightFromHeader(element)
-      })
-    },
     closeDialogs () {
       // this.keyboardShortcutsCategoriesIsVisible = false
     }
@@ -328,7 +313,6 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        this.updateDialogHeight()
         this.selectedCategory = 'all'
       }
     }

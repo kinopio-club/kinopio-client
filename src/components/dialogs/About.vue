@@ -36,21 +36,20 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
               //- img.icon.visit(src="@/assets/visit.svg")
   section(v-if="!isAddPage")
     .row
-      .button-wrap
-        button(@click.left.stop="toggleKeyboardShortcutsIsVisible")
-          .badge.keyboard-shortcut.badge-in-button ?
-          span Keyboard Shortcuts
+      a(href="https://help.kinopio.club/posts/extensions/")
+        button
+          span Browser Extensions{{' '}}
+          img.icon.visit(src="@/assets/visit.svg")
     .row
       .button-wrap
         button(@click.left.stop="toggleAppsIsVisible" :class="{active: appsIsVisible}")
           span Desktop and Mobile Apps
         Apps(:visible="appsIsVisible")
     .row
-      a(href="https://help.kinopio.club/posts/extensions/")
-        button
-          span Browser Extensions{{' '}}
-          img.icon.visit(src="@/assets/visit.svg")
-
+      .button-wrap
+        button(@click.left.stop="toggleKeyboardShortcutsIsVisible")
+          .badge.keyboard-shortcut.badge-in-button ?
+          span Keyboard Shortcuts
   section
     .row
       p Kinopio is made possible by people like you
