@@ -60,7 +60,7 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
       p There's no limit on the amount of credits you can earn.
     template(v-if="currentUserIsSignedIn")
       section.subsection
-        p Share Kinopio with your friends
+        p Share Kinopio with friends
         button(@click.left="copyUrl")
           img.icon.copy(src="@/assets/copy.svg")
           span Copy Referral URL
