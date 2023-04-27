@@ -17,6 +17,11 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             span About{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
+        a(href="https://help.kinopio.club/api/")
+          button
+            span API{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
+      .button-wrap
         a(href="https://help.kinopio.club")
           button
             span Help{{' '}}
@@ -36,24 +41,23 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
               //- img.icon.visit(src="@/assets/visit.svg")
   section(v-if="!isAddPage")
     .row
-      .button-wrap
-        button(@click.left.stop="toggleKeyboardShortcutsIsVisible")
-          .badge.keyboard-shortcut.badge-in-button ?
-          span Keyboard Shortcuts
+      a(href="https://help.kinopio.club/posts/extensions/")
+        button
+          span Browser Extensions{{' '}}
+          img.icon.visit(src="@/assets/visit.svg")
     .row
       .button-wrap
         button(@click.left.stop="toggleAppsIsVisible" :class="{active: appsIsVisible}")
           span Desktop and Mobile Apps
         Apps(:visible="appsIsVisible")
     .row
-      a(href="https://help.kinopio.club/posts/extensions/")
-        button
-          span Browser Extensions{{' '}}
-          img.icon.visit(src="@/assets/visit.svg")
-
+      .button-wrap
+        button(@click.left.stop="toggleKeyboardShortcutsIsVisible")
+          .badge.keyboard-shortcut.badge-in-button ?
+          span Keyboard Shortcuts
   section
     .row
-      p Kinopio is made possible by people like you
+      p 100% funded and made possible by people like you
     .row
       .button-wrap
         a(href="https://discord.gg/h2sR45Nby8")
@@ -72,13 +76,10 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             span Twitter{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
-        a(href="https://help.kinopio.club/api/")
+        a(href="https://www.instagram.com/kinopioclub")
           button
-            span API{{' '}}
+            span IG{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
-
-    //- video.about-video(autoplay loop muted playsinline)
-    //-   source(src="https://kinopio-updates.us-east-1.linodeobjects.com/anime-typing.mp4")
 
 </template>
 

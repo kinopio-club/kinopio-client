@@ -97,7 +97,6 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
 
 <script>
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import UserBadges from '@/components/UserBadges.vue'
@@ -114,7 +113,6 @@ export default {
   name: 'UserDetails',
   components: {
     ColorPicker,
-    UserSettings,
     User,
     Loader,
     UserBadges,
@@ -132,7 +130,6 @@ export default {
   data () {
     return {
       colorPickerIsVisible: false,
-      userSettingsIsVisible: false,
       loadingUserspaces: false,
       spacePickerIsVisible: false,
       userSpaces: [],
@@ -231,7 +228,8 @@ export default {
         return collaborator.id === this.user.id
       }))
     },
-    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() }
+    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible }
   },
   methods: {
     triggerUpgradeUserIsVisible () {
@@ -246,9 +244,9 @@ export default {
       }
     },
     toggleUserSettingsIsVisible () {
-      const isVisible = this.userSettingsIsVisible
-      this.closeDialogs()
-      this.userSettingsIsVisible = !isVisible
+      const value = !this.$store.state.userSettingsIsVisible
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('userSettingsIsVisible', value)
     },
     triggerDonateIsVisible () {
       this.$store.dispatch('closeAllDialogs')
@@ -261,7 +259,6 @@ export default {
     },
     closeDialogs () {
       this.colorPickerIsVisible = false
-      this.userSettingsIsVisible = false
       this.spacePickerIsVisible = false
     },
     updateUserColor (newValue) {
