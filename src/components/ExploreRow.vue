@@ -124,7 +124,7 @@ const normalizeLiveSpaces = (spaces) => {
     //- Live
     button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible}")
       img.icon.camera(src="@/assets/camera.svg")
-      span(v-if="state.liveSpaces.length") {{ liveSpaces.length }}
+      span(v-if="state.liveSpaces.length") {{ state.liveSpaces.length }}
   Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")
   Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
 </template>
