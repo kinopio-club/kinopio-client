@@ -180,7 +180,7 @@ const store = createStore({
     // loading
     isLoadingSpace: false,
     isJoiningSpace: false, // broadcast
-    isLoadingOtherSpaces: false,
+    isLoadingOtherItems: false,
     spaceUrlToLoad: '',
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
@@ -236,7 +236,7 @@ const store = createStore({
 
     // session data
     otherUsers: [], // { id, name color }
-    otherSpaces: [], // { {user}, name, id }
+    otherItems: { spaces: [], cards: [] },
     otherTags: []
   },
   mutations: {
@@ -1149,9 +1149,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.isJoiningSpace = value
     },
-    isLoadingOtherSpaces: (state, value) => {
+    isLoadingOtherItems: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.isLoadingOtherSpaces = value
+      state.isLoadingOtherItems = value
     },
     clearSpaceCollaboratorKeys: (state) => {
       state.spaceCollaboratorKeys = []
@@ -1373,16 +1373,19 @@ const store = createStore({
       users.push(updatedUser)
       state.otherUsers = users
     },
-    updateOtherSpaces: (state, updatedSpace) => {
-      utils.typeCheck({ value: updatedSpace, type: 'object' })
-      let spaces = utils.clone(state.otherSpaces)
-      spaces = spaces.filter(space => {
-        if (space.id !== updatedSpace.id) {
-          return space
-        }
-      })
-      spaces.push(updatedSpace)
-      state.otherSpaces = spaces
+    updateOtherItems: (state, { cards, spaces }) => {
+      utils.typeCheck({ value: cards, type: 'array' })
+      utils.typeCheck({ value: spaces, type: 'array' })
+      let otherItems = utils.clone(state.otherItems)
+      if (cards) {
+        otherItems.cards = otherItems.cards.concat(cards)
+        otherItems.cards = uniqBy(otherItems.cards, 'id')
+      }
+      if (spaces) {
+        otherItems.spaces = otherItems.spaces.concat(spaces)
+        otherItems.spaces = uniqBy(otherItems.spaces, 'id')
+      }
+      state.otherItems = otherItems
     },
     otherTags: (state, remoteTags) => {
       remoteTags = uniqBy(remoteTags, 'name')
@@ -1631,8 +1634,8 @@ const store = createStore({
       return user
     },
     otherSpaceById: (state, getters) => (spaceId) => {
-      const otherSpaces = state.otherSpaces.filter(Boolean)
-      const space = otherSpaces.find(otherSpace => otherSpace.id === spaceId)
+      const otherItems = state.otherItems.filter(Boolean)
+      const space = otherItems.find(otherSpace => otherSpace.id === spaceId)
       return space
     },
     cachedOrOtherSpaceById: (state, getters) => (spaceId) => {

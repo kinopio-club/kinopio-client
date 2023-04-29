@@ -798,9 +798,20 @@ const currentCards = {
       const cards = cardIds.map(id => getters.byId(id))
       return cards
     },
-    withSpaceLinks: (state, getters) => {
-      let cards = getters.all
-      return cards.filter(card => utils.idIsValid(card.linkToSpaceId))
+    linkedItems: (state, getters) => {
+      let cardIds = []
+      let spaceIds = []
+      const cards = getters.all
+      cards.forEach(card => {
+        const cardIdIsValid = utils.idIsValid(card.linkToCardId)
+        const spaceIdIsValid = utils.idIsValid(card.linkToSpaceId)
+        if (cardIdIsValid) {
+          cardIds.push(card.linkToCardId)
+        } else if (spaceIdIsValid) {
+          spaceIds.push(card.linkToSpaceId)
+        }
+      })
+      return { cardIds, spaceIds }
     },
     withTagName: (state, getters) => (tagName) => {
       let cards = getters.all

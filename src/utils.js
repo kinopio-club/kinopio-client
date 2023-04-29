@@ -1360,21 +1360,6 @@ export default {
     remoteSpace.removedCards = removedCards
     return remoteSpace
   },
-  normalizeSpaceMetaOnly (space) {
-    let spaceMeta = {
-      id: space.id,
-      name: space.name,
-      users: space.users,
-      background: space.background,
-      backgroundTint: space.backgroundTint,
-      moonPhase: space.moonPhase,
-      url: space.url,
-      privacy: space.privacy,
-      updatedAt: space.updatedAt,
-      showInExplore: space.showInExplore
-    }
-    return spaceMeta
-  },
   AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
     return spaces.map(space => {
       let userId

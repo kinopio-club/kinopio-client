@@ -15,7 +15,6 @@ import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
 import defer from 'lodash-es/defer'
 
-let otherSpacesQueue = [] // id
 let spectatorIdleTimers = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
 
@@ -187,7 +186,7 @@ const currentSpace = {
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
 
-    // Users and otherSpaces
+    // Users
 
     updateUserPresence: (context, update) => {
       utils.typeCheck({ value: update, type: 'object' })
@@ -214,6 +213,9 @@ const currentSpace = {
         context.dispatch('updateUserPresence', newUser)
       }
     },
+
+    // Other Items
+
     updateOtherUsers: async (context) => {
       const cards = utils.clone(context.rootGetters['currentCards/all'])
       let userIds = []
@@ -239,58 +241,40 @@ const currentSpace = {
         console.warn('🚑 updateOtherUsers', error)
       }
     },
-    updateOtherSpaces: async (context, spaceId) => {
+    updateOtherItems: async (context, { cardId, spaceId }) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
-      let links
-      if (spaceId) {
-        links = [{ linkToSpaceId: spaceId }]
+      // item ids
+      let cardIds = []
+      let spaceIds = []
+      if (cardId) {
+        cardIds.push(cardId)
+      } else if (spaceId) {
+        spaceIds.push(spaceId)
       } else {
-        links = context.rootGetters['currentCards/withSpaceLinks']
+        const response = context.rootGetters['currentCards/linkedItems']
+        cardIds = response.cardIds
+        spaceIds = response.spaceIds
       }
-      if (!links.length) { return }
-      context.commit('isLoadingOtherSpaces', true, { root: true })
-      links.forEach(link => {
-        const spaceId = link.linkToSpaceId
-        context.dispatch('saveOtherSpace', { spaceId, shouldAddToQueue: true })
-      })
-      otherSpacesQueue = uniq(otherSpacesQueue)
-      let spaces = await context.dispatch('api/getSpaces', { spaceIds: otherSpacesQueue, shouldRequestRemote: true }, { root: true })
-      if (!spaces) {
-        context.commit('isLoadingOtherSpaces', false, { root: true })
+      if (!cardIds.length && !spaceIds.length) { return }
+      context.commit('isLoadingOtherItems', true, { root: true })
+      // get items
+      const data = await context.dispatch('api/getOtherItems', { spaceIds, cardIds }, { root: true })
+      if (!data) {
+        context.commit('isLoadingOtherItems', false, { root: true })
         return
       }
-      spaces = spaces.filter(space => space.id)
-      context.commit('isLoadingOtherSpaces', false, { root: true })
-      spaces.forEach(space => {
-        space = utils.normalizeSpaceMetaOnly(space)
-        context.commit('updateOtherSpaces', space, { root: true })
-        const linkedCard = links.find(link => link.linkToSpaceId === space.id)
+      // update cardsInCurrentSpace
+      context.commit('updateOtherItems', data, { root: true })
+      const cardsInCurrentSpace = context.rootGetters['currentCards/all']
+      data.spaces.forEach(space => {
+        const linkedCard = cardsInCurrentSpace.find(card => card.linkToSpaceId === space.id)
         if (!linkedCard) { return }
         nextTick(() => {
           context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace }, { root: true })
           context.dispatch('currentCards/updateDimensions', { cardId: linkedCard.id }, { root: true })
+          context.commit('isLoadingOtherItems', false, { root: true })
         })
       })
-      otherSpacesQueue = []
-    },
-    saveOtherSpace: async (context, { spaceId, shouldAddToQueue }) => {
-      const cachedSpace = cache.space(spaceId)
-      const spaceIsCached = Boolean(cachedSpace.id)
-      if (spaceIsCached) {
-        const space = utils.normalizeSpaceMetaOnly(cachedSpace)
-        context.commit('updateOtherSpaces', space, { root: true })
-      } else if (shouldAddToQueue) {
-        otherSpacesQueue.push(spaceId)
-      } else {
-        try {
-          const space = { id: spaceId }
-          let remoteSpace = await context.dispatch('api/getSpace', { space, shouldRequestRemote: true }, { root: true })
-          remoteSpace = utils.normalizeSpaceMetaOnly(remoteSpace)
-          context.commit('updateOtherSpaces', remoteSpace, { root: true })
-        } catch (error) {
-          console.warn('🚑 otherSpace not found', error, spaceId)
-        }
-      }
     },
 
     // Space
@@ -314,7 +298,7 @@ const currentSpace = {
         context.dispatch('restoreSpaceInChunks', { space })
         context.commit('addUserToSpace', user)
         context.dispatch('updateOtherUsers')
-        context.dispatch('updateOtherSpaces')
+        context.dispatch('updateOtherItems')
       } else {
         space.users = [context.rootState.currentUser]
         const nullCardUsers = true
@@ -708,7 +692,7 @@ const currentSpace = {
         context.dispatch('scrollCardsIntoView')
         // deferrable async tasks
         context.dispatch('updateOtherUsers')
-        context.dispatch('updateOtherSpaces')
+        context.dispatch('updateOtherItems')
         context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
         context.dispatch('checkIfShouldResetDimensions')
