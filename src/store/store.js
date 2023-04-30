@@ -1634,8 +1634,8 @@ const store = createStore({
       return user
     },
     otherSpaceById: (state, getters) => (spaceId) => {
-      const otherItems = state.otherItems.filter(Boolean)
-      const space = otherItems.find(otherSpace => otherSpace.id === spaceId)
+      const otherSpaces = state.otherItems.spaces.filter(Boolean)
+      const space = otherSpaces.find(otherSpace => otherSpace.id === spaceId)
       return space
     },
     cachedOrOtherSpaceById: (state, getters) => (spaceId) => {

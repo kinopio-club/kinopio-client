@@ -241,15 +241,20 @@ const currentSpace = {
         console.warn('🚑 updateOtherUsers', error)
       }
     },
-    updateOtherItems: async (context, { cardId, spaceId }) => {
+    updateOtherItems: async (context, options) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       // item ids
       let cardIds = []
       let spaceIds = []
-      if (cardId) {
-        cardIds.push(cardId)
-      } else if (spaceId) {
-        spaceIds.push(spaceId)
+      // param
+      if (options) {
+        const { cardId, spaceId } = options
+        if (cardId) {
+          cardIds.push(cardId)
+        } else if (spaceId) {
+          spaceIds.push(spaceId)
+        }
+      // no param
       } else {
         const response = context.rootGetters['currentCards/linkedItems']
         cardIds = response.cardIds
@@ -259,6 +264,7 @@ const currentSpace = {
       context.commit('isLoadingOtherItems', true, { root: true })
       // get items
       const data = await context.dispatch('api/getOtherItems', { spaceIds, cardIds }, { root: true })
+      console.log('👯‍♀️ otherItems', data)
       if (!data) {
         context.commit('isLoadingOtherItems', false, { root: true })
         return

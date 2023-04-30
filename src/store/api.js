@@ -448,9 +448,7 @@ const self = {
         cardIds = cardIds.slice(0, max)
         spaceIds = uniq(spaceIds)
         spaceIds = spaceIds.slice(0, max)
-        console.log('🛬🛬 getting remote other cards and spaces', cardIds, spaceIds)
-        spaceIds = spaceIds.join(',')
-        cardIds = cardIds.join(',')
+        console.log('🛬🛬 getting remote other items', { cardIds, spaceIds })
         // request
         const body = { cardIds, spaceIds }
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })

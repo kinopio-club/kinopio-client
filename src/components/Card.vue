@@ -1889,7 +1889,7 @@ export default {
         linkToCardId: cardId
       }
       this.$store.dispatch('currentCards/update', update)
-      this.$store.dispatch('currentSpace/saveOtherSpace', { spaceId })
+      this.$store.dispatch('currentSpace/updateOtherItems', { spaceId })
     },
 
     // url preview
