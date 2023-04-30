@@ -118,9 +118,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .badge.button-badge.link-badge(
         v-if="card.linkToSpaceId"
         :class="{ active: currentSelectedLinkisActive }"
-        @click.left.stop="showLinkDetailsIsVisible($event)"
-        @touchend.stop="showLinkDetailsIsVisible($event)"
-        @keyup.stop.enter="showLinkDetailsIsVisible($event)"
+        @click.left.stop="showSpaceLinkDetailsIsVisible($event)"
+        @touchend.stop="showSpaceLinkDetailsIsVisible($event)"
+        @keyup.stop.enter="showSpaceLinkDetailsIsVisible($event)"
       )
         template(v-if="linkToSpace")
           UserLabelInline(:user="linkToSpace.users[0]" :shouldHideName="true")
@@ -994,7 +994,7 @@ export default {
       this.hidePickers()
       if (shouldSkipGlobalDialogs === true) { return }
       this.hideTagDetailsIsVisible()
-      this.hideLinkDetailsIsVisible()
+      this.hideSpaceLinkDetailsIsVisible()
     },
     clickName (event) {
       this.triggerUpdateMagicPaintPositionOffset()
@@ -1183,7 +1183,7 @@ export default {
       const textIsValid = !utils.hasBlankCharacters(text)
       return textIsValid && characterBeforeSlashIsBlank
     },
-    showLinkDetailsIsVisible (event) {
+    showSpaceLinkDetailsIsVisible (event) {
       this.closeDialogs()
       const linkRect = event.target.getBoundingClientRect()
       this.$store.commit('linkDetailsPosition', {
@@ -1345,7 +1345,7 @@ export default {
       this.$store.commit('currentSelectedTag', {})
       this.$store.commit('tagDetailsIsVisible', false)
     },
-    hideLinkDetailsIsVisible () {
+    hideSpaceLinkDetailsIsVisible () {
       this.$store.commit('currentSelectedLink', {})
       this.$store.commit('linkDetailsIsVisible', false)
     },

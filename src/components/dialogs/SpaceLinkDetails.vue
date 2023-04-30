@@ -50,7 +50,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(relativeTime)
 
 export default {
-  name: 'LinkDetails',
+  name: 'SpaceLinkDetails',
   components: {
     User,
     UserList,

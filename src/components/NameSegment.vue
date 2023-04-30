@@ -36,9 +36,9 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   a.link-badge-url(v-if="segment.isLink" :href="segment.name")
     span.badge.button-badge.link-badge(
       :class="{ active: currentSelectedLink.name === segment.name }"
-      @click.left.prevent="showLinkDetailsIsVisible($event, segment)"
-      @touchend.stop.prevent="showLinkDetailsIsVisible($event, segment)"
-      @keyup.stop.enter="showLinkDetailsIsVisible($event, segment)"
+      @click.left.prevent="showSpaceLinkDetailsIsVisible($event, segment)"
+      @touchend.stop.prevent="showSpaceLinkDetailsIsVisible($event, segment)"
+      @keyup.stop.enter="showSpaceLinkDetailsIsVisible($event, segment)"
     )
       template(v-if="segmentSpace(segment)")
         template(v-if="segmentSpace(segment).users")
@@ -115,8 +115,8 @@ export default {
     showTagDetailsIsVisible (event, tag) {
       this.$emit('showTagDetailsIsVisible', { event, tag })
     },
-    showLinkDetailsIsVisible (event, link) {
-      this.$emit('showLinkDetailsIsVisible', { event, link })
+    showSpaceLinkDetailsIsVisible (event, link) {
+      this.$emit('showSpaceLinkDetailsIsVisible', { event, link })
     },
     spaceIsPrivate (space) {
       if (!space.privacy) { return }

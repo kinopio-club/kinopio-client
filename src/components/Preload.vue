@@ -28,7 +28,7 @@
     img.icon(src="@/assets/anon-avatar.svg")
     img.icon(src="@/assets/apple.svg")
     img.icon(src="@/assets/arena.svg")
-    img.icon(src="@/assets/autplay.svg")
+    img.icon(src="@/assets/autoplay.svg")
     img.icon(src="@/assets/box-empty.svg")
     img.icon(src="@/assets/box-filled.svg")
     img.icon(src="@/assets/box-select.svg")

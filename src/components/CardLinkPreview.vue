@@ -17,15 +17,15 @@ const props = defineProps({
   visible: Boolean,
   linkToCardId: String
 })
-const emit = defineEmits(['showCardLinkDetailsIsVisible'])
+const emit = defineEmits(['showCardSpaceLinkDetailsIsVisible'])
 
-const showCardLinkDetailsIsVisible = () => {
-  emit('showCardLinkDetailsIsVisible', props.linkToCardId)
+const showCardSpaceLinkDetailsIsVisible = () => {
+  emit('showCardSpaceLinkDetailsIsVisible', props.linkToCardId)
 }
 </script>
 
 <template lang="pug">
-.card-link-preview.badge.button-badge(v-if="visible" @click="showCardLinkDetailsIsVisible")
+.card-link-preview.badge.button-badge(v-if="visible" @click="showCardSpaceLinkDetailsIsVisible")
   span props.linkToCardId: {{ props.linkToCardId }}
 </template>
 

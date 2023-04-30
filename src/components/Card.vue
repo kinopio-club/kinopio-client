@@ -91,7 +91,7 @@ article#card(
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
             template(v-for="segment in nameSegments")
-              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
+              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showSpaceLinkDetailsIsVisible="showSpaceLinkDetailsIsVisible")
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
@@ -150,7 +150,7 @@ article#card(
         CardLinkPreview(
           :visible="true"
           :linkToCardId="card.linkToCardId"
-          @showCardLinkDetailsIsVisible="showCardLinkDetailsIsVisible"
+          @showCardSpaceLinkDetailsIsVisible="showCardSpaceLinkDetailsIsVisible"
         )
 
     //- Upload Progress
@@ -1657,7 +1657,7 @@ export default {
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
     },
-    showLinkDetailsIsVisible ({ event, link }) {
+    showSpaceLinkDetailsIsVisible ({ event, link }) {
       if (isMultiTouch) { return }
       if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
       this.$store.dispatch('currentCards/incrementZ', this.id)
@@ -1674,8 +1674,11 @@ export default {
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
     },
-    showCardLinkDetailsIsVisible (cardId) {
-      // todo port from showLinkDetailsIsVisible
+    showCardSpaceLinkDetailsIsVisible (cardId) {
+      // TODO port from showSpaceLinkDetailsIsVisible
+      // Space: global dialog CardSpaceLinkDetails
+      // set store state pos
+      // currentselectedCardLink
     },
     spaceFromLinkSpaceId (spaceId, url) {
       let space = this.otherSpaceById(spaceId)

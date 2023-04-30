@@ -37,7 +37,7 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
               a(:href="cardUrl(notification)")
                 .card-details.badge.button-badge(@click.stop.prevent="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }")
                   template(v-for="segment in cardNameSegments(notification.card.name)")
-                    NameSegment(:segment="segment" @showTagDetailsIsVisible="showCardDetails(notification)" @showLinkDetailsIsVisible="showCardDetails(notification)")
+                    NameSegment(:segment="segment" @showTagDetailsIsVisible="showCardDetails(notification)" @showSpaceLinkDetailsIsVisible="showCardDetails(notification)")
                   img.card-image(v-if="notification.detailsImage" :src="notification.detailsImage")
 
 </template>
