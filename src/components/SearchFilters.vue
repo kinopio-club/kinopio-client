@@ -31,9 +31,16 @@ section.filters
           img.icon.pin.right-pin(src="@/assets/pin.svg")
       //- More Filters
       .button-wrap.more-filters-button-wrap
-        button.small-button(:class="{active: moreSearchFiltersVisible || totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
-          img.icon(src="@/assets/filter.svg")
-          span.badge.info.filter-is-active(v-if="totalFiltersActive")
+        template(v-if="totalFiltersActive")
+          .segmented-buttons
+            button.small-button(:class="{active: moreSearchFiltersVisible || totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
+              img.icon(src="@/assets/filter.svg")
+              span.badge.info.filter-is-active
+            button.small-button(@click.left.stop="clearSearchAndFilters")
+              img.icon.cancel(src="@/assets/add.svg")
+        template(v-if="!totalFiltersActive")
+          button.small-button(:class="{active: moreSearchFiltersVisible || totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
+            img.icon(src="@/assets/filter.svg")
         MoreSearchFilters(:visible="moreSearchFiltersVisible")
 
 </template>
@@ -86,6 +93,10 @@ export default {
     },
     toggleMoreSearchFiltersVisible () {
       this.moreSearchFiltersVisible = !this.moreSearchFiltersVisible
+    },
+    clearSearchAndFilters () {
+      this.$store.commit('clearSearch')
+      this.$store.dispatch('clearAllFilters')
     },
 
     // Toggle filters
