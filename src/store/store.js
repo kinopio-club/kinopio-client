@@ -167,9 +167,9 @@ const store = createStore({
     remoteTagsIsFetched: false,
 
     // links
-    linkDetailsIsVisible: false,
-    linkDetailsPosition: {}, // x, y
-    currentSelectedLink: {},
+    otherSpaceDetailsIsVisible: false,
+    otherItemDetailsPosition: {}, // x, y
+    currentSelectedOtherItem: {},
 
     // pinned dialogs
     spaceDetailsIsPinned: false,
@@ -284,8 +284,8 @@ const store = createStore({
       state.tagDetailsIsVisible = false
       state.tagDetailsIsVisibleFromTagList = false
       state.currentSelectedTag = {}
-      state.linkDetailsIsVisible = false
-      state.currentSelectedLink = {}
+      state.otherSpaceDetailsIsVisible = false
+      state.currentSelectedOtherItem = {}
       state.cardsWereDragged = false
       state.boxesWereDragged = false
       state.userDetailsIsVisible = false
@@ -886,17 +886,17 @@ const store = createStore({
 
     // Link Details
 
-    linkDetailsIsVisible: (state, value) => {
+    otherSpaceDetailsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.linkDetailsIsVisible = value
+      state.otherSpaceDetailsIsVisible = value
     },
-    linkDetailsPosition: (state, position) => {
+    otherItemDetailsPosition: (state, position) => {
       utils.typeCheck({ value: position, type: 'object' })
-      state.linkDetailsPosition = position
+      state.otherItemDetailsPosition = position
     },
-    currentSelectedLink: (state, link) => {
+    currentSelectedOtherItem: (state, link) => {
       utils.typeCheck({ value: link, type: 'object' })
-      state.currentSelectedLink = link
+      state.currentSelectedOtherItem = link
     },
 
     // Pinned Dialogs
@@ -1637,6 +1637,11 @@ const store = createStore({
       const otherSpaces = state.otherItems.spaces.filter(Boolean)
       const space = otherSpaces.find(otherSpace => otherSpace.id === spaceId)
       return space
+    },
+    otherCardById: (state, getters) => (cardId) => {
+      const otherCards = state.otherItems.cards.filter(Boolean)
+      const card = otherCards.find(otherCard => otherCard.id === cardId)
+      return card
     },
     cachedOrOtherSpaceById: (state, getters) => (spaceId) => {
       const currentSpace = state.currentSpace

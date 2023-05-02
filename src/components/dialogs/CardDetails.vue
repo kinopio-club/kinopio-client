@@ -117,10 +117,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Links
       .badge.button-badge.link-badge(
         v-if="card.linkToSpaceId"
-        :class="{ active: currentSelectedLinkisActive }"
-        @click.left.stop="showSpaceLinkDetailsIsVisible($event)"
-        @touchend.stop="showSpaceLinkDetailsIsVisible($event)"
-        @keyup.stop.enter="showSpaceLinkDetailsIsVisible($event)"
+        :class="{ active: currentSelectedOtherItemisActive }"
+        @click.left.stop="showotherSpaceDetailsIsVisible($event)"
+        @touchend.stop="showotherSpaceDetailsIsVisible($event)"
+        @keyup.stop.enter="showotherSpaceDetailsIsVisible($event)"
       )
         template(v-if="linkToSpace")
           UserLabelInline(:user="linkToSpace.users[0]" :shouldHideName="true")
@@ -306,7 +306,7 @@ export default {
       'currentSpace',
       'searchResultsCards',
       'currentSelectedTag',
-      'currentSelectedLink',
+      'currentSelectedOtherItem',
       'shouldPreventNextEnterKey',
       'upload',
       'pinchCounterZoomDecimal',
@@ -403,9 +403,9 @@ export default {
       })
       return tags
     },
-    currentSelectedLinkisActive () {
-      if (!this.currentSelectedLink.space) { return }
-      return this.currentSelectedLink.space.id === this.card.linkToSpaceId
+    currentSelectedOtherItemisActive () {
+      if (!this.currentSelectedOtherItem.space) { return }
+      return this.currentSelectedOtherItem.space.id === this.card.linkToSpaceId
     },
     currentUserIsSpaceMember () { return this['currentUser/isSpaceMember']() },
     isFavoriteSpace () { return this['currentSpace/isFavorite'] },
@@ -994,7 +994,7 @@ export default {
       this.hidePickers()
       if (shouldSkipGlobalDialogs === true) { return }
       this.hideTagDetailsIsVisible()
-      this.hideSpaceLinkDetailsIsVisible()
+      this.hideotherSpaceDetailsIsVisible()
     },
     clickName (event) {
       this.triggerUpdateMagicPaintPositionOffset()
@@ -1183,19 +1183,23 @@ export default {
       const textIsValid = !utils.hasBlankCharacters(text)
       return textIsValid && characterBeforeSlashIsBlank
     },
-    showSpaceLinkDetailsIsVisible (event) {
+    showotherSpaceDetailsIsVisible (event) {
       this.closeDialogs()
+      // position
       const linkRect = event.target.getBoundingClientRect()
-      this.$store.commit('linkDetailsPosition', {
+      this.$store.commit('otherItemDetailsPosition', {
         x: window.scrollX + linkRect.x + 2,
         y: window.scrollY + linkRect.y + linkRect.height - 2
       })
-      const link = {
-        cardId: this.card.id,
-        space: this.linkToSpace
+      // other item
+      const spaceId = this.card.linkToSpaceId
+      const cardId = this.card.linkToCardId
+      const otherItem = {
+        otherSpace: this.$store.getters.otherSpaceById(spaceId),
+        otherCard: this.$store.getters.otherCardById(cardId)
       }
-      this.$store.commit('currentSelectedLink', link)
-      this.$store.commit('linkDetailsIsVisible', true)
+      this.$store.commit('currentSelectedOtherItem', otherItem)
+      this.$store.commit('otherSpaceDetailsIsVisible', true)
     },
     replaceSlashCommandWithSpaceUrl (space) {
       let name = this.card.name
@@ -1345,9 +1349,9 @@ export default {
       this.$store.commit('currentSelectedTag', {})
       this.$store.commit('tagDetailsIsVisible', false)
     },
-    hideSpaceLinkDetailsIsVisible () {
-      this.$store.commit('currentSelectedLink', {})
-      this.$store.commit('linkDetailsIsVisible', false)
+    hideotherSpaceDetailsIsVisible () {
+      this.$store.commit('currentSelectedOtherItem', {})
+      this.$store.commit('otherSpaceDetailsIsVisible', false)
     },
     showTagDetailsIsVisible (event, tag) {
       this.closeDialogs()

@@ -32,19 +32,19 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   //- Tags
   template(v-if="segment.isTag")
     Tag(:tag="segment" :isClickable="true" :isActive="currentSelectedTag.name === segment.name" @clickTag="showTagDetailsIsVisible")
-  //- Link
+  //- Other Space
   a.link-badge-url(v-if="segment.isLink" :href="segment.name")
     span.badge.button-badge.link-badge(
-      :class="{ active: currentSelectedLink.name === segment.name }"
-      @click.left.prevent="showSpaceLinkDetailsIsVisible($event, segment)"
-      @touchend.stop.prevent="showSpaceLinkDetailsIsVisible($event, segment)"
-      @keyup.stop.enter="showSpaceLinkDetailsIsVisible($event, segment)"
+      :class="{ active: currentSelectedOtherItem.name === segment.name }"
+      @click.left.prevent="showotherSpaceDetailsIsVisible($event, segment)"
+      @touchend.stop.prevent="showotherSpaceDetailsIsVisible($event, segment)"
+      @keyup.stop.enter="showotherSpaceDetailsIsVisible($event, segment)"
     )
-      template(v-if="segmentSpace(segment)")
-        template(v-if="segmentSpace(segment).users")
-          UserLabelInline(:user="segmentSpace(segment).users[0]" :shouldHideName="true")
-        span {{segmentSpace(segment).name || segment.content || segment.name }}
-        img.icon.private(v-if="spaceIsPrivate(segmentSpace(segment))" src="@/assets/lock.svg")
+      template(v-if="segmentOtherSpace(segment)")
+        template(v-if="segmentOtherSpace(segment).users")
+          UserLabelInline(:user="segmentOtherSpace(segment).users[0]" :shouldHideName="true")
+        span {{segmentOtherSpace(segment).name || segment.content || segment.name }}
+        img.icon.private(v-if="spaceIsPrivate(segmentOtherSpace(segment))" src="@/assets/lock.svg")
       template(v-else)
         span {{segment.name}}
   //- File
@@ -77,7 +77,7 @@ export default {
   },
   computed: {
     currentSelectedTag () { return this.$store.state.currentSelectedTag },
-    currentSelectedLink () { return this.$store.state.currentSelectedLink },
+    currentSelectedOtherItem () { return this.$store.state.currentSelectedOtherItem },
     dataMarkdownType () {
       if (this.segment.isTag) { return 'tag' }
       if (this.segment.isLink) { return 'link' }
@@ -115,18 +115,19 @@ export default {
     showTagDetailsIsVisible (event, tag) {
       this.$emit('showTagDetailsIsVisible', { event, tag })
     },
-    showSpaceLinkDetailsIsVisible (event, link) {
-      this.$emit('showSpaceLinkDetailsIsVisible', { event, link })
+    showotherSpaceDetailsIsVisible (event, otherItem) {
+      this.$emit('showotherSpaceDetailsIsVisible', { event, otherItem })
     },
     spaceIsPrivate (space) {
       if (!space.privacy) { return }
       return space.privacy === 'private'
     },
-    segmentSpace (segment) {
-      if (segment.space) { return segment.space }
-      const spaceId = utils.spaceIdFromUrl(segment.name)
-      const space = this.$store.getters.cachedOrOtherSpaceById(spaceId)
-      return space
+    segmentOtherSpace (segment) {
+      // if (segment.otherSpace) {
+      return segment.otherSpace
+      // const spaceId = utils.spaceIdFromUrl(segment.name)
+      // const space = this.$store.getters.cachedOrOtherSpaceById(spaceId)
+      // return space
     },
     escapedUrl (url) {
       if (url.includes('javascript:')) {

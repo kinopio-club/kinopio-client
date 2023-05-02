@@ -15,7 +15,7 @@
   Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
   Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
   TagDetails
-  SpaceLinkDetails
+  OtherSpaceDetails
   UserDetails
   CardListItemOptions
   WindowHistoryHandler
@@ -35,7 +35,7 @@ import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import ScrollHandler from '@/components/ScrollHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
-import SpaceLinkDetails from '@/components/dialogs/SpaceLinkDetails.vue'
+import OtherSpaceDetails from '@/components/dialogs/OtherSpaceDetails.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
@@ -58,7 +58,7 @@ export default {
     ScrollHandler,
     WindowHistoryHandler,
     TagDetails,
-    SpaceLinkDetails,
+    OtherSpaceDetails,
     ItemsLocked,
     UserDetails,
     NotificationsWithPosition,
