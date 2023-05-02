@@ -854,6 +854,40 @@ const currentCards = {
       })
       cardIds = uniq(cardIds)
       return cardIds
+    },
+    nameSegments: (state, getters) => (card) => {
+      card = utils.clone(card)
+      let name = card.name
+      let url = utils.urlFromString(name)
+      let imageUrl
+      if (utils.urlIsImage(url)) {
+        imageUrl = url
+        name = name.replace(url, '')
+      }
+      let segments = utils.cardNameSegments(name)
+      if (imageUrl) {
+        segments.unshift({
+          isImage: true,
+          url: imageUrl
+        })
+      }
+      card.nameSegments = segments.map(segment => {
+        if (!segment.isTag) { return segment }
+        segment.color = getters.segmentTagColor(segment)
+        return segment
+      })
+      return card
+    },
+    segmentTagColor: (state, getters, rootState, rootGetters) => (segment) => {
+      const spaceTag = rootGetters['currentSpace/tagByName'](segment.name)
+      const cachedTag = cache.tagByName(segment.name)
+      if (spaceTag) {
+        return spaceTag.color
+      } else if (cachedTag) {
+        return cachedTag.color
+      } else {
+        return rootState.currentUser.color
+      }
     }
   }
 }

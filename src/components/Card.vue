@@ -135,7 +135,7 @@ article#card(
                 img.connector-icon(src="@/assets/connector-closed-in-card.svg")
               //- template(v-else)
               //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || cardLinkPreviewIsVisible" :class="{'is-image-card': isImageCard}")
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || otherCardIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="cardUrlPreviewIsVisible")
         UrlPreviewCard(
           :visible="true"
@@ -146,12 +146,8 @@ article#card(
           :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
           :isLoadingUrlPreview="isLoadingUrlPreview"
         )
-      template(v-if="cardLinkPreviewIsVisible")
-        CardLinkPreview(
-          :visible="true"
-          :fToCardId="card.linkToCardId"
-          @showCardotherSpaceDetailsIsVisible="showCardotherSpaceDetailsIsVisible"
-        )
+      template(v-if="otherCardIsVisible")
+        OtherCardPreview(:visible="otherCardIsVisible" :cardId="card.linkToCardId")
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -207,8 +203,8 @@ import Audio from '@/components/Audio.vue'
 import ImageOrVideo from '@/components/ImageOrVideo.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
-import CardLinkPreview from '@/components/CardLinkPreview.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
@@ -240,8 +236,8 @@ export default {
     ImageOrVideo,
     NameSegment,
     UrlPreviewCard,
-    CardLinkPreview,
-    UserLabelInline
+    UserLabelInline,
+    OtherCardPreview
   },
   props: {
     card: Object
@@ -400,7 +396,7 @@ export default {
     urlPreviewImageIsVisible () {
       return Boolean(this.cardUrlPreviewIsVisible && this.card.urlPreviewImage && !this.card.shouldHideUrlPreviewImage)
     },
-    cardLinkPreviewIsVisible () { return Boolean(this.card.linkToCardId) },
+    otherCardIsVisible () { return Boolean(this.card.linkToCardId) },
     isConnectorDarkInLightTheme () {
       if (this.connectionTypeColorisDark) { return this.connectionTypeColorisDark }
       return this.isDarkInLightTheme
@@ -1674,12 +1670,6 @@ export default {
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
     },
-    showCardotherSpaceDetailsIsVisible (cardId) {
-      // TODO port from showotherSpaceDetailsIsVisible
-      // Space: global dialog CardotherSpaceDetails
-      // set store state pos
-      // currentselectedCardLink
-    },
     otherSpace (spaceId, url) {
       let space = this.otherSpaceById(spaceId)
       // if (!space) {
@@ -2400,6 +2390,9 @@ article
     img
       width 10px
       height 10px
+
+  .other-card-preview
+    width 100%
 
 @keyframes bounce
   0%

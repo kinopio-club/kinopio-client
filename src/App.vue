@@ -1011,6 +1011,7 @@ code
 
 .link-badge
   background-color var(--secondary-active-background)
+  text-decoration none
   > .user
     .label-badge
       width 21px
