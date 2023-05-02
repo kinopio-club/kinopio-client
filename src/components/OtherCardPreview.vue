@@ -37,10 +37,10 @@ const updateNameSegments = () => {
 
 <template lang="pug">
 a.other-card-preview(v-if="visible" :href="url")
-  .badge.button-badge.link-badge(@click.stop.prevent="")
-    //- img.icon(src="@/assets/card.svg")
+  .badge.button-badge.link-badge(@click.stop.prevent="selectOtherCard($event)")
     template(v-if="isLoadingOtherItems")
-      span {{props.otherCardId}}
+      Loader(:visible="true" :isSmall="true")
+      span Card
     template(v-else)
       template(v-for="segment in state.nameSegments")
         img.card-image(v-if="segment.isImage" :src="segment.url")
@@ -50,9 +50,12 @@ a.other-card-preview(v-if="visible" :href="url")
 
 <style lang="stylus">
 .other-card-preview
+  display block
   text-decoration none
+  word-wrap break-word
   .link-badge
     display block
+    margin 0
   .card-image
     vertical-align middle
     border-radius var(--entity-radius)
@@ -61,5 +64,8 @@ a.other-card-preview(v-if="visible" :href="url")
     margin 4px 0px
   .tag
     display inline-block
+  .badge
+    > .loader
+      vertical-align -2px
 
 </style>

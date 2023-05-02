@@ -43,10 +43,11 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       template(v-if="segmentOtherSpace(segment)")
         template(v-if="segmentOtherSpace(segment).users")
           UserLabelInline(:user="segmentOtherSpace(segment).users[0]" :shouldHideName="true")
-        span {{segmentOtherSpace(segment).name || segment.content || segment.name }}
+        span {{segmentOtherSpace(segment).name}}
         img.icon.private(v-if="spaceIsPrivate(segmentOtherSpace(segment))" src="@/assets/lock.svg")
       template(v-else)
-        span {{segment.name}}
+        Loader(:visible="true" :isSmall="true")
+        span Space
   //- File
   span.badge.secondary-on-dark-background(v-if="segment.isFile")
     img.icon(src="@/assets/file.svg")
@@ -57,6 +58,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
@@ -68,7 +70,8 @@ export default {
   components: {
     UserLabelInline,
     NameMatch,
-    Tag
+    Tag,
+    Loader
   },
   props: {
     segment: Object,
@@ -206,4 +209,8 @@ export default {
     text-decoration none
   .strikethrough
     text-decoration line-through
+  .badge
+    > .loader
+      margin-left 0 !important
+      vertical-align -2px !important
 </style>
