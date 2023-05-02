@@ -1533,6 +1533,13 @@ export default {
     url = new URL(url)
     return this.spaceAndCardIdFromPath(url.pathname)
   },
+  urlFromSpaceAndCard ({ spaceId, cardId }) {
+    let url = `${this.kinopioDomain()}/${spaceId}`
+    if (cardId) {
+      url = `${url}/${cardId}`
+    }
+    return url
+  },
   spaceAndCardIdFromPath (path) {
     // https://regexr.com/5kr4g
     // matches (text after /) twice

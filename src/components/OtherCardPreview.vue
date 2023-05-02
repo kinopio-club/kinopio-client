@@ -9,11 +9,13 @@ const store = useStore()
 
 const props = defineProps({
   visible: Boolean,
-  cardId: String
+  otherCardId: String,
+  otherSpaceId: String
   // shouldTruncateName: Boolean
 })
 
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
+const url = computed(() => utils.urlFromSpaceAndCard({ cardId: props.otherCardId, spaceId: props.otherSpaceId }))
 
 // update card
 const state = reactive({
@@ -22,7 +24,7 @@ const state = reactive({
 })
 watch(() => store.state.isLoadingOtherItems, (value, prevValue) => {
   if (!value) {
-    state.otherCard = store.getters.otherCardById(props.cardId)
+    state.otherCard = store.getters.otherCardById(props.otherCardId)
     updateNameSegments()
   }
 })
@@ -34,11 +36,11 @@ const updateNameSegments = () => {
 </script>
 
 <template lang="pug">
-.other-card-preview(v-if="visible" href="")
+a.other-card-preview(v-if="visible" :href="url")
   .badge.button-badge.link-badge(@click.stop.prevent="")
     //- img.icon(src="@/assets/card.svg")
     template(v-if="isLoadingOtherItems")
-      span {{props.cardId}}
+      span {{props.otherCardId}}
     template(v-else)
       template(v-for="segment in state.nameSegments")
         img.card-image(v-if="segment.isImage" :src="segment.url")
