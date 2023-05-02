@@ -31,7 +31,7 @@ section.filters
           img.icon.pin.right-pin(src="@/assets/pin.svg")
       //- More Filters
       .button-wrap.more-filters-button-wrap
-        button.small-button(:class="{active: moreSearchFiltersVisible || totalFiltersActive, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
+        button.small-button(:class="{active: moreSearchFiltersVisible || totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
           img.icon(src="@/assets/filter.svg")
           span.badge.info.filter-is-active(v-if="totalFiltersActive")
         MoreSearchFilters(:visible="moreSearchFiltersVisible")
@@ -119,9 +119,6 @@ export default {
   .user-label-inline
     margin-top -4px
     height 10px
-  .has-badge
-    padding-top 2px
-    padding-bottom 1px
   @media(max-width 500px)
     dialog.more-filters
       left initial
@@ -129,10 +126,13 @@ export default {
   .comment-icon
     vertical-align -2px
   .filter-is-active
-    width 8px
-    height 16px
+    width 10px
+    height 10px
     min-width initial
     min-height initial
+    padding 0
+    border-radius 100px
+    vertical-align 0
   .title-row-flex
     align-items flex-start
   .title-row-vertical
