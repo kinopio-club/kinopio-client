@@ -166,8 +166,9 @@ const store = createStore({
     remoteTags: [],
     remoteTagsIsFetched: false,
 
-    // links
+    // other items (links)
     otherSpaceDetailsIsVisible: false,
+    otherCardDetailsIsVisible: false,
     otherItemDetailsPosition: {}, // x, y
     currentSelectedOtherItem: {},
 
@@ -285,6 +286,7 @@ const store = createStore({
       state.tagDetailsIsVisibleFromTagList = false
       state.currentSelectedTag = {}
       state.otherSpaceDetailsIsVisible = false
+      state.otherCardDetailsIsVisible = false
       state.currentSelectedOtherItem = {}
       state.cardsWereDragged = false
       state.boxesWereDragged = false
@@ -889,6 +891,10 @@ const store = createStore({
     otherSpaceDetailsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.otherSpaceDetailsIsVisible = value
+    },
+    otherCardDetailsIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.otherCardDetailsIsVisible = value
     },
     otherItemDetailsPosition: (state, position) => {
       utils.typeCheck({ value: position, type: 'object' })

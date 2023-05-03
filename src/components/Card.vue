@@ -147,7 +147,7 @@ article#card(
           :isLoadingUrlPreview="isLoadingUrlPreview"
         )
       template(v-if="otherCardIsVisible")
-        OtherCardPreview(:visible="otherCardIsVisible" :otherCardId="card.linkToCardId" :otherSpaceId="card.linkToSpaceId")
+        OtherCardPreview(:visible="otherCardIsVisible" :otherCardId="card.linkToCardId" :otherSpaceId="card.linkToSpaceId" @selectOtherCard="showOtherCardDetailsIsVisible")
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -1670,6 +1670,24 @@ export default {
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
     },
+    showOtherCardDetailsIsVisible ({ event, otherItem }) {
+      if (isMultiTouch) { return }
+      if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
+      this.$store.dispatch('currentCards/incrementZ', this.id)
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('currentUserIsDraggingCard', false)
+      const linkRect = event.target.getBoundingClientRect()
+      this.$store.commit('otherItemDetailsPosition', {
+        x: window.scrollX + linkRect.x + 2,
+        y: window.scrollY + linkRect.y + linkRect.height - 2
+      })
+      otherItem.parentCardId = this.id
+      this.$store.commit('currentSelectedOtherItem', otherItem)
+      this.$store.commit('otherCardDetailsIsVisible', true)
+      this.cancelLocking()
+      this.$store.commit('currentUserIsDraggingCard', false)
+    },
+
     otherSpace (spaceId, url) {
       let space = this.otherSpaceById(spaceId)
       // if (!space) {

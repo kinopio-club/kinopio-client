@@ -13,6 +13,7 @@ const props = defineProps({
   otherSpaceId: String
   // shouldTruncateName: Boolean
 })
+const emit = defineEmits(['selectOtherCard'])
 
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const url = computed(() => utils.urlFromSpaceAndCard({ cardId: props.otherCardId, spaceId: props.otherSpaceId }))
@@ -31,6 +32,12 @@ watch(() => store.state.isLoadingOtherItems, (value, prevValue) => {
 const updateNameSegments = () => {
   const card = store.getters['currentCards/nameSegments'](state.otherCard)
   state.nameSegments = card.nameSegments
+}
+
+// dialog
+const selectOtherCard = (event) => {
+  const otherItem = utils.clone(state.otherCard)
+  emit('selectOtherCard', { event, otherItem })
 }
 
 </script>
