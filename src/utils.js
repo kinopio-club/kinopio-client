@@ -840,33 +840,6 @@ export default {
     let spaceBetween = 12
     return this.spaceZoomDecimal() * spaceBetween
   },
-  isItemInViewport (item, zoom) {
-    let viewport = this.visualViewport()
-    zoom = zoom || 1
-    zoom = viewport.scale * zoom
-    zoom = 1 / zoom
-    viewport = {
-      pageLeft: viewport.pageLeft * zoom,
-      width: viewport.width * zoom,
-      pageTop: viewport.pageTop * zoom,
-      height: viewport.height * zoom
-    }
-    item = {
-      x: item.x,
-      y: item.y,
-      width: item.width || item.resizeWidth,
-      height: item.height || item.resizeHeight
-    }
-    // x
-    const isStartInViewportX = item.x > viewport.pageLeft || item.x + item.width > viewport.pageLeft
-    const isEndInViewportX = item.x < viewport.pageLeft + viewport.width
-    const isInViewportX = isStartInViewportX && isEndInViewportX
-    // y
-    const isStartInViewportY = item.y > viewport.pageTop || item.y + item.height > viewport.pageTop
-    const isEndInViewportY = item.y < viewport.pageTop + viewport.height
-    const isInViewportY = isStartInViewportY && isEndInViewportY
-    return isInViewportX && isInViewportY
-  },
   updateCardDimensions (card) {
     if (!card) { return }
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)

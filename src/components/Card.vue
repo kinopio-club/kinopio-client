@@ -1051,7 +1051,10 @@ export default {
       let height = this.card.height || fallbackHeight
       height = height * this.spaceZoomDecimal
       const isBottomVisible = utils.isBetween({ value: y + height, min, max })
-      const isVisible = isTopVisible || isBottomVisible
+      const scrollIsAboveBottom = scroll < y + height
+      const scrollIsBelowTop = scroll > y
+      const middleIsVisible = scrollIsAboveBottom && scrollIsBelowTop
+      const isVisible = isTopVisible || isBottomVisible || middleIsVisible
       return isVisible
     }
   },
