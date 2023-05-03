@@ -1659,11 +1659,8 @@ export default {
       this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingCard', false)
-      const linkRect = event.target.getBoundingClientRect()
-      this.$store.commit('otherItemDetailsPosition', {
-        x: window.scrollX + linkRect.x + 2,
-        y: window.scrollY + linkRect.y + linkRect.height - 2
-      })
+      const rect = event.target.getBoundingClientRect()
+      this.$store.commit('otherItemDetailsPosition', rect)
       otherItem.parentCardId = this.id
       this.$store.commit('currentSelectedOtherItem', otherItem)
       this.$store.commit('otherSpaceDetailsIsVisible', true)
@@ -1676,11 +1673,8 @@ export default {
       this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingCard', false)
-      const linkRect = event.target.getBoundingClientRect()
-      this.$store.commit('otherItemDetailsPosition', {
-        x: window.scrollX + linkRect.x + 2,
-        y: window.scrollY + linkRect.y + linkRect.height - 2
-      })
+      const rect = event.target.getBoundingClientRect()
+      this.$store.commit('otherItemDetailsPosition', rect)
       otherItem.parentCardId = this.id
       this.$store.commit('currentSelectedOtherItem', otherItem)
       this.$store.commit('otherCardDetailsIsVisible', true)

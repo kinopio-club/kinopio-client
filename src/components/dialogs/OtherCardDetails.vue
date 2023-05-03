@@ -15,22 +15,17 @@ const visible = computed(() => store.state.otherCardDetailsIsVisible)
 const styles = computed(() => {
   const position = store.state.otherItemDetailsPosition
   const isChildDialog = cardDetailsIsVisibleForCardId
-  let zoom = store.getters.spaceZoomDecimal
+  let zoom = store.getters.spaceCounterZoomDecimal
   if (isChildDialog.value) {
     zoom = 1
   }
-  const x = zoom * position.x
-  const y = zoom * position.y
-  let scale
-  if (utils.isSignificantlyPinchZoomed()) {
-    scale = store.state.pinchCounterZoomDecimal
+  if (store.state.isTouchDevice) {
+    zoom = 1 / utils.visualViewport().scale
   }
-  console.log('☔️☔️', otherCard.value, canEdit.value) // othercard
-  return {
-    left: `${x}px`,
-    top: `${y}px`,
-    transform: `scale(${scale})`
-  }
+  console.log('☔️☔️', otherCard.value, canEdit.value)
+  const left = `${position.x + 8}px`
+  const top = `${position.y + 8}px`
+  return { transform: `scale(${zoom})`, left, top }
 })
 const otherCard = computed(() => store.state.currentSelectedOtherItem)
 // const otherSpace = computed(() => store.getters.otherSpaceById(otherCard.value.spaceId))
