@@ -75,11 +75,6 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
           button
             span Twitter{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
-      .button-wrap
-        a(href="https://www.instagram.com/kinopioclub")
-          button
-            span IG{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
 
 </template>
 
