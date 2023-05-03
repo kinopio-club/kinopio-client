@@ -573,7 +573,7 @@ export default {
     notifyPressAndHoldToDrag () {
       const hasNotified = this.$store.state.hasNotifiedPressAndHoldToDrag
       if (!hasNotified) {
-        this.$store.commit('addNotification', { message: 'Tap and hold to drag boxes', icon: 'press-and-hold' })
+        this.$store.commit('addNotification', { message: 'Press and hold to drag boxes', icon: 'press-and-hold' })
       }
       this.$store.commit('hasNotifiedPressAndHoldToDrag', true)
     },

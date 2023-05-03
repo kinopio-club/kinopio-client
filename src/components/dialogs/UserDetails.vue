@@ -37,11 +37,10 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
     section.upgrade(v-if="!currentUserIsUpgraded")
       .row
         CardsCreatedProgress
-      .row(v-if="!isAppStoreMode")
+      .row(v-if="!isPricingHidden")
         .button-wrap
           button(@click="triggerUpgradeUserIsVisible")
             span Upgrade for Unlimited
-
       //- Unlimited cards from member
       .row(v-if="spaceUserIsUpgraded && !currentUserIsUpgraded")
         .badge.status
@@ -175,7 +174,7 @@ export default {
     spaceUserIsUpgraded () { return this.$store.getters['currentSpace/spaceUserIsUpgraded'] },
     spaceUser () { return this.$store.state.currentSpace.users[0] },
     isAddPage () { return this.$store.state.isAddPage },
-    isAppStoreMode () { return this.$store.state.isAppStoreMode },
+    isPricingHidden () { return this.$store.state.isPricingHidden },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
         return false
