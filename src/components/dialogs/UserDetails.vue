@@ -41,7 +41,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
         .button-wrap(v-if="!isAddPage")
           button(@click.left.stop="triggerUpgradeUserIsVisible")
             span Upgrade for Unlimited
-      .row(v-if="!isAppStoreMode")
+      .row(v-if="!isPricingHidden")
         p
           .badge.info $6/mo, $60/yr
         a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
@@ -186,7 +186,7 @@ export default {
     spaceUserIsUpgraded () { return this.$store.getters['currentSpace/spaceUserIsUpgraded'] },
     spaceUser () { return this.$store.state.currentSpace.users[0] },
     isAddPage () { return this.$store.state.isAddPage },
-    isAppStoreMode () { return this.$store.state.isAppStoreMode },
+    isPricingHidden () { return this.$store.state.isPricingHidden },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
         return false
