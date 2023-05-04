@@ -9,7 +9,6 @@ const store = useStore()
 
 const props = defineProps({
   otherSpace: Object,
-  otherSpaceId: String,
   url: String,
   parentCardId: String,
   shouldCloseAllDialogs: Boolean
@@ -56,10 +55,10 @@ const showOtherSpaceDetailsIsVisible = (event) => {
 <template lang="pug">
 a.other-space-preview(:href="props.url" ref="badge")
   .badge.button-badge.link-badge(:class="{ active: isActive }" @click.stop.prevent="showOtherSpaceDetailsIsVisible($event)")
-    template(v-if="otherSpace")
-      template(v-if="otherSpace.users")
-        UserLabelInline(:user="otherSpace.users[0]" :shouldHideName="true")
-      span {{otherSpace.name}}
+    template(v-if="props.otherSpace")
+      template(v-if="props.otherSpace.users")
+        UserLabelInline(:user="props.otherSpace.users[0]" :shouldHideName="true")
+      span {{props.otherSpace.name}}
       img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
     template(v-else)
       Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")

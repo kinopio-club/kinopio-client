@@ -147,7 +147,7 @@ article#card(
           :isLoadingUrlPreview="isLoadingUrlPreview"
         )
       template(v-if="otherCardIsVisible")
-        OtherCardPreview(:otherCardId="card.linkToCardId" :otherSpaceId="card.linkToSpaceId" :parentCardId="card.id" :shouldCloseAllDialogs="true")
+        OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldCloseAllDialogs="true")
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -398,6 +398,10 @@ export default {
       return Boolean(this.cardUrlPreviewIsVisible && this.card.urlPreviewImage && !this.card.shouldHideUrlPreviewImage)
     },
     otherCardIsVisible () { return Boolean(this.card.linkToCardId) },
+    otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
+    otherCard () {
+      return this.$store.getters.otherCardById(this.card.linkToCardId)
+    },
     isConnectorDarkInLightTheme () {
       if (this.connectionTypeColorisDark) { return this.connectionTypeColorisDark }
       return this.isDarkInLightTheme

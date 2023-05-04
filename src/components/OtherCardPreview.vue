@@ -8,18 +8,16 @@ import { useStore } from 'vuex'
 const store = useStore()
 
 const props = defineProps({
-  otherCardId: String,
-  otherSpaceId: String,
+  otherCard: Object,
+  url: String,
   parentCardId: String,
   shouldCloseAllDialogs: Boolean
 })
 const state = reactive({
-  otherCard: undefined,
   nameSegments: []
 })
 
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
-const url = computed(() => utils.urlFromSpaceAndCard({ cardId: props.otherCardId, spaceId: props.otherSpaceId }))
 
 const isActive = computed(() => {
   const isFromParentCard = store.state.currentSelectedOtherItem.parentCardId === props.parentCardId
@@ -30,14 +28,12 @@ const isActive = computed(() => {
 // update card
 watch(() => store.state.isLoadingOtherItems, (value, prevValue) => {
   if (!value) {
-    let otherCard = store.getters.otherCardById(props.otherCardId)
-    if (!otherCard) { return }
-    state.otherCard = otherCard
     updateNameSegments()
   }
 })
 const updateNameSegments = () => {
-  const card = store.getters['currentCards/nameSegments'](state.otherCard)
+  if (!props.otherCard) { return }
+  const card = store.getters['currentCards/nameSegments'](props.otherCard)
   state.nameSegments = card.nameSegments
 }
 
@@ -46,7 +42,7 @@ const showOtherCardDetailsIsVisible = (event) => {
   if (utils.isMultiTouch(event)) { return }
   if (store.state.preventDraggedCardFromShowingDetails) { return }
   let otherItem = {}
-  if (state.otherCard) {
+  if (props.otherCard) {
     otherItem = utils.clone(props.otherCard)
   }
   if (props.parentCardId) {
@@ -68,9 +64,9 @@ const showOtherCardDetailsIsVisible = (event) => {
 </script>
 
 <template lang="pug">
-a.other-card-preview(:href="url")
+a.other-card-preview(:href="props.url")
   .badge.button-badge.link-badge(:class="{ active: isActive }" @click.stop.prevent="showOtherCardDetailsIsVisible($event)")
-    template(v-if="state.otherCard")
+    template(v-if="props.otherCard")
       template(v-for="segment in state.nameSegments")
         img.card-image(v-if="segment.isImage" :src="segment.url")
         NameSegment(:segment="segment")
