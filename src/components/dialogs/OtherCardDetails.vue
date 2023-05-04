@@ -4,12 +4,27 @@ import Loader from '@/components/Loader.vue'
 import UserList from '@/components/UserList.vue'
 import consts from '@/consts.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUpdated, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
-// layout
-const visible = computed(() => store.state.otherCardDetailsIsVisible)
+// state
+const otherCard = computed(() => store.state.currentSelectedOtherItem)
+const url = computed(() => `${utils.kinopioDomain()}/${otherCard.value.spaceId}/${otherCard.value.id}`)
+const canEdit = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value))
+const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
+
+// visible
+const visible = computed(() => {
+  const isVisible = store.state.otherCardDetailsIsVisible
+  if (isVisible) {
+    textareaStyles()
+    focusTextarea()
+  }
+  return isVisible
+})
+
+// dialog styles
 const styles = computed(() => {
   const position = store.state.otherItemDetailsPosition
   const isChildDialog = cardDetailsIsVisibleForCardId
@@ -25,11 +40,18 @@ const styles = computed(() => {
   return { transform: `scale(${zoom})`, left, top }
 })
 
-// state
-const otherCard = computed(() => store.state.currentSelectedOtherItem)
-const url = computed(() => `${utils.kinopioDomain()}/${otherCard.value.spaceId}/${otherCard.value.id}`)
-const canEdit = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value))
-const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
+// textarea styles
+const textarea = ref(null)
+const textareaStyles = async () => {
+  await nextTick()
+  if (!textarea.value) { return }
+  textarea.value.style.height = textarea.value.scrollHeight + 1 + 'px'
+}
+const focusTextarea = async () => {
+  await nextTick()
+  if (!textarea.value) { return }
+  textarea.value.focus()
+}
 
 // edit parent card
 const parentCardId = computed(() => store.state.currentSelectedOtherItem.parentCardId)
@@ -45,9 +67,11 @@ const updateName = (newName) => {
   // update local
   store.commit('updateCardNameInOtherItems', { id: otherCard.value.id, name: newName })
   store.commit('triggerUpdateOtherCard', otherCard.value.id)
+  console.log(newName)
   // update remote
   // TODO
   // console.log(newName, store.state.otherItems.cards)
+  textareaStyles()
 }
 
 // jump to card
@@ -70,6 +94,8 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
       .row(v-if="canEdit")
         .textarea-wrap
           textarea.name(
+            ref="textarea"
+            rows="1"
             :value="otherCard.name"
             @input="updateName($event.target.value)"
             :maxlength="maxCardLength()"
@@ -103,5 +129,6 @@ dialog.other-card-details
     flex-wrap wrap
   .textarea-wrap,
   textarea
+    margin 0
     width 100%
 </style>

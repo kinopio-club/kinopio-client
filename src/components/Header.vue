@@ -77,7 +77,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               span {{currentSpaceName}}
               PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
               img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
-              img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
+              img.icon.view-hidden(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
             SpaceDetails(:visible="spaceDetailsIsVisible")
             ImportArenaChannel(:visible="importArenaChannelIsVisible")
             SpaceDetailsInfo(:visible="spaceDetailsInfoIsVisible")
@@ -893,6 +893,8 @@ header
       margin-left 6px
       width 16px
       vertical-align baseline
+    .view-hidden
+      margin-left 5px
 
   .read-only-badge-wrap
     min-width 63px
