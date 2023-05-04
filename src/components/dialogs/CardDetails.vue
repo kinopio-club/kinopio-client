@@ -117,7 +117,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 
       //- Other Space
       template(v-if="card.linkToSpaceId")
-        OtherSpacePreview(:otherSpace="otherSpace" :isActive="currentSelectedOtherItemisActive" @selectOtherSpace="showOtherSpaceDetailsIsVisible")
+        OtherSpacePreview(:otherSpace="otherSpace" :url="otherSpaceUrl" :isActive="currentSelectedOtherItemisActive" @selectOtherSpace="showOtherSpaceDetailsIsVisible")
       //- Comment
       .badge.info(v-if="nameIsComment" :style="{backgroundColor: updatedByUser.color}")
         span ((comment))
@@ -355,6 +355,10 @@ export default {
       const spaceId = this.card.linkToSpaceId
       const space = this.otherSpaceById(spaceId)
       return space
+    },
+    otherSpaceUrl () {
+      const spaceId = this.card.linkToSpaceId
+      return `${utils.kinopioDomain()}/${spaceId}`
     },
     isInvitedButCannotEditSpace () { return this['currentUser/isInvitedButCannotEditSpace']() },
     maxCardLength () { return consts.maxCardLength },
@@ -1164,7 +1168,7 @@ export default {
       const textIsValid = !utils.hasBlankCharacters(text)
       return textIsValid && characterBeforeSlashIsBlank
     },
-    showOtherSpaceDetailsIsVisible ({ event }) {
+    showOtherSpaceDetailsIsVisible ({ event, otherItem }) {
       this.closeDialogs()
       // position
       const linkRect = event.target.getBoundingClientRect()
@@ -1172,13 +1176,6 @@ export default {
         x: window.scrollX + linkRect.x + 2,
         y: window.scrollY + linkRect.y + linkRect.height - 2
       })
-      // other item
-      const spaceId = this.card.linkToSpaceId
-      const cardId = this.card.linkToCardId
-      const otherItem = {
-        otherSpace: this.$store.getters.otherSpaceById(spaceId),
-        otherCard: this.$store.getters.otherCardById(cardId)
-      }
       this.$store.commit('currentSelectedOtherItem', otherItem)
       this.$store.commit('otherSpaceDetailsIsVisible', true)
     },

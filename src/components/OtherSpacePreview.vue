@@ -9,7 +9,8 @@ const store = useStore()
 
 const props = defineProps({
   otherSpace: Object,
-  isActive: Boolean
+  isActive: Boolean,
+  url: String
 })
 const emit = defineEmits(['selectOtherSpace'])
 
@@ -18,10 +19,6 @@ const otherSpaceIsPrivate = computed(() => {
   return props.otherSpace.privacy === 'private'
 })
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
-const url = computed(() => {
-  if (!props.otherSpace) { return }
-  return `${utils.kinopioDomain()}/${props.otherSpace.id}`
-})
 
 // dialog
 const selectOtherSpace = (event) => {
@@ -36,7 +33,7 @@ const selectOtherSpace = (event) => {
 </script>
 
 <template lang="pug">
-a.other-space-preview(:href="url")
+a.other-space-preview(:href="props.url")
   .badge.button-badge.link-badge(:class="{ active: isActive }" @click.stop.prevent="selectOtherSpace($event)")
     template(v-if="otherSpace")
       template(v-if="otherSpace.users")
