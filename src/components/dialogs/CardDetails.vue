@@ -114,18 +114,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Tags
       template(v-for="tag in tagsInCard")
         Tag(:tag="tag" :isClickable="true" :isActive="currentSelectedTag.name === tag.name" @clickTag="showTagDetailsIsVisible")
-      //- Links
-      .badge.button-badge.link-badge(
-        v-if="card.linkToSpaceId"
-        :class="{ active: currentSelectedOtherItemisActive }"
-        @click.left.stop="showotherSpaceDetailsIsVisible($event)"
-        @touchend.stop="showotherSpaceDetailsIsVisible($event)"
-        @keyup.stop.enter="showotherSpaceDetailsIsVisible($event)"
-      )
-        template(v-if="linkToSpace")
-          UserLabelInline(:user="linkToSpace.users[0]" :shouldHideName="true")
-        span {{linkName}}
-        img.icon.private(v-if="spaceIsPrivate" src="@/assets/lock.svg")
+
+      //- Other Space
+      template(v-if="card.linkToSpaceId")
+        OtherSpacePreview(:otherSpace="otherSpace" :isActive="currentSelectedOtherItemisActive" @selectOtherSpace="showOtherSpaceDetailsIsVisible")
       //- Comment
       .badge.info(v-if="nameIsComment" :style="{backgroundColor: updatedByUser.color}")
         span ((comment))
@@ -200,6 +192,7 @@ import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
 import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
+import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -228,7 +221,8 @@ export default {
     UrlPreview,
     MediaPreview,
     UserLabelInline,
-    CardCollaborationInfo
+    CardCollaborationInfo,
+    OtherSpacePreview
   },
   data () {
     return {
@@ -346,11 +340,6 @@ export default {
       if (!results.length) { return }
       return Boolean(results.find(card => this.card.id === card.id))
     },
-    spaceIsPrivate () {
-      const space = this.linkToSpace
-      if (!space) { return }
-      return space.privacy === 'private'
-    },
     showCardTips () {
       if (this.name) { return }
       return true
@@ -362,18 +351,10 @@ export default {
       if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
       return false
     },
-    linkToSpace () {
+    otherSpace () {
       const spaceId = this.card.linkToSpaceId
       const space = this.otherSpaceById(spaceId)
       return space
-    },
-    linkName () {
-      const space = this.linkToSpace
-      if (space) {
-        return space.name
-      } else {
-        return 'Space is loading or invalid'
-      }
     },
     isInvitedButCannotEditSpace () { return this['currentUser/isInvitedButCannotEditSpace']() },
     maxCardLength () { return consts.maxCardLength },
@@ -1183,7 +1164,7 @@ export default {
       const textIsValid = !utils.hasBlankCharacters(text)
       return textIsValid && characterBeforeSlashIsBlank
     },
-    showotherSpaceDetailsIsVisible (event) {
+    showOtherSpaceDetailsIsVisible ({ event }) {
       this.closeDialogs()
       // position
       const linkRect = event.target.getBoundingClientRect()

@@ -91,7 +91,7 @@ article#card(
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
             template(v-for="segment in nameSegments")
-              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showotherSpaceDetailsIsVisible="showotherSpaceDetailsIsVisible")
+              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showOtherSpaceDetailsIsVisible="showOtherSpaceDetailsIsVisible")
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
@@ -147,7 +147,7 @@ article#card(
           :isLoadingUrlPreview="isLoadingUrlPreview"
         )
       template(v-if="otherCardIsVisible")
-        OtherCardPreview(:visible="otherCardIsVisible" :otherCardId="card.linkToCardId" :otherSpaceId="card.linkToSpaceId" @selectOtherCard="showOtherCardDetailsIsVisible")
+        OtherCardPreview(:otherCardId="card.linkToCardId" :otherSpaceId="card.linkToSpaceId" @selectOtherCard="showOtherCardDetailsIsVisible")
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -1656,7 +1656,7 @@ export default {
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
     },
-    showotherSpaceDetailsIsVisible ({ event, otherItem }) {
+    showOtherSpaceDetailsIsVisible ({ event, otherItem }) {
       if (isMultiTouch) { return }
       if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
       this.$store.dispatch('currentCards/incrementZ', this.id)

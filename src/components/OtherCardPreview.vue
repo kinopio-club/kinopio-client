@@ -8,7 +8,6 @@ import { useStore } from 'vuex'
 const store = useStore()
 
 const props = defineProps({
-  visible: Boolean,
   otherCardId: String,
   otherSpaceId: String
   // shouldTruncateName: Boolean
@@ -20,12 +19,14 @@ const url = computed(() => utils.urlFromSpaceAndCard({ cardId: props.otherCardId
 
 // update card
 const state = reactive({
-  otherCard: {},
+  otherCard: undefined,
   nameSegments: []
 })
 watch(() => store.state.isLoadingOtherItems, (value, prevValue) => {
   if (!value) {
-    state.otherCard = store.getters.otherCardById(props.otherCardId)
+    let otherCard = store.getters.otherCardById(props.otherCardId)
+    if (!otherCard) { return }
+    state.otherCard = otherCard
     updateNameSegments()
   }
 })
@@ -36,22 +37,25 @@ const updateNameSegments = () => {
 
 // dialog
 const selectOtherCard = (event) => {
-  const otherItem = utils.clone(state.otherCard)
+  let otherItem = {}
+  if (state.otherCard) {
+    otherItem = utils.clone(state.otherCard)
+  }
   emit('selectOtherCard', { event, otherItem })
 }
 
 </script>
 
 <template lang="pug">
-a.other-card-preview(v-if="visible" :href="url")
+a.other-card-preview(:href="url")
   .badge.button-badge.link-badge(@click.stop.prevent="selectOtherCard($event)")
-    template(v-if="isLoadingOtherItems")
-      Loader(:visible="true" :isSmall="true")
-      span Card
-    template(v-else)
+    template(v-if="state.otherCard")
       template(v-for="segment in state.nameSegments")
         img.card-image(v-if="segment.isImage" :src="segment.url")
         NameSegment(:segment="segment")
+    template(v-else)
+      Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")
+      span Card
 
 </template>
 

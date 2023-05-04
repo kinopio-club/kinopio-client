@@ -33,21 +33,8 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   template(v-if="segment.isTag")
     Tag(:tag="segment" :isClickable="true" :isActive="currentSelectedTag.name === segment.name" @clickTag="showTagDetailsIsVisible")
   //- Other Space
-  a.link-badge-url(v-if="segment.isLink" :href="segment.name")
-    span.badge.button-badge.link-badge(
-      :class="{ active: currentSelectedOtherItem.name === segment.name }"
-      @click.left.prevent="showotherSpaceDetailsIsVisible($event, segment)"
-      @touchend.stop.prevent="showotherSpaceDetailsIsVisible($event, segment)"
-      @keyup.stop.enter="showotherSpaceDetailsIsVisible($event, segment)"
-    )
-      template(v-if="segmentOtherSpace(segment)")
-        template(v-if="segmentOtherSpace(segment).users")
-          UserLabelInline(:user="segmentOtherSpace(segment).users[0]" :shouldHideName="true")
-        span {{segmentOtherSpace(segment).name}}
-        img.icon.private(v-if="spaceIsPrivate(segmentOtherSpace(segment))" src="@/assets/lock.svg")
-      template(v-else)
-        Loader(:visible="true" :isSmall="true")
-        span Space
+  template(v-if="segment.isLink")
+    OtherSpacePreview(:otherSpace="segment.otherSpace" :isActive="this.currentSelectedOtherItem === segment.name" @selectOtherSpace="showOtherSpaceDetailsIsVisible")
   //- File
   span.badge.secondary-on-dark-background(v-if="segment.isFile")
     img.icon(src="@/assets/file.svg")
@@ -55,9 +42,9 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
 </template>
 
 <script>
-import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
+import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
@@ -68,9 +55,9 @@ let shouldCancel = false
 export default {
   name: 'NameSegment',
   components: {
-    UserLabelInline,
     NameMatch,
     Tag,
+    OtherSpacePreview,
     Loader
   },
   props: {
@@ -118,19 +105,8 @@ export default {
     showTagDetailsIsVisible (event, tag) {
       this.$emit('showTagDetailsIsVisible', { event, tag })
     },
-    showotherSpaceDetailsIsVisible (event, otherItem) {
-      this.$emit('showotherSpaceDetailsIsVisible', { event, otherItem })
-    },
-    spaceIsPrivate (space) {
-      if (!space.privacy) { return }
-      return space.privacy === 'private'
-    },
-    segmentOtherSpace (segment) {
-      // if (segment.otherSpace) {
-      return segment.otherSpace
-      // const spaceId = utils.spaceIdFromUrl(segment.name)
-      // const space = this.$store.getters.cachedOrOtherSpaceById(spaceId)
-      // return space
+    showOtherSpaceDetailsIsVisible ({ event, otherItem }) {
+      this.$emit('showOtherSpaceDetailsIsVisible', { event, otherItem })
     },
     escapedUrl (url) {
       if (url.includes('javascript:')) {
@@ -204,9 +180,6 @@ export default {
       margin 0
       display inline-block
 
-  .link-badge-url
-    color var(--primary)
-    text-decoration none
   .strikethrough
     text-decoration line-through
   .badge

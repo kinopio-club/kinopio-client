@@ -50,10 +50,7 @@ dialog.narrow.other-space-details(v-if="visible" :open="visible" :style="styles"
   section.edit-card(v-if="!cardDetailsIsVisibleForCardId && parentCardId")
     button(@click="showCardDetails") Edit Card
   section
-    template(v-if="isLoadingOtherItems")
-      Loader(v-if="true")
-    //- TODO v-else-if handle if no data , space not found or private
-    template(v-else)
+    template(v-if="otherSpace")
       .row
         BackgroundPreview(:space="otherSpace")
         .row-title {{ otherSpace.name }}
@@ -65,6 +62,12 @@ dialog.narrow.other-space-details(v-if="visible" :open="visible" :style="styles"
             MoonPhase(v-if="otherSpace.moonPhase" :moonPhase="otherSpace.moonPhase")
             span Jump to Space{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
+    template(v-else)
+      .row(v-if="isLoadingOtherItems")
+        Loader(v-if="true")
+      .row(v-else)
+        p Space not found or is private
+
 </template>
 
 <style lang="stylus">
