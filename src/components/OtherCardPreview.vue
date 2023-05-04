@@ -10,7 +10,8 @@ const store = useStore()
 const props = defineProps({
   otherCardId: String,
   otherSpaceId: String,
-  parentCardId: String
+  parentCardId: String,
+  shouldCloseAllDialogs: Boolean
 })
 const state = reactive({
   otherCard: undefined,
@@ -52,7 +53,9 @@ const showOtherCardDetailsIsVisible = (event) => {
     otherItem.parentCardId = props.parentCardId
     store.dispatch('currentCards/incrementZ', props.parentCardId)
   }
-  store.dispatch('closeAllDialogs')
+  if (props.shouldCloseAllDialogs) {
+    store.dispatch('closeAllDialogs')
+  }
   store.commit('currentUserIsDraggingCard', false)
   const position = utils.cursorPositionInSpace(event)
   store.commit('otherItemDetailsPosition', position)

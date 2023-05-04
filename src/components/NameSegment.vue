@@ -34,7 +34,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     Tag(:tag="segment" :isClickable="true" :isActive="currentSelectedTag.name === segment.name" @clickTag="showTagDetailsIsVisible")
   //- Other Space
   template(v-if="segment.isLink")
-    OtherSpacePreview(:otherSpace="segment.otherSpace" :url="segment.name" :parentCardId="parentCardId")
+    OtherSpacePreview(:otherSpace="segment.otherSpace" :url="segment.name" :parentCardId="parentCardId" :shouldCloseAllDialogs="true")
   //- File
   span.badge.secondary-on-dark-background(v-if="segment.isFile")
     img.icon(src="@/assets/file.svg")

@@ -147,7 +147,7 @@ article#card(
           :isLoadingUrlPreview="isLoadingUrlPreview"
         )
       template(v-if="otherCardIsVisible")
-        OtherCardPreview(:otherCardId="card.linkToCardId" :otherSpaceId="card.linkToSpaceId" :parentCardId="card.id")
+        OtherCardPreview(:otherCardId="card.linkToCardId" :otherSpaceId="card.linkToSpaceId" :parentCardId="card.id" :shouldCloseAllDialogs="true")
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info

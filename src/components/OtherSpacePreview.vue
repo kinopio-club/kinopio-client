@@ -11,7 +11,8 @@ const props = defineProps({
   otherSpace: Object,
   otherSpaceId: String,
   url: String,
-  parentCardId: String
+  parentCardId: String,
+  shouldCloseAllDialogs: Boolean
 })
 
 const otherSpaceIsPrivate = computed(() => {
@@ -38,7 +39,9 @@ const showOtherSpaceDetailsIsVisible = (event) => {
     otherItem.parentCardId = props.parentCardId
     store.dispatch('currentCards/incrementZ', props.parentCardId)
   }
-  store.dispatch('closeAllDialogs')
+  if (props.shouldCloseAllDialogs) {
+    store.dispatch('closeAllDialogs')
+  }
   store.commit('currentUserIsDraggingCard', false)
   const position = utils.cursorPositionInSpace(event)
   store.commit('otherItemDetailsPosition', position)
