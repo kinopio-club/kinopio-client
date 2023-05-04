@@ -42,11 +42,6 @@ ReadOnlySpaceInfoBadges
 .row.align-items-top(v-if="isSpaceMember")
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-  //- Pin Favorite
-  .button-wrap
-    button(:class="{active: isFavoriteSpace}" @click.left.preven©t="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-      img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-      img.icon(v-else src="@/assets/heart-empty.svg")
   //- Settings
   .button-wrap
     button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
