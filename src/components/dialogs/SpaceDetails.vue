@@ -234,6 +234,7 @@ export default {
       return spaces
     },
     updateLocalSpaces () {
+      if (!this.visible) { return }
       this.debouncedUpdateLocalSpaces()
     },
     debouncedUpdateLocalSpaces: debounce(async function () {

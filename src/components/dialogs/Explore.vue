@@ -11,7 +11,15 @@ dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height'
     p(v-if="loading")
       Loader(:visible="loading")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="exploreSpaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace" :userShowInExploreDate="userShowInExploreDate" :resultsSectionHeight="resultsSectionHeight")
+    SpaceList(
+      :spaces="exploreSpaces"
+      :showUser="true"
+      :hideExploreBadge="true"
+      @selectSpace="changeSpace"
+      :userShowInExploreDate="userShowInExploreDate"
+      :resultsSectionHeight="resultsSectionHeight"
+      :showFavoriteButton="true"
+    )
 </template>
 
 <script>
