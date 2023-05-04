@@ -2,6 +2,7 @@
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import UserList from '@/components/UserList.vue'
+import consts from '@/consts.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
@@ -28,7 +29,7 @@ const styles = computed(() => {
   return { transform: `scale(${zoom})`, left, top }
 })
 const otherCard = computed(() => store.state.currentSelectedOtherItem)
-// const otherSpace = computed(() => store.getters.otherSpaceById(otherCard.value.spaceId))
+const url = computed(() => `${utils.kinopioDomain()}/${otherCard.value.spaceId}/${otherCard.value.id}`)
 const canEdit = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value))
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 
@@ -40,23 +41,67 @@ const showCardDetails = () => {
   store.dispatch('currentCards/showCardDetails', parentCardId.value)
 }
 
+// edit card
+const maxCardLength = () => { return consts.maxCardLength }
+const name = {
+  get () {
+    return otherCard.value.name
+  },
+  set (newName) {
+    console.log('🌷', newName)
+    // if (this.shouldPreventNextEnterKey) {
+    //   this.$store.commit('shouldPreventNextEnterKey', false)
+    //   this.updateCardName(newName.trim())
+    // } else {
+    //   this.updateCardName(newName)
+    // }
+    // if (this.wasPasted) {
+    //   this.wasPasted = false
+    // } else {
+    //   this.pastedName = ''
+    // }
+    // this.updateNameSplitIntoCardsCount()
+  }
+}
+
+// jump to card
+const changeSpace = () => {
+  console.log('🌻')
+  // store.dispatch('currentSpace/changeSpace', { space: otherSpace.value, isRemote: true })
+  // store.dispatch('closeAllDialogs')
+}
+
 </script>
 
 <template lang="pug">
 dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" @click.left.stop ref="dialog")
-  //- edit card
+  //- edit parent card
   section.edit-card(v-if="!cardDetailsIsVisibleForCardId && parentCardId")
     button(@click="showCardDetails") Edit Card
   section
-    template(v-if="isLoadingOtherItems")
-      Loader(v-if="true")
-    //- TODO v-else-if handle if no data , card not found or private
-    template(v-else)
+    template(v-if="otherCard")
+      //- edit
+      .row(v-if="canEdit")
+        .textarea-wrap
+          textarea.name(
+            v-model="name"
+            :maxlength="maxCardLength"
+          )
+      //- read
+      .row(v-else)
+        p {{otherCard.name}}
       .row
-        p hihi name
-        //- -> url btn on top of name if name contains url
+        a(:href="url")
+          button(@click.stop.prevent="changeSpace" @keyup.enter.prevent="changeSpace")
+            span Jump to Card{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
 
-        //- jump to card
+    template(v-else)
+      .row(v-if="isLoadingOtherItems")
+        Loader(:visible="true")
+      .row(v-else)
+        .badge.danger Card not found or is private
+
 </template>
 
 <style lang="stylus">

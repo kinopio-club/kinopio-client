@@ -27,6 +27,7 @@ const styles = computed(() => {
 const otherSpace = computed(() => store.state.currentSelectedOtherItem.otherSpace)
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const spaceUsers = computed(() => otherSpace.value.users)
+const url = computed(() => `${utils.kinopioDomain()}/${otherSpace.value.id}`)
 
 // jump to space
 const changeSpace = () => {
@@ -57,16 +58,16 @@ dialog.narrow.other-space-details(v-if="visible" :open="visible" :style="styles"
       .row.badges-wrap
         UserList(:users="spaceUsers" :isClickable="false")
       .row
-        a(:href="otherSpace.url")
+        a(:href="url")
           button(@click.stop.prevent="changeSpace" @keyup.enter.prevent="changeSpace")
             MoonPhase(v-if="otherSpace.moonPhase" :moonPhase="otherSpace.moonPhase")
             span Jump to Space{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
     template(v-else)
       .row(v-if="isLoadingOtherItems")
-        Loader(v-if="true")
+        Loader(:visible="true")
       .row(v-else)
-        p Space not found or is private
+        .badge.danger Space not found or is private
 
 </template>
 

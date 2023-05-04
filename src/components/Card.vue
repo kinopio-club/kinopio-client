@@ -91,7 +91,7 @@ article#card(
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
             template(v-for="segment in nameSegments")
-              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showOtherSpaceDetailsIsVisible="showOtherSpaceDetailsIsVisible")
+              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id")
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
@@ -147,7 +147,7 @@ article#card(
           :isLoadingUrlPreview="isLoadingUrlPreview"
         )
       template(v-if="otherCardIsVisible")
-        OtherCardPreview(:otherCardId="card.linkToCardId" :otherSpaceId="card.linkToSpaceId" @selectOtherCard="showOtherCardDetailsIsVisible")
+        OtherCardPreview(:otherCardId="card.linkToCardId" :otherSpaceId="card.linkToSpaceId" :parentCardId="card.id")
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -263,6 +263,8 @@ export default {
         }
       } else if (type === 'triggerUpdateTheme') {
         this.defaultColor = utils.cssVariable('secondary-background')
+      } else if (type === 'triggerCancelLocking') {
+        this.cancelLocking()
       }
     })
   },
@@ -382,7 +384,6 @@ export default {
       'currentConnections/typeForNewConnections',
       'currentUser/isSpaceMember',
       'currentCards/cardIdsConnectedToCardId',
-      'otherSpaceById',
       'currentUser/canEditSpace',
       'currentConnections/typesByCardId',
       'currentUser/totalCardFadingFiltersActive',
@@ -819,8 +820,8 @@ export default {
         // links
         } else if (segment.isLink) {
           const { spaceId, cardId } = utils.spaceAndCardIdFromUrl(segment.name)
-          segment.otherSpace = this.otherSpace(spaceId, segment.name)
-          segment.otherCard = this.otherCard(cardId, segment.name)
+          segment.otherSpace = this.$store.getters.otherSpaceById(spaceId)
+          segment.otherCard = this.$store.getters.otherCardById(cardId)
         } else if (segment.isText) {
           segment.markdown = utils.markdownSegments(segment.content)
         }
@@ -1656,56 +1657,6 @@ export default {
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
     },
-    showOtherSpaceDetailsIsVisible ({ event, otherItem }) {
-      if (isMultiTouch) { return }
-      if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
-      this.$store.dispatch('currentCards/incrementZ', this.id)
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('currentUserIsDraggingCard', false)
-      const rect = event.target.getBoundingClientRect()
-      this.$store.commit('otherItemDetailsPosition', rect)
-      otherItem.parentCardId = this.id
-      this.$store.commit('currentSelectedOtherItem', otherItem)
-      this.$store.commit('otherSpaceDetailsIsVisible', true)
-      this.cancelLocking()
-      this.$store.commit('currentUserIsDraggingCard', false)
-    },
-    showOtherCardDetailsIsVisible ({ event, otherItem }) {
-      if (isMultiTouch) { return }
-      if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
-      this.$store.dispatch('currentCards/incrementZ', this.id)
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('currentUserIsDraggingCard', false)
-      const rect = event.target.getBoundingClientRect()
-      this.$store.commit('otherItemDetailsPosition', rect)
-      otherItem.parentCardId = this.id
-      this.$store.commit('currentSelectedOtherItem', otherItem)
-      this.$store.commit('otherCardDetailsIsVisible', true)
-      this.cancelLocking()
-      this.$store.commit('currentUserIsDraggingCard', false)
-    },
-
-    otherSpace (spaceId, url) {
-      let space = this.otherSpaceById(spaceId)
-      // if (!space) {
-      //   space = {
-      //     name: url,
-      //     url: spaceId
-      //   }
-      // }
-      return space
-    },
-    otherCard (cardId, url) {
-      let card = this.$store.getters.otherCardById(cardId)
-      // if (!card) {
-      //   card = {
-      //     name: url,
-      //     url: cardId
-      //   }
-      // }
-      return card
-    },
-
     openUrl (event, url) {
       if (event) {
         if (event.metaKey || event.ctrlKey) {

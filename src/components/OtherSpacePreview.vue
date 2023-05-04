@@ -10,9 +10,9 @@ const store = useStore()
 const props = defineProps({
   otherSpace: Object,
   isActive: Boolean,
-  url: String
+  url: String,
+  parentCardId: String
 })
-const emit = defineEmits(['selectOtherSpace'])
 
 const otherSpaceIsPrivate = computed(() => {
   if (!props.otherSpace.privacy) { return }
@@ -21,20 +21,32 @@ const otherSpaceIsPrivate = computed(() => {
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 
 // dialog
-const selectOtherSpace = (event) => {
+const showOtherSpaceDetailsIsVisible = (event) => {
+  if (utils.isMultiTouch(event)) { return }
+  if (store.state.preventDraggedCardFromShowingDetails) { return }
   let otherItem = {}
-  if (props.otherSpace) {
+  if (props.otherItem) {
     otherItem = utils.clone(props.otherSpace)
   }
-  console.log(event.target)
-  emit('selectOtherSpace', { event, otherItem })
+  if (props.parentCardId) {
+    otherItem.parentCardId = props.parentCardId
+    store.dispatch('currentCards/incrementZ', props.parentCardId)
+  }
+  store.dispatch('closeAllDialogs')
+  store.commit('currentUserIsDraggingCard', false)
+  const rect = event.target.getBoundingClientRect()
+  store.commit('otherItemDetailsPosition', rect)
+  store.commit('currentSelectedOtherItem', otherItem)
+  store.commit('otherSpaceDetailsIsVisible', true)
+  store.commit('triggerCancelLocking')
+  store.commit('currentUserIsDraggingCard', false)
 }
 
 </script>
 
 <template lang="pug">
-a.other-space-preview(:href="props.url")
-  .badge.button-badge.link-badge(:class="{ active: isActive }" @click.stop.prevent="selectOtherSpace($event)")
+a.other-space-preview(:href="props.url" ref="badge")
+  .badge.button-badge.link-badge(:class="{ active: isActive }" @click.stop.prevent="showOtherSpaceDetailsIsVisible($event)")
     template(v-if="otherSpace")
       template(v-if="otherSpace.users")
         UserLabelInline(:user="otherSpace.users[0]" :shouldHideName="true")
@@ -47,23 +59,8 @@ a.other-space-preview(:href="props.url")
 </template>
 
 <style lang="stylus">
-// .other-space-preview
-//   display block
-//   text-decoration none
-//   word-wrap break-word
-//   .link-badge
-//     display block
-//     margin 0
-//   .card-image
-//     vertical-align middle
-//     border-radius var(--entity-radius)
-//     max-height 100px
-//     display block
-//     margin 4px 0px
-//   .tag
-//     display inline-block
-//   .badge
-//     > .loader
-//       vertical-align -2px
+.other-space-preview
+  text-decoration none
+  // word-wrap break-word
 
 </style>

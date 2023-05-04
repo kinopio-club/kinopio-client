@@ -114,10 +114,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Tags
       template(v-for="tag in tagsInCard")
         Tag(:tag="tag" :isClickable="true" :isActive="currentSelectedTag.name === tag.name" @clickTag="showTagDetailsIsVisible")
-
-      //- Other Space
-      template(v-if="card.linkToSpaceId")
-        OtherSpacePreview(:otherSpace="otherSpace" :url="otherSpaceUrl" :isActive="currentSelectedOtherItemisActive" @selectOtherSpace="showOtherSpaceDetailsIsVisible")
       //- Comment
       .badge.info(v-if="nameIsComment" :style="{backgroundColor: updatedByUser.color}")
         span ((comment))
@@ -192,7 +188,6 @@ import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
 import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
-import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -221,8 +216,7 @@ export default {
     UrlPreview,
     MediaPreview,
     UserLabelInline,
-    CardCollaborationInfo,
-    OtherSpacePreview
+    CardCollaborationInfo
   },
   data () {
     return {
@@ -319,12 +313,11 @@ export default {
       'currentSpace/isFavorite',
       'currentUser/cardIsCreatedByCurrentUser',
       'currentUser/canEditSpace',
-      'otherSpaceById',
       'currentUser/isInvitedButCannotEditSpace'
     ]),
     rowIsBelowItemActions () { return this.nameMetaRowIsVisible || this.badgesRowIsVisible || this.shouldShowItemActions || this.cardHasMedia || this.cardUrlPreviewIsVisible },
     nameMetaRowIsVisible () { return this.nameSplitIntoCardsCount },
-    badgesRowIsVisible () { return this.tagsInCard.length || this.card.linkToSpaceId || this.nameIsComment || this.isInSearchResultsCards },
+    badgesRowIsVisible () { return this.tagsInCard.length || this.nameIsComment || this.isInSearchResultsCards },
     parentElement () { return this.$refs.dialog },
     card () {
       const cardId = this.cardDetailsIsVisibleForCardId
@@ -350,15 +343,6 @@ export default {
       if (this.isSpaceMember) { return true }
       if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
       return false
-    },
-    otherSpace () {
-      const spaceId = this.card.linkToSpaceId
-      const space = this.otherSpaceById(spaceId)
-      return space
-    },
-    otherSpaceUrl () {
-      const spaceId = this.card.linkToSpaceId
-      return `${utils.kinopioDomain()}/${spaceId}`
     },
     isInvitedButCannotEditSpace () { return this['currentUser/isInvitedButCannotEditSpace']() },
     maxCardLength () { return consts.maxCardLength },
@@ -387,10 +371,6 @@ export default {
         tags.push(tag)
       })
       return tags
-    },
-    currentSelectedOtherItemisActive () {
-      if (!this.currentSelectedOtherItem.space) { return }
-      return this.currentSelectedOtherItem.space.id === this.card.linkToSpaceId
     },
     currentUserIsSpaceMember () { return this['currentUser/isSpaceMember']() },
     isFavoriteSpace () { return this['currentSpace/isFavorite'] },
@@ -979,7 +959,6 @@ export default {
       this.hidePickers()
       if (shouldSkipGlobalDialogs === true) { return }
       this.hideTagDetailsIsVisible()
-      this.hideotherSpaceDetailsIsVisible()
     },
     clickName (event) {
       this.triggerUpdateMagicPaintPositionOffset()
@@ -1168,17 +1147,6 @@ export default {
       const textIsValid = !utils.hasBlankCharacters(text)
       return textIsValid && characterBeforeSlashIsBlank
     },
-    showOtherSpaceDetailsIsVisible ({ event, otherItem }) {
-      this.closeDialogs()
-      // position
-      const linkRect = event.target.getBoundingClientRect()
-      this.$store.commit('otherItemDetailsPosition', {
-        x: window.scrollX + linkRect.x + 2,
-        y: window.scrollY + linkRect.y + linkRect.height - 2
-      })
-      this.$store.commit('currentSelectedOtherItem', otherItem)
-      this.$store.commit('otherSpaceDetailsIsVisible', true)
-    },
     replaceSlashCommandWithSpaceUrl (space) {
       let name = this.card.name
       let position = this.slashTextPosition()
@@ -1326,10 +1294,6 @@ export default {
     hideTagDetailsIsVisible () {
       this.$store.commit('currentSelectedTag', {})
       this.$store.commit('tagDetailsIsVisible', false)
-    },
-    hideotherSpaceDetailsIsVisible () {
-      this.$store.commit('currentSelectedOtherItem', {})
-      this.$store.commit('otherSpaceDetailsIsVisible', false)
     },
     showTagDetailsIsVisible (event, tag) {
       this.closeDialogs()

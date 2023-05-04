@@ -34,7 +34,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     Tag(:tag="segment" :isClickable="true" :isActive="currentSelectedTag.name === segment.name" @clickTag="showTagDetailsIsVisible")
   //- Other Space
   template(v-if="segment.isLink")
-    OtherSpacePreview(:otherSpace="segment.otherSpace" :url="segment.name" :isActive="this.currentSelectedOtherItem === segment.name" @selectOtherSpace="showOtherSpaceDetailsIsVisible")
+    OtherSpacePreview(:otherSpace="segment.otherSpace" :url="segment.name" :isActive="this.currentSelectedOtherItem.name === segment.name" :parentCardId="parentCardId")
   //- File
   span.badge.secondary-on-dark-background(v-if="segment.isFile")
     img.icon(src="@/assets/file.svg")
@@ -63,7 +63,8 @@ export default {
   props: {
     segment: Object,
     search: String,
-    isStrikeThrough: Boolean
+    isStrikeThrough: Boolean,
+    parentCardId: String
   },
   computed: {
     currentSelectedTag () { return this.$store.state.currentSelectedTag },
@@ -104,9 +105,6 @@ export default {
     },
     showTagDetailsIsVisible (event, tag) {
       this.$emit('showTagDetailsIsVisible', { event, tag })
-    },
-    showOtherSpaceDetailsIsVisible (options) {
-      this.$emit('showOtherSpaceDetailsIsVisible', options)
     },
     escapedUrl (url) {
       if (url.includes('javascript:')) {

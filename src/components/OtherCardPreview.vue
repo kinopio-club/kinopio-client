@@ -9,10 +9,9 @@ const store = useStore()
 
 const props = defineProps({
   otherCardId: String,
-  otherSpaceId: String
-  // shouldTruncateName: Boolean
+  otherSpaceId: String,
+  parentCardId: String
 })
-const emit = defineEmits(['selectOtherCard'])
 
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const url = computed(() => utils.urlFromSpaceAndCard({ cardId: props.otherCardId, spaceId: props.otherSpaceId }))
@@ -36,19 +35,32 @@ const updateNameSegments = () => {
 }
 
 // dialog
-const selectOtherCard = (event) => {
+const showOtherCardDetailsIsVisible = (event) => {
+  if (utils.isMultiTouch(event)) { return }
+  if (store.state.preventDraggedCardFromShowingDetails) { return }
   let otherItem = {}
-  if (state.otherCard) {
-    otherItem = utils.clone(state.otherCard)
+  if (props.otherItem) {
+    otherItem = utils.clone(props.otherCard)
   }
-  emit('selectOtherCard', { event, otherItem })
+  if (props.parentCardId) {
+    otherItem.parentCardId = props.parentCardId
+    store.dispatch('currentCards/incrementZ', props.parentCardId)
+  }
+  store.dispatch('closeAllDialogs')
+  store.commit('currentUserIsDraggingCard', false)
+  const rect = event.target.getBoundingClientRect()
+  store.commit('otherItemDetailsPosition', rect)
+  store.commit('currentSelectedOtherItem', otherItem)
+  store.commit('otherCardDetailsIsVisible', true)
+  store.commit('triggerCancelLocking')
+  store.commit('currentUserIsDraggingCard', false)
 }
 
 </script>
 
 <template lang="pug">
 a.other-card-preview(:href="url")
-  .badge.button-badge.link-badge(@click.stop.prevent="selectOtherCard($event)")
+  .badge.button-badge.link-badge(@click.stop.prevent="showOtherCardDetailsIsVisible($event)")
     template(v-if="state.otherCard")
       template(v-for="segment in state.nameSegments")
         img.card-image(v-if="segment.isImage" :src="segment.url")
