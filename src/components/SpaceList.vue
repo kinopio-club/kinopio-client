@@ -504,5 +504,6 @@ export default {
     right 4px
     top 3px
     padding 6px
+    padding-right 0
 
 </style>
