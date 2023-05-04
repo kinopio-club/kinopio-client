@@ -8,10 +8,7 @@ import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, ne
 import { useStore } from 'vuex'
 const store = useStore()
 
-onMounted(() => {
-  console.log(`🍆 the dialog is now mounted.`, store.state.currentSpace)
-})
-
+// layout
 const visible = computed(() => store.state.otherCardDetailsIsVisible)
 const styles = computed(() => {
   const position = store.state.otherItemDetailsPosition
@@ -23,11 +20,12 @@ const styles = computed(() => {
   if (store.state.isTouchDevice) {
     zoom = 1 / utils.visualViewport().scale
   }
-  console.log('☔️☔️', otherCard.value, canEdit.value)
   const left = `${position.x + 8}px`
   const top = `${position.y + 8}px`
   return { transform: `scale(${zoom})`, left, top }
 })
+
+// state
 const otherCard = computed(() => store.state.currentSelectedOtherItem)
 const url = computed(() => `${utils.kinopioDomain()}/${otherCard.value.spaceId}/${otherCard.value.id}`)
 const canEdit = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value))
@@ -43,25 +41,13 @@ const showCardDetails = () => {
 
 // edit card
 const maxCardLength = () => { return consts.maxCardLength }
-const name = {
-  get () {
-    return otherCard.value.name
-  },
-  set (newName) {
-    console.log('🌷', newName)
-    // if (this.shouldPreventNextEnterKey) {
-    //   this.$store.commit('shouldPreventNextEnterKey', false)
-    //   this.updateCardName(newName.trim())
-    // } else {
-    //   this.updateCardName(newName)
-    // }
-    // if (this.wasPasted) {
-    //   this.wasPasted = false
-    // } else {
-    //   this.pastedName = ''
-    // }
-    // this.updateNameSplitIntoCardsCount()
-  }
+const updateName = (newName) => {
+  // update local
+  store.commit('updateCardNameInOtherItems', { id: otherCard.value.id, name: newName })
+  store.commit('triggerUpdateOtherCard', otherCard.value.id)
+  // update remote
+  // TODO
+  // console.log(newName, store.state.otherItems.cards)
 }
 
 // jump to card
@@ -84,8 +70,9 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
       .row(v-if="canEdit")
         .textarea-wrap
           textarea.name(
-            v-model="name"
-            :maxlength="maxCardLength"
+            :value="otherCard.name"
+            @input="updateName($event.target.value)"
+            :maxlength="maxCardLength()"
           )
       //- read
       .row(v-else)
@@ -114,4 +101,7 @@ dialog.other-card-details
     margin-left 4px
   .badges-wrap
     flex-wrap wrap
+  .textarea-wrap,
+  textarea
+    width 100%
 </style>

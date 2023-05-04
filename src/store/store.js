@@ -548,6 +548,7 @@ const store = createStore({
     triggerCardIdUpdatePastedName: (state, options) => {},
     triggerDrawConnectionFrame: (state, event) => {},
     triggerCancelLocking: () => {},
+    triggerUpdateOtherCard: (state, cardId) => {},
 
     // Used by extensions only
 
@@ -1393,6 +1394,14 @@ const store = createStore({
         otherItems.spaces = uniqBy(otherItems.spaces, 'id')
       }
       state.otherItems = otherItems
+    },
+    updateCardNameInOtherItems: (state, { id, name }) => {
+      state.otherItems.cards = state.otherItems.cards.map(card => {
+        if (card.id === id) {
+          card.name = name
+        }
+        return card
+      })
     },
     otherTags: (state, remoteTags) => {
       remoteTags = uniqBy(remoteTags, 'name')

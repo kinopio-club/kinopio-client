@@ -17,6 +17,15 @@ const state = reactive({
   nameSegments: []
 })
 
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerUpdateOtherCard') {
+      if (mutation.payload !== props.otherCard.id) { return }
+      updateNameSegments()
+    }
+  })
+})
+
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 
 const isActive = computed(() => {
@@ -92,6 +101,7 @@ a.other-card-preview(:href="props.url")
     margin 4px 0px
   .tag
     display inline-block
+    pointer-events none
   .badge
     > .loader
       vertical-align -2px

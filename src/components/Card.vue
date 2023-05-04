@@ -400,7 +400,8 @@ export default {
     otherCardIsVisible () { return Boolean(this.card.linkToCardId) },
     otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
     otherCard () {
-      return this.$store.getters.otherCardById(this.card.linkToCardId)
+      const card = this.$store.getters.otherCardById(this.card.linkToCardId)
+      return card
     },
     isConnectorDarkInLightTheme () {
       if (this.connectionTypeColorisDark) { return this.connectionTypeColorisDark }
