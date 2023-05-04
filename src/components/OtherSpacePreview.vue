@@ -9,7 +9,7 @@ const store = useStore()
 
 const props = defineProps({
   otherSpace: Object,
-  isActive: Boolean,
+  otherSpaceId: String,
   url: String,
   parentCardId: String
 })
@@ -20,12 +20,18 @@ const otherSpaceIsPrivate = computed(() => {
 })
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 
+const isActive = computed(() => {
+  const isFromParentCard = store.state.currentSelectedOtherItem.parentCardId === props.parentCardId
+  const otherSpaceDetailsIsVisible = store.state.otherSpaceDetailsIsVisible
+  return otherSpaceDetailsIsVisible && isFromParentCard
+})
+
 // dialog
 const showOtherSpaceDetailsIsVisible = (event) => {
   if (utils.isMultiTouch(event)) { return }
   if (store.state.preventDraggedCardFromShowingDetails) { return }
   let otherItem = {}
-  if (props.otherItem) {
+  if (props.otherSpace) {
     otherItem = utils.clone(props.otherSpace)
   }
   if (props.parentCardId) {
@@ -34,8 +40,8 @@ const showOtherSpaceDetailsIsVisible = (event) => {
   }
   store.dispatch('closeAllDialogs')
   store.commit('currentUserIsDraggingCard', false)
-  const rect = event.target.getBoundingClientRect()
-  store.commit('otherItemDetailsPosition', rect)
+  const position = utils.cursorPositionInSpace(event)
+  store.commit('otherItemDetailsPosition', position)
   store.commit('currentSelectedOtherItem', otherItem)
   store.commit('otherSpaceDetailsIsVisible', true)
   store.commit('triggerCancelLocking')

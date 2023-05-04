@@ -12,15 +12,21 @@ const props = defineProps({
   otherSpaceId: String,
   parentCardId: String
 })
-
-const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
-const url = computed(() => utils.urlFromSpaceAndCard({ cardId: props.otherCardId, spaceId: props.otherSpaceId }))
-
-// update card
 const state = reactive({
   otherCard: undefined,
   nameSegments: []
 })
+
+const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
+const url = computed(() => utils.urlFromSpaceAndCard({ cardId: props.otherCardId, spaceId: props.otherSpaceId }))
+
+const isActive = computed(() => {
+  const isFromParentCard = store.state.currentSelectedOtherItem.parentCardId === props.parentCardId
+  const otherCardDetailsIsVisible = store.state.otherCardDetailsIsVisible
+  return otherCardDetailsIsVisible && isFromParentCard
+})
+
+// update card
 watch(() => store.state.isLoadingOtherItems, (value, prevValue) => {
   if (!value) {
     let otherCard = store.getters.otherCardById(props.otherCardId)
@@ -39,7 +45,7 @@ const showOtherCardDetailsIsVisible = (event) => {
   if (utils.isMultiTouch(event)) { return }
   if (store.state.preventDraggedCardFromShowingDetails) { return }
   let otherItem = {}
-  if (props.otherItem) {
+  if (state.otherCard) {
     otherItem = utils.clone(props.otherCard)
   }
   if (props.parentCardId) {
@@ -48,8 +54,8 @@ const showOtherCardDetailsIsVisible = (event) => {
   }
   store.dispatch('closeAllDialogs')
   store.commit('currentUserIsDraggingCard', false)
-  const rect = event.target.getBoundingClientRect()
-  store.commit('otherItemDetailsPosition', rect)
+  const position = utils.cursorPositionInSpace(event)
+  store.commit('otherItemDetailsPosition', position)
   store.commit('currentSelectedOtherItem', otherItem)
   store.commit('otherCardDetailsIsVisible', true)
   store.commit('triggerCancelLocking')
@@ -60,7 +66,7 @@ const showOtherCardDetailsIsVisible = (event) => {
 
 <template lang="pug">
 a.other-card-preview(:href="url")
-  .badge.button-badge.link-badge(@click.stop.prevent="showOtherCardDetailsIsVisible($event)")
+  .badge.button-badge.link-badge(:class="{ active: isActive }" @click.stop.prevent="showOtherCardDetailsIsVisible($event)")
     template(v-if="state.otherCard")
       template(v-for="segment in state.nameSegments")
         img.card-image(v-if="segment.isImage" :src="segment.url")
