@@ -24,7 +24,7 @@ const styles = computed(() => {
   const top = `${position.y + 8}px`
   return { transform: `scale(${zoom})`, left, top }
 })
-const otherSpace = computed(() => store.state.currentSelectedOtherItem.otherSpace)
+const otherSpace = computed(() => store.state.currentSelectedOtherItem)
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const spaceUsers = computed(() => otherSpace.value.users)
 const url = computed(() => `${utils.kinopioDomain()}/${otherSpace.value.id}`)
@@ -51,7 +51,7 @@ dialog.narrow.other-space-details(v-if="visible" :open="visible" :style="styles"
   section.edit-card(v-if="!cardDetailsIsVisibleForCardId && parentCardId")
     button(@click="showCardDetails") Edit Card
   section
-    template(v-if="otherSpace")
+    template(v-if="otherSpace.id")
       .row
         BackgroundPreview(:space="otherSpace")
         .row-title {{ otherSpace.name }}

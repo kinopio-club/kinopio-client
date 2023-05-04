@@ -79,7 +79,7 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
   section.edit-card(v-if="!cardDetailsIsVisibleForCardId && parentCardId")
     button(@click="showCardDetails") Edit Card
   section
-    template(v-if="otherCard")
+    template(v-if="otherCard.id")
       //- edit
       .row(v-if="canEdit")
         .textarea-wrap
