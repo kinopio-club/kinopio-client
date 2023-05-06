@@ -9,12 +9,14 @@ import { useStore } from 'vuex'
 const store = useStore()
 
 // state
+
 const otherCard = computed(() => store.state.currentSelectedOtherItem)
 const url = computed(() => `${utils.kinopioDomain()}/${otherCard.value.spaceId}/${otherCard.value.id}`)
 const canEdit = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value))
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 
 // visible
+
 const visible = computed(() => {
   const isVisible = store.state.otherCardDetailsIsVisible
   if (isVisible) {
@@ -25,6 +27,7 @@ const visible = computed(() => {
 })
 
 // dialog styles
+
 const styles = computed(() => {
   const position = store.state.otherItemDetailsPosition
   const isChildDialog = cardDetailsIsVisibleForCardId
@@ -41,6 +44,7 @@ const styles = computed(() => {
 })
 
 // textarea styles
+
 const textarea = ref(null)
 const textareaStyles = async () => {
   await nextTick()
@@ -54,6 +58,7 @@ const focusTextarea = async () => {
 }
 
 // edit parent card
+
 const parentCardId = computed(() => store.state.currentSelectedOtherItem.parentCardId)
 const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
 const showCardDetails = () => {
@@ -62,6 +67,7 @@ const showCardDetails = () => {
 }
 
 // edit card
+
 const maxCardLength = () => { return consts.maxCardLength }
 const updateName = (newName) => {
   // update local
@@ -74,11 +80,27 @@ const updateName = (newName) => {
   textareaStyles()
 }
 
-// jump to card
-const changeSpace = () => {
-  console.log('🌻')
-  // store.dispatch('currentSpace/changeSpace', { space: otherSpace.value, isRemote: true })
-  // store.dispatch('closeAllDialogs')
+// select card
+
+const selectCard = (card) => {
+  store.dispatch('closeAllDialogs')
+  store.dispatch('currentCards/showCardDetails', card.id)
+}
+const changeSpace = (spaceId) => {
+  if (store.state.currentSpace.id === spaceId) { return }
+  const space = { id: spaceId }
+  store.dispatch('closeAllDialogs')
+  store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+}
+const selectSpaceCard = () => {
+  store.dispatch('closeAllDialogs')
+  const isCardInCurrentSpace = otherCard.value.spaceId === store.state.currentSpace.id
+  if (isCardInCurrentSpace) {
+    selectCard(otherCard)
+  } else {
+    store.commit('loadSpaceShowDetailsForCardId', otherCard.value.id)
+    changeSpace(otherCard.value.spaceId)
+  }
 }
 
 </script>
@@ -100,12 +122,14 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
             @input="updateName($event.target.value)"
             :maxlength="maxCardLength()"
           )
+        //- TODO floating url btn
       //- read
       .row(v-else)
         p {{otherCard.name}}
+        //- TODO floating url btn
       .row
         a(:href="url")
-          button(@click.stop.prevent="changeSpace" @keyup.enter.prevent="changeSpace")
+          button(@click.stop.prevent="selectSpaceCard" @keyup.enter.prevent="selectSpaceCard")
             span Jump to Card{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
 

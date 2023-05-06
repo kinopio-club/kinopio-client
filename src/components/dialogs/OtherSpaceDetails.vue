@@ -9,7 +9,16 @@ import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, ne
 import { useStore } from 'vuex'
 const store = useStore()
 
+// state
+
 const visible = computed(() => store.state.otherSpaceDetailsIsVisible)
+const otherSpace = computed(() => store.state.currentSelectedOtherItem)
+const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
+const spaceUsers = computed(() => otherSpace.value.users)
+const url = computed(() => `${utils.kinopioDomain()}/${otherSpace.value.id}`)
+
+// dialog styles
+
 const styles = computed(() => {
   const position = store.state.otherItemDetailsPosition
   const isChildDialog = cardDetailsIsVisibleForCardId
@@ -24,18 +33,16 @@ const styles = computed(() => {
   const top = `${position.y + 8}px`
   return { transform: `scale(${zoom})`, left, top }
 })
-const otherSpace = computed(() => store.state.currentSelectedOtherItem)
-const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
-const spaceUsers = computed(() => otherSpace.value.users)
-const url = computed(() => `${utils.kinopioDomain()}/${otherSpace.value.id}`)
 
-// jump to space
+// select space
+
 const changeSpace = () => {
   store.dispatch('currentSpace/changeSpace', { space: otherSpace.value, isRemote: true })
   store.dispatch('closeAllDialogs')
 }
 
 // edit parent card
+
 const parentCardId = computed(() => store.state.currentSelectedOtherItem.parentCardId)
 const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
 const showCardDetails = () => {
