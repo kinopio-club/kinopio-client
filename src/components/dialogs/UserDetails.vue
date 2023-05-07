@@ -59,11 +59,6 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
           span Sign Out
         button(v-else @click.left="triggerSignUpOrInIsVisible")
           span Sign Up or In
-      template(v-if="currentUserIsUpgraded")
-        .row
-          .button-wrap
-            button(@click.left.stop="triggerDonateIsVisible")
-              span Donate
 
   //- Other User
   section(v-if="!isCurrentUser && userIsSignedIn && user.id")
@@ -245,10 +240,6 @@ export default {
       const value = !this.$store.state.userSettingsIsVisible
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('userSettingsIsVisible', value)
-    },
-    triggerDonateIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerDonateIsVisible')
     },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible

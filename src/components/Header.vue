@@ -30,7 +30,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             img.down-arrow(src="@/assets/down-arrow.svg")
           About(:visible="aboutIsVisible")
           KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-
+          Donate(:visible="donateIsVisible")
       .space-meta-rows
         .space-functions-row
           .segmented-buttons.add-space-functions
@@ -106,7 +106,6 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           SpaceUsers
           UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
           Pricing(:visible="pricingIsVisible")
-          Donate(:visible="donateIsVisible")
           ControlsSettings(:visible="controlsSettingsIsVisible")
           UserSettings
           //- Share
