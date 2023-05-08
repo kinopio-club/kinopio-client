@@ -21,11 +21,7 @@ const url = computed(() => `${utils.kinopioDomain()}/${otherSpace.value.id}`)
 
 const styles = computed(() => {
   const position = store.state.otherItemDetailsPosition
-  const isChildDialog = cardDetailsIsVisibleForCardId
   let zoom = store.getters.spaceCounterZoomDecimal
-  if (isChildDialog.value) {
-    zoom = 1
-  }
   if (store.state.isTouchDevice) {
     zoom = 1 / utils.visualViewport().scale
   }
@@ -59,11 +55,11 @@ dialog.narrow.other-space-details(v-if="visible" :open="visible" :style="styles"
     button(@click="showCardDetails") Edit Card
   section
     template(v-if="otherSpace.id")
+      .row.badges-wrap
+        UserList(:users="spaceUsers" :isClickable="false")
       .row
         BackgroundPreview(:space="otherSpace")
         .row-title {{ otherSpace.name }}
-      .row.badges-wrap
-        UserList(:users="spaceUsers" :isClickable="false")
       .row
         a(:href="url")
           button(@click.stop.prevent="changeSpace" @keyup.enter.prevent="changeSpace")
@@ -88,4 +84,6 @@ dialog.other-space-details
     margin-left 4px
   .badges-wrap
     flex-wrap wrap
+  li
+    padding 0
 </style>

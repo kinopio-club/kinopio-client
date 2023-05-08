@@ -11,7 +11,8 @@ const props = defineProps({
   otherSpace: Object,
   url: String,
   parentCardId: String,
-  shouldCloseAllDialogs: Boolean
+  shouldCloseAllDialogs: Boolean,
+  shouldTruncateName: Boolean
 })
 
 const otherSpaceIsPrivate = computed(() => {
@@ -24,6 +25,14 @@ const isActive = computed(() => {
   const isFromParentCard = store.state.currentSelectedOtherItem.parentCardId === props.parentCardId
   const otherSpaceDetailsIsVisible = store.state.otherSpaceDetailsIsVisible
   return otherSpaceDetailsIsVisible && isFromParentCard
+})
+
+const otherSpaceName = computed(() => {
+  let name = props.otherSpace.name
+  if (props.shouldTruncateName) {
+    name = utils.truncated(name, 15)
+  }
+  return name
 })
 
 // dialog
@@ -48,18 +57,19 @@ const showOtherSpaceDetailsIsVisible = (event) => {
   store.commit('otherSpaceDetailsIsVisible', true)
   store.commit('triggerCancelLocking')
   store.commit('currentUserIsDraggingCard', false)
+  store.commit('otherCardDetailsIsVisible', false)
   event.stopPropagation()
 }
 
 </script>
 
 <template lang="pug">
-a.other-space-preview(@click.prevent :href="props.url" ref="badge")
+a.other-space-preview(@click.prevent.stop :href="props.url" ref="badge")
   .badge.button-badge.link-badge(:class="{ active: isActive }" @mouseup.prevent="showOtherSpaceDetailsIsVisible($event)" @touchend.prevent="showOtherSpaceDetailsIsVisible($event)")
     template(v-if="props.otherSpace")
       template(v-if="props.otherSpace.users")
         UserLabelInline(:user="props.otherSpace.users[0]" :shouldHideName="true")
-      span {{props.otherSpace.name}}
+      span {{otherSpaceName}}
       img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
     template(v-else)
       Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")

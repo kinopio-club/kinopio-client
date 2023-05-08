@@ -11,13 +11,15 @@ const props = defineProps({
   otherCard: Object,
   url: String,
   parentCardId: String,
-  shouldCloseAllDialogs: Boolean
+  shouldCloseAllDialogs: Boolean,
+  shouldTruncateName: Boolean
 })
 const state = reactive({
   nameSegments: []
 })
 
 onMounted(() => {
+  updateNameSegments()
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerUpdateOtherCard') {
       if (mutation.payload !== props.otherCard.id) { return }
@@ -42,7 +44,11 @@ watch(() => store.state.isLoadingOtherItems, (value, prevValue) => {
 })
 const updateNameSegments = () => {
   if (!props.otherCard) { return }
-  const card = store.getters['currentCards/nameSegments'](props.otherCard)
+  let card = utils.clone(props.otherCard)
+  if (props.shouldTruncateName) {
+    card.name = utils.truncated(card.name, 25)
+  }
+  card = store.getters['currentCards/nameSegments'](card)
   state.nameSegments = card.nameSegments
 }
 
@@ -68,13 +74,14 @@ const showOtherCardDetailsIsVisible = (event) => {
   store.commit('otherCardDetailsIsVisible', true)
   store.commit('triggerCancelLocking')
   store.commit('currentUserIsDraggingCard', false)
+  store.commit('otherSpaceDetailsIsVisible', false)
   event.stopPropagation()
 }
 
 </script>
 
 <template lang="pug">
-a.other-card-preview(@click.prevent :href="props.url")
+a.other-card-preview(@click.prevent.stop :href="props.url")
   .badge.button-badge.link-badge(:class="{ active: isActive }" @mouseup.prevent="showOtherCardDetailsIsVisible($event)" @touchend.prevent="showOtherCardDetailsIsVisible($event)")
     template(v-if="props.otherCard")
       template(v-for="segment in state.nameSegments")

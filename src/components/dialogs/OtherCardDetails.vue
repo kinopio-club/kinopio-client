@@ -30,11 +30,7 @@ const visible = computed(() => {
 
 const styles = computed(() => {
   const position = store.state.otherItemDetailsPosition
-  const isChildDialog = cardDetailsIsVisibleForCardId
   let zoom = store.getters.spaceCounterZoomDecimal
-  if (isChildDialog.value) {
-    zoom = 1
-  }
   if (store.state.isTouchDevice) {
     zoom = 1 / utils.visualViewport().scale
   }
@@ -74,7 +70,7 @@ const updateName = (newName) => {
   const card = { id: otherCard.value.id, name: newName }
   // update local
   store.commit('updateCardNameInOtherItems', card)
-  store.commit('triggerUpdateOtherCard', otherCard.value.id)
+  store.commit('triggerUpdateOtherCard', card.id)
   store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
   textareaStyles()
 }

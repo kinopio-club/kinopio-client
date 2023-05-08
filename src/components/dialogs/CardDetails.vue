@@ -120,9 +120,17 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Tags
       template(v-for="tag in tagsInCard")
         Tag(:tag="tag" :isClickable="true" :isActive="currentSelectedTag.name === tag.name" @clickTag="showTagDetailsIsVisible")
-      //- Comment
-      .badge.info(v-if="nameIsComment" :style="{backgroundColor: updatedByUser.color}")
+      //- ((Comment))
+      .badge.info(v-if="nameIsComment")
         span ((comment))
+
+    .row.badges-row.other-items-row(v-if="isOtherItems")
+      //- other space
+      template(v-if="otherSpaceIsVisible")
+        OtherSpacePreview(:otherSpace="otherSpace" :url="otherSpaceUrl" :parentCardId="card.id" :shouldTruncateName="true")
+      //- other card
+      template(v-if="otherCardIsVisible")
+        OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")
 
     MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats")
     UrlPreview(
@@ -197,6 +205,8 @@ import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
 import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
 import ShareCard from '@/components/dialogs/ShareCard.vue'
+import OtherCardPreview from '@/components/OtherCardPreview.vue'
+import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -226,7 +236,9 @@ export default {
     MediaPreview,
     UserLabelInline,
     CardCollaborationInfo,
-    ShareCard
+    ShareCard,
+    OtherCardPreview,
+    OtherSpacePreview
   },
   data () {
     return {
@@ -383,6 +395,23 @@ export default {
       })
       return tags
     },
+
+    // other items
+
+    isOtherItems () { return this.otherCardIsVisible || this.otherSpaceIsVisible },
+    otherCardIsVisible () { return Boolean(this.card.linkToCardId) },
+    otherSpaceIsVisible () { return Boolean(this.card.linkToSpaceId) },
+    otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
+    otherSpaceUrl () { return utils.urlFromSpaceAndCard({ spaceId: this.card.linkToSpaceId }) },
+    otherCard () {
+      const card = this.$store.getters.otherCardById(this.card.linkToCardId)
+      return card
+    },
+    otherSpace () {
+      const space = this.$store.getters.otherSpaceById(this.card.linkToSpaceId)
+      return space
+    },
+
     currentUserIsSpaceMember () { return this['currentUser/isSpaceMember']() },
     isFavoriteSpace () { return this['currentSpace/isFavorite'] },
     name: {
@@ -977,6 +1006,7 @@ export default {
       this.hidePickers()
       if (shouldSkipGlobalDialogs === true) { return }
       this.hideTagDetailsIsVisible()
+      this.hideOtherItemDetailsIsVisible()
     },
     clickName (event) {
       this.triggerUpdateMagicPaintPositionOffset()
@@ -1312,6 +1342,10 @@ export default {
     hideTagDetailsIsVisible () {
       this.$store.commit('currentSelectedTag', {})
       this.$store.commit('tagDetailsIsVisible', false)
+    },
+    hideOtherItemDetailsIsVisible () {
+      this.$store.commit('otherSpaceDetailsIsVisible', false)
+      this.$store.commit('otherCardDetailsIsVisible', false)
     },
     showTagDetailsIsVisible (event, tag) {
       this.closeDialogs()
