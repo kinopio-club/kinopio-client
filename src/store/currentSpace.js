@@ -181,8 +181,6 @@ const currentSpace = {
       context.dispatch('updateModulesSpaceId')
       context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
       context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
-      context.dispatch('currentUser/validateReferral', null, { root: true })
-      context.dispatch('currentUser/validateReferralByName', null, { root: true })
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
 
@@ -706,6 +704,8 @@ const currentSpace = {
           context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
           context.dispatch('checkIfShouldPauseConnectionDirections')
           context.dispatch('checkIfShouldUpdateNewTweetCards', space)
+          context.dispatch('currentUser/validateReferral', null, { root: true })
+          context.dispatch('currentUser/validateReferralByName', null, { root: true })
           context.dispatch('api/addToQueue', {
             name: 'incrementVisits',
             body: { spaceId: space.id }
