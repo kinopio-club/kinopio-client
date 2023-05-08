@@ -49,6 +49,14 @@ const updateNameSegments = () => {
     card.name = utils.truncated(card.name, 25)
   }
   card = store.getters['currentCards/nameSegments'](card)
+  card.nameSegments = card.nameSegments.map(segment => {
+    if (segment.isLink) {
+      segment.isLink = false
+      segment.isText = true
+      segment.content = segment.name
+    }
+    return segment
+  })
   state.nameSegments = card.nameSegments
 }
 
