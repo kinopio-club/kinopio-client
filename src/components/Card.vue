@@ -1834,20 +1834,21 @@ export default {
     },
 
     updateUrlData () {
-      this.updateSpaceLink()
+      this.updateOtherItems()
       if (this.isLoadingSpace) { return }
       this.updateUrlPreview()
     },
 
     // space link
 
-    updateSpaceLink () {
+    updateOtherItems () {
       let url = this.spaceUrl
-      const shouldRemoveLink = this.card.linkToSpaceId && !url
+      const shouldRemoveLink = (this.card.linkToCardId || this.card.linkToSpaceId) && !url
       if (shouldRemoveLink) {
         const update = {
           id: this.card.id,
-          linkToSpaceId: null
+          linkToSpaceId: null,
+          linkToCardId: null
         }
         this.$store.dispatch('currentCards/update', update)
         return
@@ -1863,7 +1864,7 @@ export default {
         linkToCardId: cardId
       }
       this.$store.dispatch('currentCards/update', update)
-      this.$store.dispatch('currentSpace/updateOtherItems', { spaceId })
+      this.$store.dispatch('currentSpace/updateOtherItems', { spaceId, cardId })
     },
 
     // url preview
