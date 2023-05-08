@@ -9,7 +9,9 @@ import { useStore } from 'vuex'
 const store = useStore()
 
 // state
-
+const state = reactive({
+  errorMaxCardLength: false
+})
 const otherCard = computed(() => store.state.currentSelectedOtherItem)
 const url = computed(() => `${utils.kinopioDomain()}/${otherCard.value.spaceId}/${otherCard.value.id}`)
 const canEdit = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value))
@@ -22,6 +24,7 @@ const visible = computed(() => {
   if (isVisible) {
     textareaStyles()
     focusTextarea()
+    updateErrorMaxCardLength()
   }
   return isVisible
 })
@@ -73,6 +76,11 @@ const updateName = (newName) => {
   store.commit('triggerUpdateOtherCard', card.id)
   store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
   textareaStyles()
+  updateErrorMaxCardLength(newName)
+}
+const updateErrorMaxCardLength = (newName) => {
+  const name = newName || otherCard.value.name
+  state.errorMaxCardLength = name.length >= maxCardLength()
 }
 
 // select card
@@ -108,8 +116,8 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
   section
     template(v-if="otherCard.id")
       //- edit
-      section.subsection(v-if="canEdit")
-        .textarea-wrap
+      template(v-if="canEdit")
+        section.subsection.textarea-wrap
           textarea.name(
             ref="textarea"
             rows="1"
@@ -117,6 +125,10 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
             @input="updateName($event.target.value)"
             :maxlength="maxCardLength()"
           )
+        .row(v-if="state.errorMaxCardLength")
+          .badge.danger
+            img.icon.cancel(src="@/assets/add.svg")
+            span Max Length
       //- read
       template(v-else)
         .row
