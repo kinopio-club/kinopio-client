@@ -68,16 +68,6 @@ export default {
       if (mutation.type === 'triggerUpdateUrlPreviewComplete') {
         const cards = this.$store.state.prevNewTweetCards
         this.$store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
-      } else if (mutation.type === 'triggerCardIdUpdatePastedName') {
-        // handle pasted urls
-        const { cardId, name } = mutation.payload
-        if (cardId !== this.card.id) { return }
-        const url = utils.urlFromString(name)
-        if (!url) { return }
-        if (utils.urlIsSpace(url)) { return }
-        if (!this.card.resizeWidth) {
-          this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth: 190 })
-        }
       }
     })
   },
