@@ -70,13 +70,12 @@ const showCardDetails = () => {
 
 const maxCardLength = () => { return consts.maxCardLength }
 const updateName = (newName) => {
+  const spaceId = otherCard.value.spaceId
+  const card = { id: otherCard.value.id, name: newName }
   // update local
-  store.commit('updateCardNameInOtherItems', { id: otherCard.value.id, name: newName })
+  store.commit('updateCardNameInOtherItems', card)
   store.commit('triggerUpdateOtherCard', otherCard.value.id)
-  console.log(newName)
-  // update remote
-  // TODO
-  // console.log(newName, store.state.otherItems.cards)
+  store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
   textareaStyles()
 }
 
