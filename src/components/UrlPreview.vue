@@ -216,7 +216,7 @@ export default {
     &.no-padding
       padding 0
     &.is-no-info
-      min-height initial !important
+      min-height 40px !important
   .preview-image
     display block
     width 100%
