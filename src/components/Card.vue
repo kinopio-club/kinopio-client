@@ -2363,9 +2363,6 @@ article
       width 10px
       height 10px
 
-  // .other-card-preview
-  //   width 100%
-
 @keyframes bounce
   0%
     transform translateY(0)
