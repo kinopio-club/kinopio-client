@@ -497,7 +497,7 @@ export default {
       z-index 1
       padding 0
       padding-left 6px
-      padding-right 3px
+      padding-right 2px
   .inline-favorite-wrap
     cursor pointer
     position absolute
