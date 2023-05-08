@@ -68,13 +68,14 @@ const showOtherCardDetailsIsVisible = (event) => {
   store.commit('otherCardDetailsIsVisible', true)
   store.commit('triggerCancelLocking')
   store.commit('currentUserIsDraggingCard', false)
+  event.stopPropagation()
 }
 
 </script>
 
 <template lang="pug">
-a.other-card-preview(:href="props.url")
-  .badge.button-badge.link-badge(:class="{ active: isActive }" @click.stop.prevent="showOtherCardDetailsIsVisible($event)")
+a.other-card-preview(@click.prevent :href="props.url")
+  .badge.button-badge.link-badge(:class="{ active: isActive }" @mouseup.prevent="showOtherCardDetailsIsVisible($event)" @touchend.prevent="showOtherCardDetailsIsVisible($event)")
     template(v-if="props.otherCard")
       template(v-for="segment in state.nameSegments")
         img.card-image(v-if="segment.isImage" :src="segment.url")

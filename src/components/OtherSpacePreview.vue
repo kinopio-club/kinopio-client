@@ -48,13 +48,14 @@ const showOtherSpaceDetailsIsVisible = (event) => {
   store.commit('otherSpaceDetailsIsVisible', true)
   store.commit('triggerCancelLocking')
   store.commit('currentUserIsDraggingCard', false)
+  event.stopPropagation()
 }
 
 </script>
 
 <template lang="pug">
-a.other-space-preview(:href="props.url" ref="badge")
-  .badge.button-badge.link-badge(:class="{ active: isActive }" @click.stop.prevent="showOtherSpaceDetailsIsVisible($event)")
+a.other-space-preview(@click.prevent :href="props.url" ref="badge")
+  .badge.button-badge.link-badge(:class="{ active: isActive }" @mouseup.prevent="showOtherSpaceDetailsIsVisible($event)" @touchend.prevent="showOtherSpaceDetailsIsVisible($event)")
     template(v-if="props.otherSpace")
       template(v-if="props.otherSpace.users")
         UserLabelInline(:user="props.otherSpace.users[0]" :shouldHideName="true")
