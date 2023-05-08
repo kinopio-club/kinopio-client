@@ -441,8 +441,6 @@ const self = {
       try {
         const isOffline = !window.navigator.onLine
         if (isOffline) { return }
-        const apiKey = context.rootState.currentUser.apiKey
-        if (!shouldRequest({ apiKey })) { return }
         // normalize
         cardIds = uniq(cardIds)
         cardIds = cardIds.slice(0, max)
