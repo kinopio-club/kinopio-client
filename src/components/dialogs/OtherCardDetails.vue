@@ -96,10 +96,9 @@ const changeSpace = (spaceId) => {
   store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
 }
 const selectSpaceCard = () => {
-  store.dispatch('closeAllDialogs')
   const isCardInCurrentSpace = otherCard.value.spaceId === store.state.currentSpace.id
   if (isCardInCurrentSpace) {
-    selectCard(otherCard)
+    selectCard(otherCard.value)
   } else {
     store.commit('loadSpaceShowDetailsForCardId', otherCard.value.id)
     changeSpace(otherCard.value.spaceId)
