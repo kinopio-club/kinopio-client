@@ -117,11 +117,15 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
             @input="updateName($event.target.value)"
             :maxlength="maxCardLength()"
           )
-        //- TODO floating url btn
       //- read
-      .row(v-else)
-        p {{otherCard.name}}
-        //- TODO floating url btn
+      template(v-else)
+        .row
+          p {{otherCard.name}}
+        .row
+          .badge.info
+            img.icon(src="@/assets/unlock.svg")
+            span Read Only
+
       .row
         a(:href="url")
           button(@click.stop.prevent="selectSpaceCard" @keyup.enter.prevent="selectSpaceCard")
