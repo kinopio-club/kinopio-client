@@ -112,7 +112,7 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
   section
     template(v-if="otherCard.id")
       //- edit
-      .row(v-if="canEdit")
+      section.subsection(v-if="canEdit")
         .textarea-wrap
           textarea.name(
             ref="textarea"
