@@ -9,7 +9,7 @@ import { nanoid } from 'nanoid'
 
 let host = 'https://api.kinopio.club'
 if (import.meta.env.MODE === 'development') {
-  host = 'http://kinopio.local:3000'
+  host = 'https://kinopio.local:3000'
 }
 
 const squashCardsCreatedCount = (queue, request) => {

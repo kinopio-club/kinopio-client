@@ -59,21 +59,21 @@ export default {
   kinopioDomain () {
     let domain = 'https://kinopio.club'
     if (this.isDevelopment()) {
-      domain = 'http://kinopio.local:8080'
+      domain = 'https://kinopio.local:8080'
     }
     return domain
   },
   host () {
     let host = 'https://api.kinopio.club'
     if (this.isDevelopment()) {
-      host = 'http://kinopio.local:3000'
+      host = 'https://kinopio.local:3000'
     }
     return host
   },
   websocketHost () {
     let host = 'wss://api.kinopio.club'
     if (this.isDevelopment()) {
-      host = 'ws://kinopio.local:3000'
+      host = 'wss://kinopio.local:3000'
     }
     return host
   },
