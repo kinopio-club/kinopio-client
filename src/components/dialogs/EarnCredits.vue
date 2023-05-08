@@ -54,7 +54,7 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
     p Earn Credits
   section
     p
-      span when someone you refer, or invite to edit, signs up. You'll both earn a{{' '}}
+      span when someone you refer, or invite to a space, signs up. You'll both earn a{{' '}}
       span.badge.success ${{consts.referralCreditAmount}} credit
     .row
       p There's no limit on the amount of credits you can earn.
