@@ -262,7 +262,7 @@ const currentSpace = {
       context.commit('isLoadingOtherItems', true, { root: true })
       // get items
       const data = await context.dispatch('api/getOtherItems', { spaceIds, cardIds }, { root: true })
-      console.log('👯‍♀️ otherItems', data)
+      console.log('👯‍♀️ otherItems', { spaceIds, cardIds }, data)
       if (!data) {
         context.commit('isLoadingOtherItems', false, { root: true })
         return
