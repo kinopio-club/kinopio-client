@@ -7,7 +7,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         :disabled="!canEditCard"
         ref="name"
         rows="1"
-        placeholder="Type text here, or paste a URL"
+        placeholder="Type here, or paste a URL"
         v-model="name"
         @keydown.prevent.enter.exact
 
@@ -76,33 +76,39 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span {{cardPendingUpload.percentComplete}}%
 
     .row
-      //- Remove
-      .button-wrap
-        button.danger(:disabled="!canEditCard" @click.left="removeCard")
-          img.icon.remove(src="@/assets/remove.svg")
-          span Remove
-      //- [·]
-      .button-wrap.cards-checkboxes
-        label(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0")
-          input(type="checkbox" v-model="checkboxIsChecked" tabindex="-1")
-        label(v-else @click.left.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
-          input.add(type="checkbox" tabindex="-1")
-      //- Image
-      .button-wrap
-        button(:disabled="!canEditCard" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
-          img.icon.flower(src="@/assets/flower.svg")
-        ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImageOrFile")
-      //- Toggle Style Actions
-      .button-wrap
-        button(:disabled="!canEditCard" @click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}")
-          img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+      template(v-if="canEditCard")
+        //- Remove
+        .button-wrap
+          button.danger(@click.left="removeCard")
+            img.icon.remove(src="@/assets/remove.svg")
+            //- span Remove
+        //- [·]
+        .button-wrap.cards-checkboxes
+          label(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0")
+            input(type="checkbox" v-model="checkboxIsChecked" tabindex="-1")
+          label(v-else @click.left.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
+            input.add(type="checkbox" tabindex="-1")
+        //- Image
+        .button-wrap
+          button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
+            img.icon.flower(src="@/assets/flower.svg")
+          ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImageOrFile")
+        //- Toggle Style Actions
+        .button-wrap
+          button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}")
+            img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+      //- Share
+      .button-wrap.share-button-wrap(v-if="isName" @click.left.stop="toggleShareCardIsVisible" )
+        button(:class="{active: shareCardIsVisible}")
+          span Share
+        ShareCard(:visible="shareCardIsVisible" :card="card")
 
-    CardBoxActions(:visible="shouldShowItemActions" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
+    CardBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
     CardCollaborationInfo(:visible="shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
     .row(v-if="nameMetaRowIsVisible")
       //- Split by Line Breaks
-      .button-wrap(v-if="nameSplitIntoCardsCount")
+      .button-wrap(v-if="nameSplitIntoCardsCount && canEditCard")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split.svg")
           span Split Card ({{nameSplitIntoCardsCount}})
@@ -128,22 +134,24 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
     )
 
     //- Read Only
-    p.row.edit-message(v-if="!canEditCard")
-      template(v-if="spacePrivacyIsOpen")
-        span.badge.info
-          img.icon.open(src="@/assets/open.svg")
-          span In open spaces, you can only move and edit cards you've made
-      template(v-else-if="isInvitedButCannotEditSpace")
-        span.badge.info
-          img.icon(src="@/assets/unlock.svg")
-          span To edit spaces you've been invited to, you'll need to sign up or in
-        .row
-          .button-wrap
-            button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
-      template(v-else-if="spacePrivacyIsClosed")
-        span.badge.info
-          img.icon(src="@/assets/unlock.svg")
-          span To edit closed spaces, you'll need to be invited
+    template(v-if="!canEditCard")
+      CardCollaborationInfo(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
+      .row.edit-message
+        template(v-if="spacePrivacyIsOpen")
+          span.badge.info
+            img.icon.open(src="@/assets/open.svg")
+            span In open spaces, you can only move and edit cards you've made
+        template(v-else-if="isInvitedButCannotEditSpace")
+          span.badge.info
+            img.icon(src="@/assets/unlock.svg")
+            span To edit spaces you've been invited to, you'll need to sign up or in
+          .row
+            .button-wrap
+              button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
+        template(v-else-if="spacePrivacyIsClosed")
+          span.badge.info
+            img.icon(src="@/assets/unlock.svg")
+            span Read Only
 
     //- Info
     template(v-if="showCurrentCardLength")
@@ -188,6 +196,7 @@ import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
 import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
+import ShareCard from '@/components/dialogs/ShareCard.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -216,7 +225,8 @@ export default {
     UrlPreview,
     MediaPreview,
     UserLabelInline,
-    CardCollaborationInfo
+    CardCollaborationInfo,
+    ShareCard
   },
   data () {
     return {
@@ -258,7 +268,8 @@ export default {
       openingAlpha: 0,
       previousSelectedTag: {},
       currentSearchTag: {},
-      newTagColor: ''
+      newTagColor: '',
+      shareCardIsVisible: false
     }
   },
   created () {
@@ -522,6 +533,7 @@ export default {
         borderRadius: borderRadius
       }
     },
+    isName () { return Boolean(this.name) },
     shouldShowItemActions () { return this.currentUser.shouldShowItemActions }
   },
   methods: {
@@ -901,6 +913,11 @@ export default {
         this.scrollIntoView()
       })
     },
+    toggleShareCardIsVisible () {
+      const isVisible = this.shareCardIsVisible
+      this.closeDialogs()
+      this.shareCardIsVisible = !isVisible
+    },
     focusName (position) {
       utils.disablePinchZoom()
       if (this.shouldPreventNextFocusOnName) {
@@ -956,6 +973,7 @@ export default {
       this.$store.commit('triggerCardDetailsCloseDialogs')
       this.imagePickerIsVisible = false
       this.cardTipsIsVisible = false
+      this.shareCardIsVisible = false
       this.hidePickers()
       if (shouldSkipGlobalDialogs === true) { return }
       this.hideTagDetailsIsVisible()
@@ -1426,7 +1444,6 @@ export default {
 
 <style lang="stylus">
 .card-details
-  width 278px
   transform-origin top left
   > section
     background-color var(--secondary-background)

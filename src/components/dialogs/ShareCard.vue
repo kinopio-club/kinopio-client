@@ -56,8 +56,6 @@ const webShare = () => {
 <template lang="pug">
 dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
-    p Share
-  section
     section.subsection
       .row
         p Share With the World, or Paste in Another Space
@@ -71,4 +69,6 @@ dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="di
 </template>
 
 <style lang="stylus">
+.share-card
+  left -100px
 </style>
