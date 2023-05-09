@@ -85,6 +85,7 @@ a.other-space-preview(@click.prevent.stop :href="props.url" ref="badge")
 <style lang="stylus">
 .other-space-preview
   text-decoration none
-  // word-wrap break-word
+  .badge
+    display inline-block
 
 </style>
