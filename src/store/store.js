@@ -1385,11 +1385,11 @@ const store = createStore({
       utils.typeCheck({ value: cards, type: 'array' })
       utils.typeCheck({ value: spaces, type: 'array' })
       let otherItems = utils.clone(state.otherItems)
-      if (cards) {
+      if (cards.length) {
         otherItems.cards = otherItems.cards.concat(cards)
         otherItems.cards = uniqBy(otherItems.cards, 'id')
       }
-      if (spaces) {
+      if (spaces.length) {
         otherItems.spaces = otherItems.spaces.concat(spaces)
         otherItems.spaces = uniqBy(otherItems.spaces, 'id')
       }

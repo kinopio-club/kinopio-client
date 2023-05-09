@@ -436,7 +436,7 @@ const self = {
       }
     },
 
-    getOtherItems: async (context, { cardIds, spaceIds }) => {
+    getOtherItems: async (context, { cardIds, spaceIds, invites }) => {
       const max = 60
       try {
         const isOffline = !window.navigator.onLine
@@ -446,9 +446,9 @@ const self = {
         cardIds = cardIds.slice(0, max)
         spaceIds = uniq(spaceIds)
         spaceIds = spaceIds.slice(0, max)
-        console.log('🛬🛬 getting remote other items', { cardIds, spaceIds })
+        console.log('🛬🛬 getting remote other items', { cardIds, spaceIds, invites })
         // request
-        const body = { cardIds, spaceIds }
+        const body = { cardIds, spaceIds, invites }
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/item/multiple`, options))
         return normalizeResponse(response)

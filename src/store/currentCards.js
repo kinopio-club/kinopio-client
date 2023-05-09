@@ -801,17 +801,21 @@ const currentCards = {
     linkedItems: (state, getters) => {
       let cardIds = []
       let spaceIds = []
+      let invites = []
       const cards = getters.all
       cards.forEach(card => {
         const cardIdIsValid = utils.idIsValid(card.linkToCardId)
+        const collaboratorKeyIsValid = utils.idIsValid(card.linkToSpaceCollaboratorKey)
         const spaceIdIsValid = utils.idIsValid(card.linkToSpaceId)
-        if (cardIdIsValid) {
+        if (collaboratorKeyIsValid && spaceIdIsValid) {
+          invites.push({ spaceId: card.linkToSpaceId, collaboratorKey: card.linkToSpaceCollaboratorKey })
+        } else if (cardIdIsValid) {
           cardIds.push(card.linkToCardId)
         } else if (spaceIdIsValid) {
           spaceIds.push(card.linkToSpaceId)
         }
       })
-      return { cardIds, spaceIds }
+      return { cardIds, spaceIds, invites }
     },
     withTagName: (state, getters) => (tagName) => {
       let cards = getters.all

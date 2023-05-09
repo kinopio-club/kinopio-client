@@ -241,37 +241,44 @@ const currentSpace = {
     },
     updateOtherItems: async (context, options) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
-      // item ids
+      // other items to fetch
+      let invites = []
       let cardIds = []
       let spaceIds = []
-      // param
+      // param items
       if (options) {
-        const { cardId, spaceId } = options
-        if (cardId) {
+        const { cardId, spaceId, collaboratorKey } = options
+        if (collaboratorKey) {
+          invites.push({ spaceId, collaboratorKey })
+        } else if (cardId) {
           cardIds.push(cardId)
         } else if (spaceId) {
           spaceIds.push(spaceId)
         }
-      // no param
+      // no param items
       } else {
-        const response = context.rootGetters['currentCards/linkedItems']
-        cardIds = response.cardIds
-        spaceIds = response.spaceIds
+        const otherItemIds = context.rootGetters['currentCards/linkedItems']
+        invites = otherItemIds.invites
+        cardIds = otherItemIds.cardIds
+        spaceIds = otherItemIds.spaceIds
       }
-      if (!cardIds.length && !spaceIds.length) { return }
+      if (!cardIds.length && !spaceIds.length && !invites.length) { return }
       context.commit('isLoadingOtherItems', true, { root: true })
       // get items
-      const data = await context.dispatch('api/getOtherItems', { spaceIds, cardIds }, { root: true })
-      console.log('👯‍♀️ otherItems', { spaceIds, cardIds }, data)
+      const data = await context.dispatch('api/getOtherItems', { spaceIds, cardIds, invites }, { root: true })
+      console.log('👯‍♀️ otherItems', { spaceIds, cardIds, invites }, data)
       if (!data) {
         context.commit('isLoadingOtherItems', false, { root: true })
         return
       }
-      // update cardsInCurrentSpace
+      // update items
       context.commit('updateOtherItems', data, { root: true })
+      // update card dimensions
       const cardsInCurrentSpace = context.rootGetters['currentCards/all']
       data.spaces.forEach(space => {
-        const linkedCard = cardsInCurrentSpace.find(card => card.linkToSpaceId === space.id)
+        const linkedCard = cardsInCurrentSpace.find(card => {
+          return card.linkToSpaceId === space.id
+        })
         if (!linkedCard) { return }
         nextTick(() => {
           context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace }, { root: true })

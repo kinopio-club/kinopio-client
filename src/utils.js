@@ -1504,7 +1504,7 @@ export default {
   },
   spaceAndCardIdFromUrl (url) {
     url = new URL(url)
-    return this.spaceAndCardIdFromPath(url.pathname)
+    return this.spaceAndCardIdFromPath(url.pathname) // /spaceId/cardId
   },
   urlFromSpaceAndCard ({ spaceId, cardId }) {
     let url = `${this.kinopioDomain()}/${spaceId}`
@@ -1715,8 +1715,13 @@ export default {
     const isFile = url.toLowerCase().match(fileUrlPattern)
     return Boolean(isFile)
   },
+  urlIsInvite (url) {
+    url = new URL(url)
+    return url.pathname === '/invite'
+  },
   urlIsSpace (url) {
     if (!url) { return }
+    if (this.urlIsInvite(url)) { return }
     let spaceUrlPattern
     if (import.meta.env.MODE === 'development') {
       // https://regexr.com/5hjc2
@@ -1738,7 +1743,8 @@ export default {
     const isAudio = this.urlIsAudio(url)
     const isFile = this.urlIsFile(url)
     const isSpace = this.urlIsSpace(url)
-    return !isImage && !isVideo && !isAudio && !isFile && !isSpace
+    const isInvite = this.urlIsInvite(url)
+    return !isImage && !isVideo && !isAudio && !isFile && !isSpace && !isInvite
   },
   urlIsYoutube (url) {
     if (url.includes('/channel/')) { return }
@@ -2033,10 +2039,9 @@ export default {
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
       if (linkIsMarkdown) { return }
-      return this.urlIsSpace(url)
+      return this.urlIsSpace(url) || this.urlIsInvite(url)
     })
     const files = urls.filter(url => this.urlIsFile(url))
-
     let badges = []
     let segments = []
     tags.forEach(tag => {
@@ -2052,7 +2057,13 @@ export default {
     links.forEach(link => {
       const startPosition = name.indexOf(link)
       const endPosition = startPosition + link.length
-      badges.push({ link, startPosition, endPosition, isLink: true })
+      let badge = { link, startPosition, endPosition }
+      if (this.urlIsInvite(link)) {
+        badge.isInviteLink = true
+      } else if (this.urlIsSpace(link)) {
+        badge.isLink = true
+      }
+      badges.push(badge)
     })
     files.forEach(file => {
       const startPosition = name.indexOf(file)
@@ -2070,37 +2081,53 @@ export default {
     let currentPosition = startPosition
     // other segments
     badges.forEach((segment, index) => {
+      let newSegment
+      // tag
       if (segment.isTag) {
         const tag = segment.tag
-        segments.push({
+        newSegment = {
           isTag: true,
           name: tag.substring(2, tag.length - 2)
-        })
+        }
+      // space or card link
       } else if (segment.isLink) {
         let link = segment.link
         const { spaceId, spaceUrl, cardId } = this.spaceAndCardIdFromUrl(link)
-        link = `${this.kinopioDomain()}/${spaceUrl}`
-        segments.push({
+        // link = `${this.kinopioDomain()}/${spaceUrl}`
+        newSegment = {
           isLink: true,
           name: link,
           cardId,
           spaceId
-        })
+        }
+      // invite link
+      } else if (segment.isInviteLink) {
+        let link = segment.link
+        const url = new URL(link)
+        let queryObject = qs.decode(url.search)
+        newSegment = {
+          isInviteLink: true,
+          name: link,
+          spaceId: queryObject.spaceId,
+          collaboratorKey: queryObject.collaboratorKey
+        }
+      // file
       } else if (segment.isFile) {
-        segments.push({
+        newSegment = {
           isFile: true,
           name: this.fileNameFromUrl(segment.file)
-        })
+        }
       }
       currentPosition = segment.endPosition
       const nextBadge = badges[index + 1]
       if (nextBadge) {
-        segments.push({
+        newSegment = {
           isText: true,
           content: name.substring(currentPosition, nextBadge.startPosition)
-        })
+        }
         currentPosition = nextBadge.startPosition
       }
+      segments.push(newSegment)
     })
     const trailingText = name.substring(currentPosition, name.length)
     if (trailingText) {

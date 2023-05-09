@@ -64,8 +64,8 @@ article#card(
         button.inline-button.resize-button(tabindex="-1" :class="{hidden: isPresentationMode}")
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
+    //- Content
     span.card-content-wrap(:style="cardContentWrapStyles")
-
       //- Comment
       .card-comment(v-if="isComment")
         //- [·]
@@ -209,6 +209,7 @@ import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
 import { mapState, mapGetters } from 'vuex'
+import qs from '@aguezz/qs-parse'
 
 let isMultiTouch
 let initialTouchEvent = {}
@@ -543,9 +544,9 @@ export default {
         return null
       }
     },
-    spaceUrl () {
+    spaceOrInviteUrl () {
       const link = this.formats.link
-      if (utils.urlIsSpace(link)) {
+      if (utils.urlIsSpace(link) || utils.urlIsInvite(link)) {
         return link
       } else {
         return null
@@ -822,11 +823,16 @@ export default {
           }
           segment.color = tag.color
           segment.id = tag.id
-        // links
+        // invite
+        } else if (segment.isInviteLink) {
+          const { spaceId, collaboratorKey } = segment
+          segment.otherSpace = this.$store.getters.otherSpaceById(spaceId)
+        // space or card
         } else if (segment.isLink) {
           const { spaceId, cardId } = utils.spaceAndCardIdFromUrl(segment.name)
           segment.otherSpace = this.$store.getters.otherSpaceById(spaceId)
           segment.otherCard = this.$store.getters.otherCardById(cardId)
+        // text
         } else if (segment.isText) {
           segment.markdown = utils.markdownSegments(segment.content)
         }
@@ -1839,10 +1845,10 @@ export default {
       this.updateUrlPreview()
     },
 
-    // space link
+    // other items
 
     updateOtherItems () {
-      let url = this.spaceUrl
+      let url = this.spaceOrInviteUrl
       const shouldRemoveLink = (this.card.linkToCardId || this.card.linkToSpaceId) && !url
       if (shouldRemoveLink) {
         const update = {
@@ -1854,17 +1860,40 @@ export default {
         return
       }
       if (!url) { return }
+      const urlIsSpace = utils.urlIsSpace(url)
+      const urlIsInvite = utils.urlIsInvite(url)
       url = new URL(url)
+      if (urlIsInvite) {
+        this.updateOtherInviteItems(url)
+      } else if (urlIsSpace) {
+        this.updateOtherSpaceOrCardItems(url)
+      }
+    },
+    updateOtherSpaceOrCardItems (url) {
       const { spaceId, cardId } = utils.spaceAndCardIdFromPath(url.pathname)
       const linkExists = spaceId === this.card.linkToSpaceId
       if (linkExists) { return }
       const update = {
         id: this.card.id,
         linkToSpaceId: spaceId,
-        linkToCardId: cardId
+        linkToCardId: cardId,
+        linkToSpaceCollaboratorKey: null
       }
       this.$store.dispatch('currentCards/update', update)
       this.$store.dispatch('currentSpace/updateOtherItems', { spaceId, cardId })
+    },
+    updateOtherInviteItems (url) {
+      const { spaceId, collaboratorKey } = qs.decode(url.search)
+      const linkExists = spaceId === this.card.linkToSpaceId && collaboratorKey === this.card.linkToSpaceCollaboratorKey
+      if (linkExists) { return }
+      const update = {
+        id: this.card.id,
+        linkToSpaceId: spaceId,
+        linkToCardId: null,
+        linkToSpaceCollaboratorKey: collaboratorKey
+      }
+      this.$store.dispatch('currentCards/update', update)
+      this.$store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
     },
 
     // url preview

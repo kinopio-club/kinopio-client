@@ -12,7 +12,8 @@ const props = defineProps({
   url: String,
   parentCardId: String,
   shouldCloseAllDialogs: Boolean,
-  shouldTruncateName: Boolean
+  shouldTruncateName: Boolean,
+  isInvite: Boolean
 })
 
 const otherSpaceIsPrivate = computed(() => {
@@ -47,6 +48,8 @@ const showOtherSpaceDetailsIsVisible = (event) => {
     otherItem.parentCardId = props.parentCardId
     store.dispatch('currentCards/incrementZ', props.parentCardId)
   }
+  otherItem.url = props.url
+  otherItem.isInvite = props.isInvite
   if (props.shouldCloseAllDialogs) {
     store.dispatch('closeAllDialogs')
   }
@@ -66,6 +69,8 @@ const showOtherSpaceDetailsIsVisible = (event) => {
 <template lang="pug">
 a.other-space-preview(@click.prevent.stop :href="props.url" ref="badge")
   .badge.button-badge.link-badge(:class="{ active: isActive }" @mouseup.prevent="showOtherSpaceDetailsIsVisible($event)" @touchend.prevent="showOtherSpaceDetailsIsVisible($event)")
+    template(v-if="props.isInvite")
+      .badge.info Invite
     template(v-if="props.otherSpace")
       template(v-if="props.otherSpace.users")
         UserLabelInline(:user="props.otherSpace.users[0]" :shouldHideName="true")

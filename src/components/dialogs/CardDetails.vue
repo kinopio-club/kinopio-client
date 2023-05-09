@@ -402,7 +402,10 @@ export default {
     otherCardIsVisible () { return Boolean(this.card.linkToCardId) },
     otherSpaceIsVisible () { return Boolean(this.card.linkToSpaceId) },
     otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
-    otherSpaceUrl () { return utils.urlFromSpaceAndCard({ spaceId: this.card.linkToSpaceId }) },
+    otherSpaceUrl () {
+      // invite link
+      return utils.urlFromSpaceAndCard({ spaceId: this.card.linkToSpaceId })
+    },
     otherCard () {
       const card = this.$store.getters.otherCardById(this.card.linkToCardId)
       return card

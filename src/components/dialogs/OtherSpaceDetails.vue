@@ -15,7 +15,7 @@ const visible = computed(() => store.state.otherSpaceDetailsIsVisible)
 const otherSpace = computed(() => store.state.currentSelectedOtherItem)
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const spaceUsers = computed(() => otherSpace.value.users)
-const url = computed(() => `${utils.kinopioDomain()}/${otherSpace.value.id}`)
+// const url = computed(() => `${utils.kinopioDomain()}/${otherSpace.value.id}`)
 
 // dialog styles
 
@@ -56,15 +56,21 @@ dialog.narrow.other-space-details(v-if="visible" :open="visible" :style="styles"
   section
     template(v-if="otherSpace.id")
       .row.badges-wrap
+        template(v-if="otherSpace.isInvite")
+          .badge.info Invite
         UserList(:users="spaceUsers" :isClickable="false")
       .row
         BackgroundPreview(:space="otherSpace")
         .row-title {{ otherSpace.name }}
       .row
-        a(:href="url")
+        a(:href="otherSpace.url")
           button(@click.stop.prevent="changeSpace" @keyup.enter.prevent="changeSpace")
             MoonPhase(v-if="otherSpace.moonPhase" :moonPhase="otherSpace.moonPhase")
-            span Jump to Space{{' '}}
+            template(v-if="otherSpace.isInvite")
+              img.icon.add(src="@/assets/add.svg")
+              span Join Space{{' '}}
+            template(v-else)
+              span Jump to Space{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
     template(v-else)
       .row(v-if="isLoadingOtherItems")

@@ -32,6 +32,9 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   //- Tags
   template(v-if="segment.isTag")
     Tag(:tag="segment" :isClickable="true" :isActive="currentSelectedTag.name === segment.name" @clickTag="showTagDetailsIsVisible")
+  //- Invite
+  template(v-if="segment.isInviteLink")
+    OtherSpacePreview(:isInvite="true" :otherSpace="segment.otherSpace" :url="segment.name" :parentCardId="parentCardId" :shouldCloseAllDialogs="true")
   //- Other Space
   template(v-if="segment.isLink")
     OtherSpacePreview(:otherSpace="segment.otherSpace" :url="segment.name" :parentCardId="parentCardId" :shouldCloseAllDialogs="true")
@@ -72,6 +75,7 @@ export default {
     dataMarkdownType () {
       if (this.segment.isTag) { return 'tag' }
       if (this.segment.isLink) { return 'link' }
+      if (this.segment.isInviteLink) { return 'inviteLink' }
       if (!this.segment.markdown) { return 'text' }
       let markdown = this.segment.markdown.filter(item => Boolean(item.content))
       const segmentIsEmpty = !utils.arrayExists(markdown)
