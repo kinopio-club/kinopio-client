@@ -123,8 +123,8 @@ export default {
     updateInviteUrl (collaboratorKey) {
       const currentSpace = this.$store.state.currentSpace
       const spaceId = currentSpace.id
-      const spaceName = utils.normalizeString(currentSpace.name)
-      this.url = `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
+      const spaceName = currentSpace.name
+      this.url = utils.inviteUrl({ spaceId, spaceName, collaboratorKey })
       if (utils.isDevelopment()) {
         console.log('🍇 invite url', this.url)
       }

@@ -1513,6 +1513,11 @@ export default {
     }
     return url
   },
+  inviteUrl ({ spaceId, spaceName, collaboratorKey }) {
+    spaceName = this.normalizeString(spaceName)
+    const url = `${this.kinopioDomain()}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
+    return url
+  },
   spaceAndCardIdFromPath (path) {
     // https://regexr.com/5kr4g
     // matches (text after /) twice
