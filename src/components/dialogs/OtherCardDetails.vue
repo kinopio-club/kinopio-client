@@ -80,6 +80,7 @@ const updateName = (newName) => {
   // update input
   textareaStyles()
   updateErrorMaxCardLength(newName)
+  store.dispatch('currentCards/updateDimensions', { cards: [card] })
 }
 const updateOtherNameInCurrentSpace = ({ card, spaceId }) => {
   const currentSpaceId = store.state.currentSpace.id
