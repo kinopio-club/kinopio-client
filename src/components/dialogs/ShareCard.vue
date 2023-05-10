@@ -12,7 +12,26 @@ const props = defineProps({
   card: Object
 })
 
+// anon user
+
+const canShare = computed(() => {
+  const currentSpaceUserId = store.state.currentSpace.users[0].id
+  const currentUserId = store.state.currentUser.id
+  if (currentSpaceUserId !== currentUserId) {
+    return true
+  } else if (store.getters['currentUser/isSignedIn']) {
+    return true
+  } else {
+    return false
+  }
+})
+const triggerSignUpOrInIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerSignUpOrInIsVisible')
+}
+
 // scroll into view
+
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     scrollIntoView()
@@ -24,6 +43,7 @@ const scrollIntoView = async () => {
 }
 
 // copy url
+
 const cardUrl = () => {
   const domain = utils.kinopioDomain()
   const url = `${domain}/${props.card.spaceId}/${props.card.id}`
@@ -44,6 +64,7 @@ const copyUrl = async (event) => {
 }
 
 // web share
+
 const webShareIsSupported = computed(() => navigator.share)
 const webShare = () => {
   const data = {
@@ -57,7 +78,7 @@ const webShare = () => {
 
 <template lang="pug">
 dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="dialog")
-  section
+  section(v-if="canShare")
     section.subsection
       .row
         p Share With the World, or Paste in Another Space
@@ -68,6 +89,12 @@ dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="di
             span Copy Card URL
           button(v-if="webShareIsSupported" @click="webShare")
             img.icon.share(src="@/assets/share.svg")
+  section(v-if="!canShare")
+    p For your cards and spaces to have URLs, you'll need to sign up or in
+    .button-wrap
+      button(@click.left="triggerSignUpOrInIsVisible")
+        span Sign Up or In
+
 </template>
 
 <style lang="stylus">
