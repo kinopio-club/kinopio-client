@@ -74,9 +74,17 @@ const updateName = (newName) => {
   // update local
   store.commit('updateCardNameInOtherItems', card)
   store.commit('triggerUpdateOtherCard', card.id)
+  updateOtherNameInCurrentSpace({ card, spaceId })
+  // update remote
   store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
+  // update input
   textareaStyles()
   updateErrorMaxCardLength(newName)
+}
+const updateOtherNameInCurrentSpace = ({ card, spaceId }) => {
+  const currentSpaceId = store.state.currentSpace.id
+  if (currentSpaceId !== spaceId) { return }
+  store.commit('currentCards/update', card)
 }
 const updateErrorMaxCardLength = (newName) => {
   const name = newName || otherCard.value.name
