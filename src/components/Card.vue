@@ -1701,12 +1701,16 @@ export default {
     },
     changeSpaceAndCard (spaceId, cardId) {
       const currentSpaceId = this.$store.state.currentSpace.id
+      // space and card
       if (currentSpaceId !== spaceId) {
         this.$store.commit('loadSpaceShowDetailsForCardId', cardId)
         const space = { id: spaceId }
         this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      // card in current space
       } else {
-        this.$store.dispatch('currentCards/showCardDetails', cardId)
+        this.$nextTick(() => {
+          this.$store.dispatch('currentCards/showCardDetails', cardId)
+        })
       }
     },
     removeCommentBrackets (name) {
