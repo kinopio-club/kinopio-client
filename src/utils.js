@@ -1680,6 +1680,11 @@ export default {
     }
     return newUrl
   },
+  urlWithProtocol (url) {
+    if (!url) { return }
+    if (this.urlHasProtocol(url)) { return url }
+    return `https://${url}`
+  },
   urlIsImage (url) {
     if (!url) { return }
     // append space to match as an end character
@@ -1722,6 +1727,8 @@ export default {
     return Boolean(isFile)
   },
   urlIsInvite (url) {
+    url = this.urlWithProtocol(url)
+    if (!url) { return }
     url = new URL(url)
     return url.pathname === '/invite'
   },
