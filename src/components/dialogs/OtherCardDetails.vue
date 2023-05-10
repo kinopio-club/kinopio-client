@@ -8,6 +8,19 @@ import { reactive, computed, onMounted, onUpdated, defineProps, defineEmits, wat
 import { useStore } from 'vuex'
 const store = useStore()
 
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    // update otherCard if dialog is visible before otherCard is loaded
+    if (mutation.type === 'updateOtherItems') {
+      if (!visible.value) { return }
+      const parentCard = store.getters['currentCards/byId'](parentCardId.value)
+      let otherCard = store.getters.otherCardById(parentCard.linkToCardId)
+      otherCard = utils.clone(otherCard)
+      store.commit('currentSelectedOtherItem', otherCard)
+    }
+  })
+})
+
 // state
 const state = reactive({
   errorMaxCardLength: false
@@ -95,6 +108,7 @@ const updateOtherNameInCurrentSpace = ({ card, spaceId }) => {
 }
 const updateErrorMaxCardLength = (newName) => {
   const name = newName || otherCard.value.name
+  if (!name) { return }
   state.errorMaxCardLength = name.length >= maxCardLength()
 }
 

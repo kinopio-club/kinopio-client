@@ -9,6 +9,19 @@ import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, ne
 import { useStore } from 'vuex'
 const store = useStore()
 
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    // update otherSpace if dialog is visible before otherSpace is loaded
+    if (mutation.type === 'updateOtherItems') {
+      if (!visible.value) { return }
+      const parentCard = store.getters['currentCards/byId'](parentCardId.value)
+      let otherSpace = store.getters.otherSpaceById(parentCard.linkToSpaceId)
+      otherSpace = utils.clone(otherSpace)
+      store.commit('currentSelectedOtherItem', otherSpace)
+    }
+  })
+})
+
 // state
 
 const visible = computed(() => {
