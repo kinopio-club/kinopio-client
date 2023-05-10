@@ -1095,10 +1095,6 @@ const currentSpace = {
       const spaceUrl = utils.url({ name: state.name, id: state.id })
       return `${domain}/${spaceUrl}`
     },
-    cardUrl: (state, getters) => (card) => {
-      const url = getters.url
-      return `${url}/${card.id}`
-    },
     itemColors: (state, getters, rootState, rootGetters) => {
       const cardColors = rootGetters['currentCards/colors']
       const boxColors = rootGetters['currentBoxes/colors']

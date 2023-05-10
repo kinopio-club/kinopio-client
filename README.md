@@ -85,6 +85,22 @@ To work with code that only works on https (e.g. clipboard copy and paste), [mkc
 
 	$ mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem 'kinopio.local'
 
+## Ngrok tunnelling
+
+use Ngrok to pipe your localhost through an external https server
+
+(Note that dev kinopio-server connections won't work through Ngrok)
+
+### Setup Ngrok
+
+[login](http://ngrok.com) and download ngrok, then connect ngrok to the kinopio ngrok account
+
+    $ ./ngrok authtoken 1e2pCpJsJMwkEkqbDKF0p5eMArQ_5Ztb7NE8fqyftCnuizdab
+
+### Run Ngrok
+
+    $ ./ngrok http https://localhost:8080
+
 ## See Also
 
 - [are.na/kinopio](https://www.are.na/kinopio)

@@ -25,14 +25,16 @@ const scrollIntoView = async () => {
 
 // copy url
 const cardUrl = () => {
-  return store.getters['currentSpace/cardUrl'](props.card)
+  const domain = utils.kinopioDomain()
+  const url = `${domain}/${props.card.spaceId}/${props.card.id}`
+  console.log('🍇 card url', url)
+  return url
 }
 const copyUrl = async (event) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
   const url = cardUrl()
   try {
-    console.log(url)
     await navigator.clipboard.writeText(url)
     store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {

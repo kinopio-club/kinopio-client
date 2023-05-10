@@ -125,9 +125,7 @@ export default {
       const spaceId = currentSpace.id
       const spaceName = currentSpace.name
       this.url = utils.inviteUrl({ spaceId, spaceName, collaboratorKey })
-      if (utils.isDevelopment()) {
-        console.log('🍇 invite url', this.url)
-      }
+      console.log('🍇 invite url', this.url)
     },
     toggleTipsIsVisible () {
       this.tipsIsVisible = !this.tipsIsVisible

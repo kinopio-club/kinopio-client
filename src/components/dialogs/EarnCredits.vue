@@ -13,9 +13,7 @@ const props = defineProps({
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    if (utils.isDevelopment()) {
-      console.log('🍇 referral url', url.value)
-    }
+    console.log('🍇 referral url', url.value)
   }
 })
 
