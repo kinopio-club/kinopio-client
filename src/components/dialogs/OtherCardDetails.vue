@@ -25,6 +25,7 @@ const visible = computed(() => {
     textareaStyles()
     focusTextarea()
     updateErrorMaxCardLength()
+    scrollIntoView()
   }
   return isVisible
 })
@@ -41,6 +42,11 @@ const styles = computed(() => {
   const top = `${position.y + 8}px`
   return { transform: `scale(${zoom})`, left, top }
 })
+const scrollIntoView = async () => {
+  await nextTick()
+  const dialog = document.querySelector('dialog.other-card-details')
+  utils.scrollIntoView(dialog)
+}
 
 // textarea styles
 

@@ -11,11 +11,17 @@ const store = useStore()
 
 // state
 
-const visible = computed(() => store.state.otherSpaceDetailsIsVisible)
+const visible = computed(() => {
+  const isVisible = store.state.otherSpaceDetailsIsVisible
+  if (isVisible) {
+    scrollIntoView()
+  }
+  return isVisible
+})
+
 const otherSpace = computed(() => store.state.currentSelectedOtherItem)
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const spaceUsers = computed(() => otherSpace.value.users)
-// const url = computed(() => `${utils.kinopioDomain()}/${otherSpace.value.id}`)
 
 // dialog styles
 
@@ -29,6 +35,11 @@ const styles = computed(() => {
   const top = `${position.y + 8}px`
   return { transform: `scale(${zoom})`, left, top }
 })
+const scrollIntoView = async () => {
+  await nextTick()
+  const dialog = document.querySelector('dialog.other-space-details')
+  utils.scrollIntoView(dialog)
+}
 
 // select space
 
