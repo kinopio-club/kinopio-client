@@ -125,9 +125,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span ((comment))
 
     .row.badges-row.other-items-row(v-if="isOtherItems")
-      //- invite or other space
-      template(v-if="otherSpaceIsVisible || inviteIsVisible")
+      //- invite
+      template(v-if="inviteIsVisible")
         OtherSpacePreview(:isInvite="inviteIsVisible" :otherSpace="otherSpace" :url="otherSpaceUrl" :parentCardId="card.id" :shouldTruncateName="true")
+      //- other space
+      template(v-if="otherSpaceIsVisible")
+        OtherSpacePreview(:otherSpace="otherSpace" :url="otherSpaceUrl" :parentCardId="card.id" :shouldTruncateName="true")
       //- other card
       template(v-if="otherCardIsVisible")
         OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")
@@ -398,10 +401,21 @@ export default {
 
     // other items
 
-    isOtherItems () { return this.otherCardIsVisible || this.otherSpaceIsVisible || this.inviteIsVisible },
-    inviteIsVisible () { return Boolean(this.card.linkToSpaceCollaboratorKey) },
-    otherCardIsVisible () { return Boolean(this.card.linkToCardId) },
-    otherSpaceIsVisible () { return Boolean(this.card.linkToSpaceId) && !this.inviteIsVisible },
+    isOtherItems () {
+      return this.otherCardIsVisible || this.otherSpaceIsVisible || this.inviteIsVisible
+    },
+    inviteIsVisible () {
+      const isCardLink = Boolean(this.card.linkToSpaceCollaboratorKey)
+      return isCardLink && this.hasUrls
+    },
+    otherCardIsVisible () {
+      const isCardLink = Boolean(this.card.linkToCardId)
+      return isCardLink && this.hasUrls
+    },
+    otherSpaceIsVisible () {
+      const isCardLink = Boolean(this.card.linkToSpaceId)
+      return isCardLink && this.hasUrls
+    },
     otherCard () {
       const card = this.$store.getters.otherCardById(this.card.linkToCardId)
       return card

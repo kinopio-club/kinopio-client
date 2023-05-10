@@ -1580,7 +1580,8 @@ export default {
   },
   urlIsValidTld (url) {
     const isLocalhostUrl = url.match(this.localhostUrlPattern())
-    if (isLocalhostUrl) { return true }
+    const isDevelopmentUrl = url.includes(this.kinopioDomain())
+    if (isLocalhostUrl || isDevelopmentUrl) { return true }
     // https://regexr.com/5v6s9
     const regex = '(' + tlds + ')' + String.raw`(\?|\/| |$|\s)`
     const tldPattern = new RegExp(regex)
