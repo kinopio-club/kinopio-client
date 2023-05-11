@@ -478,7 +478,6 @@ export default {
       this.$store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
       prevCursor = undefined
       this.$store.commit('clearDraggingItems')
-      this.$store.commit('broadcast/updateStore', { updates: { userId: this.$store.state.currentUser.id }, type: 'clearRemoteCardsDragging' })
     }
   }
 }

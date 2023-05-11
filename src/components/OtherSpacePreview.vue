@@ -37,7 +37,7 @@ const otherSpaceName = computed(() => {
 })
 
 // dialog
-const showOtherSpaceDetailsIsVisible = (event) => {
+const showOtherSpaceDetailsIsVisible = async (event) => {
   if (utils.isMultiTouch(event)) { return }
   if (store.state.preventDraggedCardFromShowingDetails) { return }
   let otherItem = {}
@@ -62,6 +62,14 @@ const showOtherSpaceDetailsIsVisible = (event) => {
   store.commit('currentUserIsDraggingCard', false)
   store.commit('otherCardDetailsIsVisible', false)
   event.stopPropagation()
+  // broadcast
+  const updates = {
+    userId: store.state.currentUser.id,
+    cardId: props.parentCardId
+  }
+  store.commit('broadcast/updateStore', { updates, type: 'clearRemoteCardsDragging' })
+  await nextTick()
+  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
 }
 
 </script>
