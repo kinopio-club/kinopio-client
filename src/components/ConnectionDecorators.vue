@@ -5,7 +5,7 @@
     span Label
 //- Arrow
 .button-wrap
-  button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsIsVisible }" :disabled="!canEditAll")
+  button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsIsVisible }" :disabled="!canEditAll" title="Direction")
     svg.icon.arrow(width="20px" height="12px" viewBox="0 0 20 2")
       g(stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round")
         path(:d="path" stroke="#000000")
@@ -18,15 +18,15 @@
 
 //- Reverse
 .button-wrap
-  button(@click.left="reverseConnections" :disabled="!canEditAll")
+  button(@click.left="reverseConnections" :disabled="!canEditAll" title="Reverse")
     img.icon.reverse(src="@/assets/connection-reverse.svg")
 
 //- Curved or Straight
 .button-wrap.path-curve-options
   .segmented-buttons
-    button(:class="{active: allPathsIsCurved}" @click="togglePathIsStraight(false)")
+    button(:class="{active: allPathsIsCurved}" @click="togglePathIsStraight(false)" title="Curve")
       img.icon.connection-path(src="@/assets/connection-path.svg")
-    button(:class="{active: allPathsIsStraight}" @click="togglePathIsStraight(true)")
+    button(:class="{active: allPathsIsStraight}" @click="togglePathIsStraight(true)" title="Straight")
       img.icon.connection-path(src="@/assets/connection-path-straight.svg")
 
 </template>
