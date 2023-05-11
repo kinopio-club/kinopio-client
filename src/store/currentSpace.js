@@ -248,6 +248,15 @@ const currentSpace = {
       // param items
       if (options) {
         const { cardId, spaceId, collaboratorKey } = options
+        let space, card
+        // don't update if item already exists
+        if (spaceId) {
+          const space = context.rootGetters['otherSpaceById'](spaceId)
+        } else if (cardId) {
+          const card = context.rootGetters['otherCardById'](cardId)
+        }
+        if (space || card) { return }
+        // add options to items to fetch
         if (collaboratorKey) {
           invites.push({ spaceId, collaboratorKey })
         } else if (cardId) {
@@ -263,7 +272,7 @@ const currentSpace = {
         spaceIds = otherItemIds.spaceIds
       }
       if (!cardIds.length && !spaceIds.length && !invites.length) { return }
-      context.commit('isLoadingOtherItems', true, { root: true })
+      if (options) { context.commit('isLoadingOtherItems', true, { root: true }) }
       // get items
       const data = await context.dispatch('api/getOtherItems', { spaceIds, cardIds, invites }, { root: true })
       console.log('👯‍♀️ otherItems', { spaceIds, cardIds, invites }, data)

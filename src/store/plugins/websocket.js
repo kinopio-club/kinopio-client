@@ -81,6 +81,7 @@ const checkIfShouldUpdateLinkToItem = (store, { message, updates }) => {
   } else if (updates.linkToSpaceId) {
     options = { cardId: updates.linkToSpaceId }
   }
+  if (!options) { return }
   store.dispatch('currentSpace/updateOtherItems', options)
 }
 
