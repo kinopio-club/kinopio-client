@@ -273,28 +273,33 @@ const currentSpace = {
       }
       if (!cardIds.length && !spaceIds.length && !invites.length) { return }
       if (options) { context.commit('isLoadingOtherItems', true, { root: true }) }
-      // get items
-      const data = await context.dispatch('api/getOtherItems', { spaceIds, cardIds, invites }, { root: true })
-      console.log('👯‍♀️ otherItems', { spaceIds, cardIds, invites }, data)
-      if (!data) {
-        context.commit('isLoadingOtherItems', false, { root: true })
-        return
-      }
-      // update items
-      context.commit('updateOtherItems', data, { root: true })
-      // update card dimensions
-      const cardsInCurrentSpace = context.rootGetters['currentCards/all']
-      data.spaces.forEach(space => {
-        const linkedCard = cardsInCurrentSpace.find(card => {
-          return card.linkToSpaceId === space.id
-        })
-        if (!linkedCard) { return }
-        nextTick(() => {
-          context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace }, { root: true })
-          context.dispatch('currentCards/updateDimensions', { cardId: linkedCard.id }, { root: true })
+      try {
+        // get items
+        const data = await context.dispatch('api/getOtherItems', { spaceIds, cardIds, invites }, { root: true })
+        console.log('👯‍♀️ otherItems', { spaceIds, cardIds, invites }, data)
+        if (!data) {
           context.commit('isLoadingOtherItems', false, { root: true })
+          return
+        }
+        // update items
+        context.commit('updateOtherItems', data, { root: true })
+        // update card dimensions
+        const cardsInCurrentSpace = context.rootGetters['currentCards/all']
+        data.spaces.forEach(space => {
+          const linkedCard = cardsInCurrentSpace.find(card => {
+            return card.linkToSpaceId === space.id
+          })
+          if (!linkedCard) { return }
+          nextTick(() => {
+            context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace }, { root: true })
+            context.dispatch('currentCards/updateDimensions', { cardId: linkedCard.id }, { root: true })
+            context.commit('isLoadingOtherItems', false, { root: true })
+          })
         })
-      })
+      } catch (error) {
+        console.error('🚒 updateOtherItems', error, { spaceIds, cardIds, invites })
+        context.commit('isLoadingOtherItems', false, { root: true })
+      }
     },
 
     // Space

@@ -22,6 +22,7 @@ onMounted(() => {
   updateNameSegments()
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerUpdateOtherCard') {
+      if (!props.otherCard) { return }
       if (mutation.payload !== props.otherCard.id) { return }
       updateNameSegments()
     }
