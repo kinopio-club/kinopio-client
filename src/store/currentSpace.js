@@ -725,12 +725,15 @@ const currentSpace = {
           context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
           context.dispatch('checkIfShouldPauseConnectionDirections')
           context.dispatch('checkIfShouldUpdateNewTweetCards', space)
-          context.dispatch('currentUser/validateReferral', null, { root: true })
-          context.dispatch('currentUser/validateReferralByName', null, { root: true })
           context.dispatch('api/addToQueue', {
             name: 'incrementVisits',
             body: { spaceId: space.id }
           }, { root: true })
+          // referral
+          nextTick(() => {
+            context.dispatch('currentUser/validateReferral', null, { root: true })
+            context.dispatch('currentUser/validateReferralByName', null, { root: true })
+          })
         })
       })
       context.commit('isLoadingSpace', false, { root: true })
