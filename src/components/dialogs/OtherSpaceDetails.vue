@@ -57,8 +57,12 @@ const scrollIntoView = async () => {
 // select space
 
 const changeSpace = () => {
-  store.dispatch('currentSpace/changeSpace', { space: otherSpace.value, isRemote: true })
-  store.dispatch('closeAllDialogs')
+  if (otherSpace.value.isInvite) {
+    window.location = otherSpace.value.url
+  } else {
+    store.dispatch('currentSpace/changeSpace', { space: otherSpace.value, isRemote: true })
+    store.dispatch('closeAllDialogs')
+  }
 }
 
 // edit parent card
