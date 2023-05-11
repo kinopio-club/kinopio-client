@@ -42,6 +42,11 @@ watch(() => store.state.isLoadingOtherItems, (value, prevValue) => {
     updateNameSegments()
   }
 })
+watch(() => props.otherCard, (value, prevValue) => {
+  if (value) {
+    updateNameSegments()
+  }
+})
 const updateNameSegments = () => {
   if (!props.otherCard) { return }
   let card = utils.clone(props.otherCard)
