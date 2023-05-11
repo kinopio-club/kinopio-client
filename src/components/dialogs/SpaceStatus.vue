@@ -18,7 +18,9 @@ dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog" :class="{
         span {{' '}}
         span but cannot collaborate yet, your changes will sync once connected
       .button-wrap
-        button(@click.left="refreshBrowser") Refresh
+        button(@click.left="refreshBrowser")
+          img.icon(src="@/assets/refresh.svg")
+          span Refresh
 </template>
 
 <script>
