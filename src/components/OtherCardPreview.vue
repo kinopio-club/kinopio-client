@@ -127,7 +127,6 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
   .card-image
     vertical-align middle
     border-radius var(--entity-radius)
-    max-height 100px
     display block
     margin 4px 0px
   .tag
