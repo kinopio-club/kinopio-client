@@ -26,6 +26,13 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         hr
       .row
         p Share With the World
+        label.label.small-button.extra-options-button.inline-button(title="Default to Present Mode")
+          //- (@mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
+          //- (:class="{active: isChecked, disabled: !canEditSpace}")
+          input(type="checkbox")
+            //- v-model="checkboxState"
+          img.icon(src="@/assets/presentation.svg")
+
       .row
         .segmented-buttons
           button(@click.left="copyUrl")
@@ -353,4 +360,16 @@ export default {
 
   .segmented-buttons
     z-index 1
+  .extra-options-button
+    margin-left auto
+    margin-top 0
+    margin-bottom -2px
+    width auto
+    cursor pointer
+    height 20px
+    width initial
+    &.label
+      padding-top 2px
+    input
+      background-color transparent
 </style>
