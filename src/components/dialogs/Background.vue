@@ -18,7 +18,7 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
         placeholder="Paste an image URL or upload"
         v-model="background"
         data-type="name"
-        maxlength="250"
+        maxlength="400"
       )
       .input-button-wrap(@click.left="copyUrl")
         button.small-button
@@ -89,39 +89,57 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
 
   //- results
   template(v-if="canEditSpace")
-    section.results-section.search-input-wrap(v-if="serviceIsPexels")
-      .search-wrap
-        img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
-        Loader(:visible="loading")
-        input(
-          placeholder="Search Images on Pexels"
-          v-model="searchInput"
-          ref="searchInput"
-          @focus="resetPinchCounterZoomDecimal"
-          @keyup.stop.backspace
-          @keyup.stop.enter
-          @mouseup.stop
-          @touchend.stop
-        )
-        button.borderless.clear-input-wrap(@click.left="clearSearch")
-          img.icon.cancel(src="@/assets/add.svg")
-      .error-container(v-if="error.isNoSearchResults")
-        .badge.danger Nothing found on Pexels for {{search}}
-      .error-container(v-if="error.unknownServerError")
-        .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-      ul.results-list.image-list
-        template(v-for="image in images" :key="image.id")
-          li(@click.left="updateSpaceBackground(image.url)" tabindex="0" v-on:keydown.enter="updateSpaceBackground(image.url)" :class="{ active: isSpaceUrl(image)}")
-            img(:src="image.previewUrl")
-            a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
-              button.small-button
-                span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
-                span →
+    //- backgrounds
+    template(v-if="serviceIsBackground")
+      section.results-section
+        //- built in backgrounds
+        ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+        //- community backgrounds
+      section.results-section.community-backgrounds-section
+        .row.row-title
+          a.arena-link(target="_blank" href="https://www.are.na/kinopio/community-backgrounds")
+            img.icon.arena(src="@/assets/arena.svg")
+          span Community Backgrounds
+        Loader(:visible="communityBackgroundsIsLoading")
+        ImageList(v-if="!communityBackgroundsIsLoading" :images="communityBackgroundImages" :activeUrl="background" @selectImage="updateSpaceBackground")
 
-    section.results-section(v-else)
-      .row(v-if="serviceIsRecent")
-        p.row-title Recently Used
-      ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+    //- recent
+    template(v-else-if="serviceIsRecent")
+      section.results-section
+        .row
+          p.row-title Recently Used
+        ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+
+    //- search results
+    template(v-else-if="serviceIsPexels")
+      section.results-section.search-input-wrap
+        .search-wrap
+          img.icon.search(v-if="!searchIsLoading" src="@/assets/search.svg" @click.left="focusSearchInput")
+          Loader(:visible="searchIsLoading")
+          input(
+            placeholder="Search Images on Pexels"
+            v-model="searchInput"
+            ref="searchInput"
+            @focus="resetPinchCounterZoomDecimal"
+            @keyup.stop.backspace
+            @keyup.stop.enter
+            @mouseup.stop
+            @touchend.stop
+          )
+          button.borderless.clear-input-wrap(@click.left="clearSearch")
+            img.icon.cancel(src="@/assets/add.svg")
+        .error-container(v-if="error.isNoSearchResults")
+          .badge.danger Nothing found on Pexels for {{search}}
+        .error-container(v-if="error.unknownServerError")
+          .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+        ul.results-list.image-list
+          template(v-for="image in images" :key="image.id")
+            li(@click.left="updateSpaceBackground(image.url)" tabindex="0" v-on:keydown.enter="updateSpaceBackground(image.url)" :class="{ active: isSpaceUrl(image)}")
+              img(:src="image.previewUrl")
+              a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
+                button.small-button
+                  span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
+                  span →
 
 </template>
 
@@ -166,8 +184,10 @@ export default {
       backgroundTint: '',
       defaultColor: '#e3e3e3',
       search: '',
-      loading: false,
-      selectedImages: backgroundImages,
+      searchIsLoading: false,
+      selectedImages: [],
+      communityBackgroundsIsLoading: false,
+      communityBackgroundImages: [],
       images: [],
       service: 'background' // background, recent, pexels
     }
@@ -242,7 +262,13 @@ export default {
       return this.backgroundTint
     },
     serviceIsPexels () { return this.service === 'pexels' },
-    serviceIsRecent () { return this.service === 'recent' }
+    serviceIsRecent () { return this.service === 'recent' },
+    serviceIsBackground () { return this.service === 'background' },
+    backgroundImages () {
+      let images = backgroundImages
+      images = images.filter(image => !image.isArchived)
+      return images
+    }
   },
   methods: {
     isSpaceUrl (image) {
@@ -259,14 +285,14 @@ export default {
         element.setSelectionRange(0, length)
       })
     },
-    updateService (type) {
-      this.service = type
-      if (type === 'background') {
-        this.selectedImages = backgroundImages
-      } else if (type === 'recent') {
+    updateService (service) {
+      this.service = service
+      if (service === 'background') {
+        this.selectedImages = this.backgroundImages
+      } else if (service === 'recent') {
         const images = this.recentImagesFromCacheSpaces()
         this.selectedImages = images
-      } else if (type === 'pexels') {
+      } else if (service === 'pexels') {
         this.searchPexels()
         this.focusAndSelectSearchInput()
       }
@@ -275,7 +301,7 @@ export default {
       this.searchPexels()
     }, 350),
     async searchPexels () {
-      this.loading = true
+      this.searchIsLoading = true
       this.error.isNoSearchResults = false
       this.error.unknownServerError = false
       try {
@@ -303,7 +329,7 @@ export default {
         console.error('🚒 searchService', error)
         this.error.unknownServerError = true
       }
-      this.loading = false
+      this.searchIsLoading = false
     },
     recentImagesFromCacheSpaces () {
       let spaces = cache.getAllSpaces()
@@ -314,7 +340,7 @@ export default {
       })
       images = uniq(images)
       images = images.map(image => {
-        const backgroundImage = backgroundImages.find(item => item.url === image)
+        const backgroundImage = this.backgroundImages.find(item => item.url === image)
         if (backgroundImage) {
           return backgroundImage
         }
@@ -431,19 +457,40 @@ export default {
     },
     clearSearch () {
       this.search = ''
-      this.loading = false
+      this.searchIsLoading = false
       this.images = []
     },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
+    },
+    async updateCommunityBackgroundImages () {
+      this.communityBackgroundsIsLoading = true
+      if (this.communityBackgroundImages.length) {
+        this.communityBackgroundsIsLoading = false
+        return
+      }
+      let images = await this.$store.dispatch('api/communityBackgrounds')
+      images = images.map(image => {
+        return {
+          url: image.original,
+          thumbnailUrl: image.thumb,
+          previewUrl: image.preview
+        }
+      })
+      this.communityBackgroundImages = images
+      this.communityBackgroundsIsLoading = false
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
+        if (this.service === 'background') {
+          this.selectedImages = this.backgroundImages
+        }
         this.backgroundTint = this.currentSpace.backgroundTint
         this.closeDialogs()
         this.clearErrors()
+        this.updateCommunityBackgroundImages()
       } else {
         if (this.error.isNotImageUrl) {
           this.removeBackground()
@@ -456,8 +503,10 @@ export default {
 </script>
 
 <style lang="stylus">
-.background
+dialog.background
   width 255px
+  overflow auto
+  max-height 86vh
   .title-row
     margin-left 0 !important
   .background-preview
@@ -517,6 +566,7 @@ export default {
       flex-shrink 0
       margin-top 2px
   .results-section
+    max-height initial
     .error-container
       margin 0
       margin-left 4px
@@ -527,4 +577,8 @@ export default {
     vertical-align -1px
   .row-title
     margin-left 4px
+  .community-backgrounds-section
+    margin-top 10px
+  .arena-link
+    padding-right 5px
 </style>

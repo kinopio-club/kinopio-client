@@ -32,12 +32,14 @@
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-boxes-2x.png",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-boxes-thumbnail.png",
     "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-boxes-thumbnail.png",
-    "shouldDarkenInDarkTheme": true
+    "shouldDarkenInDarkTheme": true,
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/picture-frame-inverse-2x.png",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/picture-frame-inverse-preview.svg",
-    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/picture-frame-inverse-thumbnail-2.svg"
+    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/picture-frame-inverse-thumbnail-2.svg",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-large-boxes-2x.png",
@@ -47,13 +49,15 @@
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-grid.jpeg",
-    "shouldDarkenInDarkTheme": true
+    "shouldDarkenInDarkTheme": true,
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/gem-grid-2x.png",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/gem-grid-2-2x.png",
     "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/gem-grid-2-thumbnail.svg",
-    "shouldDarkenInDarkTheme": true
+    "shouldDarkenInDarkTheme": true,
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/texture-tomato.jpg",
@@ -80,52 +84,75 @@
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/forest-door.jpg",
-    "sourcePageUrl": "https://www.are.na/block/931018"
+    "sourcePageUrl": "https://www.are.na/block/931018",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/kusama-1.jpg",
-    "sourcePageUrl": "https://www.are.na/block/1974670"
+    "sourcePageUrl": "https://www.are.na/block/1974670",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/garden.jpeg",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/garden-thumbnail.jpeg",
-    "sourcePageUrl": "https://greenhousetype.com"
+    "sourcePageUrl": "https://greenhousetype.com",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/frosted-glass.jpg",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/frosted-glass-thumbnail.jpg",
-    "sourcePageUrl": "https://www.are.na/block/8533480"
+    "sourcePageUrl": "https://www.are.na/block/8533480",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/choco-desert.jpeg",
-    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/choco-desert-thumbnail.jpeg"
+    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/choco-desert-thumbnail.jpeg",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/shadow-leaves.jpg",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/shadow-leaves-thumbnail.jpg",
-    "sourcePageUrl": "https://www.are.na/block/8499135"
+    "sourcePageUrl": "https://www.are.na/block/8499135",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/mossy-forest.jpg",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/mossy-forest-thumbnail.jpg",    
-    "sourcePageUrl": "https://www.are.na/block/1325211"
-  },
-  {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/palm-nights.jpg",
-    "sourcePageUrl": "https://www.are.na/block/479306"
+    "sourcePageUrl": "https://www.are.na/block/1325211",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/vases.jpg",
-    "sourcePageUrl": "https://www.are.na/block/5813311"
+    "sourcePageUrl": "https://www.are.na/block/5813311",
+    "isArchived": true
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/palm-nights.jpg",
+    "sourcePageUrl": "https://www.are.na/block/479306",
+    "isArchived": true
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/vivid-blush.jpeg",
+    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/vivid-blush-thumbnail.jpeg",
+    "sourcePageUrl": "https://www.are.na/block/5673661",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/abstract-grid.jpg",
-    "sourcePageUrl": "https://www.are.na/block/4218398"
+    "sourcePageUrl": "https://www.are.na/block/4218398",
+    "isArchived": true
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/oil.jpeg",
+    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/oil-thumbnail.jpeg",
+    "sourcePageUrl": "https://www.are.na/block/897115",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/anime-school-roof.jpeg",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/anime-school-roof-thumbnail.jpeg",
-    "sourcePageUrl": "https://www.are.na/block/2086139"
+    "sourcePageUrl": "https://www.are.na/block/2086139",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/ghibli-forest-canopy.jpeg",
@@ -138,27 +165,20 @@
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/light-blush.jpg",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/light-blush-thumbnail.jpg",    
-    "sourcePageUrl": "https://www.are.na/block/2474536"
-  },
-  {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/vivid-blush.jpeg",
-    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/vivid-blush-thumbnail.jpeg",    
-    "sourcePageUrl": "https://www.are.na/block/5673661"
-  },  
-  {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/oil.jpeg",
-    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/oil-thumbnail.jpeg",    
-    "sourcePageUrl": "https://www.are.na/block/897115"
+    "sourcePageUrl": "https://www.are.na/block/2474536",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/cream.jpeg",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/cream-thumbnail.jpeg",    
-    "sourcePageUrl": "https://www.are.na/block/6597698"
+    "sourcePageUrl": "https://www.are.na/block/6597698",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/glass.jpeg",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/glass-thumbnail.jpeg",    
-    "sourcePageUrl": "https://www.are.na/block/7104743"
+    "sourcePageUrl": "https://www.are.na/block/7104743",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/classic-macos-5.png"
@@ -170,10 +190,12 @@
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/classic-macos-7.png"
   },
   {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/classic-macos-8.png"
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/classic-macos-8.png",
+    "isArchived": true
   },
   {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/classic-macos-9-2x.png"
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/classic-macos-9-2x.png",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/scatter-classic-2x.png"

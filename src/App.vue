@@ -827,6 +827,9 @@ dialog
   padding 0
   vertical-align 2px
 
+.icon.arena
+  width 18px
+
 label,
 li
   position relative

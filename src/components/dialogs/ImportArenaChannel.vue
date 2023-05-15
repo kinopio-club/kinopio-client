@@ -255,8 +255,6 @@ export default {
 
 <style lang="stylus">
 .import-arena-channel
-  .arena
-    width 18px
   .badge
     margin-bottom 10px
   .badge-with-url
