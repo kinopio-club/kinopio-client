@@ -97,7 +97,7 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
         //- community backgrounds
         section.results-section.community-backgrounds-section
           .row
-            a.badge.button-badge.secondary.arena-link(target="_blank" href="https://www.are.na/kinopio/community-backgrounds")
+            a.arena-link(target="_blank" href="https://www.are.na/kinopio/community-backgrounds")
               img.icon.arena(src="@/assets/arena.svg")
             span Community Backgrounds
           Loader(:visible="communityBackgroundsIsLoading")
