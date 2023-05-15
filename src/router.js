@@ -163,7 +163,9 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         const path = window.location.pathname
         const urlParams = new URLSearchParams(window.location.search)
-        // present=true => store presentation mode
+        if (urlParams.get('present')) {
+          store.commit('isPresentationMode', true)
+        }
         store.dispatch('updateSpaceAndCardUrlToLoad', path)
         next()
       }
@@ -173,7 +175,9 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         const path = window.location.pathname
         const urlParams = new URLSearchParams(window.location.search)
-        // present=true => store presentation mode
+        if (urlParams.get('present')) {
+          store.commit('isPresentationMode', true)
+        }
         store.dispatch('updateSpaceAndCardUrlToLoad', path)
         next()
       }

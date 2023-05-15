@@ -15,8 +15,8 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   section(v-if="spaceHasUrl")
     ReadOnlySpaceInfoBadges
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
-    //- Share URL
     section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
+      //- Explore
       template(v-if="exploreSectionIsVisible")
         .row
           p Share with the Community
@@ -24,15 +24,12 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           AddToExplore
           AskToAddToExplore
         hr
+      //- Copy URL
       .row
         p Share With the World
-        label.label.small-button.extra-options-button.inline-button(title="Default to Present Mode")
-          //- (@mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
-          //- (:class="{active: isChecked, disabled: !canEditSpace}")
-          input(type="checkbox")
-            //- v-model="checkboxState"
+        label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.left="toggleIsShareInPresentationMode" @touchend.prevent="toggleIsShareInPresentationMode" :class="{active: isShareInPresentationMode}")
+          input(type="checkbox" :value="isShareInPresentationMode")
           img.icon(src="@/assets/presentation.svg")
-
       .row
         .segmented-buttons
           button(@click.left="copyUrl")
@@ -45,10 +42,10 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   Invite(v-if="isSpaceMember && currentUserIsSignedIn")
   //- Collaborators
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
-    // collaborators
+    //- collaborators
     template(v-if="spaceHasCollaborators")
       UserList(:users="spaceCollaborators" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :showRemoveUser="isSpaceMember" @removeUser="removeCollaborator" :isClickable="true")
-    // card users
+    //- card users
     template(v-if="spaceHasOtherCardUsers")
       UserList(:users="spaceOtherCardUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 
@@ -129,7 +126,8 @@ export default {
       spaceRssFeedIsVisible: false,
       embedIsVisible: false,
       exportIsVisible: false,
-      importIsVisible: false
+      importIsVisible: false,
+      isShareInPresentationMode: false
     }
   },
   computed: {
@@ -144,7 +142,14 @@ export default {
       if (!this.userDetailsIsVisible) { return }
       return this.$store.state.userDetailsUser
     },
-    url () { return this.$store.getters['currentSpace/url'] },
+    url () {
+      let url = this.$store.getters['currentSpace/url']
+      url = new URL(url)
+      if (this.isShareInPresentationMode) {
+        url.searchParams.set('present', true)
+      }
+      return url.href
+    },
     spaceName () { return this.$store.state.currentSpace.name },
     spacePrivacy () { return this.$store.state.currentSpace.privacy },
     currentUser () { return this.$store.state.currentUser },
@@ -253,6 +258,10 @@ export default {
     toggleUserDetails (event, user) {
       this.closeDialogs()
       this.showUserDetails(event, user)
+    },
+    toggleIsShareInPresentationMode () {
+      this.closeDialogs()
+      this.isShareInPresentationMode = !this.isShareInPresentationMode
     },
     showUserDetails (event, user) {
       let element = event.target
