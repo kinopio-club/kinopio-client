@@ -18,7 +18,7 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
         placeholder="Paste an image URL or upload"
         v-model="background"
         data-type="name"
-        maxlength="250"
+        maxlength="400"
       )
       .input-button-wrap(@click.left="copyUrl")
         button.small-button
@@ -92,15 +92,16 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
     //- backgrounds
     template(v-if="serviceIsBackground")
       section.results-section
+        //- built in backgrounds
         ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
-        section.results-section.community-picks-section
-          //- .row
+        //- community backgrounds
+        section.results-section.community-backgrounds-section
           .row
             a.arena-link(target="_blank" href="https://www.are.na/kinopio/community-backgrounds")
               img.icon.arena(src="@/assets/arena.svg")
             span Community Backgrounds
-          //- ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
-          //- :images="communityBackgrounds"
+          Loader(:visible="communityBackgroundsIsLoading")
+          ImageList(v-if="!communityBackgroundsIsLoading" :images="communityBackgroundImages" :activeUrl="background" @selectImage="updateSpaceBackground")
 
     //- recent
     template(v-else-if="serviceIsRecent")
@@ -185,6 +186,8 @@ export default {
       search: '',
       searchIsLoading: false,
       selectedImages: backgroundImages,
+      communityBackgroundsIsLoading: false,
+      communityBackgroundImages: [],
       images: [],
       service: 'background' // background, recent, pexels
     }
@@ -454,6 +457,23 @@ export default {
     },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
+    },
+    async updateCommunityBackgroundImages () {
+      this.communityBackgroundsIsLoading = true
+      if (this.communityBackgroundImages.length) {
+        this.communityBackgroundsIsLoading = false
+        return
+      }
+      let images = await this.$store.dispatch('api/communityBackgrounds')
+      images = images.map(image => {
+        return {
+          url: image.original,
+          thumbnailUrl: image.thumb,
+          previewUrl: image.preview
+        }
+      })
+      this.communityBackgroundImages = images
+      this.communityBackgroundsIsLoading = false
     }
   },
   watch: {
@@ -462,6 +482,7 @@ export default {
         this.backgroundTint = this.currentSpace.backgroundTint
         this.closeDialogs()
         this.clearErrors()
+        this.updateCommunityBackgroundImages()
       } else {
         if (this.error.isNotImageUrl) {
           this.removeBackground()
@@ -545,7 +566,7 @@ export default {
     vertical-align -1px
   .row-title
     margin-left 4px
-  .community-picks-section
+  .community-backgrounds-section
     margin-top 10px
   .arena-link
     padding-right 5px

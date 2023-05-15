@@ -987,6 +987,16 @@ const self = {
         throw new Error(error)
       }
     },
+    communityBackgrounds: async (context) => {
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/services/community-backgrounds`, options)
+        const data = await normalizeResponse(response)
+        return data
+      } catch (error) {
+        console.error('🚒 communityBackgrounds', error)
+      }
+    },
 
     // Downloads
 

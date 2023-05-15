@@ -1698,7 +1698,7 @@ export default {
     // match an extension
     // which much be followed by either end of line, space, or ? (for qs) char
     const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.jpe|\.jif|\.jfif|\.png|\.svg|\.webp)(?:\n| |\?|&)/igm)
-    const isImage = url.match(imageUrlPattern)
+    const isImage = url.match(imageUrlPattern) || url.includes('is-image=true')
     return Boolean(isImage)
   },
   urlIsVideo (url) {
