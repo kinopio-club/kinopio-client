@@ -6,7 +6,14 @@ dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': d
         span Live Public Spaces
         Loader(:visible="loading")
   section.results-section(v-if="spaces.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="spaces" :showOtherUsers="true" :hideExploreBadge="true" @selectSpace="changeSpace" :resultsSectionHeight="resultsSectionHeight")
+    SpaceList(
+      :spaces="spaces"
+      :showOtherUsers="true"
+      :hideExploreBadge="true"
+      @selectSpace="changeSpace"
+      :resultsSectionHeight="resultsSectionHeight"
+      :showFavoriteButton="true"
+    )
   section.empty(v-if="!spaces.length")
     p No public spaces are currently being edited, check back soon
     img.placeholder(src="@/assets/cat-book.jpg")

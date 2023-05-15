@@ -44,6 +44,11 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
       p(v-if="error.amountIsTooLow")
         .badge.danger Because of Stripe fees, the minimum donation amount is $2
 
+  section(v-if="!currentUserIsUpgraded")
+    p Donations won't upgrade your account
+    button(@click="triggerUpgradeUserIsVisible")
+      span Upgrade for Unlimited Cards
+
   section
     p
       img.icon(src="@/assets/lock.svg")
@@ -91,9 +96,14 @@ export default {
         this.currentAmount = value
       }
     },
-    currentUser () { return this.$store.state.currentUser }
+    currentUser () { return this.$store.state.currentUser },
+    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
   methods: {
+    triggerUpgradeUserIsVisible () {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('triggerUpgradeUserIsVisible')
+    },
     toggleCustomAmountIsVisible (value) {
       value = !this.customAmountIsVisible
       this.customAmountIsVisible = value
@@ -154,8 +164,8 @@ export default {
 dialog.donate
   overflow auto
   max-height calc(100vh - 210px)
-  left initial
-  right 8px
+  // left initial
+  // right 8px
   .summary
     margin-top 10px
     margin-bottom 10px

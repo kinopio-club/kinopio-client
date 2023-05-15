@@ -33,31 +33,20 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       UserBadges(:user="user")
 
-    //- Unlimited cards from member
+    //- n cards created
     section.upgrade(v-if="!currentUserIsUpgraded")
       .row
         CardsCreatedProgress
-      .row
-        .button-wrap(v-if="!isAddPage")
-          button(@click.left.stop="triggerUpgradeUserIsVisible")
-            span Upgrade for Unlimited
       .row(v-if="!isPricingHidden")
-        p
-          .badge.info $6/mo, $60/yr
-        a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
-          button
-            span Help{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
-
+        .button-wrap
+          button(@click="triggerUpgradeUserIsVisible")
+            span Upgrade for Unlimited
+      //- Unlimited cards from member
       .row(v-if="spaceUserIsUpgraded && !currentUserIsUpgraded")
         .badge.status
           p
             UserLabelInline(:user="spaceUser")
             span is upgraded, so cards you create in this space won't increase your free card count
-      .row
-        .button-wrap
-          button.variable-length-content(@click="triggerEarnCreditsIsVisible")
-            span Earn Credits
 
     section(v-if="!isAddPage")
       .row
@@ -65,17 +54,11 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
           button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
             img.icon.settings(src="@/assets/settings.svg")
             span Settings
-
-        button(v-if="currentUserIsSignedIn" @click.left="signOut")
+        button.danger(v-if="currentUserIsSignedIn" @click.left="signOut")
           img.icon.sign-out(src="@/assets/sign-out.svg")
           span Sign Out
         button(v-else @click.left="triggerSignUpOrInIsVisible")
           span Sign Up or In
-      template(v-if="currentUserIsUpgraded")
-        .row
-          .button-wrap
-            button(@click.left.stop="triggerDonateIsVisible")
-              span Donate
 
   //- Other User
   section(v-if="!isCurrentUser && userIsSignedIn && user.id")
@@ -242,9 +225,9 @@ export default {
     userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible }
   },
   methods: {
-    triggerEarnCreditsIsVisible () {
+    triggerUpgradeUserIsVisible () {
       this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerEarnCreditsIsVisible')
+      this.$store.commit('triggerUpgradeUserIsVisible')
     },
     toggleIsFavoriteUser () {
       if (this.isFavoriteUser) {
@@ -257,14 +240,6 @@ export default {
       const value = !this.$store.state.userSettingsIsVisible
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('userSettingsIsVisible', value)
-    },
-    triggerUpgradeUserIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerUpgradeUserIsVisible')
-    },
-    triggerDonateIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerDonateIsVisible')
     },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible

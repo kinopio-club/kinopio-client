@@ -8,14 +8,18 @@ section.invite
           User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
           User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
         span Invite to Edit
+      button.small-button.tips-button.inline-button(@click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
+        span Tips
+
     Loader(:visible="loading")
     template(v-if="!loading && collaboratorKey")
       .row
-        button(@click.left="copyUrl")
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy Invite URL
-        button(@click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
-          span Tips
+        .segmented-buttons
+          button(@click.left="copyUrl")
+            img.icon.copy(src="@/assets/copy.svg")
+            span Copy Invite URL
+          button(v-if="webShareIsSupported" @click="webShare")
+            img.icon.share(src="@/assets/share.svg")
     //- Error
     template(v-if="!loading && !collaboratorKey")
       .row
@@ -83,7 +87,8 @@ export default {
       const luminosity = this.$store.state.currentUser.theme
       const color = randomColor({ luminosity })
       return { color }
-    }
+    },
+    webShareIsSupported () { return navigator.share }
   },
   methods: {
     async copyUrl (event) {
@@ -97,9 +102,9 @@ export default {
         this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
       }
     },
-    shareUrl () {
+    webShare () {
       const data = {
-        title: 'Kinopio Invite',
+        title: `Invite to Edit`,
         text: this.spaceName,
         url: this.url
       }
@@ -118,11 +123,9 @@ export default {
     updateInviteUrl (collaboratorKey) {
       const currentSpace = this.$store.state.currentSpace
       const spaceId = currentSpace.id
-      const spaceName = utils.normalizeString(currentSpace.name)
-      this.url = `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
-      if (utils.isDevelopment()) {
-        console.log('🍇 invite url', this.url)
-      }
+      const spaceName = currentSpace.name
+      this.url = utils.inviteUrl({ spaceId, spaceName, collaboratorKey })
+      console.log('🍇 invite url', this.url)
     },
     toggleTipsIsVisible () {
       this.tipsIsVisible = !this.tipsIsVisible
@@ -145,4 +148,9 @@ export default {
     vertical-align 0
   .users
     margin-right 5px
+  .tips-button
+    margin-left auto
+    margin-top 0
+    width auto
+    cursor pointer
 </style>

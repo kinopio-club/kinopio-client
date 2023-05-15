@@ -48,6 +48,7 @@ const store = createStore({
     isPricingHidden: false,
     disableViewportOptimizations: false, // for urlbox
     isPresentationMode: false,
+    pricingIsVisible: false,
     userSettingsIsVisible: false,
 
     // zoom and scroll
@@ -165,10 +166,11 @@ const store = createStore({
     remoteTags: [],
     remoteTagsIsFetched: false,
 
-    // links
-    linkDetailsIsVisible: false,
-    linkDetailsPosition: {}, // x, y
-    currentSelectedLink: {},
+    // other items (links)
+    otherSpaceDetailsIsVisible: false,
+    otherCardDetailsIsVisible: false,
+    otherItemDetailsPosition: {}, // x, y
+    currentSelectedOtherItem: {},
 
     // pinned dialogs
     spaceDetailsIsPinned: false,
@@ -179,6 +181,7 @@ const store = createStore({
     // loading
     isLoadingSpace: false,
     isJoiningSpace: false, // broadcast
+    isLoadingOtherItems: false,
     spaceUrlToLoad: '',
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
@@ -234,7 +237,7 @@ const store = createStore({
 
     // session data
     otherUsers: [], // { id, name color }
-    otherSpaces: [], // { {user}, name, id }
+    otherItems: { spaces: [], cards: [] },
     otherTags: []
   },
   mutations: {
@@ -282,12 +285,14 @@ const store = createStore({
       state.tagDetailsIsVisible = false
       state.tagDetailsIsVisibleFromTagList = false
       state.currentSelectedTag = {}
-      state.linkDetailsIsVisible = false
-      state.currentSelectedLink = {}
+      state.otherSpaceDetailsIsVisible = false
+      state.otherCardDetailsIsVisible = false
+      state.currentSelectedOtherItem = {}
       state.cardsWereDragged = false
       state.boxesWereDragged = false
       state.userDetailsIsVisible = false
       state.cardListItemOptionsIsVisible = false
+      state.pricingIsVisible = false
       state.userSettingsIsVisible = false
     },
     isOnline: (state, value) => {
@@ -434,6 +439,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.isPresentationMode = value
     },
+    pricingIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.pricingIsVisible = value
+    },
     userSettingsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.userSettingsIsVisible = value
@@ -538,6 +547,8 @@ const store = createStore({
     triggerShowExplore: () => {},
     triggerCardIdUpdatePastedName: (state, options) => {},
     triggerDrawConnectionFrame: (state, event) => {},
+    triggerCancelLocking: () => {},
+    triggerUpdateOtherCard: (state, cardId) => {},
 
     // Used by extensions only
 
@@ -879,17 +890,21 @@ const store = createStore({
 
     // Link Details
 
-    linkDetailsIsVisible: (state, value) => {
+    otherSpaceDetailsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.linkDetailsIsVisible = value
+      state.otherSpaceDetailsIsVisible = value
     },
-    linkDetailsPosition: (state, position) => {
+    otherCardDetailsIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.otherCardDetailsIsVisible = value
+    },
+    otherItemDetailsPosition: (state, position) => {
       utils.typeCheck({ value: position, type: 'object' })
-      state.linkDetailsPosition = position
+      state.otherItemDetailsPosition = position
     },
-    currentSelectedLink: (state, link) => {
+    currentSelectedOtherItem: (state, link) => {
       utils.typeCheck({ value: link, type: 'object' })
-      state.currentSelectedLink = link
+      state.currentSelectedOtherItem = link
     },
 
     // Pinned Dialogs
@@ -1142,6 +1157,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.isJoiningSpace = value
     },
+    isLoadingOtherItems: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.isLoadingOtherItems = value
+    },
     clearSpaceCollaboratorKeys: (state) => {
       state.spaceCollaboratorKeys = []
     },
@@ -1362,16 +1381,27 @@ const store = createStore({
       users.push(updatedUser)
       state.otherUsers = users
     },
-    updateOtherSpaces: (state, updatedSpace) => {
-      utils.typeCheck({ value: updatedSpace, type: 'object' })
-      let spaces = utils.clone(state.otherSpaces)
-      spaces = spaces.filter(space => {
-        if (space.id !== updatedSpace.id) {
-          return space
+    updateOtherItems: (state, { cards, spaces }) => {
+      utils.typeCheck({ value: cards, type: 'array' })
+      utils.typeCheck({ value: spaces, type: 'array' })
+      let otherItems = utils.clone(state.otherItems)
+      if (cards.length) {
+        otherItems.cards = otherItems.cards.concat(cards)
+        otherItems.cards = uniqBy(otherItems.cards, 'id')
+      }
+      if (spaces.length) {
+        otherItems.spaces = otherItems.spaces.concat(spaces)
+        otherItems.spaces = uniqBy(otherItems.spaces, 'id')
+      }
+      state.otherItems = otherItems
+    },
+    updateCardNameInOtherItems: (state, { id, name }) => {
+      state.otherItems.cards = state.otherItems.cards.map(card => {
+        if (card.id === id) {
+          card.name = name
         }
+        return card
       })
-      spaces.push(updatedSpace)
-      state.otherSpaces = spaces
     },
     otherTags: (state, remoteTags) => {
       remoteTags = uniqBy(remoteTags, 'name')
@@ -1381,7 +1411,7 @@ const store = createStore({
 
   actions: {
     updateSpaceAndCardUrlToLoad: (context, path) => {
-      const matches = utils.spaceAndCardIdFromUrl(path)
+      const matches = utils.spaceAndCardIdFromPath(path)
       if (!matches) { return }
       if (matches.cardId) {
         context.commit('loadSpaceShowDetailsForCardId', matches.cardId)
@@ -1620,9 +1650,14 @@ const store = createStore({
       return user
     },
     otherSpaceById: (state, getters) => (spaceId) => {
-      const otherSpaces = state.otherSpaces.filter(Boolean)
+      const otherSpaces = state.otherItems.spaces.filter(Boolean)
       const space = otherSpaces.find(otherSpace => otherSpace.id === spaceId)
       return space
+    },
+    otherCardById: (state, getters) => (cardId) => {
+      const otherCards = state.otherItems.cards.filter(Boolean)
+      const card = otherCards.find(otherCard => otherCard.id === cardId)
+      return card
     },
     cachedOrOtherSpaceById: (state, getters) => (spaceId) => {
       const currentSpace = state.currentSpace

@@ -75,6 +75,10 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
           button
             span Twitter{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
+      .button-wrap
+        button(@click.left.stop="triggerDonateIsVisible")
+          img.icon(src="@/assets/heart-empty.svg")
+          span Donate
 
 </template>
 
@@ -193,6 +197,10 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
+    },
+    triggerDonateIsVisible () {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('triggerDonateIsVisible')
     }
   },
   watch: {

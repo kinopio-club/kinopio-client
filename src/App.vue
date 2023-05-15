@@ -15,7 +15,6 @@
   Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
   Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
   TagDetails
-  LinkDetails
   UserDetails
   CardListItemOptions
   WindowHistoryHandler
@@ -35,7 +34,6 @@ import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import ScrollHandler from '@/components/ScrollHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
-import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
@@ -58,7 +56,6 @@ export default {
     ScrollHandler,
     WindowHistoryHandler,
     TagDetails,
-    LinkDetails,
     ItemsLocked,
     UserDetails,
     NotificationsWithPosition,
@@ -943,6 +940,8 @@ code
   &.status
     background var(--secondary-active-background-dark)
   &.secondary
+    background var(--secondary-background)
+  &.secondary-on-dark-background
     background var(--secondary-active-background)
   &.search
     background var(--search-background)
@@ -1009,6 +1008,7 @@ code
 
 .link-badge
   background-color var(--secondary-active-background)
+  text-decoration none
   > .user
     .label-badge
       width 21px
@@ -1156,6 +1156,7 @@ code
       margin-right 2px
   .badge,
   a
+    display inline-block
     margin-right 3px
   .badge + .badge,
   a + a

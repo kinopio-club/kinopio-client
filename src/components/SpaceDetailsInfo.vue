@@ -4,7 +4,7 @@
   //- Space Meta
 
   .row.space-info-wrap
-    .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
+    .button-wrap.background-preview-wrap(@click.left.stop="toggleBackgroundIsVisible")
       BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
       //- Background Upload Progress
       .uploading-container-footer(v-if="pendingUpload")
@@ -241,7 +241,6 @@ export default {
       }
       this.updateLocalSpaces()
     },
-
     duplicateSpace () {
       this.$store.dispatch('currentSpace/duplicateSpace')
       this.updateLocalSpaces()
@@ -333,11 +332,14 @@ export default {
 .space-details-info
   align-items flex-start !important
   justify-content space-between
+  margin-bottom 0 !important
 
   .space-info-wrap
+    align-items flex-start
     margin 0
     .textarea-wrap
       width 170px
+      margin-bottom 6px
       &.full-width
         width 170px
       .textarea-loader
@@ -379,6 +381,9 @@ export default {
           left 6px
     .title-row
       margin-left 6px
+
+  .background-preview-wrap
+    margin-bottom 6px
 
 .row.align-items-top
   align-items flex-start

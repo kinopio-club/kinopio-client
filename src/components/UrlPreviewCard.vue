@@ -147,7 +147,7 @@ const description = computed(() => {
   CardEmbed(:visible="state.shouldDisplayEmbed" :url="state.embedUrl" :card="card")
   .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage && !state.shouldDisplayEmbed")
     img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" @load="updateDimensions" ref="image")
-  .row.info.badge.secondary(v-if="!shouldHideInfo" :style="{background: selectedColor}")
+  .row.info.badge.status(v-if="!shouldHideInfo" :style="{background: selectedColor}")
     //- play
     .button-wrap.embed-button-wrap(v-if="isYoutubeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
       button.small-button

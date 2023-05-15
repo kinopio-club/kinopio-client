@@ -29,7 +29,17 @@ dialog.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="clo
         SpaceFilters(:visible="spaceFiltersIsVisible" :spaces="filteredSpaces")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" :showCreateNewSpaceFromSearch="true" @selectSpace="changeSpace" @addSpace="addSpace" :resultsSectionHeight="resultsSectionHeight")
+    SpaceList(
+      :spaces="filteredSpaces"
+      :isLoading="isLoadingRemoteSpaces"
+      :showUserIfCurrentUserIsCollaborator="true"
+      :parentIsSpaceDetails="true"
+      :showCreateNewSpaceFromSearch="true"
+      @selectSpace="changeSpace"
+      @addSpace="addSpace"
+      :resultsSectionHeight="resultsSectionHeight"
+      :showFavoriteButton="true"
+    )
 </template>
 
 <script>
@@ -234,6 +244,7 @@ export default {
       return spaces
     },
     updateLocalSpaces () {
+      if (!this.visible) { return }
       this.debouncedUpdateLocalSpaces()
     },
     debouncedUpdateLocalSpaces: debounce(async function () {
@@ -380,4 +391,8 @@ dialog.space-details
   &.is-pinned
     left -65px
     top -13px
+  .space-list
+    .inline-favorite-wrap
+      padding-top 4px
+
 </style>

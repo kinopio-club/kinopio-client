@@ -64,8 +64,8 @@ article#card(
         button.inline-button.resize-button(tabindex="-1" :class="{hidden: isPresentationMode}")
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
+    //- Content
     span.card-content-wrap(:style="cardContentWrapStyles")
-
       //- Comment
       .card-comment(v-if="isComment")
         //- [·]
@@ -91,7 +91,7 @@ article#card(
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
             template(v-for="segment in nameSegments")
-              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
+              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id")
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
@@ -135,17 +135,19 @@ article#card(
                 img.connector-icon(src="@/assets/connector-closed-in-card.svg")
               //- template(v-else)
               //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible" :class="{'is-image-card': isImageCard}")
-      UrlPreviewCard(
-        :visible="cardUrlPreviewIsVisible"
-        :card="card"
-        :user="createdByUser"
-        :isImageCard="isImageCard"
-        :isSelected="isSelectedOrDragging"
-        :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
-        :isLoadingUrlPreview="isLoadingUrlPreview"
-      )
-
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || otherCardIsVisible" :class="{'is-image-card': isImageCard}")
+      template(v-if="cardUrlPreviewIsVisible")
+        UrlPreviewCard(
+          :visible="true"
+          :card="card"
+          :user="createdByUser"
+          :isImageCard="isImageCard"
+          :isSelected="isSelectedOrDragging"
+          :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
+          :isLoadingUrlPreview="isLoadingUrlPreview"
+        )
+      template(v-if="otherCardIsVisible")
+        OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldCloseAllDialogs="true")
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -202,10 +204,12 @@ import ImageOrVideo from '@/components/ImageOrVideo.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
 import { mapState, mapGetters } from 'vuex'
+import qs from '@aguezz/qs-parse'
 
 let isMultiTouch
 let initialTouchEvent = {}
@@ -233,7 +237,8 @@ export default {
     ImageOrVideo,
     NameSegment,
     UrlPreviewCard,
-    UserLabelInline
+    UserLabelInline,
+    OtherCardPreview
   },
   props: {
     card: Object
@@ -259,6 +264,8 @@ export default {
         }
       } else if (type === 'triggerUpdateTheme') {
         this.defaultColor = utils.cssVariable('secondary-background')
+      } else if (type === 'triggerCancelLocking') {
+        this.cancelLocking()
       }
     })
   },
@@ -319,7 +326,7 @@ export default {
   computed: {
     ...mapState([
       'currentSelectedTag',
-      'currentSelectedLink',
+      'currentSelectedOtherItem',
       'loadSpaceShowDetailsForCardId',
       'currentUserIsResizingCard',
       'currentUserIsBoxSelecting',
@@ -378,7 +385,6 @@ export default {
       'currentConnections/typeForNewConnections',
       'currentUser/isSpaceMember',
       'currentCards/cardIdsConnectedToCardId',
-      'otherSpaceById',
       'currentUser/canEditSpace',
       'currentConnections/typesByCardId',
       'currentUser/totalCardFadingFiltersActive',
@@ -391,6 +397,12 @@ export default {
     isLightInDarkTheme () { return !this.backgroundColorIsDark && this.isThemeDark },
     urlPreviewImageIsVisible () {
       return Boolean(this.cardUrlPreviewIsVisible && this.card.urlPreviewImage && !this.card.shouldHideUrlPreviewImage)
+    },
+    otherCardIsVisible () { return Boolean(this.card.linkToCardId) },
+    otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
+    otherCard () {
+      const card = this.$store.getters.otherCardById(this.card.linkToCardId)
+      return card
     },
     isConnectorDarkInLightTheme () {
       if (this.connectionTypeColorisDark) { return this.connectionTypeColorisDark }
@@ -532,9 +544,9 @@ export default {
         return null
       }
     },
-    spaceUrl () {
+    spaceOrInviteUrl () {
       const link = this.formats.link
-      if (utils.urlIsSpace(link)) {
+      if (utils.urlIsSpace(link) || utils.urlIsInvite(link)) {
         return link
       } else {
         return null
@@ -811,10 +823,16 @@ export default {
           }
           segment.color = tag.color
           segment.id = tag.id
-        // links
+        // invite
+        } else if (segment.isInviteLink) {
+          const { spaceId, collaboratorKey } = segment
+          segment.otherSpace = this.$store.getters.otherSpaceById(spaceId)
+        // space or card
         } else if (segment.isLink) {
-          const spaceId = utils.spaceIdFromUrl(segment.name)
-          segment.space = this.spaceFromLinkSpaceId(spaceId, segment.name)
+          const { spaceId, cardId } = utils.spaceAndCardIdFromUrl(segment.name)
+          segment.otherSpace = this.$store.getters.otherSpaceById(spaceId)
+          segment.otherCard = this.$store.getters.otherCardById(cardId)
+        // text
         } else if (segment.isText) {
           segment.markdown = utils.markdownSegments(segment.content)
         }
@@ -843,21 +861,10 @@ export default {
       })
     },
     isConnectingTo () {
-      const currentConnectionSuccess = this.currentConnectionSuccess
-      if (utils.objectHasKeys(currentConnectionSuccess)) {
-        return currentConnectionSuccess.id === this.id
-      } else {
-        return false
-      }
+      return this.currentConnectionSuccess.id === this.id
     },
     isConnectingFrom () {
-      const currentConnectionSuccess = this.currentConnectionSuccess
-      const currentConnectionStartCardIds = this.currentConnectionStartCardIds
-      if (utils.objectHasKeys(currentConnectionSuccess)) {
-        return currentConnectionStartCardIds.find(cardId => cardId === this.id)
-      } else {
-        return false
-      }
+      return this.currentConnectionStartCardIds.find(cardId => cardId === this.id)
     },
     isBeingDragged () {
       let isCardId
@@ -1661,52 +1668,50 @@ export default {
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
     },
-    showLinkDetailsIsVisible ({ event, link }) {
-      if (isMultiTouch) { return }
-      if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
-      this.$store.dispatch('currentCards/incrementZ', this.id)
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('currentUserIsDraggingCard', false)
-      const linkRect = event.target.getBoundingClientRect()
-      this.$store.commit('linkDetailsPosition', {
-        x: window.scrollX + linkRect.x + 2,
-        y: window.scrollY + linkRect.y + linkRect.height - 2
-      })
-      link.cardId = this.id
-      this.$store.commit('currentSelectedLink', link)
-      this.$store.commit('linkDetailsIsVisible', true)
-      this.cancelLocking()
-      this.$store.commit('currentUserIsDraggingCard', false)
-    },
-    spaceFromLinkSpaceId (spaceId, url) {
-      let space = this.otherSpaceById(spaceId)
-      if (!space) {
-        space = {
-          isLoadingOrInvalid: true,
-          name: url,
-          url: spaceId
+    openUrl (event, url) {
+      if (event) {
+        if (event.metaKey || event.ctrlKey) {
+          return
+        } else {
+          event.preventDefault()
+          event.stopPropagation()
         }
       }
-      return space
-    },
-    openUrl (event, url) {
-      event.preventDefault()
       this.$store.dispatch('closeAllDialogs')
       if (this.$store.state.cardsWereDragged) {
         return
       }
       if (utils.urlIsSpace(url)) {
-        const spaceId = utils.spaceIdFromUrl(url)
-        this.changeSpace({ id: spaceId })
+        this.changeSpace(url)
       } else if (event.type === 'touchend') {
         window.location = url
       } else {
         window.open(url) // opens url in new tab
       }
     },
-    changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+    changeSpace (url) {
+      const { spaceId, spaceUrl, cardId } = utils.spaceAndCardIdFromUrl(url)
+      if (cardId) {
+        this.changeSpaceAndCard(spaceId, cardId)
+      } else {
+        const space = { id: spaceId }
+        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      }
       this.$store.dispatch('closeAllDialogs')
+    },
+    changeSpaceAndCard (spaceId, cardId) {
+      const currentSpaceId = this.$store.state.currentSpace.id
+      // space and card
+      if (currentSpaceId !== spaceId) {
+        this.$store.commit('loadSpaceShowDetailsForCardId', cardId)
+        const space = { id: spaceId }
+        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      // card in current space
+      } else {
+        this.$nextTick(() => {
+          this.$store.dispatch('currentCards/showCardDetails', cardId)
+        })
+      }
     },
     removeCommentBrackets (name) {
       if (!this.isComment) { return name }
@@ -1728,7 +1733,7 @@ export default {
       if (isDrawingConnection) { return }
       const hasNotified = this.hasNotifiedPressAndHoldToDrag
       if (!hasNotified) {
-        this.$store.commit('addNotification', { message: 'Tap and hold to drag cards', icon: 'press-and-hold' })
+        this.$store.commit('addNotification', { message: 'Press and hold to drag cards', icon: 'press-and-hold' })
       }
       this.$store.commit('hasNotifiedPressAndHoldToDrag', true)
     },
@@ -1839,34 +1844,60 @@ export default {
     },
 
     updateUrlData () {
-      this.updateSpaceLink()
+      this.updateOtherItems()
       if (this.isLoadingSpace) { return }
       this.updateUrlPreview()
     },
 
-    // space link
+    // other items
 
-    updateSpaceLink () {
-      let url = this.spaceUrl
-      const shouldRemoveLink = this.card.linkToSpaceId && !url
+    updateOtherItems () {
+      let url = this.spaceOrInviteUrl
+      const shouldRemoveLink = (this.card.linkToCardId || this.card.linkToSpaceId) && !url
       if (shouldRemoveLink) {
         const update = {
           id: this.card.id,
-          linkToSpaceId: null
+          linkToSpaceId: null,
+          linkToCardId: null
         }
         this.$store.dispatch('currentCards/update', update)
         return
       }
       if (!url) { return }
-      const linkToSpaceId = utils.spaceIdFromUrl(url) || null
-      const linkExists = linkToSpaceId === this.card.linkToSpaceId
+      const urlIsSpace = utils.urlIsSpace(url)
+      const urlIsInvite = utils.urlIsInvite(url)
+      url = new URL(url)
+      if (urlIsInvite) {
+        this.updateOtherInviteItems(url)
+      } else if (urlIsSpace) {
+        this.updateOtherSpaceOrCardItems(url)
+      }
+    },
+    updateOtherSpaceOrCardItems (url) {
+      const { spaceId, cardId } = utils.spaceAndCardIdFromPath(url.pathname)
+      const linkExists = spaceId === this.card.linkToSpaceId
       if (linkExists) { return }
       const update = {
         id: this.card.id,
-        linkToSpaceId
+        linkToSpaceId: spaceId,
+        linkToCardId: cardId,
+        linkToSpaceCollaboratorKey: null
       }
       this.$store.dispatch('currentCards/update', update)
-      this.$store.dispatch('currentSpace/saveOtherSpace', { spaceId: linkToSpaceId })
+      this.$store.dispatch('currentSpace/updateOtherItems', { spaceId, cardId })
+    },
+    updateOtherInviteItems (url) {
+      const { spaceId, collaboratorKey } = qs.decode(url.search)
+      const linkExists = spaceId === this.card.linkToSpaceId && collaboratorKey === this.card.linkToSpaceCollaboratorKey
+      if (linkExists) { return }
+      const update = {
+        id: this.card.id,
+        linkToSpaceId: spaceId,
+        linkToCardId: null,
+        linkToSpaceCollaboratorKey: collaboratorKey
+      }
+      this.$store.dispatch('currentCards/update', update)
+      this.$store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
     },
 
     // url preview

@@ -9,7 +9,7 @@
   ref="user"
   :title="title"
 )
-  .user-avatar-inline
+  .user-avatar-inline(:class="{ 'is-on-dark-background': isOnDarkBackground }")
     img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
   span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ user.name }}
 </template>
@@ -23,7 +23,8 @@ export default {
     user: Object,
     isClickable: Boolean,
     shouldHideName: Boolean,
-    title: String
+    title: String,
+    isOnDarkBackground: Boolean
   },
   computed: {
     userHasName () { return Boolean(this.user.name) },
@@ -68,6 +69,8 @@ export default {
   min-height initial
   padding 0 2px
   background var(--secondary-background)
+  &.is-on-dark-background
+    background var(--secondary-active-background)
   .user-avatar-inline
     width 4px
     margin-right 4px

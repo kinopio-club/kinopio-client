@@ -212,6 +212,7 @@ export default {
           connectionType[key] = type[key]
         })
       }
+      connectionType.userId = context.rootState.currentUser.id
       context.commit('createType', connectionType)
       context.dispatch('broadcast/update', { updates: connectionType, type: 'addConnectionType', handler: 'currentConnections/createType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
@@ -346,8 +347,15 @@ export default {
       })
     },
     typeForNewConnections: (state, getters, rootState) => {
-      const typeId = last(state.typeIds)
-      return state.types[typeId]
+      const userId = rootState.currentUser.id
+      let types = getters.allTypes
+      types = types.filter(type => type.userId === userId)
+      if (types.length) {
+        return last(types)
+      } else {
+        const typeId = last(state.typeIds)
+        return state.types[typeId]
+      }
     },
     typeByConnection: (state, getters) => (connection) => {
       return getters.typeByTypeId(connection.connectionTypeId)

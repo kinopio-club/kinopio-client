@@ -573,7 +573,7 @@ export default {
     notifyPressAndHoldToDrag () {
       const hasNotified = this.$store.state.hasNotifiedPressAndHoldToDrag
       if (!hasNotified) {
-        this.$store.commit('addNotification', { message: 'Tap and hold to drag boxes', icon: 'press-and-hold' })
+        this.$store.commit('addNotification', { message: 'Press and hold to drag boxes', icon: 'press-and-hold' })
       }
       this.$store.commit('hasNotifiedPressAndHoldToDrag', true)
     },
@@ -623,7 +623,7 @@ export default {
 .box
   --min-box-size 70px
   position absolute
-  border-radius 5px
+  border-radius var(--entity-radius)
   min-height var(--min-box-size)
   min-width var(--min-box-size)
   pointer-events none
@@ -653,7 +653,7 @@ export default {
     cursor pointer
     padding 8px
     padding-right 10px
-    border-bottom-right-radius 5px
+    border-bottom-right-radius var(--entity-radius)
     word-break break-word
     color var(--primary-on-light-background)
     &:hover
@@ -737,32 +737,32 @@ export default {
       top -2px
       height calc(100% + 4px)
       animation guideLeft var(--snap-guide-duration) infinite ease-in-out forwards
-      border-top-left-radius 5px
-      border-bottom-left-radius 5px
+      border-top-left-radius var(--entity-radius)
+      border-bottom-left-radius var(--entity-radius)
     &.right
       right calc(-1 * var(--snap-guide-width))
       width var(--snap-guide-width)
       top -2px
       height calc(100% + 4px)
       animation guideRight var(--snap-guide-duration) infinite ease-in-out forwards
-      border-top-right-radius 5px
-      border-bottom-right-radius 5px
+      border-top-right-radius var(--entity-radius)
+      border-bottom-right-radius var(--entity-radius)
     &.top
       top calc(-1 * var(--snap-guide-width))
       height var(--snap-guide-width)
       left -2px
       width calc(100% + 4px)
       animation guideTop var(--snap-guide-duration) infinite ease-in-out forwards
-      border-top-left-radius 5px
-      border-top-right-radius 5px
+      border-top-left-radius var(--entity-radius)
+      border-top-right-radius var(--entity-radius)
     &.bottom
       bottom calc(-1 * var(--snap-guide-width))
       height var(--snap-guide-width)
       left -2px
       width calc(100% + 4px)
       animation guideBottom var(--snap-guide-duration) infinite ease-in-out forwards
-      border-bottom-left-radius 5px
-      border-bottom-right-radius 5px
+      border-bottom-left-radius var(--entity-radius)
+      border-bottom-right-radius var(--entity-radius)
 
 @keyframes guideRight
   50%

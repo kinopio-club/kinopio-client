@@ -30,7 +30,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             img.down-arrow(src="@/assets/down-arrow.svg")
           About(:visible="aboutIsVisible")
           KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-
+          Donate(:visible="donateIsVisible")
       .space-meta-rows
         .space-functions-row
           .segmented-buttons.add-space-functions
@@ -77,7 +77,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               span {{currentSpaceName}}
               PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
               img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
-              img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
+              img.icon.view-hidden(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
             SpaceDetails(:visible="spaceDetailsIsVisible")
             ImportArenaChannel(:visible="importArenaChannelIsVisible")
             SpaceDetailsInfo(:visible="spaceDetailsInfoIsVisible")
@@ -105,7 +105,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
         .top-controls
           SpaceUsers
           UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
-          Donate(:visible="donateIsVisible")
+          Pricing(:visible="pricingIsVisible")
           ControlsSettings(:visible="controlsSettingsIsVisible")
           UserSettings
           //- Share
@@ -141,7 +141,6 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           .button-wrap(v-if="!currentUserIsSignedIn")
             button(@click.left.stop="togglePricingIsVisible" :class="{active : pricingIsVisible}")
               span Pricing
-            Pricing(:visible="pricingIsVisible")
 
   Toolbar(:visible="isSpace")
   SelectAllBelow
@@ -255,7 +254,6 @@ export default {
       sidebarIsVisible: false,
       donateIsVisible: false,
       importIsVisible: false,
-      pricingIsVisible: false,
       earnCreditsIsVisible: false
     }
   },
@@ -323,6 +321,7 @@ export default {
       'currentUser',
       'newStuffIsUpdated',
       'isLoadingSpace',
+      'isLoadingOtherItems',
       'isJoiningSpace',
       'isReconnectingToBroadcast',
       'isOnline',
@@ -383,7 +382,7 @@ export default {
     },
     spaceHasStatus () {
       if (!this.isOnline) { return }
-      return this.isLoadingSpace || this.isJoiningSpace || this.isReconnectingToBroadcast
+      return this.isLoadingSpace || this.isJoiningSpace || this.isReconnectingToBroadcast || this.isLoadingOtherItems
     },
     spaceHasStatusAndStatusDialogIsNotVisible () {
       if (this.spaceHasStatus) {
@@ -426,6 +425,9 @@ export default {
     },
     controlsSettingsIsVisible () {
       return this.$store.state.controlsSettingsIsPinned
+    },
+    pricingIsVisible () {
+      return this.$store.state.pricingIsVisible
     }
   },
   methods: {
@@ -495,7 +497,6 @@ export default {
       this.templatesIsVisible = false
       this.earnCreditsIsVisible = false
       this.importIsVisible = false
-      this.pricingIsVisible = false
       if (!this.spaceDetailsIsPinned) {
         this.spaceDetailsIsVisible = false
       }
@@ -504,9 +505,9 @@ export default {
       }
     },
     togglePricingIsVisible () {
-      const isVisible = this.pricingIsVisible
+      const value = !this.pricingIsVisible
       this.$store.dispatch('closeAllDialogs')
-      this.pricingIsVisible = !isVisible
+      this.$store.commit('pricingIsVisible', value)
     },
     toggleAboutIsVisible () {
       const isVisible = this.aboutIsVisible
@@ -891,6 +892,8 @@ header
       margin-left 6px
       width 16px
       vertical-align baseline
+    .view-hidden
+      margin-left 5px
 
   .read-only-badge-wrap
     min-width 63px

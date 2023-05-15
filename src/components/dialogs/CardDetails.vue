@@ -7,7 +7,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         :disabled="!canEditCard"
         ref="name"
         rows="1"
-        placeholder="Type text here, or paste a URL"
+        placeholder="Type here, or paste a URL"
         v-model="name"
         @keydown.prevent.enter.exact
 
@@ -76,33 +76,39 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span {{cardPendingUpload.percentComplete}}%
 
     .row
-      //- Remove
-      .button-wrap
-        button.danger(:disabled="!canEditCard" @click.left="removeCard")
-          img.icon.remove(src="@/assets/remove.svg")
-          span Remove
-      //- [·]
-      .button-wrap.cards-checkboxes
-        label(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0")
-          input(type="checkbox" v-model="checkboxIsChecked" tabindex="-1")
-        label(v-else @click.left.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
-          input.add(type="checkbox" tabindex="-1")
-      //- Image
-      .button-wrap
-        button(:disabled="!canEditCard" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
-          img.icon.flower(src="@/assets/flower.svg")
-        ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImageOrFile")
-      //- Toggle Style Actions
-      .button-wrap
-        button(:disabled="!canEditCard" @click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}")
-          img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+      template(v-if="canEditCard")
+        //- Remove
+        .button-wrap
+          button.danger(@click.left="removeCard")
+            img.icon.remove(src="@/assets/remove.svg")
+            //- span Remove
+        //- [·]
+        .button-wrap.cards-checkboxes
+          label(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0")
+            input(type="checkbox" v-model="checkboxIsChecked" tabindex="-1")
+          label(v-else @click.left.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
+            input.add(type="checkbox" tabindex="-1")
+        //- Image
+        .button-wrap
+          button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
+            img.icon.flower(src="@/assets/flower.svg")
+          ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImageOrFile")
+        //- Toggle Style Actions
+        .button-wrap
+          button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}")
+            img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+      //- Share
+      .button-wrap.share-button-wrap(v-if="isName" @click.left.stop="toggleShareCardIsVisible" )
+        button(:class="{active: shareCardIsVisible}")
+          span Share
+        ShareCard(:visible="shareCardIsVisible" :card="card")
 
-    CardBoxActions(:visible="shouldShowItemActions" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
+    CardBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
     CardCollaborationInfo(:visible="shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
     .row(v-if="nameMetaRowIsVisible")
       //- Split by Line Breaks
-      .button-wrap(v-if="nameSplitIntoCardsCount")
+      .button-wrap(v-if="nameSplitIntoCardsCount && canEditCard")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split.svg")
           span Split Card ({{nameSplitIntoCardsCount}})
@@ -114,21 +120,20 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Tags
       template(v-for="tag in tagsInCard")
         Tag(:tag="tag" :isClickable="true" :isActive="currentSelectedTag.name === tag.name" @clickTag="showTagDetailsIsVisible")
-      //- Links
-      .badge.button-badge.link-badge(
-        v-if="card.linkToSpaceId"
-        :class="{ active: currentSelectedLinkisActive }"
-        @click.left.stop="showLinkDetailsIsVisible($event)"
-        @touchend.stop="showLinkDetailsIsVisible($event)"
-        @keyup.stop.enter="showLinkDetailsIsVisible($event)"
-      )
-        template(v-if="linkToSpace")
-          UserLabelInline(:user="linkToSpace.users[0]" :shouldHideName="true")
-        span {{linkName}}
-        img.icon.private(v-if="spaceIsPrivate" src="@/assets/lock.svg")
-      //- Comment
-      .badge.info(v-if="nameIsComment" :style="{backgroundColor: updatedByUser.color}")
+      //- ((Comment))
+      .badge.info(v-if="nameIsComment")
         span ((comment))
+
+    .row.badges-row.other-items-row(v-if="isOtherItems")
+      //- invite
+      template(v-if="inviteIsVisible")
+        OtherSpacePreview(:isInvite="inviteIsVisible" :otherSpace="otherSpace" :url="otherSpaceUrl" :parentCardId="card.id" :shouldTruncateName="true")
+      //- other space
+      template(v-if="otherSpaceIsVisible")
+        OtherSpacePreview(:otherSpace="otherSpace" :url="otherSpaceUrl" :parentCardId="card.id" :shouldTruncateName="true")
+      //- other card
+      template(v-if="otherCardIsVisible")
+        OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")
 
     MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats")
     UrlPreview(
@@ -140,27 +145,29 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
     )
 
     //- Read Only
-    p.row.edit-message(v-if="!canEditCard")
-      template(v-if="spacePrivacyIsOpen")
-        span.badge.info
-          img.icon.open(src="@/assets/open.svg")
-          span In open spaces, you can only move and edit cards you've made
-      template(v-else-if="isInvitedButCannotEditSpace")
-        span.badge.info
-          img.icon(src="@/assets/unlock.svg")
-          span To edit spaces you've been invited to, you'll need to sign up or in
-        .row
-          .button-wrap
-            button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
-      template(v-else-if="spacePrivacyIsClosed")
-        span.badge.info
-          img.icon(src="@/assets/unlock.svg")
-          span To edit closed spaces, you'll need to be invited
+    template(v-if="!canEditCard")
+      CardCollaborationInfo(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
+      .row.edit-message
+        template(v-if="spacePrivacyIsOpen")
+          span.badge.info
+            img.icon.open(src="@/assets/open.svg")
+            span In open spaces, you can only move and edit cards you've made
+        template(v-else-if="isInvitedButCannotEditSpace")
+          span.badge.info
+            img.icon(src="@/assets/unlock.svg")
+            span To edit spaces you've been invited to, you'll need to sign up or in
+          .row
+            .button-wrap
+              button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
+        template(v-else-if="spacePrivacyIsClosed")
+          span.badge.info
+            img.icon(src="@/assets/unlock.svg")
+            span Read Only
 
     //- Info
     template(v-if="showCurrentCardLength")
       .row
-        span.badge.secondary
+        span.badge.secondary-on-dark-background
           span {{currentCardLength}} / {{maxCardLength}}
 
     //- Errors
@@ -200,6 +207,9 @@ import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
 import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
+import ShareCard from '@/components/dialogs/ShareCard.vue'
+import OtherCardPreview from '@/components/OtherCardPreview.vue'
+import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -228,7 +238,10 @@ export default {
     UrlPreview,
     MediaPreview,
     UserLabelInline,
-    CardCollaborationInfo
+    CardCollaborationInfo,
+    ShareCard,
+    OtherCardPreview,
+    OtherSpacePreview
   },
   data () {
     return {
@@ -270,7 +283,8 @@ export default {
       openingAlpha: 0,
       previousSelectedTag: {},
       currentSearchTag: {},
-      newTagColor: ''
+      newTagColor: '',
+      shareCardIsVisible: false
     }
   },
   created () {
@@ -306,7 +320,7 @@ export default {
       'currentSpace',
       'searchResultsCards',
       'currentSelectedTag',
-      'currentSelectedLink',
+      'currentSelectedOtherItem',
       'shouldPreventNextEnterKey',
       'upload',
       'pinchCounterZoomDecimal',
@@ -325,12 +339,11 @@ export default {
       'currentSpace/isFavorite',
       'currentUser/cardIsCreatedByCurrentUser',
       'currentUser/canEditSpace',
-      'otherSpaceById',
       'currentUser/isInvitedButCannotEditSpace'
     ]),
     rowIsBelowItemActions () { return this.nameMetaRowIsVisible || this.badgesRowIsVisible || this.shouldShowItemActions || this.cardHasMedia || this.cardUrlPreviewIsVisible },
     nameMetaRowIsVisible () { return this.nameSplitIntoCardsCount },
-    badgesRowIsVisible () { return this.tagsInCard.length || this.card.linkToSpaceId || this.nameIsComment || this.isInSearchResultsCards },
+    badgesRowIsVisible () { return this.tagsInCard.length || this.nameIsComment || this.isInSearchResultsCards },
     parentElement () { return this.$refs.dialog },
     card () {
       const cardId = this.cardDetailsIsVisibleForCardId
@@ -346,11 +359,6 @@ export default {
       if (!results.length) { return }
       return Boolean(results.find(card => this.card.id === card.id))
     },
-    spaceIsPrivate () {
-      const space = this.linkToSpace
-      if (!space) { return }
-      return space.privacy === 'private'
-    },
     showCardTips () {
       if (this.name) { return }
       return true
@@ -361,19 +369,6 @@ export default {
       if (this.isSpaceMember) { return true }
       if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
       return false
-    },
-    linkToSpace () {
-      const spaceId = this.card.linkToSpaceId
-      const space = this.otherSpaceById(spaceId)
-      return space
-    },
-    linkName () {
-      const space = this.linkToSpace
-      if (space) {
-        return space.name
-      } else {
-        return 'Space is loading or invalid'
-      }
     },
     isInvitedButCannotEditSpace () { return this['currentUser/isInvitedButCannotEditSpace']() },
     maxCardLength () { return consts.maxCardLength },
@@ -403,10 +398,46 @@ export default {
       })
       return tags
     },
-    currentSelectedLinkisActive () {
-      if (!this.currentSelectedLink.space) { return }
-      return this.currentSelectedLink.space.id === this.card.linkToSpaceId
+
+    // other items
+
+    isOtherItems () {
+      return this.otherCardIsVisible || this.otherSpaceIsVisible || this.inviteIsVisible
     },
+    inviteIsVisible () {
+      const isCardLink = Boolean(this.card.linkToSpaceCollaboratorKey)
+      return isCardLink && this.hasUrls
+    },
+    otherCardIsVisible () {
+      const isCardLink = Boolean(this.card.linkToCardId)
+      return isCardLink && this.hasUrls
+    },
+    otherSpaceIsVisible () {
+      const isCardLink = Boolean(this.card.linkToSpaceId)
+      return isCardLink && this.hasUrls
+    },
+    otherCard () {
+      const card = this.$store.getters.otherCardById(this.card.linkToCardId)
+      return card
+    },
+    otherSpace () {
+      const space = this.$store.getters.otherSpaceById(this.card.linkToSpaceId)
+      return space
+    },
+    otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
+    otherSpaceUrl () {
+      let url
+      const spaceId = this.card.linkToSpaceId
+      if (this.inviteIsVisible) {
+        const collaboratorKey = this.card.linkToSpaceCollaboratorKey
+        const spaceName = this.otherSpace.name
+        url = utils.inviteUrl({ spaceId, spaceName, collaboratorKey })
+      } else {
+        url = utils.urlFromSpaceAndCard({ spaceId })
+      }
+      return url
+    },
+
     currentUserIsSpaceMember () { return this['currentUser/isSpaceMember']() },
     isFavoriteSpace () { return this['currentSpace/isFavorite'] },
     name: {
@@ -557,6 +588,7 @@ export default {
         borderRadius: borderRadius
       }
     },
+    isName () { return Boolean(this.name) },
     shouldShowItemActions () { return this.currentUser.shouldShowItemActions }
   },
   methods: {
@@ -936,7 +968,11 @@ export default {
         this.scrollIntoView()
       })
     },
-
+    toggleShareCardIsVisible () {
+      const isVisible = this.shareCardIsVisible
+      this.closeDialogs()
+      this.shareCardIsVisible = !isVisible
+    },
     focusName (position) {
       utils.disablePinchZoom()
       if (this.shouldPreventNextFocusOnName) {
@@ -992,10 +1028,11 @@ export default {
       this.$store.commit('triggerCardDetailsCloseDialogs')
       this.imagePickerIsVisible = false
       this.cardTipsIsVisible = false
+      this.shareCardIsVisible = false
       this.hidePickers()
       if (shouldSkipGlobalDialogs === true) { return }
       this.hideTagDetailsIsVisible()
-      this.hideLinkDetailsIsVisible()
+      this.hideOtherItemDetailsIsVisible()
     },
     clickName (event) {
       this.triggerUpdateMagicPaintPositionOffset()
@@ -1184,20 +1221,6 @@ export default {
       const textIsValid = !utils.hasBlankCharacters(text)
       return textIsValid && characterBeforeSlashIsBlank
     },
-    showLinkDetailsIsVisible (event) {
-      this.closeDialogs()
-      const linkRect = event.target.getBoundingClientRect()
-      this.$store.commit('linkDetailsPosition', {
-        x: window.scrollX + linkRect.x + 2,
-        y: window.scrollY + linkRect.y + linkRect.height - 2
-      })
-      const link = {
-        cardId: this.card.id,
-        space: this.linkToSpace
-      }
-      this.$store.commit('currentSelectedLink', link)
-      this.$store.commit('linkDetailsIsVisible', true)
-    },
     replaceSlashCommandWithSpaceUrl (space) {
       let name = this.card.name
       let position = this.slashTextPosition()
@@ -1346,9 +1369,9 @@ export default {
       this.$store.commit('currentSelectedTag', {})
       this.$store.commit('tagDetailsIsVisible', false)
     },
-    hideLinkDetailsIsVisible () {
-      this.$store.commit('currentSelectedLink', {})
-      this.$store.commit('linkDetailsIsVisible', false)
+    hideOtherItemDetailsIsVisible () {
+      this.$store.commit('otherSpaceDetailsIsVisible', false)
+      this.$store.commit('otherCardDetailsIsVisible', false)
     },
     showTagDetailsIsVisible (event, tag) {
       this.closeDialogs()
@@ -1481,7 +1504,6 @@ export default {
 
 <style lang="stylus">
 .card-details
-  width 278px
   transform-origin top left
   > section
     background-color var(--secondary-background)

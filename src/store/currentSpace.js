@@ -15,7 +15,6 @@ import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
 import defer from 'lodash-es/defer'
 
-let otherSpacesQueue = [] // id
 let spectatorIdleTimers = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
 
@@ -182,12 +181,10 @@ const currentSpace = {
       context.dispatch('updateModulesSpaceId')
       context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
       context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
-      context.dispatch('currentUser/validateReferral', null, { root: true })
-      context.dispatch('currentUser/validateReferralByName', null, { root: true })
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
 
-    // Users and otherSpaces
+    // Users
 
     updateUserPresence: (context, update) => {
       utils.typeCheck({ value: update, type: 'object' })
@@ -214,6 +211,9 @@ const currentSpace = {
         context.dispatch('updateUserPresence', newUser)
       }
     },
+
+    // Other Items
+
     updateOtherUsers: async (context) => {
       const cards = utils.clone(context.rootGetters['currentCards/all'])
       let userIds = []
@@ -239,52 +239,66 @@ const currentSpace = {
         console.warn('🚑 updateOtherUsers', error)
       }
     },
-    updateOtherSpaces: async (context, spaceId) => {
+    updateOtherItems: async (context, options) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
-      let links
-      if (spaceId) {
-        links = [{ linkToSpaceId: spaceId }]
-      } else {
-        links = context.rootGetters['currentCards/withSpaceLinks']
-      }
-      if (!links.length) { return }
-      links.forEach(link => {
-        const spaceId = link.linkToSpaceId
-        context.dispatch('saveOtherSpace', { spaceId, shouldAddToQueue: true })
-      })
-      otherSpacesQueue = uniq(otherSpacesQueue)
-      let spaces = await context.dispatch('api/getSpaces', { spaceIds: otherSpacesQueue, shouldRequestRemote: true }, { root: true })
-      if (!spaces) { return }
-      spaces = spaces.filter(space => space.id)
-      spaces.forEach(space => {
-        space = utils.normalizeSpaceMetaOnly(space)
-        context.commit('updateOtherSpaces', space, { root: true })
-        const linkedCard = links.find(link => link.linkToSpaceId === space.id)
-        if (!linkedCard) { return }
-        nextTick(() => {
-          context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace }, { root: true })
-          context.dispatch('currentCards/updateDimensions', { cardId: linkedCard.id }, { root: true })
-        })
-      })
-      otherSpacesQueue = []
-    },
-    saveOtherSpace: async (context, { spaceId, shouldAddToQueue }) => {
-      const cachedSpace = cache.space(spaceId)
-      const spaceIsCached = Boolean(cachedSpace.id)
-      if (spaceIsCached) {
-        const space = utils.normalizeSpaceMetaOnly(cachedSpace)
-        context.commit('updateOtherSpaces', space, { root: true })
-      } else if (shouldAddToQueue) {
-        otherSpacesQueue.push(spaceId)
-      } else {
-        try {
-          const space = { id: spaceId }
-          let remoteSpace = await context.dispatch('api/getSpace', { space, shouldRequestRemote: true }, { root: true })
-          remoteSpace = utils.normalizeSpaceMetaOnly(remoteSpace)
-          context.commit('updateOtherSpaces', remoteSpace, { root: true })
-        } catch (error) {
-          console.warn('🚑 otherSpace not found', error, spaceId)
+      // other items to fetch
+      let invites = []
+      let cardIds = []
+      let spaceIds = []
+      // param items
+      if (options) {
+        const { cardId, spaceId, collaboratorKey } = options
+        let space, card
+        // don't update if item already exists
+        if (spaceId) {
+          const space = context.rootGetters['otherSpaceById'](spaceId)
+        } else if (cardId) {
+          const card = context.rootGetters['otherCardById'](cardId)
         }
+        if (space || card) { return }
+        // add options to items to fetch
+        if (collaboratorKey) {
+          invites.push({ spaceId, collaboratorKey })
+        } else if (cardId) {
+          cardIds.push(cardId)
+        } else if (spaceId) {
+          spaceIds.push(spaceId)
+        }
+      // no param items
+      } else {
+        const otherItemIds = context.rootGetters['currentCards/linkedItems']
+        invites = otherItemIds.invites
+        cardIds = otherItemIds.cardIds
+        spaceIds = otherItemIds.spaceIds
+      }
+      if (!cardIds.length && !spaceIds.length && !invites.length) { return }
+      if (options) { context.commit('isLoadingOtherItems', true, { root: true }) }
+      try {
+        // get items
+        const data = await context.dispatch('api/getOtherItems', { spaceIds, cardIds, invites }, { root: true })
+        console.log('👯‍♀️ otherItems', { spaceIds, cardIds, invites }, data)
+        if (!data) {
+          context.commit('isLoadingOtherItems', false, { root: true })
+          return
+        }
+        // update items
+        context.commit('updateOtherItems', data, { root: true })
+        // update card dimensions
+        const cardsInCurrentSpace = context.rootGetters['currentCards/all']
+        data.spaces.forEach(space => {
+          const linkedCard = cardsInCurrentSpace.find(card => {
+            return card.linkToSpaceId === space.id
+          })
+          if (!linkedCard) { return }
+          nextTick(() => {
+            context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace }, { root: true })
+            context.dispatch('currentCards/updateDimensions', { cardId: linkedCard.id }, { root: true })
+            context.commit('isLoadingOtherItems', false, { root: true })
+          })
+        })
+      } catch (error) {
+        console.error('🚒 updateOtherItems', error, { spaceIds, cardIds, invites })
+        context.commit('isLoadingOtherItems', false, { root: true })
       }
     },
 
@@ -309,7 +323,7 @@ const currentSpace = {
         context.dispatch('restoreSpaceInChunks', { space })
         context.commit('addUserToSpace', user)
         context.dispatch('updateOtherUsers')
-        context.dispatch('updateOtherSpaces')
+        context.dispatch('updateOtherItems')
       } else {
         space.users = [context.rootState.currentUser]
         const nullCardUsers = true
@@ -703,7 +717,7 @@ const currentSpace = {
         context.dispatch('scrollCardsIntoView')
         // deferrable async tasks
         context.dispatch('updateOtherUsers')
-        context.dispatch('updateOtherSpaces')
+        context.dispatch('updateOtherItems')
         context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
         context.dispatch('checkIfShouldResetDimensions')
@@ -715,6 +729,11 @@ const currentSpace = {
             name: 'incrementVisits',
             body: { spaceId: space.id }
           }, { root: true })
+          // referral
+          nextTick(() => {
+            context.dispatch('currentUser/validateReferral', null, { root: true })
+            context.dispatch('currentUser/validateReferralByName', null, { root: true })
+          })
         })
       })
       context.commit('isLoadingSpace', false, { root: true })

@@ -35,7 +35,7 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
         .badge.success Thanks for supporting Kinopio
       .row
         button(v-if="!cancelSubscriptionVisible" @click.left="toggleCancelSubscriptionVisible")
-          img.icon(src="@/assets/remove.svg")
+          img.cancel.icon(src="@/assets/add.svg")
           span Downgrade to Free
         span(v-if="cancelSubscriptionVisible")
           p

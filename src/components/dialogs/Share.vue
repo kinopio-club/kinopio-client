@@ -27,9 +27,12 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
       .row
         p Share With the World
       .row
-        button(@click.left="copyUrl")
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy Public URL
+        .segmented-buttons
+          button(@click.left="copyUrl")
+            img.icon.copy(src="@/assets/copy.svg")
+            span Copy Public URL
+          button(v-if="webShareIsSupported" @click="webShare")
+            img.icon.share(src="@/assets/share.svg")
 
   //- Invite
   Invite(v-if="isSpaceMember && currentUserIsSignedIn")
@@ -170,7 +173,8 @@ export default {
     spaceHasOtherCardUsers () { return Boolean(this.spaceOtherCardUsers.length) },
     dialogIsVisible () {
       return this.privacyPickerIsVisible || this.spaceRssFeedIsVisible || this.embedIsVisible || this.exportIsVisible || this.importIsVisible
-    }
+    },
+    webShareIsSupported () { return navigator.share }
   },
   methods: {
     triggerEarnCreditsIsVisible () {
@@ -196,9 +200,9 @@ export default {
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
-    shareUrl () {
+    webShare () {
       const data = {
-        title: 'Kinopio',
+        title: 'Kinopio Space',
         text: this.spaceName,
         url: this.url
       }

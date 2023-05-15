@@ -73,10 +73,16 @@ const sendEvent = (store, mutation, type) => {
   }))
 }
 
-const checkIfShouldUpdateLinkToSpaceId = (store, { message, updates }) => {
-  if (message === 'updateCard' && updates.linkToSpaceId) {
-    store.dispatch('currentSpace/updateOtherSpaces', updates.linkToSpaceId)
+const checkIfShouldUpdateLinkToItem = (store, { message, updates }) => {
+  if (message !== 'updateCard') { return }
+  let options
+  if (updates.linkToCardId) {
+    options = { cardId: updates.linkToCardId }
+  } else if (updates.linkToSpaceId) {
+    options = { cardId: updates.linkToSpaceId }
   }
+  if (!options) { return }
+  store.dispatch('currentSpace/updateOtherItems', options)
 }
 
 const checkIfShouldUpdateBackground = (store, { message, updates }) => {
@@ -135,7 +141,7 @@ export default function createWebSocketPlugin () {
           // presence
           } else if (handler) {
             store.commit(handler, updates)
-            checkIfShouldUpdateLinkToSpaceId(store, data)
+            checkIfShouldUpdateLinkToItem(store, data)
           // users
           } else if (message === 'userJoinedRoom') {
             store.dispatch('currentSpace/addUserToJoinedSpace', user)

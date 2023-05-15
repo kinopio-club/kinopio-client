@@ -1,5 +1,5 @@
 <template lang="pug">
-.loader(v-if="visible")
+.loader(v-if="visible" :class="{ small: isSmall, static: isStatic }")
   .moon
   .earth
   .asteroid
@@ -10,7 +10,9 @@
 export default {
   name: 'Loader',
   props: {
-    visible: Boolean
+    visible: Boolean,
+    isStatic: Boolean,
+    isSmall: Boolean
   }
 }
 </script>
@@ -33,6 +35,15 @@ loader-blendmode = exclusion
   background-color loader-background
   vertical-align middle
   transform translate3d( 0, 0, 0)
+  &.small
+    width 14px
+    height 14px
+  &.static
+    .moon,
+    .earth,
+    .asteroid,
+    .asteroid-dust
+      animation none
   .moon
       height 100%
       width 100%

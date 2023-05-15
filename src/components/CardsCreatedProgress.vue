@@ -13,12 +13,18 @@ defineProps({
 const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCount || 0)
 const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
 
+const togglePricingIsVisible = () => {
+  const value = !store.state.pricingIsVisible
+  store.dispatch('closeAllDialogs')
+  store.commit('pricingIsVisible', value)
+}
 </script>
 
 <template lang="pug">
 .cards-created-progress
   .info
     p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
+    button.small-button(@click="togglePricingIsVisible") Pricing
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
 
 </template>
@@ -30,4 +36,6 @@ const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
     display flex
     justify-content space-between
     align-items center
+    button
+      margin-top 0
 </style>

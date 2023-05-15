@@ -13,9 +13,7 @@ const props = defineProps({
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    if (utils.isDevelopment()) {
-      console.log('🍇 referral url', url.value)
-    }
+    console.log('🍇 referral url', url.value)
   }
 })
 
@@ -53,16 +51,14 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
   section(v-if="visible")
     p Earn Credits
   section
-    .row
-      p
-        span You'll both earn a
-        span.badge.success ${{consts.referralCreditAmount}} credit
-        span when someone you refer, or invite to edit, signs up.
+    p
+      span when someone you refer, or invite to a space, signs up. You'll both earn a{{' '}}
+      span.badge.success ${{consts.referralCreditAmount}} credit
     .row
       p There's no limit on the amount of credits you can earn.
     template(v-if="currentUserIsSignedIn")
       section.subsection
-        p Share Kinopio with your friends
+        p Share Kinopio with friends
         button(@click.left="copyUrl")
           img.icon.copy(src="@/assets/copy.svg")
           span Copy Referral URL
@@ -85,9 +81,6 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
   .badge
     vertical-align 0
     color var(--primary)
-  span + .badge
-    margin-left 6px
-    word-break break-all
   p
     &.badge
       margin-right 0
