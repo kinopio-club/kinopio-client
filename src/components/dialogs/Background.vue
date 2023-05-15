@@ -185,7 +185,7 @@ export default {
       defaultColor: '#e3e3e3',
       search: '',
       searchIsLoading: false,
-      selectedImages: backgroundImages,
+      selectedImages: [],
       communityBackgroundsIsLoading: false,
       communityBackgroundImages: [],
       images: [],
@@ -263,7 +263,12 @@ export default {
     },
     serviceIsPexels () { return this.service === 'pexels' },
     serviceIsRecent () { return this.service === 'recent' },
-    serviceIsBackground () { return this.service === 'background' }
+    serviceIsBackground () { return this.service === 'background' },
+    backgroundImages () {
+      let images = backgroundImages
+      images = images.filter(image => !image.isArchived)
+      return images
+    }
   },
   methods: {
     isSpaceUrl (image) {
@@ -283,7 +288,7 @@ export default {
     updateService (service) {
       this.service = service
       if (service === 'background') {
-        this.selectedImages = backgroundImages
+        this.selectedImages = this.backgroundImages
       } else if (service === 'recent') {
         const images = this.recentImagesFromCacheSpaces()
         this.selectedImages = images
@@ -335,7 +340,7 @@ export default {
       })
       images = uniq(images)
       images = images.map(image => {
-        const backgroundImage = backgroundImages.find(item => item.url === image)
+        const backgroundImage = this.backgroundImages.find(item => item.url === image)
         if (backgroundImage) {
           return backgroundImage
         }
@@ -479,6 +484,9 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
+        if (this.service === 'background') {
+          this.selectedImages = this.backgroundImages
+        }
         this.backgroundTint = this.currentSpace.backgroundTint
         this.closeDialogs()
         this.clearErrors()
