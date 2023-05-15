@@ -379,6 +379,7 @@ export default {
     width initial
     &.label
       padding-top 2px
-    input
-      background-color transparent
+      input
+        background-color transparent
+        pointer-events none
 </style>
