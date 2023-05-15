@@ -93,10 +93,14 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
     template(v-if="serviceIsBackground")
       section.results-section
         ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
-      section.results-section
-        p community spaces
-        //- ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
-        //- :images="communityBackgrounds"
+        section.results-section.community-picks-section
+          //- .row
+          .row
+            a.arena-link(target="_blank" href="https://www.are.na/kinopio/community-backgrounds")
+              img.icon.arena(src="@/assets/arena.svg")
+            span Community Backgrounds
+          //- ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+          //- :images="communityBackgrounds"
 
     //- recent
     template(v-else-if="serviceIsRecent")
@@ -541,4 +545,8 @@ export default {
     vertical-align -1px
   .row-title
     margin-left 4px
+  .community-picks-section
+    margin-top 10px
+  .arena-link
+    padding-right 5px
 </style>
