@@ -89,7 +89,8 @@
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/kusama-1.jpg",
-    "sourcePageUrl": "https://www.are.na/block/1974670"
+    "sourcePageUrl": "https://www.are.na/block/1974670",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/garden.jpeg",
@@ -127,12 +128,14 @@
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/palm-nights.jpg",
-    "sourcePageUrl": "https://www.are.na/block/479306"
+    "sourcePageUrl": "https://www.are.na/block/479306",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/vivid-blush.jpeg",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/vivid-blush-thumbnail.jpeg",
-    "sourcePageUrl": "https://www.are.na/block/5673661"
+    "sourcePageUrl": "https://www.are.na/block/5673661",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/abstract-grid.jpg",

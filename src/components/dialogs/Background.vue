@@ -96,7 +96,7 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
         ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
         //- community backgrounds
       section.results-section.community-backgrounds-section
-        .row
+        .row.row-title
           a.arena-link(target="_blank" href="https://www.are.na/kinopio/community-backgrounds")
             img.icon.arena(src="@/assets/arena.svg")
           span Community Backgrounds
