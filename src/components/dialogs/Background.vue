@@ -89,39 +89,52 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
 
   //- results
   template(v-if="canEditSpace")
-    section.results-section.search-input-wrap(v-if="serviceIsPexels")
-      .search-wrap
-        img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
-        Loader(:visible="loading")
-        input(
-          placeholder="Search Images on Pexels"
-          v-model="searchInput"
-          ref="searchInput"
-          @focus="resetPinchCounterZoomDecimal"
-          @keyup.stop.backspace
-          @keyup.stop.enter
-          @mouseup.stop
-          @touchend.stop
-        )
-        button.borderless.clear-input-wrap(@click.left="clearSearch")
-          img.icon.cancel(src="@/assets/add.svg")
-      .error-container(v-if="error.isNoSearchResults")
-        .badge.danger Nothing found on Pexels for {{search}}
-      .error-container(v-if="error.unknownServerError")
-        .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-      ul.results-list.image-list
-        template(v-for="image in images" :key="image.id")
-          li(@click.left="updateSpaceBackground(image.url)" tabindex="0" v-on:keydown.enter="updateSpaceBackground(image.url)" :class="{ active: isSpaceUrl(image)}")
-            img(:src="image.previewUrl")
-            a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
-              button.small-button
-                span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
-                span →
+    //- backgrounds
+    template(v-if="serviceIsBackground")
+      section.results-section
+        ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+      section.results-section
+        p community spaces
+        //- ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+        //- :images="communityBackgrounds"
 
-    section.results-section(v-else)
-      .row(v-if="serviceIsRecent")
-        p.row-title Recently Used
-      ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+    //- recent
+    template(v-else-if="serviceIsRecent")
+      section.results-section
+        .row
+          p.row-title Recently Used
+        ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+
+    //- search results
+    template(v-else-if="serviceIsPexels")
+      section.results-section.search-input-wrap
+        .search-wrap
+          img.icon.search(v-if="!searchIsLoading" src="@/assets/search.svg" @click.left="focusSearchInput")
+          Loader(:visible="searchIsLoading")
+          input(
+            placeholder="Search Images on Pexels"
+            v-model="searchInput"
+            ref="searchInput"
+            @focus="resetPinchCounterZoomDecimal"
+            @keyup.stop.backspace
+            @keyup.stop.enter
+            @mouseup.stop
+            @touchend.stop
+          )
+          button.borderless.clear-input-wrap(@click.left="clearSearch")
+            img.icon.cancel(src="@/assets/add.svg")
+        .error-container(v-if="error.isNoSearchResults")
+          .badge.danger Nothing found on Pexels for {{search}}
+        .error-container(v-if="error.unknownServerError")
+          .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+        ul.results-list.image-list
+          template(v-for="image in images" :key="image.id")
+            li(@click.left="updateSpaceBackground(image.url)" tabindex="0" v-on:keydown.enter="updateSpaceBackground(image.url)" :class="{ active: isSpaceUrl(image)}")
+              img(:src="image.previewUrl")
+              a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
+                button.small-button
+                  span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
+                  span →
 
 </template>
 
@@ -166,7 +179,7 @@ export default {
       backgroundTint: '',
       defaultColor: '#e3e3e3',
       search: '',
-      loading: false,
+      searchIsLoading: false,
       selectedImages: backgroundImages,
       images: [],
       service: 'background' // background, recent, pexels
@@ -242,7 +255,8 @@ export default {
       return this.backgroundTint
     },
     serviceIsPexels () { return this.service === 'pexels' },
-    serviceIsRecent () { return this.service === 'recent' }
+    serviceIsRecent () { return this.service === 'recent' },
+    serviceIsBackground () { return this.service === 'background' }
   },
   methods: {
     isSpaceUrl (image) {
@@ -259,14 +273,14 @@ export default {
         element.setSelectionRange(0, length)
       })
     },
-    updateService (type) {
-      this.service = type
-      if (type === 'background') {
+    updateService (service) {
+      this.service = service
+      if (service === 'background') {
         this.selectedImages = backgroundImages
-      } else if (type === 'recent') {
+      } else if (service === 'recent') {
         const images = this.recentImagesFromCacheSpaces()
         this.selectedImages = images
-      } else if (type === 'pexels') {
+      } else if (service === 'pexels') {
         this.searchPexels()
         this.focusAndSelectSearchInput()
       }
@@ -275,7 +289,7 @@ export default {
       this.searchPexels()
     }, 350),
     async searchPexels () {
-      this.loading = true
+      this.searchIsLoading = true
       this.error.isNoSearchResults = false
       this.error.unknownServerError = false
       try {
@@ -303,7 +317,7 @@ export default {
         console.error('🚒 searchService', error)
         this.error.unknownServerError = true
       }
-      this.loading = false
+      this.searchIsLoading = false
     },
     recentImagesFromCacheSpaces () {
       let spaces = cache.getAllSpaces()
@@ -431,7 +445,7 @@ export default {
     },
     clearSearch () {
       this.search = ''
-      this.loading = false
+      this.searchIsLoading = false
       this.images = []
     },
     resetPinchCounterZoomDecimal () {
