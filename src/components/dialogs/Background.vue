@@ -95,13 +95,13 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
         //- built in backgrounds
         ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
         //- community backgrounds
-        section.results-section.community-backgrounds-section
-          .row
-            a.arena-link(target="_blank" href="https://www.are.na/kinopio/community-backgrounds")
-              img.icon.arena(src="@/assets/arena.svg")
-            span Community Backgrounds
-          Loader(:visible="communityBackgroundsIsLoading")
-          ImageList(v-if="!communityBackgroundsIsLoading" :images="communityBackgroundImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+      section.results-section.community-backgrounds-section
+        .row
+          a.arena-link(target="_blank" href="https://www.are.na/kinopio/community-backgrounds")
+            img.icon.arena(src="@/assets/arena.svg")
+          span Community Backgrounds
+        Loader(:visible="communityBackgroundsIsLoading")
+        ImageList(v-if="!communityBackgroundsIsLoading" :images="communityBackgroundImages" :activeUrl="background" @selectImage="updateSpaceBackground")
 
     //- recent
     template(v-else-if="serviceIsRecent")
@@ -503,8 +503,10 @@ export default {
 </script>
 
 <style lang="stylus">
-.background
+dialog.background
   width 255px
+  overflow auto
+  max-height 86vh
   .title-row
     margin-left 0 !important
   .background-preview
@@ -564,6 +566,7 @@ export default {
       flex-shrink 0
       margin-top 2px
   .results-section
+    max-height initial
     .error-container
       margin 0
       margin-left 4px

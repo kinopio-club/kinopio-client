@@ -122,7 +122,8 @@
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/vases.jpg",
-    "sourcePageUrl": "https://www.are.na/block/5813311"
+    "sourcePageUrl": "https://www.are.na/block/5813311",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/palm-nights.jpg",
@@ -141,12 +142,14 @@
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/oil.jpeg",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/oil-thumbnail.jpeg",
-    "sourcePageUrl": "https://www.are.na/block/897115"
+    "sourcePageUrl": "https://www.are.na/block/897115",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/anime-school-roof.jpeg",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/thumbnails/anime-school-roof-thumbnail.jpeg",
-    "sourcePageUrl": "https://www.are.na/block/2086139"
+    "sourcePageUrl": "https://www.are.na/block/2086139",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/ghibli-forest-canopy.jpeg",
