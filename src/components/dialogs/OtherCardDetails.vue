@@ -142,6 +142,11 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
   section.edit-card(v-if="!cardDetailsIsVisibleForCardId && parentCardId")
     button(@click="showCardDetails") Edit Card
   section
+    //- removed
+    .row(v-if="otherCard.isRemoved")
+      .badge.danger
+        img.icon(src="@/assets/remove.svg")
+        span Removed
     template(v-if="otherCard.id")
       //- edit
       template(v-if="canEdit")
@@ -157,7 +162,7 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
           .badge.danger
             img.icon.cancel(src="@/assets/add.svg")
             span Max Length
-      //- read
+      //- read only
       template(v-else)
         .row
           p {{otherCard.name}}
@@ -165,7 +170,7 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
           .badge.info
             img.icon(src="@/assets/unlock.svg")
             span Read Only
-
+      //- jump to
       .row
         a(:href="url")
           button(@click.stop.prevent="selectSpaceCard" @keyup.enter.prevent="selectSpaceCard")

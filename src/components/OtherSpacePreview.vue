@@ -36,6 +36,12 @@ const otherSpaceName = computed(() => {
   return name
 })
 
+const isRemoved = computed(() => {
+  const space = props.otherSpace
+  if (!space) { return }
+  return space.isRemoved
+})
+
 // dialog
 const showOtherSpaceDetailsIsVisible = async (event) => {
   if (utils.isMultiTouch(event)) { return }
@@ -79,6 +85,9 @@ a.other-space-preview(@click.prevent.stop :href="props.url" ref="badge")
   .badge.button-badge.link-badge(:class="{ active: isActive }" @mouseup.prevent="showOtherSpaceDetailsIsVisible($event)" @touchend.prevent="showOtherSpaceDetailsIsVisible($event)")
     template(v-if="props.isInvite")
       .badge.info Invite
+    template(v-if="isRemoved")
+      .badge.danger
+        img.icon(src="@/assets/remove.svg")
     template(v-if="props.otherSpace")
       template(v-if="props.otherSpace.users")
         UserLabelInline(:user="props.otherSpace.users[0]" :shouldHideName="true")

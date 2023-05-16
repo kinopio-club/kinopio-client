@@ -86,6 +86,10 @@ dialog.narrow.other-space-details(v-if="visible" :open="visible" :style="styles"
       .row.badges-wrap
         template(v-if="otherSpace.isInvite")
           .badge.info Invite
+        template(v-if="otherSpace.isRemoved")
+          .badge.danger
+            img.icon(src="@/assets/remove.svg")
+            span Removed
         UserList(:users="spaceUsers" :isClickable="false")
       .row
         BackgroundPreview(:space="otherSpace")
