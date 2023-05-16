@@ -19,7 +19,7 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
 
   section
     template(v-for="item in newStuff" :key="item.id")
-      a(:href="item.url")
+      a(:href="item.url" target="_blank")
         article.badge.button-badge(:style="{ backgroundColor: item._meta.color }")
           //- media
           template(v-if="item._meta.image")
@@ -115,7 +115,7 @@ export default {
     font-family var(--serif-font)
     font-size 16px
     font-weight normal
-    text-decoration underline
+    text-decoration none
     margin-top 10px
     margin-bottom 10px
     &:hover
