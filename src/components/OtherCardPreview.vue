@@ -107,6 +107,11 @@ const showOtherCardDetailsIsVisible = async (event) => {
 a.other-card-preview(@click.prevent.stop :href="props.url")
   .badge.button-badge.link-badge(:class="{ active: isActive }" @mouseup.prevent="showOtherCardDetailsIsVisible($event)" @touchend.prevent="showOtherCardDetailsIsVisible($event)")
     template(v-if="props.otherCard")
+      //- removed
+      template(v-if="props.otherCard.isRemoved")
+        span.badge.danger
+          img.icon(src="@/assets/remove.svg")
+      //- name
       template(v-for="segment in state.nameSegments")
         img.card-image(v-if="segment.isImage" :src="segment.url")
         NameSegment(:segment="segment")
