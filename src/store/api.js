@@ -94,6 +94,7 @@ const self = {
     handleServerError: (context, { name, error, shouldNotNotifyUser }) => {
       console.error('🚒', name, error)
       if (!shouldNotNotifyUser) { return }
+      if (name === 'getLiveSpaces') { return }
       context.commit('notifyConnectionError', true, { root: true })
       context.commit('notifyConnectionErrorName', name, { root: true })
     },
