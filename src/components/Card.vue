@@ -1407,20 +1407,6 @@ export default {
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       event.stopPropagation()
     },
-    toggleUserDetailsIsVisible (event) {
-      if (isMultiTouch) { return }
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.dispatch('currentCards/incrementZ', this.id)
-      this.$store.commit('currentUserIsDraggingCard', false)
-      const user = this.createdByUser
-      const position = utils.childDialogPositionFromParent({ element: event.target, shouldIgnoreZoom: true })
-      if (this.userDetailsIsUser) { return }
-      // show dialog
-      this.$store.commit('userDetailsUser', user)
-      this.$store.commit('userDetailsPosition', position)
-      this.$store.commit('userDetailsIsVisible', true)
-      this.$store.commit('triggerScrollUserDetailsIntoView')
-    },
     toggleFilterShowAbsoluteDates () {
       this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.dispatch('closeAllDialogs')
