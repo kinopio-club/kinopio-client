@@ -13,6 +13,9 @@
 
   .right(:class="{'is-embed': isEmbedMode, 'hidden': isHidden}" v-if="!isMobileOrTouch")
     SpaceZoom
+    .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible")
+      button.small-button(:class="{active: userSettingsIsVisible}" title="User Settings")
+        img.icon.settings(src="@/assets/settings.svg")
 </template>
 
 <script>
@@ -113,7 +116,8 @@ export default {
     isMobileStandalone () {
       return utils.isMobile() && navigator.standalone // is homescreen app
     },
-    isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] }
+    isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
+    userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible }
   },
   methods: {
     closeDialogs () {
@@ -129,6 +133,14 @@ export default {
       if (!currentUserIsSignedIn) { return }
       const inboxSpace = await this.$store.dispatch('currentUser/inboxSpace')
       this.userHasInbox = Boolean(inboxSpace)
+    },
+
+    // settings
+
+    toggleUserSettingsIsVisible () {
+      const value = !this.$store.state.userSettingsIsVisible
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('userSettingsIsVisible', value)
     },
 
     // hide
@@ -272,6 +284,18 @@ export default {
     &.is-embed
       position absolute
       right 0
+    .settings-button-wrap
+      pointer-events all
+      cursor pointer
+      padding-top 6px
+      padding-left 4px
+      padding-bottom 10px
+      padding-right 6px
+      margin-right -6px
+      translate 0px 3px
+      display block
+      button
+        font-size 1rem
   &.is-mobile
     margin-bottom 10px
   &.is-mobile-standalone
