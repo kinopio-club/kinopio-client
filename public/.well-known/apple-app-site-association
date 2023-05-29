@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appID": "VWRQY6FSN5.club.kinopio.app",
+        "paths": ["*"]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "VWRQY6FSN5.club.kinopio.app"
+    ]
+  }
+}
