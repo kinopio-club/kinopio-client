@@ -392,8 +392,7 @@ label // used for checkbox buttons
   height 30px
   margin 0
   background-color var(--button-background)
-  border 1px solid var(--button-border)
-  backdrop-filter blur(30px)
+  border 1px solid var(--primary-border)
   border-radius var(--entity-radius)
   cursor pointer
   user-select none
@@ -670,7 +669,7 @@ dialog
     padding var(--subsection-padding)
     border-radius var(--entity-radius)
   section + section
-    border-top 1px solid var(--button-border)
+    border-top 1px solid var(--primary-border)
   section.subsection + section,
   section.subsection + .row
     margin-top 10px
@@ -1092,11 +1091,10 @@ code
 
 .clear-input-wrap
   cursor pointer
-  border-radius var(--small-entity-radius)
+  border-radius var(--entity-radius)
   padding-left 5px
   padding-right 5px
   margin-top -2px
-  height 20px
   img
     padding 0
     vertical-align 2px
