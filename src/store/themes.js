@@ -9,7 +9,8 @@ const themes = {
       'primary-background': 'white',
       'text-link': '#143997',
       'primary-transparent': 'rgba(0,0,0,0.5)',
-      'button-background': 'rgba(255,255,255,1)',
+      'button-background': 'rgba(255,255,255,.6)',
+      'button-border': 'rgba(0,0,0,.3)',
       'secondary-background': '#e3e3e3',
       'secondary-hover-background': '#d8d8d8',
       'secondary-active-background': '#cdcdcd',
@@ -33,7 +34,10 @@ const themes = {
       'primary-background': 'black',
       'text-link': '#788cc9',
       'primary-transparent': 'rgba(0,0,0,0.5)',
-      'button-background': 'rgba(0,0,0,0.8)',
+      'button-background': 'rgba(0,0,0,0.7)',
+
+      'button-border': 'rgba(255,255,255,.2)',
+
       'secondary-background': '#262626',
       'secondary-hover-background': '#555',
       'secondary-active-background': '#333',

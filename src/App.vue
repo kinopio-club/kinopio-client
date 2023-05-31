@@ -391,8 +391,9 @@ label // used for checkbox buttons
   padding 5px 9px
   height 30px
   margin 0
-  border 1px solid var(--primary-border)
   background-color var(--button-background)
+  border 1px solid var(--button-border)
+  backdrop-filter blur(30px)
   border-radius var(--entity-radius)
   cursor pointer
   user-select none
@@ -612,9 +613,6 @@ dialog
     transition left 0.1s, top 0.1s
   &.narrow
     width 230px
-  button,
-  label
-    background-color var(--primary-background)
   button + button,
   button + input,
   button + label,
@@ -672,7 +670,7 @@ dialog
     padding var(--subsection-padding)
     border-radius var(--entity-radius)
   section + section
-    border-top 1px solid var(--primary-border)
+    border-top 1px solid var(--button-border)
   section.subsection + section,
   section.subsection + .row
     margin-top 10px
