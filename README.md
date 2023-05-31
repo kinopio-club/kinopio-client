@@ -41,7 +41,7 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 | `store.js` | [Vuex](https://vuex.vuejs.org/) store, contains global observables and methods needed by multiple components |
 | `utils.js` | Functional methods that just do dom manipulations or common tasks. These can't access components or store directly |
 | `views/Space.vue` | Contains the core interaction layer which sends user inputs to painting, connecting, dragging etc. components. Also where new connections are created and checked to see if they connect |
-| `views/Add.vue` | `kinopio.club/add` page for browser extensions |
+| `views/Add.vue` | `kinopio.club/add` page for browser extensions and iOS share sheet |
 | `components/Card.vue` | Displays cards from the `store`, and shows `CardDetails` |
 | `components/Connection.vue` | Displays connections from the `store`, and shows `ConnectionDetails` |
 | `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
