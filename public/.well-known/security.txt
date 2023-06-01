@@ -1,0 +1,8 @@
+Contact: security@kinopio.club
+Preferred-Languages: en
+Canonical: https://kinopio.club/.well-known/security.txt
+
+Because Kinopio is an extremely small business right now, I'm not able to offer paid bug bounties at this time. But I can offer free or discounted Kinopio upgrades, depending on the severity and uniqueness of the reported issue.
+
+– Pirijan, 
+Kinopio Creator
