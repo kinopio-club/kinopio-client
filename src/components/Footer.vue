@@ -14,7 +14,7 @@
   .right(:class="{'is-embed': isEmbedMode, 'hidden': isHidden}" v-if="!isMobileOrTouch")
     SpaceZoom
     .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible")
-      button.small-button(:class="{active: userSettingsIsVisible}" title="User Settings")
+      button.small-button(:class="{active: userSettingsIsVisible}" title="Settings → Controls")
         img.icon.settings(src="@/assets/settings.svg")
 </template>
 
@@ -141,6 +141,9 @@ export default {
       const value = !this.$store.state.userSettingsIsVisible
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('userSettingsIsVisible', value)
+      this.$nextTick(() => {
+        this.$store.commit('triggerControlsSettingsIsVisible')
+      })
     },
 
     // hide
