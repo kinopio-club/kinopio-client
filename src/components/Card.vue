@@ -2254,7 +2254,7 @@ article
       .card-content-wrap
         position absolute
         top 0
-        width 100%
+        width 100% !important
         align-items initial
         justify-content space-between
         .name
