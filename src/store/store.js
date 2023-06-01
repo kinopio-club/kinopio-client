@@ -549,6 +549,7 @@ const store = createStore({
     triggerDrawConnectionFrame: (state, event) => {},
     triggerCancelLocking: () => {},
     triggerUpdateOtherCard: (state, cardId) => {},
+    triggerControlsSettingsIsVisible: () => {},
 
     // Used by extensions only
 
