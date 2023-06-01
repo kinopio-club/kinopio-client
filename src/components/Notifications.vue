@@ -1,6 +1,6 @@
 <template lang="pug">
 aside.notifications(@click.left="closeAllDialogs")
-  .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :data-is-persistent-item="item.isPersistentItem" :class="notifificationClasses(item)" :style="notificationStyle(item.type)")
+  .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :data-is-persistent-item="item.isPersistentItem" :class="notifificationClasses(item)")
     p
       span.label-badge(v-if="item.label") {{item.label}}
       template(v-if="item.icon")
@@ -23,11 +23,11 @@ aside.notifications(@click.left="closeAllDialogs")
       .button-wrap
         button(@click.left="refreshBrowser") Refresh
 
-  .persistent-item(v-if="currentUserIsPaintingLocked && isTouchDevice" :style="{ background: currentUserColor}")
+  .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
     img.icon(src="@/assets/brush.svg")
     span Hold and drag to paint
 
-  .persistent-item(v-if="currentUserIsPanningReady || currentUserIsPanning" :style="{ background: currentUserColor}")
+  .persistent-item.info(v-if="currentUserIsPanningReady || currentUserIsPanning")
     img.icon(src="@/assets/hand.svg")
     span Hold and drag to pan
 
@@ -249,7 +249,6 @@ export default {
       return this.$store.getters['currentUser/isSignedIn']
     },
     isTouchDevice () { return this.$store.state.isTouchDevice },
-    currentUserColor () { return this.$store.state.currentUser.color },
     privacyState () {
       return privacy.states().find(state => {
         return state.name === this.$store.state.currentSpace.privacy
@@ -280,13 +279,6 @@ export default {
     },
     removeNotifyThanksForDonating () {
       this.$store.commit('notifyThanksForDonating', false)
-    },
-    notificationStyle (type) {
-      if (type === 'currentUser') {
-        return {
-          'background-color': this.currentUserColor
-        }
-      }
     },
     localStorageErrorIsVisible () {
       const element = document.getElementById('notify-local-storage-is-full')
