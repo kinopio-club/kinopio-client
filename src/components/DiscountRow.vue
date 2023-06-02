@@ -34,7 +34,7 @@ const toggleDescriptionIsVisible = () => {
       span Student Info
 .row.badge.secondary(v-if="state.descriptionIsVisible")
   p If you're a student or teacher,{{' '}}
-    a(href="mailto:hi@kinopioclub?subject=Education Discount") email me
+    a(href="mailto:hi@kinopio.club?subject=Education Discount") email me
     span {{' '}}for a 50% discount
 </template>
 
