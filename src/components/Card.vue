@@ -65,7 +65,7 @@ article#card(
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
     //- Content
-    span.card-content-wrap(:style="cardContentWrapStyles")
+    span.card-content-wrap
       //- Comment
       .card-comment(v-if="isComment")
         //- [·]
@@ -622,11 +622,6 @@ export default {
         color = color || this.defaultColor
         styles.background = color
       }
-      styles = this.updateStylesWithWidth(styles)
-      return styles
-    },
-    cardContentWrapStyles () {
-      let styles = {}
       styles = this.updateStylesWithWidth(styles)
       return styles
     },
@@ -2259,7 +2254,7 @@ article
       .card-content-wrap
         position absolute
         top 0
-        width 100%
+        width 100% !important
         align-items initial
         justify-content space-between
         .name
