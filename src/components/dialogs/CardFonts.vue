@@ -62,11 +62,18 @@ const styles = computed(() => {
 
 <template lang="pug">
 dialog.narrow.card-fonts(v-if="visible" :open="visible" @click.left.stop ref="dialog")
-  section.preview(:style="styles")
-    template(v-for="segment in state.segments")
-      NameSegment(:segment="segment" :parentCardId="props.card.id")
   section
-    p add fonts list
+    .row
+      p Card Header
+    section.subsection.preview-section(:style="styles")
+      template(v-for="segment in state.segments")
+        NameSegment(:segment="segment" :parentCardId="props.card.id")
+  //- section
+  //- upgrade to use custom header fonts
+  section
+    //- recolleta
+    img(src="https://assets.fontsinuse.com/static/renders/2/1847/400/0/647c8d3c/microgramma.png")
+    img(src="https://assets.fontsinuse.com/static/samples/6/5962/880/1/5d849af5/nirvana.png")
 
 </template>
 
@@ -74,7 +81,7 @@ dialog.narrow.card-fonts(v-if="visible" :open="visible" @click.left.stop ref="di
 .card-fonts
   .name-segment
     display block
-  section.preview
+  .preview-section
     overflow hidden
     max-height 200px
     background-color var(--secondary-background)
