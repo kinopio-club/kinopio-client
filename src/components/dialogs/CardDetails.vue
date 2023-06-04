@@ -69,7 +69,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .inline-button-wrap.font-button-wrap(v-if="showCardFonts" @click.left.stop="toggleCardFontsIsVisible" :class="{ active: cardFontsIsVisible }" :disabled="!canEditCard")
         button.inline-button(tabindex="-1" :class="{ active: cardFontsIsVisible }")
           span Aa
-      //- CardFonts(:visible="cardFontsIsVisible" :card="card")
+      CardFonts(:visible="cardFontsIsVisible" :card="card")
       .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: cardTipsIsVisible }")
         button.inline-button(tabindex="-1" :class="{ active: cardTipsIsVisible }")
           span ?
@@ -213,6 +213,7 @@ import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
 import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
 import ShareCard from '@/components/dialogs/ShareCard.vue'
+import CardFonts from '@/components/dialogs/CardFonts.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import utils from '@/utils.js'
@@ -245,6 +246,7 @@ export default {
     UserLabelInline,
     CardCollaborationInfo,
     ShareCard,
+    CardFonts,
     OtherCardPreview,
     OtherSpacePreview
   },
