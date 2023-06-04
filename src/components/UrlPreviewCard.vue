@@ -227,15 +227,6 @@ const description = computed(() => {
         margin-left 3px
         margin-bottom 2px
 
-  button
-    &:disabled
-      opacity 1
-      background-color var(--secondary-background)
-      border-color var(--primary-transparent)
-      img,
-      span
-        opacity 0.5
-
   .transparent
     opacity 0.5
 
