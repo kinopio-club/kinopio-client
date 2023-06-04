@@ -1,18 +1,19 @@
 <template lang="pug">
 .row.collaboration-info(v-if="visible" @click.left.stop="closeDialogs")
-  .badge.secondary.button-badge(@click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
+  .badge.status.button-badge(@click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
     img.icon.time(src="@/assets/time.svg")
     span.name {{dateUpdatedAt}}
-  .users(@click.stop)
+  .users
     //- created by
     template(v-if="createdByUserIsNotEmpty")
-      UserLabelInline(:user="createdByUser" :isClickable="true" :title="'Created by'")
+      UserLabelInline(:user="createdByUser" :isClickable="true" :title="'Created by'" :isOnDarkBackground="true")
     //- updated by
     template(v-if="isUpdatedByDifferentUser")
-      UserLabelInline(:user="updatedByUser" :isClickable="true" :title="'Updated by'")
+      UserLabelInline(:user="updatedByUser" :isClickable="true" :title="'Updated by'" :isOnDarkBackground="true")
     //- created through api
-    .badge.secondary.system-badge(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
+    .badge.status.system-badge(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
+
 </template>
 
 <script>
@@ -37,7 +38,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerCardDetailsCloseDialogs' && this.visible) {
-        this.$store.commit('userDetailsIsVisible', false)
+        this.closeDialogsFromParent()
       }
     })
   },
@@ -84,6 +85,9 @@ export default {
       dateIsUpdated = true
       return utils.shortRelativeTime(date)
     },
+    closeDialogsFromParent () {
+      this.$store.commit('userDetailsIsVisible', false)
+    },
     closeDialogs () {
       this.$store.commit('userDetailsIsVisible', false)
       this.$emit('closeDialogs')
@@ -92,17 +96,6 @@ export default {
       this.closeDialogs()
       const value = !this.$store.state.currentUser.filterShowAbsoluteDates
       this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
-    },
-    toggleUserDetails (event, user) {
-      if (this.userDetailsIsVisible) {
-        this.closeDialogs()
-        return
-      }
-      let position = utils.childDialogPositionFromParent({ element: event.target, shouldIgnoreZoom: true })
-      this.$store.commit('userDetailsUser', user)
-      this.$store.commit('userDetailsPosition', position)
-      this.$store.commit('userDetailsIsVisible', true)
-      this.$store.commit('triggerScrollUserDetailsIntoView')
     },
     scrollParentIntoView () {
       const element = this.parentElement
@@ -131,5 +124,4 @@ export default {
     margin-top 1px
   .name
     color var(--primary)
-
 </style>

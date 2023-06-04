@@ -32,31 +32,23 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   //- Tags
   template(v-if="segment.isTag")
     Tag(:tag="segment" :isClickable="true" :isActive="currentSelectedTag.name === segment.name" @clickTag="showTagDetailsIsVisible")
-  //- Link
-  a.link-badge-url(v-if="segment.isLink" :href="segment.name")
-    span.badge.button-badge.link-badge(
-      :class="{ active: currentSelectedLink.name === segment.name }"
-      @click.left.prevent="showLinkDetailsIsVisible($event, segment)"
-      @touchend.stop.prevent="showLinkDetailsIsVisible($event, segment)"
-      @keyup.stop.enter="showLinkDetailsIsVisible($event, segment)"
-    )
-      template(v-if="segmentSpace(segment)")
-        template(v-if="segmentSpace(segment).users")
-          UserLabelInline(:user="segmentSpace(segment).users[0]" :shouldHideName="true")
-        span {{segmentSpace(segment).name || segment.content || segment.name }}
-        img.icon.private(v-if="spaceIsPrivate(segmentSpace(segment))" src="@/assets/lock.svg")
-      template(v-else)
-        span {{segment.name}}
+  //- Invite
+  template(v-if="segment.isInviteLink")
+    OtherSpacePreview(:isInvite="true" :otherSpace="segment.otherSpace" :url="segment.name" :parentCardId="parentCardId" :shouldCloseAllDialogs="true")
+  //- Other Space
+  template(v-if="segment.isLink")
+    OtherSpacePreview(:otherSpace="segment.otherSpace" :url="segment.name" :parentCardId="parentCardId" :shouldCloseAllDialogs="true")
   //- File
-  span.badge.secondary(v-if="segment.isFile")
+  span.badge.secondary-on-dark-background(v-if="segment.isFile")
     img.icon(src="@/assets/file.svg")
     span {{segment.name}}
 </template>
 
 <script>
-import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
+import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
@@ -66,21 +58,24 @@ let shouldCancel = false
 export default {
   name: 'NameSegment',
   components: {
-    UserLabelInline,
     NameMatch,
-    Tag
+    Tag,
+    OtherSpacePreview,
+    Loader
   },
   props: {
     segment: Object,
     search: String,
-    isStrikeThrough: Boolean
+    isStrikeThrough: Boolean,
+    parentCardId: String
   },
   computed: {
     currentSelectedTag () { return this.$store.state.currentSelectedTag },
-    currentSelectedLink () { return this.$store.state.currentSelectedLink },
+    currentSelectedOtherItem () { return this.$store.state.currentSelectedOtherItem },
     dataMarkdownType () {
       if (this.segment.isTag) { return 'tag' }
       if (this.segment.isLink) { return 'link' }
+      if (this.segment.isInviteLink) { return 'inviteLink' }
       if (!this.segment.markdown) { return 'text' }
       let markdown = this.segment.markdown.filter(item => Boolean(item.content))
       const segmentIsEmpty = !utils.arrayExists(markdown)
@@ -114,19 +109,6 @@ export default {
     },
     showTagDetailsIsVisible (event, tag) {
       this.$emit('showTagDetailsIsVisible', { event, tag })
-    },
-    showLinkDetailsIsVisible (event, link) {
-      this.$emit('showLinkDetailsIsVisible', { event, link })
-    },
-    spaceIsPrivate (space) {
-      if (!space.privacy) { return }
-      return space.privacy === 'private'
-    },
-    segmentSpace (segment) {
-      if (segment.space) { return segment.space }
-      const spaceId = utils.spaceIdFromUrl(segment.name)
-      const space = this.$store.getters.cachedOrOtherSpaceById(spaceId)
-      return space
     },
     escapedUrl (url) {
       if (url.includes('javascript:')) {
@@ -200,9 +182,10 @@ export default {
       margin 0
       display inline-block
 
-  .link-badge-url
-    color var(--primary)
-    text-decoration none
   .strikethrough
     text-decoration line-through
+  .badge
+    > .loader
+      margin-left 0 !important
+      vertical-align -2px !important
 </style>

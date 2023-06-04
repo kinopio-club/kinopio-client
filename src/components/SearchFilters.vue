@@ -30,10 +30,17 @@ section.filters
         button.small-button(:class="{active: dialogIsPinned}")
           img.icon.pin.right-pin(src="@/assets/pin.svg")
       //- More Filters
-      .button-wrap
-        button(:class="{active: moreSearchFiltersVisible || totalFiltersActive, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
-          img.icon(src="@/assets/filter.svg")
-          span.badge.info.filter-is-active(v-if="totalFiltersActive")
+      .button-wrap.more-filters-button-wrap
+        template(v-if="totalFiltersActive")
+          .segmented-buttons
+            button.small-button(:class="{active: moreSearchFiltersVisible || totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
+              img.icon(src="@/assets/filter.svg")
+              span.badge.info.filter-is-active
+            button.small-button(@click.left.stop="clearSearchAndFilters")
+              img.icon.cancel(src="@/assets/add.svg")
+        template(v-if="!totalFiltersActive")
+          button.small-button(:class="{active: moreSearchFiltersVisible || totalFiltersActive}" @click.left.prevent.stop="toggleMoreSearchFiltersVisible")
+            img.icon(src="@/assets/filter.svg")
         MoreSearchFilters(:visible="moreSearchFiltersVisible")
 
 </template>
@@ -87,6 +94,10 @@ export default {
     toggleMoreSearchFiltersVisible () {
       this.moreSearchFiltersVisible = !this.moreSearchFiltersVisible
     },
+    clearSearchAndFilters () {
+      this.$store.commit('clearSearch')
+      this.$store.dispatch('clearAllFilters')
+    },
 
     // Toggle filters
 
@@ -119,9 +130,6 @@ export default {
   .user-label-inline
     margin-top -4px
     height 10px
-  .has-badge
-    padding-top 2px
-    padding-bottom 1px
   @media(max-width 500px)
     dialog.more-filters
       left initial
@@ -129,10 +137,13 @@ export default {
   .comment-icon
     vertical-align -2px
   .filter-is-active
-    width 8px
-    height 16px
+    width 10px
+    height 10px
     min-width initial
     min-height initial
+    padding 0
+    border-radius 100px
+    vertical-align 0
   .title-row-flex
     align-items flex-start
   .title-row-vertical
@@ -142,4 +153,6 @@ export default {
       margin-bottom 9px
     .button-wrap:last-child
       margin 0
+  .more-filters-button-wrap
+    margin-top 5px !important
 </style>

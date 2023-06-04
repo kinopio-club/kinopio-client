@@ -1,11 +1,11 @@
 <template lang="pug">
-dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @click.left.stop="closeDialogs" :class="{narrow: !visibleFromTagList}")
+dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @click.left.stop="closeDialogs")
   section.edit-card(v-if="showEditCard")
     button(@click="showCardDetails(null)")
       span Edit Card
     button.change-color.select-all(@click="selectCardsWithTag")
       .current-color(:style="{backgroundColor: color}")
-      span Select
+      span Select All
   section(:style="{backgroundColor: color}" :class="{'is-dark': isDark}")
     .row.tag-title-row
       .row
@@ -15,9 +15,9 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
           ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagNameColor")
         .tag-name {{name}}
       //- Filter
-      label.toggle-filter(@@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
-        input(type="checkbox" v-model="isFilteredInSpace")
-        img.icon(src="@/assets/filter.svg")
+      .button-wrap
+        button.small-button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+          img.icon(src="@/assets/filter.svg")
 
     //- no cards found
     template(v-if="!cards.length && !loading")
@@ -452,7 +452,7 @@ export default {
     width initial
     .current-color
       display inline-block
-      vertical-align -3px
+      vertical-align -2px
       margin-right 4px
   .results-section
     border-top 1px solid var(--primary-border)
@@ -469,7 +469,7 @@ export default {
     background-color var(--secondary-background)
   .tag-title-row
     justify-content space-between
-    align-items flex-start
+    align-items center
     .tag-name
       margin-left 6px
     > .row

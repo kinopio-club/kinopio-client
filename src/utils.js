@@ -26,6 +26,8 @@ tlds = String.raw`(\.` + tlds + ')'
 dayjs.extend(relativeTime)
 extend([namesPlugin]) // colord
 
+const uuidLength = 21
+
 export default {
   userPrefersReducedMotion () {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -57,21 +59,21 @@ export default {
   kinopioDomain () {
     let domain = 'https://kinopio.club'
     if (this.isDevelopment()) {
-      domain = 'http://kinopio.local:8080'
+      domain = 'https://kinopio.local:8080'
     }
     return domain
   },
   host () {
     let host = 'https://api.kinopio.club'
     if (this.isDevelopment()) {
-      host = 'http://kinopio.local:3000'
+      host = 'https://kinopio.local:3000'
     }
     return host
   },
   websocketHost () {
     let host = 'wss://api.kinopio.club'
     if (this.isDevelopment()) {
-      host = 'ws://kinopio.local:3000'
+      host = 'wss://kinopio.local:3000'
     }
     return host
   },
@@ -359,7 +361,7 @@ export default {
     return ((value - min) * 100) / (max - min)
   },
   clone (object) {
-    this.typeCheck({ value: object, type: 'object', origin: 'clone' })
+    this.typeCheck({ value: object, type: 'object' })
     let cloned = JSON.stringify(object)
     cloned = JSON.parse(cloned)
     return cloned
@@ -837,33 +839,6 @@ export default {
   spaceBetweenCards () {
     let spaceBetween = 12
     return this.spaceZoomDecimal() * spaceBetween
-  },
-  isItemInViewport (item, zoom) {
-    let viewport = this.visualViewport()
-    zoom = zoom || 1
-    zoom = viewport.scale * zoom
-    zoom = 1 / zoom
-    viewport = {
-      pageLeft: viewport.pageLeft * zoom,
-      width: viewport.width * zoom,
-      pageTop: viewport.pageTop * zoom,
-      height: viewport.height * zoom
-    }
-    item = {
-      x: item.x,
-      y: item.y,
-      width: item.width || item.resizeWidth,
-      height: item.height || item.resizeHeight
-    }
-    // x
-    const isStartInViewportX = item.x > viewport.pageLeft || item.x + item.width > viewport.pageLeft
-    const isEndInViewportX = item.x < viewport.pageLeft + viewport.width
-    const isInViewportX = isStartInViewportX && isEndInViewportX
-    // y
-    const isStartInViewportY = item.y > viewport.pageTop || item.y + item.height > viewport.pageTop
-    const isEndInViewportY = item.y < viewport.pageTop + viewport.height
-    const isInViewportY = isStartInViewportY && isEndInViewportY
-    return isInViewportX && isInViewportY
   },
   updateCardDimensions (card) {
     if (!card) { return }
@@ -1358,21 +1333,6 @@ export default {
     remoteSpace.removedCards = removedCards
     return remoteSpace
   },
-  normalizeSpaceMetaOnly (space) {
-    let spaceMeta = {
-      id: space.id,
-      name: space.name,
-      users: space.users,
-      background: space.background,
-      backgroundTint: space.backgroundTint,
-      moonPhase: space.moonPhase,
-      url: space.url,
-      privacy: space.privacy,
-      updatedAt: space.updatedAt,
-      showInExplore: space.showInExplore
-    }
-    return spaceMeta
-  },
   AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
     return spaces.map(space => {
       let userId
@@ -1542,22 +1502,41 @@ export default {
   spaceHasUrl () {
     return window.location.href !== (window.location.origin + '/')
   },
-  spaceAndCardIdFromUrl (path) {
+  spaceAndCardIdFromUrl (url) {
+    url = new URL(url)
+    return this.spaceAndCardIdFromPath(url.pathname) // /spaceId/cardId
+  },
+  urlFromSpaceAndCard ({ spaceId, cardId }) {
+    let url = `${this.kinopioDomain()}/${spaceId}`
+    if (cardId) {
+      url = `${url}/${cardId}`
+    }
+    return url
+  },
+  inviteUrl ({ spaceId, spaceName, collaboratorKey }) {
+    spaceName = this.normalizeString(spaceName)
+    const url = `${this.kinopioDomain()}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
+    return url
+  },
+  spaceAndCardIdFromPath (path) {
     // https://regexr.com/5kr4g
     // matches (text after /) twice
     const urlPattern = new RegExp(/\/([^?\s/]+)\/{0,1}([^?\s/]+){0,1}/i)
     let matches = path.match(urlPattern)
     if (!matches) { return }
+    const spaceUrl = matches[1]
+    const spaceId = spaceUrl.substring(spaceUrl.length - uuidLength, spaceUrl.length)
     matches = {
-      spaceUrl: matches[1],
-      cardId: matches[2]
+      spaceUrl,
+      cardId: matches[2],
+      spaceId
     }
     return matches
   },
   spaceIdFromUrl (url) {
     url = url || window.location.href
     url = url.replaceAll('?hidden=true', '')
-    const id = url.substring(url.length - 21, url.length)
+    const id = url.substring(url.length - uuidLength, url.length)
     if (this.idIsValid(id)) { return id }
   },
   idIsValid (id) {
@@ -1601,7 +1580,8 @@ export default {
   },
   urlIsValidTld (url) {
     const isLocalhostUrl = url.match(this.localhostUrlPattern())
-    if (isLocalhostUrl) { return true }
+    const isDevelopmentUrl = url.includes(this.kinopioDomain())
+    if (isLocalhostUrl || isDevelopmentUrl) { return true }
     // https://regexr.com/5v6s9
     const regex = '(' + tlds + ')' + String.raw`(\?|\/| |$|\s)`
     const tldPattern = new RegExp(regex)
@@ -1700,6 +1680,11 @@ export default {
     }
     return newUrl
   },
+  urlWithProtocol (url) {
+    if (!url) { return }
+    if (this.urlHasProtocol(url)) { return url }
+    return `https://${url}`
+  },
   urlIsImage (url) {
     if (!url) { return }
     // append space to match as an end character
@@ -1713,7 +1698,7 @@ export default {
     // match an extension
     // which much be followed by either end of line, space, or ? (for qs) char
     const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.jpe|\.jif|\.jfif|\.png|\.svg|\.webp)(?:\n| |\?|&)/igm)
-    const isImage = url.match(imageUrlPattern)
+    const isImage = url.match(imageUrlPattern) || url.includes('is-image=true')
     return Boolean(isImage)
   },
   urlIsVideo (url) {
@@ -1741,8 +1726,15 @@ export default {
     const isFile = url.toLowerCase().match(fileUrlPattern)
     return Boolean(isFile)
   },
+  urlIsInvite (url) {
+    url = this.urlWithProtocol(url)
+    if (!url) { return }
+    url = new URL(url)
+    return url.pathname === '/invite'
+  },
   urlIsSpace (url) {
     if (!url) { return }
+    if (this.urlIsInvite(url)) { return }
     let spaceUrlPattern
     if (import.meta.env.MODE === 'development') {
       // https://regexr.com/5hjc2
@@ -1764,7 +1756,8 @@ export default {
     const isAudio = this.urlIsAudio(url)
     const isFile = this.urlIsFile(url)
     const isSpace = this.urlIsSpace(url)
-    return !isImage && !isVideo && !isAudio && !isFile && !isSpace
+    const isInvite = this.urlIsInvite(url)
+    return !isImage && !isVideo && !isAudio && !isFile && !isSpace && !isInvite
   },
   urlIsYoutube (url) {
     if (url.includes('/channel/')) { return }
@@ -2059,10 +2052,9 @@ export default {
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
       if (linkIsMarkdown) { return }
-      return this.urlIsSpace(url)
+      return this.urlIsSpace(url) || this.urlIsInvite(url)
     })
     const files = urls.filter(url => this.urlIsFile(url))
-
     let badges = []
     let segments = []
     tags.forEach(tag => {
@@ -2078,7 +2070,13 @@ export default {
     links.forEach(link => {
       const startPosition = name.indexOf(link)
       const endPosition = startPosition + link.length
-      badges.push({ link, startPosition, endPosition, isLink: true })
+      let badge = { link, startPosition, endPosition }
+      if (this.urlIsInvite(link)) {
+        badge.isInviteLink = true
+      } else if (this.urlIsSpace(link)) {
+        badge.isLink = true
+      }
+      badges.push(badge)
     })
     files.forEach(file => {
       const startPosition = name.indexOf(file)
@@ -2096,33 +2094,53 @@ export default {
     let currentPosition = startPosition
     // other segments
     badges.forEach((segment, index) => {
+      let newSegment
+      // tag
       if (segment.isTag) {
         const tag = segment.tag
-        segments.push({
+        newSegment = {
           isTag: true,
           name: tag.substring(2, tag.length - 2)
-        })
+        }
+      // space or card link
       } else if (segment.isLink) {
-        const link = segment.link
-        segments.push({
+        let link = segment.link
+        const { spaceId, spaceUrl, cardId } = this.spaceAndCardIdFromUrl(link)
+        // link = `${this.kinopioDomain()}/${spaceUrl}`
+        newSegment = {
           isLink: true,
-          name: link
-        })
+          name: link,
+          cardId,
+          spaceId
+        }
+      // invite link
+      } else if (segment.isInviteLink) {
+        let link = segment.link
+        const url = new URL(link)
+        let queryObject = qs.decode(url.search)
+        newSegment = {
+          isInviteLink: true,
+          name: link,
+          spaceId: queryObject.spaceId,
+          collaboratorKey: queryObject.collaboratorKey
+        }
+      // file
       } else if (segment.isFile) {
-        segments.push({
+        newSegment = {
           isFile: true,
           name: this.fileNameFromUrl(segment.file)
-        })
+        }
       }
       currentPosition = segment.endPosition
       const nextBadge = badges[index + 1]
       if (nextBadge) {
-        segments.push({
+        newSegment = {
           isText: true,
           content: name.substring(currentPosition, nextBadge.startPosition)
-        })
+        }
         currentPosition = nextBadge.startPosition
       }
+      segments.push(newSegment)
     })
     const trailingText = name.substring(currentPosition, name.length)
     if (trailingText) {

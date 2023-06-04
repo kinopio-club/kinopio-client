@@ -15,7 +15,6 @@
   Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
   Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
   TagDetails
-  LinkDetails
   UserDetails
   CardListItemOptions
   WindowHistoryHandler
@@ -35,7 +34,6 @@ import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import ScrollHandler from '@/components/ScrollHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
-import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
@@ -58,7 +56,6 @@ export default {
     ScrollHandler,
     WindowHistoryHandler,
     TagDetails,
-    LinkDetails,
     ItemsLocked,
     UserDetails,
     NotificationsWithPosition,
@@ -394,8 +391,8 @@ label // used for checkbox buttons
   padding 5px 9px
   height 30px
   margin 0
-  border 1px solid var(--primary-border)
   background-color var(--button-background)
+  border 1px solid var(--primary-border)
   border-radius var(--entity-radius)
   cursor pointer
   user-select none
@@ -453,11 +450,27 @@ label // used for checkbox buttons
   &.small-button
     height 20px
     padding 0px 4px
+    input[type="checkbox"]
+      width 10px
+      height 10px
+      vertical-align 0
   &.variable-length-content
     height fit-content
 
 .unselectable
   pointer-events none !important
+
+.clickable-item
+  box-shadow var(--button-hover-shadow)
+  cursor pointer
+  max-width calc(100% - 4px) !important
+  user-select none
+  user-drag none
+  &:hover
+    box-shadow var(--hover-shadow)
+  &:active,
+  &.active
+    box-shadow var(--active-shadow)
 
 table
   margin-top 10px
@@ -599,9 +612,6 @@ dialog
     transition left 0.1s, top 0.1s
   &.narrow
     width 230px
-  button,
-  label
-    background-color var(--primary-background)
   button + button,
   button + input,
   button + label,
@@ -759,7 +769,8 @@ dialog
   -webkit-user-drag none
   pointer-events none
 
-.icon + span
+.icon + span,
+.icon + .icon
   margin-left 5px
 
 .time
@@ -812,6 +823,9 @@ dialog
 .icon.button-down-arrow
   padding 0
   vertical-align 2px
+
+.icon.arena
+  width 18px
 
 label,
 li
@@ -926,6 +940,8 @@ code
   &.status
     background var(--secondary-active-background-dark)
   &.secondary
+    background var(--secondary-background)
+  &.secondary-on-dark-background
     background var(--secondary-active-background)
   &.search
     background var(--search-background)
@@ -992,6 +1008,7 @@ code
 
 .link-badge
   background-color var(--secondary-active-background)
+  text-decoration none
   > .user
     .label-badge
       width 21px
@@ -1074,11 +1091,10 @@ code
 
 .clear-input-wrap
   cursor pointer
-  border-radius var(--small-entity-radius)
+  border-radius var(--entity-radius)
   padding-left 5px
   padding-right 5px
   margin-top -2px
-  height 20px
   img
     padding 0
     vertical-align 2px
@@ -1139,6 +1155,7 @@ code
       margin-right 2px
   .badge,
   a
+    display inline-block
     margin-right 3px
   .badge + .badge,
   a + a

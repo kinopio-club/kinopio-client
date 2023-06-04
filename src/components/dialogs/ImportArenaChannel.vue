@@ -201,7 +201,11 @@ export default {
       const title = block.title
       console.log('**', block, type)
       if (type === 'Link') {
-        card.name = `${block.image.display.url} ${block.source.url}`
+        let url = block.image.display.url
+        if (!utils.urlIsImage(url)) {
+          url = block.image.original.url
+        }
+        card.name = `${url} ${block.source.url}`
       } else if (type === 'Text') {
         card.name = `${title} – ${block.content}`
       } else if (type === 'Media') {
@@ -251,8 +255,6 @@ export default {
 
 <style lang="stylus">
 .import-arena-channel
-  .arena
-    width 18px
   .badge
     margin-bottom 10px
   .badge-with-url

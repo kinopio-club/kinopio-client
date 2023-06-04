@@ -10,6 +10,7 @@ dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop ref="dialog"
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
     template(v-else-if="!spaceIsPublic")
       p To embed this space, set the privacy to
+      p
         span.badge.info
           img.icon.closed(src="@/assets/unlock.svg")
           span {{privacyName(1)}}

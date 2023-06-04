@@ -21,6 +21,11 @@ dialog.narrow.multiple-selected-actions(
         img.icon.connector-icon(v-if="cardsIsConnected" src="@/assets/connector-closed.svg")
         img.icon.connector-icon(v-else src="@/assets/connector-open.svg")
         span Connect
+      //- Share Card
+      .button-wrap(v-if="oneCardIsSelected" @click.left.stop="toggleShareCardIsVisible")
+        button(:class="{active: shareCardIsVisible}")
+          span Share
+        ShareCard(:visible="shareCardIsVisible" :card="cards[0]")
 
       //- More Options
       .button-wrap
@@ -72,6 +77,7 @@ import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
 import CardBoxActions from '@/components/subsections/CardBoxActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
+import ShareCard from '@/components/dialogs/ShareCard.vue'
 
 import { nanoid } from 'nanoid'
 import last from 'lodash-es/last'
@@ -85,7 +91,8 @@ export default {
     MoveOrCopyItems,
     CardBoxActions,
     ConnectionActions,
-    AlignAndDistribute
+    AlignAndDistribute,
+    ShareCard
   },
   data () {
     return {
@@ -94,7 +101,8 @@ export default {
       cardsIsConnected: false,
       cardsHaveCheckboxes: false,
       cardsCheckboxIsChecked: false,
-      copyOnly: false
+      copyOnly: false,
+      shareCardIsVisible: false
     }
   },
   computed: {
@@ -386,6 +394,11 @@ export default {
       this.closeDialogs()
       this.moveCardsIsVisible = !isVisible
     },
+    toggleShareCardIsVisible () {
+      const isVisible = this.shareCardIsVisible
+      this.closeDialogs()
+      this.shareCardIsVisible = !isVisible
+    },
     toggleShouldShowItemActions () {
       this.closeDialogs()
       const isVisible = !this.shouldShowItemActions
@@ -397,6 +410,7 @@ export default {
     closeDialogs () {
       this.copyCardsIsVisible = false
       this.moveCardsIsVisible = false
+      this.shareCardIsVisible = false
       this.$store.commit('triggerCardDetailsCloseDialogs')
     },
     connectionType (event) {

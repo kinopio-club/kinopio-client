@@ -21,7 +21,7 @@ hostile set localhost kinopio.local
 
 ```
 $ npm run serve
-$ http://kinopio.local:8080
+$ https://kinopio.local:8080
 ```
 
 ## Debugging
@@ -41,28 +41,11 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 | `store.js` | [Vuex](https://vuex.vuejs.org/) store, contains global observables and methods needed by multiple components |
 | `utils.js` | Functional methods that just do dom manipulations or common tasks. These can't access components or store directly |
 | `views/Space.vue` | Contains the core interaction layer which sends user inputs to painting, connecting, dragging etc. components. Also where new connections are created and checked to see if they connect |
-| `views/Add.vue` | `kinopio.club/add` page for browser extensions |
+| `views/Add.vue` | `kinopio.club/add` page for browser extensions and iOS share sheet |
 | `components/Card.vue` | Displays cards from the `store`, and shows `CardDetails` |
 | `components/Connection.vue` | Displays connections from the `store`, and shows `ConnectionDetails` |
 | `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
 | `components/layers/MagicPaint.vue` | The layers used for animating painting, scroll locking on touch, and more with `<canvas>`. As well as for multiple card and connection selection which reveals `MultipleSelectedActions` |
-
-
-## Developing on HTTPS
-
-In rare cases when working with code that only works on https (e.g. clipboard copy and paste), use Ngrok to pipe your localhost through an https server.
-
-(Note that dev server connections won't work through Ngrok)
-
-### Setup Ngrok
-
-[login](http://ngrok.com) and download ngrok, then connect ngrok to the kinopio ngrok account
-
-    $ ./ngrok authtoken 1e2pCpJsJMwkEkqbDKF0p5eMArQ_5Ztb7NE8fqyftCnuizdab
-
-### Run Ngrok
-
-    $ ./ngrok http 8080
 
 ## How to update the Hello Kinopio Space
 
@@ -94,7 +77,32 @@ To update it, create the space and export it's json. Replace `hello.json` with t
 
 item `userId`s should be `euGhpBrR9eBcjKnK16C_g`
 
+## HTTPS Signing
+
+> You shouldn't need to run this or update the cert until 2025, but just in case
+
+To work with code that only works on https (e.g. clipboard copy and paste), [mkcert](https://github.com/FiloSottile/mkcert) was used to create a local ssl certificate
+
+	$ mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem 'kinopio.local'
+
+## Ngrok tunnelling
+
+use Ngrok to pipe your localhost through an external https server
+
+(Note that dev kinopio-server connections won't work through Ngrok)
+
+### Setup Ngrok
+
+[login](http://ngrok.com) and download ngrok, then connect ngrok to the kinopio ngrok account
+
+    $ ./ngrok authtoken 1e2pCpJsJMwkEkqbDKF0p5eMArQ_5Ztb7NE8fqyftCnuizdab
+
+### Run Ngrok
+
+    $ ./ngrok http https://localhost:8080
+
 ## See Also
 
 - [are.na/kinopio](https://www.are.na/kinopio)
 - [github.com/kinopio-club](https://github.com/kinopio-club)
+

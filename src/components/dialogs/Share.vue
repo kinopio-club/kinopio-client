@@ -15,8 +15,8 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   section(v-if="spaceHasUrl")
     ReadOnlySpaceInfoBadges
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
-    //- Share URL
     section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
+      //- Explore
       template(v-if="exploreSectionIsVisible")
         .row
           p Share with the Community
@@ -24,21 +24,28 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           AddToExplore
           AskToAddToExplore
         hr
+      //- Copy URL
       .row
         p Share With the World
+        label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.left="toggleIsShareInPresentationMode" @touchend.prevent="toggleIsShareInPresentationMode" :class="{active: isShareInPresentationMode}")
+          input(type="checkbox" :value="isShareInPresentationMode")
+          img.icon(src="@/assets/presentation.svg")
       .row
-        button(@click.left="copyUrl")
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy Public URL
+        .segmented-buttons
+          button(@click.left="copyUrl")
+            img.icon.copy(src="@/assets/copy.svg")
+            span Copy Public URL
+          button(v-if="webShareIsSupported" @click="webShare")
+            img.icon.share(src="@/assets/share.svg")
 
   //- Invite
   Invite(v-if="isSpaceMember && currentUserIsSignedIn")
   //- Collaborators
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
-    // collaborators
+    //- collaborators
     template(v-if="spaceHasCollaborators")
       UserList(:users="spaceCollaborators" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :showRemoveUser="isSpaceMember" @removeUser="removeCollaborator" :isClickable="true")
-    // card users
+    //- card users
     template(v-if="spaceHasOtherCardUsers")
       UserList(:users="spaceOtherCardUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 
@@ -119,7 +126,8 @@ export default {
       spaceRssFeedIsVisible: false,
       embedIsVisible: false,
       exportIsVisible: false,
-      importIsVisible: false
+      importIsVisible: false,
+      isShareInPresentationMode: false
     }
   },
   computed: {
@@ -134,7 +142,14 @@ export default {
       if (!this.userDetailsIsVisible) { return }
       return this.$store.state.userDetailsUser
     },
-    url () { return this.$store.getters['currentSpace/url'] },
+    url () {
+      let url = this.$store.getters['currentSpace/url']
+      url = new URL(url)
+      if (this.isShareInPresentationMode) {
+        url.searchParams.set('present', true)
+      }
+      return url.href
+    },
     spaceName () { return this.$store.state.currentSpace.name },
     spacePrivacy () { return this.$store.state.currentSpace.privacy },
     currentUser () { return this.$store.state.currentUser },
@@ -170,7 +185,8 @@ export default {
     spaceHasOtherCardUsers () { return Boolean(this.spaceOtherCardUsers.length) },
     dialogIsVisible () {
       return this.privacyPickerIsVisible || this.spaceRssFeedIsVisible || this.embedIsVisible || this.exportIsVisible || this.importIsVisible
-    }
+    },
+    webShareIsSupported () { return navigator.share }
   },
   methods: {
     triggerEarnCreditsIsVisible () {
@@ -196,9 +212,9 @@ export default {
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
-    shareUrl () {
+    webShare () {
       const data = {
-        title: 'Kinopio',
+        title: 'Kinopio Space',
         text: this.spaceName,
         url: this.url
       }
@@ -242,6 +258,10 @@ export default {
     toggleUserDetails (event, user) {
       this.closeDialogs()
       this.showUserDetails(event, user)
+    },
+    toggleIsShareInPresentationMode () {
+      this.closeDialogs()
+      this.isShareInPresentationMode = !this.isShareInPresentationMode
     },
     showUserDetails (event, user) {
       let element = event.target
@@ -349,4 +369,17 @@ export default {
 
   .segmented-buttons
     z-index 1
+  .extra-options-button
+    margin-left auto
+    margin-top 0
+    margin-bottom -2px
+    width auto
+    cursor pointer
+    height 20px
+    width initial
+    &.label
+      padding-top 2px
+      input
+        background-color transparent
+        pointer-events none
 </style>

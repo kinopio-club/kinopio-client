@@ -171,6 +171,9 @@ export default {
         cache.saveSpace(remoteSpace)
       }
       cache.addToSpace(newItems, this.selectedSpace.id)
+      if (this.actionIsMove) {
+        await this.$store.dispatch('api/updateCardsWithLinkToCardIds', { prevCards: items.cards, newCards: newItems.cards })
+      }
       console.log('🚚 copies created', newItems)
       this.loading = false
     },

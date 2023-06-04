@@ -64,9 +64,13 @@ span.space-list-wrap
                 img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
               button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
                 img.icon.checkmark(src="@/assets/checkmark.svg")
-          button.duplicate.small-button(v-if="spaceIsActive(space) && spaceIsTemplate(space)" @click="duplicateSpace")
+          button.inline-duplicate.small-button(v-if="spaceIsActive(space) && spaceIsTemplate(space)")
             img.icon(src="@/assets/add.svg")
             span Copy
+          .button-wrap.inline-favorite-wrap(@click.stop.prevent="toggleIsFavoriteSpace(space)")
+            button.inline-favorite.small-button(v-if="spaceIsActive(space) && showFavoriteButton"  :class="{ active: isFavorite(space) }")
+              img.icon.favorite-icon(v-if="isFavorite(space)" src="@/assets/heart.svg")
+              img.icon.favorite-icon(v-else src="@/assets/heart-empty.svg")
 
 </template>
 
@@ -116,7 +120,8 @@ export default {
     userShowInExploreDate: String,
     showCreateNewSpaceFromSearch: Boolean,
     resultsSectionHeight: Number,
-    disableListOptimizations: Boolean
+    disableListOptimizations: Boolean,
+    showFavoriteButton: Boolean
   },
   data () {
     return {
@@ -175,6 +180,19 @@ export default {
     }
   },
   methods: {
+    // favorite
+    isFavorite (space) {
+      const favorites = this.$store.state.currentUser.favoriteSpaces
+      const isFavorite = favorites.find(favorite => favorite.id === space.id)
+      return Boolean(isFavorite)
+    },
+    toggleIsFavoriteSpace (space) {
+      if (this.isFavorite(space)) {
+        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: space })
+      } else {
+        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: space })
+      }
+    },
     updateScroll () {
       let element = this.$refs.spaceList
       if (!element) { return }
@@ -473,13 +491,19 @@ export default {
 
   .space-wrap
     position relative
-    button.duplicate
-      position absolute
-      right 4px
-      top 3px
+    button.inline-duplicate,
+    button.inline-favorite
+      cursor pointer
       z-index 1
       padding 0
       padding-left 6px
-      padding-right 6px
+      padding-right 2px
+  .inline-favorite-wrap
+    cursor pointer
+    position absolute
+    right 4px
+    top 3px
+    padding 6px
+    padding-right 0
 
 </style>

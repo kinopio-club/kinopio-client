@@ -302,6 +302,8 @@ const currentCards = {
       context.commit('update', card)
       if (card.name) {
         context.dispatch('updateDimensions', { cards: [card] })
+        context.commit('updateCardNameInOtherItems', card, { root: true })
+        context.commit('triggerUpdateOtherCard', card.id, { root: true })
       }
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
     },
@@ -798,9 +800,24 @@ const currentCards = {
       const cards = cardIds.map(id => getters.byId(id))
       return cards
     },
-    withSpaceLinks: (state, getters) => {
-      let cards = getters.all
-      return cards.filter(card => utils.idIsValid(card.linkToSpaceId))
+    linkedItems: (state, getters) => {
+      let cardIds = []
+      let spaceIds = []
+      let invites = []
+      const cards = getters.all
+      cards.forEach(card => {
+        const cardIdIsValid = utils.idIsValid(card.linkToCardId)
+        const collaboratorKeyIsValid = utils.idIsValid(card.linkToSpaceCollaboratorKey)
+        const spaceIdIsValid = utils.idIsValid(card.linkToSpaceId)
+        if (collaboratorKeyIsValid && spaceIdIsValid) {
+          invites.push({ spaceId: card.linkToSpaceId, collaboratorKey: card.linkToSpaceCollaboratorKey })
+        } else if (cardIdIsValid) {
+          cardIds.push(card.linkToCardId)
+        } else if (spaceIdIsValid) {
+          spaceIds.push(card.linkToSpaceId)
+        }
+      })
+      return { cardIds, spaceIds, invites }
     },
     withTagName: (state, getters) => (tagName) => {
       let cards = getters.all
@@ -843,6 +860,40 @@ const currentCards = {
       })
       cardIds = uniq(cardIds)
       return cardIds
+    },
+    nameSegments: (state, getters) => (card) => {
+      card = utils.clone(card)
+      let name = card.name
+      let url = utils.urlFromString(name)
+      let imageUrl
+      if (utils.urlIsImage(url)) {
+        imageUrl = url
+        name = name.replace(url, '')
+      }
+      let segments = utils.cardNameSegments(name)
+      if (imageUrl) {
+        segments.unshift({
+          isImage: true,
+          url: imageUrl
+        })
+      }
+      card.nameSegments = segments.map(segment => {
+        if (!segment.isTag) { return segment }
+        segment.color = getters.segmentTagColor(segment)
+        return segment
+      })
+      return card
+    },
+    segmentTagColor: (state, getters, rootState, rootGetters) => (segment) => {
+      const spaceTag = rootGetters['currentSpace/tagByName'](segment.name)
+      const cachedTag = cache.tagByName(segment.name)
+      if (spaceTag) {
+        return spaceTag.color
+      } else if (cachedTag) {
+        return cachedTag.color
+      } else {
+        return rootState.currentUser.color
+      }
     }
   }
 }

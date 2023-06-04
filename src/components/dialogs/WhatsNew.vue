@@ -4,20 +4,22 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
     p What's New
     .button-wrap
       a(href="https://kinopio.club/-kinopio-roadmap-6TRE21gchHI7alHLuwzd5")
-        button Roadmap →
+        button
+          span Roadmap{{' '}}
+          img.icon.visit(src="@/assets/visit.svg")
+
     .button-wrap
       a(href="https://blog.kinopio.club")
-        button Blog →
-    .button-wrap
-      button(@click.left="refreshBrowser")
-        img.refresh.icon(src="@/assets/refresh.svg")
+        button
+          span Blog{{' '}}
+          img.icon.visit(src="@/assets/visit.svg")
 
   section(v-if="!newStuff.length")
     Loader(:visible="true")
 
   section
     template(v-for="item in newStuff" :key="item.id")
-      a(:href="item.url")
+      a(:href="item.url" target="_blank")
         article.badge.button-badge(:style="{ backgroundColor: item._meta.color }")
           //- media
           template(v-if="item._meta.image")
@@ -31,7 +33,9 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
           p.summary {{item.summary}}
     .button-wrap
       a(href="https://blog.kinopio.club")
-        button Read All →
+        button
+          span Read All{{' '}}
+          img.icon.visit(src="@/assets/visit.svg")
 </template>
 
 <script>
@@ -74,9 +78,6 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
-    },
-    refreshBrowser () {
-      window.location.reload()
     }
   },
   watch: {
@@ -114,7 +115,7 @@ export default {
     font-family var(--serif-font)
     font-size 16px
     font-weight normal
-    text-decoration underline
+    text-decoration none
     margin-top 10px
     margin-bottom 10px
     &:hover

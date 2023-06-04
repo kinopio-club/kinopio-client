@@ -1,13 +1,13 @@
 <script setup>
 // import utils from '@/utils.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 // https://vuex.vuejs.org/guide/composition-api.html#accessing-state-and-getters
 import { useStore } from 'vuex'
 const store = useStore()
 
 onMounted(() => {
-  console.log(`the component is now mounted.`, store.state.currentSpace)
+  console.log(`🍆 the component is now mounted.`, store.state.currentSpace)
 })
 
 const props = defineProps({

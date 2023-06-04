@@ -4,7 +4,7 @@
   //- Space Meta
 
   .row.space-info-wrap
-    .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
+    .button-wrap.background-preview-wrap(@click.left.stop="toggleBackgroundIsVisible")
       BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
       //- Background Upload Progress
       .uploading-container-footer(v-if="pendingUpload")
@@ -38,88 +38,83 @@
 
 ReadOnlySpaceInfoBadges
 
+//- member options
 .row.align-items-top(v-if="isSpaceMember")
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
+  //- Pin Favorite
+  .button-wrap
+    button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+      img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+      img.icon(v-else src="@/assets/heart-empty.svg")
   //- Settings
   .button-wrap
     button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
       img.icon.settings(src="@/assets/settings.svg")
       span Settings
 
+//- read only options
+.row(v-if="!isSpaceMember")
+  //- Favorite
+  button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+    img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+    img.icon(v-else src="@/assets/heart-empty.svg")
+  .button-wrap
+    button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
+      img.icon.settings(src="@/assets/settings.svg")
+      span Settings
+
 //- Space Settings
-
-//- read only space settings
-section.subsection.space-settings(v-if="!isSpaceMember")
-  .row
-    //- Duplicate
-    .button-wrap
-      button(@click.left="duplicateSpace")
-        img.icon.add(src="@/assets/add.svg")
-        span Make a Copy
-    //- Export
-    .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
-      button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-        span Export
-      Export(:visible="exportIsVisible")
-  .row
-    //- Favorite
-    button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-      img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-      img.icon(v-else src="@/assets/heart-empty.svg")
-      span Follow updates
-
-//- member space settings
-section.subsection.space-settings(v-if="settingsIsVisible")
-  .row
-    //- Background
-    .button-wrap
-      button(@click.left.stop="toggleBackgroundIsVisible")
-        BackgroundPreview(:space="currentSpace")
-        span Background
-
-    //- Favorite
-    .button-wrap
-      button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-        img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-        img.icon(v-else src="@/assets/heart-empty.svg")
-        span Pin
-
-  .row
-    //- Template
-    .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
-      button.variable-length-content(:class="{ active: currentSpaceIsUserTemplate }")
-        img.icon.templates(src="@/assets/templates.svg")
-        span Template
-    //- Export
-    .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
-      button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-        span Export
+template(v-if="settingsIsVisible")
+  //- read only space settings
+  section.subsection.space-settings(v-if="!isSpaceMember")
+    .row
+      //- Duplicate
+      .button-wrap
+        button(@click.left="duplicateSpace")
+          img.icon.add(src="@/assets/add.svg")
+          span Make a Copy
+      //- Export
+      .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
+        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+          span Export
         Export(:visible="exportIsVisible")
 
-  .row(v-if="currentSpaceIsUserTemplate")
-    //- Duplicate
-    .button-wrap
-      button(@click.left="duplicateSpace")
-        img.icon.add(src="@/assets/add.svg")
-        span Make a Copy
-
-  .row
-    .button-wrap(v-if="isSpaceMember")
-      .segmented-buttons
-        //- Remove
-        button.danger(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
-          template(v-if="currentUserIsSpaceCollaborator")
-            img.icon.cancel(src="@/assets/add.svg")
-            span Leave
-          template(v-else)
-            img.icon.remove(src="@/assets/remove.svg")
-            span Remove
-        //- Hide
-        button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
-          img.icon(v-if="!currentSpaceIsHidden" src="@/assets/view.svg")
-          img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
-          span Hide
+  //- member space settings
+  section.subsection.space-settings(v-if="isSpaceMember")
+    .row
+      //- Template
+      .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
+        button.variable-length-content(:class="{ active: currentSpaceIsUserTemplate }")
+          img.icon.templates(src="@/assets/templates.svg")
+          span Make Template
+      //- Export
+      .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
+        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+          span Export
+          Export(:visible="exportIsVisible")
+    .row(v-if="currentSpaceIsUserTemplate")
+      //- Duplicate
+      .button-wrap
+        button(@click.left="duplicateSpace")
+          img.icon.add(src="@/assets/add.svg")
+          span Make a Copy
+    .row
+      .button-wrap(v-if="isSpaceMember")
+        .segmented-buttons
+          //- Remove
+          button.danger(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
+            template(v-if="currentUserIsSpaceCollaborator")
+              img.icon.cancel(src="@/assets/add.svg")
+              span Leave
+            template(v-else)
+              img.icon.remove(src="@/assets/remove.svg")
+              span Remove
+          //- Hide
+          button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
+            img.icon(v-if="!currentSpaceIsHidden" src="@/assets/view.svg")
+            img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
+            span Hide
 </template>
 
 <script>
@@ -246,7 +241,6 @@ export default {
       }
       this.updateLocalSpaces()
     },
-
     duplicateSpace () {
       this.$store.dispatch('currentSpace/duplicateSpace')
       this.updateLocalSpaces()
@@ -338,11 +332,14 @@ export default {
 .space-details-info
   align-items flex-start !important
   justify-content space-between
+  margin-bottom 0 !important
 
   .space-info-wrap
+    align-items flex-start
     margin 0
     .textarea-wrap
-      width 145px
+      width 170px
+      margin-bottom 6px
       &.full-width
         width 170px
       .textarea-loader
@@ -384,6 +381,9 @@ export default {
           left 6px
     .title-row
       margin-left 6px
+
+  .background-preview-wrap
+    margin-bottom 6px
 
 .row.align-items-top
   align-items flex-start

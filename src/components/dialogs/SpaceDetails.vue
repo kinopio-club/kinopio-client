@@ -1,34 +1,45 @@
 <template lang="pug">
-dialog.narrow.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned}")
+dialog.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned}")
   section
     SpaceDetailsInfo(@updateLocalSpaces="updateLocalSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden" @addSpace="addSpace")
   section.results-actions
-    .row
-      //- Add Space
-      .button-wrap
-        button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
-          img.icon.add(src="@/assets/add.svg")
-          span New
-          Loader(:visible="isLoadingSpace")
-        AddSpace(:visible="addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace" @addJournalSpace="addJournalSpace")
+    .row.title-row
+      div
+        //- New Space
+        .button-wrap
+          button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
+            img.icon.add(src="@/assets/add.svg")
+            span New
+            Loader(:visible="isLoadingSpace")
+          AddSpace(:visible="addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace" @addJournalSpace="addJournalSpace")
       //- Filters
       .button-wrap
         // no filters
         template(v-if="!spaceFiltersIsActive")
-          button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsActive }")
+          button.small-button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible }")
             img.icon(src="@/assets/filter.svg")
         // filters active
         template(v-if="spaceFiltersIsActive")
           .segmented-buttons
-            button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersIsActive }")
+            button.small-button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersIsActive }")
               img.icon(src="@/assets/filter.svg")
               .badge.info.filter-is-active
-            button(@click.left.stop="clearAllFilters")
+            button.small-button(@click.left.stop="clearAllFilters")
               img.icon.cancel(src="@/assets/add.svg")
         SpaceFilters(:visible="spaceFiltersIsVisible" :spaces="filteredSpaces")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" :showCreateNewSpaceFromSearch="true" @selectSpace="changeSpace" @addSpace="addSpace" :resultsSectionHeight="resultsSectionHeight")
+    SpaceList(
+      :spaces="filteredSpaces"
+      :isLoading="isLoadingRemoteSpaces"
+      :showUserIfCurrentUserIsCollaborator="true"
+      :parentIsSpaceDetails="true"
+      :showCreateNewSpaceFromSearch="true"
+      @selectSpace="changeSpace"
+      @addSpace="addSpace"
+      :resultsSectionHeight="resultsSectionHeight"
+      :showFavoriteButton="true"
+    )
 </template>
 
 <script>
@@ -233,6 +244,7 @@ export default {
       return spaces
     },
     updateLocalSpaces () {
+      if (!this.visible) { return }
       this.debouncedUpdateLocalSpaces()
     },
     debouncedUpdateLocalSpaces: debounce(async function () {
@@ -362,16 +374,25 @@ export default {
 </script>
 
 <style lang="stylus">
-.space-details
+dialog.space-details
   button.disabled
     opacity 0.5
     pointer-events none
   .filter-is-active
     margin 0
-    margin-left 5px
-    padding-top 0
-    padding-bottom 0
+    min-height initial
+    min-width initial
+    display inline-block
+    width 10px
+    height 10px
+    padding 0
+    border-radius 100px
+    margin-left 3px
   &.is-pinned
     left -65px
     top -13px
+  .space-list
+    .inline-favorite-wrap
+      padding-top 4px
+
 </style>

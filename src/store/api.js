@@ -4,11 +4,12 @@ import consts from '@/consts.js'
 
 import debounce from 'lodash-es/debounce'
 import merge from 'lodash-es/merge'
+import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
 let host = 'https://api.kinopio.club'
 if (import.meta.env.MODE === 'development') {
-  host = 'http://kinopio.local:3000'
+  host = 'https://kinopio.local:3000'
 }
 
 const squashCardsCreatedCount = (queue, request) => {
@@ -93,6 +94,7 @@ const self = {
     handleServerError: (context, { name, error, shouldNotNotifyUser }) => {
       console.error('🚒', name, error)
       if (!shouldNotNotifyUser) { return }
+      if (name === 'getLiveSpaces') { return }
       context.commit('notifyConnectionError', true, { root: true })
       context.commit('notifyConnectionErrorName', name, { root: true })
     },
@@ -434,22 +436,28 @@ const self = {
         context.dispatch('handleServerError', { name: 'getSpace', error })
       }
     },
-    getSpaces: async (context, { spaceIds, shouldRequestRemote }) => {
+
+    getOtherItems: async (context, { cardIds, spaceIds, invites }) => {
       const max = 60
       try {
-        const apiKey = context.rootState.currentUser.apiKey
-        if (!shouldRequest({ shouldRequestRemote, apiKey })) { return }
+        const isOffline = !window.navigator.onLine
+        if (isOffline) { return }
+        // normalize
+        cardIds = uniq(cardIds)
+        cardIds = cardIds.slice(0, max)
+        spaceIds = uniq(spaceIds)
         spaceIds = spaceIds.slice(0, max)
-        console.log('🛬🛬 getting remote spaces', spaceIds)
-        if (!spaceIds.length) { return }
-        spaceIds = spaceIds.join(',')
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/multiple?spaceIds=${spaceIds}`, options))
+        console.log('🛬🛬 getting remote other items', { cardIds, spaceIds, invites })
+        // request
+        const body = { cardIds, spaceIds, invites }
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/item/multiple`, options))
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getSpaces', error })
       }
     },
+
     getSpaceAnonymously: async (context, space) => {
       const isOffline = !window.navigator.onLine
       if (isOffline) { return }
@@ -590,6 +598,18 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getCardsWithLinkToSpaceId', error })
+      }
+    },
+    updateCardsWithLinkToCardIds: async (context, body) => {
+      if (!body.prevCards.length) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/card/link-to-card-ids`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'updateCardsWithLinkToCardIds', error })
       }
     },
     updateCards: async (context, body) => {
@@ -978,6 +998,16 @@ const self = {
       } catch (error) {
         console.error('🚒 createAIImage', error)
         throw new Error(error)
+      }
+    },
+    communityBackgrounds: async (context) => {
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/services/community-backgrounds`, options)
+        const data = await normalizeResponse(response)
+        return data
+      } catch (error) {
+        console.error('🚒 communityBackgrounds', error)
       }
     },
 

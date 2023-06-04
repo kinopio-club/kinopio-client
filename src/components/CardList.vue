@@ -63,7 +63,7 @@ export default {
       let cards = utils.clone(this.cards)
       cards = cards.filter(card => !this.removedCardIds.includes(card.id))
       return cards.map(card => {
-        card.nameSegments = this.cardNameSegments(card.name)
+        card = this.$store.getters['currentCards/nameSegments'](card)
         card.user = this.$store.getters['currentSpace/userById'](card.userId)
         if (!card.user) {
           card.user = {
@@ -77,38 +77,6 @@ export default {
     }
   },
   methods: {
-    segmentTagColor (segment) {
-      const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
-      const cachedTag = cache.tagByName(segment.name)
-      if (spaceTag) {
-        return spaceTag.color
-      } else if (cachedTag) {
-        return cachedTag.color
-      } else {
-        return this.currentUser.color
-      }
-    },
-    cardNameSegments (name) {
-      let url = utils.urlFromString(name)
-      let imageUrl
-      if (utils.urlIsImage(url)) {
-        imageUrl = url
-        name = name.replace(url, '')
-      }
-      let segments = utils.cardNameSegments(name)
-      if (imageUrl) {
-        segments.unshift({
-          isImage: true,
-          url: imageUrl
-        })
-      }
-      return segments.map(segment => {
-        if (!segment.isTag) { return segment }
-        segment.color = this.segmentTagColor(segment)
-        return segment
-      })
-    },
-
     selectCard (event, card) {
       this.$emit('selectCard', card)
       if (this.cardListItemOptionsCard.id === card.id) {

@@ -37,7 +37,7 @@ export default {
     shouldEmailBulletin: true,
     shouldEmailWeeklyReview: true,
     shouldShowMoreAlignOptions: false,
-    shouldUseLastConnectionType: false,
+    shouldUseLastConnectionType: true,
     shouldShowItemActions: false,
     shouldDisableRightClickToPan: false,
     shouldShowCurrentSpaceTags: false,

@@ -96,8 +96,12 @@ export default {
     ThemeSettings,
     ThemeToggle
   },
-  props: {
-    visible: Boolean
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerControlsSettingsIsVisible') {
+        this.controlsSettingsIsVisible = true
+      }
+    })
   },
   data () {
     return {
@@ -114,6 +118,7 @@ export default {
     }
   },
   computed: {
+    visible () { return this.$store.state.userSettingsIsVisible },
     isSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     isUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
@@ -190,9 +195,9 @@ export default {
 </script>
 
 <style lang="stylus">
-  @media(max-height 670px)
-    .user-settings
-      top -150px !important
+dialog.user-settings
+  left initial
+  right 8px
   .billing-cancel
     margin-top 2px
     padding-bottom 2px

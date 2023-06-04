@@ -3,9 +3,9 @@
   audio.hidden(ref="audio" controls="controls" :src="url" type="audio/mpeg" preload="metadata")
   //- use controls to playback <audio>
   .controls(
-    @keyup.stop.prevent="cancelClick"
-    @mouseup.left.stop.prevent="cancelClick"
-    @touchend.stop.prevent="cancelClick"
+    @keyup.prevent="cancelClick"
+    @mouseup.left.prevent="cancelClick"
+    @touchend.prevent="cancelClick"
   )
     .button-wrap(:class="{active: isPlaying}"
       @mousedown.left="togglePlayPause"
@@ -82,10 +82,13 @@ export default {
     this.pauseAudio()
   },
   methods: {
-    cancelClick () {
+    cancelClick (event) {
       this.$store.commit('currentUserIsDraggingCard', false)
       if (this.parentIsCardDetails) { return }
+      const isConnectingTo = this.$store.state.currentConnectionSuccess.id
+      if (isConnectingTo) { return }
       this.$store.dispatch('closeAllDialogs')
+      event.stopPropagation()
     },
     handleErrors (event) {
       console.warn('🚒', event)
@@ -279,7 +282,8 @@ export default {
   .progress-wrap
     height 100%
     width 100%
-    padding-bottom 11px
+    padding-bottom 10px
+    margin-top -6px
     progress
       background-color var(--secondary-background)
     progress::-webkit-progress-bar

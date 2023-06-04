@@ -6,7 +6,14 @@ dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': d
         span Live Public Spaces
         Loader(:visible="loading")
   section.results-section(v-if="spaces.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="spaces" :showOtherUsers="true" :hideExploreBadge="true" @selectSpace="changeSpace" :resultsSectionHeight="resultsSectionHeight")
+    SpaceList(
+      :spaces="spaces"
+      :showOtherUsers="true"
+      :hideExploreBadge="true"
+      @selectSpace="changeSpace"
+      :resultsSectionHeight="resultsSectionHeight"
+      :showFavoriteButton="true"
+    )
   section.empty(v-if="!spaces.length")
     p No public spaces are currently being edited, check back soon
     img.placeholder(src="@/assets/cat-book.jpg")
@@ -50,14 +57,14 @@ export default {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeightFromHeader(element)
+        this.dialogHeight = utils.elementHeight(element)
       })
     },
     updateResultsSectionHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+        this.resultsSectionHeight = utils.elementHeight(element, true)
       })
     }
   },
@@ -74,6 +81,8 @@ export default {
 
 <style lang="stylus">
 .live
+  left initial
+  right 8px
   max-height calc(100vh - 100px)
   .camera
     vertical-align baseline

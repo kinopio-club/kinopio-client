@@ -33,28 +33,20 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       UserBadges(:user="user")
 
-    //- Unlimited cards from member
+    //- n cards created
     section.upgrade(v-if="!currentUserIsUpgraded")
       .row
         CardsCreatedProgress
-      .row
-        .button-wrap(v-if="!isAddPage")
-          button(@click.left.stop="triggerUpgradeUserIsVisible")
+      .row(v-if="!isPricingHidden")
+        .button-wrap
+          button(@click="triggerUpgradeUserIsVisible")
             span Upgrade for Unlimited
-      .row(v-if="!isAppStoreMode")
-        p
-          .badge.info $6/mo, $60/yr
-        a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
-          button Help →
+      //- Unlimited cards from member
       .row(v-if="spaceUserIsUpgraded && !currentUserIsUpgraded")
         .badge.status
           p
             UserLabelInline(:user="spaceUser")
             span is upgraded, so cards you create in this space won't increase your free card count
-      .row
-        .button-wrap
-          button.variable-length-content(@click="triggerEarnCreditsIsVisible")
-            span Earn Credits
 
     section(v-if="!isAddPage")
       .row
@@ -62,17 +54,11 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
           button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
             img.icon.settings(src="@/assets/settings.svg")
             span Settings
-          UserSettings(:visible="userSettingsIsVisible" @removeUser="signOut")
-        button(v-if="currentUserIsSignedIn" @click.left="signOut")
+        button.danger(v-if="currentUserIsSignedIn" @click.left="signOut")
           img.icon.sign-out(src="@/assets/sign-out.svg")
           span Sign Out
         button(v-else @click.left="triggerSignUpOrInIsVisible")
           span Sign Up or In
-      template(v-if="currentUserIsUpgraded")
-        .row
-          .button-wrap
-            button(@click.left.stop="triggerDonateIsVisible")
-              span Donate
 
   //- Other User
   section(v-if="!isCurrentUser && userIsSignedIn && user.id")
@@ -104,7 +90,6 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
 
 <script>
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import UserBadges from '@/components/UserBadges.vue'
@@ -121,7 +106,6 @@ export default {
   name: 'UserDetails',
   components: {
     ColorPicker,
-    UserSettings,
     User,
     Loader,
     UserBadges,
@@ -139,7 +123,6 @@ export default {
   data () {
     return {
       colorPickerIsVisible: false,
-      userSettingsIsVisible: false,
       loadingUserspaces: false,
       spacePickerIsVisible: false,
       userSpaces: [],
@@ -186,7 +169,7 @@ export default {
     spaceUserIsUpgraded () { return this.$store.getters['currentSpace/spaceUserIsUpgraded'] },
     spaceUser () { return this.$store.state.currentSpace.users[0] },
     isAddPage () { return this.$store.state.isAddPage },
-    isAppStoreMode () { return this.$store.state.isAppStoreMode },
+    isPricingHidden () { return this.$store.state.isPricingHidden },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
         return false
@@ -238,12 +221,13 @@ export default {
         return collaborator.id === this.user.id
       }))
     },
-    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() }
+    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible }
   },
   methods: {
-    triggerEarnCreditsIsVisible () {
+    triggerUpgradeUserIsVisible () {
       this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerEarnCreditsIsVisible')
+      this.$store.commit('triggerUpgradeUserIsVisible')
     },
     toggleIsFavoriteUser () {
       if (this.isFavoriteUser) {
@@ -253,17 +237,9 @@ export default {
       }
     },
     toggleUserSettingsIsVisible () {
-      const isVisible = this.userSettingsIsVisible
-      this.closeDialogs()
-      this.userSettingsIsVisible = !isVisible
-    },
-    triggerUpgradeUserIsVisible () {
+      const value = !this.$store.state.userSettingsIsVisible
       this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerUpgradeUserIsVisible')
-    },
-    triggerDonateIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerDonateIsVisible')
+      this.$store.commit('userSettingsIsVisible', value)
     },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
@@ -272,7 +248,6 @@ export default {
     },
     closeDialogs () {
       this.colorPickerIsVisible = false
-      this.userSettingsIsVisible = false
       this.spacePickerIsVisible = false
     },
     updateUserColor (newValue) {

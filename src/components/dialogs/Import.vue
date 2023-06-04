@@ -185,8 +185,6 @@ export default {
       user-select text
   ul
     list-style-type square
-  .arena
-    width 18px
   // .button-wrap
   //   dialog
   //     @media(max-height 500px)
