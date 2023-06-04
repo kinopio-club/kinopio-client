@@ -103,10 +103,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}")
             img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
       //- Share
-      .button-wrap.share-button-wrap(v-if="isName" @click.left.stop="toggleShareCardIsVisible" )
-        button(:class="{active: shareCardIsVisible}")
+      .button-wrap.share-button-wrap(v-if="isName" @click.left.stop="toggleCardShareIsVisible" )
+        button(:class="{active: cardShareIsVisible}")
           span Share
-        ShareCard(:visible="shareCardIsVisible" :card="card")
+        CardShare(:visible="cardShareIsVisible" :card="card")
 
     CardBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
     CardCollaborationInfo(:visible="shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
@@ -212,7 +212,7 @@ import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
 import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
-import ShareCard from '@/components/dialogs/ShareCard.vue'
+import CardShare from '@/components/dialogs/CardShare.vue'
 import CardFonts from '@/components/dialogs/CardFonts.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
@@ -245,7 +245,7 @@ export default {
     MediaPreview,
     UserLabelInline,
     CardCollaborationInfo,
-    ShareCard,
+    CardShare,
     CardFonts,
     OtherCardPreview,
     OtherSpacePreview
@@ -292,7 +292,7 @@ export default {
       previousSelectedTag: {},
       currentSearchTag: {},
       newTagColor: '',
-      shareCardIsVisible: false
+      cardShareIsVisible: false
     }
   },
   created () {
@@ -989,10 +989,10 @@ export default {
         this.scrollIntoView()
       })
     },
-    toggleShareCardIsVisible () {
-      const isVisible = this.shareCardIsVisible
+    toggleCardShareIsVisible () {
+      const isVisible = this.cardShareIsVisible
       this.closeDialogs()
-      this.shareCardIsVisible = !isVisible
+      this.cardShareIsVisible = !isVisible
     },
     focusName (position) {
       utils.disablePinchZoom()
@@ -1050,7 +1050,7 @@ export default {
       this.imagePickerIsVisible = false
       this.cardTipsIsVisible = false
       this.cardFontsIsVisible = false
-      this.shareCardIsVisible = false
+      this.cardShareIsVisible = false
       this.hidePickers()
       if (shouldSkipGlobalDialogs === true) { return }
       this.hideTagDetailsIsVisible()

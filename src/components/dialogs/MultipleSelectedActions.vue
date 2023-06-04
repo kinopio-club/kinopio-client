@@ -22,10 +22,10 @@ dialog.narrow.multiple-selected-actions(
         img.icon.connector-icon(v-else src="@/assets/connector-open.svg")
         span Connect
       //- Share Card
-      .button-wrap(v-if="oneCardIsSelected" @click.left.stop="toggleShareCardIsVisible")
-        button(:class="{active: shareCardIsVisible}")
+      .button-wrap(v-if="oneCardIsSelected" @click.left.stop="toggleCardShareIsVisible")
+        button(:class="{active: cardShareIsVisible}")
           span Share
-        ShareCard(:visible="shareCardIsVisible" :card="cards[0]")
+        CardShare(:visible="cardShareIsVisible" :card="cards[0]")
 
       //- More Options
       .button-wrap
@@ -77,7 +77,7 @@ import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
 import CardBoxActions from '@/components/subsections/CardBoxActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
-import ShareCard from '@/components/dialogs/ShareCard.vue'
+import CardShare from '@/components/dialogs/CardShare.vue'
 
 import { nanoid } from 'nanoid'
 import last from 'lodash-es/last'
@@ -92,7 +92,7 @@ export default {
     CardBoxActions,
     ConnectionActions,
     AlignAndDistribute,
-    ShareCard
+    CardShare
   },
   data () {
     return {
@@ -102,7 +102,7 @@ export default {
       cardsHaveCheckboxes: false,
       cardsCheckboxIsChecked: false,
       copyOnly: false,
-      shareCardIsVisible: false
+      cardShareIsVisible: false
     }
   },
   computed: {
@@ -394,10 +394,10 @@ export default {
       this.closeDialogs()
       this.moveCardsIsVisible = !isVisible
     },
-    toggleShareCardIsVisible () {
-      const isVisible = this.shareCardIsVisible
+    toggleCardShareIsVisible () {
+      const isVisible = this.cardShareIsVisible
       this.closeDialogs()
-      this.shareCardIsVisible = !isVisible
+      this.cardShareIsVisible = !isVisible
     },
     toggleShouldShowItemActions () {
       this.closeDialogs()
@@ -410,7 +410,7 @@ export default {
     closeDialogs () {
       this.copyCardsIsVisible = false
       this.moveCardsIsVisible = false
-      this.shareCardIsVisible = false
+      this.cardShareIsVisible = false
       this.$store.commit('triggerCardDetailsCloseDialogs')
     },
     connectionType (event) {
