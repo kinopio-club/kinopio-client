@@ -1,5 +1,5 @@
 <template lang="pug">
-.prompt
+.journal-prompt
   .row
     textarea(
       v-if="!isPack"
@@ -16,11 +16,6 @@
       @keydown.ctrl.enter.exact.stop="insertLineBreak"
       @focus="checkOnFocus"
     )
-    div.prompt-pack-name(v-if="isPack" :data-id="prompt.id")
-      span.random Random
-      span.badge.button-badge(:style="{background: pack.color}" @click.stop="showPicker")
-        span.name {{name}}
-
     .button-wrap.remove-button-wrap
       button.remove.small-button(@click.left="removePrompt")
         img.icon(src="@/assets/remove.svg")
@@ -40,10 +35,6 @@ export default {
   },
   computed: {
     isPack () { return Boolean(this.prompt.packId) },
-    pack () {
-      if (!this.isPack) { return }
-      return utils.promptPackById(this.prompt.packId)
-    },
     name: {
       get () {
         if (this.pack) {
@@ -87,13 +78,9 @@ export default {
 </script>
 
 <style lang="stylus">
-.prompt + .prompt
+.journal-prompt + .journal-prompt
   margin-top 10px
-.prompt
-  .prompt-pack-name
-    width 100%
-  textarea
-    margin-bottom 5px
+.journal-prompt
   button.remove
     margin-left 6px
     width 20px

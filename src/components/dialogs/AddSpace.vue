@@ -27,9 +27,17 @@ dialog.add-space.narrow(
     //- Journal Settings
     template(v-if="editPromptsIsVisible")
       Weather
-    template(v-if="editPromptsIsVisible" )
-      Prompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
-    PromptPicker(v-if="editPromptsIsVisible" :visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack" @addCustomPrompt="addCustomPrompt")
+      JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
+
+      .row.prompt-settings
+        button(@click.left="addCustomPrompt")
+          img.icon(src="@/assets/add.svg")
+          span Add Custom Prompt
+      .row
+        label
+          //- (:class="{ active: currentUserSpacesIsVisibleOnly }")
+          input(type="checkbox" v-model="dailyPrompt")
+          span Prompt of the Day
 
   //- Inbox
   section(v-if="!hasInboxSpace")
@@ -52,8 +60,7 @@ dialog.add-space.narrow(
 </template>
 
 <script>
-import Prompt from '@/components/Prompt.vue'
-import PromptPicker from '@/components/dialogs/PromptPicker.vue'
+import JournalPrompt from '@/components/JournalPrompt.vue'
 import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
 import Weather from '@/components/Weather.vue'
@@ -66,8 +73,7 @@ import { nanoid } from 'nanoid'
 export default {
   name: 'AddSpace',
   components: {
-    Prompt,
-    PromptPicker,
+    JournalPrompt,
     MoonPhase,
     Weather
   },
@@ -90,18 +96,27 @@ export default {
       moonPhase: {},
       editPromptsIsVisible: false,
       urlIsCopied: false,
-      promptPickerPosition: {
-        left: 80,
-        top: 5
-      },
       screenIsShort: false,
       dialogHeight: null,
       hasInboxSpace: true
     }
   },
   computed: {
-    userPrompts () { return this.$store.state.currentUser.journalPrompts },
-    currentUserId () { return this.$store.state.currentUser.id }
+    userPrompts () {
+      let prompts = this.$store.state.currentUser.journalPrompts
+      prompts = prompts.filter(prompt => !prompt.packId)
+      return prompts
+    },
+    currentUserId () { return this.$store.state.currentUser.id },
+    dailyPrompt: {
+      get () {
+        // user.alsdfkj
+        return false
+      },
+      set (value) {
+        console.log('🚛', value)
+      }
+    }
   },
   methods: {
     showScreenIsShort (value) {
@@ -230,6 +245,7 @@ export default {
     margin 0
     margin-left 5px
   .moon-phase
-    vertical-align -1px
-
+    vertical-align 0px
+  .prompt-settings
+    margin-top 6px
 </style>

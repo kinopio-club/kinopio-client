@@ -1,6 +1,5 @@
 // functional methods that can see dom, but can't access components or store
 import cache from '@/cache.js'
-import promptPacks from '@/data/promptPacks.json'
 import moonphase from '@/moonphase.js'
 import consts from '@/consts.js'
 
@@ -1374,10 +1373,6 @@ export default {
 
   // Journal Space 🌚
 
-  promptPackById (packId) {
-    packId = packId.toString()
-    return promptPacks.find(pack => pack.packId === packId)
-  },
   journalSpace (currentUser, isTomorrow, weather) {
     // name
     let date = dayjs(new Date())
@@ -1408,16 +1403,9 @@ export default {
     const userPrompts = currentUser.journalPrompts
     userPrompts.forEach(prompt => {
       if (!prompt.name) { return }
+      if (prompt.packId) { return }
       let card = { id: nanoid() }
-      if (prompt.packId) {
-        const pack = this.promptPackById(prompt.packId)
-        const randomPrompt = this.randomPrompt(pack)
-        const tag = this.packTag(pack, card.id, space)
-        if (tag) { space.tags.push(tag) }
-        card.name = `[[${prompt.name}]] ${randomPrompt}`
-      } else {
-        card.name = prompt.name
-      }
+      card.name = prompt.name
       const position = this.promptCardPosition(space.cards, card.name)
       card.x = position.x
       card.y = position.y

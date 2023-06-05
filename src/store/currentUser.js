@@ -391,8 +391,7 @@ export default {
       if (utils.arrayHasItems(context.state.journalPrompts)) { return }
       let prompts = [
         { name: 'How am I feeling?' },
-        { name: 'What do I have to do today?' },
-        { name: 'Everyday', packId: '1' }
+        { name: 'What do I have to do today?' }
       ]
       prompts = prompts.map(prompt => {
         prompt.id = nanoid()
