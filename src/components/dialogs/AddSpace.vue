@@ -32,9 +32,15 @@ dialog.add-space.narrow(
         .button-wrap
           button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
             img.icon.today(src="@/assets/today.svg")
-            span Daily Prompt
+            span Today's Prompt
         .button-wrap
-          button.small-button Info
+          button.small-button(@click="toggleDailyPromptInfoIsVisible" :class="{ active: dailyPromptInfoIsVisible }")
+            span Info
+
+      //- daily prompt info
+      section.subsection(v-if="dailyPromptInfoIsVisible")
+        p Everyone in the community shares the same daily prompt, which is also shared in{{' '}}
+          a(href="https://discord.gg/h2sR45Nby8") Discord
 
       //- prompts
       section.subsection
@@ -104,7 +110,8 @@ export default {
       urlIsCopied: false,
       screenIsShort: false,
       dialogHeight: null,
-      hasInboxSpace: true
+      hasInboxSpace: true,
+      dailyPromptInfoIsVisible: false
     }
   },
   computed: {
@@ -119,6 +126,10 @@ export default {
     }
   },
   methods: {
+    toggleDailyPromptInfoIsVisible () {
+      const value = !this.dailyPromptInfoIsVisible
+      this.dailyPromptInfoIsVisible = value
+    },
     toggleShouldCreateJournalsWithDailyPrompt () {
       const value = !this.shouldCreateJournalsWithDailyPrompt
       this.$store.dispatch('currentUser/update', { shouldCreateJournalsWithDailyPrompt: value })
