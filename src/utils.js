@@ -1373,7 +1373,7 @@ export default {
 
   // Journal Space 🌚
 
-  journalSpace (currentUser, isTomorrow, weather) {
+  journalSpace ({ currentUser, isTomorrow, weather, dailyPrompt }) {
     // name
     let date = dayjs(new Date())
     if (isTomorrow) {
@@ -1398,8 +1398,20 @@ export default {
     space.isHidden = false
     space.isFromTweet = false
     space = this.spaceDefaultBackground(space, currentUser)
-    // cards
+    // summary
     space.cards.push({ id: nanoid(), name: summary, x: 60, y: 100, frameId: 0 })
+    // daily prompt
+    if (dailyPrompt) {
+      let card = { id: nanoid() }
+      card.name = dailyPrompt
+      const position = this.promptCardPosition(space.cards, card.name)
+      card.x = position.x
+      card.y = position.y
+      card.z = 0
+      card.spaceId = spaceId
+      space.cards.push(card)
+    }
+    // user prompts
     const userPrompts = currentUser.journalPrompts
     userPrompts.forEach(prompt => {
       if (!prompt.name) { return }
