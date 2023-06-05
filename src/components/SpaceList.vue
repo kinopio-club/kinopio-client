@@ -64,11 +64,8 @@ span.space-list-wrap
                 img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
               button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
                 img.icon.checkmark(src="@/assets/checkmark.svg")
-          button.inline-duplicate.small-button(v-if="spaceIsActive(space) && spaceIsTemplate(space)")
-            img.icon(src="@/assets/add.svg")
-            span Copy
-          .button-wrap.inline-favorite-wrap(@click.stop.prevent="toggleIsFavoriteSpace(space)")
-            button.inline-favorite.small-button(v-if="spaceIsActive(space) && showFavoriteButton"  :class="{ active: isFavorite(space) }")
+          .button-wrap.inline-favorite-wrap(v-if="spaceIsActive(space) && showFavoriteButton" @click.stop.prevent="toggleIsFavoriteSpace(space)")
+            button.inline-favorite.small-button(:class="{ active: isFavorite(space) }")
               img.icon.favorite-icon(v-if="isFavorite(space)" src="@/assets/heart.svg")
               img.icon.favorite-icon(v-else src="@/assets/heart-empty.svg")
 
@@ -491,7 +488,6 @@ export default {
 
   .space-wrap
     position relative
-    button.inline-duplicate,
     button.inline-favorite
       cursor pointer
       z-index 1
