@@ -21,13 +21,6 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
           button(@click="createNewSpace")
             span Create New Space
             Loader(:visible="isLoadingNewSpace")
-    //- Daily Journal
-    section.options(v-if="shouldShowDailyJournalSpace")
-      .row
-        button(@click="selectOrCreateDailyJournalSpace")
-          img.icon(v-if="!todayJournalSpace" src="@/assets/add.svg")
-          MoonPhase(:moonPhase="moonPhase.name")
-          span Daily Journal
 
     // Type to Search
     section.info-section(v-if="parentIsCardDetails && !search")
@@ -60,8 +53,6 @@ import words from '@/data/words.js'
 import newSpace from '@/data/new.json'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
-import moonphase from '@/moonphase.js'
-import MoonPhase from '@/components/MoonPhase.vue'
 
 import { nanoid } from 'nanoid'
 import fuzzy from '@/libs/fuzzy.js'
@@ -79,8 +70,7 @@ export default {
   components: {
     Loader,
     SpaceList,
-    User,
-    MoonPhase
+    User
   },
   props: {
     visible: Boolean,
@@ -94,11 +84,7 @@ export default {
     position: Object,
     search: String,
     cursorPosition: Number,
-    shouldShowNewSpace: Boolean,
-    shouldShowDailyJournalSpace: Boolean
-  },
-  mounted () {
-    this.moonPhase = moonphase()
+    shouldShowNewSpace: Boolean
   },
   data () {
     return {
@@ -153,20 +139,7 @@ export default {
       })
       return spaces
     },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    todayJournalSpace () {
-      const today = utils.journalSpaceName({})
-      const todaySpace = this.spaces.find(space => {
-        if (space.moonPhase) {
-          const createdAt = utils.journalSpaceDateFromName(space.name)
-          if (!createdAt) { return }
-          return createdAt === today
-        } else {
-          return false
-        }
-      })
-      return todaySpace
-    }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
     handleFocusBeforeFirstItem () {
@@ -238,21 +211,6 @@ export default {
       space = utils.spaceDefaultBackground(space, currentUser)
       space = cache.updateIdsInSpace(space)
       console.log('🚚 create new space', space)
-      if (this.currentUserIsSignedIn) {
-        await this.$store.dispatch('api/createSpace', space)
-      }
-      this.isLoadingNewSpace = false
-      this.selectSpace(space)
-    },
-    async selectOrCreateDailyJournalSpace () {
-      if (this.todayJournalSpace) {
-        this.isLoadingNewSpace = false
-        this.selectSpace(this.todayJournalSpace)
-        return
-      }
-      const currentUser = this.$store.state.currentUser
-      const space = utils.journalSpace(currentUser)
-      console.log('🚚 create new journal space', space)
       if (this.currentUserIsSignedIn) {
         await this.$store.dispatch('api/createSpace', space)
       }
