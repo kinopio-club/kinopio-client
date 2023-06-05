@@ -32,6 +32,7 @@ export default {
     filterUnchecked: false,
     filterComments: false,
     journalPrompts: [],
+    shouldCreateJournalsWithDailyPrompt: true,
     newSpacesAreBlank: false,
     shouldEmailNotifications: true,
     shouldEmailBulletin: true,
@@ -294,6 +295,10 @@ export default {
     panSpeedIsFast: (state, value) => {
       state.panSpeedIsFast = value
       cache.updateUser('panSpeedIsFast', value)
+    },
+    shouldCreateJournalsWithDailyPrompt: (state, value) => {
+      state.shouldCreateJournalsWithDailyPrompt = value
+      cache.updateUser('shouldCreateJournalsWithDailyPrompt', value)
     },
     showWeather: (state, value) => {
       state.showWeather = value

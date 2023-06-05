@@ -37,11 +37,7 @@ export default {
     isPack () { return Boolean(this.prompt.packId) },
     name: {
       get () {
-        if (this.pack) {
-          return this.pack.name
-        } else {
-          return this.prompt.name
-        }
+        return this.prompt.name
       },
       set (newName) {
         this.updateTextareaSize()

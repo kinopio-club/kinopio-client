@@ -27,17 +27,19 @@ dialog.add-space.narrow(
     //- Journal Settings
     template(v-if="editPromptsIsVisible")
       Weather
+      //- daily prompt
+      .row
+        .button-wrap
+          button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
+            img.icon.today(src="@/assets/today.svg")
+            span Daily Prompt
+      //- prompts
       JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
-
-      .row.prompt-settings
+      //- add prompt
+      .row
         button(@click.left="addCustomPrompt")
           img.icon(src="@/assets/add.svg")
-          span Add Custom Prompt
-      .row
-        label
-          //- (:class="{ active: currentUserSpacesIsVisibleOnly }")
-          input(type="checkbox" v-model="dailyPrompt")
-          span Prompt of the Day
+          span Prompt
 
   //- Inbox
   section(v-if="!hasInboxSpace")
@@ -108,17 +110,15 @@ export default {
       return prompts
     },
     currentUserId () { return this.$store.state.currentUser.id },
-    dailyPrompt: {
-      get () {
-        // user.alsdfkj
-        return false
-      },
-      set (value) {
-        console.log('🚛', value)
-      }
+    shouldCreateJournalsWithDailyPrompt () {
+      return this.$store.state.currentUser.shouldCreateJournalsWithDailyPrompt
     }
   },
   methods: {
+    toggleShouldCreateJournalsWithDailyPrompt () {
+      const value = !this.shouldCreateJournalsWithDailyPrompt
+      this.$store.dispatch('currentUser/update', { shouldCreateJournalsWithDailyPrompt: value })
+    },
     showScreenIsShort (value) {
       this.screenIsShort = true
       this.shouldHideFooter(true)
@@ -167,6 +167,7 @@ export default {
       const value = !this.editPromptsIsVisible
       this.closeAll()
       this.editPromptsIsVisible = value
+      this.updateDialogHeight()
     },
     closeAll () {
       this.editPromptsIsVisible = false
@@ -246,6 +247,6 @@ export default {
     margin-left 5px
   .moon-phase
     vertical-align 0px
-  .prompt-settings
-    margin-top 6px
+  .icon.today
+    vertical-align -1px
 </style>

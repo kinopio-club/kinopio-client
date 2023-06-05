@@ -87,5 +87,5 @@ export default {
   align-items center
   p
     margin-top 0 !important
-    margin-left 6px
+    margin-left 8px
 </style>
