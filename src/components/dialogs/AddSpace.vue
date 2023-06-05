@@ -28,18 +28,22 @@ dialog.add-space.narrow(
     template(v-if="editPromptsIsVisible")
       Weather
       //- daily prompt
-      .row
+      .row.daily-prompt-row
         .button-wrap
           button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
             img.icon.today(src="@/assets/today.svg")
             span Daily Prompt
+        .button-wrap
+          button.small-button Info
+
       //- prompts
-      JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
-      //- add prompt
-      .row
-        button(@click.left="addCustomPrompt")
-          img.icon(src="@/assets/add.svg")
-          span Prompt
+      section.subsection
+        JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
+        //- add prompt
+        .row
+          button(@click.left="addCustomPrompt")
+            img.icon(src="@/assets/add.svg")
+            span Prompt
 
   //- Inbox
   section(v-if="!hasInboxSpace")
@@ -234,14 +238,9 @@ export default {
 <style lang="stylus">
 .add-space
   overflow auto
+  max-height calc(100vh - 230px)
   &.short
     top -68px !important
-  max-height calc(100vh - 230px)
-  .textarea
-    background-color var(--secondary-background)
-    border 0
-    border-radius var(--small-entity-radius)
-    padding 4px
   .inbox-icon
     margin 0
     margin-left 5px
@@ -249,4 +248,6 @@ export default {
     vertical-align 0px
   .icon.today
     vertical-align -1px
+  .daily-prompt-row
+    justify-content space-between
 </style>

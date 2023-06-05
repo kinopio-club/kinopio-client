@@ -74,9 +74,9 @@ export default {
 </script>
 
 <style lang="stylus">
-.journal-prompt + .journal-prompt
-  margin-top 10px
 .journal-prompt
+  textarea
+    margin-top 0
   button.remove
     margin-left 6px
     width 20px
