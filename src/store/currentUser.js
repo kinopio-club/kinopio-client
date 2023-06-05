@@ -64,6 +64,7 @@ export default {
     referredByUserId: '',
     referrerName: '',
     weather: '',
+    journalDailyPrompt: '',
     panSpeedIsFast: false
   },
   mutations: {
@@ -368,11 +369,17 @@ export default {
       context.dispatch('themes/restore', null, { root: true })
       context.commit('triggerUserIsLoaded', null, { root: true })
       context.dispatch('updateWeather')
+      context.dispatch('updateJournalDailyPrompt')
     },
     updateWeather: async (context) => {
       const weather = await context.dispatch('api/weather', null, { root: true })
       if (!weather) { return }
       context.commit('weather', weather)
+    },
+    updateJournalDailyPrompt: async (context) => {
+      const prompt = await context.dispatch('api/journalDailyPrompt', null, { root: true })
+      if (!prompt) { return }
+      context.commit('journalDailyPrompt', prompt)
     },
     update: (context, updates) => {
       const keys = Object.keys(updates)

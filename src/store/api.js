@@ -989,6 +989,16 @@ const self = {
         context.dispatch('handleServerError', { name: 'weather', error })
       }
     },
+    journalDailyPrompt: async (context) => {
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/journal-daily-prompt`, options)
+        const data = await normalizeResponse(response)
+        return data
+      } catch (error) {
+        console.error('🚒 journalDailyPrompt', error)
+      }
+    },
     createAIImage: async (context, body) => {
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
