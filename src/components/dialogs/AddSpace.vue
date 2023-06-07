@@ -26,21 +26,23 @@ dialog.add-space.narrow(
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
     //- Journal Settings
     template(v-if="editPromptsIsVisible")
-      Weather
-      //- daily prompt
-      .row.daily-prompt-row
-        .button-wrap
-          button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
-            img.icon.today(src="@/assets/today.svg")
-            span Today's Prompt
-        .button-wrap
-          button.small-button(@click="toggleDailyPromptInfoIsVisible" :class="{ active: dailyPromptInfoIsVisible }")
-            span Info
+      section.subsection
+        Weather
+        //- daily prompt
+        .row.daily-prompt-row
+          .button-wrap
+            button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
+              img.icon.today(src="@/assets/today.svg")
+              span Daily Prompt
+          .button-wrap
+            button.small-button(@click="toggleDailyPromptInfoIsVisible" :class="{ active: dailyPromptInfoIsVisible }")
+              span Info
 
-      //- daily prompt info
-      section.subsection(v-if="dailyPromptInfoIsVisible")
-        p Everyone in the community shares the same daily prompt, which is also shared in{{' '}}
-          a(href="https://discord.gg/h2sR45Nby8") Discord
+        //- daily prompt info
+        template(v-if="dailyPromptInfoIsVisible")
+          p Everyone in the community shares the same daily prompt, which is also shared in{{' '}}
+            a(href="https://discord.gg/h2sR45Nby8") Discord
+          p Today's prompt is “{{dailyPrompt}}”
 
       //- prompts
       section.subsection
@@ -123,6 +125,9 @@ export default {
     currentUserId () { return this.$store.state.currentUser.id },
     shouldCreateJournalsWithDailyPrompt () {
       return this.$store.state.currentUser.shouldCreateJournalsWithDailyPrompt
+    },
+    dailyPrompt () {
+      return this.$store.state.currentUser.journalDailyPrompt
     }
   },
   methods: {
