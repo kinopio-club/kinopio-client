@@ -42,6 +42,7 @@ aside
 
 <script>
 import utils from '@/utils.js'
+import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
 const circleRadius = 20
@@ -675,6 +676,7 @@ export default {
         this.$store.commit('currentUserIsPainting', true)
         this.$store.commit('currentUserIsPaintingLocked', true)
         console.log('🔒 lockingAnimationFrame locked')
+        postMessage.sendHaptics({ name: 'soft' })
         lockingStartTime = undefined
       }
     },

@@ -206,6 +206,7 @@ import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import consts from '@/consts.js'
+import postMessage from '@/postMessage.js'
 
 import dayjs from 'dayjs'
 import { mapState, mapGetters } from 'vuex'
@@ -1575,6 +1576,7 @@ export default {
       this.$store.commit('currentDraggingConnectedCardIds', connectedCardIds)
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
+      postMessage.sendHaptics({ name: 'soft' })
       const updates = {
         cardId: this.card.id,
         userId: this.currentUser.id
