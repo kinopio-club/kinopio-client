@@ -1,5 +1,6 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import postMessage from '@/postMessage.js'
 // store modules
 import themes from '@/store/themes.js'
 import api from '@/store/api.js'
@@ -573,6 +574,9 @@ const store = createStore({
     cardDetailsIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.cardDetailsIsVisibleForCardId = cardId
+      if (cardId) {
+        postMessage.sendHaptics({ name: 'mediumImpact' })
+      }
     },
     parentCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
@@ -715,6 +719,9 @@ const store = createStore({
     boxDetailsIsVisibleForBoxId: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.boxDetailsIsVisibleForBoxId = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'mediumImpact' })
+      }
     },
     currentUserIsResizingBox: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -932,6 +939,9 @@ const store = createStore({
     connectionDetailsIsVisibleForConnectionId: (state, connectionId) => {
       utils.typeCheck({ value: connectionId, type: 'string' })
       state.connectionDetailsIsVisibleForConnectionId = connectionId
+      if (connectionId) {
+        postMessage.sendHaptics({ name: 'mediumImpact' })
+      }
     },
     currentConnectionColor: (state, color) => {
       utils.typeCheck({ value: color, type: 'string' })
@@ -959,6 +969,9 @@ const store = createStore({
     multipleSelectedActionsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.multipleSelectedActionsIsVisible = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'mediumImpact' })
+      }
     },
     preventMultipleSelectedActionsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

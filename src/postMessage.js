@@ -19,9 +19,6 @@ export default {
     // ??add user preference here to disable haptics??
     const name = utils.capitalizeFirstLetter(body.name)
     body.name = `on${name}Feedback`
-    // if (body.name === 'rigid' || body.name === 'soft') {
-    //   body.value = '0.75'
-    // }
     context.dispatch('send', body)
   }
 
@@ -30,13 +27,13 @@ export default {
 // // Haptic Feedback
 
 // import postMessage from '@/postMessage.js'
+// postMessage.sendHaptics({ name: 'soft' })
 
 // X  on SoftImpact Feedback: painting locked, item drag start locked
 // X on Selection Feedback: when painting/box-selecting over items
+// X on MediumImpact Feedback: x card details/ x connection details/ x box details/x multiactions is open,
 
-// on MediumImpact Feedback: card details/connection details/box details/multiactions is open,
-
-// on LightImpact Feedback: click list item (eg spacedetails -> spacelist), clicking any <button, label btn>
+// on LightImpact Feedback: click list item (eg spacedetails -> spacelist), clicking any <button, label btn> , clicking button-badge
 
 // for notifications
 // on Success Feedback:
