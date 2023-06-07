@@ -46,6 +46,7 @@ const store = createStore({
     isEmbedMode: false,
     isAddPage: false,
     isPricingHidden: false,
+    shouldSendPostmessages: false,
     disableViewportOptimizations: false, // for urlbox
     isPresentationMode: false,
     pricingIsVisible: false,
@@ -429,6 +430,10 @@ const store = createStore({
     },
     isPricingHidden: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
+      state.isPricingHidden = value
+    },
+    shouldSendPostmessages: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', allowUndefined: true })
       state.isPricingHidden = value
     },
     disableViewportOptimizations: (state, value) => {
