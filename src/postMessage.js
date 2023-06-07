@@ -5,7 +5,8 @@ export default {
     if (!window.webkit) { return }
     try {
       console.log('🛫 sending postmessage', body)
-      window.webkit.messageHandlers[body.name].postMessage(body.value)
+      const value = body.value || ''
+      window.webkit.messageHandlers[body.name].postMessage(value)
     } catch (error) {
       console.error(error)
     }
