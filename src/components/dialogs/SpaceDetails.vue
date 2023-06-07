@@ -315,7 +315,7 @@ export default {
         const cachedSpace = cache.space(space.id)
         const isCachedSpace = utils.objectHasKeys(cachedSpace)
         if (!isCachedSpace) {
-          this.storeLocal(`space-${space.id}`, space)
+          cache.storeLocal(`space-${space.id}`, space)
         }
       })
     },

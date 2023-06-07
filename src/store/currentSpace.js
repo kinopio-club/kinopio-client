@@ -367,14 +367,22 @@ const currentSpace = {
       const isTomorrow = context.rootState.loadJournalSpaceTomorrow
       const currentUser = utils.clone(context.rootState.currentUser)
       context.commit('isLoadingSpace', true, { root: true })
+      // weather
       let weather = context.rootState.currentUser.weather
       if (!weather) {
         weather = await context.dispatch('api/weather', null, { root: true })
       }
-      const space = utils.journalSpace(currentUser, isTomorrow, weather)
+      // daily prompt
+      let options = { currentUser, isTomorrow, weather }
+      if (currentUser.shouldCreateJournalsWithDailyPrompt) {
+        options.dailyPrompt = currentUser.journalDailyPrompt
+      }
+      // create space
+      const space = utils.journalSpace(options)
       context.commit('clearSearch', null, { root: true })
       context.commit('shouldResetDimensionsOnLoad', true, { root: true })
       isLoadingRemoteSpace = false
+      // load space
       context.dispatch('restoreSpaceInChunks', { space })
       context.commit('triggerLoadBackground', null, { root: true })
     },

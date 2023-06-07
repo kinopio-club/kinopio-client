@@ -1,6 +1,5 @@
 // functional methods that can see dom, but can't access components or store
 import cache from '@/cache.js'
-import promptPacks from '@/data/promptPacks.json'
 import moonphase from '@/moonphase.js'
 import consts from '@/consts.js'
 
@@ -619,6 +618,11 @@ export default {
     if (!string) { return }
     // https://regexr.com/68l08
     return string.replace(/\/$/g, '')
+  },
+  removeSurroundingQuotes (string) {
+    if (!string) { return }
+    // https://stackoverflow.com/questions/19156148/i-want-to-remove-double-quotes-from-a-string
+    return string.replace(/^"|"$/g, '')
   },
   pastTense (string) {
     if (string === 'cut') { return string }
@@ -1374,11 +1378,7 @@ export default {
 
   // Journal Space 🌚
 
-  promptPackById (packId) {
-    packId = packId.toString()
-    return promptPacks.find(pack => pack.packId === packId)
-  },
-  journalSpace (currentUser, isTomorrow, weather) {
+  journalSpace ({ currentUser, isTomorrow, weather, dailyPrompt }) {
     // name
     let date = dayjs(new Date())
     if (isTomorrow) {
@@ -1403,21 +1403,27 @@ export default {
     space.isHidden = false
     space.isFromTweet = false
     space = this.spaceDefaultBackground(space, currentUser)
-    // cards
-    space.cards.push({ id: nanoid(), name: summary, x: 60, y: 100, frameId: 0 })
+    // summary
+    space.cards.push({ id: nanoid(), name: summary, x: 80, y: 110, frameId: 0 })
+    // daily prompt
+    if (dailyPrompt) {
+      let card = { id: nanoid() }
+      card.name = dailyPrompt
+      const position = this.promptCardPosition(space.cards, card.name)
+      card.x = position.x + 10
+      card.y = position.y
+      card.z = 0
+      card.spaceId = spaceId
+      card.frameId = 5
+      space.cards.push(card)
+    }
+    // user prompts
     const userPrompts = currentUser.journalPrompts
     userPrompts.forEach(prompt => {
       if (!prompt.name) { return }
+      if (prompt.packId) { return }
       let card = { id: nanoid() }
-      if (prompt.packId) {
-        const pack = this.promptPackById(prompt.packId)
-        const randomPrompt = this.randomPrompt(pack)
-        const tag = this.packTag(pack, card.id, space)
-        if (tag) { space.tags.push(tag) }
-        card.name = `[[${prompt.name}]] ${randomPrompt}`
-      } else {
-        card.name = prompt.name
-      }
+      card.name = prompt.name
       const position = this.promptCardPosition(space.cards, card.name)
       card.x = position.x
       card.y = position.y
@@ -1467,10 +1473,10 @@ export default {
     const averageCharactersPerLine = 25
     const lines = Math.ceil(lastCardName.length / averageCharactersPerLine)
     const lineHeight = 14
-    const padding = 16
+    const padding = 26
     const lastCardHeight = (lines * lineHeight) + padding + lines
-    let distanceBetween = 60
-    let x = 100
+    let distanceBetween = 50
+    let x = 120
     if (this.checkboxFromString(newCardName)) {
       distanceBetween = 12
       x = 120

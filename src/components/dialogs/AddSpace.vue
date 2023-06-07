@@ -26,10 +26,32 @@ dialog.add-space.narrow(
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
     //- Journal Settings
     template(v-if="editPromptsIsVisible")
-      Weather
-    template(v-if="editPromptsIsVisible" )
-      Prompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
-    PromptPicker(v-if="editPromptsIsVisible" :visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack" @addCustomPrompt="addCustomPrompt")
+      section.subsection
+        Weather
+        //- daily prompt
+        .row.daily-prompt-row
+          .button-wrap
+            button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
+              img.icon.today(src="@/assets/today.svg")
+              span Prompt of the Day
+          .button-wrap
+            button.small-button(@click="toggleDailyPromptInfoIsVisible" :class="{ active: dailyPromptInfoIsVisible }")
+              span Info
+
+        //- daily prompt info
+        template(v-if="dailyPromptInfoIsVisible")
+          p Everyone in the community shares the same daily prompt, which is also shared in{{' '}}
+            a(href="https://discord.gg/h2sR45Nby8") Discord
+          p Today's prompt is “{{dailyPrompt}}”
+
+      //- prompts
+      section.subsection
+        JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
+        //- add prompt
+        .row
+          button(@click.left="addCustomPrompt")
+            img.icon(src="@/assets/add.svg")
+            span Prompt
 
   //- Inbox
   section(v-if="!hasInboxSpace")
@@ -52,8 +74,7 @@ dialog.add-space.narrow(
 </template>
 
 <script>
-import Prompt from '@/components/Prompt.vue'
-import PromptPicker from '@/components/dialogs/PromptPicker.vue'
+import JournalPrompt from '@/components/JournalPrompt.vue'
 import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
 import Weather from '@/components/Weather.vue'
@@ -66,8 +87,7 @@ import { nanoid } from 'nanoid'
 export default {
   name: 'AddSpace',
   components: {
-    Prompt,
-    PromptPicker,
+    JournalPrompt,
     MoonPhase,
     Weather
   },
@@ -90,20 +110,35 @@ export default {
       moonPhase: {},
       editPromptsIsVisible: false,
       urlIsCopied: false,
-      promptPickerPosition: {
-        left: 80,
-        top: 5
-      },
       screenIsShort: false,
       dialogHeight: null,
-      hasInboxSpace: true
+      hasInboxSpace: true,
+      dailyPromptInfoIsVisible: false
     }
   },
   computed: {
-    userPrompts () { return this.$store.state.currentUser.journalPrompts },
-    currentUserId () { return this.$store.state.currentUser.id }
+    userPrompts () {
+      let prompts = this.$store.state.currentUser.journalPrompts
+      prompts = prompts.filter(prompt => !prompt.packId)
+      return prompts
+    },
+    currentUserId () { return this.$store.state.currentUser.id },
+    shouldCreateJournalsWithDailyPrompt () {
+      return this.$store.state.currentUser.shouldCreateJournalsWithDailyPrompt
+    },
+    dailyPrompt () {
+      return this.$store.state.currentUser.journalDailyPrompt
+    }
   },
   methods: {
+    toggleDailyPromptInfoIsVisible () {
+      const value = !this.dailyPromptInfoIsVisible
+      this.dailyPromptInfoIsVisible = value
+    },
+    toggleShouldCreateJournalsWithDailyPrompt () {
+      const value = !this.shouldCreateJournalsWithDailyPrompt
+      this.$store.dispatch('currentUser/update', { shouldCreateJournalsWithDailyPrompt: value })
+    },
     showScreenIsShort (value) {
       this.screenIsShort = true
       this.shouldHideFooter(true)
@@ -152,6 +187,7 @@ export default {
       const value = !this.editPromptsIsVisible
       this.closeAll()
       this.editPromptsIsVisible = value
+      this.updateDialogHeight()
     },
     closeAll () {
       this.editPromptsIsVisible = false
@@ -218,18 +254,16 @@ export default {
 <style lang="stylus">
 .add-space
   overflow auto
+  max-height calc(100vh - 230px)
   &.short
     top -68px !important
-  max-height calc(100vh - 230px)
-  .textarea
-    background-color var(--secondary-background)
-    border 0
-    border-radius var(--small-entity-radius)
-    padding 4px
   .inbox-icon
     margin 0
     margin-left 5px
   .moon-phase
+    vertical-align 0px
+  .icon.today
     vertical-align -1px
-
+  .daily-prompt-row
+    justify-content space-between
 </style>

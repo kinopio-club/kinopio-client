@@ -32,6 +32,7 @@ export default {
     filterUnchecked: false,
     filterComments: false,
     journalPrompts: [],
+    shouldCreateJournalsWithDailyPrompt: true,
     newSpacesAreBlank: false,
     shouldEmailNotifications: true,
     shouldEmailBulletin: true,
@@ -63,6 +64,7 @@ export default {
     referredByUserId: '',
     referrerName: '',
     weather: '',
+    journalDailyPrompt: '',
     panSpeedIsFast: false
   },
   mutations: {
@@ -295,6 +297,10 @@ export default {
       state.panSpeedIsFast = value
       cache.updateUser('panSpeedIsFast', value)
     },
+    shouldCreateJournalsWithDailyPrompt: (state, value) => {
+      state.shouldCreateJournalsWithDailyPrompt = value
+      cache.updateUser('shouldCreateJournalsWithDailyPrompt', value)
+    },
     showWeather: (state, value) => {
       state.showWeather = value
       cache.updateUser('showWeather', value)
@@ -306,6 +312,10 @@ export default {
     weatherUnitIsCelcius: (state, value) => {
       state.weatherUnitIsCelcius = value
       cache.updateUser('weatherUnitIsCelcius', value)
+    },
+    journalDailyPrompt: (state, value) => {
+      state.journalDailyPrompt = value
+      cache.updateUser('journalDailyPrompt', value)
     },
     shouldUseStickyCards: (state, value) => {
       state.shouldUseStickyCards = value
@@ -363,11 +373,17 @@ export default {
       context.dispatch('themes/restore', null, { root: true })
       context.commit('triggerUserIsLoaded', null, { root: true })
       context.dispatch('updateWeather')
+      context.dispatch('updateJournalDailyPrompt')
     },
     updateWeather: async (context) => {
       const weather = await context.dispatch('api/weather', null, { root: true })
       if (!weather) { return }
       context.commit('weather', weather)
+    },
+    updateJournalDailyPrompt: async (context) => {
+      const prompt = await context.dispatch('api/journalDailyPrompt', null, { root: true })
+      if (!prompt) { return }
+      context.commit('journalDailyPrompt', prompt)
     },
     update: (context, updates) => {
       const keys = Object.keys(updates)
@@ -391,8 +407,7 @@ export default {
       if (utils.arrayHasItems(context.state.journalPrompts)) { return }
       let prompts = [
         { name: 'How am I feeling?' },
-        { name: 'What do I have to do today?' },
-        { name: 'Everyday', packId: '1' }
+        { name: 'What do I have to do today?' }
       ]
       prompts = prompts.map(prompt => {
         prompt.id = nanoid()
