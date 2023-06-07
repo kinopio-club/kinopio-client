@@ -97,7 +97,7 @@ export default {
     updateMetaThemeColor (color) {
       const metaThemeColor = document.querySelector('meta[name=theme-color]')
       metaThemeColor.setAttribute('content', color)
-      postMessage.send({ name: 'setBackgroundColor', color })
+      postMessage.send({ name: 'setBackgroundColor', value: color })
     }
   }
 }

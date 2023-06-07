@@ -1,13 +1,11 @@
-// import utils from '@/utils.js'
-// import uniq from 'lodash-es/uniq'
-
 export default {
   send (context, body) {
+    // https://www.notion.so/kinopio/JS-Bridge-Documentation-35ab7038df63439592b525b918d3acfa
     const shouldSendPostmessages = window.navigator.isSecureAppContext
     if (!window.webkit) { return }
     try {
       console.log('🛫 sending postmessage', body)
-      window.webkit.messageHandlers[body.name].postMessage(body)
+      window.webkit.messageHandlers[body.name].postMessage(body.value)
     } catch (error) {
       console.error(error)
     }

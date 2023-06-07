@@ -111,7 +111,7 @@ export default {
     apiKey: (state, apiKey) => {
       state.apiKey = apiKey
       cache.updateUser('apiKey', apiKey)
-      postMessage.send({ name: 'setApiKey', apiKey })
+      postMessage.send({ name: 'setApiKey', value: apiKey })
     },
     favoriteUsers: (state, users) => {
       utils.typeCheck({ value: users, type: 'array' })
@@ -150,7 +150,7 @@ export default {
           state[item] = user[item]
         }
         if (user.apiKey) {
-          postMessage.send({ name: 'setApiKey', apiKey: user.apiKey })
+          postMessage.send({ name: 'setApiKey', value: user.apiKey })
         }
       })
       cache.saveUser(user)
