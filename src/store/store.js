@@ -45,7 +45,7 @@ const store = createStore({
     shouldPreventNextFocusOnName: false,
     isEmbedMode: false,
     isAddPage: false,
-    isPricingHidden: true,
+    isPricingHidden: false,
     disableViewportOptimizations: false, // for urlbox
     isPresentationMode: false,
     pricingIsVisible: false,
