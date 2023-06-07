@@ -12,6 +12,7 @@ import currentConnections from '@/store/currentConnections.js'
 import currentBoxes from '@/store/currentBoxes.js'
 import upload from '@/store/upload.js'
 import userNotifications from '@/store/userNotifications.js'
+import postMessage from '@/store/postMessage.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
@@ -1711,7 +1712,8 @@ const store = createStore({
     currentConnections,
     currentBoxes,
     upload,
-    userNotifications
+    userNotifications,
+    postMessage
   },
   plugins: [websocket()]
 })
