@@ -313,6 +313,10 @@ export default {
       state.weatherUnitIsCelcius = value
       cache.updateUser('weatherUnitIsCelcius', value)
     },
+    journalDailyPrompt: (state, value) => {
+      state.journalDailyPrompt = value
+      cache.updateUser('journalDailyPrompt', value)
+    },
     shouldUseStickyCards: (state, value) => {
       state.shouldUseStickyCards = value
       cache.updateUser('shouldUseStickyCards', value)
