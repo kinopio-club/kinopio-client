@@ -15,8 +15,8 @@ export default {
 }
 
 // X onLogout: createHandler('onLogout'),
-// X setApiKey: createHandler('setApiKey'),
-// setBackgroundColor: createHandler('setBackgroundColor'),
+// X setApiKey: createHandler('setApiKey'), {apiKey}
+// X setBackgroundColor: createHandler('setBackgroundColor'), {color}
 
 // // Haptic Feedback
 // onSelectionFeedback: createHandler('onSelectionFeedback'),
