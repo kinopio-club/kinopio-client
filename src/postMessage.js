@@ -3,7 +3,7 @@
 import utils from '@/utils.js'
 
 export default {
-  send (context, body) {
+  send (body) {
     const shouldSendPostmessages = window.navigator.isSecureAppContext
     if (!window.webkit) { return }
     try {
@@ -14,14 +14,15 @@ export default {
       console.error(error)
     }
   },
-
-  sendHaptics (context, body) {
+  sendHaptics (body) {
     // ??add user preference here to disable haptics??
     const name = utils.capitalizeFirstLetter(body.name)
     body.name = `on${name}Feedback`
-    context.dispatch('send', body)
+    this.send(body)
+  },
+  sendLightHaptics () {
+    this.sendHaptics({ name: 'lightImpact' })
   }
-
 }
 
 // // Haptic Feedback
@@ -34,6 +35,12 @@ export default {
 // X on MediumImpact Feedback: x card details/ x connection details/ x box details/x multiactions is open,
 
 // on LightImpact Feedback: click list item (eg spacedetails -> spacelist), clicking any <button, label btn> , clicking button-badge
+//
+// .results-list li
+// .button-badge
+// button, label
+
+// postMessage.sendLightHaptics()
 
 // for notifications
 // on Success Feedback:
