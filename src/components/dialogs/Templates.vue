@@ -14,8 +14,7 @@ dialog.templates.narrow(
     .button-wrap(@click.left.prevent="toggleCurrentSpaceIsTemplate" @keydown.stop.enter="toggleCurrentSpaceIsTemplate")
       button.variable-length-content(:class="{ active: currentSpaceIsTemplate }")
         img.icon.templates(src="@/assets/templates.svg")
-        span(v-if="!currentSpaceIsTemplate") Make Current Space Into Template
-        span(v-if="currentSpaceIsTemplate") Is Template
+        span Current Space is Template
   section.results-section(:style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="templates" :showCategory="true" @selectSpace="changeSpace" :isLoading="isLoadingRemoteSpaces")
 </template>
