@@ -33,7 +33,7 @@ dialog.add-space.narrow(
           .button-wrap
             button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
               img.icon.today(src="@/assets/today.svg")
-              span Daily Prompt
+              span Prompt of the Day
           .button-wrap
             button.small-button(@click="toggleDailyPromptInfoIsVisible" :class="{ active: dailyPromptInfoIsVisible }")
               span Info
