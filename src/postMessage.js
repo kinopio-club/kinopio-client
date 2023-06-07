@@ -14,7 +14,7 @@ export default {
   }
 }
 
-// onLogout: createHandler('onLogout'),
+// X onLogout: createHandler('onLogout'),
 // X setApiKey: createHandler('setApiKey'),
 // setBackgroundColor: createHandler('setBackgroundColor'),
 
