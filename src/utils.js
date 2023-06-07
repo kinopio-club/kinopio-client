@@ -619,6 +619,11 @@ export default {
     // https://regexr.com/68l08
     return string.replace(/\/$/g, '')
   },
+  removeSurroundingQuotes (string) {
+    if (!string) { return }
+    // https://stackoverflow.com/questions/19156148/i-want-to-remove-double-quotes-from-a-string
+    return string.replace(/^"|"$/g, '')
+  },
   pastTense (string) {
     if (string === 'cut') { return string }
     const lastLetter = string.charAt(string.length - 1)
@@ -1399,16 +1404,17 @@ export default {
     space.isFromTweet = false
     space = this.spaceDefaultBackground(space, currentUser)
     // summary
-    space.cards.push({ id: nanoid(), name: summary, x: 60, y: 100, frameId: 0 })
+    space.cards.push({ id: nanoid(), name: summary, x: 80, y: 110, frameId: 0 })
     // daily prompt
     if (dailyPrompt) {
       let card = { id: nanoid() }
       card.name = dailyPrompt
       const position = this.promptCardPosition(space.cards, card.name)
-      card.x = position.x
+      card.x = position.x + 10
       card.y = position.y
       card.z = 0
       card.spaceId = spaceId
+      card.frameId = 5
       space.cards.push(card)
     }
     // user prompts
@@ -1467,10 +1473,10 @@ export default {
     const averageCharactersPerLine = 25
     const lines = Math.ceil(lastCardName.length / averageCharactersPerLine)
     const lineHeight = 14
-    const padding = 16
+    const padding = 26
     const lastCardHeight = (lines * lineHeight) + padding + lines
-    let distanceBetween = 60
-    let x = 100
+    let distanceBetween = 50
+    let x = 120
     if (this.checkboxFromString(newCardName)) {
       distanceBetween = 12
       x = 120
