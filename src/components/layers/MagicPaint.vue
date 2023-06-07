@@ -513,6 +513,7 @@ export default {
         const isBetweenY = utils.isBetween(y)
         if (isBetweenX && isBetweenY) {
           this.$store.dispatch('addToMultipleCardsSelected', card.id)
+          postMessage.sendHaptics({ name: 'selection' })
         }
       })
     },
@@ -528,6 +529,7 @@ export default {
         const isSelected = path.isPointInStroke(svgPoint)
         if (isSelected) {
           this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
+          postMessage.sendHaptics({ name: 'selection' })
         }
       })
     },
@@ -558,6 +560,7 @@ export default {
         const isBetweenY = utils.isBetween(y)
         if (isBetweenX && isBetweenY) {
           this.$store.dispatch('addToMultipleBoxesSelected', box.id)
+          postMessage.sendHaptics({ name: 'selection' })
         }
       })
     },

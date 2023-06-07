@@ -29,11 +29,12 @@ export default {
 
 // // Haptic Feedback
 
+// import postMessage from '@/postMessage.js'
+
 // X  on SoftImpact Feedback: painting locked, item drag start locked
+// X on Selection Feedback: when painting/box-selecting over items
 
-// on Selection Feedback: when painting/box-selecting over items
-
-// on MediumImpact Feedback: card details/connection details/box details/multiactions is open or closed,
+// on MediumImpact Feedback: card details/connection details/box details/multiactions is open,
 
 // on LightImpact Feedback: click list item (eg spacedetails -> spacelist), clicking any <button, label btn>
 
