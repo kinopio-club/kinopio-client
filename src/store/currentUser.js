@@ -1,5 +1,6 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
@@ -110,6 +111,7 @@ export default {
     apiKey: (state, apiKey) => {
       state.apiKey = apiKey
       cache.updateUser('apiKey', apiKey)
+      postMessage.send({ name: 'setApiKey', apiKey })
     },
     favoriteUsers: (state, users) => {
       utils.typeCheck({ value: users, type: 'array' })
@@ -147,20 +149,11 @@ export default {
         if (user[item]) {
           state[item] = user[item]
         }
+        if (user.apiKey) {
+          postMessage.send({ name: 'setApiKey', apiKey: user.apiKey })
+        }
       })
       cache.saveUser(user)
-    },
-    // Aug 2019 migration
-    updateBetaUserId: (state, newId) => {
-      if (state.id === '1') {
-        const newId = nanoid()
-        state.id = newId
-        cache.updateUser('id', newId)
-      }
-      // Oct 2019 migration
-      if (!state.apiKey) {
-        state.apiKey = ''
-      }
     },
     arenaAccessToken: (state, token) => {
       state.arenaAccessToken = token
@@ -364,7 +357,6 @@ export default {
       if (utils.objectHasKeys(cachedUser)) {
         console.log('🌸 Restore user from cache', cachedUser.id)
         context.commit('restoreUser', cachedUser)
-        context.commit('updateBetaUserId')
         context.dispatch('restoreRemoteUser', cachedUser)
       } else {
         console.log('🌸 Create new user')

@@ -16,7 +16,6 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
         store.commit('isPricingHidden', window.navigator.isPricingHidden)
-        store.commit('shouldSendPostmessages', window.navigator.isSecureAppContext)
         store.commit('isAddPage', true)
         next()
       }
@@ -27,7 +26,6 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
         store.commit('isPricingHidden', window.navigator.isPricingHidden)
-        store.commit('shouldSendPostmessages', window.navigator.isSecureAppContext)
         store.commit('disableViewportOptimizations', urlParams.get('disableViewportOptimizations'))
         next()
       }

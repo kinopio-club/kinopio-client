@@ -12,7 +12,6 @@ import currentConnections from '@/store/currentConnections.js'
 import currentBoxes from '@/store/currentBoxes.js'
 import upload from '@/store/upload.js'
 import userNotifications from '@/store/userNotifications.js'
-import postMessage from '@/store/postMessage.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
@@ -46,8 +45,7 @@ const store = createStore({
     shouldPreventNextFocusOnName: false,
     isEmbedMode: false,
     isAddPage: false,
-    isPricingHidden: false,
-    shouldSendPostmessages: false,
+    isPricingHidden: true,
     disableViewportOptimizations: false, // for urlbox
     isPresentationMode: false,
     pricingIsVisible: false,
@@ -431,10 +429,6 @@ const store = createStore({
     },
     isPricingHidden: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.isPricingHidden = value
-    },
-    shouldSendPostmessages: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', allowUndefined: true })
       state.isPricingHidden = value
     },
     disableViewportOptimizations: (state, value) => {
@@ -1712,8 +1706,7 @@ const store = createStore({
     currentConnections,
     currentBoxes,
     upload,
-    userNotifications,
-    postMessage
+    userNotifications
   },
   plugins: [websocket()]
 })
