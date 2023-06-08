@@ -2138,14 +2138,6 @@ export default {
         }
       }
       currentPosition = segment.endPosition
-      const nextBadge = badges[index + 1]
-      if (nextBadge) {
-        newSegment = {
-          isText: true,
-          content: name.substring(currentPosition, nextBadge.startPosition)
-        }
-        currentPosition = nextBadge.startPosition
-      }
       segments.push(newSegment)
     })
     const trailingText = name.substring(currentPosition, name.length)
