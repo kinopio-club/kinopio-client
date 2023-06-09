@@ -550,6 +550,8 @@ const store = createStore({
     triggerCancelLocking: () => {},
     triggerUpdateOtherCard: (state, cardId) => {},
     triggerControlsSettingsIsVisible: () => {},
+    triggerAboutWhatsNewIsVisible: () => {},
+    triggerWhatsNewIsVisible: () => {},
 
     // Used by extensions only
 

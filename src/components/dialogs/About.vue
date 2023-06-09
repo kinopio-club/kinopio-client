@@ -105,9 +105,10 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.whatsNewIsVisible = false
-      }
-      if (mutation.type === 'updatePageSizes') {
+      } else if (mutation.type === 'updatePageSizes') {
         this.updateDialogHeight()
+      } else if (mutation.type === 'triggerWhatsNewIsVisible') {
+        this.whatsNewIsVisible = true
       }
     })
   },
@@ -222,9 +223,6 @@ export default {
   top calc(100% - 6px) !important
   &.overflow
     overflow auto
-  .updated
-    margin 0
-    margin-left 3px
   .keyboard-shortcut
     padding 0 4px !important
   .about-video
