@@ -574,7 +574,7 @@ const currentSpace = {
     loadJournalSpace: async (context) => {
       const spaces = cache.getAllSpaces()
       const journalName = utils.journalSpaceName({ isTomorrow: context.rootState.loadJournalSpaceTomorrow })
-      const journalSpace = spaces.find(space => space.name === journalName)
+      const journalSpace = spaces.find(space => space.name === journalName && !space.isRemoved)
       if (journalSpace) {
         const space = { id: journalSpace.id }
         context.dispatch('changeSpace', { space })
