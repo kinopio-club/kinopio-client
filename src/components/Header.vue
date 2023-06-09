@@ -108,6 +108,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           Pricing(:visible="pricingIsVisible")
           ControlsSettings(:visible="controlsSettingsIsVisible")
           UserSettings
+          ResetPassword
           //- Share
           .button-wrap
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
@@ -120,7 +121,13 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               span {{notificationsUnreadCount}}
             UserNotifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
         .bottom-controls
-          ResetPassword
+          ExploreRow
+          //- Sidebar
+          .button-wrap
+            button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
+              img.icon.right-arrow(src="@/assets/down-arrow.svg")
+            Sidebar(:visible="sidebarIsVisible")
+        .row.bottom-controls
           //- Sign Up or In
           .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
             button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
@@ -131,13 +138,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
             button(@click.left.stop="triggerUpgradeUserIsVisible")
               span Upgrade
-          //- Sidebar
-          .button-wrap
-            button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
-              img.icon.right-arrow(src="@/assets/down-arrow.svg")
-            Sidebar(:visible="sidebarIsVisible")
-        .row.bottom-controls
-          ExploreRow
+          //- Pricing
           .button-wrap(v-if="!currentUserIsSignedIn")
             button(@click.left.stop="togglePricingIsVisible" :class="{active : pricingIsVisible}")
               span Pricing
