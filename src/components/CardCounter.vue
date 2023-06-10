@@ -12,14 +12,20 @@ const counterValue = computed(() => props.card.counterValue || 1)
 
 const increment = () => {
   const count = counterValue.value + 1
-  console.log('🐸🐸', count)
-  // store.dispatch('themes/isSystem', false)
-  // broadcast evt
+  const card = {
+    id: props.card.id,
+    counterValue: count
+  }
+  store.dispatch('currentCards/update', card)
 }
 const decrement = () => {
   let count = counterValue.value - 1
   count = Math.max(0, count)
-  console.log('🐸')
+  const card = {
+    id: props.card.id,
+    counterValue: count
+  }
+  store.dispatch('currentCards/update', card)
 }
 </script>
 
