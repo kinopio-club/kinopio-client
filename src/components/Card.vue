@@ -182,13 +182,7 @@ article#card(
     span.badge.search(v-if="isInSearchResultsCards")
       img.icon.search(src="@/assets/search.svg")
     //- Counter
-    .counter-buttons-wrap(v-if="card.counterIsVisible")
-      .segmented-buttons.counter-buttons
-        button.small-button
-          img.icon.minus(src="@/assets/minus.svg")
-        button.small-button
-          img.icon.plus(src="@/assets/add.svg")
-      .badge.info.counter 1
+    CardCounter(:card="card")
     //- Created Through API
     .badge.secondary(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
@@ -213,6 +207,7 @@ import NameSegment from '@/components/NameSegment.vue'
 import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
+import CardCounter from '@/components/CardCounter.vue'
 import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
@@ -246,7 +241,8 @@ export default {
     NameSegment,
     UrlPreviewCard,
     UserLabelInline,
-    OtherCardPreview
+    OtherCardPreview,
+    CardCounter
   },
   props: {
     card: Object
@@ -2331,22 +2327,6 @@ article
       margin 0
       .label-badge
         padding 0 10px
-
-    .counter-buttons-wrap
-      display flex
-      min-width 68px
-    .counter-buttons
-      margin-right 5px
-      button
-        height 22px
-        min-width 22px
-        .minus
-          width 8px
-          vertical-align 4px
-          margin-left 2px
-    .badge.counter
-      margin-left -5px
-
     .badge
       &.secondary
         display flex
