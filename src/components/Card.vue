@@ -177,10 +177,17 @@ article#card(
         span Space is Read Only
 
   //- Meta Info
-  .meta-container(v-if="filterShowUsers || filterShowDateUpdated || isInSearchResultsCards")
+  .meta-container
     //- Search result
     span.badge.search(v-if="isInSearchResultsCards")
       img.icon.search(src="@/assets/search.svg")
+    //- Counter
+    .segmented-buttons
+      button.small-button
+        img.icon.minus(src="@/assets/minus.svg")
+      button.small-button.button-count
+        span 0
+        img.icon.plus(src="@/assets/add.svg")
     //- Created Through API
     .badge.secondary(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
@@ -2323,6 +2330,17 @@ article
       margin 0
       .label-badge
         padding 0 10px
+    .segmented-buttons
+      margin-right 5px
+      button
+        height 22px
+        min-width 22px
+        .minus
+          width 8px
+          vertical-align 4px
+          margin-left 2px
+        .plus
+          margin-left 4px
     .badge
       &.secondary
         display flex
