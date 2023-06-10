@@ -2,12 +2,10 @@
 section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
   .row
     //- h1
-    .button-wrap
-      button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }")
+    .segmented-buttons
+      button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }" title="Header 1")
         span h1
-    //- h2
-    .button-wrap
-      button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }")
+      button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }" title="Header 2")
           span h2
     //- Tag
     .button-wrap(v-if="isCards")
@@ -21,7 +19,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       FramePicker(:visible="framePickerIsVisible" :cards="cards")
     //- Color
     .button-wrap(v-if="!colorIsHidden" @click.left.stop="toggleColorPickerIsVisible")
-      button.change-color(:disabled="!canEditAll" :class="{active: colorPickerIsVisible}")
+      button.change-color(:disabled="!canEditAll" :class="{active: colorPickerIsVisible}" title="Color")
         .current-color(:style="{ background: color }")
       ColorPicker(
         :currentColor="color"
@@ -33,23 +31,23 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       )
     //- Box Fill
     .segmented-buttons(v-if="isBoxes")
-      button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')" :disabled="isDisabled")
+      button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')" :disabled="isDisabled" title="Solid Fill")
         img.icon.box-icon(src="@/assets/box-filled.svg")
-      button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')" :disabled="isDisabled")
+      button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')" :disabled="isDisabled" title="No Fill")
         img.icon.box-icon(src="@/assets/box-empty.svg")
 
     //- Lock
     .button-wrap
-      button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}")
+      button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}" title="Lock Card to Background")
         img.icon(src="@/assets/lock.svg")
     //- Comment
     .button-wrap(v-if="isCards")
-      button(:disabled="!canEditAll" @click="toggleIsComment" :class="{active: isComment}")
+      button(:disabled="!canEditAll" @click="toggleIsComment" :class="{active: isComment}" title="Turn into Comment")
         img.icon(src="@/assets/comment.svg")
 
     //- Surround with Box
     .button-wrap(v-if="isCards")
-      button(:disabled="!canEditSpace" @click="containItemsInNewBox")
+      button(:disabled="!canEditSpace" @click="containItemsInNewBox" title="Surround with Box")
         img.icon.box-icon(src="@/assets/box.svg")
 </template>
 
