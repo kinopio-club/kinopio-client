@@ -52,7 +52,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
 
     //- Counter
     .button-wrap(v-if="isCards")
-      button(:disabled="!canEditSpace" @click="toggleCounterIsVisible" title="Counter")
+      button(:class="{active: countersIsVisible}" :disabled="!canEditSpace" @click="toggleCounterIsVisible" title="Counter")
         img.icon.add(src="@/assets/add.svg")
         span.counter-label 1
 
@@ -189,6 +189,10 @@ export default {
     },
     isComment () {
       const cards = this.cards.filter(card => card.isComment)
+      return Boolean(cards.length === this.cards.length)
+    },
+    countersIsVisible () {
+      const cards = this.cards.filter(card => card.counterIsVisible)
       return Boolean(cards.length === this.cards.length)
     }
   },
@@ -388,6 +392,19 @@ export default {
         this.$nextTick(() => {
           this.$store.commit('boxDetailsIsVisibleForBoxId', box.id)
         })
+      })
+    },
+    toggleCounterIsVisible () {
+      let counterIsVisible = true
+      if (this.countersIsVisible) {
+        counterIsVisible = false
+      }
+      this.cards.forEach(card => {
+        card = {
+          id: card.id,
+          counterIsVisible
+        }
+        this.$store.dispatch('currentCards/update', card)
       })
     },
 

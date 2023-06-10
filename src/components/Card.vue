@@ -182,7 +182,7 @@ article#card(
     span.badge.search(v-if="isInSearchResultsCards")
       img.icon.search(src="@/assets/search.svg")
     //- Counter
-    .counter-buttons-wrap
+    .counter-buttons-wrap(v-if="card.counterIsVisible")
       .segmented-buttons.counter-buttons
         button.small-button
           img.icon.minus(src="@/assets/minus.svg")
