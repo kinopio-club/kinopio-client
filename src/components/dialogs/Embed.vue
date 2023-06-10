@@ -66,6 +66,7 @@ dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop ref="dialog"
 <script>
 import Slider from '@/components/Slider.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import privacy from '@/data/privacy.js'
 
 export default {
@@ -104,7 +105,7 @@ export default {
     url () {
       const spaceId = this.$store.state.currentSpace.id
       const zoom = this.spaceZoomPercent
-      return `${utils.kinopioDomain()}/embed/?spaceId=${spaceId}&zoom=${zoom}`
+      return `${consts.kinopioDomain()}/embed/?spaceId=${spaceId}&zoom=${zoom}`
     },
     iframe () {
       return `<div class="kinopio-embed" style="height: 420px; width: 100%;">

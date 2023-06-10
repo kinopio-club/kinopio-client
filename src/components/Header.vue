@@ -181,6 +181,7 @@ import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 import ExploreRow from '@/components/ExploreRow.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
+import consts from '@/consts.js'
 
 import { mapState, mapGetters } from 'vuex'
 import sortBy from 'lodash-es/sortBy'
@@ -350,7 +351,7 @@ export default {
       'currentUser/totalFiltersActive'
     ]),
     currentSpaceIsHidden () { return this.$store.state.currentSpace.isHidden },
-    kinopioDomain () { return utils.kinopioDomain() },
+    kinopioDomain () { return consts.kinopioDomain() },
     userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible },
     isVisible () {
       const contentDialogIsVisible = this.cardDetailsIsVisibleForCardId || this.connectionDetailsIsVisibleForConnectionId

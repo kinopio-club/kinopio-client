@@ -5,6 +5,7 @@ import newSpace from '@/data/new.json'
 import words from '@/data/words.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
 
 import { nextTick } from 'vue'
 import randomColor from 'randomcolor'
@@ -912,7 +913,7 @@ const currentSpace = {
       }
     },
     checkIfShouldPauseConnectionDirections: (context) => {
-      const prefersReducedMotion = utils.userPrefersReducedMotion()
+      const prefersReducedMotion = consts.userPrefersReducedMotion()
       const userSetting = context.rootState.currentUser.shouldPauseConnectionDirections
       const isInteracting = context.rootGetters.isInteractingWithItem
       const shouldPause = prefersReducedMotion || userSetting || isInteracting
@@ -1116,7 +1117,7 @@ const currentSpace = {
       return Boolean(isFavoriteSpace.length)
     },
     url: (state) => {
-      const domain = utils.kinopioDomain()
+      const domain = consts.kinopioDomain()
       const spaceUrl = utils.url({ name: state.name, id: state.id })
       return `${domain}/${spaceUrl}`
     },

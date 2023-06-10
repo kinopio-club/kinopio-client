@@ -1088,7 +1088,7 @@ export default {
 
     initStickToCursor () {
       preventSticking = false
-      if (this.shouldNotStick || utils.userPrefersReducedMotion()) {
+      if (this.shouldNotStick || consts.userPrefersReducedMotion()) {
         preventSticking = true
       }
       stickyTimer = setTimeout(() => {

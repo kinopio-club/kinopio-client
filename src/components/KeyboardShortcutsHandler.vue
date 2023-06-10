@@ -3,6 +3,8 @@
 
 <script>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
+
 import { nanoid } from 'nanoid'
 
 let useSiblingConnectionType
@@ -236,7 +238,7 @@ export default {
         this.$store.commit('currentUserBoxSelectEnd', position)
         this.$store.commit('currentUserBoxSelectStart', position)
       } else if (shouldPan) {
-        if (utils.isDevelopment()) { return }
+        if (consts.isDevelopment()) { return }
         prevRightClickPosition = utils.cursorPositionInPage(event)
         event.preventDefault()
         this.$store.commit('currentUserIsPanning', true)

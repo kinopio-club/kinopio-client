@@ -20,6 +20,7 @@ dialog.narrow.explore-rss-feed(v-if="visible" :open="visible" @click.left.stop)
 
 <script>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 export default {
   name: 'ExploreRssFeed',
@@ -44,7 +45,7 @@ export default {
       }
     },
     updateUrl () {
-      this.url = `${utils.host(true)}/space/explore-spaces/feed.json`
+      this.url = `${consts.host(true)}/space/explore-spaces/feed.json`
     }
   },
   watch: {
