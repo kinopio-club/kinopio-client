@@ -182,12 +182,13 @@ article#card(
     span.badge.search(v-if="isInSearchResultsCards")
       img.icon.search(src="@/assets/search.svg")
     //- Counter
-    .segmented-buttons
-      button.small-button
-        img.icon.minus(src="@/assets/minus.svg")
-      button.small-button.button-count
-        span 0
-        img.icon.plus(src="@/assets/add.svg")
+    .counter-buttons-wrap
+      .segmented-buttons.counter-buttons
+        button.small-button
+          img.icon.minus(src="@/assets/minus.svg")
+        button.small-button
+          img.icon.plus(src="@/assets/add.svg")
+      .badge.info.counter 1
     //- Created Through API
     .badge.secondary(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
@@ -2330,7 +2331,11 @@ article
       margin 0
       .label-badge
         padding 0 10px
-    .segmented-buttons
+
+    .counter-buttons-wrap
+      display flex
+      min-width 68px
+    .counter-buttons
       margin-right 5px
       button
         height 22px
@@ -2339,8 +2344,9 @@ article
           width 8px
           vertical-align 4px
           margin-left 2px
-        .plus
-          margin-left 4px
+    .badge.counter
+      margin-left -5px
+
     .badge
       &.secondary
         display flex

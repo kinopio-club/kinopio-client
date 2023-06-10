@@ -1,7 +1,7 @@
 <template lang="pug">
 section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
   .row
-    //- h1
+    //- h1/h2
     .segmented-buttons
       button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }" title="Header 1")
         span h1
@@ -49,6 +49,13 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
     .button-wrap(v-if="isCards")
       button(:disabled="!canEditSpace" @click="containItemsInNewBox" title="Surround with Box")
         img.icon.box-icon(src="@/assets/box.svg")
+
+    //- Counter
+    .button-wrap(v-if="isCards")
+      button(:disabled="!canEditSpace" @click="toggleCounterIsVisible" title="Counter")
+        img.icon.add(src="@/assets/add.svg")
+        span.counter-label 1
+
 </template>
 
 <script>
@@ -424,4 +431,6 @@ export default {
     margin-bottom 10px
   .segmented-buttons
     display inline-flex
+  .counter-label
+    margin-left 3px
 </style>
