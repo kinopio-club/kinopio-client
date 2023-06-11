@@ -49,7 +49,7 @@ const toggleExploreIsVisible = () => {
 }
 const unreadExploreSpacesLength = computed(() => {
   let readDate = store.state.currentUser.showInExploreUpdatedAt
-  if (!readDate) { return 'Explore' }
+  if (!readDate) { return }
   readDate = dayjs(readDate)
   const unreadSpaces = state.exploreSpaces.filter(space => {
     const spaceDate = dayjs(space.showInExploreUpdatedAt)
@@ -119,7 +119,6 @@ const normalizeLiveSpaces = (spaces) => {
     //- Explore
     button.explore-button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible}")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
-      //- span Explore
       span.explore-button-label(v-if="unreadExploreSpacesLength") &nbsp;{{ unreadExploreSpacesLength }}
     //- Live
     button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible}")
