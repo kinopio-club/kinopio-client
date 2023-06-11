@@ -9,6 +9,7 @@ const props = defineProps({
 })
 
 const counterValue = computed(() => props.card.counterValue || 1)
+const canEditCard = computed(() => store.getters['currentUser/canEditCard'](props.card))
 
 const increment = () => {
   const count = counterValue.value + 1
@@ -33,10 +34,10 @@ const decrement = () => {
 .card-counter(v-if="props.card.counterIsVisible")
   .segmented-buttons.counter-buttons
     //- -
-    button.small-button(@click="decrement")
+    button.small-button(@click="decrement" :disabled="!canEditCard")
       img.icon.minus(src="@/assets/minus.svg")
     //- +
-    button.small-button(@click="increment")
+    button.small-button(@click="increment" :disabled="!canEditCard")
       img.icon.plus(src="@/assets/add.svg")
   //- count
   .badge.info.counter {{counterValue}}
