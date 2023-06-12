@@ -42,6 +42,7 @@ import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
 import CardListItemOptions from '@/components/dialogs/CardListItemOptions.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 let multiTouchAction, shouldCancelUndo
 
@@ -286,7 +287,7 @@ export default {
       if (spaceIsPrivate) { return }
       const head = document.querySelector('head')
       const spaceId = this.$store.state.currentSpace.id
-      const url = `${utils.host()}/space/${spaceId}/feed.json`
+      const url = `${consts.host()}/space/${spaceId}/feed.json`
       let link = document.createElement('link')
       link.rel = 'alternative'
       link.type = 'application/rss+xml'
@@ -1038,6 +1039,10 @@ code
 .updated,
 .open
   vertical-align -2px
+
+.updated
+  margin 0
+  margin-left 3px
 
 .visit
   vertical-align 1px

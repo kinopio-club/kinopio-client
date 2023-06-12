@@ -26,7 +26,7 @@ const state = reactive({
   errorMaxCardLength: false
 })
 const otherCard = computed(() => store.state.currentSelectedOtherItem)
-const url = computed(() => `${utils.kinopioDomain()}/${otherCard.value.spaceId}/${otherCard.value.id}`)
+const url = computed(() => `${consts.kinopioDomain()}/${otherCard.value.spaceId}/${otherCard.value.id}`)
 const canEdit = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value))
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 

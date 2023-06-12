@@ -8,6 +8,7 @@
 import { nanoid } from 'nanoid'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
@@ -106,7 +107,7 @@ export default function createWebSocketPlugin () {
     store.subscribe((mutation, state) => {
       if (mutation.type === 'broadcast/connect') {
         store.commit('isJoiningSpace', true)
-        const host = utils.websocketHost()
+        const host = consts.websocketHost()
         websocket = new WebSocket(host)
         websocket.onopen = (event) => {
           currentUserIsConnected = true

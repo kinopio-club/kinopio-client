@@ -103,7 +103,7 @@ export default {
     }
   },
   computed: {
-    kinopioDomain () { return utils.kinopioDomain() },
+    kinopioDomain () { return consts.kinopioDomain() },
     cardsCreatedIsOverLimit () { return this.$store.getters['currentUser/cardsCreatedIsOverLimit'] },
     maxCardLength () { return consts.maxCardLength },
     currentUser () { return this.$store.state.currentUser },

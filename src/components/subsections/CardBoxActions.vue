@@ -1,13 +1,11 @@
 <template lang="pug">
 section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
   .row
-    //- h1
-    .button-wrap
-      button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }")
+    //- h1/h2
+    .segmented-buttons
+      button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }" title="Header 1")
         span h1
-    //- h2
-    .button-wrap
-      button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }")
+      button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }" title="Header 2")
           span h2
     //- Tag
     .button-wrap(v-if="isCards")
@@ -21,7 +19,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       FramePicker(:visible="framePickerIsVisible" :cards="cards")
     //- Color
     .button-wrap(v-if="!colorIsHidden" @click.left.stop="toggleColorPickerIsVisible")
-      button.change-color(:disabled="!canEditAll" :class="{active: colorPickerIsVisible}")
+      button.change-color(:disabled="!canEditAll" :class="{active: colorPickerIsVisible}" title="Color")
         .current-color(:style="{ background: color }")
       ColorPicker(
         :currentColor="color"
@@ -33,24 +31,31 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       )
     //- Box Fill
     .segmented-buttons(v-if="isBoxes")
-      button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')" :disabled="isDisabled")
+      button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')" :disabled="isDisabled" title="Solid Fill")
         img.icon.box-icon(src="@/assets/box-filled.svg")
-      button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')" :disabled="isDisabled")
+      button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')" :disabled="isDisabled" title="No Fill")
         img.icon.box-icon(src="@/assets/box-empty.svg")
 
     //- Lock
     .button-wrap
-      button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}")
+      button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}" title="Lock Card to Background")
         img.icon(src="@/assets/lock.svg")
     //- Comment
     .button-wrap(v-if="isCards")
-      button(:disabled="!canEditAll" @click="toggleIsComment" :class="{active: isComment}")
+      button(:disabled="!canEditAll" @click="toggleIsComment" :class="{active: isComment}" title="Turn into Comment")
         img.icon(src="@/assets/comment.svg")
 
     //- Surround with Box
     .button-wrap(v-if="isCards")
-      button(:disabled="!canEditSpace" @click="containItemsInNewBox")
+      button(:disabled="!canEditSpace" @click="containItemsInNewBox" title="Surround with Box")
         img.icon.box-icon(src="@/assets/box.svg")
+
+    //- Counter
+    .button-wrap(v-if="isCards")
+      button(:class="{active: countersIsVisible}" :disabled="!canEditSpace" @click="toggleCounterIsVisible" title="Counter")
+        img.icon.add(src="@/assets/add.svg")
+        span.counter-label 1
+
 </template>
 
 <script>
@@ -184,6 +189,10 @@ export default {
     },
     isComment () {
       const cards = this.cards.filter(card => card.isComment)
+      return Boolean(cards.length === this.cards.length)
+    },
+    countersIsVisible () {
+      const cards = this.cards.filter(card => card.counterIsVisible)
       return Boolean(cards.length === this.cards.length)
     }
   },
@@ -385,6 +394,19 @@ export default {
         })
       })
     },
+    toggleCounterIsVisible () {
+      let counterIsVisible = true
+      if (this.countersIsVisible) {
+        counterIsVisible = false
+      }
+      this.cards.forEach(card => {
+        card = {
+          id: card.id,
+          counterIsVisible
+        }
+        this.$store.dispatch('currentCards/update', card)
+      })
+    },
 
     // boxes only
 
@@ -426,4 +448,6 @@ export default {
     margin-bottom 10px
   .segmented-buttons
     display inline-flex
+  .counter-label
+    margin-left 3px
 </style>

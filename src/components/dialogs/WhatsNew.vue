@@ -84,8 +84,6 @@ export default {
     visible (visible) {
       if (visible) {
         this.updateDialogHeight()
-      }
-      if (!visible) {
         this.updateUserLastRead()
       }
     }

@@ -6,6 +6,7 @@ dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="d
 
 <script>
 // import utils from '@/utils.js'
+// import consts from '@/consts.js'
 
 import { mapState, mapGetters } from 'vuex'
 
@@ -36,7 +37,7 @@ export default {
     ]),
     ...mapGetters([
     ])
-    // kinopioDomain () { return utils.kinopioDomain() },
+    // kinopioDomain () { return consts.kinopioDomain() },
   },
   methods: {
   },

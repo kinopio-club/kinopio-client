@@ -33,12 +33,12 @@
     "babel-eslint": "^10.0.1",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^9.8.0",
-    "lint-staged": "^11.1.2",
+    "lint-staged": "^13.2.1",
     "postcss": "^8.3.6",
     "pug": "^3.0.2",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
-    "vite": "^3.2.1",
+    "vite": "^3.2.7",
     "yorkie": "^2.0.0"
   },
   "eslintConfig": {

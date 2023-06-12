@@ -28,14 +28,6 @@ extend([namesPlugin]) // colord
 const uuidLength = 21
 
 export default {
-  userPrefersReducedMotion () {
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)')
-    if (query.matches) {
-      return true
-    } else {
-      return false
-    }
-  },
   loadImage (src) {
     // from https://stackoverflow.com/a/5058336
     return new Promise((resolve, reject) => {
@@ -44,37 +36,6 @@ export default {
       image.addEventListener('error', reject)
       image.src = src
     })
-  },
-  assetUrl (path, type) {
-    if (type) {
-      return `@/assets/${path}.${type}`
-    } else {
-      return `@/assets/${path}`
-    }
-  },
-  isDevelopment () {
-    return import.meta.env.MODE === 'development'
-  },
-  kinopioDomain () {
-    let domain = 'https://kinopio.club'
-    if (this.isDevelopment()) {
-      domain = 'https://kinopio.local:8080'
-    }
-    return domain
-  },
-  host () {
-    let host = 'https://api.kinopio.club'
-    if (this.isDevelopment()) {
-      host = 'https://kinopio.local:3000'
-    }
-    return host
-  },
-  websocketHost () {
-    let host = 'wss://api.kinopio.club'
-    if (this.isDevelopment()) {
-      host = 'wss://kinopio.local:3000'
-    }
-    return host
   },
   mobileTouchPosition (event, type) {
     let touch
@@ -1513,7 +1474,7 @@ export default {
     return this.spaceAndCardIdFromPath(url.pathname) // /spaceId/cardId
   },
   urlFromSpaceAndCard ({ spaceId, cardId }) {
-    let url = `${this.kinopioDomain()}/${spaceId}`
+    let url = `${consts.kinopioDomain()}/${spaceId}`
     if (cardId) {
       url = `${url}/${cardId}`
     }
@@ -1521,7 +1482,7 @@ export default {
   },
   inviteUrl ({ spaceId, spaceName, collaboratorKey }) {
     spaceName = this.normalizeString(spaceName)
-    const url = `${this.kinopioDomain()}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
+    const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
     return url
   },
   spaceAndCardIdFromPath (path) {
@@ -1586,7 +1547,7 @@ export default {
   },
   urlIsValidTld (url) {
     const isLocalhostUrl = url.match(this.localhostUrlPattern())
-    const isDevelopmentUrl = url.includes(this.kinopioDomain())
+    const isDevelopmentUrl = url.includes(consts.kinopioDomain())
     if (isLocalhostUrl || isDevelopmentUrl) { return true }
     // https://regexr.com/5v6s9
     const regex = '(' + tlds + ')' + String.raw`(\?|\/| |$|\s)`
@@ -2112,7 +2073,7 @@ export default {
       } else if (segment.isLink) {
         let link = segment.link
         const { spaceId, spaceUrl, cardId } = this.spaceAndCardIdFromUrl(link)
-        // link = `${this.kinopioDomain()}/${spaceUrl}`
+        // link = `${consts.kinopioDomain()}/${spaceUrl}`
         newSegment = {
           isLink: true,
           name: link,
@@ -2138,14 +2099,6 @@ export default {
         }
       }
       currentPosition = segment.endPosition
-      const nextBadge = badges[index + 1]
-      if (nextBadge) {
-        newSegment = {
-          isText: true,
-          content: name.substring(currentPosition, nextBadge.startPosition)
-        }
-        currentPosition = nextBadge.startPosition
-      }
       segments.push(newSegment)
     })
     const trailingText = name.substring(currentPosition, name.length)

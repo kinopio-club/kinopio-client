@@ -47,6 +47,7 @@ import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import cache from '@/cache.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
@@ -86,11 +87,11 @@ export default {
   methods: {
     spaceUrl (notification) {
       if (!notification.space) { return }
-      return `${utils.kinopioDomain()}/${notification.space.id}`
+      return `${consts.kinopioDomain()}/${notification.space.id}`
     },
     cardUrl (notification) {
       if (!notification.card) { return }
-      return `${utils.kinopioDomain()}/${notification.space.id}/${notification.card.id}`
+      return `${consts.kinopioDomain()}/${notification.space.id}/${notification.card.id}`
     },
     isAskToAddToExplore (notification) {
       return notification.type === 'askToAddToExplore'

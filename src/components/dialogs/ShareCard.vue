@@ -1,5 +1,6 @@
 <script setup>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
@@ -45,7 +46,7 @@ const scrollIntoView = async () => {
 // copy url
 
 const cardUrl = () => {
-  const domain = utils.kinopioDomain()
+  const domain = consts.kinopioDomain()
   const url = `${domain}/${props.card.spaceId}/${props.card.id}`
   console.log('🍇 card url', url)
   return url

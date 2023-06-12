@@ -1224,7 +1224,7 @@ export default {
     replaceSlashCommandWithSpaceUrl (space) {
       let name = this.card.name
       let position = this.slashTextPosition()
-      const spaceUrl = utils.kinopioDomain() + '/' + space.url + ' '
+      const spaceUrl = consts.kinopioDomain() + '/' + space.url + ' '
       const start = name.substring(0, position)
       const end = name.substring(position + this.slashText().length, name.length)
       const newName = start + spaceUrl + end
