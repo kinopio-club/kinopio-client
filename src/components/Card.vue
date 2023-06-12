@@ -145,6 +145,7 @@ article#card(
           :isSelected="isSelectedOrDragging"
           :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
           :isLoadingUrlPreview="isLoadingUrlPreview"
+          @retryUrlPreview="retryUrlPreview"
         )
       template(v-if="otherCardIsVisible")
         OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldCloseAllDialogs="true")
@@ -187,9 +188,8 @@ article#card(
     .badge.secondary(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
     //- User
-    .badge-wrap
-      template(v-if="filterShowUsers")
-        UserLabelInline(:user="createdByUser" :isClickable="true")
+    .badge-wrap(v-if="filterShowUsers")
+      UserLabelInline(:user="createdByUser" :isClickable="true")
     //- Date
     .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
       img.icon.time(src="@/assets/time.svg")
@@ -1891,7 +1891,7 @@ export default {
 
     async updateUrlPreview () {
       if (this.preventUpdatePrevPreview) { return }
-      if (!this.canEditCard) { return }
+      // if (!this.canEditCard) { return }
       this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
       const cardId = this.card.id
       let url = this.webUrl
@@ -1919,6 +1919,13 @@ export default {
         console.warn('🚑', error, url)
         this.updateUrlPreviewErrorUrl(url)
       }
+    },
+    retryUrlPreview () {
+      this.$store.dispatch('currentCards/update', {
+        id: this.card.id,
+        shouldUpdateUrlPreview: true
+      })
+      this.updateUrlPreview()
     },
     shouldUpdateUrlPreview (url) {
       const previewIsVisible = this.card.urlPreviewIsVisible

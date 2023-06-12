@@ -34,10 +34,10 @@ const decrement = () => {
 .card-counter(v-if="props.card.counterIsVisible")
   .segmented-buttons.counter-buttons
     //- -
-    button.small-button(@click="decrement" :disabled="!canEditCard")
+    button.small-button(@click="decrement" @touchend="decrement" :disabled="!canEditCard")
       img.icon.minus(src="@/assets/minus.svg")
     //- +
-    button.small-button(@click="increment" :disabled="!canEditCard")
+    button.small-button(@click="increment" @touchend="increment" :disabled="!canEditCard")
       img.icon.plus(src="@/assets/add.svg")
   //- count
   .badge.info.counter {{counterValue}}

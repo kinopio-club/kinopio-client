@@ -8,6 +8,9 @@ import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref } f
 import { useStore } from 'vuex'
 const store = useStore()
 
+let hasRetried
+const emit = defineEmits(['retryUrlPreview'])
+
 const props = defineProps({
   card: Object,
   user: Object,
@@ -26,7 +29,7 @@ const state = reactive({
 const shouldHideImage = computed(() => props.card.shouldHideUrlPreviewImage)
 const shouldHideInfo = computed(() => props.card.shouldHideUrlPreviewInfo)
 const isImageCard = computed(() => props.isImageCard || props.urlPreviewImageIsVisible)
-const updateDimensions = () => {
+const updateDimensions = (event) => {
   store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
 }
 const selectedColor = computed(() => {
@@ -120,6 +123,14 @@ const removeTrailingTweetText = (description) => {
   return description
 }
 
+// instagram url signature expiry
+
+const retryPreviewImage = (event) => {
+  if (hasRetried) { return }
+  emit('retryUrlPreview')
+  hasRetried = true
+}
+
 // title, description
 
 const title = computed(() => {
@@ -146,7 +157,7 @@ const description = computed(() => {
   Loader(:visible="isLoadingUrlPreview")
   CardEmbed(:visible="state.shouldDisplayEmbed" :url="state.embedUrl" :card="card")
   .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage && !state.shouldDisplayEmbed")
-    img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" @load="updateDimensions" ref="image")
+    img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" @load="updateDimensions" ref="image" @error="retryPreviewImage")
   .row.info.badge.status(v-if="!shouldHideInfo" :style="{background: selectedColor}")
     //- play
     .button-wrap.embed-button-wrap(v-if="isYoutubeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
