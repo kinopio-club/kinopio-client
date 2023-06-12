@@ -19,9 +19,6 @@ export default {
     const name = utils.capitalizeFirstLetter(body.name)
     body.name = `on${name}Feedback`
     this.send(body)
-  },
-  sendLightHaptics () {
-    this.sendHaptics({ name: 'lightImpact' })
   }
 }
 
@@ -32,11 +29,9 @@ export default {
 
 // X  on SoftImpact Feedback: painting locked, item drag start locked
 // X on Selection Feedback: when painting/box-selecting over items
-// X on MediumImpact Feedback: x card details/ x connection details/ x box details/x multiactions is open,
+// X on LightImpact Feedback: x card details/ x connection details/ x box details/x multiactions is open,
 
-// on LightImpact Feedback: connection created to card
-
-// postMessage.sendLightHaptics()
+// on MediumImpact Feedback: connection created to card
 
 // for notifications
 // on Success Feedback:

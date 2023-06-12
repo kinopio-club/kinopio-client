@@ -577,7 +577,7 @@ const store = createStore({
       utils.typeCheck({ value: cardId, type: 'string' })
       state.cardDetailsIsVisibleForCardId = cardId
       if (cardId) {
-        postMessage.sendHaptics({ name: 'mediumImpact' })
+        postMessage.sendHaptics({ name: 'lightImpact' })
       }
     },
     parentCardId: (state, cardId) => {
@@ -722,7 +722,7 @@ const store = createStore({
       utils.typeCheck({ value, type: 'string' })
       state.boxDetailsIsVisibleForBoxId = value
       if (value) {
-        postMessage.sendHaptics({ name: 'mediumImpact' })
+        postMessage.sendHaptics({ name: 'lightImpact' })
       }
     },
     currentUserIsResizingBox: (state, value) => {
@@ -942,7 +942,7 @@ const store = createStore({
       utils.typeCheck({ value: connectionId, type: 'string' })
       state.connectionDetailsIsVisibleForConnectionId = connectionId
       if (connectionId) {
-        postMessage.sendHaptics({ name: 'mediumImpact' })
+        postMessage.sendHaptics({ name: 'lightImpact' })
       }
     },
     currentConnectionColor: (state, color) => {
@@ -972,7 +972,7 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.multipleSelectedActionsIsVisible = value
       if (value) {
-        postMessage.sendHaptics({ name: 'mediumImpact' })
+        postMessage.sendHaptics({ name: 'lightImpact' })
       }
     },
     preventMultipleSelectedActionsIsVisible: (state, value) => {
