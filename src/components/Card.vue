@@ -861,7 +861,11 @@ export default {
       })
     },
     isConnectingTo () {
-      return this.currentConnectionSuccess.id === this.id
+      const connectingToId = this.currentConnectionSuccess.id
+      if (connectingToId) {
+        postMessage.sendHaptics({ name: 'mediumImpact' })
+      }
+      return connectingToId === this.id
     },
     isConnectingFrom () {
       return this.currentConnectionStartCardIds.find(cardId => cardId === this.id)
@@ -1580,7 +1584,7 @@ export default {
       this.$store.commit('currentDraggingConnectedCardIds', connectedCardIds)
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
-      postMessage.sendHaptics({ name: 'soft' })
+      postMessage.sendHaptics({ name: 'softImpact' })
       const updates = {
         cardId: this.card.id,
         userId: this.currentUser.id

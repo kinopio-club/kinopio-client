@@ -25,12 +25,11 @@ export default {
 // // Haptic Feedback
 
 // import postMessage from '@/postMessage.js'
-// postMessage.sendHaptics({ name: 'soft' })
+// postMessage.sendHaptics({ name: 'softImpact' })
 
 // X  on SoftImpact Feedback: painting locked, item drag start locked
 // X on Selection Feedback: when painting/box-selecting over items
 // X on LightImpact Feedback: x card details/ x connection details/ x box details/x multiactions is open,
-
 // on MediumImpact Feedback: connection created to card
 
 // for notifications
@@ -43,4 +42,4 @@ export default {
 // onHeavyImpactFeedback
 // on RigidImpact Feedback:
 
-// click list item (eg spacedetails -> spacelist), clicking any <button, label btn> , clicking button-badge
+// settings: [] haptic feedback , if appcontentsecure ,

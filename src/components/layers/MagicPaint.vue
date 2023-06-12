@@ -679,7 +679,7 @@ export default {
         this.$store.commit('currentUserIsPainting', true)
         this.$store.commit('currentUserIsPaintingLocked', true)
         console.log('🔒 lockingAnimationFrame locked')
-        postMessage.sendHaptics({ name: 'soft' })
+        postMessage.sendHaptics({ name: 'softImpact' })
         lockingStartTime = undefined
       }
     },
