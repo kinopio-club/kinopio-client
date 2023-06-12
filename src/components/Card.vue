@@ -177,10 +177,12 @@ article#card(
         span Space is Read Only
 
   //- Meta Info
-  .meta-container(v-if="filterShowUsers || filterShowDateUpdated || isInSearchResultsCards")
+  .meta-container
     //- Search result
     span.badge.search(v-if="isInSearchResultsCards")
       img.icon.search(src="@/assets/search.svg")
+    //- Counter
+    CardCounter(:card="card")
     //- Created Through API
     .badge.secondary(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
@@ -205,6 +207,7 @@ import NameSegment from '@/components/NameSegment.vue'
 import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
+import CardCounter from '@/components/CardCounter.vue'
 import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
@@ -238,7 +241,8 @@ export default {
     NameSegment,
     UrlPreviewCard,
     UserLabelInline,
-    OtherCardPreview
+    OtherCardPreview,
+    CardCounter
   },
   props: {
     card: Object
