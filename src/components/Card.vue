@@ -188,9 +188,8 @@ article#card(
     .badge.secondary(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
     //- User
-    .badge-wrap
-      template(v-if="filterShowUsers")
-        UserLabelInline(:user="createdByUser" :isClickable="true")
+    .badge-wrap(v-if="filterShowUsers")
+      UserLabelInline(:user="createdByUser" :isClickable="true")
     //- Date
     .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
       img.icon.time(src="@/assets/time.svg")
