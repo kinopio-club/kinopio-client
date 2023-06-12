@@ -66,7 +66,8 @@ export default {
     referrerName: '',
     weather: '',
     journalDailyPrompt: '',
-    panSpeedIsFast: false
+    panSpeedIsFast: false,
+    shouldDisableHapticFeedback: false
   },
   mutations: {
     color: (state, value) => {
@@ -289,6 +290,10 @@ export default {
     panSpeedIsFast: (state, value) => {
       state.panSpeedIsFast = value
       cache.updateUser('panSpeedIsFast', value)
+    },
+    shouldDisableHapticFeedback: (state, value) => {
+      state.shouldDisableHapticFeedback = value
+      cache.updateUser('shouldDisableHapticFeedback', value)
     },
     shouldCreateJournalsWithDailyPrompt: (state, value) => {
       state.shouldCreateJournalsWithDailyPrompt = value

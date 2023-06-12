@@ -1,6 +1,5 @@
-// https://www.notion.so/kinopio/JS-Bridge-Documentation-35ab7038df63439592b525b918d3acfa
-
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 export default {
   send (body) {
@@ -14,32 +13,13 @@ export default {
       console.error(error)
     }
   },
+
+  // https://www.notion.so/kinopio/JS-Bridge-Documentation-35ab7038df63439592b525b918d3acfa
   sendHaptics (body) {
-    // ??add user preference here to disable haptics??
+    const shouldPrevent = cache.getLocal('user').shouldDisableHapticFeedback
+    if (shouldPrevent) { return }
     const name = utils.capitalizeFirstLetter(body.name)
     body.name = `on${name}Feedback`
     this.send(body)
   }
 }
-
-// // Haptic Feedback
-
-// import postMessage from '@/postMessage.js'
-// postMessage.sendHaptics({ name: 'softImpact' })
-
-// X  on SoftImpact Feedback: painting locked, item drag start locked
-// X on Selection Feedback: when painting/box-selecting over items
-// X on LightImpact Feedback: x card details/ x connection details/ x box details/x multiactions is open,
-// on MediumImpact Feedback: connection created to card
-
-// for notifications
-// on Success Feedback:
-// on Warning Feedback:
-// on Error Feedback:
-
-// unused
-
-// onHeavyImpactFeedback
-// on RigidImpact Feedback:
-
-// settings: [] haptic feedback , if appcontentsecure ,
