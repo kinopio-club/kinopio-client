@@ -1246,18 +1246,30 @@ const store = createStore({
     notifySpaceNotFound: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifySpaceNotFound = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'error' })
+      }
     },
     notifyConnectionError: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyConnectionError = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'error' })
+      }
     },
     notifyConnectionErrorName: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.notifyConnectionErrorName = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'error' })
+      }
     },
     notifyServerCouldNotSave: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyServerCouldNotSave = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'error' })
+      }
     },
     notifySpaceIsRemoved: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
