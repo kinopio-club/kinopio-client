@@ -34,11 +34,7 @@ export default {
 // X on Selection Feedback: when painting/box-selecting over items
 // X on MediumImpact Feedback: x card details/ x connection details/ x box details/x multiactions is open,
 
-// on LightImpact Feedback: click list item (eg spacedetails -> spacelist), clicking any <button, label btn> , clicking button-badge
-//
-// .results-list li
-// .button-badge
-// button, label
+// on LightImpact Feedback: connection created to card
 
 // postMessage.sendLightHaptics()
 
@@ -51,3 +47,5 @@ export default {
 
 // onHeavyImpactFeedback
 // on RigidImpact Feedback:
+
+// click list item (eg spacedetails -> spacelist), clicking any <button, label btn> , clicking button-badge
