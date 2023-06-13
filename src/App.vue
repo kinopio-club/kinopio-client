@@ -287,7 +287,7 @@ export default {
       if (spaceIsPrivate) { return }
       const head = document.querySelector('head')
       const spaceId = this.$store.state.currentSpace.id
-      const url = `${consts.host()}/space/${spaceId}/feed.json`
+      const url = `${consts.apiHost()}/space/${spaceId}/feed.json`
       let link = document.createElement('link')
       link.rel = 'alternative'
       link.type = 'application/rss+xml'
