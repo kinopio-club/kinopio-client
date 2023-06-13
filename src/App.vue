@@ -1122,8 +1122,8 @@ code
   background-image url('assets/logo-base.png')
 .logo
   .logo-image
-    width 47px
-    height 41px
+    width 40px
+    height 35px
     background-repeat no-repeat
     background-size contain
     display inline-block
