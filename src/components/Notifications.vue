@@ -108,12 +108,7 @@ aside.notifications(@click.left="closeAllDialogs")
       span Kinopio updates are available
     .row
       .button-wrap
-        button(@click.left.stop="showWhatsNew")
-          span What's New
-          img.updated.icon(src="@/assets/updated.gif")
-      .button-wrap
-        button(@click.left="refreshBrowser")
-          span Update
+        button(@click.left="refreshBrowser") Update
 
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
     p Error saving changes to server, retrying…
@@ -420,9 +415,6 @@ export default {
     },
     removeNotifyConnectionError () {
       this.$store.commit('notifyConnectionError', false)
-    },
-    showWhatsNew () {
-      this.$store.commit('triggerAboutWhatsNewIsVisible')
     }
   }
 }

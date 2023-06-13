@@ -299,11 +299,6 @@ export default {
         this.sidebarIsVisible = true
       } else if (mutation.type === 'triggerImportIsVisible') {
         this.importIsVisible = true
-      } else if (mutation.type === 'triggerAboutWhatsNewIsVisible') {
-        this.aboutIsVisible = true
-        this.$nextTick(() => {
-          this.$store.commit('triggerWhatsNewIsVisible')
-        })
       }
     })
   },
