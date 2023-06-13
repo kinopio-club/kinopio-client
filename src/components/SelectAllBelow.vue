@@ -45,6 +45,11 @@ export default {
       if (this.$store.state.isEmbedMode) { return }
       const edgeThreshold = 30
       let header = document.querySelector('header').getBoundingClientRect().height
+      let toolbar = document.querySelector('nav.toolbar')
+      if (toolbar) {
+        toolbar = toolbar.getBoundingClientRect().height
+        header = header + toolbar + 5
+      }
       let footer = document.querySelector('.footer-wrap footer')
       if (footer) {
         footer = footer.getBoundingClientRect().height + 20

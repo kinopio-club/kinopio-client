@@ -54,7 +54,7 @@ export default {
 <style lang="stylus">
 .toolbar
   position absolute
-  top 55px
+  top 65px
   .toolbar-badge-wrap
     pointer-events none
     position absolute
