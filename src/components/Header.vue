@@ -135,11 +135,11 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               Loader(:visible="loadingSignUpOrIn")
             SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
           //- Upgrade
-          .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
+          .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn && !isPricingHidden")
             button(@click.left.stop="triggerUpgradeUserIsVisible")
               span Upgrade
           //- Pricing
-          .button-wrap(v-if="!currentUserIsSignedIn")
+          .button-wrap(v-if="!currentUserIsSignedIn && !isPricingHidden")
             button(@click.left.stop="togglePricingIsVisible" :class="{active : pricingIsVisible}")
               span Pricing
 
@@ -345,6 +345,7 @@ export default {
       'currentUser/isSignedIn',
       'currentUser/totalFiltersActive'
     ]),
+    isPricingHidden () { return this.$store.state.isPricingHidden },
     currentSpaceIsHidden () { return this.$store.state.currentSpace.isHidden },
     kinopioDomain () { return consts.kinopioDomain() },
     userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible },

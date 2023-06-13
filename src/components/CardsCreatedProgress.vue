@@ -12,6 +12,7 @@ defineProps({
 
 const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCount || 0)
 const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
+const isPricingHidden = computed(() => store.state.isPricingHidden)
 
 const togglePricingIsVisible = () => {
   const value = !store.state.pricingIsVisible
@@ -24,7 +25,8 @@ const togglePricingIsVisible = () => {
 .cards-created-progress
   .info
     p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
-    button.small-button(@click="togglePricingIsVisible") Pricing
+    template(v-if="!isPricingHidden")
+      button.small-button(@click="togglePricingIsVisible") Pricing
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
 
 </template>
