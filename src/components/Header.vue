@@ -753,25 +753,19 @@ header
   .logo
     cursor pointer
     display flex
-    > .logo-image
-      min-width 45px
       .label-badge
         bottom -2px
     img
       vertical-align middle
     .down-arrow
-      padding-left 4px
-      opacity 0.4
-    &:hover,
-    &:focus
-      .label-badge
-        transform translateY(2px)
-      .down-arrow
-        transform translateY(3px)
+      padding-left 2px
+      opacity 0.5
+    .label-badge
+      transform translateY(10px)
     &:active,
     &.active
       .down-arrow
-        transform translateY(5px)
+        transform translateY(2px)
 
   .embed-nav
     .logo
