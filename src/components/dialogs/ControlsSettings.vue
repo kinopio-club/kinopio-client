@@ -10,7 +10,7 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
         input(type="checkbox" v-model="newSpacesAreBlank")
         span New Spaces Are Blank
-  section(v-if="isNativeApp")
+  section(v-if="deviceSupportsHapticFeedback")
     .row
       p Device
     .row
@@ -82,7 +82,7 @@ export default {
     panSpeedIsFast () { return this.$store.state.currentUser.panSpeedIsFast },
     newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank },
     shouldDisableHapticFeedback () { return this.$store.state.currentUser.shouldDisableHapticFeedback },
-    isNativeApp () { return window.navigator.isSecureAppContext }
+    deviceSupportsHapticFeedback () { return window.navigator.isSecureAppContext && this.isMobile }
   },
   methods: {
     toggleShouldDisableHapticFeedback () {
