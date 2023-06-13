@@ -45,7 +45,7 @@ export default {
       }
     },
     updateUrl () {
-      this.url = `${consts.host(true)}/space/explore-spaces/feed.json`
+      this.url = `${consts.apiHost(true)}/space/explore-spaces/feed.json`
     }
   },
   watch: {
