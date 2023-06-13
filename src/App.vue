@@ -1040,10 +1040,6 @@ code
 .open
   vertical-align -2px
 
-.updated
-  margin 0
-  margin-left 3px
-
 .visit
   vertical-align 1px
 
