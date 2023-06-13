@@ -4,11 +4,11 @@
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}" :class="{'no-padding': shouldHideInfo && !shouldHideImage, 'is-no-info': !previewHasInfo}")
       //- card details buttons
-      .content-buttons
+      .content-buttons(v-if="canEditCard")
         .row
           //- hide url
-          .button-wrap(v-if="moreOptionsIsVisible")
-            button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}" :disabled="!canEditCard")
+          .button-wrap
+            button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}")
               img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
               img.icon(v-else src="@/assets/view.svg")
               span Hide URL
@@ -18,13 +18,13 @@
         //- all, image, text, none
         .row(v-if="previewHasInfo && moreOptionsIsVisible")
           .segmented-buttons
-            button(v-if="previewHasImage && previewHasInfo" @click="showAll" :class="{active : isShowAll}" :disabled="!canEditCard")
+            button(v-if="previewHasImage && previewHasInfo" @click="showAll" :class="{active : isShowAll}")
               span All
-            button(v-if="previewHasImage" @click="showImage" :class="{active : isShowImage}" :disabled="!canEditCard")
+            button(v-if="previewHasImage" @click="showImage" :class="{active : isShowImage}")
               span Image
-            button(v-if="previewHasInfo" @click="showInfo" :class="{active : isShowInfo}" :disabled="!canEditCard")
+            button(v-if="previewHasInfo" @click="showInfo" :class="{active : isShowInfo}")
               span Text
-            button(@click="showNone" :class="{active : isShowNone}" :disabled="!canEditCard")
+            button(@click="showNone" :class="{active : isShowNone}")
               span None
 
       //- image
