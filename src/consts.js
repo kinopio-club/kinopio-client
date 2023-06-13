@@ -30,7 +30,7 @@ export default {
     }
     return domain
   },
-  host () {
+  apiHost () {
     let host = 'https://api.kinopio.club'
     if (this.isDevelopment()) {
       host = 'https://kinopio.local:3000'

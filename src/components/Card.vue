@@ -105,7 +105,7 @@ article#card(
               img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
           //- Url →
-          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent @click.stop.prevent="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible, 'is-hidden-by-opacity': isPresentationMode}" target="_blank")
+          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible, 'is-hidden-by-opacity': isPresentationMode}" target="_blank")
             .url.inline-button-wrap
               button.inline-button(:style="{background: itemBackground}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -209,6 +209,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import CardCounter from '@/components/CardCounter.vue'
 import consts from '@/consts.js'
+import postMessage from '@/postMessage.js'
 
 import dayjs from 'dayjs'
 import { mapState, mapGetters } from 'vuex'
@@ -860,7 +861,11 @@ export default {
       })
     },
     isConnectingTo () {
-      return this.currentConnectionSuccess.id === this.id
+      const connectingToId = this.currentConnectionSuccess.id
+      if (connectingToId) {
+        postMessage.sendHaptics({ name: 'mediumImpact' })
+      }
+      return connectingToId === this.id
     },
     isConnectingFrom () {
       return this.currentConnectionStartCardIds.find(cardId => cardId === this.id)
@@ -1579,6 +1584,7 @@ export default {
       this.$store.commit('currentDraggingConnectedCardIds', connectedCardIds)
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
+      postMessage.sendHaptics({ name: 'softImpact' })
       const updates = {
         cardId: this.card.id,
         userId: this.currentUser.id
@@ -1656,6 +1662,9 @@ export default {
     openUrl (event, url) {
       if (event) {
         if (event.metaKey || event.ctrlKey) {
+          this.$nextTick(() => {
+            this.$store.dispatch('closeAllDialogs')
+          })
           return
         } else {
           event.preventDefault()

@@ -10,6 +10,15 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
         input(type="checkbox" v-model="newSpacesAreBlank")
         span New Spaces Are Blank
+  section(v-if="deviceSupportsHapticFeedback")
+    .row
+      p Device
+    .row
+      label.variable-length-content(:class="{active: shouldDisableHapticFeedback}" @click.left.prevent="toggleShouldDisableHapticFeedback" @keydown.stop.enter="toggleShouldDisableHapticFeedback")
+        input(type="checkbox" v-model="shouldDisableHapticFeedback")
+        img.icon.vibrate(src="@/assets/vibrate.svg")
+        span Disable Haptic Feedback
+
   section
     .row
       p Motion
@@ -71,9 +80,15 @@ export default {
     shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle },
     controlsSettingsIsPinned () { return this.$store.state.controlsSettingsIsPinned },
     panSpeedIsFast () { return this.$store.state.currentUser.panSpeedIsFast },
-    newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank }
+    newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank },
+    shouldDisableHapticFeedback () { return this.$store.state.currentUser.shouldDisableHapticFeedback },
+    deviceSupportsHapticFeedback () { return window.navigator.isSecureAppContext && this.isMobile }
   },
   methods: {
+    toggleShouldDisableHapticFeedback () {
+      const value = !this.shouldDisableHapticFeedback
+      this.$store.commit('currentUser/shouldDisableHapticFeedback', value)
+    },
     toggleNewSpacesAreBlank () {
       const value = !this.newSpacesAreBlank
       this.$store.dispatch('currentUser/newSpacesAreBlank', value)
@@ -134,4 +149,6 @@ export default {
   .panning-speed-buttons
     margin-left 6px
     margin-top 0
+  .icon.vibrate
+    vertical-align 1px
 </style>

@@ -79,23 +79,23 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       template(v-if="canEditCard")
         //- Remove
         .button-wrap
-          button.danger(@click.left="removeCard")
+          button.danger(@click.left="removeCard" title="Remove Card")
             img.icon.remove(src="@/assets/remove.svg")
             //- span Remove
         //- [·]
         .button-wrap.cards-checkboxes
-          label(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0")
+          label(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0" title="Checkbox")
             input(type="checkbox" v-model="checkboxIsChecked" tabindex="-1")
           label(v-else @click.left.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
             input.add(type="checkbox" tabindex="-1")
         //- Image
         .button-wrap
-          button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
+          button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}" title="Image")
             img.icon.flower(src="@/assets/flower.svg")
           ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImageOrFile")
         //- Toggle Style Actions
         .button-wrap
-          button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}")
+          button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}" title="More Options")
             img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
       //- Share
       .button-wrap.share-button-wrap(v-if="isName" @click.left.stop="toggleShareCardIsVisible" )

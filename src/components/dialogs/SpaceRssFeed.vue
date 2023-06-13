@@ -57,7 +57,7 @@ export default {
     },
     updateUrl () {
       const spaceId = this.$store.state.currentSpace.id
-      this.url = `${consts.host()}/space/${spaceId}/feed.json`
+      this.url = `${consts.apiHost()}/space/${spaceId}/feed.json`
     }
   },
   watch: {

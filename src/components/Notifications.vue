@@ -60,8 +60,11 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimit" :class="{'notification-jiggle': notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
     p To add more cards, you'll need to upgrade
     .row
-      button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
-
+      template(v-if="isPricingHidden")
+        a(:href="isPricingHiddenEmailSupportUrl")
+          button Contact Support
+      template(v-else)
+        button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
   .persistent-item.success(v-if="notifySignUpToEditSpace" ref="readOnly" :class="{'notification-jiggle': readOnlyJiggle}")
     p
       PrivacyIcon(:privacy="privacyState.name")
@@ -265,7 +268,14 @@ export default {
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(currentSpace.id)
     },
-    referralCreditAmount () { return consts.referralCreditAmount }
+    referralCreditAmount () { return consts.referralCreditAmount },
+    isPricingHidden () { return this.$store.state.isPricingHidden },
+    isPricingHiddenEmailSupportUrl () {
+      let address = 'support@kinopio.club'
+      const subject = 'Upgrading from iOS'
+      const body = "I'm using Kinopio on iOS. How do I upgrade my account and how much does it cost?"
+      return `mailto:${address}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    }
   },
   methods: {
     notifificationClasses (item) {

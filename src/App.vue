@@ -287,7 +287,7 @@ export default {
       if (spaceIsPrivate) { return }
       const head = document.querySelector('head')
       const spaceId = this.$store.state.currentSpace.id
-      const url = `${consts.host()}/space/${spaceId}/feed.json`
+      const url = `${consts.apiHost()}/space/${spaceId}/feed.json`
       let link = document.createElement('link')
       link.rel = 'alternative'
       link.type = 'application/rss+xml'
@@ -1122,8 +1122,8 @@ code
   background-image url('assets/logo-base.png')
 .logo
   .logo-image
-    width 47px
-    height 41px
+    width 44px
+    height 40px
     background-repeat no-repeat
     background-size contain
     display inline-block

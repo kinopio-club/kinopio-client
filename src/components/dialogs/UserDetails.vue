@@ -97,6 +97,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import postMessage from '@/postMessage.js'
 import { defineAsyncComponent } from 'vue'
 const User = defineAsyncComponent({
   loader: () => import('@/components/User.vue')
@@ -264,6 +265,7 @@ export default {
       })
     },
     signOut () {
+      postMessage.send({ name: 'onLogout' })
       cache.removeAll()
       // clear history wipe state from vue-router
       window.history.replaceState({}, 'Kinopio', '/')

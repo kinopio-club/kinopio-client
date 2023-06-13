@@ -15,10 +15,7 @@ const router = createRouter({
       component: () => import('./views/Add.vue'),
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
-        const isPricingHidden = urlParams.get('appStoreMode')
-        if (isPricingHidden) {
-          store.commit('isPricingHidden', isPricingHidden)
-        }
+        store.commit('isPricingHidden', window.navigator.isPricingHidden)
         store.commit('isAddPage', true)
         next()
       }
@@ -28,12 +25,8 @@ const router = createRouter({
       component: Space,
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
-        const disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
-        const isPricingHidden = urlParams.get('appStoreMode')
-        if (isPricingHidden) {
-          store.commit('isPricingHidden', isPricingHidden)
-        }
-        store.commit('disableViewportOptimizations', disableViewportOptimizations)
+        store.commit('isPricingHidden', window.navigator.isPricingHidden)
+        store.commit('disableViewportOptimizations', urlParams.get('disableViewportOptimizations'))
         next()
       }
     }, {

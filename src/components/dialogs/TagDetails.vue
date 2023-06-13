@@ -445,7 +445,6 @@ export default {
 .tag-details
   cursor auto
   transform-origin top left
-  overflow auto
   section.edit-card
     background-color var(--secondary-background)
   button.select-all

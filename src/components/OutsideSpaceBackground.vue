@@ -3,6 +3,8 @@
 </template>
 
 <script>
+import postMessage from '@/postMessage.js'
+
 // adapted from https://gist.github.com/pketh/3f62b807db3835d564c1
 let colorCycleTimer
 let colorCycleIteration = 0
@@ -95,6 +97,7 @@ export default {
     updateMetaThemeColor (color) {
       const metaThemeColor = document.querySelector('meta[name=theme-color]')
       metaThemeColor.setAttribute('content', color)
+      postMessage.send({ name: 'setBackgroundColor', value: color })
     }
   }
 }
