@@ -45,6 +45,9 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
           span Pan Fast
     .row(v-if="panSpeedIsFast")
       .badge.danger Fast panning is experimental. If panning is not smooth for you then switch back to slow
+  section
+    .row
+      p Debug
     .row
       label.variable-length-content(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
