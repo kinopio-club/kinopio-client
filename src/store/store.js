@@ -1007,6 +1007,7 @@ const store = createStore({
     },
     addToMultipleCardsSelected: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
+      postMessage.sendHaptics({ name: 'selection' })
       state.multipleCardsSelectedIds.push(cardId)
     },
     removeFromMultipleCardsSelected: (state, cardId) => {
@@ -1068,6 +1069,8 @@ const store = createStore({
       state.remoteConnectionsSelected = state.remoteConnectionsSelected.concat(updates)
     },
     addToMultipleConnectionsSelected: (state, connectionId) => {
+      utils.typeCheck({ value: connectionId, type: 'string' })
+      postMessage.sendHaptics({ name: 'selection' })
       state.multipleConnectionsSelectedIds.push(connectionId)
     },
     removeFromMultipleConnectionsSelected: (state, connectionId) => {
@@ -1117,6 +1120,7 @@ const store = createStore({
     },
     addToMultipleBoxesSelected: (state, boxId) => {
       utils.typeCheck({ value: boxId, type: 'string' })
+      postMessage.sendHaptics({ name: 'selection' })
       state.multipleBoxesSelectedIds.push(boxId)
     },
     removeFromMultipleBoxesSelected: (state, boxId) => {
