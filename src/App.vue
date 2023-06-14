@@ -625,7 +625,8 @@ dialog
   .button-wrap + label,
   .segmented-buttons + .button-wrap,
   .button-wrap + .segmented-buttons,
-  .segmented-buttons + .segmented-buttons
+  .segmented-buttons + .segmented-buttons,
+  .small-button + .small-button
     margin-left 6px
   .title-row
     display flex

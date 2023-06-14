@@ -6,6 +6,9 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
         BackgroundPreview(:space="currentSpace")
         span.title Background
       .row
+        button.small-button(:class="{active: currentBackgroundIsDefault}" @click.left.stop="updateDefaultBackground")
+          BackgroundPreview(:space="defaultBackground")
+          span Default
         button.small-button(v-if="canEditSpace" @click.left="removeBackgroundAll")
           img.icon(src="@/assets/remove.svg")
 
@@ -268,9 +271,29 @@ export default {
       let images = backgroundImages
       images = images.filter(image => !image.isArchived)
       return images
+    },
+    defaultBackground () {
+      const currentUser = this.$store.state.currentUser
+      return {
+        background: currentUser.defaultSpaceBackground,
+        backgroundTint: currentUser.defaultSpaceBackgroundTint
+      }
+    },
+    currentBackgroundIsDefault () {
+      const currentUser = this.$store.state.currentUser
+      const currentSpace = this.$store.state.currentSpace
+      const backgroundIsDefault = currentUser.defaultSpaceBackground === currentSpace.background
+      const backgroundTintIsDefault = currentUser.defaultSpaceBackgroundTint === currentSpace.backgroundTint
+      return backgroundIsDefault && backgroundTintIsDefault
     }
   },
   methods: {
+    updateDefaultBackground () {
+      const currentSpace = this.$store.state.currentSpace
+      const background = currentSpace.background
+      const backgroundTint = currentSpace.backgroundTint
+      this.$store.dispatch('currentUser/update', { defaultSpaceBackground: background, defaultSpaceBackgroundTint: backgroundTint })
+    },
     isSpaceUrl (image) {
       return image.url === this.background
     },
@@ -581,4 +604,12 @@ dialog.background
     margin-top 10px
   .arena-link
     padding-right 5px
+  .small-button
+    .background-preview
+      width 13px
+      margin-right 3px
+      .preview-wrap
+        width 13px
+        height 13px
+        vertical-align -1px
 </style>
