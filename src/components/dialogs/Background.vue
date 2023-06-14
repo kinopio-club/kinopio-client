@@ -6,7 +6,7 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
         BackgroundPreview(:space="currentSpace")
         span.title Background
       .row
-        button.small-button(:disabled="!canEditSpace" @click.left="removeBackgroundAll")
+        button.small-button(v-if="canEditSpace" @click.left="removeBackgroundAll")
           img.icon(src="@/assets/remove.svg")
 
   section(@mouseup.stop @touchend.stop)
