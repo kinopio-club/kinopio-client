@@ -26,6 +26,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
         :visible="colorPickerIsVisible"
         :removeIsVisible="isCards"
         :recentColors="itemColors"
+        :defaultCardColorIsVisible="true"
         @selectedColor="updateColor"
         @removeColor="removeColor"
       )

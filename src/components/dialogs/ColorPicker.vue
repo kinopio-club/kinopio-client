@@ -56,14 +56,23 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
         input(type="color" v-model="color")
         img.spectrum.icon(src="@/assets/spectrum.png")
 
-  //- Favorite Colors
-  section.favorite-colors
-    button.toggle-favorite-color(@click="toggleFavoriteColor")
-      img.icon(v-if="!currentColorIsUserColor" src="@/assets/heart-empty.svg")
-      img.icon(v-if="currentColorIsUserColor" src="@/assets/heart.svg")
-      span.current-color(:style="{ background: currentColor }")
-    template(v-for="color in favoriteColors")
-      button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color, 'isFavorite')")
+  section.user-colors
+    .row
+      //- default color
+      .segmented-buttons
+        button(@click.left.stop="updateDefaultCardColor")
+          span New Card Color
+          .default-color.current-color(:style="{ 'background-color': defaultCardColor }")
+        button(@click.left.stop="removeDefaultCardColor")
+          img.icon.cancel(src="@/assets/add.svg")
+    //- favorite colors
+    .row
+      button.toggle-favorite-color(@click="toggleFavoriteColor")
+        img.icon(v-if="!currentColorIsUserColor" src="@/assets/heart-empty.svg")
+        img.icon(v-if="currentColorIsUserColor" src="@/assets/heart.svg")
+        span.current-color(:style="{ background: currentColor }")
+      template(v-for="color in favoriteColors")
+        button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color, 'isFavorite')")
 
 </template>
 
@@ -85,7 +94,19 @@ export default {
     visible: Boolean,
     removeIsVisible: Boolean,
     shouldLightenColors: Boolean,
-    recentColors: Array
+    recentColors: Array,
+    defaultCardColorIsVisible: Boolean
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      const { type, payload } = mutation
+      if (type === 'triggerUpdateTheme') {
+        this.defaultColor = utils.cssVariable('secondary-background')
+      }
+    })
+  },
+  mounted () {
+    this.defaultColor = utils.cssVariable('secondary-background')
   },
   data () {
     return {
@@ -97,7 +118,8 @@ export default {
         blue: []
       },
       luminosity: 'light',
-      opacity: 100
+      opacity: 100,
+      defaultColor: '#e3e3e3'
     }
   },
   computed: {
@@ -130,9 +152,21 @@ export default {
         return utils.cssVariable('primary')
       }
       return utils.colorIsDark(this.currentColor)
-    }
+    },
+    defaultCardColor () {
+      const userDefault = this.$store.state.currentUser.defaultCardBackgroundColor
+      return userDefault || this.defaultColor
+    },
+    currentColorIsDefaultColor () { return this.defaultCardColor === this.currentColor }
   },
   methods: {
+    updateDefaultCardColor () {
+      const color = this.currentColor
+      this.$store.dispatch('currentUser/update', { defaultCardBackgroundColor: color })
+    },
+    removeDefaultCardColor () {
+      this.$store.dispatch('currentUser/update', { defaultCardBackgroundColor: null })
+    },
     colorIsCurrent (color) {
       return color === this.currentColor
     },
@@ -280,7 +314,7 @@ export default {
     width 14px
     height 14px
     pointer-events none
-  section.favorite-colors
+  section.user-colors
     display flex
     flex-wrap wrap
     align-items center
@@ -297,6 +331,9 @@ export default {
       display inline-block
     .color
       width 26px
+  .default-color
+    vertical-align -2px
+    margin-left 5px
   input
     border-color var(--primary-on-light-background)
     color var(--primary-on-light-background)
