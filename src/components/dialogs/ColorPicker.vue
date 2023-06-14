@@ -60,7 +60,7 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
     //- default color
     .row(v-if="defaultCardColorIsVisible")
       .segmented-buttons
-        button(@click.left.stop="updateDefaultCardColor")
+        button(@click.left.stop="updateDefaultCardColor" :class="{ active: currentColorIsDefaultColor }")
           span New Card Color
           .default-color.current-color(:style="{ 'background-color': defaultCardColor }")
         button(@click.left.stop="removeDefaultCardColor")
