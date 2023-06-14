@@ -8,19 +8,6 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
         span Use System Theme
   section
     .row
-      p Color to use as the default for new cards
-    .row
-      .button-wrap
-        .segmented-buttons
-          button(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-            .current-color(:style="{ 'background-color': defaultCardColor }")
-            span Card Color
-          button(@click.left.stop="removeDefaultCardColor")
-            img.icon.cancel(src="@/assets/add.svg")
-        ColorPicker(:currentColor="defaultCardColor" :visible="colorPickerIsVisible" @selectedColor="updateDefaultCardColor")
-
-  section
-    .row
       p Set current background as the default for new spaces
     .row
       .button-wrap
@@ -36,34 +23,15 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
 
 <script>
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
-import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'ColorsAndThemeSettings',
   components: {
-    BackgroundPreview,
-    ColorPicker
+    BackgroundPreview
   },
   props: {
     visible: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      const { type, payload } = mutation
-      if (type === 'triggerUpdateTheme') {
-        this.defaultColor = utils.cssVariable('secondary-background')
-      }
-    })
-  },
-  mounted () {
-    this.defaultColor = utils.cssVariable('secondary-background')
-  },
-  data () {
-    return {
-      colorPickerIsVisible: false,
-      defaultColor: '#e3e3e3'
-    }
   },
   computed: {
     currentUser () { return this.$store.state.currentUser },
@@ -84,40 +52,19 @@ export default {
       const backgroundTintIsDefault = this.currentUser.defaultSpaceBackgroundTint === this.currentSpace.backgroundTint
       return backgroundIsDefault && backgroundTintIsDefault
     },
-    defaultCardColor () {
-      const userDefault = this.currentUser.defaultCardBackgroundColor
-      return userDefault || this.defaultColor
-    },
     themeIsSystem () { return this.$store.state.currentUser.themeIsSystem }
   },
   methods: {
     toggleThemeIsSystem () {
       this.$store.dispatch('themes/toggleIsSystem')
     },
-    closeDialogs () {
-      this.colorPickerIsVisible = false
-    },
     updateBackground () {
       const background = this.currentSpace.background
       const backgroundTint = this.currentSpace.backgroundTint
       this.$store.dispatch('currentUser/update', { defaultSpaceBackground: background, defaultSpaceBackgroundTint: backgroundTint })
-      this.closeDialogs()
     },
     removeBackground () {
       this.$store.dispatch('currentUser/update', { defaultSpaceBackground: null, defaultSpaceBackgroundTint: null })
-      this.closeDialogs()
-    },
-    updateDefaultCardColor (color) {
-      this.$store.dispatch('currentUser/update', { defaultCardBackgroundColor: color })
-    },
-    removeDefaultCardColor () {
-      this.updateDefaultCardColor(null)
-      this.closeDialogs()
-    },
-    toggleColorPicker () {
-      const value = !this.colorPickerIsVisible
-      this.closeDialogs()
-      this.colorPickerIsVisible = value
     },
     updateTheme (themeName) {
       this.$store.dispatch('themes/update', themeName)
@@ -130,12 +77,4 @@ export default {
 dialog.theme-and-colors-settings
   .background-preview
     margin-right 6px
-  .current-color
-    height 14px
-    width 14px
-    margin-bottom 1px
-    border-radius var(--small-entity-radius)
-    display inline-block
-    vertical-align -3px
-    margin-right 5px
 </style>
