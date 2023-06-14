@@ -57,8 +57,8 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
         img.spectrum.icon(src="@/assets/spectrum.png")
 
   section.user-colors
-    .row
-      //- default color
+    //- default color
+    .row(v-if="defaultCardColorIsVisible")
       .segmented-buttons
         button(@click.left.stop="updateDefaultCardColor")
           span New Card Color

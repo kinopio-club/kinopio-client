@@ -86,7 +86,7 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
       .row
         .button-wrap
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-            span.current-color(:style="{ background: backgroundTintBadgeColor }")
+            span.current-color.background-tint-color(:style="{ background: backgroundTintBadgeColor }")
             span Background Tint
           ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
 
@@ -594,7 +594,7 @@ dialog.background
       margin 0
       margin-left 4px
       margin-bottom 4px
-  .current-color
+  .background-tint-color
     display inline-block
     margin-right 6px
     vertical-align -1px
