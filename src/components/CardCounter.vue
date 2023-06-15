@@ -8,7 +8,7 @@ const props = defineProps({
   card: Object
 })
 
-const counterValue = computed(() => props.card.counterValue || 1)
+const counterValue = computed(() => props.card.counterValue || 0)
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace'])
 
 const increment = () => {
