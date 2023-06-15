@@ -40,6 +40,11 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
           img.icon(src="@/assets/light.svg")
         button(title="dark colors" :class="{active: luminosity === 'dark'}" @click="updateLuminosity('dark')")
           img.icon(src="@/assets/dark.svg")
+      .button-wrap
+        button.small-button
+          .default-color.current-color(:style="{ 'background-color': defaultCardColor }")
+          span Default
+
     .row
       //- hue
       .segmented-buttons
@@ -58,13 +63,13 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
 
   section.user-colors
     //- default color
-    .row(v-if="defaultCardColorIsVisible")
-      .segmented-buttons
-        button(@click.left.stop="updateDefaultCardColor" :class="{ active: currentColorIsDefaultColor }")
-          span New Card Color
-          .default-color.current-color(:style="{ 'background-color': defaultCardColor }")
-        button(@click.left.stop="removeDefaultCardColor")
-          img.icon.cancel(src="@/assets/add.svg")
+    //- .row(v-if="defaultCardColorIsVisible")
+    //-   .segmented-buttons
+    //-     button(@click.left.stop="updateDefaultCardColor" :class="{ active: currentColorIsDefaultColor }")
+    //-       span New Card Color
+    //-       .default-color.current-color(:style="{ 'background-color': defaultCardColor }")
+    //-     button(@click.left.stop="removeDefaultCardColor")
+    //-       img.icon.cancel(src="@/assets/add.svg")
     //- favorite colors
     .row
       button.toggle-favorite-color(@click="toggleFavoriteColor")
@@ -324,16 +329,17 @@ export default {
       align-items center
       margin-right 5px
       margin-bottom 5px
-    .current-color
+    .color
+      width 26px
+  .current-color
       height 14px
       width 14px
       border-radius var(--small-entity-radius)
       display inline-block
-    .color
-      width 26px
   .default-color
     vertical-align -2px
-    margin-left 5px
+    // margin-left 5px
+    margin-right 3px
   input
     border-color var(--primary-on-light-background)
     color var(--primary-on-light-background)
