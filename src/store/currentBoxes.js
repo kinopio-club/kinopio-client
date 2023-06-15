@@ -370,6 +370,7 @@ export default {
       }
       let boxes = context.getters.isSelected
       boxes = boxes.filter(box => !box.isLocked)
+      boxes = boxes.filter(box => context.rootGetters['currentUser/canEditBox'](box))
       // prevent boxes bunching up at 0
       boxes.forEach(box => {
         if (!box) { return }
