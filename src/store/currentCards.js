@@ -448,6 +448,7 @@ const currentCards = {
       cards = cards.filter(card => Boolean(card))
       if (!cards.length) { return }
       cards = cards.filter(card => !card.isLocked)
+      cards = cards.filter(card => context.rootGetters['currentUser/canEditCard'](card))
       // prevent cards bunching up at 0
       cards.forEach(card => {
         if (!card) { return }
