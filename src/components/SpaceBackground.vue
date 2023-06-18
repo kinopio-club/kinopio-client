@@ -1,13 +1,14 @@
 <template lang="pug">
 .space-background(:style="backgroundStyles" :class="{invert: shouldInvertInDarkTheme}")
 .layout-viewport#layout-viewport(v-if="visible" :style="{ background: backgroundTint }")
-.layout-viewport.dark-theme-tint(v-if="isThemeDark && !spaceBackgroundTintIsDark" :class="{darker: shouldDarkenInDarkTheme}")
 </template>
 
 <script>
 import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
 import postMessage from '@/postMessage.js'
+
+import { colord, extend } from 'colord'
 
 export default {
   name: 'SpaceBackground',
@@ -43,7 +44,15 @@ export default {
       return this.currentSpace.background || defaultBackground
     },
     backgroundTint () {
-      const color = this.currentSpace.backgroundTint
+      let color = this.currentSpace.backgroundTint || 'white'
+      let darkness = 0
+      if (this.shouldDarkenTint) {
+        darkness = 0.3
+      }
+      if (this.shouldDarkenTintBasedOnBackground) {
+        darkness = 0.7
+      }
+      color = colord(color).darken(darkness).toRgbString()
       postMessage.send({ name: 'setBackgroundTintColor', value: color })
       return color
     },
@@ -58,7 +67,10 @@ export default {
     spaceBackgroundTintIsDark () {
       return utils.colorIsDark(this.backgroundTint)
     },
-    shouldDarkenInDarkTheme () {
+    shouldDarkenTint () {
+      return this.isThemeDark && !this.spaceBackgroundTintIsDark
+    },
+    shouldDarkenTintBasedOnBackground () {
       if (!this.isThemeDark) { return }
       if (this.backgroundIsDefault) { return true }
       const data = this.kinopioBackgroundImageData
@@ -136,10 +148,6 @@ export default {
   z-index 0
   mix-blend-mode multiply
   transform-origin top left
-.dark-theme-tint
-  background-color rgba(0,0,0,0.3)
-  &.darker
-    background-color rgba(0,0,0,0.7)
 .space-background
   position absolute
   width 100%
