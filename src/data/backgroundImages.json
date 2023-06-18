@@ -13,14 +13,12 @@
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/dot-grid-2x.png",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/dot-grid.svg",
-    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/dot-grid-thumbnail.svg",
-    "shouldDarkenInDarkTheme": true
+    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/dot-grid-thumbnail.svg"
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-2x.png",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-preview.svg",
     "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-thumbnail-2.svg",
-    "shouldDarkenInDarkTheme": true,
     "shouldInvertInDarkTheme": true
   },
   {
@@ -32,7 +30,6 @@
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-boxes-2x.png",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-boxes-thumbnail.png",
     "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-boxes-thumbnail.png",
-    "shouldDarkenInDarkTheme": true,
     "isArchived": true
   },
   {
@@ -44,19 +41,16 @@
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-large-boxes-2x.png",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-large-boxes-thumbnail.png",
-    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-large-boxes-thumbnail.png",
-    "shouldDarkenInDarkTheme": true
+    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-large-boxes-thumbnail.png"
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-grid.jpeg",
-    "shouldDarkenInDarkTheme": true,
     "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/gem-grid-2x.png",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/gem-grid-2-2x.png",
     "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/gem-grid-2-thumbnail.svg",
-    "shouldDarkenInDarkTheme": true,
     "isArchived": true
   },
   {

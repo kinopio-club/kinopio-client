@@ -47,10 +47,7 @@ export default {
       let color = this.currentSpace.backgroundTint || 'white'
       let darkness = 0
       if (this.shouldDarkenTint) {
-        darkness = 0.3
-      }
-      if (this.shouldDarkenTintBasedOnBackground) {
-        darkness = 0.7
+        darkness = 0.2
       }
       color = colord(color).darken(darkness).toRgbString()
       postMessage.send({ name: 'setBackgroundTintColor', value: color })
@@ -69,13 +66,6 @@ export default {
     },
     shouldDarkenTint () {
       return this.isThemeDark && !this.spaceBackgroundTintIsDark
-    },
-    shouldDarkenTintBasedOnBackground () {
-      if (!this.isThemeDark) { return }
-      if (this.backgroundIsDefault) { return true }
-      const data = this.kinopioBackgroundImageData
-      if (!data) { return }
-      return data.shouldDarkenInDarkTheme
     },
     shouldInvertInDarkTheme () {
       if (!this.isThemeDark) { return }
