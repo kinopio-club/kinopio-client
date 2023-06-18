@@ -12,7 +12,6 @@
 
 <script>
 import backgroundImages from '@/data/backgroundImages.json'
-import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
 
 export default {
@@ -26,12 +25,10 @@ export default {
     backgroundTintStyles () {
       const color = this.space.backgroundTint
       if (color) {
-        postMessage.send({ name: 'setBackgroundTintColor', value: color })
         return {
           background: color
         }
       } else {
-        postMessage.send({ name: 'setBackgroundTintColor', value: '' })
         return {}
       }
     },

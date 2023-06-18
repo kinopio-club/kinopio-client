@@ -5,9 +5,11 @@ export default {
   send (body) {
     const shouldSendPostmessages = window.navigator.isSecureAppContext
     if (!window.webkit) { return }
+    if (!window.webkit.messageHandlers[body.name]) { return }
     try {
       console.log('🛫 sending postmessage', body)
       const value = body.value || ''
+      console.log(window.webkit.messageHandlers[body.name])
       window.webkit.messageHandlers[body.name].postMessage(value)
     } catch (error) {
       console.error(error)

@@ -7,6 +7,7 @@
 <script>
 import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
+import postMessage from '@/postMessage.js'
 
 export default {
   name: 'SpaceBackground',
@@ -43,6 +44,7 @@ export default {
     },
     backgroundTint () {
       const color = this.currentSpace.backgroundTint
+      postMessage.send({ name: 'setBackgroundTintColor', value: color })
       return color
     },
     isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
