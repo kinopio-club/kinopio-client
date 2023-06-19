@@ -612,6 +612,9 @@ const store = createStore({
     currentUserIsDrawingConnection: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsDrawingConnection = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'mediumImpact' })
+      }
     },
     currentConnectionSuccess: (state, object) => {
       utils.typeCheck({ value: object, type: 'object', allowUndefined: true })
