@@ -553,12 +553,16 @@ export default {
     },
     styles () {
       let zoom = this.spaceCounterZoomDecimal
-      if (this.$store.state.isTouchDevice) {
-        zoom = 1 / utils.visualViewport().scale
+      if (utils.isAndroid()) {
+        zoom = utils.visualViewport().scale
+      } else if (this.$store.state.isTouchDevice) {
+        // on iOS, keyboard focus zooms
+        zoom = 1
       }
+      const transform = `scale(${zoom})`
       const left = `${this.card.x + 8}px`
       const top = `${this.card.y + 8}px`
-      return { transform: `scale(${zoom})`, left, top }
+      return { transform, left, top }
     },
     cardUrlPreviewIsVisible () {
       const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
