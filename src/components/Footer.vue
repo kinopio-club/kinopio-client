@@ -3,7 +3,7 @@
   .left(v-if="leftIsVisble")
     footer
       Notifications
-      .controls(v-if="controlsIsVisible" :class="{'hidden': isHidden}")
+      .controls(v-if="controlsIsVisible" :class="{'hidden': isHiddenOnTouch}")
         section
           .button-wrap(v-if="userHasInbox")
             button(@click.left.prevent.stop="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
@@ -11,7 +11,7 @@
               img.icon.inbox-icon(src="@/assets/inbox.svg")
             AddToInbox(:visible="addToInboxIsVisible")
 
-  .right(:class="{'is-embed': isEmbedMode, 'hidden': isHidden}" v-if="!isMobileOrTouch")
+  .right(:class="{'is-embed': isEmbedMode, 'hidden': isHiddenOnTouch}" v-if="!isMobileOrTouch")
     SpaceZoom
     .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible")
       button.small-button(:class="{active: userSettingsIsVisible}" title="Settings → Controls")
@@ -28,9 +28,9 @@ import utils from '@/utils.js'
 import { mapState, mapGetters } from 'vuex'
 
 const fadeOutDuration = 10
-const hiddenDuration = 20
+const hiddenOnTouchDuration = 20
 const updatePositionDuration = 60
-let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
+let fadeOutIteration, fadeOutTimer, hiddenOnTouchIteration, hiddenOnTouchTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
 
 export default {
   name: 'Footer',
@@ -48,7 +48,7 @@ export default {
     return {
       position: {},
       isFadingOut: false,
-      isHidden: false,
+      isHiddenOnTouch: false,
       addToInboxIsVisible: false,
       userHasInbox: false
     }
@@ -60,7 +60,7 @@ export default {
       } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         this.updatePosition()
       } else if (mutation.type === 'triggerHideTouchInterface') {
-        this.hidden()
+        this.hideOnTouch()
       } else if (mutation.type === 'triggerAddToInboxIsVisible') {
         this.addToInboxIsVisible = true
       } else if (mutation.type === 'triggerCheckIfUseHasInboxSpace') {
@@ -145,25 +145,25 @@ export default {
 
     // hide
 
-    hidden (event) {
+    hideOnTouch (event) {
       if (!this.isTouchDevice) { return }
-      hiddenIteration = 0
-      if (hiddenTimer) { return }
-      hiddenTimer = window.requestAnimationFrame(this.hiddenFrame)
+      hiddenOnTouchIteration = 0
+      if (hiddenOnTouchTimer) { return }
+      hiddenOnTouchTimer = window.requestAnimationFrame(this.hiddenOnTouchFrame)
     },
-    hiddenFrame () {
-      hiddenIteration++
-      this.isHidden = true
-      if (hiddenIteration < hiddenDuration) {
-        window.requestAnimationFrame(this.hiddenFrame)
+    hiddenOnTouchFrame () {
+      hiddenOnTouchIteration++
+      this.isHiddenOnTouch = true
+      if (hiddenOnTouchIteration < hiddenOnTouchDuration) {
+        window.requestAnimationFrame(this.hiddenOnTouchFrame)
       } else {
         this.cancelHidden()
       }
     },
     cancelHidden () {
-      window.cancelAnimationFrame(hiddenTimer)
-      hiddenTimer = undefined
-      this.isHidden = false
+      window.cancelAnimationFrame(hiddenOnTouchTimer)
+      hiddenOnTouchTimer = undefined
+      this.isHiddenOnTouch = false
     },
 
     // fade out
