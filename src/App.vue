@@ -81,7 +81,7 @@ export default {
     // use timer to prevent being fired from page reload scroll
     // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
     setTimeout(() => {
-      window.addEventListener('scroll', this.updateUserHasScrolled)
+      window.addEventListener('scroll', this.scroll)
     }, 100)
     this.updateMetaDescription()
     window.addEventListener('touchstart', this.touchStart)
@@ -91,7 +91,7 @@ export default {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.updateThemeFromSystem)
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.updateUserHasScrolled)
+    window.removeEventListener('scroll', this.scroll)
     window.removeEventListener('touchstart', this.touchStart)
     window.removeEventListener('touchmove', this.touchMove)
     window.removeEventListener('touchend', this.touchEnd)
@@ -158,6 +158,58 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
+    // events
+
+    touchStart (event) {
+      shouldCancelUndo = false
+      if (!utils.isMultiTouch(event)) {
+        multiTouchAction = null
+        return
+      }
+      this.$store.commit('shouldAddCard', false)
+      const touches = event.touches.length
+      if (touches >= 2) {
+        this.toggleIsPinchZooming(event)
+      }
+      // undo/redo
+      if (touches === 2) {
+        multiTouchAction = 'undo'
+      } else if (touches === 3) {
+        multiTouchAction = 'redo'
+      }
+    },
+    touchMove (event) {
+      const isFromDialog = event.target.closest('dialog')
+      if (isFromDialog) { return }
+      shouldCancelUndo = true
+      this.isTouchScrolling = true
+    },
+    touchEnd () {
+      if (this.$store.state.isAddPage) { return }
+      this.isPinchZooming = false
+      this.checkIfInertiaScrollEnd()
+      if (shouldCancelUndo) {
+        shouldCancelUndo = false
+        multiTouchAction = ''
+        return
+      }
+      if (!multiTouchAction) { return }
+      if (multiTouchAction === 'undo') {
+        this.$store.dispatch('history/undo')
+        this.$store.commit('addNotification', { message: 'Undo', icon: 'undo' })
+      } else if (multiTouchAction === 'redo') {
+        this.$store.dispatch('history/redo')
+        this.$store.commit('addNotification', { message: 'Redo', icon: 'redo' })
+      }
+      multiTouchAction = null
+    },
+    scroll () {
+      if (this.$store.state.userHasScrolled) { return }
+      this.$store.commit('userHasScrolled', true)
+    },
+
+    //
+
     themeFromSystem () {
       const themeIsSystem = this.$store.state.currentUser.themeIsSystem
       if (!themeIsSystem) { return }
@@ -183,30 +235,6 @@ export default {
       if (utils.shouldIgnoreTouchInteraction(event)) { return }
       this.isPinchZooming = true
     },
-    touchStart (event) {
-      shouldCancelUndo = false
-      if (!utils.isMultiTouch(event)) {
-        multiTouchAction = null
-        return
-      }
-      this.$store.commit('shouldAddCard', false)
-      const touches = event.touches.length
-      if (touches >= 2) {
-        this.toggleIsPinchZooming(event)
-      }
-      // undo/redo
-      if (touches === 2) {
-        multiTouchAction = 'undo'
-      } else if (touches === 3) {
-        multiTouchAction = 'redo'
-      }
-    },
-    touchMove (event) {
-      const isFromDialog = event.target.closest('dialog')
-      if (isFromDialog) { return }
-      shouldCancelUndo = true
-      this.isTouchScrolling = true
-    },
     checkIfInertiaScrollEnd () {
       if (!utils.isAndroid) { return }
       if (inertiaScrollEndIntervalTimer) { return }
@@ -228,25 +256,6 @@ export default {
         }
       }, 250)
     },
-    touchEnd () {
-      if (this.$store.state.isAddPage) { return }
-      this.isPinchZooming = false
-      this.checkIfInertiaScrollEnd()
-      if (shouldCancelUndo) {
-        shouldCancelUndo = false
-        multiTouchAction = ''
-        return
-      }
-      if (!multiTouchAction) { return }
-      if (multiTouchAction === 'undo') {
-        this.$store.dispatch('history/undo')
-        this.$store.commit('addNotification', { message: 'Undo', icon: 'undo' })
-      } else if (multiTouchAction === 'redo') {
-        this.$store.dispatch('history/redo')
-        this.$store.commit('addNotification', { message: 'Redo', icon: 'redo' })
-      }
-      multiTouchAction = null
-    },
     broadcastUserCursor (event) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
@@ -257,10 +266,6 @@ export default {
     },
     isTouchDevice () {
       this.$store.commit('isTouchDevice', true)
-    },
-    updateUserHasScrolled () {
-      if (this.$store.state.userHasScrolled) { return }
-      this.$store.commit('userHasScrolled', true)
     },
     updateMetaDescription () {
       let description = 'Kinopio is the thinking tool for building new ideas and solving hard problems. Create spaces to brainstorm, research, plan and take notes.'
