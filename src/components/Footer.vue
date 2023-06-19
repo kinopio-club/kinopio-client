@@ -29,7 +29,7 @@ import { mapState, mapGetters } from 'vuex'
 
 const fadeOutDuration = 10
 const hiddenDuration = 20
-const updatePositionDuration = 60
+const updatePositionDuration = 120
 let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
 
 export default {
