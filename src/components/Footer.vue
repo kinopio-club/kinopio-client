@@ -6,7 +6,7 @@
       .controls(v-if="controlsIsVisible" :class="{'hidden': isHidden}")
         section
           .button-wrap(v-if="userHasInbox")
-            button(@click.left="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
+            button(@click.left.prevent.stop="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
               img.icon(src="@/assets/add.svg")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
             AddToInbox(:visible="addToInboxIsVisible")
@@ -104,13 +104,10 @@ export default {
     },
     controlsIsVisible () {
       const contentDialogIsVisible = Boolean(this.cardDetailsIsVisibleForCardId || this.multipleSelectedActionsIsVisible || this.connectionDetailsIsVisibleForConnectionId)
-      // only hide footer on touch devices
-      if (!this.isTouchDevice) { return true }
       if (this.shouldExplicitlyHideFooter) { return }
-      let isVisible = true
-      if (contentDialogIsVisible) { isVisible = false }
-      if (this.shouldHideFooter) { isVisible = false }
-      return isVisible
+      if (contentDialogIsVisible) { return }
+      if (this.shouldHideFooter) { return }
+      return true
     },
     isMobile () { return utils.isMobile() },
     isMobileStandalone () {
