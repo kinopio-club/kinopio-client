@@ -1,5 +1,5 @@
 <template lang="pug">
-.space-background#layout-viewport(:style="backgroundStyles" :class="{invert: shouldInvertInDarkTheme}")
+.space-background-image(:style="backgroundStyles" :class="{invert: shouldInvertInDarkTheme}")
 .space-background-tint(v-if="visible" :style="{ background: backgroundTint }")
 </template>
 
@@ -130,7 +130,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.space-background
+.space-background-image
   position absolute
   width 100%
   height 100%
