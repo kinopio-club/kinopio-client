@@ -974,7 +974,6 @@ export default {
       this.shareCardIsVisible = !isVisible
     },
     focusName (position) {
-      utils.disablePinchZoom()
       if (this.shouldPreventNextFocusOnName) {
         this.triggerUpdatePositionInVisualViewport()
         this.$store.commit('shouldPreventNextFocusOnName', false)
@@ -1010,12 +1009,9 @@ export default {
       if (utils.isIPhone()) {
         behavior = 'auto'
       }
-      utils.disablePinchZoom()
       this.$nextTick(() => {
-        if (!utils.isIPhone()) {
-          this.scrollIntoView(behavior)
-          this.focusName()
-        }
+        this.scrollIntoView(behavior)
+        this.focusName()
         this.triggerUpdateMagicPaintPositionOffset()
         this.triggerUpdatePositionInVisualViewport()
       })
@@ -1495,7 +1491,6 @@ export default {
     visible (visible) {
       if (!visible) {
         this.closeCard()
-        utils.enablePinchZoom()
       }
     }
   }
