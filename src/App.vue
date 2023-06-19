@@ -226,7 +226,7 @@ export default {
         } else {
           prevPosition = current
         }
-      }, 60)
+      }, 250)
     },
     touchEnd () {
       if (this.$store.state.isAddPage) { return }

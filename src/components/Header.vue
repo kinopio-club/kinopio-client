@@ -703,7 +703,6 @@ export default {
       }
     },
     isTouchScrolling (value) {
-      if (!utils.isAndroid()) { return }
       if (value) {
         this.fadeOut()
         this.updatePosition()
