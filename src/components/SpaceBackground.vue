@@ -1,6 +1,6 @@
 <template lang="pug">
-.space-background(:style="backgroundStyles" :class="{invert: shouldInvertInDarkTheme}")
-.layout-viewport#layout-viewport(v-if="visible" :style="{ background: backgroundTint }")
+.space-background#layout-viewport(:style="backgroundStyles" :class="{invert: shouldInvertInDarkTheme}")
+.space-background-tint(v-if="visible" :style="{ background: backgroundTint }")
 </template>
 
 <script>
@@ -130,14 +130,6 @@ export default {
 </script>
 
 <style lang="stylus">
-.layout-viewport
-  position fixed
-  width 110%
-  height 110%
-  pointer-events none
-  z-index 0
-  mix-blend-mode multiply
-  transform-origin top left
 .space-background
   position absolute
   width 100%
@@ -149,4 +141,12 @@ export default {
   &.invert
     filter invert()
 
+.space-background-tint
+  position absolute
+  width 110%
+  height 110%
+  pointer-events none
+  z-index 0
+  mix-blend-mode multiply
+  transform-origin top left
 </style>
