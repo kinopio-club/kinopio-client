@@ -270,6 +270,7 @@ export default {
   max-width 100%
   pointer-events none
   transform-origin left bottom
+  margin-bottom env(safe-area-inset-bottom)
   .right
     margin-left auto
     display flex
