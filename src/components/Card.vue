@@ -1830,7 +1830,6 @@ export default {
     showCardDetailsTouch (event) {
       this.cancelLocking()
       if (this.touchIsNearTouchPosition(event)) {
-        this.$store.commit('shouldPreventNextFocusOnName', true)
         this.showCardDetails(event)
       }
       const userId = this.currentUser.id
