@@ -230,6 +230,7 @@ const store = createStore({
     filteredConnectionTypeIds: [],
     filteredFrameIds: [],
     filteredTagNames: [],
+    spaceListFilterInfo: {},
 
     // card list item options
     cardListItemOptionsPosition: {}, // x, y
@@ -1383,6 +1384,10 @@ const store = createStore({
     removeFromFilteredTagNames: (state, name) => {
       utils.typeCheck({ value: name, type: 'string' })
       state.filteredTagNames = state.filteredTagNames.filter(tagName => tagName !== name)
+    },
+    spaceListFilterInfo: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
+      state.spaceListFilterInfo = value
     },
 
     // Card List Item Options
