@@ -128,8 +128,7 @@ export default {
       focusOnId: '',
       scrollY: 0,
       scrollHeight: null,
-      heightByIndex: {},
-      initialValue: ''
+      heightByIndex: {}
     }
   },
   mounted () {
@@ -276,6 +275,9 @@ export default {
       if (!spaces.length) { return }
       if (!filter) {
         this.focusOnId = ''
+        this.$nextTick(() => {
+          this.updateScroll()
+        })
         return
       }
       this.focusOnId = spaces[0].id
