@@ -258,8 +258,10 @@ export default {
       }
       const position = utils.cursorPositionInPage(event)
       currentCursorPosition = position
+      // box selection
       if (this.$store.state.currentUserIsBoxSelecting) {
         this.$store.commit('currentUserBoxSelectEnd', position)
+      // panning
       } else if (this.$store.state.currentUserIsPanning) {
         event.preventDefault()
         if (!prevCursorPosition) {
