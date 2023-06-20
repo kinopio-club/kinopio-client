@@ -719,15 +719,21 @@ export default {
       const isSpaceScope = checkIsSpaceScope(event)
       if (!isSpaceScope) { return }
       event.preventDefault()
+      let position = currentCursorPosition || prevCursorPosition
+      position = this.updateWithZoom(position)
       // check card limits
       if (this.$store.getters['currentSpace/shouldPreventAddCard']) {
         this.$store.commit('notifyCardsCreatedIsOverLimit', true)
         return
       }
+      // check read only
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      if (!canEditSpace) {
+        this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
+        return
+      }
       // get clipboard data
       let data = await this.getClipboardData()
-      let position = currentCursorPosition || prevCursorPosition
-      position = this.updateWithZoom(position)
       console.log('🎊 pasteData', data, position)
       if (!data) { return }
       this.$store.commit('closeAllDialogs')
