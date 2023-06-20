@@ -10,7 +10,8 @@ const dialog = ref(null)
 
 const props = defineProps({
   visible: Boolean,
-  card: Object
+  card: Object,
+  isReadOnly: Boolean
 })
 
 // anon user
@@ -78,7 +79,7 @@ const webShare = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{ 'read-only': props.isReadOnly }")
   section(v-if="canShare")
     section.subsection
       .row
@@ -101,4 +102,6 @@ dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="di
 <style lang="stylus">
 .share-card
   left -100px
+  &.read-only
+    left 8px
 </style>

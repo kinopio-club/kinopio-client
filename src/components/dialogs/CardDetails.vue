@@ -101,7 +101,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .button-wrap.share-button-wrap(v-if="isName" @click.left.stop="toggleShareCardIsVisible" )
         button(:class="{active: shareCardIsVisible}")
           span Share
-        ShareCard(:visible="shareCardIsVisible" :card="card")
+        ShareCard(:visible="shareCardIsVisible" :card="card" :isReadOnly="!canEditCard")
 
     CardBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
     CardCollaborationInfo(:visible="shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
