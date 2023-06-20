@@ -7,6 +7,7 @@ span.space-list-wrap
     :isLoading="isLoading"
     :parentIsPinned="parentIsPinned"
     :showCreateNewSpaceFromSearch="showCreateNewSpaceFromSearch"
+    :isInitialValueFromSpaceListFilterInfo="true"
     @updateFilter="updateFilter"
     @updateFilteredItems="updateFilteredSpaces"
     @focusNextItem="focusNextItemFromFilter"
@@ -177,7 +178,6 @@ export default {
     }
   },
   methods: {
-    // favorite
     isFavorite (space) {
       const favorites = this.$store.state.currentUser.favoriteSpaces
       const isFavorite = favorites.find(favorite => favorite.id === space.id)
@@ -263,12 +263,21 @@ export default {
     updateFilteredSpaces (spaces) {
       this.filteredSpaces = spaces
     },
-    updateFilter (filter) {
+    updateFilter (filter, isClearFilter) {
       this.filter = filter
+      if (!isClearFilter) {
+        this.$store.commit('spaceListFilterInfo', {
+          filter,
+          updatedAt: new Date().getTime()
+        })
+      }
       const spaces = this.spacesFiltered || this.spaces
       if (!spaces.length) { return }
       if (!filter) {
         this.focusOnId = ''
+        this.$nextTick(() => {
+          this.updateScroll()
+        })
         return
       }
       this.focusOnId = spaces[0].id
