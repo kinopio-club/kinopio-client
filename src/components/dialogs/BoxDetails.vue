@@ -23,13 +23,16 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         maxLength="600"
         :class="{'is-dark': colorisDark}"
       )
-    CardBoxActions(:visible="true" :boxes="[box]" @closeDialogs="closeDialogs" :colorIsHidden="true" :isDisabled="!canEditBox")
-    .row
+    CardBoxActions(:visible="canEditBox" :boxes="[box]" @closeDialogs="closeDialogs" :colorIsHidden="true")
+    .row(v-if="canEditBox")
       //- remove
       .button-wrap
-        button(:disabled="!canEditBox" @click.left="removeBox")
+        button.danger(@click.left="removeBox")
           img.icon(src="@/assets/remove.svg")
-          span Remove
+    .row(v-if="!canEditBox")
+      span.badge.info
+        img.icon(src="@/assets/unlock.svg")
+        span Read Only
 
 </template>
 

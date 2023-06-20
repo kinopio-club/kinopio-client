@@ -9,7 +9,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
       input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="focus" @blur="blur" :class="{'is-dark': typeColorisDark}")
 
-    .row
+    .row(v-if="canEditConnection")
       //- Arrows or Label
       ConnectionDecorators(:connections="[currentConnection]")
 
@@ -28,16 +28,15 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       template(v-else-if="spacePrivacyIsClosed")
         span.badge.info
           img.icon(src="@/assets/unlock.svg")
-          span To edit closed spaces, you'll need to be invited
-    .row
+          span Read Only
+    .row(v-if="canEditConnection")
       //- Remove
-      button.danger(:disabled="!canEditConnection" @click.left="removeConnection")
+      button.danger(@click.left="removeConnection")
         img.icon(src="@/assets/remove.svg")
-        span Remove
-  section.results-actions(ref="resultsActions")
+  section.results-actions(v-if="canEditConnection" ref="resultsActions")
     //- Use Last Type
     .row.title-row
-      label(:class="{active: shouldUseLastConnectionType, disabled: !canEditConnection}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
+      label(:class="{active: shouldUseLastConnectionType}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
         input(type="checkbox" v-model="shouldUseLastConnectionType")
         .badge.badge-in-button(:style="{backgroundColor: typeColor}")
         span Use Last Type
@@ -46,7 +45,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         img.icon(src="@/assets/filter.svg")
 
     .row
-      button(:disabled="!canEditConnection" @click.left="addConnectionType")
+      button(@click.left="addConnectionType")
         img.icon(src="@/assets/add.svg")
         .badge.badge-in-button(:style="{backgroundColor: nextConnectionTypeColor}")
         span Type
