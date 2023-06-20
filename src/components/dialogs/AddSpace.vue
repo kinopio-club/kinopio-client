@@ -15,6 +15,7 @@ dialog.add-space.narrow(
         button.success(@click="addSpace")
           img.icon(src="@/assets/add.svg")
           span New Space
+
     //- Add Journal
     .row
       .segmented-buttons
@@ -24,26 +25,21 @@ dialog.add-space.narrow(
           span Daily Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+
     //- Journal Settings
     template(v-if="editPromptsIsVisible")
+      //- weather
       section.subsection
         Weather
-        //- daily prompt
+      //- daily prompt
+      section.subsection
         .row.daily-prompt-row
           .button-wrap
             button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
               img.icon.today(src="@/assets/today.svg")
               span Prompt of the Day
-          .button-wrap
-            button.small-button(@click="toggleDailyPromptInfoIsVisible" :class="{ active: dailyPromptInfoIsVisible }")
-              span Info
-
-        //- daily prompt info
-        template(v-if="dailyPromptInfoIsVisible")
-          p Everyone in the community shares the same daily prompt, which is also shared in{{' '}}
-            a(href="https://discord.gg/h2sR45Nby8") Discord
-          p Today's prompt is “{{dailyPrompt}}”
-
+        .row(v-if="shouldCreateJournalsWithDailyPrompt")
+          p {{dailyPrompt}}
       //- prompts
       section.subsection
         JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
@@ -112,8 +108,7 @@ export default {
       urlIsCopied: false,
       screenIsShort: false,
       dialogHeight: null,
-      hasInboxSpace: true,
-      dailyPromptInfoIsVisible: false
+      hasInboxSpace: true
     }
   },
   computed: {
@@ -131,10 +126,6 @@ export default {
     }
   },
   methods: {
-    toggleDailyPromptInfoIsVisible () {
-      const value = !this.dailyPromptInfoIsVisible
-      this.dailyPromptInfoIsVisible = value
-    },
     toggleShouldCreateJournalsWithDailyPrompt () {
       const value = !this.shouldCreateJournalsWithDailyPrompt
       this.$store.dispatch('currentUser/update', { shouldCreateJournalsWithDailyPrompt: value })
