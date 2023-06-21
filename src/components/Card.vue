@@ -185,7 +185,7 @@ article#card(
     //- Counter
     CardCounter(:card="card")
     //- Created Through API
-    .badge.secondary(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
+    .badge.secondary(v-if="card.isCreatedThroughPublicApi && filterShowUsers" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
     //- User
     .badge-wrap(v-if="filterShowUsers")
