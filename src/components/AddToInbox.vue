@@ -4,7 +4,7 @@
     .row.title-row-flex
       span.title Add To Inbox
 
-      .button-wrap(v-if="!isNativeApp")
+      .button-wrap(v-if="!shouldHideInboxButton")
         a(:href="inboxUrl")
           button.small-button(@pointerup="changeToInboxSpace")
             img.icon.inbox-icon(src="@/assets/inbox.svg")
@@ -132,7 +132,10 @@ export default {
         return 'Type text here'
       }
     },
-    isNativeApp () { return window.navigator.isSecureAppContext }
+    shouldHideInboxButton () {
+      const isNativeApp = window.navigator.isSecureAppContext
+      return isNativeApp && this.isAddPage
+    }
   },
   methods: {
     insertUrl (event) {
