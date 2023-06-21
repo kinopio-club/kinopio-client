@@ -3,7 +3,8 @@
   section(:class="{'margin-bottom': isAddPage}")
     .row.title-row-flex
       span.title Add To Inbox
-      .button-wrap
+
+      .button-wrap(v-if="!isNativeApp")
         a(:href="inboxUrl")
           button.small-button(@pointerup="changeToInboxSpace")
             img.icon.inbox-icon(src="@/assets/inbox.svg")
@@ -130,7 +131,8 @@ export default {
       } else {
         return 'Type text here'
       }
-    }
+    },
+    isNativeApp () { return window.navigator.isSecureAppContext }
   },
   methods: {
     insertUrl (event) {
