@@ -1405,6 +1405,7 @@ export default {
       const value = !this.isChecked
       this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('currentCards/toggleChecked', { cardId: this.id, value })
+      postMessage.sendHaptics({ name: 'heavyImpact' })
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
       const userId = this.currentUser.id
