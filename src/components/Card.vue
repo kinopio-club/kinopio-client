@@ -444,7 +444,10 @@ export default {
     },
     resizeWidth () {
       if (this.isComment) { return }
-      const resizeWidth = this.card.resizeWidth
+      let resizeWidth = this.card.resizeWidth
+      if (this.embedIsVisible) {
+        resizeWidth = Math.max(resizeWidth, 235)
+      }
       if (!resizeWidth) { return }
       return resizeWidth
     },
