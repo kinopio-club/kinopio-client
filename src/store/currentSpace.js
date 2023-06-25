@@ -1152,6 +1152,11 @@ const currentSpace = {
 
     // users
 
+    allUsers: (state, getters) => (excludeCurrentUser) => {
+      let users = getters.members(excludeCurrentUser)
+      users = users.concat(state.spectators)
+      return users
+    },
     members: (state, getters, rootState) => (excludeCurrentUser) => {
       const users = state.users
       const collaborators = state.collaborators || []
