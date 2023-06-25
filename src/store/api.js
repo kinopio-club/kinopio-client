@@ -934,7 +934,7 @@ const self = {
       try {
         const apiKey = '0788beaa34f65adc0fe7ac'
         const host = 'https://iframe.ly/api/iframely'
-        const response = await fetch(`${host}/?url=${encodeURIComponent(url)}&api_key=${apiKey}`)
+        const response = await fetch(`${host}/?url=${encodeURIComponent(url)}&api_key=${apiKey}&autoplay=1`)
         if (response.status !== 200) {
           throw new Error(response.status)
         }

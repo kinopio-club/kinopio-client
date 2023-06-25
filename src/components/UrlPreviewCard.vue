@@ -1,10 +1,8 @@
 <script setup>
-import CardEmbed from '@/components/CardEmbed.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref } from 'vue'
-// https://vuex.vuejs.org/guide/composition-api.html#accessing-state-and-getters
 import { useStore } from 'vuex'
 const store = useStore()
 
@@ -17,13 +15,7 @@ const props = defineProps({
   visible: Boolean,
   isSelected: Boolean,
   isImageCard: Boolean,
-  urlPreviewImageIsVisible: Boolean,
-  isLoadingUrlPreview: Boolean
-})
-
-const state = reactive({
-  shouldDisplayEmbed: false,
-  embedUrl: ''
+  urlPreviewImageIsVisible: Boolean
 })
 
 const shouldHideImage = computed(() => props.card.shouldHideUrlPreviewImage)
@@ -36,80 +28,39 @@ const selectedColor = computed(() => {
   if (!props.isSelected) { return }
   return props.user.color
 })
-
-// youtube
-
-const isYoutubeUrl = computed(() => {
-  const url = props.card.urlPreviewUrl
-  return utils.urlIsYoutube(url)
+const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem)
+const embedIsScript = computed(() => {
+  const embed = props.card.urlPreviewEmbedHtml
+  if (!embed) { return }
+  return embed.includes('<script')
 })
-const isYoutubeShortenedUrl = computed(() => {
-  const url = props.card.urlPreviewUrl
-  return url.includes('https://youtu.be')
-})
-const youtubeUrlVideoId = () => {
-  if (!isYoutubeUrl.value) { return }
-  const url = props.card.urlPreviewUrl
-  let id
-  if (isYoutubeShortenedUrl.value) {
-    const idPattern = new RegExp(/([-a-zA-Z0-9_-])+$/g)
-    // matches end from last '/'
-    // https://youtu.be/-abABC123 → -abABC123
-    id = url.match(idPattern)[0]
-  } else {
-    // matches 'v=' until next qs '&'
-    // www.youtube.com/watch?v=PYeY8fWUyO8 → "v=PYeY8fWUyO8"
-    const idPattern = new RegExp(/v=([^&]+)/g)
-    id = url.match(idPattern)
-    if (!id) { return }
-    id = id[0]
-    id = id.slice(2, id.length)
-  }
-  return id
-}
-const youtubeUrlPlaylistId = () => {
-  if (!isYoutubeUrl.value) { return }
-  const url = props.card.urlPreviewUrl
-  let id
-  const idPattern = new RegExp(/list=([-a-zA-Z0-9_-])+$/g)
-  // https://regexr.com/7bk6t
-  // matches end from last 'list='
-  // https://youtu.be/playlist?list=abABC123 → list=abABC123
-  id = url.match(idPattern)
-  if (!id) { return }
-  id = id[0]
-  id = id.slice(5, id.length)
-  return id
-}
-const youtubeEmbedUrl = () => {
-  const videoId = youtubeUrlVideoId()
-  const playlistId = youtubeUrlPlaylistId()
-  // https://developers.google.com/youtube/player_parameters
-  const params = 'autoplay=1&color=white&playsinline=1&modestbranding=1'
-  let url
-  if (videoId) {
-    url = `https://www.youtube-nocookie.com/embed/${videoId}?${params}`
-  } else if (playlistId) {
-    url = `https://www.youtube-nocookie.com/embed/videoseries?list=${playlistId}&${params}`
-  }
-  return url
-}
+
+// embed
+
 const toggleShouldDisplayEmbed = () => {
   store.dispatch('closeAllDialogs')
-  const value = !state.shouldDisplayEmbed
+  const embedIsVisibleForCardId = store.state.embedIsVisibleForCardId
+  let value
+  if (props.card.id === embedIsVisibleForCardId) {
+    value = true
+  }
+  value = !value
   if (value) {
-    state.embedUrl = youtubeEmbedUrl()
-    if (!state.embedUrl) {
-      store.commit('addNotification', { message: 'Could not get embed URL', type: 'danger' })
-      return
-    }
     store.commit('embedIsVisibleForCardId', props.card.id)
   } else {
-    state.embedUrl = ''
     store.commit('embedIsVisibleForCardId', '')
   }
-  state.shouldDisplayEmbed = value
 }
+const shouldDisplayEmbed = computed(() => {
+  const embedIsVisibleForCardId = store.state.embedIsVisibleForCardId
+  return props.card.id === embedIsVisibleForCardId
+})
+
+const iframeHeightFromCardWidth = computed(() => {
+  const width = props.card.resizeWidth || props.card.width
+  const height = width * (2 / 3)
+  return height
+})
 
 // twitter
 
@@ -141,7 +92,7 @@ const title = computed(() => {
 })
 const description = computed(() => {
   let description = props.card.urlPreviewDescription
-  if (isImageCard.value || isYoutubeUrl.value) {
+  if (isImageCard.value) {
     return
   } else if (isTwitterUrl.value) {
     return removeTrailingTweetText(description)
@@ -154,20 +105,29 @@ const description = computed(() => {
 <template lang="pug">
 //- image
 .url-preview-card(v-if="visible" :style="{background: selectedColor}" :class="{'is-image-card': props.isImageCard}")
-  Loader(:visible="isLoadingUrlPreview")
-  CardEmbed(:visible="state.shouldDisplayEmbed" :url="state.embedUrl" :card="card")
-  .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage && !state.shouldDisplayEmbed")
-    img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" @load="updateDimensions" ref="image" @error="retryPreviewImage")
+  //- image
+  template(v-if="!shouldDisplayEmbed")
+    .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage")
+      img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" @load="updateDimensions" ref="image" @error="retryPreviewImage")
+
+  //- embed
+  template(v-if="shouldDisplayEmbed")
+    .embed(v-if="embedIsScript")
+      iframe(:srcdoc="card.urlPreviewEmbedHtml" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeightFromCardWidth + 'px' }")
+    .embed(v-else v-html="card.urlPreviewEmbedHtml")
+
   .row.info.badge.status(v-if="!shouldHideInfo" :style="{background: selectedColor}")
     //- play
-    .button-wrap.embed-button-wrap(v-if="isYoutubeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
+    .button-wrap.embed-button-wrap(v-if="card.urlPreviewEmbedHtml" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
       button.small-button
-        img.icon.stop(v-if="state.shouldDisplayEmbed" src="@/assets/box-filled.svg")
+        img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
         img.icon.play(v-else src="@/assets/play.svg")
+      img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+
     //- text
     .text(v-if="!shouldHideInfo")
       .row
-        template(v-if="!isYoutubeUrl")
+        template(v-if="!card.urlPreviewEmbedHtml")
           img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
         .title {{title}}
@@ -223,9 +183,22 @@ const description = computed(() => {
   .description
     margin-top 10px
 
+  .embed
+    width 100%
+    iframe
+      border none
+      border-radius var(--entity-radius)
+      border-bottom-left-radius 0
+      border-bottom-right-radius 0
+      max-width 100%
+      width 100%
+      height 100%
+      &.ignore
+        pointer-events none
+
   .embed-button-wrap
     flex-shrink 0
-    padding-right 6px
+    padding-right 4px
     button
       width 23px
       background transparent
@@ -237,6 +210,11 @@ const description = computed(() => {
         width 7px
         margin-left 3px
         margin-bottom 2px
+    .favicon
+      margin-left 4px
+      margin-right 0
+      margin-top 0
+      vertical-align -1px
 
   button
     &:disabled
