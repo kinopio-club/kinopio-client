@@ -1554,13 +1554,17 @@ export default {
       this.$store.dispatch('currentCards/removeResize', { cardIds })
     },
     updateStylesWithWidth (styles) {
-      const connectorIsNotVisibleToReadOnlyUser = (!this.connectorIsVisible && !this.isLocked) || this.isComment
+      const cardHasExtendedContent = this.cardUrlPreviewIsVisible || this.otherCardIsVisible || this.isVisualCard || this.isAudioCard
+      const connectorIsNotVisibleToReadOnlyUser = (!this.connectorIsVisible && !this.isLocked && !cardHasExtendedContent) || this.isComment
       if (this.width) {
         styles.width = this.width
       }
       if (this.resizeWidth) {
         styles.maxWidth = this.resizeWidth
         styles.width = this.resizeWidth
+      }
+      if (connectorIsNotVisibleToReadOnlyUser) {
+        styles.width = styles.width - 20
       }
       styles.width = styles.width + 'px'
       styles.maxWidth = styles.maxWidth + 'px'
