@@ -1945,7 +1945,6 @@ export default {
           html = data.html
         }
         this.updateUrlPreviewSuccess({ links, meta, cardId, url, html })
-        return true
       } catch (error) {
         console.warn('🚑', error, url)
         this.updateUrlPreviewErrorUrl(url)
@@ -2018,10 +2017,12 @@ export default {
     updateUrlPreviewErrorUrl (url) {
       const cardId = this.card.id
       this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+      const name = this.removeHiddenQueryString(this.card.name)
       const update = {
         id: cardId,
         urlPreviewErrorUrl: url,
-        urlPreviewUrl: url
+        urlPreviewUrl: url,
+        name
       }
       this.$store.dispatch('currentCards/update', update)
     }
