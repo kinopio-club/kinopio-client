@@ -29,11 +29,6 @@ const selectedColor = computed(() => {
   return props.user.color
 })
 const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem)
-const embedIsScript = computed(() => {
-  const embed = props.card.urlPreviewEmbedHtml
-  if (!embed) { return }
-  return embed.includes('<script')
-})
 
 // embed
 
@@ -55,8 +50,14 @@ const shouldDisplayEmbed = computed(() => {
   const embedIsVisibleForCardId = store.state.embedIsVisibleForCardId
   return props.card.id === embedIsVisibleForCardId
 })
-
-const iframeHeightFromCardWidth = computed(() => {
+const embedIsIframeDoc = computed(() => {
+  const embed = props.card.urlPreviewEmbedHtml
+  if (!embed) { return }
+  const isGist = embed.includes('https://gist.github.com')
+  return isGist
+})
+const iframeHeight = computed(() => {
+  console.log(props.card.urlPreviewEmbedHtml)
   const width = props.card.resizeWidth || props.card.width
   const height = width * (2 / 3)
   return height
@@ -113,8 +114,8 @@ const description = computed(() => {
 
   //- embed
   template(v-if="shouldDisplayEmbed")
-    .embed(v-if="embedIsScript")
-      iframe(:srcdoc="card.urlPreviewEmbedHtml" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeightFromCardWidth + 'px' }")
+    .embed(v-if="embedIsIframeDoc")
+      iframe(:srcdoc="card.urlPreviewEmbedHtml" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }")
     .embed(v-else v-html="card.urlPreviewEmbedHtml")
 
   .row.info.badge.status(v-if="!shouldHideInfo" :style="{background: selectedColor}")
