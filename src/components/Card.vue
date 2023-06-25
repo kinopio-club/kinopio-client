@@ -294,6 +294,7 @@ export default {
       }
     }
     this.updateCardDimensions()
+    this.checkIfShouldUpdateYoutubePreview()
   },
   data () {
     return {
@@ -1084,6 +1085,19 @@ export default {
       card = utils.updateCardDimensions(card)
       if (!card) { return }
       this.$store.commit('currentCards/update', card)
+    },
+
+    // migration added june 2023
+
+    checkIfShouldUpdateYoutubePreview () {
+      const name = this.card.name
+      if (!name) { return }
+      const url = utils.urlFromString(name)
+      if (!url) { return }
+      const urlIsYoutube = utils.urlIsYoutube(url)
+      if (urlIsYoutube && !this.card.urlPreviewEmbedHtml) {
+        this.retryUrlPreview()
+      }
     },
 
     // mouse handlers
