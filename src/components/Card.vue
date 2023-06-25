@@ -2047,7 +2047,7 @@ export default {
 
 <style lang="stylus">
 article
-  --card-width 235px
+  --card-width 200px
   pointer-events all
   position absolute
   max-width var(--card-width)
