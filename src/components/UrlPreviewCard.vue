@@ -70,7 +70,9 @@ const isTwitterUrl = computed(() => {
 })
 const removeTrailingTweetText = (description) => {
   const index = description.lastIndexOf('— ')
-  description = description.substring(0, index)
+  if (index > 1) {
+    description = description.substring(0, index)
+  }
   return description
 }
 
@@ -91,13 +93,12 @@ const title = computed(() => {
   return title
 })
 const description = computed(() => {
-  let description = props.card.urlPreviewDescription
-  if (isImageCard.value) {
-    return
-  } else if (isTwitterUrl.value) {
-    return removeTrailingTweetText(description)
+  if (isTwitterUrl.value) {
+    let description = props.card.urlPreviewDescription
+    description = removeTrailingTweetText(description)
+    return utils.truncated(description, 200)
   }
-  return utils.truncated(description, 200)
+  return null
 })
 
 </script>
