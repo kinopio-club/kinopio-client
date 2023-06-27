@@ -1,6 +1,7 @@
 <script setup>
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
@@ -42,6 +43,7 @@ const toggleShouldDisplayEmbed = () => {
   value = !value
   if (value) {
     store.commit('embedIsVisibleForCardId', props.card.id)
+    autoplay()
   } else {
     store.commit('embedIsVisibleForCardId', '')
   }
@@ -58,14 +60,21 @@ const embedIsIframeDoc = computed(() => {
 })
 const iframeHeight = computed(() => {
   const url = props.card.urlPreviewUrl
-  const width = props.card.resizeWidth || props.card.width
+  let width = props.card.resizeWidth || props.card.width
+  width = Math.max(width, consts.minCardEmbedWidth)
   let aspectRatio = 2 / 3
   if (utils.urlIsYoutube(url)) {
-    aspectRatio = 9 / 16
+    aspectRatio = 9 / 16.3
   }
   let height = Math.round(width * aspectRatio)
   return height
 })
+
+const autoplay = async () => {
+  await nextTick()
+  console.log('🚛', document.querySelector('.embed iframe'), document.querySelector('.embed iframe').contentWindow)
+  // document.querySelector('.embed iframe').contentWindow.postMessage({command: 'play'}, '*');
+}
 
 // twitter
 

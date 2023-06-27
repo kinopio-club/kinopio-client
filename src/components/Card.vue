@@ -447,7 +447,7 @@ export default {
       if (this.isComment) { return }
       let resizeWidth = this.card.resizeWidth
       if (this.embedIsVisible) {
-        resizeWidth = Math.max(resizeWidth, 235)
+        resizeWidth = Math.max(resizeWidth, consts.minCardEmbedWidth)
       }
       if (!resizeWidth) { return }
       return resizeWidth
