@@ -834,6 +834,9 @@ export default {
     if (cardMediaElement && isResettingCardDimensions) {
       cardMediaElement.style.width = null
     }
+    if (isResettingCardDimensions) {
+      articleElement.style.maxWidth = null
+    }
   },
   topLeftItem (items) {
     items = this.clone(items)
