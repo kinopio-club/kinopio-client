@@ -218,7 +218,6 @@ const description = computed(() => {
       width calc(100% + 16px)
       margin-left -8px
       margin-bottom -20px
-      transform translateY(-8px)
 
     iframe
       border none
