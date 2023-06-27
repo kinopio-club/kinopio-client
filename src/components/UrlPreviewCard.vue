@@ -2,7 +2,7 @@
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
@@ -57,9 +57,13 @@ const embedIsIframeDoc = computed(() => {
   return isScript
 })
 const iframeHeight = computed(() => {
-  console.log(props.card.urlPreviewEmbedHtml)
+  const url = props.card.urlPreviewUrl
   const width = props.card.resizeWidth || props.card.width
-  const height = width * (2 / 3)
+  let aspectRatio = 2 / 3
+  if (utils.urlIsYoutube(url)) {
+    aspectRatio = 9 / 16
+  }
+  let height = Math.round(width * aspectRatio)
   return height
 })
 
