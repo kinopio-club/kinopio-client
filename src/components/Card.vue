@@ -1940,7 +1940,6 @@ export default {
       try {
         url = this.removeHiddenQueryString(url)
         let response = await this.$store.dispatch('api/urlPreview', url)
-        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
         if (!response) { throw 'api/urlPreview' }
         let { data, host } = response
         const { links, meta } = data
@@ -2007,6 +2006,7 @@ export default {
       cardId = cardId || this.card.id
       if (!cardId) {
         console.warn('🚑 could not updateUrlPreviewSuccess', cardId, this.card)
+        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
         return
       }
       const update = {
@@ -2019,6 +2019,7 @@ export default {
         urlPreviewEmbedHtml: html
       }
       this.$store.dispatch('currentCards/update', update)
+      this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
     },
     updateUrlPreviewErrorUrl (url) {
       const cardId = this.card.id
