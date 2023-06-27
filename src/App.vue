@@ -257,8 +257,6 @@ export default {
       }, 250)
     },
     broadcastUserCursor (event) {
-      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
-      if (!canEditSpace) { return }
       let updates = utils.cursorPositionInSpace(event)
       updates.userId = this.$store.state.currentUser.id
       updates.zoom = this.spaceZoomDecimal

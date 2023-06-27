@@ -565,8 +565,6 @@ export default {
     // Remote Painting
 
     broadcastCircle (event, circle) {
-      const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()
-      if (!currentUserCanEdit) { return }
       const position = utils.cursorPositionInSpace(event)
       this.$store.commit('broadcast/update', {
         updates: {
