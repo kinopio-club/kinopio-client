@@ -146,6 +146,7 @@ article#card(
           :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
           :isLoadingUrlPreview="isLoadingUrlPreview"
           @retryUrlPreview="retryUrlPreview"
+          :backgroundColor="backgroundColor"
         )
       template(v-if="otherCardIsVisible")
         OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldCloseAllDialogs="true")

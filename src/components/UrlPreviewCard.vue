@@ -16,7 +16,8 @@ const props = defineProps({
   visible: Boolean,
   isSelected: Boolean,
   isImageCard: Boolean,
-  urlPreviewImageIsVisible: Boolean
+  urlPreviewImageIsVisible: Boolean,
+  backgroundColor: String
 })
 
 const shouldHideImage = computed(() => props.card.shouldHideUrlPreviewImage)
@@ -131,7 +132,7 @@ const description = computed(() => {
 
 <template lang="pug">
 //- image
-.url-preview-card(v-if="visible" :style="{background: selectedColor}" :class="{'is-image-card': props.isImageCard}")
+.url-preview-card(v-if="visible" :style="{background: props.backgroundColor}" :class="{'is-image-card': props.isImageCard}")
   //- image
   template(v-if="!shouldDisplayEmbed")
     .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage")
@@ -143,7 +144,7 @@ const description = computed(() => {
       iframe(:srcdoc="card.urlPreviewEmbedHtml" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }")
     .embed(v-else v-html="card.urlPreviewEmbedHtml")
 
-  .row.info.badge.status.embed-info(v-if="!shouldHideInfo" :style="{background: selectedColor}")
+  .row.info.badge.status.embed-info(v-if="!shouldHideInfo" :style="{background: props.backgroundColor}")
     //- play
     .button-wrap.embed-button-wrap(v-if="card.urlPreviewEmbedHtml" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
       button.small-button
