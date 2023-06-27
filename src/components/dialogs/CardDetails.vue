@@ -1416,7 +1416,8 @@ export default {
         urlPreviewUrl: '',
         urlPreviewImage: '',
         urlPreviewTitle: '',
-        urlPreviewDescription: ''
+        urlPreviewDescription: '',
+        urlPreviewEmbedHtml: ''
       }
       this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
       this.$store.dispatch('currentCards/update', update)

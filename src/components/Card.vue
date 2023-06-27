@@ -92,7 +92,7 @@ article#card(
           p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id")
-            Loader(:visible="isLoadingUrlPreview")
+          Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
       span.card-buttons-wrap(v-if="isCardButtonsVisible")
@@ -294,6 +294,7 @@ export default {
       }
     }
     this.updateCardDimensions()
+    this.checkIfShouldUpdatePreviewHtml()
   },
   data () {
     return {
@@ -444,7 +445,10 @@ export default {
     },
     resizeWidth () {
       if (this.isComment) { return }
-      const resizeWidth = this.card.resizeWidth
+      let resizeWidth = this.card.resizeWidth
+      if (this.embedIsVisible || this.isLoadingUrlPreview) {
+        resizeWidth = Math.max(resizeWidth, consts.minCardEmbedWidth)
+      }
       if (!resizeWidth) { return }
       return resizeWidth
     },
@@ -560,9 +564,13 @@ export default {
     currentCardDetailsIsVisible () {
       return this.id === this.cardDetailsIsVisibleForCardId
     },
+    embedIsVisible () {
+      const embedIsVisibleForCardId = this.$store.state.embedIsVisibleForCardId
+      return this.card.id === embedIsVisibleForCardId
+    },
     shouldNotStick () {
       if (!this.currentUser.shouldUseStickyCards) { return true }
-      if (this.$store.state.embedIsVisibleForCardId === this.card.id) { return true }
+      if (this.embedIsVisible) { return true }
       const userIsConnecting = this.currentConnectionStartCardIds.length
       const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
@@ -1045,16 +1053,13 @@ export default {
       const user = this.createdByUser
       return user.id === this.userDetailsUser.id
     },
-    isPlayingEmbed () {
-      return this.$store.state.embedIsVisibleForCardId === this.card.id
-    },
     isVisibleInViewport () {
       if (this.disableViewportOptimizations) { return true }
       if (this.shouldJiggle) { return true }
       if (this.currentDraggingConnectedCardIds.includes(this.id)) { return true }
       if (this.isBeingDragged) { return true }
       if (this.isPlayingAudio) { return true }
-      if (this.isPlayingEmbed) { return true }
+      if (this.embedIsVisible) { return true }
       const threshold = 400 * this.spaceCounterZoomDecimal
       const fallbackHeight = 200
       const offset = utils.outsideSpaceOffset().y
@@ -1080,6 +1085,21 @@ export default {
       card = utils.updateCardDimensions(card)
       if (!card) { return }
       this.$store.commit('currentCards/update', card)
+    },
+
+    // migration added june 2023
+
+    checkIfShouldUpdatePreviewHtml () {
+      const name = this.card.name
+      if (!name) { return }
+      const url = utils.urlFromString(name)
+      if (!url) { return }
+      const urlIsYoutube = utils.urlIsYoutube(url)
+      const urlIsSpotify = url.includes('open.spotify.com')
+      const shouldUpdate = urlIsYoutube || urlIsSpotify
+      if (shouldUpdate && !this.card.urlPreviewEmbedHtml) {
+        this.retryUrlPreview()
+      }
     },
 
     // mouse handlers
@@ -1536,14 +1556,20 @@ export default {
       this.$store.dispatch('currentCards/removeResize', { cardIds })
     },
     updateStylesWithWidth (styles) {
-      const connectorIsNotVisibleToReadOnlyUser = (!this.connectorIsVisible && !this.isLocked) || this.isComment
+      const cardHasExtendedContent = this.cardUrlPreviewIsVisible || this.otherCardIsVisible || this.isVisualCard || this.isAudioCard
+      const connectorIsNotVisibleToReadOnlyUser = (!this.connectorIsVisible && !this.isLocked && !cardHasExtendedContent) || this.isComment
       if (this.width) {
-        styles.width = this.width + 'px'
+        styles.width = this.width
       }
       if (this.resizeWidth) {
-        styles.maxWidth = this.resizeWidth + 'px'
-        styles.width = this.resizeWidth + 'px'
+        styles.maxWidth = this.resizeWidth
+        styles.width = this.resizeWidth
       }
+      if (connectorIsNotVisibleToReadOnlyUser) {
+        styles.width = styles.width - 20
+      }
+      styles.width = styles.width + 'px'
+      styles.maxWidth = styles.maxWidth + 'px'
       return styles
     },
     updateCardConnectionPathsIfOpenSpace () {
@@ -1917,11 +1943,14 @@ export default {
         this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
         if (!response) { throw 'api/urlPreview' }
         let { data, host } = response
-        console.log('🚗 link preview', host, data)
         const { links, meta } = data
+        console.log('🚗 link preview', url, data, links, meta)
         if (!links) { throw 'link preview error' }
-        this.updateUrlPreviewSuccess({ links, meta, cardId, url })
-        return true
+        let html
+        if (links.player || links.reader) {
+          html = data.html
+        }
+        this.updateUrlPreviewSuccess({ links, meta, cardId, url, html })
       } catch (error) {
         console.warn('🚑', error, url)
         this.updateUrlPreviewErrorUrl(url)
@@ -1973,7 +2002,7 @@ export default {
       let image = icon.find(item => item.href)
       return image.href || ''
     },
-    updateUrlPreviewSuccess ({ links, meta, cardId, url }) {
+    updateUrlPreviewSuccess ({ links, meta, cardId, url, html }) {
       if (!this.nameIncludesUrl(url)) { return }
       cardId = cardId || this.card.id
       if (!cardId) {
@@ -1986,17 +2015,20 @@ export default {
         urlPreviewTitle: utils.truncated(meta.title || meta.site),
         urlPreviewDescription: utils.truncated(meta.description, 280),
         urlPreviewImage: this.previewImage(links),
-        urlPreviewFavicon: this.previewFavicon(links)
+        urlPreviewFavicon: this.previewFavicon(links),
+        urlPreviewEmbedHtml: html
       }
       this.$store.dispatch('currentCards/update', update)
     },
     updateUrlPreviewErrorUrl (url) {
       const cardId = this.card.id
       this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+      const name = this.removeHiddenQueryString(this.card.name)
       const update = {
         id: cardId,
         urlPreviewErrorUrl: url,
-        urlPreviewUrl: url
+        urlPreviewUrl: url,
+        name
       }
       this.$store.dispatch('currentCards/update', update)
     }
@@ -2017,7 +2049,7 @@ export default {
 
 <style lang="stylus">
 article
-  --card-width 235px
+  --card-width 200px
   pointer-events all
   position absolute
   max-width var(--card-width)
@@ -2114,11 +2146,10 @@ article
         &.has-checkbox
           .audio
             width 132px
-        .loader
-          margin-left 5px
-          width 14px
-          height 14px
-          vertical-align -3px
+      .loader
+        width 14px
+        height 14px
+        transform translateX(8px) translateY(8px)
 
     .connector
       position relative
