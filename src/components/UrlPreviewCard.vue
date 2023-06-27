@@ -43,8 +43,9 @@ const toggleShouldDisplayEmbed = () => {
   value = !value
   if (value) {
     store.commit('embedIsVisibleForCardId', props.card.id)
-    autoplay()
+    addAutoplay()
   } else {
+    removeAutoplay()
     store.commit('embedIsVisibleForCardId', '')
   }
 }
@@ -70,10 +71,21 @@ const iframeHeight = computed(() => {
   return height
 })
 
+// autoplay
+
+const addAutoplay = async () => {
+  await nextTick()
+  document.querySelector('.embed iframe').addEventListener('load', autoplay)
+}
+const removeAutoplay = () => {
+  document.querySelector('.embed iframe').removeEventListener('load', autoplay)
+}
 const autoplay = async () => {
   await nextTick()
-  console.log('🚛', document.querySelector('.embed iframe'), document.querySelector('.embed iframe').contentWindow)
-  // document.querySelector('.embed iframe').contentWindow.postMessage({command: 'play'}, '*');
+  // spotify
+  setTimeout(() => {
+    document.querySelector('.embed iframe').contentWindow.postMessage({ command: 'play' }, '*')
+  }, '200')
 }
 
 // twitter
