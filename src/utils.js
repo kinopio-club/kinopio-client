@@ -820,6 +820,8 @@ export default {
     const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
     const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
+    const cardMediaElement = articleElement.querySelector(`.media-card`)
+    const isResettingCardDimensions = !card.width
     let width = 'initial'
     if (articleElement.dataset.resizeWidth) {
       width = articleElement.dataset.resizeWidth + 'px'
@@ -829,6 +831,9 @@ export default {
     cardElement.style.width = width
     contentWrapElement.style.width = width
     contentWrapElement.style.height = 'initial'
+    if (cardMediaElement && isResettingCardDimensions) {
+      cardMediaElement.style.width = null
+    }
   },
   topLeftItem (items) {
     items = this.clone(items)
