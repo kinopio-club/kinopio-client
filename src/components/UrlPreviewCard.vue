@@ -64,7 +64,7 @@ const iframeHeight = computed(() => {
   width = Math.max(width, consts.minCardEmbedWidth)
   let aspectRatio = 2 / 3
   if (utils.urlIsYoutube(url)) {
-    aspectRatio = 9 / 16.3
+    aspectRatio = 9 / 15
   }
   let height = Math.round(width * aspectRatio)
   return height
@@ -127,11 +127,11 @@ const description = computed(() => {
 
   //- embed
   template(v-if="shouldDisplayEmbed")
-    .embed(v-if="embedIsIframeDoc")
+    .embed.iframe-embed(v-if="embedIsIframeDoc")
       iframe(:srcdoc="card.urlPreviewEmbedHtml" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }")
     .embed(v-else v-html="card.urlPreviewEmbedHtml")
 
-  .row.info.badge.status(v-if="!shouldHideInfo" :style="{background: selectedColor}")
+  .row.info.badge.status.embed-info(v-if="!shouldHideInfo" :style="{background: selectedColor}")
     //- play
     .button-wrap.embed-button-wrap(v-if="card.urlPreviewEmbedHtml" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
       button.small-button
@@ -200,6 +200,12 @@ const description = computed(() => {
 
   .embed
     width 100%
+    &.iframe-embed
+      width calc(100% + 16px)
+      margin-left -8px
+      margin-bottom -20px
+      transform translateY(-8px)
+
     iframe
       border none
       border-radius var(--entity-radius)
@@ -210,6 +216,10 @@ const description = computed(() => {
       height 100%
       &.ignore
         pointer-events none
+
+  .embed-info
+    border-top-left-radius 0
+    border-top-right-radius 0
 
   .embed-button-wrap
     flex-shrink 0
