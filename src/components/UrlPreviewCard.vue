@@ -53,8 +53,8 @@ const shouldDisplayEmbed = computed(() => {
 const embedIsIframeDoc = computed(() => {
   const embed = props.card.urlPreviewEmbedHtml
   if (!embed) { return }
-  const isGist = embed.includes('https://gist.github.com')
-  return isGist
+  const isScript = embed.includes('<script')
+  return isScript
 })
 const iframeHeight = computed(() => {
   console.log(props.card.urlPreviewEmbedHtml)
