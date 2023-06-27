@@ -294,7 +294,7 @@ export default {
       }
     }
     this.updateCardDimensions()
-    this.checkIfShouldUpdateYoutubePreview()
+    this.checkIfShouldUpdatePreviewHtml()
   },
   data () {
     return {
@@ -1089,13 +1089,15 @@ export default {
 
     // migration added june 2023
 
-    checkIfShouldUpdateYoutubePreview () {
+    checkIfShouldUpdatePreviewHtml () {
       const name = this.card.name
       if (!name) { return }
       const url = utils.urlFromString(name)
       if (!url) { return }
       const urlIsYoutube = utils.urlIsYoutube(url)
-      if (urlIsYoutube && !this.card.urlPreviewEmbedHtml) {
+      const urlIsSpotify = url.includes('open.spotify.com')
+      const shouldUpdate = urlIsYoutube || urlIsSpotify
+      if (shouldUpdate && !this.card.urlPreviewEmbedHtml) {
         this.retryUrlPreview()
       }
     },
