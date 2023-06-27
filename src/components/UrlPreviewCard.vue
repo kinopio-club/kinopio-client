@@ -36,6 +36,7 @@ const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem
 
 const toggleShouldDisplayEmbed = () => {
   store.dispatch('closeAllDialogs')
+  store.dispatch('currentCards/incrementZ', props.card.id)
   const embedIsVisibleForCardId = store.state.embedIsVisibleForCardId
   let value
   if (props.card.id === embedIsVisibleForCardId) {
