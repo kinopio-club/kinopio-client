@@ -2108,10 +2108,16 @@ article
       margin-left -8px // cancels out margin-right in .card-content or .card-comment
       height 32px
 
+    .loader
+      width 14px
+      height 14px
+
     .name-wrap,
     .card-comment
       display flex
       align-items flex-start
+      > .loader
+        transform translateX(8px) translateY(8px)
       .checkbox-wrap
         padding-top 8px
         padding-left 8px
@@ -2146,10 +2152,6 @@ article
         &.has-checkbox
           .audio
             width 132px
-      .loader
-        width 14px
-        height 14px
-        transform translateX(8px) translateY(8px)
 
     .connector
       position relative
