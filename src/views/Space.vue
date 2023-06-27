@@ -11,7 +11,7 @@ main#space.space(
   Cards
   LockedItemButtons
   //- Presence
-  template(v-for="user in spaceMembers")
+  template(v-for="user in users")
     UserLabelCursor(:user="user")
   BoxDetails
   CardDetails
@@ -153,9 +153,9 @@ export default {
         return true
       } else { return false }
     },
-    spaceMembers () {
+    users () {
       const excludeCurrentUser = true
-      return this.$store.getters['currentSpace/members'](excludeCurrentUser)
+      return this.$store.getters['currentSpace/allUsers'](excludeCurrentUser)
     },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },

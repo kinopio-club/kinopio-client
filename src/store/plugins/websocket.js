@@ -179,8 +179,6 @@ export default function createWebSocketPlugin () {
         store.commit('currentSpace/removeClientsFromSpace')
         sendEvent(store, mutation)
       } else if (mutation.type === 'broadcast/update') {
-        const canEditSpace = store.getters['currentUser/canEditSpace']()
-        if (!canEditSpace) { return }
         sendEvent(store, mutation)
       } else if (mutation.type === 'broadcast/updateUser') {
         sendEvent(store, mutation)
