@@ -219,6 +219,9 @@ export default {
       let element = this.$refs.footer
       const rect = element.getBoundingClientRect()
       let height = rect.height
+      if (window.navigator.shouldAddSafeAreaPaddingBottom) {
+        height = height - 20
+      }
       let style = {
         // transform: `translate(${left}px, ${top + offsetTop}px) scale(${counterScale})`,
         transform: `translate(${left}px, 0px) scale(${counterScale})`,
