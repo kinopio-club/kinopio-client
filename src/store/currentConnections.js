@@ -96,11 +96,9 @@ export default {
 
     // broadcast
 
-    updatePathsWhileDraggingBroadcast: (state, { connections, paths }) => {
-      if (!paths) { return }
+    updatePathsWhileDraggingBroadcast: (state, { connections }) => {
       connections.forEach(connection => {
-        const path = paths.find(path => path.id === connection.id).path
-        state.connections[connection.id].path = path
+        state.connections[connection.id].path = connection.path
       })
     },
     updatePathsBroadcast: (state, { connections }) => {
@@ -244,11 +242,13 @@ export default {
       })
     },
     updatePathsWhileDragging: (context, { connections }) => {
-      const paths = connections.map(connection => {
+      connections = connections.map(connection => {
         const path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
         context.commit('updatePathWhileDragging', { connection, path })
+        connection.path = path
+        return connection
       })
-      context.dispatch('broadcast/update', { updates: { connections, paths }, type: 'updateConnection', handler: 'currentConnections/updatePathsWhileDraggingBroadcast' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnection', handler: 'currentConnections/updatePathsWhileDraggingBroadcast' }, { root: true })
     },
     correctPaths: (context, { shouldUpdateApi }) => {
       if (!context.rootState.webfontIsLoaded) { return }

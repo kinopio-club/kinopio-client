@@ -497,7 +497,6 @@ const currentCards = {
       context.commit('cardsWereDragged', true, { root: true })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveWhileDraggingBroadcast' }, { root: true })
-      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsWhileDraggingBroadcast' }, { root: true })
       connections.forEach(connection => {
         context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       })
