@@ -96,11 +96,6 @@ export default {
 
     // broadcast
 
-    updatePathsWhileDraggingBroadcast: (state, { connections }) => {
-      connections.forEach(connection => {
-        state.connections[connection.id].path = connection.path
-      })
-    },
     updatePathsBroadcast: (state, { connections }) => {
       connections.forEach(connection => {
         state.connections[connection.id].path = connection.path
@@ -248,7 +243,7 @@ export default {
         connection.path = path
         return connection
       })
-      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnection', handler: 'currentConnections/updatePathsWhileDraggingBroadcast' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnection', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
     },
     correctPaths: (context, { shouldUpdateApi }) => {
       if (!context.rootState.webfontIsLoaded) { return }
