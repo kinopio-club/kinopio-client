@@ -232,7 +232,8 @@ export default {
     currentUser () { return this.$store.state.currentUser },
     background: {
       get () {
-        return this.currentSpace.background
+        const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/default-background-2x.png'
+        return this.currentSpace.background || defaultBackground
       },
       set (url) {
         this.updateSpaceBackground(url)
