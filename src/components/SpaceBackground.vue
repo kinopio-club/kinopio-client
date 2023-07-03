@@ -113,27 +113,16 @@ export default {
       }
     },
     updateBackgroundSize () {
-      const defaultSize = {
-        width: 310,
-        height: 200
-      }
       let backgroundImage = this.imageUrl
       backgroundImage = utils.urlFromCSSBackgroundImage(backgroundImage)
-      let isRetina
       let image = new Image()
-      let width, height
-      if (backgroundImage) {
-        isRetina = backgroundImage.includes('-2x.') || backgroundImage.includes('@2x.')
-        image.src = backgroundImage
-        width = image.width
-        height = image.height
-        if (isRetina) {
-          width = width / 2
-          height = height / 2
-        }
-      } else {
-        width = defaultSize.width
-        height = defaultSize.height
+      image.src = backgroundImage
+      let isRetina = backgroundImage.includes('-2x.') || backgroundImage.includes('@2x.')
+      let width = image.width
+      let height = image.height
+      if (isRetina) {
+        width = width / 2
+        height = height / 2
       }
       if (width === 0 || height === 0) {
         this.size = 'initial'
