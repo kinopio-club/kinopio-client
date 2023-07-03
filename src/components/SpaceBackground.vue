@@ -16,6 +16,8 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerLoadBackground') {
         this.loadBackground()
+      } else if (mutation.type === 'triggerUpdateTheme') {
+        this.loadBackground()
       }
     })
   },
@@ -41,7 +43,18 @@ export default {
     },
     background () {
       const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/default-background-2x.png'
-      return this.currentSpace.background || defaultBackground
+      let data = this.kinopioBackgroundImageData
+      let url
+      // darkUrl
+      if (data && this.isThemeDark) {
+        url = data.darkUrl || data.url
+      // url
+      } else if (data) {
+        url = data.url
+      } else {
+        url = this.currentSpace.background || defaultBackground
+      }
+      return url
     },
     backgroundTint () {
       let color = this.currentSpace.backgroundTint || 'white'
