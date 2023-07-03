@@ -1,6 +1,6 @@
 [
   {
-    "url": "",
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/default-background-2x.png",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/default-background-preview.png",
     "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg"
   },  
@@ -17,14 +17,15 @@
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-2x.png",
+    "darkUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-inverse-2x.png",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-preview.svg",
-    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-thumbnail-2.svg",
-    "shouldInvertInDarkTheme": true
+    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-thumbnail-2.svg"
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-inverse-2x.png",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-inverse-preview.svg",
-    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-inverse-thumbnail-2.svg"
+    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-inverse-thumbnail-2.svg",
+    "isArchived": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-boxes-2x.png",

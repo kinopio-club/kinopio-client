@@ -42,7 +42,6 @@ export default {
       return styles
     },
     background () {
-      const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/default-background-2x.png'
       let data = this.kinopioBackgroundImageData
       let url
       // darkUrl
@@ -52,7 +51,7 @@ export default {
       } else if (data) {
         url = data.url
       } else {
-        url = this.currentSpace.background || defaultBackground
+        url = this.currentSpace.background
       }
       return url
     },
