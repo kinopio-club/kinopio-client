@@ -2,7 +2,8 @@
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/default-background-2x.png",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/default-background-preview.png",
-    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg"
+    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg",
+    "isDefault": true
   },  
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/blank.png",

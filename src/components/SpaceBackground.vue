@@ -14,10 +14,10 @@ export default {
   name: 'SpaceBackground',
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerLoadBackground') {
-        this.loadBackground()
+      if (mutation.type === 'triggerUpdateBackground') {
+        this.updateBackground()
       } else if (mutation.type === 'triggerUpdateTheme') {
-        this.loadBackground()
+        this.updateBackground()
       }
     })
   },
@@ -67,7 +67,13 @@ export default {
     },
     isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
     kinopioBackgroundImageData () {
-      const data = backgroundImages.find(image => image.url === this.currentSpace.background)
+      const data = backgroundImages.find(image => {
+        const background = this.currentSpace.background
+        if (!background) {
+          return image.isDefault
+        }
+        return background === image.url
+      })
       return data
     },
     backgroundIsDefault () {
@@ -88,7 +94,7 @@ export default {
     }
   },
   methods: {
-    async loadBackground () {
+    async updateBackground () {
       const background = this.background
       if (!utils.urlIsImage(background)) {
         this.imageUrl = ''
@@ -102,7 +108,7 @@ export default {
         }
       } catch (error) {
         if (background) {
-          console.warn('🚑 loadBackground', background, error)
+          console.warn('🚑 updateBackground', background, error)
         }
       }
     },

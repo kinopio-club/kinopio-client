@@ -362,7 +362,7 @@ const currentSpace = {
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
-      context.commit('triggerLoadBackground', null, { root: true })
+      context.commit('triggerUpdateBackground', null, { root: true })
     },
     createNewJournalSpace: async (context) => {
       const isTomorrow = context.rootState.loadJournalSpaceTomorrow
@@ -385,7 +385,7 @@ const currentSpace = {
       isLoadingRemoteSpace = false
       // load space
       context.dispatch('restoreSpaceInChunks', { space })
-      context.commit('triggerLoadBackground', null, { root: true })
+      context.commit('triggerUpdateBackground', null, { root: true })
     },
     createNewInboxSpace: (context, shouldCreateWithoutLoading) => {
       let space = utils.clone(inboxSpace)
@@ -406,7 +406,7 @@ const currentSpace = {
         context.commit('clearSearch', null, { root: true })
         isLoadingRemoteSpace = false
         context.dispatch('restoreSpaceInChunks', { space })
-        context.commit('triggerLoadBackground', null, { root: true })
+        context.commit('triggerUpdateBackground', null, { root: true })
         nextTick(() => {
           context.dispatch('currentCards/updateDimensions', {}, { root: true })
         })
@@ -438,7 +438,7 @@ const currentSpace = {
       }
       context.commit('triggerUpdateWindowHistory', { space, isRemote: currentUserIsSignedIn }, { root: true })
       context.commit('addUserToSpace', user)
-      context.commit('triggerLoadBackground', null, { root: true })
+      context.commit('triggerUpdateBackground', null, { root: true })
       context.dispatch('updateModulesSpaceId', space)
       nextTick(() => {
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
@@ -650,7 +650,7 @@ const currentSpace = {
       }
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('restoreSpace', space)
-      context.commit('triggerLoadBackground', null, { root: true })
+      context.commit('triggerUpdateBackground', null, { root: true })
       // split into chunks
       const cardChunks = utils.splitArrayIntoChunks(cards, chunkSize)
       const connectionChunks = utils.splitArrayIntoChunks(connections, chunkSize)
