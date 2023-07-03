@@ -16,7 +16,7 @@
         .badge.info
           Loader(:visible="true")
           span {{remotePendingUpload.percentComplete}}%
-      Background(:visible="backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
+      BackgroundPicker(:visible="backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
     //- Name
     .textarea-wrap(:class="{'full-width': shouldHidePin}")
       textarea.name(
@@ -118,7 +118,7 @@ template(v-if="settingsIsVisible")
 </template>
 
 <script>
-import Background from '@/components/dialogs/Background.vue'
+import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
@@ -131,7 +131,7 @@ export default {
   name: 'SpaceDetailsInfo',
   emits: ['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace'],
   components: {
-    Background,
+    BackgroundPicker,
     BackgroundPreview,
     Loader,
     PrivacyButton,
