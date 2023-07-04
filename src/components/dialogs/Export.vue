@@ -3,12 +3,20 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
   section
     p Export
   section
-    //- Card Names
     .row
       button(@click.left="copyText")
         img.icon.copy(src="@/assets/copy.svg")
         span Copy All Card Names
-    //- PDF
+    .row
+      button(@click.left="duplicateSpace")
+        img.icon(src="@/assets/add.svg")
+        span Make a Copy
+    .row(v-if="spaceIsDuplicated")
+      span.badge.success Space copied
+
+  section
+    .row
+      p Download
     .row
       .button-wrap(v-if="currentUserIsSignedIn")
         button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
@@ -16,14 +24,7 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
       .button-wrap
         button(@click.left="downloadLocalJSON")
           span JSON
-
     Pdf(:visible="pdfIsVisible")
-    //- Duplicate
-    button(@click.left="duplicateSpace")
-      img.icon(src="@/assets/add.svg")
-      span Make a Copy
-    .row(v-if="spaceIsDuplicated")
-      span.badge.success Space copied
 
   section
     // anon user
@@ -34,7 +35,7 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     // signed in user
     template(v-if="currentUserIsSignedIn")
       p
-        span Backup
+        span Backup All
       button.variable-length-content(@click.left="downloadAllSpacesRemote" :class="{ active: isLoadingAllSpaces }")
         span Download all Spaces (JSON and TXT)
         Loader(:visible="isLoadingAllSpaces")
