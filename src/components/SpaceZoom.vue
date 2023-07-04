@@ -1,5 +1,5 @@
 <template lang="pug">
-.space-zoom
+.space-zoom(v-if="!isMobileOrTouch")
   Slider(
     @updatePlayhead="updateSpaceZoom"
     @resetPlayhead="resetZoomOrigin"
@@ -17,6 +17,7 @@
 <script>
 import Slider from '@/components/Slider.vue'
 import consts from '@/consts.js'
+import utils from '@/utils.js'
 
 const increment = 10
 
@@ -63,7 +64,11 @@ export default {
     max () { return consts.spaceZoom.max }, // 100
     min () { return consts.spaceZoom.min }, // 20
     spaceZoomPercent () { return this.$store.state.spaceZoomPercent },
-    minKeyboardShortcut () { return 'Z' }
+    minKeyboardShortcut () { return 'Z' },
+    isMobileOrTouch () {
+      const isMobile = utils.isMobile()
+      return this.$store.isTouchDevice || isMobile
+    }
   },
   methods: {
     updateSpaceZoomFromTrigger (percent) {

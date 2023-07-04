@@ -12,8 +12,7 @@
             AddToInbox(:visible="addToInboxIsVisible")
 
   .right(:class="{'is-embed': isEmbedMode, 'hidden': isHiddenOnTouch}")
-    template(v-if="!isMobileOrTouch")
-      SpaceZoom
+    SpaceZoom
     .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible")
       button.small-button(:class="{active: userSettingsIsVisible}" title="Settings → Controls")
         img.icon.settings(src="@/assets/settings.svg")
@@ -90,10 +89,6 @@ export default {
       'currentUser/isSignedIn',
       'isTouchDevice'
     ]),
-    isMobileOrTouch () {
-      const isMobile = utils.isMobile()
-      return this.isTouchDevice || isMobile
-    },
     isVisible () {
       if (this.isAddPage) { return }
       return true
