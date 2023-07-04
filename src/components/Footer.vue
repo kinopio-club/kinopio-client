@@ -27,10 +27,9 @@ import utils from '@/utils.js'
 
 import { mapState, mapGetters } from 'vuex'
 
-const fadeOutDuration = 10
 const hiddenOnTouchDuration = 20
 const updatePositionDuration = 60
-let fadeOutIteration, fadeOutTimer, hiddenOnTouchIteration, hiddenOnTouchTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
+let hiddenOnTouchIteration, hiddenOnTouchTimer, updatePositionIteration, updatePositionTimer
 
 export default {
   name: 'Footer',
@@ -47,7 +46,6 @@ export default {
   data () {
     return {
       position: {},
-      isFadingOut: false,
       isHiddenOnTouch: false,
       addToInboxIsVisible: false,
       userHasInbox: false
@@ -110,7 +108,8 @@ export default {
       return utils.isMobile() && navigator.standalone // is homescreen app
     },
     isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
-    userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible }
+    userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible },
+    isFadingOut () { return this.$store.state.isFadingOutDuringTouch }
   },
   methods: {
     closeDialogs () {
@@ -162,31 +161,6 @@ export default {
       this.isHiddenOnTouch = false
     },
 
-    // fade out
-
-    fadeOut () {
-      fadeOutIteration = 0
-      if (fadeOutTimer) { return }
-      shouldCancelFadeOut = false
-      fadeOutTimer = window.requestAnimationFrame(this.fadeOutFrame)
-    },
-    cancelFadeOut () {
-      window.cancelAnimationFrame(fadeOutTimer)
-      fadeOutTimer = undefined
-      this.isFadingOut = false
-      this.cancelUpdatePosition()
-      this.updatePosition()
-    },
-    fadeOutFrame () {
-      fadeOutIteration++
-      this.isFadingOut = true
-      if (shouldCancelFadeOut) {
-        this.cancelFadeOut()
-      } else if (fadeOutIteration < fadeOutDuration) {
-        window.requestAnimationFrame(this.fadeOutFrame)
-      }
-    },
-
     // update position
 
     updatePosition () {
@@ -234,21 +208,13 @@ export default {
   watch: {
     isPinchZooming (value) {
       if (value) {
-        this.fadeOut()
         this.updatePosition()
-      } else {
-        shouldCancelFadeOut = true
-        this.cancelFadeOut()
       }
     },
     isTouchScrolling (value) {
       if (!utils.isAndroid()) { return }
       if (value) {
-        this.fadeOut()
         this.updatePosition()
-      } else {
-        shouldCancelFadeOut = true
-        this.cancelFadeOut()
       }
     }
   }

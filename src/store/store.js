@@ -51,6 +51,7 @@ const store = createStore({
     isPresentationMode: false,
     pricingIsVisible: false,
     userSettingsIsVisible: false,
+    isFadingOutDuringTouch: false,
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -448,6 +449,10 @@ const store = createStore({
     userSettingsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.userSettingsIsVisible = value
+    },
+    isFadingOutDuringTouch: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.isFadingOutDuringTouch = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

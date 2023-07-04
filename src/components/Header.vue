@@ -250,7 +250,6 @@ export default {
       notifications: [],
       notificationsIsLoading: true,
       addSpaceIsVisible: false,
-      isFadingOut: false,
       isHidden: false,
       templatesIsVisible: false,
       sidebarIsVisible: false,
@@ -431,7 +430,8 @@ export default {
     },
     pricingIsVisible () {
       return this.$store.state.pricingIsVisible
-    }
+    },
+    isFadingOut () { return this.$store.state.isFadingOutDuringTouch }
   },
   methods: {
     openKinopio () {
@@ -608,13 +608,13 @@ export default {
     cancelFadeOut () {
       window.cancelAnimationFrame(fadeOutTimer)
       fadeOutTimer = undefined
-      this.isFadingOut = false
+      this.$store.commit('isFadingOutDuringTouch', false)
       this.cancelUpdatePosition()
       this.updatePosition()
     },
     fadeOutFrame () {
       fadeOutIteration++
-      this.isFadingOut = true
+      this.$store.commit('isFadingOutDuringTouch', true)
       if (shouldCancelFadeOut) {
         this.cancelFadeOut()
       } else if (fadeOutIteration < fadeOutDuration) {
