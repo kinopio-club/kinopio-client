@@ -35,8 +35,8 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     template(v-if="currentUserIsSignedIn")
       p
         span Backup
-      button(@click.left="downloadAllSpacesRemote" :class="{ active: isLoadingAllSpaces }")
-        span All Spaces (JSON and TXT)
+      button.variable-length-content(@click.left="downloadAllSpacesRemote" :class="{ active: isLoadingAllSpaces }")
+        span Download all Spaces (JSON and TXT)
         Loader(:visible="isLoadingAllSpaces")
     a#export-downlaod-anchor.hidden
     .info-container(v-if="isLoadingAllSpaces")
@@ -186,6 +186,7 @@ export default {
   button
     display block
     margin-left 0
+    white-space initial
   button + button
     margin-top 10px
   .badge.success
