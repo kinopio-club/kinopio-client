@@ -11,8 +11,9 @@
               img.icon.inbox-icon(src="@/assets/inbox.svg")
             AddToInbox(:visible="addToInboxIsVisible")
 
-  .right(:class="{'is-embed': isEmbedMode, 'hidden': isHiddenOnTouch}" v-if="!isMobileOrTouch")
-    SpaceZoom
+  .right(:class="{'is-embed': isEmbedMode, 'hidden': isHiddenOnTouch}")
+    template(v-if="!isMobileOrTouch")
+      SpaceZoom
     .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible")
       button.small-button(:class="{active: userSettingsIsVisible}" title="Settings → Controls")
         img.icon.settings(src="@/assets/settings.svg")
