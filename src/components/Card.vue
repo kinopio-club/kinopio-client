@@ -92,7 +92,7 @@ article#card(
           p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id")
-          Loader(:visible="isLoadingUrlPreview")
+            Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
       span.card-buttons-wrap(v-if="isCardButtonsVisible")
@@ -2008,6 +2008,7 @@ export default {
       }
       const update = {
         id: cardId,
+        name: utils.addHiddenQueryStringToURLs(this.card.name),
         urlPreviewUrl: url,
         urlPreviewTitle: utils.truncated(meta.title || meta.site),
         urlPreviewDescription: utils.truncated(meta.description, 280),
@@ -2109,6 +2110,9 @@ article
     .loader
       width 14px
       height 14px
+      flex-shrink 0
+      vertical-align -2px
+      margin-left 3px
 
     .name-wrap,
     .card-comment
