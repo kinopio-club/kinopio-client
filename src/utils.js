@@ -1841,6 +1841,16 @@ export default {
     })
     return name
   },
+  removeHiddenQueryStringFromURLs (name) {
+    const urls = this.urlsFromString(name)
+    urls.forEach(url => {
+      const prevUrl = url
+      url = url.replace('?hidden=true', '')
+      url = url.replace('&hidden=true', '')
+      name = name.replace(prevUrl, url)
+    })
+    return name
+  },
 
   // Checkbox ✅
 

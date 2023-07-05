@@ -1935,7 +1935,7 @@ export default {
         return
       }
       try {
-        url = this.removeHiddenQueryString(url)
+        url = utils.removeHiddenQueryStringFromURLs(url)
         let response = await this.$store.dispatch('api/urlPreview', url)
         if (!response) { throw 'api/urlPreview' }
         let { data, host } = response
@@ -1966,12 +1966,6 @@ export default {
       const isNotKinopioUrl = !url.startsWith('https://kinopio.club')
       const isLocalhostUrl = url.match(utils.localhostUrlPattern())
       return previewIsVisible && isNotPreviewUrl && isNotErrorUrl && isNotKinopioUrl && !isLocalhostUrl
-    },
-    removeHiddenQueryString (url) {
-      if (!url) { return }
-      url = url.replace('?hidden=true', '')
-      url = url.replace('&hidden=true', '')
-      return url
     },
     nameIncludesUrl (url) {
       const name = this.card.name
@@ -2022,7 +2016,7 @@ export default {
     updateUrlPreviewErrorUrl (url) {
       const cardId = this.card.id
       this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-      const name = this.removeHiddenQueryString(this.card.name)
+      const name = utils.removeHiddenQueryStringFromURLs(this.card.name)
       const update = {
         id: cardId,
         urlPreviewErrorUrl: url,
