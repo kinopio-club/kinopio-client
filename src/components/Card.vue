@@ -439,7 +439,7 @@ export default {
     },
     width () {
       if (this.isComment) { return }
-      if (this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible) { return }
+      if (this.currentCardDetailsIsVisible) { return }
       const width = this.card.resizeWidth || this.card.width
       if (!width) { return }
       return width
