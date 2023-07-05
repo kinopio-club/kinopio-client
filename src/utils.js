@@ -1825,6 +1825,7 @@ export default {
   addHiddenQueryStringToURLs (name) {
     const urls = this.urlsFromString(name)
     urls.forEach(url => {
+      if (url.includes('https://www.icloud.com')) { return } // https://club.kinopio.club/t/icloud-albums-dont-work-with-hidden-true/1153
       url = url.trim()
       url = this.removeTrailingSlash(url)
       if (!this.urlIsWebsite(url)) { return }
