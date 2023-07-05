@@ -92,7 +92,7 @@ article#card(
           p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id")
-          Loader(:visible="isLoadingUrlPreview")
+            Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
       span.card-buttons-wrap(v-if="isCardButtonsVisible")
@@ -439,7 +439,7 @@ export default {
     },
     width () {
       if (this.isComment) { return }
-      if (this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible) { return }
+      if (this.currentCardDetailsIsVisible) { return }
       const width = this.card.resizeWidth || this.card.width
       if (!width) { return }
       return width
@@ -1935,7 +1935,7 @@ export default {
         return
       }
       try {
-        url = this.removeHiddenQueryString(url)
+        url = utils.removeHiddenQueryStringFromURLs(url)
         let response = await this.$store.dispatch('api/urlPreview', url)
         if (!response) { throw 'api/urlPreview' }
         let { data, host } = response
@@ -1966,12 +1966,6 @@ export default {
       const isNotKinopioUrl = !url.startsWith('https://kinopio.club')
       const isLocalhostUrl = url.match(utils.localhostUrlPattern())
       return previewIsVisible && isNotPreviewUrl && isNotErrorUrl && isNotKinopioUrl && !isLocalhostUrl
-    },
-    removeHiddenQueryString (url) {
-      if (!url) { return }
-      url = url.replace('?hidden=true', '')
-      url = url.replace('&hidden=true', '')
-      return url
     },
     nameIncludesUrl (url) {
       const name = this.card.name
@@ -2008,6 +2002,7 @@ export default {
       }
       const update = {
         id: cardId,
+        name: utils.addHiddenQueryStringToURLs(this.card.name),
         urlPreviewUrl: url,
         urlPreviewTitle: utils.truncated(meta.title || meta.site),
         urlPreviewDescription: utils.truncated(meta.description, 280),
@@ -2021,7 +2016,7 @@ export default {
     updateUrlPreviewErrorUrl (url) {
       const cardId = this.card.id
       this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-      const name = this.removeHiddenQueryString(this.card.name)
+      const name = utils.removeHiddenQueryStringFromURLs(this.card.name)
       const update = {
         id: cardId,
         urlPreviewErrorUrl: url,
@@ -2109,6 +2104,9 @@ article
     .loader
       width 14px
       height 14px
+      flex-shrink 0
+      vertical-align -2px
+      margin-left 3px
 
     .name-wrap,
     .card-comment

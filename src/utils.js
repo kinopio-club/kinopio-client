@@ -1825,6 +1825,7 @@ export default {
   addHiddenQueryStringToURLs (name) {
     const urls = this.urlsFromString(name)
     urls.forEach(url => {
+      if (url.includes('https://www.icloud.com')) { return } // https://club.kinopio.club/t/icloud-albums-dont-work-with-hidden-true/1153
       url = url.trim()
       url = this.removeTrailingSlash(url)
       if (!this.urlIsWebsite(url)) { return }
@@ -1837,6 +1838,16 @@ export default {
       queryObject.hidden = 'true'
       const newUrl = qs.encode(domain, queryObject)
       name = name.replace(url, newUrl)
+    })
+    return name
+  },
+  removeHiddenQueryStringFromURLs (name) {
+    const urls = this.urlsFromString(name)
+    urls.forEach(url => {
+      const prevUrl = url
+      url = url.replace('?hidden=true', '')
+      url = url.replace('&hidden=true', '')
+      name = name.replace(prevUrl, url)
     })
     return name
   },

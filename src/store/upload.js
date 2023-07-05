@@ -126,9 +126,9 @@ export default {
     },
     addCardsAndUploadFiles: async (context, { files, event }) => {
       let position = utils.cursorPositionInSpace(event)
+      context.dispatch('currentUser/notifyReadOnly', position, { root: true })
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) {
-        context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
         context.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })
         return
       }

@@ -706,45 +706,15 @@ export default {
         }
       })
     },
-    updateLink ({ url, newUrl }) {
-      url = url.trim()
-      const newName = this.name.replace(url, newUrl)
-      this.updateCardName(newName)
-    },
     toggleUrlsIsVisible () {
       const isVisible = !this.urlsIsVisible
-      let newUrls = []
-      this.urls.forEach(url => {
-        url = url.trim()
-        url = utils.removeTrailingSlash(url)
-        const isUrl = utils.urlType(url) === 'link'
-        if (!isUrl) { return }
-        const queryString = utils.queryString(url)
-        const domain = utils.urlWithoutQueryString(url)
-        let queryObject
-        if (queryString) {
-          queryObject = qs.decode(queryString)
-        } else {
-          queryObject = {}
-        }
-        if (isVisible) {
-          queryObject.hidden = true
-          const newUrl = qs.encode(domain, queryObject)
-          newUrls.push({
-            url,
-            newUrl
-          })
-        } else {
-          delete queryObject.hidden
-          delete queryObject.kinopio
-          const newUrl = qs.encode(domain, queryObject)
-          newUrls.push({
-            url,
-            newUrl
-          })
-        }
-      })
-      newUrls.forEach(urls => this.updateLink(urls))
+      let newName
+      if (isVisible) {
+        newName = utils.addHiddenQueryStringToURLs(this.name)
+      } else {
+        newName = utils.removeHiddenQueryStringFromURLs(this.name)
+      }
+      this.updateCardName(newName)
     },
     updateNameSplitIntoCardsCount () {
       const isPreview = true
