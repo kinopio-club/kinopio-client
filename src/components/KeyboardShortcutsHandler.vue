@@ -727,11 +727,7 @@ export default {
         return
       }
       // check read only
-      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
-      if (!canEditSpace) {
-        this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
-        return
-      }
+      this.$store.dispatch('currentUser/notifyReadOnly', position)
       // get clipboard data
       let data = await this.getClipboardData()
       console.log('🎊 pasteData', data, position)

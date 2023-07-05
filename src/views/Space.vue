@@ -273,7 +273,8 @@ export default {
     dragItems () {
       this.$store.dispatch('history/pause')
       const prevCursor = this.cursor()
-      const shouldPrevent = this.checkIfShouldPreventInteraction()
+      this.$store.dispatch('currentUser/notifyReadOnly', prevCursor)
+      const shouldPrevent = !this.$store.getters['currentUser/canEditSpace']()
       if (shouldPrevent) { return }
       this.$store.dispatch('currentCards/move', {
         endCursor,
@@ -322,16 +323,6 @@ export default {
       }
       return cursor
     },
-    checkIfShouldPreventInteraction () {
-      if (this.spaceIsReadOnly) {
-        const position = this.cursor()
-        const notificationWithPosition = document.querySelector('.notifications-with-position .item')
-        if (!notificationWithPosition) {
-          this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
-        }
-        return true
-      }
-    },
     normalizeSpaceCardsZ () {
       const sorted = sortBy(this.unlockedCards, ['z'])
       const zList = sorted.map(card => card.z)
@@ -348,10 +339,8 @@ export default {
         x: position.x,
         y: position.y
       }
-      if (this.spaceIsReadOnly) {
-        this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
-        return
-      }
+      this.$store.dispatch('currentUser/notifyReadOnly', position)
+      if (this.spaceIsReadOnly) { return }
       this.normalizeSpaceCardsZ()
       this.$store.dispatch('currentCards/add', { position, isParentCard })
       this.$store.commit('childCardId', '')

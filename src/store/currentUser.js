@@ -773,6 +773,17 @@ export default {
         context.commit('addNotification', { message: 'Invalid referral, refferer name not found', type: 'danger', isPersistentItem: true }, { root: true })
       }
       context.commit('validateReferralByName', '', { root: true })
+    },
+    notifyReadOnly: (context, position) => {
+      const canEditSpace = context.getters.canEditSpace()
+      if (canEditSpace) { return }
+      const cannotEditUnlessSignedIn = context.getters.cannotEditUnlessSignedIn()
+      const notificationWithPosition = document.querySelector('.notifications-with-position .item')
+      if (cannotEditUnlessSignedIn) {
+        context.commit('addNotificationWithPosition', { message: 'Sign in to Edit', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
+      } else {
+        context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
+      }
     }
   },
   getters: {
@@ -799,6 +810,12 @@ export default {
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
       const isSpaceMember = getters.isSpaceMember(space)
       return canEditOpenSpace || isSpaceMember
+    },
+    cannotEditUnlessSignedIn: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const spaceIsOpen = space.privacy === 'open'
+      const currentUserIsSignedIn = getters.isSignedIn
+      return !currentUserIsSignedIn && spaceIsOpen
     },
     cardIsCreatedByCurrentUser: (state, getters, rootState) => (card) => {
       const isCreatedByUser = state.id === card.userId
