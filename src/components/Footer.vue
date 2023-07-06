@@ -13,7 +13,7 @@
 
   .right(:class="{'is-embed': isEmbedMode, 'hidden': isHiddenOnTouch}")
     SpaceZoom
-    .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible")
+    .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible" @touchend.stop)
       button.small-button(:class="{active: userSettingsIsVisible}" title="Settings → Controls")
         img.icon.settings(src="@/assets/settings.svg")
 </template>
