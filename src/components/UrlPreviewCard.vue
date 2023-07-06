@@ -216,6 +216,7 @@ const description = computed(() => {
     word-wrap anywhere
   .description
     margin-top 10px
+    word-wrap anywhere
 
   .embed
     width 100%
