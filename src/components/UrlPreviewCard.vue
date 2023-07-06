@@ -104,6 +104,8 @@ const removeTrailingTweetText = (description) => {
   // https://regexr.com/7gfja
   // remove pic.twitter.com/abc
   description = description.replace(/pic\.twitter.com\/\S+/g, '')
+  // remove t.co
+  description = description.replace(/https:\/\/t.co\/\S+/g, '')
   return description
 }
 
