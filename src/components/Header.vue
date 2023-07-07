@@ -789,7 +789,6 @@ header
       vertical-align 0
 
   .space-details-row
-    display initial
     button
       white-space nowrap
       overflow hidden
@@ -857,6 +856,8 @@ header
     flex-direction column
   .left
     display flex
+    flex-shrink 0
+
     @media(max-width 414px)
       max-width calc(100% - 100px)
 
