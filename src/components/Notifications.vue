@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.notifications(v-if="items.length" @click.left="closeAllDialogs")
+aside.notifications(@click.left="closeAllDialogs")
   .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :data-is-persistent-item="item.isPersistentItem" :class="notifificationClasses(item)")
     p
       span.label-badge(v-if="item.label") {{item.label}}
