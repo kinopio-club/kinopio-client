@@ -580,11 +580,6 @@ export default {
     // https://regexr.com/68l08
     return string.replace(/\/$/g, '')
   },
-  removeSurroundingQuotes (string) {
-    if (!string) { return }
-    // https://stackoverflow.com/questions/19156148/i-want-to-remove-double-quotes-from-a-string
-    return string.replace(/^"|"$/g, '')
-  },
   pastTense (string) {
     if (string === 'cut') { return string }
     const lastLetter = string.charAt(string.length - 1)

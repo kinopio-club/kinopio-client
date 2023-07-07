@@ -995,7 +995,6 @@ const self = {
         const response = await fetch(`${host}/journal-daily-prompt`, options)
         const data = await normalizeResponse(response)
         let name = data.name
-        name = utils.removeSurroundingQuotes(name)
         return name
       } catch (error) {
         console.error('🚒 journalDailyPrompt', error)
