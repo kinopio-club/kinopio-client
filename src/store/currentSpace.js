@@ -349,8 +349,8 @@ const currentSpace = {
         space.boxes = []
       } else {
         space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
-        space.cards[1].x = random(180, 200)
-        space.cards[1].y = random(180, 200)
+        space.cards[1].x = space.cards[1].x + random(0, 20)
+        space.cards[1].y = space.cards[1].y + random(0, 20)
       }
       space.userId = context.rootState.currentUser.id
       space = utils.spaceDefaultBackground(space, context.rootState.currentUser)
