@@ -4,16 +4,15 @@
     footer
       Notifications
       .controls(v-if="controlsIsVisible" :class="{'hidden': isHiddenOnTouch}")
-        section
-          .button-wrap
-            button(@click.left.prevent.stop="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
-              img.icon(src="@/assets/add.svg")
-              img.icon.inbox-icon(src="@/assets/inbox.svg")
-            AddToInbox(:visible="addToInboxIsVisible")
+        .button-wrap
+          button(@click.left.prevent.stop="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
+            img.icon(src="@/assets/add.svg")
+            img.icon.inbox-icon(src="@/assets/inbox.svg")
+          AddToInbox(:visible="addToInboxIsVisible")
 
-  .right(:class="{'is-embed': isEmbedMode, 'hidden': isHiddenOnTouch}")
+  .right(v-if="controlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom
-    .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible" @touchend.stop)
+    .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible" @touchend.stop :class="{'hidden': isHiddenOnTouch}")
       button.small-button(:class="{active: userSettingsIsVisible}" title="Settings → Controls")
         img.icon.settings(src="@/assets/settings.svg")
 </template>
@@ -94,6 +93,8 @@ export default {
       return true
     },
     controlsIsVisible () {
+      const isTouchDevice = this.$store.state.isTouchDevice
+      if (!isTouchDevice) { return true }
       const contentDialogIsVisible = Boolean(this.cardDetailsIsVisibleForCardId || this.multipleSelectedActionsIsVisible || this.connectionDetailsIsVisibleForConnectionId)
       if (this.shouldExplicitlyHideFooter) { return }
       if (contentDialogIsVisible) { return }
@@ -269,19 +270,19 @@ footer
     height 11px
   .controls
     transition 0.2s opacity
-    > section
-      display flex
-      &:last-child
-        margin-top 6px
-      > .button-wrap
-        pointer-events all
-        margin-left 6px
-        display inline-block
-        dialog
-          top initial
-          bottom calc(100% - 8px)
-        &:first-child
-          margin-left 0
+    dialog
+      top initial
+      bottom calc(100% - 8px)
+    // > section
+    //   display flex
+    //   &:last-child
+    //     margin-top 6px
+    //   > .button-wrap
+    //     pointer-events all
+    //     margin-left 6px
+    //     display inline-block
+    //     &:first-child
+    //       margin-left 0
 
   .segmented-buttons
     .down-arrow
