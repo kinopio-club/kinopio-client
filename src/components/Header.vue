@@ -805,7 +805,7 @@ header
     > .button-wrap
       max-width 60vw
       @media(max-width 550px)
-        max-width 40vw
+        max-width 33vw
       > button
         .privacy-icon
           margin-left 6px
