@@ -178,21 +178,20 @@ export default {
       const scale = utils.roundFloat(viewport.scale)
       const counterScale = utils.roundFloat(1 / viewport.scale)
       const left = Math.round(viewport.offsetLeft)
-      let element = this.$refs.footer
-      const rect = element.getBoundingClientRect()
-      let height = rect.height
+      let footer = this.$refs.footer
+      if (!footer) { return }
+      let bottom = 0
       if (window.navigator.shouldAddSafeAreaPaddingBottom) {
-        height = height + 20
+        bottom = 20
       }
       let style = {
-        // transform: `translate(${left}px, ${top + offsetTop}px) scale(${counterScale})`,
         transform: `translate(${left}px, 0px) scale(${counterScale})`,
         maxWidth: Math.round(viewport.width * scale) + 'px',
-        top: `calc(100dvh - ${height}px)`
+        bottom: `max(${bottom}px, env(safe-area-inset-bottom))`
       }
-      if (utils.isIPhone() && scale <= 1) {
-        style.transform = 'none'
-        style.zoom = counterScale
+      if (scale > 1) {
+        let top = Math.round(viewport.offsetTop)
+        style.transform = `translate(${left}px, -${top}px) scale(${counterScale})`
       }
       this.position = style
     }
