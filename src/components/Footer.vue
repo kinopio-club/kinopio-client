@@ -189,10 +189,8 @@ export default {
         maxWidth: Math.round(viewport.width * scale) + 'px',
         bottom: `max(${bottom}px, env(safe-area-inset-bottom))`
       }
-      if (scale > 1) {
-        let top = Math.round(viewport.offsetTop)
-        style.transform = `translate(${left}px, -${top}px) scale(${counterScale})`
-      }
+      // if (scale > 1) {
+      // }
       this.position = style
     }
   },
