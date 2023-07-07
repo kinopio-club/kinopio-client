@@ -5,7 +5,7 @@
       Notifications
       .controls(v-if="controlsIsVisible" :class="{'hidden': isHiddenOnTouch}")
         section
-          .button-wrap(v-if="userHasInbox")
+          .button-wrap
             button(@click.left.prevent.stop="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
               img.icon(src="@/assets/add.svg")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
@@ -47,8 +47,7 @@ export default {
     return {
       position: {},
       isHiddenOnTouch: false,
-      addToInboxIsVisible: false,
-      userHasInbox: false
+      addToInboxIsVisible: false
     }
   },
   mounted () {
@@ -61,8 +60,6 @@ export default {
         this.hideOnTouch()
       } else if (mutation.type === 'triggerAddToInboxIsVisible') {
         this.addToInboxIsVisible = true
-      } else if (mutation.type === 'triggerCheckIfUseHasInboxSpace') {
-        this.updateUserHasInbox()
       }
     })
     window.addEventListener('scroll', this.updatePosition)
@@ -119,12 +116,6 @@ export default {
       const isVisible = this.addToInboxIsVisible
       this.$store.dispatch('closeAllDialogs')
       this.addToInboxIsVisible = !isVisible
-    },
-    async updateUserHasInbox () {
-      const currentUserIsSignedIn = this['currentUser/isSignedIn']
-      if (!currentUserIsSignedIn) { return }
-      const inboxSpace = await this.$store.dispatch('currentUser/inboxSpace')
-      this.userHasInbox = Boolean(inboxSpace)
     },
 
     // settings

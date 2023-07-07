@@ -181,7 +181,6 @@ const currentSpace = {
       context.dispatch('checkIfShouldCreateNewUserSpaces')
       context.dispatch('updateModulesSpaceId')
       context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
-      context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
 
@@ -490,7 +489,6 @@ const currentSpace = {
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
       context.commit('triggerUpdateWindowHistory', {}, { root: true })
-      context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
     },
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
@@ -882,7 +880,6 @@ const currentSpace = {
         name: 'removeSpace',
         body: { id: space.id }
       }, { root: true })
-      context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
     },
     deleteSpace: (context, space) => {
       cache.deleteSpace(space)

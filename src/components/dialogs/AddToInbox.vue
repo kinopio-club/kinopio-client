@@ -1,7 +1,19 @@
 <template lang="pug">
 dialog.add-to-inbox(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="dialogStyles")
-  AddToInbox(:visible="true")
-  section.card-list-section(ref="results")
+  AddToInbox(:visible="userHasInbox")
+  section(v-if="!userHasInbox")
+    //- no inbox found
+    template(v-if="currentUserIsSignedIn")
+      p.badge.danger
+        span Could not find Inbox space
+      button(@click.left="updateInboxCards")
+        img.refresh.icon(src="@/assets/refresh.svg")
+    //- not signed in
+    template(v-else)
+      p.badge.info
+        span Sign Up or In for quick access to your Inbox
+      button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+  section.card-list-section(v-if="userHasInbox" ref="results")
     Loader(:visible="isLoading")
     template(v-if="isCards")
       CardList(
@@ -43,7 +55,8 @@ export default {
       cards: [],
       isLoading: false,
       resultsSectionHeight: null,
-      dialogHeight: null
+      dialogHeight: null,
+      userHasInbox: true
     }
   },
   computed: {
@@ -57,7 +70,8 @@ export default {
     },
     dialogStyles () {
       return { maxHeight: this.dialogHeight + 'px' }
-    }
+    },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
     updateDialogHeight () {
@@ -84,18 +98,27 @@ export default {
         this.isLoading = true
       }
       try {
-        let space = await this.$store.dispatch('api/getInboxSpace')
-        console.log(space)
+        if (!this.currentUserIsSignedIn) {
+          this.userHasInbox = false
+          return
+        }
+        const space = await this.$store.dispatch('currentUser/inboxSpace')
         let cards = this.filterCards(space.cards)
         cards = this.sortCards(cards)
         this.cards = cards
+        this.userHasInbox = true
       } catch (error) {
         console.error('🚒 updateInboxCards', error)
+        this.userHasInbox = false
       }
       this.isLoading = false
     },
     closeDialogs () {
       this.$store.commit('cardListItemOptionsIsVisible', false)
+    },
+    triggerSignUpOrInIsVisible () {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('triggerSignUpOrInIsVisible')
     }
   },
   watch: {
