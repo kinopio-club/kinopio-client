@@ -2034,6 +2034,7 @@ export default {
       if (!value) { return }
       this.$nextTick(() => {
         this.updateCardDimensions()
+        this.$store.dispatch('currentConnections/correctPaths', { shouldUpdateApi: false })
       })
     }
   }
