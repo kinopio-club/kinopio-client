@@ -1062,6 +1062,8 @@ export default {
       if (this.isBeingDragged) { return true }
       if (this.isPlayingAudio) { return true }
       if (this.embedIsVisible) { return true }
+      const isTextOnlyCard = this.normalizedName === this.card.name
+      if (isTextOnlyCard) { return true }
       const threshold = 400 * this.spaceCounterZoomDecimal
       const fallbackHeight = 200
       const offset = utils.outsideSpaceOffset().y
