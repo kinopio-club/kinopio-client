@@ -327,7 +327,8 @@ export default {
       stickyTranslateY: 0,
       isAnimationUnsticking: false,
       stickyStretchResistance: 6,
-      defaultColor: '#e3e3e3'
+      defaultColor: '#e3e3e3',
+      pathIsUpdated: false
     }
   },
   computed: {
@@ -1086,6 +1087,11 @@ export default {
       card = utils.updateCardDimensions(card)
       if (!card) { return }
       this.$store.commit('currentCards/update', card)
+    },
+    updatePaths () {
+      if (this.pathIsUpdated) { return }
+      this.$store.dispatch('currentConnections/correctPaths', { shouldUpdateApi: false })
+      this.pathIsUpdated = true
     },
 
     // migration added june 2023
@@ -2034,7 +2040,7 @@ export default {
       if (!value) { return }
       this.$nextTick(() => {
         this.updateCardDimensions()
-        this.$store.dispatch('currentConnections/correctPaths', { shouldUpdateApi: false })
+        this.correctPaths()
       })
     }
   }
