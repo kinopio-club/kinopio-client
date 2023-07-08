@@ -735,8 +735,6 @@ const currentSpace = {
           }, { root: true })
           // referral
           nextTick(() => {
-            context.dispatch('currentCards/updateDimensions', {}, { root: true })
-            context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
             context.dispatch('currentUser/validateReferral', null, { root: true })
             context.dispatch('currentUser/validateReferralByName', null, { root: true })
           })
