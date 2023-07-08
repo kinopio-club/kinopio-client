@@ -1,5 +1,5 @@
 <template lang="pug">
-article#card(
+article.card-wrap#card(
   v-if="isVisibleInViewport"
   :style="positionStyle"
   :data-card-id="id"
@@ -2048,7 +2048,7 @@ export default {
 </script>
 
 <style lang="stylus">
-article
+article.card-wrap
   --card-width 200px
   pointer-events all
   position absolute
