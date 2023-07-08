@@ -1088,9 +1088,9 @@ export default {
       if (!card) { return }
       this.$store.commit('currentCards/update', card)
     },
-    updatePaths () {
+    correctPaths () {
       if (this.pathIsUpdated) { return }
-      this.$store.dispatch('currentConnections/correctPaths', { shouldUpdateApi: false })
+      this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: false })
       this.pathIsUpdated = true
     },
 
