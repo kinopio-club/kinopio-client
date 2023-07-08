@@ -367,6 +367,9 @@ export default {
         this.closeDialogs()
         this.updateFavorites()
         this.updateHeights()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     }
   }

@@ -330,10 +330,13 @@ export default {
       this.updateHeights()
       if (visible) {
         this.hasSearched = false
+        this.$store.commit('shouldExplicitlyHideFooter', true)
         if (utils.isMobile()) { return }
         this.$nextTick(() => {
           this.$store.commit('triggerFocusResultsFilter')
         })
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     }
   }

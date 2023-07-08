@@ -93,10 +93,10 @@ export default {
       return true
     },
     controlsIsVisible () {
+      if (this.shouldExplicitlyHideFooter) { return }
       const isTouchDevice = this.$store.state.isTouchDevice
       if (!isTouchDevice) { return true }
       const contentDialogIsVisible = Boolean(this.cardDetailsIsVisibleForCardId || this.multipleSelectedActionsIsVisible || this.connectionDetailsIsVisibleForConnectionId)
-      if (this.shouldExplicitlyHideFooter) { return }
       if (contentDialogIsVisible) { return }
       if (this.shouldHideFooter) { return }
       return true

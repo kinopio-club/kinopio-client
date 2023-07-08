@@ -431,7 +431,7 @@ const store = createStore({
       state.isAddPage = value
     },
     isPricingHidden: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
+      utils.typeCheck({ value, type: 'boolean', allowUndefined: true })
       state.isPricingHidden = value
     },
     disableViewportOptimizations: (state, value) => {
