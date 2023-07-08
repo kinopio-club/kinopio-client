@@ -745,10 +745,6 @@ header
     position relative
     display inline-block
     margin-right 6px
-    > .button-wrap
-      > .keyboard-shortcuts
-        max-height calc(100vh - 120px)
-        top calc(100% - 6px)
   .logo
     cursor pointer
     display flex
