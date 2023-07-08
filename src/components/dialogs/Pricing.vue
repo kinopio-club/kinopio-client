@@ -2,12 +2,20 @@
 import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
 import DiscountRow from '@/components/DiscountRow.vue'
 
-import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
 const props = defineProps({
   visible: Boolean
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    store.commit('shouldExplicitlyHideFooter', true)
+  } else {
+    store.commit('shouldExplicitlyHideFooter', false)
+  }
 })
 
 </script>

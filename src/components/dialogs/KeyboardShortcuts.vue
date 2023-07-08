@@ -324,7 +324,7 @@ export default {
 .keyboard-shortcuts
   user-select text
   overflow auto
-  max-height calc(100vh - 300px)
+  max-height calc(100vh - 60px)
   span
     color var(--primary)
   .title

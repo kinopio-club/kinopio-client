@@ -190,6 +190,9 @@ export default {
       if (visible) {
         this.updateDialogHeight()
         this.updateFavorites()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     }
   }
