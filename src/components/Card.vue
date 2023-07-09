@@ -55,21 +55,21 @@ article.card-wrap#card(
     template(v-if="!isComment")
       ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" @updateCardDimensions="updateCardDimensions")
 
-    //- resize
-    .bottom-button-wrap(v-if="resizeIsVisible")
-      .inline-button-wrap(
-        @mousedown.left.stop="startResizing"
-        @touchstart.stop="startResizing"
-        @dblclick="removeResize"
-      )
-        button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode}")
-          img.resize-icon.icon(src="@/assets/resize-corner.svg")
-
-    //- tilt TEMP
-    .left-bottom-button-wrap.bottom-button-wrap
-      .inline-button-wrap
-        button.inline-button
-          img.resize-icon.icon(src="@/assets/resize-corner.svg")
+    template(v-if="bottomButtonsIsVisible")
+      //- resize
+      .bottom-button-wrap
+        .inline-button-wrap(
+          @mousedown.left.stop="startResizing"
+          @touchstart.stop="startResizing"
+          @dblclick="removeResize"
+        )
+          button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode}")
+            img.resize-icon.icon(src="@/assets/resize-corner.svg")
+      //- tilt
+      .left-bottom-button-wrap.bottom-button-wrap
+        .inline-button-wrap
+          button.inline-button
+            img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
     //- Content
     span.card-content-wrap
@@ -481,7 +481,7 @@ export default {
       if (!results.length) { return }
       return Boolean(results.find(card => this.card.id === card.id))
     },
-    resizeIsVisible () {
+    bottomButtonsIsVisible () {
       if (this.isLocked) { return }
       if (!this.canEditSpace) { return }
       return true
