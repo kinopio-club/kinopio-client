@@ -70,6 +70,14 @@ article.card-wrap#card(
         .inline-button-wrap
           button.inline-button
             img.resize-icon.icon(src="@/assets/resize-corner.svg")
+        Slider(
+          :minValue="0"
+          :value="50"
+          :maxValue="100"
+          :shouldHideBadge="true"
+        )
+        //- @updatePlayhead="updateOpacity"
+        //- @resetPlayhead="resetOpacity"
 
     //- Content
     span.card-content-wrap
@@ -218,6 +226,7 @@ import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import CardCounter from '@/components/CardCounter.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
+import Slider from '@/components/Slider.vue'
 
 import dayjs from 'dayjs'
 import { mapState, mapGetters } from 'vuex'
@@ -251,7 +260,8 @@ export default {
     UrlPreviewCard,
     UserLabelInline,
     OtherCardPreview,
-    CardCounter
+    CardCounter,
+    Slider
   },
   props: {
     card: Object
