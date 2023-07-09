@@ -55,29 +55,7 @@ article.card-wrap#card(
     template(v-if="!isComment")
       ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" @updateCardDimensions="updateCardDimensions")
 
-    template(v-if="bottomButtonsIsVisible")
-      //- resize
-      .bottom-button-wrap
-        .inline-button-wrap(
-          @mousedown.left.stop="startResizing"
-          @touchstart.stop="startResizing"
-          @dblclick="removeResize"
-        )
-          button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode}")
-            img.resize-icon.icon(src="@/assets/resize-corner.svg")
-      //- tilt
-      .left-bottom-button-wrap.bottom-button-wrap
-        .inline-button-wrap
-          button.inline-button
-            img.resize-icon.icon(src="@/assets/resize-corner.svg")
-        Slider(
-          :minValue="0"
-          :value="50"
-          :maxValue="100"
-          :shouldHideBadge="true"
-        )
-        //- @updatePlayhead="updateOpacity"
-        //- @resetPlayhead="resetOpacity"
+    TiltResize(:card="card" :visible="tiltResizeIsVisible")
 
     //- Content
     span.card-content-wrap
@@ -226,7 +204,7 @@ import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import CardCounter from '@/components/CardCounter.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
-import Slider from '@/components/Slider.vue'
+import TiltResize from '@/components/TiltResize.vue'
 
 import dayjs from 'dayjs'
 import { mapState, mapGetters } from 'vuex'
@@ -261,7 +239,7 @@ export default {
     UserLabelInline,
     OtherCardPreview,
     CardCounter,
-    Slider
+    TiltResize
   },
   props: {
     card: Object
@@ -491,7 +469,7 @@ export default {
       if (!results.length) { return }
       return Boolean(results.find(card => this.card.id === card.id))
     },
-    bottomButtonsIsVisible () {
+    tiltResizeIsVisible () {
       if (this.isLocked) { return }
       if (!this.canEditSpace) { return }
       return true
@@ -1553,34 +1531,6 @@ export default {
       }
       this.$store.commit('currentUserIsDrawingConnection', true)
     },
-    startResizing (event) {
-      if (!this.canEditSpace) { return }
-      if (utils.isMultiTouch(event)) { return }
-      this.$store.dispatch('history/pause')
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      this.$store.dispatch('currentCards/incrementZ', this.id)
-      this.$store.commit('currentUserIsResizingCard', true)
-      let cardIds = [this.id]
-      const multipleCardsSelectedIds = this.multipleCardsSelectedIds
-      if (multipleCardsSelectedIds.length) {
-        cardIds = multipleCardsSelectedIds
-      }
-      this.$store.commit('currentUserIsResizingCardIds', cardIds)
-      const updates = {
-        userId: this.currentUser.id,
-        cardIds: cardIds
-      }
-      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
-    },
-    removeResize () {
-      let cardIds = [this.id]
-      const multipleCardsSelectedIds = this.multipleCardsSelectedIds
-      if (multipleCardsSelectedIds.length) {
-        cardIds = multipleCardsSelectedIds
-      }
-      this.$store.dispatch('currentCards/removeResize', { cardIds })
-    },
     updateStylesWithWidth (styles) {
       const cardHasExtendedContent = this.cardUrlPreviewIsVisible || this.otherCardIsVisible || this.isVisualCard || this.isAudioCard
       if (this.width) {
@@ -2363,34 +2313,6 @@ article.card-wrap
     .audio-wrap
       margin-top 8px
       margin-left 8px
-
-  .bottom-button-wrap
-    position absolute
-    right 0px
-    bottom 0px
-    display flex
-    .inline-button-wrap
-      z-index 1
-      cursor ew-resize
-      button
-        cursor ew-resize
-    img
-      -webkit-user-drag none
-
-  // tilt
-  .left-bottom-button-wrap
-    right initial
-    left 0px
-    bottom 0px
-    .inline-button-wrap
-      // background pink
-      transform translate(-8px, 13px)
-      cursor col-resize
-      button
-        cursor col-resize
-        transform scaleX(-1)
-    img
-      -webkit-user-drag none
 
   .lock-button-wrap
     opacity 0
