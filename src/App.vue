@@ -559,18 +559,22 @@ label
       background-color var(--secondary-active-background)
 
 .bottom-button-wrap
-  .resize-button-wrap
+  .inline-button-wrap
     transform translate(8px, 13px)
     &:hover
-      .resize-button
+      background transparent
+      button
         opacity 1
-    .resize-button
+        background-color transparent
+    button
       border 0
       width 12px
       height 12px
       padding 0
       background-color transparent
       opacity 0.3
+      &:hover
+        background-color transparent
 
 hr
   border-top 1px solid var(--primary-border)

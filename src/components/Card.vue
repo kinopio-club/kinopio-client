@@ -54,14 +54,21 @@ article.card-wrap#card(
 
     template(v-if="!isComment")
       ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" @updateCardDimensions="updateCardDimensions")
+
+    //- resize
     .bottom-button-wrap(v-if="resizeIsVisible")
-      //- resize
-      .resize-button-wrap.inline-button-wrap(
+      .inline-button-wrap(
         @mousedown.left.stop="startResizing"
         @touchstart.stop="startResizing"
         @dblclick="removeResize"
       )
-        button.inline-button.resize-button(tabindex="-1" :class="{hidden: isPresentationMode}")
+        button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode}")
+          img.resize-icon.icon(src="@/assets/resize-corner.svg")
+
+    //- tilt TEMP
+    .left-bottom-button-wrap.bottom-button-wrap
+      .inline-button-wrap
+        button.inline-button
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
     //- Content
@@ -2352,11 +2359,26 @@ article.card-wrap
     right 0px
     bottom 0px
     display flex
-    .resize-button-wrap
+    .inline-button-wrap
       z-index 1
       cursor ew-resize
       button
         cursor ew-resize
+    img
+      -webkit-user-drag none
+
+  // tilt
+  .left-bottom-button-wrap
+    right initial
+    left 0px
+    bottom 0px
+    .inline-button-wrap
+      // background pink
+      transform translate(-8px, 13px)
+      cursor col-resize
+      button
+        cursor col-resize
+        transform scaleX(-1)
     img
       -webkit-user-drag none
 

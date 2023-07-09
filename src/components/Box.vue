@@ -42,13 +42,13 @@
 
   //- resize
   .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPainting}")
-    .resize-button-wrap.inline-button-wrap(
+    .inline-button-wrap(
         @pointerover="updateIsHover(true)"
         @pointerleave="updateIsHover(false)"
         @mousedown.left="startResizing"
         @touchstart="startResizing"
       )
-      button.inline-button.resize-button(
+      button.inline-button(
         tabindex="-1"
       )
         img.resize-icon.icon(src="@/assets/resize-corner.svg")
@@ -685,7 +685,7 @@ export default {
     right 0px
     bottom 0px
     display flex
-    .resize-button-wrap
+    .inline-button-wrap
       transform translate(10px, 13px)
       z-index 1
       cursor nwse-resize
