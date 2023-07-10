@@ -9,7 +9,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
 
   section
     .row
-      p Thinking canvas for building ideas and solving problems
+      p For building ideas and solving problems
     .row
       .button-wrap
         a(href="https://help.kinopio.club/about")
