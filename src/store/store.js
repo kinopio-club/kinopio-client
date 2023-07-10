@@ -551,11 +551,11 @@ const store = createStore({
     triggerSearchScopeIsRemote: () => {},
     triggerSearchScopeIsLocal: () => {},
     triggerShowExplore: () => {},
-    triggerCardIdUpdatePastedName: (state, options) => {},
     triggerDrawConnectionFrame: (state, event) => {},
     triggerCancelLocking: () => {},
     triggerUpdateOtherCard: (state, cardId) => {},
     triggerControlsSettingsIsVisible: () => {},
+    triggerUpdateCardDetailsCardName: (state, options) => {},
 
     // Used by extensions only
 

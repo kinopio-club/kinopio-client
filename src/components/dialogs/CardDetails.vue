@@ -303,6 +303,10 @@ export default {
         if (!cardId) { return }
         prevCardId = cardId
         this.showCard(cardId)
+      } else if (mutation.type === 'triggerUpdateCardDetailsCardName') {
+        const { cardId, name } = mutation.payload
+        if (cardId !== this.card.id) { return }
+        this.updateCardName(name)
       }
     })
   },
@@ -809,11 +813,6 @@ export default {
       this.pastedName = text
       this.wasPasted = true
       this.$store.dispatch('currentCards/updateURLQueryStrings', { cardId: this.card.id })
-      this.$nextTick(() => {
-        this.$nextTick(() => {
-          this.$store.commit('triggerCardIdUpdatePastedName', { cardId: this.card.id, name: text })
-        })
-      })
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')

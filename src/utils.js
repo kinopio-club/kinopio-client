@@ -161,11 +161,20 @@ export default {
     let scrollY = 0
     scrollX = x + 20
     scrollY = y + 80
-    window.scrollBy({
+    const viewportIsNarrow = viewportWidth < (consts.sidebarWidth * 2)
+    const sidebarIsVisible = document.querySelector('dialog.sidebar')
+    if (sidebarIsVisible) {
+      scrollX = scrollX + consts.sidebarWidth
+    }
+    if (sidebarIsVisible && viewportIsNarrow) {
+      scrollX = scrollX - 80
+    }
+    const scroll = {
       left: scrollX,
       top: scrollY,
       behavior
-    })
+    }
+    window.scrollBy(scroll)
   },
   cursorPositionInViewport (event) {
     let x, y
