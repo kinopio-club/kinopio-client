@@ -73,6 +73,9 @@ export default {
       if (visible) {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     }
   }

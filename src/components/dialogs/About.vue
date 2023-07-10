@@ -211,6 +211,9 @@ export default {
       if (visible) {
         this.closeDialogs()
         this.updateDialogHeight()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     }
   }

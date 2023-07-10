@@ -425,6 +425,7 @@ const currentCards = {
       cardIds.forEach(cardId => {
         const body = { id: cardId, resizeWidth: null, width: null }
         context.dispatch('update', body)
+        utils.removeAllCardDimensions({ id: cardId })
         context.dispatch('updateDimensions', { cardId })
       })
     },

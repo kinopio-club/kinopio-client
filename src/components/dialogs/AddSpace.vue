@@ -236,6 +236,9 @@ export default {
       this.updateDialogHeight()
       if (visible) {
         this.checkIfUserHasInboxSpace()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     }
   }

@@ -6,7 +6,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }" title="Header 1")
         span h1
       button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }" title="Header 2")
-          span h2
+        span h2
     //- Tag
     .button-wrap(v-if="isCards")
       button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: tagPickerIsVisible }")

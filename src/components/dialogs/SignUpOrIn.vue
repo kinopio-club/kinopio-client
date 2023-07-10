@@ -381,6 +381,9 @@ export default {
       if (value) {
         this.clearErrors()
         this.createSessionToken()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     },
     'loading.signUpOrIn' (value) {

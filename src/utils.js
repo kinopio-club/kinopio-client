@@ -81,7 +81,7 @@ export default {
   },
   elementHeight (element, isChildElement) {
     if (!element) { return }
-    const threshold = 50
+    const threshold = 10
     const rect = element.getBoundingClientRect()
     let height
     const viewportHeight = this.visualViewport().height
@@ -91,7 +91,6 @@ export default {
       const dialogRect = dialog.getBoundingClientRect()
       height = height - (rect.y - dialogRect.y)
     }
-
     const zoomScale = this.visualViewport().scale
     if (zoomScale > 1) {
       height = height * zoomScale
@@ -816,7 +815,6 @@ export default {
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
     const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
     const cardMediaElement = articleElement.querySelector(`.media-card`)
-    const isResettingCardDimensions = !card.width
     let width = 'initial'
     if (articleElement.dataset.resizeWidth) {
       width = articleElement.dataset.resizeWidth + 'px'
@@ -826,12 +824,21 @@ export default {
     cardElement.style.width = width
     contentWrapElement.style.width = width
     contentWrapElement.style.height = 'initial'
-    if (cardMediaElement && isResettingCardDimensions) {
+  },
+  removeAllCardDimensions (card) {
+    const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+    const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
+    const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
+    const cardMediaElement = articleElement.querySelector(`.media-card`)
+    articleElement.style.width = null
+    articleElement.style.height = null
+    cardElement.style.width = null
+    contentWrapElement.style.width = null
+    contentWrapElement.style.height = null
+    if (cardMediaElement) {
       cardMediaElement.style.width = null
     }
-    if (isResettingCardDimensions) {
-      articleElement.style.maxWidth = null
-    }
+    articleElement.style.maxWidth = null
   },
   topLeftItem (items) {
     items = this.clone(items)

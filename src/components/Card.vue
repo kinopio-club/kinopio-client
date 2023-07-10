@@ -1,5 +1,5 @@
 <template lang="pug">
-article#card(
+article.card-wrap#card(
   v-if="isVisibleInViewport"
   :style="positionStyle"
   :data-card-id="id"
@@ -327,7 +327,8 @@ export default {
       stickyTranslateY: 0,
       isAnimationUnsticking: false,
       stickyStretchResistance: 6,
-      defaultColor: '#e3e3e3'
+      defaultColor: '#e3e3e3',
+      pathIsUpdated: false
     }
   },
   computed: {
@@ -1061,6 +1062,8 @@ export default {
       if (this.isBeingDragged) { return true }
       if (this.isPlayingAudio) { return true }
       if (this.embedIsVisible) { return true }
+      const isTextOnlyCard = this.normalizedName === this.card.name
+      if (isTextOnlyCard) { return true }
       const threshold = 400 * this.spaceCounterZoomDecimal
       const fallbackHeight = 200
       const offset = utils.outsideSpaceOffset().y
@@ -1086,6 +1089,11 @@ export default {
       card = utils.updateCardDimensions(card)
       if (!card) { return }
       this.$store.commit('currentCards/update', card)
+    },
+    correctPaths () {
+      if (this.pathIsUpdated) { return }
+      this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: false })
+      this.pathIsUpdated = true
     },
 
     // migration added june 2023
@@ -2034,6 +2042,7 @@ export default {
       if (!value) { return }
       this.$nextTick(() => {
         this.updateCardDimensions()
+        this.correctPaths()
       })
     }
   }
@@ -2041,7 +2050,7 @@ export default {
 </script>
 
 <style lang="stylus">
-article
+article.card-wrap
   --card-width 200px
   pointer-events all
   position absolute

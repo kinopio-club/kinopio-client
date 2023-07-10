@@ -725,11 +725,8 @@ const currentSpace = {
         // deferrable async tasks
         context.dispatch('updateOtherUsers')
         context.dispatch('updateOtherItems')
-        context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
-        context.dispatch('currentCards/updateDimensions', {}, { root: true })
         context.dispatch('checkIfShouldResetDimensions')
         nextTick(() => {
-          context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
           context.dispatch('checkIfShouldPauseConnectionDirections')
           context.dispatch('checkIfShouldUpdateNewTweetCards', space)
           context.dispatch('api/addToQueue', {

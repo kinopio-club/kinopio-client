@@ -200,8 +200,9 @@ export default {
         this.filteredNotifications = this.notifications
         this.updateDialogHeight()
         this.$emit('updateNotifications')
-      }
-      if (!visible) {
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
         this.markAllAsRead()
         this.filteredNotifications = null
       }
