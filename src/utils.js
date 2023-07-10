@@ -159,12 +159,8 @@ export default {
     let y = rect.y + rect.height - viewportHeight
     let scrollX = 0
     let scrollY = 0
-    if (x > 0) {
-      scrollX = x + 20
-    }
-    if (y > 0) {
-      scrollY = y + 80
-    }
+    scrollX = x + 20
+    scrollY = y + 80
     window.scrollBy({
       left: scrollX,
       top: scrollY,
