@@ -22,12 +22,15 @@ watch(() => props.visible, (value, prevValue) => {
 
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 
-// list
+// cards
 
-const cards = computed(() => store.state.currentSpace.cards)
+const cards = computed(() => store.getters['currentCards/all'])
 const canEditCard = (card) => {
   return store.getters['currentUser/canEditCard'](card)
 }
+
+// textarea
+
 const updateTextareaSize = (element) => {
   const modifier = 1
   element.style.height = element.scrollHeight + modifier + 'px'
@@ -198,39 +201,23 @@ template(v-if="visible")
 </template>
 
 <style lang="stylus">
-
 section.text
-  // background-color var(--secondary-background)
   .textarea-wrap
     cursor pointer
     background-color var(--secondary-background)
     border-radius var(--entity-radius)
     padding 8px
-    // padding-top 4px
-
     margin-bottom 4px
-
-    // border-bottom 1px solid var(--primary-border)
-
     &:hover
-      // box-shadow var(--hover-shadow)
       box-shadow var(--button-hover-shadow)
-      // background-color var(--primary-background)
     &:active
-      // box-shadow var(--active-shadow)
       box-shadow var(--button-active-inset-shadow)
     textarea
-      // margin-bottom 2px
       margin-bottom 0
-      // border-bottom 0
-
     img
       max-width 100px
       border-radius var(--entity-radius)
       margin-top 4px
-      // margin-bottom -6px
+      margin-bottom -4px
       cursor pointer
-  // span + .badge
-  //   margin-left 3px
-    // border-bottom 1px solid var(--primary-border)
 </style>
