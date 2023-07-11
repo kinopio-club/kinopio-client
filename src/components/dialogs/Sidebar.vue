@@ -100,11 +100,13 @@ export default {
         this.updateDialogHeight()
       } else if (mutation.type === 'triggerRemovedIsVisible') {
         this.$nextTick(() => {
-          this.toggleRemovedIsVisible()
+          this.clearVisible()
+          this.removedIsVisible = true
         })
       } else if (mutation.type === 'triggerAIImagesIsVisible') {
         this.$nextTick(() => {
-          this.toggleAIImagesIsVisible()
+          this.clearVisible()
+          this.AIImagesIsVisible = true
         })
       }
     })
@@ -133,7 +135,7 @@ export default {
     closeDialogs () {
       this.$store.commit('tagDetailsIsVisible', false)
     },
-    clearIsVisible () {
+    clearVisible () {
       this.linksIsVisible = false
       this.tagsIsVisible = false
       this.commentsIsVisible = false
@@ -145,50 +147,42 @@ export default {
     },
     toggleTagsIsVisible () {
       const value = !this.tagsIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.tagsIsVisible = value
     },
     toggleLinksIsVisible () {
       const value = !this.linksIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.linksIsVisible = value
     },
     toggleCommentsIsVisible () {
       const value = !this.commentsIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.commentsIsVisible = value
     },
     toggleRemovedIsVisible () {
       const value = !this.removedIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.removedIsVisible = value
     },
     toggleAIImagesIsVisible () {
       const value = !this.AIImagesIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.AIImagesIsVisible = value
     },
     toggleStatsIsVisible () {
       const value = !this.statsIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.statsIsVisible = value
     },
     toggleFavoritesIsVisible () {
       const value = !this.favoritesIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.favoritesIsVisible = value
     },
     toggleTextIsVisible () {
       const value = !this.textIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.textIsVisible = value
     },
     updateDialogHeight () {
