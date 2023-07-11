@@ -49,11 +49,15 @@ const textareaWrapStyles = (card) => {
   return styles
 }
 const textareaStyles = (card) => {
+  if (!card.backgroundColor) { return }
   let styles = {
     backgroundColor: card.backgroundColor
   }
   if (utils.colorIsDark(card.backgroundColor)) {
     const color = utils.cssVariable('primary-on-dark-background')
+    styles.color = color
+  } else {
+    const color = utils.cssVariable('primary-on-light-background')
     styles.color = color
   }
   return styles
