@@ -151,18 +151,18 @@ const imageUrl = (card) => {
 <template lang="pug">
 .text(v-if="visible")
   section
-    .row.title-row
-      div
-        span {{cards.length}} Cards
-        span.badge.info(v-if="!canEditSpace") Read Only
-        span.badge.success(v-if="canEditSpace") Editable
-      //- button(@click="addCard")
-      //-   img.icon.add(src="@/assets/add.svg")
-      button.small-button(title="By last edited")
-        img.icon.filter(src="@/assets/filter.svg")
-        //- span EditedAt
-        //- img.icon.down-arrow(src="@/assets/down-arrow.svg")
-        span ▼
+    //- .row.title-row
+      //- div
+      //-   span {{cards.length}} Cards
+      //-   span.badge.info(v-if="!canEditSpace") Read Only
+      //-   //- span.badge.success(v-if="canEditSpace") Editable
+      //- //- button(@click="addCard")
+      //- //-   img.icon.add(src="@/assets/add.svg")
+      //- button.small-button(title="By last edited")
+      //-   img.icon.filter(src="@/assets/filter.svg")
+      //-   //- span EditedAt
+      //-   //- img.icon.down-arrow(src="@/assets/down-arrow.svg")
+      //-   span ▼
 
     .row
       button(@click="copyText")
@@ -194,6 +194,9 @@ const imageUrl = (card) => {
     background-color var(--primary-background)
     .textarea-wrap
       cursor pointer
+      position relative
+      display flex
+      align-items flex-start
       // margin-bottom 7px
       // border-bottom 1px solid var(--primary-border)
       textarea
@@ -202,9 +205,12 @@ const imageUrl = (card) => {
         margin-bottom 0
         padding 4px
       img
-        max-width 50px
+        // position absolute
+        right 0
+        top 0
+        max-width 40px
         border-radius var(--entity-radius)
-        margin 0 4px
+        margin 4px
         cursor pointer
     span + .badge
       margin-left 3px
