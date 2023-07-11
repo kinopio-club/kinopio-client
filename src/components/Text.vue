@@ -1,7 +1,6 @@
 <script setup>
 import utils from '@/utils.js'
 import CardTips from '@/components/dialogs/CardTips.vue'
-import TextFilters from '@/components/dialogs/TextFilters.vue'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
@@ -16,7 +15,7 @@ const props = defineProps({
 })
 const state = reactive({
   cardTipsIsVisible: false,
-  textFiltersIsVisible: false
+  sortOrderIsDesc: true
 })
 const section = ref(null)
 
@@ -34,24 +33,21 @@ const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 
 const closeDialogs = () => {
   state.cardTipsIsVisible = false
-  state.textFiltersIsVisible = false
 }
 const toggleCardTipsIsVisible = () => {
   const value = !state.cardTipsIsVisible
   closeDialogs()
   state.cardTipsIsVisible = value
 }
-const toggleTextFiltersIsVisible = () => {
-  const value = !state.textFiltersIsVisible
-  closeDialogs()
-  state.textFiltersIsVisible = value
-}
 
 // cards
 
 const cards = computed(() => store.getters['currentCards/all'])
-const filteredCards = computed(() => {
-  console.log('☎️', cards.value)
+const toggleSortOrder = () => {
+  state.sortOrderIsDesc = !state.sortOrderIsDesc
+}
+const sortedCards = computed(() => {
+  console.log('☎️', state.sortOrderIsDesc, cards.value)
   return cards.value
 })
 const canEditCard = (card) => {
@@ -103,7 +99,7 @@ const copyText = async (event) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
   try {
-    const text = utils.textFromCardNames(filteredCards.value)
+    const text = utils.textFromCardNames(sortedCards.value)
     await navigator.clipboard.writeText(text)
     store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
@@ -146,7 +142,7 @@ const moveToPrevious = (event, index) => {
   })
 }
 const moveToNext = (event, index) => {
-  if (index === filteredCards.value.length - 1) { return }
+  if (index === sortedCards.value.length - 1) { return }
   const isCursorAtEnd = event.target.selectionEnd === event.target.textLength
   if (!isCursorAtEnd) { return }
   const next = event.target.parentElement.nextElementSibling.querySelector('textarea')
@@ -199,10 +195,13 @@ template(v-if="visible")
     .row.title-row
       div Card Text Editor
       //- filter
-      .button-wrap(@click.stop="toggleTextFiltersIsVisible")
-        button.small-button(:class="{ active: state.textFiltersIsVisible }")
-          img.icon.filter(src="@/assets/filter.svg")
-        TextFilters(:visible="state.textFiltersIsVisible")
+      .button-wrap(@click.stop="toggleSortOrder" title="Sort Order")
+        button.small-button
+          img.icon.time(src="@/assets/time.svg")
+          img.icon.triangle.down(v-if="state.sortOrderIsDesc" src="@/assets/triangle.svg")
+          img.icon.triangle(v-else src="@/assets/triangle.svg")
+
+        //- TextFilters(:visible="state.textFiltersIsVisible")
     .row.title-row
       //- copy
       button.small-button(@click="copyText")
@@ -215,7 +214,7 @@ template(v-if="visible")
         CardTips(:visible="state.cardTipsIsVisible" :preventScrollIntoView="true")
 
   section.text.results-section(ref="section" @click="closeDialogs")
-    template(v-for="(card, index) in filteredCards")
+    template(v-for="(card, index) in sortedCards")
       .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea($event, card)")
         textarea(
           @click.stop
@@ -255,5 +254,7 @@ section.text
   .button-wrap
     padding-left 6px
     margin 0
-
+  .triangle
+    &.down
+      transform scaleY(-1)
 </style>
