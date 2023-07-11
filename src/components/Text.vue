@@ -238,6 +238,7 @@ section.text
     background-color var(--secondary-background)
     border-radius var(--entity-radius)
     padding 8px
+    padding-bottom 4px
     margin-bottom 4px
     position relative
     &:hover
