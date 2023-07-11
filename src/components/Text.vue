@@ -165,12 +165,19 @@ template(v-if="visible")
       //-   span ▼
 
     .row
-      p Card Text Editor
+      //- div Edit Cards as Text
+      div Card Text Editor
+      //- button.small-button
+      //-   img.icon.filter(src="@/assets/filter.svg")
+      //-   span Last Edited
 
-    .row
+    .row.title-row
       button(@click="copyText")
         img.icon.copy(src="@/assets/copy.svg")
         span Copy All
+      //- button.small-button
+      //-   img.icon.filter(src="@/assets/filter.svg")
+        //- span Last Edited
 
   section.text.results-section(ref="section")
     template(v-for="(card, index) in cards")
@@ -193,29 +200,37 @@ template(v-if="visible")
 <style lang="stylus">
 
 section.text
-  // &.results-section
-  //   overflow scroll
-  // background-color var(--primary-background)
+  // background-color var(--secondary-background)
   .textarea-wrap
     cursor pointer
-    position relative
-    display flex
-    align-items flex-start
-    // margin-bottom 7px
+    background-color var(--secondary-background)
+    border-radius var(--entity-radius)
+    padding 8px
+    // padding-top 4px
+
+    margin-bottom 4px
+
     // border-bottom 1px solid var(--primary-border)
+
+    &:hover
+      // box-shadow var(--hover-shadow)
+      box-shadow var(--button-hover-shadow)
+      // background-color var(--primary-background)
+    &:active
+      // box-shadow var(--active-shadow)
+      box-shadow var(--button-active-inset-shadow)
     textarea
-      border-radius var(--small-entity-radius)
-      border-bottom 0
+      // margin-bottom 2px
       margin-bottom 0
-      padding 4px
+      // border-bottom 0
+
     img
-      // position absolute
-      right 0
-      top 0
-      max-width 40px
+      max-width 100px
       border-radius var(--entity-radius)
-      margin 4px
+      margin-top 4px
+      // margin-bottom -6px
       cursor pointer
-  span + .badge
-    margin-left 3px
+  // span + .badge
+  //   margin-left 3px
+    // border-bottom 1px solid var(--primary-border)
 </style>
