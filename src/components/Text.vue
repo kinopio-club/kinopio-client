@@ -1,5 +1,7 @@
 <script setup>
 import utils from '@/utils.js'
+import CardTips from '@/components/dialogs/CardTips.vue'
+import TextFilters from '@/components/dialogs/TextFilters.vue'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
@@ -12,15 +14,38 @@ onMounted(() => {
 const props = defineProps({
   visible: Boolean
 })
+const state = reactive({
+  cardTipsIsVisible: false,
+  textFiltersIsVisible: false
+})
 const section = ref(null)
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateAllTextareaSizes()
+  } else {
+    closeDialogs()
   }
 })
 
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+
+// dialogs
+
+const closeDialogs = () => {
+  state.cardTipsIsVisible = false
+  state.textFiltersIsVisible = false
+}
+const toggleCardTipsIsVisible = () => {
+  const value = !state.cardTipsIsVisible
+  closeDialogs()
+  state.cardTipsIsVisible = value
+}
+const toggleTextFiltersIsVisible = () => {
+  const value = !state.textFiltersIsVisible
+  closeDialogs()
+  state.textFiltersIsVisible = value
+}
 
 // cards
 
@@ -153,7 +178,7 @@ const imageUrl = (card) => {
 
 <template lang="pug">
 template(v-if="visible")
-  section.text
+  section.text(@click="closeDialogs")
     //- .row.title-row
       //- div
       //-   span {{cards.length}} Cards
@@ -167,22 +192,25 @@ template(v-if="visible")
       //-   //- img.icon.down-arrow(src="@/assets/down-arrow.svg")
       //-   span ▼
 
-    .row
-      //- div Edit Cards as Text
-      div Card Text Editor
-      //- button.small-button
-      //-   img.icon.filter(src="@/assets/filter.svg")
-      //-   span Last Edited
-
     .row.title-row
-      button(@click="copyText")
+      div Card Text Editor
+      //- filter
+      .button-wrap(@click.stop="toggleTextFiltersIsVisible")
+        button.small-button(:class="{ active: state.textFiltersIsVisible }")
+          img.icon.filter(src="@/assets/filter.svg")
+        TextFilters(:visible="state.textFiltersIsVisible")
+    .row.title-row
+      //- copy
+      button.small-button(@click="copyText")
         img.icon.copy(src="@/assets/copy.svg")
-        span Copy All
-      //- button.small-button
-      //-   img.icon.filter(src="@/assets/filter.svg")
-        //- span Last Edited
+        span Copy
+      //- tips
+      .button-wrap(@click.stop="toggleCardTipsIsVisible")
+        button.small-button(:class="{ active: state.cardTipsIsVisible }")
+          span ?
+        CardTips(:visible="state.cardTipsIsVisible" :preventScrollIntoView="true")
 
-  section.text.results-section(ref="section")
+  section.text.results-section(ref="section" @click="closeDialogs")
     template(v-for="(card, index) in cards")
       .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea($event, card)")
         textarea(
@@ -220,4 +248,8 @@ section.text
       margin-top 4px
       margin-bottom -4px
       cursor pointer
+  .button-wrap
+    padding-left 6px
+    margin 0
+
 </style>

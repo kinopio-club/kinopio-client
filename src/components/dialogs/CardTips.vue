@@ -44,22 +44,25 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
 
 <script>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 export default {
   name: 'CardTips',
   props: {
     visible: Boolean,
-    maxCardLength: Number
+    preventScrollIntoView: Boolean
   },
   data () {
     return {
       markdownInfoIsVisible: false
     }
   },
-  // computed: {
-  // },
+  computed: {
+    maxCardLength () { return consts.maxCardLength }
+  },
   methods: {
     scrollIntoView () {
+      if (this.preventScrollIntoView) { return }
       if (utils.isMobile()) { return }
       this.$nextTick(() => {
         const element = this.$refs.dialog

@@ -68,7 +68,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: cardTipsIsVisible }")
         button.inline-button(tabindex="-1" :class="{ active: cardTipsIsVisible }")
           span ?
-      CardTips(:visible="cardTipsIsVisible" :maxCardLength="maxCardLength")
+      CardTips(:visible="cardTipsIsVisible")
 
     .row(v-if="cardPendingUpload")
       .badge.info
