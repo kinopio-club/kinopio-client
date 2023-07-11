@@ -247,7 +247,8 @@ section.text
     textarea
       margin-bottom 0
     img
-      max-width 100px
+      max-width 60px
+      max-height 60px
       border-radius var(--entity-radius)
       margin-top 4px
       margin-bottom -4px
