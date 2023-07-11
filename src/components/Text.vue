@@ -37,17 +37,24 @@ const updateAllTextareaSizes = async () => {
     updateTextareaSize(element)
   })
 }
-const cardStyles = (card) => {
+const textareaWrapStyles = (card) => {
+  let styles = {
+    backgroundColor: card.backgroundColor
+  }
+  if (card.backgroundColor) {
+    const borderRadius = utils.cssVariable('entity-radius')
+    styles.borderRadius = borderRadius
+  }
+
+  return styles
+}
+const textareaStyles = (card) => {
   let styles = {
     backgroundColor: card.backgroundColor
   }
   if (utils.colorIsDark(card.backgroundColor)) {
     const color = utils.cssVariable('primary-on-dark-background')
     styles.color = color
-  }
-  if (card.backgroundColor) {
-    const borderRadius = utils.cssVariable('entity-radius')
-    styles.borderRadius = borderRadius
   }
   return styles
 }
@@ -70,10 +77,21 @@ const copyText = async (event) => {
 //   card = card || cards.value[0]
 //   console.log('same as Enter key in carddetails', card)
 // }
-const focus = async (event, card) => {
+const focus = (card) => {
   store.commit('triggerScrollCardIntoView', card.id)
   store.commit('shouldPreventNextFocusOnName', true)
   store.commit('cardDetailsIsVisibleForCardId', card.id)
+}
+const focusTextarea = async (event, card) => {
+  let element = section.value.querySelector(`textarea[data-card-id="${card.id}"]`)
+  focus(card)
+  await nextTick()
+  await nextTick()
+  element.focus()
+  const end = element.textLength
+  setTimeout(() => {
+    element.setSelectionRange(end, end)
+  })
 }
 
 // keyboard navigation
@@ -135,19 +153,21 @@ section.text(v-if="visible")
     //- button(@click="addCard")
     //-   img.icon.add(src="@/assets/add.svg")
 section.results-section(ref="section")
-  .textarea-wrap(v-for="(card, index) in cards")
-    textarea(
-      :data-card-id="card.id"
-      @focus="focus($event, card)"
-      @keydown.up="moveToPrevious($event, index)"
-      @keydown.down="moveToNext($event, index)"
-      rows="1"
-      :disabled="!canEditCard(card)"
-      :value="card.name"
-      @input="updateName($event, card)"
-      :style="cardStyles(card)"
-    )
-    img(v-if="imageUrl(card)" :src="imageUrl(card)")
+  template(v-for="(card, index) in cards")
+    .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea($event, card)")
+      textarea(
+        @click.stop
+        :data-card-id="card.id"
+        @focus="focus(card)"
+        @keydown.up="moveToPrevious($event, index)"
+        @keydown.down="moveToNext($event, index)"
+        rows="1"
+        :disabled="!canEditCard(card)"
+        :value="card.name"
+        @input="updateName($event, card)"
+        :style="textareaStyles(card)"
+      )
+      img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea($event, card)")
 </template>
 
 <style lang="stylus" scoped>
@@ -155,18 +175,21 @@ section
   overflow scroll
   background-color var(--primary-background)
   .textarea-wrap
-    position relative
-    img
-      position absolute
-      right 5px
-      top 5px
-      width 40px
-      border-radius var(--small-entity-radius)
-  textarea
-    border-radius var(--entity-radius)
-    border-bottom-left-radius 0
-    border-bottom-right-radius 0
-    padding 3px 6px
-    &:focus
+    cursor pointer
+    margin-bottom 8px
+    border-bottom 1px solid var(--primary-border)
+    textarea
       border-radius var(--entity-radius)
+      border-bottom-left-radius 0
+      border-bottom-right-radius 0
+      border-bottom 0
+      margin-bottom 0
+      padding 3px 6px
+      &:focus
+        border-radius var(--entity-radius)
+    img
+      max-width 50px
+      border-radius var(--entity-radius)
+      margin 6px 4px
+      cursor pointer
 </style>

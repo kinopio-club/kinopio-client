@@ -914,14 +914,14 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     textareaSizes () {
-      let textareas = document.querySelectorAll('dialog textarea')
+      const element = this.$refs.dialog
+      console.log(element)
+      let textarea = element.querySelector('textarea')
       let modifier = 0
       if (this.canEditCard) {
         modifier = 1
       }
-      textareas.forEach(textarea => {
-        textarea.style.height = textarea.scrollHeight + modifier + 'px'
-      })
+      textarea.style.height = textarea.scrollHeight + modifier + 'px'
     },
     toggleCardTipsIsVisible () {
       const isVisible = this.cardTipsIsVisible
