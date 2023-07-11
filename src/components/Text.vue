@@ -4,6 +4,9 @@ import CardTips from '@/components/dialogs/CardTips.vue'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+
+import sortBy from 'lodash-es/sortBy'
+import dayjs from 'dayjs'
 const store = useStore()
 
 onMounted(() => {
@@ -47,8 +50,11 @@ const toggleSortOrder = () => {
   state.sortOrderIsDesc = !state.sortOrderIsDesc
 }
 const sortedCards = computed(() => {
-  console.log('☎️', state.sortOrderIsDesc, cards.value)
-  return cards.value
+  const sorted = sortBy(cards.value, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
+  if (state.sortOrderIsDesc) {
+    sorted.reverse()
+  }
+  return sorted
 })
 const canEditCard = (card) => {
   return store.getters['currentUser/canEditCard'](card)
