@@ -50,6 +50,10 @@ const toggleTextFiltersIsVisible = () => {
 // cards
 
 const cards = computed(() => store.getters['currentCards/all'])
+const filteredCards = computed(() => {
+  console.log('☎️', cards.value)
+  return cards.value
+})
 const canEditCard = (card) => {
   return store.getters['currentUser/canEditCard'](card)
 }
@@ -99,7 +103,7 @@ const copyText = async (event) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
   try {
-    const text = utils.textFromCardNames(cards.value)
+    const text = utils.textFromCardNames(filteredCards.value)
     await navigator.clipboard.writeText(text)
     store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
@@ -142,7 +146,7 @@ const moveToPrevious = (event, index) => {
   })
 }
 const moveToNext = (event, index) => {
-  if (index === cards.value.length - 1) { return }
+  if (index === filteredCards.value.length - 1) { return }
   const isCursorAtEnd = event.target.selectionEnd === event.target.textLength
   if (!isCursorAtEnd) { return }
   const next = event.target.parentElement.nextElementSibling.querySelector('textarea')
@@ -211,7 +215,7 @@ template(v-if="visible")
         CardTips(:visible="state.cardTipsIsVisible" :preventScrollIntoView="true")
 
   section.text.results-section(ref="section" @click="closeDialogs")
-    template(v-for="(card, index) in cards")
+    template(v-for="(card, index) in filteredCards")
       .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea($event, card)")
         textarea(
           @click.stop
