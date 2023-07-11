@@ -32,7 +32,7 @@ export default {
         this.updateSpaceZoomFromTrigger(this.max)
         window.scrollTo(0, 0)
       } else if (mutation.type === 'triggerSpaceZoomOut') {
-        let percent = this.spaceZoomPercent
+        let percent = this.$store.state.spaceZoomPercent
         let speed
         if (mutation.payload) {
           speed = mutation.payload.speed
@@ -40,7 +40,7 @@ export default {
         percent -= speed || increment
         this.updateSpaceZoomFromTrigger(percent)
       } else if (mutation.type === 'triggerSpaceZoomIn') {
-        let percent = this.spaceZoomPercent
+        let percent = this.$store.state.spaceZoomPercent
         let speed
         if (mutation.payload) {
           speed = mutation.payload.speed
