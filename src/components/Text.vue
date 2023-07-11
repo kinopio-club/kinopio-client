@@ -78,25 +78,25 @@ const focus = async (event, card) => {
 
 // keyboard navigation
 
-const moveToNext = (event) => {
-  const isCursorAtEnd = event.target.selectionEnd === event.target.textLength
-  if (!isCursorAtEnd) { return }
-  const next = event.target.nextElementSibling
-  if (!next) { return }
-  next.focus()
-  setTimeout(() => {
-    next.setSelectionRange(0, 0)
-  })
-}
-const moveToPrevious = (event) => {
+const moveToPrevious = (event, index) => {
+  if (index === 0) { return }
   const isCursorAtStart = event.target.selectionEnd === 0
   if (!isCursorAtStart) { return }
-  const prev = event.target.previousElementSibling
-  if (!prev) { return }
+  const prev = event.target.parentElement.previousElementSibling.querySelector('textarea')
   const end = prev.textLength
   prev.focus()
   setTimeout(() => {
     prev.setSelectionRange(end, end)
+  })
+}
+const moveToNext = (event, index) => {
+  if (index === cards.value.length - 1) { return }
+  const isCursorAtEnd = event.target.selectionEnd === event.target.textLength
+  if (!isCursorAtEnd) { return }
+  const next = event.target.parentElement.nextElementSibling.querySelector('textarea')
+  next.focus()
+  setTimeout(() => {
+    next.setSelectionRange(0, 0)
   })
 }
 
@@ -121,12 +121,12 @@ section.text(v-if="visible")
     //- button(@click="addCard")
     //-   img.icon.add(src="@/assets/add.svg")
 section.results-section(ref="section")
-  template(v-for="card in cards")
+  .textarea-wrap(v-for="(card, index) in cards")
     textarea(
       :data-card-id="card.id"
       @focus="focus($event, card)"
-      @keydown.down="moveToNext"
-      @keydown.up="moveToPrevious"
+      @keydown.up="moveToPrevious($event, index)"
+      @keydown.down="moveToNext($event, index)"
       rows="1"
       :disabled="!canEditCard(card)"
       :value="card.name"
@@ -139,6 +139,8 @@ section.results-section(ref="section")
 section
   overflow scroll
   background-color var(--primary-background)
+  .textarea-wrap
+    position relative
   textarea
     border-radius var(--entity-radius)
     border-bottom-left-radius 0
