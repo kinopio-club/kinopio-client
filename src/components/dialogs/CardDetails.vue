@@ -678,7 +678,7 @@ export default {
         this.openingAlpha = alpha
         window.requestAnimationFrame(this.openingAnimationFrame)
       } else if (this.isOpening && percentComplete > 1) {
-        console.log('🎴🐢 cardDetails openingAnimationFrame complete')
+        console.log('🐢 cardDetails openingAnimationFrame complete')
         openingAnimationTimer = undefined
         openingStartTime = undefined
         this.isOpening = false
@@ -915,7 +915,6 @@ export default {
     },
     textareaSizes () {
       const element = this.$refs.dialog
-      console.log(element)
       let textarea = element.querySelector('textarea')
       let modifier = 0
       if (this.canEditCard) {
