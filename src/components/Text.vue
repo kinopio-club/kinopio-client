@@ -240,7 +240,7 @@ template(v-if="visible")
 <style lang="stylus">
 section.text
   .textarea-wrap
-    cursor pointer
+    cursor text
     background-color var(--secondary-background)
     border-radius var(--entity-radius)
     padding 8px
@@ -256,7 +256,7 @@ section.text
       border-radius var(--entity-radius)
       margin-top 4px
       margin-bottom -4px
-      cursor pointer
+      cursor text
   .button-wrap
     padding-left 6px
     margin 0
