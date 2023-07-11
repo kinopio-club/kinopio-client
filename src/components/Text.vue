@@ -1,5 +1,6 @@
 <script setup>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import CardTips from '@/components/dialogs/CardTips.vue'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
@@ -10,6 +11,7 @@ import dayjs from 'dayjs'
 const store = useStore()
 
 onMounted(() => {
+  updateSortedCards()
   updateAllTextareaSizes()
 })
 
@@ -18,12 +20,14 @@ const props = defineProps({
 })
 const state = reactive({
   cardTipsIsVisible: false,
-  sortOrderIsDesc: true
+  sortOrderIsDesc: true,
+  sortedCards: []
 })
 const section = ref(null)
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
+    updateSortedCards()
     updateAllTextareaSizes()
   } else {
     closeDialogs()
@@ -46,18 +50,37 @@ const toggleCardTipsIsVisible = () => {
 // cards
 
 const cards = computed(() => store.getters['currentCards/all'])
-const toggleSortOrder = () => {
-  state.sortOrderIsDesc = !state.sortOrderIsDesc
-}
-const sortedCards = computed(() => {
+const updateSortedCards = () => {
   const sorted = sortBy(cards.value, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
   if (state.sortOrderIsDesc) {
     sorted.reverse()
   }
-  return sorted
-})
-const canEditCard = (card) => {
-  return store.getters['currentUser/canEditCard'](card)
+  state.sortedCards = sorted
+}
+const canEditCard = (card) => { return store.getters['currentUser/canEditCard'](card) }
+const updateName = (event, card) => {
+  const newName = event.target.value
+  store.commit('triggerUpdateCardDetailsCardName', { cardId: card.id, name: newName })
+  const element = event.target
+  updateTextareaSize(element)
+}
+const imageUrl = (card) => {
+  const urls = utils.urlsFromString(card.name)
+  if (!urls) { return }
+  let imageUrl
+  if (card.urlPreviewIsVisible && card.urlPreviewImage) {
+    imageUrl = card.urlPreviewImage
+  }
+  urls.forEach(url => {
+    if (utils.urlIsImage(url)) {
+      imageUrl = url
+    }
+  })
+  return imageUrl
+}
+const toggleSortOrder = () => {
+  state.sortOrderIsDesc = !state.sortOrderIsDesc
+  updateSortedCards()
 }
 
 // textarea
@@ -105,7 +128,7 @@ const copyText = async (event) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
   try {
-    const text = utils.textFromCardNames(sortedCards.value)
+    const text = utils.textFromCardNames(state.sortedCards)
     await navigator.clipboard.writeText(text)
     store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
@@ -113,10 +136,6 @@ const copyText = async (event) => {
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
-// const addCard = (card) => {
-//   card = card || cards.value[0]
-//   console.log('same as Enter key in carddetails', card)
-// }
 const focus = (card) => {
   store.commit('triggerScrollCardIntoView', card.id)
   store.commit('shouldPreventNextFocusOnName', true)
@@ -133,6 +152,11 @@ const focusTextarea = async (event, card) => {
     element.setSelectionRange(end, end)
   })
 }
+const isMaxLength = (card) => {
+  const isActive = store.state.cardDetailsIsVisibleForCardId === card.id
+  const isMax = card.name.length >= consts.maxCardLength
+  return isActive && isMax
+}
 
 // keyboard navigation
 
@@ -148,7 +172,7 @@ const moveToPrevious = (event, index) => {
   })
 }
 const moveToNext = (event, index) => {
-  if (index === sortedCards.value.length - 1) { return }
+  if (index === state.sortedCards.length - 1) { return }
   const isCursorAtEnd = event.target.selectionEnd === event.target.textLength
   if (!isCursorAtEnd) { return }
   const next = event.target.parentElement.nextElementSibling.querySelector('textarea')
@@ -158,56 +182,23 @@ const moveToNext = (event, index) => {
   })
 }
 
-// editing
-
-const updateName = (event, card) => {
-  const newName = event.target.value
-  store.commit('triggerUpdateCardDetailsCardName', { cardId: card.id, name: newName })
-  const element = event.target
-  updateTextareaSize(element)
-}
-const imageUrl = (card) => {
-  const urls = utils.urlsFromString(card.name)
-  if (!urls) { return }
-  let imageUrl
-  if (card.urlPreviewIsVisible && card.urlPreviewImage) {
-    imageUrl = card.urlPreviewImage
-  }
-  urls.forEach(url => {
-    if (utils.urlIsImage(url)) {
-      imageUrl = url
-    }
-  })
-  return imageUrl
-}
 </script>
 
 <template lang="pug">
 template(v-if="visible")
   section.text(@click="closeDialogs")
-    //- .row.title-row
-      //- div
-      //-   span {{cards.length}} Cards
-      //-   span.badge.info(v-if="!canEditSpace") Read Only
-      //-   //- span.badge.success(v-if="canEditSpace") Editable
-      //- //- button(@click="addCard")
-      //- //-   img.icon.add(src="@/assets/add.svg")
-      //- button.small-button(title="By last edited")
-      //-   img.icon.filter(src="@/assets/filter.svg")
-      //-   //- span EditedAt
-      //-   //- img.icon.down-arrow(src="@/assets/down-arrow.svg")
-      //-   span ▼
-
     .row.title-row
       div Card Text Editor
-      //- filter
+      //- sort
       .button-wrap(@click.stop="toggleSortOrder" title="Sort Order")
         button.small-button
           img.icon.time(src="@/assets/time.svg")
-          img.icon.triangle.down(v-if="state.sortOrderIsDesc" src="@/assets/triangle.svg")
-          img.icon.triangle(v-else src="@/assets/triangle.svg")
-
-        //- TextFilters(:visible="state.textFiltersIsVisible")
+          template(v-if="state.sortOrderIsDesc")
+            img.icon.triangle.down(src="@/assets/triangle.svg")
+            //- span Latest
+          template(v-else)
+            img.icon.triangle(src="@/assets/triangle.svg")
+            //- span Oldest
     .row.title-row
       //- copy
       button.small-button(@click="copyText")
@@ -220,7 +211,8 @@ template(v-if="visible")
         CardTips(:visible="state.cardTipsIsVisible" :preventScrollIntoView="true")
 
   section.text.results-section(ref="section" @click="closeDialogs")
-    template(v-for="(card, index) in sortedCards")
+    template(v-for="(card, index) in state.sortedCards")
+      //- cards
       .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea($event, card)")
         textarea(
           @click.stop
@@ -231,10 +223,12 @@ template(v-if="visible")
           rows="1"
           :disabled="!canEditCard(card)"
           :value="card.name"
+          :maxlength="consts.maxCardLength"
           @input="updateName($event, card)"
           :style="textareaStyles(card)"
         )
         img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea($event, card)")
+        //- .badge.danger.max-length-badge(v-if="isMaxLength(card)") Max Length
 </template>
 
 <style lang="stylus">
@@ -245,6 +239,7 @@ section.text
     border-radius var(--entity-radius)
     padding 8px
     margin-bottom 4px
+    position relative
     &:hover
       box-shadow var(--button-hover-shadow)
     &:active
@@ -257,6 +252,11 @@ section.text
       margin-top 4px
       margin-bottom -4px
       cursor text
+    .max-length-badge
+      position absolute
+      bottom 4px
+      right 4px
+
   .button-wrap
     padding-left 6px
     margin 0

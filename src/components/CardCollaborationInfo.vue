@@ -54,9 +54,9 @@ export default {
       const showAbsoluteDate = this.$store.state.currentUser.filterShowAbsoluteDates
       if (date) {
         if (showAbsoluteDate) {
-          return this.absoluteDate(date)
+          return new Date(date).toLocaleString()
         } else {
-          return this.relativeDate(date)
+          return utils.shortRelativeTime(date)
         }
       } else {
         return 'now'
@@ -69,21 +69,6 @@ export default {
       if (!this.userDetailsIsVisible) { return }
       const userDetailsUser = this.$store.state.userDetailsUser
       return user.id === userDetailsUser.id
-    },
-    absoluteDate (date) {
-      if (dateIsUpdated && updatedAbsoluteDate) {
-        return updatedAbsoluteDate
-      }
-      dateIsUpdated = true
-      updatedAbsoluteDate = new Date(date).toLocaleString()
-      return updatedAbsoluteDate
-    },
-    relativeDate (date) {
-      if (dateIsUpdated) {
-        return 'now'
-      }
-      dateIsUpdated = true
-      return utils.shortRelativeTime(date)
     },
     closeDialogsFromParent () {
       this.$store.commit('userDetailsIsVisible', false)
