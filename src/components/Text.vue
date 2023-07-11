@@ -20,6 +20,8 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+
 // list
 
 const cards = computed(() => store.state.currentSpace.cards)
@@ -150,7 +152,9 @@ const imageUrl = (card) => {
 template(v-if="visible")
   section.text
     .row.title-row
-      span {{cards.length}} Cards
+      div
+        span {{cards.length}} Cards
+        span.badge.info(v-if="!canEditSpace") Read Only
       button.small-button
         img.icon.filter(src="@/assets/filter.svg")
       //- button(@click="addCard")
@@ -196,4 +200,6 @@ section
       border-radius var(--entity-radius)
       margin 6px 4px
       cursor pointer
+  span + .badge
+    margin-left 3px
 </style>
