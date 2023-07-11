@@ -147,31 +147,35 @@ const imageUrl = (card) => {
 </script>
 
 <template lang="pug">
-section.text(v-if="visible")
-  .row
-    p {{cards.length}} Cards
-  .row
-    button(@click="copyText")
-      img.icon.copy(src="@/assets/copy.svg")
-      span Copy
-    //- button(@click="addCard")
-    //-   img.icon.add(src="@/assets/add.svg")
-section.results-section(ref="section")
-  template(v-for="(card, index) in cards")
-    .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea($event, card)")
-      textarea(
-        @click.stop
-        :data-card-id="card.id"
-        @focus="focus(card)"
-        @keydown.up="moveToPrevious($event, index)"
-        @keydown.down="moveToNext($event, index)"
-        rows="1"
-        :disabled="!canEditCard(card)"
-        :value="card.name"
-        @input="updateName($event, card)"
-        :style="textareaStyles(card)"
-      )
-      img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea($event, card)")
+template(v-if="visible")
+  section.text
+    .row.title-row
+      span {{cards.length}} Cards
+      button.small-button
+        img.icon.filter(src="@/assets/filter.svg")
+      //- button(@click="addCard")
+      //-   img.icon.add(src="@/assets/add.svg")
+    .row
+      button(@click="copyText")
+        img.icon.copy(src="@/assets/copy.svg")
+        span Copy All
+
+  section.results-section(ref="section")
+    template(v-for="(card, index) in cards")
+      .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea($event, card)")
+        textarea(
+          @click.stop
+          :data-card-id="card.id"
+          @focus="focus(card)"
+          @keydown.up="moveToPrevious($event, index)"
+          @keydown.down="moveToNext($event, index)"
+          rows="1"
+          :disabled="!canEditCard(card)"
+          :value="card.name"
+          @input="updateName($event, card)"
+          :style="textareaStyles(card)"
+        )
+        img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea($event, card)")
 </template>
 
 <style lang="stylus" scoped>
@@ -180,17 +184,13 @@ section
   background-color var(--primary-background)
   .textarea-wrap
     cursor pointer
-    margin-bottom 8px
+    margin-bottom 7px
     border-bottom 1px solid var(--primary-border)
     textarea
-      border-radius var(--entity-radius)
-      border-bottom-left-radius 0
-      border-bottom-right-radius 0
+      border-radius var(--small-entity-radius)
       border-bottom 0
       margin-bottom 0
-      padding 3px 6px
-      &:focus
-        border-radius var(--entity-radius)
+      padding 4px
     img
       max-width 50px
       border-radius var(--entity-radius)
