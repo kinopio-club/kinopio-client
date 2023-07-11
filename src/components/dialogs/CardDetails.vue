@@ -306,6 +306,7 @@ export default {
       } else if (mutation.type === 'triggerUpdateCardDetailsCardName') {
         const { cardId, name } = mutation.payload
         if (cardId !== this.card.id) { return }
+        this.cancelOpening()
         this.updateCardName(name)
       }
     })

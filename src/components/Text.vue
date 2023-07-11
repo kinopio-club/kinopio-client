@@ -20,7 +20,7 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
-// cards list
+// list
 
 const cards = computed(() => store.state.currentSpace.cards)
 const canEditCard = (card) => {
@@ -66,23 +66,38 @@ const copyText = async (event) => {
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
-const addCard = (card) => {
-  card = card || cards.value[0]
-  console.log('same as Enter key in carddetails', card)
-}
-
-// focus
-
-const scrollCardIntoView = async (event, card) => {
+// const addCard = (card) => {
+//   card = card || cards.value[0]
+//   console.log('same as Enter key in carddetails', card)
+// }
+const focus = async (event, card) => {
   store.commit('triggerScrollCardIntoView', card.id)
   store.commit('shouldPreventNextFocusOnName', true)
   store.commit('cardDetailsIsVisibleForCardId', card.id)
 }
-const focusNext = (event) => {
-  console.log('♥️', event, window.getSelection(), window.getSelection().rangeCount)
+
+// keyboard navigation
+
+const moveToNext = (event) => {
+  const isCursorAtEnd = event.target.selectionEnd === event.target.textLength
+  if (!isCursorAtEnd) { return }
+  const next = event.target.nextElementSibling
+  if (!next) { return }
+  next.focus()
+  setTimeout(() => {
+    next.setSelectionRange(0, 0)
+  })
 }
-const focusPrev = (event) => {
-  console.log('🍇', event)
+const moveToPrevious = (event) => {
+  const isCursorAtStart = event.target.selectionEnd === 0
+  if (!isCursorAtStart) { return }
+  const prev = event.target.previousElementSibling
+  if (!prev) { return }
+  const end = prev.textLength
+  prev.focus()
+  setTimeout(() => {
+    prev.setSelectionRange(end, end)
+  })
 }
 
 // editing
@@ -98,19 +113,20 @@ const updateName = (event, card) => {
 <template lang="pug">
 section.text(v-if="visible")
   .row
+    p {{cards.length}} Cards
+  .row
     button(@click="copyText")
       img.icon.copy(src="@/assets/copy.svg")
       span Copy
-    button(@click="addCard")
-      img.icon.add(src="@/assets/add.svg")
+    //- button(@click="addCard")
+    //-   img.icon.add(src="@/assets/add.svg")
 section.results-section(ref="section")
   template(v-for="card in cards")
     textarea(
       :data-card-id="card.id"
-      contenteditable
-      @focus="scrollCardIntoView($event, card)"
-      @keydown.down="focusNext"
-      @keydown.up="focusPrev"
+      @focus="focus($event, card)"
+      @keydown.down="moveToNext"
+      @keydown.up="moveToPrevious"
       rows="1"
       :disabled="!canEditCard(card)"
       :value="card.name"
