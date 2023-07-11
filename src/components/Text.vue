@@ -149,8 +149,8 @@ const imageUrl = (card) => {
 </script>
 
 <template lang="pug">
-.text(v-if="visible")
-  section
+template(v-if="visible")
+  section.text
     //- .row.title-row
       //- div
       //-   span {{cards.length}} Cards
@@ -165,11 +165,14 @@ const imageUrl = (card) => {
       //-   span ▼
 
     .row
+      p Card Text Editor
+
+    .row
       button(@click="copyText")
         img.icon.copy(src="@/assets/copy.svg")
         span Copy All
 
-  section.results-section(ref="section")
+  section.text.results-section(ref="section")
     template(v-for="(card, index) in cards")
       .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea($event, card)")
         textarea(
@@ -188,30 +191,31 @@ const imageUrl = (card) => {
 </template>
 
 <style lang="stylus">
-.text
-  section
-    overflow scroll
-    background-color var(--primary-background)
-    .textarea-wrap
+
+section.text
+  // &.results-section
+  //   overflow scroll
+  // background-color var(--primary-background)
+  .textarea-wrap
+    cursor pointer
+    position relative
+    display flex
+    align-items flex-start
+    // margin-bottom 7px
+    // border-bottom 1px solid var(--primary-border)
+    textarea
+      border-radius var(--small-entity-radius)
+      border-bottom 0
+      margin-bottom 0
+      padding 4px
+    img
+      // position absolute
+      right 0
+      top 0
+      max-width 40px
+      border-radius var(--entity-radius)
+      margin 4px
       cursor pointer
-      position relative
-      display flex
-      align-items flex-start
-      // margin-bottom 7px
-      // border-bottom 1px solid var(--primary-border)
-      textarea
-        border-radius var(--small-entity-radius)
-        border-bottom 0
-        margin-bottom 0
-        padding 4px
-      img
-        // position absolute
-        right 0
-        top 0
-        max-width 40px
-        border-radius var(--entity-radius)
-        margin 4px
-        cursor pointer
-    span + .badge
-      margin-left 3px
+  span + .badge
+    margin-left 3px
 </style>
