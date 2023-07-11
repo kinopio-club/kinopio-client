@@ -149,16 +149,21 @@ const imageUrl = (card) => {
 </script>
 
 <template lang="pug">
-template(v-if="visible")
-  section.text
+.text(v-if="visible")
+  section
     .row.title-row
       div
         span {{cards.length}} Cards
         span.badge.info(v-if="!canEditSpace") Read Only
-      button.small-button
-        img.icon.filter(src="@/assets/filter.svg")
+        span.badge.success(v-if="canEditSpace") Editable
       //- button(@click="addCard")
       //-   img.icon.add(src="@/assets/add.svg")
+      button.small-button(title="By last edited")
+        img.icon.filter(src="@/assets/filter.svg")
+        //- span EditedAt
+        //- img.icon.down-arrow(src="@/assets/down-arrow.svg")
+        span ▼
+
     .row
       button(@click="copyText")
         img.icon.copy(src="@/assets/copy.svg")
@@ -182,24 +187,25 @@ template(v-if="visible")
         img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea($event, card)")
 </template>
 
-<style lang="stylus" scoped>
-section
-  overflow scroll
-  background-color var(--primary-background)
-  .textarea-wrap
-    cursor pointer
-    margin-bottom 7px
-    border-bottom 1px solid var(--primary-border)
-    textarea
-      border-radius var(--small-entity-radius)
-      border-bottom 0
-      margin-bottom 0
-      padding 4px
-    img
-      max-width 50px
-      border-radius var(--entity-radius)
-      margin 6px 4px
+<style lang="stylus">
+.text
+  section
+    overflow scroll
+    background-color var(--primary-background)
+    .textarea-wrap
       cursor pointer
-  span + .badge
-    margin-left 3px
+      // margin-bottom 7px
+      // border-bottom 1px solid var(--primary-border)
+      textarea
+        border-radius var(--small-entity-radius)
+        border-bottom 0
+        margin-bottom 0
+        padding 4px
+      img
+        max-width 50px
+        border-radius var(--entity-radius)
+        margin 0 4px
+        cursor pointer
+    span + .badge
+      margin-left 3px
 </style>
