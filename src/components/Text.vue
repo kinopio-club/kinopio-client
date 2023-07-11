@@ -108,6 +108,20 @@ const updateName = (event, card) => {
   const element = event.target
   updateTextareaSize(element)
 }
+const imageUrl = (card) => {
+  const urls = utils.urlsFromString(card.name)
+  if (!urls) { return }
+  let imageUrl
+  if (card.urlPreviewIsVisible && card.urlPreviewImage) {
+    imageUrl = card.urlPreviewImage
+  }
+  urls.forEach(url => {
+    if (utils.urlIsImage(url)) {
+      imageUrl = url
+    }
+  })
+  return imageUrl
+}
 </script>
 
 <template lang="pug">
@@ -132,7 +146,8 @@ section.results-section(ref="section")
       :value="card.name"
       @input="updateName($event, card)"
       :style="cardStyles(card)"
-      )
+    )
+    img(v-if="imageUrl(card)" :src="imageUrl(card)")
 </template>
 
 <style lang="stylus" scoped>
@@ -141,6 +156,12 @@ section
   background-color var(--primary-background)
   .textarea-wrap
     position relative
+    img
+      position absolute
+      right 5px
+      top 5px
+      width 40px
+      border-radius var(--small-entity-radius)
   textarea
     border-radius var(--entity-radius)
     border-bottom-left-radius 0
