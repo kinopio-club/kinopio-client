@@ -80,15 +80,24 @@ const addCard = async (card) => {
   store.commit('triggerAddCard', { id: newCardId })
   updateSortedCards()
   await nextTick()
-  let element = section.value.querySelector(`textarea[data-card-id="${newCardId}"]`)
+  const element = section.value.querySelector(`textarea[data-card-id="${newCardId}"]`)
   updateAllTextareaSizes()
   element.focus()
 }
-const addChildCard = (card) => {
-  console.log('🌷🌷🌷', card.name)
-//   store.commit('parentCardId', card.id)
-//   store.commit('triggerAddCard')
-// childCardId
+const addChildCard = async (card) => {
+  const newCardId = nanoid()
+  store.commit('parentCardId', card.id)
+  store.commit('shouldPreventNextFocusOnName', true)
+  store.commit('shouldPreventNextEnterKey', false)
+  store.commit('triggerAddChildCard', { id: newCardId })
+  updateSortedCards()
+  await nextTick()
+  await nextTick()
+  const element = section.value.querySelector(`textarea[data-card-id="${newCardId}"]`)
+  updateAllTextareaSizes()
+  element.focus()
+
+  store.commit('childCardId', newCardId)
 }
 
 // textarea
@@ -244,7 +253,7 @@ template(v-if="visible")
           @keydown.up="moveToPrevious($event, index)"
           @keydown.down="moveToNext($event, index)"
           @keydown.enter.exact.prevent="addCard(card)"
-          @keydown.shift.enter.exact.prevent="addChildCard(card, index)"
+          @keydown.shift.enter.exact.prevent="addChildCard(card)"
           rows="1"
           :disabled="!canEditCard(card)"
           :value="card.name"

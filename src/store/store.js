@@ -528,6 +528,7 @@ const store = createStore({
     triggerShowConnectionDetails: (state, options) => {},
     triggerUpdateWindowHistory: (state, options) => {},
     triggerAddCard: (state, options) => {},
+    triggerAddChildCard: (state, options) => {},
     triggerCardDetailsCloseDialogs: () => {},
     triggerSpaceDetailsCloseDialogs: () => {},
     triggerTemplatesIsVisible: () => {},
