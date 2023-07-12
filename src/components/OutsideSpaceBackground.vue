@@ -45,6 +45,7 @@ export default {
   },
   computed: {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
+    outsideSpaceBackgroundIsStatic () { return this.$store.state.currentUser.outsideSpaceBackgroundIsStatic },
     styles () {
       return {
         backgroundColor: this.backgroundColor
@@ -66,12 +67,15 @@ export default {
       g += gi
       b += bi
       this.backgroundColor = `rgb(${r}, ${g}, ${b})`
+      if (this.outsideSpaceBackgroundIsStatic) {
+        this.backgroundColor = null
+      }
       this.updateMetaThemeColor(this.backgroundColor)
     },
     cancel () {
       window.cancelAnimationFrame(colorCycleTimer)
       colorCycleTimer = undefined
-      const color = this.$store.state.currentSpace.backgroundTint || '#ffffff'
+      const color = this.$store.state.currentSpace.backgroundTint || null
       this.updateMetaThemeColor(color)
     },
     start () {
@@ -110,5 +114,5 @@ export default {
   left 0
   width 110%
   height 110%
-  background-color var(--secondary-background)
+  background-color var(--secondary-active-background)
 </style>
