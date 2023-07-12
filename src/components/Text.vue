@@ -8,6 +8,7 @@ import { useStore } from 'vuex'
 
 import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
+import { nanoid } from 'nanoid'
 const store = useStore()
 
 onMounted(() => {
@@ -47,9 +48,8 @@ const toggleCardTipsIsVisible = () => {
   state.cardTipsIsVisible = value
 }
 
-// cards
+// sort
 
-const cards = computed(() => store.getters['currentCards/all'])
 const updateSortedCards = () => {
   const sorted = sortBy(cards.value, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
   if (state.sortOrderIsDesc) {
@@ -64,26 +64,31 @@ const updateName = (event, card) => {
   const element = event.target
   updateTextareaSize(element)
 }
-const imageUrl = (card) => {
-  const urls = utils.urlsFromString(card.name)
-  if (!urls) { return }
-  let imageUrl
-  if (card.urlPreviewIsVisible && card.urlPreviewImage) {
-    imageUrl = card.urlPreviewImage
-  }
-  urls.forEach(url => {
-    if (utils.urlIsImage(url)) {
-      imageUrl = url
-    }
-  })
-  return imageUrl
-}
 const toggleSortOrder = () => {
   state.sortOrderIsDesc = !state.sortOrderIsDesc
   updateSortedCards()
 }
-const addCard = (card, index, newCardIsChildCard) => {
-  console.log('🌷', card.name, index, newCardIsChildCard)
+
+// cards
+
+const cards = computed(() => store.getters['currentCards/all'])
+const addCard = async (card) => {
+  const newCardId = nanoid()
+  store.commit('parentCardId', card.id)
+  store.commit('shouldPreventNextFocusOnName', true)
+  store.commit('shouldPreventNextEnterKey', false)
+  store.commit('triggerAddCard', { id: newCardId })
+  updateSortedCards()
+  await nextTick()
+  let element = section.value.querySelector(`textarea[data-card-id="${newCardId}"]`)
+  updateAllTextareaSizes()
+  element.focus()
+}
+const addChildCard = (card) => {
+  console.log('🌷🌷🌷', card.name)
+//   store.commit('parentCardId', card.id)
+//   store.commit('triggerAddCard')
+// childCardId
 }
 
 // textarea
@@ -96,6 +101,7 @@ const updateAllTextareaSizes = async () => {
   await nextTick()
   const textareas = section.value.querySelectorAll('textarea')
   textareas.forEach(element => {
+    element.style.height = null
     updateTextareaSize(element)
   })
 }
@@ -124,6 +130,20 @@ const textareaStyles = (card) => {
   }
   return styles
 }
+const imageUrl = (card) => {
+  const urls = utils.urlsFromString(card.name)
+  if (!urls) { return }
+  let imageUrl
+  if (card.urlPreviewIsVisible && card.urlPreviewImage) {
+    imageUrl = card.urlPreviewImage
+  }
+  urls.forEach(url => {
+    if (utils.urlIsImage(url)) {
+      imageUrl = url
+    }
+  })
+  return imageUrl
+}
 
 // actions
 
@@ -144,7 +164,7 @@ const focus = (card) => {
   store.commit('shouldPreventNextFocusOnName', true)
   store.commit('cardDetailsIsVisibleForCardId', card.id)
 }
-const focusTextarea = async (event, card) => {
+const focusTextarea = async (card) => {
   let element = section.value.querySelector(`textarea[data-card-id="${card.id}"]`)
   focus(card)
   await nextTick()
@@ -216,15 +236,15 @@ template(v-if="visible")
   section.text.results-section(ref="section" @click="closeDialogs")
     template(v-for="(card, index) in state.sortedCards")
       //- cards
-      .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea($event, card)")
+      .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea(card)")
         textarea(
           @click.stop
           :data-card-id="card.id"
           @focus="focus(card)"
           @keydown.up="moveToPrevious($event, index)"
           @keydown.down="moveToNext($event, index)"
-          @keydown.enter.exact.prevent="addCard(card, index)"
-          @keydown.shift.enter.exact.prevent="addCard(card, index, true)"
+          @keydown.enter.exact.prevent="addCard(card)"
+          @keydown.shift.enter.exact.prevent="addChildCard(card, index)"
           rows="1"
           :disabled="!canEditCard(card)"
           :value="card.name"
@@ -232,8 +252,8 @@ template(v-if="visible")
           @input="updateName($event, card)"
           :style="textareaStyles(card)"
         )
-        img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea($event, card)")
-        //- .badge.danger.max-length-badge(v-if="isMaxLength(card)") Max Length
+        img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea(card)")
+        .badge.danger.max-length-badge(v-if="isMaxLength(card)") Max Length
 </template>
 
 <style lang="stylus">
@@ -261,7 +281,7 @@ section.text
       cursor text
     .max-length-badge
       position absolute
-      bottom 4px
+      top 8px
       right 4px
 
   .button-wrap

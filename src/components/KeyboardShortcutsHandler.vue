@@ -40,7 +40,8 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerAddCard') {
-        this.addCard()
+        const options = mutation.payload
+        this.addCard(options)
       } else if (mutation.type === 'triggerSelectAllItemsBelowCursor') {
         const position = mutation.payload
         this.selectAllItemsBelowCursor(position)
@@ -322,7 +323,8 @@ export default {
       return object
     },
 
-    addCard () {
+    addCard (options) {
+      options = options || {}
       if (this.$store.state.shouldPreventNextEnterKey) {
         this.$store.commit('shouldPreventNextEnterKey', false)
         return
@@ -339,7 +341,6 @@ export default {
       const spaceBetweenCards = utils.spaceBetweenCards()
       let position = {}
       let isParentCard = true
-      console.log(scroll.x, parentCard, parentCard.getBoundingClientRect().x)
       if (shouldOutdentChildToParent) {
         const rect = childCard.getBoundingClientRect()
         const parentRect = parentCard.getBoundingClientRect()
@@ -375,7 +376,7 @@ export default {
         backgroundColor = parentCard.backgroundColor
       }
       this.$store.commit('shouldPreventNextEnterKey', true)
-      this.$store.dispatch('currentCards/add', { position, isParentCard, backgroundColor })
+      this.$store.dispatch('currentCards/add', { position, isParentCard, backgroundColor, id: options.id })
       if (childCard) {
         this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
         this.$nextTick(() => {
