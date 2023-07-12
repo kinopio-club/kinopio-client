@@ -1051,14 +1051,15 @@ export default {
       return user.id === this.userDetailsUser.id
     },
     isVisibleInViewport () {
-      if (this.disableViewportOptimizations) { return true }
-      if (this.shouldJiggle) { return true }
-      if (this.currentDraggingConnectedCardIds.includes(this.id)) { return true }
-      if (this.isBeingDragged) { return true }
-      if (this.isPlayingAudio) { return true }
-      if (this.embedIsVisible) { return true }
+      let isVisible
+      if (this.disableViewportOptimizations) { isVisible = true }
+      if (this.shouldJiggle) { isVisible = true }
+      if (this.currentDraggingConnectedCardIds.includes(this.id)) { isVisible = true }
+      if (this.isBeingDragged) { isVisible = true }
+      if (this.isPlayingAudio) { isVisible = true }
+      if (this.embedIsVisible) { isVisible = true }
       const isTextOnlyCard = this.normalizedName === this.card.name
-      if (isTextOnlyCard) { return true }
+      if (isTextOnlyCard) { isVisible = true }
       const threshold = 400 * this.spaceCounterZoomDecimal
       const fallbackHeight = 200
       const offset = utils.outsideSpaceOffset().y
@@ -1074,7 +1075,10 @@ export default {
       const scrollIsAboveBottom = scroll < y + height
       const scrollIsBelowTop = scroll > y
       const middleIsVisible = scrollIsAboveBottom && scrollIsBelowTop
-      const isVisible = isTopVisible || isBottomVisible || middleIsVisible
+      isVisible = isVisible || (isTopVisible || isBottomVisible || middleIsVisible)
+      if (isVisible) {
+        this.correctPaths()
+      }
       return isVisible
     }
   },
@@ -1087,8 +1091,10 @@ export default {
     },
     correctPaths () {
       if (this.pathIsUpdated) { return }
-      this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: false })
-      this.pathIsUpdated = true
+      this.$nextTick(() => {
+        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: false })
+        this.pathIsUpdated = true
+      })
     },
 
     // migration added june 2023

@@ -33,7 +33,7 @@ dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="clos
               img.icon(src="@/assets/heart.svg")
               span {{favoriteSpacesEditedCount}}
             template(v-else)
-              img.icon(src="@/assets/heart-empty.svg")
+              img.icon(src="@/assets/heart.svg")
 
       //- Pin
       .title-row

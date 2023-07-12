@@ -182,7 +182,7 @@ export default {
       if (!footer) { return }
       let bottom = 0
       if (window.navigator.shouldAddSafeAreaPaddingBottom) {
-        bottom = 20
+        bottom = 40
       }
       let style = {
         transform: `translate(${left}px, 0px) scale(${counterScale})`,
