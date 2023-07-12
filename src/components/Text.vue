@@ -51,10 +51,16 @@ const toggleCardTipsIsVisible = () => {
 // sort
 
 const updateSortedCards = () => {
-  const sorted = sortBy(cards.value, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
+  let sorted = sortBy(cards.value, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
   if (state.sortOrderIsDesc) {
     sorted.reverse()
   }
+  state.sortedCards = sorted
+}
+const updateSortedCardsWithNewCard = ({ newCardId, index }) => {
+  let sorted = utils.clone(state.sortedCards)
+  const newCard = cards.value.find(card => card.id === newCardId)
+  sorted = utils.insertIntoArray(sorted, newCard, index)
   state.sortedCards = sorted
 }
 const canEditCard = (card) => { return store.getters['currentUser/canEditCard'](card) }
@@ -72,26 +78,27 @@ const toggleSortOrder = () => {
 // cards
 
 const cards = computed(() => store.getters['currentCards/all'])
-const addCard = async (card) => {
+const addCard = async (card, index) => {
   const newCardId = nanoid()
   store.commit('parentCardId', card.id)
   store.commit('shouldPreventNextFocusOnName', true)
   store.commit('shouldPreventNextEnterKey', false)
   store.commit('triggerAddCard', { id: newCardId })
-  updateSortedCards()
+  await nextTick()
+  updateSortedCardsWithNewCard({ newCardId, index: index + 1 })
   await nextTick()
   const element = section.value.querySelector(`textarea[data-card-id="${newCardId}"]`)
   updateAllTextareaSizes()
   element.focus()
 }
-const addChildCard = async (card) => {
+const addChildCard = async (card, index) => {
   const newCardId = nanoid()
   store.commit('parentCardId', card.id)
   store.commit('shouldPreventNextFocusOnName', true)
   store.commit('shouldPreventNextEnterKey', false)
   store.commit('triggerAddChildCard', { id: newCardId })
-  updateSortedCards()
   await nextTick()
+  updateSortedCardsWithNewCard({ newCardId, index: index + 1 })
   await nextTick()
   const element = section.value.querySelector(`textarea[data-card-id="${newCardId}"]`)
   updateAllTextareaSizes()
@@ -252,8 +259,8 @@ template(v-if="visible")
           @focus="focus(card)"
           @keydown.up="moveToPrevious($event, index)"
           @keydown.down="moveToNext($event, index)"
-          @keydown.enter.exact.prevent="addCard(card)"
-          @keydown.shift.enter.exact.prevent="addChildCard(card)"
+          @keydown.enter.exact.prevent="addCard(card, index)"
+          @keydown.shift.enter.exact.prevent="addChildCard(card, index)"
           rows="1"
           :disabled="!canEditCard(card)"
           :value="card.name"

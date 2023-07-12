@@ -655,6 +655,13 @@ export default {
   insertStringAtIndex (string, insert, index) {
     return string.substr(0, index) + insert + string.substr(index)
   },
+  insertIntoArray (array, value, index) {
+    let start = array.slice(0, index)
+    const end = array.slice(index, array.length)
+    start.push(value)
+    const newArray = start.concat(end)
+    return newArray
+  },
   normalizeToUnixTime (date) {
     return new Date(date).getTime()
   },
