@@ -63,12 +63,10 @@ const updateSortedCardsWithNewCard = ({ newCardId, index }) => {
   sorted = utils.insertIntoArray(sorted, newCard, index)
   state.sortedCards = sorted
 }
-const canEditCard = (card) => { return store.getters['currentUser/canEditCard'](card) }
-const updateName = (event, card) => {
-  const newName = event.target.value
-  store.commit('triggerUpdateCardDetailsCardName', { cardId: card.id, name: newName })
-  const element = event.target
-  updateTextareaSize(element)
+const removeFromSortedCards = (index) => {
+  let sorted = utils.clone(state.sortedCards)
+  sorted = utils.removeFromArray(sorted, index)
+  state.sortedCards = sorted
 }
 const toggleSortOrder = () => {
   state.sortOrderIsDesc = !state.sortOrderIsDesc
@@ -77,6 +75,13 @@ const toggleSortOrder = () => {
 
 // cards
 
+const canEditCard = (card) => { return store.getters['currentUser/canEditCard'](card) }
+const updateName = (event, card) => {
+  const newName = event.target.value
+  store.commit('triggerUpdateCardDetailsCardName', { cardId: card.id, name: newName })
+  const element = event.target
+  updateTextareaSize(element)
+}
 const cards = computed(() => store.getters['currentCards/all'])
 const addCard = async (card, index) => {
   const newCardId = nanoid()
@@ -105,6 +110,11 @@ const addChildCard = async (card, index) => {
   element.focus()
 
   store.commit('childCardId', newCardId)
+}
+const removeEmpty = (card, index) => {
+  if (card.name) { return }
+  store.dispatch('currentSpace/removeEmptyCards')
+  removeFromSortedCards(index)
 }
 
 // textarea
@@ -257,6 +267,7 @@ template(v-if="visible")
           @click.stop
           :data-card-id="card.id"
           @focus="focus(card)"
+          @blur="removeEmpty(card, index)"
           @keydown.up="moveToPrevious($event, index)"
           @keydown.down="moveToNext($event, index)"
           @keydown.enter.exact.prevent="addCard(card, index)"

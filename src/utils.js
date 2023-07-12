@@ -662,6 +662,11 @@ export default {
     const newArray = start.concat(end)
     return newArray
   },
+  removeFromArray (array, index) {
+    delete array[index]
+    array = array.filter(item => Boolean(item))
+    return array
+  },
   normalizeToUnixTime (date) {
     return new Date(date).getTime()
   },
