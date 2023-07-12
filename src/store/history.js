@@ -28,6 +28,7 @@ import utils from '@/utils.js'
 import { nextTick } from 'vue'
 
 let showDebugMessages = false
+const showLogMessages = true // true
 
 const normalizeUpdates = ({ item, itemType, previous, isRemoved }) => {
   // removed
@@ -85,7 +86,9 @@ const self = {
       // add patch to pointer
       state.patches.splice(state.pointer, 0, patch)
       state.pointer = state.pointer + 1
-      console.log('⏺ history', { newPatch: patch, pointer: state.pointer })
+      if (showLogMessages) {
+        console.log('⏺ history', { newPatch: patch, pointer: state.pointer })
+      }
     },
     // trim: (state) => {
     // TODO trim history from pointer as seperate commit method
@@ -99,11 +102,13 @@ const self = {
       state.patches = []
       state.pointer = 0
       state.snapshots = { cards: {}, connections: {}, connectionTypes: {} }
-      console.log('⏹ clear history')
+      if (showLogMessages) {
+        console.log('⏹ clear history')
+      }
     },
     isPaused: (state, value) => {
       state.isPaused = value
-      if (showDebugMessages) {
+      if (showDebugMessages && showLogMessages) {
         console.log('⏸ history is paused', state.isPaused)
       }
     },
