@@ -25,6 +25,7 @@ const state = reactive({
   sortedCards: []
 })
 const section = ref(null)
+let prevIndex
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -83,6 +84,16 @@ const updateName = (event, card) => {
   updateTextareaSize(element)
 }
 const cards = computed(() => store.getters['currentCards/all'])
+const addCardAtIndex = () => {
+  let index = prevIndex || 0
+  const card = state.sortedCards[index]
+  if (!prevIndex) {
+    index = -1
+  } else {
+    index += 1
+  }
+  addCard(card, index)
+}
 const addCard = async (card, index) => {
   const newCardId = nanoid()
   store.commit('parentCardId', card.id)
@@ -90,11 +101,12 @@ const addCard = async (card, index) => {
   store.commit('shouldPreventNextEnterKey', false)
   store.commit('triggerAddCard', { id: newCardId })
   await nextTick()
-  updateSortedCardsWithNewCard({ newCardId, index: index + 1 })
+  updateSortedCardsWithNewCard({ newCardId, index })
   await nextTick()
   const element = section.value.querySelector(`textarea[data-card-id="${newCardId}"]`)
   updateAllTextareaSizes()
   element.focus()
+  prevIndex = index
 }
 const addChildCard = async (card, index) => {
   const newCardId = nanoid()
@@ -103,12 +115,12 @@ const addChildCard = async (card, index) => {
   store.commit('shouldPreventNextEnterKey', false)
   store.commit('triggerAddChildCard', { id: newCardId })
   await nextTick()
-  updateSortedCardsWithNewCard({ newCardId, index: index + 1 })
+  updateSortedCardsWithNewCard({ newCardId, index })
   await nextTick()
   const element = section.value.querySelector(`textarea[data-card-id="${newCardId}"]`)
   updateAllTextareaSizes()
   element.focus()
-
+  prevIndex = index
   store.commit('childCardId', newCardId)
 }
 const removeEmpty = (card, index) => {
@@ -185,14 +197,15 @@ const copyText = async (event) => {
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
-const focus = (card) => {
+const focus = (card, index) => {
   store.commit('triggerScrollCardIntoView', card.id)
   store.commit('shouldPreventNextFocusOnName', true)
   store.commit('cardDetailsIsVisibleForCardId', card.id)
+  prevIndex = index
 }
-const focusTextarea = async (card) => {
+const focusTextarea = async (card, index) => {
   let element = section.value.querySelector(`textarea[data-card-id="${card.id}"]`)
-  focus(card)
+  focus(card, index)
   await nextTick()
   await nextTick()
   element.focus()
@@ -249,10 +262,14 @@ template(v-if="visible")
             img.icon.triangle(src="@/assets/triangle.svg")
             //- span Oldest
     .row.title-row
-      //- copy
-      button.small-button(@click="copyText")
-        img.icon.copy(src="@/assets/copy.svg")
-        span Copy
+      div
+        button(@click="addCardAtIndex")
+          img.icon.add(src="@/assets/add.svg")
+          span Card
+        //- copy
+        button(@click="copyText")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy All
       //- tips
       .button-wrap(@click.stop="toggleCardTipsIsVisible")
         button.small-button(:class="{ active: state.cardTipsIsVisible }")
@@ -262,16 +279,16 @@ template(v-if="visible")
   section.text.results-section(ref="section" @click="closeDialogs")
     template(v-for="(card, index) in state.sortedCards")
       //- cards
-      .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea(card)")
+      .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea(card, index)")
         textarea(
           @click.stop
           :data-card-id="card.id"
-          @focus="focus(card)"
+          @focus="focus(card, index)"
           @blur="removeEmpty(card, index)"
           @keydown.up="moveToPrevious($event, index)"
           @keydown.down="moveToNext($event, index)"
-          @keydown.enter.exact.prevent="addCard(card, index)"
-          @keydown.shift.enter.exact.prevent="addChildCard(card, index)"
+          @keydown.enter.exact.prevent="addCard(card, index + 1)"
+          @keydown.shift.enter.exact.prevent="addChildCard(card, index + 1)"
           rows="1"
           :disabled="!canEditCard(card)"
           :value="card.name"
@@ -279,7 +296,7 @@ template(v-if="visible")
           @input="updateName($event, card)"
           :style="textareaStyles(card)"
         )
-        img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea(card)")
+        img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea(card, index)")
         .badge.danger.max-length-badge(v-if="isMaxLength(card)") Max Length
 </template>
 
