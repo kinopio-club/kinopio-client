@@ -102,13 +102,14 @@ export default {
         cards.forEach((card, index) => {
           if (index > 0) {
             const previousItem = cards[index - 1]
-            const previousItemHeight = Math.round(previousItem.height * zoom)
+            const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
+            const previousItemHeight = rect.height * zoom
             const previousBottomSide = previousItem.y + previousItemHeight
             const yDelta = card.y - previousBottomSide
             const isNotEquallyDistributed = !utils.isBetween({
               value: Math.abs(yDelta),
-              min: this.spaceBetween - 1,
-              max: this.spaceBetween + 1
+              min: consts.spaceBetweenCards - 1,
+              max: consts.spaceBetweenCards + 1
             })
             if (isNotEquallyDistributed) {
               yIsDistributed = false
@@ -126,13 +127,14 @@ export default {
         cards.forEach((card, index) => {
           if (index > 0) {
             const previousItem = cards[index - 1]
-            const previousItemWidth = Math.round(previousItem.width * zoom)
+            const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
+            const previousItemWidth = rect.width * zoom
             const previousRightSide = previousItem.x + previousItemWidth
             const xDelta = card.x - previousRightSide
             const isNotEquallyDistributed = !utils.isBetween({
               value: Math.abs(xDelta),
-              min: this.spaceBetween - 1,
-              max: this.spaceBetween + 1
+              min: consts.spaceBetweenCards - 1,
+              max: consts.spaceBetweenCards + 1
             })
             if (isNotEquallyDistributed) {
               xIsDistributed = false
@@ -169,10 +171,10 @@ export default {
     isRightAligned () {
       const zoom = this.spaceCounterZoomDecimal
       const origin = this.items[0]
-      const xRight = origin.x + (origin.width * zoom)
+      const xRight = origin.x + origin.width
       const xIsAligned = this.items.every(item => {
         return utils.isBetween({
-          value: item.x + (item.width * zoom),
+          value: item.x + item.width,
           min: xRight - 1,
           max: xRight + 1
         })
@@ -225,7 +227,14 @@ export default {
     isBottomAligned () {
       const origin = this.items[0]
       const yBottom = origin.y + origin.height
-      const yIsAligned = this.items.every(item => item.y + item.height === yBottom)
+      const yIsAligned = this.items.every(item => {
+        const bottomIsEqual = utils.isBetween({
+          value: item.y + item.height,
+          min: yBottom - 1,
+          max: yBottom + 1
+        })
+        return bottomIsEqual
+      })
       return yIsAligned
     },
     isDistributedVertically () {
@@ -330,6 +339,7 @@ export default {
       this.alignTopItems(boxes, 'boxes')
     },
     alignTopItems (items, type) {
+      const zoom = this.spaceCounterZoomDecimal
       let newItems = []
       const origin = items[0]
       items.forEach((item, index) => {
@@ -339,8 +349,8 @@ export default {
           if (this.shouldDistributeWithAlign) {
             const previousItem = newItems[index - 1]
             const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
-            const previousRightSide = previousItem.x + rect.width
-            item.x = previousRightSide + this.spaceBetween
+            const previousRightSide = previousItem.x + (rect.width * zoom)
+            item.x = previousRightSide + consts.spaceBetweenCards
           }
           this.updateItem(item, type)
         }
@@ -379,18 +389,17 @@ export default {
       this.alignRightItems(boxes, 'boxes')
     },
     alignRightItems (items, type) {
-      const origin = items[0]
       const zoom = this.spaceCounterZoomDecimal
+      const origin = items[0]
+      if (!origin) { return }
+      let rect = utils.cardRectFromId(origin.id) || utils.boxRectFromId(origin.id) || origin
+      const originWidth = rect.width * zoom
       items.forEach((item, index) => {
         if (index > 0) {
           item = utils.clone(item)
-          item.x = origin.x + (origin.width * zoom) - (item.width * zoom)
-          if (this.shouldDistributeWithAlign) {
-            const previousItem = items[index - 1]
-            const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
-            const previousBottomSide = previousItem.y + (rect.height * zoom)
-            item.y = previousBottomSide + this.spaceBetween
-          }
+          rect = utils.cardRectFromId(item.id) || utils.boxRectFromId(item.id) || item
+          const itemWidth = rect.width * zoom
+          item.x = origin.x + originWidth - itemWidth
           this.updateItem(item, type)
         }
       })
@@ -426,6 +435,7 @@ export default {
       this.alignLeftItems(boxes, 'boxes')
     },
     alignLeftItems (items, type) {
+      const zoom = this.spaceCounterZoomDecimal
       let newItems = []
       const origin = items[0]
       items.forEach((item, index) => {
@@ -435,8 +445,9 @@ export default {
           if (this.shouldDistributeWithAlign) {
             const previousItem = newItems[index - 1]
             const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
-            const previousBottomSide = previousItem.y + rect.height
-            item.y = previousBottomSide + this.spaceBetween
+            const previousItemHeight = rect.height * zoom
+            const previousBottomSide = previousItem.y + previousItemHeight
+            item.y = previousBottomSide + consts.spaceBetweenCards
           }
           this.updateItem(item, type)
         }
