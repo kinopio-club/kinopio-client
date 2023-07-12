@@ -67,6 +67,7 @@ export default {
     weather: '',
     journalDailyPrompt: '',
     panSpeedIsFast: false,
+    outsideSpaceBackgroundIsStatic: false,
     shouldDisableHapticFeedback: false
   },
   mutations: {
@@ -290,6 +291,10 @@ export default {
     panSpeedIsFast: (state, value) => {
       state.panSpeedIsFast = value
       cache.updateUser('panSpeedIsFast', value)
+    },
+    outsideSpaceBackgroundIsStatic: (state, value) => {
+      state.outsideSpaceBackgroundIsStatic = value
+      cache.updateUser('outsideSpaceBackgroundIsStatic', value)
     },
     shouldDisableHapticFeedback: (state, value) => {
       state.shouldDisableHapticFeedback = value
