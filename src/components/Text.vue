@@ -82,6 +82,9 @@ const toggleSortOrder = () => {
   state.sortOrderIsDesc = !state.sortOrderIsDesc
   updateSortedCards()
 }
+const addCard = (card, index, newCardIsChildCard) => {
+  console.log('🌷', card.name, index, newCardIsChildCard)
+}
 
 // textarea
 
@@ -220,6 +223,8 @@ template(v-if="visible")
           @focus="focus(card)"
           @keydown.up="moveToPrevious($event, index)"
           @keydown.down="moveToNext($event, index)"
+          @keydown.enter.exact.prevent="addCard(card, index)"
+          @keydown.shift.enter.exact.prevent="addCard(card, index, true)"
           rows="1"
           :disabled="!canEditCard(card)"
           :value="card.name"
