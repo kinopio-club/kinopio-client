@@ -95,6 +95,7 @@ const addCardAtIndex = () => {
   addCard(card, index)
 }
 const addCard = async (card, index) => {
+  if (!card.name) { return }
   const newCardId = nanoid()
   store.commit('parentCardId', card.id)
   store.commit('shouldPreventNextFocusOnName', true)
@@ -109,6 +110,7 @@ const addCard = async (card, index) => {
   prevIndex = index
 }
 const addChildCard = async (card, index) => {
+  if (!card.name) { return }
   const newCardId = nanoid()
   store.commit('parentCardId', card.id)
   store.commit('shouldPreventNextFocusOnName', true)
