@@ -97,7 +97,6 @@ const addCardAtIndex = () => {
 const addCard = async (card, index) => {
   if (!card.name) { return }
   const newCardId = nanoid()
-  store.commit('parentCardId', card.id)
   store.commit('shouldPreventNextFocusOnName', true)
   store.commit('shouldPreventNextEnterKey', false)
   store.commit('triggerAddCard', { id: newCardId })
@@ -123,7 +122,6 @@ const addChildCard = async (card, index) => {
   updateAllTextareaSizes()
   element.focus()
   prevIndex = index
-  store.commit('childCardId', newCardId)
 }
 const removeEmpty = (card, index) => {
   if (card.name) { return }
