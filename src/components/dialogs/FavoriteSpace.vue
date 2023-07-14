@@ -43,8 +43,8 @@ dialog.narrow.favorite-space(v-if="visible" :open="visible" @click.left.stop ref
 </template>
 
 <style lang="stylus">
-dialog.favorite-space
-  left initial
-  right 8px
+// dialog.favorite-space
+  // left initial
+  // right 8px
 
 </style>

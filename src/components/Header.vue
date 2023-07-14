@@ -99,6 +99,12 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
               img.icon.offline(src="@/assets/offline.svg")
             Offline(:visible="offlineIsVisible")
+          //- Favorite Space
+          .button-wrap(v-if="!spaceHasStatusAndStatusDialogIsNotVisible")
+            button.favorite-space-button(@click="toggleFavoriteSpaceIsVisible" :class="{active: favoriteSpaceIsVisible}")
+              img.icon.heart(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+              img.icon.heart(v-else src="@/assets/heart-empty.svg")
+            FavoriteSpace(:visible="favoriteSpaceIsVisible")
 
     .right
       .controls(v-if="isSpace")
@@ -181,6 +187,7 @@ import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 import CommunityRow from '@/components/CommunityRow.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
+import FavoriteSpace from '@/components/dialogs/FavoriteSpace.vue'
 import consts from '@/consts.js'
 
 import { mapState, mapGetters } from 'vuex'
@@ -226,7 +233,8 @@ export default {
     SpaceTodayJournalBadge,
     ControlsSettings,
     CommunityRow,
-    UserSettings
+    UserSettings,
+    FavoriteSpace
   },
   props: {
     isPinchZooming: Boolean,
@@ -255,7 +263,8 @@ export default {
       sidebarIsVisible: false,
       donateIsVisible: false,
       importIsVisible: false,
-      earnCreditsIsVisible: false
+      earnCreditsIsVisible: false,
+      favoriteSpaceIsVisible: false
     }
   },
   created () {
@@ -431,7 +440,8 @@ export default {
     pricingIsVisible () {
       return this.$store.state.pricingIsVisible
     },
-    isFadingOut () { return this.$store.state.isFadingOutDuringTouch }
+    isFadingOut () { return this.$store.state.isFadingOutDuringTouch },
+    isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] }
   },
   methods: {
     openKinopio () {
@@ -500,6 +510,7 @@ export default {
       this.templatesIsVisible = false
       this.earnCreditsIsVisible = false
       this.importIsVisible = false
+      this.favoriteSpaceIsVisible = false
       if (!this.spaceDetailsIsPinned) {
         this.spaceDetailsIsVisible = false
       }
@@ -572,6 +583,11 @@ export default {
       const isVisible = this.upgradeUserIsVisible
       this.$store.dispatch('closeAllDialogs')
       this.upgradeUserIsVisible = !isVisible
+    },
+    toggleFavoriteSpaceIsVisible () {
+      const isVisible = this.favoriteSpaceIsVisible
+      this.$store.dispatch('closeAllDialogs')
+      this.favoriteSpaceIsVisible = !isVisible
     },
 
     // hide
@@ -799,12 +815,15 @@ header
     dialog
       max-width initial
     > .button-wrap
-      max-width 60vw
+      max-width 58vw
       @media(max-width 550px)
-        max-width 33vw
+        max-width 31vw
       > button
         .privacy-icon
           margin-left 6px
+    .favorite-space-button
+      img
+        vertical-align -1
 
   // should not bubble down into dialogs
   .space-details-row,
