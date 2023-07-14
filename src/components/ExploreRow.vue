@@ -1,6 +1,7 @@
 <script setup>
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
+import FavoriteSpace from '@/components/dialogs/FavoriteSpace.vue'
 
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref } from 'vue'
 import { useStore } from 'vuex'
@@ -32,12 +33,14 @@ const state = reactive({
   isLoadingLiveSpaces: true,
   liveIsVisible: false,
   liveSpaces: [],
-  exploreSpaces: []
+  exploreSpaces: [],
+  favoriteSpaceIsVisible: false
 })
 
 const closeDialogs = () => {
   state.exploreIsVisible = false
   state.liveIsVisible = false
+  state.favoriteSpaceIsVisible = false
 }
 
 // Explore
@@ -111,6 +114,15 @@ const normalizeLiveSpaces = (spaces) => {
   return normalizedSpaces
 }
 
+// Favorite Space
+
+const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
+const toggleFavoriteSpaceIsVisible = () => {
+  const isVisible = state.favoriteSpaceIsVisible
+  store.dispatch('closeAllDialogs')
+  state.favoriteSpaceIsVisible = !isVisible
+}
+
 </script>
 
 <template lang="pug">
@@ -124,8 +136,14 @@ const normalizeLiveSpaces = (spaces) => {
     button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible}")
       img.icon.camera(src="@/assets/camera.svg")
       span(v-if="state.liveSpaces.length") {{ state.liveSpaces.length }}
+    //- Favorite Space
+    button.favorite-space-button(@click="toggleFavoriteSpaceIsVisible" :class="{active: state.favoriteSpaceIsVisible}")
+      img.icon.heart(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+      img.icon.heart(v-else src="@/assets/heart-empty.svg")
+
   Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")
   Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
+  FavoriteSpace(:visible="state.favoriteSpaceIsVisible")
 </template>
 
 <style lang="stylus">
@@ -134,4 +152,8 @@ const normalizeLiveSpaces = (spaces) => {
   .explore-button
     .explore-button-label
       margin-left 0
+  .favorite-space-button
+    img
+      vertical-align -1
+
 </style>
