@@ -446,7 +446,7 @@ label // used for checkbox buttons
     cursor default
     color var(--primary)
     opacity 0.5
-    pointer-events none
+    pointer-events none !important
   &.is-dark
     border-color var(--primary-background)
     img

@@ -264,17 +264,18 @@ export default {
         this.$store.commit('notifyCurrentSpaceIsNowRemoved', true)
       }
       this.updateLocalSpaces()
-      this.changeToLastSpace()
+      this.changeToPrevSpace()
     },
-    changeToLastSpace () {
+    changeToPrevSpace () {
       let spaces = cache.getAllSpaces().filter(space => {
         return this.$store.getters['currentUser/canEditSpace'](space)
       })
       spaces = spaces.filter(space => space.id !== this.currentSpace.id)
-      if (spaces.length) {
-        const cachedSpace = this.$store.getters.cachedOrOtherSpaceById(this.currentUser.prevLastSpaceId)
-        const space = cachedSpace || spaces[0]
-        this.$store.dispatch('currentSpace/changeSpace', space)
+      const recentSpace = spaces[0]
+      if (this.currentUser.prevSpaceIdInSession) {
+        this.$store.dispatch('currentSpace/loadPrevSpaceInSession')
+      } else if (recentSpace) {
+        this.$store.dispatch('currentSpace/changeSpace', recentSpace)
       } else {
         this.$emit('addSpace')
       }

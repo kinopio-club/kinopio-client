@@ -827,6 +827,17 @@ const currentSpace = {
       }
       context.dispatch('updateUserLastSpaceId')
     },
+    loadPrevSpaceInSession: async (context) => {
+      const user = context.rootState.currentUser
+      const spaceId = user.prevSpaceIdInSession
+      if (!spaceId) { return }
+      let spaceToRestore = cache.space(user.prevSpaceIdInSession)
+      if (spaceToRestore.id) {
+        context.dispatch('loadSpace', { spaceToRestore })
+      } else if (user.prevSpaceIdInSession) {
+        context.dispatch('loadSpace', { id: user.prevSpaceIdInSession })
+      }
+    },
     updateSpace: async (context, updates) => {
       const space = utils.clone(context.state)
       updates.id = space.id
@@ -875,6 +886,7 @@ const currentSpace = {
         name: 'removeSpace',
         body: { id: space.id }
       }, { root: true })
+      context.commit('currentUser/prevSpaceIdInSession', '', { root: true })
     },
     deleteSpace: (context, space) => {
       cache.deleteSpace(space)
@@ -882,6 +894,7 @@ const currentSpace = {
         name: 'deleteSpace',
         body: space
       }, { root: true })
+      context.commit('currentUser/prevSpaceIdInSession', '', { root: true })
     },
     restoreRemovedSpace: async (context, space) => {
       cache.restoreRemovedSpace(space)
