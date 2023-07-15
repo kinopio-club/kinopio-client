@@ -322,7 +322,7 @@ export default {
       } else {
         space = await this.$store.dispatch('currentUser/inboxSpace')
       }
-      this.$store.dispatch('currentSpace/changeSpace', { space })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     }
   }
 }

@@ -211,7 +211,7 @@ export default {
         this.notifySignedIn()
         this.addCollaboratorToInvitedSpaces()
         const currentSpace = this.$store.state.currentSpace
-        this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
+        this.$store.commit('triggerUpdateWindowHistory')
         this.$store.dispatch('themes/restore')
         this.clearNotifications()
         this.checkIfShouldAddReferral()
@@ -253,7 +253,7 @@ export default {
         this.clearNotifications()
         if (shouldLoadLastSpace) {
           this.$store.dispatch('currentSpace/loadLastSpace')
-          this.$store.commit('triggerUpdateWindowHistory', { space: this.$store.state.currentSpace })
+          this.$store.commit('triggerUpdateWindowHistory')
         }
       } else {
         await this.handleErrors(result)
@@ -295,7 +295,7 @@ export default {
     updateCurrentSpace (previousUser) {
       const currentUser = this.$store.state.currentUser
       const currentSpace = this.$store.state.currentSpace
-      this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
+      this.$store.commit('triggerUpdateWindowHistory')
       this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
       const userIsSpaceUser = this.$store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
       if (userIsSpaceUser) {

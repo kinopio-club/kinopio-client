@@ -112,7 +112,7 @@ export default {
       this.exploreRssFeedIsVisible = false
     },
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     },
     toggleExploreRssFeedIsVisible () {
       this.exploreRssFeedIsVisible = !this.exploreRssFeedIsVisible

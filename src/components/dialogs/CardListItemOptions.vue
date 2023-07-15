@@ -82,11 +82,9 @@ export default {
     jumpToCard () {
       const card = this.cardListItemOptionsCard
       if (this.currentSpace.id !== card.spaceId) {
+        const space = { id: card.spaceId }
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
-        this.$store.dispatch('currentSpace/changeSpace', {
-          space: { id: card.spaceId },
-          isRemote: true
-        })
+        this.$store.dispatch('currentSpace/changeSpace', space)
       } else {
         this.$store.dispatch('currentCards/showCardDetails', card.id)
       }

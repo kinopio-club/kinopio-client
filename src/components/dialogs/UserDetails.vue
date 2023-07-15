@@ -298,7 +298,7 @@ export default {
       this.userSpaces = []
     },
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     },
     async removeCollaborator () {
       const user = this.user

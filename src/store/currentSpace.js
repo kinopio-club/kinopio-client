@@ -148,13 +148,11 @@ const currentSpace = {
       const loadInboxSpace = context.rootState.loadInboxSpace
       const loadNewSpace = context.rootState.loadNewSpace
       const user = context.rootState.currentUser
-      let isRemote
       // restore from url
       if (spaceUrl) {
         console.log('🚃 Restore space from url', spaceUrl)
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
-        isRemote = true
         await context.dispatch('loadSpace', { space })
       // restore or create journal space
       } else if (loadJournalSpace) {
@@ -180,7 +178,7 @@ const currentSpace = {
       }
       context.dispatch('checkIfShouldCreateNewUserSpaces')
       context.dispatch('updateModulesSpaceId')
-      context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
+      context.commit('triggerUpdateWindowHistory', null, { root: true })
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
 
@@ -435,7 +433,7 @@ const currentSpace = {
       if (currentUserIsSignedIn) {
         await context.dispatch('api/createSpace', space, { root: true })
       }
-      context.commit('triggerUpdateWindowHistory', { space, isRemote: currentUserIsSignedIn }, { root: true })
+      context.commit('triggerUpdateWindowHistory', space, { root: true })
       context.commit('addUserToSpace', user)
       context.commit('triggerUpdateBackground', null, { root: true })
       context.dispatch('updateModulesSpaceId', space)
@@ -469,7 +467,7 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', {}, { root: true })
+      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
     addJournalSpace: async (context) => {
       const user = context.rootState.currentUser
@@ -478,7 +476,7 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', {}, { root: true })
+      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
 
     addInboxSpace: (context) => {
@@ -488,13 +486,13 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', {}, { root: true })
+      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const user = context.rootState.currentUser
-      const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
+      const currentSpaceIsRemote = context.rootGetters['currentSpace/isRemote']
       let remoteSpace
       try {
         if (currentUserIsSignedIn) {
@@ -576,7 +574,7 @@ const currentSpace = {
       const journalSpace = spaces.find(space => space.name === journalName && !space.isRemoved)
       if (journalSpace) {
         const space = { id: journalSpace.id }
-        context.dispatch('changeSpace', { space })
+        context.dispatch('changeSpace', space)
       } else {
         await context.dispatch('addJournalSpace')
         context.commit('triggerSpaceDetailsUpdateLocalSpaces', null, { root: true })
@@ -588,7 +586,7 @@ const currentSpace = {
       const inboxSpace = await context.dispatch('currentUser/inboxSpace', null, { root: true })
       if (inboxSpace) {
         const space = { id: inboxSpace.id }
-        context.dispatch('changeSpace', { space })
+        context.dispatch('changeSpace', space)
       } else {
         context.commit('addNotification', { message: 'Inbox space not found', type: 'danger' }, { root: true })
         context.dispatch('loadLastSpace')
@@ -843,16 +841,16 @@ const currentSpace = {
         body: updates
       }, { root: true })
     },
-    changeSpace: async (context, { space, isRemote }) => {
-      console.log('🚟 Change space', { space, isRemote })
+    changeSpace: async (context, space) => {
+      console.log('🚟 Change space', space)
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('notifySpaceNotFound', false, { root: true })
       context.commit('notifySpaceIsRemoved', false, { root: true })
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })
-      context.commit('triggerUpdateWindowHistory', { space, isRemote }, { root: true })
-      const userIsMember = context.rootGetters['currentUser/isSpaceMember']
+      context.commit('triggerUpdateWindowHistory', space, { root: true })
+      const userIsMember = context.rootGetters['currentUser/isSpaceMember']()
       if (!userIsMember) { return }
       context.dispatch('api/addToQueue', {
         name: 'updateSpace',
@@ -890,7 +888,7 @@ const currentSpace = {
       const restoredSpace = await context.dispatch('api/restoreRemovedSpace', space, { root: true })
       space = restoredSpace || space
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
-      context.dispatch('changeSpace', { space })
+      context.dispatch('changeSpace', space)
     },
     deleteAllRemovedSpaces: (context) => {
       const userId = context.rootState.currentUser.id
@@ -1091,6 +1089,12 @@ const currentSpace = {
     isHelloKinopio: (state) => {
       return state.name === 'Hello Kinopio'
     },
+    isRemote: (state, getters, rootState, rootGetters) => {
+      const isSpaceMember = rootGetters['currentUser/isSpaceMember']()
+      const isOtherSpace = !isSpaceMember
+      const currentUserIsSignedIn = rootGetters['currentUser/isSignedIn']
+      return isOtherSpace || currentUserIsSignedIn
+    },
     shouldBroadcast: (state) => {
       const users = state.users.length
       const collaborators = state.collaborators.length
@@ -1101,7 +1105,7 @@ const currentSpace = {
       return shouldBroadcast
     },
     shouldUpdateApi: (state, getters, rootState, rootGetters) => {
-      const isSpaceMember = rootGetters['currentUser/isSpaceMember']
+      const isSpaceMember = rootGetters['currentUser/isSpaceMember']()
       const isSignedIn = rootGetters['currentUser/isSignedIn']
       return isSpaceMember && isSignedIn
     },

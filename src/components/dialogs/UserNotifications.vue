@@ -111,14 +111,14 @@ export default {
       this.$store.commit('cardDetailsIsVisibleForCardId', null)
       if (this.isCurrentSpace(spaceId)) { return }
       const space = { id: spaceId }
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     },
     showCardDetails (notification) {
       let space = utils.clone(notification.space)
       const card = utils.clone(notification.card)
       if (this.currentSpaceId !== space.id) {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
-        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+        this.$store.dispatch('currentSpace/changeSpace', space)
       } else {
         this.$store.dispatch('currentCards/showCardDetails', card.id)
       }

@@ -209,7 +209,7 @@ export default {
       this.$store.commit('triggerSpaceDetailsCloseDialogs')
     },
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space })
+      this.$store.dispatch('currentSpace/changeSpace', space)
       this.$store.dispatch('closeAllDialogs')
       this.closeDialogs()
     },

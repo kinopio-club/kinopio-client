@@ -283,10 +283,10 @@ export default {
       }
     },
     updateMetaRSSFeed () {
-      const spaceHasUrl = utils.spaceHasUrl()
       const spaceIsPrivate = this.$store.state.currentSpace.privacy === 'private'
+      const spaceIsRemote = this.$store.getters['currentSpace/isRemote']
       this.clearMetaRSSFeed()
-      if (!spaceHasUrl) { return }
+      if (!spaceIsRemote) { return }
       if (spaceIsPrivate) { return }
       const head = document.querySelector('head')
       const spaceId = this.$store.state.currentSpace.id

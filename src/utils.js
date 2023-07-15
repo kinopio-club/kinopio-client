@@ -1476,9 +1476,6 @@ export default {
       return id
     }
   },
-  spaceHasUrl () {
-    return window.location.href !== (window.location.origin + '/')
-  },
   spaceAndCardIdFromUrl (url) {
     url = new URL(url)
     return this.spaceAndCardIdFromPath(url.pathname) // /spaceId/cardId
@@ -1522,15 +1519,6 @@ export default {
       return undefined
     }
     return true
-  },
-  currentSpaceIsRemote (space, currentUser) {
-    if (!this.arrayExists(space.users)) { return true }
-    const currentUserCreatedSpace = currentUser.id === space.users[0].id
-    if (currentUserCreatedSpace) {
-      return Boolean(currentUser.apiKey)
-    } else {
-      return true
-    }
   },
   normalizeUrl (url) {
     const lastCharacterPosition = url.length - 1

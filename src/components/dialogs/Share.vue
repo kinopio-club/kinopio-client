@@ -7,12 +7,12 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         button.small-button(@click.left.stop="isPresentationMode")
           img.icon(src="@/assets/presentation.svg")
           span Present
-        .button-wrap(v-if="spaceHasUrl")
+        .button-wrap(v-if="spaceIsRemote")
           button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: spaceRssFeedIsVisible }")
             span RSS
           SpaceRssFeed(:visible="spaceRssFeedIsVisible")
 
-  section(v-if="spaceHasUrl")
+  section(v-if="spaceIsRemote")
     ReadOnlySpaceInfoBadges
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
@@ -49,7 +49,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     template(v-if="spaceHasOtherCardUsers")
       UserList(:users="spaceOtherCardUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 
-  section(v-if="!spaceHasUrl")
+  section(v-if="!spaceIsRemote")
     p
       span To share or invite collaborators,
       span.badge.info you need to Sign Up or In
@@ -119,7 +119,6 @@ export default {
   data () {
     return {
       urlIsCopied: false,
-      spaceHasUrl: false,
       privacyPickerIsVisible: false,
       selectedUser: {},
       dialogHeight: null,
@@ -162,6 +161,9 @@ export default {
     },
     isSpaceMember () {
       return this.$store.getters['currentUser/isSpaceMember']()
+    },
+    spaceIsRemote () {
+      return this.$store.getters['currentSpace/isRemote']
     },
     spaceCollaborators () { return this.$store.state.currentSpace.collaborators },
     spaceHasCollaborators () {
@@ -285,17 +287,11 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
-    },
-    updateSpaceHasUrl () {
-      const hasCurrentSpacePath = this.$store.state.currentSpacePath !== '/'
-      const hasWindowUrl = window.location.href !== (window.location.origin + '/')
-      this.spaceHasUrl = hasCurrentSpacePath || hasWindowUrl
     }
   },
   watch: {
     visible (visible) {
       this.$store.commit('clearNotificationsWithPosition')
-      this.updateSpaceHasUrl()
       this.closeDialogs()
       if (visible) {
         this.updateDialogHeight()

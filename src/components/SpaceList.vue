@@ -356,6 +356,7 @@ export default {
         return
       }
       if (!space) { return }
+      this.$store.commit('isLoadingSpace', true)
       this.$emit('selectSpace', space)
     },
     closeDialog () {
@@ -492,6 +493,7 @@ export default {
       width 13px
       height 13px
       top 5px
+      z-index 1
     .icon.templates
       margin-right 4px
 
