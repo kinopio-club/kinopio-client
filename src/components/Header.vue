@@ -436,7 +436,10 @@ export default {
       return this.$store.state.pricingIsVisible
     },
     isFadingOut () { return this.$store.state.isFadingOutDuringTouch },
-    prevSpaceId () { return this.$store.state.prevSpaceIdInSession }
+    prevSpaceId () {
+      const spaceId = this.$store.state.prevSpaceIdInSession
+      return spaceId && spaceId !== this.currentSpace.id
+    }
   },
   methods: {
     changeToPrevSpace () {
