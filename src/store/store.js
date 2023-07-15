@@ -1473,6 +1473,7 @@ const store = createStore({
         width: itemsRect.width + padding,
         height: itemsRect.height + padding
       }
+      context.commit('resetPageSizes')
       context.commit('updatePageSizes', itemsRect)
     },
     checkIfItemShouldIncreasePageSize: (context, item) => {
