@@ -93,9 +93,9 @@ export default {
       const isSpaceUser = spaceUser.id === this.currentUser.id
       const isNotSignedIn = !this.$store.getters['currentUser/isSignedIn']
       if (isSpaceUser && isNotSignedIn) {
-        this.$store.dispatch('currentSpace/changeSpace', { space })
+        this.$store.dispatch('currentSpace/changeSpace', space)
       } else {
-        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+        this.$store.dispatch('currentSpace/changeSpace', space)
       }
     },
     toggleUserDetails (event, user) {

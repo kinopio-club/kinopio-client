@@ -417,7 +417,7 @@ export default {
     },
     changeSpace (spaceId) {
       const space = { id: spaceId }
-      this.$store.dispatch('currentSpace/changeSpace', { space })
+      this.$store.dispatch('currentSpace/changeSpace', space)
       this.$store.dispatch('closeAllDialogs')
     },
     removeNotifyEarnedCredits () {

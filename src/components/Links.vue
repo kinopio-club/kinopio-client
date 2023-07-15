@@ -88,7 +88,7 @@ export default {
       this.currentUserSpacesIsVisibleOnly = !this.currentUserSpacesIsVisibleOnly
     },
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
       this.$store.dispatch('closeAllDialogs')
     },
     async updateLinks () {

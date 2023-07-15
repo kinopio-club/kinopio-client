@@ -108,7 +108,7 @@ export default {
       }
     },
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     },
     // copied from SpaceDetails.vue
     sortSpacesByEditedAt (spaces) {

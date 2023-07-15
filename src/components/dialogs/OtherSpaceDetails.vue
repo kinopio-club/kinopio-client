@@ -60,7 +60,7 @@ const changeSpace = () => {
   if (otherSpace.value.isInvite) {
     window.location = otherSpace.value.url
   } else {
-    store.dispatch('currentSpace/changeSpace', { space: otherSpace.value, isRemote: true })
+    store.dispatch('currentSpace/changeSpace', otherSpace.value)
     store.dispatch('closeAllDialogs')
   }
 }

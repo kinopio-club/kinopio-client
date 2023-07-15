@@ -63,6 +63,10 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               img.icon.cancel(src="@/assets/add.svg")
 
         .space-details-row.segmented-buttons
+          //- Back
+          .button-wrap(v-if="prevSpaceId" title="Go Back" @click.stop="changeToPrevSpace")
+            button
+              img.icon.left-arrow(src="@/assets/down-arrow.svg")
           //- Current Space
           .button-wrap
             button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active: spaceDetailsIsVisible}")
@@ -431,9 +435,15 @@ export default {
     pricingIsVisible () {
       return this.$store.state.pricingIsVisible
     },
-    isFadingOut () { return this.$store.state.isFadingOutDuringTouch }
+    isFadingOut () { return this.$store.state.isFadingOutDuringTouch },
+    prevSpaceId () { return this.$store.state.prevSpaceIdInSession }
   },
   methods: {
+    changeToPrevSpace () {
+      const id = this.$store.state.currentSpace.id
+      this.$store.dispatch('currentSpace/loadPrevSpaceInSession')
+      this.$store.commit('prevSpaceIdInSession', id)
+    },
     openKinopio () {
       const url = this.currentSpaceUrl
       const title = `${this.currentSpaceName} – Kinopio`
@@ -799,9 +809,9 @@ header
     dialog
       max-width initial
     > .button-wrap
-      max-width 60vw
+      max-width 58vw
       @media(max-width 550px)
-        max-width 33vw
+        max-width 31vw
       > button
         .privacy-icon
           margin-left 6px

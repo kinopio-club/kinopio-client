@@ -12,7 +12,6 @@ export default {
   state: {
     id: nanoid(),
     lastSpaceId: '',
-    prevLastSpaceId: '',
     color: randomColor({ luminosity: 'light' }),
     name: undefined,
     description: undefined,
@@ -92,7 +91,6 @@ export default {
       cache.updateUser('email', value)
     },
     lastSpaceId: (state, spaceId) => {
-      state.prevLastSpaceId = state.lastSpaceId
       state.lastSpaceId = spaceId
       cache.updateUser('lastSpaceId', spaceId)
     },

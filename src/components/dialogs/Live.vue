@@ -51,7 +51,7 @@ export default {
   },
   methods: {
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     },
     updateDialogHeight () {
       if (!this.visible) { return }
