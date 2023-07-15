@@ -125,7 +125,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               span {{notificationsUnreadCount}}
             UserNotifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
         .bottom-controls
-          ExploreRow
+          Discovery
           //- Sidebar
           .button-wrap
             button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
@@ -183,7 +183,7 @@ import Pricing from '@/components/dialogs/Pricing.vue'
 import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
-import ExploreRow from '@/components/ExploreRow.vue'
+import Discovery from '@/components/Discovery.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import consts from '@/consts.js'
 
@@ -229,7 +229,7 @@ export default {
     EarnCredits,
     SpaceTodayJournalBadge,
     ControlsSettings,
-    ExploreRow,
+    Discovery,
     UserSettings
   },
   props: {
