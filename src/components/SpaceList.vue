@@ -492,7 +492,7 @@ export default {
       position absolute
       width 13px
       height 13px
-      top 5px
+      top 10px
       z-index 1
     .icon.templates
       margin-right 4px
