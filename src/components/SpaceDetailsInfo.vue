@@ -272,7 +272,7 @@ export default {
       })
       spaces = spaces.filter(space => space.id !== this.currentSpace.id)
       const recentSpace = spaces[0]
-      if (this.currentUser.prevSpaceIdInSession) {
+      if (this.$store.state.prevSpaceIdInSession) {
         this.$store.dispatch('currentSpace/loadPrevSpaceInSession')
       } else if (recentSpace) {
         this.$store.dispatch('currentSpace/changeSpace', recentSpace)

@@ -828,14 +828,14 @@ const currentSpace = {
       context.dispatch('updateUserLastSpaceId')
     },
     loadPrevSpaceInSession: async (context) => {
-      const user = context.rootState.currentUser
-      const spaceId = user.prevSpaceIdInSession
-      if (!spaceId) { return }
-      let space = cache.space(user.prevSpaceIdInSession)
+      const prevSpaceIdInSession = context.rootState.prevSpaceIdInSession
+      if (!prevSpaceIdInSession) { return }
+      let space = cache.space(prevSpaceIdInSession)
       if (space.id) {
         context.dispatch('loadSpace', { space })
-      } else if (user.prevSpaceIdInSession) {
-        context.dispatch('loadSpace', { id: user.prevSpaceIdInSession })
+      } else if (prevSpaceIdInSession) {
+        space = { id: prevSpaceIdInSession }
+        context.dispatch('loadSpace', { space })
       }
     },
     updateSpace: async (context, updates) => {
@@ -853,6 +853,7 @@ const currentSpace = {
       }, { root: true })
     },
     changeSpace: async (context, space) => {
+      context.commit('prevSpaceIdInSession', context.state.id, { root: true })
       console.log('🚟 Change space', space)
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('notifySpaceNotFound', false, { root: true })
@@ -886,7 +887,7 @@ const currentSpace = {
         name: 'removeSpace',
         body: { id: space.id }
       }, { root: true })
-      context.commit('currentUser/prevSpaceIdInSession', '', { root: true })
+      context.commit('prevSpaceIdInSession', '', { root: true })
     },
     deleteSpace: (context, space) => {
       cache.deleteSpace(space)
@@ -894,7 +895,7 @@ const currentSpace = {
         name: 'deleteSpace',
         body: space
       }, { root: true })
-      context.commit('currentUser/prevSpaceIdInSession', '', { root: true })
+      context.commit('prevSpaceIdInSession', '', { root: true })
     },
     restoreRemovedSpace: async (context, space) => {
       cache.restoreRemovedSpace(space)

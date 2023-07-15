@@ -442,7 +442,7 @@ export default {
     changeToPrevSpace () {
       const id = this.$store.state.currentSpace.id
       this.$store.dispatch('currentSpace/loadPrevSpaceInSession')
-      this.$store.commit('currentUser/prevSpaceIdInSession', id)
+      this.$store.commit('prevSpaceIdInSession', id)
     },
     openKinopio () {
       const url = this.currentSpaceUrl
