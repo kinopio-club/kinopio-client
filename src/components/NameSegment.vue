@@ -42,6 +42,12 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   span.badge.secondary-on-dark-background(v-if="segment.isFile")
     img.icon(src="@/assets/file.svg")
     span {{segment.name}}
+  //- System Action
+  template(v-if="segment.isAction")
+    //- Explore
+    button.small-button(@click.stop="systemAction(segment.action)")
+      img.icon.sunglasses(v-if="segment.action === 'explore'" src="@/assets/sunglasses.svg")
+      span {{segment.actionName}}
 </template>
 
 <script>
@@ -127,6 +133,10 @@ export default {
       } else {
         window.open(url) // opens url in new tab
       }
+    },
+    systemAction (action) {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('triggerShowExplore')
     }
   }
 }

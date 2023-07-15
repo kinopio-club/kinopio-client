@@ -2018,12 +2018,34 @@ export default {
     return styles
   },
 
+  // App Buttons
+
+  actionsFromString (string) {
+    const allowedActions = ['explore']
+    // https://regexr.com/7h3ia
+    const syactionPattern = new RegExp(/::systemAction=\w+/gm)
+    let actions = string.match(syactionPattern)
+    if (!actions) { return }
+    actions = actions.filter(action => action.includes(allowedActions))
+    return actions
+  },
+  actionNameFromAction (string) {
+    // https://regexr.com/7h3ig
+    // ::system_action=xyz → matches xyz
+    const actionNamePattern = new RegExp(/=\w+/gm)
+    let name = string.match(actionNamePattern)
+    name = name[0]
+    name = name.replace('=', '')
+    return name
+  },
+
   // Name Segments 🎫
 
   cardNameSegments (name) {
     if (!name) { return [] }
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name, true) || []
+    const actions = this.actionsFromString(name) || []
     const markdownLinks = name.match(this.markdown().linkPattern) || []
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
@@ -2058,6 +2080,11 @@ export default {
       const startPosition = name.indexOf(file)
       const endPosition = startPosition + file.length
       badges.push({ file, startPosition, endPosition, isFile: true })
+    })
+    actions.forEach(action => {
+      const startPosition = name.indexOf(action)
+      const endPosition = startPosition + action.length
+      badges.push({ action, startPosition, endPosition, isAction: true })
     })
     badges = sortBy(badges, ['startPosition'])
     if (!badges.length) {
@@ -2105,6 +2132,14 @@ export default {
         newSegment = {
           isFile: true,
           name: this.fileNameFromUrl(segment.file)
+        }
+      // button
+      } else if (segment.isAction) {
+        const action = this.actionNameFromAction(segment.action)
+        newSegment = {
+          isAction: true,
+          action,
+          actionName: this.capitalizeFirstLetter(action)
         }
       }
       currentPosition = segment.endPosition
