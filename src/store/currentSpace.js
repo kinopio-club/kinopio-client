@@ -831,9 +831,9 @@ const currentSpace = {
       const user = context.rootState.currentUser
       const spaceId = user.prevSpaceIdInSession
       if (!spaceId) { return }
-      let spaceToRestore = cache.space(user.prevSpaceIdInSession)
-      if (spaceToRestore.id) {
-        context.dispatch('loadSpace', { spaceToRestore })
+      let space = cache.space(user.prevSpaceIdInSession)
+      if (space.id) {
+        context.dispatch('loadSpace', { space })
       } else if (user.prevSpaceIdInSession) {
         context.dispatch('loadSpace', { id: user.prevSpaceIdInSession })
       }
