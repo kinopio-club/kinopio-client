@@ -456,7 +456,11 @@ const store = createStore({
       state.isFadingOutDuringTouch = value
     },
     prevSpaceIdInSession: (state, value) => {
-      state.prevSpaceIdInSession = value
+      if (value === state.prevSpaceIdInSession) {
+        state.prevSpaceIdInSession = ''
+      } else {
+        state.prevSpaceIdInSession = value
+      }
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
