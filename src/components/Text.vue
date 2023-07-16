@@ -61,6 +61,7 @@ const updateSortedCards = () => {
     sorted.reverse()
   }
   state.sortedCards = sorted
+  updateAllTextareaSizes()
 }
 const updateSortedCardsWithNewCard = ({ newCardId, index }) => {
   let sorted = utils.clone(state.sortedCards)
