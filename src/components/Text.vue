@@ -20,7 +20,6 @@ onMounted(() => {
     }
   })
 })
-
 const props = defineProps({
   visible: Boolean
 })
@@ -190,18 +189,18 @@ const imageUrl = (card) => {
 
 // actions
 
-const copyText = async (event) => {
-  store.commit('clearNotificationsWithPosition')
-  const position = utils.cursorPositionInPage(event)
-  try {
-    const text = utils.textFromCardNames(state.sortedCards)
-    await navigator.clipboard.writeText(text)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-  } catch (error) {
-    console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-  }
-}
+// const copyText = async (event) => {
+//   store.commit('clearNotificationsWithPosition')
+//   const position = utils.cursorPositionInPage(event)
+//   try {
+//     const text = utils.textFromCardNames(state.sortedCards)
+//     await navigator.clipboard.writeText(text)
+//     store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+//   } catch (error) {
+//     console.warn('🚑 copyText', error)
+//     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+//   }
+// }
 const focus = (card, index) => {
   store.commit('triggerScrollCardIntoView', card.id)
   store.commit('shouldPreventNextFocusOnName', true)
@@ -256,6 +255,21 @@ template(v-if="visible")
   section.text(@click="closeDialogs")
     .row.title-row
       div Card Text Editor
+      //- tips
+      .button-wrap(@click.stop="toggleCardTipsIsVisible")
+        button.small-button(:class="{ active: state.cardTipsIsVisible }")
+          span ?
+        CardTips(:visible="state.cardTipsIsVisible" :preventScrollIntoView="true" :shouldHideExtras="true")
+
+    .row.title-row
+      div
+        button.small-button(@click="addCardAtIndex")
+          img.icon.add(src="@/assets/add.svg")
+          span Card
+        //- copy
+        //- button(@click="copyText")
+        //-   img.icon.copy(src="@/assets/copy.svg")
+        //-   span Copy All
       //- sort
       .button-wrap(@click.stop="toggleSortOrder" title="Sort Order")
         button.small-button
@@ -266,20 +280,6 @@ template(v-if="visible")
           template(v-else)
             img.icon.triangle(src="@/assets/triangle.svg")
             //- span Oldest
-    .row.title-row
-      div
-        button(@click="addCardAtIndex")
-          img.icon.add(src="@/assets/add.svg")
-          span Card
-        //- copy
-        button(@click="copyText")
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy All
-      //- tips
-      .button-wrap(@click.stop="toggleCardTipsIsVisible")
-        button.small-button(:class="{ active: state.cardTipsIsVisible }")
-          span ?
-        CardTips(:visible="state.cardTipsIsVisible" :preventScrollIntoView="true" :shouldHideExtras="true")
 
   section.text.results-section(ref="section" @click="closeDialogs")
     template(v-for="(card, index) in state.sortedCards")
@@ -340,8 +340,8 @@ section.text
     &.down
       transform scaleY(-1)
 
-  @media(max-height 500px)
-    dialog.card-tips
-      top -50px
+  // @media(max-height 500px)
+  //   dialog.card-tips
+  //     top -50px
 
 </style>
