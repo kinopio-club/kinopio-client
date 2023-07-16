@@ -37,7 +37,7 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerCardDetailsCloseDialogs' && this.visible) {
+      if (mutation.type === 'triggerCloseChildDialogs' && this.visible) {
         this.closeDialogsFromParent()
       }
     })

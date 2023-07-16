@@ -994,7 +994,7 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     closeDialogs (shouldSkipGlobalDialogs) {
-      this.$store.commit('triggerCardDetailsCloseDialogs')
+      this.$store.commit('triggerCloseChildDialogs')
       this.imagePickerIsVisible = false
       this.cardTipsIsVisible = false
       this.shareCardIsVisible = false

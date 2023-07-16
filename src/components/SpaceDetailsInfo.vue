@@ -147,7 +147,7 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerSpaceDetailsCloseDialogs') {
+      if (mutation.type === 'triggerCloseChildDialogs') {
         this.closeDialogs()
       } else if (mutation.type === 'triggerFocusSpaceDetailsName') {
         this.$nextTick(() => {

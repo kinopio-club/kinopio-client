@@ -411,7 +411,7 @@ export default {
       this.copyCardsIsVisible = false
       this.moveCardsIsVisible = false
       this.shareCardIsVisible = false
-      this.$store.commit('triggerCardDetailsCloseDialogs')
+      this.$store.commit('triggerCloseChildDialogs')
     },
     connectionType (event) {
       let connectionType = last(this.$store.getters['currentConnections/allTypes'])
