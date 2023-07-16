@@ -34,6 +34,7 @@ export default {
     },
     currentSpace () { return this.$store.state.currentSpace },
     backgroundStyles () {
+      if (!this.isSpacePage) { return }
       const styles = {
         backgroundImage: `url('${this.imageUrl}')`,
         backgroundSize: this.size,
@@ -91,6 +92,11 @@ export default {
       const data = this.kinopioBackgroundImageData
       if (!data) { return }
       return data.shouldInvertInDarkTheme
+    },
+    isSpacePage () {
+      const isOther = this.$store.state.isAddPage
+      const isSpace = !isOther
+      return isSpace
     }
   },
   methods: {

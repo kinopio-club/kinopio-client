@@ -1727,7 +1727,7 @@ export default {
         this.changeSpaceAndCard(spaceId, cardId)
       } else {
         const space = { id: spaceId }
-        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+        this.$store.dispatch('currentSpace/changeSpace', space)
       }
       this.$store.dispatch('closeAllDialogs')
     },
@@ -1737,7 +1737,7 @@ export default {
       if (currentSpaceId !== spaceId) {
         this.$store.commit('loadSpaceShowDetailsForCardId', cardId)
         const space = { id: spaceId }
-        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+        this.$store.dispatch('currentSpace/changeSpace', space)
       // card in current space
       } else {
         this.$nextTick(() => {

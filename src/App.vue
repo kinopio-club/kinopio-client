@@ -283,10 +283,10 @@ export default {
       }
     },
     updateMetaRSSFeed () {
-      const spaceHasUrl = utils.spaceHasUrl()
       const spaceIsPrivate = this.$store.state.currentSpace.privacy === 'private'
+      const spaceIsRemote = this.$store.getters['currentSpace/isRemote']
       this.clearMetaRSSFeed()
-      if (!spaceHasUrl) { return }
+      if (!spaceIsRemote) { return }
       if (spaceIsPrivate) { return }
       const head = document.querySelector('head')
       const spaceId = this.$store.state.currentSpace.id
@@ -446,7 +446,7 @@ label // used for checkbox buttons
     cursor default
     color var(--primary)
     opacity 0.5
-    pointer-events none
+    pointer-events none !important
   &.is-dark
     border-color var(--primary-background)
     img
@@ -1125,8 +1125,8 @@ code
   background-image url('assets/logo-base.png')
 .logo
   .logo-image
-    width 44px
-    height 40px
+    width 36px
+    height 33px
     background-repeat no-repeat
     background-size contain
     display inline-block

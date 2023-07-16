@@ -82,8 +82,6 @@ export default {
     window.addEventListener('touchmove', this.interact)
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
-    // keep space element updated to viewport size so connections show up
-    this.updatePageSizes()
     window.addEventListener('resize', this.updatePageSizesDebounced)
 
     this.updateIsOnline()
@@ -163,7 +161,7 @@ export default {
     correctCardConnectionPaths () {
       const space = utils.clone(this.$store.state.currentSpace)
       const user = utils.clone(this.$store.state.currentUser)
-      const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
+      const currentSpaceIsRemote = this.$store.getters['currentSpace/isRemote']
       this.$store.dispatch('currentConnections/correctPaths', { shouldUpdateApi: currentSpaceIsRemote })
     },
     loadSpaceOnBackOrForward (event) {

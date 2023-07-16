@@ -104,7 +104,7 @@ export default {
       this.$store.commit('addNotification', { message: `Resubscribed to notifications from ${space.name}`, type: 'success' })
     },
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     }
   },
   watch: {

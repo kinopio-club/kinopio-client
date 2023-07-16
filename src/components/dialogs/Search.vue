@@ -217,7 +217,7 @@ export default {
     changeSpace (spaceId) {
       if (this.$store.state.currentSpace.id === spaceId) { return }
       const space = { id: spaceId }
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
       this.closeDialogs()
       this.$store.dispatch('closeAllDialogs')
     },

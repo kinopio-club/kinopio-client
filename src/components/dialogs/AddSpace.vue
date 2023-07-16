@@ -146,7 +146,6 @@ export default {
       if (this.shouldAddSpaceDirectly) {
         this.$store.dispatch('closeAllDialogs')
         this.$store.dispatch('currentSpace/loadJournalSpace')
-        this.$store.dispatch('currentSpace/updateSpacePageSize')
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
       }
     },
@@ -163,7 +162,6 @@ export default {
       if (this.shouldAddSpaceDirectly) {
         this.$store.dispatch('closeAllDialogs')
         this.$store.dispatch('currentSpace/addSpace')
-        this.$store.dispatch('currentSpace/updateSpacePageSize')
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
       }
     },
@@ -172,7 +170,6 @@ export default {
       this.$store.dispatch('closeAllDialogs')
       window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addInboxSpace')
-      this.$store.dispatch('currentSpace/updateSpacePageSize')
     },
     toggleEditPromptsIsVisible () {
       const value = !this.editPromptsIsVisible

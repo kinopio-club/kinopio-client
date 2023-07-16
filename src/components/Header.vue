@@ -63,6 +63,10 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               img.icon.cancel(src="@/assets/add.svg")
 
         .space-details-row.segmented-buttons
+          //- Back
+          .button-wrap(v-if="prevSpaceId" title="Go Back" @click.stop="changeToPrevSpace")
+            button
+              img.icon.left-arrow(src="@/assets/down-arrow.svg")
           //- Current Space
           .button-wrap
             button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active: spaceDetailsIsVisible}")
@@ -121,7 +125,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               span {{notificationsUnreadCount}}
             UserNotifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
         .bottom-controls
-          ExploreRow
+          Discovery
           //- Sidebar
           .button-wrap
             button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
@@ -179,7 +183,7 @@ import Pricing from '@/components/dialogs/Pricing.vue'
 import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
-import ExploreRow from '@/components/ExploreRow.vue'
+import Discovery from '@/components/Discovery.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import consts from '@/consts.js'
 
@@ -225,7 +229,7 @@ export default {
     EarnCredits,
     SpaceTodayJournalBadge,
     ControlsSettings,
-    ExploreRow,
+    Discovery,
     UserSettings
   },
   props: {
@@ -431,9 +435,18 @@ export default {
     pricingIsVisible () {
       return this.$store.state.pricingIsVisible
     },
-    isFadingOut () { return this.$store.state.isFadingOutDuringTouch }
+    isFadingOut () { return this.$store.state.isFadingOutDuringTouch },
+    prevSpaceId () {
+      const spaceId = this.$store.state.prevSpaceIdInSession
+      return spaceId && spaceId !== this.currentSpace.id
+    }
   },
   methods: {
+    changeToPrevSpace () {
+      const id = this.$store.state.currentSpace.id
+      this.$store.dispatch('currentSpace/loadPrevSpaceInSession')
+      this.$store.commit('prevSpaceIdInSession', id)
+    },
     openKinopio () {
       const url = this.currentSpaceUrl
       const title = `${this.currentSpaceName} – Kinopio`
@@ -799,9 +812,9 @@ header
     dialog
       max-width initial
     > .button-wrap
-      max-width 60vw
+      max-width 58vw
       @media(max-width 550px)
-        max-width 33vw
+        max-width 31vw
       > button
         .privacy-icon
           margin-left 6px

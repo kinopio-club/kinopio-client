@@ -52,6 +52,7 @@ const store = createStore({
     pricingIsVisible: false,
     userSettingsIsVisible: false,
     isFadingOutDuringTouch: false,
+    prevSpaceIdInSession: '',
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -453,6 +454,13 @@ const store = createStore({
     isFadingOutDuringTouch: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.isFadingOutDuringTouch = value
+    },
+    prevSpaceIdInSession: (state, value) => {
+      if (value === state.prevSpaceIdInSession) {
+        state.prevSpaceIdInSession = ''
+      } else {
+        state.prevSpaceIdInSession = value
+      }
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1475,6 +1483,7 @@ const store = createStore({
         width: itemsRect.width + padding,
         height: itemsRect.height + padding
       }
+      context.commit('resetPageSizes')
       context.commit('updatePageSizes', itemsRect)
     },
     checkIfItemShouldIncreasePageSize: (context, item) => {
