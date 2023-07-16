@@ -134,6 +134,7 @@ export default {
     },
     closeDialogs () {
       this.$store.commit('tagDetailsIsVisible', false)
+      this.$store.commit('triggerCloseChildDialogs')
     },
     clearVisible () {
       this.linksIsVisible = false

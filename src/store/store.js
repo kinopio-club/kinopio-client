@@ -557,6 +557,7 @@ const store = createStore({
     triggerUpdateOtherCard: (state, cardId) => {},
     triggerControlsSettingsIsVisible: () => {},
     triggerUpdateCardDetailsCardName: (state, options) => {},
+    triggerCloseChildDialogs: () => {},
 
     // Used by extensions only
 

@@ -14,6 +14,11 @@ const store = useStore()
 onMounted(() => {
   updateSortedCards()
   updateAllTextareaSizes()
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerCloseChildDialogs') {
+      closeDialogs()
+    }
+  })
 })
 
 const props = defineProps({
@@ -274,7 +279,7 @@ template(v-if="visible")
       .button-wrap(@click.stop="toggleCardTipsIsVisible")
         button.small-button(:class="{ active: state.cardTipsIsVisible }")
           span ?
-        CardTips(:visible="state.cardTipsIsVisible" :preventScrollIntoView="true")
+        CardTips(:visible="state.cardTipsIsVisible" :preventScrollIntoView="true" :shouldHideExtras="true")
 
   section.text.results-section(ref="section" @click="closeDialogs")
     template(v-for="(card, index) in state.sortedCards")
@@ -334,4 +339,9 @@ section.text
   .triangle
     &.down
       transform scaleY(-1)
+
+  @media(max-height 500px)
+    dialog.card-tips
+      top -50px
+
 </style>
