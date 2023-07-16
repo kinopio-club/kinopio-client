@@ -624,6 +624,7 @@ const currentSpace = {
       cards = sortBy(cards, ['distanceFromOrigin'])
       // page size
       const itemsRect = utils.pageSizeFromItems(cards)
+      context.commit('resetPageSizes', null, { root: true })
       context.commit('updatePageSizes', itemsRect, { root: true })
       // sort connections
       const connectionIds = Object.keys(connections)
@@ -744,7 +745,6 @@ const currentSpace = {
       if (!context.rootState.isEmbedMode) {
         context.commit('triggerSpaceZoomReset', null, { root: true })
       }
-      context.commit('resetPageSizes', null, { root: true })
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('isAddPage', false, { root: true })
       const emptySpace = utils.emptySpace(space.id)

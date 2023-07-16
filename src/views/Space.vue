@@ -82,8 +82,6 @@ export default {
     window.addEventListener('touchmove', this.interact)
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
-    // keep space element updated to viewport size so connections show up
-    this.updatePageSizes()
     window.addEventListener('resize', this.updatePageSizesDebounced)
 
     this.updateIsOnline()
