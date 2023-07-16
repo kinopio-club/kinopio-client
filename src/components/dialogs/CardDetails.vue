@@ -68,7 +68,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: cardTipsIsVisible }")
         button.inline-button(tabindex="-1" :class="{ active: cardTipsIsVisible }")
           span ?
-      CardTips(:visible="cardTipsIsVisible" :maxCardLength="maxCardLength")
+      CardTips(:visible="cardTipsIsVisible")
 
     .row(v-if="cardPendingUpload")
       .badge.info
@@ -303,6 +303,11 @@ export default {
         if (!cardId) { return }
         prevCardId = cardId
         this.showCard(cardId)
+      } else if (mutation.type === 'triggerUpdateCardDetailsCardName') {
+        const { cardId, name } = mutation.payload
+        if (cardId !== this.card.id) { return }
+        this.cancelOpening()
+        this.updateCardName(name)
       }
     })
   },
@@ -673,7 +678,7 @@ export default {
         this.openingAlpha = alpha
         window.requestAnimationFrame(this.openingAnimationFrame)
       } else if (this.isOpening && percentComplete > 1) {
-        console.log('🎴🐢 cardDetails openingAnimationFrame complete')
+        console.log('🐢 cardDetails openingAnimationFrame complete')
         openingAnimationTimer = undefined
         openingStartTime = undefined
         this.isOpening = false
@@ -809,11 +814,6 @@ export default {
       this.pastedName = text
       this.wasPasted = true
       this.$store.dispatch('currentCards/updateURLQueryStrings', { cardId: this.card.id })
-      this.$nextTick(() => {
-        this.$nextTick(() => {
-          this.$store.commit('triggerCardIdUpdatePastedName', { cardId: this.card.id, name: text })
-        })
-      })
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
@@ -914,14 +914,13 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     textareaSizes () {
-      let textareas = document.querySelectorAll('dialog textarea')
+      const element = this.$refs.dialog
+      let textarea = element.querySelector('textarea')
       let modifier = 0
       if (this.canEditCard) {
         modifier = 1
       }
-      textareas.forEach(textarea => {
-        textarea.style.height = textarea.scrollHeight + modifier + 'px'
-      })
+      textarea.style.height = textarea.scrollHeight + modifier + 'px'
     },
     toggleCardTipsIsVisible () {
       const isVisible = this.cardTipsIsVisible
@@ -995,7 +994,7 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     closeDialogs (shouldSkipGlobalDialogs) {
-      this.$store.commit('triggerCardDetailsCloseDialogs')
+      this.$store.commit('triggerCloseChildDialogs')
       this.imagePickerIsVisible = false
       this.cardTipsIsVisible = false
       this.shareCardIsVisible = false

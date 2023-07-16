@@ -535,9 +535,8 @@ const store = createStore({
     triggerMoreFiltersIsNotVisible: () => {},
     triggerShowConnectionDetails: (state, options) => {},
     triggerUpdateWindowHistory: (state, options) => {},
-    triggerAddCard: () => {},
-    triggerCardDetailsCloseDialogs: () => {},
-    triggerSpaceDetailsCloseDialogs: () => {},
+    triggerAddCard: (state, options) => {},
+    triggerAddChildCard: (state, options) => {},
     triggerTemplatesIsVisible: () => {},
     triggerEarnCreditsIsVisible: () => {},
     triggerImportIsVisible: () => {},
@@ -559,11 +558,12 @@ const store = createStore({
     triggerSearchScopeIsRemote: () => {},
     triggerSearchScopeIsLocal: () => {},
     triggerShowExplore: () => {},
-    triggerCardIdUpdatePastedName: (state, options) => {},
     triggerDrawConnectionFrame: (state, event) => {},
     triggerCancelLocking: () => {},
     triggerUpdateOtherCard: (state, cardId) => {},
     triggerControlsSettingsIsVisible: () => {},
+    triggerUpdateCardDetailsCardName: (state, options) => {},
+    triggerCloseChildDialogs: () => {},
 
     // Used by extensions only
 
