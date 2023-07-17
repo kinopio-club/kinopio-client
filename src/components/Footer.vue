@@ -93,6 +93,7 @@ export default {
       return true
     },
     controlsIsVisible () {
+      if (this.isPresentationMode) { return }
       if (this.shouldExplicitlyHideFooter) { return }
       const isTouchDevice = this.$store.state.isTouchDevice
       if (!isTouchDevice) { return true }

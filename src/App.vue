@@ -22,7 +22,7 @@
   ScrollHandler
   NotificationsWithPosition(layer="app")
   Preload
-  .badge.label-badge.development-badge(v-if="isDevelopment && !isAddPage")
+  .badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
     span DEV
 </template>
 
@@ -155,7 +155,12 @@ export default {
       }
       return undefined
     },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
+    isDevelpmentBadgeVisible () {
+      if (this.isAddPage) { return }
+      if (this.$store.state.isPresentationMode) { return }
+      return this.isDevelopment
+    }
   },
   methods: {
     // events
