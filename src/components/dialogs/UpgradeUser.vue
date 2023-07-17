@@ -12,16 +12,20 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop @keydown.sto
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-    UpgradeUserSubscribe(:visible="currentUserIsSignedIn" :priceIsMonthly="priceIsMonthly" :price="price")
+
+    UpgradeUserSubscribeStripe(:visible="stripeIsVisible" :priceIsMonthly="priceIsMonthly" :price="price")
+    UpgradeUserSubscribeApple(:visible="appleIsVisible" :priceIsMonthly="priceIsMonthly" :price="price")
+
   section(v-if="currentUserIsSignedIn")
     p
       img.icon(src="@/assets/lock.svg")
-      span Payments securely processed by Stripe. Card info is not sent to Kinopio.
+      span Payments securely processed by {{paymentProcessor}}. Card info is not sent to Kinopio.
 
 </template>
 
 <script>
-import UpgradeUserSubscribe from '@/components/UpgradeUserSubscribe.vue'
+import UpgradeUserSubscribeStripe from '@/components/UpgradeUserSubscribeStripe.vue'
+import UpgradeUserSubscribeApple from '@/components/UpgradeUserSubscribeApple.vue'
 import DiscountRow from '@/components/DiscountRow.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -30,7 +34,8 @@ export default {
   name: 'UpgradeUser',
   components: {
     Loader,
-    UpgradeUserSubscribe,
+    UpgradeUserSubscribeStripe,
+    UpgradeUserSubscribeApple,
     DiscountRow
   },
   props: {
@@ -50,6 +55,16 @@ export default {
     }
   },
   computed: {
+    isSecureAppContextIOS () { return navigator.isSecureAppContextIOS },
+    stripeIsVisible () { return this.currentUserIsSignedIn && !this.isSecureAppContextIOS },
+    appleIsVisible () { return this.currentUserIsSignedIn && this.isSecureAppContextIOS },
+    paymentProcessor () {
+      if (this.isSecureAppContextIOS) {
+        return 'Apple'
+      } else {
+        return 'Stripe'
+      }
+    },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     price () {
       let price

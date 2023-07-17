@@ -3,6 +3,8 @@ import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, ne
 import { useStore } from 'vuex'
 const store = useStore()
 
+const isSecureAppContextIOS = computed(() => navigator.isSecureAppContextIOS)
+
 // earn credits
 
 const props = defineProps({
@@ -25,7 +27,7 @@ const toggleDescriptionIsVisible = () => {
 </script>
 
 <template lang="pug">
-.row.discount-row
+.row.discount-row(v-if="!isSecureAppContextIOS")
   .button-wrap
     button(@click="triggerEarnCreditsIsVisible")
       span Earn Credits
