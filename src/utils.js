@@ -2020,20 +2020,23 @@ export default {
 
   // App Buttons
 
-  actionsFromString (string) {
-    const allowedActions = ['explore']
+  commandsFromString (string) {
+    const allowedCommands = Object.keys(consts.systemCommands)
     // https://regexr.com/7h3ia
-    const syactionPattern = new RegExp(/::systemAction=\w+/gm)
-    let actions = string.match(syactionPattern)
-    if (!actions) { return }
-    actions = actions.filter(action => action.includes(allowedActions))
-    return actions
+    const commandPattern = new RegExp(/::systemAction=\w+/gm)
+    let commands = string.match(commandPattern)
+    if (!commands) { return }
+    commands = commands.filter(command => {
+      const name = this.commandNameFromCommand(command)
+      return allowedCommands.includes(name)
+    })
+    return commands
   },
-  actionNameFromAction (string) {
+  commandNameFromCommand (string) {
     // https://regexr.com/7h3ig
-    // ::system_action=xyz → matches xyz
-    const actionNamePattern = new RegExp(/=\w+/gm)
-    let name = string.match(actionNamePattern)
+    // ::system_command=xyz → matches xyz
+    const commandNamePattern = new RegExp(/=\w+/gm)
+    let name = string.match(commandNamePattern)
     name = name[0]
     name = name.replace('=', '')
     return name
@@ -2045,7 +2048,7 @@ export default {
     if (!name) { return [] }
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name, true) || []
-    const actions = this.actionsFromString(name) || []
+    const commands = this.commandsFromString(name) || []
     const markdownLinks = name.match(this.markdown().linkPattern) || []
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
@@ -2081,10 +2084,10 @@ export default {
       const endPosition = startPosition + file.length
       badges.push({ file, startPosition, endPosition, isFile: true })
     })
-    actions.forEach(action => {
-      const startPosition = name.indexOf(action)
-      const endPosition = startPosition + action.length
-      badges.push({ action, startPosition, endPosition, isAction: true })
+    commands.forEach(command => {
+      const startPosition = name.indexOf(command)
+      const endPosition = startPosition + command.length
+      badges.push({ command, startPosition, endPosition, isCommand: true })
     })
     badges = sortBy(badges, ['startPosition'])
     if (!badges.length) {
@@ -2134,12 +2137,13 @@ export default {
           name: this.fileNameFromUrl(segment.file)
         }
       // button
-      } else if (segment.isAction) {
-        const action = this.actionNameFromAction(segment.action)
+      } else if (segment.isCommand) {
+        const command = this.commandNameFromCommand(segment.command)
+        const name = consts.systemCommands[command]
         newSegment = {
-          isAction: true,
-          action,
-          actionName: this.capitalizeFirstLetter(action)
+          isCommand: true,
+          command,
+          name
         }
       }
       currentPosition = segment.endPosition

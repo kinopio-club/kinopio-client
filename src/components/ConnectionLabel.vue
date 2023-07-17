@@ -156,7 +156,7 @@ export default {
     },
     showConnectionDetails (event) {
       if (isMultiTouch) { return }
-      this.$store.commit('triggerShowConnectionDetails', {
+      this.$store.commit('triggerConnectionDetailsIsVisible', {
         connectionId: this.id,
         event
       })

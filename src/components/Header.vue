@@ -302,6 +302,8 @@ export default {
         this.sidebarIsVisible = true
       } else if (mutation.type === 'triggerImportIsVisible') {
         this.importIsVisible = true
+      } else if (mutation.type === 'triggerAddSpaceIsVisible') {
+        this.addSpaceIsVisible = true
       }
     })
   },
