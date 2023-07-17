@@ -3,12 +3,12 @@
   .left(v-if="leftIsVisble")
     footer
       Notifications
-      .controls(v-if="controlsIsVisible" :class="{'hidden': isHiddenOnTouch}")
-        .button-wrap
-          button(@click.left.prevent.stop="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
-            img.icon(src="@/assets/add.svg")
-            img.icon.inbox-icon(src="@/assets/inbox.svg")
-          AddToInbox(:visible="addToInboxIsVisible")
+      //- .controls(v-if="controlsIsVisible" :class="{'hidden': isHiddenOnTouch}")
+      //-   .button-wrap
+      //-     button(@click.left.prevent.stop="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
+      //-       img.icon(src="@/assets/add.svg")
+      //-       img.icon.inbox-icon(src="@/assets/inbox.svg")
+      //-     AddToInbox(:visible="addToInboxIsVisible")
 
   .right(v-if="controlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom
