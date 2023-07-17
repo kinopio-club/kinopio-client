@@ -99,7 +99,6 @@ export default {
   },
   props: {
     visible: Boolean,
-    priceIsMonthly: Boolean,
     price: Object
   },
   mounted () {
@@ -329,7 +328,7 @@ export default {
       const result = await this.$store.dispatch('api/createSubscription', {
         customerId: customer.id,
         paymentMethodId: paymentMethod.id,
-        priceId: this.price.id
+        priceId: this.price.stripePriceId
       })
       console.log('🎡 stripe subscription', result)
       if (result.error) {

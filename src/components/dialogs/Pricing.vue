@@ -1,6 +1,7 @@
 <script setup>
 import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
 import DiscountRow from '@/components/DiscountRow.vue'
+import consts from '@/consts.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
@@ -17,6 +18,9 @@ watch(() => props.visible, (value, prevValue) => {
     store.commit('shouldExplicitlyHideFooter', false)
   }
 })
+
+const monthlyPrice = computed(() => consts.price('month'))
+const yearlyPrice = computed(() => consts.price('year'))
 
 </script>
 

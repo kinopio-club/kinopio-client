@@ -16,6 +16,42 @@ export default {
   rootUserId: 'euGhpBrR9eBcjKnK16C_g',
   sidebarWidth: 250,
   systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Desktop and Mobile Apps' },
+  isDevelopment: import.meta.env.MODE === 'development',
+  price (period) {
+    if (period === 'month') {
+      return this.monthlyPrice()
+    } else if (period === 'year') {
+      return this.yearlyPrice()
+    }
+  },
+  monthlyPrice () {
+    let price = {
+      amount: 6,
+      period: 'month',
+      stripePriceId: 'price_1L2GvBDFIr5ywhwobbE35dhA'
+    }
+    if (this.isDevelopment) {
+      price.stripePriceId = 'price_1L7200DFIr5ywhwoAJGkA7yK'
+    }
+    if (navigator.isSecureAppContextIOS) {
+      price.amount = 8
+    }
+    return price
+  },
+  yearlyPrice () {
+    let price = {
+      amount: 60,
+      period: 'year',
+      stripePriceId: 'price_1L2ErWDFIr5ywhwodsKxEEAq'
+    }
+    if (this.isDevelopment) {
+      price.stripePriceId = 'price_1L720NDFIr5ywhwo0wS5PWAv'
+    }
+    if (navigator.isSecureAppContextIOS) {
+      price.amount = 80
+    }
+    return price
+  },
   userPrefersReducedMotion () {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
     if (query.matches) {
@@ -24,26 +60,23 @@ export default {
       return false
     }
   },
-  isDevelopment () {
-    return import.meta.env.MODE === 'development'
-  },
   kinopioDomain () {
     let domain = 'https://kinopio.club'
-    if (this.isDevelopment()) {
+    if (this.isDevelopment) {
       domain = 'https://kinopio.local:8080'
     }
     return domain
   },
   apiHost () {
     let host = 'https://api.kinopio.club'
-    if (this.isDevelopment()) {
+    if (this.isDevelopment) {
       host = 'https://kinopio.local:3000'
     }
     return host
   },
   websocketHost () {
     let host = 'wss://api.kinopio.club'
-    if (this.isDevelopment()) {
+    if (this.isDevelopment) {
       host = 'wss://kinopio.local:3000'
     }
     return host
