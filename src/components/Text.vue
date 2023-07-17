@@ -91,12 +91,13 @@ const updateName = (event, card) => {
 const cards = computed(() => store.getters['currentCards/all'])
 const addCardAtIndex = () => {
   let index = prevIndex || 0
-  const card = state.sortedCards[index]
+  let card = state.sortedCards[index]
   if (!prevIndex) {
     index = -1
   } else {
     index += 1
   }
+  card = card || state.sortedCards[index]
   addCard(card, index)
 }
 const addCard = async (card, index) => {
@@ -190,18 +191,6 @@ const imageUrl = (card) => {
 
 // actions
 
-// const copyText = async (event) => {
-//   store.commit('clearNotificationsWithPosition')
-//   const position = utils.cursorPositionInPage(event)
-//   try {
-//     const text = utils.textFromCardNames(state.sortedCards)
-//     await navigator.clipboard.writeText(text)
-//     store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-//   } catch (error) {
-//     console.warn('🚑 copyText', error)
-//     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-//   }
-// }
 const focus = (card, index) => {
   store.commit('triggerScrollCardIntoView', card.id)
   store.commit('shouldPreventNextFocusOnName', true)
@@ -267,10 +256,6 @@ template(v-if="visible")
         button.small-button(@click="addCardAtIndex")
           img.icon.add(src="@/assets/add.svg")
           span Card
-        //- copy
-        //- button(@click="copyText")
-        //-   img.icon.copy(src="@/assets/copy.svg")
-        //-   span Copy All
       //- sort
       .button-wrap(@click.stop="toggleSortOrder" title="Sort Order")
         button.small-button
