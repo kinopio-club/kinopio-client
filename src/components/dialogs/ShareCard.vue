@@ -14,19 +14,11 @@ const props = defineProps({
   isReadOnly: Boolean
 })
 
+const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
+
 // anon user
 
-const canShare = computed(() => {
-  const currentSpaceUserId = store.state.currentSpace.users[0].id
-  const currentUserId = store.state.currentUser.id
-  if (currentSpaceUserId !== currentUserId) {
-    return true
-  } else if (store.getters['currentUser/isSignedIn']) {
-    return true
-  } else {
-    return false
-  }
-})
+const canShare = computed(() => store.getters['currentSpace/isRemote'])
 const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
@@ -91,6 +83,11 @@ dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="di
             span Copy Card URL
           button(v-if="webShareIsSupported" @click="webShare")
             img.icon.share(src="@/assets/share.svg")
+      .row(v-if="canShare && spaceIsPrivate")
+        .badge.danger
+          img.icon.lock-icon(src="@/assets/lock.svg")
+          span Cards in private spaces can only be viewed by space members
+
   section(v-if="!canShare")
     p For your cards and spaces to have URLs, you'll need to sign up or in
     .button-wrap

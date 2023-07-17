@@ -1730,7 +1730,7 @@ const store = createStore({
       return 1 / getters.spaceZoomDecimal
     },
     isTouchDevice: (state) => {
-      return state.isTouchDevice || utils.isMobile()
+      return state.isTouchDevice || utils.isMobile() || window.navigator.isSecureAppContext
     },
     zoomTransform: (state, getters) => {
       const zoom = getters.spaceZoomDecimal
