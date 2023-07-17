@@ -2040,7 +2040,7 @@ export default {
   commandsFromString (string) {
     const allowedCommands = Object.keys(consts.systemCommands)
     // https://regexr.com/7h3ia
-    const commandPattern = new RegExp(/::systemAction=\w+/gm)
+    const commandPattern = new RegExp(/::systemCommand=\w+/gm)
     let commands = string.match(commandPattern)
     if (!commands) { return }
     commands = commands.filter(command => {
