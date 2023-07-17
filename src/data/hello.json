@@ -727,7 +727,7 @@
       "x": 725,
       "y": 1067,
       "z": 2048,
-      "name": "Desktop and mobile apps",
+      "name": "::systemCommand=apps",
       "frameId": 0,
       "isRemoved": false,
       "nameUpdatedAt": "2023-07-15T23:16:31.369Z",

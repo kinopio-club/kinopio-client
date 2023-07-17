@@ -13,11 +13,13 @@ const props = defineProps({
 const commandIsExplore = computed(() => props.command === 'explore')
 const commandIsTemplates = computed(() => props.command === 'templates')
 const commandIsNewSpace = computed(() => props.command === 'newSpace')
+const commandIsApps = computed(() => props.command === 'apps')
 
 const clickCommand = () => {
   const explore = commandIsExplore.value
   const templates = commandIsTemplates.value
   const newSpace = commandIsNewSpace.value
+  const apps = commandIsApps.value
   store.dispatch('closeAllDialogs')
   if (explore) {
     store.commit('triggerExploreIsVisible')
@@ -25,13 +27,15 @@ const clickCommand = () => {
     store.commit('triggerTemplatesIsVisible')
   } else if (newSpace) {
     store.commit('triggerAddSpaceIsVisible')
+  } else if (apps) {
+    store.commit('triggerAppsIsVisible')
   }
 }
 
 </script>
 
 <template lang="pug">
-button.small-button.system-command(
+button.small-button.variable-length-content.system-command(
   @click.stop="clickCommand"
   @touchstart.stop="clickCommand"
   @keyup.stop.enter="clickCommand"

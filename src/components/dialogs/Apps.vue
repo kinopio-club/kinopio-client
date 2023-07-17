@@ -132,7 +132,7 @@ export default {
       history.replaceState({}, title, pathname)
     },
     updateCurrentDeviceView () {
-      if (utils.isMobile()) {
+      if (this.$store.getters.isTouchDevice) {
         this.isDesktop = false
       } else {
         this.isDesktop = true

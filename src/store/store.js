@@ -561,6 +561,7 @@ const store = createStore({
     triggerUpdateCardDetailsCardName: (state, options) => {},
     triggerCloseChildDialogs: () => {},
     triggerAddSpaceIsVisible: () => {},
+    triggerAppsIsVisible: () => {},
 
     // Used by extensions only
 
