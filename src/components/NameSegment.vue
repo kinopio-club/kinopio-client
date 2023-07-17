@@ -45,7 +45,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   //- System Command
   template(v-if="segment.isCommand")
     //- Explore
-    button.small-button(@click.stop="systemCommand(segment)" :class="{ success: commandIsNewSpace(segment) }")
+    button.small-button(@click.stop="systemCommand(segment)" @touchstart.stop="systemCommand(segment)" :class="{ success: commandIsNewSpace(segment) }")
       img.icon.sunglasses(v-if="commandIsExplore(segment)" src="@/assets/sunglasses.svg")
       img.icon.templates(v-if="commandIsTemplates(segment)" src="@/assets/templates.svg")
       img.icon.add(v-if="commandIsNewSpace(segment)" src="@/assets/add.svg")
