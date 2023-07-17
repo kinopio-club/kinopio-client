@@ -83,7 +83,7 @@ dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="di
   section(v-if="canShare")
     section.subsection
       .row
-        p Share With the World, or Paste in Another Space
+        p Share this card publically, or paste it in another space
       .row
         .segmented-buttons
           button(@click.left="copyUrl")
