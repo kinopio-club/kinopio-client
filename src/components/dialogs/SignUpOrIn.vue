@@ -195,7 +195,6 @@ export default {
       const password = event.target[1].value
       const confirmPassword = event.target[2].value
       let currentUser = utils.clone(this.$store.state.currentUser)
-      currentUser.isPricingHidden = this.$store.state.isPricingHidden
       if (!this.isPasswordMatchesEmail(email, password)) { return }
       if (!this.isSignUpPasswordTooShort(password)) { return }
       if (!this.isSignUpPasswordsMatch(password, confirmPassword)) { return }

@@ -37,7 +37,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
     section.upgrade(v-if="!currentUserIsUpgraded")
       .row
         CardsCreatedProgress
-      .row(v-if="!isPricingHidden")
+      .row
         .button-wrap
           button(@click="triggerUpgradeUserIsVisible")
             span Upgrade for Unlimited
@@ -170,7 +170,6 @@ export default {
     spaceUserIsUpgraded () { return this.$store.getters['currentSpace/spaceUserIsUpgraded'] },
     spaceUser () { return this.$store.state.currentSpace.users[0] },
     isAddPage () { return this.$store.state.isAddPage },
-    isPricingHidden () { return this.$store.state.isPricingHidden },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
         return false

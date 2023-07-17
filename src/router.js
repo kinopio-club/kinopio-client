@@ -15,7 +15,6 @@ const router = createRouter({
       component: () => import('./views/Add.vue'),
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
-        store.commit('isPricingHidden', window.navigator.isPricingHidden)
         store.commit('isAddPage', true)
         next()
       }
@@ -25,7 +24,6 @@ const router = createRouter({
       component: Space,
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
-        store.commit('isPricingHidden', window.navigator.isPricingHidden)
         store.commit('disableViewportOptimizations', urlParams.get('disableViewportOptimizations'))
         next()
       }

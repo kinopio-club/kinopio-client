@@ -46,7 +46,6 @@ const store = createStore({
     shouldPreventNextFocusOnName: false,
     isEmbedMode: false,
     isAddPage: false,
-    isPricingHidden: false,
     disableViewportOptimizations: false, // for urlbox
     isPresentationMode: false,
     pricingIsVisible: false,
@@ -430,10 +429,6 @@ const store = createStore({
     isAddPage: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.isAddPage = value
-    },
-    isPricingHidden: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', allowUndefined: true })
-      state.isPricingHidden = value
     },
     disableViewportOptimizations: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', allowUndefined: true })
