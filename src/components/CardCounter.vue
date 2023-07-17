@@ -9,7 +9,7 @@ const props = defineProps({
 })
 
 const counterValue = computed(() => props.card.counterValue || 0)
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace'])
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 
 const increment = () => {
   const count = counterValue.value + 1

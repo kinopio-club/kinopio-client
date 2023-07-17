@@ -59,7 +59,7 @@ export default {
         this.cancelAnimation()
       } else if (mutation.type === 'currentConnections/remove') {
         this.controlCurve = undefined
-      } else if (mutation.type === 'triggerShowConnectionDetails') {
+      } else if (mutation.type === 'triggerConnectionDetailsIsVisible') {
         if (mutation.payload.connectionId === this.id) {
           const isFromStore = true
           this.showConnectionDetails(mutation.payload.event, isFromStore)

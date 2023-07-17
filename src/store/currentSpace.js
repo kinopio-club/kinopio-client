@@ -932,7 +932,7 @@ const currentSpace = {
     checkIfShouldShowExploreOnLoad: (context) => {
       const shouldShow = context.rootState.shouldShowExploreOnLoad
       if (shouldShow) {
-        context.commit('triggerShowExplore', null, { root: true })
+        context.commit('triggerExploreIsVisible', null, { root: true })
       }
       context.commit('shouldShowExploreOnLoad', false, { root: true })
     },

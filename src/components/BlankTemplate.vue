@@ -7,6 +7,11 @@ const store = useStore()
 
 onMounted(() => {
   console.log(`🍆 the component is now mounted.`, store.state.currentSpace)
+  // store.subscribe((mutation, state) => {
+  //   if (mutation.type === 'triggerUpdateOtherCard') {
+  //     mutation.payload
+  //   }
+  // })
 })
 
 const props = defineProps({

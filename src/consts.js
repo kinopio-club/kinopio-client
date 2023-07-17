@@ -11,8 +11,11 @@ export default {
   referralCreditAmount: 6,
   defaultTimeout: 40000,
   minCardEmbedWidth: 235,
+  defaultCardMaxWidth: 200,
   pexelsApiKey: '4kZOQl4a0OjcWLrMHzj6sEJMarmlZzJiP6P67lqZpOrxbtITfwpKyC4j',
   rootUserId: 'euGhpBrR9eBcjKnK16C_g',
+  sidebarWidth: 250,
+  systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates' },
   userPrefersReducedMotion () {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
     if (query.matches) {

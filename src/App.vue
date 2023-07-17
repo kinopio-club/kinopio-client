@@ -354,7 +354,7 @@ body
     min-height initial
     left initial
     right 0px
-    bottom 80px
+    bottom 40px
     position fixed
     pointer-events none
     z-index 100

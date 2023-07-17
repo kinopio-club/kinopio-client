@@ -15,7 +15,7 @@ onMounted(() => {
   updateLiveSpaces()
   updateExploreSpaces()
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerShowExplore') {
+    if (mutation.type === 'triggerExploreIsVisible') {
       toggleExploreIsVisible()
     } else if (mutation.type === 'closeAllDialogs') {
       closeDialogs()

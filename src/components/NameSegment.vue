@@ -42,12 +42,14 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   span.badge.secondary-on-dark-background(v-if="segment.isFile")
     img.icon(src="@/assets/file.svg")
     span {{segment.name}}
-  //- System Action
-  template(v-if="segment.isAction")
+  //- System Command
+  template(v-if="segment.isCommand")
     //- Explore
-    button.small-button(@click.stop="systemAction(segment.action)")
-      img.icon.sunglasses(v-if="segment.action === 'explore'" src="@/assets/sunglasses.svg")
-      span {{segment.actionName}}
+    button.small-button(@click.stop="systemCommand(segment)" :class="{ success: commandIsNewSpace(segment) }")
+      img.icon.sunglasses(v-if="commandIsExplore(segment)" src="@/assets/sunglasses.svg")
+      img.icon.templates(v-if="commandIsTemplates(segment)" src="@/assets/templates.svg")
+      img.icon.add(v-if="commandIsNewSpace(segment)" src="@/assets/add.svg")
+      span {{segment.name}}
 </template>
 
 <script>
@@ -134,9 +136,24 @@ export default {
         window.open(url) // opens url in new tab
       }
     },
-    systemAction (action) {
+
+    // system commands
+
+    commandIsExplore (segment) { return segment.command === 'explore' },
+    commandIsTemplates (segment) { return segment.command === 'templates' },
+    commandIsNewSpace (segment) { return segment.command === 'newSpace' },
+    systemCommand (segment) {
+      const explore = this.commandIsExplore(segment)
+      const templates = this.commandIsTemplates(segment)
+      const newSpace = this.commandIsNewSpace(segment)
       this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerShowExplore')
+      if (explore) {
+        this.$store.commit('triggerExploreIsVisible')
+      } else if (templates) {
+        this.$store.commit('triggerTemplatesIsVisible')
+      } else if (newSpace) {
+        this.$store.commit('triggerAddSpaceIsVisible')
+      }
     }
   }
 }
