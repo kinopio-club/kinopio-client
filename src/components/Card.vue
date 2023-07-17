@@ -1066,7 +1066,7 @@ export default {
       const isTextOnlyCard = this.normalizedName === this.card.name
       if (isTextOnlyCard) { isVisible = true }
       const threshold = 400 * this.spaceCounterZoomDecimal
-      const fallbackHeight = 200
+      const fallbackHeight = consts.defaultCardMaxWidth
       const offset = utils.outsideSpaceOffset().y
       const scroll = (this.windowScroll.y - offset) * this.spaceCounterZoomDecimal
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
@@ -1987,7 +1987,7 @@ export default {
       return name.includes(url) || name.includes(normalizedUrl)
     },
     previewImage ({ thumbnail }) {
-      const minWidth = 200
+      const minWidth = consts.defaultCardMaxWidth
       if (!thumbnail) { return '' }
       let image = thumbnail.find(item => {
         let shouldSkipImage = false

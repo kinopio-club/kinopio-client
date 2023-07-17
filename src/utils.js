@@ -159,17 +159,22 @@ export default {
     let y = rect.y + rect.height - viewportHeight
     let scrollX = 0
     let scrollY = 0
-    if (x > 0) {
-      scrollX = x + 20
+    scrollX = x + 20
+    scrollY = y + 80
+    const viewportIsNarrow = viewportWidth < (consts.sidebarWidth * 2)
+    const sidebarIsVisible = document.querySelector('dialog.sidebar')
+    if (sidebarIsVisible) {
+      scrollX = scrollX + consts.sidebarWidth
     }
-    if (y > 0) {
-      scrollY = y + 80
+    if (sidebarIsVisible && viewportIsNarrow) {
+      scrollX = scrollX - 80
     }
-    window.scrollBy({
+    const scroll = {
       left: scrollX,
       top: scrollY,
       behavior
-    })
+    }
+    window.scrollBy(scroll)
   },
   cursorPositionInViewport (event) {
     let x, y
@@ -649,6 +654,18 @@ export default {
   },
   insertStringAtIndex (string, insert, index) {
     return string.substr(0, index) + insert + string.substr(index)
+  },
+  insertIntoArray (array, value, index) {
+    let start = array.slice(0, index)
+    const end = array.slice(index, array.length)
+    start.push(value)
+    const newArray = start.concat(end)
+    return newArray
+  },
+  removeFromArray (array, index) {
+    delete array[index]
+    array = array.filter(item => Boolean(item))
+    return array
   },
   normalizeToUnixTime (date) {
     return new Date(date).getTime()

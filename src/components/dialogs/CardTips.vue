@@ -4,19 +4,25 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
     p Tips
   section
     article
-      p
-        span.badge.keyboard-shortcut [[
-        span create tags to label and group ideas
+      p Card character limit is {{maxCardLength}}
     article
       p
-        span.badge.keyboard-shortcut /
-        span link to other spaces
-    article
+        span.badge.keyboard-shortcut Enter
+        span New card
+      p
+        span.badge.keyboard-shortcut Shift-Enter
+        span New child card
       p
         span.badge.keyboard-shortcut Ctrl-Enter
         span line break
-    article
-      p Card character limit is {{maxCardLength}}
+    article(v-if="shouldHideExtras")
+      p
+        span.badge.keyboard-shortcut [[
+        span create tags to label and group ideas
+      p
+        span.badge.keyboard-shortcut /
+        span link to other spaces
+
     article
       .row
         button(@click.left.stop="toggleMarkdownInfoIsVisible" :class="{ active: markdownInfoIsVisible }")
@@ -44,22 +50,26 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
 
 <script>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 export default {
   name: 'CardTips',
   props: {
     visible: Boolean,
-    maxCardLength: Number
+    preventScrollIntoView: Boolean,
+    shouldHideExtras: Boolean
   },
   data () {
     return {
       markdownInfoIsVisible: false
     }
   },
-  // computed: {
-  // },
+  computed: {
+    maxCardLength () { return consts.maxCardLength }
+  },
   methods: {
     scrollIntoView () {
+      if (this.preventScrollIntoView) { return }
       if (utils.isMobile()) { return }
       this.$nextTick(() => {
         const element = this.$refs.dialog
@@ -84,7 +94,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.card-tips
+dialog.card-tips
   left initial
   right 8px
   top 22px

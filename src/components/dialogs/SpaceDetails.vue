@@ -206,7 +206,7 @@ export default {
     closeDialogs () {
       this.addSpaceIsVisible = false
       this.spaceFiltersIsVisible = false
-      this.$store.commit('triggerSpaceDetailsCloseDialogs')
+      this.$store.commit('triggerCloseChildDialogs')
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', space)

@@ -40,7 +40,11 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerAddCard') {
-        this.addCard()
+        const options = mutation.payload
+        this.addCard(options)
+      } else if (mutation.type === 'triggerAddChildCard') {
+        const options = mutation.payload
+        this.addChildCard(options)
       } else if (mutation.type === 'triggerSelectAllItemsBelowCursor') {
         const position = mutation.payload
         this.selectAllItemsBelowCursor(position)
@@ -322,7 +326,8 @@ export default {
       return object
     },
 
-    addCard () {
+    addCard (options) {
+      options = options || {}
       if (this.$store.state.shouldPreventNextEnterKey) {
         this.$store.commit('shouldPreventNextEnterKey', false)
         return
@@ -339,7 +344,6 @@ export default {
       const spaceBetweenCards = utils.spaceBetweenCards()
       let position = {}
       let isParentCard = true
-      console.log(scroll.x, parentCard, parentCard.getBoundingClientRect().x)
       if (shouldOutdentChildToParent) {
         const rect = childCard.getBoundingClientRect()
         const parentRect = parentCard.getBoundingClientRect()
@@ -375,7 +379,7 @@ export default {
         backgroundColor = parentCard.backgroundColor
       }
       this.$store.commit('shouldPreventNextEnterKey', true)
-      this.$store.dispatch('currentCards/add', { position, isParentCard, backgroundColor })
+      this.$store.dispatch('currentCards/add', { position, isParentCard, backgroundColor, id: options.id })
       if (childCard) {
         this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
         this.$nextTick(() => {
@@ -384,7 +388,8 @@ export default {
       }
     },
 
-    addChildCard () {
+    addChildCard (options) {
+      options = options || {}
       useSiblingConnectionType = false
       const spaceBetweenCards = utils.spaceBetweenCards()
       const scroll = this.$store.getters.windowScrollWithSpaceOffset
@@ -399,7 +404,7 @@ export default {
       } else if (parentCard) {
         baseCard = parentCard
       } else {
-        this.addCard()
+        this.addCard(options)
         return
       }
       const rect = baseCard.getBoundingClientRect()
@@ -410,7 +415,7 @@ export default {
       initialPosition = this.updateWithZoom(initialPosition)
       const position = this.nonOverlappingCardPosition(initialPosition)
       parentCard = this.$store.getters['currentCards/byId'](parentCardId)
-      this.$store.dispatch('currentCards/add', { position, backgroundColor: parentCard.backgroundColor })
+      this.$store.dispatch('currentCards/add', { position, backgroundColor: parentCard.backgroundColor, id: options.id })
       this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
       this.$nextTick(() => {
         this.addConnection(baseCardId)

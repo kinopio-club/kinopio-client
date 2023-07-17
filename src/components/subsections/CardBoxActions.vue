@@ -94,7 +94,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       const { type } = mutation
-      if (type === 'triggerCardDetailsCloseDialogs' && this.visible) {
+      if (type === 'triggerCloseChildDialogs' && this.visible) {
         const shouldPreventEmit = true
         this.closeDialogs(shouldPreventEmit)
       } else if (type === 'triggerSelectedCardsContainInBox') {

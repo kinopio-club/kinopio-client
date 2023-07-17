@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     closeDialogs () {
-      this.$store.commit('triggerSpaceDetailsCloseDialogs')
+      this.$store.commit('triggerCloseChildDialogs')
     }
   },
   watch: {
