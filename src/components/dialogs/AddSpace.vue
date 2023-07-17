@@ -22,7 +22,7 @@ dialog.add-space.narrow(
         button(@click="addJournalSpace")
           img.icon(src="@/assets/add.svg")
           MoonPhase(:moonPhase="moonPhase.name")
-          span Daily Journal
+          span Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
@@ -252,7 +252,7 @@ export default {
     margin 0
     margin-left 5px
   .moon-phase
-    vertical-align 0px
+    vertical-align -1px
   .icon.today
     vertical-align -1px
   .daily-prompt-row

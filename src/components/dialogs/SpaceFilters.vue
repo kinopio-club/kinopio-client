@@ -20,6 +20,7 @@ dialog.narrow.space-filters(v-if="visible" :open="visible" @click.left.stop ref=
       button(@click="showSpacesOnly" :class="{active: spacesIsActive}") Normal
       button(@click="showJournalsOnly" :class="{active: journalsIsActive}")
         MoonPhase(:moonPhase="moonPhase.name")
+        span Journals
 
   section.results-section.collaborators
     UserList(:users="spaceUsers" :isClickable="true" @selectUser="filterByUser" :selectedUser="dialogSpaceFilterByUser")
@@ -135,8 +136,6 @@ export default {
     max-height calc(100vh - 200px)
   button + .row
     margin-top 10px
-  .moon-phase
-    margin 0
   .cancel
     vertical-align 0
 </style>
