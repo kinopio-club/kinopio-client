@@ -13,8 +13,8 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop @keydown.sto
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
     //- Payment
-    UpgradeUserSubscribeStripe(:visible="stripeIsVisible" :price="currentPrice")
-    UpgradeUserSubscribeApple(:visible="appleIsVisible" :price="currentPrice")
+    UpgradeUserStripe(:visible="stripeIsVisible" :price="currentPrice")
+    UpgradeUserApple(:visible="appleIsVisible" :price="currentPrice")
   section(v-if="currentUserIsSignedIn")
     p
       img.icon(src="@/assets/lock.svg")
@@ -22,8 +22,8 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop @keydown.sto
 </template>
 
 <script>
-import UpgradeUserSubscribeStripe from '@/components/UpgradeUserSubscribeStripe.vue'
-import UpgradeUserSubscribeApple from '@/components/UpgradeUserSubscribeApple.vue'
+import UpgradeUserStripe from '@/components/UpgradeUserStripe.vue'
+import UpgradeUserApple from '@/components/UpgradeUserApple.vue'
 import DiscountRow from '@/components/DiscountRow.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -33,8 +33,8 @@ export default {
   name: 'UpgradeUser',
   components: {
     Loader,
-    UpgradeUserSubscribeStripe,
-    UpgradeUserSubscribeApple,
+    UpgradeUserStripe,
+    UpgradeUserApple,
     DiscountRow
   },
   props: {

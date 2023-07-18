@@ -39,9 +39,9 @@ const incrementBy = () => {
 
 <template lang="pug">
 .component-name(v-if="visible")
-  button(@click="incrementBy")
-    span Count is: {{ state.count }}
-  p Current theme is: {{ themeName }}
+  //- button(@click="incrementBy")
+  //-   span Count is: {{ state.count }}
+  //- p Current theme is: {{ themeName }}
 </template>
 
 <style lang="stylus">

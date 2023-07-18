@@ -1,5 +1,5 @@
 <template lang="pug">
-.upgrade-user-subscribe(v-if="visible")
+.upgrade-user-stripe(v-if="visible")
   //- https://stripe.com/docs/testing
   //- name on card:   someone
   //- email:          hi@pirijan.com
@@ -438,7 +438,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.upgrade-user-subscribe
+.upgrade-user-stripe
   .user
     margin-right 6px
     vertical-align middle
