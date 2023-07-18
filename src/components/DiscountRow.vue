@@ -1,5 +1,6 @@
 <script setup>
 import consts from '@/consts.js'
+import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
@@ -7,36 +8,47 @@ const store = useStore()
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
-// earn credits
-
-const props = defineProps({
-  earnCreditsIsVisible: Boolean
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerCloseChildDialogs') {
+      closeDialogs()
+    }
+  })
 })
-const triggerEarnCreditsIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerEarnCreditsIsVisible')
-}
-
-// student info
 
 const state = reactive({
-  descriptionIsVisible: false
+  studentInfoIsVisible: false,
+  earnCreditsIsVisible: false
 })
-const toggleDescriptionIsVisible = () => {
-  state.descriptionIsVisible = !state.descriptionIsVisible
+
+const closeDialogs = () => {
+  state.studentInfoIsVisible = false
+  state.earnCreditsIsVisible = false
+}
+const toggleEarnCreditsIsVisible = () => {
+  const value = !state.earnCreditsIsVisible
+  closeDialogs()
+  state.earnCreditsIsVisible = value
+}
+const toggleStudentInfoIsVisible = () => {
+  const value = !state.studentInfoIsVisible
+  closeDialogs()
+  state.studentInfoIsVisible = value
+  console.log(state.studentInfoIsVisible)
 }
 
 </script>
 
 <template lang="pug">
-.row.discount-row(v-if="!isSecureAppContextIOS")
+.row.discount-row(v-if="!isSecureAppContextIOS" @click.stop="closeDialogs")
   .button-wrap
-    button(@click="triggerEarnCreditsIsVisible")
+    button(@click.stop="toggleEarnCreditsIsVisible" :class="{ active: state.earnCreditsIsVisible }")
       span Earn Credits
+    EarnCredits(:visible="state.earnCreditsIsVisible")
   .button-wrap
-    button(@click="toggleDescriptionIsVisible" :class="{ active: state.descriptionIsVisible }")
+    button(@click.stop="toggleStudentInfoIsVisible" :class="{ active: state.studentInfoIsVisible }")
       span Student Info
-.row.badge.secondary(v-if="state.descriptionIsVisible")
+.row.badge.secondary(v-if="state.studentInfoIsVisible" @click.stop)
   p If you're a student or teacher,{{' '}}
     a(href="mailto:hi@kinopio.club?subject=Education Discount") email me
     span {{' '}}for a 50% discount
@@ -46,4 +58,6 @@ const toggleDescriptionIsVisible = () => {
 .discount-row
   margin-top 10px
   display inline-block
+  dialog.refer
+    left 0
 </style>

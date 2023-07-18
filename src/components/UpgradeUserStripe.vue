@@ -43,10 +43,7 @@
     span (シ_ _)シ Something went wrong, Please try again or contact support
 
   .summary
-    User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
     .row.row-wrap
-      .badge.info
-        span ${{price.amount}}/{{price.period}}
       .badge.secondary
         span Tax included
       Loader(:visible="loading.credits")
@@ -54,17 +51,16 @@
         span ${{credits}} credit
 
   button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
-    span Upgrade Account
+    User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
+    span Upgrade
     span(v-if="initialPaymentAfterCredits === 0") {{' '}}For Free
+    span(v-else) {{' '}}For ${{price.amount}}/{{price.period}}
     Loader(:visible="loading.subscriptionIsBeingCreated")
 
   p(v-if="credits")
     span You'll be billed ${{initialPaymentAfterCredits}} immediately.
     span(v-if="isCreditsRemainingAfterInitialPayment") {{' '}}Your remaining credits will be applied to future bills.
     span {{' '}}Then you'll be billed ${{price.amount}} each {{price.period}}.
-  p(v-else)
-    span You'll be billed ${{price.amount}} immediately, and then ${{price.amount}} each {{price.period}}.
-
   p You can cancel anytime.
 
 </template>
@@ -99,7 +95,7 @@ export default {
   },
   props: {
     visible: Boolean,
-    price: Object
+    price: Object // amount, stripePriceId
   },
   mounted () {
     this.updateCredits()
@@ -413,6 +409,7 @@ export default {
           return
         }
       }
+      if (this.loading.subscriptionIsBeingCreated) { return }
       this.loading.subscriptionIsBeingCreated = true
       try {
         customer = await this.createCustomer()

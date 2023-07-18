@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop @keydown.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildDialogs" @keydown.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     .row
       p Upgrade your account for unlimited cards and uploads
@@ -12,9 +12,10 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop @keydown.sto
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-    //- Payment
-    UpgradeUserStripe(:visible="stripeIsVisible" :price="currentPrice")
-    UpgradeUserApple(:visible="appleIsVisible" :price="currentPrice")
+    //- Checkout
+    template(v-if="currentUserIsSignedIn")
+      UpgradeUserStripe(:visible="!isSecureAppContextIOS" :price="currentPrice")
+      UpgradeUserApple(:visible="isSecureAppContextIOS" :price="currentPrice")
   section(v-if="currentUserIsSignedIn")
     p
       img.icon(src="@/assets/lock.svg")
@@ -55,8 +56,6 @@ export default {
   },
   computed: {
     isSecureAppContextIOS () { return consts.isSecureAppContextIOS },
-    stripeIsVisible () { return this.currentUserIsSignedIn && !this.isSecureAppContextIOS },
-    appleIsVisible () { return this.currentUserIsSignedIn && this.isSecureAppContextIOS },
     paymentProcessor () {
       if (this.isSecureAppContextIOS) {
         return 'Apple'
@@ -95,6 +94,9 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
+    },
+    closeChildDialogs () {
+      this.$store.commit('triggerCloseChildDialogs')
     }
   },
   watch: {
