@@ -2,15 +2,15 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
 
+let showDebugMessages = false
+
 export default {
   send (body) {
     const shouldSendPostmessages = consts.isSecureAppContext
-    if (!window.webkit) { return }
-    if (!window.webkit.messageHandlers[body.name]) { return }
+    if (!shouldSendPostmessages) { return }
     try {
-      console.log('🛫 sending postmessage', body)
+      this.log(body)
       const value = body.value || ''
-      console.log(window.webkit.messageHandlers[body.name])
       window.webkit.messageHandlers[body.name].postMessage(value)
     } catch (error) {
       console.error(error)
@@ -24,5 +24,14 @@ export default {
     const name = utils.capitalizeFirstLetter(body.name)
     body.name = `on${name}Feedback`
     this.send(body)
+  },
+
+  log (body) {
+    const isBackgroundColor = body.name === 'setBackgroundColor'
+    if (!showDebugMessages && isBackgroundColor) {
+
+    } else {
+      console.log('🛫 sending postmessage', body)
+    }
   }
 }
