@@ -1,5 +1,5 @@
 <template lang="pug">
-.upgrade-user-subscribe(v-if="currentUserIsSignedIn")
+.upgrade-user-subscribe(v-if="visible")
   //- https://stripe.com/docs/testing
   //- name on card:   someone
   //- email:          hi@pirijan.com
