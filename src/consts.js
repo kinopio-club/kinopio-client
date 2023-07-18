@@ -63,7 +63,8 @@ export default {
     let price = {
       amount: 6,
       period: 'month',
-      stripePriceId: 'price_1L2GvBDFIr5ywhwobbE35dhA'
+      stripePriceId: 'price_1L2GvBDFIr5ywhwobbE35dhA',
+      applePriceId: 'm1'
     }
     if (this.isDevelopment) {
       price.stripePriceId = 'price_1L7200DFIr5ywhwoAJGkA7yK'
