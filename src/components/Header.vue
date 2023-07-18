@@ -140,8 +140,8 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               Loader(:visible="loadingSignUpOrIn")
             SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
           //- Upgrade
-          .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn" :class="{active: upgradeUserIsVisible}")
-            button(@click.left.stop="toggleUpgradeUserIsVisible")
+          .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
+            button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
               span Upgrade
           //- Pricing
           .button-wrap(v-if="!currentUserIsSignedIn")

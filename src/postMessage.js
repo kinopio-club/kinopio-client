@@ -29,7 +29,6 @@ export default {
   log (body) {
     const isBackgroundColor = body.name === 'setBackgroundColor'
     if (!showDebugMessages && isBackgroundColor) {
-
     } else {
       console.log('🛫 sending postmessage', body)
     }

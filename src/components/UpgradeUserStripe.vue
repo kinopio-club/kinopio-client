@@ -68,6 +68,7 @@
 <script>
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import cache from '@/cache.js'
 import { defineAsyncComponent } from 'vue'
 
@@ -264,6 +265,7 @@ export default {
     },
     async loadStripe () {
       if (!this.currentUserIsSignedIn) { return }
+      if (consts.isSecureAppContextIOS) { return }
       this.loading.stripeIsLoading = true
       if (!this.$store.state.stripeIsLoaded) {
         this.$store.commit('stripeIsLoaded', true)
