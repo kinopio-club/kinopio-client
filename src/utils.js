@@ -159,8 +159,12 @@ export default {
     let y = rect.y + rect.height - viewportHeight
     let scrollX = 0
     let scrollY = 0
-    scrollX = x + 20
-    scrollY = y + 80
+    if (x > 0) {
+      scrollX = x + 20
+    }
+    if (y > 0) {
+      scrollY = y + 80
+    }
     const viewportIsNarrow = viewportWidth < (consts.sidebarWidth * 2)
     const sidebarIsVisible = document.querySelector('dialog#sidebar')
     if (sidebarIsVisible) {
