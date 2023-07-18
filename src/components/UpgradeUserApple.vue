@@ -10,6 +10,7 @@ const store = useStore()
 
 onMounted(() => {
   window.addEventListener('message', handleSubscriptionSuccess)
+  updateCredits()
 })
 
 const props = defineProps({
@@ -20,7 +21,8 @@ const props = defineProps({
 const state = reactive({
   loading: {
     subscriptionIsBeingCreated: false
-  }
+  },
+  creditsEarned: 0
 })
 
 const user = computed(() => store.state.currentUser)
@@ -30,6 +32,16 @@ const subscribe = () => {
   state.loading.subscriptionIsBeingCreated = true
   try {
     postMessage.send({ name: 'createSubscription', userId: store.state.currentUser.id, appleSubscriptionId: props.price.applePriceId })
+  } catch (error) {
+    console.error('🚒', error)
+  }
+}
+
+const updateCredits = async () => {
+  try {
+    const data = await store.dispatch('api/getReferralsByUser')
+    console.log('🫧', data)
+    state.creditsEarned = data.creditsEarned
   } catch (error) {
     console.error('🚒', error)
   }
@@ -56,7 +68,10 @@ const handleSubscriptionSuccess = (event) => {
 
 <template lang="pug">
 .upgrade-user-apple(v-if="visible")
-
+  .row(v-if="state.creditsEarned")
+    .badge.info
+      span You have ${{state.creditsEarned}} in referral credits. To redeem credits you'll need to upgrade kinopio on the {{' '}}
+      a(href="consts.kinopioDomain") web
   .row
     button(@click.left="subscribe" :class="{active : state.loading.subscriptionIsBeingCreated}")
       User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")

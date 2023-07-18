@@ -72,7 +72,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           span Embed
         Embed(:visible="embedIsVisible")
 
-  section
+  section(v-if='!isSecureAppContextIOS')
     .button-wrap
       button(@click="triggerEarnCreditsIsVisible")
         span Earn Credits
@@ -91,6 +91,7 @@ import Import from '@/components/dialogs/Import.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
+import consts from '@/consts.js'
 
 export default {
   name: 'Share',
@@ -130,6 +131,7 @@ export default {
     }
   },
   computed: {
+    isSecureAppContextIOS () { return consts.isSecureAppContextIOS },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     exploreSectionIsVisible () {
