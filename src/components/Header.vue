@@ -48,7 +48,6 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible || totalFiltersActive || searchResultsCount}")
                 template(v-if="!searchResultsCount")
                   img.icon.search(src="@/assets/search.svg")
-                  img.icon.filter(src="@/assets/filter.svg" v-if="!totalFiltersActive")
                 .badge.search.search-count-badge(v-if="searchResultsCount")
                   img.icon.search(src="@/assets/search.svg")
                   span {{searchResultsCount}}
@@ -56,10 +55,10 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
                   img.icon(src="@/assets/filter.svg")
                   span {{totalFiltersActive}}
               Search(:visible="searchIsVisible")
-            button(@click="showPreviousSearchCard" v-if="searchResultsCount")
-              img.icon.left-arrow(src="@/assets/down-arrow.svg")
-            button(@click="showNextSearchCard" v-if="searchResultsCount")
-              img.icon.right-arrow(src="@/assets/down-arrow.svg")
+            //- button(@click="showPreviousSearchCard" v-if="searchResultsCount")
+            //-   img.icon.left-arrow(src="@/assets/down-arrow.svg")
+            //- button(@click="showNextSearchCard" v-if="searchResultsCount")
+            //-   img.icon.right-arrow(src="@/assets/down-arrow.svg")
             button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
               img.icon.cancel(src="@/assets/add.svg")
 
