@@ -985,6 +985,7 @@ export default {
     return rect
   },
   pageSizeFromItems (items) {
+    const padding = 250
     items = this.clone(items)
     items = items.filter(item => item.x && item.y)
     if (!items.length) {
@@ -995,10 +996,10 @@ export default {
     let y = 0
     items.forEach(item => {
       if (item.x > x) {
-        x = item.x
+        x = item.x + padding
       }
       if (item.y > y) {
-        y = item.y
+        y = item.y + padding
       }
     })
     const width = x + defaultSize

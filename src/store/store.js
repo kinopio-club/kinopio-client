@@ -1467,7 +1467,6 @@ const store = createStore({
       context.commit('spaceUrlToLoad', matches.spaceUrl)
     },
     updatePageSizes: (context) => {
-      const padding = 250
       const cards = context.getters['currentCards/all']
       const boxes = context.getters['currentBoxes/all']
       let items = cards.concat(boxes)
@@ -1475,10 +1474,6 @@ const store = createStore({
         x: 0, y: 0, width: 500, height: 500
       })
       let itemsRect = utils.pageSizeFromItems(items)
-      itemsRect = {
-        width: itemsRect.width + padding,
-        height: itemsRect.height + padding
-      }
       context.commit('resetPageSizes')
       context.commit('updatePageSizes', itemsRect)
     },
