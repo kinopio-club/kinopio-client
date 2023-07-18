@@ -64,7 +64,7 @@ export default {
       amount: 6,
       period: 'month',
       stripePriceId: 'price_1L2GvBDFIr5ywhwobbE35dhA',
-      applePriceId: 'm1'
+      applePriceId: 'placeholder-month-plan-subscription-id'
     }
     if (this.isDevelopment) {
       price.stripePriceId = 'price_1L7200DFIr5ywhwoAJGkA7yK'
@@ -78,7 +78,8 @@ export default {
     let price = {
       amount: 60,
       period: 'year',
-      stripePriceId: 'price_1L2ErWDFIr5ywhwodsKxEEAq'
+      stripePriceId: 'price_1L2ErWDFIr5ywhwodsKxEEAq',
+      applePriceId: 'placeholder-year-plan-subscription-id'
     }
     if (this.isDevelopment) {
       price.stripePriceId = 'price_1L720NDFIr5ywhwo0wS5PWAv'
