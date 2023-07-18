@@ -1,9 +1,10 @@
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import cache from '@/cache.js'
 
 export default {
   send (body) {
-    const shouldSendPostmessages = window.navigator.isSecureAppContext
+    const shouldSendPostmessages = consts.isSecureAppContext
     if (!window.webkit) { return }
     if (!window.webkit.messageHandlers[body.name]) { return }
     try {

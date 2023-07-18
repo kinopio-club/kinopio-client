@@ -1,9 +1,11 @@
 <script setup>
+import consts from '@/consts.js'
+
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
-const isSecureAppContextIOS = computed(() => navigator.isSecureAppContextIOS)
+const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
 // earn credits
 

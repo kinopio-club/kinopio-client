@@ -18,6 +18,8 @@ export default {
   sidebarWidth: 250,
   systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Desktop and Mobile Apps' },
   isDevelopment: import.meta.env.MODE === 'development',
+  isSecureAppContextIOS: navigator.isSecureAppContextIOS,
+  isSecureAppContext: navigator.isSecureAppContext,
   kinopioDomain () {
     let domain = 'https://kinopio.club'
     if (this.isDevelopment) {
@@ -66,7 +68,7 @@ export default {
     if (this.isDevelopment) {
       price.stripePriceId = 'price_1L7200DFIr5ywhwoAJGkA7yK'
     }
-    if (navigator.isSecureAppContextIOS) {
+    if (this.isSecureAppContextIOS) {
       price.amount = 8
     }
     return price
@@ -80,7 +82,7 @@ export default {
     if (this.isDevelopment) {
       price.stripePriceId = 'price_1L720NDFIr5ywhwo0wS5PWAv'
     }
-    if (navigator.isSecureAppContextIOS) {
+    if (this.isSecureAppContextIOS) {
       price.amount = 80
     }
     return price

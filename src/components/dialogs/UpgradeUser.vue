@@ -54,7 +54,7 @@ export default {
     }
   },
   computed: {
-    isSecureAppContextIOS () { return navigator.isSecureAppContextIOS },
+    isSecureAppContextIOS () { return consts.isSecureAppContextIOS },
     stripeIsVisible () { return this.currentUserIsSignedIn && !this.isSecureAppContextIOS },
     appleIsVisible () { return this.currentUserIsSignedIn && this.isSecureAppContextIOS },
     paymentProcessor () {

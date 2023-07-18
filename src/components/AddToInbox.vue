@@ -133,7 +133,7 @@ export default {
       }
     },
     shouldHideInboxButton () {
-      const isNativeApp = window.navigator.isSecureAppContext
+      const isNativeApp = consts.isSecureAppContext
       return isNativeApp && this.isAddPage
     }
   },

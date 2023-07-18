@@ -100,7 +100,7 @@ export default {
     outsideSpaceBackgroundIsStatic () { return this.$store.state.currentUser.outsideSpaceBackgroundIsStatic },
     newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank },
     shouldDisableHapticFeedback () { return this.$store.state.currentUser.shouldDisableHapticFeedback },
-    deviceSupportsHapticFeedback () { return window.navigator.isSecureAppContext && this.isMobile }
+    deviceSupportsHapticFeedback () { return consts.isSecureAppContext && this.isMobile }
   },
   methods: {
     toggleShouldDisableHapticFeedback () {
