@@ -2,10 +2,15 @@
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import postMessage from '@/postMessage.js'
+import consts from '@/consts.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
+
+onMounted(() => {
+  window.addEventListener('message', handleSubscriptionSuccess)
+})
 
 const props = defineProps({
   visible: Boolean,
@@ -14,8 +19,7 @@ const props = defineProps({
 
 const state = reactive({
   loading: {
-    subscriptionIsBeingCreated: false,
-    isRestoringPurchase: false
+    subscriptionIsBeingCreated: false
   }
 })
 
@@ -25,11 +29,27 @@ const subscribe = () => {
   if (state.loading.subscriptionIsBeingCreated) { return }
   state.loading.subscriptionIsBeingCreated = true
   try {
-    console.log('💰', props.price)
     postMessage.send({ name: 'createSubscription', userId: store.state.currentUser.id, appleSubscriptionId: props.price.applePriceId })
   } catch (error) {
     console.error('🚒', error)
   }
+}
+
+const handleSubscriptionSuccess = (event) => {
+  const data = event.data
+  state.loading.subscriptionIsBeingCreated = false
+  if (!consts.isSecureAppContext) { return }
+  if (data.name !== 'upgradedUser') { return }
+  if (!data.isSuccess) { return }
+  this.$store.commit('currentUser/isUpgraded', true)
+  this.$store.commit('notifyCardsCreatedIsOverLimit', false)
+  this.$store.commit('notifyEarnedCredits', false)
+  this.$store.commit('addNotification', {
+    message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software',
+    type: 'success',
+    isPersistentItem: true
+  })
+  this.$store.dispatch('closeAllDialogs')
 }
 
 </script>

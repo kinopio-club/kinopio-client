@@ -371,15 +371,5 @@ export default {
       return invitedSpace.id !== space.id
     })
     this.storeLocal('invitedSpaces', invitedSpaces)
-  },
-
-  // Billing
-
-  saveStripeIds (stripeIds) {
-    this.storeLocal('stripeIds', stripeIds)
   }
-  // stripeIds () {
-  //   return this.getLocal('stripeIds')
-  // },
-
 }

@@ -349,7 +349,6 @@ export default {
       }
       const result = await this.$store.dispatch('api/updateSubscription', data)
       console.log('🎡 subscribed', result)
-      cache.saveStripeIds(data)
       this.loading.subscriptionIsBeingCreated = false
       this.$store.commit('currentUser/isUpgraded', true)
       this.$store.commit('notifyCardsCreatedIsOverLimit', false)
