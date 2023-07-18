@@ -159,10 +159,14 @@ export default {
     let y = rect.y + rect.height - viewportHeight
     let scrollX = 0
     let scrollY = 0
-    scrollX = x + 20
-    scrollY = y + 80
+    if (x > 0) {
+      scrollX = x + 20
+    }
+    if (y > 0) {
+      scrollY = y + 80
+    }
     const viewportIsNarrow = viewportWidth < (consts.sidebarWidth * 2)
-    const sidebarIsVisible = document.querySelector('dialog.sidebar')
+    const sidebarIsVisible = document.querySelector('dialog#sidebar')
     if (sidebarIsVisible) {
       scrollX = scrollX + consts.sidebarWidth
     }
@@ -981,6 +985,7 @@ export default {
     return rect
   },
   pageSizeFromItems (items) {
+    const padding = 250
     items = this.clone(items)
     items = items.filter(item => item.x && item.y)
     if (!items.length) {
@@ -991,10 +996,10 @@ export default {
     let y = 0
     items.forEach(item => {
       if (item.x > x) {
-        x = item.x
+        x = item.x + padding
       }
       if (item.y > y) {
-        y = item.y
+        y = item.y + padding
       }
     })
     const width = x + defaultSize
