@@ -19,15 +19,15 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
-const monthlyPrice = computed(() => consts.price('month'))
-const yearlyPrice = computed(() => consts.price('year'))
+const monthlyPrice = computed(() => consts.price('month').amount)
+const yearlyPrice = computed(() => consts.price('year').amount)
 
 </script>
 
 <template lang="pug">
 dialog.narrow.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
-    p Kinopio is free for 100 cards, afterwards it's $6/month or $60/year
+    p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
     DiscountRow()
     ReferredNewUserCredits()
     table
