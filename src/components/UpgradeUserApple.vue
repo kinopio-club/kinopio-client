@@ -22,25 +22,35 @@ const state = reactive({
   loading: {
     subscriptionIsBeingCreated: false
   },
+  error: {
+    unknownServerError: false
+  },
   creditsEarned: 0
 })
 
 const user = computed(() => store.state.currentUser)
 
-const subscribe = () => {
+const subscribe = async () => {
+  state.error.unknownServerError = false
   if (state.loading.subscriptionIsBeingCreated) { return }
   state.loading.subscriptionIsBeingCreated = true
   try {
-    postMessage.send({
+    const appleAppAccountToken = self.crypto.randomUUID()
+    await store.dispatch('api/updateAppleAppAccountToken', { appleAppAccountToken })
+    const body = {
       name: 'createSubscription',
       value: {
-        userId: store.state.currentUser.id,
+        appleAppAccountToken,
         appleSubscriptionId: props.price.applePriceId
       }
-    })
+    }
+    console.log('🎡', body)
+    postMessage.send(body)
   } catch (error) {
     console.error('🚒', error)
+    state.error.unknownServerError = true
   }
+  state.loading.subscriptionIsBeingCreated = false
 }
 
 const updateCredits = async () => {
@@ -83,6 +93,7 @@ const handleSubscriptionSuccess = (event) => {
       User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
       span Upgrade for ${{price.amount}}/{{price.period}}
       Loader(:visible="state.loading.subscriptionIsBeingCreated")
+  .badge.danger(v-if="state.error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support. Your transaction was not processed.
 
 </template>
 

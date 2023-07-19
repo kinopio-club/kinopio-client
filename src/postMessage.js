@@ -12,6 +12,7 @@ export default {
   send (body) {
     const shouldSendPostmessages = consts.isSecureAppContext
     if (!shouldSendPostmessages) { return }
+    if (!window.webkit) { return }
     try {
       this.logSend(body)
       const value = body.value || ''
