@@ -35,6 +35,7 @@ const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem
 // embed
 
 const toggleShouldDisplayEmbed = () => {
+  if (isTwitterUrl.value) { return }
   store.dispatch('closeAllDialogs')
   store.dispatch('currentCards/incrementZ', props.card.id)
   const embedIsVisibleForCardId = store.state.embedIsVisibleForCardId
@@ -153,7 +154,7 @@ const description = computed(() => {
   .row.info.badge.status.embed-info(v-if="!shouldHideInfo" :style="{background: props.backgroundColor}")
     //- play
     .button-wrap.embed-button-wrap(v-if="card.urlPreviewEmbedHtml" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
-      button.small-button
+      button.small-button(v-if="!isTwitterUrl")
         img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
         img.icon.play(v-else src="@/assets/play.svg")
       img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
