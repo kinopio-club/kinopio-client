@@ -31,7 +31,13 @@ const subscribe = () => {
   if (state.loading.subscriptionIsBeingCreated) { return }
   state.loading.subscriptionIsBeingCreated = true
   try {
-    postMessage.send({ name: 'createSubscription', userId: store.state.currentUser.id, appleSubscriptionId: props.price.applePriceId })
+    postMessage.send({
+      name: 'createSubscription',
+      value: {
+        userId: store.state.currentUser.id,
+        appleSubscriptionId: props.price.applePriceId
+      }
+    })
   } catch (error) {
     console.error('🚒', error)
   }
