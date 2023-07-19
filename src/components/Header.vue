@@ -129,7 +129,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           //- Sidebar
           .button-wrap
             button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
-              img.icon.right-arrow(src="@/assets/down-arrow.svg")
+              img.icon.sidebar(src="@/assets/sidebar.svg")
             Sidebar(:visible="sidebarIsVisible")
         .row.bottom-controls
           //- Sign Up or In
@@ -935,6 +935,9 @@ header
     margin-right 4px
     width 12px
     vertical-align 0
+
+  .icon.sidebar
+    vertical-align -1px
 
   .badge.space-status-success
     margin 0
