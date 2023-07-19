@@ -85,7 +85,7 @@ template(v-if="settingsIsVisible")
     .row
       //- Template
       .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
-        button.variable-length-content(:class="{ active: currentSpaceIsUserTemplate }")
+        button(:class="{ active: currentSpaceIsUserTemplate }")
           img.icon.templates(src="@/assets/templates.svg")
           span Make Template
       //- Export
