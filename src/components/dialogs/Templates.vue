@@ -12,7 +12,7 @@ dialog.templates.narrow(
   section.add-to-templates
     //- Add to Templates
     .button-wrap(@click.left.prevent="toggleCurrentSpaceIsTemplate" @keydown.stop.enter="toggleCurrentSpaceIsTemplate")
-      button.variable-length-content(:class="{ active: currentSpaceIsTemplate }")
+      button(:class="{ active: currentSpaceIsTemplate }")
         img.icon.templates(src="@/assets/templates.svg")
         span Current Space is Template
   section.results-section(:style="{'max-height': resultsSectionHeight + 'px'}")

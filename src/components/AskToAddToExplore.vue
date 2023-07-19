@@ -1,7 +1,7 @@
 <template lang="pug">
 .button-wrap.ask-to-add-to-explore(v-if="isVisible")
   template(v-if="!isAsked")
-    button.variable-length-content(@click.left.prevent="askToAddToExplore" @keydown.stop.enter="askToAddToExplore")
+    button(@click.left.prevent="askToAddToExplore" @keydown.stop.enter="askToAddToExplore")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
       span Ask to Add to Explore
     template(v-if="error.userNeedsToSignUpOrIn")
