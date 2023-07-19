@@ -262,6 +262,7 @@ export default {
       }, 250)
     },
     broadcastUserCursor (event) {
+      if (!this.$store.getters.isSpacePage) { return }
       let updates = utils.cursorPositionInSpace(event)
       updates.userId = this.$store.state.currentUser.id
       updates.zoom = this.spaceZoomDecimal

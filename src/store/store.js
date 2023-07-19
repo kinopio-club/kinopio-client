@@ -1677,6 +1677,9 @@ const store = createStore({
 
   },
   getters: {
+    isSpacePage: (state) => {
+      return !state.isAddPage
+    },
     shouldScrollAtEdges: (state, getters) => (event) => {
       let isPainting
       if (event.touches) {

@@ -2,14 +2,14 @@
 .add-to-inbox-page(v-if="visible")
   section(:class="{'margin-bottom': isAddPage}")
     .row.title-row-flex
-      span.title Add To Inbox
-
-      .button-wrap(v-if="!shouldHideInboxButton")
+      span.title Add Card
+      //- inbox
+      .button-wrap
+        //- (v-if="!shouldHideInboxButton")
         a(:href="inboxUrl")
-          button.small-button(@pointerup="changeToInboxSpace")
+          button.small-button
             img.icon.inbox-icon(src="@/assets/inbox.svg")
             span Inbox
-
   section
     .row(v-if="cardsCreatedIsOverLimit || error.unknownServerError || error.maxLength")
       //- error: card limit
@@ -22,7 +22,6 @@
           span Upgrade for more cards
       //- error: connection
       .badge.danger(v-if="error.unknownServerError || error.maxLength") (シ_ _)シ Server error
-
     //- textarea
     .row
       User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
@@ -36,26 +35,33 @@
           @keydown.enter.exact.prevent="addCard"
           @focusin="updateKeyboardShortcutTipIsVisible(true)"
           @focusout="updateKeyboardShortcutTipIsVisible(false)"
-
           @keyup.alt.enter.exact.stop
           @keyup.ctrl.enter.exact.stop
           @keydown.alt.enter.exact.stop="insertLineBreak"
           @keydown.ctrl.enter.exact.stop="insertLineBreak"
           @touchend="focusName"
         )
-    //- button
+    //- space picker
+    .row
+      select(name="spaces" v-model="selectedSpaceId")
+        option(value="inbox" default) Inbox
+        template(v-for="space in spaces")
+          option(:value="space.id") {{space.name}}
+      Loader(:visible="loading.updateSpaces")
+    //- submit
     .row
       //- Add
       .button-wrap
-        button(@pointerup="addCard" :class="{active: loading.addCard, disabled: error.maxLength}")
+        button.success(@pointerup="addCard" :class="{active: loading.addCard, disabled: error.maxLength}")
           img.icon.add-icon(src="@/assets/add.svg")
           span Add
           Loader(:visible="loading.addCard")
         .badge.label-badge.info-badge(v-if="keyboardShortcutTipIsVisible")
           span Enter
     .row(v-if="success")
-      .badge.success
-        span Added
+      a(:href="selectedSpaceUrl")
+        .badge.success.button-badge
+          span Added to space
 
 </template>
 
@@ -82,6 +88,7 @@ export default {
     utils.disablePinchZoom()
     this.$nextTick(() => {
       this.focusAndSelectName()
+      this.updateSpaces()
     })
   },
   beforeUnmount () {
@@ -91,7 +98,8 @@ export default {
   data () {
     return {
       loading: {
-        addCard: false
+        addCard: false,
+        updateSpaces: false
       },
       error: {
         maxLength: false,
@@ -100,7 +108,9 @@ export default {
       success: false,
       newName: '',
       keyboardShortcutTipIsVisible: false,
-      successSpaceId: ''
+      // successSpaceId: '',
+      selectedSpaceId: 'inbox',
+      spaces: []
     }
   },
   computed: {
@@ -109,10 +119,10 @@ export default {
     maxCardLength () { return consts.maxCardLength },
     currentUser () { return this.$store.state.currentUser },
     isAddPage () { return this.$store.state.isAddPage },
-    successSpaceIsCurrentSpace () {
-      const currentSpace = this.$store.state.currentSpace
-      return this.successSpaceId === currentSpace.id
-    },
+    // successSpaceIsCurrentSpace () {
+    //   const currentSpace = this.$store.state.currentSpace
+    //   return this.successSpaceId === currentSpace.id
+    // },
     name: {
       get () {
         return this.newName
@@ -124,18 +134,25 @@ export default {
         this.updateMaxLengthError()
       }
     },
-    inboxUrl () { return this.successSpaceId || 'inbox' },
+    inboxUrl () {
+      let url = `${consts.kinopioDomain()}/inbox`
+      return url
+    },
+    selectedSpaceUrl () {
+      let url = `${consts.kinopioDomain()}/${this.selectedSpaceId}`
+      return url
+    },
     textareaPlaceholder () {
       if (this.isAddPage) {
         return 'Type text here, or paste a URL'
       } else {
         return 'Type text here'
       }
-    },
-    shouldHideInboxButton () {
-      const isNativeApp = consts.isSecureAppContext
-      return isNativeApp && this.isAddPage
     }
+    // shouldHideInboxButton () {
+    //   const isNativeApp = consts.isSecureAppContext
+    //   return isNativeApp && this.isAddPage
+    // }
   },
   methods: {
     insertUrl (event) {
@@ -190,6 +207,20 @@ export default {
       if (!icon) { return '' }
       let image = icon.find(item => item.href)
       return image.href || ''
+    },
+
+    // spaces
+
+    async updateSpaces () {
+      try {
+        this.loading.updateSpaces = true
+        let spaces = await this.$store.dispatch('api/getUserSpaces')
+        spaces = spaces.filter(space => space.name !== 'Inbox')
+        this.spaces = spaces
+      } catch (error) {
+        console.error('🚒', error)
+      }
+      this.loading.updateSpaces = false
     },
 
     // card
@@ -256,9 +287,14 @@ export default {
       try {
         const user = this.$store.state.currentUser
         card.userId = user.id
-        console.log('🛫 create card in inbox', card)
-        card = await this.$store.dispatch('api/createCardInInbox', card)
-        this.successSpaceId = card.spaceId
+        console.log('🛫 create card in space', card, this.selectedSpaceId)
+        if (this.selectedSpaceId === 'inbox') {
+          card = await this.$store.dispatch('api/createCardInInbox', card)
+        } else {
+          card.spaceId = this.selectedSpaceId
+          card = await this.$store.dispatch('api/createCard', card)
+        }
+        // this.successSpaceId = card.spaceId
         this.updateCurrentSpace(card)
         this.success = true
         this.newName = ''
@@ -306,24 +342,23 @@ export default {
 
     updateKeyboardShortcutTipIsVisible (value) {
       this.keyboardShortcutTipIsVisible = value
-    },
+    }
 
     // inbox button
-
-    async changeToInboxSpace (event) {
-      if (this.isAddPage) { return }
-      this.$store.dispatch('closeAllDialogs')
-      event.preventDefault()
-      event.stopPropagation()
-      let space
-      if (this.successSpaceIsCurrentSpace) { return }
-      if (this.successSpaceId) {
-        space = { id: this.successSpaceId }
-      } else {
-        space = await this.$store.dispatch('currentUser/inboxSpace')
-      }
-      this.$store.dispatch('currentSpace/changeSpace', space)
-    }
+    // async changeToInboxSpace (event) {
+    //   if (this.isAddPage) { return }
+    //   this.$store.dispatch('closeAllDialogs')
+    //   event.preventDefault()
+    //   event.stopPropagation()
+    //   let space
+    //   if (this.successSpaceIsCurrentSpace) { return }
+    //   if (this.successSpaceId) {
+    //     space = { id: this.successSpaceId }
+    //   } else {
+    //     space = await this.$store.dispatch('currentUser/inboxSpace')
+    //   }
+    //   this.$store.dispatch('currentSpace/changeSpace', space)
+    // }
   }
 }
 </script>
@@ -385,5 +420,8 @@ export default {
 
   .margin-bottom
     margin-bottom 10px
+
+  select
+    width 100%
 
 </style>
