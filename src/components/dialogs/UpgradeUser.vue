@@ -102,6 +102,7 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
+        console.log('🎡', 'isSecureAppContext', consts.isSecureAppContext, 'isSecureAppContextIOS', consts.isSecureAppContextIOS)
         this.updateDialogHeight()
         this.$store.commit('shouldExplicitlyHideFooter', true)
       } else {
