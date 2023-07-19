@@ -35,7 +35,7 @@ const clickCommand = () => {
 </script>
 
 <template lang="pug">
-button.small-button.variable-length-content.system-command(
+button.small-button.system-command(
   @click.stop="clickCommand"
   @touchstart.stop="clickCommand"
   @keyup.stop.enter="clickCommand"

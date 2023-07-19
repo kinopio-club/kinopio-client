@@ -84,9 +84,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
             //- span Remove
         //- [·]
         .button-wrap.cards-checkboxes
-          label(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0" title="Checkbox")
+          label.fixed-height(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0" title="Checkbox")
             input(type="checkbox" v-model="checkboxIsChecked" tabindex="-1")
-          label(v-else @click.left.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
+          label.fixed-height(v-else @click.left.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
             input.add(type="checkbox" tabindex="-1")
         //- Image
         .button-wrap

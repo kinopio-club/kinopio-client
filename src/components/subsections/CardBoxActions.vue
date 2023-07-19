@@ -43,7 +43,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
     //- Comment
     .button-wrap(v-if="isCards")
       button(:disabled="!canEditAll" @click="toggleIsComment" :class="{active: isComment}" title="Turn into Comment")
-        img.icon(src="@/assets/comment.svg")
+        img.icon.comment(src="@/assets/comment.svg")
 
     //- Surround with Box
     .button-wrap(v-if="isCards")
