@@ -95,7 +95,7 @@ a.other-space-preview(@click.prevent.stop :href="props.url" ref="badge")
       img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
     template(v-else)
       Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")
-      span Space
+      span Space…
 
 </template>
 

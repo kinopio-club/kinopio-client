@@ -39,9 +39,9 @@ export default {
   mounted () {
     this.initUser()
     // retry failed sync operations every 5 seconds
-    processQueueIntervalTimer = setInterval(() => {
-      this.$store.dispatch('api/processQueueOperations')
-    }, 5000)
+    // processQueueIntervalTimer = setInterval(() => {
+    //   this.$store.dispatch('api/processQueueOperations')
+    // }, 5000)
   },
   beforeUnmount () {
     clearInterval(processQueueIntervalTimer)

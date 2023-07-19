@@ -242,7 +242,7 @@ export default {
         this.$store.commit('currentUserBoxSelectEnd', position)
         this.$store.commit('currentUserBoxSelectStart', position)
       } else if (shouldPan) {
-        if (consts.isDevelopment()) { return }
+        if (consts.isDevelopment) { return }
         prevRightClickPosition = utils.cursorPositionInPage(event)
         event.preventDefault()
         this.$store.commit('currentUserIsPanning', true)

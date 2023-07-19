@@ -117,6 +117,7 @@ button
     margin 0
     margin-right 6px
     vertical-align middle
+    border-radius var(--small-entity-radius)
     .user-avatar
       width 15px
       height 14px

@@ -1,36 +1,41 @@
 <template lang="pug">
-dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop @keydown.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildDialogs" @keydown.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     .row
       p Upgrade your account for unlimited cards and uploads
     .row
       .segmented-buttons
-        button(:class="{active: priceIsMonthly}" @click.left="togglePriceIsMonthly(true)") $6/month
-        button(:class="{active: !priceIsMonthly}" @click.left="togglePriceIsMonthly(false)") $60/year
-          .badge.label-badge -17%
+        button(:class="{active: period === 'month'}" @click.left="updatePeriod('month')") ${{monthlyPrice.amount}}/month
+        button(:class="{active: period === 'year'}" @click.left="updatePeriod('year')") ${{yearlyPrice.amount}}/year
+          .badge.label-badge -{{yearlyDiscount}}%
     DiscountRow
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-    UpgradeUserSubscribe(:visible="currentUserIsSignedIn" :priceIsMonthly="priceIsMonthly" :price="price")
+    //- Checkout
+    template(v-if="currentUserIsSignedIn")
+      UpgradeUserStripe(:visible="!isSecureAppContextIOS" :price="currentPrice")
+      UpgradeUserApple(:visible="isSecureAppContextIOS" :price="currentPrice")
   section(v-if="currentUserIsSignedIn")
     p
       img.icon(src="@/assets/lock.svg")
-      span Payments securely processed by Stripe. Card info is not sent to Kinopio.
-
+      span Payments securely processed by {{paymentProcessor}}. Card info is not sent to Kinopio.
 </template>
 
 <script>
-import UpgradeUserSubscribe from '@/components/UpgradeUserSubscribe.vue'
+import UpgradeUserStripe from '@/components/UpgradeUserStripe.vue'
+import UpgradeUserApple from '@/components/UpgradeUserApple.vue'
 import DiscountRow from '@/components/DiscountRow.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 export default {
   name: 'UpgradeUser',
   components: {
     Loader,
-    UpgradeUserSubscribe,
+    UpgradeUserStripe,
+    UpgradeUserApple,
     DiscountRow
   },
   props: {
@@ -46,37 +51,39 @@ export default {
   data () {
     return {
       dialogHeight: null,
-      priceIsMonthly: true
+      period: 'month' // year, life
     }
   },
   computed: {
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    price () {
-      let price
-      if (this.priceIsMonthly) {
-        price = {
-          amount: 6,
-          period: 'month',
-          id: 'price_1L2GvBDFIr5ywhwobbE35dhA'
-        }
+    isSecureAppContextIOS () { return consts.isSecureAppContextIOS },
+    paymentProcessor () {
+      if (this.isSecureAppContextIOS) {
+        return 'Apple'
       } else {
-        price = {
-          amount: 60,
-          period: 'year',
-          id: 'price_1L2ErWDFIr5ywhwodsKxEEAq'
-        }
+        return 'Stripe'
       }
-      if (import.meta.env.MODE === 'development') {
-        if (this.priceIsMonthly) {
-          price.id = 'price_1L7200DFIr5ywhwoAJGkA7yK'
-        } else {
-          price.id = 'price_1L720NDFIr5ywhwo0wS5PWAv'
-        }
-      }
-      return price
+    },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentPrice () { return consts.price(this.period) },
+    monthlyPrice () { return consts.price('month') },
+    yearlyPrice () { return consts.price('year') },
+    yearlyDiscount () {
+      const base = this.monthlyPrice.amount * 12
+      const yearly = this.yearlyPrice.amount
+      // https://www.calculatorsoup.com/calculators/algebra/percent-difference-calculator.php
+      const numerator = base - yearly
+      const denomenator = (base + yearly) / 2
+      const result = (numerator / denomenator) * 100
+      return Math.round(result)
     }
   },
   methods: {
+    price (period) {
+      return consts.price(period)
+    },
+    updatePeriod (value) {
+      this.period = value
+    },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
@@ -88,8 +95,8 @@ export default {
         this.dialogHeight = utils.elementHeight(element)
       })
     },
-    togglePriceIsMonthly (value) {
-      this.priceIsMonthly = value
+    closeChildDialogs () {
+      this.$store.commit('triggerCloseChildDialogs')
     }
   },
   watch: {

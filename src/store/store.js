@@ -1,4 +1,5 @@
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import cache from '@/cache.js'
 import postMessage from '@/postMessage.js'
 // store modules
@@ -1677,6 +1678,9 @@ const store = createStore({
 
   },
   getters: {
+    isSpacePage: (state) => {
+      return !state.isAddPage
+    },
     shouldScrollAtEdges: (state, getters) => (event) => {
       let isPainting
       if (event.touches) {
@@ -1722,7 +1726,7 @@ const store = createStore({
       return 1 / getters.spaceZoomDecimal
     },
     isTouchDevice: (state) => {
-      return state.isTouchDevice || utils.isMobile() || window.navigator.isSecureAppContext
+      return state.isTouchDevice || utils.isMobile() || consts.isSecureAppContext
     },
     zoomTransform: (state, getters) => {
       const zoom = getters.spaceZoomDecimal

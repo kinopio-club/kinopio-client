@@ -157,6 +157,7 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
             :value="otherCard.name"
             @input="updateName($event.target.value)"
             :maxlength="maxCardLength()"
+            placeholder="Type here, or paste a URL"
           )
         .row(v-if="state.errorMaxCardLength")
           .badge.danger
