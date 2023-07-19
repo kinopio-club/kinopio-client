@@ -70,7 +70,7 @@ export default {
       price.stripePriceId = 'price_1L7200DFIr5ywhwoAJGkA7yK'
     }
     if (this.isSecureAppContextIOS) {
-      price.amount = 8
+      price.amount = 7
     }
     return price
   },
@@ -85,7 +85,7 @@ export default {
       price.stripePriceId = 'price_1L720NDFIr5ywhwo0wS5PWAv'
     }
     if (this.isSecureAppContextIOS) {
-      price.amount = 80
+      price.amount = 70
     }
     return price
   }
