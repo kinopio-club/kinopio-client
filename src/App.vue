@@ -262,6 +262,7 @@ export default {
       }, 250)
     },
     broadcastUserCursor (event) {
+      if (!this.$store.getters.isSpacePage) { return }
       let updates = utils.cursorPositionInSpace(event)
       updates.userId = this.$store.state.currentUser.id
       updates.zoom = this.spaceZoomDecimal
@@ -323,6 +324,7 @@ export default {
   --entity-radius 6px
   --small-entity-radius 3px
   --subsection-padding 5px
+  --button-fixed-height 30px
   --serif-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
 
@@ -398,7 +400,7 @@ label // used for checkbox buttons
   touch-action manipulation
   text-align left
   padding 5px 9px
-  height 30px
+  height fit-content
   margin 0
   background-color var(--button-background)
   border 1px solid var(--primary-border)
@@ -463,9 +465,8 @@ label // used for checkbox buttons
       width 10px
       height 10px
       vertical-align 0
-  &.variable-length-content
-    height fit-content
-
+  &.fixed-height
+    height var(--button-fixed-height)
 .unselectable
   pointer-events none !important
 
@@ -686,6 +687,7 @@ dialog
     border-top 0
 
   .change-color
+    height var(--button-fixed-height)
     .current-color
       height 14px
       width 14px
@@ -817,7 +819,10 @@ dialog
   vertical-align 2px
 
 .icon.box-icon
-  vertical-align 0
+  vertical-align -1px
+
+.icon.comment
+  vertical-align -1px
 
 .icon.leave
   transform rotate(-45deg)

@@ -250,6 +250,7 @@ const store = createStore({
       state.pageHeight = 0
     },
     updatePageSizes: (state, itemsRect) => {
+      if (!itemsRect) { return }
       const viewportWidth = utils.visualViewport().width
       let viewportHeight = utils.visualViewport().height
       state.viewportWidth = Math.round(viewportWidth)
@@ -1677,6 +1678,9 @@ const store = createStore({
 
   },
   getters: {
+    isSpacePage: (state) => {
+      return !state.isAddPage
+    },
     shouldScrollAtEdges: (state, getters) => (event) => {
       let isPainting
       if (event.touches) {

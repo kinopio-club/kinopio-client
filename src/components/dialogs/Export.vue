@@ -36,7 +36,7 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     template(v-if="currentUserIsSignedIn")
       p
         span Backup All
-      button.variable-length-content(@click.left="downloadAllSpacesRemote" :class="{ active: isLoadingAllSpaces }")
+      button(@click.left="downloadAllSpacesRemote" :class="{ active: isLoadingAllSpaces }")
         span Download all Spaces (JSON and TXT)
         Loader(:visible="isLoadingAllSpaces")
     a#export-downlaod-anchor.hidden
