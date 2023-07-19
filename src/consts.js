@@ -18,8 +18,8 @@ export default {
   sidebarWidth: 250,
   systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Desktop and Mobile Apps' },
   isDevelopment: import.meta.env.MODE === 'development',
-  isSecureAppContextIOS: navigator.isSecureAppContextIOS,
-  isSecureAppContext: navigator.isSecureAppContext,
+  isSecureAppContextIOS: navigator.isSecureAppContextIOS, // true = iOS app
+  isSecureAppContext: navigator.isSecureAppContext, // true = iOS app
   kinopioDomain () {
     let domain = 'https://kinopio.club'
     if (this.isDevelopment) {
