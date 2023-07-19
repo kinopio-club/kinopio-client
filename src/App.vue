@@ -3,9 +3,9 @@
   @pointermove="broadcastUserCursor"
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
-  :class="{ 'no-background': isAddPage, 'is-dark-theme': isThemeDark }"
+  :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
 )
-  base(v-if="isAddPage" target="_blank")
+  base(v-if="!isSpacePage" target="_blank")
   OutsideSpaceBackground
   SpaceBackground
   ItemsLocked
@@ -120,14 +120,14 @@ export default {
         return false
       }
     },
-    isAddPage () { return this.$store.state.isAddPage },
+    isSpacePage () { return this.$store.getters.isSpacePage },
     pageWidth () {
-      if (this.isAddPage) { return }
+      if (!this.isSpacePage) { return }
       const size = Math.max(this.$store.state.pageWidth, this.$store.state.viewportWidth)
       return size + 'px'
     },
     pageHeight () {
-      if (this.isAddPage) { return }
+      if (!this.isSpacePage) { return }
       const size = Math.max(this.$store.state.pageHeight, this.$store.state.viewportHeight)
       return size + 'px'
     },
@@ -157,7 +157,7 @@ export default {
     },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     isDevelpmentBadgeVisible () {
-      if (this.isAddPage) { return }
+      if (!this.isSpacePage) { return }
       if (this.$store.state.isPresentationMode) { return }
       return this.isDevelopment
     }
@@ -190,7 +190,7 @@ export default {
       this.isTouchScrolling = true
     },
     touchEnd () {
-      if (this.$store.state.isAddPage) { return }
+      if (!this.isSpacePage) { return }
       this.isPinchZooming = false
       this.checkIfInertiaScrollEnd()
       if (shouldCancelUndo) {
