@@ -38,7 +38,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
     .row.title-row
       label(:class="{active: shouldUseLastConnectionType}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
         input(type="checkbox" v-model="shouldUseLastConnectionType")
-        .badge.badge-in-button(:style="{backgroundColor: typeColor}")
+        .badge.badge-in-button(:style="{backgroundColor: lastTypeColor}")
         span Use Last Type
       //- Filter
       button.small-button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
@@ -54,7 +54,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
     ResultsFilter(:items="connectionTypesByUpdatedAt" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
     ul.results-list
       template(v-for="type in connectionTypesFiltered" :key="type.id")
-        li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click.left="changeConnectionType(type)")
+        li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click.left="changeConnectionType(type)" :data-type-id="type.id")
           .badge(:style="{backgroundColor: type.color}")
           .name {{type.name}}
 </template>
@@ -174,6 +174,10 @@ export default {
         this.toggleFilteredInSpace()
       }
     },
+    lastTypeColor () {
+      const lastType = this.$store.getters['currentConnections/lastType']
+      return lastType.color
+    },
     typeColorisDark () {
       return utils.colorIsDark(this.typeColor)
     }
@@ -212,7 +216,7 @@ export default {
         id: this.currentConnection.id,
         connectionTypeId: type.id
       })
-      this.$store.commit('currentConnections/reorderTypeToEnd', type)
+      this.$store.commit('currentConnections/lastTypeId', type.id)
     },
     toggleColorPicker () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible
@@ -308,7 +312,7 @@ export default {
         if (this.visible) {
           this.colorPickerIsVisible = false
           this.scrollIntoViewAndFocus()
-          this.$store.commit('currentConnections/reorderTypeToEnd', this.currentConnectionType)
+          this.$store.commit('currentConnections/lastTypeId', this.currentConnectionType.id)
         } else {
           this.$store.commit('shouldHideConnectionOutline', false)
         }

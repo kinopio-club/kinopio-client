@@ -499,9 +499,9 @@ export default {
     },
     connectionTypes () { return this['currentConnections/typesByCardId'](this.id) },
     connectionTypeColorisDark () {
-      const lastType = this.connectionTypes[this.connectionTypes.length - 1]
-      if (!lastType) { return }
-      return utils.colorIsDark(lastType.color)
+      const type = this.connectionTypes[this.connectionTypes.length - 1]
+      if (!type) { return }
+      return utils.colorIsDark(type.color)
     },
     name () {
       this.updateMediaUrls()
