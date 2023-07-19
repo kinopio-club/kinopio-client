@@ -26,7 +26,7 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerDrawConnectionFrame') {
         const event = mutation.payload
-        this.drawConnection(event)
+        this.drawCurrentConnection(event)
       }
     })
   },
@@ -67,10 +67,10 @@ export default {
   methods: {
     interact (event) {
       if (this.isDrawingConnection) {
-        this.drawConnection(event)
+        this.drawCurrentConnection(event)
       }
     },
-    drawConnection (event) {
+    drawCurrentConnection (event) {
       let end = utils.cursorPositionInSpace(event)
       const startCardId = this.startCardId
       let start = utils.connectorCoords(startCardId) // TODO get real pos
@@ -118,11 +118,7 @@ export default {
         this.$store.commit('currentConnectionSuccess', {})
       }
     },
-    addConnection (connection) {
-      this.$store.dispatch('currentConnections/addType', prevType)
-      this.$store.dispatch('currentConnections/add', { connection, type: prevType })
-    },
-    createConnections (event) {
+    addConnections (event) {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       const startCardIds = this.$store.state.currentConnectionStartCardIds
       let endCardId
@@ -148,14 +144,15 @@ export default {
           const controlPoint = this.$store.state.currentUser.defaultConnectionControlPoint
           const path = this.$store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId, controlPoint)
           const connection = { startCardId, endCardId, path, controlPoint }
-          this.addConnection(connection)
+          this.$store.dispatch('currentConnections/addType', prevType)
+          this.$store.dispatch('currentConnections/add', { connection, type: prevType })
         })
       })
     },
     stopInteractions (event) {
       if (this.isDrawingConnection) {
         this.$store.dispatch('clearMultipleSelected')
-        this.createConnections(event)
+        this.addConnections(event)
       }
       this.$store.commit('currentConnectionSuccess', {})
       const isCurrentConnection = this.$store.state.currentConnectionStartCardIds.length
