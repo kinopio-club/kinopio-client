@@ -250,6 +250,7 @@ const store = createStore({
       state.pageHeight = 0
     },
     updatePageSizes: (state, itemsRect) => {
+      if (!itemsRect) { return }
       const viewportWidth = utils.visualViewport().width
       let viewportHeight = utils.visualViewport().height
       state.viewportWidth = Math.round(viewportWidth)
