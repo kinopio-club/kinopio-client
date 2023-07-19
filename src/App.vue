@@ -6,24 +6,26 @@
   :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
 )
   base(v-if="!isSpacePage" target="_blank")
-  OutsideSpaceBackground
-  SpaceBackground
-  ItemsLocked
-  MagicPaint
+  template(v-if="isSpacePage")
+    OutsideSpaceBackground
+    SpaceBackground
+    ItemsLocked
+    MagicPaint
   //- router-view is Space or Add
   router-view
-  Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
-  Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
-  TagDetails
-  UserDetails
-  CardListItemOptions
-  WindowHistoryHandler
-  KeyboardShortcutsHandler
-  ScrollHandler
-  NotificationsWithPosition(layer="app")
-  Preload
-  .badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
-    span DEV
+  template(v-if="isSpacePage")
+    Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
+    Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
+    TagDetails
+    UserDetails
+    CardListItemOptions
+    WindowHistoryHandler
+    KeyboardShortcutsHandler
+    ScrollHandler
+    NotificationsWithPosition(layer="app")
+    Preload
+    .badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
+      span DEV
 </template>
 
 <script>
@@ -157,7 +159,6 @@ export default {
     },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     isDevelpmentBadgeVisible () {
-      if (!this.isSpacePage) { return }
       if (this.$store.state.isPresentationMode) { return }
       return this.isDevelopment
     }
