@@ -3,52 +3,63 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
   section
     p Billing
 
-  section(v-if="loading.gettingBillingInfo")
-    Loader(:visible="true")
-
-  template(v-if="!loading.gettingBillingInfo")
-    // downgraded
-    section(v-if="isAwaitingDowngrade")
+  //- apple
+  template(v-if="appleSubscriptionIsActive")
+    section
       p
-        span.badge.success Subscription Cancelled
-      p Your plan will be downgraded to free on {{info.nextBillingDate || downgradeAt}}. You'll receive an email when that happens
+        img.icon(src="@/assets/apple.svg")
+        span Because you upgraded on iOS, your subscription is managed by Apple{{' '}}
+        a(href="https://support.apple.com/billing")
+          span (More Info)
 
-    //- free
-    section(v-if="!isUpgraded")
-      template(v-if="isAwaitingDowngrade")
-        p You can upgrade your account again whenever you're ready
-      template(v-else)
-        ReferredNewUserCredits
-        p After you upgrade your account you'll be able to manage your payment details here
-      button(@click.left="triggerUpgradeUserIsVisible") Upgrade
+  //- stripe
+  template(v-else)
+    section(v-if="loading.gettingBillingInfo")
+      Loader(:visible="true")
 
-    //- upgraded
-    section(v-if="isUpgraded")
-      .summary
-        User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
+    template(v-if="!loading.gettingBillingInfo")
+      // downgraded
+      section(v-if="isAwaitingDowngrade")
         p
-          span You are paying{{' '}}
-            .badge.info ${{info.price}}/{{info.period}}
-      p(v-if="info.nextBillingDate") Next payment: {{info.nextBillingDate}}
-      p(v-if="info.cardType") {{info.cardType}} ••{{info.cardLast4}} – {{info.cardExpMonth}}/{{info.cardExpYear}}
-      p
-        .badge.success Thanks for supporting Kinopio
-      .row
-        button(v-if="!cancelSubscriptionVisible" @click.left="toggleCancelSubscriptionVisible")
-          img.cancel.icon(src="@/assets/add.svg")
-          span Downgrade to Free
-        span(v-if="cancelSubscriptionVisible")
+          span.badge.success Subscription Cancelled
+        p Your plan will be downgraded to free on {{info.nextBillingDate || downgradeAt}}. You'll receive an email when that happens
+
+      //- free
+      section(v-if="!isUpgraded")
+        template(v-if="isAwaitingDowngrade")
+          p You can upgrade your account again whenever you're ready
+        template(v-else)
+          ReferredNewUserCredits
+          p After you upgrade your account you'll be able to manage your payment details here
+        button(@click.left="triggerUpgradeUserIsVisible") Upgrade
+
+      //- upgraded
+      section(v-if="isUpgraded")
+        .summary
+          User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
           p
-            span.badge.danger You won't be able to add new cards
-            span unless you upgrade your account again. All of your cards and spaces will still be accessible.
-          .segmented-buttons
-            button(@click.left="toggleCancelSubscriptionVisible")
-              span Cancel
-            button.danger(@click.left="cancelSubscription")
-              img.icon(src="@/assets/remove.svg")
-              span Downgrade
-              Loader(:visible="loading.isCancelling")
-    UserCredits(:showEarnCreditsButton="true")
+            span You are paying{{' '}}
+              .badge.info ${{info.price}}/{{info.period}}
+        p(v-if="info.nextBillingDate") Next payment: {{info.nextBillingDate}}
+        p(v-if="info.cardType") {{info.cardType}} ••{{info.cardLast4}} – {{info.cardExpMonth}}/{{info.cardExpYear}}
+        p
+          .badge.success Thanks for supporting Kinopio
+        .row
+          button(v-if="!cancelSubscriptionVisible" @click.left="toggleCancelSubscriptionVisible")
+            img.cancel.icon(src="@/assets/add.svg")
+            span Downgrade to Free
+          span(v-if="cancelSubscriptionVisible")
+            p
+              span.badge.danger You won't be able to add new cards
+              span unless you upgrade your account again. All of your cards and spaces will still be accessible.
+            .segmented-buttons
+              button(@click.left="toggleCancelSubscriptionVisible")
+                span Cancel
+              button.danger(@click.left="cancelSubscription")
+                img.icon(src="@/assets/remove.svg")
+                span Downgrade
+                Loader(:visible="loading.isCancelling")
+      UserCredits(:showEarnCreditsButton="true")
 </template>
 
 <script>
@@ -116,6 +127,9 @@ export default {
     },
     isAwaitingDowngrade () {
       return this.isCancelled || this.downgradeAt
+    },
+    appleSubscriptionIsActive () {
+      return this.user.appleSubscriptionIsActive
     }
   },
   methods: {
@@ -185,9 +199,11 @@ export default {
   },
   watch: {
     visible (visible) {
-      if (visible) {
+      if (visible && !this.appleSubscriptionIsActive) {
         this.getBillingInfo()
         this.isCancelled = false
+      }
+      if (visible) {
         this.updateDialogHeight()
       }
     }
