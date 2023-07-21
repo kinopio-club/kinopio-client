@@ -71,6 +71,7 @@ import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import postMessage from '@/postMessage.js'
 
 import { nanoid } from 'nanoid'
 
@@ -298,6 +299,7 @@ export default {
         this.updateCurrentSpace(card)
         this.success = true
         this.newName = ''
+        postMessage.send({ name: 'addCardFromAddPage', value: card })
       } catch (error) {
         console.error('🚑 addCard', error)
         this.error.unknownServerError = true
