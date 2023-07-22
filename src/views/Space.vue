@@ -41,6 +41,7 @@ import Cards from '@/components/Cards.vue'
 import Connections from '@/components/Connections.vue'
 import LockedItemButtons from '@/components/LockedItemButtons.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
@@ -196,6 +197,7 @@ export default {
       }
     },
     addCardFromOutsideAppContext (event) {
+      if (!consts.isSecureAppContext) { return }
       const currentSpace = this.$store.state.currentSpace
       const data = event.data
       if (data.name !== 'addedCardFromAddPage') { return }

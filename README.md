@@ -47,6 +47,10 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 | `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
 | `components/layers/MagicPaint.vue` | The layers used for animating painting, scroll locking on touch, and more with `<canvas>`. As well as for multiple card and connection selection which reveals `MultipleSelectedActions` |
 
+## Post Messages
+
+Post messages are used to communicate with a parent `secureAppContext` environment, such as the iOS app that wraps the website in a child webview.
+
 ## How to update the Hello Kinopio Space
 
 The hello space serves as the entry point and marketing page for new users. It's generated within the app from `hello.json`.
