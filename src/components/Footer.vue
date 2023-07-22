@@ -3,12 +3,6 @@
   .left(v-if="leftIsVisble")
     footer
       Notifications
-      //- .controls(v-if="controlsIsVisible" :class="{'hidden': isHiddenOnTouch}")
-      //-   .button-wrap
-      //-     button(@click.left.prevent.stop="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
-      //-       img.icon(src="@/assets/add.svg")
-      //-       img.icon.inbox-icon(src="@/assets/inbox.svg")
-      //-     AddToInbox(:visible="addToInboxIsVisible")
 
   .right(v-if="controlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom
@@ -18,7 +12,6 @@
 </template>
 
 <script>
-import AddToInbox from '@/components/dialogs/AddToInbox.vue'
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
@@ -35,8 +28,7 @@ export default {
   components: {
     Notifications,
     Loader,
-    SpaceZoom,
-    AddToInbox
+    SpaceZoom
   },
   props: {
     isPinchZooming: Boolean,
@@ -45,8 +37,7 @@ export default {
   data () {
     return {
       position: {},
-      isHiddenOnTouch: false,
-      addToInboxIsVisible: false
+      isHiddenOnTouch: false
     }
   },
   mounted () {
@@ -57,8 +48,6 @@ export default {
         this.updatePosition()
       } else if (mutation.type === 'triggerHideTouchInterface') {
         this.hideOnTouch()
-      } else if (mutation.type === 'triggerAddToInboxIsVisible') {
-        this.addToInboxIsVisible = true
       }
     })
     window.addEventListener('scroll', this.updatePosition)
@@ -112,12 +101,6 @@ export default {
   },
   methods: {
     closeDialogs () {
-      this.addToInboxIsVisible = false
-    },
-    toggleAddToInboxIsVisible () {
-      const isVisible = this.addToInboxIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.addToInboxIsVisible = !isVisible
     },
 
     // settings

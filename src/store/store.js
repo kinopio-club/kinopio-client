@@ -544,7 +544,6 @@ const store = createStore({
     triggerRemovedIsVisible: () => {},
     triggerAIImagesIsVisible: () => {},
     triggerClearAllSpaceFilters: () => {},
-    triggerAddToInboxIsVisible: () => {},
     triggerScrollUserDetailsIntoView: () => {},
     triggerUpdateLockedItemButtonsPositions: () => {},
     triggerUpdateBackground: () => {},
