@@ -54,13 +54,14 @@ const currentCards = {
 
     // create
 
-    create: (state, card) => {
+    create: (state, { card, shouldPreventCache }) => {
       if (!card.id) {
         console.warn('🚑 could not create card', card)
         return
       }
       state.ids.push(card.id)
       state.cards[card.id] = card
+      if (shouldPreventCache) { return }
       cache.updateSpace('cards', state.cards, currentSpaceId)
     },
 
@@ -222,8 +223,8 @@ const currentCards = {
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       card.spaceId = currentSpaceId
       context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
-      context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
-      context.commit('create', card)
+      context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
+      context.commit('create', { card })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
@@ -248,8 +249,8 @@ const currentCards = {
           urlPreviewIsVisible: true
         }
         context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
-        context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
-        context.commit('create', card)
+        context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
+        context.commit('create', { card })
       })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: newCards.length
@@ -274,12 +275,12 @@ const currentCards = {
         })
       }
       context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
-      context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
       }, { root: true })
       context.dispatch('history/add', { cards: [card] }, { root: true })
-      context.commit('create', card)
+      context.commit('create', { card })
     },
 
     // update

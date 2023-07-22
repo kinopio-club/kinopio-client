@@ -21,12 +21,6 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
-            img.icon.inbox-icon(src="@/assets/inbox.svg")
-            span Add to Inbox
-          .badge.keyboard-shortcut I
-      article
-        .row
-          .badge.title
             img.icon.dark(src="@/assets/dark.svg")
             span Toggle Dark Theme
           .badge.keyboard-shortcut T

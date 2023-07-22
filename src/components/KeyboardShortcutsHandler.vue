@@ -93,11 +93,6 @@ export default {
         this.$store.dispatch('currentSpace/addSpace')
         this.$store.commit('addNotification', { message: 'New space created', icon: 'add', type: 'success', label: 'N' })
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
-      // i
-      } else if (key === 'i' && isSpaceScope) {
-        if (this.$store.state.isAddPage) { return }
-        this.$store.dispatch('closeAllDialogs')
-        this.$store.commit('triggerAddToInboxIsVisible')
       // t
       } else if (key === 't' && isSpaceScope) {
         this.$store.commit('addNotification', { message: 'Theme toggled', type: 'info', label: 'T' })

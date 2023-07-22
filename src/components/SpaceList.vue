@@ -514,6 +514,6 @@ export default {
     padding-right 0
 
   .moon-phase
-    margin-top 3px
+    margin-top 4px
     margin-right 4px
 </style>

@@ -251,10 +251,6 @@ export default {
   .inbox-icon
     margin 0
     margin-left 5px
-  .moon-phase
-    vertical-align -1px
-  .icon.today
-    vertical-align -1px
   .daily-prompt-row
     justify-content space-between
 </style>

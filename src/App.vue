@@ -460,7 +460,7 @@ label // used for checkbox buttons
     img
       filter invert(1)
   &.small-button
-    height 20px
+    height fit-content
     padding 0px 4px
     input[type="checkbox"]
       width 10px
