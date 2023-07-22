@@ -95,16 +95,6 @@ const insertUrl = async (event) => {
   focusAndSelectName()
   updateMaxLengthError()
 }
-// successSpaceIsCurrentSpace () {
-//   const currentSpace = store.state.currentSpace
-//   return this.successSpaceId === currentSpace.id
-// },
-// const themeName = computed(() => store.state.currentUser.theme)
-// const incrementBy = () => {
-//   state.count = state.count + 1
-//   emit('updateCount', state.count)
-//   // store.dispatch('themes/isSystem', false)
-// }
 
 // sign in
 
@@ -206,11 +196,13 @@ const addCard = async () => {
     console.log('🛫 create card in space', card, state.selectedSpaceId)
     if (state.selectedSpaceId === 'inbox') {
       card = await store.dispatch('api/createCardInInbox', card)
+      const space = cache.getInboxSpace()
+      addCardToSpaceLocal(card, space)
     } else {
       card.spaceId = state.selectedSpaceId
       card = await store.dispatch('api/createCard', card)
+      addCardToSpaceLocal(card, { id: card.spaceId })
     }
-    // state.successSpaceId = card.spaceId
     state.success = true
     state.newName = ''
     postMessage.send({ name: 'addCardFromAddPage', value: card })
@@ -221,6 +213,11 @@ const addCard = async () => {
   state.loading.addingCard = false
   textarea.value.style.height = 'initial'
   focusAndSelectName()
+}
+const addCardToSpaceLocal = (card, space) => {
+  space = cache.space(space.id)
+  const cards = space.cards.push(card)
+  cache.updateSpace('cards', cards, space.id)
 }
 
 // card url preview (ported from Card.vue)
