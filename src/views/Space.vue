@@ -88,6 +88,9 @@ export default {
     window.addEventListener('online', this.updateIsOnline)
     window.addEventListener('offline', this.updateIsOnline)
 
+    // when a card is added through Add.vue in a sharesheet with the space open behind it
+    window.addEventListener('message', this.addCardFromOutsideAppContext)
+
     this.addInteractionBlur()
 
     window.addEventListener('unload', this.unloadPage)
@@ -114,6 +117,7 @@ export default {
     window.removeEventListener('online', this.updateIsOnline)
     window.removeEventListener('offline', this.updateIsOnline)
     window.removeEventListener('unload', this.unloadPage)
+    window.removeEventListener('message', this.addCardFromOutsideAppContext)
     window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
     clearInterval(processQueueIntervalTimer)
   },
@@ -190,6 +194,14 @@ export default {
       if (status) {
         this.$store.dispatch('api/processQueueOperations')
       }
+    },
+    addCardFromOutsideAppContext (event) {
+      const currentSpace = this.$store.state.currentSpace
+      const data = event.data
+      if (data.name !== 'addedCardFromAddPage') { return }
+      const card = data.value
+      if (card.spaceId !== currentSpace.id) { return }
+      this.$store.commit('currentCards/create', { card, shouldPreventCache: true })
     },
     addInteractionBlur () {
       if (!utils.isMobile()) { return }

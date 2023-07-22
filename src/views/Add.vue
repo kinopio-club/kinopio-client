@@ -364,7 +364,6 @@ main.add-page
   section(v-if="!currentUserIsSignedIn")
     .row
       p Sign In to Use Kinopio
-    //- sign in form
     form(@submit.prevent="signIn")
       input(type="email" placeholder="Email" required v-model="state.email" @input="clearErrors")
       input(type="password" placeholder="Password" required v-model="state.password" @input="clearErrors")
