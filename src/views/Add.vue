@@ -14,7 +14,7 @@ const store = useStore()
 onMounted(() => {
   initUser()
   window.addEventListener('message', insertUrl)
-  initForm()
+  initCardTextarea()
 })
 
 const state = reactive({
@@ -41,16 +41,17 @@ const state = reactive({
 
 const textarea = ref(null)
 
+// init
+
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const kinopioDomain = computed(() => consts.kinopioDomain())
 const cardsCreatedIsOverLimit = computed(() => store.getters['currentUser/cardsCreatedIsOverLimit'])
 const maxCardLength = computed(() => consts.maxCardLength)
 const currentUser = computed(() => store.state.currentUser)
 const isAddPage = computed(() => store.state.isAddPage)
-// successSpaceIsCurrentSpace () {
-//   const currentSpace = store.state.currentSpace
-//   return this.successSpaceId === currentSpace.id
-// },
+const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
+const selectedSpaceUrl = computed(() => `${consts.kinopioDomain()}/${state.selectedSpaceId}`)
+const textareaPlaceholder = computed(() => 'Type text here, or paste a URL')
 const name = computed({
   get () {
     return state.newName
@@ -62,10 +63,41 @@ const name = computed({
     updateMaxLengthError()
   }
 })
-const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
-const selectedSpaceUrl = computed(() => `${consts.kinopioDomain()}/${state.selectedSpaceId}`)
-const textareaPlaceholder = computed(() => 'Type text here, or paste a URL')
-
+const initUser = async () => {
+  store.dispatch('currentUser/init')
+}
+const initCardTextarea = async () => {
+  await nextTick()
+  focusAndSelectName()
+  updateSpaces()
+}
+const focusName = () => {
+  const element = textarea.value
+  if (!element) { return }
+  element.focus()
+}
+const focusAndSelectName = () => {
+  if (utils.isMobile()) { return }
+  const element = textarea.value
+  if (!element) { return }
+  const length = element.value.length
+  focusName()
+  if (length) {
+    element.setSelectionRange(0, length)
+  }
+}
+const insertUrl = async (event) => {
+  const url = event.data
+  state.newName = url + state.newName
+  await nextTick()
+  updateTextareaSize()
+  focusAndSelectName()
+  updateMaxLengthError()
+}
+// successSpaceIsCurrentSpace () {
+//   const currentSpace = store.state.currentSpace
+//   return this.successSpaceId === currentSpace.id
+// },
 // const themeName = computed(() => store.state.currentUser.theme)
 // const incrementBy = () => {
 //   state.count = state.count + 1
@@ -73,29 +105,12 @@ const textareaPlaceholder = computed(() => 'Type text here, or paste a URL')
 //   // store.dispatch('themes/isSystem', false)
 // }
 
-const initUser = async () => {
-  store.dispatch('currentUser/init')
-}
-
-const initForm = async () => {
-  await nextTick()
-  focusAndSelectName()
-  updateSpaces()
-}
-
-const clearErrors = () => {
-  state.error.unknownServerError = false
-  state.error.signInCredentials = false
-  state.error.tooManyAttempts = false
-}
-
 // sign in
 
 const isSuccess = (response) => {
   const success = [200, 201, 202, 204]
   return Boolean(success.includes(response.status))
 }
-
 const handleSignInErrors = (response) => {
   state.loading.signIn = false
   state.error.signInCredentials = false
@@ -113,7 +128,6 @@ const handleSignInErrors = (response) => {
     state.error.unknownServerError = true
   }
 }
-
 const signIn = async (event) => {
   if (state.loading.signIn) { return }
   const email = event.target[0].value.toLowerCase()
@@ -128,58 +142,6 @@ const signIn = async (event) => {
   } else {
     handleSignInErrors(result)
   }
-}
-
-const insertUrl = async (event) => {
-  const url = event.data
-  state.newName = url + state.newName
-  await nextTick()
-  updateTextareaSize()
-  focusAndSelectName()
-  updateMaxLengthError()
-}
-
-const updateTextareaSize = () => {
-  if (!textarea.value) { return }
-  let modifier = 0
-  textarea.value.style.height = textarea.value.scrollHeight + modifier + 'px'
-}
-
-// url preview (from Card.vue)
-
-const urlPreview = async (url) => {
-  try {
-    let response = await store.dispatch('api/urlPreview', url)
-    if (!response) { return }
-    let { data, host } = response
-    console.log('🚗 link preview', host, data)
-    const { links, meta } = data
-    return { links, meta }
-  } catch (error) {
-    console.warn('🚑 urlPreview', error, url)
-  }
-}
-
-const previewImage = ({ thumbnail }) => {
-  const minWidth = 200
-  if (!thumbnail) { return '' }
-  let image = thumbnail.find(item => {
-    let shouldSkipImage = false
-    if (item.media) {
-      if (item.media.width < minWidth) {
-        shouldSkipImage = true
-      }
-    }
-    return item.href && !shouldSkipImage
-  })
-  if (!image) { return '' }
-  return image.href || ''
-}
-
-const previewFavicon = ({ icon }) => {
-  if (!icon) { return '' }
-  let image = icon.find(item => item.href)
-  return image.href || ''
 }
 
 // spaces
@@ -198,34 +160,6 @@ const updateSpaces = async () => {
 
 // card
 
-const focusName = () => {
-  const element = textarea.value
-  if (!element) { return }
-  element.focus()
-}
-const focusAndSelectName = () => {
-  if (utils.isMobile()) { return }
-  const element = textarea.value
-  if (!element) { return }
-  const length = element.value.length
-  focusName()
-  if (length) {
-    element.setSelectionRange(0, length)
-  }
-}
-const emptyInboxSpace = () => {
-  const user = store.state.currentUser
-  let space = utils.clone(inboxSpace)
-  space.id = nanoid()
-  space.userId = user.id
-  space.users = [user]
-  space.cards = space.cards.map(card => {
-    card.id = nanoid()
-    card.spaceId = space.id
-    return card
-  })
-  return space
-}
 const addCard = async () => {
   clearErrorsAndSuccess()
   if (state.cardsCreatedIsOverLimit) { return }
@@ -280,7 +214,63 @@ const addCard = async () => {
   textarea.value.style.height = 'initial'
   focusAndSelectName()
 }
+const updateCurrentSpace = (card) => {
+  if (isAddPage.value) { return }
+  // if (!successSpaceIsCurrentSpace) { return }
+  store.commit('currentCards/create', card)
+  store.dispatch('currentCards/updateDimensions', { cards: [card] })
+}
 
+// card url preview (ported from Card.vue)
+
+const urlPreview = async (url) => {
+  try {
+    let response = await store.dispatch('api/urlPreview', url)
+    if (!response) { return }
+    let { data, host } = response
+    console.log('🚗 link preview', host, data)
+    const { links, meta } = data
+    return { links, meta }
+  } catch (error) {
+    console.warn('🚑 urlPreview', error, url)
+  }
+}
+const previewImage = ({ thumbnail }) => {
+  const minWidth = 200
+  if (!thumbnail) { return '' }
+  let image = thumbnail.find(item => {
+    let shouldSkipImage = false
+    if (item.media) {
+      if (item.media.width < minWidth) {
+        shouldSkipImage = true
+      }
+    }
+    return item.href && !shouldSkipImage
+  })
+  if (!image) { return '' }
+  return image.href || ''
+}
+const previewFavicon = ({ icon }) => {
+  if (!icon) { return '' }
+  let image = icon.find(item => item.href)
+  return image.href || ''
+}
+
+// state handlers
+
+const updateKeyboardShortcutTipIsVisible = (value) => {
+  state.keyboardShortcutTipIsVisible = value
+}
+const clearErrors = () => {
+  state.error.unknownServerError = false
+  state.error.signInCredentials = false
+  state.error.tooManyAttempts = false
+}
+const updateTextareaSize = () => {
+  if (!textarea.value) { return }
+  let modifier = 0
+  textarea.value.style.height = textarea.value.scrollHeight + modifier + 'px'
+}
 const clearErrorsAndSuccess = () => {
   state.error.unknownServerError = false
   state.success = false
@@ -302,18 +292,6 @@ const insertLineBreak = async (event) => {
   state.newName = newName
   await nextTick()
   updateTextareaSize()
-}
-const updateCurrentSpace = (card) => {
-  if (isAddPage.value) { return }
-  // if (!successSpaceIsCurrentSpace) { return }
-  store.commit('currentCards/create', card)
-  store.dispatch('currentCards/updateDimensions', { cards: [card] })
-}
-
-// handlers
-
-const updateKeyboardShortcutTipIsVisible = (value) => {
-  state.keyboardShortcutTipIsVisible = value
 }
 
 </script>
