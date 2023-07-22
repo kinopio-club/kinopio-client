@@ -14,6 +14,7 @@ const router = createRouter({
       // which is lazy-loaded when the route is visited.
       component: () => import('./views/Add.vue'),
       beforeEnter: (to, from, next) => {
+        window.document.title = 'Add Card'
         const urlParams = new URLSearchParams(window.location.search)
         store.commit('isAddPage', true)
         next()

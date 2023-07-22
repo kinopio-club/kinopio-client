@@ -31,6 +31,8 @@ const state = reactive({
 
 const themeName = computed(() => store.state.currentUser.theme)
 const incrementBy = () => {
+  const theme = themeName.value
+  console.log('🧢', theme)
   state.count = state.count + 1
   emit('updateCount', state.count)
   // store.dispatch('themes/isSystem', false)
