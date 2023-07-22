@@ -1,7 +1,7 @@
 <template lang="pug">
 main.add-page
   .add-form(v-if="currentUserIsSignedIn")
-    section(:class="{'margin-bottom': isAddPage}")
+    section
       .row.title-row-flex
         span.title Add Card
         //- inbox
@@ -92,8 +92,6 @@ import postMessage from '@/postMessage.js'
 
 import { nanoid } from 'nanoid'
 
-let processQueueIntervalTimer
-
 export default {
   name: 'AddPage',
   components: {
@@ -113,7 +111,6 @@ export default {
     })
   },
   beforeUnmount () {
-    clearInterval(processQueueIntervalTimer)
     window.removeEventListener('message', this.insertUrl)
     utils.enablePinchZoom()
   },
@@ -171,11 +168,7 @@ export default {
       return url
     },
     textareaPlaceholder () {
-      if (this.isAddPage) {
-        return 'Type text here, or paste a URL'
-      } else {
-        return 'Type text here'
-      }
+      return 'Type text here, or paste a URL'
     }
 
   },
@@ -427,14 +420,17 @@ main.add-page
   padding 8px
   min-height 100vh
   height 100%
+  margin-bottom 2rem
   section
     position relative
     display block
   .loader
     margin-left 5px
-  .badge
-    .loader
-      margin-right 0
+  a
+    color var(--primary)
+    text-decoration none
+
+  // sign in
 
   .sign-in
     background var(--secondary-background)
@@ -444,26 +440,17 @@ main.add-page
       margin-bottom 10px
     button
       margin 0
-    a
-      color var(--primary)
-      text-decoration none
 
   .row
     margin-bottom 10px
     display flex
     > input
       margin-bottom 0
-    &:last-child
-      margin-bottom 0
 
   .button-wrap + .button-wrap
     margin-left 6px
 
-  // .row
-  //   margin-bottom 10px
-  //   display flex
-  //   align-items center
-  //   position relative
+  // add card
 
   .add-form
     position relative
@@ -481,29 +468,7 @@ main.add-page
       padding 0px 5px
       vertical-align 0
       margin-left 6px
-    .success
-      .row
-        margin-bottom 8px
-        &:last-child
-          margin-bottom 0
 
-    .sign-in
-      background var(--secondary-background)
-      form
-        margin-top 10px
-      input
-        margin-bottom 10px
-      button
-        margin 0
-
-    .inbox-icon,
-    .add-icon
-      vertical-align 1px
-      margin 0
-
-    a
-      color var(--primary)
-      text-decoration none
     .textarea-wrap
       margin-top 3px
       margin-left 6px
@@ -518,11 +483,13 @@ main.add-page
     .badge
       display inline-block
 
-    .margin-bottom
-      margin-bottom 10px
-
     select
       width 100%
+
+  .inbox-icon,
+  .add-icon
+    vertical-align 1px
+    margin 0
 
 .app
   overflow initial
