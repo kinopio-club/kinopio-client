@@ -14,7 +14,7 @@ const store = useStore()
 
 onMounted(() => {
   initUser()
-  window.addEventListener('message', insertUrl)
+  window.addEventListener('message', insertUrl) // postmessages from browser extension
   initCardTextarea()
 })
 
@@ -211,7 +211,6 @@ const addCard = async () => {
       card = await store.dispatch('api/createCard', card)
     }
     // state.successSpaceId = card.spaceId
-    updateCurrentSpace(card)
     state.success = true
     state.newName = ''
     postMessage.send({ name: 'addCardFromAddPage', value: card })
@@ -222,12 +221,6 @@ const addCard = async () => {
   state.loading.addingCard = false
   textarea.value.style.height = 'initial'
   focusAndSelectName()
-}
-const updateCurrentSpace = (card) => {
-  if (isAddPage.value) { return }
-  // if (!successSpaceIsCurrentSpace) { return }
-  store.commit('currentCards/create', card)
-  store.dispatch('currentCards/updateDimensions', { cards: [card] })
 }
 
 // card url preview (ported from Card.vue)
