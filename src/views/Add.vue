@@ -3,6 +3,7 @@ import inboxSpace from '@/data/inbox.json'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
@@ -146,18 +147,26 @@ const signIn = async (event) => {
 
 // spaces
 
-const updateSpaces = async () => {
+const updateSpaces = () => {
   try {
     state.loading.updateSpaces = true
-    let spaces = await store.dispatch('api/getUserSpaces')
-    spaces = spaces.filter(space => space.name !== 'Inbox')
-    state.spaces = spaces
+    updateSpacesLocal()
+    updateSpacesRemote()
   } catch (error) {
     console.error('🚒', error)
   }
   state.loading.updateSpaces = false
 }
-
+const updateSpacesLocal = () => {
+  let spaces = cache.getAllSpaces()
+  spaces = spaces.filter(space => space.name !== 'Inbox')
+  state.spaces = spaces
+}
+const updateSpacesRemote = async () => {
+  let spaces = await store.dispatch('api/getUserSpaces')
+  spaces = spaces.filter(space => space.name !== 'Inbox')
+  state.spaces = spaces
+}
 // card
 
 const addCard = async () => {
