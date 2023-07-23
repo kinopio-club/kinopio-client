@@ -1,5 +1,6 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
@@ -947,14 +948,11 @@ export default {
       const images = getters.AIImagesThisMonth
       return Math.floor(images.length / 2)
     },
-    AIImageLimitUpgradedUser: (state) => {
-      return 50
-    },
     AIImagesLimit: (state, getters) => {
       if (state.isUpgraded) {
-        return getters.AIImageLimitUpgradedUser
+        return consts.AIImageLimitUpgradedUser
       } else {
-        return 10
+        return consts.AIImageLimitFreeUser
       }
     },
     AIImagesIsUnderLimit: (state, getters) => {

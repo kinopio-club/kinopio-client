@@ -15,7 +15,7 @@ section.ai-images-progress(v-if="currentUserIsSignedIn" :class="{'margin-bottom-
 </template>
 
 <script>
-// import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 export default {
   name: 'AIImagesProgress',
@@ -31,7 +31,7 @@ export default {
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     AIImagesThisMonthCount () { return this.$store.getters['currentUser/AIImagesThisMonthCount'] },
     AIImagesLimit () { return this.$store.getters['currentUser/AIImagesLimit'] },
-    AIImageLimitUpgradedUser () { return this.$store.getters['currentUser/AIImageLimitUpgradedUser'] }
+    AIImageLimitUpgradedUser () { return consts.AIImageLimitUpgradedUser }
 
   },
   methods: {
