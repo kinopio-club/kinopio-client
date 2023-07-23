@@ -8,69 +8,81 @@ import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
 import dayjs from 'dayjs'
 
+const initialState = {
+  id: nanoid(),
+  lastSpaceId: '',
+  color: randomColor({ luminosity: 'light' }),
+  name: undefined,
+  description: undefined,
+  website: undefined,
+  lastReadNewStuffId: undefined,
+  apiKey: '',
+  arenaAccessToken: '',
+  favoriteUsers: [],
+  favoriteSpaces: [],
+  favoriteColors: [],
+  cardsCreatedCount: 0,
+  isUpgraded: false,
+  isModerator: false,
+  isGuideMaker: false,
+  filterShowUsers: false,
+  filterShowDateUpdated: false,
+  filterShowAbsoluteDates: false,
+  filterUnchecked: false,
+  filterComments: false,
+  journalPrompts: [],
+  shouldCreateJournalsWithDailyPrompt: true,
+  newSpacesAreBlank: false,
+  shouldEmailNotifications: true,
+  shouldEmailBulletin: true,
+  shouldEmailWeeklyReview: true,
+  shouldShowMoreAlignOptions: false,
+  shouldUseLastConnectionType: true,
+  shouldShowItemActions: false,
+  shouldDisableRightClickToPan: false,
+  shouldShowCurrentSpaceTags: false,
+  showInExploreUpdatedAt: null, // date
+  dialogSpaceFilters: null, // null, journals, spaces
+  dialogSpaceFilterByUser: {},
+  dialogSpaceFilterShowHidden: false,
+  defaultSpaceBackground: undefined,
+  defaultSpaceBackgroundTint: undefined,
+  defaultCardBackgroundColor: undefined,
+  defaultConnectionControlPoint: null, // null, 'q00,00'
+  downgradeAt: null,
+  showWeather: false,
+  weatherLocation: undefined,
+  weatherUnitIsCelcius: false,
+  shouldUseStickyCards: true,
+  shouldDisableItemJiggle: false,
+  shouldPauseConnectionDirections: false,
+  lastUsedImagePickerService: '',
+  AIImages: [],
+  theme: null,
+  themeIsSystem: false,
+  referredByUserId: '',
+  referrerName: '',
+  weather: '',
+  journalDailyPrompt: '',
+  panSpeedIsFast: false,
+  outsideSpaceBackgroundIsStatic: false,
+  shouldDisableHapticFeedback: false
+}
+
 export default {
   namespaced: true,
-  state: {
-    id: nanoid(),
-    lastSpaceId: '',
-    color: randomColor({ luminosity: 'light' }),
-    name: undefined,
-    description: undefined,
-    website: undefined,
-    lastReadNewStuffId: undefined,
-    apiKey: '',
-    arenaAccessToken: '',
-    favoriteUsers: [],
-    favoriteSpaces: [],
-    favoriteColors: [],
-    cardsCreatedCount: 0,
-    isUpgraded: false,
-    isModerator: false,
-    isGuideMaker: false,
-    filterShowUsers: false,
-    filterShowDateUpdated: false,
-    filterShowAbsoluteDates: false,
-    filterUnchecked: false,
-    filterComments: false,
-    journalPrompts: [],
-    shouldCreateJournalsWithDailyPrompt: true,
-    newSpacesAreBlank: false,
-    shouldEmailNotifications: true,
-    shouldEmailBulletin: true,
-    shouldEmailWeeklyReview: true,
-    shouldShowMoreAlignOptions: false,
-    shouldUseLastConnectionType: true,
-    shouldShowItemActions: false,
-    shouldDisableRightClickToPan: false,
-    shouldShowCurrentSpaceTags: false,
-    showInExploreUpdatedAt: null, // date
-    dialogSpaceFilters: null, // null, journals, spaces
-    dialogSpaceFilterByUser: {},
-    dialogSpaceFilterShowHidden: false,
-    defaultSpaceBackground: undefined,
-    defaultSpaceBackgroundTint: undefined,
-    defaultCardBackgroundColor: undefined,
-    defaultConnectionControlPoint: null, // null, 'q00,00'
-    downgradeAt: null,
-    showWeather: false,
-    weatherLocation: undefined,
-    weatherUnitIsCelcius: false,
-    shouldUseStickyCards: true,
-    shouldDisableItemJiggle: false,
-    shouldPauseConnectionDirections: false,
-    lastUsedImagePickerService: '',
-    AIImages: [],
-    theme: null,
-    themeIsSystem: false,
-    referredByUserId: '',
-    referrerName: '',
-    weather: '',
-    journalDailyPrompt: '',
-    panSpeedIsFast: false,
-    outsideSpaceBackgroundIsStatic: false,
-    shouldDisableHapticFeedback: false
-  },
+  state: utils.clone(initialState),
   mutations: {
+    replaceState: (state, newUser) => {
+      if (!newUser) { return }
+      Object.keys(state).forEach(key => {
+        state[key] = newUser[key] || initialState[key]
+      })
+      postMessage.send({ name: 'setApiKey', value: newUser.apiKey })
+      cache.removeLocal('user')
+      cache.storeLocal('user', newUser)
+    },
+
     color: (state, value) => {
       state.color = value
       cache.updateUser('color', value)
@@ -108,11 +120,6 @@ export default {
     lastReadNewStuffId: (state, newStuffId) => {
       state.lastReadNewStuffId = newStuffId
       cache.updateUser('lastReadNewStuffId', newStuffId)
-    },
-    apiKey: (state, apiKey) => {
-      state.apiKey = apiKey
-      cache.updateUser('apiKey', apiKey)
-      postMessage.send({ name: 'setApiKey', value: apiKey })
     },
     favoriteUsers: (state, users) => {
       utils.typeCheck({ value: users, type: 'array' })

@@ -201,11 +201,12 @@ export default {
       this.loading.signUpOrIn = true
       currentUser = await this.validateReferrerName(currentUser)
       const response = await this.$store.dispatch('api/signUp', { email, password, currentUser, sessionToken })
-      const result = await response.json()
+      const newUser = await response.json()
       if (this.isSuccess(response)) {
         this.$store.commit('clearAllNotifications', false)
-        this.$store.commit('currentUser/apiKey', result.apiKey)
+        this.$store.commit('currentUser/replaceState', newUser)
         this.updateLocalSpacesWithNewUserId()
+        this.updateCurrentSpaceWithNewUserId(currentUser, newUser)
         await this.$store.dispatch('api/createSpaces')
         this.notifySignedIn()
         this.addCollaboratorToInvitedSpaces()
@@ -216,7 +217,7 @@ export default {
         this.checkIfShouldAddReferral()
         this.checkIfShouldUpgradeReferral()
       } else {
-        await this.handleErrors(result)
+        await this.handleErrors(newUser)
       }
     },
 
@@ -288,7 +289,13 @@ export default {
         cache.updateSpace('connectionTypes', space.connectionTypes, space.id)
         cache.updateSpace('connections', space.connections, space.id)
         cache.updateSpace('boxes', space.boxes, space.id)
+        cache.updateSpace('users', [{ id: userId }], space.id)
       })
+    },
+
+    updateCurrentSpaceWithNewUserId (previousUser, newUser) {
+      this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
+      this.$store.commit('currentSpace/addUserToSpace', newUser)
     },
 
     updateCurrentSpace (previousUser) {
