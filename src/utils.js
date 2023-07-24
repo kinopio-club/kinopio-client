@@ -1191,6 +1191,7 @@ export default {
     space.privacy = 'private'
     space.isTemplate = false
     space.isHidden = false
+    space.collaboratorKey = nanoid()
     space.cards = space.cards.map(card => {
       card.userId = null
       if (card.nameUpdatedByUserId) {
