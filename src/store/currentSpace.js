@@ -426,7 +426,8 @@ const currentSpace = {
     },
     saveImportedSpace: async (context) => {
       context.commit('isLoadingSpace', true, { root: true })
-      const space = utils.clone(context.state)
+      let space = utils.clone(context.state)
+      space = utils.clearSpaceMeta(space, 'copy')
       const user = context.rootState.currentUser
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       cache.saveSpace(space)
