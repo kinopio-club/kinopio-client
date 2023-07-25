@@ -167,7 +167,13 @@ export default {
     }
     const sidebarIsVisible = document.querySelector('dialog#sidebar')
     if (sidebarIsVisible) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'start' })
+      const viewportIsNarrow = viewportWidth < (consts.sidebarWidth * 2)
+      const vertical = 'center'
+      let horizontal = 'center'
+      if (viewportIsNarrow) {
+        horizontal = 'start'
+      }
+      element.scrollIntoView({ behavior: 'smooth', block: vertical, inline: horizontal })
     } else {
       const scroll = {
         left,
