@@ -603,7 +603,7 @@ dialog
   left 8px
   top 8px
   position absolute
-  max-height calc(100vh - 100px)
+  max-height 100dvh
   margin 0
   padding 0
   user-select auto
