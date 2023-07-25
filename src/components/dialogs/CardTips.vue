@@ -15,7 +15,7 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
       .row
         p
           img.icon(src="@/assets/add.svg")
-          span Child Card
+          span Add Child Card
         span.badge.keyboard-shortcut Shift-Enter
     article
       .row
@@ -23,15 +23,21 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
           img.icon(src="@/assets/line-break.svg")
           span Line Break
         span.badge.keyboard-shortcut Ctrl-Enter
-    article(v-if="shouldHideExtras")
-      .row
-        span Backlinked Tag
-        span.badge.keyboard-shortcut [[
-    article(v-if="shouldHideExtras")
-      .row
-        span Link to Other Spaces
-        span.badge.keyboard-shortcut /
+    template(v-if="!shouldHideAdvanced")
+      article
+        .row
+          span Backlinked Tag
+          span.badge.keyboard-shortcut [[
+      article
+        .row
+          span Link to Other Spaces
+          span.badge.keyboard-shortcut /
+      //- article
+      //-   .row
+      //-     span Comment Card
+      //-     span.badge.keyboard-shortcut ((
 
+    //- Markdown
     article
       .row
         button(@click.left.stop="toggleMarkdownInfoIsVisible" :class="{ active: markdownInfoIsVisible }")
@@ -66,7 +72,7 @@ export default {
   props: {
     visible: Boolean,
     preventScrollIntoView: Boolean,
-    shouldHideExtras: Boolean
+    shouldHideAdvanced: Boolean
   },
   data () {
     return {

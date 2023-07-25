@@ -255,7 +255,7 @@ template(v-if="visible")
         button.small-button(:class="{ active: state.cardTipsIsVisible }")
           span ?
       Teleport(to="header")
-        CardTips(:visible="state.cardTipsIsVisible" :preventScrollIntoView="true" :shouldHideExtras="true")
+        CardTips(:visible="state.cardTipsIsVisible" :preventScrollIntoView="true" :shouldHideAdvanced="true")
 
     .row.title-row
       div
