@@ -17,6 +17,9 @@ onMounted(() => {
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerCloseChildDialogs') {
       closeDialogs()
+    } else if (mutation.type === 'isLoadingSpace') {
+      if (!props.visible) { return }
+      updateSortedCards()
     }
   })
 })
@@ -34,7 +37,6 @@ let prevIndex
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateSortedCards()
-    updateAllTextareaSizes()
   } else {
     closeDialogs()
   }
