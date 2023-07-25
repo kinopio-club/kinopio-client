@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
+dialog.card-tips(v-if="visible" @click.stop :open="visible" ref="dialog")
   section
     p Tips
   section
@@ -8,17 +8,17 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
     article
       p
         span.badge.keyboard-shortcut Enter
-        span New card
+        span new card
       p
         span.badge.keyboard-shortcut Shift-Enter
-        span New child card
+        span child card
       p
         span.badge.keyboard-shortcut Ctrl-Enter
         span line break
     article(v-if="shouldHideExtras")
       p
         span.badge.keyboard-shortcut [[
-        span create tags to label and group ideas
+        span backlinked tag
       p
         span.badge.keyboard-shortcut /
         span link to other spaces
@@ -98,6 +98,9 @@ dialog.card-tips
   left initial
   right 8px
   top 22px
+  width 180px
+  overflow auto
+  overscroll-behavior-y auto
   article
     position static
     margin-bottom 10px
