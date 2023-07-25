@@ -216,6 +216,8 @@ const addCard = async () => {
 }
 const addCardToSpaceLocal = (card, space) => {
   space = cache.space(space.id)
+  if (!space) { return }
+  if (!space.cards) { return }
   const cards = space.cards.push(card)
   cache.updateSpace('cards', cards, space.id)
 }
