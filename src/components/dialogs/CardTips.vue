@@ -1,27 +1,36 @@
 <template lang="pug">
-dialog.card-tips(v-if="visible" @click.stop :open="visible" ref="dialog")
+dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
   section
     p Tips
   section
     article
       p Card character limit is {{maxCardLength}}
     article
-      p
+      .row
+        p
+          img.icon(src="@/assets/add.svg")
+          span Add Card
         span.badge.keyboard-shortcut Enter
-        span new card
-      p
+    article
+      .row
+        p
+          img.icon(src="@/assets/add.svg")
+          span Child Card
         span.badge.keyboard-shortcut Shift-Enter
-        span child card
-      p
+    article
+      .row
+        p
+          img.icon(src="@/assets/line-break.svg")
+          span Line Break
         span.badge.keyboard-shortcut Ctrl-Enter
-        span line break
     article(v-if="shouldHideExtras")
-      p
+      .row
+        span Backlinked Tag
         span.badge.keyboard-shortcut [[
-        span backlinked tag
-      p
+    article(v-if="shouldHideExtras")
+      .row
+        span Link to Other Spaces
         span.badge.keyboard-shortcut /
-        span link to other spaces
 
     article
       .row
@@ -98,7 +107,6 @@ dialog.card-tips
   left initial
   right 8px
   top 22px
-  width 180px
   overflow auto
   overscroll-behavior-y auto
   article
