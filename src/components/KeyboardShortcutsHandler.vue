@@ -362,8 +362,8 @@ export default {
         }
       } else {
         position = {
-          x: scroll.x + 40,
-          y: scroll.y + 80
+          x: scroll.x + 100,
+          y: scroll.y + 120
         }
       }
       position = this.updateWithZoom(position)

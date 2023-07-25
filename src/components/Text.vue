@@ -101,7 +101,10 @@ const addCardAtIndex = () => {
   addCard(card, index)
 }
 const addCard = async (card, index) => {
-  if (!card.name) { return }
+  if (card && !card.name) { return }
+  if (!card) {
+    card = null
+  }
   const newCardId = nanoid()
   store.commit('shouldPreventNextFocusOnName', true)
   store.commit('shouldPreventNextEnterKey', false)
