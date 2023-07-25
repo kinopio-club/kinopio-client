@@ -157,28 +157,25 @@ export default {
     const viewportHeight = this.visualViewport().height
     let x = rect.x + rect.width - viewportWidth
     let y = rect.y + rect.height - viewportHeight
-    let scrollX = 0
-    let scrollY = 0
+    let left = 0
+    let top = 0
     if (x > 0) {
-      scrollX = x + 20
+      left = x + 20
     }
     if (y > 0) {
-      scrollY = y + 80
+      top = y + 80
     }
-    const viewportIsNarrow = viewportWidth < (consts.sidebarWidth * 2)
     const sidebarIsVisible = document.querySelector('dialog#sidebar')
     if (sidebarIsVisible) {
-      scrollX = scrollX + consts.sidebarWidth
+      element.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'start' })
+    } else {
+      const scroll = {
+        left,
+        top,
+        behavior
+      }
+      window.scrollBy(scroll)
     }
-    if (sidebarIsVisible && viewportIsNarrow) {
-      scrollX = scrollX - 80
-    }
-    const scroll = {
-      left: scrollX,
-      top: scrollY,
-      behavior
-    }
-    window.scrollBy(scroll)
   },
   cursorPositionInViewport (event) {
     let x, y
