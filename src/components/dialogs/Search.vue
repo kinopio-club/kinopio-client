@@ -311,13 +311,13 @@ export default {
     updateDialogHeight () {
       this.$nextTick(() => {
         let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element) - 100
+        this.dialogHeight = utils.elementHeight(element)
       })
     },
     updateResultsSectionHeight () {
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeight(element) - 2 - 100
+        this.resultsSectionHeight = utils.elementHeight(element) - 2
       })
     },
     triggerSignUpOrInIsVisible () {
