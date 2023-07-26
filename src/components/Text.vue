@@ -154,6 +154,7 @@ const updateTextareaSize = (element) => {
   element.style.height = element.scrollHeight + modifier + 'px'
 }
 const updateAllTextareaSizes = async () => {
+  if (!props.visible) { return }
   await nextTick()
   const textareas = section.value.querySelectorAll('textarea')
   textareas.forEach(element => {
