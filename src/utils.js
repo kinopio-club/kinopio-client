@@ -16,6 +16,7 @@ import { colord, extend } from 'colord'
 import qs from '@aguezz/qs-parse'
 import namesPlugin from 'colord/plugins/names'
 import getCurvePoints from '@/libs/curve_calc.js'
+import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
@@ -152,22 +153,24 @@ export default {
   scrollIntoView ({ element, behavior }) {
     behavior = behavior || 'smooth'
     if (!element) { return }
-    const rect = element.getBoundingClientRect()
+    const sidebarIsVisible = document.querySelector('dialog#sidebar')
     const viewportWidth = this.visualViewport().width
-    const halfViewportWidth = viewportWidth / 2
-    const viewportHeight = this.visualViewport().height
-    let x = rect.x + rect.width - viewportWidth
-    let y = rect.y + rect.height - viewportHeight
-    const isRightOfCenter = (rect.x + window.scrollX) > halfViewportWidth
-    if (isRightOfCenter) {
-      x = x + halfViewportWidth
+    const isViewportNarrow = viewportWidth < (consts.maxCardLength * 2)
+    let horizontal = 'nearest'
+    let vertical = 'nearest'
+    if (sidebarIsVisible) {
+      horizontal = 'center'
+      vertical = 'center'
     }
-    const scroll = {
-      left: x,
-      top: y,
-      behavior
+    if (sidebarIsVisible && isViewportNarrow) {
+      horizontal = 'start'
     }
-    window.scrollBy(scroll)
+    scrollIntoViewIfNeeded(element, {
+      behavior,
+      scrollMode: 'if-needed',
+      block: vertical,
+      inline: horizontal
+    })
   },
   cursorPositionInViewport (event) {
     let x, y

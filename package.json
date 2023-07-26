@@ -19,6 +19,7 @@
     "nanoid": "^3.1.31",
     "overlap-area": "^1.0.0",
     "randomcolor": "^0.5.4",
+    "scroll-into-view-if-needed": "^3.0.10",
     "shader": "^1.0.0",
     "vue": "^3.2.6",
     "vue-router": "^4.0.11",
