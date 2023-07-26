@@ -149,7 +149,7 @@ export default {
       viewport.setAttribute('content', 'width=device-width, initial-scale=1') // index.html default
     }
   },
-  scrollIntoView (element, behavior) {
+  scrollIntoView ({ element, behavior }) {
     behavior = behavior || 'smooth'
     if (!element) { return }
     const rect = element.getBoundingClientRect()

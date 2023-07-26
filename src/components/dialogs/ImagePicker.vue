@@ -362,7 +362,7 @@ export default {
       if (!this.visible) { return }
       const element = this.$refs.dialog
       if (!element) { return }
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     isCardUrl (image) {

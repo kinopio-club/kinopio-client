@@ -131,7 +131,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
     },
     duplicateSpace () {
       this.$store.dispatch('currentSpace/duplicateSpace')

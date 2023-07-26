@@ -88,7 +88,7 @@ export default {
       if (utils.isMobile()) { return }
       this.$nextTick(() => {
         const element = this.$refs.dialog
-        utils.scrollIntoView(element)
+        utils.scrollIntoView({ element })
       })
     },
     toggleMarkdownInfoIsVisible () {

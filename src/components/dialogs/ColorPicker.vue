@@ -202,7 +202,7 @@ export default {
     scrollIntoView () {
       this.$nextTick(() => {
         const element = this.$refs.dialog
-        utils.scrollIntoView(element)
+        utils.scrollIntoView({ element })
       })
     },
     updateLuminosityFromTheme () {

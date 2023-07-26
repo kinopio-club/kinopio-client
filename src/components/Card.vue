@@ -257,7 +257,7 @@ export default {
       } else if (type === 'triggerScrollCardIntoView') {
         if (payload === this.card.id) {
           const element = this.$refs.card
-          utils.scrollIntoView(element)
+          utils.scrollIntoView({ element })
         }
       } else if (type === 'triggerUploadComplete') {
         let { cardId, url } = payload
