@@ -2,6 +2,7 @@
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import CardTips from '@/components/dialogs/CardTips.vue'
+import Loader from '@/components/Loader.vue'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
@@ -43,6 +44,7 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const isLoadingSpace = computed(() => store.state.isLoadingSpace)
 
 // dialogs
 
@@ -274,6 +276,7 @@ template(v-if="visible")
             //- span Oldest
 
   section.text.results-section(ref="section" @click="closeDialogs")
+    Loader(:visible="isLoadingSpace")
     template(v-for="(card, index) in state.sortedCards")
       //- cards
       .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea(card, index)")
