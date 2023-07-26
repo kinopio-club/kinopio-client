@@ -80,6 +80,18 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
           img.icon(src="@/assets/heart-empty.svg")
           span Donate
 
+  section
+    .row
+      a(href="https://help.kinopio.club/posts/terms-of-service/")
+        button
+          span Terms of Service
+          img.icon.visit(src="@/assets/visit.svg")
+    .row
+      a(href="https://help.kinopio.club/posts/privacy-policy")
+        button
+          span Privacy Policy
+          img.icon.visit(src="@/assets/visit.svg")
+
 </template>
 
 <script>
