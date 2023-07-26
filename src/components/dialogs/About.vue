@@ -165,6 +165,7 @@ export default {
     },
     async updateNewStuff () {
       let data = await this.$store.dispatch('api/getNewStuff')
+      if (!data) { return }
       data = data.items.slice(0, 20)
       data = data.map(item => {
         item.summary = utils.convertHTMLEntities(item.summary)
