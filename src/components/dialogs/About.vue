@@ -36,7 +36,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
       .button-wrap
         button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: appsAndExtensionsIsVisible}")
           span Apps and Extensions
-        Apps(:visible="appsAndExtensionsIsVisible")
+        AppsAndExtensions(:visible="appsAndExtensionsIsVisible")
     .row
       .button-wrap
         button(@click.left.stop="toggleKeyboardShortcutsIsVisible")

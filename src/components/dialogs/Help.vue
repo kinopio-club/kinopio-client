@@ -16,7 +16,7 @@ dialog.help.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
     .row
       a(href="https://help.kinopio.club")
         button
-          span Help Topics{{' '}}
+          span Help and Support{{' '}}
           img.icon.visit(src="@/assets/visit.svg")
     .row
       .button-wrap
@@ -29,16 +29,34 @@ dialog.help.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
           button
             span API{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
+    //- .row
+    //-   .button-wrap
+    //-     a(href="https://help.kinopio.club/api/")
+    //-       button
+    //-         span Blog{{' '}}
+    //-         img.icon.visit(src="@/assets/visit.svg")
+
+    //- section.subsection
+    //-   .row
+    //-     a(href="https://help.kinopio.club/posts/terms-of-service/")
+    //-       button
+    //-         span Instagram{{' '}}
+    //-         img.icon.visit(src="@/assets/visit.svg")
+    //-   .row
+    //-     a(href="https://help.kinopio.club/posts/terms-of-service/")
+    //-       button
+    //-         span Mastodon{{' '}}
+    //-         img.icon.visit(src="@/assets/visit.svg")
   section
-    .row
-      a(href="https://help.kinopio.club/posts/terms-of-service/")
-        button
-          span Terms of Service{{' '}}
-          img.icon.visit(src="@/assets/visit.svg")
     .row
       a(href="https://help.kinopio.club/posts/privacy-policy")
         button
           span Privacy Policy{{' '}}
+          img.icon.visit(src="@/assets/visit.svg")
+    .row
+      a(href="https://help.kinopio.club/posts/terms-of-service/")
+        button
+          span Terms of Service{{' '}}
           img.icon.visit(src="@/assets/visit.svg")
     //- img.froggo(src="@/assets/froggo.png")
 
