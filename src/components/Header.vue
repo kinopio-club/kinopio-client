@@ -359,10 +359,10 @@ export default {
     kinopioDomain () { return consts.kinopioDomain() },
     userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible },
     isVisible () {
-      const contentDialogIsVisible = this.cardDetailsIsVisibleForCardId || this.connectionDetailsIsVisibleForConnectionId
       if (this.isPresentationMode) { return }
       if (this.isAddPage) { return }
-      if (contentDialogIsVisible && this.isTouchDevice) {
+      const contentDialogIsVisible = this.cardDetailsIsVisibleForCardId || this.connectionDetailsIsVisibleForConnectionId
+      if (contentDialogIsVisible && this.isTouchDevice && !this.sidebarIsVisible) {
         return false
       } else {
         return true
