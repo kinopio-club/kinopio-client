@@ -88,7 +88,15 @@ const toggleSortOrder = () => {
 const canEditCard = (card) => { return store.getters['currentUser/canEditCard'](card) }
 const updateName = (event, card) => {
   const newName = event.target.value
-  store.commit('triggerUpdateCardDetailsCardName', { cardId: card.id, name: newName })
+  if (store.state.isTouchDevice) {
+    card = {
+      id: card.id,
+      name: newName
+    }
+    store.dispatch('currentCards/update', card)
+  } else {
+    store.commit('triggerUpdateCardDetailsCardName', { cardId: card.id, name: newName })
+  }
   const element = event.target
   updateTextareaSize(element)
 }
