@@ -88,15 +88,7 @@ const toggleSortOrder = () => {
 const canEditCard = (card) => { return store.getters['currentUser/canEditCard'](card) }
 const updateName = (event, card) => {
   const newName = event.target.value
-  if (store.state.isTouchDevice) {
-    card = {
-      id: card.id,
-      name: newName
-    }
-    store.dispatch('currentCards/update', card)
-  } else {
-    store.commit('triggerUpdateCardDetailsCardName', { cardId: card.id, name: newName })
-  }
+  store.commit('triggerUpdateCardDetailsCardName', { cardId: card.id, name: newName })
   const element = event.target
   updateTextareaSize(element)
 }
@@ -213,10 +205,6 @@ const imageUrl = (card) => {
 // actions
 
 const focus = (card, index) => {
-  if (store.state.isTouchDevice) {
-    prevIndex = index
-    return
-  }
   store.commit('triggerScrollCardIntoView', card.id)
   store.commit('shouldPreventNextFocusOnName', true)
   store.commit('cardDetailsIsVisibleForCardId', card.id)
@@ -296,29 +284,32 @@ template(v-if="visible")
   section.text.results-section(ref="section" @click="closeDialogs")
     Loader(:visible="isLoadingSpace")
     template(v-for="(card, index) in state.sortedCards")
-      //- cards
-      .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea(card, index)")
-        textarea(
-          v-if="canEditCard(card)"
-          @click.stop
-          :data-card-id="card.id"
-          @focus="focus(card, index)"
-          @blur="removeEmpty(card, index)"
-          @keydown.up="moveToPrevious($event, index)"
-          @keydown.down="moveToNext($event, index)"
-          @keydown.enter.exact.prevent="addCard(card, index + 1)"
-          @keydown.shift.enter.exact.prevent="addChildCard(card, index + 1)"
-          rows="1"
-          :disabled="!canEditCard(card)"
-          :value="card.name"
-          :maxlength="consts.maxCardLength"
-          @input="updateName($event, card)"
-          :style="textareaStyles(card)"
-        )
-        p.read-only-name(v-else-if="!canEditCard(card)")
-          span {{card.name}}
-        img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea(card, index)")
-        .badge.danger.max-length-badge(v-if="isMaxLength(card)") Max Length
+      //- edit
+      template(v-if="canEditCard(card)")
+        .textarea-wrap(@click="focusTextarea(card, index)" :style="textareaWrapStyles(card)")
+          textarea(
+            @click.stop
+            :data-card-id="card.id"
+            @focus="focus(card, index)"
+            @blur="removeEmpty(card, index)"
+            @keydown.up="moveToPrevious($event, index)"
+            @keydown.down="moveToNext($event, index)"
+            @keydown.enter.exact.prevent="addCard(card, index + 1)"
+            @keydown.shift.enter.exact.prevent="addChildCard(card, index + 1)"
+            rows="1"
+            :disabled="!canEditCard(card)"
+            :value="card.name"
+            :maxlength="consts.maxCardLength"
+            @input="updateName($event, card)"
+            :style="textareaStyles(card)"
+          )
+      //- read only
+      template(v-else)
+        .textarea-wrap(@click="focus(card, index)" :style="textareaWrapStyles(card)")
+          p.read-only-name
+            span {{card.name}}
+          img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea(card, index)")
+          .badge.danger.max-length-badge(v-if="isMaxLength(card)") Max Length
 </template>
 
 <style lang="stylus">

@@ -85,7 +85,7 @@ export default {
     scrollParentIntoView () {
       const element = this.parentElement
       if (!element) { return }
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
     }
   },
   watch: {

@@ -16,6 +16,7 @@ import { colord, extend } from 'colord'
 import qs from '@aguezz/qs-parse'
 import namesPlugin from 'colord/plugins/names'
 import getCurvePoints from '@/libs/curve_calc.js'
+import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
@@ -149,39 +150,27 @@ export default {
       viewport.setAttribute('content', 'width=device-width, initial-scale=1') // index.html default
     }
   },
-  scrollIntoView (element, behavior) {
+  scrollIntoView ({ element, behavior }) {
     behavior = behavior || 'smooth'
     if (!element) { return }
-    const rect = element.getBoundingClientRect()
-    const viewportWidth = this.visualViewport().width
-    const viewportHeight = this.visualViewport().height
-    let x = rect.x + rect.width - viewportWidth
-    let y = rect.y + rect.height - viewportHeight
-    let left = 0
-    let top = 0
-    if (x > 0) {
-      left = x + 20
-    }
-    if (y > 0) {
-      top = y + 80
-    }
     const sidebarIsVisible = document.querySelector('dialog#sidebar')
+    const viewportWidth = this.visualViewport().width
+    const isViewportNarrow = viewportWidth < (consts.maxCardLength * 2)
+    let horizontal = 'nearest'
+    let vertical = 'nearest'
     if (sidebarIsVisible) {
-      const viewportIsNarrow = viewportWidth < (consts.sidebarWidth * 2)
-      const vertical = 'center'
-      let horizontal = 'center'
-      if (viewportIsNarrow) {
-        horizontal = 'start'
-      }
-      element.scrollIntoView({ behavior: 'smooth', block: vertical, inline: horizontal })
-    } else {
-      const scroll = {
-        left,
-        top,
-        behavior
-      }
-      window.scrollBy(scroll)
+      horizontal = 'center'
+      vertical = 'center'
     }
+    if (sidebarIsVisible && isViewportNarrow) {
+      horizontal = 'start'
+    }
+    scrollIntoViewIfNeeded(element, {
+      behavior,
+      scrollMode: 'if-needed',
+      block: vertical,
+      inline: horizontal
+    })
   },
   cursorPositionInViewport (event) {
     let x, y

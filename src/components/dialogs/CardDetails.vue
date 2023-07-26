@@ -972,7 +972,7 @@ export default {
         this.$nextTick(() => {
           this.$nextTick(() => {
             const element = this.$refs.dialog
-            utils.scrollIntoView(element, behavior)
+            utils.scrollIntoView({ element, behavior })
           })
         })
       })

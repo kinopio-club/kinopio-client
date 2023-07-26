@@ -33,7 +33,7 @@ watch(() => props.visible, (value, prevValue) => {
 })
 const scrollIntoView = async () => {
   await nextTick()
-  utils.scrollIntoView(dialog.value)
+  utils.scrollIntoView({ element: dialog.value })
 }
 
 // copy url

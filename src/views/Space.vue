@@ -415,6 +415,7 @@ export default {
       }
     },
     addOrCloseCard (event) {
+      const sidebarIsVisible = window.document.querySelector('dialog#sidebar')
       if (this.$store.state.shouldAddCard) {
         let position = utils.cursorPositionInSpace(event)
         // prevent addCard if position is outside space
@@ -426,7 +427,7 @@ export default {
         // add card
         this.addCard(event)
       // close item details
-      } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
+      } else if ((this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) && !sidebarIsVisible) {
         this.$store.dispatch('closeAllDialogs')
       }
     },
@@ -492,8 +493,6 @@ export default {
   position relative // used by svg connections
   transform-origin top left
   z-index 0
-  &.hidden-by-mindmap
-    opacity 0.4
   .card-overlap-indicator
     position absolute
     z-index calc(var(--max-z) - 70)

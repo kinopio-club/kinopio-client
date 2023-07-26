@@ -309,7 +309,7 @@ export default {
 
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
     },
 
     // Add Parent and Child Cards

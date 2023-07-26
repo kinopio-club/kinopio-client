@@ -359,10 +359,10 @@ export default {
     kinopioDomain () { return consts.kinopioDomain() },
     userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible },
     isVisible () {
-      const contentDialogIsVisible = this.cardDetailsIsVisibleForCardId || this.connectionDetailsIsVisibleForConnectionId
       if (this.isPresentationMode) { return }
       if (this.isAddPage) { return }
-      if (contentDialogIsVisible && this.isTouchDevice) {
+      const contentDialogIsVisible = this.cardDetailsIsVisibleForCardId || this.connectionDetailsIsVisibleForConnectionId
+      if (contentDialogIsVisible && this.isTouchDevice && !this.sidebarIsVisible) {
         return false
       } else {
         return true
@@ -748,8 +748,6 @@ header
   justify-content space-between
   transition 0.2s opacity
   transform-origin left top
-  &.hidden-by-mindmap
-    opacity 0.2
   nav,
   aside
     pointer-events none

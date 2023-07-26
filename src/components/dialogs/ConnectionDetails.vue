@@ -256,7 +256,7 @@ export default {
         const element = this.$refs.dialog
         this.updateResultsSectionMaxHeight()
         this.$nextTick(() => {
-          utils.scrollIntoView(element)
+          utils.scrollIntoView({ element })
         })
       })
     },

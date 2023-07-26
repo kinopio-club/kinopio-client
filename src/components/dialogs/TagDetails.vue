@@ -376,7 +376,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
     },
     updateResultsSectionHeight () {
       if (!this.visible) { return }
