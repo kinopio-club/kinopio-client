@@ -212,6 +212,7 @@ const focus = (card, index) => {
 }
 const focusTextarea = async (card, index) => {
   let element = section.value.querySelector(`textarea[data-card-id="${card.id}"]`)
+  if (!element) { return }
   focus(card, index)
   await nextTick()
   await nextTick()
