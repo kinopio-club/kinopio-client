@@ -154,34 +154,20 @@ export default {
     if (!element) { return }
     const rect = element.getBoundingClientRect()
     const viewportWidth = this.visualViewport().width
+    const halfViewportWidth = viewportWidth / 2
     const viewportHeight = this.visualViewport().height
     let x = rect.x + rect.width - viewportWidth
     let y = rect.y + rect.height - viewportHeight
-    let left = 0
-    let top = 0
-    if (x > 0) {
-      left = x + 20
+    const isRightOfCenter = (rect.x + window.scrollX) > halfViewportWidth
+    if (isRightOfCenter) {
+      x = x + halfViewportWidth
     }
-    if (y > 0) {
-      top = y + 80
+    const scroll = {
+      left: x,
+      top: y,
+      behavior
     }
-    const sidebarIsVisible = document.querySelector('dialog#sidebar')
-    if (sidebarIsVisible) {
-      const viewportIsNarrow = viewportWidth < (consts.sidebarWidth * 2)
-      const vertical = 'center'
-      let horizontal = 'center'
-      if (viewportIsNarrow) {
-        horizontal = 'start'
-      }
-      element.scrollIntoView({ behavior: 'smooth', block: vertical, inline: horizontal })
-    } else {
-      const scroll = {
-        left,
-        top,
-        behavior
-      }
-      window.scrollBy(scroll)
-    }
+    window.scrollBy(scroll)
   },
   cursorPositionInViewport (event) {
     let x, y
