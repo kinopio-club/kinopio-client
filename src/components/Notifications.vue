@@ -21,7 +21,9 @@ aside.notifications(@click.left="closeAllDialogs")
     p Local storage error has occured, please refresh
     .row
       .button-wrap
-        button(@click.left="refreshBrowser") Refresh
+        button(@click.left="refreshBrowser")
+          img.refresh.icon(src="@/assets/refresh.svg")
+          span Refresh
 
   .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
     img.icon(src="@/assets/brush.svg")
@@ -97,6 +99,7 @@ aside.notifications(@click.left="closeAllDialogs")
             span Email Support
       .button-wrap
         button(@click.left="refreshBrowser")
+          img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
       .button-wrap
         button(@click="removeNotifyConnectionError")
@@ -108,16 +111,25 @@ aside.notifications(@click.left="closeAllDialogs")
       span Kinopio updates are available
     .row
       .button-wrap
-        button(@click.left="refreshBrowser") Update
+        button(@click.left="refreshBrowser")
+        img.refresh.icon(src="@/assets/refresh.svg")
+        span Update
 
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
     p Error saving changes to server, retrying…
+    .row
+      .button-wrap
+        button(@click.left="refreshBrowser")
+          img.refresh.icon(src="@/assets/refresh.svg")
+          span Refresh
 
   .persistent-item.danger(v-if="notifySpaceOutOfSync")
     p Space is out of sync, please refresh
     .row
       .button-wrap
-        button(@click.left="refreshBrowser") Refresh
+        img.refresh.icon(src="@/assets/refresh.svg")
+        button(@click.left="refreshBrowser")
+        span Refresh
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="template" :class="{'notification-jiggle': readOnlyJiggle}")
     button(@click.left="duplicateSpace")
@@ -494,6 +506,9 @@ export default {
 
   .redo
     transform scaleX(-1)
+
+  .icon.refresh
+    vertical-align 0px
 
   .filter-icon
     margin 0
