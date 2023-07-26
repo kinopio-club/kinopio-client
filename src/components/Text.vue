@@ -205,6 +205,7 @@ const imageUrl = (card) => {
 // actions
 
 const focus = (card, index) => {
+  if (store.isTouchDevice) { return }
   store.commit('triggerScrollCardIntoView', card.id)
   store.commit('shouldPreventNextFocusOnName', true)
   store.commit('cardDetailsIsVisibleForCardId', card.id)
