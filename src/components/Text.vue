@@ -93,7 +93,12 @@ const updateName = (event, card) => {
   updateTextareaSize(element)
 }
 const cards = computed(() => store.getters['currentCards/all'])
-const addCardAtIndex = () => {
+const addCardAtIndex = (event) => {
+  if (!canEditSpace.value) {
+    const position = utils.cursorPositionInPage(event)
+    store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'app', icon: 'cancel' })
+    return
+  }
   let index = prevIndex || 0
   let card = state.sortedCards[index]
   if (!prevIndex) {
@@ -281,6 +286,7 @@ template(v-if="visible")
       //- cards
       .textarea-wrap(:style="textareaWrapStyles(card)" @click="focusTextarea(card, index)")
         textarea(
+          v-if="canEditCard(card)"
           @click.stop
           :data-card-id="card.id"
           @focus="focus(card, index)"
@@ -296,6 +302,8 @@ template(v-if="visible")
           @input="updateName($event, card)"
           :style="textareaStyles(card)"
         )
+        p.read-only-name(v-else-if="!canEditCard(card)")
+          span {{card.name}}
         img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea(card, index)")
         .badge.danger.max-length-badge(v-if="isMaxLength(card)") Max Length
 </template>
@@ -316,6 +324,8 @@ section.text
       box-shadow var(--button-active-inset-shadow)
     textarea
       margin-bottom 0
+    .read-only-name
+      word-break break-word
     img
       max-width 60px
       max-height 60px
