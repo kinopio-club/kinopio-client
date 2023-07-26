@@ -4,7 +4,7 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
     p Donate
   section
     p As you may know, Kinopio is built by me, Pirijan.
-    p Donations help support me. I'm grateful and flattered that you're even here.
+    p Donations help support my work. I'm grateful and flattered that you're even here.
     p
       span You'll also get the {{' '}}
       span.badge.info

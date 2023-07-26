@@ -12,22 +12,9 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
       p For building ideas and solving problems
     .row
       .button-wrap
-        a(href="https://help.kinopio.club/about")
-          button
-            span About{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
-      .button-wrap
-        a(href="https://help.kinopio.club/api/")
-          button
-            span API{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
-      .button-wrap
-        a(href="https://help.kinopio.club")
-          button
-            span Help{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
-
-    .row
+        button(@click.stop="toggleHelpIsVisible" :class="{active: helpIsVisible}")
+          span Help
+        Help(:visible="helpIsVisible")
       .button-wrap
         button(@click.left.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
           span What's New
@@ -40,15 +27,15 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
     //-       span Pop Up Shop{{' '}}
               //- img.icon.visit(src="@/assets/visit.svg")
   section(v-if="!isAddPage")
-    .row
-      a(href="https://help.kinopio.club/posts/extensions/")
-        button
-          span Browser Extensions{{' '}}
-          img.icon.visit(src="@/assets/visit.svg")
+    //- .row
+    //-   a(href="https://help.kinopio.club/posts/extensions/")
+    //-     button
+    //-       span Browser Extensions{{' '}}
+    //-       img.icon.visit(src="@/assets/visit.svg")
     .row
       .button-wrap
         button(@click.left.stop="toggleAppsIsVisible" :class="{active: appsIsVisible}")
-          span Desktop and Mobile Apps
+          span Apps and Extensions
         Apps(:visible="appsIsVisible")
     .row
       .button-wrap
@@ -71,32 +58,16 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             img.icon.visit(src="@/assets/visit.svg")
     .row
       .button-wrap
-        a(href="https://twitter.com/kinopioclub")
-          button
-            span Twitter{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
-      .button-wrap
         button(@click.left.stop="triggerDonateIsVisible")
           img.icon(src="@/assets/heart-empty.svg")
           span Donate
-
-  section
-    .row
-      a(href="https://help.kinopio.club/posts/terms-of-service/")
-        button
-          span Terms of Service{{' '}}
-          img.icon.visit(src="@/assets/visit.svg")
-    .row
-      a(href="https://help.kinopio.club/posts/privacy-policy")
-        button
-          span Privacy Policy{{' '}}
-          img.icon.visit(src="@/assets/visit.svg")
 
 </template>
 
 <script>
 import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 import Apps from '@/components/dialogs/Apps.vue'
+import Help from '@/components/dialogs/Help.vue'
 import utils from '@/utils.js'
 
 import dayjs from 'dayjs'
@@ -108,7 +79,8 @@ export default {
   name: 'About',
   components: {
     WhatsNew,
-    Apps
+    Apps,
+    Help
   },
   props: {
     visible: Boolean
@@ -127,6 +99,7 @@ export default {
     return {
       whatsNewIsVisible: false,
       appsIsVisible: false,
+      helpIsVisible: false,
       newStuff: [],
       isIPhone: false,
       isAndroid: false,
@@ -153,7 +126,7 @@ export default {
     newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated },
     isAddPage () { return this.$store.state.isAddPage },
     childDialogIsVisible () {
-      return this.whatsNewIsVisible || this.appsIsVisible
+      return this.whatsNewIsVisible || this.appsIsVisible || this.helpIsVisible
     }
   },
   methods: {
@@ -174,6 +147,11 @@ export default {
       const isVisible = this.appsIsVisible
       this.closeDialogs()
       this.appsIsVisible = !isVisible
+    },
+    toggleHelpIsVisible () {
+      const isVisible = this.helpIsVisible
+      this.closeDialogs()
+      this.helpIsVisible = !isVisible
     },
     async updateNewStuff () {
       let data = await this.$store.dispatch('api/getNewStuff')
@@ -203,6 +181,7 @@ export default {
     closeDialogs () {
       this.whatsNewIsVisible = false
       this.appsIsVisible = false
+      this.helpIsVisible = false
     },
     updateDialogHeight () {
       if (!this.visible) { return }
