@@ -303,13 +303,14 @@ template(v-if="visible")
             @input="updateName($event, card)"
             :style="textareaStyles(card)"
           )
+          img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea(card, index)")
+          .badge.danger.max-length-badge(v-if="isMaxLength(card)") Max Length
       //- read only
       template(v-else)
         .textarea-wrap(@click="focus(card, index)" :style="textareaWrapStyles(card)")
           p.read-only-name
             span {{card.name}}
-          img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea(card, index)")
-          .badge.danger.max-length-badge(v-if="isMaxLength(card)") Max Length
+          img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focus(card, index)")
 </template>
 
 <style lang="stylus">
