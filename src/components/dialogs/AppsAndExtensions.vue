@@ -171,10 +171,10 @@ dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :styl
                 span Add to Home screen
     template(v-else)
       .row
-        a(href="https://testflight.apple.com/join/VoN2TmsM")
+        a(href="https://apps.apple.com/us/app/kinopio/id6448743101")
           button
             img.icon(src="@/assets/apple.svg")
-            span Install Testflight Beta
+            span Download from App Store
 
 </template>
 
