@@ -315,6 +315,7 @@ const currentSpace = {
       const user = context.rootState.currentUser
       let space = utils.clone(helloSpace)
       space.id = nanoid()
+      space.collaboratorKey = nanoid()
       if (shouldLoadNewHelloSpace) {
         space = cache.updateIdsInSpace(space)
         context.commit('clearSearch', null, { root: true })
@@ -339,6 +340,7 @@ const currentSpace = {
       space.id = nanoid()
       space.createdAt = new Date()
       space.editedAt = new Date()
+      space.collaboratorKey = nanoid()
       const newSpacesAreBlank = context.rootState.currentUser.newSpacesAreBlank
       if (newSpacesAreBlank) {
         space.connectionTypes = []

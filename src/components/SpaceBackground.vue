@@ -18,6 +18,8 @@ export default {
         this.updateBackground()
       } else if (mutation.type === 'triggerUpdateTheme') {
         this.updateBackground()
+      } else if (mutation.type === 'isLoadingSpace') {
+        this.updateBackground()
       }
     })
   },

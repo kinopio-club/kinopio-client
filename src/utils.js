@@ -1388,6 +1388,7 @@ export default {
     space.isTemplate = false
     space.isHidden = false
     space.isFromTweet = false
+    space.collaboratorKey = nanoid()
     space = this.spaceDefaultBackground(space, currentUser)
     // summary
     space.cards.push({ id: nanoid(), name: summary, x: 80, y: 110, frameId: 0 })
