@@ -14,16 +14,20 @@ const props = defineProps({
 dialog.help.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     .row
+      a(href="mailto:support@kinopio.club")
+        button
+          span Email Support
+    .row
       a(href="https://help.kinopio.club")
         button
-          span Help and Support{{' '}}
+          span Help and Tutorials{{' '}}
           img.icon.visit(src="@/assets/visit.svg")
     .row
-      .button-wrap
-        a(href="https://help.kinopio.club/about")
-          button
-            span About{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
+      //- .button-wrap
+      //-   a(href="https://help.kinopio.club/about")
+      //-     button
+      //-       span About{{' '}}
+      //-       img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
         a(href="https://help.kinopio.club/api/")
           button
