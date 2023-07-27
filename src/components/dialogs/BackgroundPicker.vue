@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
+dialog.background-picker(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
     .row.title-row
       div
@@ -504,10 +504,10 @@ export default {
 </script>
 
 <style lang="stylus">
-dialog.background
+dialog.background-picker
   width 255px
   overflow auto
-  max-height 86vh
+  max-height calc(100dvh - 120px)
   .title-row
     margin-left 0 !important
   .background-preview
