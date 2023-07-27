@@ -61,6 +61,18 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         button(@click.left.stop="triggerDonateIsVisible")
           img.icon(src="@/assets/heart-empty.svg")
           span Donate
+    section.subsection
+      .row
+        .button-wrap
+          a(href="https://pkm.social/@kinopio")
+            button
+              span Mastodon{{' '}}
+              img.icon.visit(src="@/assets/visit.svg")
+        .button-wrap
+          a(href="https://twitter.com/kinopioClub")
+            button
+              span Twitter{{' '}}
+              img.icon.visit(src="@/assets/visit.svg")
 
 </template>
 
