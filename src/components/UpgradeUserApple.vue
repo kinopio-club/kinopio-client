@@ -9,7 +9,7 @@ import { useStore } from 'vuex'
 const store = useStore()
 
 onMounted(() => {
-  window.addEventListener('message', handleSubscriptionSuccess)
+  window.addEventListener('message', handleSubscriptionSuccess) // iOS IAP subscription sheet transaction completes
   updateCredits()
 })
 
