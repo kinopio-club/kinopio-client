@@ -112,7 +112,7 @@ export default {
       this.exploreRssFeedIsVisible = false
     },
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     },
     toggleExploreRssFeedIsVisible () {
       this.exploreRssFeedIsVisible = !this.exploreRssFeedIsVisible
@@ -126,8 +126,10 @@ export default {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
         this.updateUserShowInExploreUpdatedAt()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
       } else {
         this.exploreRssFeedIsVisible = false
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     },
     loading (value) {
@@ -142,7 +144,6 @@ export default {
 dialog.explore
   left initial
   right 8px
-  max-height calc(100vh - 100px)
   .community
     .badge
       display flex

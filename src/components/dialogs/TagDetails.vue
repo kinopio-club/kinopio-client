@@ -322,7 +322,7 @@ export default {
       this.$store.dispatch('closeAllDialogs')
       if (this.spaceIsCurrentSpace(spaceId)) { return }
       const space = { id: spaceId }
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     },
     showCardDetails (card) {
       card = card || this.currentCard
@@ -335,7 +335,7 @@ export default {
         } else {
           space = cache.space(card.spaceId)
         }
-        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+        this.$store.dispatch('currentSpace/changeSpace', space)
       } else {
         const cardId = card.id || this.currentTag.cardId
         this.$store.commit('preventCardDetailsOpeningAnimation', false)
@@ -376,7 +376,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
     },
     updateResultsSectionHeight () {
       if (!this.visible) { return }
@@ -445,7 +445,6 @@ export default {
 .tag-details
   cursor auto
   transform-origin top left
-  overflow auto
   section.edit-card
     background-color var(--secondary-background)
   button.select-all

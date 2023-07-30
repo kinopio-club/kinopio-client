@@ -206,10 +206,10 @@ export default {
     closeDialogs () {
       this.addSpaceIsVisible = false
       this.spaceFiltersIsVisible = false
-      this.$store.commit('triggerSpaceDetailsCloseDialogs')
+      this.$store.commit('triggerCloseChildDialogs')
     },
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space })
+      this.$store.dispatch('currentSpace/changeSpace', space)
       this.$store.dispatch('closeAllDialogs')
       this.closeDialogs()
     },
@@ -315,7 +315,7 @@ export default {
         const cachedSpace = cache.space(space.id)
         const isCachedSpace = utils.objectHasKeys(cachedSpace)
         if (!isCachedSpace) {
-          this.storeLocal(`space-${space.id}`, space)
+          cache.storeLocal(`space-${space.id}`, space)
         }
       })
     },
@@ -367,6 +367,9 @@ export default {
         this.closeDialogs()
         this.updateFavorites()
         this.updateHeights()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     }
   }

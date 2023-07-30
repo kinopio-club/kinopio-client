@@ -73,7 +73,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: cardTipsIsVisible }")
         button.inline-button(tabindex="-1" :class="{ active: cardTipsIsVisible }")
           span ?
-      CardTips(:visible="cardTipsIsVisible" :maxCardLength="maxCardLength")
+      CardTips(:visible="cardTipsIsVisible")
 
     .row(v-if="cardPendingUpload")
       .badge.info
@@ -84,29 +84,29 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       template(v-if="canEditCard")
         //- Remove
         .button-wrap
-          button.danger(@click.left="removeCard")
+          button.danger(@click.left="removeCard" title="Remove Card")
             img.icon.remove(src="@/assets/remove.svg")
             //- span Remove
         //- [·]
         .button-wrap.cards-checkboxes
-          label(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0")
+          label.fixed-height(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0" title="Checkbox")
             input(type="checkbox" v-model="checkboxIsChecked" tabindex="-1")
-          label(v-else @click.left.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
+          label.fixed-height(v-else @click.left.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
             input.add(type="checkbox" tabindex="-1")
         //- Image
         .button-wrap
-          button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
+          button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}" title="Image")
             img.icon.flower(src="@/assets/flower.svg")
           ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImageOrFile")
         //- Toggle Style Actions
         .button-wrap
-          button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}")
+          button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}" title="More Options")
             img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
       //- Share
       .button-wrap.share-button-wrap(v-if="isName" @click.left.stop="toggleCardShareIsVisible" )
         button(:class="{active: cardShareIsVisible}")
           span Share
-        CardShare(:visible="cardShareIsVisible" :card="card")
+        CardShare(:visible="cardShareIsVisible" :card="card" :isReadOnly="!canEditCard")
 
     CardBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
     CardCollaborationInfo(:visible="shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
@@ -311,6 +311,11 @@ export default {
         if (!cardId) { return }
         prevCardId = cardId
         this.showCard(cardId)
+      } else if (mutation.type === 'triggerUpdateCardDetailsCardName') {
+        const { cardId, name } = mutation.payload
+        if (cardId !== this.card.id) { return }
+        this.cancelOpening()
+        this.updateCardName(name)
       }
     })
   },
@@ -568,12 +573,16 @@ export default {
     },
     styles () {
       let zoom = this.spaceCounterZoomDecimal
-      if (this.$store.state.isTouchDevice) {
-        zoom = 1 / utils.visualViewport().scale
+      if (utils.isAndroid()) {
+        zoom = utils.visualViewport().scale
+      } else if (this.$store.state.isTouchDevice) {
+        // on iOS, keyboard focus zooms
+        zoom = 1
       }
+      const transform = `scale(${zoom})`
       const left = `${this.card.x + 8}px`
       const top = `${this.card.y + 8}px`
-      return { transform: `scale(${zoom})`, left, top }
+      return { transform, left, top }
     },
     cardUrlPreviewIsVisible () {
       const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
@@ -684,7 +693,7 @@ export default {
         this.openingAlpha = alpha
         window.requestAnimationFrame(this.openingAnimationFrame)
       } else if (this.isOpening && percentComplete > 1) {
-        console.log('🎴🐢 cardDetails openingAnimationFrame complete')
+        console.log('🐢 cardDetails openingAnimationFrame complete')
         openingAnimationTimer = undefined
         openingStartTime = undefined
         this.isOpening = false
@@ -717,45 +726,15 @@ export default {
         }
       })
     },
-    updateLink ({ url, newUrl }) {
-      url = url.trim()
-      const newName = this.name.replace(url, newUrl)
-      this.updateCardName(newName)
-    },
     toggleUrlsIsVisible () {
       const isVisible = !this.urlsIsVisible
-      let newUrls = []
-      this.urls.forEach(url => {
-        url = url.trim()
-        url = utils.removeTrailingSlash(url)
-        const isUrl = utils.urlType(url) === 'link'
-        if (!isUrl) { return }
-        const queryString = utils.queryString(url)
-        const domain = utils.urlWithoutQueryString(url)
-        let queryObject
-        if (queryString) {
-          queryObject = qs.decode(queryString)
-        } else {
-          queryObject = {}
-        }
-        if (isVisible) {
-          queryObject.hidden = true
-          const newUrl = qs.encode(domain, queryObject)
-          newUrls.push({
-            url,
-            newUrl
-          })
-        } else {
-          delete queryObject.hidden
-          delete queryObject.kinopio
-          const newUrl = qs.encode(domain, queryObject)
-          newUrls.push({
-            url,
-            newUrl
-          })
-        }
-      })
-      newUrls.forEach(urls => this.updateLink(urls))
+      let newName
+      if (isVisible) {
+        newName = utils.addHiddenQueryStringToURLs(this.name)
+      } else {
+        newName = utils.removeHiddenQueryStringFromURLs(this.name)
+      }
+      this.updateCardName(newName)
     },
     updateNameSplitIntoCardsCount () {
       const isPreview = true
@@ -850,11 +829,6 @@ export default {
       this.pastedName = text
       this.wasPasted = true
       this.$store.dispatch('currentCards/updateURLQueryStrings', { cardId: this.card.id })
-      this.$nextTick(() => {
-        this.$nextTick(() => {
-          this.$store.commit('triggerCardIdUpdatePastedName', { cardId: this.card.id, name: text })
-        })
-      })
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
@@ -955,14 +929,13 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     textareaSizes () {
-      let textareas = document.querySelectorAll('dialog textarea')
+      const element = this.$refs.dialog
+      let textarea = element.querySelector('textarea')
       let modifier = 0
       if (this.canEditCard) {
         modifier = 1
       }
-      textareas.forEach(textarea => {
-        textarea.style.height = textarea.scrollHeight + modifier + 'px'
-      })
+      textarea.style.height = textarea.scrollHeight + modifier + 'px'
     },
     toggleCardTipsIsVisible () {
       const isVisible = this.cardTipsIsVisible
@@ -995,7 +968,6 @@ export default {
       this.cardShareIsVisible = !isVisible
     },
     focusName (position) {
-      utils.disablePinchZoom()
       if (this.shouldPreventNextFocusOnName) {
         this.triggerUpdatePositionInVisualViewport()
         this.$store.commit('shouldPreventNextFocusOnName', false)
@@ -1021,7 +993,7 @@ export default {
         this.$nextTick(() => {
           this.$nextTick(() => {
             const element = this.$refs.dialog
-            utils.scrollIntoView(element, behavior)
+            utils.scrollIntoView({ element, behavior })
           })
         })
       })
@@ -1031,12 +1003,9 @@ export default {
       if (utils.isIPhone()) {
         behavior = 'auto'
       }
-      utils.disablePinchZoom()
       this.$nextTick(() => {
-        if (!utils.isIPhone()) {
-          this.scrollIntoView(behavior)
-          this.focusName()
-        }
+        this.scrollIntoView(behavior)
+        this.focusName()
         this.triggerUpdateMagicPaintPositionOffset()
         this.triggerUpdatePositionInVisualViewport()
       })
@@ -1046,7 +1015,7 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     closeDialogs (shouldSkipGlobalDialogs) {
-      this.$store.commit('triggerCardDetailsCloseDialogs')
+      this.$store.commit('triggerCloseChildDialogs')
       this.imagePickerIsVisible = false
       this.cardTipsIsVisible = false
       this.cardFontsIsVisible = false
@@ -1246,7 +1215,7 @@ export default {
     replaceSlashCommandWithSpaceUrl (space) {
       let name = this.card.name
       let position = this.slashTextPosition()
-      const spaceUrl = utils.kinopioDomain() + '/' + space.url + ' '
+      const spaceUrl = consts.kinopioDomain() + '/' + space.url + ' '
       const start = name.substring(0, position)
       const end = name.substring(position + this.slashText().length, name.length)
       const newName = start + spaceUrl + end
@@ -1438,7 +1407,8 @@ export default {
         urlPreviewUrl: '',
         urlPreviewImage: '',
         urlPreviewTitle: '',
-        urlPreviewDescription: ''
+        urlPreviewDescription: '',
+        urlPreviewEmbedHtml: ''
       }
       this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
       this.$store.dispatch('currentCards/update', update)
@@ -1517,7 +1487,6 @@ export default {
     visible (visible) {
       if (!visible) {
         this.closeCard()
-        utils.enablePinchZoom()
       }
     }
   }

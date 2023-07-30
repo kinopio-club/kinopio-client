@@ -7,14 +7,25 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
 
   section
     .row
+      p New Spaces
+    .row
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
         input(type="checkbox" v-model="newSpacesAreBlank")
         span New Spaces Are Blank
+  section(v-if="deviceSupportsHapticFeedback")
+    .row
+      p Device
+    .row
+      label(:class="{active: shouldDisableHapticFeedback}" @click.left.prevent="toggleShouldDisableHapticFeedback" @keydown.stop.enter="toggleShouldDisableHapticFeedback")
+        input(type="checkbox" v-model="shouldDisableHapticFeedback")
+        img.icon.vibrate(src="@/assets/vibrate.svg")
+        span Disable Haptic Feedback
+
   section
     .row
       p Motion
     .row
-      label.variable-length-content(:class="{ active: shouldDisableItemJiggle }" @click.left.prevent="toggleshouldDisableItemJiggle" @keydown.stop.enter="toggleshouldDisableItemJiggle")
+      label(:class="{ active: shouldDisableItemJiggle }" @click.left.prevent="toggleshouldDisableItemJiggle" @keydown.stop.enter="toggleshouldDisableItemJiggle")
         input(type="checkbox" v-model="shouldDisableItemJiggle")
         span Disable Jiggle While Dragging
     .row
@@ -22,12 +33,27 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
         input(type="checkbox" v-model="shouldDisableStickyCards")
         span Disable Sticky Cards
     .row
-      label.variable-length-content(:class="{ active: shouldPauseConnectionDirections }" @click.left.prevent="toggleShouldPauseConnectionDirections" @keydown.stop.enter="toggleShouldPauseConnectionDirections")
+      label(:class="{ active: shouldPauseConnectionDirections }" @click.left.prevent="toggleShouldPauseConnectionDirections" @keydown.stop.enter="toggleShouldPauseConnectionDirections")
         input(type="checkbox" v-model="shouldPauseConnectionDirections")
         span Pause Connection Directions
+
   section
     .row
-      p Hold and Drag to Pan
+      p Outside Space
+    section.subsection
+      p The area outside your space, visible when zoomed out
+    .row
+      .segmented-buttons
+        button(:class="{ active: !outsideSpaceBackgroundIsStatic }" @click="updateOutsideSpaceBackgroundIsStatic(false)")
+          span Dynamic Colors
+        button(:class="{ active: outsideSpaceBackgroundIsStatic }" @click="updateOutsideSpaceBackgroundIsStatic(true)")
+          span Static
+
+  section
+    .row
+      p Panning
+    section.subsection
+      p Hold and drag space key, or right/middle mouse button, to Pan
     .row
       .segmented-buttons
         button(:class="{ active: !panSpeedIsFast }" @click="updatePanSpeedIsFast(false)")
@@ -37,7 +63,7 @@ dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.
     .row(v-if="panSpeedIsFast")
       .badge.danger Fast panning is experimental. If panning is not smooth for you then switch back to slow
     .row
-      label.variable-length-content(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
+      label(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
         span Disable Right/Middle Click to Pan
 </template>
@@ -71,15 +97,25 @@ export default {
     shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle },
     controlsSettingsIsPinned () { return this.$store.state.controlsSettingsIsPinned },
     panSpeedIsFast () { return this.$store.state.currentUser.panSpeedIsFast },
-    newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank }
+    outsideSpaceBackgroundIsStatic () { return this.$store.state.currentUser.outsideSpaceBackgroundIsStatic },
+    newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank },
+    shouldDisableHapticFeedback () { return this.$store.state.currentUser.shouldDisableHapticFeedback },
+    deviceSupportsHapticFeedback () { return consts.isSecureAppContext && this.isMobile }
   },
   methods: {
+    toggleShouldDisableHapticFeedback () {
+      const value = !this.shouldDisableHapticFeedback
+      this.$store.commit('currentUser/shouldDisableHapticFeedback', value)
+    },
     toggleNewSpacesAreBlank () {
       const value = !this.newSpacesAreBlank
       this.$store.dispatch('currentUser/newSpacesAreBlank', value)
     },
     updatePanSpeedIsFast (value) {
       this.$store.dispatch('currentUser/update', { panSpeedIsFast: value })
+    },
+    updateOutsideSpaceBackgroundIsStatic (value) {
+      this.$store.dispatch('currentUser/update', { outsideSpaceBackgroundIsStatic: value })
     },
     toggleshouldDisableItemJiggle () {
       const value = !this.shouldDisableItemJiggle
@@ -134,4 +170,6 @@ export default {
   .panning-speed-buttons
     margin-left 6px
     margin-top 0
+  .icon.vibrate
+    vertical-align 1px
 </style>

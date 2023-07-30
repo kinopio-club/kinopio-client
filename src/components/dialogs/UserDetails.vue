@@ -37,7 +37,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
     section.upgrade(v-if="!currentUserIsUpgraded")
       .row
         CardsCreatedProgress
-      .row(v-if="!isPricingHidden")
+      .row
         .button-wrap
           button(@click="triggerUpgradeUserIsVisible")
             span Upgrade for Unlimited
@@ -97,6 +97,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import postMessage from '@/postMessage.js'
 import { defineAsyncComponent } from 'vue'
 const User = defineAsyncComponent({
   loader: () => import('@/components/User.vue')
@@ -169,7 +170,6 @@ export default {
     spaceUserIsUpgraded () { return this.$store.getters['currentSpace/spaceUserIsUpgraded'] },
     spaceUser () { return this.$store.state.currentSpace.users[0] },
     isAddPage () { return this.$store.state.isAddPage },
-    isPricingHidden () { return this.$store.state.isPricingHidden },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
         return false
@@ -264,6 +264,7 @@ export default {
       })
     },
     signOut () {
+      postMessage.send({ name: 'onLogout' })
       cache.removeAll()
       // clear history wipe state from vue-router
       window.history.replaceState({}, 'Kinopio', '/')
@@ -296,7 +297,7 @@ export default {
       this.userSpaces = []
     },
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     },
     async removeCollaborator () {
       const user = this.user
@@ -306,7 +307,7 @@ export default {
     scrollUserDetailsIntoView () {
       this.$nextTick(() => {
         const element = this.$refs.dialog
-        utils.scrollIntoView(element)
+        utils.scrollIntoView({ element })
       })
     }
   },

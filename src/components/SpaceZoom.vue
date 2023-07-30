@@ -1,5 +1,5 @@
 <template lang="pug">
-.space-zoom
+.space-zoom(v-if="!isMobileOrTouch")
   Slider(
     @updatePlayhead="updateSpaceZoom"
     @resetPlayhead="resetZoomOrigin"
@@ -17,6 +17,7 @@
 <script>
 import Slider from '@/components/Slider.vue'
 import consts from '@/consts.js'
+import utils from '@/utils.js'
 
 const increment = 10
 
@@ -31,7 +32,7 @@ export default {
         this.updateSpaceZoomFromTrigger(this.max)
         window.scrollTo(0, 0)
       } else if (mutation.type === 'triggerSpaceZoomOut') {
-        let percent = this.spaceZoomPercent
+        let percent = this.$store.state.spaceZoomPercent
         let speed
         if (mutation.payload) {
           speed = mutation.payload.speed
@@ -39,7 +40,7 @@ export default {
         percent -= speed || increment
         this.updateSpaceZoomFromTrigger(percent)
       } else if (mutation.type === 'triggerSpaceZoomIn') {
-        let percent = this.spaceZoomPercent
+        let percent = this.$store.state.spaceZoomPercent
         let speed
         if (mutation.payload) {
           speed = mutation.payload.speed
@@ -63,7 +64,11 @@ export default {
     max () { return consts.spaceZoom.max }, // 100
     min () { return consts.spaceZoom.min }, // 20
     spaceZoomPercent () { return this.$store.state.spaceZoomPercent },
-    minKeyboardShortcut () { return 'Z' }
+    minKeyboardShortcut () { return 'Z' },
+    isMobileOrTouch () {
+      const isMobile = utils.isMobile()
+      return this.$store.isTouchDevice || isMobile
+    }
   },
   methods: {
     updateSpaceZoomFromTrigger (percent) {

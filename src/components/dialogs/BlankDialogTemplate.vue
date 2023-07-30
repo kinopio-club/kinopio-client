@@ -2,12 +2,11 @@
 // import utils from '@/utils.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
-// https://vuex.vuejs.org/guide/composition-api.html#accessing-state-and-getters
 import { useStore } from 'vuex'
 const store = useStore()
 
 onMounted(() => {
-  console.log(`🍆 the component is now mounted.`, store.state.currentSpace)
+  console.log(`🍆 the dialog is now mounted.`, store.state.currentSpace)
 })
 
 const props = defineProps({
@@ -34,12 +33,15 @@ const incrementBy = () => {
 </script>
 
 <template lang="pug">
-.component-name(v-if="visible")
-  button(@click="incrementBy")
-    span Count is: {{ state.count }}
-  p Current theme is: {{ themeName }}
+dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+  section
+    p blank dialog, please duplicate
+  section
+    button(@click="incrementBy")
+      span Count is: {{ state.count }}
+    p Current theme is: {{ themeName }}
 </template>
 
 <style lang="stylus">
-// .component-name
+// .dialog-name
 </style>

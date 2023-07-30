@@ -51,7 +51,7 @@ export default {
   },
   methods: {
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     },
     updateDialogHeight () {
       if (!this.visible) { return }
@@ -73,6 +73,9 @@ export default {
       if (visible) {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     }
   }

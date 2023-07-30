@@ -1,12 +1,11 @@
 <template lang="pug">
 .row.weather-row
-  .button-wrap(@click="toggleShowWeather")
-    button(:class="{ active: showWeather }")
+  .segmented-buttons
+    button(@click="toggleShowWeather" :class="{ active: showWeather }")
       span Weather
-  .segmented-buttons.weather-units(v-if="showWeather")
-    button(@click="toggleWeatherUnitIsCelcius(false)" :class="{ active: !weatherUnitIsCelcius }")
+    button(v-if="showWeather" @click="toggleWeatherUnitIsCelcius(false)" :class="{ active: !weatherUnitIsCelcius }")
       span F°
-    button(@click="toggleWeatherUnitIsCelcius(true)" :class="{ active: weatherUnitIsCelcius }")
+    button(v-if="showWeather" @click="toggleWeatherUnitIsCelcius(true)" :class="{ active: weatherUnitIsCelcius }")
       span C°
   p(v-if="!weatherLocation") Requires location access
 .row(v-if="error.location")
@@ -87,5 +86,5 @@ export default {
   align-items center
   p
     margin-top 0 !important
-    margin-left 6px
+    margin-left 8px
 </style>

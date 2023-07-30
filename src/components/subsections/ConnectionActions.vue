@@ -20,7 +20,7 @@ const state = reactive({
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCardDetailsCloseDialogs' && props.visible) {
+    if (mutation.type === 'triggerCloseChildDialogs' && props.visible) {
       closeDialogs()
     }
   })

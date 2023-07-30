@@ -47,6 +47,7 @@ import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import cache from '@/cache.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
@@ -86,11 +87,11 @@ export default {
   methods: {
     spaceUrl (notification) {
       if (!notification.space) { return }
-      return `${utils.kinopioDomain()}/${notification.space.id}`
+      return `${consts.kinopioDomain()}/${notification.space.id}`
     },
     cardUrl (notification) {
       if (!notification.card) { return }
-      return `${utils.kinopioDomain()}/${notification.space.id}/${notification.card.id}`
+      return `${consts.kinopioDomain()}/${notification.space.id}/${notification.card.id}`
     },
     isAskToAddToExplore (notification) {
       return notification.type === 'askToAddToExplore'
@@ -110,14 +111,14 @@ export default {
       this.$store.commit('cardDetailsIsVisibleForCardId', null)
       if (this.isCurrentSpace(spaceId)) { return }
       const space = { id: spaceId }
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     },
     showCardDetails (notification) {
       let space = utils.clone(notification.space)
       const card = utils.clone(notification.card)
       if (this.currentSpaceId !== space.id) {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
-        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+        this.$store.dispatch('currentSpace/changeSpace', space)
       } else {
         this.$store.dispatch('currentCards/showCardDetails', card.id)
       }
@@ -199,8 +200,9 @@ export default {
         this.filteredNotifications = this.notifications
         this.updateDialogHeight()
         this.$emit('updateNotifications')
-      }
-      if (!visible) {
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
         this.markAllAsRead()
         this.filteredNotifications = null
       }

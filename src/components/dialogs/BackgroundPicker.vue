@@ -1,12 +1,12 @@
 <template lang="pug">
-dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
+dialog.background-picker(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
     .row.title-row
       div
         BackgroundPreview(:space="currentSpace")
         span.title Background
       .row
-        button.small-button(:disabled="!canEditSpace" @click.left="removeBackgroundAll")
+        button.small-button(v-if="canEditSpace" @click.left="removeBackgroundAll")
           img.icon(src="@/assets/remove.svg")
 
   section(@mouseup.stop @touchend.stop)
@@ -232,7 +232,8 @@ export default {
     currentUser () { return this.$store.state.currentUser },
     background: {
       get () {
-        return this.currentSpace.background
+        const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/default-background-2x.png'
+        return this.currentSpace.background || defaultBackground
       },
       set (url) {
         this.updateSpaceBackground(url)
@@ -385,7 +386,7 @@ export default {
     updateSpaceBackground (url) {
       url = url.url || url
       this.$store.dispatch('currentSpace/updateSpace', { background: url })
-      this.$store.commit('triggerLoadBackground')
+      this.$store.commit('triggerUpdateBackground')
       this.updatePageSizes()
     },
     removeBackgroundTint () {
@@ -503,10 +504,10 @@ export default {
 </script>
 
 <style lang="stylus">
-dialog.background
+dialog.background-picker
   width 255px
   overflow auto
-  max-height 86vh
+  max-height calc(100dvh - 120px)
   .title-row
     margin-left 0 !important
   .background-preview

@@ -201,23 +201,23 @@ export default {
       this.loading.signUpOrIn = true
       currentUser = await this.validateReferrerName(currentUser)
       const response = await this.$store.dispatch('api/signUp', { email, password, currentUser, sessionToken })
-      const result = await response.json()
+      const newUser = await response.json()
       if (this.isSuccess(response)) {
         this.$store.commit('clearAllNotifications', false)
-        this.$store.commit('currentUser/apiKey', result.apiKey)
+        this.$store.commit('currentUser/replaceState', newUser)
         this.updateLocalSpacesWithNewUserId()
+        this.updateCurrentSpaceWithNewUserId(currentUser, newUser)
         await this.$store.dispatch('api/createSpaces')
         this.notifySignedIn()
         this.addCollaboratorToInvitedSpaces()
         const currentSpace = this.$store.state.currentSpace
-        this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
-        this.$store.commit('triggerCheckIfUseHasInboxSpace')
+        this.$store.commit('triggerUpdateWindowHistory')
         this.$store.dispatch('themes/restore')
         this.clearNotifications()
         this.checkIfShouldAddReferral()
         this.checkIfShouldUpgradeReferral()
       } else {
-        await this.handleErrors(result)
+        await this.handleErrors(newUser)
       }
     },
 
@@ -253,9 +253,8 @@ export default {
         this.clearNotifications()
         if (shouldLoadLastSpace) {
           this.$store.dispatch('currentSpace/loadLastSpace')
-          this.$store.commit('triggerUpdateWindowHistory', { space: this.$store.state.currentSpace })
+          this.$store.commit('triggerUpdateWindowHistory')
         }
-        this.$store.commit('triggerCheckIfUseHasInboxSpace')
       } else {
         await this.handleErrors(result)
       }
@@ -290,13 +289,19 @@ export default {
         cache.updateSpace('connectionTypes', space.connectionTypes, space.id)
         cache.updateSpace('connections', space.connections, space.id)
         cache.updateSpace('boxes', space.boxes, space.id)
+        cache.updateSpace('users', [{ id: userId }], space.id)
       })
+    },
+
+    updateCurrentSpaceWithNewUserId (previousUser, newUser) {
+      this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
+      this.$store.commit('currentSpace/addUserToSpace', newUser)
     },
 
     updateCurrentSpace (previousUser) {
       const currentUser = this.$store.state.currentUser
       const currentSpace = this.$store.state.currentSpace
-      this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
+      this.$store.commit('triggerUpdateWindowHistory')
       this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
       const userIsSpaceUser = this.$store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
       if (userIsSpaceUser) {
@@ -382,6 +387,9 @@ export default {
       if (value) {
         this.clearErrors()
         this.createSessionToken()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     },
     'loading.signUpOrIn' (value) {

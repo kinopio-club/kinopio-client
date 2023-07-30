@@ -7,12 +7,12 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         button.small-button(@click.left.stop="isPresentationMode")
           img.icon(src="@/assets/presentation.svg")
           span Present
-        .button-wrap(v-if="spaceHasUrl")
+        .button-wrap(v-if="spaceIsRemote")
           button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: spaceRssFeedIsVisible }")
             span RSS
           SpaceRssFeed(:visible="spaceRssFeedIsVisible")
 
-  section(v-if="spaceHasUrl")
+  section(v-if="spaceIsRemote")
     ReadOnlySpaceInfoBadges
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
@@ -49,7 +49,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     template(v-if="spaceHasOtherCardUsers")
       UserList(:users="spaceOtherCardUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 
-  section(v-if="!spaceHasUrl")
+  section(v-if="!spaceIsRemote")
     p
       span To share or invite collaborators,
       span.badge.info you need to Sign Up or In
@@ -72,7 +72,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
           span Embed
         Embed(:visible="embedIsVisible")
 
-  section
+  section(v-if='!isSecureAppContextIOS')
     .button-wrap
       button(@click="triggerEarnCreditsIsVisible")
         span Earn Credits
@@ -91,6 +91,7 @@ import Import from '@/components/dialogs/Import.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
+import consts from '@/consts.js'
 
 export default {
   name: 'Share',
@@ -119,7 +120,6 @@ export default {
   data () {
     return {
       urlIsCopied: false,
-      spaceHasUrl: false,
       privacyPickerIsVisible: false,
       selectedUser: {},
       dialogHeight: null,
@@ -131,6 +131,7 @@ export default {
     }
   },
   computed: {
+    isSecureAppContextIOS () { return consts.isSecureAppContextIOS },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     exploreSectionIsVisible () {
@@ -162,6 +163,9 @@ export default {
     },
     isSpaceMember () {
       return this.$store.getters['currentUser/isSpaceMember']()
+    },
+    spaceIsRemote () {
+      return this.$store.getters['currentSpace/isRemote']
     },
     spaceCollaborators () { return this.$store.state.currentSpace.collaborators },
     spaceHasCollaborators () {
@@ -285,20 +289,17 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
-    },
-    updateSpaceHasUrl () {
-      const hasCurrentSpacePath = this.$store.state.currentSpacePath !== '/'
-      const hasWindowUrl = window.location.href !== (window.location.origin + '/')
-      this.spaceHasUrl = hasCurrentSpacePath || hasWindowUrl
     }
   },
   watch: {
     visible (visible) {
       this.$store.commit('clearNotificationsWithPosition')
-      this.updateSpaceHasUrl()
       this.closeDialogs()
       if (visible) {
         this.updateDialogHeight()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     }
   }

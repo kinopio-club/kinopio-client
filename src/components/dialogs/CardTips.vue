@@ -4,19 +4,40 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
     p Tips
   section
     article
-      p
-        span.badge.keyboard-shortcut [[
-        span create tags to label and group ideas
-    article
-      p
-        span.badge.keyboard-shortcut /
-        span link to other spaces
-    article
-      p
-        span.badge.keyboard-shortcut Ctrl-Enter
-        span line break
-    article
       p Card character limit is {{maxCardLength}}
+    article
+      .row
+        p
+          img.icon(src="@/assets/add.svg")
+          span Add Card
+        span.badge.keyboard-shortcut Enter
+    article
+      .row
+        p
+          img.icon(src="@/assets/add.svg")
+          span Add Child Card
+        span.badge.keyboard-shortcut Shift-Enter
+    article
+      .row
+        p
+          img.icon(src="@/assets/line-break.svg")
+          span Line Break
+        span.badge.keyboard-shortcut Ctrl-Enter
+    template(v-if="!shouldHideAdvanced")
+      article
+        .row
+          span Backlinked Tag
+          span.badge.keyboard-shortcut [[
+      article
+        .row
+          span Link to Other Spaces
+          span.badge.keyboard-shortcut /
+      //- article
+      //-   .row
+      //-     span Comment Card
+      //-     span.badge.keyboard-shortcut ((
+
+    //- Markdown
     article
       .row
         button(@click.left.stop="toggleMarkdownInfoIsVisible" :class="{ active: markdownInfoIsVisible }")
@@ -44,26 +65,30 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
 
 <script>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 export default {
   name: 'CardTips',
   props: {
     visible: Boolean,
-    maxCardLength: Number
+    preventScrollIntoView: Boolean,
+    shouldHideAdvanced: Boolean
   },
   data () {
     return {
       markdownInfoIsVisible: false
     }
   },
-  // computed: {
-  // },
+  computed: {
+    maxCardLength () { return consts.maxCardLength }
+  },
   methods: {
     scrollIntoView () {
+      if (this.preventScrollIntoView) { return }
       if (utils.isMobile()) { return }
       this.$nextTick(() => {
         const element = this.$refs.dialog
-        utils.scrollIntoView(element)
+        utils.scrollIntoView({ element })
       })
     },
     toggleMarkdownInfoIsVisible () {
@@ -84,10 +109,12 @@ export default {
 </script>
 
 <style lang="stylus">
-.card-tips
+dialog.card-tips
   left initial
   right 8px
   top 22px
+  overflow auto
+  overscroll-behavior-y auto
   article
     position static
     margin-bottom 10px

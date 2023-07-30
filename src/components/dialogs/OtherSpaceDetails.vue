@@ -51,7 +51,7 @@ const styles = computed(() => {
 const scrollIntoView = async () => {
   await nextTick()
   const dialog = document.querySelector('dialog.other-space-details')
-  utils.scrollIntoView(dialog)
+  utils.scrollIntoView({ element: dialog })
 }
 
 // select space
@@ -60,7 +60,7 @@ const changeSpace = () => {
   if (otherSpace.value.isInvite) {
     window.location = otherSpace.value.url
   } else {
-    store.dispatch('currentSpace/changeSpace', { space: otherSpace.value, isRemote: true })
+    store.dispatch('currentSpace/changeSpace', otherSpace.value)
     store.dispatch('closeAllDialogs')
   }
 }

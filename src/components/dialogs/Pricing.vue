@@ -1,8 +1,9 @@
 <script setup>
 import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
 import DiscountRow from '@/components/DiscountRow.vue'
+import consts from '@/consts.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
@@ -10,12 +11,23 @@ const props = defineProps({
   visible: Boolean
 })
 
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    store.commit('shouldExplicitlyHideFooter', true)
+  } else {
+    store.commit('shouldExplicitlyHideFooter', false)
+  }
+})
+
+const monthlyPrice = computed(() => consts.price('month').amount)
+const yearlyPrice = computed(() => consts.price('year').amount)
+
 </script>
 
 <template lang="pug">
 dialog.narrow.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
-    p Kinopio is free for 100 cards, afterwards it's $6/month or $60/year
+    p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
     DiscountRow()
     ReferredNewUserCredits()
     table

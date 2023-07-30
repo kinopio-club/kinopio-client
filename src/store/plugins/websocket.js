@@ -8,6 +8,7 @@
 import { nanoid } from 'nanoid'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
@@ -23,7 +24,7 @@ const joinSpaceRoom = (store, mutation) => {
   if (!websocket) { return }
   const space = utils.clone(store.state.currentSpace)
   const user = utils.clone(store.state.currentUser)
-  const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
+  const currentSpaceIsRemote = store.getters['currentSpace/isRemote']
   if (!currentSpaceIsRemote) {
     store.commit('isJoiningSpace', false)
     return
@@ -90,7 +91,7 @@ const checkIfShouldUpdateBackground = (store, { message, updates }) => {
   updateKeys.forEach(key => {
     const shouldUpdateBackground = key === 'background' || key === 'backgroundTint'
     if (message === 'updateSpace' && shouldUpdateBackground) {
-      store.commit('triggerLoadBackground')
+      store.commit('triggerUpdateBackground')
     }
   })
 }
@@ -106,7 +107,7 @@ export default function createWebSocketPlugin () {
     store.subscribe((mutation, state) => {
       if (mutation.type === 'broadcast/connect') {
         store.commit('isJoiningSpace', true)
-        const host = utils.websocketHost()
+        const host = consts.websocketHost()
         websocket = new WebSocket(host)
         websocket.onopen = (event) => {
           currentUserIsConnected = true
@@ -178,8 +179,6 @@ export default function createWebSocketPlugin () {
         store.commit('currentSpace/removeClientsFromSpace')
         sendEvent(store, mutation)
       } else if (mutation.type === 'broadcast/update') {
-        const canEditSpace = store.getters['currentUser/canEditSpace']()
-        if (!canEditSpace) { return }
         sendEvent(store, mutation)
       } else if (mutation.type === 'broadcast/updateUser') {
         sendEvent(store, mutation)

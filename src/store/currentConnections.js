@@ -17,7 +17,8 @@ export default {
     ids: [],
     connections: {},
     typeIds: [],
-    types: {}
+    types: {},
+    lastTypeId: ''
   },
   mutations: {
 
@@ -89,20 +90,12 @@ export default {
       })
       cache.updateSpace('connectionTypes', state.types, currentSpaceId)
     },
-    reorderTypeToEnd: (state, type) => {
-      state.typeIds.filter(id => id !== type.id)
-      state.typeIds.push(type.id)
+    lastTypeId: (state, id) => {
+      state.lastTypeId = id
     },
 
     // broadcast
 
-    updatePathsWhileDraggingBroadcast: (state, { connections, paths }) => {
-      if (!paths) { return }
-      connections.forEach(connection => {
-        const path = paths.find(path => path.id === connection.id).path
-        state.connections[connection.id].path = path
-      })
-    },
     updatePathsBroadcast: (state, { connections }) => {
       connections.forEach(connection => {
         state.connections[connection.id].path = connection.path
@@ -214,6 +207,7 @@ export default {
       }
       connectionType.userId = context.rootState.currentUser.id
       context.commit('createType', connectionType)
+      context.commit('lastTypeId', connectionType.id)
       context.dispatch('broadcast/update', { updates: connectionType, type: 'addConnectionType', handler: 'currentConnections/createType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
     },
@@ -244,11 +238,13 @@ export default {
       })
     },
     updatePathsWhileDragging: (context, { connections }) => {
-      const paths = connections.map(connection => {
+      connections = connections.map(connection => {
         const path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
         context.commit('updatePathWhileDragging', { connection, path })
+        connection.path = path
+        return connection
       })
-      context.dispatch('broadcast/update', { updates: { connections, paths }, type: 'updateConnection', handler: 'currentConnections/updatePathsWhileDraggingBroadcast' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnection', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
     },
     correctPaths: (context, { shouldUpdateApi }) => {
       if (!context.rootState.webfontIsLoaded) { return }
@@ -346,15 +342,15 @@ export default {
         return typeIds.includes(type.id)
       })
     },
-    typeForNewConnections: (state, getters, rootState) => {
+    typeForNewConnections: (state, getters, rootState, rootGetters) => {
       const userId = rootState.currentUser.id
+      const shouldUseLastConnectionType = rootState.currentUser.shouldUseLastConnectionType
       let types = getters.allTypes
       types = types.filter(type => type.userId === userId)
-      if (types.length) {
-        return last(types)
+      if (shouldUseLastConnectionType) {
+        return getters.lastType
       } else {
-        const typeId = last(state.typeIds)
-        return state.types[typeId]
+        return last(types)
       }
     },
     typeByConnection: (state, getters) => (connection) => {
@@ -375,6 +371,11 @@ export default {
         return isColor && isName
       })
       return existingType
+    },
+    lastType: (state, getters) => {
+      const id = state.lastTypeId || last(state.typeIds)
+      let type = getters.typeByTypeId(id)
+      return type
     },
 
     // path utils

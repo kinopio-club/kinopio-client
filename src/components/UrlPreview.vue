@@ -4,10 +4,10 @@
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}" :class="{'no-padding': shouldHideInfo && !shouldHideImage, 'is-no-info': !previewHasInfo}")
       //- card details buttons
-      .content-buttons
-        .row(v-if="canEditCard")
+      .content-buttons(v-if="canEditCard")
+        .row
           //- hide url
-          .button-wrap(v-if="moreOptionsIsVisible")
+          .button-wrap
             button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}")
               img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
               img.icon(v-else src="@/assets/view.svg")
@@ -106,8 +106,13 @@ export default {
       return title
     },
     description () {
-      let description = this.card.urlPreviewDescription
-      return utils.truncated(description, 100)
+      const url = this.card.urlPreviewUrl
+      const isTwitterUrl = url.includes('twitter.com')
+      if (isTwitterUrl) {
+        let description = this.card.urlPreviewDescription
+        return utils.truncated(description, 350)
+      }
+      return null
     },
     shouldLoadUrlPreviewImage () {
       return this.card.urlPreviewImage && this.imageCanLoad

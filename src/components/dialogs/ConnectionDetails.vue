@@ -9,7 +9,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
       input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="focus" @blur="blur" :class="{'is-dark': typeColorisDark}")
 
-    .row
+    .row(v-if="canEditConnection")
       //- Arrows or Label
       ConnectionDecorators(:connections="[currentConnection]")
 
@@ -28,25 +28,24 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       template(v-else-if="spacePrivacyIsClosed")
         span.badge.info
           img.icon(src="@/assets/unlock.svg")
-          span To edit closed spaces, you'll need to be invited
-    .row
+          span Read Only
+    .row(v-if="canEditConnection")
       //- Remove
-      button.danger(:disabled="!canEditConnection" @click.left="removeConnection")
+      button.danger(@click.left="removeConnection")
         img.icon(src="@/assets/remove.svg")
-        span Remove
-  section.results-actions(ref="resultsActions")
+  section.results-actions(v-if="canEditConnection" ref="resultsActions")
     //- Use Last Type
     .row.title-row
-      label(:class="{active: shouldUseLastConnectionType, disabled: !canEditConnection}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
+      label(:class="{active: shouldUseLastConnectionType}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
         input(type="checkbox" v-model="shouldUseLastConnectionType")
-        .badge.badge-in-button(:style="{backgroundColor: typeColor}")
+        .badge.badge-in-button(:style="{backgroundColor: lastTypeColor}")
         span Use Last Type
       //- Filter
       button.small-button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
         img.icon(src="@/assets/filter.svg")
 
     .row
-      button(:disabled="!canEditConnection" @click.left="addConnectionType")
+      button(@click.left="addConnectionType")
         img.icon(src="@/assets/add.svg")
         .badge.badge-in-button(:style="{backgroundColor: nextConnectionTypeColor}")
         span Type
@@ -55,7 +54,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
     ResultsFilter(:items="connectionTypesByUpdatedAt" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
     ul.results-list
       template(v-for="type in connectionTypesFiltered" :key="type.id")
-        li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click.left="changeConnectionType(type)")
+        li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click.left="changeConnectionType(type)" :data-type-id="type.id")
           .badge(:style="{backgroundColor: type.color}")
           .name {{type.name}}
 </template>
@@ -175,6 +174,10 @@ export default {
         this.toggleFilteredInSpace()
       }
     },
+    lastTypeColor () {
+      const lastType = this.$store.getters['currentConnections/lastType']
+      return lastType.color
+    },
     typeColorisDark () {
       return utils.colorIsDark(this.typeColor)
     }
@@ -213,7 +216,7 @@ export default {
         id: this.currentConnection.id,
         connectionTypeId: type.id
       })
-      this.$store.commit('currentConnections/reorderTypeToEnd', type)
+      this.$store.commit('currentConnections/lastTypeId', type.id)
     },
     toggleColorPicker () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible
@@ -253,7 +256,7 @@ export default {
         const element = this.$refs.dialog
         this.updateResultsSectionMaxHeight()
         this.$nextTick(() => {
-          utils.scrollIntoView(element)
+          utils.scrollIntoView({ element })
         })
       })
     },
@@ -309,7 +312,7 @@ export default {
         if (this.visible) {
           this.colorPickerIsVisible = false
           this.scrollIntoViewAndFocus()
-          this.$store.commit('currentConnections/reorderTypeToEnd', this.currentConnectionType)
+          this.$store.commit('currentConnections/lastTypeId', this.currentConnectionType.id)
         } else {
           this.$store.commit('shouldHideConnectionOutline', false)
         }

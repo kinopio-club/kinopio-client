@@ -3,6 +3,8 @@
 </template>
 
 <script>
+import postMessage from '@/postMessage.js'
+
 // adapted from https://gist.github.com/pketh/3f62b807db3835d564c1
 let colorCycleTimer
 let colorCycleIteration = 0
@@ -43,6 +45,7 @@ export default {
   },
   computed: {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
+    outsideSpaceBackgroundIsStatic () { return this.$store.state.currentUser.outsideSpaceBackgroundIsStatic },
     styles () {
       return {
         backgroundColor: this.backgroundColor
@@ -64,12 +67,15 @@ export default {
       g += gi
       b += bi
       this.backgroundColor = `rgb(${r}, ${g}, ${b})`
+      if (this.outsideSpaceBackgroundIsStatic) {
+        this.backgroundColor = null
+      }
       this.updateMetaThemeColor(this.backgroundColor)
     },
     cancel () {
       window.cancelAnimationFrame(colorCycleTimer)
       colorCycleTimer = undefined
-      const color = this.$store.state.currentSpace.backgroundTint || '#ffffff'
+      const color = this.$store.state.currentSpace.backgroundTint || null
       this.updateMetaThemeColor(color)
     },
     start () {
@@ -95,6 +101,7 @@ export default {
     updateMetaThemeColor (color) {
       const metaThemeColor = document.querySelector('meta[name=theme-color]')
       metaThemeColor.setAttribute('content', color)
+      postMessage.send({ name: 'setBackgroundColor', value: color })
     }
   }
 }
@@ -107,5 +114,5 @@ export default {
   left 0
   width 110%
   height 110%
-  background-color var(--secondary-background)
+  background-color var(--secondary-active-background)
 </style>

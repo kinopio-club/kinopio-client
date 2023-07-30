@@ -411,7 +411,7 @@ export default {
       this.copyCardsIsVisible = false
       this.moveCardsIsVisible = false
       this.cardShareIsVisible = false
-      this.$store.commit('triggerCardDetailsCloseDialogs')
+      this.$store.commit('triggerCloseChildDialogs')
     },
     connectionType (event) {
       let connectionType = last(this.$store.getters['currentConnections/allTypes'])
@@ -527,7 +527,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
     },
     updatePinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())

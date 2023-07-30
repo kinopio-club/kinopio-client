@@ -1,71 +1,88 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
+import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
 import dayjs from 'dayjs'
 
+const initialState = {
+  id: nanoid(),
+  lastSpaceId: '',
+  color: randomColor({ luminosity: 'light' }),
+  name: undefined,
+  description: undefined,
+  website: undefined,
+  lastReadNewStuffId: undefined,
+  apiKey: '',
+  arenaAccessToken: '',
+  favoriteUsers: [],
+  favoriteSpaces: [],
+  favoriteColors: [],
+  cardsCreatedCount: 0,
+  isUpgraded: false,
+  isModerator: false,
+  isGuideMaker: false,
+  filterShowUsers: false,
+  filterShowDateUpdated: false,
+  filterShowAbsoluteDates: false,
+  filterUnchecked: false,
+  filterComments: false,
+  journalPrompts: [],
+  shouldCreateJournalsWithDailyPrompt: true,
+  newSpacesAreBlank: false,
+  shouldEmailNotifications: true,
+  shouldEmailBulletin: true,
+  shouldEmailWeeklyReview: true,
+  shouldShowMoreAlignOptions: false,
+  shouldUseLastConnectionType: true,
+  shouldShowItemActions: false,
+  shouldDisableRightClickToPan: false,
+  shouldShowCurrentSpaceTags: false,
+  showInExploreUpdatedAt: null, // date
+  dialogSpaceFilters: null, // null, journals, spaces
+  dialogSpaceFilterByUser: {},
+  dialogSpaceFilterShowHidden: false,
+  defaultSpaceBackground: undefined,
+  defaultSpaceBackgroundTint: undefined,
+  defaultCardBackgroundColor: undefined,
+  defaultConnectionControlPoint: null, // null, 'q00,00'
+  downgradeAt: null,
+  showWeather: false,
+  weatherLocation: undefined,
+  weatherUnitIsCelcius: false,
+  shouldUseStickyCards: true,
+  shouldDisableItemJiggle: false,
+  shouldPauseConnectionDirections: false,
+  lastUsedImagePickerService: '',
+  AIImages: [],
+  theme: null,
+  themeIsSystem: false,
+  referredByUserId: '',
+  referrerName: '',
+  weather: '',
+  journalDailyPrompt: '',
+  panSpeedIsFast: false,
+  outsideSpaceBackgroundIsStatic: false,
+  shouldDisableHapticFeedback: false
+}
+
 export default {
   namespaced: true,
-  state: {
-    id: nanoid(),
-    lastSpaceId: '',
-    prevLastSpaceId: '',
-    color: randomColor({ luminosity: 'light' }),
-    name: undefined,
-    description: undefined,
-    website: undefined,
-    lastReadNewStuffId: undefined,
-    apiKey: '',
-    arenaAccessToken: '',
-    favoriteUsers: [],
-    favoriteSpaces: [],
-    favoriteColors: [],
-    cardsCreatedCount: 0,
-    isUpgraded: false,
-    isModerator: false,
-    isGuideMaker: false,
-    filterShowUsers: false,
-    filterShowDateUpdated: false,
-    filterShowAbsoluteDates: false,
-    filterUnchecked: false,
-    filterComments: false,
-    journalPrompts: [],
-    newSpacesAreBlank: false,
-    shouldEmailNotifications: true,
-    shouldEmailBulletin: true,
-    shouldEmailWeeklyReview: true,
-    shouldShowMoreAlignOptions: false,
-    shouldUseLastConnectionType: true,
-    shouldShowItemActions: false,
-    shouldDisableRightClickToPan: false,
-    shouldShowCurrentSpaceTags: false,
-    showInExploreUpdatedAt: null, // date
-    dialogSpaceFilters: null, // null, journals, spaces
-    dialogSpaceFilterByUser: {},
-    dialogSpaceFilterShowHidden: false,
-    defaultSpaceBackground: undefined,
-    defaultSpaceBackgroundTint: undefined,
-    defaultCardBackgroundColor: undefined,
-    defaultConnectionControlPoint: null, // null, 'q00,00'
-    downgradeAt: null,
-    showWeather: false,
-    weatherLocation: undefined,
-    weatherUnitIsCelcius: false,
-    shouldUseStickyCards: true,
-    shouldDisableItemJiggle: false,
-    shouldPauseConnectionDirections: false,
-    lastUsedImagePickerService: '',
-    AIImages: [],
-    theme: null,
-    themeIsSystem: false,
-    referredByUserId: '',
-    referrerName: '',
-    weather: '',
-    panSpeedIsFast: false
-  },
+  state: utils.clone(initialState),
   mutations: {
+    replaceState: (state, newUser) => {
+      if (!newUser) { return }
+      Object.keys(state).forEach(key => {
+        state[key] = newUser[key] || initialState[key]
+      })
+      postMessage.send({ name: 'setApiKey', value: newUser.apiKey })
+      cache.removeLocal('user')
+      cache.storeLocal('user', newUser)
+    },
+
     color: (state, value) => {
       state.color = value
       cache.updateUser('color', value)
@@ -87,7 +104,6 @@ export default {
       cache.updateUser('email', value)
     },
     lastSpaceId: (state, spaceId) => {
-      state.prevLastSpaceId = state.lastSpaceId
       state.lastSpaceId = spaceId
       cache.updateUser('lastSpaceId', spaceId)
     },
@@ -104,10 +120,6 @@ export default {
     lastReadNewStuffId: (state, newStuffId) => {
       state.lastReadNewStuffId = newStuffId
       cache.updateUser('lastReadNewStuffId', newStuffId)
-    },
-    apiKey: (state, apiKey) => {
-      state.apiKey = apiKey
-      cache.updateUser('apiKey', apiKey)
     },
     favoriteUsers: (state, users) => {
       utils.typeCheck({ value: users, type: 'array' })
@@ -145,20 +157,11 @@ export default {
         if (user[item]) {
           state[item] = user[item]
         }
+        if (user.apiKey) {
+          postMessage.send({ name: 'setApiKey', value: user.apiKey })
+        }
       })
       cache.saveUser(user)
-    },
-    // Aug 2019 migration
-    updateBetaUserId: (state, newId) => {
-      if (state.id === '1') {
-        const newId = nanoid()
-        state.id = newId
-        cache.updateUser('id', newId)
-      }
-      // Oct 2019 migration
-      if (!state.apiKey) {
-        state.apiKey = ''
-      }
     },
     arenaAccessToken: (state, token) => {
       state.arenaAccessToken = token
@@ -295,6 +298,18 @@ export default {
       state.panSpeedIsFast = value
       cache.updateUser('panSpeedIsFast', value)
     },
+    outsideSpaceBackgroundIsStatic: (state, value) => {
+      state.outsideSpaceBackgroundIsStatic = value
+      cache.updateUser('outsideSpaceBackgroundIsStatic', value)
+    },
+    shouldDisableHapticFeedback: (state, value) => {
+      state.shouldDisableHapticFeedback = value
+      cache.updateUser('shouldDisableHapticFeedback', value)
+    },
+    shouldCreateJournalsWithDailyPrompt: (state, value) => {
+      state.shouldCreateJournalsWithDailyPrompt = value
+      cache.updateUser('shouldCreateJournalsWithDailyPrompt', value)
+    },
     showWeather: (state, value) => {
       state.showWeather = value
       cache.updateUser('showWeather', value)
@@ -306,6 +321,10 @@ export default {
     weatherUnitIsCelcius: (state, value) => {
       state.weatherUnitIsCelcius = value
       cache.updateUser('weatherUnitIsCelcius', value)
+    },
+    journalDailyPrompt: (state, value) => {
+      state.journalDailyPrompt = value
+      cache.updateUser('journalDailyPrompt', value)
     },
     shouldUseStickyCards: (state, value) => {
       state.shouldUseStickyCards = value
@@ -354,7 +373,6 @@ export default {
       if (utils.objectHasKeys(cachedUser)) {
         console.log('🌸 Restore user from cache', cachedUser.id)
         context.commit('restoreUser', cachedUser)
-        context.commit('updateBetaUserId')
         context.dispatch('restoreRemoteUser', cachedUser)
       } else {
         console.log('🌸 Create new user')
@@ -363,11 +381,17 @@ export default {
       context.dispatch('themes/restore', null, { root: true })
       context.commit('triggerUserIsLoaded', null, { root: true })
       context.dispatch('updateWeather')
+      context.dispatch('updateJournalDailyPrompt')
     },
     updateWeather: async (context) => {
       const weather = await context.dispatch('api/weather', null, { root: true })
       if (!weather) { return }
       context.commit('weather', weather)
+    },
+    updateJournalDailyPrompt: async (context) => {
+      const prompt = await context.dispatch('api/journalDailyPrompt', null, { root: true })
+      if (!prompt) { return }
+      context.commit('journalDailyPrompt', prompt)
     },
     update: (context, updates) => {
       const keys = Object.keys(updates)
@@ -391,8 +415,7 @@ export default {
       if (utils.arrayHasItems(context.state.journalPrompts)) { return }
       let prompts = [
         { name: 'How am I feeling?' },
-        { name: 'What do I have to do today?' },
-        { name: 'Everyday', packId: '1' }
+        { name: 'What do I have to do today?' }
       ]
       prompts = prompts.map(prompt => {
         prompt.id = nanoid()
@@ -442,7 +465,7 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       console.log('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
-      if (remoteUser.stripeSubscriptionId || remoteUser.downgradeAt) {
+      if (remoteUser.stripeSubscriptionId || remoteUser.downgradeAt || remoteUser.appleSubscriptionIsActive) {
         context.commit('isUpgraded', true)
       } else {
         context.commit('isUpgraded', false)
@@ -761,6 +784,17 @@ export default {
         context.commit('addNotification', { message: 'Invalid referral, refferer name not found', type: 'danger', isPersistentItem: true }, { root: true })
       }
       context.commit('validateReferralByName', '', { root: true })
+    },
+    notifyReadOnly: (context, position) => {
+      const canEditSpace = context.getters.canEditSpace()
+      if (canEditSpace) { return }
+      const cannotEditUnlessSignedIn = context.getters.cannotEditUnlessSignedIn()
+      const notificationWithPosition = document.querySelector('.notifications-with-position .item')
+      if (cannotEditUnlessSignedIn) {
+        context.commit('addNotificationWithPosition', { message: 'Sign in to Edit', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
+      } else {
+        context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
+      }
     }
   },
   getters: {
@@ -787,6 +821,12 @@ export default {
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
       const isSpaceMember = getters.isSpaceMember(space)
       return canEditOpenSpace || isSpaceMember
+    },
+    cannotEditUnlessSignedIn: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const spaceIsOpen = space.privacy === 'open'
+      const currentUserIsSignedIn = getters.isSignedIn
+      return !currentUserIsSignedIn && spaceIsOpen
     },
     cardIsCreatedByCurrentUser: (state, getters, rootState) => (card) => {
       const isCreatedByUser = state.id === card.userId
@@ -915,14 +955,11 @@ export default {
       const images = getters.AIImagesThisMonth
       return Math.floor(images.length / 2)
     },
-    AIImageLimitUpgradedUser: (state) => {
-      return 50
-    },
     AIImagesLimit: (state, getters) => {
       if (state.isUpgraded) {
-        return getters.AIImageLimitUpgradedUser
+        return consts.AIImageLimitUpgradedUser
       } else {
-        return 10
+        return consts.AIImageLimitFreeUser
       }
     },
     AIImagesIsUnderLimit: (state, getters) => {

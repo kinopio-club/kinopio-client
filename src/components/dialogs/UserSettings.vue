@@ -83,6 +83,7 @@ import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import Loader from '@/components/Loader.vue'
+import cache from '@/cache.js'
 
 export default {
   name: 'UserSettings',
@@ -142,8 +143,11 @@ export default {
         })
       }
       await this.$store.dispatch('api/deleteUserPermanent')
+      cache.removeAll()
+      // clear history wipe state from vue-router
+      window.history.replaceState({}, 'Kinopio', '/')
+      location.reload()
       this.loading.deleteUserPermanent = false
-      this.$emit('removeUser')
     },
     toggleControlsSettingsIsVisible () {
       const isVisible = this.controlsSettingsIsVisible

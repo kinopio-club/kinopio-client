@@ -3,12 +3,20 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
   section
     p Export
   section
-    //- Card Names
     .row
       button(@click.left="copyText")
         img.icon.copy(src="@/assets/copy.svg")
         span Copy All Card Names
-    //- PDF
+    .row
+      button(@click.left="duplicateSpace")
+        img.icon(src="@/assets/add.svg")
+        span Make a Copy
+    .row(v-if="spaceIsDuplicated")
+      span.badge.success Space copied
+
+  section
+    .row
+      p Download
     .row
       .button-wrap(v-if="currentUserIsSignedIn")
         button(@click.left.stop="togglePdfIsVisible" :class="{ active: pdfIsVisible }")
@@ -16,14 +24,7 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
       .button-wrap
         button(@click.left="downloadLocalJSON")
           span JSON
-
     Pdf(:visible="pdfIsVisible")
-    //- Duplicate
-    button(@click.left="duplicateSpace")
-      img.icon(src="@/assets/add.svg")
-      span Make a Copy
-    .row(v-if="spaceIsDuplicated")
-      span.badge.success Space copied
 
   section
     // anon user
@@ -34,9 +35,9 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     // signed in user
     template(v-if="currentUserIsSignedIn")
       p
-        span Backup
+        span Backup All
       button(@click.left="downloadAllSpacesRemote" :class="{ active: isLoadingAllSpaces }")
-        span All Spaces (JSON and TXT)
+        span Download all Spaces (JSON and TXT)
         Loader(:visible="isLoadingAllSpaces")
     a#export-downlaod-anchor.hidden
     .info-container(v-if="isLoadingAllSpaces")
@@ -130,7 +131,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
     },
     duplicateSpace () {
       this.$store.dispatch('currentSpace/duplicateSpace')
@@ -186,6 +187,7 @@ export default {
   button
     display block
     margin-left 0
+    white-space initial
   button + button
     margin-top 10px
   .badge.success

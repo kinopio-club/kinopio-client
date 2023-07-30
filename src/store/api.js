@@ -123,6 +123,7 @@ const self = {
     // Queue
 
     addToQueue: (context, { name, body, spaceId }) => {
+      if (!context.rootGetters.isSpacePage) { return }
       body = utils.clone(body)
       body.spaceId = spaceId || context.rootState.currentSpace.id
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
@@ -860,6 +861,15 @@ const self = {
         context.dispatch('handleServerError', { name: 'donationUrl', error })
       }
     },
+    updateAppleAppAccountToken: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/billing/update-app-account-token`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'appleAppAccountToken', error })
+      }
+    },
 
     // Upload
 
@@ -932,9 +942,9 @@ const self = {
     },
     urlPreview: async (context, url) => {
       try {
-        const apiKey = '0788beaa34f65adc0fe7ac'
+        const apiKey = consts.iframelyApiKey
         const host = 'https://iframe.ly/api/iframely'
-        const response = await fetch(`${host}/?url=${encodeURIComponent(url)}&api_key=${apiKey}`)
+        const response = await fetch(`${host}/?url=${encodeURIComponent(url)}&api_key=${apiKey}&autoplay=1`)
         if (response.status !== 200) {
           throw new Error(response.status)
         }
@@ -987,6 +997,17 @@ const self = {
         return weather
       } catch (error) {
         context.dispatch('handleServerError', { name: 'weather', error })
+      }
+    },
+    journalDailyPrompt: async (context) => {
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/journal-daily-prompt`, options)
+        const data = await normalizeResponse(response)
+        let name = data.name
+        return name
+      } catch (error) {
+        console.error('🚒 journalDailyPrompt', error)
       }
     },
     createAIImage: async (context, body) => {

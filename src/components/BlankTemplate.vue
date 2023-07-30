@@ -2,12 +2,16 @@
 // import utils from '@/utils.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
-// https://vuex.vuejs.org/guide/composition-api.html#accessing-state-and-getters
 import { useStore } from 'vuex'
 const store = useStore()
 
 onMounted(() => {
-  console.log(`🍆 the dialog is now mounted.`, store.state.currentSpace)
+  console.log(`🍆 the component is now mounted.`, store.state.currentSpace)
+  // store.subscribe((mutation, state) => {
+  //   if (mutation.type === 'triggerUpdateOtherCard') {
+  //     mutation.payload
+  //   }
+  // })
 })
 
 const props = defineProps({
@@ -27,6 +31,8 @@ const state = reactive({
 
 const themeName = computed(() => store.state.currentUser.theme)
 const incrementBy = () => {
+  const theme = themeName.value
+  console.log('🧢', theme)
   state.count = state.count + 1
   emit('updateCount', state.count)
   // store.dispatch('themes/isSystem', false)
@@ -34,15 +40,12 @@ const incrementBy = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="dialog")
-  section
-    p blank dialog, please duplicate
-  section
-    button(@click="incrementBy")
-      span Count is: {{ state.count }}
-    p Current theme is: {{ themeName }}
+.component-name(v-if="visible")
+  button(@click="incrementBy")
+    span Count is: {{ state.count }}
+  p Current theme is: {{ themeName }}, prop is {{ visible }}
 </template>
 
 <style lang="stylus">
-// .dialog-name
+// .component-name
 </style>

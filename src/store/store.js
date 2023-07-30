@@ -1,5 +1,7 @@
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import cache from '@/cache.js'
+import postMessage from '@/postMessage.js'
 // store modules
 import themes from '@/store/themes.js'
 import api from '@/store/api.js'
@@ -45,11 +47,12 @@ const store = createStore({
     shouldPreventNextFocusOnName: false,
     isEmbedMode: false,
     isAddPage: false,
-    isPricingHidden: false,
     disableViewportOptimizations: false, // for urlbox
     isPresentationMode: false,
     pricingIsVisible: false,
     userSettingsIsVisible: false,
+    isFadingOutDuringTouch: false,
+    prevSpaceIdInSession: '',
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -229,6 +232,7 @@ const store = createStore({
     filteredConnectionTypeIds: [],
     filteredFrameIds: [],
     filteredTagNames: [],
+    spaceListFilterInfo: {},
 
     // card list item options
     cardListItemOptionsPosition: {}, // x, y
@@ -246,6 +250,7 @@ const store = createStore({
       state.pageHeight = 0
     },
     updatePageSizes: (state, itemsRect) => {
+      if (!itemsRect) { return }
       const viewportWidth = utils.visualViewport().width
       let viewportHeight = utils.visualViewport().height
       state.viewportWidth = Math.round(viewportWidth)
@@ -427,10 +432,6 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.isAddPage = value
     },
-    isPricingHidden: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.isPricingHidden = value
-    },
     disableViewportOptimizations: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', allowUndefined: true })
       state.disableViewportOptimizations = value
@@ -446,6 +447,17 @@ const store = createStore({
     userSettingsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.userSettingsIsVisible = value
+    },
+    isFadingOutDuringTouch: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.isFadingOutDuringTouch = value
+    },
+    prevSpaceIdInSession: (state, value) => {
+      if (value === state.prevSpaceIdInSession) {
+        state.prevSpaceIdInSession = ''
+      } else {
+        state.prevSpaceIdInSession = value
+      }
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -518,11 +530,10 @@ const store = createStore({
     triggerShowNextSearchCard: () => {},
     triggerShowPreviousSearchCard: () => {},
     triggerMoreFiltersIsNotVisible: () => {},
-    triggerShowConnectionDetails: (state, options) => {},
+    triggerConnectionDetailsIsVisible: (state, options) => {},
     triggerUpdateWindowHistory: (state, options) => {},
-    triggerAddCard: () => {},
-    triggerCardDetailsCloseDialogs: () => {},
-    triggerSpaceDetailsCloseDialogs: () => {},
+    triggerAddCard: (state, options) => {},
+    triggerAddChildCard: (state, options) => {},
     triggerTemplatesIsVisible: () => {},
     triggerEarnCreditsIsVisible: () => {},
     triggerImportIsVisible: () => {},
@@ -533,23 +544,25 @@ const store = createStore({
     triggerRemovedIsVisible: () => {},
     triggerAIImagesIsVisible: () => {},
     triggerClearAllSpaceFilters: () => {},
-    triggerAddToInboxIsVisible: () => {},
-    triggerCheckIfUseHasInboxSpace: () => {},
     triggerScrollUserDetailsIntoView: () => {},
     triggerUpdateLockedItemButtonsPositions: () => {},
-    triggerLoadBackground: () => {},
+    triggerUpdateBackground: () => {},
     triggerCenterZoomOrigin: () => {},
     triggerRemoveCardFromCardList: (state, card) => {},
     triggerUpdateTheme: () => {},
     triggerUserIsLoaded: () => {},
     triggerSearchScopeIsRemote: () => {},
     triggerSearchScopeIsLocal: () => {},
-    triggerShowExplore: () => {},
     triggerCardIdUpdatePastedName: (state, options) => {},
+    triggerExploreIsVisible: () => {},
     triggerDrawConnectionFrame: (state, event) => {},
     triggerCancelLocking: () => {},
     triggerUpdateOtherCard: (state, cardId) => {},
     triggerControlsSettingsIsVisible: () => {},
+    triggerUpdateCardDetailsCardName: (state, options) => {},
+    triggerCloseChildDialogs: () => {},
+    triggerAddSpaceIsVisible: () => {},
+    triggerAppsIsVisible: () => {},
 
     // Used by extensions only
 
@@ -573,6 +586,9 @@ const store = createStore({
     cardDetailsIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.cardDetailsIsVisibleForCardId = cardId
+      if (cardId) {
+        postMessage.sendHaptics({ name: 'lightImpact' })
+      }
     },
     parentCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
@@ -608,6 +624,9 @@ const store = createStore({
     currentUserIsDrawingConnection: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsDrawingConnection = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'mediumImpact' })
+      }
     },
     currentConnectionSuccess: (state, object) => {
       utils.typeCheck({ value: object, type: 'object', allowUndefined: true })
@@ -715,6 +734,9 @@ const store = createStore({
     boxDetailsIsVisibleForBoxId: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.boxDetailsIsVisibleForBoxId = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'lightImpact' })
+      }
     },
     currentUserIsResizingBox: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -932,6 +954,9 @@ const store = createStore({
     connectionDetailsIsVisibleForConnectionId: (state, connectionId) => {
       utils.typeCheck({ value: connectionId, type: 'string' })
       state.connectionDetailsIsVisibleForConnectionId = connectionId
+      if (connectionId) {
+        postMessage.sendHaptics({ name: 'lightImpact' })
+      }
     },
     currentConnectionColor: (state, color) => {
       utils.typeCheck({ value: color, type: 'string' })
@@ -959,6 +984,9 @@ const store = createStore({
     multipleSelectedActionsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.multipleSelectedActionsIsVisible = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'lightImpact' })
+      }
     },
     preventMultipleSelectedActionsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -994,6 +1022,7 @@ const store = createStore({
     },
     addToMultipleCardsSelected: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
+      postMessage.sendHaptics({ name: 'selection' })
       state.multipleCardsSelectedIds.push(cardId)
     },
     removeFromMultipleCardsSelected: (state, cardId) => {
@@ -1055,6 +1084,8 @@ const store = createStore({
       state.remoteConnectionsSelected = state.remoteConnectionsSelected.concat(updates)
     },
     addToMultipleConnectionsSelected: (state, connectionId) => {
+      utils.typeCheck({ value: connectionId, type: 'string' })
+      postMessage.sendHaptics({ name: 'selection' })
       state.multipleConnectionsSelectedIds.push(connectionId)
     },
     removeFromMultipleConnectionsSelected: (state, connectionId) => {
@@ -1104,6 +1135,7 @@ const store = createStore({
     },
     addToMultipleBoxesSelected: (state, boxId) => {
       utils.typeCheck({ value: boxId, type: 'string' })
+      postMessage.sendHaptics({ name: 'selection' })
       state.multipleBoxesSelectedIds.push(boxId)
     },
     removeFromMultipleBoxesSelected: (state, boxId) => {
@@ -1231,18 +1263,30 @@ const store = createStore({
     notifySpaceNotFound: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifySpaceNotFound = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'error' })
+      }
     },
     notifyConnectionError: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyConnectionError = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'error' })
+      }
     },
     notifyConnectionErrorName: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.notifyConnectionErrorName = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'error' })
+      }
     },
     notifyServerCouldNotSave: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyServerCouldNotSave = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'error' })
+      }
     },
     notifySpaceIsRemoved: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1352,6 +1396,10 @@ const store = createStore({
       utils.typeCheck({ value: name, type: 'string' })
       state.filteredTagNames = state.filteredTagNames.filter(tagName => tagName !== name)
     },
+    spaceListFilterInfo: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
+      state.spaceListFilterInfo = value
+    },
 
     // Card List Item Options
     cardListItemOptionsPosition: (state, value) => {
@@ -1420,7 +1468,6 @@ const store = createStore({
       context.commit('spaceUrlToLoad', matches.spaceUrl)
     },
     updatePageSizes: (context) => {
-      const padding = 250
       const cards = context.getters['currentCards/all']
       const boxes = context.getters['currentBoxes/all']
       let items = cards.concat(boxes)
@@ -1428,10 +1475,7 @@ const store = createStore({
         x: 0, y: 0, width: 500, height: 500
       })
       let itemsRect = utils.pageSizeFromItems(items)
-      itemsRect = {
-        width: itemsRect.width + padding,
-        height: itemsRect.height + padding
-      }
+      context.commit('resetPageSizes')
       context.commit('updatePageSizes', itemsRect)
     },
     checkIfItemShouldIncreasePageSize: (context, item) => {
@@ -1633,6 +1677,9 @@ const store = createStore({
 
   },
   getters: {
+    isSpacePage: (state) => {
+      return !state.isAddPage
+    },
     shouldScrollAtEdges: (state, getters) => (event) => {
       let isPainting
       if (event.touches) {
@@ -1678,7 +1725,7 @@ const store = createStore({
       return 1 / getters.spaceZoomDecimal
     },
     isTouchDevice: (state) => {
-      return state.isTouchDevice || utils.isMobile()
+      return state.isTouchDevice || utils.isMobile() || consts.isSecureAppContext
     },
     zoomTransform: (state, getters) => {
       const zoom = getters.spaceZoomDecimal

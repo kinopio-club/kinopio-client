@@ -1,25 +1,17 @@
 <template lang="pug">
-.footer-wrap(:style="position" v-if="isVisible" :class="{'fade-out': isFadingOut}")
+.footer-wrap(:style="position" v-if="isVisible" :class="{'fade-out': isFadingOut}" ref="footer")
   .left(v-if="leftIsVisble")
     footer
       Notifications
-      .controls(v-if="controlsIsVisible" :class="{'hidden': isHidden}")
-        section
-          .button-wrap(v-if="userHasInbox")
-            button(@click.left="toggleAddToInboxIsVisible" :class="{ active: addToInboxIsVisible}")
-              img.icon(src="@/assets/add.svg")
-              img.icon.inbox-icon(src="@/assets/inbox.svg")
-            AddToInbox(:visible="addToInboxIsVisible")
 
-  .right(:class="{'is-embed': isEmbedMode, 'hidden': isHidden}" v-if="!isMobileOrTouch")
+  .right(v-if="controlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom
-    .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible")
+    .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible" @touchend.stop :class="{'hidden': isHiddenOnTouch}")
       button.small-button(:class="{active: userSettingsIsVisible}" title="Settings → Controls")
         img.icon.settings(src="@/assets/settings.svg")
 </template>
 
 <script>
-import AddToInbox from '@/components/dialogs/AddToInbox.vue'
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
@@ -27,18 +19,16 @@ import utils from '@/utils.js'
 
 import { mapState, mapGetters } from 'vuex'
 
-const fadeOutDuration = 10
-const hiddenDuration = 20
+const hiddenOnTouchDuration = 20
 const updatePositionDuration = 60
-let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
+let hiddenOnTouchIteration, hiddenOnTouchTimer, updatePositionIteration, updatePositionTimer
 
 export default {
   name: 'Footer',
   components: {
     Notifications,
     Loader,
-    SpaceZoom,
-    AddToInbox
+    SpaceZoom
   },
   props: {
     isPinchZooming: Boolean,
@@ -47,10 +37,7 @@ export default {
   data () {
     return {
       position: {},
-      isFadingOut: false,
-      isHidden: false,
-      addToInboxIsVisible: false,
-      userHasInbox: false
+      isHiddenOnTouch: false
     }
   },
   mounted () {
@@ -60,11 +47,7 @@ export default {
       } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         this.updatePosition()
       } else if (mutation.type === 'triggerHideTouchInterface') {
-        this.hidden()
-      } else if (mutation.type === 'triggerAddToInboxIsVisible') {
-        this.addToInboxIsVisible = true
-      } else if (mutation.type === 'triggerCheckIfUseHasInboxSpace') {
-        this.updateUserHasInbox()
+        this.hideOnTouch()
       }
     })
     window.addEventListener('scroll', this.updatePosition)
@@ -89,10 +72,6 @@ export default {
       'currentUser/isSignedIn',
       'isTouchDevice'
     ]),
-    isMobileOrTouch () {
-      const isMobile = utils.isMobile()
-      return this.isTouchDevice || isMobile
-    },
     isVisible () {
       if (this.isAddPage) { return }
       return true
@@ -103,36 +82,25 @@ export default {
       return true
     },
     controlsIsVisible () {
-      const contentDialogIsVisible = Boolean(this.cardDetailsIsVisibleForCardId || this.multipleSelectedActionsIsVisible || this.connectionDetailsIsVisibleForConnectionId)
-      // only hide footer on touch devices
-      if (!this.isTouchDevice) { return true }
+      if (this.isPresentationMode) { return }
       if (this.shouldExplicitlyHideFooter) { return }
-      let isVisible = true
-      if (contentDialogIsVisible) { isVisible = false }
-      if (this.shouldHideFooter) { isVisible = false }
-      return isVisible
+      const isTouchDevice = this.$store.state.isTouchDevice
+      if (!isTouchDevice) { return true }
+      const contentDialogIsVisible = Boolean(this.cardDetailsIsVisibleForCardId || this.multipleSelectedActionsIsVisible || this.connectionDetailsIsVisibleForConnectionId)
+      if (contentDialogIsVisible) { return }
+      if (this.shouldHideFooter) { return }
+      return true
     },
     isMobile () { return utils.isMobile() },
     isMobileStandalone () {
       return utils.isMobile() && navigator.standalone // is homescreen app
     },
     isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
-    userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible }
+    userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible },
+    isFadingOut () { return this.$store.state.isFadingOutDuringTouch }
   },
   methods: {
     closeDialogs () {
-      this.addToInboxIsVisible = false
-    },
-    toggleAddToInboxIsVisible () {
-      const isVisible = this.addToInboxIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.addToInboxIsVisible = !isVisible
-    },
-    async updateUserHasInbox () {
-      const currentUserIsSignedIn = this['currentUser/isSignedIn']
-      if (!currentUserIsSignedIn) { return }
-      const inboxSpace = await this.$store.dispatch('currentUser/inboxSpace')
-      this.userHasInbox = Boolean(inboxSpace)
     },
 
     // settings
@@ -148,56 +116,30 @@ export default {
 
     // hide
 
-    hidden (event) {
+    hideOnTouch (event) {
       if (!this.isTouchDevice) { return }
-      hiddenIteration = 0
-      if (hiddenTimer) { return }
-      hiddenTimer = window.requestAnimationFrame(this.hiddenFrame)
+      hiddenOnTouchIteration = 0
+      if (hiddenOnTouchTimer) { return }
+      hiddenOnTouchTimer = window.requestAnimationFrame(this.hiddenOnTouchFrame)
     },
-    hiddenFrame () {
-      hiddenIteration++
-      this.isHidden = true
-      if (hiddenIteration < hiddenDuration) {
-        window.requestAnimationFrame(this.hiddenFrame)
+    hiddenOnTouchFrame () {
+      hiddenOnTouchIteration++
+      this.isHiddenOnTouch = true
+      if (hiddenOnTouchIteration < hiddenOnTouchDuration) {
+        window.requestAnimationFrame(this.hiddenOnTouchFrame)
       } else {
         this.cancelHidden()
       }
     },
     cancelHidden () {
-      window.cancelAnimationFrame(hiddenTimer)
-      hiddenTimer = undefined
-      this.isHidden = false
-    },
-
-    // fade out
-
-    fadeOut () {
-      fadeOutIteration = 0
-      if (fadeOutTimer) { return }
-      shouldCancelFadeOut = false
-      fadeOutTimer = window.requestAnimationFrame(this.fadeOutFrame)
-    },
-    cancelFadeOut () {
-      window.cancelAnimationFrame(fadeOutTimer)
-      fadeOutTimer = undefined
-      this.isFadingOut = false
-      this.cancelUpdatePosition()
-      this.updatePosition()
-    },
-    fadeOutFrame () {
-      fadeOutIteration++
-      this.isFadingOut = true
-      if (shouldCancelFadeOut) {
-        this.cancelFadeOut()
-      } else if (fadeOutIteration < fadeOutDuration) {
-        window.requestAnimationFrame(this.fadeOutFrame)
-      }
+      window.cancelAnimationFrame(hiddenOnTouchTimer)
+      hiddenOnTouchTimer = undefined
+      this.isHiddenOnTouch = false
     },
 
     // update position
 
     updatePosition () {
-      if (!this.isTouchDevice) { return }
       updatePositionIteration = 0
       if (updatePositionTimer) { return }
       updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
@@ -217,45 +159,35 @@ export default {
     },
     updatePositionInVisualViewport () {
       const viewport = utils.visualViewport()
-      const layoutViewport = document.getElementById('layout-viewport')
       const scale = utils.roundFloat(viewport.scale)
       const counterScale = utils.roundFloat(1 / viewport.scale)
       const left = Math.round(viewport.offsetLeft)
-      let offsetTop = 0
-      if (navigator.standalone) {
-        offsetTop = 15
+      let footer = this.$refs.footer
+      if (!footer) { return }
+      let bottom = 0
+      if (window.navigator.shouldAddSafeAreaPaddingBottom) {
+        bottom = 40
       }
-      const top = Math.round(viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height)
       let style = {
-        transform: `translate(${left}px, ${top + offsetTop}px) scale(${counterScale})`,
-        maxWidth: Math.round(viewport.width * scale) + 'px'
+        transform: `translate(${left}px, 0px) scale(${counterScale})`,
+        maxWidth: Math.round(viewport.width * scale) + 'px',
+        bottom: `max(${bottom}px, env(safe-area-inset-bottom))`
       }
-      if (utils.isIPhone() && scale <= 1) {
-        style.transform = 'none'
-        style.zoom = counterScale
-        style.marginBottom = offsetTop + 'px'
-      }
+      // if (scale > 1) {
+      // }
       this.position = style
     }
   },
   watch: {
     isPinchZooming (value) {
       if (value) {
-        this.fadeOut()
         this.updatePosition()
-      } else {
-        shouldCancelFadeOut = true
-        this.cancelFadeOut()
       }
     },
     isTouchScrolling (value) {
       if (!utils.isAndroid()) { return }
       if (value) {
-        this.fadeOut()
         this.updatePosition()
-      } else {
-        shouldCancelFadeOut = true
-        this.cancelFadeOut()
       }
     }
   }
@@ -271,12 +203,12 @@ export default {
   z-index var(--footer-max-z)
   position fixed
   left 0
-  bottom 0
   right 0
   padding 8px
   max-width 100%
   pointer-events none
   transform-origin left bottom
+  margin-bottom env(safe-area-inset-bottom)
   .right
     margin-left auto
     display flex
@@ -319,19 +251,19 @@ footer
     height 11px
   .controls
     transition 0.2s opacity
-    > section
-      display flex
-      &:last-child
-        margin-top 6px
-      > .button-wrap
-        pointer-events all
-        margin-left 6px
-        display inline-block
-        dialog
-          top initial
-          bottom calc(100% - 8px)
-        &:first-child
-          margin-left 0
+    dialog
+      top initial
+      bottom calc(100% - 8px)
+    // > section
+    //   display flex
+    //   &:last-child
+    //     margin-top 6px
+    //   > .button-wrap
+    //     pointer-events all
+    //     margin-left 6px
+    //     display inline-block
+    //     &:first-child
+    //       margin-left 0
 
   .segmented-buttons
     .down-arrow

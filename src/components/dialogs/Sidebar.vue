@@ -1,23 +1,22 @@
 <template lang="pug">
-dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
+dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   section
     .row.title-row-flex
       .button-wrap.segmented-buttons-wrap
         //- first row
         .segmented-buttons
+          //- Text
+          button(@click.left="toggleTextIsVisible" :class="{active: textIsVisible}")
+            span Text
           //- Tags
           button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
             span Tags
-          //- Links
-          button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
-            span Links
           //- Comments
           button(@click.left="toggleCommentsIsVisible" :class="{ active: commentsIsVisible}")
             img.icon.comment-icon(src="@/assets/comment.svg")
-          //- Removed
-          button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
-            img.icon(src="@/assets/remove.svg")
-            img.icon.remove-undo(src="@/assets/undo.svg")
+          //- Links
+          button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
+            span Links
         //- second row
         .segmented-buttons
           //- AI Images
@@ -33,7 +32,11 @@ dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="clos
               img.icon(src="@/assets/heart.svg")
               span {{favoriteSpacesEditedCount}}
             template(v-else)
-              img.icon(src="@/assets/heart-empty.svg")
+              img.icon(src="@/assets/heart.svg")
+          //- Removed
+          button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+            img.icon(src="@/assets/remove.svg")
+            img.icon.remove-undo(src="@/assets/undo.svg")
 
       //- Pin
       .title-row
@@ -48,6 +51,7 @@ dialog.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="clos
   AIImages(:visible="AIImagesIsVisible")
   Stats(:visible="statsIsVisible")
   Favorites(:visible="favoritesIsVisible")
+  Text(:visible="textIsVisible")
 
 </template>
 
@@ -59,7 +63,8 @@ import Comments from '@/components/Comments.vue'
 import Removed from '@/components/Removed.vue'
 import AIImages from '@/components/AIImages.vue'
 import Stats from '@/components/Stats.vue'
-import Favorites from '@/components/dialogs/Favorites.vue'
+import Favorites from '@/components/Favorites.vue'
+import Text from '@/components/Text.vue'
 
 export default {
   name: 'Sidebar',
@@ -70,7 +75,8 @@ export default {
     Removed,
     AIImages,
     Stats,
-    Favorites
+    Favorites,
+    Text
   },
   props: {
     visible: Boolean
@@ -78,13 +84,14 @@ export default {
   data () {
     return {
       dialogHeight: null,
-      tagsIsVisible: true,
+      tagsIsVisible: false,
       linksIsVisible: false,
       commentsIsVisible: false,
       removedIsVisible: false,
       AIImagesIsVisible: false,
       statsIsVisible: false,
-      favoritesIsVisible: false
+      favoritesIsVisible: false,
+      textIsVisible: true
     }
   },
   created () {
@@ -93,11 +100,13 @@ export default {
         this.updateDialogHeight()
       } else if (mutation.type === 'triggerRemovedIsVisible') {
         this.$nextTick(() => {
-          this.toggleRemovedIsVisible()
+          this.clearVisible()
+          this.removedIsVisible = true
         })
       } else if (mutation.type === 'triggerAIImagesIsVisible') {
         this.$nextTick(() => {
-          this.toggleAIImagesIsVisible()
+          this.clearVisible()
+          this.AIImagesIsVisible = true
         })
       }
     })
@@ -125,8 +134,9 @@ export default {
     },
     closeDialogs () {
       this.$store.commit('tagDetailsIsVisible', false)
+      this.$store.commit('triggerCloseChildDialogs')
     },
-    clearIsVisible () {
+    clearVisible () {
       this.linksIsVisible = false
       this.tagsIsVisible = false
       this.commentsIsVisible = false
@@ -134,48 +144,47 @@ export default {
       this.AIImagesIsVisible = false
       this.statsIsVisible = false
       this.favoritesIsVisible = false
+      this.textIsVisible = false
     },
     toggleTagsIsVisible () {
       const value = !this.tagsIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.tagsIsVisible = value
     },
     toggleLinksIsVisible () {
       const value = !this.linksIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.linksIsVisible = value
     },
     toggleCommentsIsVisible () {
       const value = !this.commentsIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.commentsIsVisible = value
     },
     toggleRemovedIsVisible () {
       const value = !this.removedIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.removedIsVisible = value
     },
     toggleAIImagesIsVisible () {
       const value = !this.AIImagesIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.AIImagesIsVisible = value
     },
     toggleStatsIsVisible () {
       const value = !this.statsIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.statsIsVisible = value
     },
     toggleFavoritesIsVisible () {
       const value = !this.favoritesIsVisible
-      if (!value) { return }
-      this.clearIsVisible()
+      this.clearVisible()
       this.favoritesIsVisible = value
+    },
+    toggleTextIsVisible () {
+      const value = !this.textIsVisible
+      this.clearVisible()
+      this.textIsVisible = value
     },
     updateDialogHeight () {
       if (!this.visible) { return }
@@ -190,6 +199,9 @@ export default {
       if (visible) {
         this.updateDialogHeight()
         this.updateFavorites()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     }
   }
@@ -202,6 +214,7 @@ export default {
   left initial
   right 8px
   max-height calc(100vh - 25px)
+  overflow auto
   &.is-pinned
     top -13px
   .title-row-flex

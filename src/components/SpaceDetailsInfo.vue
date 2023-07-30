@@ -16,7 +16,7 @@
         .badge.info
           Loader(:visible="true")
           span {{remotePendingUpload.percentComplete}}%
-      Background(:visible="backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
+      BackgroundPicker(:visible="backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
     //- Name
     .textarea-wrap(:class="{'full-width': shouldHidePin}")
       textarea.name(
@@ -85,7 +85,7 @@ template(v-if="settingsIsVisible")
     .row
       //- Template
       .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
-        button.variable-length-content(:class="{ active: currentSpaceIsUserTemplate }")
+        button(:class="{ active: currentSpaceIsUserTemplate }")
           img.icon.templates(src="@/assets/templates.svg")
           span Make Template
       //- Export
@@ -118,7 +118,7 @@ template(v-if="settingsIsVisible")
 </template>
 
 <script>
-import Background from '@/components/dialogs/Background.vue'
+import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
@@ -131,7 +131,7 @@ export default {
   name: 'SpaceDetailsInfo',
   emits: ['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace'],
   components: {
-    Background,
+    BackgroundPicker,
     BackgroundPreview,
     Loader,
     PrivacyButton,
@@ -147,7 +147,7 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerSpaceDetailsCloseDialogs') {
+      if (mutation.type === 'triggerCloseChildDialogs') {
         this.closeDialogs()
       } else if (mutation.type === 'triggerFocusSpaceDetailsName') {
         this.$nextTick(() => {
@@ -264,16 +264,18 @@ export default {
         this.$store.commit('notifyCurrentSpaceIsNowRemoved', true)
       }
       this.updateLocalSpaces()
-      this.changeToLastSpace()
+      this.changeToPrevSpace()
     },
-    changeToLastSpace () {
+    changeToPrevSpace () {
       let spaces = cache.getAllSpaces().filter(space => {
         return this.$store.getters['currentUser/canEditSpace'](space)
       })
       spaces = spaces.filter(space => space.id !== this.currentSpace.id)
-      if (spaces.length) {
-        const cachedSpace = this.$store.getters.cachedOrOtherSpaceById(this.currentUser.prevLastSpaceId)
-        this.$store.dispatch('currentSpace/changeSpace', { space: cachedSpace || spaces[0] })
+      const recentSpace = spaces[0]
+      if (this.$store.state.prevSpaceIdInSession) {
+        this.$store.dispatch('currentSpace/loadPrevSpaceInSession')
+      } else if (recentSpace) {
+        this.$store.dispatch('currentSpace/changeSpace', recentSpace)
       } else {
         this.$emit('addSpace')
       }
@@ -345,7 +347,7 @@ export default {
       .textarea-loader
         position absolute
         right 0
-        top 5px
+        top 0
         .loader
           width 14px
           height 14px

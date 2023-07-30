@@ -1,19 +1,25 @@
 <template lang="pug">
-.space-background(:style="backgroundStyles" :class="{invert: shouldInvertInDarkTheme}")
-.layout-viewport#layout-viewport(v-if="visible" :style="{ background: backgroundTint }")
-.layout-viewport.dark-theme-tint(v-if="isThemeDark && !spaceBackgroundTintIsDark" :class="{darker: shouldDarkenInDarkTheme}")
+.space-background-image(:style="backgroundStyles" :class="{invert: shouldInvertInDarkTheme}")
+.space-background-tint(v-if="visible" :style="{ background: backgroundTint }")
 </template>
 
 <script>
 import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
+import postMessage from '@/postMessage.js'
+
+import { colord, extend } from 'colord'
 
 export default {
   name: 'SpaceBackground',
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerLoadBackground') {
-        this.loadBackground()
+      if (mutation.type === 'triggerUpdateBackground') {
+        this.updateBackground()
+      } else if (mutation.type === 'triggerUpdateTheme') {
+        this.updateBackground()
+      } else if (mutation.type === 'isLoadingSpace') {
+        this.updateBackground()
       }
     })
   },
@@ -30,6 +36,7 @@ export default {
     },
     currentSpace () { return this.$store.state.currentSpace },
     backgroundStyles () {
+      if (!this.isSpacePage) { return }
       const styles = {
         backgroundImage: `url('${this.imageUrl}')`,
         backgroundSize: this.size,
@@ -38,16 +45,38 @@ export default {
       return styles
     },
     background () {
-      const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/default-background-2x.png'
-      return this.currentSpace.background || defaultBackground
+      let data = this.kinopioBackgroundImageData
+      let url
+      // darkUrl
+      if (data && this.isThemeDark) {
+        url = data.darkUrl || data.url
+      // url
+      } else if (data) {
+        url = data.url
+      } else {
+        url = this.currentSpace.background
+      }
+      return url
     },
     backgroundTint () {
-      const color = this.currentSpace.backgroundTint
+      let color = this.currentSpace.backgroundTint || 'white'
+      let darkness = 0
+      if (this.shouldDarkenTint) {
+        darkness = 0.2
+      }
+      color = colord(color).darken(darkness).toRgbString()
+      postMessage.send({ name: 'setBackgroundTintColor', value: color })
       return color
     },
     isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
     kinopioBackgroundImageData () {
-      const data = backgroundImages.find(image => image.url === this.currentSpace.background)
+      const data = backgroundImages.find(image => {
+        const background = this.currentSpace.background
+        if (!background) {
+          return image.isDefault
+        }
+        return background === image.url
+      })
       return data
     },
     backgroundIsDefault () {
@@ -56,12 +85,8 @@ export default {
     spaceBackgroundTintIsDark () {
       return utils.colorIsDark(this.backgroundTint)
     },
-    shouldDarkenInDarkTheme () {
-      if (!this.isThemeDark) { return }
-      if (this.backgroundIsDefault) { return true }
-      const data = this.kinopioBackgroundImageData
-      if (!data) { return }
-      return data.shouldDarkenInDarkTheme
+    shouldDarkenTint () {
+      return this.isThemeDark && !this.spaceBackgroundTintIsDark
     },
     shouldInvertInDarkTheme () {
       if (!this.isThemeDark) { return }
@@ -69,10 +94,15 @@ export default {
       const data = this.kinopioBackgroundImageData
       if (!data) { return }
       return data.shouldInvertInDarkTheme
+    },
+    isSpacePage () {
+      const isOther = this.$store.state.isAddPage
+      const isSpace = !isOther
+      return isSpace
     }
   },
   methods: {
-    async loadBackground () {
+    async updateBackground () {
       const background = this.background
       if (!utils.urlIsImage(background)) {
         this.imageUrl = ''
@@ -86,32 +116,21 @@ export default {
         }
       } catch (error) {
         if (background) {
-          console.warn('🚑 loadBackground', background, error)
+          console.warn('🚑 updateBackground', background, error)
         }
       }
     },
     updateBackgroundSize () {
-      const defaultSize = {
-        width: 310,
-        height: 200
-      }
       let backgroundImage = this.imageUrl
       backgroundImage = utils.urlFromCSSBackgroundImage(backgroundImage)
-      let isRetina
       let image = new Image()
-      let width, height
-      if (backgroundImage) {
-        isRetina = backgroundImage.includes('-2x.') || backgroundImage.includes('@2x.')
-        image.src = backgroundImage
-        width = image.width
-        height = image.height
-        if (isRetina) {
-          width = width / 2
-          height = height / 2
-        }
-      } else {
-        width = defaultSize.width
-        height = defaultSize.height
+      image.src = backgroundImage
+      let isRetina = backgroundImage.includes('-2x.') || backgroundImage.includes('@2x.')
+      let width = image.width
+      let height = image.height
+      if (isRetina) {
+        width = width / 2
+        height = height / 2
       }
       if (width === 0 || height === 0) {
         this.size = 'initial'
@@ -126,19 +145,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.layout-viewport
-  position fixed
-  width 110%
-  height 110%
-  pointer-events none
-  z-index 0
-  mix-blend-mode multiply
-  transform-origin top left
-.dark-theme-tint
-  background-color rgba(0,0,0,0.3)
-  &.darker
-    background-color rgba(0,0,0,0.7)
-.space-background
+.space-background-image
   position absolute
   width 100%
   height 100%
@@ -149,4 +156,12 @@ export default {
   &.invert
     filter invert()
 
+.space-background-tint
+  position absolute
+  width 110%
+  height 110%
+  pointer-events none
+  z-index 0
+  mix-blend-mode multiply
+  transform-origin top left
 </style>

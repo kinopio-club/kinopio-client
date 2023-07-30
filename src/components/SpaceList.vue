@@ -7,6 +7,7 @@ span.space-list-wrap
     :isLoading="isLoading"
     :parentIsPinned="parentIsPinned"
     :showCreateNewSpaceFromSearch="showCreateNewSpaceFromSearch"
+    :isInitialValueFromSpaceListFilterInfo="true"
     @updateFilter="updateFilter"
     @updateFilteredItems="updateFilteredSpaces"
     @focusNextItem="focusNextItemFromFilter"
@@ -64,11 +65,8 @@ span.space-list-wrap
                 img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
               button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
                 img.icon.checkmark(src="@/assets/checkmark.svg")
-          button.inline-duplicate.small-button(v-if="spaceIsActive(space) && spaceIsTemplate(space)")
-            img.icon(src="@/assets/add.svg")
-            span Copy
-          .button-wrap.inline-favorite-wrap(@click.stop.prevent="toggleIsFavoriteSpace(space)")
-            button.inline-favorite.small-button(v-if="spaceIsActive(space) && showFavoriteButton"  :class="{ active: isFavorite(space) }")
+          .button-wrap.inline-favorite-wrap(v-if="spaceIsActive(space) && showFavoriteButton" @click.stop.prevent="toggleIsFavoriteSpace(space)")
+            button.inline-favorite.small-button(:class="{ active: isFavorite(space) }")
               img.icon.favorite-icon(v-if="isFavorite(space)" src="@/assets/heart.svg")
               img.icon.favorite-icon(v-else src="@/assets/heart-empty.svg")
 
@@ -180,7 +178,6 @@ export default {
     }
   },
   methods: {
-    // favorite
     isFavorite (space) {
       const favorites = this.$store.state.currentUser.favoriteSpaces
       const isFavorite = favorites.find(favorite => favorite.id === space.id)
@@ -266,12 +263,21 @@ export default {
     updateFilteredSpaces (spaces) {
       this.filteredSpaces = spaces
     },
-    updateFilter (filter) {
+    updateFilter (filter, isClearFilter) {
       this.filter = filter
+      if (!isClearFilter) {
+        this.$store.commit('spaceListFilterInfo', {
+          filter,
+          updatedAt: new Date().getTime()
+        })
+      }
       const spaces = this.spacesFiltered || this.spaces
       if (!spaces.length) { return }
       if (!filter) {
         this.focusOnId = ''
+        this.$nextTick(() => {
+          this.updateScroll()
+        })
         return
       }
       this.focusOnId = spaces[0].id
@@ -350,6 +356,7 @@ export default {
         return
       }
       if (!space) { return }
+      this.$store.commit('isLoadingSpace', true)
       this.$emit('selectSpace', space)
     },
     closeDialog () {
@@ -485,13 +492,13 @@ export default {
       position absolute
       width 13px
       height 13px
-      top 5px
+      top 10px
+      z-index 1
     .icon.templates
       margin-right 4px
 
   .space-wrap
     position relative
-    button.inline-duplicate,
     button.inline-favorite
       cursor pointer
       z-index 1
@@ -506,4 +513,7 @@ export default {
     padding 6px
     padding-right 0
 
+  .moon-phase
+    margin-top 4px
+    margin-right 4px
 </style>

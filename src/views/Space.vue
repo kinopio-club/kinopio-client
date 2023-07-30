@@ -11,7 +11,7 @@ main#space.space(
   Cards
   LockedItemButtons
   //- Presence
-  template(v-for="user in spaceMembers")
+  template(v-for="user in users")
     UserLabelCursor(:user="user")
   BoxDetails
   CardDetails
@@ -41,6 +41,7 @@ import Cards from '@/components/Cards.vue'
 import Connections from '@/components/Connections.vue'
 import LockedItemButtons from '@/components/LockedItemButtons.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
@@ -82,13 +83,14 @@ export default {
     window.addEventListener('touchmove', this.interact)
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
-    // keep space element updated to viewport size so connections show up
-    this.updatePageSizes()
     window.addEventListener('resize', this.updatePageSizesDebounced)
 
     this.updateIsOnline()
     window.addEventListener('online', this.updateIsOnline)
     window.addEventListener('offline', this.updateIsOnline)
+
+    // when a card is added through Add.vue in a sharesheet with the space open behind it
+    window.addEventListener('message', this.addCardFromOutsideAppContext)
 
     this.addInteractionBlur()
 
@@ -116,6 +118,7 @@ export default {
     window.removeEventListener('online', this.updateIsOnline)
     window.removeEventListener('offline', this.updateIsOnline)
     window.removeEventListener('unload', this.unloadPage)
+    window.removeEventListener('message', this.addCardFromOutsideAppContext)
     window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
     clearInterval(processQueueIntervalTimer)
   },
@@ -153,9 +156,9 @@ export default {
         return true
       } else { return false }
     },
-    spaceMembers () {
+    users () {
       const excludeCurrentUser = true
-      return this.$store.getters['currentSpace/members'](excludeCurrentUser)
+      return this.$store.getters['currentSpace/allUsers'](excludeCurrentUser)
     },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
@@ -163,7 +166,7 @@ export default {
     correctCardConnectionPaths () {
       const space = utils.clone(this.$store.state.currentSpace)
       const user = utils.clone(this.$store.state.currentUser)
-      const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
+      const currentSpaceIsRemote = this.$store.getters['currentSpace/isRemote']
       this.$store.dispatch('currentConnections/correctPaths', { shouldUpdateApi: currentSpaceIsRemote })
     },
     loadSpaceOnBackOrForward (event) {
@@ -192,6 +195,15 @@ export default {
       if (status) {
         this.$store.dispatch('api/processQueueOperations')
       }
+    },
+    addCardFromOutsideAppContext (event) {
+      if (!consts.isSecureAppContext) { return }
+      const currentSpace = this.$store.state.currentSpace
+      const data = event.data
+      if (data.name !== 'addedCardFromAddPage') { return }
+      const card = data.value
+      if (card.spaceId !== currentSpace.id) { return }
+      this.$store.commit('currentCards/create', { card, shouldPreventCache: true })
     },
     addInteractionBlur () {
       if (!utils.isMobile()) { return }
@@ -273,7 +285,8 @@ export default {
     dragItems () {
       this.$store.dispatch('history/pause')
       const prevCursor = this.cursor()
-      const shouldPrevent = this.checkIfShouldPreventInteraction()
+      this.$store.dispatch('currentUser/notifyReadOnly', prevCursor)
+      const shouldPrevent = !this.$store.getters['currentUser/canEditSpace']()
       if (shouldPrevent) { return }
       this.$store.dispatch('currentCards/move', {
         endCursor,
@@ -322,16 +335,6 @@ export default {
       }
       return cursor
     },
-    checkIfShouldPreventInteraction () {
-      if (this.spaceIsReadOnly) {
-        const position = this.cursor()
-        const notificationWithPosition = document.querySelector('.notifications-with-position .item')
-        if (!notificationWithPosition) {
-          this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
-        }
-        return true
-      }
-    },
     normalizeSpaceCardsZ () {
       const sorted = sortBy(this.unlockedCards, ['z'])
       const zList = sorted.map(card => card.z)
@@ -348,10 +351,8 @@ export default {
         x: position.x,
         y: position.y
       }
-      if (this.spaceIsReadOnly) {
-        this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
-        return
-      }
+      this.$store.dispatch('currentUser/notifyReadOnly', position)
+      if (this.spaceIsReadOnly) { return }
       this.normalizeSpaceCardsZ()
       this.$store.dispatch('currentCards/add', { position, isParentCard })
       this.$store.commit('childCardId', '')
@@ -414,6 +415,7 @@ export default {
       }
     },
     addOrCloseCard (event) {
+      const sidebarIsVisible = window.document.querySelector('dialog#sidebar')
       if (this.$store.state.shouldAddCard) {
         let position = utils.cursorPositionInSpace(event)
         // prevent addCard if position is outside space
@@ -425,7 +427,7 @@ export default {
         // add card
         this.addCard(event)
       // close item details
-      } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
+      } else if ((this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) && !sidebarIsVisible) {
         this.$store.dispatch('closeAllDialogs')
       }
     },
@@ -491,8 +493,6 @@ export default {
   position relative // used by svg connections
   transform-origin top left
   z-index 0
-  &.hidden-by-mindmap
-    opacity 0.4
   .card-overlap-indicator
     position absolute
     z-index calc(var(--max-z) - 70)

@@ -42,6 +42,7 @@ aside
 
 <script>
 import utils from '@/utils.js'
+import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
 const circleRadius = 20
@@ -446,7 +447,8 @@ export default {
         this.$store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
         return
       }
-      const shouldPrevent = this.checkIfShouldPreventInteraction(position)
+      this.$store.dispatch('currentUser/notifyReadOnly', position)
+      const shouldPrevent = !this.$store.getters['currentUser/canEditSpace']()
       if (shouldPrevent) {
         this.$store.commit('currentUserToolbar', 'card')
         return
@@ -454,15 +456,6 @@ export default {
       this.$store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
       this.$store.commit('currentBoxIsNew', true)
       event.preventDefault() // allows dragging boxes without scrolling on touch
-    },
-    checkIfShouldPreventInteraction (position) {
-      const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()
-      if (currentUserCanEdit) { return }
-      const notificationWithPosition = document.querySelector('.notifications-with-position .item')
-      if (!notificationWithPosition) {
-        this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
-      }
-      return true
     },
 
     // Selecting
@@ -564,8 +557,6 @@ export default {
     // Remote Painting
 
     broadcastCircle (event, circle) {
-      const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()
-      if (!currentUserCanEdit) { return }
       const position = utils.cursorPositionInSpace(event)
       this.$store.commit('broadcast/update', {
         updates: {
@@ -675,6 +666,7 @@ export default {
         this.$store.commit('currentUserIsPainting', true)
         this.$store.commit('currentUserIsPaintingLocked', true)
         console.log('🔒 lockingAnimationFrame locked')
+        postMessage.sendHaptics({ name: 'softImpact' })
         lockingStartTime = undefined
       }
     },

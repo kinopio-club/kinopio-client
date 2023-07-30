@@ -1,6 +1,5 @@
 // functional methods that can see dom, but can't access components or store
 import cache from '@/cache.js'
-import promptPacks from '@/data/promptPacks.json'
 import moonphase from '@/moonphase.js'
 import consts from '@/consts.js'
 
@@ -17,6 +16,7 @@ import { colord, extend } from 'colord'
 import qs from '@aguezz/qs-parse'
 import namesPlugin from 'colord/plugins/names'
 import getCurvePoints from '@/libs/curve_calc.js'
+import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
@@ -29,14 +29,6 @@ extend([namesPlugin]) // colord
 const uuidLength = 21
 
 export default {
-  userPrefersReducedMotion () {
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)')
-    if (query.matches) {
-      return true
-    } else {
-      return false
-    }
-  },
   loadImage (src) {
     // from https://stackoverflow.com/a/5058336
     return new Promise((resolve, reject) => {
@@ -45,37 +37,6 @@ export default {
       image.addEventListener('error', reject)
       image.src = src
     })
-  },
-  assetUrl (path, type) {
-    if (type) {
-      return `@/assets/${path}.${type}`
-    } else {
-      return `@/assets/${path}`
-    }
-  },
-  isDevelopment () {
-    return import.meta.env.MODE === 'development'
-  },
-  kinopioDomain () {
-    let domain = 'https://kinopio.club'
-    if (this.isDevelopment()) {
-      domain = 'https://kinopio.local:8080'
-    }
-    return domain
-  },
-  host () {
-    let host = 'https://api.kinopio.club'
-    if (this.isDevelopment()) {
-      host = 'https://kinopio.local:3000'
-    }
-    return host
-  },
-  websocketHost () {
-    let host = 'wss://api.kinopio.club'
-    if (this.isDevelopment()) {
-      host = 'wss://kinopio.local:3000'
-    }
-    return host
   },
   mobileTouchPosition (event, type) {
     let touch
@@ -121,7 +82,7 @@ export default {
   },
   elementHeight (element, isChildElement) {
     if (!element) { return }
-    const threshold = 50
+    const threshold = 10
     const rect = element.getBoundingClientRect()
     let height
     const viewportHeight = this.visualViewport().height
@@ -131,7 +92,6 @@ export default {
       const dialogRect = dialog.getBoundingClientRect()
       height = height - (rect.y - dialogRect.y)
     }
-
     const zoomScale = this.visualViewport().scale
     if (zoomScale > 1) {
       height = height * zoomScale
@@ -190,26 +150,26 @@ export default {
       viewport.setAttribute('content', 'width=device-width, initial-scale=1') // index.html default
     }
   },
-  scrollIntoView (element, behavior) {
+  scrollIntoView ({ element, behavior }) {
     behavior = behavior || 'smooth'
     if (!element) { return }
-    const rect = element.getBoundingClientRect()
+    const sidebarIsVisible = document.querySelector('dialog#sidebar')
     const viewportWidth = this.visualViewport().width
-    const viewportHeight = this.visualViewport().height
-    let x = rect.x + rect.width - viewportWidth
-    let y = rect.y + rect.height - viewportHeight
-    let scrollX = 0
-    let scrollY = 0
-    if (x > 0) {
-      scrollX = x + 20
+    const isViewportNarrow = viewportWidth < (consts.maxCardLength * 2)
+    let horizontal = 'nearest'
+    let vertical = 'nearest'
+    if (sidebarIsVisible) {
+      horizontal = 'center'
+      vertical = 'center'
     }
-    if (y > 0) {
-      scrollY = y + 80
+    if (sidebarIsVisible && isViewportNarrow) {
+      horizontal = 'start'
     }
-    window.scrollBy({
-      left: scrollX,
-      top: scrollY,
-      behavior
+    scrollIntoViewIfNeeded(element, {
+      behavior,
+      scrollMode: 'if-needed',
+      block: vertical,
+      inline: horizontal
     })
   },
   cursorPositionInViewport (event) {
@@ -691,6 +651,18 @@ export default {
   insertStringAtIndex (string, insert, index) {
     return string.substr(0, index) + insert + string.substr(index)
   },
+  insertIntoArray (array, value, index) {
+    let start = array.slice(0, index)
+    const end = array.slice(index, array.length)
+    start.push(value)
+    const newArray = start.concat(end)
+    return newArray
+  },
+  removeFromArray (array, index) {
+    delete array[index]
+    array = array.filter(item => Boolean(item))
+    return array
+  },
   normalizeToUnixTime (date) {
     return new Date(date).getTime()
   },
@@ -855,6 +827,7 @@ export default {
     const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
     const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
+    const cardMediaElement = articleElement.querySelector(`.media-card`)
     let width = 'initial'
     if (articleElement.dataset.resizeWidth) {
       width = articleElement.dataset.resizeWidth + 'px'
@@ -864,6 +837,21 @@ export default {
     cardElement.style.width = width
     contentWrapElement.style.width = width
     contentWrapElement.style.height = 'initial'
+  },
+  removeAllCardDimensions (card) {
+    const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+    const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
+    const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
+    const cardMediaElement = articleElement.querySelector(`.media-card`)
+    articleElement.style.width = null
+    articleElement.style.height = null
+    cardElement.style.width = null
+    contentWrapElement.style.width = null
+    contentWrapElement.style.height = null
+    if (cardMediaElement) {
+      cardMediaElement.style.width = null
+    }
+    articleElement.style.maxWidth = null
   },
   topLeftItem (items) {
     items = this.clone(items)
@@ -989,6 +977,7 @@ export default {
     return rect
   },
   pageSizeFromItems (items) {
+    const padding = 250
     items = this.clone(items)
     items = items.filter(item => item.x && item.y)
     if (!items.length) {
@@ -999,10 +988,10 @@ export default {
     let y = 0
     items.forEach(item => {
       if (item.x > x) {
-        x = item.x
+        x = item.x + padding
       }
       if (item.y > y) {
-        y = item.y
+        y = item.y + padding
       }
     })
     const width = x + defaultSize
@@ -1194,6 +1183,7 @@ export default {
     space.privacy = 'private'
     space.isTemplate = false
     space.isHidden = false
+    space.collaboratorKey = nanoid()
     space.cards = space.cards.map(card => {
       card.userId = null
       if (card.nameUpdatedByUserId) {
@@ -1374,11 +1364,7 @@ export default {
 
   // Journal Space 🌚
 
-  promptPackById (packId) {
-    packId = packId.toString()
-    return promptPacks.find(pack => pack.packId === packId)
-  },
-  journalSpace (currentUser, isTomorrow, weather) {
+  journalSpace ({ currentUser, isTomorrow, weather, dailyPrompt }) {
     // name
     let date = dayjs(new Date())
     if (isTomorrow) {
@@ -1402,22 +1388,29 @@ export default {
     space.isTemplate = false
     space.isHidden = false
     space.isFromTweet = false
+    space.collaboratorKey = nanoid()
     space = this.spaceDefaultBackground(space, currentUser)
-    // cards
-    space.cards.push({ id: nanoid(), name: summary, x: 60, y: 100, frameId: 0 })
+    // summary
+    space.cards.push({ id: nanoid(), name: summary, x: 80, y: 110, frameId: 0 })
+    // daily prompt
+    if (dailyPrompt) {
+      let card = { id: nanoid() }
+      card.name = dailyPrompt
+      const position = this.promptCardPosition(space.cards, card.name)
+      card.x = position.x + 10
+      card.y = position.y
+      card.z = 0
+      card.spaceId = spaceId
+      card.frameId = 5
+      space.cards.push(card)
+    }
+    // user prompts
     const userPrompts = currentUser.journalPrompts
     userPrompts.forEach(prompt => {
       if (!prompt.name) { return }
+      if (prompt.packId) { return }
       let card = { id: nanoid() }
-      if (prompt.packId) {
-        const pack = this.promptPackById(prompt.packId)
-        const randomPrompt = this.randomPrompt(pack)
-        const tag = this.packTag(pack, card.id, space)
-        if (tag) { space.tags.push(tag) }
-        card.name = `[[${prompt.name}]] ${randomPrompt}`
-      } else {
-        card.name = prompt.name
-      }
+      card.name = prompt.name
       const position = this.promptCardPosition(space.cards, card.name)
       card.x = position.x
       card.y = position.y
@@ -1467,10 +1460,10 @@ export default {
     const averageCharactersPerLine = 25
     const lines = Math.ceil(lastCardName.length / averageCharactersPerLine)
     const lineHeight = 14
-    const padding = 16
+    const padding = 26
     const lastCardHeight = (lines * lineHeight) + padding + lines
-    let distanceBetween = 60
-    let x = 100
+    let distanceBetween = 50
+    let x = 120
     if (this.checkboxFromString(newCardName)) {
       distanceBetween = 12
       x = 120
@@ -1499,15 +1492,12 @@ export default {
       return id
     }
   },
-  spaceHasUrl () {
-    return window.location.href !== (window.location.origin + '/')
-  },
   spaceAndCardIdFromUrl (url) {
     url = new URL(url)
     return this.spaceAndCardIdFromPath(url.pathname) // /spaceId/cardId
   },
   urlFromSpaceAndCard ({ spaceId, cardId }) {
-    let url = `${this.kinopioDomain()}/${spaceId}`
+    let url = `${consts.kinopioDomain()}/${spaceId}`
     if (cardId) {
       url = `${url}/${cardId}`
     }
@@ -1515,7 +1505,7 @@ export default {
   },
   inviteUrl ({ spaceId, spaceName, collaboratorKey }) {
     spaceName = this.normalizeString(spaceName)
-    const url = `${this.kinopioDomain()}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
+    const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
     return url
   },
   spaceAndCardIdFromPath (path) {
@@ -1546,15 +1536,6 @@ export default {
     }
     return true
   },
-  currentSpaceIsRemote (space, currentUser) {
-    if (!this.arrayExists(space.users)) { return true }
-    const currentUserCreatedSpace = currentUser.id === space.users[0].id
-    if (currentUserCreatedSpace) {
-      return Boolean(currentUser.apiKey)
-    } else {
-      return true
-    }
-  },
   normalizeUrl (url) {
     const lastCharacterPosition = url.length - 1
     if (url[lastCharacterPosition] === '/') {
@@ -1580,7 +1561,7 @@ export default {
   },
   urlIsValidTld (url) {
     const isLocalhostUrl = url.match(this.localhostUrlPattern())
-    const isDevelopmentUrl = url.includes(this.kinopioDomain())
+    const isDevelopmentUrl = url.includes(consts.kinopioDomain())
     if (isLocalhostUrl || isDevelopmentUrl) { return true }
     // https://regexr.com/5v6s9
     const regex = '(' + tlds + ')' + String.raw`(\?|\/| |$|\s)`
@@ -1633,7 +1614,7 @@ export default {
     // followed by alphanumerics
     // then trailing '/' or '-'
     // matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)?[^\s(["<>]{2,}\.[^\s."><]+\w\/?-?/igm)
+    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)?[^\s(["<>]{2,}\.[^\s."><]+[\w=]\/?-?/igm)
     let localhostUrls = string.match(this.localhostUrlPattern()) || []
     let urls = string.match(urlPattern) || []
     urls = urls.concat(localhostUrls)
@@ -1850,6 +1831,7 @@ export default {
   addHiddenQueryStringToURLs (name) {
     const urls = this.urlsFromString(name)
     urls.forEach(url => {
+      if (url.includes('https://www.icloud.com')) { return } // https://club.kinopio.club/t/icloud-albums-dont-work-with-hidden-true/1153
       url = url.trim()
       url = this.removeTrailingSlash(url)
       if (!this.urlIsWebsite(url)) { return }
@@ -1862,6 +1844,16 @@ export default {
       queryObject.hidden = 'true'
       const newUrl = qs.encode(domain, queryObject)
       name = name.replace(url, newUrl)
+    })
+    return name
+  },
+  removeHiddenQueryStringFromURLs (name) {
+    const urls = this.urlsFromString(name)
+    urls.forEach(url => {
+      const prevUrl = url
+      url = url.replace('?hidden=true', '')
+      url = url.replace('&hidden=true', '')
+      name = name.replace(prevUrl, url)
     })
     return name
   },
@@ -2042,12 +2034,37 @@ export default {
     return styles
   },
 
+  // App Buttons
+
+  commandsFromString (string) {
+    const allowedCommands = Object.keys(consts.systemCommands)
+    // https://regexr.com/7h3ia
+    const commandPattern = new RegExp(/::systemCommand=\w+/gm)
+    let commands = string.match(commandPattern)
+    if (!commands) { return }
+    commands = commands.filter(command => {
+      const name = this.commandNameFromCommand(command)
+      return allowedCommands.includes(name)
+    })
+    return commands
+  },
+  commandNameFromCommand (string) {
+    // https://regexr.com/7h3ig
+    // ::system_command=xyz → matches xyz
+    const commandNamePattern = new RegExp(/=\w+/gm)
+    let name = string.match(commandNamePattern)
+    name = name[0]
+    name = name.replace('=', '')
+    return name
+  },
+
   // Name Segments 🎫
 
   cardNameSegments (name) {
     if (!name) { return [] }
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name, true) || []
+    const commands = this.commandsFromString(name) || []
     const markdownLinks = name.match(this.markdown().linkPattern) || []
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
@@ -2083,6 +2100,11 @@ export default {
       const endPosition = startPosition + file.length
       badges.push({ file, startPosition, endPosition, isFile: true })
     })
+    commands.forEach(command => {
+      const startPosition = name.indexOf(command)
+      const endPosition = startPosition + command.length
+      badges.push({ command, startPosition, endPosition, isCommand: true })
+    })
     badges = sortBy(badges, ['startPosition'])
     if (!badges.length) {
       return [{ isText: true, content: name }]
@@ -2106,7 +2128,7 @@ export default {
       } else if (segment.isLink) {
         let link = segment.link
         const { spaceId, spaceUrl, cardId } = this.spaceAndCardIdFromUrl(link)
-        // link = `${this.kinopioDomain()}/${spaceUrl}`
+        // link = `${consts.kinopioDomain()}/${spaceUrl}`
         newSegment = {
           isLink: true,
           name: link,
@@ -2130,16 +2152,17 @@ export default {
           isFile: true,
           name: this.fileNameFromUrl(segment.file)
         }
+      // button
+      } else if (segment.isCommand) {
+        const command = this.commandNameFromCommand(segment.command)
+        const name = consts.systemCommands[command]
+        newSegment = {
+          isCommand: true,
+          command,
+          name
+        }
       }
       currentPosition = segment.endPosition
-      const nextBadge = badges[index + 1]
-      if (nextBadge) {
-        newSegment = {
-          isText: true,
-          content: name.substring(currentPosition, nextBadge.startPosition)
-        }
-        currentPosition = nextBadge.startPosition
-      }
       segments.push(newSegment)
     })
     const trailingText = name.substring(currentPosition, name.length)

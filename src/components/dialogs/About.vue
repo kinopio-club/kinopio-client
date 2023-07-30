@@ -9,7 +9,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
 
   section
     .row
-      p Thinking canvas for building ideas and solving problems
+      p For building ideas and solving problems
     .row
       .button-wrap
         a(href="https://help.kinopio.club/about")
@@ -79,6 +79,18 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         button(@click.left.stop="triggerDonateIsVisible")
           img.icon(src="@/assets/heart-empty.svg")
           span Donate
+
+  section
+    .row
+      a(href="https://help.kinopio.club/posts/terms-of-service/")
+        button
+          span Terms of Service{{' '}}
+          img.icon.visit(src="@/assets/visit.svg")
+    .row
+      a(href="https://help.kinopio.club/posts/privacy-policy")
+        button
+          span Privacy Policy{{' '}}
+          img.icon.visit(src="@/assets/visit.svg")
 
 </template>
 
@@ -165,6 +177,7 @@ export default {
     },
     async updateNewStuff () {
       let data = await this.$store.dispatch('api/getNewStuff')
+      if (!data) { return }
       data = data.items.slice(0, 20)
       data = data.map(item => {
         item.summary = utils.convertHTMLEntities(item.summary)
@@ -211,6 +224,9 @@ export default {
       if (visible) {
         this.closeDialogs()
         this.updateDialogHeight()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     }
   }

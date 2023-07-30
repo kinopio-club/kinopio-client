@@ -217,7 +217,7 @@ export default {
     changeSpace (spaceId) {
       if (this.$store.state.currentSpace.id === spaceId) { return }
       const space = { id: spaceId }
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
       this.closeDialogs()
       this.$store.dispatch('closeAllDialogs')
     },
@@ -311,13 +311,13 @@ export default {
     updateDialogHeight () {
       this.$nextTick(() => {
         let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element) - 100
+        this.dialogHeight = utils.elementHeight(element)
       })
     },
     updateResultsSectionHeight () {
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeight(element) - 2 - 100
+        this.resultsSectionHeight = utils.elementHeight(element) - 2
       })
     },
     triggerSignUpOrInIsVisible () {
@@ -330,10 +330,13 @@ export default {
       this.updateHeights()
       if (visible) {
         this.hasSearched = false
+        this.$store.commit('shouldExplicitlyHideFooter', true)
         if (utils.isMobile()) { return }
         this.$nextTick(() => {
           this.$store.commit('triggerFocusResultsFilter')
         })
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     }
   }

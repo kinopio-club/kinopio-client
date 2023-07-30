@@ -1,15 +1,14 @@
 <template lang="pug">
-a#pdf-downlaod-anchor.hidden
 section.subsection.pdf(v-if="visible")
+  a#pdf-downlaod-anchor.hidden
   template(v-if="isLoading")
-    .row
-      Loader(:visible="true")
-      span Creating space PDF…
+    Loader(:visible="true")
+    p Creating space PDF…
   template(v-if="unknownServerError")
     .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
   template(v-if="!isLoading && !unknownServerError")
-    p {{fileName()}}.pdf
     .badge.success Downloaded
+    p {{fileName()}}.pdf
 </template>
 
 <script>
@@ -83,12 +82,10 @@ export default {
 <style lang="stylus" scoped>
 .pdf
   margin-top 10px
-  margin-bottom 10px
   padding-bottom 4px
   .loader
     height 14px
     width 14px
     vertical-align 0px
-    margin-right 4px
-
+    margin 0
 </style>

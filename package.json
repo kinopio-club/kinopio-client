@@ -19,6 +19,7 @@
     "nanoid": "^3.1.31",
     "overlap-area": "^1.0.0",
     "randomcolor": "^0.5.4",
+    "scroll-into-view-if-needed": "^3.0.10",
     "shader": "^1.0.0",
     "vue": "^3.2.6",
     "vue-router": "^4.0.11",
@@ -33,12 +34,12 @@
     "babel-eslint": "^10.0.1",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^9.8.0",
-    "lint-staged": "^11.1.2",
+    "lint-staged": "^13.2.1",
     "postcss": "^8.3.6",
     "pug": "^3.0.2",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
-    "vite": "^3.2.1",
+    "vite": "^3.2.7",
     "yorkie": "^2.0.0"
   },
   "eslintConfig": {

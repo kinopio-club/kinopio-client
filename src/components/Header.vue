@@ -31,6 +31,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           About(:visible="aboutIsVisible")
           KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
           Donate(:visible="donateIsVisible")
+          Apps(:visible="appsIsVisible")
       .space-meta-rows
         .space-functions-row
           .segmented-buttons.add-space-functions
@@ -47,7 +48,6 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible || totalFiltersActive || searchResultsCount}")
                 template(v-if="!searchResultsCount")
                   img.icon.search(src="@/assets/search.svg")
-                  img.icon.filter(src="@/assets/filter.svg" v-if="!totalFiltersActive")
                 .badge.search.search-count-badge(v-if="searchResultsCount")
                   img.icon.search(src="@/assets/search.svg")
                   span {{searchResultsCount}}
@@ -55,14 +55,18 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
                   img.icon(src="@/assets/filter.svg")
                   span {{totalFiltersActive}}
               Search(:visible="searchIsVisible")
-            button(@click="showPreviousSearchCard" v-if="searchResultsCount")
-              img.icon.left-arrow(src="@/assets/down-arrow.svg")
-            button(@click="showNextSearchCard" v-if="searchResultsCount")
-              img.icon.right-arrow(src="@/assets/down-arrow.svg")
+            //- button(@click="showPreviousSearchCard" v-if="searchResultsCount")
+            //-   img.icon.left-arrow(src="@/assets/down-arrow.svg")
+            //- button(@click="showNextSearchCard" v-if="searchResultsCount")
+            //-   img.icon.right-arrow(src="@/assets/down-arrow.svg")
             button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
               img.icon.cancel(src="@/assets/add.svg")
 
         .space-details-row.segmented-buttons
+          //- Back
+          .button-wrap(v-if="prevSpaceId" title="Go Back" @click.stop="changeToPrevSpace")
+            button
+              img.icon.left-arrow(src="@/assets/down-arrow.svg")
           //- Current Space
           .button-wrap
             button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active: spaceDetailsIsVisible}")
@@ -108,6 +112,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           Pricing(:visible="pricingIsVisible")
           ControlsSettings(:visible="controlsSettingsIsVisible")
           UserSettings
+          ResetPassword
           //- Share
           .button-wrap
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
@@ -120,7 +125,13 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               span {{notificationsUnreadCount}}
             UserNotifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
         .bottom-controls
-          ResetPassword
+          Discovery
+          //- Sidebar
+          .button-wrap
+            button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
+              img.icon.sidebar(src="@/assets/sidebar.svg")
+            Sidebar(:visible="sidebarIsVisible")
+        .row.bottom-controls
           //- Sign Up or In
           .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
             button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
@@ -129,15 +140,9 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
           //- Upgrade
           .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
-            button(@click.left.stop="triggerUpgradeUserIsVisible")
+            button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
               span Upgrade
-          //- Sidebar
-          .button-wrap
-            button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
-              img.icon.right-arrow(src="@/assets/down-arrow.svg")
-            Sidebar(:visible="sidebarIsVisible")
-        .row.bottom-controls
-          ExploreRow
+          //- Pricing
           .button-wrap(v-if="!currentUserIsSignedIn")
             button(@click.left.stop="togglePricingIsVisible" :class="{active : pricingIsVisible}")
               span Pricing
@@ -162,6 +167,7 @@ import Loader from '@/components/Loader.vue'
 import templates from '@/data/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
+import Apps from '@/components/dialogs/Apps.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Search from '@/components/dialogs/Search.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
@@ -178,8 +184,9 @@ import Pricing from '@/components/dialogs/Pricing.vue'
 import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
-import ExploreRow from '@/components/ExploreRow.vue'
+import Discovery from '@/components/Discovery.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
+import consts from '@/consts.js'
 
 import { mapState, mapGetters } from 'vuex'
 import sortBy from 'lodash-es/sortBy'
@@ -207,6 +214,7 @@ export default {
     Loader,
     ImportArenaChannel,
     KeyboardShortcuts,
+    Apps,
     UpgradeUser,
     Search,
     MoonPhase,
@@ -223,7 +231,7 @@ export default {
     EarnCredits,
     SpaceTodayJournalBadge,
     ControlsSettings,
-    ExploreRow,
+    Discovery,
     UserSettings
   },
   props: {
@@ -240,6 +248,7 @@ export default {
       notificationsIsVisible: false,
       loadingSignUpOrIn: false,
       keyboardShortcutsIsVisible: false,
+      appsIsVisible: false,
       upgradeUserIsVisible: false,
       spaceStatusIsVisible: false,
       offlineIsVisible: false,
@@ -248,7 +257,6 @@ export default {
       notifications: [],
       notificationsIsLoading: true,
       addSpaceIsVisible: false,
-      isFadingOut: false,
       isHidden: false,
       templatesIsVisible: false,
       sidebarIsVisible: false,
@@ -269,6 +277,8 @@ export default {
         this.spaceDetailsInfoIsVisible = true
       } else if (mutation.type === 'triggerSignUpOrInIsVisible') {
         this.signUpOrInIsVisible = true
+      } else if (mutation.type === 'triggerAppsIsVisible') {
+        this.appsIsVisible = true
       } else if (mutation.type === 'triggerKeyboardShortcutsIsVisible') {
         this.keyboardShortcutsIsVisible = true
       } else if (mutation.type === 'triggerUpgradeUserIsVisible') {
@@ -297,6 +307,8 @@ export default {
         this.sidebarIsVisible = true
       } else if (mutation.type === 'triggerImportIsVisible') {
         this.importIsVisible = true
+      } else if (mutation.type === 'triggerAddSpaceIsVisible') {
+        this.addSpaceIsVisible = true
       }
     })
   },
@@ -344,13 +356,13 @@ export default {
       'currentUser/totalFiltersActive'
     ]),
     currentSpaceIsHidden () { return this.$store.state.currentSpace.isHidden },
-    kinopioDomain () { return utils.kinopioDomain() },
+    kinopioDomain () { return consts.kinopioDomain() },
     userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible },
     isVisible () {
-      const contentDialogIsVisible = this.cardDetailsIsVisibleForCardId || this.connectionDetailsIsVisibleForConnectionId
       if (this.isPresentationMode) { return }
       if (this.isAddPage) { return }
-      if (contentDialogIsVisible && this.isTouchDevice) {
+      const contentDialogIsVisible = this.cardDetailsIsVisibleForCardId || this.connectionDetailsIsVisibleForConnectionId
+      if (contentDialogIsVisible && this.isTouchDevice && !this.sidebarIsVisible) {
         return false
       } else {
         return true
@@ -428,9 +440,19 @@ export default {
     },
     pricingIsVisible () {
       return this.$store.state.pricingIsVisible
+    },
+    isFadingOut () { return this.$store.state.isFadingOutDuringTouch },
+    prevSpaceId () {
+      const spaceId = this.$store.state.prevSpaceIdInSession
+      return spaceId && spaceId !== this.currentSpace.id
     }
   },
   methods: {
+    changeToPrevSpace () {
+      const id = this.$store.state.currentSpace.id
+      this.$store.dispatch('currentSpace/loadPrevSpaceInSession')
+      this.$store.commit('prevSpaceIdInSession', id)
+    },
     openKinopio () {
       const url = this.currentSpaceUrl
       const title = `${this.currentSpaceName} – Kinopio`
@@ -488,6 +510,7 @@ export default {
       this.signUpOrInIsVisible = false
       this.shareIsVisible = false
       this.keyboardShortcutsIsVisible = false
+      this.appsIsVisible = false
       this.upgradeUserIsVisible = false
       this.donateIsVisible = false
       this.spaceStatusIsVisible = false
@@ -565,7 +588,7 @@ export default {
     setLoadingSignUpOrIn (value) {
       this.loadingSignUpOrIn = value
     },
-    triggerUpgradeUserIsVisible () {
+    toggleUpgradeUserIsVisible () {
       const isVisible = this.upgradeUserIsVisible
       this.$store.dispatch('closeAllDialogs')
       this.upgradeUserIsVisible = !isVisible
@@ -605,13 +628,13 @@ export default {
     cancelFadeOut () {
       window.cancelAnimationFrame(fadeOutTimer)
       fadeOutTimer = undefined
-      this.isFadingOut = false
+      this.$store.commit('isFadingOutDuringTouch', false)
       this.cancelUpdatePosition()
       this.updatePosition()
     },
     fadeOutFrame () {
       fadeOutIteration++
-      this.isFadingOut = true
+      this.$store.commit('isFadingOutDuringTouch', true)
       if (shouldCancelFadeOut) {
         this.cancelFadeOut()
       } else if (fadeOutIteration < fadeOutDuration) {
@@ -700,7 +723,6 @@ export default {
       }
     },
     isTouchScrolling (value) {
-      if (!utils.isAndroid()) { return }
       if (value) {
         this.fadeOut()
         this.updatePosition()
@@ -726,8 +748,6 @@ header
   justify-content space-between
   transition 0.2s opacity
   transform-origin left top
-  &.hidden-by-mindmap
-    opacity 0.2
   nav,
   aside
     pointer-events none
@@ -743,32 +763,22 @@ header
     position relative
     display inline-block
     margin-right 6px
-    > .button-wrap
-      > .keyboard-shortcuts
-        max-height calc(100vh - 120px)
-        top calc(100% - 6px)
   .logo
     cursor pointer
     display flex
-    > .logo-image
-      min-width 45px
       .label-badge
         bottom -2px
     img
       vertical-align middle
     .down-arrow
-      padding-left 4px
-      opacity 0.4
-    &:hover,
-    &:focus
-      .label-badge
-        transform translateY(2px)
-      .down-arrow
-        transform translateY(3px)
+      padding-left 2px
+      opacity 0.5
+    .label-badge
+      transform translateY(10px)
     &:active,
     &.active
       .down-arrow
-        transform translateY(5px)
+        transform translateY(2px)
 
   .embed-nav
     .logo
@@ -793,7 +803,6 @@ header
       vertical-align 0
 
   .space-details-row
-    display initial
     button
       white-space nowrap
       overflow hidden
@@ -808,9 +817,9 @@ header
     dialog
       max-width initial
     > .button-wrap
-      max-width 60vw
+      max-width 58vw
       @media(max-width 550px)
-        max-width 40vw
+        max-width 31vw
       > button
         .privacy-icon
           margin-left 6px
@@ -861,6 +870,8 @@ header
     flex-direction column
   .left
     display flex
+    flex-shrink 0
+
     @media(max-width 414px)
       max-width calc(100% - 100px)
 
@@ -922,6 +933,9 @@ header
     margin-right 4px
     width 12px
     vertical-align 0
+
+  .icon.sidebar
+    vertical-align -1px
 
   .badge.space-status-success
     margin 0

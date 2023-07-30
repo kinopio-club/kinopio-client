@@ -19,9 +19,9 @@ watch(() => props.visible, (value, prevValue) => {
 
 const url = computed(() => {
   if (store.state.currentUser.referrerName) {
-    return utils.kinopioDomain() + '/from/' + store.state.currentUser.referrerName
+    return consts.kinopioDomain() + '/from/' + store.state.currentUser.referrerName
   } else {
-    return utils.kinopioDomain() + '/refer/' + store.state.currentUser.id
+    return consts.kinopioDomain() + '/refer/' + store.state.currentUser.id
   }
 })
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])

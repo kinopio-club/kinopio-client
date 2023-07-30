@@ -15,21 +15,39 @@ dialog.add-space.narrow(
         button.success(@click="addSpace")
           img.icon(src="@/assets/add.svg")
           span New Space
+
     //- Add Journal
     .row
       .segmented-buttons
         button(@click="addJournalSpace")
           img.icon(src="@/assets/add.svg")
           MoonPhase(:moonPhase="moonPhase.name")
-          span Daily Journal
+          span Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+
     //- Journal Settings
     template(v-if="editPromptsIsVisible")
-      Weather
-    template(v-if="editPromptsIsVisible" )
-      Prompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
-    PromptPicker(v-if="editPromptsIsVisible" :visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack" @addCustomPrompt="addCustomPrompt")
+      //- weather
+      section.subsection
+        Weather
+      //- daily prompt
+      section.subsection
+        .row.daily-prompt-row
+          .button-wrap
+            button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
+              img.icon.today(src="@/assets/today.svg")
+              span Prompt of the Day
+        .row(v-if="shouldCreateJournalsWithDailyPrompt")
+          p {{dailyPrompt}}
+      //- prompts
+      section.subsection
+        JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
+        //- add prompt
+        .row
+          button(@click.left="addCustomPrompt")
+            img.icon(src="@/assets/add.svg")
+            span Prompt
 
   //- Inbox
   section(v-if="!hasInboxSpace")
@@ -52,8 +70,7 @@ dialog.add-space.narrow(
 </template>
 
 <script>
-import Prompt from '@/components/Prompt.vue'
-import PromptPicker from '@/components/dialogs/PromptPicker.vue'
+import JournalPrompt from '@/components/JournalPrompt.vue'
 import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
 import Weather from '@/components/Weather.vue'
@@ -66,8 +83,7 @@ import { nanoid } from 'nanoid'
 export default {
   name: 'AddSpace',
   components: {
-    Prompt,
-    PromptPicker,
+    JournalPrompt,
     MoonPhase,
     Weather
   },
@@ -90,20 +106,30 @@ export default {
       moonPhase: {},
       editPromptsIsVisible: false,
       urlIsCopied: false,
-      promptPickerPosition: {
-        left: 80,
-        top: 5
-      },
       screenIsShort: false,
       dialogHeight: null,
       hasInboxSpace: true
     }
   },
   computed: {
-    userPrompts () { return this.$store.state.currentUser.journalPrompts },
-    currentUserId () { return this.$store.state.currentUser.id }
+    userPrompts () {
+      let prompts = this.$store.state.currentUser.journalPrompts
+      prompts = prompts.filter(prompt => !prompt.packId)
+      return prompts
+    },
+    currentUserId () { return this.$store.state.currentUser.id },
+    shouldCreateJournalsWithDailyPrompt () {
+      return this.$store.state.currentUser.shouldCreateJournalsWithDailyPrompt
+    },
+    dailyPrompt () {
+      return this.$store.state.currentUser.journalDailyPrompt
+    }
   },
   methods: {
+    toggleShouldCreateJournalsWithDailyPrompt () {
+      const value = !this.shouldCreateJournalsWithDailyPrompt
+      this.$store.dispatch('currentUser/update', { shouldCreateJournalsWithDailyPrompt: value })
+    },
     showScreenIsShort (value) {
       this.screenIsShort = true
       this.shouldHideFooter(true)
@@ -120,7 +146,6 @@ export default {
       if (this.shouldAddSpaceDirectly) {
         this.$store.dispatch('closeAllDialogs')
         this.$store.dispatch('currentSpace/loadJournalSpace')
-        this.$store.dispatch('currentSpace/updateSpacePageSize')
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
       }
     },
@@ -137,7 +162,6 @@ export default {
       if (this.shouldAddSpaceDirectly) {
         this.$store.dispatch('closeAllDialogs')
         this.$store.dispatch('currentSpace/addSpace')
-        this.$store.dispatch('currentSpace/updateSpacePageSize')
         this.$store.commit('triggerSpaceDetailsInfoIsVisible')
       }
     },
@@ -146,12 +170,12 @@ export default {
       this.$store.dispatch('closeAllDialogs')
       window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addInboxSpace')
-      this.$store.dispatch('currentSpace/updateSpacePageSize')
     },
     toggleEditPromptsIsVisible () {
       const value = !this.editPromptsIsVisible
       this.closeAll()
       this.editPromptsIsVisible = value
+      this.updateDialogHeight()
     },
     closeAll () {
       this.editPromptsIsVisible = false
@@ -209,6 +233,9 @@ export default {
       this.updateDialogHeight()
       if (visible) {
         this.checkIfUserHasInboxSpace()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     }
   }
@@ -218,18 +245,12 @@ export default {
 <style lang="stylus">
 .add-space
   overflow auto
+  max-height calc(100vh - 230px)
   &.short
     top -68px !important
-  max-height calc(100vh - 230px)
-  .textarea
-    background-color var(--secondary-background)
-    border 0
-    border-radius var(--small-entity-radius)
-    padding 4px
   .inbox-icon
     margin 0
     margin-left 5px
-  .moon-phase
-    vertical-align -1px
-
+  .daily-prompt-row
+    justify-content space-between
 </style>

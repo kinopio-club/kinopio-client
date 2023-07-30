@@ -11,7 +11,7 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
       p {{actionLabelCapitalized}} {{pluralItem}} to space
     .row
       .button-wrap
-        button.variable-length-content(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
+        button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
           span {{selectedSpace.name}}
           img.down-arrow(src="@/assets/down-arrow.svg")
         SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true")
@@ -229,7 +229,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
     },
     closeDialogs () {
       this.spacePickerIsVisible = false

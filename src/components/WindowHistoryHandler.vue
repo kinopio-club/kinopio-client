@@ -19,23 +19,16 @@ export default {
     currentSpaceName () { return this.currentSpace.name }
   },
   methods: {
-    async updateWindowHistory ({ space, isRemote }) {
+    async updateWindowHistory (space) {
       const isEmbedMode = this.$store.state.isEmbedMode
       space = space || this.currentSpace
       const spaceUrl = utils.url(space)
       const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
-      const spaceHasUrl = currentUserIsSignedIn || isRemote
-      if (spaceHasUrl) {
-        this.$store.commit('currentSpacePath', spaceUrl, { root: true })
-        if (navigator.standalone || isEmbedMode) { return }
-        await this.$router.push('/' + spaceUrl)
-        const state = utils.clone(this.$store.state)
-        history.replaceState({ ...history.state, ...state }, '')
-      } else {
-        this.$store.commit('currentSpacePath', '/', { root: true })
-        if (navigator.standalone || isEmbedMode) { return }
-        this.$router.replace({ path: '/' })
-      }
+      this.$store.commit('currentSpacePath', spaceUrl, { root: true })
+      if (navigator.standalone || isEmbedMode) { return }
+      await this.$router.push('/' + spaceUrl)
+      const state = utils.clone(this.$store.state)
+      history.replaceState({ ...history.state, ...state }, '')
     },
     updateWindowTitle () {
       const spaceName = this.currentSpaceName

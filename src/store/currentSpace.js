@@ -5,6 +5,7 @@ import newSpace from '@/data/new.json'
 import words from '@/data/words.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
 
 import { nextTick } from 'vue'
 import randomColor from 'randomcolor'
@@ -147,13 +148,11 @@ const currentSpace = {
       const loadInboxSpace = context.rootState.loadInboxSpace
       const loadNewSpace = context.rootState.loadNewSpace
       const user = context.rootState.currentUser
-      let isRemote
       // restore from url
       if (spaceUrl) {
         console.log('🚃 Restore space from url', spaceUrl)
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
-        isRemote = true
         await context.dispatch('loadSpace', { space })
       // restore or create journal space
       } else if (loadJournalSpace) {
@@ -179,8 +178,7 @@ const currentSpace = {
       }
       context.dispatch('checkIfShouldCreateNewUserSpaces')
       context.dispatch('updateModulesSpaceId')
-      context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
-      context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
+      context.commit('triggerUpdateWindowHistory', null, { root: true })
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
 
@@ -317,6 +315,7 @@ const currentSpace = {
       const user = context.rootState.currentUser
       let space = utils.clone(helloSpace)
       space.id = nanoid()
+      space.collaboratorKey = nanoid()
       if (shouldLoadNewHelloSpace) {
         space = cache.updateIdsInSpace(space)
         context.commit('clearSearch', null, { root: true })
@@ -341,6 +340,7 @@ const currentSpace = {
       space.id = nanoid()
       space.createdAt = new Date()
       space.editedAt = new Date()
+      space.collaboratorKey = nanoid()
       const newSpacesAreBlank = context.rootState.currentUser.newSpacesAreBlank
       if (newSpacesAreBlank) {
         space.connectionTypes = []
@@ -349,8 +349,8 @@ const currentSpace = {
         space.boxes = []
       } else {
         space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
-        space.cards[1].x = random(180, 200)
-        space.cards[1].y = random(180, 200)
+        space.cards[1].x = space.cards[1].x + random(0, 20)
+        space.cards[1].y = space.cards[1].y + random(0, 20)
       }
       space.userId = context.rootState.currentUser.id
       space = utils.spaceDefaultBackground(space, context.rootState.currentUser)
@@ -361,22 +361,30 @@ const currentSpace = {
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
-      context.commit('triggerLoadBackground', null, { root: true })
+      context.commit('triggerUpdateBackground', null, { root: true })
     },
     createNewJournalSpace: async (context) => {
       const isTomorrow = context.rootState.loadJournalSpaceTomorrow
       const currentUser = utils.clone(context.rootState.currentUser)
       context.commit('isLoadingSpace', true, { root: true })
+      // weather
       let weather = context.rootState.currentUser.weather
       if (!weather) {
         weather = await context.dispatch('api/weather', null, { root: true })
       }
-      const space = utils.journalSpace(currentUser, isTomorrow, weather)
+      // daily prompt
+      let options = { currentUser, isTomorrow, weather }
+      if (currentUser.shouldCreateJournalsWithDailyPrompt) {
+        options.dailyPrompt = currentUser.journalDailyPrompt
+      }
+      // create space
+      const space = utils.journalSpace(options)
       context.commit('clearSearch', null, { root: true })
       context.commit('shouldResetDimensionsOnLoad', true, { root: true })
       isLoadingRemoteSpace = false
+      // load space
       context.dispatch('restoreSpaceInChunks', { space })
-      context.commit('triggerLoadBackground', null, { root: true })
+      context.commit('triggerUpdateBackground', null, { root: true })
     },
     createNewInboxSpace: (context, shouldCreateWithoutLoading) => {
       let space = utils.clone(inboxSpace)
@@ -397,7 +405,7 @@ const currentSpace = {
         context.commit('clearSearch', null, { root: true })
         isLoadingRemoteSpace = false
         context.dispatch('restoreSpaceInChunks', { space })
-        context.commit('triggerLoadBackground', null, { root: true })
+        context.commit('triggerUpdateBackground', null, { root: true })
         nextTick(() => {
           context.dispatch('currentCards/updateDimensions', {}, { root: true })
         })
@@ -420,16 +428,17 @@ const currentSpace = {
     },
     saveImportedSpace: async (context) => {
       context.commit('isLoadingSpace', true, { root: true })
-      const space = utils.clone(context.state)
+      let space = utils.clone(context.state)
+      space = utils.clearSpaceMeta(space, 'copy')
       const user = context.rootState.currentUser
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       cache.saveSpace(space)
       if (currentUserIsSignedIn) {
         await context.dispatch('api/createSpace', space, { root: true })
       }
-      context.commit('triggerUpdateWindowHistory', { space, isRemote: currentUserIsSignedIn }, { root: true })
+      context.commit('triggerUpdateWindowHistory', space, { root: true })
       context.commit('addUserToSpace', user)
-      context.commit('triggerLoadBackground', null, { root: true })
+      context.commit('triggerUpdateBackground', null, { root: true })
       context.dispatch('updateModulesSpaceId', space)
       nextTick(() => {
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
@@ -461,7 +470,7 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', {}, { root: true })
+      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
     addJournalSpace: async (context) => {
       const user = context.rootState.currentUser
@@ -470,7 +479,7 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', {}, { root: true })
+      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
 
     addInboxSpace: (context) => {
@@ -480,14 +489,13 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', {}, { root: true })
-      context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
+      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const user = context.rootState.currentUser
-      const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
+      const currentSpaceIsRemote = context.rootGetters['currentSpace/isRemote']
       let remoteSpace
       try {
         if (currentUserIsSignedIn) {
@@ -566,10 +574,10 @@ const currentSpace = {
     loadJournalSpace: async (context) => {
       const spaces = cache.getAllSpaces()
       const journalName = utils.journalSpaceName({ isTomorrow: context.rootState.loadJournalSpaceTomorrow })
-      const journalSpace = spaces.find(space => space.name === journalName)
+      const journalSpace = spaces.find(space => space.name === journalName && !space.isRemoved)
       if (journalSpace) {
         const space = { id: journalSpace.id }
-        context.dispatch('changeSpace', { space })
+        context.dispatch('changeSpace', space)
       } else {
         await context.dispatch('addJournalSpace')
         context.commit('triggerSpaceDetailsUpdateLocalSpaces', null, { root: true })
@@ -581,7 +589,7 @@ const currentSpace = {
       const inboxSpace = await context.dispatch('currentUser/inboxSpace', null, { root: true })
       if (inboxSpace) {
         const space = { id: inboxSpace.id }
-        context.dispatch('changeSpace', { space })
+        context.dispatch('changeSpace', space)
       } else {
         context.commit('addNotification', { message: 'Inbox space not found', type: 'danger' }, { root: true })
         context.dispatch('loadLastSpace')
@@ -619,6 +627,7 @@ const currentSpace = {
       cards = sortBy(cards, ['distanceFromOrigin'])
       // page size
       const itemsRect = utils.pageSizeFromItems(cards)
+      context.commit('resetPageSizes', null, { root: true })
       context.commit('updatePageSizes', itemsRect, { root: true })
       // sort connections
       const connectionIds = Object.keys(connections)
@@ -641,7 +650,7 @@ const currentSpace = {
       }
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('restoreSpace', space)
-      context.commit('triggerLoadBackground', null, { root: true })
+      context.commit('triggerUpdateBackground', null, { root: true })
       // split into chunks
       const cardChunks = utils.splitArrayIntoChunks(cards, chunkSize)
       const connectionChunks = utils.splitArrayIntoChunks(connections, chunkSize)
@@ -707,6 +716,7 @@ const currentSpace = {
         isRemote,
         cardUsers: context.rootGetters['currentCards/userIds']
       })
+      context.dispatch('updatePageSizes', null, { root: true })
       if (isRemote) {
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', space)
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', space)
@@ -718,11 +728,8 @@ const currentSpace = {
         // deferrable async tasks
         context.dispatch('updateOtherUsers')
         context.dispatch('updateOtherItems')
-        context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
-        context.dispatch('currentCards/updateDimensions', {}, { root: true })
         context.dispatch('checkIfShouldResetDimensions')
         nextTick(() => {
-          context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
           context.dispatch('checkIfShouldPauseConnectionDirections')
           context.dispatch('checkIfShouldUpdateNewTweetCards', space)
           context.dispatch('api/addToQueue', {
@@ -742,7 +749,6 @@ const currentSpace = {
       if (!context.rootState.isEmbedMode) {
         context.commit('triggerSpaceZoomReset', null, { root: true })
       }
-      context.commit('resetPageSizes', null, { root: true })
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('isAddPage', false, { root: true })
       const emptySpace = utils.emptySpace(space.id)
@@ -825,6 +831,17 @@ const currentSpace = {
       }
       context.dispatch('updateUserLastSpaceId')
     },
+    loadPrevSpaceInSession: async (context) => {
+      const prevSpaceIdInSession = context.rootState.prevSpaceIdInSession
+      if (!prevSpaceIdInSession) { return }
+      let space = cache.space(prevSpaceIdInSession)
+      if (space.id) {
+        context.dispatch('loadSpace', { space })
+      } else if (prevSpaceIdInSession) {
+        space = { id: prevSpaceIdInSession }
+        context.dispatch('loadSpace', { space })
+      }
+    },
     updateSpace: async (context, updates) => {
       const space = utils.clone(context.state)
       updates.id = space.id
@@ -839,16 +856,17 @@ const currentSpace = {
         body: updates
       }, { root: true })
     },
-    changeSpace: async (context, { space, isRemote }) => {
-      console.log('🚟 Change space', { space, isRemote })
+    changeSpace: async (context, space) => {
+      context.commit('prevSpaceIdInSession', context.state.id, { root: true })
+      console.log('🚟 Change space', space)
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('notifySpaceNotFound', false, { root: true })
       context.commit('notifySpaceIsRemoved', false, { root: true })
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })
-      context.commit('triggerUpdateWindowHistory', { space, isRemote }, { root: true })
-      const userIsMember = context.rootGetters['currentUser/isSpaceMember']
+      context.commit('triggerUpdateWindowHistory', space, { root: true })
+      const userIsMember = context.rootGetters['currentUser/isSpaceMember']()
       if (!userIsMember) { return }
       context.dispatch('api/addToQueue', {
         name: 'updateSpace',
@@ -873,7 +891,7 @@ const currentSpace = {
         name: 'removeSpace',
         body: { id: space.id }
       }, { root: true })
-      context.commit('triggerCheckIfUseHasInboxSpace', null, { root: true })
+      context.commit('prevSpaceIdInSession', '', { root: true })
     },
     deleteSpace: (context, space) => {
       cache.deleteSpace(space)
@@ -881,13 +899,14 @@ const currentSpace = {
         name: 'deleteSpace',
         body: space
       }, { root: true })
+      context.commit('prevSpaceIdInSession', '', { root: true })
     },
     restoreRemovedSpace: async (context, space) => {
       cache.restoreRemovedSpace(space)
       const restoredSpace = await context.dispatch('api/restoreRemovedSpace', space, { root: true })
       space = restoredSpace || space
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
-      context.dispatch('changeSpace', { space })
+      context.dispatch('changeSpace', space)
     },
     deleteAllRemovedSpaces: (context) => {
       const userId = context.rootState.currentUser.id
@@ -904,7 +923,7 @@ const currentSpace = {
       }
     },
     checkIfShouldPauseConnectionDirections: (context) => {
-      const prefersReducedMotion = utils.userPrefersReducedMotion()
+      const prefersReducedMotion = consts.userPrefersReducedMotion()
       const userSetting = context.rootState.currentUser.shouldPauseConnectionDirections
       const isInteracting = context.rootGetters.isInteractingWithItem
       const shouldPause = prefersReducedMotion || userSetting || isInteracting
@@ -917,7 +936,7 @@ const currentSpace = {
     checkIfShouldShowExploreOnLoad: (context) => {
       const shouldShow = context.rootState.shouldShowExploreOnLoad
       if (shouldShow) {
-        context.commit('triggerShowExplore', null, { root: true })
+        context.commit('triggerExploreIsVisible', null, { root: true })
       }
       context.commit('shouldShowExploreOnLoad', false, { root: true })
     },
@@ -1088,6 +1107,12 @@ const currentSpace = {
     isHelloKinopio: (state) => {
       return state.name === 'Hello Kinopio'
     },
+    isRemote: (state, getters, rootState, rootGetters) => {
+      const isSpaceMember = rootGetters['currentUser/isSpaceMember']()
+      const isOtherSpace = !isSpaceMember
+      const currentUserIsSignedIn = rootGetters['currentUser/isSignedIn']
+      return isOtherSpace || currentUserIsSignedIn
+    },
     shouldBroadcast: (state) => {
       const users = state.users.length
       const collaborators = state.collaborators.length
@@ -1098,7 +1123,7 @@ const currentSpace = {
       return shouldBroadcast
     },
     shouldUpdateApi: (state, getters, rootState, rootGetters) => {
-      const isSpaceMember = rootGetters['currentUser/isSpaceMember']
+      const isSpaceMember = rootGetters['currentUser/isSpaceMember']()
       const isSignedIn = rootGetters['currentUser/isSignedIn']
       return isSpaceMember && isSignedIn
     },
@@ -1108,7 +1133,7 @@ const currentSpace = {
       return Boolean(isFavoriteSpace.length)
     },
     url: (state) => {
-      const domain = utils.kinopioDomain()
+      const domain = consts.kinopioDomain()
       const spaceUrl = utils.url({ name: state.name, id: state.id })
       return `${domain}/${spaceUrl}`
     },
@@ -1143,6 +1168,14 @@ const currentSpace = {
 
     // users
 
+    allUsers: (state, getters, rootState) => (excludeCurrentUser) => {
+      let users = getters.members()
+      users = users.concat(state.spectators)
+      if (excludeCurrentUser) {
+        users = users.filter(user => user.id !== rootState.currentUser.id)
+      }
+      return users
+    },
     members: (state, getters, rootState) => (excludeCurrentUser) => {
       const users = state.users
       const collaborators = state.collaborators || []

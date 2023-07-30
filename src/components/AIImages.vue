@@ -54,7 +54,8 @@ export default {
   },
   computed: {
     AIImages () {
-      const AIImages = this.$store.state.currentUser.AIImages
+      let AIImages = this.$store.state.currentUser.AIImages
+      AIImages = utils.clone(AIImages)
       return AIImages.reverse()
     }
   },

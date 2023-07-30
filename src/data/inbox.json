@@ -16,7 +16,7 @@
     {
       "id": "1",
       "x": 70,
-      "y": 90,
+      "y": 140,
       "z": 0,
       "name": "Use this space to collect thoughts, todos, and ideas that don't have a place to go yet\n\nCapture ideas from anywhere with the [browser extension](https://help.kinopio.club/posts/extensions)",
       "width": 235,
@@ -25,7 +25,7 @@
     {
       "id": "2",
       "x": 320,
-      "y": 90,
+      "y": 140,
       "z": 0,
       "name": "When you're ready, work through your cards by moving them to other spaces",
       "width": 235,

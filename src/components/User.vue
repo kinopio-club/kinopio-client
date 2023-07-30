@@ -1,5 +1,5 @@
 <template lang="pug">
-.user(:data-user-id="userId" :key="userId" ref="user" @keydown.stop.enter="toggleUserDetailsIsVisible" :class="{active: userDetailsIsVisibleForUser, 'is-small': isSmall }")
+.user(:title="user.name" :data-user-id="userId" :key="userId" ref="user" @keydown.stop.enter="toggleUserDetailsIsVisible" :class="{active: userDetailsIsVisibleForUser, 'is-small': isSmall }")
   .user-avatar(
     @mouseup.left.stop="toggleUserDetailsIsVisible"
     @touchend.stop="toggleUserDetailsIsVisible"
@@ -117,6 +117,7 @@ button
     margin 0
     margin-right 6px
     vertical-align middle
+    border-radius var(--small-entity-radius)
     .user-avatar
       width 15px
       height 14px

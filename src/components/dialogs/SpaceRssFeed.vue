@@ -25,6 +25,7 @@ dialog.narrow.space-rss-feed(v-if="visible" :open="visible" @click.left.stop)
 
 <script>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 export default {
   name: 'RssFeed',
@@ -56,7 +57,7 @@ export default {
     },
     updateUrl () {
       const spaceId = this.$store.state.currentSpace.id
-      this.url = `${utils.host()}/space/${spaceId}/feed.json`
+      this.url = `${consts.apiHost()}/space/${spaceId}/feed.json`
     }
   },
   watch: {

@@ -1,5 +1,5 @@
 <template lang="pug">
-article#card(
+article.card-wrap#card(
   v-if="isVisibleInViewport"
   :style="positionStyle"
   :data-card-id="id"
@@ -105,7 +105,7 @@ article#card(
               img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
           //- Url →
-          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent @click.stop.prevent="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible, 'is-hidden-by-opacity': isPresentationMode}" target="_blank")
+          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible, 'is-hidden-by-opacity': isPresentationMode}" target="_blank")
             .url.inline-button-wrap
               button.inline-button(:style="{background: itemBackground}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -145,6 +145,8 @@ article#card(
           :isSelected="isSelectedOrDragging"
           :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
           :isLoadingUrlPreview="isLoadingUrlPreview"
+          @retryUrlPreview="retryUrlPreview"
+          :backgroundColor="backgroundColor"
         )
       template(v-if="otherCardIsVisible")
         OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldCloseAllDialogs="true")
@@ -177,17 +179,18 @@ article#card(
         span Space is Read Only
 
   //- Meta Info
-  .meta-container(v-if="filterShowUsers || filterShowDateUpdated || isInSearchResultsCards")
+  .meta-container
     //- Search result
     span.badge.search(v-if="isInSearchResultsCards")
       img.icon.search(src="@/assets/search.svg")
+    //- Counter
+    CardCounter(:card="card")
     //- Created Through API
-    .badge.secondary(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
+    .badge.secondary(v-if="card.isCreatedThroughPublicApi && filterShowUsers" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
     //- User
-    .badge-wrap
-      template(v-if="filterShowUsers")
-        UserLabelInline(:user="createdByUser" :isClickable="true")
+    .badge-wrap(v-if="filterShowUsers")
+      UserLabelInline(:user="createdByUser" :isClickable="true")
     //- Date
     .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
       img.icon.time(src="@/assets/time.svg")
@@ -205,7 +208,9 @@ import NameSegment from '@/components/NameSegment.vue'
 import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
+import CardCounter from '@/components/CardCounter.vue'
 import consts from '@/consts.js'
+import postMessage from '@/postMessage.js'
 
 import dayjs from 'dayjs'
 import { mapState, mapGetters } from 'vuex'
@@ -238,7 +243,8 @@ export default {
     NameSegment,
     UrlPreviewCard,
     UserLabelInline,
-    OtherCardPreview
+    OtherCardPreview,
+    CardCounter
   },
   props: {
     card: Object
@@ -251,7 +257,7 @@ export default {
       } else if (type === 'triggerScrollCardIntoView') {
         if (payload === this.card.id) {
           const element = this.$refs.card
-          utils.scrollIntoView(element)
+          utils.scrollIntoView({ element })
         }
       } else if (type === 'triggerUploadComplete') {
         let { cardId, url } = payload
@@ -289,6 +295,7 @@ export default {
       }
     }
     this.updateCardDimensions()
+    this.checkIfShouldUpdatePreviewHtml()
   },
   data () {
     return {
@@ -320,7 +327,8 @@ export default {
       stickyTranslateY: 0,
       isAnimationUnsticking: false,
       stickyStretchResistance: 6,
-      defaultColor: '#e3e3e3'
+      defaultColor: '#e3e3e3',
+      pathIsUpdated: false
     }
   },
   computed: {
@@ -432,14 +440,17 @@ export default {
     },
     width () {
       if (this.isComment) { return }
-      if (this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible) { return }
+      if (this.currentCardDetailsIsVisible) { return }
       const width = this.card.resizeWidth || this.card.width
       if (!width) { return }
       return width
     },
     resizeWidth () {
       if (this.isComment) { return }
-      const resizeWidth = this.card.resizeWidth
+      let resizeWidth = this.card.resizeWidth
+      if (this.embedIsVisible || this.isLoadingUrlPreview) {
+        resizeWidth = Math.max(resizeWidth, consts.minCardEmbedWidth)
+      }
       if (!resizeWidth) { return }
       return resizeWidth
     },
@@ -488,9 +499,9 @@ export default {
     },
     connectionTypes () { return this['currentConnections/typesByCardId'](this.id) },
     connectionTypeColorisDark () {
-      const lastType = this.connectionTypes[this.connectionTypes.length - 1]
-      if (!lastType) { return }
-      return utils.colorIsDark(lastType.color)
+      const type = this.connectionTypes[this.connectionTypes.length - 1]
+      if (!type) { return }
+      return utils.colorIsDark(type.color)
     },
     name () {
       this.updateMediaUrls()
@@ -555,9 +566,13 @@ export default {
     currentCardDetailsIsVisible () {
       return this.id === this.cardDetailsIsVisibleForCardId
     },
+    embedIsVisible () {
+      const embedIsVisibleForCardId = this.$store.state.embedIsVisibleForCardId
+      return this.card.id === embedIsVisibleForCardId
+    },
     shouldNotStick () {
       if (!this.currentUser.shouldUseStickyCards) { return true }
-      if (this.$store.state.embedIsVisibleForCardId === this.card.id) { return true }
+      if (this.embedIsVisible) { return true }
       const userIsConnecting = this.currentConnectionStartCardIds.length
       const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
@@ -856,7 +871,11 @@ export default {
       })
     },
     isConnectingTo () {
-      return this.currentConnectionSuccess.id === this.id
+      const connectingToId = this.currentConnectionSuccess.id
+      if (connectingToId) {
+        postMessage.sendHaptics({ name: 'mediumImpact' })
+      }
+      return connectingToId === this.id
     },
     isConnectingFrom () {
       return this.currentConnectionStartCardIds.find(cardId => cardId === this.id)
@@ -1036,18 +1055,18 @@ export default {
       const user = this.createdByUser
       return user.id === this.userDetailsUser.id
     },
-    isPlayingEmbed () {
-      return this.$store.state.embedIsVisibleForCardId === this.card.id
-    },
     isVisibleInViewport () {
-      if (this.disableViewportOptimizations) { return true }
-      if (this.shouldJiggle) { return true }
-      if (this.currentDraggingConnectedCardIds.includes(this.id)) { return true }
-      if (this.isBeingDragged) { return true }
-      if (this.isPlayingAudio) { return true }
-      if (this.isPlayingEmbed) { return true }
+      let isVisible
+      if (this.disableViewportOptimizations) { isVisible = true }
+      if (this.shouldJiggle) { isVisible = true }
+      if (this.currentDraggingConnectedCardIds.includes(this.id)) { isVisible = true }
+      if (this.isBeingDragged) { isVisible = true }
+      if (this.isPlayingAudio) { isVisible = true }
+      if (this.embedIsVisible) { isVisible = true }
+      const isTextOnlyCard = this.normalizedName === this.card.name
+      if (isTextOnlyCard) { isVisible = true }
       const threshold = 400 * this.spaceCounterZoomDecimal
-      const fallbackHeight = 200
+      const fallbackHeight = consts.defaultCardMaxWidth
       const offset = utils.outsideSpaceOffset().y
       const scroll = (this.windowScroll.y - offset) * this.spaceCounterZoomDecimal
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
@@ -1061,7 +1080,10 @@ export default {
       const scrollIsAboveBottom = scroll < y + height
       const scrollIsBelowTop = scroll > y
       const middleIsVisible = scrollIsAboveBottom && scrollIsBelowTop
-      const isVisible = isTopVisible || isBottomVisible || middleIsVisible
+      isVisible = isVisible || (isTopVisible || isBottomVisible || middleIsVisible)
+      if (isVisible) {
+        this.correctPaths()
+      }
       return isVisible
     }
   },
@@ -1071,6 +1093,28 @@ export default {
       card = utils.updateCardDimensions(card)
       if (!card) { return }
       this.$store.commit('currentCards/update', card)
+    },
+    correctPaths () {
+      if (this.pathIsUpdated) { return }
+      this.$nextTick(() => {
+        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: false })
+        this.pathIsUpdated = true
+      })
+    },
+
+    // migration added june 2023
+
+    checkIfShouldUpdatePreviewHtml () {
+      const name = this.card.name
+      if (!name) { return }
+      const url = utils.urlFromString(name)
+      if (!url) { return }
+      const urlIsYoutube = utils.urlIsYoutube(url)
+      const urlIsSpotify = url.includes('open.spotify.com')
+      const shouldUpdate = urlIsYoutube || urlIsSpotify
+      if (shouldUpdate && !this.card.urlPreviewEmbedHtml) {
+        this.retryUrlPreview()
+      }
     },
 
     // mouse handlers
@@ -1088,7 +1132,7 @@ export default {
 
     initStickToCursor () {
       preventSticking = false
-      if (this.shouldNotStick || utils.userPrefersReducedMotion()) {
+      if (this.shouldNotStick || consts.userPrefersReducedMotion()) {
         preventSticking = true
       }
       stickyTimer = setTimeout(() => {
@@ -1396,6 +1440,7 @@ export default {
       const value = !this.isChecked
       this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('currentCards/toggleChecked', { cardId: this.id, value })
+      postMessage.sendHaptics({ name: 'heavyImpact' })
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
       const userId = this.currentUser.id
@@ -1526,14 +1571,16 @@ export default {
       this.$store.dispatch('currentCards/removeResize', { cardIds })
     },
     updateStylesWithWidth (styles) {
-      const connectorIsNotVisibleToReadOnlyUser = (!this.connectorIsVisible && !this.isLocked) || this.isComment
+      const cardHasExtendedContent = this.cardUrlPreviewIsVisible || this.otherCardIsVisible || this.isVisualCard || this.isAudioCard
       if (this.width) {
-        styles.width = this.width + 'px'
+        styles.width = this.width
       }
       if (this.resizeWidth) {
-        styles.maxWidth = this.resizeWidth + 'px'
-        styles.width = this.resizeWidth + 'px'
+        styles.maxWidth = this.resizeWidth
+        styles.width = this.resizeWidth
       }
+      styles.width = styles.width + 'px'
+      styles.maxWidth = styles.maxWidth + 'px'
       return styles
     },
     updateCardConnectionPathsIfOpenSpace () {
@@ -1575,6 +1622,7 @@ export default {
       this.$store.commit('currentDraggingConnectedCardIds', connectedCardIds)
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
+      postMessage.sendHaptics({ name: 'softImpact' })
       const updates = {
         cardId: this.card.id,
         userId: this.currentUser.id
@@ -1652,6 +1700,9 @@ export default {
     openUrl (event, url) {
       if (event) {
         if (event.metaKey || event.ctrlKey) {
+          this.$nextTick(() => {
+            this.$store.dispatch('closeAllDialogs')
+          })
           return
         } else {
           event.preventDefault()
@@ -1676,7 +1727,7 @@ export default {
         this.changeSpaceAndCard(spaceId, cardId)
       } else {
         const space = { id: spaceId }
-        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+        this.$store.dispatch('currentSpace/changeSpace', space)
       }
       this.$store.dispatch('closeAllDialogs')
     },
@@ -1686,7 +1737,7 @@ export default {
       if (currentSpaceId !== spaceId) {
         this.$store.commit('loadSpaceShowDetailsForCardId', cardId)
         const space = { id: spaceId }
-        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+        this.$store.dispatch('currentSpace/changeSpace', space)
       // card in current space
       } else {
         this.$nextTick(() => {
@@ -1817,7 +1868,6 @@ export default {
     showCardDetailsTouch (event) {
       this.cancelLocking()
       if (this.touchIsNearTouchPosition(event)) {
-        this.$store.commit('shouldPreventNextFocusOnName', true)
         this.showCardDetails(event)
       }
       const userId = this.currentUser.id
@@ -1885,7 +1935,7 @@ export default {
 
     async updateUrlPreview () {
       if (this.preventUpdatePrevPreview) { return }
-      if (!this.canEditCard) { return }
+      // if (!this.canEditCard) { return }
       this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
       const cardId = this.card.id
       let url = this.webUrl
@@ -1899,20 +1949,29 @@ export default {
         return
       }
       try {
-        url = this.removeHiddenQueryString(url)
+        url = utils.removeHiddenQueryStringFromURLs(url)
         let response = await this.$store.dispatch('api/urlPreview', url)
-        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
         if (!response) { throw 'api/urlPreview' }
         let { data, host } = response
-        console.log('🚗 link preview', host, data)
         const { links, meta } = data
+        console.log('🚗 link preview', url, data, links, meta)
         if (!links) { throw 'link preview error' }
-        this.updateUrlPreviewSuccess({ links, meta, cardId, url })
-        return true
+        let html
+        if (links.player || links.reader) {
+          html = data.html
+        }
+        this.updateUrlPreviewSuccess({ links, meta, cardId, url, html })
       } catch (error) {
         console.warn('🚑', error, url)
         this.updateUrlPreviewErrorUrl(url)
       }
+    },
+    retryUrlPreview () {
+      this.$store.dispatch('currentCards/update', {
+        id: this.card.id,
+        shouldUpdateUrlPreview: true
+      })
+      this.updateUrlPreview()
     },
     shouldUpdateUrlPreview (url) {
       const previewIsVisible = this.card.urlPreviewIsVisible
@@ -1922,19 +1981,13 @@ export default {
       const isLocalhostUrl = url.match(utils.localhostUrlPattern())
       return previewIsVisible && isNotPreviewUrl && isNotErrorUrl && isNotKinopioUrl && !isLocalhostUrl
     },
-    removeHiddenQueryString (url) {
-      if (!url) { return }
-      url = url.replace('?hidden=true', '')
-      url = url.replace('&hidden=true', '')
-      return url
-    },
     nameIncludesUrl (url) {
       const name = this.card.name
       const normalizedUrl = utils.removeTrailingSlash(url)
       return name.includes(url) || name.includes(normalizedUrl)
     },
     previewImage ({ thumbnail }) {
-      const minWidth = 200
+      const minWidth = consts.defaultCardMaxWidth
       if (!thumbnail) { return '' }
       let image = thumbnail.find(item => {
         let shouldSkipImage = false
@@ -1953,30 +2006,36 @@ export default {
       let image = icon.find(item => item.href)
       return image.href || ''
     },
-    updateUrlPreviewSuccess ({ links, meta, cardId, url }) {
+    updateUrlPreviewSuccess ({ links, meta, cardId, url, html }) {
       if (!this.nameIncludesUrl(url)) { return }
       cardId = cardId || this.card.id
       if (!cardId) {
         console.warn('🚑 could not updateUrlPreviewSuccess', cardId, this.card)
+        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
         return
       }
       const update = {
         id: cardId,
+        name: utils.addHiddenQueryStringToURLs(this.card.name),
         urlPreviewUrl: url,
         urlPreviewTitle: utils.truncated(meta.title || meta.site),
         urlPreviewDescription: utils.truncated(meta.description, 280),
         urlPreviewImage: this.previewImage(links),
-        urlPreviewFavicon: this.previewFavicon(links)
+        urlPreviewFavicon: this.previewFavicon(links),
+        urlPreviewEmbedHtml: html
       }
       this.$store.dispatch('currentCards/update', update)
+      this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
     },
     updateUrlPreviewErrorUrl (url) {
       const cardId = this.card.id
       this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+      const name = utils.removeHiddenQueryStringFromURLs(this.card.name)
       const update = {
         id: cardId,
         urlPreviewErrorUrl: url,
-        urlPreviewUrl: url
+        urlPreviewUrl: url,
+        name
       }
       this.$store.dispatch('currentCards/update', update)
     }
@@ -1989,6 +2048,7 @@ export default {
       if (!value) { return }
       this.$nextTick(() => {
         this.updateCardDimensions()
+        this.correctPaths()
       })
     }
   }
@@ -1996,8 +2056,8 @@ export default {
 </script>
 
 <style lang="stylus">
-article
-  --card-width 235px
+article.card-wrap
+  --card-width 200px
   pointer-events all
   position absolute
   max-width var(--card-width)
@@ -2056,10 +2116,19 @@ article
       margin-left -8px // cancels out margin-right in .card-content or .card-comment
       height 32px
 
+    .loader
+      width 14px
+      height 14px
+      flex-shrink 0
+      vertical-align -2px
+      margin-left 3px
+
     .name-wrap,
     .card-comment
       display flex
       align-items flex-start
+      > .loader
+        transform translateX(8px) translateY(8px)
       .checkbox-wrap
         padding-top 8px
         padding-left 8px
@@ -2094,11 +2163,6 @@ article
         &.has-checkbox
           .audio
             width 132px
-        .loader
-          margin-left 5px
-          width 14px
-          height 14px
-          vertical-align -3px
 
     .connector
       position relative

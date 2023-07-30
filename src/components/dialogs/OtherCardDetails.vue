@@ -26,7 +26,7 @@ const state = reactive({
   errorMaxCardLength: false
 })
 const otherCard = computed(() => store.state.currentSelectedOtherItem)
-const url = computed(() => `${utils.kinopioDomain()}/${otherCard.value.spaceId}/${otherCard.value.id}`)
+const url = computed(() => `${consts.kinopioDomain()}/${otherCard.value.spaceId}/${otherCard.value.id}`)
 const canEdit = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value))
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 
@@ -58,7 +58,7 @@ const styles = computed(() => {
 const scrollIntoView = async () => {
   await nextTick()
   const dialog = document.querySelector('dialog.other-card-details')
-  utils.scrollIntoView(dialog)
+  utils.scrollIntoView({ element: dialog })
 }
 
 // textarea styles
@@ -122,7 +122,7 @@ const changeSpace = (spaceId) => {
   if (store.state.currentSpace.id === spaceId) { return }
   const space = { id: spaceId }
   store.dispatch('closeAllDialogs')
-  store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+  store.dispatch('currentSpace/changeSpace', space)
 }
 const selectSpaceCard = () => {
   const isCardInCurrentSpace = otherCard.value.spaceId === store.state.currentSpace.id
@@ -157,6 +157,7 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
             :value="otherCard.name"
             @input="updateName($event.target.value)"
             :maxlength="maxCardLength()"
+            placeholder="Type here, or paste a URL"
           )
         .row(v-if="state.errorMaxCardLength")
           .badge.danger

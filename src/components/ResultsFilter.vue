@@ -30,6 +30,7 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
+import dayjs from 'dayjs'
 
 export default {
   name: 'ResultsFilter',
@@ -45,7 +46,8 @@ export default {
     initialValue: String,
     isLoading: Boolean,
     parentIsPinned: Boolean,
-    showCreateNewSpaceFromSearch: Boolean
+    showCreateNewSpaceFromSearch: Boolean,
+    isInitialValueFromSpaceListFilterInfo: Boolean
   },
   data () {
     return {
@@ -77,6 +79,18 @@ export default {
       }
     })
   },
+  mounted () {
+    if (this.isInitialValueFromSpaceListFilterInfo) {
+      const time = 60
+      const info = this.$store.state.spaceListFilterInfo
+      if (!info.filter) { return }
+      let isExpired = dayjs().diff(info.updatedAt, 'seconds')
+      isExpired = isExpired > time
+      if (!isExpired) {
+        this.updateFilter(info.filter)
+      }
+    }
+  },
   computed: {
     addSpaceIsVisible () {
       return this.showCreateNewSpaceFromSearch && this.filter.length > 1
@@ -99,27 +113,30 @@ export default {
         return this.filter
       },
       set (newValue) {
-        this.filter = newValue
-        this.$emit('updateFilter', this.filter)
-        const options = {
-          pre: '',
-          post: '',
-          extract: (item) => {
-            let name = item.name || ''
-            return name
-          }
-        }
-        const filtered = fuzzy.filter(this.filter, this.items, options)
-        const items = filtered.map(item => {
-          let result = utils.clone(item.original)
-          result.matchIndexes = item.indices
-          return result
-        })
-        this.$emit('updateFilteredItems', items)
+        this.updateFilter(newValue)
       }
     }
   },
   methods: {
+    updateFilter (newValue) {
+      this.filter = newValue
+      this.$emit('updateFilter', this.filter)
+      const options = {
+        pre: '',
+        post: '',
+        extract: (item) => {
+          let name = item.name || ''
+          return name
+        }
+      }
+      const filtered = fuzzy.filter(this.filter, this.items, options)
+      const items = filtered.map(item => {
+        let result = utils.clone(item.original)
+        result.matchIndexes = item.indices
+        return result
+      })
+      this.$emit('updateFilteredItems', items)
+    },
     addSpace () {
       const name = this.filter
       window.scrollTo(0, 0)
@@ -138,7 +155,7 @@ export default {
     },
     clearFilter () {
       this.filter = ''
-      this.$emit('updateFilter', this.filter)
+      this.$emit('updateFilter', this.filter, true)
       this.$emit('updateFilteredItems', [])
       this.$emit('clearFilter')
     },

@@ -42,11 +42,15 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   span.badge.secondary-on-dark-background(v-if="segment.isFile")
     img.icon(src="@/assets/file.svg")
     span {{segment.name}}
+  //- System Command
+  template(v-if="segment.isCommand")
+    SystemCommand(:command="segment.command" :name="segment.name")
 </template>
 
 <script>
 import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
+import SystemCommand from '@/components/SystemCommand.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -60,8 +64,9 @@ export default {
   components: {
     NameMatch,
     Tag,
-    OtherSpacePreview,
-    Loader
+    SystemCommand,
+    Loader,
+    OtherSpacePreview
   },
   props: {
     segment: Object,

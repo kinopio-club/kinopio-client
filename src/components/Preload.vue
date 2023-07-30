@@ -90,6 +90,7 @@
     img.icon(src="@/assets/search.svg")
     img.icon(src="@/assets/settings.svg")
     img.icon(src="@/assets/share.svg")
+    img.icon(src="@/assets/sidebar.svg")
     img.icon(src="@/assets/sign-out.svg")
     img.icon(src="@/assets/split-vertically.svg")
     img.icon(src="@/assets/split.svg")

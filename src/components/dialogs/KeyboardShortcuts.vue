@@ -21,12 +21,6 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
-            img.icon.inbox-icon(src="@/assets/inbox.svg")
-            span Add to Inbox
-          .badge.keyboard-shortcut I
-      article
-        .row
-          .badge.title
             img.icon.dark(src="@/assets/dark.svg")
             span Toggle Dark Theme
           .badge.keyboard-shortcut T
@@ -324,7 +318,7 @@ export default {
 .keyboard-shortcuts
   user-select text
   overflow auto
-  max-height calc(100vh - 300px)
+  max-height calc(100vh - 60px)
   span
     color var(--primary)
   .title

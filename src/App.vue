@@ -3,27 +3,29 @@
   @pointermove="broadcastUserCursor"
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
-  :class="{ 'no-background': isAddPage, 'is-dark-theme': isThemeDark }"
+  :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
 )
-  base(v-if="isAddPage" target="_blank")
-  OutsideSpaceBackground
-  SpaceBackground
-  ItemsLocked
-  MagicPaint
+  base(v-if="!isSpacePage" target="_blank")
+  template(v-if="isSpacePage")
+    OutsideSpaceBackground
+    SpaceBackground
+    ItemsLocked
+    MagicPaint
   //- router-view is Space or Add
   router-view
-  Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
-  Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
-  TagDetails
-  UserDetails
-  CardListItemOptions
-  WindowHistoryHandler
-  KeyboardShortcutsHandler
-  ScrollHandler
-  NotificationsWithPosition(layer="app")
-  Preload
-  .badge.label-badge.development-badge(v-if="isDevelopment && !isAddPage")
-    span DEV
+  template(v-if="isSpacePage")
+    Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
+    Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
+    TagDetails
+    UserDetails
+    CardListItemOptions
+    WindowHistoryHandler
+    KeyboardShortcutsHandler
+    ScrollHandler
+    NotificationsWithPosition(layer="app")
+    Preload
+    .badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
+      span DEV
 </template>
 
 <script>
@@ -42,6 +44,7 @@ import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
 import CardListItemOptions from '@/components/dialogs/CardListItemOptions.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 let multiTouchAction, shouldCancelUndo
 
@@ -80,7 +83,7 @@ export default {
     // use timer to prevent being fired from page reload scroll
     // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
     setTimeout(() => {
-      window.addEventListener('scroll', this.updateUserHasScrolled)
+      window.addEventListener('scroll', this.scroll)
     }, 100)
     this.updateMetaDescription()
     window.addEventListener('touchstart', this.touchStart)
@@ -90,7 +93,7 @@ export default {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.updateThemeFromSystem)
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.updateUserHasScrolled)
+    window.removeEventListener('scroll', this.scroll)
     window.removeEventListener('touchstart', this.touchStart)
     window.removeEventListener('touchmove', this.touchMove)
     window.removeEventListener('touchend', this.touchEnd)
@@ -119,14 +122,14 @@ export default {
         return false
       }
     },
-    isAddPage () { return this.$store.state.isAddPage },
+    isSpacePage () { return this.$store.getters.isSpacePage },
     pageWidth () {
-      if (this.isAddPage) { return }
+      if (!this.isSpacePage) { return }
       const size = Math.max(this.$store.state.pageWidth, this.$store.state.viewportWidth)
       return size + 'px'
     },
     pageHeight () {
-      if (this.isAddPage) { return }
+      if (!this.isSpacePage) { return }
       const size = Math.max(this.$store.state.pageHeight, this.$store.state.viewportHeight)
       return size + 'px'
     },
@@ -154,9 +157,65 @@ export default {
       }
       return undefined
     },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
+    isDevelpmentBadgeVisible () {
+      if (this.$store.state.isPresentationMode) { return }
+      return this.isDevelopment
+    }
   },
   methods: {
+    // events
+
+    touchStart (event) {
+      shouldCancelUndo = false
+      if (!utils.isMultiTouch(event)) {
+        multiTouchAction = null
+        return
+      }
+      this.$store.commit('shouldAddCard', false)
+      const touches = event.touches.length
+      if (touches >= 2) {
+        this.toggleIsPinchZooming(event)
+      }
+      // undo/redo
+      if (touches === 2) {
+        multiTouchAction = 'undo'
+      } else if (touches === 3) {
+        multiTouchAction = 'redo'
+      }
+    },
+    touchMove (event) {
+      const isFromDialog = event.target.closest('dialog')
+      if (isFromDialog) { return }
+      shouldCancelUndo = true
+      this.isTouchScrolling = true
+    },
+    touchEnd () {
+      if (!this.isSpacePage) { return }
+      this.isPinchZooming = false
+      this.checkIfInertiaScrollEnd()
+      if (shouldCancelUndo) {
+        shouldCancelUndo = false
+        multiTouchAction = ''
+        return
+      }
+      if (!multiTouchAction) { return }
+      if (multiTouchAction === 'undo') {
+        this.$store.dispatch('history/undo')
+        this.$store.commit('addNotification', { message: 'Undo', icon: 'undo' })
+      } else if (multiTouchAction === 'redo') {
+        this.$store.dispatch('history/redo')
+        this.$store.commit('addNotification', { message: 'Redo', icon: 'redo' })
+      }
+      multiTouchAction = null
+    },
+    scroll () {
+      if (this.$store.state.userHasScrolled) { return }
+      this.$store.commit('userHasScrolled', true)
+    },
+
+    //
+
     themeFromSystem () {
       const themeIsSystem = this.$store.state.currentUser.themeIsSystem
       if (!themeIsSystem) { return }
@@ -182,30 +241,6 @@ export default {
       if (utils.shouldIgnoreTouchInteraction(event)) { return }
       this.isPinchZooming = true
     },
-    touchStart (event) {
-      shouldCancelUndo = false
-      if (!utils.isMultiTouch(event)) {
-        multiTouchAction = null
-        return
-      }
-      this.$store.commit('shouldAddCard', false)
-      const touches = event.touches.length
-      if (touches >= 2) {
-        this.toggleIsPinchZooming(event)
-      }
-      // undo/redo
-      if (touches === 2) {
-        multiTouchAction = 'undo'
-      } else if (touches === 3) {
-        multiTouchAction = 'redo'
-      }
-    },
-    touchMove (event) {
-      const isFromDialog = event.target.closest('dialog')
-      if (isFromDialog) { return }
-      shouldCancelUndo = true
-      this.isTouchScrolling = true
-    },
     checkIfInertiaScrollEnd () {
       if (!utils.isAndroid) { return }
       if (inertiaScrollEndIntervalTimer) { return }
@@ -225,30 +260,10 @@ export default {
         } else {
           prevPosition = current
         }
-      }, 60)
-    },
-    touchEnd () {
-      if (this.$store.state.isAddPage) { return }
-      this.isPinchZooming = false
-      this.checkIfInertiaScrollEnd()
-      if (shouldCancelUndo) {
-        shouldCancelUndo = false
-        multiTouchAction = ''
-        return
-      }
-      if (!multiTouchAction) { return }
-      if (multiTouchAction === 'undo') {
-        this.$store.dispatch('history/undo')
-        this.$store.commit('addNotification', { message: 'Undo', icon: 'undo' })
-      } else if (multiTouchAction === 'redo') {
-        this.$store.dispatch('history/redo')
-        this.$store.commit('addNotification', { message: 'Redo', icon: 'redo' })
-      }
-      multiTouchAction = null
+      }, 250)
     },
     broadcastUserCursor (event) {
-      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
-      if (!canEditSpace) { return }
+      if (!this.$store.getters.isSpacePage) { return }
       let updates = utils.cursorPositionInSpace(event)
       updates.userId = this.$store.state.currentUser.id
       updates.zoom = this.spaceZoomDecimal
@@ -256,10 +271,6 @@ export default {
     },
     isTouchDevice () {
       this.$store.commit('isTouchDevice', true)
-    },
-    updateUserHasScrolled () {
-      if (this.$store.state.userHasScrolled) { return }
-      this.$store.commit('userHasScrolled', true)
     },
     updateMetaDescription () {
       let description = 'Kinopio is the thinking tool for building new ideas and solving hard problems. Create spaces to brainstorm, research, plan and take notes.'
@@ -279,14 +290,14 @@ export default {
       }
     },
     updateMetaRSSFeed () {
-      const spaceHasUrl = utils.spaceHasUrl()
       const spaceIsPrivate = this.$store.state.currentSpace.privacy === 'private'
+      const spaceIsRemote = this.$store.getters['currentSpace/isRemote']
       this.clearMetaRSSFeed()
-      if (!spaceHasUrl) { return }
+      if (!spaceIsRemote) { return }
       if (spaceIsPrivate) { return }
       const head = document.querySelector('head')
       const spaceId = this.$store.state.currentSpace.id
-      const url = `${utils.host()}/space/${spaceId}/feed.json`
+      const url = `${consts.apiHost()}/space/${spaceId}/feed.json`
       let link = document.createElement('link')
       link.rel = 'alternative'
       link.type = 'application/rss+xml'
@@ -314,6 +325,7 @@ export default {
   --entity-radius 6px
   --small-entity-radius 3px
   --subsection-padding 5px
+  --button-fixed-height 30px
   --serif-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
 
@@ -350,7 +362,7 @@ body
     min-height initial
     left initial
     right 0px
-    bottom 80px
+    bottom 40px
     position fixed
     pointer-events none
     z-index 100
@@ -389,7 +401,7 @@ label // used for checkbox buttons
   touch-action manipulation
   text-align left
   padding 5px 9px
-  height 30px
+  height fit-content
   margin 0
   background-color var(--button-background)
   border 1px solid var(--primary-border)
@@ -442,21 +454,20 @@ label // used for checkbox buttons
     cursor default
     color var(--primary)
     opacity 0.5
-    pointer-events none
+    pointer-events none !important
   &.is-dark
     border-color var(--primary-background)
     img
       filter invert(1)
   &.small-button
-    height 20px
+    height fit-content
     padding 0px 4px
     input[type="checkbox"]
       width 10px
       height 10px
       vertical-align 0
-  &.variable-length-content
-    height fit-content
-
+  &.fixed-height
+    height var(--button-fixed-height)
 .unselectable
   pointer-events none !important
 
@@ -592,7 +603,7 @@ dialog
   left 8px
   top 8px
   position absolute
-  max-height calc(100vh - 100px)
+  max-height 90dvh
   margin 0
   padding 0
   user-select auto
@@ -677,6 +688,7 @@ dialog
     border-top 0
 
   .change-color
+    height var(--button-fixed-height)
     .current-color
       height 14px
       width 14px
@@ -808,7 +820,10 @@ dialog
   vertical-align 2px
 
 .icon.box-icon
-  vertical-align 0
+  vertical-align -1px
+
+.icon.comment
+  vertical-align -1px
 
 .icon.leave
   transform rotate(-45deg)
@@ -877,7 +892,6 @@ li
   padding-top 0
   border-top 0
   overflow auto
-  max-height calc(92vh - 245px)
 
 ul.results-list
   margin 0
@@ -1121,8 +1135,8 @@ code
   background-image url('assets/logo-base.png')
 .logo
   .logo-image
-    width 47px
-    height 41px
+    width 36px
+    height 33px
     background-repeat no-repeat
     background-size contain
     display inline-block

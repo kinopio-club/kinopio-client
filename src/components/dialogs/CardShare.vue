@@ -1,5 +1,6 @@
 <script setup>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
@@ -9,22 +10,15 @@ const dialog = ref(null)
 
 const props = defineProps({
   visible: Boolean,
-  card: Object
+  card: Object,
+  isReadOnly: Boolean
 })
+
+const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
 
 // anon user
 
-const canShare = computed(() => {
-  const currentSpaceUserId = store.state.currentSpace.users[0].id
-  const currentUserId = store.state.currentUser.id
-  if (currentSpaceUserId !== currentUserId) {
-    return true
-  } else if (store.getters['currentUser/isSignedIn']) {
-    return true
-  } else {
-    return false
-  }
-})
+const canShare = computed(() => store.getters['currentSpace/isRemote'])
 const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
@@ -39,13 +33,13 @@ watch(() => props.visible, (value, prevValue) => {
 })
 const scrollIntoView = async () => {
   await nextTick()
-  utils.scrollIntoView(dialog.value)
+  utils.scrollIntoView({ element: dialog.value })
 }
 
 // copy url
 
 const cardUrl = () => {
-  const domain = utils.kinopioDomain()
+  const domain = consts.kinopioDomain()
   const url = `${domain}/${props.card.spaceId}/${props.card.id}`
   console.log('🍇 card url', url)
   return url
@@ -77,11 +71,11 @@ const webShare = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{ 'read-only': props.isReadOnly }")
   section(v-if="canShare")
     section.subsection
       .row
-        p Share With the World, or Paste in Another Space
+        p Share this card publically, or paste it in another space
       .row
         .segmented-buttons
           button(@click.left="copyUrl")
@@ -89,6 +83,11 @@ dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="di
             span Copy Card URL
           button(v-if="webShareIsSupported" @click="webShare")
             img.icon.share(src="@/assets/share.svg")
+      .row(v-if="canShare && spaceIsPrivate")
+        .badge.danger
+          img.icon.lock-icon(src="@/assets/lock.svg")
+          span Cards in private spaces can only be viewed by space members
+
   section(v-if="!canShare")
     p For your cards and spaces to have URLs, you'll need to sign up or in
     .button-wrap
@@ -100,4 +99,6 @@ dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="di
 <style lang="stylus">
 .share-card
   left -100px
+  &.read-only
+    left 8px
 </style>
