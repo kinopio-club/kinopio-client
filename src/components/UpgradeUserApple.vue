@@ -50,7 +50,6 @@ const subscribe = async () => {
     console.error('🚒', error)
     state.error.unknownServerError = true
   }
-  state.loading.subscriptionIsBeingCreated = false
 }
 
 const updateCredits = async () => {
