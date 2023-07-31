@@ -10,8 +10,10 @@ const store = useStore()
 
 onMounted(() => {
   window.addEventListener('message', handleSubscriptionSuccess) // iOS IAP subscription sheet transaction completes
+  appleAppAccountToken = self.crypto.randomUUID()
   updateCredits()
 })
+let appleAppAccountToken
 
 const props = defineProps({
   visible: Boolean,
@@ -35,7 +37,6 @@ const subscribe = async () => {
   if (state.loading.subscriptionIsBeingCreated) { return }
   state.loading.subscriptionIsBeingCreated = true
   try {
-    const appleAppAccountToken = self.crypto.randomUUID()
     await store.dispatch('api/updateAppleAppAccountToken', { appleAppAccountToken })
     const body = {
       name: 'createSubscription',
@@ -69,15 +70,15 @@ const handleSubscriptionSuccess = (event) => {
   console.log('🎡 handleSubscriptionSuccess', data)
   if (data.name !== 'upgradedUser') { return }
   if (!data.isSuccess) { return }
-  this.$store.commit('currentUser/isUpgraded', true)
-  this.$store.commit('notifyCardsCreatedIsOverLimit', false)
-  this.$store.commit('notifyEarnedCredits', false)
-  this.$store.commit('addNotification', {
+  store.commit('currentUser/isUpgraded', true)
+  store.commit('notifyCardsCreatedIsOverLimit', false)
+  store.commit('notifyEarnedCredits', false)
+  store.commit('addNotification', {
     message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software',
     type: 'success',
     isPersistentItem: true
   })
-  this.$store.dispatch('closeAllDialogs')
+  store.dispatch('closeAllDialogs')
 }
 
 </script>
