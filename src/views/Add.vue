@@ -170,7 +170,7 @@ const addCard = async () => {
   const url = utils.urlFromString(state.newName)
   let urlPreview = {}
   if (url) {
-    let { links, meta } = await urlPreview(url)
+    let { links, meta } = await getUrlPreview(url)
     urlPreview = {
       title: utils.truncated(meta.title || meta.site),
       description: utils.truncated(meta.description, 280),
@@ -224,7 +224,7 @@ const addCardToSpaceLocal = (card, space) => {
 
 // card url preview (ported from Card.vue)
 
-const urlPreview = async (url) => {
+const getUrlPreview = async (url) => {
   try {
     let response = await store.dispatch('api/urlPreview', url)
     if (!response) { return }
