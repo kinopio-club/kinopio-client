@@ -1,0 +1,12 @@
+/* Webfont: NeuePowerTrial-HeavyOblique */@font-face {
+    font-family: 'NeuePowerTrialHeavy';
+    src: url('NeuePowerTrial-HeavyOblique.eot'); /* IE9 Compat Modes */
+    src: url('NeuePowerTrial-HeavyOblique.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+         url('NeuePowerTrial-HeavyOblique.woff') format('woff'), /* Modern Browsers */
+         url('NeuePowerTrial-HeavyOblique.woff2') format('woff2'), /* Modern Browsers */
+         url('NeuePowerTrial-HeavyOblique.ttf') format('truetype'); /* Safari, Android, iOS */
+             font-style: italic;
+    font-weight: normal;
+    text-rendering: optimizeLegibility;
+}
+

@@ -1,0 +1,12 @@
+/* Webfont: NeuePowerTrial-Light */@font-face {
+    font-family: 'NeuePowerTrialLight';
+    src: url('NeuePowerTrial-Light.eot'); /* IE9 Compat Modes */
+    src: url('NeuePowerTrial-Light.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+         url('NeuePowerTrial-Light.woff') format('woff'), /* Modern Browsers */
+         url('NeuePowerTrial-Light.woff2') format('woff2'), /* Modern Browsers */
+         url('NeuePowerTrial-Light.ttf') format('truetype'); /* Safari, Android, iOS */
+             font-style: normal;
+    font-weight: normal;
+    text-rendering: optimizeLegibility;
+}
+

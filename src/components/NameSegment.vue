@@ -193,4 +193,20 @@ export default {
     > .loader
       margin-left 0 !important
       vertical-align -2px !important
+
+h1,
+h2
+  // font-family BallPill !important
+  // font-family Standard !important
+  font-family NeuePower !important
+
+  // font-family GintoNord !important
+
+// BallPill,
+// Standard
+h1
+  font-size 20px !important
+h2
+  font-size 18px !important
+
 </style>

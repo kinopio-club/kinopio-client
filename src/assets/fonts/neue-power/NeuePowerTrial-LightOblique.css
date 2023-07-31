@@ -1,0 +1,12 @@
+/* Webfont: NeuePowerTrial-LightOblique */@font-face {
+    font-family: 'NeuePowerTrialLight';
+    src: url('NeuePowerTrial-LightOblique.eot'); /* IE9 Compat Modes */
+    src: url('NeuePowerTrial-LightOblique.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+         url('NeuePowerTrial-LightOblique.woff') format('woff'), /* Modern Browsers */
+         url('NeuePowerTrial-LightOblique.woff2') format('woff2'), /* Modern Browsers */
+         url('NeuePowerTrial-LightOblique.ttf') format('truetype'); /* Safari, Android, iOS */
+             font-style: italic;
+    font-weight: normal;
+    text-rendering: optimizeLegibility;
+}
+

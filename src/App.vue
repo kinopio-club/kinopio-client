@@ -329,17 +329,209 @@ export default {
   --serif-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
 
+// recoleta
 @font-face
   font-family 'Recoleta'
   src url("assets/fonts/Recoleta-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
-
 @font-face
   font-family 'Recoleta'
   src url("assets/fonts/Recoleta-Bold.woff2") format("woff2")
   font-weight bold
   font-style normal
+
+// ballpill
+@font-face
+  font-family 'BallPill'
+  src url("assets/fonts/bb-bureau/BallPill-trial-regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+@font-face
+  font-family 'BallPill'
+  src url("assets/fonts/bb-bureau/BallPill-trial-bold.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+
+// Bilibot
+// @font-face
+//   font-family 'Bilibot'
+//   src url("assets/fonts/bb-bureau/Bilibot-trial-Light.woff2") format("woff2")
+//   font-weight normal
+//   font-style normal
+// @font-face
+//   font-family 'Bilibot'
+//   src url("assets/fonts/bb-bureau/Bilibot-trial-Bold.woff2") format("woff2")
+//   font-weight bold
+//   font-style normal
+
+// Gikit x
+// @font-face
+//   font-family 'Gikit'
+//   src url("assets/fonts/bb-bureau/Gikit-trial-Text.woff2") format("woff2")
+//   font-weight normal
+//   font-style normal
+// @font-face
+//   font-family 'Gikit'
+//   src url("assets/fonts/bb-bureau/Gikit-trial-Text.woff2") format("woff2")
+//   font-weight bold
+//   font-style normal
+
+// GroteskRemix
+@font-face
+  font-family 'GroteskRemix'
+  src url("assets/fonts/bb-bureau/GroteskRemix-trial-regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+@font-face
+  font-family 'GroteskRemix'
+  src url("assets/fonts/bb-bureau/GroteskRemix-trial-bold.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+
+// HARBER
+// @font-face
+//   font-family 'HARBER'
+//   src url("assets/fonts/bb-bureau/HARBER-trial-Light.woff2") format("woff2")
+//   font-weight normal
+//   font-style normal
+// @font-face
+//   font-family 'HARBER'
+//   src url("assets/fonts/bb-bureau/HARBER-trial-Regular.woff2") format("woff2")
+//   font-weight bold
+//   font-style normal
+
+// // Marianne
+// @font-face
+//   font-family 'Marianne'
+//   src url("assets/fonts/bb-bureau/Marianne-trial-Inline.woff2") format("woff2")
+//   font-weight normal
+//   font-style normal
+// @font-face
+//   font-family 'Marianne'
+//   src url("assets/fonts/bb-bureau/Marianne-trial-Solid.woff2") format("woff2")
+//   font-weight bold
+//   font-style normal
+
+// Standard
+@font-face
+  font-family 'Standard'
+  src url("assets/fonts/bb-bureau/Standard-trial-60.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+@font-face
+  font-family 'Standard'
+  src url("assets/fonts/bb-bureau/Standard-trial-100.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+
+// Pickle-Standard
+// @font-face
+//   font-family 'Pickle-Standard'
+//   src url("assets/fonts/bb-bureau/Pickle-Standard-trial-1.woff2") format("woff2")
+//   font-weight normal
+//   font-style normal
+// @font-face
+//   font-family 'Pickle-Standard'
+//   src url("assets/fonts/bb-bureau/Pickle-Standard-trial-0.woff2") format("woff2")
+//   font-weight bold
+//   font-style normal
+
+// Tme
+// @font-face
+//   font-family 'Tme'
+//   src url("assets/fonts/bb-bureau/Tme-trial-Light.woff2") format("woff2")
+//   font-weight normal
+//   font-style normal
+// @font-face
+//   font-family 'Tme'
+//   src url("assets/fonts/bb-bureau/Tme-trial-Bold.woff2") format("woff2")
+//   font-weight bold
+//   font-style normal
+
+// ZIGZAG
+// @font-face
+//   font-family 'ZIGZAG'
+//   src url("assets/fonts/bb-bureau/ZIGZAG-trial-Not-Rounded.woff2") format("woff2")
+//   font-weight normal
+//   font-style normal
+// @font-face
+//   font-family 'ZIGZAG'
+//   src url("assets/fonts/bb-bureau/ZIGZAG-trial-Rounded.woff2") format("woff2")
+//   font-weight bold
+//   font-style normal
+
+// GT-Cinetype
+// @font-face
+//   font-family 'GT-Cinetype'
+//   src url("assets/fonts/grilli-type/GT-Cinetype-Regular.woff2") format("woff2")
+//   font-weight normal
+//   font-style normal
+// @font-face
+//   font-family 'GT-Cinetype'
+//   src url("assets/fonts/grilli-type/GT-Cinetype-Bold.woff2") format("woff2")
+//   font-weight bold
+//   font-style normal
+
+// Greenhouse
+// @font-face
+//   font-family 'Greenhouse'
+//   src url("assets/fonts/greenhouse-type/Greenhouse-Aureum.woff") format("woff")
+//   font-weight normal
+//   font-style normal
+// @font-face
+//   font-family 'Greenhouse'
+//   src url("assets/fonts/greenhouse-type/Greenhouse-ORYKD.woff") format("woff")
+//   font-weight bold
+//   font-style normal
+
+// ROMIE
+// @font-face
+//   font-family 'ROMIE'
+//   src url("assets/fonts/ROMIE/RomieTrial-Regular.woff2") format("woff2")
+//   font-weight normal
+//   font-style normal
+// @font-face
+//   font-family 'ROMIE'
+//   src url("assets/fonts/ROMIE/RomieTrial-Black.woff2") format("woff2")
+//   font-weight bold
+//   font-style normal
+
+// NeuePower
+@font-face
+  font-family 'NeuePower'
+  src url("assets/fonts/neue-power/NeuePowerTrial-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+@font-face
+  font-family 'NeuePower'
+  src url("assets/fonts/neue-power/NeuePowerTrial-Ultra.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+
+// GintoNord
+@font-face
+  font-family 'GintoNord'
+  src url("assets/fonts/dinamo/GintoNord/ABCGintoNord-Regular-Trial.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+@font-face
+  font-family 'GintoNord'
+  src url("assets/fonts/dinamo/GintoNord/ABCGintoNord-Bold-Trial.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+
+// ROM
+// @font-face
+//   font-family 'ROM'
+//   src url("assets/fonts/dinamo/ROM/ABCROM-Regular-Trial.woff2") format("woff2")
+//   font-weight normal
+//   font-style normal
+// @font-face
+//   font-family 'ROM'
+//   src url("assets/fonts/dinamo/ROM/abcrom-bold-trial-webfont.woff2") format("woff2")
+//   font-weight bold
+//   font-style normal
 
 *
   -webkit-overflow-scrolling touch
