@@ -861,15 +861,6 @@ const self = {
         context.dispatch('handleServerError', { name: 'donationUrl', error })
       }
     },
-    updateAppleAppAccountToken: async (context, body) => {
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/billing/update-app-account-token`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'appleAppAccountToken', error })
-      }
-    },
 
     // Upload
 
