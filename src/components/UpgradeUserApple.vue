@@ -66,6 +66,7 @@ const handleSubscriptionSuccess = (event) => {
   if (!consts.isSecureAppContext) { return }
   const data = event.data
   state.loading.subscriptionIsBeingCreated = false
+  console.log('🎡 handleSubscriptionSuccess', data)
   if (data.name !== 'upgradedUser') { return }
   if (!data.isSuccess) { return }
   this.$store.commit('currentUser/isUpgraded', true)
