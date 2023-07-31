@@ -251,6 +251,14 @@ const moveToNext = (event, index) => {
   })
 }
 
+// global search
+
+const isInSearchResultsCards = (card) => {
+  const results = store.state.searchResultsCards
+  if (!results.length) { return }
+  return Boolean(results.find(result => result.id === card.id))
+}
+
 </script>
 
 <template lang="pug">
@@ -305,12 +313,20 @@ template(v-if="visible")
           )
           img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focusTextarea(card, index)")
           .badge.danger.max-length-badge(v-if="isMaxLength(card)") Max Length
+          //- search
+          span.badge.search.badge-search(v-if="isInSearchResultsCards(card)")
+            img.icon.search(src="@/assets/search.svg")
+
       //- read only
       template(v-else)
         .textarea-wrap(@click="focus(card, index)" :style="textareaWrapStyles(card)")
           p.read-only-name
             span {{card.name}}
           img(v-if="imageUrl(card)" :src="imageUrl(card)" @click="focus(card, index)")
+          //- search
+          span.badge.search.badge-search(v-if="isInSearchResultsCards(card)")
+            img.icon.search(src="@/assets/search.svg")
+
 </template>
 
 <style lang="stylus">
@@ -350,6 +366,13 @@ section.text
     &.down
       transform scaleY(-1)
 
+  .badge-search
+    position absolute
+    right 4px
+    bottom 6px
+    img
+      margin 0
+      cursor auto
   // @media(max-height 500px)
   //   dialog.card-tips
   //     top -50px
