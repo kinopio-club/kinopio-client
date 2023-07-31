@@ -1984,7 +1984,7 @@ export default {
     nameIncludesUrl (url) {
       const name = this.card.name
       const normalizedUrl = utils.removeTrailingSlash(url)
-      return name.includes(url) || name.includes(normalizedUrl)
+      return name.includes(url) || name.includes(normalizedUrl) || normalizedUrl.includes(name)
     },
     previewImage ({ thumbnail }) {
       const minWidth = consts.defaultCardMaxWidth
