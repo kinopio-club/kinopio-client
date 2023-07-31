@@ -52,7 +52,6 @@ import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
 import SystemCommand from '@/components/SystemCommand.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
-import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
@@ -65,7 +64,6 @@ export default {
     NameMatch,
     Tag,
     SystemCommand,
-    Loader,
     OtherSpacePreview
   },
   props: {
