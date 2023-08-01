@@ -10,10 +10,8 @@ const store = useStore()
 
 onMounted(() => {
   window.addEventListener('message', handleSubscriptionSuccess) // iOS IAP subscription sheet transaction completes
-  appleAppAccountToken = self.crypto.randomUUID()
   updateCredits()
 })
-let appleAppAccountToken
 
 const props = defineProps({
   visible: Boolean,
@@ -33,11 +31,14 @@ const state = reactive({
 const user = computed(() => store.state.currentUser)
 
 const subscribe = async () => {
+  const appleAppAccountToken = store.state.currentUser.appleAppAccountToken
   state.error.unknownServerError = false
   if (state.loading.subscriptionIsBeingCreated) { return }
   state.loading.subscriptionIsBeingCreated = true
   try {
-    await store.dispatch('api/updateAppleAppAccountToken', { appleAppAccountToken })
+    if (!appleAppAccountToken) {
+      throw { message: 'no user.appleAppAccountToken' }
+    }
     const body = {
       name: 'createSubscription',
       value: {

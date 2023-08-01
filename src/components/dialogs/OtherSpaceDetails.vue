@@ -1,12 +1,12 @@
 <script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import UserList from '@/components/UserList.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
-
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 const store = useStore()
 
 onMounted(() => {

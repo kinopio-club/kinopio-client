@@ -1,9 +1,9 @@
 <script setup>
-// import utils from '@/utils.js'
-
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
+
+// import utils from '@/utils.js'
 
 onMounted(() => {
   console.log(`🍆 the component is now mounted.`, store.state.currentSpace)

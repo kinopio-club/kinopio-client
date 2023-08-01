@@ -1,11 +1,11 @@
 <script setup>
-import Explore from '@/components/dialogs/Explore.vue'
-import Live from '@/components/dialogs/Live.vue'
-
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import dayjs from 'dayjs'
+
+import Explore from '@/components/dialogs/Explore.vue'
+import Live from '@/components/dialogs/Live.vue'
 const store = useStore()
 
 let updateLiveSpacesIntervalTimer

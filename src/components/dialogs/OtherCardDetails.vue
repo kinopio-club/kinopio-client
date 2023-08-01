@@ -1,11 +1,11 @@
 <script setup>
+import { reactive, computed, onMounted, onUpdated, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import UserList from '@/components/UserList.vue'
 import consts from '@/consts.js'
-
-import { reactive, computed, onMounted, onUpdated, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 const store = useStore()
 
 onMounted(() => {

@@ -66,7 +66,8 @@ const initialState = {
   journalDailyPrompt: '',
   panSpeedIsFast: false,
   outsideSpaceBackgroundIsStatic: false,
-  shouldDisableHapticFeedback: false
+  shouldDisableHapticFeedback: false,
+  appleAppAccountToken: self.crypto.randomUUID()
 }
 
 export default {
