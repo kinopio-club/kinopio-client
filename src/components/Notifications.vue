@@ -112,8 +112,8 @@ aside.notifications(@click.left="closeAllDialogs")
     .row
       .button-wrap
         button(@click.left="refreshBrowser")
-        img.refresh.icon(src="@/assets/refresh.svg")
-        span Update
+          img.refresh.icon(src="@/assets/refresh.svg")
+          span Update
 
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
     p Error saving changes to server, retrying…
@@ -127,9 +127,9 @@ aside.notifications(@click.left="closeAllDialogs")
     p Space is out of sync, please refresh
     .row
       .button-wrap
-        img.refresh.icon(src="@/assets/refresh.svg")
         button(@click.left="refreshBrowser")
-        span Refresh
+          img.refresh.icon(src="@/assets/refresh.svg")
+          span Refresh
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="template" :class="{'notification-jiggle': readOnlyJiggle}")
     button(@click.left="duplicateSpace")
