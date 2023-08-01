@@ -28,7 +28,7 @@ const clickCommand = () => {
   } else if (newSpace) {
     store.commit('triggerAddSpaceIsVisible')
   } else if (apps) {
-    store.commit('triggerAppsIsVisible')
+    store.commit('triggerAppsAndExtensionsIsVisible')
   }
 }
 

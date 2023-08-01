@@ -49,19 +49,24 @@ const state = reactive({
   isAndroid: false
 })
 
+// platform
+
 const toggleIsAndroid = (value) => {
   state.isAndroid = value
 }
 const toggleIsDesktop = (value) => {
   state.isDesktop = value
 }
-
-const updateDialogHeight = async () => {
-  if (!props.visible) { return }
-  await nextTick()
-  let element = dialog.value
-  state.dialogHeight = utils.elementHeight(element)
+const updateCurrentDeviceView = () => {
+  if (store.getters.isTouchDevice) {
+    state.isDesktop = false
+  } else {
+    state.isDesktop = true
+  }
 }
+
+// url
+
 const stripUrlPath = () => {
   title = document.title
   pathname = window.location.pathname
@@ -73,12 +78,14 @@ const restoreUrlPath = () => {
   // temporary url change for bookmarking, doesn't update vue-router history
   history.replaceState({}, title, pathname)
 }
-const updateCurrentDeviceView = () => {
-  if (store.getters.isTouchDevice) {
-    state.isDesktop = false
-  } else {
-    state.isDesktop = true
-  }
+
+// dialog
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialog.value
+  state.dialogHeight = utils.elementHeight(element)
 }
 
 </script>
@@ -96,22 +103,51 @@ dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :styl
     .logo-wrap
       .app-frame
         .logo-image
-      span.arrow →
+      span.arrow.icon →
       img.icon(src="@/assets/computer.svg")
-
-    p Download Kinopio
     .row
-      p for
-        .badge.info Mac, Windows, Linux
+      p App for Mac, Windows, and Linux
     .row
       a(href="https://dl.todesktop.com/201223j48l03cxi" download)
-        button Download App
+        button
+          img.icon(src="@/assets/system.svg")
+          span Download App
+    .row
+      p Extensions
+    .row
+      .button-wrap
+        a(href="https://addons.mozilla.org/en-US/firefox/addon/add-to-kinopio")
+          button
+            span Firefox{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
+      .button-wrap
+        a(href="https://chrome.google.com/webstore/detail/kinopio/hodmmkfpchpgmaemlicohlkiigpejakn")
+          button
+            span Chrome{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
+    .row
+      .button-wrap
+        a(href="https://apps.apple.com/app/add-to-kinopio/id1614926102")
+          button
+            span Safari{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
+      .button-wrap
+        a(href="https://www.raycast.com/pirijan/kinopio-inbox")
+          button
+            span Raycast{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
+    .row
+      .button-wrap
+        a(href="https://phonetonote.com/")
+          button
+            span SMS via phonetonote{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
 
   section(v-if="!state.isDesktop")
     .logo-wrap
       .app-frame
         .logo-image
-      span.arrow →
+      span.arrow.icon →
       img.icon(src="@/assets/phone.svg")
 
     .row
@@ -135,10 +171,10 @@ dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :styl
                 span Add to Home screen
     template(v-else)
       .row
-        a(href="https://testflight.apple.com/join/VoN2TmsM")
+        a(href="https://apps.apple.com/us/app/kinopio/id6448743101")
           button
             img.icon(src="@/assets/apple.svg")
-            span Install Testflight Beta
+            span Download from App Store
 
 </template>
 
@@ -151,7 +187,6 @@ dialog.apps
     margin-bottom 10px
     .arrow
       margin-left 5px
-      margin-right 5px
   .logo-image
     width 35px
     height 30px

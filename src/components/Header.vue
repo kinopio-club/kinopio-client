@@ -31,7 +31,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           About(:visible="aboutIsVisible")
           KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
           Donate(:visible="donateIsVisible")
-          Apps(:visible="appsIsVisible")
+          AppsAndExtensions(:visible="appsAndExtensionsIsVisible")
       .space-meta-rows
         .space-functions-row
           .segmented-buttons.add-space-functions
@@ -167,7 +167,7 @@ import Loader from '@/components/Loader.vue'
 import templates from '@/data/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
-import Apps from '@/components/dialogs/Apps.vue'
+import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Search from '@/components/dialogs/Search.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
@@ -214,7 +214,7 @@ export default {
     Loader,
     ImportArenaChannel,
     KeyboardShortcuts,
-    Apps,
+    AppsAndExtensions,
     UpgradeUser,
     Search,
     MoonPhase,
@@ -248,7 +248,7 @@ export default {
       notificationsIsVisible: false,
       loadingSignUpOrIn: false,
       keyboardShortcutsIsVisible: false,
-      appsIsVisible: false,
+      appsAndExtensionsIsVisible: false,
       upgradeUserIsVisible: false,
       spaceStatusIsVisible: false,
       offlineIsVisible: false,
@@ -277,8 +277,8 @@ export default {
         this.spaceDetailsInfoIsVisible = true
       } else if (mutation.type === 'triggerSignUpOrInIsVisible') {
         this.signUpOrInIsVisible = true
-      } else if (mutation.type === 'triggerAppsIsVisible') {
-        this.appsIsVisible = true
+      } else if (mutation.type === 'triggerAppsAndExtensionsIsVisible') {
+        this.appsAndExtensionsIsVisible = true
       } else if (mutation.type === 'triggerKeyboardShortcutsIsVisible') {
         this.keyboardShortcutsIsVisible = true
       } else if (mutation.type === 'triggerUpgradeUserIsVisible') {
@@ -510,7 +510,7 @@ export default {
       this.signUpOrInIsVisible = false
       this.shareIsVisible = false
       this.keyboardShortcutsIsVisible = false
-      this.appsIsVisible = false
+      this.appsAndExtensionsIsVisible = false
       this.upgradeUserIsVisible = false
       this.donateIsVisible = false
       this.spaceStatusIsVisible = false

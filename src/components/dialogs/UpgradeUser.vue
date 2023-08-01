@@ -20,6 +20,7 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildD
     p
       img.icon(src="@/assets/lock.svg")
       span Payments securely processed by {{paymentProcessor}}. Card info is not sent to Kinopio.
+      //- You'll be redirected to Stripe to complete checkout
 </template>
 
 <script>
