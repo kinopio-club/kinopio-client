@@ -66,9 +66,13 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         .button-wrap
           a(href="https://twitter.com/kinopioClub")
             button
-              //- span 𝕏{{' '}}
-              span Twitter{{' '}}
+              span 𝕏{{' '}}
               img.icon.visit(src="@/assets/visit.svg")
+        //- .button-wrap
+        //-   a(href="https://www.instagram.com/kinopioclub/")
+        //-     button
+        //-       span IG{{' '}}
+        //-       img.icon.visit(src="@/assets/visit.svg")
         .button-wrap
           a(href="https://pkm.social/@kinopio")
             button
