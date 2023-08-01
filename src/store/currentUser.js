@@ -67,7 +67,7 @@ const initialState = {
   panSpeedIsFast: false,
   outsideSpaceBackgroundIsStatic: false,
   shouldDisableHapticFeedback: false,
-  appleAppAccountToken: self.crypto.randomUUID()
+  appleAppAccountToken: null
 }
 
 export default {
@@ -366,6 +366,12 @@ export default {
     },
     weather: (state, value) => {
       state.weather = value
+    },
+    appleAppAccountToken: (state, value) => {
+      state.weather = value
+    },
+    initNewUser: (state) => {
+      state.appleAppAccountToken = self.crypto.randomUUID()
     }
   },
   actions: {
@@ -429,6 +435,7 @@ export default {
     },
     createNewUser: (context) => {
       context.commit('themeIsSystem', true)
+      context.commit('initNewUser')
       cache.saveUser(context.state)
       context.dispatch('createNewUserJournalPrompts')
     },
@@ -473,6 +480,8 @@ export default {
       }
       const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
       context.commit('otherTags', remoteTags, { root: true })
+      // migration added aug 2023
+      context.dispatch('migrationEnsureAppleAppAccountToken')
     },
     restoreUserFavorites: async (context) => {
       context.commit('isLoadingFavorites', true, { root: true })
@@ -490,6 +499,14 @@ export default {
       context.commit('favoriteSpaces', favorites.favoriteSpaces)
       context.commit('favoriteColors', favorites.favoriteColors)
       context.commit('isLoadingFavorites', false, { root: true })
+    },
+    // migration added aug 2023
+    migrationEnsureAppleAppAccountToken: (context) => {
+      if (!context.state.appleAppAccountToken) {
+        const appleAppAccountToken = self.crypto.randomUUID()
+        console.log('migration: ensure appleAppAccountToken', appleAppAccountToken)
+        context.dispatch('update', { appleAppAccountToken })
+      }
     },
     addFavorite: (context, { type, item }) => {
       let color, notification

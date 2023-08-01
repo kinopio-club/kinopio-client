@@ -81,7 +81,7 @@
       "urlPreviewDescription": null,
       "urlPreviewErrorUrl": null,
       "urlPreviewEmbedHtml": null,
-      "backgroundColor": null,
+      "backgroundColor": "rgb(251, 245, 199)",
       "resizeWidth": 0,
       "isCreatedThroughPublicApi": false,
       "counterIsVisible": false,
