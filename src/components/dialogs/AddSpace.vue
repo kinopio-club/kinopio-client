@@ -114,7 +114,6 @@ export default {
   computed: {
     userPrompts () {
       let prompts = this.$store.state.currentUser.journalPrompts
-      prompts = prompts.filter(prompt => !prompt.packId)
       return prompts
     },
     currentUserId () { return this.$store.state.currentUser.id },
@@ -188,21 +187,6 @@ export default {
         const textareas = document.querySelectorAll('.add-space textarea')
         last(textareas).focus()
       })
-    },
-    addPromptPack (pack) {
-      const promptPack = { id: nanoid(), name: pack.name, packId: pack.packId, userId: this.currentUserId }
-      this.$store.dispatch('currentUser/addJournalPrompt', promptPack)
-    },
-    togglePromptPack (pack) {
-      const userPack = this.userPrompts.find(userPrompt => {
-        if (!userPrompt.packId) { return }
-        return pack.packId === userPrompt.packId.toString()
-      })
-      if (userPack) {
-        this.$store.dispatch('currentUser/removeJournalPrompt', userPack)
-      } else {
-        this.addPromptPack(pack)
-      }
     },
     updateDialogHeight () {
       if (!this.visible) { return }

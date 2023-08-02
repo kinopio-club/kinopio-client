@@ -2,7 +2,6 @@
 .journal-prompt
   .row
     textarea(
-      v-if="!isPack"
       ref="name"
       rows="1"
       v-model="name"
@@ -34,7 +33,6 @@ export default {
     this.updateTextareaSize()
   },
   computed: {
-    isPack () { return Boolean(this.prompt.packId) },
     name: {
       get () {
         return this.prompt.name

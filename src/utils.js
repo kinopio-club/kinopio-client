@@ -5,7 +5,6 @@ import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
-import random from 'lodash-es/random'
 import last from 'lodash-es/last'
 import sortBy from 'lodash-es/sortBy'
 import times from 'lodash-es/times'
@@ -1408,7 +1407,6 @@ export default {
     const userPrompts = currentUser.journalPrompts
     userPrompts.forEach(prompt => {
       if (!prompt.name) { return }
-      if (prompt.packId) { return }
       let card = { id: nanoid() }
       card.name = prompt.name
       const position = this.promptCardPosition(space.cards, card.name)
@@ -1437,20 +1435,6 @@ export default {
     if (matches) {
       return matches[0]
     }
-  },
-  randomPrompt (pack) {
-    let index = random(0, pack.prompts.length - 1)
-    return pack.prompts[index]
-  },
-  packTag (pack, cardId, space) {
-    const spaceHasTag = space.tags.find(tag => tag.name === pack.name)
-    if (spaceHasTag) { return }
-    return this.newTag({
-      name: pack.name,
-      defaultColor: pack.color,
-      cardId: cardId,
-      spaceId: space.id
-    })
   },
   promptCardPosition (cards, newCardName) {
     const lastCard = last(cards)
