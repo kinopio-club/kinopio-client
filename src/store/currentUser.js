@@ -7,6 +7,7 @@ import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
 import dayjs from 'dayjs'
+import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID()
 
 const initialState = {
   id: nanoid(),
@@ -371,7 +372,7 @@ export default {
       state.weather = value
     },
     initNewUser: (state) => {
-      state.appleAppAccountToken = self.crypto.randomUUID()
+      state.appleAppAccountToken = uuidv4()
     }
   },
   actions: {
@@ -503,7 +504,7 @@ export default {
     // migration added aug 2023
     migrationEnsureAppleAppAccountToken: (context) => {
       if (!context.state.appleAppAccountToken) {
-        const appleAppAccountToken = self.crypto.randomUUID()
+        const appleAppAccountToken = uuidv4()
         console.log('migration: ensure appleAppAccountToken', appleAppAccountToken)
         context.dispatch('update', { appleAppAccountToken })
       }
