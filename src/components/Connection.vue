@@ -1,6 +1,6 @@
 <template lang="pug">
 template(v-if="isVisibleInViewport")
-  g.connection
+  g.connection(v-if="cards.startCard && cards.endCard")
     path.connection-path(
       fill="none"
       :stroke="typeColor"
