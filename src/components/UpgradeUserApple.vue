@@ -31,6 +31,7 @@ const state = reactive({
 
 const user = computed(() => store.state.currentUser)
 const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const appleAppAccountToken = computed(() => store.state.currentUser.appleAppAccountToken)
 
 const clearErrors = () => {
   state.error.unknownServerError = false
@@ -38,18 +39,18 @@ const clearErrors = () => {
 }
 
 const subscribe = async () => {
-  const appleAppAccountToken = store.state.currentUser.appleAppAccountToken
+  console.log('💰 appleAppAccountToken', appleAppAccountToken.value)
   clearErrors()
   if (state.loading.subscriptionIsBeingCreated) { return }
   state.loading.subscriptionIsBeingCreated = true
   try {
-    if (!appleAppAccountToken) {
+    if (!appleAppAccountToken.value) {
       throw { message: 'no user.appleAppAccountToken' }
     }
     const body = {
       name: 'createSubscription',
       value: {
-        appleAppAccountToken,
+        appleAppAccountToken: appleAppAccountToken.value,
         appleSubscriptionId: props.price.applePriceId
       }
     }
@@ -99,6 +100,7 @@ const handleSubscriptionSuccess = (event) => {
 
 <template lang="pug">
 .upgrade-user-apple(v-if="visible")
+  p {{appleAppAccountToken}}
   .row(v-if="state.creditsEarned")
     .badge.info
       span You have ${{state.creditsEarned}} in referral credits. To redeem credits you'll need to upgrade kinopio on the {{' '}}
