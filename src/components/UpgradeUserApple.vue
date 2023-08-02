@@ -100,7 +100,6 @@ const handleSubscriptionSuccess = (event) => {
 
 <template lang="pug">
 .upgrade-user-apple(v-if="visible")
-  p {{appleAppAccountToken}}
   .row(v-if="state.creditsEarned")
     .badge.info
       span You have ${{state.creditsEarned}} in referral credits. To redeem credits you'll need to upgrade kinopio on the {{' '}}
