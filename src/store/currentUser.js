@@ -68,7 +68,8 @@ const initialState = {
   panSpeedIsFast: false,
   outsideSpaceBackgroundIsStatic: false,
   shouldDisableHapticFeedback: false,
-  appleAppAccountToken: null
+  appleAppAccountToken: null,
+  appleSubscriptionIsActive: null
 }
 
 export default {
@@ -370,6 +371,9 @@ export default {
     },
     appleAppAccountToken: (state, value) => {
       state.weather = value
+    },
+    appleSubscriptionIsActive: (state, value) => {
+      state.appleSubscriptionIsActive = value
     },
     initNewUser: (state) => {
       state.appleAppAccountToken = uuidv4()

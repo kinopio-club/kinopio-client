@@ -83,6 +83,7 @@ const handleSubscriptionSuccess = (event) => {
     return
   }
   store.commit('currentUser/isUpgraded', true)
+  store.commit('currentUser/appleSubscriptionIsActive', true)
   store.commit('notifyCardsCreatedIsOverLimit', false)
   store.commit('notifyEarnedCredits', false)
   if (!utils.dialogIsVisible()) {
