@@ -10,7 +10,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
     p Create an account to share your spaces and access them anywhere
     ReferredNewUserCredits
     form(@submit.prevent="signUp")
-      input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
+      input(ref="email" type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
       .badge.info(v-if="error.accountAlreadyExists") An account with this email already exists, Sign In instead
       input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
       input(type="password" placeholder="Confirm Password" required @input="clearErrors")
@@ -27,7 +27,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   section(v-else)
     p Welcome back
     form(@submit.prevent="signIn")
-      input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
+      input.email(ref="email" type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
       input(type="password" placeholder="Password" required v-model="password" @input="clearErrors")
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
       .badge.danger(v-if="error.signInCredentials") Incorrect email or password
@@ -124,12 +124,14 @@ export default {
     showSignUpVisible () {
       this.signUpVisible = true
       this.clearErrors()
+      this.focusEmail()
     },
 
     hideSignUpVisible () {
       this.signUpVisible = false
       this.resetVisible = false
       this.clearErrors()
+      this.focusEmail()
     },
 
     toggleResetVisible () {
@@ -380,6 +382,14 @@ export default {
     clearNotifications () {
       this.$store.commit('notifyReferralSuccessUser', null)
       this.$store.commit('notifyReferralSuccessReferrerName', false)
+    },
+
+    focusEmail () {
+      this.$nextTick(() => {
+        const element = this.$refs.email
+        if (!element) { return }
+        element.focus()
+      })
     }
   },
   watch: {
@@ -388,6 +398,7 @@ export default {
         this.clearErrors()
         this.createSessionToken()
         this.$store.commit('shouldExplicitlyHideFooter', true)
+        this.focusEmail()
       } else {
         this.$store.commit('shouldExplicitlyHideFooter', false)
       }
