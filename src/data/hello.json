@@ -316,7 +316,7 @@
       "urlPreviewErrorUrl": null,
       "urlPreviewEmbedHtml": null,
       "backgroundColor": null,
-      "resizeWidth": 0,
+      "resizeWidth": 220,
       "isCreatedThroughPublicApi": false,
       "counterIsVisible": false,
       "counterValue": 1,
@@ -325,8 +325,8 @@
       "spaceId": "hUZAy8K_ZblEXTU80ifQs",
       "userId": null,
       "distanceFromOrigin": 515,
-      "width": 200,
-      "height": 114
+      "width": 220,
+      "height": 124
     },
     {
       "id": "BmGVahj9WocgeBVUyQK2N",
