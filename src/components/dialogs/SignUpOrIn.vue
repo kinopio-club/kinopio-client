@@ -404,7 +404,7 @@ dialog.sign-up-or-in
   left initial
   right 8px
   overflow auto
-  @media(max-height 450px)
+  @media(max-height 750px)
     // for ios keyboard input
     top -50px !important
   .reset-form
