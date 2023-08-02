@@ -485,8 +485,6 @@ export default {
       }
       const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
       context.commit('otherTags', remoteTags, { root: true })
-      // migration added aug 2023
-      context.dispatch('migrationEnsureAppleAppAccountToken')
     },
     restoreUserFavorites: async (context) => {
       context.commit('isLoadingFavorites', true, { root: true })
@@ -504,14 +502,6 @@ export default {
       context.commit('favoriteSpaces', favorites.favoriteSpaces)
       context.commit('favoriteColors', favorites.favoriteColors)
       context.commit('isLoadingFavorites', false, { root: true })
-    },
-    // migration added aug 2023
-    migrationEnsureAppleAppAccountToken: (context) => {
-      if (!context.state.appleAppAccountToken) {
-        const appleAppAccountToken = uuidv4()
-        console.log('migration: ensure appleAppAccountToken', appleAppAccountToken)
-        context.dispatch('update', { appleAppAccountToken })
-      }
     },
     addFavorite: (context, { type, item }) => {
       let color, notification
