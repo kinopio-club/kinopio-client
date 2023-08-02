@@ -1,11 +1,12 @@
 <script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import postMessage from '@/postMessage.js'
 import consts from '@/consts.js'
-
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import utils from '@/utils.js'
 const store = useStore()
 
 onMounted(() => {
@@ -29,10 +30,16 @@ const state = reactive({
 })
 
 const user = computed(() => store.state.currentUser)
+const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
+
+const clearErrors = () => {
+  state.error.unknownServerError = false
+  state.error.subscriptionError = false
+}
 
 const subscribe = async () => {
   const appleAppAccountToken = store.state.currentUser.appleAppAccountToken
-  state.error.unknownServerError = false
+  clearErrors()
   if (state.loading.subscriptionIsBeingCreated) { return }
   state.loading.subscriptionIsBeingCreated = true
   try {
@@ -70,16 +77,21 @@ const handleSubscriptionSuccess = (event) => {
   state.loading.subscriptionIsBeingCreated = false
   console.log('🎡 handleSubscriptionSuccess', data)
   if (data.name !== 'upgradedUser') { return }
-  if (!data.isSuccess) { return }
+  if (!data.isSuccess) {
+    state.error.subscriptionError = true
+    state.loading.subscriptionIsBeingCreated = false
+    return
+  }
   store.commit('currentUser/isUpgraded', true)
   store.commit('notifyCardsCreatedIsOverLimit', false)
   store.commit('notifyEarnedCredits', false)
-  store.commit('addNotification', {
-    message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software',
-    type: 'success',
-    isPersistentItem: true
-  })
-  store.dispatch('closeAllDialogs')
+  if (!utils.dialogIsVisible()) {
+    store.commit('addNotification', {
+      message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software',
+      type: 'success',
+      isPersistentItem: true
+    })
+  }
 }
 
 </script>
@@ -90,12 +102,17 @@ const handleSubscriptionSuccess = (event) => {
     .badge.info
       span You have ${{state.creditsEarned}} in referral credits. To redeem credits you'll need to upgrade kinopio on the {{' '}}
       a(href="consts.kinopioDomain") web
-  .row
+  .row(v-if='!isUpgraded')
     button(@click.left="subscribe" :class="{active : state.loading.subscriptionIsBeingCreated}")
       User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
       span Upgrade for ${{price.amount}}/{{price.period}}
       Loader(:visible="state.loading.subscriptionIsBeingCreated")
-  .badge.danger(v-if="state.error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support. Your transaction was not processed.
+  .badge.danger(v-if="state.error.unknownServerError")
+    span (シ_ _)シ Something went wrong, Please try again or contact support. Your transaction was not processed.
+  .badge.danger(v-if='state.error.subscriptionError')
+    span (シ_ _)シ Your subscription was not processed, Please try again or contact support.
+  .badge.success(v-if="isUpgraded")
+    span Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software
 
 </template>
 

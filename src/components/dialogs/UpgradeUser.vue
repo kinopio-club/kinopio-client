@@ -16,7 +16,7 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildD
     template(v-if="currentUserIsSignedIn")
       UpgradeUserStripe(:visible="!isSecureAppContextIOS" :price="currentPrice")
       UpgradeUserApple(:visible="isSecureAppContextIOS" :price="currentPrice")
-  section(v-if="currentUserIsSignedIn")
+  section(v-if="currentUserIsSignedIn && !isUpgraded")
     p
       img.icon(src="@/assets/lock.svg")
       span Payments securely processed by {{paymentProcessor}}. Card info is not sent to Kinopio.
@@ -76,7 +76,8 @@ export default {
       const denomenator = (base + yearly) / 2
       const result = (numerator / denomenator) * 100
       return Math.round(result)
-    }
+    },
+    isUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
   methods: {
     price (period) {

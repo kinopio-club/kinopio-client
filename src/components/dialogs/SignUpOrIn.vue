@@ -400,11 +400,13 @@ export default {
 </script>
 
 <style lang="stylus">
-.sign-up-or-in
-  top calc(100% - 8px)
+dialog.sign-up-or-in
   left initial
   right 8px
   overflow auto
+  @media(max-height 450px)
+    // for ios keyboard input
+    top -50px !important
   .reset-form
     margin-top 10px
   p,
