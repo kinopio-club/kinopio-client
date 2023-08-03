@@ -1,4 +1,5 @@
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
@@ -107,7 +108,7 @@ export default {
           context.commit('triggerUploadComplete', {
             cardId,
             spaceId,
-            url: `${presignedPostData.url}/${key}`
+            url: `${consts.cdnHost}/${key}`
           }, { root: true })
           context.commit('removePendingUpload', { cardId, spaceId })
           resolve(request.response)

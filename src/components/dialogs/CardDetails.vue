@@ -481,9 +481,9 @@ export default {
     validWebUrls () {
       const urls = this.validUrls.filter(url => {
         const urlHasProtocol = utils.urlHasProtocol(url)
-        const isLinode = url.includes('us-east-1.linodeobjects.com')
+        const isUpload = url.includes('us-east-1.linodeobjects.com') || url.includes('cdn.kinopio.club')
         const isSpace = utils.urlIsSpace(url)
-        return urlHasProtocol && !isLinode && !isSpace
+        return urlHasProtocol && !isUpload && !isSpace
       })
       if (!urls.length && this.card.urlPreviewUrl) {
         this.removeUrlPreview()
