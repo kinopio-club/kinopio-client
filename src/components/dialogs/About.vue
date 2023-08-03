@@ -61,22 +61,27 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         button(@click.left.stop="triggerDonateIsVisible")
           img.icon(src="@/assets/heart-empty.svg")
           span Donate
-    section.subsection
+      .button-wrap
+        button(@click.left.stop="toggleSocialMediaIsVisible" :class="{active: socialMediaIsVisible}")
+          span Social Media
+
+    section.subsection(v-if="socialMediaIsVisible")
       .row
+        .button-wrap
+          a(href="https://pkm.social/@kinopio")
+            button
+              span Mastodon{{' '}}
+              img.icon.visit(src="@/assets/visit.svg")
         .button-wrap
           a(href="https://twitter.com/kinopioClub")
             button
               span 𝕏{{' '}}
               img.icon.visit(src="@/assets/visit.svg")
-        //- .button-wrap
-        //-   a(href="https://www.instagram.com/kinopioclub/")
-        //-     button
-        //-       span IG{{' '}}
-        //-       img.icon.visit(src="@/assets/visit.svg")
+      .row
         .button-wrap
-          a(href="https://pkm.social/@kinopio")
+          a(href="https://www.instagram.com/kinopioclub/")
             button
-              span Mastodon{{' '}}
+              span Instagram{{' '}}
               img.icon.visit(src="@/assets/visit.svg")
 
 </template>
@@ -121,7 +126,8 @@ export default {
       isIPhone: false,
       isAndroid: false,
       isMobile: false,
-      dialogHeight: null
+      dialogHeight: null,
+      socialMediaIsVisible: false
     }
   },
   async mounted () {
@@ -210,6 +216,9 @@ export default {
     triggerDonateIsVisible () {
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerDonateIsVisible')
+    },
+    toggleSocialMediaIsVisible () {
+      this.socialMediaIsVisible = !this.socialMediaIsVisible
     }
   },
   watch: {
