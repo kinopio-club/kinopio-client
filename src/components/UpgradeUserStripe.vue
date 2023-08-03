@@ -96,7 +96,7 @@ export default {
   },
   props: {
     visible: Boolean,
-    price: Object // amount, stripePriceId
+    price: Object // { amount, stripePriceId }
   },
   mounted () {
     this.updateCredits()
@@ -343,8 +343,6 @@ export default {
       const data = {
         stripeCustomerId: customer.id,
         stripeSubscriptionId: subscription.id,
-        stripePriceId: subscription.items.data[0].price.id,
-        stripePaymentMethodId: paymentMethod.id,
         creditsUsed: this.creditsUsedForInitialPayment
       }
       const result = await this.$store.dispatch('api/updateSubscription', data)
