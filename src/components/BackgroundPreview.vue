@@ -33,7 +33,7 @@ export default {
       }
     },
     backgroundStyles () {
-      const defaultBackgroundThumbnail = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg'
+      const defaultBackgroundThumbnail = 'https://bk.kinopio.club/background-thumbnail.svg'
       let background = this.space.background
       const backgroundImage = backgroundImages.find(image => {
         const isImage = image.url === background
