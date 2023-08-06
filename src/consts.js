@@ -22,6 +22,7 @@ export default {
   isDevelopment: import.meta.env.MODE === 'development',
   isSecureAppContextIOS: navigator.isSecureAppContextIOS, // true = iOS app
   isSecureAppContext: navigator.isSecureAppContext, // true = iOS app
+  cdnHost: 'https://cdn.kinopio.club',
   kinopioDomain () {
     let domain = 'https://kinopio.club'
     if (this.isDevelopment) {
