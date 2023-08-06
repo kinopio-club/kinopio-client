@@ -71,7 +71,7 @@
           span.badge.success shopping for groceries
           span {{' '}}
           span.badge.danger in the style of ukiyo-e
-        img(src="https://kinopio-updates.us-east-1.linodeobjects.com/dall-e-example.jpg")
+        img(src="https://updates.kinopio.club/dall-e-example.jpg")
 
   AIImagesProgress(:showAIImageHistoryButton="true")
 
