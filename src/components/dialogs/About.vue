@@ -107,18 +107,17 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
               img.icon.visit(src="@/assets/visit.svg")
       .row
         //- tiktok
-        .button-wrap
-          a(href="https://www.tiktok.com/@kinopioclub/")
-            button
-              span TikTok{{' '}}
-              img.icon.visit(src="@/assets/visit.svg")
+        //- .button-wrap
+        //-   a(href="https://www.tiktok.com/@kinopioclub/")
+        //-     button
+        //-       span TikTok{{' '}}
+        //-       img.icon.visit(src="@/assets/visit.svg")
         //- youtube
         .button-wrap
           a(href="https://www.youtube.com/@kinopio-club/")
             button
               span Youtube{{' '}}
               img.icon.visit(src="@/assets/visit.svg")
-      .row
         //- 𝕏
         .button-wrap
           a(href="https://x.com/kinopioClub")
