@@ -1025,7 +1025,7 @@ const currentSpace = {
       if (currentUser.isUpgraded) { return }
       const cardsCreatedLimit = context.rootState.cardsCreatedLimit
       const value = cardsCreatedLimit - currentUser.cardsCreatedCount
-      if (utils.isBetween({ value, min: 0, max: 10 })) {
+      if (utils.isBetween({ value, min: 0, max: 15 })) {
         context.commit('notifyCardsCreatedIsNearLimit', true, { root: true })
       }
     },
