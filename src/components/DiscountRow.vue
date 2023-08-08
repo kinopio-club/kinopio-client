@@ -58,6 +58,6 @@ section.subsection(v-if="state.studentInfoIsVisible" @click.stop)
 .discount-row
   margin-top 10px
   display inline-block
-  dialog.refer
+  dialog.earn-credits
     left 0
 </style>

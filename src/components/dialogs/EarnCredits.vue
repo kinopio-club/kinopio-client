@@ -47,7 +47,7 @@ const triggerSignUpOrInIsVisible = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.narrow.earn-credits(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section(v-if="visible")
     p Earn Credits
   section
@@ -73,7 +73,7 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
 </template>
 
 <style lang="stylus">
-.refer
+.earn-credits
   overflow auto
   top calc(100% - 8px)
   left initial
