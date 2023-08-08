@@ -133,7 +133,7 @@ dialog.upgrade-user
     margin 0
   p
     color var(--primary)
-  @media(max-height 700px)
+  @media(max-height 650px)
     top -60px !important
 
 </style>

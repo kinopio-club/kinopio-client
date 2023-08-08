@@ -101,7 +101,7 @@ dialog.pricing
   table
     td
       max-width 120px
-  @media(max-height 700px)
+  @media(max-height 650px)
     top -60px !important
 
 </style>

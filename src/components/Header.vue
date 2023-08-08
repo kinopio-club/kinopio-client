@@ -136,16 +136,16 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               span Sign Up or In
               Loader(:visible="loadingSignUpOrIn")
             SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
-          //- Upgrade
-          .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
-            button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
-              span Upgrade
-            UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
           //- Pricing
           .button-wrap(v-if="!userIsUpgraded")
             button(@click.left.stop="togglePricingIsVisible" :class="{active : pricingIsVisible}")
               span Pricing
             Pricing(:visible="pricingIsVisible")
+          //- Upgrade
+          .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
+            button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
+              span Upgrade
+            UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
 
   Toolbar(:visible="isSpace")
   SelectAllBelow
