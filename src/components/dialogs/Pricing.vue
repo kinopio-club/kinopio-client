@@ -8,18 +8,30 @@ import User from '@/components/User.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
 import consts from '@/consts.js'
+import utils from '@/utils.js'
 const store = useStore()
 
 const props = defineProps({
   visible: Boolean
 })
+const dialog = ref(null)
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'updatePageSizes') {
+      updateDialogHeight()
+    }
+  })
+})
 
 const state = reactive({
-  aboutMeIsVisible: false
+  aboutMeIsVisible: false,
+  dialogHeight: null
 })
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
+    updateDialogHeight()
     store.commit('shouldExplicitlyHideFooter', true)
   } else {
     store.commit('shouldExplicitlyHideFooter', false)
@@ -28,6 +40,12 @@ watch(() => props.visible, (value, prevValue) => {
 
 const monthlyPrice = computed(() => consts.price('month').amount)
 const yearlyPrice = computed(() => consts.price('year').amount)
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  state.dialogHeight = utils.elementHeight(dialog.value)
+}
 
 // free cards from space member
 
@@ -49,7 +67,7 @@ const kinopioUser = computed(() => {
 </script>
 
 <template lang="pug">
-dialog.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
     DiscountRow
