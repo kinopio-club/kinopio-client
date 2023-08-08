@@ -21,7 +21,7 @@ section.subsection.cards-created-progress
     p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
   .button-wrap
-    button.success(@click="triggerUpgradeUserIsVisible")
+    button(@click="triggerUpgradeUserIsVisible")
       span Upgrade for Unlimited
 
 </template>
