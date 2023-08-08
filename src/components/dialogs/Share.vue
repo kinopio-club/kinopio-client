@@ -41,7 +41,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   //- Invite
   Invite(v-if="isSpaceMember && currentUserIsSignedIn")
   //- Collaborators
-  section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
+  section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers || currentMemberIsSignedIn")
     //- collaborators
     template(v-if="spaceHasCollaborators")
       UserList(:users="spaceCollaborators" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :showRemoveUser="isSpaceMember" @removeUser="removeCollaborator" :isClickable="true")
@@ -163,6 +163,10 @@ export default {
     },
     isSpaceMember () {
       return this.$store.getters['currentUser/isSpaceMember']()
+    },
+    currentMemberIsSignedIn () {
+      if (!this.isSpaceMember) { return true }
+      return this.currentUserIsSignedIn
     },
     spaceIsRemote () {
       return this.$store.getters['currentSpace/isRemote']

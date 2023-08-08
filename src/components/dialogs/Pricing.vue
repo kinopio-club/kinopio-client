@@ -4,11 +4,18 @@ import { useStore } from 'vuex'
 
 import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
 import DiscountRow from '@/components/DiscountRow.vue'
+import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
+import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
 import consts from '@/consts.js'
 const store = useStore()
 
 const props = defineProps({
   visible: Boolean
+})
+
+const state = reactive({
+  aboutMeIsVisible: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -22,14 +29,31 @@ watch(() => props.visible, (value, prevValue) => {
 const monthlyPrice = computed(() => consts.price('month').amount)
 const yearlyPrice = computed(() => consts.price('year').amount)
 
+// free cards from space member
+
+const spaceUserIsUpgraded = computed(() => store.getters['currentSpace/spaceUserIsUpgraded'])
+const spaceUser = computed(() => store.state.currentSpace.users[0])
+
+// about me
+
+const toggleAboutMeIsVisible = () => {
+  state.aboutMeIsVisible = !state.aboutMeIsVisible
+}
+const kinopioUser = computed(() => {
+  return {
+    id: 'euGhpBrR9eBcjKnK16C_g',
+    color: 'rgb(160, 247, 240)'
+  }
+})
+
 </script>
 
 <template lang="pug">
-dialog.narrow.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
-    DiscountRow()
-    ReferredNewUserCredits()
+    DiscountRow
+    ReferredNewUserCredits
     table
       tbody
         tr.table-header
@@ -47,14 +71,31 @@ dialog.narrow.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialo
           td 10 AI images
           td 50 AI images/mo
 
-  section
-    section.subsection
-      p Hi, my name is Pirijan and I'm the creator of Kinopio.
-      p I believe in building ethical, economically-sustainable,
-        span {{' '}}
-        a(href="https://pketh.org/organic-software.html") organic software
-        span {{' '}}
-        span that's designed by artists, built by craftspeople, and funded by the people who enjoy it.
+    CardsCreatedProgress
+
+    //- free cards from space member
+    section.subsection(v-if="spaceUserIsUpgraded")
+      p
+        UserLabelInline(:user="spaceUser")
+        span is upgraded, so cards you create in this space won't increase your free card count
+
+  //- about me
+  section.about-me
+    button(:class="{active: state.aboutMeIsVisible}" @click="toggleAboutMeIsVisible")
+      span Who Makes Kinopio?
+    template(v-if="state.aboutMeIsVisible")
+      section.subsection
+        .row
+          User(:user="kinopioUser" :isClickable="false" :hideYouLabel="true")
+          div
+            p Hi, my name is{{' '}}
+              a(href="https://pketh.org") Pirijan
+              span {{' '}}and I'm the creator of Kinopio.
+            p I believe in building ethical, economically-sustainable,
+              span {{' '}}
+              a(href="https://pketh.org/organic-software.html") organic software
+              span {{' '}}
+              span that's designed by artists, built by craftspeople, and funded by the people who enjoy it.
 </template>
 
 <style lang="stylus">
@@ -65,4 +106,14 @@ dialog.pricing
   max-height calc(100vh - 25px)
   p
     user-select text
+  .subsection
+    margin-top 10px
+  .about-me
+    .row
+      align-items flex-start
+      .user
+        margin-right 6px
+  table
+    td
+      max-width 120px
 </style>

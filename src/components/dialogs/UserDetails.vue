@@ -33,21 +33,6 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       UserBadges(:user="user")
 
-    //- n cards created
-    section.upgrade(v-if="!currentUserIsUpgraded")
-      .row
-        CardsCreatedProgress
-      .row
-        .button-wrap
-          button(@click="triggerUpgradeUserIsVisible")
-            span Upgrade for Unlimited
-      //- Unlimited cards from member
-      .row(v-if="spaceUserIsUpgraded && !currentUserIsUpgraded")
-        .badge.status
-          p
-            UserLabelInline(:user="spaceUser")
-            span is upgraded, so cards you create in this space won't increase your free card count
-
     section(v-if="!isAddPage")
       .row
         .button-wrap
@@ -165,10 +150,7 @@ export default {
     userIsUpgraded () { return this.user.isUpgraded },
     isCurrentUser () { return this.$store.getters['currentUser/isCurrentUser'](this.user) },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     isLoadingFavorites () { return this.$store.state.isLoadingFavorites },
-    spaceUserIsUpgraded () { return this.$store.getters['currentSpace/spaceUserIsUpgraded'] },
-    spaceUser () { return this.$store.state.currentSpace.users[0] },
     isAddPage () { return this.$store.state.isAddPage },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
@@ -225,10 +207,6 @@ export default {
     userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible }
   },
   methods: {
-    triggerUpgradeUserIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerUpgradeUserIsVisible')
-    },
     toggleIsFavoriteUser () {
       if (this.isFavoriteUser) {
         this.$store.dispatch('currentUser/removeFavorite', { type: 'user', item: this.user })

@@ -143,7 +143,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
               span Upgrade
           //- Pricing
-          .button-wrap(v-if="!currentUserIsSignedIn")
+          .button-wrap(v-if="!userIsUpgraded")
             button(@click.left.stop="togglePricingIsVisible" :class="{active : pricingIsVisible}")
               span Pricing
 
