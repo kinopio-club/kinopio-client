@@ -40,6 +40,10 @@ watch(() => props.visible, (value, prevValue) => {
 const monthlyPrice = computed(() => consts.price('month').amount)
 const yearlyPrice = computed(() => consts.price('year').amount)
 
+const closeChildDialogs = () => {
+  store.commit('triggerCloseChildDialogs')
+}
+
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
@@ -54,7 +58,7 @@ const spaceUser = computed(() => store.state.currentSpace.users[0])
 </script>
 
 <template lang="pug">
-dialog.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeChildDialogs" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
     DiscountRow
