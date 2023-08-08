@@ -113,7 +113,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.upgrade-user
+dialog.upgrade-user
   overflow auto
   max-height calc(100vh - 210px)
   left initial
@@ -133,5 +133,7 @@ export default {
     margin 0
   p
     color var(--primary)
+  @media(max-height 700px)
+    top -60px !important
 
 </style>
