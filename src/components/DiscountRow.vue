@@ -60,4 +60,7 @@ section.subsection(v-if="state.studentInfoIsVisible" @click.stop)
   display inline-block
   dialog.earn-credits
     left 0
+    max-height 320px
+    @media(max-height 650px)
+      max-height 300px
 </style>
