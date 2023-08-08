@@ -9,7 +9,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
 
   section
     .row
-      p For building ideas and solving problems
+      p Thinking canvas for new ideas and hard problems
     .row
       .button-wrap
         button(@click.stop="toggleHelpIsVisible" :class="{active: helpIsVisible}")
@@ -57,10 +57,9 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             span Forum{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
     .row
-      .button-wrap
-        button(@click.left.stop="triggerDonateIsVisible")
-          img.icon(src="@/assets/heart-empty.svg")
-          span Donate
+      AboutMe
+
+    .row
       .button-wrap
         button(@click.left.stop="toggleMoreLinksIsVisible" :class="{active: moreLinksIsVisible}")
           span More Links
@@ -124,7 +123,6 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             button
               span 𝕏{{' '}}
               img.icon.visit(src="@/assets/visit.svg")
-
 </template>
 
 <script>
@@ -132,6 +130,7 @@ import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import Help from '@/components/dialogs/Help.vue'
 import utils from '@/utils.js'
+import AboutMe from '@/components/AboutMe.vue'
 
 import dayjs from 'dayjs'
 
@@ -143,7 +142,8 @@ export default {
   components: {
     WhatsNew,
     AppsAndExtensions,
-    Help
+    Help,
+    AboutMe
   },
   props: {
     visible: Boolean
@@ -253,10 +253,6 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
-    },
-    triggerDonateIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerDonateIsVisible')
     },
     toggleMoreLinksIsVisible () {
       this.moreLinksIsVisible = !this.moreLinksIsVisible

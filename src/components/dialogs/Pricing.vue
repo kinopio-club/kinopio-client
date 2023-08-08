@@ -4,9 +4,9 @@ import { useStore } from 'vuex'
 
 import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
 import DiscountRow from '@/components/DiscountRow.vue'
-import User from '@/components/User.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
+import AboutMe from '@/components/AboutMe.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
 const store = useStore()
@@ -25,7 +25,6 @@ onMounted(() => {
 })
 
 const state = reactive({
-  aboutMeIsVisible: false,
   dialogHeight: null
 })
 
@@ -51,18 +50,6 @@ const updateDialogHeight = async () => {
 
 const spaceUserIsUpgraded = computed(() => store.getters['currentSpace/spaceUserIsUpgraded'])
 const spaceUser = computed(() => store.state.currentSpace.users[0])
-
-// about me
-
-const toggleAboutMeIsVisible = () => {
-  state.aboutMeIsVisible = !state.aboutMeIsVisible
-}
-const kinopioUser = computed(() => {
-  return {
-    id: 'euGhpBrR9eBcjKnK16C_g',
-    color: 'rgb(160, 247, 240)'
-  }
-})
 
 </script>
 
@@ -97,23 +84,8 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
         UserLabelInline(:user="spaceUser")
         span is upgraded, so cards you create in this space won't increase your free card count
 
-  //- about me
-  section.about-me
-    button(:class="{active: state.aboutMeIsVisible}" @click="toggleAboutMeIsVisible")
-      span Who Makes Kinopio?
-    template(v-if="state.aboutMeIsVisible")
-      section.subsection
-        .row
-          User(:user="kinopioUser" :isClickable="false" :hideYouLabel="true")
-          div
-            p Hi, my name is{{' '}}
-              a(href="https://pketh.org") Pirijan
-              span {{' '}}and I'm the creator of Kinopio.
-            p I believe in building ethical, economically-sustainable,
-              span {{' '}}
-              a(href="https://pketh.org/organic-software.html") organic software
-              span {{' '}}
-              span that's designed by artists, built by craftspeople, and funded by the people who enjoy it.
+  section
+    AboutMe
 </template>
 
 <style lang="stylus">
@@ -126,11 +98,6 @@ dialog.pricing
     user-select text
   .subsection
     margin-top 10px
-  .about-me
-    .row
-      align-items flex-start
-      .user
-        margin-right 6px
   table
     td
       max-width 120px
