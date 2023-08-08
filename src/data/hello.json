@@ -216,7 +216,7 @@
       "x": 118,
       "y": 450,
       "z": 2035,
-      "name": "Create new cards by tapping anywhere. \n\nOr get started with a ::systemCommand=newSpace",
+      "name": "Add cards by tapping anywhere. \n\nOr get started with a ::systemCommand=newSpace",
       "frameId": null,
       "isRemoved": false,
       "nameUpdatedAt": "2023-07-17T13:42:20.658Z",
