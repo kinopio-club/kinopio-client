@@ -44,8 +44,7 @@ export default {
         shouldZoomIn = deltaY > 0
         shouldZoomOut = deltaY < 0
       }
-      let speed = Math.min(Math.abs(deltaY), 5)
-      speed = speed * 2
+      let speed = Math.max(Math.abs(deltaY), 1)
       this.updateZoomOrigin(event)
       if (shouldZoomIn) {
         this.$store.commit('triggerSpaceZoomIn', { speed })
