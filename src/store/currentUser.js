@@ -7,7 +7,7 @@ import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
 import dayjs from 'dayjs'
-import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), for legacy todesktop support
+import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), for legacy todestkop support
 
 const initialState = {
   id: nanoid(),

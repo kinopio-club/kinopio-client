@@ -507,6 +507,7 @@ export default {
 dialog.background-picker
   width 255px
   overflow auto
+  max-height calc(100vh - 120px) //- todesktop chromium fix
   max-height calc(100dvh - 120px)
   .title-row
     margin-left 0 !important
