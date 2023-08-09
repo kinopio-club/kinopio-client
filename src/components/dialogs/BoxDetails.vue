@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="styles" :data-box-id="box.id")
   section
-    .row
+    .row.info-row
       //- color
       .button-wrap
         button.change-color(:disabled="!canEditBox" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
@@ -13,16 +13,17 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           @selectedColor="updateColor"
         )
       //- name
-      input.name(
-        :disabled="!canEditBox"
-        placeholder="Box Name"
-        v-model="name"
-        ref="name"
-        @blur="blur"
-        @keydown.enter.stop.prevent="closeAllDialogs"
-        maxLength="600"
-        :class="{'is-dark': colorisDark}"
-      )
+      .textarea-wrap
+        textarea.name(
+          :disabled="!canEditBox"
+          ref="name"
+          rows="1"
+          placeholder="Box Name"
+          v-model="name"
+          @keydown.enter.stop.prevent="closeAllDialogs"
+          maxLength="600"
+          :class="{'is-dark': colorisDark}"
+        )
     CardBoxActions(:visible="canEditBox" :boxes="[box]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="canEditBox")
       //- remove
@@ -81,6 +82,7 @@ export default {
       },
       set (name) {
         this.update({ name })
+        this.textareaSizes()
       }
     },
     canEditBox () { return this.$store.getters['currentUser/canEditBox'](this.box) },
@@ -162,6 +164,15 @@ export default {
         this.focusName()
         this.selectName()
       })
+    },
+    textareaSizes () {
+      const element = this.$refs.dialog
+      let textarea = element.querySelector('textarea')
+      let modifier = 0
+      if (this.canEditBox) {
+        modifier = 1
+      }
+      textarea.style.height = textarea.scrollHeight + modifier + 'px'
     }
   },
   watch: {
@@ -174,6 +185,7 @@ export default {
           this.closeDialogs()
           this.broadcastShowBoxDetails()
           this.scrollIntoViewAndFocus()
+          this.textareaSizes()
         // close
         } else {
           this.$store.dispatch('history/resume')
@@ -192,8 +204,13 @@ export default {
 <style lang="stylus">
 .box-details
   transform-origin top left
-  input.name
+  textarea.name
     margin-left 6px
+    margin-top 2px
+    margin-bottom 0
+    width calc(100% - 6px)
     &.is-dark
       color var(--primary-background)
+  .info-row
+    align-items flex-start
 </style>
