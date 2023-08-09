@@ -12,7 +12,7 @@ template(v-if="isVisibleInViewport")
       :data-type-id="connectionTypeId"
       :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
       :key="id"
-      :d="path"
+      :d="connectionPath"
       @mousedown.left="startDraggingConnection"
       @touchstart="startDraggingConnection"
       @mouseup.left="showConnectionDetails"
@@ -32,7 +32,7 @@ template(v-if="isVisibleInViewport")
       stop(offset="90%" :stop-color="typeColor")
 
   circle(v-if="directionIsVisible && !isUpdatingPath && isVisibleInViewport" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}")
-    animateMotion(dur="3s" repeatCount="indefinite" :path="path" rotate="auto")
+    animateMotion(dur="3s" repeatCount="indefinite" :path="connectionPath" rotate="auto")
 </template>
 
 <script>
@@ -57,8 +57,6 @@ export default {
         }
       } else if (mutation.type === 'currentCards/move') {
         this.cancelAnimation()
-      } else if (mutation.type === 'currentConnections/remove') {
-        this.controlCurve = undefined
       } else if (mutation.type === 'triggerConnectionDetailsIsVisible') {
         if (mutation.payload.connectionId === this.id) {
           const isFromStore = true
@@ -69,7 +67,6 @@ export default {
   },
   data () {
     return {
-      controlCurve: undefined,
       curvedPath: '',
       frameCount: 0
     }
@@ -147,15 +144,7 @@ export default {
     connectionPath () { return this.connection.path },
     remoteCardsIsDragging () { return Boolean(this.remoteCardsDragging.length) },
     path () {
-      let path
-      if (this.controlCurve) {
-        const { controlPoint, x, y } = this.controlCurve
-        path = this.curvedPath || this.connection.path
-        path = this.updatedPath(path, controlPoint, x, y)
-      } else {
-        path = this.connection.path
-      }
-      return path
+      return this.connection.path
     },
     typeColor () {
       if (!this.connectionType) { return }
@@ -377,8 +366,10 @@ export default {
       return { x, y }
     },
     animationFrame () {
+      if (this.frameCount === 0) {
+        this.curvedPath = this.connection.path
+      }
       this.frameCount++
-      this.curvedPath = this.path
       const curvePattern = new RegExp(/(q[-0-9]*),([-0-9]*)\w+/)
       // "q90,40" from "m747,148 q90,40 -85,75"
       // "q-90,-40" from "m747,148 q-90,-40 -85,75" (negative)
@@ -392,13 +383,10 @@ export default {
         x: parseInt(points[0]),
         y: parseInt(points[1])
       })
-      this.controlCurve = {
-        controlPoint: curveMatch[0], // "q90, 40"
-        index: curveMatch.index,
-        length: curveMatch[0].length,
-        x,
-        y
-      }
+      const controlPoint = curveMatch[0]
+      this.curvedPath = this.updatedPath(this.curvedPath, controlPoint, x, y)
+      const element = this.$refs.connection
+      element.setAttribute('d', this.curvedPath)
       if (this.shouldAnimate) {
         window.requestAnimationFrame(this.animationFrame)
       }
@@ -406,7 +394,6 @@ export default {
     cancelAnimation () {
       window.cancelAnimationFrame(animationTimer)
       animationTimer = undefined
-      this.controlCurve = undefined
       this.curvedPath = undefined
       this.frameCount = 0
     },
