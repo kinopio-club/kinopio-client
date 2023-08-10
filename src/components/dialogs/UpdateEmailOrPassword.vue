@@ -105,9 +105,6 @@ export default {
       this.error.unknownServerError = false
       this.error.accountAlreadyExists = false
       this.success = false
-    },
-    updatePassword () {
-      this.$store.commit('passwordResetIsVisible', true)
     }
   },
   watch: {
