@@ -218,14 +218,18 @@ export default {
       this.helpIsVisible = !isVisible
     },
     async updateNewStuff () {
-      let data = await this.$store.dispatch('api/getNewStuff')
-      if (!data) { return }
-      data = data.items.slice(0, 20)
-      data = data.map(item => {
-        item.summary = utils.convertHTMLEntities(item.summary)
-        return item
-      })
-      this.newStuff = data
+      try {
+        let data = await this.$store.dispatch('api/getNewStuff')
+        if (!data) { return }
+        data = data.items.slice(0, 20)
+        data = data.map(item => {
+          item.summary = utils.convertHTMLEntities(item.summary)
+          return item
+        })
+        this.newStuff = data
+      } catch (error) {
+        console.error('🚒 updateNewStuff', error)
+      }
     },
     checkNewStuffIsUpdated (latestUpdateId) {
       if (this.isAddPage) { return }
@@ -235,6 +239,7 @@ export default {
     },
     async checkIfKinopioUpdatesAreAvailable () {
       await this.updateNewStuff()
+      if (!this.newStuff.length) { return }
       let newest = this.newStuff[0]
       newest = dayjs(newest.date_published)
       const timeSinceNewest = initTime.diff(newest, 'minute')
