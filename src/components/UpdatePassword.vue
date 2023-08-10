@@ -79,7 +79,7 @@ const updatePassword = async (event) => {
   if (!isPasswordTooShort(password)) { return }
   if (!isPasswordsMatch(password, confirmPassword)) { return }
   state.loading.updatePassword = true
-  const apiKey = store.state.updatePasswordApiKey
+  const apiKey = store.state.updatePasswordApiKey || store.state.currentUser.apiKey
   const response = await store.dispatch('api/updatePassword', { password, apiKey })
   const result = await response.json()
   if (isSuccess(response)) {
