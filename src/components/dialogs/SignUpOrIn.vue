@@ -49,11 +49,11 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
     button(@click.left="toggleResetVisible" :class="{active : resetVisible}")
       span Forgot Password?
     div(v-show="resetVisible")
-      form.reset-form(@submit.prevent="updatePassword")
-        input(type="email" placeholder="Email" ref="updatePasswordEmail" required @input="clearErrors")
-        button(type="submit" :class="{active : loading.updatePassword || resetSuccess}")
+      form.reset-form(@submit.prevent="resetPassword")
+        input(type="email" placeholder="Email" ref="resetPasswordEmail" required @input="clearErrors")
+        button(type="submit" :class="{active : loading.resetPassword || resetSuccess}")
           span Reset Password
-          Loader(:visible="loading.updatePassword")
+          Loader(:visible="loading.resetPassword")
       .badge.success(v-if="resetSuccess") Password Reset Email Sent
       .badge.danger(v-if="error.resetUserEmailNotFound") A user with that that email address wasn't found. Try another?
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
@@ -98,7 +98,7 @@ export default {
       },
       loading: {
         signUpOrIn: false,
-        updatePassword: false
+        resetPassword: false
       },
       resetSuccess: false
     }
@@ -145,7 +145,7 @@ export default {
 
     async handleErrors (response) {
       this.loading.signUpOrIn = false
-      this.loading.updatePassword = false
+      this.loading.resetPassword = false
       this.error.signInCredentials = false
       this.error.accountAlreadyExists = false
       this.error.tooManyAttempts = false
@@ -348,12 +348,12 @@ export default {
       this.$store.commit('addNotification', { message: 'Signed In', type: 'success' })
     },
 
-    async updatePassword (event) {
-      if (this.loading.updatePassword || this.resetSuccess) { return }
+    async resetPassword (event) {
+      if (this.loading.resetPassword || this.resetSuccess) { return }
       const email = event.target[0].value.toLowerCase()
-      this.loading.updatePassword = true
+      this.loading.resetPassword = true
       const response = await this.$store.dispatch('api/resetPassword', email)
-      this.loading.updatePassword = false
+      this.loading.resetPassword = false
       if (response.status === 404) {
         this.error.resetUserEmailNotFound = true
       } else if (response.status === 429) {
