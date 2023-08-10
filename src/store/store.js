@@ -67,7 +67,7 @@ const store = createStore({
     previousResultItem: {},
 
     // reset password
-    resetPasswordApiKey: '',
+    updatePasswordApiKey: '',
     passwordResetIsVisible: false,
 
     // services
@@ -480,9 +480,9 @@ const store = createStore({
       state.searchResultsCards = []
       state.previousResultItem = {}
     },
-    resetPasswordApiKey: (state, apiKey) => {
+    updatePasswordApiKey: (state, apiKey) => {
       utils.typeCheck({ value: apiKey, type: 'string' })
-      state.resetPasswordApiKey = apiKey
+      state.updatePasswordApiKey = apiKey
     },
     passwordResetIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

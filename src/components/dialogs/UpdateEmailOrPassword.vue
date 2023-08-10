@@ -1,38 +1,37 @@
-
 <template lang="pug">
 dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
-  section
-    p Update Email
-  section
-    template(v-if="!currentUserIsSignedIn")
+  template(v-if="!currentUserIsSignedIn")
+    section
       p After you sign up you'll be able to update your email address here
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-    template(v-else)
+  template(v-else)
+    section
+      .row
+        p Update Email
       form(@submit.prevent="updateEmail")
         input(type="text" placeholder="Email" required autocomplete="email" v-model="email")
         button(type="submit" :class="{active : loading}")
-          span Update
+          span Update Email
           Loader(:visible="loading")
-    //- status
-    .row(v-if="success")
-      span.badge.success Email Changed
-    .row(v-if="success")
-      span.badge.success A confirmation email has been sent to both your previous and new addresses
-    .row(v-if="error.unknownServerError")
-      span.badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-    .row(v-else-if="error.accountAlreadyExists")
-      span.badge.danger An account with this email already exists
-
+      p.badge.success(v-if="success.email")
+        span Email Updated. A confirmation email has been sent to both your new and previous addresses
+      p.badge.danger(v-if="error.unknownServerError.email")
+        span (シ_ _)シ Something went wrong, Please try again or contact support
+      p.badge.danger(v-else-if="error.accountAlreadyExists")
+        span An account with this email already exists
+    UpdatePassword
 </template>
 
 <script>
 import utils from '@/utils.js'
+import UpdatePassword from '@/components/UpdatePassword.vue'
 import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'UpdateEmail',
   components: {
-    Loader
+    Loader,
+    UpdatePassword
   },
   props: {
     visible: Boolean
@@ -106,6 +105,9 @@ export default {
       this.error.unknownServerError = false
       this.error.accountAlreadyExists = false
       this.success = false
+    },
+    updatePassword () {
+      this.$store.commit('passwordResetIsVisible', true)
     }
   },
   watch: {
@@ -122,8 +124,8 @@ export default {
 
 <style lang="stylus">
 .update-email
-  max-height calc(100vh - 190px)
   overflow auto
-  .row
-    margin-top 10px
+  @media(max-height 650px)
+    top -200px !important
+
 </style>

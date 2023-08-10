@@ -40,9 +40,9 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
         UserBilling(:visible="userBillingIsVisible")
     .row
       .button-wrap
-        button(@click.left.stop="toggleUpdateEmailIsVisible" :class="{active: updateEmailIsVisible}")
-          span Update Email
-        UpdateEmail(:visible="updateEmailIsVisible")
+        button(@click.left.stop="toggleUpdateEmailOrPasswordIsVisible" :class="{active: updateEmailOrPasswordIsVisible}")
+          span Update Email Or Password
+        UpdateEmailOrPassword(:visible="updateEmailOrPasswordIsVisible")
 
   //- Delete Account
   section.delete-account
@@ -76,7 +76,7 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
 
 <script>
 import UserBilling from '@/components/dialogs/UserBilling.vue'
-import UpdateEmail from '@/components/dialogs/UpdateEmail.vue'
+import UpdateEmailOrPassword from '@/components/dialogs/UpdateEmailOrPassword.vue'
 import ApiKey from '@/components/dialogs/ApiKey.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
@@ -90,7 +90,7 @@ export default {
   components: {
     Loader,
     UserBilling,
-    UpdateEmail,
+    UpdateEmailOrPassword,
     ApiKey,
     NotificationSettings,
     ControlsSettings,
@@ -107,7 +107,7 @@ export default {
   data () {
     return {
       userBillingIsVisible: false,
-      updateEmailIsVisible: false,
+      updateEmailOrPasswordIsVisible: false,
       apiKeyIsVisible: false,
       deleteAllConfirmationVisible: false,
       loading: {
@@ -126,7 +126,7 @@ export default {
   methods: {
     closeDialogs () {
       this.userBillingIsVisible = false
-      this.updateEmailIsVisible = false
+      this.updateEmailOrPasswordIsVisible = false
       this.apiKeyIsVisible = false
       this.notificationSettingsIsVisible = false
       this.controlsSettingsIsVisible = false
@@ -161,11 +161,11 @@ export default {
       this.deleteAllConfirmationVisible = false
       this.userBillingIsVisible = !isVisible
     },
-    toggleUpdateEmailIsVisible () {
-      const isVisible = this.updateEmailIsVisible
+    toggleUpdateEmailOrPasswordIsVisible () {
+      const isVisible = this.updateEmailOrPasswordIsVisible
       this.closeDialogs()
       this.deleteAllConfirmationVisible = false
-      this.updateEmailIsVisible = !isVisible
+      this.updateEmailOrPasswordIsVisible = !isVisible
     },
     toggleNotificationSettingsIsVisible () {
       const isVisible = this.notificationSettingsIsVisible

@@ -110,7 +110,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           SpaceUsers
           ControlsSettings(:visible="controlsSettingsIsVisible")
           UserSettings
-          ResetPassword
+          UpdatePassword
           //- Share
           .button-wrap
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
@@ -160,7 +160,7 @@ import Offline from '@/components/dialogs/Offline.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
 import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
-import ResetPassword from '@/components/dialogs/ResetPassword.vue'
+import UpdatePassword from '@/components/dialogs/UpdatePassword.vue'
 import Share from '@/components/dialogs/Share.vue'
 import UserNotifications from '@/components/dialogs/UserNotifications.vue'
 import Loader from '@/components/Loader.vue'
@@ -208,7 +208,7 @@ export default {
     Offline,
     User,
     SignUpOrIn,
-    ResetPassword,
+    UpdatePassword,
     Share,
     UserNotifications,
     Loader,

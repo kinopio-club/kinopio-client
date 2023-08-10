@@ -54,7 +54,7 @@ const router = createRouter({
         const urlParams = new URLSearchParams(window.location.search)
         const apiKey = urlParams.get('apiKey')
         if (apiKey) {
-          store.commit('resetPasswordApiKey', apiKey)
+          store.commit('updatePasswordApiKey', apiKey)
           store.commit('passwordResetIsVisible', true)
         }
         next()
