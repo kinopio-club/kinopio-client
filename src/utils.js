@@ -487,7 +487,7 @@ export default {
   isAndroid () {
     return navigator.platform && (/Android/.test(navigator.platform) || /Android/.test(navigator.userAgent))
   },
-  isApple () {
+  isSafari () {
     return /Safari/.test(navigator.userAgent)
   },
   isMobile () {

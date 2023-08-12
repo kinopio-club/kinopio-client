@@ -232,7 +232,7 @@ export default {
     currentUser () { return this.$store.state.currentUser },
     background: {
       get () {
-        const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/default-background-2x.png'
+        const defaultBackground = 'https://bk.kinopio.club/default-background-2x.png'
         return this.currentSpace.background || defaultBackground
       },
       set (url) {
@@ -507,6 +507,7 @@ export default {
 dialog.background-picker
   width 255px
   overflow auto
+  max-height calc(100vh - 120px) //- todesktop chromium fix
   max-height calc(100dvh - 120px)
   .title-row
     margin-left 0 !important

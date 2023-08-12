@@ -9,7 +9,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
 
   section
     .row
-      p For building ideas and solving problems
+      p Thinking canvas for new ideas and hard problems
     .row
       .button-wrap
         button(@click.stop="toggleHelpIsVisible" :class="{active: helpIsVisible}")
@@ -57,28 +57,72 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             span Forum{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
     .row
+      AboutMe
+
+    .row
       .button-wrap
-        button(@click.left.stop="triggerDonateIsVisible")
-          img.icon(src="@/assets/heart-empty.svg")
-          span Donate
-    section.subsection
+        button(@click.left.stop="toggleMoreLinksIsVisible" :class="{active: moreLinksIsVisible}")
+          span More Links
+
+    section.subsection(v-if="moreLinksIsVisible")
       .row
+        //- are.na
         .button-wrap
-          a(href="https://twitter.com/kinopioClub")
+          a(href="https://www.are.na/kinopio/")
             button
-              span 𝕏{{' '}}
+              span Are.na{{' '}}
               img.icon.visit(src="@/assets/visit.svg")
-        //- .button-wrap
-        //-   a(href="https://www.instagram.com/kinopioclub/")
-        //-     button
-        //-       span IG{{' '}}
-        //-       img.icon.visit(src="@/assets/visit.svg")
+        //- blog
+        .button-wrap
+          a(href="https://blog.kinopio.club/")
+            button
+              span Blog{{' '}}
+              img.icon.visit(src="@/assets/visit.svg")
+      .row
+        //- futureland
+        .button-wrap
+          a(href="https://futureland.tv/@pirijan/kinopio-development-diary")
+            button
+              span Futureland{{' '}}
+              img.icon.visit(src="@/assets/visit.svg")
+        //- IG
+        .button-wrap
+          a(href="https://www.instagram.com/kinopioclub/")
+            button
+              span IG{{' '}}
+              img.icon.visit(src="@/assets/visit.svg")
+      .row
+        //- mastodon
         .button-wrap
           a(href="https://pkm.social/@kinopio")
             button
               span Mastodon{{' '}}
               img.icon.visit(src="@/assets/visit.svg")
-
+        //- posts.cv
+        .button-wrap
+          a(href="https://posts.cv/pketh")
+            button
+              span Posts.cv{{' '}}
+              img.icon.visit(src="@/assets/visit.svg")
+      .row
+        //- tiktok
+        //- .button-wrap
+        //-   a(href="https://www.tiktok.com/@kinopioclub/")
+        //-     button
+        //-       span TikTok{{' '}}
+        //-       img.icon.visit(src="@/assets/visit.svg")
+        //- youtube
+        .button-wrap
+          a(href="https://www.youtube.com/@kinopio-club/")
+            button
+              span Youtube{{' '}}
+              img.icon.visit(src="@/assets/visit.svg")
+        //- 𝕏
+        .button-wrap
+          a(href="https://x.com/kinopioClub")
+            button
+              span 𝕏{{' '}}
+              img.icon.visit(src="@/assets/visit.svg")
 </template>
 
 <script>
@@ -86,6 +130,7 @@ import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import Help from '@/components/dialogs/Help.vue'
 import utils from '@/utils.js'
+import AboutMe from '@/components/AboutMe.vue'
 
 import dayjs from 'dayjs'
 
@@ -97,7 +142,8 @@ export default {
   components: {
     WhatsNew,
     AppsAndExtensions,
-    Help
+    Help,
+    AboutMe
   },
   props: {
     visible: Boolean
@@ -121,7 +167,8 @@ export default {
       isIPhone: false,
       isAndroid: false,
       isMobile: false,
-      dialogHeight: null
+      dialogHeight: null,
+      moreLinksIsVisible: false
     }
   },
   async mounted () {
@@ -171,14 +218,18 @@ export default {
       this.helpIsVisible = !isVisible
     },
     async updateNewStuff () {
-      let data = await this.$store.dispatch('api/getNewStuff')
-      if (!data) { return }
-      data = data.items.slice(0, 20)
-      data = data.map(item => {
-        item.summary = utils.convertHTMLEntities(item.summary)
-        return item
-      })
-      this.newStuff = data
+      try {
+        let data = await this.$store.dispatch('api/getNewStuff')
+        if (!data) { return }
+        data = data.items.slice(0, 20)
+        data = data.map(item => {
+          item.summary = utils.convertHTMLEntities(item.summary)
+          return item
+        })
+        this.newStuff = data
+      } catch (error) {
+        console.error('🚒 updateNewStuff', error)
+      }
     },
     checkNewStuffIsUpdated (latestUpdateId) {
       if (this.isAddPage) { return }
@@ -188,6 +239,7 @@ export default {
     },
     async checkIfKinopioUpdatesAreAvailable () {
       await this.updateNewStuff()
+      if (!this.newStuff.length) { return }
       let newest = this.newStuff[0]
       newest = dayjs(newest.date_published)
       const timeSinceNewest = initTime.diff(newest, 'minute')
@@ -207,9 +259,8 @@ export default {
         this.dialogHeight = utils.elementHeight(element)
       })
     },
-    triggerDonateIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerDonateIsVisible')
+    toggleMoreLinksIsVisible () {
+      this.moreLinksIsVisible = !this.moreLinksIsVisible
     }
   },
   watch: {

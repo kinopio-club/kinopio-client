@@ -8,7 +8,6 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildD
         button(:class="{active: period === 'month'}" @click.left="updatePeriod('month')") ${{monthlyPrice.amount}}/month
         button(:class="{active: period === 'year'}" @click.left="updatePeriod('year')") ${{yearlyPrice.amount}}/year
           .badge.label-badge -{{yearlyDiscount}}%
-    DiscountRow
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
@@ -26,7 +25,6 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildD
 <script>
 import UpgradeUserStripe from '@/components/UpgradeUserStripe.vue'
 import UpgradeUserApple from '@/components/UpgradeUserApple.vue'
-import DiscountRow from '@/components/DiscountRow.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -36,8 +34,7 @@ export default {
   components: {
     Loader,
     UpgradeUserStripe,
-    UpgradeUserApple,
-    DiscountRow
+    UpgradeUserApple
   },
   props: {
     visible: Boolean
@@ -116,7 +113,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.upgrade-user
+dialog.upgrade-user
   overflow auto
   max-height calc(100vh - 210px)
   left initial
@@ -136,5 +133,7 @@ export default {
     margin 0
   p
     color var(--primary)
+  @media(max-height 650px)
+    top -60px !important
 
 </style>

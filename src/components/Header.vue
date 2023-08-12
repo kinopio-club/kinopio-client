@@ -108,11 +108,9 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
       .controls(v-if="isSpace")
         .top-controls
           SpaceUsers
-          UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
-          Pricing(:visible="pricingIsVisible")
           ControlsSettings(:visible="controlsSettingsIsVisible")
           UserSettings
-          ResetPassword
+          UpdatePassword
           //- Share
           .button-wrap
             button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
@@ -138,14 +136,16 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
               span Sign Up or In
               Loader(:visible="loadingSignUpOrIn")
             SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
+          //- Pricing
+          .button-wrap(v-if="!userIsUpgraded")
+            button(@click.left.stop="togglePricingIsVisible" :class="{active : pricingIsVisible}")
+              span Pricing
+            Pricing(:visible="pricingIsVisible")
           //- Upgrade
           .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
             button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
               span Upgrade
-          //- Pricing
-          .button-wrap(v-if="!currentUserIsSignedIn")
-            button(@click.left.stop="togglePricingIsVisible" :class="{active : pricingIsVisible}")
-              span Pricing
+            UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
 
   Toolbar(:visible="isSpace")
   SelectAllBelow
@@ -160,7 +160,7 @@ import Offline from '@/components/dialogs/Offline.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
 import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
-import ResetPassword from '@/components/dialogs/ResetPassword.vue'
+import UpdatePassword from '@/components/dialogs/UpdatePassword.vue'
 import Share from '@/components/dialogs/Share.vue'
 import UserNotifications from '@/components/dialogs/UserNotifications.vue'
 import Loader from '@/components/Loader.vue'
@@ -208,7 +208,7 @@ export default {
     Offline,
     User,
     SignUpOrIn,
-    ResetPassword,
+    UpdatePassword,
     Share,
     UserNotifications,
     Loader,

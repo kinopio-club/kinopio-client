@@ -1,10 +1,10 @@
 <script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
+import { useStore } from 'vuex'
+
 import Loader from '@/components/Loader.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
-
-import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
-import { useStore } from 'vuex'
 const store = useStore()
 
 onMounted(() => {
@@ -21,7 +21,7 @@ const state = reactive({
   creditsEarned: 0,
   creditsUnused: 0,
   usersReferred: 0,
-  moreInfoIsVisible: false
+  detailsIsVisible: false
 })
 
 const updateCredits = async () => {
@@ -43,9 +43,9 @@ const triggerEarnCreditsIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerEarnCreditsIsVisible')
 }
-const toggleMoreInfoIsVisible = () => {
-  state.moreInfoIsVisible = !state.moreInfoIsVisible
-  console.log(state.moreInfoIsVisible)
+const toggleDetailsIsVisible = () => {
+  state.detailsIsVisible = !state.detailsIsVisible
+  console.log(state.detailsIsVisible)
 }
 
 </script>
@@ -54,14 +54,14 @@ const toggleMoreInfoIsVisible = () => {
 section.user-credits
   .row.title-row-flex
     p.section-title Your Credits
-    button.small-button(@click="toggleMoreInfoIsVisible" :class="{active: state.moreInfoIsVisible}")
-      span More Info
+    button.small-button(@click="toggleDetailsIsVisible" :class="{active: state.detailsIsVisible}")
+      span Details
   Loader(:visible="state.isLoading")
 
   template(v-if="!state.isLoading")
-    p.badge.success(v-if="!state.moreInfoIsVisible")
+    p.badge.success(v-if="!state.detailsIsVisible")
       span ${{state.creditsUnused}} credit remaining for future payments
-    section.subsection.table-subsection(v-if="state.moreInfoIsVisible")
+    section.subsection.table-subsection(v-if="state.detailsIsVisible")
       section
         p {{state.usersReferred}} people referred so far
       section

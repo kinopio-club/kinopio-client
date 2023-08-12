@@ -29,11 +29,11 @@ dialog.narrow.multiple-selected-actions(
 
       //- More Options
       .button-wrap
-        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}")
+        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedItemActions" :class="{active : shouldShowMultipleSelectedItemActions}")
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
-    CardBoxActions(:visible="shouldShowItemActions && (cardsIsSelected || boxesIsSelected)" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }")
-    ConnectionActions(:visible="shouldShowItemActions && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll")
+    CardBoxActions(:visible="shouldShowMultipleSelectedItemActions && (cardsIsSelected || boxesIsSelected)" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }")
+    ConnectionActions(:visible="shouldShowMultipleSelectedItemActions && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll")
 
   section
     template(v-if="oneCardOrMultipleBoxesIsSelected")
@@ -112,7 +112,7 @@ export default {
       return isThemeDark && userColorIsLight
     },
     maxCardLength () { return consts.maxCardLength },
-    shouldShowItemActions () { return this.$store.state.currentUser.shouldShowItemActions },
+    shouldShowMultipleSelectedItemActions () { return this.$store.state.currentUser.shouldShowMultipleSelectedItemActions },
     visible () {
       const isSelectedItems = this.multipleConnectionsSelectedIds.length || this.multipleCardsSelectedIds.length || this.multipleBoxesSelectedIds.length
       return this.$store.state.multipleSelectedActionsIsVisible && isSelectedItems
@@ -399,10 +399,10 @@ export default {
       this.closeDialogs()
       this.shareCardIsVisible = !isVisible
     },
-    toggleShouldShowItemActions () {
+    toggleShouldShowMultipleSelectedItemActions () {
       this.closeDialogs()
-      const isVisible = !this.shouldShowItemActions
-      this.$store.dispatch('currentUser/shouldShowItemActions', isVisible)
+      const isVisible = !this.shouldShowMultipleSelectedItemActions
+      this.$store.dispatch('currentUser/shouldShowMultipleSelectedItemActions', isVisible)
       this.$nextTick(() => {
         this.scrollIntoView()
       })

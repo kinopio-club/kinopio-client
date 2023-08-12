@@ -2,30 +2,27 @@
 // import utils from '@/utils.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
-// https://vuex.vuejs.org/guide/composition-api.html#accessing-state-and-getters
 import { useStore } from 'vuex'
 const store = useStore()
-
-defineProps({
-  showReferButton: Boolean
-})
 
 const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCount || 0)
 const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
 
-const togglePricingIsVisible = () => {
-  const value = !store.state.pricingIsVisible
+const triggerUpgradeUserIsVisible = () => {
   store.dispatch('closeAllDialogs')
-  store.commit('pricingIsVisible', value)
+  store.commit('triggerUpgradeUserIsVisible')
 }
+
 </script>
 
 <template lang="pug">
-.cards-created-progress
+section.subsection.cards-created-progress
   .info
     p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
-    button.small-button(@click="togglePricingIsVisible") Pricing
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
+  .button-wrap
+    button(@click="triggerUpgradeUserIsVisible")
+      span Upgrade for Unlimited
 
 </template>
 
@@ -36,6 +33,6 @@ const togglePricingIsVisible = () => {
     display flex
     justify-content space-between
     align-items center
-    button
-      margin-top 0
+  .button-wrap
+    margin-top 10px
 </style>
