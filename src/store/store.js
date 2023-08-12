@@ -66,8 +66,8 @@ const store = createStore({
     searchResultsCards: [],
     previousResultItem: {},
 
-    // reset password
-    resetPasswordApiKey: '',
+    // update password
+    updatePasswordApiKey: '',
     passwordResetIsVisible: false,
 
     // services
@@ -480,9 +480,9 @@ const store = createStore({
       state.searchResultsCards = []
       state.previousResultItem = {}
     },
-    resetPasswordApiKey: (state, apiKey) => {
+    updatePasswordApiKey: (state, apiKey) => {
       utils.typeCheck({ value: apiKey, type: 'string' })
-      state.resetPasswordApiKey = apiKey
+      state.updatePasswordApiKey = apiKey
     },
     passwordResetIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1515,6 +1515,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteCardDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteBoxDetailsVisible' })
+      context.commit('passwordResetIsVisible', false)
     },
     toggleCardSelected: (context, cardId) => {
       const previousMultipleCardsSelectedIds = context.state.previousMultipleCardsSelectedIds

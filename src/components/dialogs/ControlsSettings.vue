@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.controls-settings.is-pinnable(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="controlsSettingsIsPinned" :class="{'is-pinned': controlsSettingsIsPinned}")
+dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="controlsSettingsIsPinned" :class="{'is-pinned': controlsSettingsIsPinned}")
   section.title-row
     p Controls
     button.pin-button.small-button(:class="{active: controlsSettingsIsPinned}" @click.left="toggleDialogIsPinned" title="Pin dialog")
@@ -161,7 +161,6 @@ export default {
 <style lang="stylus">
 .controls-settings
   overflow auto
-  width 222px
   &.is-pinned
     left initial
     right 8px
