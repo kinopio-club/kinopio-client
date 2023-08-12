@@ -70,7 +70,9 @@ const initialState = {
   outsideSpaceBackgroundIsStatic: false,
   shouldDisableHapticFeedback: false,
   appleAppAccountToken: null,
-  appleSubscriptionIsActive: null
+  appleSubscriptionIsActive: null,
+  personalSpaceId: null,
+  personalSpaceName: null
 }
 
 export default {
@@ -382,6 +384,14 @@ export default {
     },
     initNewUser: (state) => {
       state.appleAppAccountToken = uuidv4()
+    },
+    personalSpaceId: (state, value) => {
+      state.personalSpaceId = value
+      cache.updateUser('personalSpaceId', value)
+    },
+    personalSpaceName: (state, value) => {
+      state.personalSpaceName = value
+      cache.updateUser('personalSpaceName', value)
     }
   },
   actions: {

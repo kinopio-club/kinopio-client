@@ -411,7 +411,7 @@ label // used for checkbox buttons
   color var(--primary)
   .down-arrow
     padding-left 4px
-    vertical-align 1px
+    vertical-align 2px
   &.borderless
     border-color transparent
     background-color transparent

@@ -31,6 +31,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
         a(:href="websiteUrl" v-if="websiteUrl")
           button.inline-button
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
+      PersonalSpace(:isCurrentUser="isCurrentUser" @closeDialogs="closeDialogs" @getUserSpaces="getUserSpaces" :loadingUserspaces="loadingUserspaces" :user="user" :userSpaces="userSpaces")
       UserBadges(:user="user")
 
     section(v-if="!isAddPage")
@@ -80,6 +81,7 @@ import Loader from '@/components/Loader.vue'
 import UserBadges from '@/components/UserBadges.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
+import PersonalSpace from '@/components/PersonalSpace.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import postMessage from '@/postMessage.js'
@@ -97,7 +99,8 @@ export default {
     UserBadges,
     SpacePicker,
     UserLabelInline,
-    CardsCreatedProgress
+    CardsCreatedProgress,
+    PersonalSpace
   },
   created () {
     this.$store.subscribe((mutation, state) => {
