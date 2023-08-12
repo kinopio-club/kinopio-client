@@ -17,7 +17,7 @@ const state = reactive({
   loading: {
     updatePassword: false
   },
-  resetSuccess: false
+  success: false
 })
 
 const clearErrors = () => {
@@ -83,11 +83,11 @@ const updatePassword = async (event) => {
   const response = await store.dispatch('api/updatePassword', { password, apiKey })
   const result = await response.json()
   if (isSuccess(response)) {
-    store.commit('passwordResetIsVisible', false)
-    store.commit('addNotification', { message: 'Your password has been changed. You can now use it to Sign In' })
+    state.success = true
   } else {
     await handleErrors(result)
   }
+  state.loading.updatePassword = false
 }
 
 </script>
@@ -97,8 +97,8 @@ section
   .row
     p Change Password
   form(@submit.prevent="updatePassword")
-    input(type="state.password" placeholder="New Password" required @input="clearErrors" v-model="state.password")
-    input(type="state.password" placeholder="Confirm New Password" required @input="clearErrors")
+    input(type="password" placeholder="New Password" required @input="clearErrors" v-model="state.password")
+    input(type="password" placeholder="Confirm New Password" required @input="clearErrors")
     .row(v-if="state.error.passwordMatch")
       .badge.danger Passwords can't match
     .row(v-if="state.error.passwordTooShort")
@@ -110,6 +110,8 @@ section
     button(type="submit" :class="{active : state.loading.updatePassword}")
       span Update Password
       Loader(:visible="state.loading.updatePassword")
+    p.row(v-if="state.success")
+      .badge.success Your password has been changed. You can now use it to Sign In
 </template>
 
 <style lang="stylus">

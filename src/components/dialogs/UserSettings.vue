@@ -201,7 +201,7 @@ export default {
 <style lang="stylus">
 dialog.user-settings
   left initial
-  right 8px
+  right 16px
   .billing-cancel
     margin-top 2px
     padding-bottom 2px

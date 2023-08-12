@@ -66,7 +66,7 @@ const store = createStore({
     searchResultsCards: [],
     previousResultItem: {},
 
-    // reset password
+    // update password
     updatePasswordApiKey: '',
     passwordResetIsVisible: false,
 
@@ -1513,8 +1513,9 @@ const store = createStore({
       const user = utils.clone(context.rootState.currentUser)
       context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'updateUserPresence' }, { root: true })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteCardDetailsVisible' })
-      context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
+      context.commit('broadcast/update', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteBoxDetailsVisible' })
+      context.commit('passwordResetIsVisible', false)
     },
     toggleCardSelected: (context, cardId) => {
       const previousMultipleCardsSelectedIds = context.state.previousMultipleCardsSelectedIds
