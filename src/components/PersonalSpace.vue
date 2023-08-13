@@ -13,6 +13,14 @@ const props = defineProps({
 })
 const emit = defineEmits(['closeDialogs', 'getUserSpaces'])
 
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerCloseChildDialogs') {
+      closeChildDialogs()
+    }
+  })
+})
+
 const state = reactive({
   personalSpacePickerIsVisible: false,
   personalSpaceTipsIsVisible: false
@@ -26,13 +34,15 @@ const personalSpaceName = computed(() => {
     return 'Personal Space'
   }
 })
-
 const personalSpace = computed(() => {
   return { id: store.state.currentUser.personalSpaceId }
 })
 
 // toggle state
 
+const closeChildDialogs = () => {
+  state.personalSpacePickerIsVisible = false
+}
 const closeDialogs = () => {
   state.personalSpacePickerIsVisible = false
   emit('closeDialogs')
@@ -61,7 +71,7 @@ const updatePersonalSpace = (space) => {
   })
 }
 const removePersonalSpace = () => {
-  console.log('♥️')
+  closeDialogs()
   store.dispatch('currentUser/update', { personalSpaceId: null, personalSpaceName: null })
 }
 

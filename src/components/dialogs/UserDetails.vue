@@ -228,6 +228,7 @@ export default {
       this.colorPickerIsVisible = !isVisible
     },
     closeDialogs () {
+      this.$store.commit('triggerCloseChildDialogs')
       this.colorPickerIsVisible = false
       this.spacePickerIsVisible = false
     },
