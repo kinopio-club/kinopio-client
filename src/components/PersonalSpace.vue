@@ -27,6 +27,10 @@ const personalSpaceName = computed(() => {
   }
 })
 
+const personalSpace = computed(() => {
+  return { id: store.state.currentUser.personalSpaceId }
+})
+
 // toggle state
 
 const closeDialogs = () => {
@@ -70,7 +74,7 @@ template(v-if="props.isCurrentUser")
       button.personal-space-button(@click.left.stop="togglePersonalSpacePickerIsVisible" :class="{active: state.personalSpacePickerIsVisible}")
         span {{personalSpaceName}}
         img.down-arrow(src="@/assets/down-arrow.svg")
-      SpacePicker(:visible="state.personalSpacePickerIsVisible" :loading="props.loadingUserspaces" :user="props.user" :userSpaces="props.userSpaces" @selectSpace="updatePersonalSpace")
+      SpacePicker(:visible="state.personalSpacePickerIsVisible" :loading="props.loadingUserspaces" :user="props.user" :userSpaces="props.userSpaces" @selectSpace="updatePersonalSpace" :selectedSpace="personalSpace")
       button(@click.stop="removePersonalSpace")
         img.icon.cancel(src="@/assets/add.svg")
     button.small-button(title="tips" @click.stop="togglePersonalSpaceTipsIsVisible" :class="{active: state.personalSpaceTipsIsVisible}")
