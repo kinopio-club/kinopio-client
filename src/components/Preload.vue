@@ -68,6 +68,7 @@
     img.icon(src="@/assets/light.svg")
     img.icon(src="@/assets/line-break.svg")
     img.icon(src="@/assets/lock.svg")
+    img.icon(src="@/assets/mail.svg")
     img.icon(src="@/assets/magnifying-glass.svg")
     img.icon(src="@/assets/marker.svg")
     img.icon(src="@/assets/merge.svg")

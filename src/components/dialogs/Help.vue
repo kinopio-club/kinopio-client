@@ -16,6 +16,7 @@ dialog.help.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
     .row
       a(href="mailto:support@kinopio.club")
         button
+          img.icon(src="@/assets/mail.svg")
           span Email Support
     .row
       a(href="https://help.kinopio.club")
