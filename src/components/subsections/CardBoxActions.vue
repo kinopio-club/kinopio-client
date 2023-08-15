@@ -53,8 +53,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
     //- Counter
     .button-wrap(v-if="isCards")
       button(:class="{active: countersIsVisible}" :disabled="!canEditSpace" @click="toggleCounterIsVisible" title="Counter")
-        img.icon.add(src="@/assets/add.svg")
-        span.counter-label 1
+        span Vote
 
 </template>
 
@@ -447,6 +446,4 @@ export default {
     margin-bottom 10px
   .segmented-buttons
     display inline-flex
-  .counter-label
-    margin-left 3px
 </style>
