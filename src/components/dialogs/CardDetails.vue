@@ -468,6 +468,7 @@ export default {
     urls () {
       const name = utils.removeMarkdownCodeblocksFromString(this.name)
       const urls = utils.urlsFromString(name, true)
+      this.updateCardWidthForUrl(urls)
       return urls
     },
     validUrls () {
@@ -601,6 +602,11 @@ export default {
     shouldShowItemActions () { return this.currentUser.shouldShowItemActions }
   },
   methods: {
+    updateCardWidthForUrl (urls) {
+      if (!utils.arrayExists(urls)) { return }
+      if (this.card.resizeWidth) { return }
+      this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth: consts.defaultCardMaxWidth })
+    },
     broadcastShowCardDetails () {
       const updates = {
         cardId: this.card.id,
