@@ -45,15 +45,15 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
         p
           .badge.success Thanks for supporting Kinopio
         .row
-          button(v-if="!cancelSubscriptionVisible" @click.left="toggleCancelSubscriptionVisible")
+          button(v-if="!cancelSubscriptionIsVisible" @click.left="toggleCancelSubscriptionIsVisible")
             img.cancel.icon(src="@/assets/add.svg")
             span Downgrade to Free
-          span(v-if="cancelSubscriptionVisible")
+          span(v-if="cancelSubscriptionIsVisible")
             p
               span.badge.danger You won't be able to add new cards
               span unless you upgrade your account again. All of your cards and spaces will still be accessible.
             .segmented-buttons
-              button(@click.left="toggleCancelSubscriptionVisible")
+              button(@click.left="toggleCancelSubscriptionIsVisible")
                 span Cancel
               button.danger(@click.left="cancelSubscription")
                 img.icon(src="@/assets/remove.svg")
@@ -95,7 +95,7 @@ export default {
   },
   data () {
     return {
-      cancelSubscriptionVisible: false,
+      cancelSubscriptionIsVisible: false,
       isCancelled: false,
       dialogHeight: null,
       info: {
@@ -133,9 +133,9 @@ export default {
     }
   },
   methods: {
-    toggleCancelSubscriptionVisible () {
+    toggleCancelSubscriptionIsVisible () {
       if (this.loading.isCancelling) { return }
-      this.cancelSubscriptionVisible = !this.cancelSubscriptionVisible
+      this.cancelSubscriptionIsVisible = !this.cancelSubscriptionIsVisible
     },
     triggerUpgradeUserIsVisible () {
       this.$store.dispatch('closeAllDialogs')

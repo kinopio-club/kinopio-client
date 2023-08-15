@@ -75,7 +75,7 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
 </template>
 
 <script>
-import UserBilling from '@/components/dialogs/UserBilling.vue'
+import UserBilling from '@/components/dialogs/UserBilling2.vue'
 import UpdateEmailOrPassword from '@/components/dialogs/UpdateEmailOrPassword.vue'
 import ApiKey from '@/components/dialogs/ApiKey.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
