@@ -4,6 +4,7 @@
 
 <script>
 import postMessage from '@/postMessage.js'
+import utils from '@/utils.js'
 
 // adapted from https://gist.github.com/pketh/3f62b807db3835d564c1
 let colorCycleTimer
@@ -68,7 +69,7 @@ export default {
       b += bi
       this.backgroundColor = `rgb(${r}, ${g}, ${b})`
       if (this.outsideSpaceBackgroundIsStatic) {
-        this.backgroundColor = null
+        this.backgroundColor = utils.cssVariable('secondary-active-background')
       }
       this.updateMetaThemeColor(this.backgroundColor)
     },
