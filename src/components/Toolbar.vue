@@ -1,11 +1,12 @@
 <template lang="pug">
 nav.toolbar(v-if="visible")
-  //- Box
   .segmented-buttons.vertical
-    button(v-if="canEditSpace" :class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')" :title="boxBadgeLabel")
+    //- Box
+    button(v-if="canEditSpace" :class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')" title="Add Box (B)")
       img.icon.box-icon(src="@/assets/box.svg")
       .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsBox")
-        span {{boxBadgeLabel}}
+        span Add Box (B)
+    //- Line
     button(title="Add Line (L)")
       img.icon(src="@/assets/line.svg")
 </template>
@@ -18,19 +19,11 @@ export default {
   },
   computed: {
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
-    isTouchDevice () { return this.$store.state.isTouchDevice },
     currentUserToolbar () { return this.$store.state.currentUserToolbar },
     // currentUserToolbarIsCard () { return this.currentUserToolbar === 'card' },
     currentUserToolbarIsBox () {
       if (this.$store.state.currentUserIsResizingBox) { return }
       return this.currentUserToolbar === 'box'
-    },
-    boxBadgeLabel () {
-      let label = 'Draw Box'
-      if (!this.isTouchDevice) {
-        label = label + ' (B)'
-      }
-      return label
     }
   },
   methods: {
