@@ -204,7 +204,7 @@ const self = {
       // lines
       if (lines) {
         lines = lines.map(line => {
-          let previous = context.rootGetters['currentlines/byId'](line.id)
+          let previous = context.rootGetters['currentLines/byId'](line.id)
           if (useSnapshot) {
             previous = context.state.snapshots['lines'][line.id]
           }
