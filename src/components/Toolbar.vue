@@ -7,7 +7,7 @@ nav.toolbar(v-if="visible")
       .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsBox")
         span {{boxBadgeLabel}}
     button(title="Add Line (L)")
-      span L
+      img.icon(src="@/assets/line.svg")
 </template>
 
 <script>
