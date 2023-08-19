@@ -41,7 +41,7 @@ const toggleToolbar = (value) => {
 const addLine = () => {
   store.dispatch('closeAllDialogs')
   store.dispatch('clearMultipleSelected')
-  console.log('♥️♥️♥️♥️')
+  store.dispatch('currentLines/add', { y: 200 })
 }
 
 </script>

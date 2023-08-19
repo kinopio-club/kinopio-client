@@ -136,7 +136,8 @@ export default {
         y: line.y,
         color: line.color || color,
         fill: line.fill || 'filled', // empty, filled
-        name: line.name || `Line ${count}`
+        name: line.name || `Line ${count}`,
+        isHorizontal: line.isHorizontal || true
       }
       context.dispatch('history/add', { lines: [line] }, { root: true })
       context.commit('create', line)
