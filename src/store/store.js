@@ -12,6 +12,7 @@ import currentSpace from '@/store/currentSpace.js'
 import currentCards from '@/store/currentCards.js'
 import currentConnections from '@/store/currentConnections.js'
 import currentBoxes from '@/store/currentBoxes.js'
+import currentLines from '@/store/currentLines.js'
 import upload from '@/store/upload.js'
 import userNotifications from '@/store/userNotifications.js'
 // store plugins
@@ -1753,6 +1754,7 @@ const store = createStore({
     currentCards,
     currentConnections,
     currentBoxes,
+    currentLines,
     upload,
     userNotifications
   },

@@ -74,7 +74,7 @@ const self = {
     patches: [],
     pointer: 0,
     isPaused: false,
-    snapshots: { cards: {}, connections: {}, connectionTypes: {}, boxes: {} }
+    snapshots: { cards: {}, connections: {}, connectionTypes: {}, boxes: {}, lines: {} }
   },
   mutations: {
     add: (state, patch) => {
@@ -140,7 +140,8 @@ const self = {
       const connections = utils.clone(context.rootState.currentConnections.connections)
       const connectionTypes = utils.clone(context.rootState.currentConnections.types)
       const boxes = utils.clone(context.rootState.currentBoxes.boxes)
-      context.commit('snapshots', { cards, connections, connectionTypes, boxes })
+      const lines = utils.clone(context.rootState.currentLines.lines)
+      context.commit('snapshots', { cards, connections, connectionTypes, boxes, lines })
     },
     pause: (context) => {
       if (context.state.isPaused) { return }
@@ -153,7 +154,7 @@ const self = {
 
     // Add Patch
 
-    add: (context, { cards, connections, connectionTypes, boxes, useSnapshot, isRemoved }) => {
+    add: (context, { cards, connections, connectionTypes, boxes, lines, useSnapshot, isRemoved }) => {
       if (context.state.isPaused) { return }
       let patch = []
       // cards
@@ -200,6 +201,18 @@ const self = {
         })
         patch = patch.concat(boxes)
       }
+      // lines
+      if (lines) {
+        lines = lines.map(line => {
+          let previous = context.rootGetters['currentlines/byId'](line.id)
+          if (useSnapshot) {
+            previous = context.state.snapshots['lines'][line.id]
+          }
+          return normalizeUpdates({ item: line, itemType: 'line', previous, isRemoved })
+        })
+        patch = patch.concat(lines)
+      }
+      // all
       context.commit('add', patch)
       // context.commit('trim')
     },

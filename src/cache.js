@@ -178,6 +178,18 @@ export default {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${spaceId}`, space)
   }, 200),
+  updateSpaceLinesDebounced: debounce(function (lines, spaceId) {
+    lines = utils.denormalizeItems(lines)
+    let space = this.space(spaceId)
+    if (!utils.objectHasKeys(space)) {
+      console.warn(updateErrorMessage)
+      return
+    }
+    lines = utils.denormalizeItems(lines)
+    space.lines = lines
+    space.cacheDate = Date.now()
+    this.storeLocal(`space-${spaceId}`, space)
+  }, 200),
   addToSpace ({ cards, connections, connectionTypes }, spaceId) {
     let space = this.space(spaceId)
     space.cards = space.cards || []
