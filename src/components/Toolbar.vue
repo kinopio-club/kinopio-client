@@ -1,11 +1,13 @@
 <template lang="pug">
 nav.toolbar(v-if="visible")
   //- Box
-  .segmented-buttons
+  .segmented-buttons.vertical
     button(v-if="canEditSpace" :class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')" :title="boxBadgeLabel")
       img.icon.box-icon(src="@/assets/box.svg")
       .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsBox")
         span {{boxBadgeLabel}}
+    button(title="Add Line (L)")
+      span L
 </template>
 
 <script>
