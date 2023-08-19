@@ -369,6 +369,7 @@ export default {
         y: endCursor.y - prevCursor.y
       }
       let boxes = context.getters.isSelected
+      boxes = boxes.filter(box => !box.isLocked)
       boxes = boxes.filter(box => context.rootGetters['currentUser/canEditBox'](box))
       // prevent boxes bunching up at 0
       boxes.forEach(box => {
@@ -481,6 +482,14 @@ export default {
       const boxIds = getters.isSelectedIds
       const boxes = boxIds.map(id => getters.byId(id))
       return boxes
+    },
+    isNotLocked: (state, getters) => {
+      let boxes = getters.all
+      return boxes.filter(box => !box.isLocked)
+    },
+    isLocked: (state, getters) => {
+      let boxes = getters.all
+      return boxes.filter(box => box.isLocked)
     },
     colors: (state, getters) => {
       const boxes = getters.all
