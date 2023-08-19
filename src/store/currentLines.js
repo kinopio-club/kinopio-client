@@ -64,7 +64,7 @@ export default {
     moveWhileDraggingBroadcast: (state, { lines }) => {
       lines.forEach(line => {
         const element = document.querySelector(`.line[data-line-id="${line.id}"]`)
-        element.style.left = line.x + 'px'
+        // element.style.left = line.x + 'px'
         element.style.top = line.y + 'px'
       })
     },
@@ -72,7 +72,7 @@ export default {
       lines.forEach(updated => {
         const line = state.lines[updated.id]
         if (!line) { return }
-        line.x = updated.x
+        // line.x = updated.x
         line.y = updated.y
       })
       cache.updateSpaceLinesDebounced(state.lines, currentSpaceId)
@@ -121,7 +121,7 @@ export default {
 
     // create
 
-    add: (context, { line, shouldResize }) => {
+    add: (context, line) => {
       const count = context.state.ids.length
       const minLineSize = 70
       const isThemeDark = context.rootState.currentUser.theme === 'dark'
@@ -135,7 +135,6 @@ export default {
         userId: context.rootState.currentUser.id,
         y: line.y,
         color: line.color || color,
-        fill: line.fill || 'filled', // empty, filled
         name: line.name || `Line ${count}`,
         isHorizontal: line.isHorizontal || true
       }
@@ -143,11 +142,6 @@ export default {
       context.commit('create', line)
       context.dispatch('api/addToQueue', { name: 'createLine', body: line }, { root: true })
       context.dispatch('broadcast/update', { updates: line, type: 'createLine', handler: 'currentLines/create' }, { root: true })
-      if (shouldResize) {
-        context.dispatch('history/pause', null, { root: true })
-        context.commit('currentUserIsResizingLine', true, { root: true })
-        context.commit('currentUserIsResizingLineIds', [line.id], { root: true })
-      }
     },
 
     // update
@@ -185,7 +179,7 @@ export default {
       // prevent lines bunching up at 0
       lines.forEach(line => {
         if (!line) { return }
-        if (line.x === 0) { delta.x = Math.max(0, delta.x) }
+        // if (line.x === 0) { delta.x = Math.max(0, delta.x) }
         if (line.y === 0) { delta.y = Math.max(0, delta.y) }
       })
       lines = lines.filter(line => Boolean(line))
@@ -198,15 +192,15 @@ export default {
         } else {
           position = utils.linePositionFromElement(line.id)
         }
-        line.x = position.x
+        // line.x = position.x
         line.y = position.y
         // x
-        if (line.x === undefined || line.x === null) {
-          delete line.x
-        } else {
-          line.x = Math.max(0, line.x + delta.x)
-          line.x = Math.round(line.x)
-        }
+        // if (line.x === undefined || line.x === null) {
+        //   delete line.x
+        // } else {
+        //   line.x = Math.max(0, line.x + delta.x)
+        //   line.x = Math.round(line.x)
+        // }
         // y
         if (line.y === undefined || line.y === null) {
           delete line.y
@@ -216,7 +210,6 @@ export default {
         }
         line = {
           name: line.name,
-          x: line.x,
           y: line.y,
           id: line.id
         }
@@ -225,7 +218,7 @@ export default {
       })
       // update
       context.commit('move', { lines })
-      context.commit('linesWereDragged', true, { root: true })
+      // context.commit('linesWereDragged', true, { root: true })
       context.dispatch('broadcast/update', { updates: { lines }, type: 'moveLines', handler: 'currentLines/moveWhileDraggingBroadcast' }, { root: true })
     },
     afterMove: (context) => {
@@ -241,10 +234,10 @@ export default {
         line = utils.clone(line)
         if (!line) { return }
         const position = utils.linePositionFromElement(id)
-        line.x = position.x
+        // line.x = position.x
         line.y = position.y
-        const { x, y } = line
-        return { id, x, y }
+        // const { x, y } = line
+        return { id, y: line.y }
       })
       lines = lines.filter(line => Boolean(line))
       context.commit('move', { lines, spaceId })
