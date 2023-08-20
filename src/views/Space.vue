@@ -6,6 +6,7 @@ main#space.space(
   :style="styles"
   :data-zoom="spaceZoomDecimal"
 )
+  Lines
   Connections(:startCursor="startCursor")
   Boxes
   Cards
@@ -37,6 +38,7 @@ import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import BoxSelecting from '@/components/BoxSelecting.vue'
 import Boxes from '@/components/Boxes.vue'
+import Lines from '@/components/Lines.vue'
 import Cards from '@/components/Cards.vue'
 import Connections from '@/components/Connections.vue'
 import LockedItemButtons from '@/components/LockedItemButtons.vue'
@@ -64,6 +66,7 @@ export default {
     NotificationsWithPosition,
     BoxSelecting,
     Boxes,
+    Lines,
     Cards,
     LockedItemButtons,
     Connections,

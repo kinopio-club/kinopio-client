@@ -43,6 +43,7 @@ export default {
       if (this.$store.state.currentUserIsDraggingCard) { return }
       if (this.$store.state.currentUserIsDraggingBox) { return }
       if (this.$store.state.isEmbedMode) { return }
+      if (event.target.closest('.line')) { return }
       const edgeThreshold = 30
       let header = document.querySelector('header').getBoundingClientRect().height
       let footer = document.querySelector('.footer-wrap footer')
