@@ -627,7 +627,6 @@ export default {
   min-height var(--min-box-size)
   min-width var(--min-box-size)
   pointer-events none
-  z-index -1
   &.hover
     box-shadow var(--hover-shadow)
   &.active

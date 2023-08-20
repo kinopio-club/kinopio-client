@@ -84,5 +84,6 @@ const horizontalLineStyles = computed(() => {
   .line-horizontal
     left 0
     height 1px
-    // z-index -1
+    z-index -1
+    position relative
 </style>
