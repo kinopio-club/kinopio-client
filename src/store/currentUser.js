@@ -865,6 +865,11 @@ export default {
       const isNoUser = !box.userId
       return isCreatedByUser || isNoUser
     },
+    lineIsCreatedByCurrentUser: (state, getters, rootState) => (line) => {
+      const isCreatedByUser = state.id === line.userId
+      const isNoUser = !line.userId
+      return isCreatedByUser || isNoUser
+    },
     canEditCard: (state, getters, rootState, rootGetters) => (card) => {
       const isSpaceMember = getters.isSpaceMember()
       if (isSpaceMember) { return true }
@@ -879,6 +884,14 @@ export default {
       const canEditSpace = getters.canEditSpace
       const boxIsCreatedByCurrentUser = getters.boxIsCreatedByCurrentUser(box)
       if (canEditSpace && boxIsCreatedByCurrentUser) { return true }
+      return false
+    },
+    canEditLine: (state, getters, rootState, rootGetters) => (line) => {
+      const isSpaceMember = getters.isSpaceMember()
+      if (isSpaceMember) { return true }
+      const canEditSpace = getters.canEditSpace
+      const lineIsCreatedByCurrentUser = getters.lineIsCreatedByCurrentUser(line)
+      if (canEditSpace && lineIsCreatedByCurrentUser) { return true }
       return false
     },
     connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
