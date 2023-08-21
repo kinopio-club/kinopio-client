@@ -59,7 +59,6 @@ const isSelected = computed(() => {
 const isDragging = computed(() => {
   const isDragging = store.state.currentUserIsDraggingLine
   const isCurrent = store.state.currentDraggingLineId === props.line.id
-  console.log(props.line.id, isDragging, isCurrent, isSelected.value)
   return isDragging && (isCurrent || isSelected.value)
 })
 const currentLineIsSelected = computed(() => {
