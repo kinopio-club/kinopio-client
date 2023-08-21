@@ -2,7 +2,7 @@
 .select-all-below(v-if="isVisible" :style="{ top: positionY + 'px' }")
   .badge.label-badge(:style="{ 'background-color': userColor }" @mousedown="handleMouseDown")
     img.icon(src="@/assets/brush-y.svg")
-    .pointer(:style="{ 'background-color': userColor }" :class="{ wide: isSelecting }")
+    .pointer(:style="{ 'background-color': userColor }" :class="{ wide: isSelectingAllBelow }")
 </template>
 
 <script>
@@ -23,17 +23,17 @@ export default {
   data () {
     return {
       isVisible: false,
-      isSelecting: false,
       positionY: 250
     }
   },
   computed: {
     userColor () { return this.$store.state.currentUser.color },
-    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() }
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
+    isSelectingAllBelow () { return this.$store.state.isSelectingAllBelow }
   },
   methods: {
     handleMouseDown (event) {
-      this.isSelecting = true
+      this.$store.commit('isSelectingAllBelow', true)
       this.selectAllBelow(event)
     },
     handleMouseMove (event) {
@@ -63,19 +63,19 @@ export default {
       const isInPosition = isInThreshold && isBetweenControls
       const isCancelledByHover = Boolean(event.target.closest('button') || event.target.closest('article'))
       const shouldShow = isInPosition && !isCancelledByHover
-      if (shouldShow || this.isSelecting) {
+      if (shouldShow || this.isSelectingAllBelow) {
         this.positionY = position.y
         this.isVisible = true
       } else {
         this.isVisible = false
       }
-      if (this.isSelecting) {
+      if (this.isSelectingAllBelow) {
         this.debouncedSelectAllBelow(event)
       }
     },
     handleMouseUp (event) {
-      if (!this.isSelecting) { return }
-      this.isSelecting = false
+      if (!this.isSelectingAllBelow) { return }
+      this.$store.commit('isSelectingAllBelow', false)
       this.selectAllBelow(event)
       this.isVisible = false
       setTimeout(() => {

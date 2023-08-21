@@ -12,14 +12,19 @@ const props = defineProps({
 // styles
 
 const styles = computed(() => {
-  return {
+  let styles = {
     top: props.line.y + 'px'
   }
+  return styles
 })
 const infoStyles = computed(() => {
-  return {
+  let styles = {
     backgroundColor: props.line.color
   }
+  if (store.state.isSelectingAllBelow) {
+    styles.pointerEvents = 'none'
+  }
+  return styles
 })
 const horizontalLineStyles = computed(() => {
   return {
@@ -31,7 +36,9 @@ const horizontalLineStyles = computed(() => {
 
 <template lang="pug">
 .line(:key="props.line.id" :data-line-id="props.line.id" :style="styles")
-  .line-info.badge.button-badge(:style="infoStyles")
+  .line-info.badge.button-badge(
+    :style="infoStyles"
+  )
     button.small-button
       img.icon(src="@/assets/brush-y.svg")
     span {{props.line.name}}

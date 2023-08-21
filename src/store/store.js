@@ -54,6 +54,7 @@ const store = createStore({
     userSettingsIsVisible: false,
     isFadingOutDuringTouch: false,
     prevSpaceIdInSession: '',
+    isSelectingAllBelow: false,
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -459,6 +460,10 @@ const store = createStore({
       } else {
         state.prevSpaceIdInSession = value
       }
+    },
+    isSelectingAllBelow: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.isSelectingAllBelow = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
