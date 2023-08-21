@@ -378,7 +378,8 @@ export default {
       'cardsWereDragged',
       'search',
       'hasNotifiedPressAndHoldToDrag',
-      'isPresentationMode'
+      'isPresentationMode',
+      'currentUserIsPanningReady'
     ]),
     ...mapGetters([
       'spaceCounterZoomDecimal',

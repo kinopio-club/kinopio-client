@@ -149,13 +149,14 @@ export default {
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     isResizingBox () { return this.$store.state.currentUserIsResizingBox },
     isDraggingBox () { return this.$store.state.currentUserIsDraggingBox },
+    isDraggingLine () { return this.$store.state.currentUserIsDraggingLine },
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth },
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
     currentUser () { return this.$store.state.currentUser },
     isInteracting () {
-      if (this.isDraggingCard || this.isDrawingConnection || this.isResizingCard || this.isResizingBox || this.isDraggingBox) {
+      if (this.isDraggingCard || this.isDrawingConnection || this.isResizingCard || this.isResizingBox || this.isDraggingBox || this.isDraggingLine) {
         return true
       } else { return false }
     },
@@ -300,10 +301,14 @@ export default {
         endCursor,
         prevCursor: prevCursor
       })
+      this.$store.dispatch('currentLines/move', {
+        endCursor,
+        prevCursor: prevCursor
+      })
     },
     interact (event) {
       endCursor = utils.cursorPositionInViewport(event)
-      if (this.isDraggingCard || this.isDraggingBox) {
+      if (this.isDraggingCard || this.isDraggingBox || this.isDraggingLine) {
         this.constrainCursorToAxis(event)
         this.dragItems()
       }
@@ -322,6 +327,8 @@ export default {
         this.$store.commit('preventDraggedCardFromShowingDetails', true)
       } else if (this.$store.state.currentUserIsDraggingBox) {
         this.$store.commit('preventDraggedBoxFromShowingDetails', true)
+      } else if (this.$store.state.currentUserIsDraggingLine) {
+        this.$store.commit('preventDraggedLineFromShowingDetails', true)
       }
     },
     cursor () {
@@ -478,6 +485,7 @@ export default {
       this.$store.commit('currentUserIsPaintingLocked', false)
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('currentUserIsDraggingBox', false)
+      this.$store.commit('currentUserIsDraggingLine', false)
       this.$store.commit('boxesWereDragged', false)
       this.updatePageSizes()
       this.$store.commit('prevCursorPosition', utils.cursorPositionInPage(event))

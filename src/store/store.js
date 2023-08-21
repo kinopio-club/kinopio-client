@@ -111,6 +111,18 @@ const store = createStore({
     remoteBoxesDragging: [],
     preventDraggedBoxFromShowingDetails: false,
 
+    // lines
+    lineDetailsIsVisibleForLineId: '',
+    multipleLinesSelectedIds: [],
+    remoteLineDetailsVisible: [],
+    // dragging lines
+    currentDraggingLineId: '',
+    linesWereDragged: false,
+    currentUserIsDraggingLine: false,
+    currentUserIsDraggingLineIds: [],
+    remoteLinesDragging: [],
+    preventDraggedLineFromShowingDetails: false,
+
     // cards
     shouldAddCard: false,
     cardDetailsIsVisibleForCardId: '',
@@ -289,6 +301,7 @@ const store = createStore({
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
       state.boxDetailsIsVisibleForBoxId = ''
+      state.lineDetailsIsVisibleForLineId = ''
       state.tagDetailsIsVisible = false
       state.tagDetailsIsVisibleFromTagList = false
       state.currentSelectedTag = {}
@@ -297,6 +310,7 @@ const store = createStore({
       state.currentSelectedOtherItem = {}
       state.cardsWereDragged = false
       state.boxesWereDragged = false
+      state.linesWereDragged = false
       state.userDetailsIsVisible = false
       state.cardListItemOptionsIsVisible = false
       state.pricingIsVisible = false
@@ -776,6 +790,32 @@ const store = createStore({
       state.remoteUserResizingBoxes = state.remoteUserResizingBoxes.concat(update)
     },
 
+    // Lines
+
+    lineDetailsIsVisibleForLineId: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.lineDetailsIsVisibleForLineId = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'lightImpact' })
+      }
+    },
+    currentUserIsDraggingLine: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.currentUserIsDraggingLine = value
+    },
+    updateRemoteLinesDetailsVisible: (state, update) => {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      let lineDetailsVisible = utils.clone(state.remoteLinesDetailsVisible)
+      lineDetailsVisible = lineDetailsVisible.filter(line => line.id !== update.lineId) || []
+      lineDetailsVisible.push(update)
+      state.remoteLinesDetailsVisible = lineDetailsVisible
+    },
+    clearRemoteLinesDetailsVisible: (state, update) => {
+      utils.typeCheck({ value: update, type: 'object' })
+      state.remoteLinesDetailsVisible = state.remoteLinesDetailsVisible.filter(line => line.userId !== update.userId) || []
+    },
+
     // Toolbar Mode
 
     currentUserToolbar: (state, value) => {
@@ -869,6 +909,33 @@ const store = createStore({
     preventDraggedBoxFromShowingDetails: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.preventDraggedBoxFromShowingDetails = value
+    },
+
+    // Dragging Lines
+
+    currentDraggingLineId: (state, lineId) => {
+      utils.typeCheck({ value: lineId, type: 'string' })
+      state.currentDraggingLineId = lineId
+    },
+    lineesWereDragged: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.linesWereDragged = value
+    },
+    addToRemoteLineesDragging: (state, update) => {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      let line = utils.clone(state.remoteLineesDragging)
+      line = line.filter(line => line.userId !== update.userId) || []
+      line.push(update)
+      state.remoteLineesDragging = line
+    },
+    clearRemoteLinesDragging: (state, update) => {
+      utils.typeCheck({ value: update, type: 'object' })
+      state.remoteLineesDragging = state.remoteLineesDragging.filter(line => line.userId !== update.userId)
+    },
+    preventDraggedLineFromShowingDetails: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.preventDraggedLineFromShowingDetails = value
     },
 
     // User Details
@@ -1006,10 +1073,12 @@ const store = createStore({
       state.multipleCardsSelectedIds = []
       state.multipleConnectionsSelectedIds = []
       state.multipleBoxesSelectedIds = []
+      state.multipleLinesSelectedIds = []
     },
     clearDraggingItems: (state) => {
       state.currentDraggingCardId = ''
       state.currentDraggingBoxId = ''
+      state.currentDraggingLineId = ''
     },
     newTweetCards: (state, cards) => {
       utils.typeCheck({ value: cards, type: 'array' })
@@ -1571,7 +1640,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxesSelected' }, { root: true })
     },
     clearMultipleSelected: (context) => {
-      if (context.state.multipleCardsSelectedIds.length || context.state.multipleConnectionsSelectedIds.length || context.state.multipleBoxesSelectedIds.length) {
+      if (context.state.multipleCardsSelectedIds.length || context.state.multipleConnectionsSelectedIds.length || context.state.multipleBoxesSelectedIds.length || context.state.multipleLinesSelectedIds.length) {
         context.commit('clearMultipleSelected')
       }
       const space = context.rootState.currentSpace

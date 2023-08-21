@@ -890,6 +890,9 @@ export default {
   boxElementFromId (boxId) {
     return document.querySelector(`.box[data-box-id="${boxId}"]`)
   },
+  lineElementFromId (lineId) {
+    return document.querySelector(`.line[data-line-id="${lineId}"]`)
+  },
   boxRectFromId (boxId) {
     const element = this.boxElementFromId(boxId)
     if (!element) { return }
@@ -897,6 +900,12 @@ export default {
   },
   boxPositionFromElement (boxId) {
     const element = this.boxElementFromId(boxId)
+    const x = parseInt(element.style.left)
+    const y = parseInt(element.style.top)
+    return { x, y }
+  },
+  linePositionFromElement (lineId) {
+    const element = this.lineElementFromId(lineId)
     const x = parseInt(element.style.left)
     const y = parseInt(element.style.top)
     return { x, y }
