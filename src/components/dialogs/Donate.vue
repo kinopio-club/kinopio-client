@@ -46,7 +46,7 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
   section(v-if="!currentUserIsUpgraded")
     p Donations won't upgrade your account
     button(@click="triggerUpgradeUserIsVisible")
-      span Upgrade for Unlimited Cards
+      span Upgrade Account
 
   section
     p

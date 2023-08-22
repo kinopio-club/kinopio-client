@@ -17,7 +17,7 @@
     span Guide Maker
 
 .row(v-if="description")
-  .badge.status
+  section.subsection
     span(v-html="description")
 </template>
 
@@ -38,7 +38,7 @@ export default {
   },
   computed: {
     isBadges () {
-      return this.user.isSpectator || this.user.isUpgraded || this.user.isModerator || this.user.isGuideMaker
+      return this.user.isSpectator || this.user.isUpgraded || this.user.isModerator || this.user.isGuideMaker || this.user.isDonor
     }
   },
   methods: {
