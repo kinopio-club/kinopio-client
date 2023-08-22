@@ -200,8 +200,8 @@ const router = createRouter({
         next()
       }
     }, {
-      path: '/notify-donation-success',
-      name: 'notify-donation-success',
+      path: '/donation-success',
+      name: 'donation-success',
       component: Space,
       beforeEnter: (to, from, next) => {
         store.commit('notifyThanksForDonating', true)
