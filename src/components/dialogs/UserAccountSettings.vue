@@ -34,12 +34,10 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
                 img.icon.visit(src="@/assets/visit.svg")
 
     section
-      .row
-        p Change Email
       form(@submit.prevent="updateEmail")
         input(type="text" placeholder="Email" required autocomplete="email" v-model="email")
         button(type="submit" :class="{active : loading}")
-          span Change Email
+          span Update Email
           Loader(:visible="loading")
       p.badge.success(v-if="success.email")
         span Email Updated. A confirmation email has been sent to both your new and previous addresses
