@@ -58,71 +58,17 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             img.icon.visit(src="@/assets/visit.svg")
     .row
       AboutMe
-
     .row
       .button-wrap
-        button(@click.left.stop="toggleMoreLinksIsVisible" :class="{active: moreLinksIsVisible}")
-          span More Links
-
-    section.subsection(v-if="moreLinksIsVisible")
-      .row
-        //- are.na
-        .button-wrap
-          a(href="https://www.are.na/kinopio/")
-            button
-              span Are.na{{' '}}
-              img.icon.visit(src="@/assets/visit.svg")
-        //- blog
-        .button-wrap
-          a(href="https://blog.kinopio.club/")
-            button
-              span Blog{{' '}}
-              img.icon.visit(src="@/assets/visit.svg")
-      .row
-        //- futureland
-        .button-wrap
-          a(href="https://futureland.tv/@pirijan/kinopio-development-diary")
-            button
-              span Futureland{{' '}}
-              img.icon.visit(src="@/assets/visit.svg")
-        //- IG
-        .button-wrap
-          a(href="https://www.instagram.com/kinopioclub/")
-            button
-              span IG{{' '}}
-              img.icon.visit(src="@/assets/visit.svg")
-      .row
-        //- mastodon
-        .button-wrap
-          a(href="https://pkm.social/@kinopio")
-            button
-              span Mastodon{{' '}}
-              img.icon.visit(src="@/assets/visit.svg")
-        //- posts.cv
-        .button-wrap
-          a(href="https://posts.cv/pketh")
-            button
-              span Posts.cv{{' '}}
-              img.icon.visit(src="@/assets/visit.svg")
-      .row
-        //- tiktok
-        //- .button-wrap
-        //-   a(href="https://www.tiktok.com/@kinopioclub/")
-        //-     button
-        //-       span TikTok{{' '}}
-        //-       img.icon.visit(src="@/assets/visit.svg")
-        //- youtube
-        .button-wrap
-          a(href="https://www.youtube.com/@kinopio-club/")
-            button
-              span Youtube{{' '}}
-              img.icon.visit(src="@/assets/visit.svg")
-        //- 𝕏
-        .button-wrap
-          a(href="https://x.com/kinopioClub")
-            button
-              span 𝕏{{' '}}
-              img.icon.visit(src="@/assets/visit.svg")
+        button(@click.left.stop="triggerDonateIsVisible")
+          img.icon(src="@/assets/heart-empty.svg")
+          span Donate
+    .row
+      .button-wrap
+        a(href="https://kinopio.club/social-media-plezJhK98WCzh52YOYSLR")
+          button
+            span Social Media{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
 </template>
 
 <script>
@@ -167,8 +113,7 @@ export default {
       isIPhone: false,
       isAndroid: false,
       isMobile: false,
-      dialogHeight: null,
-      moreLinksIsVisible: false
+      dialogHeight: null
     }
   },
   async mounted () {
@@ -194,6 +139,10 @@ export default {
     }
   },
   methods: {
+    triggerDonateIsVisible () {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('triggerDonateIsVisible')
+    },
     refreshBrowser () {
       window.location.reload()
     },
@@ -258,9 +207,6 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
-    },
-    toggleMoreLinksIsVisible () {
-      this.moreLinksIsVisible = !this.moreLinksIsVisible
     }
   },
   watch: {
