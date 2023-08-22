@@ -9,8 +9,13 @@ const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCou
 const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
 
 const triggerUpgradeUserIsVisible = () => {
+  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
   store.dispatch('closeAllDialogs')
-  store.commit('triggerUpgradeUserIsVisible')
+  if (currentUserIsSignedIn) {
+    store.commit('triggerUpgradeUserIsVisible')
+  } else {
+    store.commit('triggerSignUpOrInIsVisible')
+  }
 }
 
 </script>
