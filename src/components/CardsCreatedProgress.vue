@@ -23,7 +23,7 @@ const triggerUpgradeUserIsVisible = () => {
 <template lang="pug">
 section.subsection.cards-created-progress
   .info
-    p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
+    p {{cardsCreatedCount}}/{{cardsCreatedLimit}} free cards created
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
   .button-wrap
     button(@click="triggerUpgradeUserIsVisible")
