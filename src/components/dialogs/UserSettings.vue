@@ -31,6 +31,7 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
     .row
       .button-wrap
         button(@click.left.stop="toggleUserAccountSettingsIsVisible" :class="{active: userAccountSettingsIsVisible}")
+          User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
           span Account
         UserAccountSettings(:visible="userAccountSettingsIsVisible")
     .row
@@ -76,6 +77,7 @@ import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
+import User from '@/components/User.vue'
 
 export default {
   name: 'UserSettings',
@@ -86,7 +88,8 @@ export default {
     NotificationSettings,
     ControlsSettings,
     ThemeSettings,
-    ThemeToggle
+    ThemeToggle,
+    User
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -111,7 +114,8 @@ export default {
   computed: {
     visible () { return this.$store.state.userSettingsIsVisible },
     isSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    isUpgraded () { return this.$store.state.currentUser.isUpgraded }
+    isUpgraded () { return this.$store.state.currentUser.isUpgraded },
+    currentUser () { return this.$store.state.currentUser }
   },
   methods: {
     closeDialogs () {
