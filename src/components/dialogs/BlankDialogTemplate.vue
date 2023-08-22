@@ -1,12 +1,18 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+
+import utils from '@/utils.js'
 const store = useStore()
 
-// import utils from '@/utils.js'
+const dialog = ref(null)
 
 onMounted(() => {
-  console.log(`🍆 the dialog is now mounted.`, store.state.currentSpace)
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'updatePageSizes') {
+      updateDialogHeight()
+    }
+  })
 })
 
 const props = defineProps({
@@ -16,13 +22,21 @@ const emit = defineEmits(['updateCount'])
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    console.log('💁‍♀️', value)
+    updateDialogHeight()
   }
 })
 
 const state = reactive({
-  count: 0
+  count: 0,
+  dialogHeight: null
 })
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialog.value
+  state.dialogHeight = utils.elementHeight(element)
+}
 
 const themeName = computed(() => store.state.currentUser.theme)
 const incrementBy = () => {
@@ -33,7 +47,7 @@ const incrementBy = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p blank dialog, please duplicate
   section
