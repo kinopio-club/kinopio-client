@@ -1,5 +1,7 @@
 <template lang="pug">
 dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+  section
+    p Account
   template(v-if="!currentUserIsSignedIn")
     section
       p After you sign up you'll be able to update your email address here
@@ -7,11 +9,11 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
   template(v-else)
     section
       .row
-        p Update Email
+        p Change Email
       form(@submit.prevent="updateEmail")
         input(type="text" placeholder="Email" required autocomplete="email" v-model="email")
         button(type="submit" :class="{active : loading}")
-          span Update Email
+          span Change Email
           Loader(:visible="loading")
       p.badge.success(v-if="success.email")
         span Email Updated. A confirmation email has been sent to both your new and previous addresses

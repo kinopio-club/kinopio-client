@@ -30,6 +30,11 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
   section
     .row
       .button-wrap
+        button(@click.left.stop="toggleUserAccountSettingsIsVisible" :class="{active: userAccountSettingsIsVisible}")
+          span Account
+        UserAccountSettings(:visible="userAccountSettingsIsVisible")
+    .row
+      .button-wrap
         button(@click.left.stop="toggleApiKeyIsVisible" :class="{active: apiKeyIsVisible}")
           span API Key
         ApiKey(:visible="apiKeyIsVisible")
@@ -38,11 +43,6 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
         button(@click.left.stop="toggleUserBillingIsVisible" :class="{active: userBillingIsVisible}")
           span Billing
         UserBilling(:visible="userBillingIsVisible")
-    .row
-      .button-wrap
-        button(@click.left.stop="toggleUpdateEmailOrPasswordIsVisible" :class="{active: updateEmailOrPasswordIsVisible}")
-          span Update Email Or Password
-        UpdateEmailOrPassword(:visible="updateEmailOrPasswordIsVisible")
 
   //- Delete Account
   section.delete-account
@@ -75,8 +75,8 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
 </template>
 
 <script>
-import UserBilling from '@/components/dialogs/UserBilling2.vue'
-import UpdateEmailOrPassword from '@/components/dialogs/UpdateEmailOrPassword.vue'
+import UserBilling from '@/components/dialogs/UserBilling.vue'
+import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
 import ApiKey from '@/components/dialogs/ApiKey.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
@@ -90,7 +90,7 @@ export default {
   components: {
     Loader,
     UserBilling,
-    UpdateEmailOrPassword,
+    UserAccountSettings,
     ApiKey,
     NotificationSettings,
     ControlsSettings,
@@ -107,7 +107,7 @@ export default {
   data () {
     return {
       userBillingIsVisible: false,
-      updateEmailOrPasswordIsVisible: false,
+      userAccountSettingsIsVisible: false,
       apiKeyIsVisible: false,
       deleteAllConfirmationVisible: false,
       loading: {
@@ -126,7 +126,7 @@ export default {
   methods: {
     closeDialogs () {
       this.userBillingIsVisible = false
-      this.updateEmailOrPasswordIsVisible = false
+      this.userAccountSettingsIsVisible = false
       this.apiKeyIsVisible = false
       this.notificationSettingsIsVisible = false
       this.controlsSettingsIsVisible = false
@@ -161,11 +161,11 @@ export default {
       this.deleteAllConfirmationVisible = false
       this.userBillingIsVisible = !isVisible
     },
-    toggleUpdateEmailOrPasswordIsVisible () {
-      const isVisible = this.updateEmailOrPasswordIsVisible
+    toggleUserAccountSettingsIsVisible () {
+      const isVisible = this.userAccountSettingsIsVisible
       this.closeDialogs()
       this.deleteAllConfirmationVisible = false
-      this.updateEmailOrPasswordIsVisible = !isVisible
+      this.userAccountSettingsIsVisible = !isVisible
     },
     toggleNotificationSettingsIsVisible () {
       const isVisible = this.notificationSettingsIsVisible
