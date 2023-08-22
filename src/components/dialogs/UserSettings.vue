@@ -35,13 +35,8 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
         UserAccountSettings(:visible="userAccountSettingsIsVisible")
     .row
       .button-wrap
-        button(@click.left.stop="toggleApiKeyIsVisible" :class="{active: apiKeyIsVisible}")
-          span API Key
-        ApiKey(:visible="apiKeyIsVisible")
-    .row
-      .button-wrap
         button(@click.left.stop="toggleUserBillingIsVisible" :class="{active: userBillingIsVisible}")
-          span Billing
+          span Billing and Credits
         UserBilling(:visible="userBillingIsVisible")
 
   //- Delete Account
@@ -56,8 +51,6 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
           span(v-if="isSignedIn") all your spaces and user data from this computer and Kinopio's servers?
           span(v-else) all your spaces and user data from this computer?
         section.subsection(v-if="isUpgraded")
-          //- span.badge.info.badge-billing Use Billing ⤴
-          //- .row.billing-cancel
           span Or cancel paid subscription
           .row.billing-cancel
             button(@click.left.stop="toggleUserBillingIsVisible")
@@ -77,7 +70,6 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
 <script>
 import UserBilling from '@/components/dialogs/UserBilling.vue'
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
-import ApiKey from '@/components/dialogs/ApiKey.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
@@ -91,7 +83,6 @@ export default {
     Loader,
     UserBilling,
     UserAccountSettings,
-    ApiKey,
     NotificationSettings,
     ControlsSettings,
     ThemeSettings,
@@ -108,7 +99,6 @@ export default {
     return {
       userBillingIsVisible: false,
       userAccountSettingsIsVisible: false,
-      apiKeyIsVisible: false,
       deleteAllConfirmationVisible: false,
       loading: {
         deleteUserPermanent: false
@@ -127,7 +117,6 @@ export default {
     closeDialogs () {
       this.userBillingIsVisible = false
       this.userAccountSettingsIsVisible = false
-      this.apiKeyIsVisible = false
       this.notificationSettingsIsVisible = false
       this.controlsSettingsIsVisible = false
       this.themeSettingsIsVisible = false
@@ -172,12 +161,6 @@ export default {
       this.closeDialogs()
       this.deleteAllConfirmationVisible = false
       this.notificationSettingsIsVisible = !isVisible
-    },
-    toggleApiKeyIsVisible () {
-      const isVisible = this.apiKeyIsVisible
-      this.closeDialogs()
-      this.deleteAllConfirmationVisible = false
-      this.apiKeyIsVisible = !isVisible
     },
     toggleThemeSettingsIsVisible () {
       const isVisible = this.themeSettingsIsVisible
