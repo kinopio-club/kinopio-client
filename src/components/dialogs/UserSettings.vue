@@ -38,7 +38,7 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
       .button-wrap
         button(@click.left.stop="toggleUserBillingAndCreditsIsVisible" :class="{active: userBillingAndCreditsIsVisible}")
           span Billing and Credits
-        UserBilling(:visible="userBillingAndCreditsIsVisible")
+        UserBillingAndCredits(:visible="userBillingAndCreditsIsVisible")
 
   //- Delete Account
   section.delete-account

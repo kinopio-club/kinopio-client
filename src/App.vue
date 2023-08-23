@@ -682,7 +682,8 @@ dialog
   section + section
     border-top 1px solid var(--primary-border)
   section.subsection + section,
-  section.subsection + .row
+  section.subsection + .row,
+  .badge + .row
     margin-top 10px
   section.subsection + section.subsection
     border-top 0

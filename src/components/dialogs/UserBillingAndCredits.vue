@@ -2,7 +2,6 @@
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import UserCredits from '@/components/UserCredits.vue'
 import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
@@ -82,14 +81,22 @@ const customerPortal = async () => {
 dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p Billing and Credits
+
+  //- stripe
   section(v-if="subscriptionIsStripe")
     p You can access receipts, update your payment method, or cancel through Stripe
     button(@click="customerPortal" :class="{ active: state.loading }")
-      span Stripe Customer Portal
+      span Manage Billing
       Loader(:visible="state.loading")
+    p.badge.danger(v-if="state.error.unknownServerError")
+      span (シ_ _)シ Something went wrong, Please try again or contact support.
+
+  //- free
   section(v-else-if="subscriptionIsFree")
     p Your subscription has been set to free for life
     p (✿◠‿◠)
+
+  //- apple
   section(v-else-if="subscriptionIsApple")
     p
       .badge.success Thanks for supporting Kinopio
@@ -99,17 +106,15 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
     p
       a(href="https://support.apple.com/billing")
         span Apple Billing and Subscriptions Info
+
+  //- not signed in
   section(v-else)
     p After you upgrade your account you'll be able to manage your payment details here
     button(@click.left="triggerUpgradeUserIsVisible") Upgrade
+    ReferredNewUserCredits
 
-  .badge.danger(v-if="state.error.unknownServerError")
-    span (シ_ _)シ Something went wrong, Please try again or contact support.
-
-  //- credits section goes here (v-if="subscriptionIsStripe || subscriptionIsFree")
-
+  UserCredits(:showEarnCreditsButton="true")
 </template>
 
 <style lang="stylus">
-// .component-name
 </style>
