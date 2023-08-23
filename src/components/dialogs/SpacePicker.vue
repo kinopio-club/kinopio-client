@@ -6,45 +6,44 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
         span To link to a space,
         span.badge.info you need to Sign Up or In
       button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
-  template(v-if="(parentIsCardDetails && currentUserIsSignedIn) || !parentIsCardDetails")
-    // New Space
-    section.options(v-if="shouldShowNewSpace")
+  //- New Space
+  section.options(v-if="shouldShowNewSpace")
+    .row
+      button(@click="toggleNewSpaceIsVisible" :class="{ active: newSpaceIsVisible }")
+        img.icon(src="@/assets/add.svg")
+        span New Space
+    template(v-if="newSpaceIsVisible")
       .row
-        button(@click="toggleNewSpaceIsVisible" :class="{ active: newSpaceIsVisible }")
-          img.icon(src="@/assets/add.svg")
-          span New Space
-      template(v-if="newSpaceIsVisible")
-        .row
-          .button-wrap
-          input(placeholder="name" ref="newSpaceName" v-model="newSpaceName" @keyup.space.prevent @keyup.escape.stop="toggleNewSpaceIsVisible" @keyup.stop @keyup.enter.exact="createNewSpace")
-        .row
-          button(@click="createNewSpace")
-            span Create New Space
-            Loader(:visible="isLoadingNewSpace")
+        .button-wrap
+        input(placeholder="name" ref="newSpaceName" v-model="newSpaceName" @keyup.space.prevent @keyup.escape.stop="toggleNewSpaceIsVisible" @keyup.stop @keyup.enter.exact="createNewSpace")
+      .row
+        button(@click="createNewSpace")
+          span Create New Space
+          Loader(:visible="isLoadingNewSpace")
 
-    // Type to Search
-    section.info-section(v-if="parentIsCardDetails && !search")
-      p
-        img.icon.search(src="@/assets/search.svg")
-        span Type to search spaces {{search}}
-    // Space List
-    section.results-section
-      Loader(:visible="loading")
-      SpaceList(
-        v-if="filteredSpaces.length"
-        :hideFilter="hideFilter"
-        :spaces="filteredSpaces"
-        :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator"
-        :selectedSpace="selectedSpace"
-        @selectSpace="selectSpace"
-        :search="search"
-        @focusBeforeFirstItem="handleFocusBeforeFirstItem"
-      )
-      .error-container(v-if="!filteredSpaces.length && !loading")
-        User(:user="activeUser" :isClickable="false" :key="activeUser.id")
-        span(v-if="activeUserIsCurrentUser && search") has no spaces matching {{search}}
-        span(v-else-if="activeUserIsCurrentUser") has no spaces
-        span(v-else) has no public spaces
+  //- Type to Search
+  section.info-section(v-if="parentIsCardDetails && !search")
+    p
+      img.icon.search(src="@/assets/search.svg")
+      span Type to search spaces {{search}}
+  //- Space List
+  section.results-section
+    Loader(:visible="loading")
+    SpaceList(
+      v-if="filteredSpaces.length"
+      :hideFilter="hideFilter"
+      :spaces="filteredSpaces"
+      :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator"
+      :selectedSpace="selectedSpace"
+      @selectSpace="selectSpace"
+      :search="search"
+      @focusBeforeFirstItem="handleFocusBeforeFirstItem"
+    )
+    .error-container(v-if="!filteredSpaces.length && !loading")
+      User(:user="activeUser" :isClickable="false" :key="activeUser.id")
+      span(v-if="activeUserIsCurrentUser && search") has no spaces matching {{search}}
+      span(v-else-if="activeUserIsCurrentUser") has no spaces
+      span(v-else) has no public spaces
 </template>
 
 <script>

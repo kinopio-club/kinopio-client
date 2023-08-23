@@ -91,12 +91,14 @@ export default {
     window.addEventListener('touchend', this.touchEnd)
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.logMatchMediaChange)
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.updateThemeFromSystem)
+    window.addEventListener('visibilitychange', this.cancelTouch)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.scroll)
     window.removeEventListener('touchstart', this.touchStart)
     window.removeEventListener('touchmove', this.touchMove)
     window.removeEventListener('touchend', this.touchEnd)
+    window.removeEventListener('visibilitychange', this.cancelTouch)
   },
   data () {
     return {
@@ -212,6 +214,10 @@ export default {
     scroll () {
       if (this.$store.state.userHasScrolled) { return }
       this.$store.commit('userHasScrolled', true)
+    },
+    cancelTouch () {
+      this.isPinchZooming = false
+      this.isTouchScrolling = false
     },
 
     //
