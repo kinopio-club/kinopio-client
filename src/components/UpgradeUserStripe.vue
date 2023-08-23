@@ -78,7 +78,6 @@ const isCreditsRemainingAfterInitialPayment = computed(() => {
 
 const subscribe = async () => {
   if (state.loading.subscribe) { return }
-  // do referral credits stuff here?
   try {
     clearState()
     state.loading.subscribe = true
