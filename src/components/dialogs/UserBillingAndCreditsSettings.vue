@@ -86,7 +86,7 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
   section(v-if="subscriptionIsStripe")
     p You can access receipts, update your payment method, or cancel through Stripe
     button(@click="customerPortal" :class="{ active: state.loading }")
-      span Manage Billing
+      span Customer Portal
       Loader(:visible="state.loading")
     p.badge.danger(v-if="state.error.unknownServerError")
       span (シ_ _)シ Something went wrong, Please try again or contact support.
