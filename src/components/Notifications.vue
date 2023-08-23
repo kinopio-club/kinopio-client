@@ -39,7 +39,14 @@ aside.notifications(@click.left="closeAllDialogs")
         .badge.info.is-donor Donor
       span , I deeply appreciate your support
     .row
-      button(@click="removeNotifyThanksForDonating")
+      button(@click="removeNotifyThanks")
+        img.icon.cancel(src="@/assets/add.svg")
+        span Feels Good
+
+  .persistent-item.success(v-if="notifyThanksForUpgrading")
+    p Thank you for upgrading, I deeply appreciate your support
+    .row
+      button(@click="removeNotifyThanks")
         img.icon.cancel(src="@/assets/add.svg")
         span Feels Good
 
@@ -250,6 +257,7 @@ export default {
     notifySpaceIsHidden () { return this.$store.state.notifySpaceIsHidden },
     notifyCurrentSpaceIsNowRemoved () { return this.$store.state.notifyCurrentSpaceIsNowRemoved },
     notifyThanksForDonating () { return this.$store.state.notifyThanksForDonating },
+    notifyThanksForUpgrading () { return this.$store.state.notifyThanksForUpgrading },
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
@@ -289,8 +297,9 @@ export default {
       }
       return classes
     },
-    removeNotifyThanksForDonating () {
+    removeNotifyThanks () {
       this.$store.commit('notifyThanksForDonating', false)
+      this.$store.commit('notifyThanksForUpgrading', false)
     },
     localStorageErrorIsVisible () {
       const element = document.getElementById('notify-local-storage-is-full')

@@ -208,6 +208,18 @@ const router = createRouter({
         next()
       }
     }, {
+      path: '/subscription-success',
+      name: 'subscription-success',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const sessionId = urlParams.get('sessionId')
+        if (sessionId) {
+          store.commit('notifyThanksForUpgrading', true)
+        }
+        next()
+      }
+    }, {
       path: '/for/:referrerName',
       component: Space,
       beforeEnter: (to, from, next) => {

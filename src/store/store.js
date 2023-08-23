@@ -221,6 +221,7 @@ const store = createStore({
     hasNotifiedPressAndHoldToDrag: false,
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
+    notifyThanksForUpgrading: false,
     notifyReferralSuccessUser: null,
     notifyEarnedCredits: false,
     notifyReferralSuccessReferrerName: null,
@@ -1334,6 +1335,10 @@ const store = createStore({
     notifyThanksForDonating: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyThanksForDonating = value
+    },
+    notifyThanksForUpgrading: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.notifyThanksForUpgrading = value
     },
     notifyReferralSuccessUser: (state, user) => {
       utils.typeCheck({ value: user, type: 'object' })
