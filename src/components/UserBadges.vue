@@ -38,7 +38,8 @@ export default {
   },
   computed: {
     isBadges () {
-      return this.user.isSpectator || this.user.isUpgraded || this.user.isModerator || this.user.isGuideMaker || this.user.isDonor
+      const badges = ['isSpectator', 'isUpgraded', 'isModerator', 'isGuideMaker', 'isDonor']
+      return badges.find(badge => this.user[badge])
     }
   },
   methods: {
