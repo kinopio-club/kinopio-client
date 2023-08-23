@@ -5,10 +5,10 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
   section
     p Donations help support my work. I'm grateful and flattered that you're even here.
     p
-      span You'll also get the {{' '}}
-      span.badge.info
+      span You'll also get the coveted {{' '}}
+      span.badge.success
         span Donor
-      span badge on your user profile
+      span badge on your profile
     p
       .segmented-buttons
         button(@click="updateAmount(5)" :class="{ active: this.currentAmount === 5 }")
@@ -31,27 +31,23 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
           User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
           .badge.info
             span ${{currentAmount}}
-            span /once
-
+            span /one time
       button(@click="donate" :class="{ active: isLoading }")
-        span Donation Checkout{{' '}}
-        img.icon.visit(src="@/assets/visit.svg")
+        span Donation Checkout
         Loader(:visible="isLoading")
 
       p(v-if="error.unknownServerError")
         .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
       p(v-if="error.amountIsTooLow")
         .badge.danger Because of Stripe fees, the minimum donation amount is $2
+      p
+        img.icon(src="@/assets/lock.svg")
+        span You'll be redirected to Stripe to complete checkout
 
   section(v-if="!currentUserIsUpgraded")
     p Donations won't upgrade your account
     button(@click="triggerUpgradeUserIsVisible")
-      span Upgrade for Unlimited Cards
-
-  section
-    p
-      img.icon(src="@/assets/lock.svg")
-      span You'll be redirected to Stripe to complete checkout
+      span Upgrade Account
 
 </template>
 

@@ -19,11 +19,6 @@ const kinopioUser = computed(() => {
     color: 'rgb(160, 247, 240)'
   }
 })
-
-const triggerDonateIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerDonateIsVisible')
-}
 </script>
 
 <template lang="pug">
@@ -43,10 +38,6 @@ const triggerDonateIsVisible = () => {
             a(href="https://pketh.org/organic-software.html") organic software
             span {{' '}}
             span designed by artists, built by craftspeople, and funded by the people who enjoy it.
-      .button-wrap
-        button(@click.left.stop="triggerDonateIsVisible")
-          img.icon(src="@/assets/heart-empty.svg")
-          span Donate
 
 </template>
 

@@ -10,6 +10,8 @@ const visible = computed(() => store.state.passwordResetIsVisible)
 
 <template lang="pug">
 dialog.narrow.reset-password(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+  section
+    p Update Password
   UpdatePassword
 </template>
 

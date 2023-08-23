@@ -805,57 +805,30 @@ const self = {
       }
     },
 
-    // Billing
+    // Billing Stripe
 
-    createCustomer: async (context, body) => {
+    subscriptionUrl: async (context, body) => {
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/billing/create-customer`, options)
+        const response = await fetch(`${host}/billing/stripe/subscription-url`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createCustomer', error })
+        context.dispatch('handleServerError', { name: 'subscriptionUrl', error })
       }
     },
-    createSubscription: async (context, body) => {
+    customerPortalUrl: async (context, body) => {
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/billing/create-subscription`, options)
+        const response = await fetch(`${host}/billing/stripe/customer-portal-url`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createSubscription', error })
-      }
-    },
-    updateSubscription: async (context, body) => {
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/billing/update-subscription`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'updateSubscription', error })
-      }
-    },
-    cancelSubscription: async (context, body) => {
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/billing/cancel-subscription`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'cancelSubscription', error })
-      }
-    },
-    subscriptionInfo: async (context, body) => {
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/billing/retrieve-subscription-info`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'subscriptionInfo', error })
+        context.dispatch('handleServerError', { name: 'customerPortalUrl', error })
       }
     },
     donationUrl: async (context, body) => {
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/billing/donation-url`, options)
+        const response = await fetch(`${host}/billing/stripe/donation-url`, options)
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'donationUrl', error })

@@ -9,6 +9,7 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
     .row
       .button-wrap
         button(@click.left.stop="toggleControlsSettingsIsVisible" :class="{active: controlsSettingsIsVisible}")
+          img.icon.settings(src="@/assets/settings.svg")
           span Controls
         ControlsSettings(:visible="controlsSettingsIsVisible")
     //- Notifications
@@ -21,28 +22,24 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
     .row
       .button-wrap
         .segmented-buttons
-          button(@click.left.stop="toggleThemeSettingsIsVisible" :class="{active: themeSettingsIsVisible}")
-            span Theme
+          button(@click.left.stop="toggleThemeAndColorsSettingsIsVisible" :class="{active: themeAndColorsSettingsIsVisible}")
+            span Theme and Colors
           ThemeToggle
-        ThemeSettings(:visible="themeSettingsIsVisible")
+        ThemeAndColorsSettings(:visible="themeAndColorsSettingsIsVisible")
 
   //- Account Settings
   section
     .row
       .button-wrap
-        button(@click.left.stop="toggleApiKeyIsVisible" :class="{active: apiKeyIsVisible}")
-          span API Key
-        ApiKey(:visible="apiKeyIsVisible")
+        button(@click.left.stop="toggleUserAccountSettingsIsVisible" :class="{active: userAccountSettingsIsVisible}")
+          User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
+          span Account
+        UserAccountSettings(:visible="userAccountSettingsIsVisible")
     .row
       .button-wrap
-        button(@click.left.stop="toggleUserBillingIsVisible" :class="{active: userBillingIsVisible}")
-          span Billing
-        UserBilling(:visible="userBillingIsVisible")
-    .row
-      .button-wrap
-        button(@click.left.stop="toggleUpdateEmailOrPasswordIsVisible" :class="{active: updateEmailOrPasswordIsVisible}")
-          span Update Email Or Password
-        UpdateEmailOrPassword(:visible="updateEmailOrPasswordIsVisible")
+        button(@click.left.stop="toggleUserBillingAndCreditsSettingsIsVisible" :class="{active: userBillingAndCreditsSettingsIsVisible}")
+          span Billing and Credits
+        UserBillingAndCreditsSettings(:visible="userBillingAndCreditsSettingsIsVisible")
 
   //- Delete Account
   section.delete-account
@@ -56,11 +53,9 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
           span(v-if="isSignedIn") all your spaces and user data from this computer and Kinopio's servers?
           span(v-else) all your spaces and user data from this computer?
         section.subsection(v-if="isUpgraded")
-          //- span.badge.info.badge-billing Use Billing ⤴
-          //- .row.billing-cancel
           span Or cancel paid subscription
           .row.billing-cancel
-            button(@click.left.stop="toggleUserBillingIsVisible")
+            button(@click.left.stop="toggleUserBillingAndCreditsSettingsIsVisible")
               span Billing
 
         .segmented-buttons
@@ -75,27 +70,27 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
 </template>
 
 <script>
-import UserBilling from '@/components/dialogs/UserBilling.vue'
-import UpdateEmailOrPassword from '@/components/dialogs/UpdateEmailOrPassword.vue'
-import ApiKey from '@/components/dialogs/ApiKey.vue'
+import UserBillingAndCreditsSettings from '@/components/dialogs/UserBillingAndCreditsSettings.vue'
+import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
-import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
+import ThemeAndColorsSettings from '@/components/dialogs/ThemeAndColorsSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
+import User from '@/components/User.vue'
 
 export default {
   name: 'UserSettings',
   components: {
     Loader,
-    UserBilling,
-    UpdateEmailOrPassword,
-    ApiKey,
+    UserBillingAndCreditsSettings,
+    UserAccountSettings,
     NotificationSettings,
     ControlsSettings,
-    ThemeSettings,
-    ThemeToggle
+    ThemeAndColorsSettings,
+    ThemeToggle,
+    User
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -106,31 +101,30 @@ export default {
   },
   data () {
     return {
-      userBillingIsVisible: false,
-      updateEmailOrPasswordIsVisible: false,
-      apiKeyIsVisible: false,
+      userBillingAndCreditsSettingsIsVisible: false,
+      userAccountSettingsIsVisible: false,
       deleteAllConfirmationVisible: false,
       loading: {
         deleteUserPermanent: false
       },
       notificationSettingsIsVisible: false,
       controlsSettingsIsVisible: false,
-      themeSettingsIsVisible: false
+      themeAndColorsSettingsIsVisible: false
     }
   },
   computed: {
     visible () { return this.$store.state.userSettingsIsVisible },
     isSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    isUpgraded () { return this.$store.state.currentUser.isUpgraded }
+    isUpgraded () { return this.$store.state.currentUser.isUpgraded },
+    currentUser () { return this.$store.state.currentUser }
   },
   methods: {
     closeDialogs () {
-      this.userBillingIsVisible = false
-      this.updateEmailOrPasswordIsVisible = false
-      this.apiKeyIsVisible = false
+      this.userBillingAndCreditsSettingsIsVisible = false
+      this.userAccountSettingsIsVisible = false
       this.notificationSettingsIsVisible = false
       this.controlsSettingsIsVisible = false
-      this.themeSettingsIsVisible = false
+      this.themeAndColorsSettingsIsVisible = false
     },
     toggleDeleteAllConfirmationVisible () {
       this.deleteAllConfirmationVisible = !this.deleteAllConfirmationVisible
@@ -155,17 +149,17 @@ export default {
       this.deleteAllConfirmationVisible = false
       this.controlsSettingsIsVisible = !isVisible
     },
-    toggleUserBillingIsVisible () {
-      const isVisible = this.userBillingIsVisible
+    toggleUserBillingAndCreditsSettingsIsVisible () {
+      const isVisible = this.userBillingAndCreditsSettingsIsVisible
       this.closeDialogs()
       this.deleteAllConfirmationVisible = false
-      this.userBillingIsVisible = !isVisible
+      this.userBillingAndCreditsSettingsIsVisible = !isVisible
     },
-    toggleUpdateEmailOrPasswordIsVisible () {
-      const isVisible = this.updateEmailOrPasswordIsVisible
+    toggleUserAccountSettingsIsVisible () {
+      const isVisible = this.userAccountSettingsIsVisible
       this.closeDialogs()
       this.deleteAllConfirmationVisible = false
-      this.updateEmailOrPasswordIsVisible = !isVisible
+      this.userAccountSettingsIsVisible = !isVisible
     },
     toggleNotificationSettingsIsVisible () {
       const isVisible = this.notificationSettingsIsVisible
@@ -173,17 +167,11 @@ export default {
       this.deleteAllConfirmationVisible = false
       this.notificationSettingsIsVisible = !isVisible
     },
-    toggleApiKeyIsVisible () {
-      const isVisible = this.apiKeyIsVisible
+    toggleThemeAndColorsSettingsIsVisible () {
+      const isVisible = this.themeAndColorsSettingsIsVisible
       this.closeDialogs()
       this.deleteAllConfirmationVisible = false
-      this.apiKeyIsVisible = !isVisible
-    },
-    toggleThemeSettingsIsVisible () {
-      const isVisible = this.themeSettingsIsVisible
-      this.closeDialogs()
-      this.deleteAllConfirmationVisible = false
-      this.themeSettingsIsVisible = !isVisible
+      this.themeAndColorsSettingsIsVisible = !isVisible
     }
 
   },

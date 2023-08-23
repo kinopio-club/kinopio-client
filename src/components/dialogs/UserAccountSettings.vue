@@ -1,5 +1,7 @@
 <template lang="pug">
 dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+  section
+    p Account
   template(v-if="!currentUserIsSignedIn")
     section
       p After you sign up you'll be able to update your email address here
@@ -7,7 +9,31 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
   template(v-else)
     section
       .row
-        p Update Email
+        .button-wrap
+          button(@click.left.stop="toggleApiKeyIsVisible" :class="{active: apiKeyIsVisible}")
+            span Get API Key
+          ApiKey(:visible="apiKeyIsVisible")
+      template(v-if="apiKeyIsVisible")
+        p.badge.danger Be careful with sharing your API Key
+        p Anyone with your key can read, edit, and remove your cards and spaces
+        p.row
+          .url-textarea.single-line
+            span {{key}}
+          .input-button-wrap(@click.left="copyKey")
+            button.small-button
+              img.icon.copy(src="@/assets/copy.svg")
+        .row
+          .button-wrap
+            button(@click.left="copyKey")
+              img.icon.copy(src="@/assets/copy.svg")
+              span Copy Key
+          .button-wrap
+            a(href="https://help.kinopio.club/api")
+              button
+                span Docs{{' '}}
+                img.icon.visit(src="@/assets/visit.svg")
+
+    section
       form(@submit.prevent="updateEmail")
         input(type="text" placeholder="Email" required autocomplete="email" v-model="email")
         button(type="submit" :class="{active : loading}")
@@ -26,6 +52,7 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
 import utils from '@/utils.js'
 import UpdatePassword from '@/components/UpdatePassword.vue'
 import Loader from '@/components/Loader.vue'
+import cache from '@/cache.js'
 
 export default {
   name: 'UpdateEmail',
@@ -52,11 +79,13 @@ export default {
       error: {
         unknownServerError: false,
         accountAlreadyExists: false
-      }
+      },
+      apiKeyIsVisible: false
     }
   },
   computed: {
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    key () { return cache.user().apiKey }
   },
   methods: {
     updateDialogHeight () {
@@ -105,6 +134,22 @@ export default {
       this.error.unknownServerError = false
       this.error.accountAlreadyExists = false
       this.success = false
+    },
+    toggleApiKeyIsVisible () {
+      const isVisible = this.apiKeyIsVisible
+      this.apiKeyIsVisible = !isVisible
+      this.updateDialogHeight()
+    },
+    async copyKey (event) {
+      this.$store.commit('clearNotificationsWithPosition')
+      const position = utils.cursorPositionInPage(event)
+      try {
+        await navigator.clipboard.writeText(this.key)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+      } catch (error) {
+        console.warn('🚑 copyKey', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      }
     }
   },
   watch: {
@@ -123,6 +168,6 @@ export default {
 .update-email
   overflow auto
   @media(max-height 650px)
-    top -200px !important
+    top -100px !important
 
 </style>

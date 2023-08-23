@@ -9,8 +9,13 @@ const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCou
 const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
 
 const triggerUpgradeUserIsVisible = () => {
+  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
   store.dispatch('closeAllDialogs')
-  store.commit('triggerUpgradeUserIsVisible')
+  if (currentUserIsSignedIn) {
+    store.commit('triggerUpgradeUserIsVisible')
+  } else {
+    store.commit('triggerSignUpOrInIsVisible')
+  }
 }
 
 </script>
@@ -18,7 +23,7 @@ const triggerUpgradeUserIsVisible = () => {
 <template lang="pug">
 section.subsection.cards-created-progress
   .info
-    p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
+    p {{cardsCreatedCount}}/{{cardsCreatedLimit}} free cards created
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
   .button-wrap
     button(@click="triggerUpgradeUserIsVisible")
