@@ -9,6 +9,7 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
     .row
       .button-wrap
         button(@click.left.stop="toggleControlsSettingsIsVisible" :class="{active: controlsSettingsIsVisible}")
+          img.icon.settings(src="@/assets/settings.svg")
           span Controls
         ControlsSettings(:visible="controlsSettingsIsVisible")
     //- Notifications
