@@ -82,19 +82,19 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
   section
     p Billing and Credits
 
+  //- free
+  section(v-if="subscriptionIsFree")
+    p Your subscription has been set to free for life
+    p (✿◠‿◠)
+
   //- stripe
-  section(v-if="subscriptionIsStripe")
+  section(v-else-if="subscriptionIsStripe")
     p You can access receipts, update your payment method, or cancel through Stripe
     button(@click="customerPortal" :class="{ active: state.loading }")
       span Customer Portal
       Loader(:visible="state.loading")
     p.badge.danger(v-if="state.error.unknownServerError")
       span (シ_ _)シ Something went wrong, Please try again or contact support.
-
-  //- free
-  section(v-else-if="subscriptionIsFree")
-    p Your subscription has been set to free for life
-    p (✿◠‿◠)
 
   //- apple
   section(v-else-if="subscriptionIsApple")
