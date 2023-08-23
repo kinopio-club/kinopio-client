@@ -36,9 +36,9 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
         UserAccountSettings(:visible="userAccountSettingsIsVisible")
     .row
       .button-wrap
-        button(@click.left.stop="toggleUserBillingAndCreditsIsVisible" :class="{active: userBillingAndCreditsIsVisible}")
+        button(@click.left.stop="toggleUserBillingAndCreditsSettingsIsVisible" :class="{active: userBillingAndCreditsSettingsIsVisible}")
           span Billing and Credits
-        UserBillingAndCredits(:visible="userBillingAndCreditsIsVisible")
+        UserBillingAndCreditsSettings(:visible="userBillingAndCreditsSettingsIsVisible")
 
   //- Delete Account
   section.delete-account
@@ -54,7 +54,7 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
         section.subsection(v-if="isUpgraded")
           span Or cancel paid subscription
           .row.billing-cancel
-            button(@click.left.stop="toggleUserBillingAndCreditsIsVisible")
+            button(@click.left.stop="toggleUserBillingAndCreditsSettingsIsVisible")
               span Billing
 
         .segmented-buttons
@@ -69,7 +69,7 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
 </template>
 
 <script>
-import UserBillingAndCredits from '@/components/dialogs/UserBillingAndCredits.vue'
+import UserBillingAndCreditsSettings from '@/components/dialogs/UserBillingAndCreditsSettings.vue'
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
@@ -83,7 +83,7 @@ export default {
   name: 'UserSettings',
   components: {
     Loader,
-    UserBillingAndCredits,
+    UserBillingAndCreditsSettings,
     UserAccountSettings,
     NotificationSettings,
     ControlsSettings,
@@ -100,7 +100,7 @@ export default {
   },
   data () {
     return {
-      userBillingAndCreditsIsVisible: false,
+      userBillingAndCreditsSettingsIsVisible: false,
       userAccountSettingsIsVisible: false,
       deleteAllConfirmationVisible: false,
       loading: {
@@ -119,7 +119,7 @@ export default {
   },
   methods: {
     closeDialogs () {
-      this.userBillingAndCreditsIsVisible = false
+      this.userBillingAndCreditsSettingsIsVisible = false
       this.userAccountSettingsIsVisible = false
       this.notificationSettingsIsVisible = false
       this.controlsSettingsIsVisible = false
@@ -148,11 +148,11 @@ export default {
       this.deleteAllConfirmationVisible = false
       this.controlsSettingsIsVisible = !isVisible
     },
-    toggleUserBillingAndCreditsIsVisible () {
-      const isVisible = this.userBillingAndCreditsIsVisible
+    toggleUserBillingAndCreditsSettingsIsVisible () {
+      const isVisible = this.userBillingAndCreditsSettingsIsVisible
       this.closeDialogs()
       this.deleteAllConfirmationVisible = false
-      this.userBillingAndCreditsIsVisible = !isVisible
+      this.userBillingAndCreditsSettingsIsVisible = !isVisible
     },
     toggleUserAccountSettingsIsVisible () {
       const isVisible = this.userAccountSettingsIsVisible
