@@ -22,10 +22,10 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
     .row
       .button-wrap
         .segmented-buttons
-          button(@click.left.stop="toggleThemeSettingsIsVisible" :class="{active: themeSettingsIsVisible}")
-            span Theme
+          button(@click.left.stop="toggleThemeAndColorsSettingsIsVisible" :class="{active: themeAndColorsSettingsIsVisible}")
+            span Theme and Colors
           ThemeToggle
-        ThemeSettings(:visible="themeSettingsIsVisible")
+        ThemeAndColorsSettings(:visible="themeAndColorsSettingsIsVisible")
 
   //- Account Settings
   section
@@ -74,7 +74,7 @@ import UserBillingAndCreditsSettings from '@/components/dialogs/UserBillingAndCr
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
-import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
+import ThemeAndColorsSettings from '@/components/dialogs/ThemeAndColorsSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
@@ -88,7 +88,7 @@ export default {
     UserAccountSettings,
     NotificationSettings,
     ControlsSettings,
-    ThemeSettings,
+    ThemeAndColorsSettings,
     ThemeToggle,
     User
   },
@@ -109,7 +109,7 @@ export default {
       },
       notificationSettingsIsVisible: false,
       controlsSettingsIsVisible: false,
-      themeSettingsIsVisible: false
+      themeAndColorsSettingsIsVisible: false
     }
   },
   computed: {
@@ -124,7 +124,7 @@ export default {
       this.userAccountSettingsIsVisible = false
       this.notificationSettingsIsVisible = false
       this.controlsSettingsIsVisible = false
-      this.themeSettingsIsVisible = false
+      this.themeAndColorsSettingsIsVisible = false
     },
     toggleDeleteAllConfirmationVisible () {
       this.deleteAllConfirmationVisible = !this.deleteAllConfirmationVisible
@@ -167,11 +167,11 @@ export default {
       this.deleteAllConfirmationVisible = false
       this.notificationSettingsIsVisible = !isVisible
     },
-    toggleThemeSettingsIsVisible () {
-      const isVisible = this.themeSettingsIsVisible
+    toggleThemeAndColorsSettingsIsVisible () {
+      const isVisible = this.themeAndColorsSettingsIsVisible
       this.closeDialogs()
       this.deleteAllConfirmationVisible = false
-      this.themeSettingsIsVisible = !isVisible
+      this.themeAndColorsSettingsIsVisible = !isVisible
     }
 
   },
