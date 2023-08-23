@@ -463,6 +463,7 @@ export default {
     flex-wrap wrap
     justify-content flex-end
     align-content flex-start
+    flex-shrink 0
     .user
       margin-right 0
 
