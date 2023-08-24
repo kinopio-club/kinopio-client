@@ -169,9 +169,13 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item.success(v-if="notifyEarnedCredits")
-    p You've earned ${{referralCreditAmount}} in referral credits, which will be used when you upgrade
+    p You've earned ${{referralCreditAmount}} in referral credits,{{' '}}
+      template(v-if="currentUserIsUpgraded")
+        span which will be used on your next payment
+      template(v-else)
+        span which will be used when you upgrade
     .row
-      button(@click.left.stop="triggerUpgradeUserIsVisible")
+      button(v-if="!currentUserIsUpgraded" @click.left.stop="triggerUpgradeUserIsVisible")
         span Upgrade
       button(@click.left.stop="triggerEarnCreditsIsVisible")
         span Earn More
@@ -265,9 +269,8 @@ export default {
     notifyReferralSuccessReferrerName () { return this.$store.state.notifyReferralSuccessReferrerName },
     referrerName () { return this.$store.state.currentUser.referrerName },
     notifyEarnedCredits () { return this.$store.state.notifyEarnedCredits },
-    currentUserIsSignedIn () {
-      return this.$store.getters['currentUser/isSignedIn']
-    },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     isTouchDevice () { return this.$store.state.isTouchDevice },
     privacyState () {
       return privacy.states().find(state => {
