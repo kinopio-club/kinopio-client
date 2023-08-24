@@ -23,7 +23,6 @@ const state = reactive({
   password: '',
   loading: {
     signIn: false,
-    addingCard: false,
     updateSpaces: false
   },
   error: {
@@ -44,6 +43,7 @@ const textarea = ref(null)
 
 // init
 
+const isOnline = computed(() => store.state.isOnline)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const kinopioDomain = computed(() => consts.kinopioDomain())
 const cardsCreatedIsOverLimit = computed(() => store.getters['currentUser/cardsCreatedIsOverLimit'])
@@ -163,9 +163,7 @@ const addCard = async () => {
   clearErrorsAndSuccess()
   if (state.cardsCreatedIsOverLimit) { return }
   if (state.error.maxLength) { return }
-  if (state.loading.addingCard) { return }
   if (!state.newName) { return }
-  state.loading.addingCard = true
   // url preview data
   const url = utils.urlFromString(state.newName)
   let urlPreview = {}
@@ -189,6 +187,10 @@ const addCard = async () => {
     urlPreviewImage: urlPreview.image,
     urlPreviewFavicon: urlPreview.favicon
   }
+  state.success = true
+  state.newName = ''
+  textarea.value.style.height = 'initial'
+  focusAndSelectName()
   // save card to inbox
   try {
     const user = store.state.currentUser
@@ -203,16 +205,11 @@ const addCard = async () => {
       card = await store.dispatch('api/createCard', card)
       addCardToSpaceLocal(card, { id: card.spaceId })
     }
-    state.success = true
-    state.newName = ''
     postMessage.send({ name: 'addCardFromAddPage', value: card })
   } catch (error) {
     console.error('🚑 addCard', error)
     state.error.unknownServerError = true
   }
-  state.loading.addingCard = false
-  textarea.value.style.height = 'initial'
-  focusAndSelectName()
 }
 const addCardToSpaceLocal = (card, space) => {
   space = cache.space(space.id)
@@ -310,6 +307,10 @@ main.add-page
               img.icon.inbox-icon(src="@/assets/inbox.svg")
               span Inbox
     section
+      .row(v-if="!isOnline")
+        .badge.danger
+          img.icon.offline(src="@/assets/offline.svg")
+          span Offline
       .row(v-if="cardsCreatedIsOverLimit || state.error.unknownServerError || state.error.maxLength")
         //- error: card limit
         template(v-if="cardsCreatedIsOverLimit")
@@ -351,10 +352,9 @@ main.add-page
       .row
         //- Add
         .button-wrap
-          button.success(@pointerup="addCard" :class="{active: state.loading.addingCard, disabled: state.error.maxLength}")
+          button.success(@pointerup="addCard" :class="{disabled: state.error.maxLength}")
             img.icon.add-icon(src="@/assets/add.svg")
             span Add
-            Loader(:visible="state.loading.addingCard")
           .badge.label-badge.info-badge(v-if="state.keyboardShortcutTipIsVisible")
             span Enter
       .row(v-if="state.success")
@@ -385,6 +385,7 @@ main.add-page
   min-height 100vh
   height 100%
   margin-bottom 2rem
+  background var(--primary-background)
   section
     position relative
     display block
