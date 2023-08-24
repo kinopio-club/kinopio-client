@@ -190,7 +190,7 @@ import PrivacyIcon from '@/components/PrivacyIcon.vue'
 
 import dayjs from 'dayjs'
 
-let pageWasOffline, pageWasHidden, checkIfShouldNotifySpaceOutOfSyncIntervalTimer
+let pageWasOffline, checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
 export default {
   name: 'Notifications',
@@ -307,11 +307,7 @@ export default {
       return Boolean(!isHidden)
     },
     updatePageVisibilityChange (event) {
-      if (document.visibilityState === 'hidden') {
-        pageWasHidden = true
-        return
-      }
-      if (pageWasHidden) {
+      if (document.visibilityState === 'visible') {
         this.checkIfShouldNotifySpaceOutOfSync()
       }
     },
@@ -397,6 +393,7 @@ export default {
       this.$store.commit('triggerEarnCreditsIsVisible')
     },
     async checkIfShouldNotifySpaceOutOfSync () {
+      console.log('☎️ checkIfShouldNotifySpaceOutOfSync…')
       const space = utils.clone(this.$store.state.currentSpace)
       const canEditSpace = this.$store.getters['currentUser/canEditSpace'](space)
       let remoteSpace
@@ -410,7 +407,7 @@ export default {
       const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
       const hoursDelta = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'hour') // hourDelta
       const updatedAtIsChanged = hoursDelta >= 1
-      console.log('☎️ checkIfShouldNotifySpaceOutOfSync', {
+      console.log('☎️ checkIfShouldNotifySpaceOutOfSync result', {
         hoursDelta,
         updatedAtIsChanged,
         spaceUpdatedAt: space.updatedAt,
