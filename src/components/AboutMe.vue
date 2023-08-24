@@ -24,6 +24,7 @@ const kinopioUser = computed(() => {
 <template lang="pug">
 .about-me
   button(:class="{active: state.aboutMeIsVisible}" @click="toggleAboutMeIsVisible")
+    User(:user="kinopioUser" :isClickable="false" :hideYouLabel="true")
     span Who Makes Kinopio?
   template(v-if="state.aboutMeIsVisible")
     section.subsection
