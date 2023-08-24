@@ -62,7 +62,7 @@ export default {
       let color = this.currentSpace.backgroundTint || 'white'
       let darkness = 0
       if (this.shouldDarkenTint) {
-        darkness = 0.2
+        darkness = 0.4
       }
       color = colord(color).darken(darkness).toRgbString()
       postMessage.send({ name: 'setBackgroundTintColor', value: color })
