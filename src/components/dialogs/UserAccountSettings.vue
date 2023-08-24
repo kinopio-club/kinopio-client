@@ -12,7 +12,6 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
         .button-wrap
           button(@click.left.stop="toggleApiKeyIsVisible" :class="{active: apiKeyIsVisible}")
             span Get API Key
-          ApiKey(:visible="apiKeyIsVisible")
       template(v-if="apiKeyIsVisible")
         p.badge.danger Be careful with sharing your API Key
         p Anyone with your key can read, edit, and remove your cards and spaces
@@ -39,7 +38,7 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
         button(type="submit" :class="{active : loading}")
           span Update Email
           Loader(:visible="loading")
-      p.badge.success(v-if="success.email")
+      p.badge.success(v-if="success")
         span Email Updated. A confirmation email has been sent to both your new and previous addresses
       p.badge.danger(v-if="error.unknownServerError.email")
         span (シ_ _)シ Something went wrong, Please try again or contact support
