@@ -31,8 +31,7 @@ export default {
   },
   computed: {
     visible () {
-      const isAddPage = this.$store.state.isAddPage
-      return !isAddPage
+      return this.$store.getters.isSpacePage
     },
     currentSpace () { return this.$store.state.currentSpace },
     backgroundStyles () {
