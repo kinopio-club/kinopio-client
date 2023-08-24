@@ -1,11 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+const store = useStore()
 
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
-const store = useStore()
 
 onMounted(() => {
   updateCredits()

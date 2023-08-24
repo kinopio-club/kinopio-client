@@ -1,10 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+const store = useStore()
 
 import consts from '@/consts.js'
 import EarnCredits from '@/components/dialogs/EarnCredits.vue'
-const store = useStore()
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 

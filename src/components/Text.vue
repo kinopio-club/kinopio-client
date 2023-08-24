@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+const store = useStore()
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -10,7 +11,6 @@ import Loader from '@/components/Loader.vue'
 import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
-const store = useStore()
 
 onMounted(() => {
   updateSortedCards()

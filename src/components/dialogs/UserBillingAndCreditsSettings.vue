@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+const store = useStore()
 
 import Loader from '@/components/Loader.vue'
 import UserCredits from '@/components/UserCredits.vue'
@@ -8,7 +9,6 @@ import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
 import utils from '@/utils.js'
 
 import dayjs from 'dayjs'
-const store = useStore()
 
 const dialog = ref(null)
 
