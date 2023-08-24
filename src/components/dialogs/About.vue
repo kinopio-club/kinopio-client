@@ -3,7 +3,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
   section
     .row.title-row
       p About Kinopio
-      .row
+      span
         button.small-button(@click.left="refreshBrowser" title="Refresh")
           img.refresh.icon(src="@/assets/refresh.svg")
 
