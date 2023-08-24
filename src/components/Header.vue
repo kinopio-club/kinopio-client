@@ -121,6 +121,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           .button-wrap
             button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
               span {{notificationsUnreadCount}}
+              .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
             UserNotifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
         .bottom-controls
           Discovery
@@ -942,6 +943,12 @@ header
     padding 0 7px
     border-radius 10px
     vertical-align 0
+
+  .badge.notification-button-badge
+    margin 0
+    position absolute
+    top -2px
+    right -2px
 
   .no-padding
     padding 0 !important
