@@ -768,35 +768,60 @@ export default {
       return space
     },
     validateReferral: async (context) => {
-      let referralUserId
+      let referrerUserId
       const referrerName = context.rootState.validateReferralFromReferrerName
       const isFromSpaceInvite = Boolean(context.rootState.validateUserReferralBySpaceUser)
+      // get referrer
       if (referrerName) {
         const response = await context.dispatch('api/getPublicUserByReferrerName', { referrerName }, { root: true })
-        referralUserId = response.id
+        referrerUserId = response.id
       } else if (isFromSpaceInvite) {
         const referralUsers = context.rootGetters['currentSpace/members']()
-        referralUserId = referralUsers[0].id
+        referrerUserId = referralUsers[0].id
       } else {
-        referralUserId = context.rootState.validateUserReferral
+        referrerUserId = context.rootState.validateUserReferral
       }
-      if (!referralUserId) { return }
-      const canBeReferred = context.getters.canBeReferred(referralUserId)
-      const publicUser = await context.dispatch('api/getPublicUser', { id: referralUserId }, { root: true })
-      if (!publicUser) {
+      // check if referrer exists
+      if (!referrerUserId) { return }
+      const referrerUser = await context.dispatch('api/getPublicUser', { id: referrerUserId }, { root: true })
+      if (!referrerUser) {
         context.commit('addNotification', { message: 'Invalid referral, referring user not found', type: 'danger' }, { root: true })
         return
       }
+      // check if current user can be referred
+      const canBeReferred = context.getters.canBeReferred(referrerUserId)
       if (canBeReferred) {
-        context.commit('notifyReferralSuccessUser', publicUser, { root: true })
-        context.dispatch('update', { referredByUserId: publicUser.id })
-      } else if (!isFromSpaceInvite) {
-        context.commit('addNotification', { message: 'Only new users can be referred', type: 'danger', isPersistentItem: true }, { root: true })
+        context.dispatch('addReferral', referrerUser)
+      } else {
+        context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', type: 'danger' }, { root: true })
       }
+      // reset state
       context.commit('validateUserReferralBySpaceUser', false, { root: true })
       context.commit('validateUserReferral', '', { root: true })
     },
+    addReferral: async (context, referrerUser) => {
+      try {
+        const isSignedIn = context.getters.isSignedIn
+        context.dispatch('update', { referredByUserId: referrerUser.id })
+        const referral = await context.dispatch('api/createReferral', {
+          userId: referrerUser.id,
+          referredUserId: context.state.id
+        }, { root: true })
+        console.log('🫧 referral created', referral)
+        if (isSignedIn) {
+          context.commit('notifyEarnedCredits', true, { root: true })
+        } else {
+          context.commit('notifyReferralSuccessUser', referrerUser, { root: true })
+        }
+      } catch (error) {
+        console.error('🚒 addReferral', error)
+        context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', type: 'danger' }, { root: true })
+      }
+    },
     validateReferralByName: async (context) => {
+      // handles /for/xyz
+      // named referrals grant free accounts to press
+      // they are explictly defined in airtable
       if (!context.rootState.validateReferralByName) { return }
       const referrerName = context.rootState.validateReferralByName.trim()
       const response = await context.dispatch('api/getReferralsByReferrerName', { referrerName }, { root: true })
@@ -960,8 +985,10 @@ export default {
       return userFilters + tagNames.length + connections.length + frames.length
     },
     canBeReferred: (state, getters) => (referralUserId) => {
-      if (getters.isSignedIn) { return }
+      const isAlreadyReferred = state.referredByUserId
+      if (isAlreadyReferred) { return }
       if (referralUserId === state.id) { return }
+      if (state.isUpgraded) { return }
       return true
     },
 
