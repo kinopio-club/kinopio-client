@@ -34,9 +34,7 @@ const toggleStudentInfoIsVisible = () => {
   const value = !state.studentInfoIsVisible
   closeDialogs()
   state.studentInfoIsVisible = value
-  console.log(state.studentInfoIsVisible)
 }
-
 </script>
 
 <template lang="pug">

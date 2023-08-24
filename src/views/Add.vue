@@ -1,4 +1,7 @@
 <script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
 import inboxSpace from '@/data/inbox.json'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
@@ -7,8 +10,6 @@ import cache from '@/cache.js'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 import { nanoid } from 'nanoid'
 const store = useStore()
 

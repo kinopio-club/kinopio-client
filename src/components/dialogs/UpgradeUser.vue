@@ -3,6 +3,8 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildD
   section
     .row
       p Upgrade your account for unlimited cards and uploads
+    .row(v-if="studentDiscountIsAvailable")
+      .badge.success Student discount has been applied to yearly plan
     .row
       .segmented-buttons
         button(:class="{active: period === 'month'}" @click.left="updatePeriod('month')") ${{monthlyPrice.amount}}/month
@@ -61,9 +63,16 @@ export default {
       }
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    currentPrice () { return consts.price(this.period) },
+    currentPrice () {
+      const isStudentDiscount = this.studentDiscountIsAvailable
+      return consts.price(this.period, isStudentDiscount)
+    },
     monthlyPrice () { return consts.price('month') },
-    yearlyPrice () { return consts.price('year') },
+    studentDiscountIsAvailable () { return this.$store.state.currentUser.studentDiscountIsAvailable },
+    yearlyPrice () {
+      const isStudentDiscount = this.studentDiscountIsAvailable
+      return consts.price('year', isStudentDiscount)
+    },
     yearlyDiscount () {
       const base = this.monthlyPrice.amount * 12
       const yearly = this.yearlyPrice.amount
@@ -77,7 +86,8 @@ export default {
   },
   methods: {
     price (period) {
-      return consts.price(period)
+      const isStudentDiscount = this.studentDiscountIsAvailable
+      return consts.price(period, isStudentDiscount)
     },
     updatePeriod (value) {
       this.period = value

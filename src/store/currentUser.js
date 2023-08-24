@@ -70,7 +70,8 @@ const initialState = {
   outsideSpaceBackgroundIsStatic: false,
   shouldDisableHapticFeedback: false,
   appleAppAccountToken: null,
-  appleSubscriptionIsActive: null
+  appleSubscriptionIsActive: null,
+  studentDiscountIsAvailable: false
 }
 
 export default {

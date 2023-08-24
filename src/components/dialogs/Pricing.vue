@@ -37,8 +37,12 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
+const studentDiscountIsAvailable = computed(() => store.state.currentUser.studentDiscountIsAvailable)
 const monthlyPrice = computed(() => consts.price('month').amount)
-const yearlyPrice = computed(() => consts.price('year').amount)
+const yearlyPrice = computed(() => {
+  const isStudentDiscount = store.state.currentUser.studentDiscountIsAvailable
+  return consts.price('year', isStudentDiscount).amount
+})
 
 const closeChildDialogs = () => {
   store.commit('triggerCloseChildDialogs')
@@ -61,6 +65,7 @@ const spaceUser = computed(() => store.state.currentSpace.users[0])
 dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeChildDialogs" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
+    p.badge.success(v-if="studentDiscountIsAvailable") Student discount has been applied to yearly plan
     DiscountRow
     ReferredNewUserCredits
     table

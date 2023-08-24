@@ -55,11 +55,11 @@ export default {
 
   // price
 
-  price (period) {
+  price (period, isStudentDiscount) {
     if (period === 'month') {
       return this.monthlyPrice()
     } else if (period === 'year') {
-      return this.yearlyPrice()
+      return this.yearlyPrice(isStudentDiscount)
     }
   },
   monthlyPrice () {
@@ -77,7 +77,14 @@ export default {
     }
     return price
   },
-  yearlyPrice () {
+  yearlyPrice (isStudentDiscount) {
+    if (isStudentDiscount) {
+      return this.yearlyStudentPrice()
+    } else {
+      return this.yearlyStandardPrice()
+    }
+  },
+  yearlyStandardPrice () {
     let price = {
       amount: 60,
       period: 'year',
@@ -89,6 +96,20 @@ export default {
     }
     if (this.isSecureAppContextIOS) {
       price.amount = 70
+    }
+    return price
+  },
+  yearlyStudentPrice () {
+    if (this.isSecureAppContextIOS) {
+      return this.yearlyStandardPrice()
+    }
+    let price = {
+      amount: 30,
+      period: 'year',
+      stripePriceId: 'price_1NidyHDFIr5ywhwoVSx6JSpP'
+    }
+    if (this.isDevelopment) {
+      price.stripePriceId = 'price_1Nie0DDFIr5ywhwoesLtHpVu'
     }
     return price
   }
