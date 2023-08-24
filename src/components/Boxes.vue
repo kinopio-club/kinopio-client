@@ -15,8 +15,7 @@ export default {
   },
   computed: {
     isPainting () { return this.$store.state.currentUserIsPainting },
-    unlockedBoxes () { return this.$store.getters['currentBoxes/isNotLocked'] },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
+    unlockedBoxes () { return this.$store.getters['currentBoxes/isNotLocked'] }
   }
 }
 </script>

@@ -347,6 +347,7 @@ const currentSpace = {
         space.connections = []
         space.cards = []
         space.boxes = []
+        space.lines = []
       } else {
         space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
         space.cards[1].x = space.cards[1].x + random(0, 20)
@@ -603,9 +604,9 @@ const currentSpace = {
       context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
       context.dispatch('currentBoxes/updateSpaceId', space.id, { root: true })
     },
-    restoreSpaceInChunks: (context, { space, isRemote, addCards, addConnections, addConnectionTypes, addBoxes }) => {
+    restoreSpaceInChunks: (context, { space, isRemote, addCards, addConnections, addConnectionTypes, addBoxes, addLines }) => {
       if (!utils.objectHasKeys(space)) { return }
-      console.log('🌱 Restoring space', space, { 'isRemote': isRemote, addCards, addConnections, addConnectionTypes, addBoxes })
+      console.log('🌱 Restoring space', space, { 'isRemote': isRemote, addCards, addConnections, addConnectionTypes, addBoxes, addLines })
       const chunkSize = 50
       const timeStart = utils.normalizeToUnixTime(new Date())
       const origin = { x: window.scrollX, y: window.scrollY }
@@ -617,6 +618,7 @@ const currentSpace = {
       cards = utils.normalizeItems(cards)
       connections = utils.normalizeItems(connections)
       let boxes = addBoxes || space.boxes || []
+      let lines = addLines || space.lines || []
       // sort cards
       const cardIds = Object.keys(cards)
       cards = cardIds.map(id => {
@@ -646,6 +648,7 @@ const currentSpace = {
         context.commit('currentCards/clear', null, { root: true })
         context.commit('currentConnections/clear', null, { root: true })
         context.commit('currentBoxes/clear', null, { root: true })
+        context.commit('currentLines/clear', null, { root: true })
         context.dispatch('updateModulesSpaceId', space)
       }
       context.commit('isLoadingSpace', true, { root: true })
@@ -665,13 +668,14 @@ const currentSpace = {
       // restore space
       if (!primaryChunks.length) {
         context.commit('currentBoxes/restore', boxes, { root: true })
+        context.commit('currentLines/restore', lines, { root: true })
         context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
         return
       }
-      // restore types
+      // restore other items
       context.commit('currentConnections/restoreTypes', connectionTypes, { root: true })
-      // restore boxes
       context.commit('currentBoxes/restore', boxes, { root: true })
+      context.commit('currentLines/restore', lines, { root: true })
       // restore chunks
       primaryChunks.forEach((chunk, index) => {
         defer(function () {
@@ -708,10 +712,12 @@ const currentSpace = {
       let cards = context.rootState.currentCards.ids.length
       let connections = context.rootState.currentConnections.ids.length
       let boxes = context.rootState.currentBoxes.ids.length
+      let lines = context.rootState.currentLines.ids.length
       console.log(`${emoji} Restore space complete in ${timeEnd - timeStart}ms,`, {
         cards,
         connections,
         boxes,
+        lines,
         spaceName: space.name,
         isRemote,
         cardUsers: context.rootGetters['currentCards/userIds']
@@ -798,11 +804,17 @@ const currentSpace = {
       const boxResults = utils.mergeSpaceKeyValues({ prevItems: boxes, newItems: remoteSpace.boxes })
       context.dispatch('currentBoxes/mergeUnique', { newItems: boxResults.updateItems, itemType: 'box' }, { root: true })
       context.dispatch('currentBoxes/mergeRemove', { removeItems: boxResults.removeItems, itemType: 'box' }, { root: true })
+      // lines
+      const lines = context.rootGetters['currentBoxes/all']
+      const lineResults = utils.mergeSpaceKeyValues({ prevItems: lines, newItems: remoteSpace.lines })
+      context.dispatch('currentBoxes/mergeUnique', { newItems: lineResults.updateItems, itemType: 'line' }, { root: true })
+      context.dispatch('currentBoxes/mergeRemove', { removeItems: lineResults.removeItems, itemType: 'line' }, { root: true })
       console.log('🎑 Merge space', {
         cards: cardResults,
         types: connectionTypeReults,
         connections: connectionResults,
         boxes: boxResults,
+        lines: lineResults,
         localSpace: space,
         space: remoteSpace
       })
@@ -812,7 +824,8 @@ const currentSpace = {
         addCards: cardResults.addItems,
         addConnectionTypes: connectionTypeReults.addItems,
         addConnections: connectionResults.addItems,
-        addBoxes: boxResults.addItems
+        addBoxes: boxResults.addItems,
+        addLines: lineResults.addItems
       })
     },
     loadLastSpace: async (context) => {
@@ -1140,7 +1153,8 @@ const currentSpace = {
     itemColors: (state, getters, rootState, rootGetters) => {
       const cardColors = rootGetters['currentCards/colors']
       const boxColors = rootGetters['currentBoxes/colors']
-      const colors = cardColors.concat(boxColors)
+      const lineColors = rootGetters['currentLines/colors']
+      const colors = cardColors.concat(boxColors).concat(lineColors)
       return uniq(colors)
     },
 

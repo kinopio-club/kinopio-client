@@ -66,6 +66,7 @@
     img.icon(src="@/assets/inbox.svg")
     img.icon(src="@/assets/leave.svg")
     img.icon(src="@/assets/light.svg")
+    img.icon(src="@/assets/line.svg")
     img.icon(src="@/assets/line-break.svg")
     img.icon(src="@/assets/lock.svg")
     img.icon(src="@/assets/mail.svg")
