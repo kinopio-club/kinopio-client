@@ -242,4 +242,5 @@ const endLineInfoInteraction = (event) => {
     position relative
     &.active
       height 4px
+      transform translateY(-2px)
 </style>
