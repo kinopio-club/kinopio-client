@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 import Loader from '@/components/Loader.vue'
 import UserCredits from '@/components/UserCredits.vue'
@@ -9,6 +8,7 @@ import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
 import utils from '@/utils.js'
 
 import dayjs from 'dayjs'
+const store = useStore()
 
 const dialog = ref(null)
 
@@ -43,9 +43,9 @@ const triggerUpgradeUserIsVisible = () => {
   store.commit('triggerUpgradeUserIsVisible')
 }
 
-const subscriptionIsApple = computed(() => store.getters.currentUser.appleSubscriptionIsActive)
-const subscriptionIsStripe = computed(() => store.getters.currentUser.stripeSubscriptionId)
-const subscriptionIsFree = computed(() => store.getters.currentUser.subscriptionIsFree)
+const subscriptionIsApple = computed(() => store.getters['currentUser/appleSubscriptionIsActive'])
+const subscriptionIsStripe = computed(() => store.getters['currentUser/stripeSubscriptionId'])
+const subscriptionIsFree = computed(() => store.getters['currentUser/subscriptionIsFree'])
 
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
