@@ -201,7 +201,6 @@ export default {
       if (!this.isSignUpPasswordTooShort(password)) { return }
       if (!this.isSignUpPasswordsMatch(password, confirmPassword)) { return }
       this.loading.signUpOrIn = true
-      currentUser = await this.validateReferrerName(currentUser)
       const response = await this.$store.dispatch('api/signUp', { email, password, currentUser, sessionToken })
       const newUser = await response.json()
       if (this.isSuccess(response)) {
@@ -366,17 +365,6 @@ export default {
     createSessionToken () {
       sessionToken = nanoid()
       this.$store.dispatch('api/createSessionToken', sessionToken)
-    },
-
-    async validateReferrerName (currentUser) {
-      const referrerName = currentUser.advocateReferrerName
-      if (!referrerName) { return currentUser }
-      const response = await this.$store.dispatch('api/getReferralsByReferrerName', { referrerName })
-      const isValid = response.isValid
-      if (!isValid) {
-        delete currentUser.advocateReferrerName
-      }
-      return currentUser
     },
 
     clearNotifications () {

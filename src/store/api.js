@@ -382,10 +382,10 @@ const self = {
         context.dispatch('handleServerError', { name: 'getPublicUsers', error })
       }
     },
-    getPublicUserByAdvocateReferrerName: async (context, referrerName) => {
+    getAdvocateUser: async (context, name) => {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/user/advocate-referrer-name/${referrerName}`, options)
+        const response = await fetch(`${host}/user/by-advocate-referrer-name/${name}`, options)
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getPublicUser', error })
@@ -794,14 +794,17 @@ const self = {
         console.error('🚒 getReferralsByUser', error)
       }
     },
-    getReferralsByReferrerName: async (context, body) => {
+
+    // Advocate Referrals
+
+    getAdvocateUnused: async (context, name) => {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/referral/name/${body.advocateReferrerName}`, options)
-        console.log(response)
+        const response = await fetch(`${host}/advocate-referral/unused/${name}`, options)
+        // server throws return 404 if no match
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getReferralsByUser', error)
+        console.error('🚒 getAdvocateUnused', error)
       }
     },
 

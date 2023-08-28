@@ -807,7 +807,7 @@ export default {
       const referrerName = context.rootState.validateFromAdvocateReferralName
       // get referrer
       if (!referrerName) { return }
-      const referrer = await context.dispatch('api/getPublicUserByAdvocateReferrerName', referrerName, { root: true })
+      const referrer = await context.dispatch('api/getAdvocateUser', referrerName, { root: true })
       if (!referrer) {
         context.commit('addNotification', { message: 'Invalid referral, referring user not found', type: 'danger' }, { root: true })
         return
@@ -825,16 +825,15 @@ export default {
       // grant free accounts to press, influencers, and ambassadors
       const referrerName = context.rootState.validateAdvocateReferralName
       if (!referrerName) { return }
-      const response = await context.dispatch('api/getReferralsByReferrerName', { referrerName }, { root: true })
-      const isValid = response.isValid
+      const isAdvocate = await context.dispatch('api/getAdvocateUnused', referrerName, { root: true })
       const isSignedIn = context.getters.isSignedIn
       if (isSignedIn) {
         context.commit('addNotification', { message: 'Only new users can be referred', type: 'danger', isPersistentItem: true }, { root: true })
-      } else if (isValid) {
+      } else if (isAdvocate) {
         context.commit('notifyReferralSuccessReferrerName', true, { root: true })
         context.dispatch('update', { referrerName })
       } else {
-        context.commit('addNotification', { message: 'Invalid referral, refferer name not found', type: 'danger', isPersistentItem: true }, { root: true })
+        context.commit('addNotification', { message: 'Invalid referral, unused advocate refferer not found', type: 'danger', isPersistentItem: true }, { root: true })
       }
       context.commit('validateAdvocateReferralName', '', { root: true })
     },
