@@ -221,20 +221,19 @@ const router = createRouter({
       }
 
     }, {
-      path: '/for/:advocateReferrerName',
+      path: '/for/:name',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const advocateReferrerName = to.params.advocateReferrerName
-        store.commit('validateAdvocateReferralName', advocateReferrerName)
+        const name = to.params.name
+        store.commit('validateAdvocateReferralName', name)
         next()
       }
     }, {
-      path: '/from/:advocateReferrerName',
+      path: '/from/:name',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const advocateReferrerName = to.params.advocateReferrerName
-        store.commit('validateFromAdvocateReferralName', advocateReferrerName)
-        // todo validate at user init
+        const name = to.params.name
+        store.commit('validateFromAdvocateReferralName', name)
         next()
       }
     }

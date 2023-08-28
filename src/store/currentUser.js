@@ -812,7 +812,7 @@ export default {
         context.commit('addNotification', { message: 'Invalid referral, referring user not found', type: 'danger' }, { root: true })
         return
       }
-      // check if current user can be referred by space invite
+      // check if current user can be referred
       const canBeReferred = context.getters.canBeReferred(referrer.id)
       if (canBeReferred) {
         context.dispatch('addReferral', referrer)
