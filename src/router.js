@@ -187,7 +187,7 @@ const router = createRouter({
         const spaceId = urlParams.get('spaceId')
         const collaboratorKey = urlParams.get('collaboratorKey')
         const disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
-        store.commit('shouldValidateUserReferralBySpaceUser', true)
+        store.commit('shouldValidateUserReferralFromSpaceInvite', true)
         store.commit('disableViewportOptimizations', disableViewportOptimizations)
         if (!spaceId || !collaboratorKey) { return }
         store.commit('isLoadingSpace', true)
@@ -216,24 +216,25 @@ const router = createRouter({
       component: Space,
       beforeEnter: (to, from, next) => {
         const userId = to.params.userId
-        store.commit('validateUserReferral', userId)
+        store.commit('validateReferralUserId', userId)
         next()
       }
 
     }, {
-      path: '/for/:advocateReferrer',
+      path: '/for/:advocateReferrerName',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const advocateReferrer = to.params.advocateReferrer
-        store.commit('validateAdvocateReferral', advocateReferrer)
+        const advocateReferrerName = to.params.advocateReferrerName
+        store.commit('validateAdvocateReferralName', advocateReferrerName)
         next()
       }
     }, {
-      path: '/from/:referrerName',
+      path: '/from/:advocateReferrerName',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const referrerName = to.params.referrerName
-        store.commit('validateFromAdvocateReferral', referrerName)
+        const advocateReferrerName = to.params.advocateReferrerName
+        store.commit('validateFromAdvocateReferralName', advocateReferrerName)
+        // todo validate at user init
         next()
       }
     }

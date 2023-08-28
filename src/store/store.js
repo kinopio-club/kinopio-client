@@ -199,10 +199,10 @@ const store = createStore({
     shouldShowExploreOnLoad: false,
 
     // referral
-    validateUserReferral: '',
-    validateUserReferralBySpaceUser: false,
-    validateAdvocateReferral: '',
-    validateFromAdvocateReferral: '',
+    validateReferralUserId: '',
+    shouldValidateUserReferralFromSpaceInvite: false,
+    validateAdvocateReferralName: '',
+    validateFromAdvocateReferralName: '',
 
     // notifications
     notifications: [],
@@ -337,21 +337,21 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldShowExploreOnLoad = value
     },
-    validateUserReferral: (state, userId) => {
+    validateReferralUserId: (state, userId) => {
       utils.typeCheck({ value: userId, type: 'string' })
-      state.validateUserReferral = userId
+      state.validateReferralUserId = userId
     },
-    validateUserReferralBySpaceUser: (state, value) => {
+    shouldValidateUserReferralFromSpaceInvite: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.validateUserReferralBySpaceUser = value
+      state.shouldValidateUserReferralFromSpaceInvite = value
     },
-    validateAdvocateReferral: (state, value) => {
+    validateAdvocateReferralName: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
-      state.validateAdvocateReferral = value
+      state.validateAdvocateReferralName = value
     },
-    validateFromAdvocateReferral: (state, value) => {
+    validateFromAdvocateReferralName: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
-      state.validateFromAdvocateReferral = value
+      state.validateFromAdvocateReferralName = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })

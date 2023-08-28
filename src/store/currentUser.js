@@ -400,6 +400,10 @@ export default {
       context.commit('triggerUserIsLoaded', null, { root: true })
       context.dispatch('updateWeather')
       context.dispatch('updateJournalDailyPrompt')
+      // handle referrals
+      context.dispatch('validateReferralUserId')
+      context.dispatch('validateFromAdvocateReferralName')
+      context.dispatch('validateAdvocateReferralName')
     },
     updateWeather: async (context) => {
       const weather = await context.dispatch('api/weather', null, { root: true })
@@ -767,21 +771,22 @@ export default {
       }
       return space
     },
-    validateUserReferral: async (context) => {
-      let referrerUserId
-      const referrerName = context.rootState.validateUserReferral
-      const isFromSpaceInvite = Boolean(context.rootState.shouldValidateUserReferralBySpaceUser)
-      // get referrer
-      if (referrerName) {
-        const response = await context.dispatch('api/getPublicUserByReferrerName', { referrerName }, { root: true })
-        referrerUserId = response.id
-      } else if (isFromSpaceInvite) {
-        const referralUsers = context.rootGetters['currentSpace/members']()
-        referrerUserId = referralUsers[0].id
+    notifyReadOnly: (context, position) => {
+      const canEditSpace = context.getters.canEditSpace()
+      if (canEditSpace) { return }
+      const cannotEditUnlessSignedIn = context.getters.cannotEditUnlessSignedIn()
+      const notificationWithPosition = document.querySelector('.notifications-with-position .item')
+      if (cannotEditUnlessSignedIn) {
+        context.commit('addNotificationWithPosition', { message: 'Sign in to Edit', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
       } else {
-        referrerUserId = context.rootState.validateUserReferral
+        context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
       }
-      // check if referrer exists
+    },
+
+    // referrals
+
+    validateReferralUserId: async (context) => {
+      const referrerUserId = context.rootState.validateReferralUserId
       if (!referrerUserId) { return }
       const referrerUser = await context.dispatch('api/getPublicUser', { id: referrerUserId }, { root: true })
       if (!referrerUser) {
@@ -791,38 +796,35 @@ export default {
       // check if current user can be referred
       const canBeReferred = context.getters.canBeReferred(referrerUserId)
       if (canBeReferred) {
-        context.dispatch('addUserReferral', referrerUser)
+        context.dispatch('addReferral', referrerUser)
       } else {
         context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', type: 'danger' }, { root: true })
       }
       // reset state
-      context.commit('shouldValidateUserReferralBySpaceUser', false, { root: true })
-      context.commit('validateUserReferral', '', { root: true })
+      context.commit('validateReferralUserId', '', { root: true })
     },
-    addUserReferral: async (context, referrerUser) => {
-      try {
-        const isSignedIn = context.getters.isSignedIn
-        context.dispatch('update', { referredByUserId: referrerUser.id })
-        const referral = await context.dispatch('api/createReferral', {
-          userId: referrerUser.id,
-          referredUserId: context.state.id
-        }, { root: true })
-        console.log('🫧 referral created', referral)
-        if (isSignedIn) {
-          context.commit('notifyEarnedCredits', true, { root: true })
-        } else {
-          context.commit('notifyReferralSuccessUser', referrerUser, { root: true })
-        }
-      } catch (error) {
-        console.error('🚒 addUserReferral', error)
-        context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', type: 'danger' }, { root: true })
+    validateFromAdvocateReferralName: async (context) => {
+      const referrerName = context.rootState.validateFromAdvocateReferralName
+      // get referrer
+      if (!referrerName) { return }
+      const referrer = await context.dispatch('api/getPublicUserByAdvocateReferrerName', referrerName, { root: true })
+      if (!referrer) {
+        context.commit('addNotification', { message: 'Invalid referral, referring user not found', type: 'danger' }, { root: true })
+        return
       }
+      // check if current user can be referred by space invite
+      const canBeReferred = context.getters.canBeReferred(referrer.id)
+      if (canBeReferred) {
+        context.dispatch('addReferral', referrer)
+      }
+      // reset state
+      context.commit('validateFromAdvocateReferralName', '', { root: true })
     },
-    validateAdvocateReferral: async (context) => {
+    validateAdvocateReferralName: async (context) => {
       // handles /for/xyz
       // grant free accounts to press, influencers, and ambassadors
-      if (!context.rootState.validateAdvocateReferral) { return }
-      const referrerName = context.rootState.validateAdvocateReferral.trim()
+      const referrerName = context.rootState.validateAdvocateReferralName
+      if (!referrerName) { return }
       const response = await context.dispatch('api/getReferralsByReferrerName', { referrerName }, { root: true })
       const isValid = response.isValid
       const isSignedIn = context.getters.isSignedIn
@@ -834,17 +836,46 @@ export default {
       } else {
         context.commit('addNotification', { message: 'Invalid referral, refferer name not found', type: 'danger', isPersistentItem: true }, { root: true })
       }
-      context.commit('validateAdvocateReferral', '', { root: true })
+      context.commit('validateAdvocateReferralName', '', { root: true })
     },
-    notifyReadOnly: (context, position) => {
-      const canEditSpace = context.getters.canEditSpace()
-      if (canEditSpace) { return }
-      const cannotEditUnlessSignedIn = context.getters.cannotEditUnlessSignedIn()
-      const notificationWithPosition = document.querySelector('.notifications-with-position .item')
-      if (cannotEditUnlessSignedIn) {
-        context.commit('addNotificationWithPosition', { message: 'Sign in to Edit', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
-      } else {
-        context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
+    validateUserReferralFromSpaceInvite: async (context) => {
+      const isFromSpaceInvite = Boolean(context.rootState.shouldValidateUserReferralFromSpaceInvite)
+      if (!isFromSpaceInvite) { return }
+      // get referrer
+      const referrers = context.rootGetters['currentSpace/members']()
+      const referrerId = referrers[0].id
+      if (!referrerId) { return }
+      const referrer = await context.dispatch('api/getPublicUser', { id: referrerId }, { root: true })
+      if (!referrer) {
+        context.commit('addNotification', { message: 'Invalid referral, referring user not found', type: 'danger' }, { root: true })
+        return
+      }
+      // check if current user can be referred by space invite
+      const isSignedIn = context.getters.isSignedIn
+      const canBeReferred = context.getters.canBeReferred(referrerId) && !isSignedIn
+      if (canBeReferred) {
+        context.dispatch('addReferral', referrer)
+      }
+      // reset state
+      context.commit('shouldValidateUserReferralFromSpaceInvite', false, { root: true })
+    },
+    addReferral: async (context, referrer) => {
+      try {
+        const isSignedIn = context.getters.isSignedIn
+        context.dispatch('update', { referredByUserId: referrer.id })
+        const referral = await context.dispatch('api/createReferral', {
+          userId: referrer.id,
+          referredUserId: context.state.id
+        }, { root: true })
+        console.log('🫧 referral created', referral)
+        if (isSignedIn) {
+          context.commit('notifyEarnedCredits', true, { root: true })
+        } else {
+          context.commit('notifyReferralSuccessUser', referrer, { root: true })
+        }
+      } catch (error) {
+        console.error('🚒 addReferral', error)
+        context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', type: 'danger' }, { root: true })
       }
     }
   },

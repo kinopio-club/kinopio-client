@@ -382,10 +382,10 @@ const self = {
         context.dispatch('handleServerError', { name: 'getPublicUsers', error })
       }
     },
-    getPublicUserByReferrerName: async (context, body) => {
+    getPublicUserByAdvocateReferrerName: async (context, referrerName) => {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/user/referrer-name/${body.referrerName}`, options)
+        const response = await fetch(`${host}/user/advocate-referrer-name/${referrerName}`, options)
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getPublicUser', error })
