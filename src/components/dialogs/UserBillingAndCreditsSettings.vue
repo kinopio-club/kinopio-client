@@ -43,8 +43,8 @@ const triggerUpgradeUserIsVisible = () => {
   store.commit('triggerUpgradeUserIsVisible')
 }
 
-const subscriptionIsApple = computed(() => store.getters['currentUser/appleSubscriptionIsActive'])
-const subscriptionIsStripe = computed(() => store.getters['currentUser/stripeSubscriptionId'])
+const subscriptionIsApple = computed(() => store.getters['currentUser/subscriptionIsApple'])
+const subscriptionIsStripe = computed(() => store.getters['currentUser/subscriptionIsStripe'])
 const subscriptionIsFree = computed(() => store.getters['currentUser/subscriptionIsFree'])
 
 const updateDialogHeight = async () => {
