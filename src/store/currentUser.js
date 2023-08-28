@@ -986,8 +986,10 @@ export default {
     },
     canBeReferred: (state, getters) => (referralUserId) => {
       const isAlreadyReferred = state.referredByUserId
+      const isSameUser = referralUserId === state.id
+      console.log('🕵️‍♀️ canBeReferred check:', { isAlreadyReferred, isSameUser, isUpgraded: state.isUpgraded, referralUserId })
       if (isAlreadyReferred) { return }
-      if (referralUserId === state.id) { return }
+      if (isSameUser) { return }
       if (state.isUpgraded) { return }
       return true
     },
