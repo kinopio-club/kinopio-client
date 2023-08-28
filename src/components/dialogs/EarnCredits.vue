@@ -1,11 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
 import { useStore } from 'vuex'
+const store = useStore()
 
 import UserCredits from '@/components/UserCredits.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
-const store = useStore()
 
 const props = defineProps({
   visible: Boolean
