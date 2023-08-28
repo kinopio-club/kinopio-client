@@ -767,10 +767,10 @@ export default {
       }
       return space
     },
-    validateReferral: async (context) => {
+    validateUserReferral: async (context) => {
       let referrerUserId
-      const referrerName = context.rootState.validateReferralFromReferrerName
-      const isFromSpaceInvite = Boolean(context.rootState.validateUserReferralBySpaceUser)
+      const referrerName = context.rootState.validateUserReferral
+      const isFromSpaceInvite = Boolean(context.rootState.shouldValidateUserReferralBySpaceUser)
       // get referrer
       if (referrerName) {
         const response = await context.dispatch('api/getPublicUserByReferrerName', { referrerName }, { root: true })
@@ -791,15 +791,15 @@ export default {
       // check if current user can be referred
       const canBeReferred = context.getters.canBeReferred(referrerUserId)
       if (canBeReferred) {
-        context.dispatch('addReferral', referrerUser)
+        context.dispatch('addUserReferral', referrerUser)
       } else {
         context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', type: 'danger' }, { root: true })
       }
       // reset state
-      context.commit('validateUserReferralBySpaceUser', false, { root: true })
+      context.commit('shouldValidateUserReferralBySpaceUser', false, { root: true })
       context.commit('validateUserReferral', '', { root: true })
     },
-    addReferral: async (context, referrerUser) => {
+    addUserReferral: async (context, referrerUser) => {
       try {
         const isSignedIn = context.getters.isSignedIn
         context.dispatch('update', { referredByUserId: referrerUser.id })
@@ -814,16 +814,15 @@ export default {
           context.commit('notifyReferralSuccessUser', referrerUser, { root: true })
         }
       } catch (error) {
-        console.error('🚒 addReferral', error)
+        console.error('🚒 addUserReferral', error)
         context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', type: 'danger' }, { root: true })
       }
     },
-    validateReferralByName: async (context) => {
+    validateAdvocateReferral: async (context) => {
       // handles /for/xyz
-      // named referrals grant free accounts to press
-      // they are explictly defined in airtable
-      if (!context.rootState.validateReferralByName) { return }
-      const referrerName = context.rootState.validateReferralByName.trim()
+      // grant free accounts to press, influencers, and ambassadors
+      if (!context.rootState.validateAdvocateReferral) { return }
+      const referrerName = context.rootState.validateAdvocateReferral.trim()
       const response = await context.dispatch('api/getReferralsByReferrerName', { referrerName }, { root: true })
       const isValid = response.isValid
       const isSignedIn = context.getters.isSignedIn
@@ -835,7 +834,7 @@ export default {
       } else {
         context.commit('addNotification', { message: 'Invalid referral, refferer name not found', type: 'danger', isPersistentItem: true }, { root: true })
       }
-      context.commit('validateReferralByName', '', { root: true })
+      context.commit('validateAdvocateReferral', '', { root: true })
     },
     notifyReadOnly: (context, position) => {
       const canEditSpace = context.getters.canEditSpace()

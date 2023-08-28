@@ -201,8 +201,8 @@ const store = createStore({
     // referral
     validateUserReferral: '',
     validateUserReferralBySpaceUser: false,
-    validateReferralByName: '',
-    validateReferralFromReferrerName: '',
+    validateAdvocateReferral: '',
+    validateFromAdvocateReferral: '',
 
     // notifications
     notifications: [],
@@ -345,13 +345,13 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.validateUserReferralBySpaceUser = value
     },
-    validateReferralByName: (state, value) => {
+    validateAdvocateReferral: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
-      state.validateReferralByName = value
+      state.validateAdvocateReferral = value
     },
-    validateReferralFromReferrerName: (state, value) => {
+    validateFromAdvocateReferral: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
-      state.validateReferralFromReferrerName = value
+      state.validateFromAdvocateReferral = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
