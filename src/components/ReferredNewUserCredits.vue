@@ -8,7 +8,7 @@ const store = useStore()
 const referralCreditAmount = computed(() => consts.referralCreditAmount)
 const referredByUserId = computed(() => store.state.currentUser.referredByUserId)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const referrerName = computed(() => store.state.currentUser.referrerName)
+const referrerName = computed(() => store.state.currentUser.advocateReferrerName)
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
 </script>

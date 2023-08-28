@@ -369,7 +369,7 @@ export default {
       cache.updateUser('referredByUserId', value)
     },
     referrerName: (state, value) => {
-      state.referrerName = value
+      state.advocateReferrerName = value
       cache.updateUser('referrerName', value)
     },
     weather: (state, value) => {
@@ -401,7 +401,7 @@ export default {
       context.dispatch('updateWeather')
       context.dispatch('updateJournalDailyPrompt')
       // handle referrals
-      context.dispatch('validateReferralUserId')
+      context.dispatch('validateUserReferralUserId')
       context.dispatch('validateFromAdvocateReferralName')
       context.dispatch('validateAdvocateReferralName')
     },
@@ -785,8 +785,8 @@ export default {
 
     // referrals
 
-    validateReferralUserId: async (context) => {
-      const referrerUserId = context.rootState.validateReferralUserId
+    validateUserReferralUserId: async (context) => {
+      const referrerUserId = context.rootState.validateUserReferralUserId
       if (!referrerUserId) { return }
       const referrerUser = await context.dispatch('api/getPublicUser', { id: referrerUserId }, { root: true })
       if (!referrerUser) {
@@ -801,7 +801,7 @@ export default {
         context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', type: 'danger' }, { root: true })
       }
       // reset state
-      context.commit('validateReferralUserId', '', { root: true })
+      context.commit('validateUserReferralUserId', '', { root: true })
     },
     validateFromAdvocateReferralName: async (context) => {
       const referrerName = context.rootState.validateFromAdvocateReferralName

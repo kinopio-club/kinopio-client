@@ -216,7 +216,7 @@ const router = createRouter({
       component: Space,
       beforeEnter: (to, from, next) => {
         const userId = to.params.userId
-        store.commit('validateReferralUserId', userId)
+        store.commit('validateUserReferralUserId', userId)
         next()
       }
 

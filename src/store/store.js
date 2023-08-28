@@ -199,7 +199,7 @@ const store = createStore({
     shouldShowExploreOnLoad: false,
 
     // referral
-    validateReferralUserId: '',
+    validateUserReferralUserId: '',
     shouldValidateUserReferralFromSpaceInvite: false,
     validateAdvocateReferralName: '',
     validateFromAdvocateReferralName: '',
@@ -337,9 +337,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldShowExploreOnLoad = value
     },
-    validateReferralUserId: (state, userId) => {
+    validateUserReferralUserId: (state, userId) => {
       utils.typeCheck({ value: userId, type: 'string' })
-      state.validateReferralUserId = userId
+      state.validateUserReferralUserId = userId
     },
     shouldValidateUserReferralFromSpaceInvite: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

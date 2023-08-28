@@ -263,7 +263,7 @@ export default {
     },
 
     async checkIfShouldUpgradeReferral () {
-      const referrerName = this.$store.state.currentUser.referrerName
+      const referrerName = this.$store.state.currentUser.advocateReferrerName
       if (!referrerName) { return }
       this.$store.commit('currentUser/isUpgraded', true, { root: true })
       this.$store.commit('addNotification', { message: `Your account has been upgraded to free. Thanks for helping share Kinopio`, type: 'success', isPersistentItem: true })
@@ -369,12 +369,12 @@ export default {
     },
 
     async validateReferrerName (currentUser) {
-      const referrerName = currentUser.referrerName
+      const referrerName = currentUser.advocateReferrerName
       if (!referrerName) { return currentUser }
       const response = await this.$store.dispatch('api/getReferralsByReferrerName', { referrerName })
       const isValid = response.isValid
       if (!isValid) {
-        delete currentUser.referrerName
+        delete currentUser.advocateReferrerName
       }
       return currentUser
     },

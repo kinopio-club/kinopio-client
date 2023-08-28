@@ -1,11 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 import UserCredits from '@/components/UserCredits.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+const store = useStore()
 
 const props = defineProps({
   visible: Boolean
@@ -18,8 +18,8 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const url = computed(() => {
-  if (store.state.currentUser.referrerName) {
-    return consts.kinopioDomain() + '/from/' + store.state.currentUser.referrerName
+  if (store.state.currentUser.advocateReferrerName) {
+    return consts.kinopioDomain() + '/from/' + store.state.currentUser.advocateReferrerName
   } else {
     return consts.kinopioDomain() + '/refer/' + store.state.currentUser.id
   }

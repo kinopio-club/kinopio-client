@@ -797,7 +797,7 @@ const self = {
     getReferralsByReferrerName: async (context, body) => {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/referral/name/${body.referrerName}`, options)
+        const response = await fetch(`${host}/referral/name/${body.advocateReferrerName}`, options)
         console.log(response)
         return normalizeResponse(response)
       } catch (error) {
