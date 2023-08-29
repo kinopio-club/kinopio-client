@@ -237,6 +237,7 @@ export default {
   cursor pointer
   position absolute
   transform-origin top left
+  z-index 1
   &.cursor-default
     cursor default
   .name
