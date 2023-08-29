@@ -382,15 +382,6 @@ const self = {
         context.dispatch('handleServerError', { name: 'getPublicUsers', error })
       }
     },
-    getAdvocateUser: async (context, name) => {
-      try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/user/by-advocate-referrer-name/${name}`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'getPublicUser', error })
-      }
-    },
     updateUserFavorites: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }
@@ -805,6 +796,16 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 getAdvocateUnused', error)
+      }
+    },
+    getAdvocateUsedUser: async (context, name) => {
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        // const response = await fetch(`${host}/user/by-advocate-referrer-name/${name}`, options)
+        const response = await fetch(`${host}/advocate-referral/used/${name}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getPublicUser', error })
       }
     },
 

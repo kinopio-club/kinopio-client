@@ -84,8 +84,7 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
 
   //- free
   section(v-if="subscriptionIsFree")
-    p Your subscription has been set to free for life
-    p (✿◠‿◠)
+    p Your subscription has been set to free
 
   //- stripe
   section(v-else-if="subscriptionIsStripe")
