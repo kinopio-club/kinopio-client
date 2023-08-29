@@ -386,12 +386,13 @@ export default {
     }
   },
   actions: {
-    init: (context) => {
+    init: async (context) => {
       const cachedUser = cache.user()
       if (utils.objectHasKeys(cachedUser)) {
         console.log('🌸 Restore user from cache', cachedUser.id)
         context.commit('restoreUser', cachedUser)
-        context.dispatch('restoreRemoteUser', cachedUser)
+        context.dispatch('themes/restore', null, { root: true })
+        await context.dispatch('restoreRemoteUser', cachedUser)
       } else {
         console.log('🌸 Create new user')
         context.dispatch('createNewUser')
@@ -401,9 +402,13 @@ export default {
       context.dispatch('updateWeather')
       context.dispatch('updateJournalDailyPrompt')
       // handle referrals
-      context.dispatch('validateUserReferralUserId')
-      context.dispatch('validateFromAdvocateReferralName')
-      context.dispatch('validateAdvocateReferralName')
+      nextTick(() => {
+        nextTick(() => {
+          context.dispatch('validateUserReferralUserId')
+          context.dispatch('validateFromAdvocateReferralName')
+          context.dispatch('validateAdvocateReferralName')
+        })
+      })
     },
     updateWeather: async (context) => {
       const weather = await context.dispatch('api/weather', null, { root: true })
