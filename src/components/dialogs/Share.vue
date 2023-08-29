@@ -2,7 +2,7 @@
 dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
   section
     .row.title-row
-      p Share
+      span Share
       .row
         button.small-button(@click.left.stop="isPresentationMode")
           img.icon(src="@/assets/presentation.svg")
