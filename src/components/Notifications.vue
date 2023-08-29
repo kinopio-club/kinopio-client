@@ -161,7 +161,7 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item.success(v-if="notifyReferralSuccessReferrerName")
-    p welcome {{referrerName}}, once you sign up your account will be upgraded to free
+    p welcome {{advocateReferrerName}}, once you sign up your account will be upgraded to free
     .row
       button(@click.left.stop="triggerSignUpOrInIsVisible")
         span Sign Up for Your Free Account
@@ -267,7 +267,7 @@ export default {
     currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
     notifyReferralSuccessUser () { return this.$store.state.notifyReferralSuccessUser },
     notifyReferralSuccessReferrerName () { return this.$store.state.notifyReferralSuccessReferrerName },
-    referrerName () { return this.$store.state.currentUser.referrerName },
+    advocateReferrerName () { return this.$store.state.currentUser.advocateReferrerName },
     notifyEarnedCredits () { return this.$store.state.notifyEarnedCredits },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },

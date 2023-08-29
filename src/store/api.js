@@ -382,15 +382,6 @@ const self = {
         context.dispatch('handleServerError', { name: 'getPublicUsers', error })
       }
     },
-    getPublicUserByReferrerName: async (context, body) => {
-      try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/user/referrer-name/${body.referrerName}`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'getPublicUser', error })
-      }
-    },
     updateUserFavorites: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }
@@ -794,14 +785,26 @@ const self = {
         console.error('🚒 getReferralsByUser', error)
       }
     },
-    getReferralsByReferrerName: async (context, body) => {
+
+    // Advocate Referrals
+
+    getAdvocateUnused: async (context, name) => {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/referral/name/${body.referrerName}`, options)
-        console.log(response)
+        const response = await fetch(`${host}/advocate-referral/unused/${name}`, options)
+        // server throws return 404 if no match
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 getReferralsByUser', error)
+        console.error('🚒 getAdvocateUnused', error)
+      }
+    },
+    getAdvocateUsedUser: async (context, name) => {
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/advocate-referral/used/${name}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getPublicUser', error })
       }
     },
 

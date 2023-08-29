@@ -72,41 +72,6 @@ const router = createRouter({
         store.dispatch('currentUser/updateArenaAccessToken', arenaReturnedCode)
       }
     }, {
-      path: '/invite',
-      name: 'invite',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        store.dispatch('currentUser/init')
-        const urlParams = new URLSearchParams(window.location.search)
-        const apiKey = store.state.currentUser.apiKey
-        const spaceId = urlParams.get('spaceId')
-        const collaboratorKey = urlParams.get('collaboratorKey')
-        const disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
-        store.commit('validateUserReferralBySpaceUser', true)
-        store.commit('disableViewportOptimizations', disableViewportOptimizations)
-        if (!spaceId || !collaboratorKey) { return }
-        store.commit('isLoadingSpace', true)
-        if (apiKey) {
-          store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
-            .then(response => {
-              store.commit('spaceUrlToLoad', spaceId)
-              store.commit('addNotification', { message: 'You can now edit this space', type: 'success' })
-              next()
-            }).catch(error => {
-              console.error('🚒', error)
-              if (error.status === 401) {
-                store.commit('addNotification', { message: 'Space could not be found, or your invite was invalid', type: 'danger' })
-              } else {
-                store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
-              }
-            })
-        } else {
-          store.commit('spaceUrlToLoad', spaceId)
-          next()
-        }
-        store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
-      }
-    }, {
       path: '/explore',
       component: Space,
       beforeEnter: (to, from, next) => {
@@ -192,14 +157,6 @@ const router = createRouter({
         next()
       }
     }, {
-      path: '/refer/:userId',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        const userId = to.params.userId
-        store.commit('validateUserReferral', userId)
-        next()
-      }
-    }, {
       path: '/donation-success',
       name: 'donation-success',
       component: Space,
@@ -220,19 +177,63 @@ const router = createRouter({
         next()
       }
     }, {
-      path: '/for/:referrerName',
+      path: '/invite',
+      name: 'invite',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const referrerName = to.params.referrerName
-        store.commit('validateReferralByName', referrerName)
+        store.dispatch('currentUser/init')
+        const urlParams = new URLSearchParams(window.location.search)
+        const apiKey = store.state.currentUser.apiKey
+        const spaceId = urlParams.get('spaceId')
+        const collaboratorKey = urlParams.get('collaboratorKey')
+        const disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        store.commit('shouldValidateUserReferralFromSpaceInvite', true)
+        store.commit('disableViewportOptimizations', disableViewportOptimizations)
+        if (!spaceId || !collaboratorKey) { return }
+        store.commit('isLoadingSpace', true)
+        if (apiKey) {
+          store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
+            .then(response => {
+              store.commit('spaceUrlToLoad', spaceId)
+              store.commit('addNotification', { message: 'You can now edit this space', type: 'success' })
+              next()
+            }).catch(error => {
+              console.error('🚒', error)
+              if (error.status === 401) {
+                store.commit('addNotification', { message: 'Space could not be found, or your invite was invalid', type: 'danger' })
+              } else {
+                store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
+              }
+            })
+        } else {
+          store.commit('spaceUrlToLoad', spaceId)
+          next()
+        }
+        store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
+      }
+    }, {
+      path: '/refer/:userId',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const userId = to.params.userId
+        store.commit('validateUserReferralUserId', userId)
+        next()
+      }
+
+    }, {
+      path: '/for/:name',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const name = to.params.name
+        store.commit('validateAdvocateReferralName', name)
         next()
       }
     }, {
-      path: '/from/:referrerName',
+      path: '/from/:name',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const referrerName = to.params.referrerName
-        store.commit('validateReferralFromReferrerName', referrerName)
+        const name = to.params.name
+        store.commit('validateFromAdvocateReferralName', name)
         next()
       }
     }

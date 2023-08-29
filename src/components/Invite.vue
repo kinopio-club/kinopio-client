@@ -38,7 +38,7 @@ section.invite
       .row
         p You'll both earn a{{' '}}
           span.badge.success $6 credit
-          span when someone you invite signs up for a Kinopio account
+          span when someone new you invite signs up for a Kinopio account
       template(v-if="currentUserIsUpgraded")
         hr
         .row

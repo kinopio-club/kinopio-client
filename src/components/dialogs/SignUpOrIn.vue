@@ -201,7 +201,6 @@ export default {
       if (!this.isSignUpPasswordTooShort(password)) { return }
       if (!this.isSignUpPasswordsMatch(password, confirmPassword)) { return }
       this.loading.signUpOrIn = true
-      currentUser = await this.validateReferrerName(currentUser)
       const response = await this.$store.dispatch('api/signUp', { email, password, currentUser, sessionToken })
       const newUser = await response.json()
       if (this.isSuccess(response)) {
@@ -263,7 +262,7 @@ export default {
     },
 
     async checkIfShouldUpgradeReferral () {
-      const referrerName = this.$store.state.currentUser.referrerName
+      const referrerName = this.$store.state.currentUser.advocateReferrerName
       if (!referrerName) { return }
       this.$store.commit('currentUser/isUpgraded', true, { root: true })
       this.$store.commit('addNotification', { message: `Your account has been upgraded to free. Thanks for helping share Kinopio`, type: 'success', isPersistentItem: true })
@@ -366,17 +365,6 @@ export default {
     createSessionToken () {
       sessionToken = nanoid()
       this.$store.dispatch('api/createSessionToken', sessionToken)
-    },
-
-    async validateReferrerName (currentUser) {
-      const referrerName = currentUser.referrerName
-      if (!referrerName) { return currentUser }
-      const response = await this.$store.dispatch('api/getReferralsByReferrerName', { referrerName })
-      const isValid = response.isValid
-      if (!isValid) {
-        delete currentUser.referrerName
-      }
-      return currentUser
     },
 
     clearNotifications () {

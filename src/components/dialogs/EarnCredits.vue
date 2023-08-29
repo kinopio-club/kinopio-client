@@ -18,8 +18,8 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const url = computed(() => {
-  if (store.state.currentUser.referrerName) {
-    return consts.kinopioDomain() + '/from/' + store.state.currentUser.referrerName
+  if (store.state.currentUser.advocateReferrerName) {
+    return consts.kinopioDomain() + '/from/' + store.state.currentUser.advocateReferrerName
   } else {
     return consts.kinopioDomain() + '/refer/' + store.state.currentUser.id
   }

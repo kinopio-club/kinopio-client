@@ -203,6 +203,7 @@ export default {
     position = position || this.cursorPositionInPage(event)
     // #space
     const space = document.getElementById('space')
+    if (!space) { return }
     let rect = space.getBoundingClientRect()
     position = {
       x: position.x - rect.x,

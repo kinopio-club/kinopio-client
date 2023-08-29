@@ -738,8 +738,7 @@ const currentSpace = {
           }, { root: true })
           // referral
           nextTick(() => {
-            context.dispatch('currentUser/validateReferral', null, { root: true })
-            context.dispatch('currentUser/validateReferralByName', null, { root: true })
+            context.dispatch('currentUser/validateUserReferralFromSpaceInvite', null, { root: true })
           })
         })
       })
