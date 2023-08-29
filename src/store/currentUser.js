@@ -859,8 +859,8 @@ export default {
       const isFromSpaceInvite = Boolean(context.rootState.shouldValidateUserReferralFromSpaceInvite)
       if (!isFromSpaceInvite) { return }
       // get referrer
-      const referrers = context.rootGetters['currentSpace/members']()
-      const referrerId = referrers[0].id
+      const spaceMembers = context.rootGetters['currentSpace/members']()
+      const referrerId = spaceMembers[0].id
       if (!referrerId) { return }
       const referrer = await context.dispatch('api/getPublicUser', { id: referrerId }, { root: true })
       if (!referrer) {
