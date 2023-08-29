@@ -801,7 +801,6 @@ const self = {
     getAdvocateUsedUser: async (context, name) => {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        // const response = await fetch(`${host}/user/by-advocate-referrer-name/${name}`, options)
         const response = await fetch(`${host}/advocate-referral/used/${name}`, options)
         return normalizeResponse(response)
       } catch (error) {
