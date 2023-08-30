@@ -21,7 +21,7 @@
   )
   button.borderless.clear-input-wrap(v-if="addSpaceIsVisible" @click="addSpace")
     img.icon.add(src="@/assets/add.svg")
-  button.borderless.clear-input-wrap(@click.left="clearFilter")
+  button.borderless.clear-input-wrap(@click.left="clearFilter(true)")
     img.icon.cancel(src="@/assets/add.svg")
 </template>
 
@@ -80,15 +80,14 @@ export default {
     })
   },
   mounted () {
-    if (this.isInitialValueFromSpaceListFilterInfo) {
-      const time = 60
-      const info = this.$store.state.spaceListFilterInfo
-      if (!info.filter) { return }
-      let isExpired = dayjs().diff(info.updatedAt, 'seconds')
-      isExpired = isExpired > time
-      if (!isExpired) {
-        this.updateFilter(info.filter)
-      }
+    if (!this.isInitialValueFromSpaceListFilterInfo) { return }
+    const time = 60
+    const info = this.$store.state.spaceListFilterInfo
+    if (!info.filter) { return }
+    let isExpired = dayjs().diff(info.updatedAt, 'seconds')
+    isExpired = isExpired > time
+    if (!isExpired) {
+      this.updateFilter(info.filter)
     }
   },
   computed: {
@@ -142,7 +141,8 @@ export default {
       window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addSpace', { name })
       this.$nextTick(() => {
-        this.clearFilter()
+        const shouldClearFilterInfo = true
+        this.clearFilter(shouldClearFilterInfo)
         this.$store.commit('triggerSpaceDetailsUpdateLocalSpaces')
         this.$store.commit('triggerFocusSpaceDetailsName')
       })
@@ -153,11 +153,17 @@ export default {
       element.focus()
       element.setSelectionRange(0, 99999)
     },
-    clearFilter () {
+    clearFilter (shouldClearFilterInfo) {
       this.filter = ''
       this.$emit('updateFilter', this.filter, true)
       this.$emit('updateFilteredItems', [])
       this.$emit('clearFilter')
+      if (shouldClearFilterInfo) {
+        this.$store.commit('spaceListFilterInfo', {
+          filter: '',
+          updatedAt: new Date().getTime()
+        })
+      }
     },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
