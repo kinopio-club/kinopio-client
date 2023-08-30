@@ -40,7 +40,8 @@ export default {
   actions: {
     checkIfFileTooBig: (context, file) => {
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
-      const isFileTooBig = utils.isFileTooBig(file, userIsUpgraded)
+      const spaceUserIsUpgraded = context.rootGetters['currentSpace/spaceUserIsUpgraded']
+      const isFileTooBig = utils.isFileTooBig({ file, userIsUpgraded, spaceUserIsUpgraded })
       if (isFileTooBig) {
         throw {
           type: 'sizeLimit',
@@ -72,13 +73,14 @@ export default {
       const fileName = utils.normalizeFileUrl(file.name)
       let key = `${cardId || spaceId}/${fileName}`
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
+      const spaceUserIsUpgraded = context.rootGetters['currentSpace/spaceUserIsUpgraded']
       context.dispatch('checkIfFileTooBig', file)
       // add presignedPostData to upload
       let presignedPostData
       if (file.presignedPostData) {
         presignedPostData = file.presignedPostData
       } else {
-        presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type }, { root: true })
+        presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type, spaceUserIsUpgraded }, { root: true })
       }
       const formData = new FormData()
       Object.keys(presignedPostData.fields).forEach(key => {
@@ -128,6 +130,8 @@ export default {
     addCardsAndUploadFiles: async (context, { files, event }) => {
       let position = utils.cursorPositionInSpace(event)
       context.dispatch('currentUser/notifyReadOnly', position, { root: true })
+      const userIsUpgraded = context.rootState.currentUser.isUpgraded
+      const spaceUserIsUpgraded = context.rootGetters['currentSpace/spaceUserIsUpgraded']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) {
         context.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })
@@ -149,8 +153,7 @@ export default {
       }
       // check sizeLimit
       const filesTooBig = files.find(file => {
-        const userIsUpgraded = context.rootState.currentUser.isUpgraded
-        return utils.isFileTooBig(file, userIsUpgraded)
+        return utils.isFileTooBig({ file, userIsUpgraded, spaceUserIsUpgraded })
       })
       if (filesTooBig) {
         context.commit('addNotificationWithPosition', { message: 'Too Big', position, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
@@ -179,10 +182,8 @@ export default {
         })
         context.commit('addPendingUpload', { key, fileName, cardId })
       }
-
       // add presignedPostData to files
-      const userIsUpgraded = context.rootState.currentUser.isUpgraded
-      const multiplePresignedPostData = await context.dispatch('api/createMultiplePresignedPosts', { files: filesPostData, userIsUpgraded }, { root: true })
+      const multiplePresignedPostData = await context.dispatch('api/createMultiplePresignedPosts', { files: filesPostData, userIsUpgraded, spaceUserIsUpgraded }, { root: true })
       files.map((file, index) => {
         file.presignedPostData = multiplePresignedPostData[index]
       })

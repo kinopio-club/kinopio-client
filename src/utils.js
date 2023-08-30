@@ -1947,9 +1947,10 @@ export default {
 
   // Upload
 
-  isFileTooBig (file, userIsUpgraded) {
+  isFileTooBig ({ file, userIsUpgraded, spaceUserIsUpgraded }) {
+    const isUpgraded = userIsUpgraded || spaceUserIsUpgraded
     const sizeLimit = 1024 * 1024 * 5 // 5mb
-    if (file.size > sizeLimit && !userIsUpgraded) {
+    if (file.size > sizeLimit && !isUpgraded) {
       return true
     }
   },
