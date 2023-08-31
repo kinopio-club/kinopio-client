@@ -3,20 +3,25 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildD
   section
     .row
       p Upgrade your account for unlimited cards and uploads
-    .row(v-if="studentDiscountIsAvailable")
+    //- student info
+    .row(v-if="studentDiscountIsAvailable && isSecureAppContextIOS")
+      .badge.danger Your account has a student discount applied but you have to upgrade via the web to use it
+    .row(v-else-if="studentDiscountIsAvailable")
       .badge.success Student discount has been applied to yearly plan
+    //- period picker
     .row
       .segmented-buttons
         button(:class="{active: period === 'month'}" @click.left="updatePeriod('month')") ${{monthlyPrice.amount}}/month
         button(:class="{active: period === 'year'}" @click.left="updatePeriod('year')") ${{yearlyPrice.amount}}/year
           .badge.label-badge -{{yearlyDiscount}}%
-    .should-sign-up(v-if="!currentUserIsSignedIn")
+    //- checkout
+    template(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-    //- Checkout
     template(v-if="currentUserIsSignedIn")
       UpgradeUserStripe(:visible="!isSecureAppContextIOS" :price="currentPrice")
       UpgradeUserApple(:visible="isSecureAppContextIOS" :price="currentPrice")
+
   section(v-if="currentUserIsSignedIn && !isUpgraded")
     p
       img.icon(src="@/assets/lock.svg")

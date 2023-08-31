@@ -1,11 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+const store = useStore()
 
 onMounted(() => {
   updateCredits()
@@ -101,7 +101,10 @@ const subscribe = async () => {
   .row
     button(@click.left="subscribe" :class="{active : state.loading.subscribe}")
       User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
-      span Upgrade for ${{price.amount}}/{{price.period}}
+      template(v-if="state.credits")
+        span Upgrade for ${{initialPaymentAfterCredits}}, then ${{price.amount}}/{{price.period}}
+      template(v-else)
+        span Upgrade for ${{price.amount}}/{{price.period}}
       Loader(:visible="state.loading.subscribe")
 
   .badge.danger(v-if="state.error.unknownServerError")
