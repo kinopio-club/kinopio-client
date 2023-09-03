@@ -110,6 +110,7 @@ const subscribe = async () => {
   .badge.danger(v-if="state.error.unknownServerError")
     span (シ_ _)シ Something went wrong, Please try again or contact support. Your transaction was not processed.
 
+  //- credits
   .row(v-if="state.loading.credits || state.credits")
     Loader(:visible="state.loading.credits")
     .badge.success(v-if="state.credits")

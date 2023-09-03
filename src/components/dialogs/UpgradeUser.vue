@@ -55,7 +55,7 @@ export default {
   data () {
     return {
       dialogHeight: null,
-      period: 'month' // year, life
+      period: 'year' // year, life
     }
   },
   computed: {
