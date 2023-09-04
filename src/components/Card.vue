@@ -2382,6 +2382,7 @@ article.card-wrap
     position absolute
     .user-label-inline
       margin-right 0
+      width max-content
     .user-badge
       display flex
       margin 0

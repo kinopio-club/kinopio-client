@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
 import DiscountRow from '@/components/DiscountRow.vue'
@@ -10,6 +9,7 @@ import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
 import AboutMe from '@/components/AboutMe.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
+const store = useStore()
 
 const props = defineProps({
   visible: Boolean
@@ -65,7 +65,7 @@ const spaceUser = computed(() => store.state.currentSpace.users[0])
 dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeChildDialogs" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
-    p.badge.success(v-if="studentDiscountIsAvailable") Student discount has been applied to yearly plan
+    p.badge.success(v-if="studentDiscountIsAvailable") Your account qualifies for a student discount
     DiscountRow
     ReferredNewUserCredits
     table
