@@ -5,9 +5,9 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildD
       p Upgrade your account for unlimited cards and uploads
     //- student info
     .row(v-if="studentDiscountIsAvailable && isSecureAppContextIOS")
-      .badge.danger Your account has a student discount applied but you have to upgrade via the web to use it
+      .badge.danger Your account qualifies for a student discount but you have to upgrade via the web to use it
     .row(v-else-if="studentDiscountIsAvailable")
-      .badge.success Student discount has been applied to yearly plan
+      .badge.success Your account qualifies for a student discount
     //- period picker
     .row
       .segmented-buttons
