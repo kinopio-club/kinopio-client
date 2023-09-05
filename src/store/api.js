@@ -204,6 +204,8 @@ const self = {
       }
     },
     getNewStuff: async (context) => {
+      const isSpacePage = this.$store.getters.isSpacePage
+      if (!isSpacePage) { return }
       try {
         const response = await fetch(`${host}/meta/new-stuff`)
         return normalizeResponse(response)
@@ -268,6 +270,8 @@ const self = {
       }
     },
     getUserAIImages: async (context, limit) => {
+      const isSpacePage = this.$store.getters.isSpacePage
+      if (!isSpacePage) { return }
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }
       try {
@@ -397,6 +401,8 @@ const self = {
     // Space
 
     getExploreSpaces: async (context) => {
+      const isSpacePage = this.$store.getters.isSpacePage
+      if (!isSpacePage) { return }
       try {
         console.log('🛬 getting new spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
@@ -407,6 +413,8 @@ const self = {
       }
     },
     getLiveSpaces: async (context) => {
+      const isSpacePage = this.$store.getters.isSpacePage
+      if (!isSpacePage) { return }
       try {
         console.log('🛬 getting live spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
