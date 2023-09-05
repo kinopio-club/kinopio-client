@@ -87,7 +87,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             SpaceDetailsInfo(:visible="spaceDetailsInfoIsVisible")
             Import(:visible="importIsVisible")
             //- Read Only badge
-            .label-badge.read-only-badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
+            .label-badge.read-only-badge-wrap(v-if="!userCanEditSpace")
               span(:class="{'invisible': readOnlyJiggle}")
                 span Read Only
               span.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
