@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 import inboxSpace from '@/data/inbox.json'
 import Loader from '@/components/Loader.vue'
@@ -12,6 +11,7 @@ import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
 import { nanoid } from 'nanoid'
+const store = useStore()
 
 onMounted(() => {
   initUser()
@@ -165,8 +165,14 @@ const addCard = async () => {
   if (state.cardsCreatedIsOverLimit) { return }
   if (state.error.maxLength) { return }
   if (!state.newName) { return }
+  // show completion immediately, assume success
+  let newName = state.newName
+  state.success = true
+  state.newName = ''
+  textarea.value.style.height = 'initial'
+  focusAndSelectName()
   // url preview data
-  const url = utils.urlFromString(state.newName)
+  const url = utils.urlFromString(newName)
   let urlPreview = {}
   if (url) {
     let { links, meta } = await getUrlPreview(url)
@@ -180,7 +186,7 @@ const addCard = async () => {
   // create card
   let card = {
     id: nanoid(),
-    name: state.newName,
+    name: newName,
     z: 1,
     urlPreviewUrl: url,
     urlPreviewTitle: urlPreview.title,
@@ -188,25 +194,23 @@ const addCard = async () => {
     urlPreviewImage: urlPreview.image,
     urlPreviewFavicon: urlPreview.favicon
   }
-  state.success = true
-  state.newName = ''
-  textarea.value.style.height = 'initial'
-  focusAndSelectName()
-  // save card to inbox
   try {
     const user = store.state.currentUser
     card.userId = user.id
     console.log('🛫 create card in space', card, state.selectedSpaceId)
+    let spaceId
     if (state.selectedSpaceId === 'inbox') {
-      card = await store.dispatch('api/createCardInInbox', card)
-      const space = cache.getInboxSpace()
-      addCardToSpaceLocal(card, space)
+      const inbox = cache.getInboxSpace()
+      spaceId = inbox.id
     } else {
-      card.spaceId = state.selectedSpaceId
-      card = await store.dispatch('api/createCard', card)
-      addCardToSpaceLocal(card, { id: card.spaceId })
+      spaceId = state.selectedSpaceId
     }
+    // save card
+    card.spaceId = spaceId
+    const space = { id: spaceId }
+    addCardToSpaceLocal(card, space)
     postMessage.send({ name: 'addCardFromAddPage', value: card })
+    card = store.dispatch('api/createCard', card)
   } catch (error) {
     console.error('🚑 addCard', error)
     state.error.unknownServerError = true
