@@ -204,7 +204,7 @@ const self = {
       }
     },
     getNewStuff: async (context) => {
-      const isSpacePage = this.$store.getters.isSpacePage
+      const isSpacePage = context.rootGetters.isSpacePage
       if (!isSpacePage) { return }
       try {
         const response = await fetch(`${host}/meta/new-stuff`)
@@ -270,7 +270,7 @@ const self = {
       }
     },
     getUserAIImages: async (context, limit) => {
-      const isSpacePage = this.$store.getters.isSpacePage
+      const isSpacePage = context.rootGetters.isSpacePage
       if (!isSpacePage) { return }
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }
@@ -401,7 +401,7 @@ const self = {
     // Space
 
     getExploreSpaces: async (context) => {
-      const isSpacePage = this.$store.getters.isSpacePage
+      const isSpacePage = context.rootGetters.isSpacePage
       if (!isSpacePage) { return }
       try {
         console.log('🛬 getting new spaces')
@@ -413,7 +413,7 @@ const self = {
       }
     },
     getLiveSpaces: async (context) => {
-      const isSpacePage = this.$store.getters.isSpacePage
+      const isSpacePage = context.rootGetters.isSpacePage
       if (!isSpacePage) { return }
       try {
         console.log('🛬 getting live spaces')
@@ -645,17 +645,17 @@ const self = {
         context.dispatch('handleServerError', { name: 'createCard', error })
       }
     },
-    createCardInInbox: async (context, body) => {
-      const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/card/to-inbox`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'createCardInInbox', error })
-      }
-    },
+    // createCardInInbox: async (context, body) => {
+    //   const apiKey = context.rootState.currentUser.apiKey
+    //   if (!shouldRequest({ apiKey })) { return }
+    //   try {
+    //     const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+    //     const response = await fetch(`${host}/card/to-inbox`, options)
+    //     return normalizeResponse(response)
+    //   } catch (error) {
+    //     context.dispatch('handleServerError', { name: 'createCardInInbox', error })
+    //   }
+    // },
     searchCards: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }

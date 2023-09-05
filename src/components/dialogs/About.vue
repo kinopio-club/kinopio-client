@@ -123,6 +123,7 @@ export default {
     this.isIPhone = utils.isIPhone()
     this.isAndroid = utils.isAndroid()
     await this.updateNewStuff()
+    if (!utils.arrayHasItems(this.newStuff)) { return }
     this.checkNewStuffIsUpdated(this.newStuff[0].id)
     checkKinopioUpdatesIntervalTimer = setInterval(() => {
       this.checkIfKinopioUpdatesAreAvailable()

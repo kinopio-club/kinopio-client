@@ -603,7 +603,7 @@ export default {
   },
   methods: {
     updateCardWidthForUrl (urls) {
-      if (!utils.arrayExists(urls)) { return }
+      if (!utils.arrayHasItems(urls)) { return }
       if (this.card.resizeWidth) { return }
       this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth: consts.defaultCardMaxWidth })
     },

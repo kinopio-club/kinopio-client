@@ -364,17 +364,7 @@ export default {
     // returns 1.23
     return Math.round(number * 100) / 100
   },
-  arrayExists (array) {
-    this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayExists' })
-    if (!array) {
-      return false
-    } else if (!array.length) {
-      return false
-    } else {
-      return true
-    }
-  },
-  arrayHasItems (array) {
+  arrayHasItems (array) { // !arrayIsEmpty, arrayExists
     this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayHasItems' })
     if (array) {
       if (array.length) {
@@ -786,7 +776,7 @@ export default {
   // normalize items
 
   normalizeItems (items) {
-    if (!this.arrayExists(items)) { return items }
+    if (!this.arrayHasItems(items)) { return items }
     items = items.filter(item => Boolean(item))
     let normalizedItems = {}
     items.forEach(item => {
@@ -1301,7 +1291,7 @@ export default {
   },
   normalizeSpace (space) {
     if (!this.objectHasKeys(space)) { return space }
-    if (!this.arrayExists(space.connections)) { return space }
+    if (!this.arrayHasItems(space.connections)) { return space }
     const connections = space.connections.filter(connection => {
       const hasTypeId = Boolean(connection.connectionTypeId)
       return hasTypeId

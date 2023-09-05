@@ -267,7 +267,7 @@ export default {
       })
     },
     updateWithExistingRemoteSpaces (userSpaces) {
-      if (!utils.arrayExists(this.remoteSpaces)) { return userSpaces }
+      if (!utils.arrayHasItems(this.remoteSpaces)) { return userSpaces }
       let spaces = userSpaces
       this.remoteSpaces.forEach(space => {
         const spaceExists = userSpaces.find(userSpace => userSpace.id === space.id)

@@ -81,7 +81,7 @@ export default {
       if (this.segment.isInviteLink) { return 'inviteLink' }
       if (!this.segment.markdown) { return 'text' }
       let markdown = this.segment.markdown.filter(item => Boolean(item.content))
-      const segmentIsEmpty = !utils.arrayExists(markdown)
+      const segmentIsEmpty = !utils.arrayHasItems(markdown)
       if (segmentIsEmpty) { return 'text' }
       let types = markdown.map(item => item.type)
       types = utils.arrayToString(types)
