@@ -65,10 +65,9 @@ dialog.narrow.multiple-selected-actions(
         img.icon(src="@/assets/split.svg")
         span Split
 
-    p(v-if="canEditAsNonMember && !selectedItemsIsCreatedByCurrentUser")
-      span.badge.info
-        img.icon.open(src="@/assets/open.svg")
-        span In open spaces, you can only edit cards and connections you've made
+    p.badge.info(v-if="canEditAsNonMember && !selectedItemsIsCreatedByCurrentUser")
+      img.icon.open(src="@/assets/open.svg")
+      span In open spaces, you can only edit items you created
 </template>
 
 <script>
