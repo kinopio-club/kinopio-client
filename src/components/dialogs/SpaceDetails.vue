@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned}")
+dialog.space-details.is-pinnable.wide(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned}")
   section
     SpaceDetailsInfo(@updateLocalSpaces="updateLocalSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden" @addSpace="addSpace")
   section.results-actions
@@ -392,7 +392,7 @@ dialog.space-details
     border-radius 100px
     margin-left 3px
   &.is-pinned
-    left -65px
+    left -45px
     top -13px
   .space-list
     .inline-favorite-wrap

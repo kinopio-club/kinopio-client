@@ -629,6 +629,8 @@ dialog
     transition left 0.1s, top 0.1s
   &.narrow
     width 230px
+  &.wide
+    width 280px
   button + button,
   button + input,
   button + label,

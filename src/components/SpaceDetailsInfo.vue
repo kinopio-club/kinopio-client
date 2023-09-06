@@ -87,7 +87,7 @@ template(v-if="settingsIsVisible")
       .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
         button(:class="{ active: currentSpaceIsUserTemplate }")
           img.icon.templates(src="@/assets/templates.svg")
-          span Make Template
+          span Mark as Template
       //- Export
       .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
@@ -340,10 +340,10 @@ export default {
     align-items flex-start
     margin 0
     .textarea-wrap
-      width 170px
+      width 200px
       margin-bottom 6px
       &.full-width
-        width 170px
+        width 225px
       .textarea-loader
         position absolute
         right 0
