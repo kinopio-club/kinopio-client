@@ -25,10 +25,6 @@ dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @clic
     .row
       p Motion
     .row
-      label(:class="{ active: shouldDisableItemJiggle }" @click.left.prevent="toggleshouldDisableItemJiggle" @keydown.stop.enter="toggleshouldDisableItemJiggle")
-        input(type="checkbox" v-model="shouldDisableItemJiggle")
-        span Disable Jiggle While Dragging
-    .row
       label(:class="{ active: shouldDisableStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
         input(type="checkbox" v-model="shouldDisableStickyCards")
         span Disable Sticky Cards
@@ -94,7 +90,6 @@ export default {
     shouldDisableStickyCards () { return !this.$store.state.currentUser.shouldUseStickyCards },
     shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
     shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
-    shouldDisableItemJiggle () { return this.$store.state.currentUser.shouldDisableItemJiggle },
     controlsSettingsIsPinned () { return this.$store.state.controlsSettingsIsPinned },
     panSpeedIsFast () { return this.$store.state.currentUser.panSpeedIsFast },
     outsideSpaceBackgroundIsStatic () { return this.$store.state.currentUser.outsideSpaceBackgroundIsStatic },
@@ -116,10 +111,6 @@ export default {
     },
     updateOutsideSpaceBackgroundIsStatic (value) {
       this.$store.dispatch('currentUser/update', { outsideSpaceBackgroundIsStatic: value })
-    },
-    toggleshouldDisableItemJiggle () {
-      const value = !this.shouldDisableItemJiggle
-      this.$store.dispatch('currentUser/update', { shouldDisableItemJiggle: value })
     },
     toggleShouldUseStickyCards () {
       let value = this.$store.state.currentUser.shouldUseStickyCards

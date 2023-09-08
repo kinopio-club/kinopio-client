@@ -1745,6 +1745,9 @@ const store = createStore({
     },
     isInteractingWithItem: (state) => {
       return state.currentUserIsDraggingCard || state.currentUserIsDrawingConnection || state.currentUserIsResizingCard || state.currentUserIsResizingBox || state.currentUserIsDraggingBox
+    },
+    isMultipleItemsSelected: (state) => {
+      return state.multipleCardsSelectedIds.length || state.multipleConnectionsSelectedIds.length || state.multipleBoxesSelectedIds.length
     }
   },
 

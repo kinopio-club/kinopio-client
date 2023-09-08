@@ -56,7 +56,6 @@ const initialState = {
   weatherLocation: undefined,
   weatherUnitIsCelcius: false,
   shouldUseStickyCards: true,
-  shouldDisableItemJiggle: false,
   shouldPauseConnectionDirections: false,
   lastUsedImagePickerService: '',
   AIImages: [],
@@ -338,10 +337,6 @@ export default {
     shouldUseStickyCards: (state, value) => {
       state.shouldUseStickyCards = value
       cache.updateUser('shouldUseStickyCards', value)
-    },
-    shouldDisableItemJiggle: (state, value) => {
-      state.shouldDisableItemJiggle = value
-      cache.updateUser('shouldDisableItemJiggle', value)
     },
     shouldPauseConnectionDirections: (state, value) => {
       state.shouldPauseConnectionDirections = value

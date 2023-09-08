@@ -460,10 +460,9 @@ export default {
       return isLocked
     },
     shouldJiggle () {
-      const shouldDisableItemJiggle = this.currentUser.shouldDisableItemJiggle
-      const manyCardsSelected = this.multipleCardsSelectedIds.length > 10
+      const isMultipleItemsSelected = this.$store.getters.isMultipleItemsSelected
       const isShiftKeyDown = this.currentUserIsBoxSelecting
-      if (isShiftKeyDown || shouldDisableItemJiggle || manyCardsSelected) { return }
+      if (isMultipleItemsSelected || isShiftKeyDown) { return }
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
     isSelectedOrDragging () {
