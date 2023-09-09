@@ -576,10 +576,6 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldAddCard = value
     },
-    currentUserIsHoveringOverConnectionId: (state, connectionId) => {
-      utils.typeCheck({ value: connectionId, type: 'string' })
-      state.currentUserIsHoveringOverConnectionId = connectionId
-    },
     currentUserIsHoveringOverCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.currentUserIsHoveringOverCardId = cardId
@@ -620,8 +616,12 @@ const store = createStore({
       state.embedIsVisibleForCardId = cardId
     },
 
-    // Connecting
+    // Connections
 
+    currentUserIsHoveringOverConnectionId: (state, connectionId) => {
+      utils.typeCheck({ value: connectionId, type: 'string' })
+      state.currentUserIsHoveringOverConnectionId = connectionId
+    },
     currentUserIsDrawingConnection: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsDrawingConnection = value

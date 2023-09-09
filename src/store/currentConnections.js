@@ -377,6 +377,11 @@ export default {
       let type = getters.typeByTypeId(id)
       return type
     },
+    isCardConnected: (state) => (card, connection) => {
+      let start = connection.startCardId === card.id
+      let end = connection.endCardId === card.id
+      return start || end
+    },
 
     // path utils
 

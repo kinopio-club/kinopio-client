@@ -651,7 +651,7 @@ export default {
       return utils.colorIsDark(color)
     },
     connectorGlowStyle () {
-      const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor || this.currentUserIsHoveringOverCardIdColor
+      const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor || this.currentUserIsHoveringOverCardIdColor || this.currentUserIsHoveringOverConnectionIdColor
       if (!color) { return }
       return { background: color }
     },
@@ -711,6 +711,16 @@ export default {
         const newType = this.updateTypeForConnection(connection.id)
         return newType.color
       }
+      return connectionType.color
+    },
+    currentUserIsHoveringOverConnectionIdColor () {
+      const connectionId = this.$store.state.currentUserIsHoveringOverConnectionId
+      if (!connectionId) { return }
+      const connection = this['currentConnections/byId'](connectionId)
+      if (!connection) { return }
+      const isCardConnected = this.$store.getters['currentConnections/isCardConnected'](this.card, connection)
+      if (!isCardConnected) { return }
+      const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
       return connectionType.color
     },
     updatedAt () { return this.card.nameUpdatedAt || this.card.createdAt },

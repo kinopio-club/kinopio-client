@@ -24,6 +24,9 @@ template(v-if="isVisibleInViewport")
       tabindex="0"
       @dragover.prevent
       @drop.prevent.stop="addCardsAndUploadFiles"
+
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
     )
 
   defs
@@ -402,7 +405,17 @@ export default {
       files = Array.from(files)
       const currentCursor = utils.cursorPositionInViewport(event)
       this.$store.dispatch('upload/addCardsAndUploadFiles', { files, currentCursor })
+    },
+
+    // mouse handlers
+
+    handleMouseEnter () {
+      this.$store.commit('currentUserIsHoveringOverConnectionId', this.connection.id)
+    },
+    handleMouseLeave () {
+      this.$store.commit('currentUserIsHoveringOverConnectionId', '')
     }
+
   },
   watch: {
     shouldAnimate (shouldAnimate) {
