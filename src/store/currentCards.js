@@ -15,12 +15,6 @@ let currentSpaceId
 let prevMovePositions = {}
 let tallestCardHeight = 0
 
-const updateTallestCardHeight = (height) => {
-  if (height > tallestCardHeight) {
-    tallestCardHeight = Math.ceil(height)
-  }
-}
-
 const currentCards = {
   namespaced: true,
   state: {
@@ -47,7 +41,6 @@ const currentCards = {
         card.x = card.x || 100
         card.y = card.y || 100
         state.cards[card.id] = card
-        updateTallestCardHeight(card.height)
       })
       state.ids = state.ids.concat(cardIds)
     },
@@ -392,7 +385,7 @@ const currentCards = {
             height: Math.ceil(card.height)
           }
           context.commit('update', body)
-          updateTallestCardHeight(card.height)
+          context.dispatch('updateTallestCardHeight', card)
           if (!dimensionsChanged) { return }
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
@@ -405,6 +398,17 @@ const currentCards = {
       } else if (cardIds) {
         context.dispatch('removeResize', { cardIds: cardIds })
       }
+    },
+    updateTallestCardHeight: (context, card) => {
+      nextTick(() => {
+        if (!card.height) {
+          card = utils.updateCardDimensions(card)
+        }
+        const height = card.height
+        if (height > tallestCardHeight) {
+          tallestCardHeight = Math.ceil(height)
+        }
+      })
     },
 
     // resize

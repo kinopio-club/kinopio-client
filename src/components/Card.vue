@@ -1093,6 +1093,7 @@ export default {
       card = utils.updateCardDimensions(card)
       if (!card) { return }
       this.$store.commit('currentCards/update', card)
+      this.$store.dispatch('currentCards/updateTallestCardHeight', card)
     },
     correctPaths () {
       if (this.pathIsUpdated) { return }
