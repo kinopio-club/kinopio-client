@@ -14,6 +14,7 @@ import { nextTick } from 'vue'
 let currentSpaceId
 let prevMovePositions = {}
 let tallestCardHeight = 0
+let canBeSelectedSortedByY = {}
 
 const currentCards = {
   namespaced: true,
@@ -661,6 +662,27 @@ const currentCards = {
       context.dispatch('broadcast/update', { updates: card, type: 'restoreRemovedCard', handler: 'currentCards/restoreRemoved' }, { root: true })
     },
 
+    // select
+
+    updateCanBeSelectedSortedByY: (context) => {
+      // remove unselectable
+      const commentsAreHidden = context.state.filterComments
+      let cards = context.getters.all
+      cards = cards.filter(card => !card.isLocked)
+      if (commentsAreHidden) {
+        cards = cards.filter(card => !card.isComment)
+      }
+      // result
+      cards = sortBy(cards, ['y'])
+      let yIndex = []
+      cards.forEach(card => yIndex.push(card.y))
+      const result = {
+        cards,
+        yIndex
+      }
+      canBeSelectedSortedByY = result
+    },
+
     // card details
 
     showCardDetails: (context, cardId) => {
@@ -745,26 +767,10 @@ const currentCards = {
       return cards.filter(card => card.isLocked)
     },
     canBeSelectedSortedByY: (state, getters) => {
-      // remove unselectable
-      const commentsAreHidden = state.filterComments
-      let cards = getters.all
-      cards = cards.filter(card => !card.isLocked)
-      if (commentsAreHidden) {
-        cards = cards.filter(card => !card.isComment)
-      }
-      // result
-      cards = sortBy(cards, ['y'])
-      let yIndex = []
-      cards.forEach(card => yIndex.push(card.y))
-      const result = {
-        cards,
-        yIndex
-      }
-      return result
+      return canBeSelectedSortedByY
     },
     isSelectable: (state, getters, rootState) => (position) => {
       const threshold = tallestCardHeight
-      const canBeSelectedSortedByY = getters.canBeSelectedSortedByY
       let yIndex = canBeSelectedSortedByY.yIndex
       let cards = canBeSelectedSortedByY.cards
       // ┌─────────────────────────────────┐

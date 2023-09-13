@@ -415,8 +415,12 @@ export default {
         }
       })
     },
+    selectableCards () {
+      this.$store.dispatch('currentCards/updateCanBeSelectedSortedByY')
+      return this.$store.getters['currentCards/canBeSelectedSortedByY'].cards
+    },
     selectContainedCards () {
-      const cards = this.$store.getters['currentCards/canBeSelectedSortedByY'].cards
+      const cards = this.selectableCards()
       cards.forEach(card => {
         if (this.isItemInSelectedBoxes(card, 'card')) {
           this.$store.dispatch('addToMultipleCardsSelected', card.id)

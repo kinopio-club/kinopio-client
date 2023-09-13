@@ -393,6 +393,7 @@ export default {
       startCursor = utils.cursorPositionInViewport(event)
       this.currentCursor = startCursor
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
+      this.$store.dispatch('currentCards/updateCanBeSelectedSortedByY')
       if (utils.isMultiTouch(event)) { return }
       this.startLocking()
       if (event.touches) {
