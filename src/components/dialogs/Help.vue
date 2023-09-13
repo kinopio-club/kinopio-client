@@ -32,6 +32,7 @@ dialog.help.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
       .button-wrap
         a(href="https://help.kinopio.club/api/")
           button
+            img.icon(src="@/assets/system.svg")
             span API{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
     //- .row
