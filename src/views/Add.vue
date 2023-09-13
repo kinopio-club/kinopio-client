@@ -209,12 +209,12 @@ const addCard = async () => {
     card.spaceId = spaceId
     const space = { id: spaceId }
     addCardToSpaceLocal(card, space)
-    postMessage.send({ name: 'addCardFromAddPage', value: card })
     card = store.dispatch('api/createCard', card)
   } catch (error) {
     console.error('🚑 addCard', error)
-    // state.error.unknownServerError = true
+    state.error.unknownServerError = true
   }
+  postMessage.send({ name: 'addCardFromAddPage', value: card })
 }
 const addCardToSpaceLocal = (card, space) => {
   space = cache.space(space.id)
