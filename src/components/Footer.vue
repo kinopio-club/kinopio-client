@@ -51,7 +51,9 @@ export default {
       }
     })
     window.addEventListener('scroll', this.updatePosition)
-    this.updatePosition()
+    this.$nextTick(() => {
+      this.updatePosition()
+    })
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updatePosition)
