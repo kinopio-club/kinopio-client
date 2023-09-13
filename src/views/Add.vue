@@ -213,7 +213,7 @@ const addCard = async () => {
     card = store.dispatch('api/createCard', card)
   } catch (error) {
     console.error('🚑 addCard', error)
-    state.error.unknownServerError = true
+    // state.error.unknownServerError = true
   }
 }
 const addCardToSpaceLocal = (card, space) => {
