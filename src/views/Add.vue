@@ -53,7 +53,7 @@ const currentUser = computed(() => store.state.currentUser)
 const isAddPage = computed(() => store.state.isAddPage)
 const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
 const selectedSpaceUrl = computed(() => `${consts.kinopioDomain()}/${state.selectedSpaceId}`)
-const textareaPlaceholder = computed(() => 'Type text here, or paste a URL')
+const textareaPlaceholder = computed(() => 'Add cards by typing here, or paste a URL')
 const name = computed({
   get () {
     return state.newName
@@ -303,15 +303,6 @@ const insertLineBreak = async (event) => {
 main.add-page
   .add-form(v-if="currentUserIsSignedIn")
     section
-      .row.title-row-flex
-        span.title Add Card
-        //- inbox
-        .button-wrap
-          a(:href="inboxUrl")
-            button.small-button
-              img.icon.inbox-icon(src="@/assets/inbox.svg")
-              span Inbox
-    section
       .row(v-if="!isOnline")
         .badge.danger
           img.icon.offline(src="@/assets/offline.svg")
@@ -355,17 +346,21 @@ main.add-page
         Loader(:visible="state.loading.updateSpaces")
       //- submit
       .row
+        .button-wrap
+          a(:href="selectedSpaceUrl")
+            button
+              span Space{{' '}}
+              img.icon.visit(src="@/assets/visit.svg")
         //- Add
         .button-wrap
           button.success(@pointerup="addCard" :class="{disabled: state.error.maxLength}")
             img.icon.add-icon(src="@/assets/add.svg")
             span Add
-          .badge.label-badge.info-badge(v-if="state.keyboardShortcutTipIsVisible")
+          .badge.label-badge.enter-badge(v-if="state.keyboardShortcutTipIsVisible")
             span Enter
       .row(v-if="state.success")
-        a(:href="selectedSpaceUrl")
-          .badge.success.button-badge
-            span Added to space
+        .badge.success
+          span Added to space
 
   //- sign in
   section(v-if="!currentUserIsSignedIn")
@@ -389,6 +384,7 @@ main.add-page
   padding 8px
   min-height 100vh
   height 100%
+  margin-top 6px
   margin-bottom 2rem
   background var(--primary-background)
   section
@@ -412,7 +408,7 @@ main.add-page
       margin 0
 
   .row
-    margin-bottom 10px
+    margin-bottom 12px
     display flex
     > input
       margin-bottom 0
@@ -432,12 +428,12 @@ main.add-page
       .title
         color var(--primary)
 
-    .info-badge
-      position static
+    .enter-badge
+      position absolute
       display inline-block
-      padding 0px 5px
       vertical-align 0
-      margin-left 6px
+      bottom -14px
+      left 6px
 
     .textarea-wrap
       margin-top 3px
