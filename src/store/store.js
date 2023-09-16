@@ -1684,6 +1684,7 @@ const store = createStore({
   },
   getters: {
     isSpacePage: (state) => {
+      if (window.location.pathname === '/add') { return }
       return !state.isAddPage
     },
     shouldScrollAtEdges: (state, getters) => (event) => {
