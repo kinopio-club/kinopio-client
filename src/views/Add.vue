@@ -326,6 +326,7 @@ main.add-page
         User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
         .textarea-wrap
           textarea.name(
+            name="cardName"
             ref="textarea"
             rows="1"
             :placeholder="textareaPlaceholder"
@@ -370,8 +371,8 @@ main.add-page
     .row
       p Sign In to Use Kinopio
     form(@submit.prevent="signIn")
-      input(type="email" placeholder="Email" required v-model="state.email" @input="clearErrors")
-      input(type="password" placeholder="Password" required v-model="state.password" @input="clearErrors")
+      input(name="email" type="email" placeholder="Email" required v-model="state.email" @input="clearErrors")
+      input(name="password" type="password" placeholder="Password" required v-model="state.password" @input="clearErrors")
       .row
         button(type="submit" :class="{active : state.loading.signIn}")
           span Sign In
