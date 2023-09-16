@@ -194,27 +194,30 @@ const addCard = async () => {
     urlPreviewImage: urlPreview.image,
     urlPreviewFavicon: urlPreview.favicon
   }
+  let space
   try {
     const user = store.state.currentUser
     card.userId = user.id
     console.log('🛫 create card in space', card, state.selectedSpaceId)
     let spaceId
+    // inbox
     if (state.selectedSpaceId === 'inbox') {
-      const inbox = cache.getInboxSpace()
-      spaceId = inbox.id
+      card = await store.dispatch('api/createCardInInbox', card)
+      space = { id: card.spaceId }
+    // space
     } else {
       spaceId = state.selectedSpaceId
+      card.spaceId = spaceId
+      space = { id: spaceId }
+      card = store.dispatch('api/createCard', card)
     }
-    // save card
-    card.spaceId = spaceId
-    const space = { id: spaceId }
-    addCardToSpaceLocal(card, space)
-    card = store.dispatch('api/createCard', card)
   } catch (error) {
-    console.error('🚑 addCard', error)
+    console.error('🚒 addCard', error)
     state.error.unknownServerError = true
   }
+  console.log('🛫 new card', card)
   postMessage.send({ name: 'addCardFromAddPage', value: card })
+  addCardToSpaceLocal(card, space)
 }
 const addCardToSpaceLocal = (card, space) => {
   space = cache.space(space.id)
