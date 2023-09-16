@@ -36,7 +36,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   template(v-if="segment.isInviteLink")
     OtherSpacePreview(:isInvite="true" :otherSpace="segment.otherSpace" :url="segment.name" :parentCardId="parentCardId" :shouldCloseAllDialogs="true")
   //- Other Space
-  template(v-if="segment.isLink")
+  template(v-if="isSpaceLink(segment)")
     OtherSpacePreview(:otherSpace="segment.otherSpace" :url="segment.name" :parentCardId="parentCardId" :shouldCloseAllDialogs="true")
   //- File
   span.badge.secondary-on-dark-background(v-if="segment.isFile")
@@ -130,6 +130,10 @@ export default {
       } else {
         window.open(url) // opens url in new tab
       }
+    },
+    isSpaceLink (segment) {
+      if (segment.cardId) { return }
+      return segment.isLink
     }
   }
 }
