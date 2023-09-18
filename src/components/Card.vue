@@ -1134,7 +1134,7 @@ export default {
     connectionColorForCardIds (cardIds) {
       if (!cardIds.length) { return }
       let color
-      cardIds.forEach(cardId => {
+      cardIds.find(cardId => {
         let connections = this['currentConnections/all']
         connections = connections.filter(connection => connection.startCardId === cardId || connection.endCardId === cardId)
         connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
@@ -1152,7 +1152,7 @@ export default {
     connectionColorForConnectionIds (connectionIds) {
       if (!connectionIds.length) { return }
       let color
-      connectionIds.forEach(connectionId => {
+      connectionIds.find(connectionId => {
         const connection = this['currentConnections/byId'](connectionId)
         if (!connection) { return }
         const isCardConnected = this.$store.getters['currentConnections/isCardConnected'](this.card, connection)
