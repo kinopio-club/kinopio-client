@@ -651,7 +651,7 @@ export default {
       return utils.colorIsDark(color)
     },
     connectorGlowStyle () {
-      const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor || this.currentUserIsHoveringOverCardIdColor || this.currentUserIsHoveringOverConnectionIdColor
+      const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor || this.currentUserIsHoveringOverCardIdColor || this.currentUserIsMultipleSelectedCardIdColor || this.currentUserIsHoveringOverConnectionIdColor || this.currentUserIsMultipleSelectedConnectionIdColor
       if (!color) { return }
       return { background: color }
     },
@@ -699,29 +699,20 @@ export default {
       return connectionType.color
     },
     currentUserIsHoveringOverCardIdColor () {
-      const hoveringOverCardId = this.currentUserIsHoveringOverCardId
-      if (!hoveringOverCardId) { return }
-      let connections = this['currentConnections/all']
-      connections = connections.filter(connection => connection.startCardId === hoveringOverCardId || connection.endCardId === hoveringOverCardId)
-      connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
-      const connection = connections[0]
-      if (!connection) { return }
-      const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
-      if (!connectionType) {
-        const newType = this.updateTypeForConnection(connection.id)
-        return newType.color
-      }
-      return connectionType.color
+      const cardId = this.currentUserIsHoveringOverCardId
+      return this.connectionColorForCardIds([cardId])
+    },
+    currentUserIsMultipleSelectedCardIdColor () {
+      const cardIds = this.multipleCardsSelectedIds
+      return this.connectionColorForCardIds(cardIds)
     },
     currentUserIsHoveringOverConnectionIdColor () {
       const connectionId = this.$store.state.currentUserIsHoveringOverConnectionId
-      if (!connectionId) { return }
-      const connection = this['currentConnections/byId'](connectionId)
-      if (!connection) { return }
-      const isCardConnected = this.$store.getters['currentConnections/isCardConnected'](this.card, connection)
-      if (!isCardConnected) { return }
-      const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
-      return connectionType.color
+      return this.connectionColorForConnectionIds([connectionId])
+    },
+    currentUserIsMultipleSelectedConnectionIdColor () {
+      const connectionIds = this.$store.state.multipleConnectionsSelectedIds
+      return this.connectionColorForConnectionIds(connectionIds)
     },
     updatedAt () { return this.card.nameUpdatedAt || this.card.createdAt },
     dateUpdatedAt () {
@@ -1136,6 +1127,40 @@ export default {
     handleMouseLeave () {
       this.unstickToCursor()
       this.$store.commit('currentUserIsHoveringOverCardId', '')
+    },
+
+    // connector glow
+
+    connectionColorForCardIds (cardIds) {
+      if (!cardIds.length) { return }
+      let color
+      cardIds.forEach(cardId => {
+        let connections = this['currentConnections/all']
+        connections = connections.filter(connection => connection.startCardId === cardId || connection.endCardId === cardId)
+        connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
+        const connection = connections[0]
+        if (!connection) { return }
+        const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
+        if (!connectionType) {
+          const newType = this.updateTypeForConnection(connection.id)
+          return newType.color
+        }
+        color = connectionType.color
+      })
+      return color
+    },
+    connectionColorForConnectionIds (connectionIds) {
+      if (!connectionIds.length) { return }
+      let color
+      connectionIds.forEach(connectionId => {
+        const connection = this['currentConnections/byId'](connectionId)
+        if (!connection) { return }
+        const isCardConnected = this.$store.getters['currentConnections/isCardConnected'](this.card, connection)
+        if (!isCardConnected) { return }
+        const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
+        color = connectionType.color
+      })
+      return color
     },
 
     // sticky
