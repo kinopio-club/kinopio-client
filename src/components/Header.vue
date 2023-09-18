@@ -64,7 +64,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
 
         .space-details-row.segmented-buttons
           //- Back
-          .button-wrap(v-if="prevSpaceId" title="Go Back" @click.stop="changeToPrevSpace")
+          .button-wrap(v-if="backButtonIsVisible" title="Go Back" @click.stop="changeToPrevSpace")
             button
               img.icon.left-arrow(src="@/assets/down-arrow.svg")
           //- Current Space
@@ -443,7 +443,7 @@ export default {
       return this.$store.state.pricingIsVisible
     },
     isFadingOut () { return this.$store.state.isFadingOutDuringTouch },
-    prevSpaceId () {
+    backButtonIsVisible () {
       const spaceId = this.$store.state.prevSpaceIdInSession
       return spaceId && spaceId !== this.currentSpace.id
     }

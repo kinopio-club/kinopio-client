@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.space-details.is-pinnable.wide(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned}")
+dialog.space-details.is-pinnable.wide(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned, 'back-button-is-visible': backButtonIsVisible}")
   section
     SpaceDetailsInfo(@updateLocalSpaces="updateLocalSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden" @addSpace="addSpace")
   section.results-actions
@@ -175,6 +175,10 @@ export default {
       } else {
         return 'Remove'
       }
+    },
+    backButtonIsVisible () {
+      const spaceId = this.$store.state.prevSpaceIdInSession
+      return spaceId && spaceId !== this.currentSpace.id
     }
   },
   methods: {
@@ -378,6 +382,8 @@ export default {
 
 <style lang="stylus">
 dialog.space-details
+  &.back-button-is-visible
+    left -18px
   button.disabled
     opacity 0.5
     pointer-events none
