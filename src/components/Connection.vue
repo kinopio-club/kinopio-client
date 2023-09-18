@@ -107,7 +107,7 @@ export default {
     ]),
     connectionClasses () {
       return {
-        active: this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected || this.isCurrentCardConnection,
+        active: this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected || this.isCurrentCardConnection || this.isHoveredOverConnectedCard,
         filtered: this.isFiltered,
         hover: this.isHovered,
         'hide-connection-outline': this.shouldHideConnectionOutline,
@@ -182,6 +182,11 @@ export default {
       return Boolean(this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected)
     },
     isHovered () { return this.id === this.currentUserIsHoveringOverConnectionId },
+    isHoveredOverConnectedCard () {
+      const cardId = this.$store.state.currentUserIsHoveringOverCardId
+      if (!cardId) { return }
+      return (cardId === this.startCardId || cardId === this.endCardId)
+    },
 
     // filters
     filtersIsActive () {
