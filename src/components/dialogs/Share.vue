@@ -15,6 +15,17 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   section(v-if="spaceIsRemote")
     ReadOnlySpaceInfoBadges
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
+
+    //- Private
+    section.subsection.share-private(v-if="spaceIsPrivate")
+      .row
+        .segmented-buttons
+          button(@click.left="copyUrl")
+            img.icon.copy(src="@/assets/copy.svg")
+            span Copy Private URL
+          button(v-if="webShareIsSupported" @click="webShare")
+            img.icon.share(src="@/assets/share.svg")
+    //- Public
     section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
       //- Explore
       template(v-if="exploreSectionIsVisible")
@@ -341,9 +352,7 @@ export default {
   .collaborators
     max-height calc(100vh - 200px)
   .share-private
-    margin-bottom 10px
-    .last-child
-      margin 0
+    margin-top 10px
   .privacy-button + input
     margin-top 10px
   .privacy-button
