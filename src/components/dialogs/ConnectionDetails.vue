@@ -13,22 +13,19 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       //- Arrows or Label
       ConnectionDecorators(:connections="[currentConnection]")
 
-    p.edit-message(v-if="!canEditConnection")
+    p.edit-message.badge.info(v-if="!canEditConnection")
       template(v-if="spacePrivacyIsOpen")
-        span.badge.info
-          img.icon.open(src="@/assets/open.svg")
-          span In open spaces, you can only edit connections you've made
+        img.icon.open(src="@/assets/open.svg")
+        span In open spaces, you can only edit connections you created
       template(v-else-if="isInvitedButCannotEditSpace")
-        span.badge.info
-          img.icon(src="@/assets/unlock.svg")
-          span To edit spaces you've been invited to, you'll need to sign up or in
+        img.icon(src="@/assets/unlock.svg")
+        span To edit spaces you've been invited to, you'll need to sign up or in
         .row
           .button-wrap
             button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
       template(v-else-if="spacePrivacyIsClosed")
-        span.badge.info
-          img.icon(src="@/assets/unlock.svg")
-          span Read Only
+        img.icon(src="@/assets/unlock.svg")
+        span Read Only
     .row(v-if="canEditConnection")
       //- Remove
       button.danger(@click.left="removeConnection")

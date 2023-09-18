@@ -151,7 +151,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         template(v-if="spacePrivacyIsOpen")
           span.badge.info
             img.icon.open(src="@/assets/open.svg")
-            span In open spaces, you can only move and edit cards you've made
+            span In open spaces, you can only move and edit cards you created
         template(v-else-if="isInvitedButCannotEditSpace")
           span.badge.info
             img.icon(src="@/assets/unlock.svg")

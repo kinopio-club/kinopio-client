@@ -53,6 +53,7 @@ const store = createStore({
     userSettingsIsVisible: false,
     isFadingOutDuringTouch: false,
     prevSpaceIdInSession: '',
+    outsideSpaceBackgroundColor: '',
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -460,6 +461,10 @@ const store = createStore({
         state.prevSpaceIdInSession = value
       }
     },
+    outsideSpaceBackgroundColor: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.outsideSpaceBackgroundColor = value
+    },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.searchIsVisible = value
@@ -576,10 +581,6 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldAddCard = value
     },
-    currentUserIsHoveringOverConnectionId: (state, connectionId) => {
-      utils.typeCheck({ value: connectionId, type: 'string' })
-      state.currentUserIsHoveringOverConnectionId = connectionId
-    },
     currentUserIsHoveringOverCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.currentUserIsHoveringOverCardId = cardId
@@ -620,8 +621,12 @@ const store = createStore({
       state.embedIsVisibleForCardId = cardId
     },
 
-    // Connecting
+    // Connections
 
+    currentUserIsHoveringOverConnectionId: (state, connectionId) => {
+      utils.typeCheck({ value: connectionId, type: 'string' })
+      state.currentUserIsHoveringOverConnectionId = connectionId
+    },
     currentUserIsDrawingConnection: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsDrawingConnection = value
@@ -1746,6 +1751,9 @@ const store = createStore({
     },
     isInteractingWithItem: (state) => {
       return state.currentUserIsDraggingCard || state.currentUserIsDrawingConnection || state.currentUserIsResizingCard || state.currentUserIsResizingBox || state.currentUserIsDraggingBox
+    },
+    isMultipleItemsSelected: (state) => {
+      return state.multipleCardsSelectedIds.length || state.multipleConnectionsSelectedIds.length || state.multipleBoxesSelectedIds.length
     }
   },
 

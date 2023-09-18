@@ -39,17 +39,12 @@ export default {
   beforeUnmount () {
     this.cancel()
   },
-  data () {
-    return {
-      backgroundColor: ''
-    }
-  },
   computed: {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     outsideSpaceBackgroundIsStatic () { return this.$store.state.currentUser.outsideSpaceBackgroundIsStatic },
     styles () {
       return {
-        backgroundColor: this.backgroundColor
+        backgroundColor: this.$store.state.outsideSpaceBackgroundColor
       }
     }
   },
@@ -67,11 +62,12 @@ export default {
       r += ri
       g += gi
       b += bi
-      this.backgroundColor = `rgb(${r}, ${g}, ${b})`
+      let backgroundColor = `rgb(${r}, ${g}, ${b})`
       if (this.outsideSpaceBackgroundIsStatic) {
-        this.backgroundColor = utils.cssVariable('secondary-active-background')
+        backgroundColor = utils.cssVariable('secondary-active-background')
       }
-      this.updateMetaThemeColor(this.backgroundColor)
+      this.$store.commit('outsideSpaceBackgroundColor', backgroundColor)
+      this.updateMetaThemeColor(backgroundColor)
     },
     cancel () {
       window.cancelAnimationFrame(colorCycleTimer)

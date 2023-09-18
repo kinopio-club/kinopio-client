@@ -1,11 +1,12 @@
 <script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
+import { useStore } from 'vuex'
+
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
 
 import uniq from 'lodash-es/uniq'
 import uniqBy from 'lodash-es/uniqBy'
-import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
-import { useStore } from 'vuex'
 const store = useStore()
 
 const props = defineProps({

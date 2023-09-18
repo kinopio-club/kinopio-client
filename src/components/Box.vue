@@ -174,9 +174,8 @@ export default {
     isPainting () { return this.$store.state.currentUserIsPainting },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     shouldJiggle () {
-      const shouldDisableItemJiggle = this.$store.state.currentUser.shouldDisableItemJiggle
-      const manyCardsSelected = this.$store.state.multipleCardsSelectedIds.length > 10
-      if (shouldDisableItemJiggle || manyCardsSelected) { return }
+      const isMultipleItemsSelected = this.$store.getters.isMultipleItemsSelected
+      if (isMultipleItemsSelected) { return }
       return this.isDragging
     },
     isDragging () {
