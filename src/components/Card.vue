@@ -2261,7 +2261,7 @@ article.card-wrap
       position absolute
       left -1px
       top -1px
-      width 10px
+      width 9.5px
 
     .resize-icon
       position absolute
