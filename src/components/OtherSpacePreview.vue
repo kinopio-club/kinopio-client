@@ -1,11 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
+const store = useStore()
 
 const props = defineProps({
   otherSpace: Object,
@@ -13,7 +13,8 @@ const props = defineProps({
   parentCardId: String,
   shouldCloseAllDialogs: Boolean,
   shouldTruncateName: Boolean,
-  isInvite: Boolean
+  isInvite: Boolean,
+  isNotClickable: Boolean
 })
 
 const otherSpaceIsPrivate = computed(() => {
@@ -81,8 +82,8 @@ const showOtherSpaceDetailsIsVisible = async (event) => {
 </script>
 
 <template lang="pug">
-a.other-space-preview(@click.prevent.stop :href="props.url" ref="badge")
-  .badge.button-badge.link-badge(:class="{ active: isActive }" @mouseup.prevent="showOtherSpaceDetailsIsVisible($event)" @touchend.prevent="showOtherSpaceDetailsIsVisible($event)")
+a.other-space-preview(@click.prevent.stop.left :href="props.url" ref="badge")
+  .badge.button-badge.link-badge(:class="{ active: isActive, 'is-not-clickable': props.isNotClickable }" @mouseup.prevent="showOtherSpaceDetailsIsVisible($event)" @touchend.prevent="showOtherSpaceDetailsIsVisible($event)")
     template(v-if="props.isInvite")
       .badge.info Invite
     template(v-if="isRemoved")
@@ -104,5 +105,9 @@ a.other-space-preview(@click.prevent.stop :href="props.url" ref="badge")
   text-decoration none
   .badge
     display inline-block
+  .is-not-clickable
+    box-shadow none !important
+    pointer-events none
+    // background-color var(--secondary-active-background)
 
 </style>
