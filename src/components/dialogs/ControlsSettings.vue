@@ -7,23 +7,19 @@ dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @clic
 
   section
     .row
-      p New Spaces
+      p General
     .row
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
         input(type="checkbox" v-model="newSpacesAreBlank")
         span New Spaces Are Blank
-  section(v-if="deviceSupportsHapticFeedback")
+  section
     .row
-      p Device
-    .row
+      p Motion
+    .row(v-if="deviceSupportsHapticFeedback")
       label(:class="{active: shouldDisableHapticFeedback}" @click.left.prevent="toggleShouldDisableHapticFeedback" @keydown.stop.enter="toggleShouldDisableHapticFeedback")
         input(type="checkbox" v-model="shouldDisableHapticFeedback")
         img.icon.vibrate(src="@/assets/vibrate.svg")
         span Disable Haptic Feedback
-
-  section
-    .row
-      p Motion
     .row
       label(:class="{ active: shouldDisableStickyCards }" @click.left.prevent="toggleShouldUseStickyCards" @keydown.stop.enter="toggleShouldUseStickyCards")
         input(type="checkbox" v-model="shouldDisableStickyCards")
@@ -34,21 +30,29 @@ dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @clic
         span Pause Connection Directions
 
   section
-    .row
-      p Outside Space
-    section.subsection
+    .row.title-row
+      p Outside Space Color
+      .button-wrap
+        button.small-button(@click="toggleOutsideSpaceColorTipsIsVisible" :class="{ active: outsideSpaceColorTipsIsVisible }")
+          span ?
+    section.subsection(v-if="outsideSpaceColorTipsIsVisible")
       p The area outside your space, visible when zoomed out
     .row
+      .outside-space(:style="outsideSpaceStyles")
+        BackgroundPreview(:space="currentSpace")
       .segmented-buttons
         button(:class="{ active: !outsideSpaceBackgroundIsStatic }" @click="updateOutsideSpaceBackgroundIsStatic(false)")
-          span Dynamic Colors
+          span Colorful
         button(:class="{ active: outsideSpaceBackgroundIsStatic }" @click="updateOutsideSpaceBackgroundIsStatic(true)")
-          span Static
+          span Grey
 
   section
-    .row
+    .row.title-row
       p Panning
-    section.subsection
+      .button-wrap
+        button.small-button(@click="togglePanningTipsIsVisible" :class="{ active: panningTipsIsVisible }")
+          span ?
+    section.subsection(v-if="panningTipsIsVisible")
       p Hold and drag space key, or right/middle mouse button, to Pan
     .row
       .segmented-buttons
@@ -67,9 +71,13 @@ dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @clic
 <script>
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import BackgroundPreview from '@/components/BackgroundPreview.vue'
 
 export default {
   name: 'ControlsSettings',
+  components: {
+    BackgroundPreview
+  },
   props: {
     visible: Boolean
   },
@@ -82,7 +90,9 @@ export default {
   },
   data () {
     return {
-      dialogHeight: null
+      dialogHeight: null,
+      panningTipsIsVisible: false,
+      outsideSpaceColorTipsIsVisible: false
     }
   },
   computed: {
@@ -95,7 +105,14 @@ export default {
     outsideSpaceBackgroundIsStatic () { return this.$store.state.currentUser.outsideSpaceBackgroundIsStatic },
     newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank },
     shouldDisableHapticFeedback () { return this.$store.state.currentUser.shouldDisableHapticFeedback },
-    deviceSupportsHapticFeedback () { return consts.isSecureAppContext && this.isMobile }
+    deviceSupportsHapticFeedback () { return consts.isSecureAppContext && this.isMobile },
+    outsideSpaceStyles () {
+      const color = this.$store.state.outsideSpaceBackgroundColor
+      return {
+        backgroundColor: color
+      }
+    },
+    currentSpace () { return this.$store.state.currentSpace }
   },
   methods: {
     toggleShouldDisableHapticFeedback () {
@@ -137,6 +154,23 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
+    },
+
+    // tips
+
+    clearTips () {
+      this.panningTipsIsVisible = false
+      this.outsideSpaceColorTipsIsVisible = false
+    },
+    togglePanningTipsIsVisible () {
+      const value = !this.panningTipsIsVisible
+      this.clearTips()
+      this.panningTipsIsVisible = value
+    },
+    toggleOutsideSpaceColorTipsIsVisible () {
+      const value = !this.outsideSpaceColorTipsIsVisible
+      this.clearTips()
+      this.outsideSpaceColorTipsIsVisible = value
     }
   },
   watch: {
@@ -162,4 +196,23 @@ export default {
     margin-top 0
   .icon.vibrate
     vertical-align 1px
+  .title-row
+    p + .button-wrap
+      margin 0
+  .outside-space
+    display block
+    width 30px
+    height 30px
+    border-radius var(--entity-radius)
+    margin-right 6px
+    position relative
+    .background-preview
+      position absolute
+      bottom 4px
+      right 4px
+      .preview-wrap
+        background-color var(--primary-background)
+        width 18px
+        height 18px
+        border-radius var(--small-entity-radius)
 </style>

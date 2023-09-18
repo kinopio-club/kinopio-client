@@ -53,6 +53,7 @@ const store = createStore({
     userSettingsIsVisible: false,
     isFadingOutDuringTouch: false,
     prevSpaceIdInSession: '',
+    outsideSpaceBackgroundColor: '',
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -459,6 +460,10 @@ const store = createStore({
       } else {
         state.prevSpaceIdInSession = value
       }
+    },
+    outsideSpaceBackgroundColor: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.outsideSpaceBackgroundColor = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
