@@ -1607,8 +1607,12 @@ export default {
     },
     updateStylesWithWidth (styles) {
       const cardHasExtendedContent = this.cardUrlPreviewIsVisible || this.otherCardIsVisible || this.isVisualCard || this.isAudioCard
+      const cardHasMedia = this.cardHasMedia || this.cardHasUrls
       if (this.width) {
         styles.width = this.width
+      }
+      if (this.cardHasMedia) {
+        styles.width = consts.defaultCardMaxWidth
       }
       if (this.resizeWidth) {
         styles.maxWidth = this.resizeWidth

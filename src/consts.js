@@ -11,7 +11,7 @@ export default {
   referralCreditAmount: 6,
   defaultTimeout: 40000,
   minCardEmbedWidth: 235,
-  defaultCardMaxWidth: 200,
+  defaultCardMaxWidth: 200, // 230
   AIImageLimitUpgradedUser: 50,
   AIImageLimitFreeUser: 10,
   pexelsApiKey: '4kZOQl4a0OjcWLrMHzj6sEJMarmlZzJiP6P67lqZpOrxbtITfwpKyC4j',
