@@ -1222,6 +1222,14 @@ const currentSpace = {
       const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
       const spaceUserIsUpgraded = getters.spaceUserIsUpgraded
       return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
+    },
+    readOnlyKey: (state, getters, rootState, rootGetters) => (space) => {
+      const readOnlyKey = rootState.spaceReadOnlyKey
+      if (space.id === readOnlyKey.spaceId) {
+        return readOnlyKey.key
+      } else {
+        return null
+      }
     }
   }
 }

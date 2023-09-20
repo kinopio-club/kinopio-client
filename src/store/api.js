@@ -112,6 +112,9 @@ const self = {
       if (apiKey) {
         headers.append('Authorization', apiKey)
       }
+      if (options.spaceReadOnlyKey) {
+        headers.append('Read-Only-Authorization', options.spaceReadOnlyKey)
+      }
       headers.append('User-Id', context.rootState.currentUser.id)
       return {
         method: options.method,
@@ -424,19 +427,19 @@ const self = {
         context.dispatch('handleServerError', { name: 'getLiveSpaces', error, shouldNotNotifyUser: true })
       }
     },
-    getSpace: async (context, { space, shouldRequestRemote }) => {
+    getSpace: async (context, { space, shouldRequestRemote, spaceReadOnlyKey }) => {
       try {
         const apiKey = context.rootState.currentUser.apiKey
         if (!shouldRequest({ shouldRequestRemote, apiKey })) { return }
+        let spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
         console.log('🛬 getting remote space', space.id)
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace, spaceReadOnlyKey })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getSpace', error })
       }
     },
-
     getOtherItems: async (context, { cardIds, spaceIds, invites }) => {
       const max = 60
       try {
@@ -457,15 +460,15 @@ const self = {
         context.dispatch('handleServerError', { name: 'getSpaces', error })
       }
     },
-
     getSpaceAnonymously: async (context, space) => {
       const isOffline = !window.navigator.onLine
       if (isOffline) { return }
       const invite = cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id) || {}
       space.collaboratorKey = space.collaboratorKey || invite.collaboratorKey
+      let spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
       try {
-        console.log('🛬 getting remote space anonymously', space.id, space.collaboratorKey)
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: space })
+        console.log('🛬 getting remote space anonymously', space.id, space.collaboratorKey, spaceReadOnlyKey)
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: space, spaceReadOnlyKey })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {

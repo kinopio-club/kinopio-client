@@ -189,7 +189,10 @@ const router = createRouter({
         const disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
         store.commit('shouldValidateUserReferralFromSpaceInvite', true)
         store.commit('disableViewportOptimizations', disableViewportOptimizations)
-        if (!spaceId || !collaboratorKey) { return }
+        if (!spaceId || !collaboratorKey) {
+          store.commit('addNotification', { message: 'Invalid invite URL', type: 'danger' })
+          return
+        }
         store.commit('isLoadingSpace', true)
         if (apiKey) {
           store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
@@ -210,6 +213,22 @@ const router = createRouter({
           next()
         }
         store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
+      }
+    }, {
+      path: '/read',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const spaceId = urlParams.get('spaceId')
+        const readOnlyKey = urlParams.get('readOnlyKey')
+        if (!spaceId || !readOnlyKey) {
+          store.commit('addNotification', { message: 'Invalid read URL', type: 'danger' })
+          return
+        }
+        store.commit('isLoadingSpace', true)
+        store.commit('spaceUrlToLoad', spaceId)
+        store.commit('spaceReadOnlyKey', { spaceId, key: readOnlyKey })
+        next()
       }
     }, {
       path: '/refer/:userId',
