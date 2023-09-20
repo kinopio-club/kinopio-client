@@ -296,6 +296,8 @@ export default {
     }
     this.updateCardDimensions()
     this.checkIfShouldUpdatePreviewHtml()
+    const defaultCardMaxWidth = this.$store.getters['currentCards/defaultCardMaxWidth'] + 'px'
+    utils.setCssVariable('card-width', defaultCardMaxWidth)
   },
   data () {
     return {
@@ -1066,7 +1068,7 @@ export default {
       const isTextOnlyCard = this.normalizedName === this.card.name
       if (isTextOnlyCard) { isVisible = true }
       const threshold = 400 * this.spaceCounterZoomDecimal
-      const fallbackHeight = consts.defaultCardMaxWidth
+      const fallbackHeight = this.$store.getters['currentCards/defaultCardMaxWidth']
       const offset = utils.outsideSpaceOffset().y
       const scroll = (this.windowScroll.y - offset) * this.spaceCounterZoomDecimal
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
@@ -1612,7 +1614,7 @@ export default {
         styles.width = this.width
       }
       if (this.cardHasMedia) {
-        styles.width = consts.defaultCardMaxWidth
+        styles.width = this.$store.getters['currentCards/defaultCardMaxWidth']
       }
       if (this.resizeWidth) {
         styles.maxWidth = this.resizeWidth
@@ -2026,7 +2028,7 @@ export default {
       return name.includes(url) || name.includes(normalizedUrl) || normalizedUrl.includes(name)
     },
     previewImage ({ thumbnail }) {
-      const minWidth = consts.defaultCardMaxWidth
+      const minWidth = this.$store.getters['currentCards/defaultCardMaxWidth']
       if (!thumbnail) { return '' }
       let image = thumbnail.find(item => {
         let shouldSkipImage = false
@@ -2096,7 +2098,6 @@ export default {
 
 <style lang="stylus">
 article.card-wrap
-  --card-width 200px
   pointer-events all
   position absolute
   max-width var(--card-width)

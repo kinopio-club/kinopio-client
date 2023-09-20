@@ -605,7 +605,8 @@ export default {
     updateCardWidthForUrl (urls) {
       if (!utils.arrayHasItems(urls)) { return }
       if (this.card.resizeWidth) { return }
-      this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth: consts.defaultCardMaxWidth })
+      const resizeWidth = this.$store.getters['currentCards/defaultCardMaxWidth']
+      this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth })
     },
     broadcastShowCardDetails () {
       const updates = {

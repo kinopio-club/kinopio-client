@@ -905,6 +905,10 @@ const currentCards = {
       } else {
         return rootState.currentUser.color
       }
+    },
+    defaultCardMaxWidth: (state, getters, rootState, rootGetters) => {
+      const maxWidth = rootState.currentSpace.defaultCardMaxWidth || 230
+      return maxWidth
     }
   }
 }
