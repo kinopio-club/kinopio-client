@@ -350,11 +350,11 @@ main.add-page
         Loader(:visible="state.loading.updateSpaces")
       //- submit
       .row
-        .button-wrap
-          a(:href="selectedSpaceUrl")
-            button
-              span Space{{' '}}
-              img.icon.visit(src="@/assets/visit.svg")
+        //- .button-wrap
+        //-   a(:href="selectedSpaceUrl")
+        //-     button
+        //-       span Space{{' '}}
+        //-       img.icon.visit(src="@/assets/visit.svg")
         //- Add
         .button-wrap
           button.success(@pointerup="addCard" :class="{disabled: state.error.maxLength}")
