@@ -1,49 +1,56 @@
 <template lang="pug">
 section.invite
-  p Invite Collaborators
   section.subsection
     .row
       p
         .users
           User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
           User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-        span Invite to Edit
-      button.small-button.extra-options-button.inline-button(@click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
-        span Tips
+        span Invite Collaborators
 
     Loader(:visible="loading")
-    template(v-if="!loading && collaboratorKey")
-      .row
-        .segmented-buttons
-          button(@click.left="copyUrl")
-            img.icon.copy(src="@/assets/copy.svg")
-            span Copy Invite URL
-          button(v-if="webShareIsSupported" @click="webShare")
-            img.icon.share(src="@/assets/share.svg")
-    //- Error
-    template(v-if="!loading && !collaboratorKey")
-      .row
-        .badge.danger シ_ _)シ Something went wrong
-      .row
-        button(@click="updateCollaboratorKey") Try Again
-    //- Tips
-    .more-info(v-if="tipsIsVisible")
-      template(v-if="spaceIsPrivate")
+    temaplate(v-if="!loading")
+
+      //- Copy buttons
+      template(v-if="collaboratorKey")
+        .row
+          .segmented-buttons
+            button(@click.left="copyUrl")
+              img.icon.copy(src="@/assets/copy.svg")
+              span Copy Edit URL
+            button(v-if="webShareIsSupported" @click="webShare")
+              img.icon.share(src="@/assets/share.svg")
+          button.small-button.extra-options-button.inline-button(@click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
+            span Tips
+
+        template(v-if="spaceIsPrivate")
+          .row
+            .segmented-buttons
+              button(@click.left="copyReadUrl")
+                img.icon.copy(src="@/assets/copy.svg")
+                span Copy Read Only URL
+              button(v-if="webShareIsSupported" @click="webShareRead")
+                img.icon.share(src="@/assets/share.svg")
+
+      //- Error
+      template(v-if="!collaboratorKey")
+        .row
+          .badge.danger シ_ _)シ Something went wrong
+        .row
+          button(@click="updateCollaboratorKey") Try Again
+
+      //- Tips
+      .more-info(v-if="tipsIsVisible")
         .row
           p
-            span No account is needed to view{{' '}}
-            span.badge.danger private spaces
-            span {{' '}}– but editing requires an account.
-        hr
-      .row
-        p You'll both earn a{{' '}}
-          span.badge.success $6 credit
-          span when someone new you invite signs up for a Kinopio account
-      template(v-if="currentUserIsUpgraded")
-        hr
+            span No account is needed to read spaces, but editing requires an account
         .row
-          .badge.success
-            span Because your account is upgraded, others can create cards here for free
+          p.badge.success You'll both earn a $6 credit when someone you invite signs up for a Kinopio account
+        template(v-if="currentUserIsUpgraded")
+          hr
+          .row
+            .badge.success
+              span Because your account is upgraded, others can create cards here for free
 
 </template>
 
@@ -88,7 +95,16 @@ export default {
       const color = randomColor({ luminosity })
       return { color }
     },
-    webShareIsSupported () { return navigator.share }
+    webShareIsSupported () { return navigator.share },
+    readOnlyUrl () {
+      const currentSpace = this.$store.state.currentSpace
+      const spaceId = currentSpace.id
+      const spaceName = currentSpace.name
+      const readOnlyKey = currentSpace.readOnlyKey
+      const url = utils.readOnlyUrl({ spaceId, spaceName, readOnlyKey })
+      console.log('🍇 read only url', url)
+      return url
+    }
   },
   methods: {
     async copyUrl (event) {
@@ -102,11 +118,31 @@ export default {
         this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
       }
     },
+    async copyReadUrl (event) {
+      this.$store.commit('clearNotificationsWithPosition')
+      const position = utils.cursorPositionInPage(event)
+      console.log(this.readOnlyUrl)
+      try {
+        await navigator.clipboard.writeText(this.readOnlyUrl)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+      } catch (error) {
+        console.warn('🚑 copyText', error)
+        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+      }
+    },
     webShare () {
       const data = {
         title: `Invite to Edit`,
         text: this.spaceName,
         url: this.url
+      }
+      navigator.share(data)
+    },
+    webShareRead () {
+      const data = {
+        title: `Invite to Read Only`,
+        text: this.spaceName,
+        url: this.readOnlyUrl
       }
       navigator.share(data)
     },

@@ -1483,6 +1483,11 @@ export default {
     const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
     return url
   },
+  readOnlyUrl ({ spaceId, spaceName, readOnlyKey }) {
+    spaceName = this.normalizeString(spaceName)
+    const url = `${consts.kinopioDomain()}/read?spaceId=${spaceId}&readOnlyKey=${readOnlyKey}&name=${spaceName}`
+    return url
+  },
   spaceAndCardIdFromPath (path) {
     // https://regexr.com/5kr4g
     // matches (text after /) twice

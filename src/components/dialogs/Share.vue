@@ -1,14 +1,14 @@
 <template lang="pug">
-dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
+dialog.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
   section
     .row.title-row
       span Share
       .row
-        button.small-button(@click.left.stop="isPresentationMode")
+        button.small-button(@click.left.stop="isPresentationMode" title="Presentation Mode")
           img.icon(src="@/assets/presentation.svg")
           span Present
         .button-wrap(v-if="spaceIsRemote")
-          button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: spaceRssFeedIsVisible }")
+          button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: spaceRssFeedIsVisible }" title="Space RSS Feed")
             span RSS
           SpaceRssFeed(:visible="spaceRssFeedIsVisible")
 
@@ -17,7 +17,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
     //- Private
-    section.subsection.share-private(v-if="spaceIsPrivate")
+    section.subsection.share-private.share-url-subsection(v-if="spaceIsPrivate")
       .row
         .segmented-buttons
           button(@click.left="copyUrl")
@@ -25,22 +25,9 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
             span Copy Private URL
           button(v-if="webShareIsSupported" @click="webShare")
             img.icon.share(src="@/assets/share.svg")
+
     //- Public
     section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
-      //- Explore
-      template(v-if="exploreSectionIsVisible")
-        .row
-          p Share with the Community
-        .row
-          AddToExplore
-          AskToAddToExplore
-        hr
-      //- Copy URL
-      .row
-        p Share With the World
-        label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.left="toggleIsShareInPresentationMode" @touchend.prevent="toggleIsShareInPresentationMode" :class="{active: isShareInPresentationMode}")
-          input(type="checkbox" :value="isShareInPresentationMode")
-          img.icon(src="@/assets/presentation.svg")
       .row
         .segmented-buttons
           button(@click.left="copyUrl")
@@ -48,11 +35,21 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
             span Copy Public URL
           button(v-if="webShareIsSupported" @click="webShare")
             img.icon.share(src="@/assets/share.svg")
+        label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.left="toggleIsShareInPresentationMode" @touchend.prevent="toggleIsShareInPresentationMode" :class="{active: isShareInPresentationMode}")
+          input(type="checkbox" :value="isShareInPresentationMode")
+          img.icon(src="@/assets/presentation.svg")
+      //- Explore
+      template(v-if="exploreSectionIsVisible")
+        .row
+          p Share with the Community
+        .row
+          AddToExplore
+          AskToAddToExplore
 
   //- Invite
   Invite(v-if="isSpaceMember && currentUserIsSignedIn")
   //- Collaborators
-  section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers || currentMemberIsSignedIn")
+  section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
     //- collaborators
     template(v-if="spaceHasCollaborators")
       UserList(:users="spaceCollaborators" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :showRemoveUser="isSpaceMember" @removeUser="removeCollaborator" :isClickable="true")
