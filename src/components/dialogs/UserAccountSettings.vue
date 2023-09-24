@@ -18,9 +18,6 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
         p.row
           .url-textarea.single-line
             span {{key}}
-          .input-button-wrap(@click.left="copyKey")
-            button.small-button
-              img.icon.copy(src="@/assets/copy.svg")
         .row
           .button-wrap
             button(@click.left="copyKey")
