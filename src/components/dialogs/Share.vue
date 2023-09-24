@@ -1,5 +1,225 @@
+<script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import PrivacyButton from '@/components/PrivacyButton.vue'
+import Invite from '@/components/Invite.vue'
+import SpaceRssFeed from '@/components/dialogs/SpaceRssFeed.vue'
+import Embed from '@/components/dialogs/Embed.vue'
+import UserList from '@/components/UserList.vue'
+import utils from '@/utils.js'
+import Export from '@/components/dialogs/Export.vue'
+import Import from '@/components/dialogs/Import.vue'
+import AddToExplore from '@/components/AddToExplore.vue'
+import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
+import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
+import consts from '@/consts.js'
+const store = useStore()
+
+const dialog = ref(null)
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'updatePageSizes') {
+      updateDialogHeight()
+    }
+  })
+})
+
+const props = defineProps({
+  visible: Boolean
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  store.commit('clearNotificationsWithPosition')
+  closeDialogs()
+  if (value) {
+    updateDialogHeight()
+    store.commit('shouldExplicitlyHideFooter', true)
+  } else {
+    store.commit('shouldExplicitlyHideFooter', false)
+  }
+})
+
+const state = reactive({
+  urlIsCopied: false,
+  privacyPickerIsVisible: false,
+  dialogHeight: null,
+  spaceRssFeedIsVisible: false,
+  embedIsVisible: false,
+  exportIsVisible: false,
+  importIsVisible: false,
+  isShareInPresentationMode: false
+})
+
+const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const spaceIsRemote = computed(() => store.getters['currentSpace/isRemote'])
+
+// add to explore
+
+const exploreSectionIsVisible = computed(() => {
+  const showInExplore = store.state.currentSpace.showInExplore
+  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
+  const shouldShowAskToAddToExplore = !isSpaceMember && !showInExplore
+  return isSpaceMember || shouldShowAskToAddToExplore
+})
+
+// collaborators
+
+const selectedUser = computed(() => {
+  const userDetailsIsVisible = store.state.userDetailsIsVisible
+  if (!userDetailsIsVisible) { return }
+  return store.state.userDetailsUser
+})
+const spaceCollaborators = computed(() => store.state.currentSpace.collaborators)
+const spaceHasCollaborators = computed(() => {
+  const collaborators = store.state.currentSpace.collaborators
+  return Boolean(collaborators.length)
+})
+const spaceOtherCardUsers = computed(() => {
+  const currentUserId = store.state.currentUser.id
+  const collaborators = store.state.currentSpace.collaborators
+  let users = store.getters['currentCards/users']
+  users = users.filter(user => Boolean(user))
+  // remove currentUser
+  users = users.filter(user => user.id !== currentUserId)
+  // remove collaborators
+  users = users.filter(user => {
+    const isCollaborator = this.spaceCollaborators.find(collaborator => {
+      return collaborator.id === user.id
+    })
+    return !isCollaborator
+  })
+  return users
+})
+const spaceHasOtherCardUsers = computed(() => Boolean(spaceOtherCardUsers.value.length))
+const toggleUserDetails = (event, user) => {
+  closeDialogs()
+  showUserDetails(event, user)
+}
+const showUserDetails = (event, user) => {
+  let element = event.target
+  let options = { element, offsetX: 25, shouldIgnoreZoom: true }
+  let position = utils.childDialogPositionFromParent(options)
+  store.commit('userDetailsUser', user)
+  store.commit('userDetailsPosition', position)
+  store.commit('userDetailsIsVisible', true)
+}
+const removeCollaborator = async (user) => {
+  store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
+  const isCurrentUser = store.state.currentUser.id === user.id
+  if (isCurrentUser) {
+    store.dispatch('closeAllDialogs')
+  }
+  closeDialogs()
+}
+
+// copy url
+
+const spaceIsPrivate = computed(() => {
+  const privacy = store.state.currentSpace.privacy
+  return privacy === 'private'
+})
+const spaceUrl = computed(() => {
+  let url = store.getters['currentSpace/url']
+  url = new URL(url)
+  if (state.isShareInPresentationMode) {
+    url.searchParams.set('present', true)
+  }
+  return url.href
+})
+const copySpaceUrl = async (event) => {
+  store.commit('clearNotificationsWithPosition')
+  const position = utils.cursorPositionInPage(event)
+  try {
+    await navigator.clipboard.writeText(spaceUrl.value)
+    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
+}
+const webShareIsSupported = computed(() => navigator.share)
+const webShare = () => {
+  const spaceName = store.state.currentSpace.name
+  const data = {
+    title: 'Kinopio Space',
+    text: spaceName,
+    url: spaceUrl.value
+  }
+  navigator.share(data)
+}
+
+// dialog
+
+const updateDialogHeight = () => {
+  if (!props.visible) { return }
+  nextTick(() => {
+    let element = dialog.value
+    state.dialogHeight = utils.elementHeight(element)
+  })
+}
+const dialogIsVisible = computed(() => {
+  return state.privacyPickerIsVisible || state.spaceRssFeedIsVisible || state.embedIsVisible || state.exportIsVisible || state.importIsVisible
+})
+const closeDialogs = () => {
+  state.privacyPickerIsVisible = false
+  state.spaceRssFeedIsVisible = false
+  state.embedIsVisible = false
+  state.exportIsVisible = false
+  state.importIsVisible = false
+  store.commit('userDetailsIsVisible', false)
+}
+
+// toggles
+
+const triggerEarnCreditsIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerEarnCreditsIsVisible')
+}
+const isPresentationMode = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('isPresentationMode', true)
+}
+const triggerSignUpOrInIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerSignUpOrInIsVisible')
+}
+const togglePrivacyPickerIsVisible = () => {
+  const isVisible = state.privacyPickerIsVisible
+  closeDialogs()
+  state.privacyPickerIsVisible = !isVisible
+}
+const toggleSpaceRssFeedIsVisible = () => {
+  const isVisible = state.spaceRssFeedIsVisible
+  closeDialogs()
+  state.spaceRssFeedIsVisible = !isVisible
+}
+const toggleEmbedIsVisible = () => {
+  const isVisible = state.embedIsVisible
+  closeDialogs()
+  state.embedIsVisible = !isVisible
+}
+const toggleExportIsVisible = () => {
+  const isVisible = state.exportIsVisible
+  closeDialogs()
+  state.exportIsVisible = !isVisible
+}
+const toggleImportIsVisible = () => {
+  const isVisible = state.importIsVisible
+  closeDialogs()
+  state.importIsVisible = !isVisible
+}
+const toggleIsShareInPresentationMode = () => {
+  closeDialogs()
+  state.isShareInPresentationMode = !state.isShareInPresentationMode
+}
+</script>
+
 <template lang="pug">
-dialog.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
+dialog.share(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
   section
     .row.title-row
       span Share
@@ -8,19 +228,19 @@ dialog.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref=
           img.icon(src="@/assets/presentation.svg")
           span Present
         .button-wrap(v-if="spaceIsRemote")
-          button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: spaceRssFeedIsVisible }" title="Space RSS Feed")
+          button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: state.spaceRssFeedIsVisible }" title="Space RSS Feed")
             span RSS
-          SpaceRssFeed(:visible="spaceRssFeedIsVisible")
+          SpaceRssFeed(:visible="state.spaceRssFeedIsVisible")
 
   section(v-if="spaceIsRemote")
     ReadOnlySpaceInfoBadges
-    PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
+    PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
     //- Private
     section.subsection.share-private.share-url-subsection(v-if="spaceIsPrivate")
       .row
         .segmented-buttons
-          button(@click.left="copyUrl")
+          button(@click.left="copySpaceUrl")
             img.icon.copy(src="@/assets/copy.svg")
             span Copy Private URL
           button(v-if="webShareIsSupported" @click="webShare")
@@ -30,7 +250,7 @@ dialog.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref=
     section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
       .row
         .segmented-buttons
-          button(@click.left="copyUrl")
+          button(@click.left="copySpaceUrl")
             img.icon.copy(src="@/assets/copy.svg")
             span Copy Public URL
           button(v-if="webShareIsSupported" @click="webShare")
@@ -52,10 +272,10 @@ dialog.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref=
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
     //- collaborators
     template(v-if="spaceHasCollaborators")
-      UserList(:users="spaceCollaborators" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :showRemoveUser="isSpaceMember" @removeUser="removeCollaborator" :isClickable="true")
+      UserList(:users="spaceCollaborators" :selectedUser="selectedUser" @selectUser="toggleUserDetails" :showRemoveUser="isSpaceMember" @removeUser="removeCollaborator" :isClickable="true")
     //- card users
     template(v-if="spaceHasOtherCardUsers")
-      UserList(:users="spaceOtherCardUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
+      UserList(:users="spaceOtherCardUsers" :selectedUser="selectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 
   section(v-if="!spaceIsRemote")
     p
@@ -68,258 +288,26 @@ dialog.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref=
     .row
       //- Import, Export
       .segmented-buttons(@click.stop)
-        button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+        button(@click.left.stop="toggleImportIsVisible" :class="{ active: state.importIsVisible }")
           span Import
-          Import(:visible="importIsVisible" @closeDialog="closeDialogs")
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+          Import(:visible="state.importIsVisible" @closeDialog="closeDialogs")
+        button(@click.left.stop="toggleExportIsVisible" :class="{ active: state.exportIsVisible }")
           span Export
-          Export(:visible="exportIsVisible")
+          Export(:visible="state.exportIsVisible")
       //- Embed
       .button-wrap
-        button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
+        button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: state.embedIsVisible }")
           span Embed
-        Embed(:visible="embedIsVisible")
+        Embed(:visible="state.embedIsVisible")
 
   section(v-if='!isSecureAppContextIOS')
     .button-wrap
       button(@click="triggerEarnCreditsIsVisible")
         span Earn Credits
-
 </template>
 
-<script>
-import PrivacyButton from '@/components/PrivacyButton.vue'
-import Invite from '@/components/Invite.vue'
-import SpaceRssFeed from '@/components/dialogs/SpaceRssFeed.vue'
-import Embed from '@/components/dialogs/Embed.vue'
-import UserList from '@/components/UserList.vue'
-import utils from '@/utils.js'
-import Export from '@/components/dialogs/Export.vue'
-import Import from '@/components/dialogs/Import.vue'
-import AddToExplore from '@/components/AddToExplore.vue'
-import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
-import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
-import consts from '@/consts.js'
-
-export default {
-  name: 'Share',
-  components: {
-    PrivacyButton,
-    Invite,
-    SpaceRssFeed,
-    Embed,
-    UserList,
-    Export,
-    Import,
-    AddToExplore,
-    AskToAddToExplore,
-    ReadOnlySpaceInfoBadges
-  },
-  props: {
-    visible: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
-      }
-    })
-  },
-  data () {
-    return {
-      urlIsCopied: false,
-      privacyPickerIsVisible: false,
-      selectedUser: {},
-      dialogHeight: null,
-      spaceRssFeedIsVisible: false,
-      embedIsVisible: false,
-      exportIsVisible: false,
-      importIsVisible: false,
-      isShareInPresentationMode: false
-    }
-  },
-  computed: {
-    isSecureAppContextIOS () { return consts.isSecureAppContextIOS },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    showInExplore () { return this.$store.state.currentSpace.showInExplore },
-    exploreSectionIsVisible () {
-      const shouldShowAskToAddToExplore = !this.isSpaceMember && !this.showInExplore
-      return this.isSpaceMember || shouldShowAskToAddToExplore
-    },
-    userDetailsIsVisible () { return this.$store.state.userDetailsIsVisible },
-    userDetailsSelectedUser () {
-      if (!this.userDetailsIsVisible) { return }
-      return this.$store.state.userDetailsUser
-    },
-    url () {
-      let url = this.$store.getters['currentSpace/url']
-      url = new URL(url)
-      if (this.isShareInPresentationMode) {
-        url.searchParams.set('present', true)
-      }
-      return url.href
-    },
-    spaceName () { return this.$store.state.currentSpace.name },
-    spacePrivacy () { return this.$store.state.currentSpace.privacy },
-    currentUser () { return this.$store.state.currentUser },
-    canEditSpace () {
-      const canEdit = this.$store.getters['currentUser/canEditSpace']()
-      return canEdit
-    },
-    spaceIsPrivate () {
-      return this.spacePrivacy === 'private'
-    },
-    isSpaceMember () {
-      return this.$store.getters['currentUser/isSpaceMember']()
-    },
-    currentMemberIsSignedIn () {
-      if (!this.isSpaceMember) { return true }
-      return this.currentUserIsSignedIn
-    },
-    spaceIsRemote () {
-      return this.$store.getters['currentSpace/isRemote']
-    },
-    spaceCollaborators () { return this.$store.state.currentSpace.collaborators },
-    spaceHasCollaborators () {
-      return Boolean(this.spaceCollaborators.length)
-    },
-    spaceOtherCardUsers () {
-      const currentUserId = this.$store.state.currentUser.id
-      let users = this.$store.getters['currentCards/users']
-      users = users.filter(user => Boolean(user))
-      // remove currentUser
-      users = users.filter(user => user.id !== currentUserId)
-      // remove collaborators
-      users = users.filter(user => {
-        const isCollaborator = this.spaceCollaborators.find(collaborator => {
-          return collaborator.id === user.id
-        })
-        return !isCollaborator
-      })
-      return users
-    },
-    spaceHasOtherCardUsers () { return Boolean(this.spaceOtherCardUsers.length) },
-    dialogIsVisible () {
-      return this.privacyPickerIsVisible || this.spaceRssFeedIsVisible || this.embedIsVisible || this.exportIsVisible || this.importIsVisible
-    },
-    webShareIsSupported () { return navigator.share }
-  },
-  methods: {
-    triggerEarnCreditsIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerEarnCreditsIsVisible')
-    },
-    isPresentationMode () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('isPresentationMode', true)
-    },
-    async copyUrl (event) {
-      this.$store.commit('clearNotificationsWithPosition')
-      const position = utils.cursorPositionInPage(event)
-      try {
-        await navigator.clipboard.writeText(this.url)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-      } catch (error) {
-        console.warn('🚑 copyText', error)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-      }
-    },
-    triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerSignUpOrInIsVisible')
-    },
-    webShare () {
-      const data = {
-        title: 'Kinopio Space',
-        text: this.spaceName,
-        url: this.url
-      }
-      // only works in https, supported by safari and android chrome
-      // https://caniuse.com/#feat=web-share
-      navigator.share(data)
-    },
-    togglePrivacyPickerIsVisible () {
-      const isVisible = this.privacyPickerIsVisible
-      this.closeDialogs()
-      this.privacyPickerIsVisible = !isVisible
-    },
-    toggleSpaceRssFeedIsVisible () {
-      const isVisible = this.spaceRssFeedIsVisible
-      this.closeDialogs()
-      this.spaceRssFeedIsVisible = !isVisible
-    },
-    toggleEmbedIsVisible () {
-      const isVisible = this.embedIsVisible
-      this.closeDialogs()
-      this.embedIsVisible = !isVisible
-    },
-    toggleExportIsVisible () {
-      const isVisible = this.exportIsVisible
-      this.closeDialogs()
-      this.exportIsVisible = !isVisible
-    },
-    toggleImportIsVisible () {
-      const isVisible = this.importIsVisible
-      this.closeDialogs()
-      this.importIsVisible = !isVisible
-    },
-    closeDialogs () {
-      this.privacyPickerIsVisible = false
-      this.spaceRssFeedIsVisible = false
-      this.embedIsVisible = false
-      this.exportIsVisible = false
-      this.importIsVisible = false
-      this.$store.commit('userDetailsIsVisible', false)
-    },
-    toggleUserDetails (event, user) {
-      this.closeDialogs()
-      this.showUserDetails(event, user)
-    },
-    toggleIsShareInPresentationMode () {
-      this.closeDialogs()
-      this.isShareInPresentationMode = !this.isShareInPresentationMode
-    },
-    showUserDetails (event, user) {
-      let element = event.target
-      let options = { element, offsetX: 25, shouldIgnoreZoom: true }
-      let position = utils.childDialogPositionFromParent(options)
-      this.$store.commit('userDetailsUser', user)
-      this.$store.commit('userDetailsPosition', position)
-      this.$store.commit('userDetailsIsVisible', true)
-    },
-    async removeCollaborator (user) {
-      this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
-      const isCurrentUser = this.$store.state.currentUser.id === user.id
-      if (isCurrentUser) {
-        this.$store.dispatch('closeAllDialogs')
-      }
-      this.closeDialogs()
-    },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
-      })
-    }
-  },
-  watch: {
-    visible (visible) {
-      this.$store.commit('clearNotificationsWithPosition')
-      this.closeDialogs()
-      if (visible) {
-        this.updateDialogHeight()
-        this.$store.commit('shouldExplicitlyHideFooter', true)
-      } else {
-        this.$store.commit('shouldExplicitlyHideFooter', false)
-      }
-    }
-  }
-}
-</script>
-
 <style lang="stylus">
-.share
+dialog.share
   top calc(100% - 8px)
   left initial
   right 8px
