@@ -56,14 +56,14 @@ const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const spaceIsRemote = computed(() => store.getters['currentSpace/isRemote'])
+const spaceIsPublic = computed(() => store.state.currentSpace.privacy !== 'private')
 
 // add to explore
 
 const exploreSectionIsVisible = computed(() => {
   const showInExplore = store.state.currentSpace.showInExplore
-  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
-  const shouldShowAskToAddToExplore = !isSpaceMember && !showInExplore
-  return isSpaceMember || shouldShowAskToAddToExplore
+  const shouldShowAskToAddToExplore = !isSpaceMember.value && !showInExplore
+  return spaceIsPublic.value && (isSpaceMember.value || shouldShowAskToAddToExplore)
 })
 
 // collaborators
@@ -87,7 +87,7 @@ const spaceOtherCardUsers = computed(() => {
   users = users.filter(user => user.id !== currentUserId)
   // remove collaborators
   users = users.filter(user => {
-    const isCollaborator = this.spaceCollaborators.find(collaborator => {
+    const isCollaborator = spaceCollaborators.value.find(collaborator => {
       return collaborator.id === user.id
     })
     return !isCollaborator
@@ -118,10 +118,10 @@ const removeCollaborator = async (user) => {
 
 // copy url
 
-const spaceIsPrivate = computed(() => {
-  const privacy = store.state.currentSpace.privacy
-  return privacy === 'private'
-})
+// const spaceIsPrivate = computed(() => {
+//   const privacy = store.state.currentSpace.privacy
+//   return privacy === 'private'
+// })
 const spaceUrl = computed(() => {
   let url = store.getters['currentSpace/url']
   url = new URL(url)
@@ -237,26 +237,27 @@ dialog.share(v-if="props.visible" :open="props.visible" @click.left.stop="closeD
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
     //- Private
-    section.subsection.share-private.share-url-subsection(v-if="spaceIsPrivate")
+    //- section.subsection.share-private.share-url-subsection(v-if="spaceIsPrivate")
+    //-   .row
+    //-     .segmented-buttons
+    //-       button(@click.left="copySpaceUrl")
+    //-         img.icon.copy(src="@/assets/copy.svg")
+    //-         span Copy URL
+    //-       button(v-if="webShareIsSupported" @click="webShare")
+    //-         img.icon.share(src="@/assets/share.svg")
+
+    //- Public
+    section.subsection(:class="{'share-url-subsection-member': isSpaceMember}")
       .row
         .segmented-buttons
           button(@click.left="copySpaceUrl")
             img.icon.copy(src="@/assets/copy.svg")
-            span Copy Private URL
+            span Copy URL
           button(v-if="webShareIsSupported" @click="webShare")
             img.icon.share(src="@/assets/share.svg")
 
-    //- Public
-    section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection': isSpaceMember}")
-      .row
-        .segmented-buttons
-          button(@click.left="copySpaceUrl")
-            img.icon.copy(src="@/assets/copy.svg")
-            span Copy Public URL
-          button(v-if="webShareIsSupported" @click="webShare")
-            img.icon.share(src="@/assets/share.svg")
-        label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.left="toggleIsShareInPresentationMode" @touchend.prevent="toggleIsShareInPresentationMode" :class="{active: isShareInPresentationMode}")
-          input(type="checkbox" :value="isShareInPresentationMode")
+        label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.left="toggleIsShareInPresentationMode" @touchend.prevent="toggleIsShareInPresentationMode" :class="{active: state.isShareInPresentationMode}")
+          input(type="checkbox" :value="state.isShareInPresentationMode")
           img.icon(src="@/assets/presentation.svg")
       //- Explore
       template(v-if="exploreSectionIsVisible")
@@ -350,7 +351,7 @@ dialog.share
     pointer-events none
   p + .subsection
     margin-top 10px
-  .share-url-subsection
+  .share-url-subsection-member
     margin-top 0
     border-top-left-radius 0
     border-top-right-radius 0

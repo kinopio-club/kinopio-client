@@ -5,6 +5,7 @@ import { useStore, mapState, mapGetters } from 'vuex'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import randomColor from 'randomcolor'
 const store = useStore()
@@ -16,12 +17,13 @@ onMounted(() => {
 const state = reactive({
   // isUpdatingInviteKeys: false,
   updatedInviteKeys: false,
-  tipsIsVisible: false
+  tipsIsVisible: false,
+  inviteType: 'edit' // 'edit', 'readOnly'
 })
 
 const currentUser = computed(() => store.state.currentUser)
 const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
-const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
+// const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
 const spaceName = computed(() => store.state.currentSpace.name)
 const randomUser = computed(() => {
   const luminosity = store.state.currentUser.theme
@@ -31,6 +33,15 @@ const randomUser = computed(() => {
 const collaboratorKey = computed(() => store.state.currentSpace.collaboratorKey)
 const toggleTipsIsVisible = () => {
   state.tipsIsVisible = !state.tipsIsVisible
+}
+const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
+
+// invite types
+
+const inviteTypeIsEdit = computed(() => state.inviteType === 'edit')
+const inviteTypeIsReadOnly = computed(() => state.inviteType === 'readOnly')
+const toggleInviteType = (type) => {
+  state.inviteType = type
 }
 
 // urls
@@ -51,27 +62,22 @@ const readOnlyUrl = computed(() => {
   return url
 })
 
-//  copy urls
+//  copy invite urls
 
-const copyEditUrl = async (event) => {
-  store.commit('clearNotificationsWithPosition')
-  const position = utils.cursorPositionInPage(event)
-  try {
-    await navigator.clipboard.writeText(editUrl.value)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-  } catch (error) {
-    console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+const copyInviteUrl = async (event) => {
+  let url
+  if (inviteTypeIsEdit.value) {
+    url = editUrl.value
+  } else if (inviteTypeIsReadOnly.value) {
+    url = readOnlyUrl.value
   }
-}
-const copyReadUrl = async (event) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
   try {
-    await navigator.clipboard.writeText(readOnlyUrl.value)
+    await navigator.clipboard.writeText(url)
     store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
-    console.warn('🚑 copyText', error)
+    console.warn('🚑 copyInviteUrl', error, url)
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
@@ -79,19 +85,17 @@ const copyReadUrl = async (event) => {
 // native web share
 
 const webShareIsSupported = computed(() => navigator.share)
-const webShareEdit = () => {
+const webShareInvite = () => {
+  let title
+  if (inviteTypeIsEdit.value) {
+    title = 'Invite to Edit'
+  } else if (inviteTypeIsReadOnly.value) {
+    title = 'Invite to Edit Only'
+  }
   const data = {
-    title: `Invite to Edit`,
+    title,
     text: spaceName.value,
     url: editUrl.value
-  }
-  navigator.share(data)
-}
-const webShareRead = () => {
-  const data = {
-    title: `Invite to Edit Only`,
-    text: spaceName.value,
-    url: readOnlyUrl.value
   }
   navigator.share(data)
 }
@@ -117,42 +121,40 @@ const webShareRead = () => {
 
 <template lang="pug">
 section.invite
-  section.subsection
-    .row
-      p
-        .users
-          User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-          User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-        span Invite Collaborators
+  .row
+    p
+      .users
+        User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+        User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+      span Invite Collaborators
+  .row.invite-url-segmented-buttons
+    .segmented-buttons
+      button(@click="toggleInviteType('edit')" :class="{active: inviteTypeIsEdit}")
+        span Can Edit
+      button(@click="toggleInviteType('readOnly')" :class="{active: inviteTypeIsReadOnly}")
+        span Read Only
 
-    //- Copy buttons
+  section.subsection.invite-url-subsection
+    //- Copy Invite
     .row
       .segmented-buttons
-        button(@click.left="copyEditUrl")
+        button(@click.left="copyInviteUrl")
           img.icon.copy(src="@/assets/copy.svg")
-          span Copy Edit URL
-        button(v-if="webShareIsSupported" @click="webShareEdit")
+          //- img.icon.lock-icon(src="@/assets/lock.svg" v-if="spaceIsPrivate")
+          span Copy Invite URL
+        button(v-if="webShareIsSupported" @click="webShareInvite")
           img.icon.share(src="@/assets/share.svg")
-      button.small-button.extra-options-button.inline-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
-        span Tips
-    .row(v-if="spaceIsPrivate")
-      .segmented-buttons
-        button(@click.left="copyReadUrl")
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy Read Only URL
-        button(v-if="webShareIsSupported" @click="webShareRead")
-          img.icon.share(src="@/assets/share.svg")
-
+      button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
+        span ?
     //- Tips
-    p.more-info(v-if="state.tipsIsVisible")
+    template(v-if="state.tipsIsVisible")
       .row
         p No account is needed to read spaces, but editing requires an account
       .row
         p.badge.success You'll both earn a $6 credit when someone you invite signs up for a Kinopio account
-      .row
-        p.badge.success(v-if="currentUserIsUpgraded")
+      .row(v-if="currentUserIsUpgraded")
+        p.badge.success
           span Because your account is upgraded, others can create cards here for free
-
     //- Revoke
     //- .row
     //-   button.small-button.inline-button.revoke-button(@click="updateInviteKeys" :class="{active: state.isUpdatingInviteKeys}")
@@ -181,4 +183,11 @@ section.invite
   //     vertical-align -1px
   //   .loader
   //     vertical-align -3px
+  .invite-url-segmented-buttons
+    margin-bottom 0
+    button
+      border-bottom-left-radius 0
+      border-bottom-right-radius 0
+  .invite-url-subsection
+    border-top-left-radius 0
 </style>
