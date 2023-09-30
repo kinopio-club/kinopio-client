@@ -54,8 +54,8 @@ const readOnlyUrl = computed(() => {
   const currentSpace = store.state.currentSpace
   const spaceId = currentSpace.id
   const readOnlyKey = currentSpace.readOnlyKey
-  const url = utils.readOnlyUrl({ spaceId, spaceName: spaceName.value, readOnlyKey })
-  console.log('🍇 read only url', url)
+  const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, readOnlyKey })
+  console.log('🍇 invite read only url', url)
   return url
 })
 

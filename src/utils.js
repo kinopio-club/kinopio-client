@@ -1478,14 +1478,15 @@ export default {
     }
     return url
   },
-  inviteUrl ({ spaceId, spaceName, collaboratorKey }) {
+  inviteUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey }) {
     spaceName = this.normalizeString(spaceName)
-    const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
-    return url
-  },
-  readOnlyUrl ({ spaceId, spaceName, readOnlyKey }) {
-    spaceName = this.normalizeString(spaceName)
-    const url = `${consts.kinopioDomain()}/read?spaceId=${spaceId}&readOnlyKey=${readOnlyKey}&name=${spaceName}`
+    let key = ''
+    if (collaboratorKey) {
+      key = `collaboratorKey=${collaboratorKey}`
+    } else if (readOnlyKey) {
+      key = `readOnlyKey=${readOnlyKey}`
+    }
+    const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&${key}&name=${spaceName}`
     return url
   },
   spaceAndCardIdFromPath (path) {
