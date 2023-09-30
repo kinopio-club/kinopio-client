@@ -14,7 +14,8 @@ onMounted(() => {
 })
 
 const state = reactive({
-  loading: false,
+  // isUpdatingInviteKeys: false,
+  updatedInviteKeys: false,
   tipsIsVisible: false
 })
 
@@ -94,6 +95,24 @@ const webShareRead = () => {
   }
   navigator.share(data)
 }
+
+// revoke
+
+// const updateInviteKeys = async () => {
+//   if (state.isUpdatingInviteKeys) { return }
+//   state.isUpdatingInviteKeys = true
+//   state.updatedInviteKeys = false
+//   try {
+//     // api // update space
+//     state.updatedInviteKeys = true
+//   } catch (error) {
+//     console.error('🚒 updateInviteKeys', error)
+//   }
+//   state.isUpdatingInviteKeys = false
+// }
+
+// TODO see: try again api/..
+
 </script>
 
 <template lang="pug">
@@ -106,42 +125,43 @@ section.invite
           User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
         span Invite Collaborators
 
-    Loader(:visible="state.loading")
-    template(v-if="!state.loading")
+    //- Copy buttons
+    .row
+      .segmented-buttons
+        button(@click.left="copyEditUrl")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Edit URL
+        button(v-if="webShareIsSupported" @click="webShareEdit")
+          img.icon.share(src="@/assets/share.svg")
+      button.small-button.extra-options-button.inline-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
+        span Tips
+    .row(v-if="spaceIsPrivate")
+      .segmented-buttons
+        button(@click.left="copyReadUrl")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Read Only URL
+        button(v-if="webShareIsSupported" @click="webShareRead")
+          img.icon.share(src="@/assets/share.svg")
 
-      //- Copy buttons
-      template(v-if="collaboratorKey")
-        .row
-          .segmented-buttons
-            button(@click.left="copyEditUrl")
-              img.icon.copy(src="@/assets/copy.svg")
-              span Copy Edit URL
-            button(v-if="webShareIsSupported" @click="webShareEdit")
-              img.icon.share(src="@/assets/share.svg")
-          button.small-button.extra-options-button.inline-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
-            span Tips
+    //- Tips
+    p.more-info(v-if="state.tipsIsVisible")
+      .row
+        p No account is needed to read spaces, but editing requires an account
+      .row
+        p.badge.success You'll both earn a $6 credit when someone you invite signs up for a Kinopio account
+      .row
+        p.badge.success(v-if="currentUserIsUpgraded")
+          span Because your account is upgraded, others can create cards here for free
 
-        template(v-if="spaceIsPrivate")
-          .row
-            .segmented-buttons
-              button(@click.left="copyReadUrl")
-                img.icon.copy(src="@/assets/copy.svg")
-                span Copy Read Only URL
-              button(v-if="webShareIsSupported" @click="webShareRead")
-                img.icon.share(src="@/assets/share.svg")
+    //- Revoke
+    //- .row
+    //-   button.small-button.inline-button.revoke-button(@click="updateInviteKeys" :class="{active: state.isUpdatingInviteKeys}")
+    //-     img.icon.cancel(src="@/assets/add.svg")
+    //-     span Revoke
+    //-       Loader(:visible="state.isUpdatingInviteKeys" :isSmall="true")
+        //- .row(v-if="updatedInviteKeys")
+        //- .badge.success blah
 
-      //- Tips
-      .more-info(v-if="state.tipsIsVisible")
-        .row
-          p
-            span No account is needed to read spaces, but editing requires an account
-        .row
-          p.badge.success You'll both earn a $6 credit when someone you invite signs up for a Kinopio account
-        template(v-if="currentUserIsUpgraded")
-          hr
-          .row
-            .badge.success
-              span Because your account is upgraded, others can create cards here for free
 </template>
 
 <style lang="stylus">
@@ -153,4 +173,12 @@ section.invite
     vertical-align 0
   .users
     margin-right 5px
+  // .revoke-button
+  //   width initial
+  //   height 20px
+  //   cursor pointer
+  //   .icon
+  //     vertical-align -1px
+  //   .loader
+  //     vertical-align -3px
 </style>
