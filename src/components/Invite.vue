@@ -15,15 +15,12 @@ onMounted(() => {
 })
 
 const state = reactive({
-  // isUpdatingInviteKeys: false,
-  updatedInviteKeys: false,
   tipsIsVisible: false,
   inviteType: 'edit' // 'edit', 'readOnly'
 })
 
 const currentUser = computed(() => store.state.currentUser)
 const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
-// const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
 const spaceName = computed(() => store.state.currentSpace.name)
 const randomUser = computed(() => {
   const luminosity = store.state.currentUser.theme
@@ -100,23 +97,6 @@ const webShareInvite = () => {
   navigator.share(data)
 }
 
-// revoke
-
-// const updateInviteKeys = async () => {
-//   if (state.isUpdatingInviteKeys) { return }
-//   state.isUpdatingInviteKeys = true
-//   state.updatedInviteKeys = false
-//   try {
-//     // api // update space
-//     state.updatedInviteKeys = true
-//   } catch (error) {
-//     console.error('🚒 updateInviteKeys', error)
-//   }
-//   state.isUpdatingInviteKeys = false
-// }
-
-// TODO see: try again api/..
-
 </script>
 
 <template lang="pug">
@@ -140,7 +120,6 @@ section.invite
       .segmented-buttons
         button(@click.left="copyInviteUrl")
           img.icon.copy(src="@/assets/copy.svg")
-          //- img.icon.lock-icon(src="@/assets/lock.svg" v-if="spaceIsPrivate")
           span Copy Invite URL
         button(v-if="webShareIsSupported" @click="webShareInvite")
           img.icon.share(src="@/assets/share.svg")
@@ -155,14 +134,6 @@ section.invite
       .row(v-if="currentUserIsUpgraded")
         p.badge.success
           span Because your account is upgraded, others can create cards here for free
-    //- Revoke
-    //- .row
-    //-   button.small-button.inline-button.revoke-button(@click="updateInviteKeys" :class="{active: state.isUpdatingInviteKeys}")
-    //-     img.icon.cancel(src="@/assets/add.svg")
-    //-     span Revoke
-    //-       Loader(:visible="state.isUpdatingInviteKeys" :isSmall="true")
-        //- .row(v-if="updatedInviteKeys")
-        //- .badge.success blah
 
 </template>
 
@@ -175,14 +146,6 @@ section.invite
     vertical-align 0
   .users
     margin-right 5px
-  // .revoke-button
-  //   width initial
-  //   height 20px
-  //   cursor pointer
-  //   .icon
-  //     vertical-align -1px
-  //   .loader
-  //     vertical-align -3px
   .invite-url-segmented-buttons
     margin-bottom 0
     button
