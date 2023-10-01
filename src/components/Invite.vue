@@ -32,6 +32,7 @@ const toggleTipsIsVisible = () => {
   state.tipsIsVisible = !state.tipsIsVisible
 }
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
+const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
 
 // invite types
 
@@ -107,10 +108,10 @@ section.invite
         User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
         User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
       span Invite Collaborators
-  .row.invite-url-segmented-buttons
+  .row.invite-url-segmented-buttons(v-if="spaceIsPrivate")
     .segmented-buttons
       button(@click="toggleInviteType('edit')" :class="{active: inviteTypeIsEdit}")
-        span Can Edit
+        span To Edit
       button(@click="toggleInviteType('readOnly')" :class="{active: inviteTypeIsReadOnly}")
         span Read Only
 
@@ -120,7 +121,8 @@ section.invite
       .segmented-buttons
         button(@click.left="copyInviteUrl")
           img.icon.copy(src="@/assets/copy.svg")
-          span Copy Invite URL
+          span(v-if="inviteTypeIsEdit") Copy Invite to Edit
+          span(v-if="inviteTypeIsReadOnly") Copy Invite to Read
         button(v-if="webShareIsSupported" @click="webShareInvite")
           img.icon.share(src="@/assets/share.svg")
       button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
@@ -151,6 +153,6 @@ section.invite
     button
       border-bottom-left-radius 0
       border-bottom-right-radius 0
-  .invite-url-subsection
-    border-top-left-radius 0
+    + .invite-url-subsection
+      border-top-left-radius 0
 </style>

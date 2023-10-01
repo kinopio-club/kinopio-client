@@ -118,10 +118,6 @@ const removeCollaborator = async (user) => {
 
 // copy url
 
-// const spaceIsPrivate = computed(() => {
-//   const privacy = store.state.currentSpace.privacy
-//   return privacy === 'private'
-// })
 const spaceUrl = computed(() => {
   let url = store.getters['currentSpace/url']
   url = new URL(url)
@@ -232,22 +228,12 @@ dialog.share(v-if="props.visible" :open="props.visible" @click.left.stop="closeD
             span RSS
           SpaceRssFeed(:visible="state.spaceRssFeedIsVisible")
 
-  section(v-if="spaceIsRemote")
+  section(v-if="spaceIsRemote" :class="{'space-is-public': spaceIsPublic}")
     ReadOnlySpaceInfoBadges
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
-    //- Private
-    //- section.subsection.share-private.share-url-subsection(v-if="spaceIsPrivate")
-    //-   .row
-    //-     .segmented-buttons
-    //-       button(@click.left="copySpaceUrl")
-    //-         img.icon.copy(src="@/assets/copy.svg")
-    //-         span Copy URL
-    //-       button(v-if="webShareIsSupported" @click="webShare")
-    //-         img.icon.share(src="@/assets/share.svg")
-
-    //- Public
-    section.subsection(:class="{'share-url-subsection-member': isSpaceMember}")
+    //- Copy URL
+    section.subsection(v-if="spaceIsPublic" :class="{'share-url-subsection-member': isSpaceMember}")
       .row
         .segmented-buttons
           button(@click.left="copySpaceUrl")
@@ -382,4 +368,11 @@ dialog.share
       input
         background-color transparent
         pointer-events none
+
+  .space-is-public
+    .privacy-button
+      button
+        border-bottom-left-radius 0
+        border-bottom-right-radius 0
+
 </style>
