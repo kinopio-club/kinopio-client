@@ -40,6 +40,7 @@
     img.icon(src="@/assets/center-horizontally.svg")
     img.icon(src="@/assets/checkmark-invert.svg")
     img.icon(src="@/assets/checkmark.svg")
+    img.icon(src="@/assets/clover.svg")
     img.icon(src="@/assets/comment.svg")
     img.icon(src="@/assets/connection-clear.svg")
     img.icon(src="@/assets/connection-path-straight.svg")
