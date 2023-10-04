@@ -317,6 +317,7 @@ export default {
     window.addEventListener('scroll', this.updatePosition)
     this.updatePosition()
     this.updateNotifications()
+    this.$store.commit('isLoadingSpace', true)
     updateNotificationsIntervalTimer = setInterval(() => {
       this.updateNotifications()
     }, 1000 * 60 * 10) // 10 minutes
