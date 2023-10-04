@@ -126,12 +126,12 @@ export default {
 
 <style lang="stylus">
 .space-filters
-  @media(max-width 490px)
-    left -40px
+  @media(max-width 560px)
+    left -100px
   @media(max-width 430px)
-    left -70px
+    left -190px
   @media(max-width 370px)
-    left -110px
+    left -240px
   .collaborators
     max-height calc(100vh - 200px)
   button + .row

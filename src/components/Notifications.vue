@@ -79,7 +79,7 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.danger(v-if="notifySpaceNotFound")
     p Space could not be found, or is private
     .row
-      button(@click.left.stop="triggerSpaceDetailsVisible") Your Spaces
+      button(@click.left.stop="triggerSpaceDetailsVisible") Spaces
       button(v-if="!currentUserIsSignedIn" @click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
       button(@click.left="removeNotifySpaceNotFound")
         img.icon.cancel(src="@/assets/add.svg")
