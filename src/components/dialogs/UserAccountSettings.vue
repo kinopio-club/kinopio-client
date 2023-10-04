@@ -11,6 +11,7 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
       .row
         .button-wrap
           button(@click.left.stop="toggleApiKeyIsVisible" :class="{active: apiKeyIsVisible}")
+            img.icon.key(src="@/assets/key.svg")
             span Get API Key
       template(v-if="apiKeyIsVisible")
         p.badge.danger Be careful with sharing your API Key

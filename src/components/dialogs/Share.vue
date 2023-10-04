@@ -215,7 +215,7 @@ const toggleIsShareInPresentationMode = () => {
 </script>
 
 <template lang="pug">
-dialog.share(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
+dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
   section
     .row.title-row
       span Share
@@ -228,12 +228,12 @@ dialog.share(v-if="props.visible" :open="props.visible" @click.left.stop="closeD
             span RSS
           SpaceRssFeed(:visible="state.spaceRssFeedIsVisible")
 
-  section(v-if="spaceIsRemote" :class="{'space-is-public': spaceIsPublic}")
+  section(v-if="spaceIsRemote")
     ReadOnlySpaceInfoBadges
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
     //- Copy URL
-    section.subsection(v-if="spaceIsPublic" :class="{'share-url-subsection-member': isSpaceMember}")
+    section.subsection(:class="{'share-url-subsection-member': isSpaceMember}")
       .row
         .segmented-buttons
           button(@click.left="copySpaceUrl")
@@ -369,10 +369,9 @@ dialog.share
         background-color transparent
         pointer-events none
 
-  .space-is-public
-    .privacy-button
-      button
-        border-bottom-left-radius 0
-        border-bottom-right-radius 0
+  .privacy-button
+    button
+      border-bottom-left-radius 0
+      border-bottom-right-radius 0
 
 </style>

@@ -79,6 +79,14 @@ const copyInviteUrl = async (event) => {
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
+const inviteButtonLabel = computed(() => {
+  if (inviteTypeIsEdit.value) {
+    return 'Copy Invite to Edit URL'
+  } else {
+    // if inviteTypeIsReadOnly.value
+    return 'Copy Invite to Read URL'
+  }
+})
 
 // native web share
 
@@ -108,6 +116,9 @@ section.invite
         User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
         User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
       span Invite Collaborators
+    button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
+      span ?
+
   .row.invite-url-segmented-buttons(v-if="spaceIsPrivate")
     .segmented-buttons
       button(@click="toggleInviteType('edit')" :class="{active: inviteTypeIsEdit}")
@@ -121,12 +132,9 @@ section.invite
       .segmented-buttons
         button(@click.left="copyInviteUrl")
           img.icon.copy(src="@/assets/copy.svg")
-          span(v-if="inviteTypeIsEdit") Copy Invite to Edit
-          span(v-if="inviteTypeIsReadOnly") Copy Invite to Read
+          span {{inviteButtonLabel}}
         button(v-if="webShareIsSupported" @click="webShareInvite")
           img.icon.share(src="@/assets/share.svg")
-      button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
-        span ?
     //- Tips
     template(v-if="state.tipsIsVisible")
       .row
