@@ -1653,7 +1653,7 @@ export default {
     // https://regexr.com/4rjtu
     // match an extension
     // which much be followed by either end of line, space, or ? (for qs) char
-    const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.jpe|\.jif|\.jfif|\.png|\.svg|\.webp)(?:\n| |\?|&)/igm)
+    const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.jpe|\.jif|\.jfif|\.png|\.svg|\.webp|\.avif)(?:\n| |\?|&)/igm)
     const isImage = url.match(imageUrlPattern) || url.includes('is-image=true')
     return Boolean(isImage)
   },
