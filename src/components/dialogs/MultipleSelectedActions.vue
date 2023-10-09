@@ -32,7 +32,7 @@ dialog.narrow.multiple-selected-actions(
         button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedItemActions" :class="{active : shouldShowMultipleSelectedItemActions}")
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
-    CardBoxActions(:visible="shouldShowMultipleSelectedItemActions && (cardsIsSelected || boxesIsSelected)" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }")
+    CardOrBoxActions(:visible="shouldShowMultipleSelectedItemActions && (cardsIsSelected || boxesIsSelected)" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }")
     ConnectionActions(:visible="shouldShowMultipleSelectedItemActions && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll")
 
   section
@@ -73,7 +73,7 @@ dialog.narrow.multiple-selected-actions(
 <script>
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
-import CardBoxActions from '@/components/subsections/CardBoxActions.vue'
+import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 import ShareCard from '@/components/dialogs/ShareCard.vue'
@@ -88,7 +88,7 @@ export default {
   name: 'MultipleSelectedActions',
   components: {
     MoveOrCopyItems,
-    CardBoxActions,
+    CardOrBoxActions,
     ConnectionActions,
     AlignAndDistribute,
     ShareCard
