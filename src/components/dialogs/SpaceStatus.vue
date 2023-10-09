@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog" :class="{'right-side': showOnRightSide}")
+dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog")
   section
     p(v-if="!isConnected")
       Loader(:visible="true")
@@ -36,13 +36,6 @@ export default {
   props: {
     visible: Boolean
   },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.checkIfShouldBeOnRightSide()
-      }
-    })
-  },
   data () {
     return {
       spaceIsCached: false,
@@ -58,14 +51,6 @@ export default {
     isConnected () { return !this.isLoadingSpace && !this.isJoiningSpace && !this.isReconnectingToBroadcast }
   },
   methods: {
-    checkIfShouldBeOnRightSide () {
-      this.showOnRightSide = false
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.showOnRightSide = utils.elementShouldBeOnRightSide(element)
-      })
-    },
     refreshBrowser () {
       window.location.reload()
     }
@@ -75,7 +60,6 @@ export default {
       if (visible) {
         const cachedSpace = cache.space(this.currentSpace.id)
         this.spaceIsCached = utils.arrayHasItems(cachedSpace.cards)
-        this.checkIfShouldBeOnRightSide()
       }
     }
   }
@@ -84,9 +68,8 @@ export default {
 
 <style lang="stylus">
 .space-status
-  &.right-side
-    left initial
-    right 8px
+  @media(max-width 414px)
+    left -60px
   .badge
     display inline-block
 
