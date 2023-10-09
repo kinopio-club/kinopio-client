@@ -100,6 +100,7 @@
     img.icon(src="@/assets/stats.svg")
     img.icon(src="@/assets/sticker.svg")
     img.icon(src="@/assets/sunglasses.svg")
+    img.icon(src="@/assets/star.svg")
     img.icon(src="@/assets/system.svg")
     img.icon(src="@/assets/templates.svg")
     img.icon(src="@/assets/time.svg")
