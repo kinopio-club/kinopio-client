@@ -5,9 +5,9 @@ dialog.narrow.space-rss-feed(v-if="visible" :open="visible" @click.left.stop)
 
   section
     p Subscribe to cards recently created or updated
-    p(v-if="spaceIsPrivate")
-      img.icon(src="@/assets/view.svg")
-      span Space RSS Feeds are only available on public spaces
+    p.badge.danger(v-if="spaceIsPrivate")
+      img.icon(src="@/assets/lock.svg")
+      span RSS Feeds are only available on public spaces
 
     template(v-if="!spaceIsPrivate")
       p.row
@@ -72,4 +72,6 @@ export default {
 dialog.space-rss-feed
   left initial
   right 4px
+  .badge
+    margin-right 0
 </style>
