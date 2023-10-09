@@ -41,7 +41,7 @@ section.subsection.cards-created-progress
       button(@click.stop="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
         span What Happens When I Run Out of Free Cards?
   .row(v-if="state.tipsIsVisible")
-    p You'll always have access to your cards. But you won't be able to create new cards unless you remove some to decrease your card count.
+    p You'll always have access to your cards and spaces. But you won't be able to create new cards unless you remove some to decrease your card count.
 </template>
 
 <style lang="stylus">
