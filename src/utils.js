@@ -1685,8 +1685,12 @@ export default {
   urlIsInvite (url) {
     url = this.urlWithProtocol(url)
     if (!url) { return }
-    url = new URL(url)
-    return url.pathname === '/invite'
+    try {
+      url = new URL(url)
+      return url.pathname === '/invite'
+    } catch (error) {
+      console.warn('🚑 urlIsInvite', error)
+    }
   },
   urlIsSpace (url) {
     if (!url) { return }
