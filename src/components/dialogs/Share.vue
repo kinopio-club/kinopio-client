@@ -130,13 +130,9 @@ const spaceUrl = computed(() => {
 const copySpaceUrl = async (event) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
-  let message = 'Copied'
-  if (spaceIsPrivate.value) {
-    message = 'Copied Private URL'
-  }
   try {
     await navigator.clipboard.writeText(spaceUrl.value)
-    store.commit('addNotificationWithPosition', { message, position, type: 'success', layer: 'app', icon: 'checkmark' })
+    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
