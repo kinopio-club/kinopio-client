@@ -106,8 +106,8 @@ dialog.narrow.other-space-details(v-if="visible" :open="visible" :style="styles"
           button(@click.stop.prevent="changeSpace" @keyup.enter.prevent="changeSpace")
             MoonPhase(v-if="otherSpace.moonPhase" :moonPhase="otherSpace.moonPhase")
             template(v-if="otherSpace.isInvite")
-              img.icon.add(src="@/assets/add.svg")
-              span Join Space{{' '}}
+              span(v-if="isInviteToEdit") Join Space{{' '}}
+              span(v-else="isInviteToReadOnly") View Space{{' '}}
             template(v-else)
               span Jump to Space{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
