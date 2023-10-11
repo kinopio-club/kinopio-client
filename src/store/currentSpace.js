@@ -18,6 +18,7 @@ import defer from 'lodash-es/defer'
 
 let spectatorIdleTimers = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
+let loadLastSpaceAttempts = 0
 
 const currentSpace = {
   namespaced: true,
@@ -822,6 +823,8 @@ const currentSpace = {
       let spaceToRestore = cache.space(user.lastSpaceId)
       if (spaceToRestore.id) {
         space = spaceToRestore
+      } else if (loadLastSpaceAttempts > 2) {
+        return
       } else if (user.lastSpaceId) {
         space = { id: user.lastSpaceId }
       }
@@ -831,6 +834,7 @@ const currentSpace = {
         context.dispatch('createNewHelloSpace')
       }
       context.dispatch('updateUserLastSpaceId')
+      loadLastSpaceAttempts += 1
     },
     loadPrevSpaceInSession: async (context) => {
       const prevSpaceIdInSession = context.rootState.prevSpaceIdInSession
