@@ -79,13 +79,20 @@ const showOtherSpaceDetailsIsVisible = async (event) => {
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
 }
 
+// invite type
+
+const isInviteToReadOnly = computed(() => props.url.includes('readOnlyKey'))
+const isInviteToEdit = computed(() => props.url.includes('collaboratorKey'))
+
 </script>
 
 <template lang="pug">
 a.other-space-preview(@click.prevent.stop.left :href="props.url" ref="badge")
   .badge.button-badge.link-badge(:class="{ active: isActive, 'is-not-clickable': props.isNotClickable }" @mouseup.prevent="showOtherSpaceDetailsIsVisible($event)" @touchend.prevent="showOtherSpaceDetailsIsVisible($event)")
     template(v-if="props.isInvite")
-      .badge.info Invite
+      .badge.info(v-if="isInviteToEdit") Invite To Edit
+      .badge.info(v-else-if="isInviteToReadOnly") Invite To Read Only
+      .badge.info(v-else) Invite
     template(v-if="isRemoved")
       .badge.danger
         img.icon(src="@/assets/remove.svg")
