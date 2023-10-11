@@ -1159,7 +1159,7 @@ export default {
     return space
   },
   emptySpace (spaceId) {
-    return { id: spaceId, moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], boxes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [], isHidden: false, visits: 0 }
+    return { id: spaceId, name: 'Spaces…', moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], boxes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [], isHidden: false, visits: 0 }
   },
   clearSpaceMeta (space, type) {
     space.originSpaceId = space.id

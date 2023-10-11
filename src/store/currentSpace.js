@@ -18,7 +18,6 @@ import defer from 'lodash-es/defer'
 
 let spectatorIdleTimers = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
-let loadLastSpaceAttempts = 0
 
 const currentSpace = {
   namespaced: true,
@@ -823,18 +822,13 @@ const currentSpace = {
       let spaceToRestore = cache.space(user.lastSpaceId)
       if (spaceToRestore.id) {
         space = spaceToRestore
-      } else if (loadLastSpaceAttempts > 2) {
-        return
       } else if (user.lastSpaceId) {
         space = { id: user.lastSpaceId }
       }
       if (space) {
         context.dispatch('loadSpace', { space })
-      } else {
-        context.dispatch('createNewHelloSpace')
+        context.dispatch('updateUserLastSpaceId')
       }
-      context.dispatch('updateUserLastSpaceId')
-      loadLastSpaceAttempts += 1
     },
     loadPrevSpaceInSession: async (context) => {
       const prevSpaceIdInSession = context.rootState.prevSpaceIdInSession
@@ -885,6 +879,10 @@ const currentSpace = {
       }
     },
     updateUserLastSpaceId: (context) => {
+      const isPrivate = context.state.privacy === 'private'
+      const canEdit = context.rootGetters['currentUser/canEditSpace']()
+      const spaceIsReadOnlyInvite = isPrivate && !canEdit
+      if (spaceIsReadOnlyInvite) { return }
       const space = context.state
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
     },
