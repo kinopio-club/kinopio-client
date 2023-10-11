@@ -57,6 +57,7 @@ const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSigned
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const spaceIsRemote = computed(() => store.getters['currentSpace/isRemote'])
 const spaceIsPublic = computed(() => store.state.currentSpace.privacy !== 'private')
+const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
 
 // add to explore
 
@@ -129,9 +130,13 @@ const spaceUrl = computed(() => {
 const copySpaceUrl = async (event) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
+  let message = 'Copied'
+  if (spaceIsPrivate.value) {
+    message = 'Copied Private URL'
+  }
   try {
     await navigator.clipboard.writeText(spaceUrl.value)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    store.commit('addNotificationWithPosition', { message, position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
@@ -238,6 +243,8 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
         .segmented-buttons
           button(@click.left="copySpaceUrl")
             img.icon.copy(src="@/assets/copy.svg")
+            .badge.badge-in-button.danger.private-copy-badge(v-if="spaceIsPrivate")
+              img.icon.lock(src="@/assets/lock.svg")
             span Copy URL
           button(v-if="webShareIsSupported" @click="webShare")
             img.icon.share(src="@/assets/share.svg")
@@ -374,4 +381,7 @@ dialog.share
       border-bottom-left-radius 0
       border-bottom-right-radius 0
 
+  .private-copy-badge
+    margin-left 6px
+    vertical-align 1px
 </style>
