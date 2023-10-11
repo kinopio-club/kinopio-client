@@ -295,6 +295,9 @@ export default {
     },
 
     updateCurrentSpaceWithNewUserId (previousUser, newUser) {
+      const currentSpace = this.$store.state.currentSpace
+      const userIsSpaceUser = this.$store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
+      if (!userIsSpaceUser) { return }
       this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
       this.$store.commit('currentSpace/addUserToSpace', newUser)
     },
