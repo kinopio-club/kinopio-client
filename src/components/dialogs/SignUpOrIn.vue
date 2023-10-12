@@ -32,7 +32,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
       .badge.danger(v-if="error.signInCredentials") Incorrect email or password
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
-      button(type="submit" :class="{active : loading.signUpOrIn}")
+      button(type="submit" :class="{active : loading.signUpOrIn}" tabindex="0")
         span Sign In
         Loader(:visible="loading.signUpOrIn")
 
