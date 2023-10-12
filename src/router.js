@@ -183,33 +183,31 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         store.dispatch('currentUser/init')
         const urlParams = new URLSearchParams(window.location.search)
-        const apiKey = store.state.currentUser.apiKey
         const spaceId = urlParams.get('spaceId')
         const collaboratorKey = urlParams.get('collaboratorKey')
+        const readOnlyKey = urlParams.get('readOnlyKey')
+        const isPresentationMode = urlParams.get('present') || false
         const disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
-        store.commit('shouldValidateUserReferralFromSpaceInvite', true)
         store.commit('disableViewportOptimizations', disableViewportOptimizations)
-        if (!spaceId || !collaboratorKey) { return }
         store.commit('isLoadingSpace', true)
-        if (apiKey) {
-          store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
-            .then(response => {
-              store.commit('spaceUrlToLoad', spaceId)
-              store.commit('addNotification', { message: 'You can now edit this space', type: 'success' })
-              next()
-            }).catch(error => {
-              console.error('🚒', error)
-              if (error.status === 401) {
-                store.commit('addNotification', { message: 'Space could not be found, or your invite was invalid', type: 'danger' })
-              } else {
-                store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
-              }
-            })
+        if (!spaceId) {
+          store.commit('addNotification', { message: 'Invalid invite URL', type: 'danger' })
+          next()
+          return
+        }
+        store.commit('shouldValidateUserReferralFromSpaceInvite', true)
+        store.commit('isPresentationMode', isPresentationMode)
+        // edit
+        if (collaboratorKey) {
+          inviteToEdit({ next, store, spaceId, collaboratorKey })
+        // read only
+        } else if (readOnlyKey) {
+          inviteToReadOnly({ next, store, spaceId, readOnlyKey })
+        // error
         } else {
-          store.commit('spaceUrlToLoad', spaceId)
+          store.commit('addNotification', { message: 'Invalid invite URL', type: 'danger' })
           next()
         }
-        store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
       }
     }, {
       path: '/refer/:userId',
@@ -241,3 +239,32 @@ const router = createRouter({
 })
 
 export default router
+
+const inviteToEdit = ({ next, store, spaceId, collaboratorKey }) => {
+  const apiKey = store.state.currentUser.apiKey
+  if (apiKey) {
+    store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
+      .then(response => {
+        store.commit('spaceUrlToLoad', spaceId)
+        store.commit('addNotification', { message: 'You can now edit this space', type: 'success' })
+        next()
+      }).catch(error => {
+        console.error('🚒', error)
+        if (error.status === 401) {
+          store.commit('addNotification', { message: 'Space could not be found, or your invite was invalid', type: 'danger' })
+        } else {
+          store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
+        }
+      })
+  } else {
+    store.commit('spaceUrlToLoad', spaceId)
+    next()
+  }
+  store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
+}
+
+const inviteToReadOnly = ({ next, store, spaceId, readOnlyKey }) => {
+  store.commit('spaceUrlToLoad', spaceId)
+  store.commit('spaceReadOnlyKey', { spaceId, key: readOnlyKey })
+  next()
+}

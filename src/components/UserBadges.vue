@@ -15,6 +15,10 @@
   //- Guide Maker
   .badge.button-badge.info(v-if="user.isGuideMaker" @click.stop="toggleDescription('GuideMaker')" :class="{active: name === 'GuideMaker'}")
     span Guide Maker
+  //- Ambassador
+  .badge.button-badge.success(v-if="user.isAmbassador" @click.stop="toggleDescription('Ambassador')" :class="{active: name === 'Ambassador'}")
+    img.icon.star(src="@/assets/star.svg")
+    span Ambassador
 
 .row(v-if="description")
   section.subsection
@@ -38,7 +42,7 @@ export default {
   },
   computed: {
     isBadges () {
-      const badges = ['isSpectator', 'isUpgraded', 'isModerator', 'isGuideMaker', 'isDonor']
+      const badges = ['isSpectator', 'isUpgraded', 'isModerator', 'isGuideMaker', 'isDonor', 'isAmbassador']
       return badges.find(badge => this.user[badge])
     }
   },

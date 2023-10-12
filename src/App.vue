@@ -853,6 +853,14 @@ dialog
 .icon.arena
   width 18px
 
+.icon.clover
+  width 12px
+  vertical-align -1px
+
+.icon.key
+  height 10px
+  vertical-align 1px
+
 label,
 li
   position relative

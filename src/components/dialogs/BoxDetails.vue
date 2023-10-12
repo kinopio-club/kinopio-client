@@ -24,7 +24,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           maxLength="600"
           :class="{'is-dark': colorisDark}"
         )
-    CardBoxActions(:visible="canEditBox" :boxes="[box]" @closeDialogs="closeDialogs" :colorIsHidden="true")
+    CardOrBoxActions(:visible="canEditBox" :boxes="[box]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="canEditBox")
       //- remove
       .button-wrap
@@ -39,7 +39,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
 
 <script>
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import CardBoxActions from '@/components/subsections/CardBoxActions.vue'
+import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import utils from '@/utils.js'
 
 let prevBoxId
@@ -48,7 +48,7 @@ export default {
   name: 'BoxDetails',
   components: {
     ColorPicker,
-    CardBoxActions
+    CardOrBoxActions
   },
   data () {
     return {

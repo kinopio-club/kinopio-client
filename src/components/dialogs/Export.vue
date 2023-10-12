@@ -196,6 +196,4 @@ export default {
     display none
   .info-container
     margin-top 10px
-  .url-textarea
-    max-height 100px
 </style>

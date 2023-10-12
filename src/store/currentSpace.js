@@ -316,6 +316,7 @@ const currentSpace = {
       let space = utils.clone(helloSpace)
       space.id = nanoid()
       space.collaboratorKey = nanoid()
+      space.readOnlyKey = nanoid()
       if (shouldLoadNewHelloSpace) {
         space = cache.updateIdsInSpace(space)
         context.commit('clearSearch', null, { root: true })
@@ -341,6 +342,7 @@ const currentSpace = {
       space.createdAt = new Date()
       space.editedAt = new Date()
       space.collaboratorKey = nanoid()
+      space.readOnlyKey = nanoid()
       const newSpacesAreBlank = context.rootState.currentUser.newSpacesAreBlank
       if (newSpacesAreBlank) {
         space.connectionTypes = []
@@ -825,10 +827,8 @@ const currentSpace = {
       }
       if (space) {
         context.dispatch('loadSpace', { space })
-      } else {
-        context.dispatch('createNewHelloSpace')
+        context.dispatch('updateUserLastSpaceId')
       }
-      context.dispatch('updateUserLastSpaceId')
     },
     loadPrevSpaceInSession: async (context) => {
       const prevSpaceIdInSession = context.rootState.prevSpaceIdInSession
@@ -879,6 +879,10 @@ const currentSpace = {
       }
     },
     updateUserLastSpaceId: (context) => {
+      const isPrivate = context.state.privacy === 'private'
+      const canEdit = context.rootGetters['currentUser/canEditSpace']()
+      const spaceIsReadOnlyInvite = isPrivate && !canEdit
+      if (spaceIsReadOnlyInvite) { return }
       const space = context.state
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
     },
@@ -1222,6 +1226,14 @@ const currentSpace = {
       const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
       const spaceUserIsUpgraded = getters.spaceUserIsUpgraded
       return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
+    },
+    readOnlyKey: (state, getters, rootState, rootGetters) => (space) => {
+      const readOnlyKey = rootState.spaceReadOnlyKey
+      if (space.id === readOnlyKey.spaceId) {
+        return readOnlyKey.key
+      } else {
+        return null
+      }
     }
   }
 }

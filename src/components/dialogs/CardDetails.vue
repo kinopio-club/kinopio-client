@@ -103,7 +103,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           span Share
         ShareCard(:visible="shareCardIsVisible" :card="card" :isReadOnly="!canEditCard")
 
-    CardBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
+    CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
     CardCollaborationInfo(:visible="shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
     .row(v-if="nameMetaRowIsVisible")
@@ -196,7 +196,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 </template>
 
 <script>
-import CardBoxActions from '@/components/subsections/CardBoxActions.vue'
+import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
@@ -228,7 +228,7 @@ let openingAnimationTimer, openingStartTime, shouldCancelOpening
 export default {
   name: 'CardDetails',
   components: {
-    CardBoxActions,
+    CardOrBoxActions,
     ImagePicker,
     CardTips,
     TagPicker,

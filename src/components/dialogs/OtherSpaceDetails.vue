@@ -1,13 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import UserList from '@/components/UserList.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
+const store = useStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -74,6 +74,11 @@ const showCardDetails = () => {
   store.dispatch('currentCards/showCardDetails', parentCardId.value)
 }
 
+// invite type
+
+const isInviteToReadOnly = computed(() => otherSpace.value.url.includes('readOnlyKey'))
+const isInviteToEdit = computed(() => otherSpace.value.url.includes('collaboratorKey'))
+
 </script>
 
 <template lang="pug">
@@ -85,7 +90,9 @@ dialog.narrow.other-space-details(v-if="visible" :open="visible" :style="styles"
     template(v-if="otherSpace.id")
       .row.badges-wrap
         template(v-if="otherSpace.isInvite")
-          .badge.info Invite
+          .badge.info(v-if="isInviteToEdit") Invite To Edit
+          .badge.info(v-else-if="isInviteToReadOnly") Invite To Read Only
+          .badge.info(v-else) Invite
         template(v-if="otherSpace.isRemoved")
           .badge.danger
             img.icon(src="@/assets/remove.svg")
@@ -99,8 +106,8 @@ dialog.narrow.other-space-details(v-if="visible" :open="visible" :style="styles"
           button(@click.stop.prevent="changeSpace" @keyup.enter.prevent="changeSpace")
             MoonPhase(v-if="otherSpace.moonPhase" :moonPhase="otherSpace.moonPhase")
             template(v-if="otherSpace.isInvite")
-              img.icon.add(src="@/assets/add.svg")
-              span Join Space{{' '}}
+              span(v-if="isInviteToEdit") Join Space{{' '}}
+              span(v-else="isInviteToReadOnly") View Space{{' '}}
             template(v-else)
               span Jump to Space{{' '}}
             img.icon.visit(src="@/assets/visit.svg")

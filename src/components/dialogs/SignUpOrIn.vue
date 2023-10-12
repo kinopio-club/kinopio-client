@@ -19,7 +19,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       .badge.danger(v-if="error.passwordTooShort") Password must be longer than 4 characters
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-      button(type="submit" :class="{active : loading.signUpOrIn}")
+      button(type="submit" :class="{active : loading.signUpOrIn}" tabindex="0")
         span Sign Up
         Loader(:visible="loading.signUpOrIn")
 
@@ -32,7 +32,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
       .badge.danger(v-if="error.signInCredentials") Incorrect email or password
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
-      button(type="submit" :class="{active : loading.signUpOrIn}")
+      button(type="submit" :class="{active : loading.signUpOrIn}" tabindex="0")
         span Sign In
         Loader(:visible="loading.signUpOrIn")
 
@@ -295,6 +295,9 @@ export default {
     },
 
     updateCurrentSpaceWithNewUserId (previousUser, newUser) {
+      const currentSpace = this.$store.state.currentSpace
+      const userIsSpaceUser = this.$store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
+      if (!userIsSpaceUser) { return }
       this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
       this.$store.commit('currentSpace/addUserToSpace', newUser)
     },

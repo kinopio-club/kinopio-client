@@ -254,9 +254,6 @@ export default {
 .more-or-copy-cards
   top calc(100% - 8px)
   cursor initial
-  .url-textarea
-    max-height 100px
-    width 100%
   .error-card-limit
     margin-top 10px
 </style>

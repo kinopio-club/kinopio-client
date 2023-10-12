@@ -1159,7 +1159,7 @@ export default {
     return space
   },
   emptySpace (spaceId) {
-    return { id: spaceId, moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], boxes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [], isHidden: false, visits: 0 }
+    return { id: spaceId, name: 'Spaces…', moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], boxes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [], isHidden: false, visits: 0 }
   },
   clearSpaceMeta (space, type) {
     space.originSpaceId = space.id
@@ -1478,9 +1478,15 @@ export default {
     }
     return url
   },
-  inviteUrl ({ spaceId, spaceName, collaboratorKey }) {
+  inviteUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey }) {
     spaceName = this.normalizeString(spaceName)
-    const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
+    let invite = ''
+    if (collaboratorKey) {
+      invite = `collaboratorKey=${collaboratorKey}`
+    } else if (readOnlyKey) {
+      invite = `readOnlyKey=${readOnlyKey}`
+    }
+    const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&${invite}&name=${spaceName}`
     return url
   },
   spaceAndCardIdFromPath (path) {

@@ -18,5 +18,9 @@
   {
     "name": "Donor",
     "description": "Donors have supported the sustainable development of Kinopio through a generous donation"
+  },
+  {
+    "name": "Ambassador",
+    "description": "<a href='https://kinopio.club/friends-of-kinopio-ambassadors-YNmS6C3fofN3R9mYgO1Bu'>Friends of Kinopio</a> that share how they use Kinopio with the world"
   }
 ]

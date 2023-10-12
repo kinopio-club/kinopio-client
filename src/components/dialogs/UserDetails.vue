@@ -79,7 +79,6 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import UserBadges from '@/components/UserBadges.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
-import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import postMessage from '@/postMessage.js'
@@ -96,8 +95,7 @@ export default {
     Loader,
     UserBadges,
     SpacePicker,
-    UserLabelInline,
-    CardsCreatedProgress
+    UserLabelInline
   },
   created () {
     this.$store.subscribe((mutation, state) => {

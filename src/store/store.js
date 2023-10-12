@@ -187,6 +187,7 @@ const store = createStore({
     isJoiningSpace: false, // broadcast
     isLoadingOtherItems: false,
     spaceUrlToLoad: '',
+    spaceReadOnlyKey: {}, //  { spaceId, key }
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
     isLoadingFavorites: false,
@@ -1239,6 +1240,10 @@ const store = createStore({
     spaceUrlToLoad: (state, spaceUrl) => {
       utils.typeCheck({ value: spaceUrl, type: 'string' })
       state.spaceUrlToLoad = spaceUrl
+    },
+    spaceReadOnlyKey: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
+      state.spaceReadOnlyKey = value
     },
 
     // Notifications
