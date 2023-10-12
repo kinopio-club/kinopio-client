@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.background-picker(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
+dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
     .row.title-row
       div
@@ -20,9 +20,9 @@ dialog.background-picker(v-if="visible" :open="visible" @click.left.stop="closeD
         data-type="name"
         maxlength="400"
       )
-      .input-button-wrap(@click.left="copyUrl")
-        button.small-button
-          img.icon.copy(src="@/assets/copy.svg")
+      //- .input--wrap(@click.left="copyUrl")
+      //-   button.small-button
+      //-     img.icon.buttoncopy(src="@/assets/copy.svg")
 
     p.read-only-url(v-if="!canEditSpace && background")
       span {{background}}
@@ -67,6 +67,13 @@ dialog.background-picker(v-if="visible" :open="visible" @click.left.stop="closeD
     //- buttons
     template(v-if="canEditSpace")
       .row
+        //- Tint
+        .button-wrap
+          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+            span.current-color(:style="{ background: backgroundTintBadgeColor }")
+            span Tint
+          ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
+        //- Type
         .segmented-buttons
           button(@click.left.stop="updateService('background')" :class="{ active: service === 'background'}")
             img.icon.flower(src="@/assets/flower.svg")
@@ -79,13 +86,6 @@ dialog.background-picker(v-if="visible" :open="visible" @click.left.stop="closeD
           button(@click.left.stop="selectFile")
             span Upload
           input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
-      //- Tint
-      .row
-        .button-wrap
-          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-            span.current-color(:style="{ background: backgroundTintBadgeColor }")
-            span Background Tint
-          ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
 
   //- results
   template(v-if="canEditSpace")
@@ -96,10 +96,11 @@ dialog.background-picker(v-if="visible" :open="visible" @click.left.stop="closeD
         ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
         //- community backgrounds
       section.results-section.community-backgrounds-section
-        .row.row-title
+        .row.title-row
+          p.row-title Community Backgrounds
           a.arena-link(target="_blank" href="https://www.are.na/kinopio/community-backgrounds")
-            img.icon.arena(src="@/assets/arena.svg")
-          span Community Backgrounds
+            button.small-button
+              img.icon.arena(src="@/assets/arena.svg")
         Loader(:visible="communityBackgroundsIsLoading")
         ImageList(v-if="!communityBackgroundsIsLoading" :images="communityBackgroundImages" :activeUrl="background" @selectImage="updateSpaceBackground")
 
@@ -352,17 +353,17 @@ export default {
       images = images.slice(0, max)
       return images
     },
-    async copyUrl (event) {
-      this.$store.commit('clearNotificationsWithPosition')
-      const position = utils.cursorPositionInPage(event)
-      try {
-        await navigator.clipboard.writeText(this.background)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-      } catch (error) {
-        console.warn('🚑 copyText', error)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-      }
-    },
+    // async copyUrl (event) {
+    //   this.$store.commit('clearNotificationsWithPosition')
+    //   const position = utils.cursorPositionInPage(event)
+    //   try {
+    //     await navigator.clipboard.writeText(this.background)
+    //     this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    //   } catch (error) {
+    //     console.warn('🚑 copyText', error)
+    //     this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    //   }
+    // },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
       this.closeDialogs()
