@@ -1,15 +1,20 @@
 <script setup>
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick, defineAsyncComponent } from 'vue'
 import { useStore } from 'vuex'
 
 import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
 import SystemCommand from '@/components/SystemCommand.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
 const store = useStore()
+const CodeBlock = defineAsyncComponent({
+  loader: () => import('@/components/CodeBlock.vue'),
+  loadingComponent: Loader
+})
 
 let shouldCancel = false
 
@@ -19,12 +24,13 @@ const props = defineProps({
   isStrikeThrough: Boolean,
   parentCardId: String
 })
-const emit = defineEmits(['showTagDetailsIsVisible'])
+const emit = defineEmits(['showTagDetailsIsVisible', 'updateCardDimensions'])
 
 // state
 
 const currentSelectedTag = computed(() => { return store.state.currentSelectedTag })
 const currentSelectedOtherItem = computed(() => { return store.state.currentSelectedOtherItem })
+const updateCardDimensions = () => { emit('updateCardDimensions') }
 
 // segment data
 
@@ -117,8 +123,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
         template(v-else-if="markdown.type === 'strikethrough'")
           del {{markdown.content}}
         template(v-else-if="markdown.type === 'codeBlock'")
-
-          pre {{markdown.content}}
+          CodeBlock(:content="markdown.content" @updateCardDimensions="updateCardDimensions")
         template(v-else-if="markdown.type === 'code'")
           code {{markdown.content}}
     //- Name results list
@@ -158,23 +163,14 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       -webkit-touch-callout none // for ios
       &:hover
         text-decoration none
-    pre
-      font-weight normal
-      background-color var(--secondary-active-background)
-      border-radius var(--small-entity-radius)
-      margin 0
-      white-space pre-wrap
-      vertical-align 0
     code
+      color var(--primary)
+      background-color var(--secondary-active-background)
       font-weight normal
       background-color var(--secondary-active-background)
       border-radius var(--small-entity-radius)
       margin-right 0
       vertical-align 0
-    pre,
-    code
-      color var(--primary)
-      background-color var(--secondary-active-background)
     h1
       font-family var(--serif-font)
       font-size 22px
