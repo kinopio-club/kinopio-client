@@ -6,15 +6,11 @@ import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
 import SystemCommand from '@/components/SystemCommand.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
-import Loader from '@/components/Loader.vue'
+import CodeBlock from '@/components/CodeBlock.vue'
 import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
 const store = useStore()
-const CodeBlock = defineAsyncComponent({
-  loader: () => import('@/components/CodeBlock.vue'),
-  loadingComponent: Loader
-})
 
 let shouldCancel = false
 
@@ -123,7 +119,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
         template(v-else-if="markdown.type === 'strikethrough'")
           del {{markdown.content}}
         template(v-else-if="markdown.type === 'codeBlock'")
-          CodeBlock(:content="markdown.content" @updateCardDimensions="updateCardDimensions")
+          CodeBlock(:content="markdown.content" :parentCardId="props.parentCardId" @updateCardDimensions="updateCardDimensions")
         template(v-else-if="markdown.type === 'code'")
           code {{markdown.content}}
     //- Name results list
