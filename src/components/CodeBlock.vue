@@ -16,38 +16,42 @@ const props = defineProps({
 })
 const emit = defineEmits(['updateCardDimensions'])
 
-// watch(() => props.visible, (value, prevValue) => {
-//   if (value) {
-//     console.log('💁‍♀️', value)
-//   }
-// })
+const languages = []
 
-// const state = reactive({
-//   count: 0
-// })
+const toggleLanguagePicker = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('currentUserIsDraggingCard', false)
+}
 
-// const themeName = computed(() => store.state.currentUser.theme)
-// const incrementBy = () => {
-//   const theme = themeName.value
-//   console.log('🧢', theme)
-//   state.count = state.count + 1
-//   emit('updateCount', state.count)
-//   // store.dispatch('themes/isSystem', false)
-// }
 </script>
 
 <template lang="pug">
-pre.code-block {{props.content}}
+.code-block
+  .language-button
+    button.small-button.inline-button(@click.stop="toggleLanguagePicker")
+      span Auto
+  pre {{props.content}}
 </template>
 
 <style lang="stylus">
-pre.code-block
-  color var(--primary)
-  background-color var(--secondary-active-background)
-  font-weight normal
-  background-color var(--secondary-active-background)
-  border-radius var(--small-entity-radius)
-  margin 0
-  white-space pre-wrap
-  vertical-align 0
+.code-block
+  position relative
+  .language-button
+    position absolute
+    right 0
+    top 0
+    padding-right 2px
+    padding-top 2px
+    button
+      width initial
+      cursor pointer
+  pre
+    color var(--primary)
+    background-color var(--secondary-active-background)
+    font-weight normal
+    background-color var(--secondary-active-background)
+    border-radius var(--small-entity-radius)
+    margin 0
+    white-space pre-wrap
+    vertical-align 0
 </style>
