@@ -1,9 +1,105 @@
+<script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import NameMatch from '@/components/NameMatch.vue'
+import Tag from '@/components/Tag.vue'
+import SystemCommand from '@/components/SystemCommand.vue'
+import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
+import utils from '@/utils.js'
+
+import fuzzy from '@/libs/fuzzy.js'
+const store = useStore()
+
+let shouldCancel = false
+
+const props = defineProps({
+  segment: Object,
+  search: String,
+  isStrikeThrough: Boolean,
+  parentCardId: String
+})
+const emit = defineEmits(['showTagDetailsIsVisible'])
+
+// state
+
+const currentSelectedTag = computed(() => { return store.state.currentSelectedTag })
+const currentSelectedOtherItem = computed(() => { return store.state.currentSelectedOtherItem })
+
+// segment data
+
+const dataMarkdownType = computed(() => {
+  if (props.segment.isTag) { return 'tag' }
+  if (props.segment.isLink) { return 'link' }
+  if (props.segment.isInviteLink) { return 'inviteLink' }
+  if (!props.segment.markdown) { return 'text' }
+  let markdown = props.segment.markdown.filter(item => Boolean(item.content))
+  const segmentIsEmpty = !utils.arrayHasItems(markdown)
+  if (segmentIsEmpty) { return 'text' }
+  let types = markdown.map(item => item.type)
+  types = utils.arrayToString(types)
+  return types
+})
+const dataTagColor = computed(() => {
+  if (!props.segment.isTag) { return }
+  return props.segment.color
+})
+const dataTagName = computed(() => {
+  if (!props.segment.isTag) { return }
+  return props.segment.name
+})
+const isSpaceLink = (segment) => {
+  if (segment.cardId) { return }
+  return segment.isLink
+}
+const escapedUrl = (url) => {
+  if (url.includes('javascript:')) {
+    return null
+  }
+  return url
+}
+
+// search
+
+const matchIndexes = (name) => {
+  if (!name) { return [] }
+  const options = {
+    pre: '',
+    post: ''
+  }
+  const filtered = fuzzy.filter(props.search, [name], options)
+  if (filtered.length) {
+    return filtered[0].indices
+  } else {
+    return []
+  }
+}
+
+// click
+
+const updateShouldCancel = (event) => {
+  shouldCancel = store.state.preventDraggedCardFromShowingDetails
+}
+const openUrl = (event, url) => {
+  event.preventDefault()
+  store.dispatch('closeAllDialogs')
+  if (shouldCancel) {
+    shouldCancel = false
+  } else {
+    window.open(url) // opens url in new tab
+  }
+}
+const showTagDetailsIsVisible = (event, tag) => {
+  emit('showTagDetailsIsVisible', { event, tag })
+}
+</script>
+
 <template lang="pug">
 span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTagColor" :data-tag-name="dataTagName")
-  template(v-if="segment.isText && segment.content")
+  template(v-if="props.segment.isText && props.segment.content")
     //- Name markdown
-    span.markdown(v-if="segment.markdown")
-      template(v-for="markdown in segment.markdown")
+    span.markdown(v-if="props.segment.markdown")
+      template(v-for="markdown in props.segment.markdown")
         template(v-if="markdown.type === 'text'")
           span {{markdown.content}}
         template(v-else-if="markdown.type === 'link'")
@@ -21,123 +117,32 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
         template(v-else-if="markdown.type === 'strikethrough'")
           del {{markdown.content}}
         template(v-else-if="markdown.type === 'codeBlock'")
+
           pre {{markdown.content}}
         template(v-else-if="markdown.type === 'code'")
           code {{markdown.content}}
     //- Name results list
-    template(v-if="!segment.markdown")
-      span(v-if="search")
-        NameMatch(:name="segment.content" :indexes="matchIndexes(segment.content)")
-      span(v-else :class="{ strikethrough: isStrikeThrough }") {{segment.content}}
+    template(v-if="!props.segment.markdown")
+      span(v-if="props.search")
+        NameMatch(:name="props.segment.content" :indexes="matchIndexes(props.segment.content)")
+      span(v-else :class="{ strikethrough: props.isStrikeThrough }") {{props.segment.content}}
   //- Tags
-  template(v-if="segment.isTag")
-    Tag(:tag="segment" :isClickable="true" :isActive="currentSelectedTag.name === segment.name" @clickTag="showTagDetailsIsVisible")
+  template(v-if="props.segment.isTag")
+    Tag(:tag="props.segment" :isClickable="true" :isActive="currentSelectedTag.name === props.segment.name" @clickTag="showTagDetailsIsVisible")
   //- Invite
-  template(v-if="segment.isInviteLink")
-    OtherSpacePreview(:isInvite="true" :otherSpace="segment.otherSpace" :url="segment.name" :parentCardId="parentCardId" :shouldCloseAllDialogs="true")
+  template(v-if="props.segment.isInviteLink")
+    OtherSpacePreview(:isInvite="true" :otherSpace="props.segment.otherSpace" :url="props.segment.name" :parentCardId="props.parentCardId" :shouldCloseAllDialogs="true")
   //- Other Space
-  template(v-if="isSpaceLink(segment)")
-    OtherSpacePreview(:otherSpace="segment.otherSpace" :url="segment.name" :parentCardId="parentCardId" :shouldCloseAllDialogs="true")
+  template(v-if="isSpaceLink(props.segment)")
+    OtherSpacePreview(:otherSpace="props.segment.otherSpace" :url="props.segment.name" :parentCardId="props.parentCardId" :shouldCloseAllDialogs="true")
   //- File
-  span.badge.secondary-on-dark-background(v-if="segment.isFile")
+  span.badge.secondary-on-dark-background(v-if="props.segment.isFile")
     img.icon(src="@/assets/file.svg")
-    span {{segment.name}}
+    span {{props.segment.name}}
   //- System Command
-  template(v-if="segment.isCommand")
-    SystemCommand(:command="segment.command" :name="segment.name")
+  template(v-if="props.segment.isCommand")
+    SystemCommand(:command="props.segment.command" :name="props.segment.name")
 </template>
-
-<script>
-import NameMatch from '@/components/NameMatch.vue'
-import Tag from '@/components/Tag.vue'
-import SystemCommand from '@/components/SystemCommand.vue'
-import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
-import utils from '@/utils.js'
-
-import fuzzy from '@/libs/fuzzy.js'
-
-let shouldCancel = false
-
-export default {
-  name: 'NameSegment',
-  components: {
-    NameMatch,
-    Tag,
-    SystemCommand,
-    OtherSpacePreview
-  },
-  props: {
-    segment: Object,
-    search: String,
-    isStrikeThrough: Boolean,
-    parentCardId: String
-  },
-  computed: {
-    currentSelectedTag () { return this.$store.state.currentSelectedTag },
-    currentSelectedOtherItem () { return this.$store.state.currentSelectedOtherItem },
-    dataMarkdownType () {
-      if (this.segment.isTag) { return 'tag' }
-      if (this.segment.isLink) { return 'link' }
-      if (this.segment.isInviteLink) { return 'inviteLink' }
-      if (!this.segment.markdown) { return 'text' }
-      let markdown = this.segment.markdown.filter(item => Boolean(item.content))
-      const segmentIsEmpty = !utils.arrayHasItems(markdown)
-      if (segmentIsEmpty) { return 'text' }
-      let types = markdown.map(item => item.type)
-      types = utils.arrayToString(types)
-      return types
-    },
-    dataTagColor () {
-      if (!this.segment.isTag) { return }
-      return this.segment.color
-    },
-    dataTagName () {
-      if (!this.segment.isTag) { return }
-      return this.segment.name
-    }
-  },
-  methods: {
-    matchIndexes (name) {
-      if (!name) { return [] }
-      const options = {
-        pre: '',
-        post: ''
-      }
-      const filtered = fuzzy.filter(this.search, [name], options)
-      if (filtered.length) {
-        return filtered[0].indices
-      } else {
-        return []
-      }
-    },
-    showTagDetailsIsVisible (event, tag) {
-      this.$emit('showTagDetailsIsVisible', { event, tag })
-    },
-    escapedUrl (url) {
-      if (url.includes('javascript:')) {
-        return null
-      }
-      return url
-    },
-    updateShouldCancel (event) {
-      shouldCancel = this.$store.state.preventDraggedCardFromShowingDetails
-    },
-    openUrl (event, url) {
-      event.preventDefault()
-      this.$store.dispatch('closeAllDialogs')
-      if (shouldCancel) {
-        shouldCancel = false
-      } else {
-        window.open(url) // opens url in new tab
-      }
-    },
-    isSpaceLink (segment) {
-      if (segment.cardId) { return }
-      return segment.isLink
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .name-segment
