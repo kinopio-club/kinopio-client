@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, ne
 import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
+import CodeLanguagePicker from '@/components/dialogs/CodeLanguagePicker.vue'
 
 const store = useStore()
 
@@ -12,6 +13,8 @@ onMounted(() => {
   // TODO syntaxHighlight()
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerCloseChildDialogs') {
+      closeDialogs()
+    } else if (mutation.type === 'closeAllDialogs') {
       closeDialogs()
     }
   })
@@ -61,19 +64,20 @@ const language = computed(() => {
 const updateLanguage = (newLanguage) => {
   if (newLanguage === language.value) { return }
   console.log('🌺 updateCardCodeBlockLanguage', newLanguage, language.value, props.parentCardId)
-  // dispatch currentcards.update
+  // dispatch currentcards.update { id: props.parentCardId, codeBlockLanguage: newLanguage }
   // TODO syntaxHighlight()  , if !preventSyntaxHighlight param
 }
 
 // code language picker dialog
 
-const toggleCodeLanguagePicker = () => {
+const toggleCodeLanguagePicker = async () => {
+  const value = !state.languagePickerIsVisible
   store.dispatch('closeAllDialogs')
   store.commit('currentUserIsDraggingCard', false)
-  const value = !state.languagePickerIsVisible
   store.commit('triggerCloseChildDialogs')
+  await nextTick()
   state.languagePickerIsVisible = value
-  // TODO CodeLanguagePicker: pass props.parentCardId, updates card.codeBlockLanguage
+  console.log('🚒🚒🚒', state.languagePickerIsVisible)
 }
 
 const closeDialogs = () => {
@@ -84,10 +88,10 @@ const closeDialogs = () => {
 <template lang="pug">
 .code-block
   .language-button(@click.stop="toggleCodeLanguagePicker")
-    button.small-button.inline-button
+    button.small-button.inline-button(:class="{ active: state.languagePickerIsVisible }")
       span {{language}}
       Loader(:visible="state.isLoadingSyntaxHighlight" :isStatic="true" :isSmall="true")
-    //- TODO CodeLanguagePicker pass props.parentCardId, @updateLanguage="updateLanguage"
+    CodeLanguagePicker(:visible="state.languagePickerIsVisible" :currentLanguage="language", @updateLanguage="updateLanguage")
 
   //- code
   template(v-if="state.isLoadingSyntaxHighlight")
