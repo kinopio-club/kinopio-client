@@ -1215,7 +1215,7 @@ export default {
       if (this.isAnimationUnsticking) { return }
       if (preventSticking) { return }
       if (!stickyTimerComplete) { return }
-      const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap', 'inline-button', 'badge', 'code-block', 'language-button']
+      const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap', 'inline-button', 'badge']
       const elements = ['button', 'progress', 'iframe']
       const isOverAction = classes.includes(event.target.className) || elements.includes(event.target.nodeName.toLowerCase())
       const isOverTag = event.target.className.includes('button-badge')

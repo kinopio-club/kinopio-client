@@ -117,7 +117,7 @@ const languagePickerIsVisible = computed(() => {
 <style lang="stylus">
 .code-block
   position relative
-  .language-button
+  .button-wrap
     position absolute
     right 0
     top 0
