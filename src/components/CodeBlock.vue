@@ -92,8 +92,9 @@ const toggleCodeLanguagePicker = async (event) => {
   .button-wrap
     position absolute
     right 0
-    top 0
-    padding 6px
+    bottom -6px
+    padding 8px
+    // background-color pink
     &:hover
       button
         box-shadow var(--button-hover-shadow)
@@ -103,8 +104,8 @@ const toggleCodeLanguagePicker = async (event) => {
         box-shadow var(--button-active-inset-shadow)
         background-color var(--secondary-active-background)
     button
-      margin-right -4px
-      margin-top -4px
+      margin-right -6px
+      margin-bottom -6px
       width initial
       cursor pointer
       &.active
@@ -127,7 +128,7 @@ const toggleCodeLanguagePicker = async (event) => {
     word-wrap none
     span
       font-family var(--mono-font)
-      font-size 13px
+      font-size 12px
   .loader
     width 12px !important
     height 12px !important
