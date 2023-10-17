@@ -22,7 +22,12 @@ const themes = {
       'new-unread-background': '#57a8ff',
       'secondary-active-background-dark': '#cdcdcd',
       'light-shadow': 'rgba(0,0,0,0.20)',
-      'heavy-shadow': 'rgba(0,0,0,0.25)'
+      'heavy-shadow': 'rgba(0,0,0,0.25)',
+      // codeblock
+      'code-comment': '#898989',
+      'code-punctuation': 'black',
+      'code-string': '#a2162d',
+      'code-keyword': '#00119e'
     }
   },
   dark: {
@@ -46,7 +51,12 @@ const themes = {
       'new-unread-background': '#2f6fb5',
       'secondary-active-background-dark': '#444',
       'light-shadow': 'rgba(0,0,0,0.25)',
-      'heavy-shadow': 'rgba(0,0,0,0.55)'
+      'heavy-shadow': 'rgba(0,0,0,0.55)',
+      // codeblock
+      'code-comment': 'teal',
+      'code-punctuation': 'orange',
+      'code-string': 'pink',
+      'code-keyword': 'purple'
     }
   }
 }

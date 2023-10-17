@@ -2195,6 +2195,7 @@ article.card-wrap
         align-self stretch
         word-break break-word
         white-space pre-line
+        width 100%
         &.is-checked
           text-decoration line-through
           h1,

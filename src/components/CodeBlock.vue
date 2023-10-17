@@ -2,16 +2,14 @@
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
+import codeLanguages from '@/data/codeLanguages.json'
+
+import { highlight } from 'macrolight'
+
 const store = useStore()
 
 onMounted(() => {
   emit('updateCardDimensions')
-  // TODO syntaxHighlight()
-})
-watch(() => props.content, (value, prevValue) => {
-  if (value) {
-    // TODO syntaxHighlight()
-  }
 })
 
 const props = defineProps({
@@ -19,46 +17,37 @@ const props = defineProps({
   parentCardId: String
 })
 const emit = defineEmits(['updateCardDimensions'])
-const state = reactive({
-  isLoadingSyntaxHighlight: true,
-  contentSyntaxHighlightTree: null,
-  languagePickerIsVisible: false
-})
 
-const syntaxHighlight = () => {
-  if (language.value === 'txt') {
-    state.contentSyntaxHighlightTree = null
-    state.isLoadingSyntaxHighlight = false
-    return
-  }
-  state.isLoadingSyntaxHighlight = true
-  try {
-    // TODO call api util w props.content and with card.codeBlockLanguage, no auth works on anon
-    // assign state.contentSyntaxHighlightTree
-    // assign card.codeBlockLanguage , if no lang detected then assign 'txt'
-  } catch (error) {
-    console.error('🚑 syntaxHighlight', props.parentCardId, error)
-  }
-  state.isLoadingSyntaxHighlight = false
-}
+// syntax highlight
 
-// language
-
-const language = computed(() => {
+const currentLanguage = computed(() => {
   const card = store.getters['currentCards/byId'](props.parentCardId)
   const language = card.codeBlockLanguage || 'txt'
   return language
 })
+const syntaxHighlightHtml = computed(() => {
+  const codeLangauage = codeLanguages.find(lang => lang.name === 'js')
+  const keywords = codeLangauage.keywords
+  const html = highlight(props.content, {
+    styles: {
+      comment: '',
+      punctuation: '',
+      string: '',
+      keyword: ''
+    },
+    keywords
+  })
+  console.log('♥️', html)
+  return html
+})
 
-const updateLanguage = (newLanguage) => {
-  if (newLanguage === language.value) { return }
-  console.log('🌺 updateCardCodeBlockLanguage', newLanguage, language.value, props.parentCardId)
-  // dispatch currentcards.update { id: props.parentCardId, codeBlockLanguage: newLanguage }
-  // TODO syntaxHighlight()  , if !preventSyntaxHighlight param
-}
+// language picker
 
-// code language picker dialog
-
+const languagePickerIsVisible = computed(() => {
+  const isVisible = store.state.codeLanguagePickerIsVisible
+  const isCard = store.state.codeLanguagePickerCardId === props.parentCardId
+  return isVisible && isCard
+})
 const toggleCodeLanguagePicker = async (event) => {
   const value = !store.state.codeLanguagePickerIsVisible
   let element = event.target.closest('.language-button')
@@ -67,9 +56,6 @@ const toggleCodeLanguagePicker = async (event) => {
   } else {
     element = event.target.closest('button')
   }
-
-  console.log('🚒🚒', event.target, element)
-
   const rect = element.getBoundingClientRect()
   const position = {
     x: window.scrollX + rect.x + 2,
@@ -77,41 +63,27 @@ const toggleCodeLanguagePicker = async (event) => {
     pageX: window.scrollX,
     pageY: window.scrollY
   }
-  // console.log('🍔🍔🍔🍔',value, )
   store.dispatch('closeAllDialogs')
   store.commit('currentUserIsDraggingCard', false)
   await nextTick()
   store.commit('codeLanguagePickerIsVisible', value)
   store.commit('codeLanguagePickerPosition', position)
   store.commit('codeLanguagePickerCardId', props.parentCardId)
-
-  // state.languagePickerIsVisible = value
 }
+// const shouldNotHighlight = computed(() => {
+//   const card = store.getters['currentCards/byId'](props.parentCardId)
+//   return !card.codeBlockLanguage || 'txt'
+// })
 
-const languagePickerIsVisible = computed(() => {
-  const isVisible = store.state.codeLanguagePickerIsVisible
-  const isCard = store.state.codeLanguagePickerCardId === props.parentCardId
-  return isVisible && isCard
-})
 </script>
 
 <template lang="pug">
 .code-block
-  .language-button(@click.stop="toggleCodeLanguagePicker")
+  .language-button.button-wrap(@click.stop="toggleCodeLanguagePicker")
     button.small-button.inline-button(:class="{ active: languagePickerIsVisible }")
-      span {{language}}
-      Loader(:visible="state.isLoadingSyntaxHighlight" :isStatic="true" :isSmall="true")
-    CodeLanguagePicker(:visible="state.languagePickerIsVisible" :currentLanguage="language", @updateLanguage="updateLanguage")
-
-  //- code
-  template(v-if="state.isLoadingSyntaxHighlight")
-    pre {{props.content}}
-  template(v-else-if="state.contentSyntaxHighlightTree")
-    //- render from contentSyntaxHighlightTree
-    pre {{state.contentSyntaxHighlightTree}}
-  template(v-else)
-    pre {{props.content}}
-
+      //- TODO lang color badge
+      span {{currentLanguage}}
+  pre(v-html="syntaxHighlightHtml")
 </template>
 
 <style lang="stylus">
@@ -140,6 +112,10 @@ const languagePickerIsVisible = computed(() => {
         background-color var(--secondary-active-background)
 
   pre
+    overflow scroll !important
+    white-space pre !important
+    padding 4px
+    padding-right 2rem
     color var(--primary)
     background-color var(--secondary-active-background)
     font-weight normal
@@ -148,7 +124,22 @@ const languagePickerIsVisible = computed(() => {
     margin 0
     white-space pre-wrap
     vertical-align 0
+    word-wrap none
+    span
+      font-family var(--mono-font)
+      font-size 13px
   .loader
     width 12px !important
     height 12px !important
+
+  // syntax highlighting
+  .macrolight-comment
+    color var(--code-comment)
+  .macrolight-punctuation
+    color var(--code-punctuation)
+  .macrolight-string
+    color var(--code-string)
+  .macrolight-keyword
+    font-weight bold
+    color var(--code-keyword)
 </style>
