@@ -18,6 +18,7 @@ main#space.space(
   OtherCardDetails
   OtherSpaceDetails
   ConnectionDetails
+  CodeLanguagePicker
   MultipleSelectedActions
   ScrollAtEdgesHandler
   NotificationsWithPosition(layer="space")
@@ -32,6 +33,7 @@ import OtherSpaceDetails from '@/components/dialogs/OtherSpaceDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
+import CodeLanguagePicker from '@/components/dialogs/CodeLanguagePicker.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
@@ -59,6 +61,7 @@ export default {
     BoxDetails,
     UserLabelCursor,
     ConnectionDetails,
+    CodeLanguagePicker,
     MultipleSelectedActions,
     ScrollAtEdgesHandler,
     NotificationsWithPosition,

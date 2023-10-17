@@ -1,5 +1,4 @@
 [
-  {"name": "auto"},
   {"name": "txt"},
   {"name": "c", "grammar": "source.c", "color": "#555555"},
   {"name": "c++", "grammar": "source.c++", "color": "#f34b7d"},

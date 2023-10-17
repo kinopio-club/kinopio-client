@@ -2,22 +2,11 @@
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import Loader from '@/components/Loader.vue'
-import CodeLanguagePicker from '@/components/dialogs/CodeLanguagePicker.vue'
-
 const store = useStore()
 
 onMounted(() => {
-  console.log(`🍆 codeblock component is now mounted.`, props.parentCardId)
   emit('updateCardDimensions')
   // TODO syntaxHighlight()
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeDialogs()
-    } else if (mutation.type === 'closeAllDialogs') {
-      closeDialogs()
-    }
-  })
 })
 watch(() => props.content, (value, prevValue) => {
   if (value) {
@@ -57,7 +46,7 @@ const syntaxHighlight = () => {
 
 const language = computed(() => {
   const card = store.getters['currentCards/byId'](props.parentCardId)
-  const language = card.codeBlockLanguage || 'auto'
+  const language = card.codeBlockLanguage || 'txt'
   return language
 })
 
@@ -70,25 +59,46 @@ const updateLanguage = (newLanguage) => {
 
 // code language picker dialog
 
-const toggleCodeLanguagePicker = async () => {
-  const value = !state.languagePickerIsVisible
+const toggleCodeLanguagePicker = async (event) => {
+  const value = !store.state.codeLanguagePickerIsVisible
+  let element = event.target.closest('.language-button')
+  if (element) {
+    element = element.querySelector('button')
+  } else {
+    element = event.target.closest('button')
+  }
+
+  console.log('🚒🚒', event.target, element)
+
+  const rect = element.getBoundingClientRect()
+  const position = {
+    x: window.scrollX + rect.x + 2,
+    y: window.scrollY + rect.y + rect.height - 2,
+    pageX: window.scrollX,
+    pageY: window.scrollY
+  }
+  // console.log('🍔🍔🍔🍔',value, )
   store.dispatch('closeAllDialogs')
   store.commit('currentUserIsDraggingCard', false)
-  store.commit('triggerCloseChildDialogs')
   await nextTick()
-  state.languagePickerIsVisible = value
-  console.log('🚒🚒🚒', state.languagePickerIsVisible)
+  store.commit('codeLanguagePickerIsVisible', value)
+  store.commit('codeLanguagePickerPosition', position)
+  store.commit('codeLanguagePickerCardId', props.parentCardId)
+
+  // state.languagePickerIsVisible = value
 }
 
-const closeDialogs = () => {
-  state.languagePickerIsVisible = false
-}
+const languagePickerIsVisible = computed(() => {
+  const isVisible = store.state.codeLanguagePickerIsVisible
+  const isCard = store.state.codeLanguagePickerCardId === props.parentCardId
+  return isVisible && isCard
+})
 </script>
 
 <template lang="pug">
 .code-block
   .language-button(@click.stop="toggleCodeLanguagePicker")
-    button.small-button.inline-button(:class="{ active: state.languagePickerIsVisible }")
+    button.small-button.inline-button(:class="{ active: languagePickerIsVisible }")
       span {{language}}
       Loader(:visible="state.isLoadingSyntaxHighlight" :isStatic="true" :isSmall="true")
     CodeLanguagePicker(:visible="state.languagePickerIsVisible" :currentLanguage="language", @updateLanguage="updateLanguage")
@@ -111,11 +121,24 @@ const closeDialogs = () => {
     position absolute
     right 0
     top 0
-    padding-right 2px
-    padding-top 2px
+    padding 6px
+    &:hover
+      button
+        box-shadow var(--button-hover-shadow)
+        background-color var(--secondary-hover-background)
+    &:active
+      button
+        box-shadow var(--button-active-inset-shadow)
+        background-color var(--secondary-active-background)
     button
+      margin-right -4px
+      margin-top -4px
       width initial
       cursor pointer
+      &.active
+        box-shadow var(--button-active-inset-shadow)
+        background-color var(--secondary-active-background)
+
   pre
     color var(--primary)
     background-color var(--secondary-active-background)

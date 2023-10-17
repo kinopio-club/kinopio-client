@@ -245,7 +245,13 @@ const store = createStore({
     // session data
     otherUsers: [], // { id, name color }
     otherItems: { spaces: [], cards: [] },
-    otherTags: []
+    otherTags: [],
+
+    // codeblocks
+
+    codeLanguagePickerIsVisible: false,
+    codeLanguagePickerPosition: {}, // x, y
+    codeLanguagePickerCardId: ''
   },
   mutations: {
     resetPageSizes: (state) => {
@@ -302,6 +308,7 @@ const store = createStore({
       state.cardListItemOptionsIsVisible = false
       state.pricingIsVisible = false
       state.userSettingsIsVisible = false
+      state.codeLanguagePickerIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1470,7 +1477,23 @@ const store = createStore({
     otherTags: (state, remoteTags) => {
       remoteTags = uniqBy(remoteTags, 'name')
       state.otherTags = remoteTags
+    },
+
+    // Code Blocks
+
+    codeLanguagePickerIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.codeLanguagePickerIsVisible = value
+    },
+    codeLanguagePickerPosition: (state, position) => {
+      utils.typeCheck({ value: position, type: 'object' })
+      state.codeLanguagePickerPosition = position
+    },
+    codeLanguagePickerCardId: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      state.codeLanguagePickerCardId = cardId
     }
+
   },
 
   actions: {

@@ -574,6 +574,7 @@ export default {
     shouldNotStick () {
       if (!this.currentUser.shouldUseStickyCards) { return true }
       if (this.embedIsVisible) { return true }
+      if (this.$store.state.codeLanguagePickerIsVisible) { return true }
       const userIsConnecting = this.currentConnectionStartCardIds.length
       const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
@@ -1214,7 +1215,7 @@ export default {
       if (this.isAnimationUnsticking) { return }
       if (preventSticking) { return }
       if (!stickyTimerComplete) { return }
-      const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap', 'inline-button', 'badge']
+      const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap', 'inline-button', 'badge', 'code-block', 'language-button']
       const elements = ['button', 'progress', 'iframe']
       const isOverAction = classes.includes(event.target.className) || elements.includes(event.target.nodeName.toLowerCase())
       const isOverTag = event.target.className.includes('button-badge')
