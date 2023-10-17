@@ -53,10 +53,10 @@ const themes = {
       'light-shadow': 'rgba(0,0,0,0.25)',
       'heavy-shadow': 'rgba(0,0,0,0.55)',
       // codeblock
-      'code-comment': 'teal',
-      'code-punctuation': 'orange',
-      'code-string': 'pink',
-      'code-keyword': 'purple'
+      'code-comment': '#898989',
+      'code-punctuation': 'white',
+      'code-string': '#fddd88',
+      'code-keyword': '#79e6d9'
     }
   }
 }
