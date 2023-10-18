@@ -6,6 +6,8 @@
     img.icon.search(src="@/assets/search.svg" @click.left="focusFilterInput")
 
   input(
+    name="filter"
+    type="text"
     :placeholder="inputPlaceholder"
     v-model="filterItems"
     ref="filterInput"
