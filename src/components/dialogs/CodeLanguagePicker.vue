@@ -22,7 +22,8 @@ onMounted(() => {
 
 const state = reactive({
   dialogHeight: null,
-  filteredCodeLanguages: codeLanguages
+  filteredCodeLanguages: codeLanguages,
+  focusOnId: null
 })
 const visible = computed(() => store.state.codeLanguagePickerIsVisible)
 const position = computed(() => store.state.codeLanguagePickerPosition)
@@ -35,6 +36,9 @@ const languageIsActive = (language) => {
   const cardLanguage = card.codeBlockLanguage || 'txt'
   return language.name === cardLanguage
 }
+const languageIsFocused = (language) => {
+  return state.focusOnId === language.id
+}
 const selectLanguage = (language) => {
   store.dispatch('currentCards/update', {
     id: cardId.value,
@@ -43,23 +47,36 @@ const selectLanguage = (language) => {
   store.dispatch('closeAllDialogs')
 }
 
-// results list filter
+// results list input
 
-const updateFilter = async (filter, isClearFilter) => {
-  if (isClearFilter || !filter) {
-    await nextTick()
-    state.filteredCodeLanguages = codeLanguages
+const clearFilter = () => {
+  state.focusOnId = null
+  state.filteredCodeLanguages = codeLanguages
+}
+const onBlur = () => {
+  state.focusOnId = null
+}
+const onFocus = () => {
+  state.focusOnId = state.filteredCodeLanguages[0].id
+}
+const updateFilter = async (filter) => {
+  if (!filter) {
+    state.focusOnId = codeLanguages[0].id
   }
   updateDialogHeight()
 }
 const updateFilteredItems = (items) => {
   state.filteredCodeLanguages = items
+  if (items.length) {
+    state.focusOnId = state.filteredCodeLanguages[0].id
+  }
   updateDialogHeight()
 }
-const focusNextItemFromFilter = () => {
+const focusNextItem = () => {
+  // const currentIndex = state.filteredCodeLanguages.findIndex(language => )
   console.log('🍔🍔🍔')
 }
-const focusPreviousItemFromFilter = () => {
+const focusPreviousItem = () => {
   console.log('☮️☮️☮️')
 }
 const selectItemFromFilter = () => {
@@ -103,13 +120,16 @@ dialog.narrow.code-language-picker(v-if="visible" :open="visible" @click.left.st
     :placeholder="placeholder"
     @updateFilter="updateFilter"
     @updateFilteredItems="updateFilteredItems"
-    @focusNextItem="focusNextItemFromFilter"
-    @focusPreviousItem="focusPreviousItemFromFilter"
+    @focusNextItem="focusNextItem"
+    @focusPreviousItem="focusPreviousItem"
     @selectItem="selectItemFromFilter"
+    @onFocus="onFocus"
+    @onBlur="onBlur"
+    @clearFilter="clearFilter"
   )
   ul.results-list(ref="resultsList")
-    template(v-for="(language, index) in state.filteredCodeLanguages")
-      li(@click="selectLanguage(language)" :class="{active: languageIsActive(language)}")
+    template(v-for="(language, index) in state.filteredCodeLanguages" :key="language.id")
+      li(@click="selectLanguage(language)" :class="{active: languageIsActive(language), hover: languageIsFocused(language)}")
         .badge.dot(:style="languageColorStyle(language)")
         span {{language.name}}
 </template>

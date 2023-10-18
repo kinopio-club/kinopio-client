@@ -11,8 +11,8 @@
     :placeholder="inputPlaceholder"
     v-model="filterItems"
     ref="filterInput"
-    @focus="resetPinchCounterZoomDecimal"
-    @blur="triggerUpdatePositionInVisualViewport"
+    @focus="focus"
+    @blur="blur"
     @keydown.down.exact="focusNextItem"
     @keydown.up.exact="focusPreviousItem"
     @keydown.enter.exact.stop.prevent="selectItem"
@@ -174,8 +174,16 @@ export default {
         })
       }
     },
+    focus () {
+      this.$emit('onFocus')
+      this.resetPinchCounterZoomDecimal()
+    },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
+    },
+    blur () {
+      this.$emit('onBlur')
+      this.triggerUpdatePositionInVisualViewport()
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
