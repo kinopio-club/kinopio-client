@@ -9,7 +9,7 @@ import utils from '@/utils.js'
 const store = useStore()
 
 const dialog = ref(null)
-const placeholder = 'Search Code Languages'
+const placeholder = 'Search Languages'
 
 onMounted(() => {
   updateDialogHeight()
@@ -116,6 +116,7 @@ dialog.narrow.code-language-picker(v-if="visible" :open="visible" @click.left.st
 
 <style lang="stylus">
 dialog.code-language-picker
+  width 200px
   min-height 150px
   padding 4px
   position absolute
