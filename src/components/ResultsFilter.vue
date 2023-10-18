@@ -89,6 +89,11 @@ export default {
     if (!isExpired) {
       this.updateFilter(info.filter)
     }
+    // autofocus
+    if (this.$store.state.isTouchDevice) { return }
+    this.$nextTick(() => {
+      this.focusFilterInput()
+    })
   },
   computed: {
     addSpaceIsVisible () {
