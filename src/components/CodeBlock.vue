@@ -117,7 +117,7 @@ const toggleCodeLanguagePicker = async (event) => {
     overflow scroll !important
     white-space pre !important
     padding 4px
-    padding-right 2rem
+    padding-right 4rem
     color var(--primary)
     background-color var(--secondary-active-background)
     font-weight normal
