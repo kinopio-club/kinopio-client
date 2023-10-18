@@ -21,7 +21,8 @@ onMounted(() => {
 })
 
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  filteredCodeLanguages: codeLanguages
 })
 const visible = computed(() => store.state.codeLanguagePickerIsVisible)
 const position = computed(() => store.state.codeLanguagePickerPosition)
@@ -44,17 +45,17 @@ const selectLanguage = (language) => {
 
 // results list filter
 
-const updateFilter = (filter, isClearFilter) => {
-  console.log('🚛', filter, isClearFilter)
-  // if isclear => state.languages = codeLanguages
-  // if (isClearFilter) {
+const updateFilter = async (filter, isClearFilter) => {
+  if (isClearFilter || !filter) {
+    await nextTick()
+    state.filteredCodeLanguages = codeLanguages
+  }
   updateDialogHeight()
-  // }
 }
-// const updateFilteredItems = (items) => {
-//   // state.languages = items
-//   updateDialogHeight()
-// }
+const updateFilteredItems = (items) => {
+  state.filteredCodeLanguages = items
+  updateDialogHeight()
+}
 const focusNextItemFromFilter = () => {
   console.log('🍔🍔🍔')
 }
@@ -101,12 +102,13 @@ dialog.narrow.code-language-picker(v-if="visible" :open="visible" @click.left.st
     :items="codeLanguages"
     :placeholder="placeholder"
     @updateFilter="updateFilter"
+    @updateFilteredItems="updateFilteredItems"
     @focusNextItem="focusNextItemFromFilter"
     @focusPreviousItem="focusPreviousItemFromFilter"
     @selectItem="selectItemFromFilter"
   )
   ul.results-list(ref="resultsList")
-    template(v-for="(language, index) in codeLanguages")
+    template(v-for="(language, index) in state.filteredCodeLanguages")
       li(@click="selectLanguage(language)" :class="{active: languageIsActive(language)}")
         .badge.dot(:style="languageColorStyle(language)")
         span {{language.name}}
