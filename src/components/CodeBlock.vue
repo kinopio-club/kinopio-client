@@ -2,16 +2,16 @@
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import codeLanguages from '@/data/codeLanguages.json'
-
 import { highlight } from 'macrolight'
 
+import codeLanguages from '@/data/codeLanguages.json'
 const store = useStore()
+
+const defaultLanguageName = 'txt'
 
 onMounted(() => {
   emit('updateCardDimensions')
 })
-
 const props = defineProps({
   content: String,
   parentCardId: String
@@ -20,16 +20,15 @@ const emit = defineEmits(['updateCardDimensions'])
 
 // syntax highlight
 
+const shouldSyntaxHighlight = computed(() => currentLanguage.value.name !== defaultLanguageName)
 const currentLanguage = computed(() => {
-  const defaultLanguageName = 'txt'
   const card = store.getters['currentCards/byId'](props.parentCardId)
   const name = card.codeBlockLanguage || defaultLanguageName
   let codeLanguage = codeLanguages.find(language => language.name === name)
   codeLanguage = codeLanguage || codeLanguages[0]
   return codeLanguage
 })
-const syntaxHighlightHtml = computed(() => {
-  // TODO ??'txt' lang should not process highlights at all?
+const syntaxHighlightHTML = computed(() => {
   const keywords = currentLanguage.value.keywords
   const html = highlight(props.content, {
     styles: {
@@ -82,7 +81,11 @@ const toggleCodeLanguagePicker = async (event) => {
       span(v-if="currentLanguage.color")
         .badge.dot(:style="{ backgroundColor: currentLanguage.color }")
       span {{currentLanguage.name}}
-  pre(v-html="syntaxHighlightHtml")
+  template(v-if="shouldSyntaxHighlight")
+    pre(v-html="syntaxHighlightHTML")
+  template(v-else)
+    pre {{props.content}}
+
 </template>
 
 <style lang="stylus">
@@ -124,9 +127,11 @@ const toggleCodeLanguagePicker = async (event) => {
     white-space pre-wrap
     vertical-align 0
     word-wrap none
+    font-size 12px
+    font-family var(--mono-font)
     span
-      font-family var(--mono-font)
       font-size 12px
+      font-family var(--mono-font)
   .loader
     width 12px !important
     height 12px !important
