@@ -80,6 +80,7 @@ export default {
         })
       }
     })
+    this.autoFocus()
   },
   mounted () {
     if (!this.isInitialValueFromSpaceListFilterInfo) { return }
@@ -91,11 +92,6 @@ export default {
     if (!isExpired) {
       this.updateFilter(info.filter)
     }
-    // autofocus
-    if (this.$store.state.isTouchDevice) { return }
-    this.$nextTick(() => {
-      this.focusFilterInput()
-    })
   },
   computed: {
     addSpaceIsVisible () {
@@ -124,6 +120,12 @@ export default {
     }
   },
   methods: {
+    autoFocus () {
+      if (this.$store.state.isTouchDevice) { return }
+      this.$nextTick(() => {
+        this.focusFilterInput()
+      })
+    },
     updateFilter (newValue) {
       this.filter = newValue
       this.$emit('updateFilter', this.filter)
