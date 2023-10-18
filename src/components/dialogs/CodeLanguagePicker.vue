@@ -40,6 +40,7 @@ const languageIsFocused = (language) => {
   return state.focusOnId === language.id
 }
 const selectLanguage = (language) => {
+  if (!language) { return }
   store.dispatch('currentCards/update', {
     id: cardId.value,
     codeBlockLanguage: language.name
@@ -73,14 +74,20 @@ const updateFilteredItems = (items) => {
   updateDialogHeight()
 }
 const focusNextItem = () => {
-  // const currentIndex = state.filteredCodeLanguages.findIndex(language => )
-  console.log('🍔🍔🍔')
+  const currentIndex = state.filteredCodeLanguages.findIndex(language => language.id === state.focusOnId) || 0
+  const language = state.filteredCodeLanguages[currentIndex + 1]
+  if (!language) { return }
+  state.focusOnId = language.id
 }
 const focusPreviousItem = () => {
-  console.log('☮️☮️☮️')
+  const currentIndex = state.filteredCodeLanguages.findIndex(language => language.id === state.focusOnId) || 0
+  const language = state.filteredCodeLanguages[currentIndex - 1]
+  if (!language) { return }
+  state.focusOnId = language.id
 }
 const selectItemFromFilter = () => {
-  console.log('🍇🍇🍇')
+  const language = state.filteredCodeLanguages.find(language => language.id === state.focusOnId)
+  selectLanguage(language)
 }
 const languageColorStyle = (language) => {
   return {
