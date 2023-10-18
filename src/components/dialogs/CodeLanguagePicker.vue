@@ -26,6 +26,9 @@ const state = reactive({
   focusOnId: null
 })
 const visible = computed(() => store.state.codeLanguagePickerIsVisible)
+watch(() => visible.value, (value, prevValue) => {
+  if (value) { scrollIntoView() }
+})
 const position = computed(() => store.state.codeLanguagePickerPosition)
 const cardId = computed(() => store.state.codeLanguagePickerCardId)
 
@@ -114,9 +117,18 @@ const styles = computed(() => {
 const updateDialogHeight = async () => {
   await nextTick()
   await nextTick()
-  let element = dialog.value
+  const element = dialog.value
   if (!element) { return }
   state.dialogHeight = utils.elementHeight(element)
+}
+const scrollIntoView = async () => {
+  // wait for element to be rendered before getting position
+  await nextTick()
+  await nextTick()
+  await nextTick()
+  await nextTick()
+  const element = dialog.value
+  utils.scrollIntoView({ element })
 }
 </script>
 
