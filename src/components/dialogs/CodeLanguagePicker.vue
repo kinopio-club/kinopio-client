@@ -9,7 +9,7 @@ import utils from '@/utils.js'
 const store = useStore()
 
 const dialog = ref(null)
-const placeholder = 'Filter Languages'
+const placeholder = 'Search Code Languages'
 
 onMounted(() => {
   updateDialogHeight()
@@ -21,13 +21,56 @@ onMounted(() => {
 })
 
 const state = reactive({
-  dialogHeight: null,
-  languages: codeLanguages
-  // filteredLanguages: codeLanguages
+  dialogHeight: null
 })
 const visible = computed(() => store.state.codeLanguagePickerIsVisible)
 const position = computed(() => store.state.codeLanguagePickerPosition)
 const cardId = computed(() => store.state.codeLanguagePickerCardId)
+
+// languages
+
+const languageIsActive = (language) => {
+  const card = store.getters['currentCards/byId'](cardId.value)
+  const cardLanguage = card.codeBlockLanguage || 'txt'
+  return language.name === cardLanguage
+}
+const selectLanguage = (language) => {
+  store.dispatch('currentCards/update', {
+    id: cardId.value,
+    codeBlockLanguage: language.name
+  })
+  store.dispatch('closeAllDialogs')
+}
+
+// results list filter
+
+const updateFilter = (filter, isClearFilter) => {
+  console.log('🚛', filter, isClearFilter)
+  // if isclear => state.languages = codeLanguages
+  // if (isClearFilter) {
+  updateDialogHeight()
+  // }
+}
+// const updateFilteredItems = (items) => {
+//   // state.languages = items
+//   updateDialogHeight()
+// }
+const focusNextItemFromFilter = () => {
+  console.log('🍔🍔🍔')
+}
+const focusPreviousItemFromFilter = () => {
+  console.log('☮️☮️☮️')
+}
+const selectItemFromFilter = () => {
+  console.log('🍇🍇🍇')
+}
+const languageColorStyle = (language) => {
+  return {
+    backgroundColor: language.color || 'transparent'
+  }
+}
+
+// dialog
 
 const styles = computed(() => {
   // adapted from card details
@@ -43,7 +86,6 @@ const styles = computed(() => {
   const maxHeight = `${state.dialogHeight}px`
   return { transform, left, top, maxHeight }
 })
-
 const updateDialogHeight = async () => {
   await nextTick()
   await nextTick()
@@ -51,46 +93,6 @@ const updateDialogHeight = async () => {
   if (!element) { return }
   state.dialogHeight = utils.elementHeight(element)
 }
-
-// results list
-
-const updateFilter = (filter, isClearFilter) => {
-  console.log('🚛', filter, isClearFilter)
-  // if isclear => state.languages = codeLanguages
-  // if (isClearFilter) {
-  updateDialogHeight()
-  // }
-}
-
-// const updateFilteredItems = (items) => {
-//   // state.languages = items
-//   updateDialogHeight()
-// }
-
-const focusNextItemFromFilter = () => {
-  console.log('🍔🍔🍔')
-}
-
-const focusPreviousItemFromFilter = () => {
-  console.log('☮️☮️☮️')
-}
-
-const selectItemFromFilter = () => {
-  console.log('🍇🍇🍇')
-}
-
-const languageColorStyle = (language) => {
-  return {
-    backgroundColor: language.color || 'transparent'
-  }
-}
-
-const languageIsActive = (language) => {
-  const card = store.getters['currentCards/byId'](cardId.value)
-  const cardLanguage = card.codeBlockLanguage || 'txt'
-  return language.name === cardLanguage
-}
-
 </script>
 
 <template lang="pug">
@@ -103,13 +105,11 @@ dialog.narrow.code-language-picker(v-if="visible" :open="visible" @click.left.st
     @focusPreviousItem="focusPreviousItemFromFilter"
     @selectItem="selectItemFromFilter"
   )
-
   ul.results-list(ref="resultsList")
-    template(v-for="(language, index) in state.languages")
-      li(:class="{active: languageIsActive(language)}")
-        .badge(:style="languageColorStyle(language)")
+    template(v-for="(language, index) in codeLanguages")
+      li(@click="selectLanguage(language)" :class="{active: languageIsActive(language)}")
+        .badge.dot(:style="languageColorStyle(language)")
         span {{language.name}}
-
 </template>
 
 <style lang="stylus">
@@ -122,10 +122,4 @@ dialog.code-language-picker
   overflow auto
   li
     align-items center !important
-  .badge
-    min-width initial
-    min-height initial
-    width 12px
-    height 12px
-    border-radius 100px
 </style>

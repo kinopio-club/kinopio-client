@@ -21,13 +21,16 @@ const emit = defineEmits(['updateCardDimensions'])
 // syntax highlight
 
 const currentLanguage = computed(() => {
+  const defaultLanguageName = 'txt'
   const card = store.getters['currentCards/byId'](props.parentCardId)
-  const language = card.codeBlockLanguage || 'txt'
-  return language
+  const name = card.codeBlockLanguage || defaultLanguageName
+  let codeLanguage = codeLanguages.find(language => language.name === name)
+  codeLanguage = codeLanguage || codeLanguages[0]
+  return codeLanguage
 })
 const syntaxHighlightHtml = computed(() => {
-  const codeLangauage = codeLanguages.find(lang => lang.name === 'js')
-  const keywords = codeLangauage.keywords
+  // TODO ??'txt' lang should not process highlights at all?
+  const keywords = currentLanguage.value.keywords
   const html = highlight(props.content, {
     styles: {
       comment: '',
@@ -37,7 +40,6 @@ const syntaxHighlightHtml = computed(() => {
     },
     keywords
   })
-  console.log('♥️', html)
   return html
 })
 
@@ -70,10 +72,6 @@ const toggleCodeLanguagePicker = async (event) => {
   store.commit('codeLanguagePickerPosition', position)
   store.commit('codeLanguagePickerCardId', props.parentCardId)
 }
-// const shouldNotHighlight = computed(() => {
-//   const card = store.getters['currentCards/byId'](props.parentCardId)
-//   return !card.codeBlockLanguage || 'txt'
-// })
 
 </script>
 
@@ -81,8 +79,9 @@ const toggleCodeLanguagePicker = async (event) => {
 .code-block
   .language-button.button-wrap(@click.stop="toggleCodeLanguagePicker")
     button.small-button.inline-button(:class="{ active: languagePickerIsVisible }")
-      //- TODO lang color badge
-      span {{currentLanguage}}
+      span(v-if="currentLanguage.color")
+        .badge.dot(:style="{ backgroundColor: currentLanguage.color }")
+      span {{currentLanguage.name}}
   pre(v-html="syntaxHighlightHtml")
 </template>
 
@@ -94,7 +93,6 @@ const toggleCodeLanguagePicker = async (event) => {
     right 0
     bottom -6px
     padding 8px
-    // background-color pink
     &:hover
       button
         box-shadow var(--button-hover-shadow)
@@ -132,6 +130,11 @@ const toggleCodeLanguagePicker = async (event) => {
   .loader
     width 12px !important
     height 12px !important
+  .badge.dot
+    width 8px
+    height 8px
+    vertical-align 0
+    padding 0
 
   // syntax highlighting
   .macrolight-comment
