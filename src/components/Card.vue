@@ -91,7 +91,7 @@ article.card-wrap#card(
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
             template(v-for="segment in nameSegments")
-              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id")
+              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" @updateCardDimensions="updateCardDimensions")
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
@@ -574,6 +574,7 @@ export default {
     shouldNotStick () {
       if (!this.currentUser.shouldUseStickyCards) { return true }
       if (this.embedIsVisible) { return true }
+      if (this.$store.state.codeLanguagePickerIsVisible) { return true }
       const userIsConnecting = this.currentConnectionStartCardIds.length
       const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
@@ -2194,6 +2195,7 @@ article.card-wrap
         align-self stretch
         word-break break-word
         white-space pre-line
+        width 100%
         &.is-checked
           text-decoration line-through
           h1,

@@ -994,7 +994,9 @@ export default {
       space = space || rootState.currentSpace
       const currentUserIsSignedIn = getters.isSignedIn
       const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
-      return !currentUserIsSignedIn && isInvitedToSpace
+      const isReadOnlyInvitedToSpace = rootState.spaceReadOnlyKey.spaceId === space.id
+      const inviteRequiresSignIn = !currentUserIsSignedIn && isInvitedToSpace
+      return isReadOnlyInvitedToSpace || inviteRequiresSignIn
     },
     shouldPreventCardsCreatedCountUpdate: (state, getters, rootState, rootGetters) => {
       const spaceUserIsUpgraded = rootGetters['currentSpace/spaceUserIsUpgraded']

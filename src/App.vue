@@ -1020,6 +1020,11 @@ code
     padding 0px 7px
     vertical-align 0
     margin-right 5px
+  &.dot
+    min-width initial
+    min-height initial
+    width 12px
+    height 12px
 
 .label-badge
   position absolute

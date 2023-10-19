@@ -6,11 +6,13 @@
     img.icon.search(src="@/assets/search.svg" @click.left="focusFilterInput")
 
   input(
+    name="filter"
+    type="text"
     :placeholder="inputPlaceholder"
     v-model="filterItems"
     ref="filterInput"
-    @focus="resetPinchCounterZoomDecimal"
-    @blur="triggerUpdatePositionInVisualViewport"
+    @focus="focus"
+    @blur="blur"
     @keydown.down.exact="focusNextItem"
     @keydown.up.exact="focusPreviousItem"
     @keydown.enter.exact.stop.prevent="selectItem"
@@ -78,6 +80,7 @@ export default {
         })
       }
     })
+    this.autoFocus()
   },
   mounted () {
     if (!this.isInitialValueFromSpaceListFilterInfo) { return }
@@ -117,6 +120,12 @@ export default {
     }
   },
   methods: {
+    autoFocus () {
+      if (this.$store.state.isTouchDevice) { return }
+      this.$nextTick(() => {
+        this.focusFilterInput()
+      })
+    },
     updateFilter (newValue) {
       this.filter = newValue
       this.$emit('updateFilter', this.filter)
@@ -165,8 +174,16 @@ export default {
         })
       }
     },
+    focus () {
+      this.$emit('onFocus')
+      this.resetPinchCounterZoomDecimal()
+    },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
+    },
+    blur () {
+      this.$emit('onBlur')
+      this.triggerUpdatePositionInVisualViewport()
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')

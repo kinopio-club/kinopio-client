@@ -1,10 +1,11 @@
 <script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
+import { useStore } from 'vuex'
+
 import CardList from '@/components/CardList.vue'
 import Loader from '@/components/Loader.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 
-import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
-import { useStore } from 'vuex'
 const store = useStore()
 
 const props = defineProps({
