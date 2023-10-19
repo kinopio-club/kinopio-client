@@ -2,6 +2,7 @@
 import cache from '@/cache.js'
 import moonphase from '@/moonphase.js'
 import consts from '@/consts.js'
+import codeLanguages from '@/data/codeLanguages.json'
 
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
@@ -2294,5 +2295,26 @@ export default {
       }
     })
     return string
+  },
+  languageFromCodeBlock (string) {
+    // https://regexr.com/7lt5b
+    // matches first word on first line
+    const languagePattern = /^(\w)+\s/g
+    let newString = string
+    let match = string.match(languagePattern)
+    if (!match) { return }
+    const name = match[0].trim()
+    // match language
+    let language = codeLanguages.find(codeLanguage => {
+      const isName = codeLanguage.name === name
+      let isAlias
+      if (codeLanguage.aliases) {
+        isAlias = codeLanguage.aliases.includes(name)
+      }
+      return isName || isAlias
+    })
+    if (!language) { return }
+    newString = string.replace(match[0], '')
+    return { language, newString }
   }
 }

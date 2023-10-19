@@ -5,6 +5,8 @@ import { useStore } from 'vuex'
 import { highlight } from 'macrolight'
 
 import codeLanguages from '@/data/codeLanguages.json'
+import utils from '@/utils.js'
+
 const store = useStore()
 
 const defaultLanguageName = 'txt'
@@ -21,16 +23,21 @@ const emit = defineEmits(['updateCardDimensions'])
 // syntax highlight
 
 const shouldSyntaxHighlight = computed(() => currentLanguage.value.name !== defaultLanguageName)
+const languageFromCodeBlock = computed(() => utils.languageFromCodeBlock(props.content))
 const currentLanguage = computed(() => {
   const card = store.getters['currentCards/byId'](props.parentCardId)
-  const name = card.codeBlockLanguage || defaultLanguageName
-  let codeLanguage = codeLanguages.find(language => language.name === name)
-  codeLanguage = codeLanguage || codeLanguages[0]
-  return codeLanguage
+  let language = codeLanguages.find(codeLanguage => codeLanguage.name === card.codeBlockLanguage)
+  // priority: card.codeBlockLanguage → ```js → default
+  language = language || languageFromCodeBlock.value?.language || codeLanguages[0]
+  return language
 })
 const syntaxHighlightHTML = computed(() => {
+  let content = props.content
+  if (languageFromCodeBlock.value) {
+    content = languageFromCodeBlock.value.newString
+  }
   const keywords = currentLanguage.value.keywords
-  const html = highlight(props.content, {
+  const html = highlight(content, {
     styles: {
       comment: '',
       punctuation: '',
@@ -81,6 +88,7 @@ const toggleCodeLanguagePicker = async (event) => {
       span(v-if="currentLanguage.color")
         .badge.dot(:style="{ backgroundColor: currentLanguage.color }")
       span {{currentLanguage.name}}
+
   template(v-if="shouldSyntaxHighlight")
     pre(v-html="syntaxHighlightHTML")
   template(v-else)
