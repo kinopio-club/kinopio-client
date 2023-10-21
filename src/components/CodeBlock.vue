@@ -11,14 +11,10 @@ const store = useStore()
 
 const defaultLanguageName = 'txt'
 
-onMounted(() => {
-  emit('updateCardDimensions')
-})
 const props = defineProps({
   content: String,
   parentCardId: String
 })
-const emit = defineEmits(['updateCardDimensions'])
 
 // syntax highlight
 

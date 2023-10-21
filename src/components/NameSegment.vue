@@ -20,13 +20,12 @@ const props = defineProps({
   isStrikeThrough: Boolean,
   parentCardId: String
 })
-const emit = defineEmits(['showTagDetailsIsVisible', 'updateCardDimensions'])
+const emit = defineEmits(['showTagDetailsIsVisible'])
 
 // state
 
 const currentSelectedTag = computed(() => { return store.state.currentSelectedTag })
 const currentSelectedOtherItem = computed(() => { return store.state.currentSelectedOtherItem })
-const updateCardDimensions = () => { emit('updateCardDimensions') }
 
 // segment data
 
@@ -119,7 +118,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
         template(v-else-if="markdown.type === 'strikethrough'")
           del {{markdown.content}}
         template(v-else-if="markdown.type === 'codeBlock'")
-          CodeBlock(:content="markdown.content" :parentCardId="props.parentCardId" @updateCardDimensions="updateCardDimensions")
+          CodeBlock(:content="markdown.content" :parentCardId="props.parentCardId")
         template(v-else-if="markdown.type === 'code'")
           code {{markdown.content}}
     //- Name results list
