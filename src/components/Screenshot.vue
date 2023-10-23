@@ -67,8 +67,8 @@ const initCanvas = () => {
   if (!canvas) { return }
   context = canvas.getContext('2d')
   // TODO use fixed canvas size/screenshot area , instead of user viewport based
-  const viewportWidth = store.state.viewportWidth
-  const viewportHeight = store.state.viewportHeight
+  const viewportWidth = 2400 // store.state.viewportWidth
+  const viewportHeight = 1350 // store.state.viewportHeight
   canvas.width = viewportWidth * window.devicePixelRatio
   canvas.height = viewportHeight * window.devicePixelRatio
   canvas.style.width = viewportWidth + 'px'
@@ -81,12 +81,13 @@ const drawCards = async () => {
   await nextTick()
   const secondaryBackground = utils.cssVariable('secondary-background')
   const entityRadius = parseInt(utils.cssVariable('entity-radius'))
-  cards.value.forEach(card => {
-    context.fillStyle = secondaryBackground
-    context.roundRect(card.x, card.y, card.width, card.height, entityRadius)
-    context.fill()
-    drawCardConnector(card)
-  })
+  for (const card of cards.value) {
+    let rect = new Path2D()
+    rect.roundRect(card.x, card.y, card.width, card.height, entityRadius)
+    context.fillStyle = card.backgroundColor || secondaryBackground
+    context.fill(rect)
+    await drawCardConnector(card)
+  }
 }
 
 const drawCardConnector = async (card) => {
@@ -101,13 +102,13 @@ const drawCardConnector = async (card) => {
   const margin = 16
   const x = card.x + card.width - margin
   const y = card.y + margin
-  context.beginPath()
-  context.arc(x, y, radius, 0, 2 * Math.PI)
+  let circle = new Path2D()
+  circle.arc(x, y, radius, 0, 2 * Math.PI)
   context.strokeStyle = primaryBorder
   context.lineWidth = 1
-  context.stroke()
+  context.stroke(circle)
   context.fillStyle = typeColor
-  context.fill()
+  context.fill(circle)
 }
 
 const drawConnections = async () => {
@@ -117,7 +118,6 @@ const drawConnections = async () => {
     context.lineCap = 'round'
     const type = store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
     context.strokeStyle = type.color
-    console.log('🌍🌍🌍', connection)
     const path = new Path2D(connection.path)
     context.stroke(path)
   })
