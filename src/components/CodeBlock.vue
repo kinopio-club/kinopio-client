@@ -118,6 +118,7 @@ const toggleCodeLanguagePicker = async (event) => {
         background-color var(--secondary-active-background)
 
   pre
+    max-height 300px
     overflow scroll !important
     white-space pre !important
     padding 4px
