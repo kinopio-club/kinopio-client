@@ -376,7 +376,14 @@ export default {
       return false
     },
     isInvitedButCannotEditSpace () { return this['currentUser/isInvitedButCannotEditSpace']() },
-    maxCardLength () { return consts.maxCardLength },
+    maxCardLength () {
+      const isCodeblock = this.card.name.includes('```')
+      if (isCodeblock) {
+        return consts.maxCodeBlockCardLength
+      } else {
+        return consts.maxCardLength
+      }
+    },
     currentCardLength () {
       if (!this.card.name) { return 0 }
       return this.card.name.length
