@@ -2,20 +2,15 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-// import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import utils from '@/utils.js'
 
-// import debounce from 'lodash-es/debounce'
-
 const store = useStore()
-// const offset = 10 // container margin / 2
 let canvas, context
 const element = ref(null)
 
 onMounted(() => {
   // TEMP: change to being manually triggered after n mins on a space, and n mins after last change,
   // if member
-  //
   store.subscribe((mutation, state) => {
     if (mutation.type === 'isLoadingSpace' && !mutation.payload) {
       update()
@@ -53,13 +48,14 @@ const cards = computed(() => store.getters['currentCards/all'])
 const connections = computed(() => store.getters['currentConnections/all'])
 
 const update = async () => {
-  console.log('👩‍🎨 update screenshot')
+  console.time('👩‍🎨 update screenshot')
   initCanvas()
   // await drawBackground() // tile
   await drawConnections()
   await drawCards()
 
   // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/save
+  console.timeEnd('👩‍🎨 update screenshot')
 }
 
 const initCanvas = () => {
@@ -77,11 +73,16 @@ const initCanvas = () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
 }
 
+const drawBackground = async () => {
+  // draw background and tint color
+  // dark mode aware
+}
 const drawCards = async () => {
   await nextTick()
   const secondaryBackground = utils.cssVariable('secondary-background')
   const entityRadius = parseInt(utils.cssVariable('entity-radius'))
   for (const card of cards.value) {
+    // TODO ignore items that are outside canvas
     let rect = new Path2D()
     rect.roundRect(card.x, card.y, card.width, card.height, entityRadius)
     context.fillStyle = card.backgroundColor || secondaryBackground
@@ -89,7 +90,6 @@ const drawCards = async () => {
     await drawCardConnector(card)
   }
 }
-
 const drawCardConnector = async (card) => {
   await nextTick()
   const primaryBorder = utils.cssVariable('primary-border')
@@ -110,10 +110,10 @@ const drawCardConnector = async (card) => {
   context.fillStyle = typeColor
   context.fill(circle)
 }
-
 const drawConnections = async () => {
   await nextTick()
   connections.value.forEach(connection => {
+    // TODO ignore items that are outside canvas
     context.lineWidth = 5
     context.lineCap = 'round'
     const type = store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
@@ -122,14 +122,16 @@ const drawConnections = async () => {
     context.stroke(path)
   })
 }
+const drawBoxes = async () => {
+  // filled or not filled, info area
+}
+
+// TODO FUTURe draw Lines
 
 </script>
 
 <template lang="pug">
 canvas.minimap(ref='element')
-  //-     .box(:style="boxStyle(box)" :data-box-minimap-id="box.id")
-  //-       .box-background.filled(v-if="boxFillIsFilled(box)" :style="{ backgroundColor: box.color }")
-
 </template>
 
 <style lang="stylus">
@@ -138,8 +140,8 @@ canvas.minimap(ref='element')
   position fixed
   top 0
   left 0
-  width 100vw
-  height 100vh
+  // width 100vw
+  // height 100vh
   // cursor pointer
   // backdrop-filter blur(8px)
 
