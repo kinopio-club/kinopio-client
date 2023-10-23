@@ -377,8 +377,8 @@ export default {
     },
     isInvitedButCannotEditSpace () { return this['currentUser/isInvitedButCannotEditSpace']() },
     maxCardLength () {
-      const codeBlock = this.card.name.match(utils.markdown().codeBlockPattern)
-      if (codeBlock) {
+      const isCodeblock = this.card.name.includes('```')
+      if (isCodeblock) {
         return consts.maxCodeBlockCardLength
       } else {
         return consts.maxCardLength
