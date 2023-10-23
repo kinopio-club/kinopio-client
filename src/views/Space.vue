@@ -23,6 +23,7 @@ main#space.space(
   ScrollAtEdgesHandler
   NotificationsWithPosition(layer="space")
   BoxSelecting
+  Screenshot
 </template>
 
 <script>
@@ -42,6 +43,7 @@ import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
 import Connections from '@/components/Connections.vue'
 import LockedItemButtons from '@/components/LockedItemButtons.vue'
+import Screenshot from '@/components/Screenshot.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -70,7 +72,8 @@ export default {
     Cards,
     LockedItemButtons,
     Connections,
-    OtherSpaceDetails
+    OtherSpaceDetails,
+    Screenshot
   },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')
