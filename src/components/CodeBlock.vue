@@ -54,7 +54,7 @@ const languagePickerIsVisible = computed(() => {
 })
 const toggleCodeLanguagePicker = async (event) => {
   const value = !store.state.codeLanguagePickerIsVisible
-  let element = event.target.closest('.language-button')
+  let element = event.target.closest('.button-wrap')
   if (element) {
     element = element.querySelector('button')
   } else {
@@ -75,15 +75,34 @@ const toggleCodeLanguagePicker = async (event) => {
   store.commit('codeLanguagePickerCardId', props.parentCardId)
 }
 
+// copy code
+
+const copy = async (event) => {
+  store.commit('clearNotificationsWithPosition')
+  store.dispatch('closeAllDialogs')
+  const position = utils.cursorPositionInPage(event)
+  try {
+    await navigator.clipboard.writeText(props.content)
+    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
+}
+
 </script>
 
 <template lang="pug">
 .code-block
-  .language-button.button-wrap(@click.stop="toggleCodeLanguagePicker")
-    button.small-button.inline-button(:class="{ active: languagePickerIsVisible }")
-      span(v-if="currentLanguage.color")
-        .badge.dot(:style="{ backgroundColor: currentLanguage.color }")
-      span {{currentLanguage.name}}
+  .code-buttons
+    .button-wrap(@click.stop="toggleCodeLanguagePicker" title="Code Language")
+      button.small-button.inline-button(:class="{ active: languagePickerIsVisible }")
+        span(v-if="currentLanguage.color")
+          .badge.dot(:style="{ backgroundColor: currentLanguage.color }")
+        span {{currentLanguage.name}}
+    .button-wrap(@click.stop="copy" title="Copy Code")
+      button.small-button.inline-button
+        img.icon.copy(src="@/assets/copy.svg")
 
   template(v-if="shouldSyntaxHighlight")
     pre(v-html="syntaxHighlightHTML")
@@ -95,34 +114,36 @@ const toggleCodeLanguagePicker = async (event) => {
 <style lang="stylus">
 .code-block
   position relative
-  .button-wrap
+  .code-buttons
     position absolute
     right 0
     bottom -6px
-    padding 8px
-    &:hover
+    .button-wrap
+      padding 8px
+      padding-left 8px
+      &:last-child
+        padding-left 0
+      &:hover
+        button
+          box-shadow var(--button-hover-shadow)
+          background-color var(--secondary-hover-background)
+      &:active
+        button
+          box-shadow var(--button-active-inset-shadow)
+          background-color var(--secondary-active-background)
       button
-        box-shadow var(--button-hover-shadow)
-        background-color var(--secondary-hover-background)
-    &:active
-      button
-        box-shadow var(--button-active-inset-shadow)
-        background-color var(--secondary-active-background)
-    button
-      margin-right -6px
-      margin-bottom -6px
-      width initial
-      cursor pointer
-      &.active
-        box-shadow var(--button-active-inset-shadow)
-        background-color var(--secondary-active-background)
-
+        margin-right -6px
+        margin-bottom -6px
+        width initial
+        cursor pointer
+        &.active
+          box-shadow var(--button-active-inset-shadow)
+          background-color var(--secondary-active-background)
   pre
     max-height 300px
     overflow scroll !important
     white-space pre !important
     padding 4px
-    padding-right 4rem
     color var(--primary)
     background-color var(--secondary-active-background)
     font-weight normal
@@ -145,6 +166,8 @@ const toggleCodeLanguagePicker = async (event) => {
     height 8px
     vertical-align 0
     padding 0
+  .icon.copy
+    width 10px
 
   // syntax highlighting
   .macrolight-comment
