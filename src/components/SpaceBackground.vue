@@ -23,12 +23,6 @@ export default {
       }
     })
   },
-  data () {
-    return {
-      imageUrl: '',
-      size: 'initial'
-    }
-  },
   computed: {
     visible () {
       return this.$store.getters.isSpacePage
@@ -37,8 +31,8 @@ export default {
     backgroundStyles () {
       if (!this.isSpacePage) { return }
       const styles = {
-        backgroundImage: `url('${this.imageUrl}')`,
-        backgroundSize: this.size,
+        backgroundImage: `url('${this.$store.state.spaceBackgroundUrl}')`,
+        backgroundSize: this.$store.state.spaceBackgroundSize,
         transform: this.$store.getters.zoomTransform
       }
       return styles
@@ -104,13 +98,12 @@ export default {
     async updateBackground () {
       const background = this.background
       if (!utils.urlIsImage(background)) {
-        this.imageUrl = ''
         this.updateBackgroundSize()
       }
       try {
         const image = await utils.loadImage(background)
         if (image) {
-          this.imageUrl = background
+          this.$store.commit('spaceBackgroundUrl', background)
           this.updateBackgroundSize()
         }
       } catch (error) {
@@ -120,7 +113,7 @@ export default {
       }
     },
     updateBackgroundSize () {
-      let backgroundImage = this.imageUrl
+      let backgroundImage = this.$store.state.spaceBackgroundUrl
       backgroundImage = utils.urlFromCSSBackgroundImage(backgroundImage)
       let image = new Image()
       image.src = backgroundImage
@@ -132,12 +125,12 @@ export default {
         height = height / 2
       }
       if (width === 0 || height === 0) {
-        this.size = 'initial'
+        this.$store.commit('spaceBackgroundSize', 'initial')
         return
       }
       width = Math.round(width)
       height = Math.round(height)
-      this.size = `${width}px ${height}px`
+      this.$store.commit('spaceBackgroundSize', `${width}px ${height}px`)
     }
   }
 }
