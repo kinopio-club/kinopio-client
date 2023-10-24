@@ -255,7 +255,7 @@ const store = createStore({
 
     // space background
     spaceBackgroundUrl: '',
-    spaceBackgroundSize: 'initial'
+    spaceBackgroundSize: null // { width, height }
   },
   mutations: {
     resetPageSizes: (state) => {
@@ -1505,7 +1505,7 @@ const store = createStore({
       state.spaceBackgroundUrl = imageUrl
     },
     spaceBackgroundSize: (state, value) => {
-      utils.typeCheck({ value, type: 'string' })
+      utils.typeCheck({ value, type: 'object', allowUndefined: true })
       state.spaceBackgroundSize = value
     }
 

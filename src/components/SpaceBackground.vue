@@ -35,9 +35,15 @@ const backgroundIsDefault = computed(() => !store.state.currentSpace.background)
 
 const backgroundStyles = computed(() => {
   if (!isSpacePage.value) { return }
+  let size = store.state.spaceBackgroundSize
+  if (size) {
+    size = `${size.width}px ${size.height}px`
+  } else {
+    size = 'initial'
+  }
   const styles = {
     backgroundImage: `url('${store.state.spaceBackgroundUrl}')`,
-    backgroundSize: store.state.spaceBackgroundSize,
+    backgroundSize: size,
     transform: store.getters.zoomTransform
   }
   return styles
@@ -117,12 +123,12 @@ const updateBackgroundSize = () => {
     height = height / 2
   }
   if (width === 0 || height === 0) {
-    store.commit('spaceBackgroundSize', 'initial')
+    store.commit('spaceBackgroundSize', null)
     return
   }
   width = Math.round(width)
   height = Math.round(height)
-  store.commit('spaceBackgroundSize', `${width}px ${height}px`)
+  store.commit('spaceBackgroundSize', { width, height })
 }
 
 </script>
