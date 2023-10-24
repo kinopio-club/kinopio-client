@@ -115,7 +115,7 @@ const updateBackgroundSize = () => {
   backgroundImage = utils.urlFromCSSBackgroundImage(backgroundImage)
   let image = new Image()
   image.src = backgroundImage
-  let isRetina = backgroundImage.includes('-2x.') || backgroundImage.includes('@2x.')
+  const isRetina = backgroundImage.includes('-2x.') || backgroundImage.includes('@2x.')
   let width = image.width
   let height = image.height
   if (isRetina) {

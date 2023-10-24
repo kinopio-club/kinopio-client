@@ -6,6 +6,9 @@ import utils from '@/utils.js'
 
 const store = useStore()
 let canvas, context
+const width = 2400
+const height = 1350
+
 const element = ref(null)
 
 onMounted(() => {
@@ -50,7 +53,8 @@ const connections = computed(() => store.getters['currentConnections/all'])
 const update = async () => {
   console.time('👩‍🎨 update screenshot')
   initCanvas()
-  // await drawBackground() // tile
+  await drawBackground()
+  await drawBackgroundTint()
   await drawConnections()
   await drawCards()
 
@@ -62,20 +66,28 @@ const initCanvas = () => {
   canvas = element.value
   if (!canvas) { return }
   context = canvas.getContext('2d')
-  // TODO use fixed canvas size/screenshot area , instead of user viewport based
-  const viewportWidth = 2400 // store.state.viewportWidth
-  const viewportHeight = 1350 // store.state.viewportHeight
-  canvas.width = viewportWidth * window.devicePixelRatio
-  canvas.height = viewportHeight * window.devicePixelRatio
-  canvas.style.width = viewportWidth + 'px'
-  canvas.style.height = viewportHeight + 'px'
+  canvas.width = width * window.devicePixelRatio
+  canvas.height = height * window.devicePixelRatio
+  canvas.style.width = width + 'px'
+  canvas.style.height = height + 'px'
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   context.clearRect(0, 0, canvas.width, canvas.height)
 }
-
 const drawBackground = async () => {
-  // draw background and tint color
-  // dark mode aware
+  const backgroundUrl = store.state.spaceBackgroundUrl
+  const isRetina = backgroundUrl.includes('-2x.') || backgroundUrl.includes('@2x.')
+  let image = new Image()
+  image.src = backgroundUrl
+  const pattern = context.createPattern(image, 'repeat')
+  if (isRetina) {
+    const matrix = new DOMMatrix()
+    pattern.setTransform(matrix.scale(0.5))
+  }
+  context.fillStyle = pattern
+  context.fillRect(0, 0, width, height)
+}
+const drawBackgroundTint = async () => {
+
 }
 const drawCards = async () => {
   await nextTick()
@@ -130,7 +142,7 @@ const drawBoxes = async () => {
   // filled or not filled, info area
 }
 
-// TODO FUTURe draw Lines
+// TODO FUTURE draw Lines
 
 </script>
 
@@ -140,49 +152,8 @@ canvas.minimap(ref='element')
 
 <style lang="stylus">
 .minimap
-  background rgba(110, 48, 75, .5)
+  background rgba(110, 48, 75, .5) // temp
   position fixed
   top 0
   left 0
-  // width 100vw
-  // height 100vh
-  // cursor pointer
-  // backdrop-filter blur(8px)
-
-  // .overlay-background
-  //   background-color var(--primary-background)
-  //   opacity 0.5
-  // canvas#connections
-  //   opacity 0.99
-  // .cards-wrap,
-  // canvas#connections,
-  // .boxes-wrap
-  //   position absolute
-  //   left 0
-  //   margin 20px
-  // .box
-  //   position absolute
-  //   border-radius 3px
-  //   border-width 2px
-  //   border-style solid
-  //   z-index -1
-  // .box-background
-  //   position absolute
-  //   left 0px
-  //   top 0px
-  //   width 100%
-  //   height 100%
-  //   &.filled
-  //     opacity 0.6
-  // .card
-  //   position absolute
-  //   background-color var(--secondary-background)
-  //   border-radius 3px
-  //   background-size cover
-  //   transition 0.5s box-shadow
-  //   &.transparent-background
-  //     background-color transparent !important
-  //   &.is-in-viewport
-  //     box-shadow 5px 5px 0 var(--light-shadow)
-
 </style>
