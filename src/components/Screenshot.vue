@@ -14,8 +14,10 @@ const element = ref(null)
 // TODO move to SERVER, triggered on space load by member, and space unload by member (debounce n mins)
 onMounted(() => {
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'isLoadingSpace') {
-      update()
+    if (mutation.type === 'isLoadingSpace' && !mutation.payload) {
+      setTimeout(() => {
+        update()
+      }, 500)
     }
   })
 })
@@ -35,8 +37,10 @@ const update = async () => {
   console.time('👩‍🎨 update screenshot')
   initCanvas()
   await drawBackground()
+  await drawBackgroundTint()
   await drawConnections()
   await drawCards()
+  console.log('🍔🍔🍔🍔boxes')
   await drawBoxes()
 
   // TODO https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/save
@@ -53,17 +57,18 @@ const initCanvas = () => {
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   context.clearRect(0, 0, canvas.width, canvas.height)
 }
-const imageDataURL = async (url) => {
-  // adapted from https://stackoverflow.com/a/72876887
-  let image = await fetch(url)
-  image = await image.blob()
-  let bitmap = await createImageBitmap(image)
-  let imageCanvas = document.createElement('canvas')
-  let imageContext = imageCanvas.getContext('2d')
-  imageCanvas.width = bitmap.width
-  imageCanvas.height = bitmap.height
-  imageContext.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height)
-  return imageCanvas.toDataURL('image/png')
+const loadImage = (path) => {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    image.crossOrigin = 'Anonymous' // to avoid CORS
+    image.src = path
+    image.onload = () => {
+      resolve(image)
+    }
+    image.onerror = (error) => {
+      reject(error)
+    }
+  })
 }
 
 // background
@@ -71,20 +76,22 @@ const imageDataURL = async (url) => {
 const drawBackground = async () => {
   const backgroundUrl = store.state.spaceBackgroundUrl
   const isRetina = backgroundUrl.includes('-2x.') || backgroundUrl.includes('@2x.')
-  const dataURL = await imageDataURL(backgroundUrl)
-  let image = new Image()
-  image.src = dataURL
-  const pattern = context.createPattern(image, 'repeat')
-  if (isRetina) {
-    const matrix = new DOMMatrix()
-    pattern.setTransform(matrix.scale(0.5))
+  try {
+    const image = await loadImage(backgroundUrl)
+    const pattern = context.createPattern(image, 'repeat')
+    if (isRetina) {
+      const matrix = new DOMMatrix()
+      pattern.setTransform(matrix.scale(0.5))
+    }
+    context.fillStyle = pattern
+    context.fillRect(0, 0, width, height)
+  } catch (error) {
+    console.log('🚒 drawBackground', error)
   }
-  context.fillStyle = pattern
-  context.fillRect(0, 0, width, height)
-  await drawBackgroundTint()
 }
 const drawBackgroundTint = async () => {
   const color = store.state.currentSpace.backgroundTint
+  if (!color) { return }
   let tint = new Path2D()
   tint.rect(0, 0, width, height)
   context.fillStyle = color
@@ -103,7 +110,32 @@ const drawCards = async () => {
     rect.roundRect(card.x, card.y, card.width, card.height, css.value.entityRadius)
     context.fillStyle = card.backgroundColor || css.value.secondaryBackground
     context.fill(rect)
+    // await drawCardSubsection(card) for (codeblock) or (urlpreviewimg if visible)
+    await drawCardImage(card)
     await drawCardConnector(card)
+  }
+}
+const cardImageUrl = (card) => {
+  const imageUrlIsUrlPreview = card.urlPreviewImage && card.urlPreviewIsVisible
+  if (imageUrlIsUrlPreview) {
+    return card.urlPreviewImage
+  }
+  const urls = utils.urlsFromString(card.name)
+  if (urls) {
+    return urls.find(url => utils.urlIsImage(url))
+  }
+}
+const drawCardImage = async (card) => {
+  const imageUrl = cardImageUrl(card)
+  if (!imageUrl) { return }
+  console.log('♥️', imageUrl)
+  try {
+    const image = await loadImage(imageUrl)
+    context.roundRect(card.x, card.y, card.width, card.height, css.value.entityRadius)
+    context.clip()
+    context.drawImage(image, card.x, card.y, card.width, card.height)
+  } catch (error) {
+    console.log('🚒 drawCardImage', error)
   }
 }
 const drawCardConnector = async (card) => {
