@@ -28,14 +28,13 @@ const update = async () => {
   console.time('👩‍🎨 update screenshot')
   initCanvas()
   await drawBackground()
-  await drawBackgroundTint()
   await drawConnections()
   await drawCards()
+  await drawBoxes()
 
-  // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/save
+  // TODO https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/save
   console.timeEnd('👩‍🎨 update screenshot')
 }
-
 const initCanvas = () => {
   canvas = element.value
   if (!canvas) { return }
@@ -47,6 +46,9 @@ const initCanvas = () => {
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   context.clearRect(0, 0, canvas.width, canvas.height)
 }
+
+// background
+
 const drawBackground = async () => {
   const backgroundUrl = store.state.spaceBackgroundUrl
   const isRetina = backgroundUrl.includes('-2x.') || backgroundUrl.includes('@2x.')
@@ -59,6 +61,7 @@ const drawBackground = async () => {
   }
   context.fillStyle = pattern
   context.fillRect(0, 0, width, height)
+  await drawBackgroundTint()
 }
 const drawBackgroundTint = async () => {
   const color = store.state.currentSpace.backgroundTint
@@ -69,6 +72,9 @@ const drawBackgroundTint = async () => {
   context.fill(tint)
   context.globalCompositeOperation = 'source-over' // default blend mode
 }
+
+// cards
+
 const drawCards = async () => {
   await nextTick()
   const css = {
@@ -106,6 +112,9 @@ const drawCardConnector = async (card) => {
   context.fillStyle = typeColor
   context.fill(circle)
 }
+
+// connections
+
 const drawConnections = async () => {
   await nextTick()
   connections.value.forEach(connection => {
@@ -117,10 +126,34 @@ const drawConnections = async () => {
     context.stroke(path)
   })
 }
+
+// boxes
+
 const drawBoxes = async () => {
-  // TODO ignore items that are outside canvas
-  // if (box.y > height) { continue }
-  // filled or not filled, info area
+  await nextTick()
+  const css = {
+    entityRadius: parseInt(utils.cssVariable('entity-radius'))
+  }
+  for (const box of boxes.value) {
+    if (box.y > height) { continue }
+    let rect = new Path2D()
+    rect.roundRect(box.x, box.y, box.resizeWidth, box.resizeHeight, css.entityRadius)
+    context.strokeStyle = box.color
+    context.lineWidth = 2
+    context.stroke(rect)
+    if (box.fill === 'filled') {
+      context.fillStyle = box.color
+      context.globalAlpha = 0.5
+      context.fill(rect)
+      context.globalAlpha = 1 // default alpha
+    }
+    await drawBoxInfo(box)
+  }
+}
+
+const drawBoxInfo = async (box) => {
+  // dom get rect for .box-info w data-id
+  // round rect
 }
 
 // TODO FUTURE draw Lines
