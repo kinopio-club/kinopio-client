@@ -79,20 +79,24 @@ const drawBackground = async () => {
 }
 const drawCards = async () => {
   await nextTick()
-  const secondaryBackground = utils.cssVariable('secondary-background')
-  const entityRadius = parseInt(utils.cssVariable('entity-radius'))
+  const css = {
+    secondaryBackground: utils.cssVariable('secondary-background'),
+    entityRadius: parseInt(utils.cssVariable('entity-radius'))
+  }
   for (const card of cards.value) {
     // TODO ignore items that are outside canvas
     let rect = new Path2D()
-    rect.roundRect(card.x, card.y, card.width, card.height, entityRadius)
-    context.fillStyle = card.backgroundColor || secondaryBackground
+    rect.roundRect(card.x, card.y, card.width, card.height, css.entityRadius)
+    context.fillStyle = card.backgroundColor || css.secondaryBackground
     context.fill(rect)
     await drawCardConnector(card)
   }
 }
 const drawCardConnector = async (card) => {
   await nextTick()
-  const primaryBorder = utils.cssVariable('primary-border')
+  const css = {
+    primaryBorder: utils.cssVariable('primary-border')
+  }
   const connectionTypes = store.getters['currentConnections/typesByCardId'](card.id)
   let typeColor = 'transparent'
   if (connectionTypes.length) {
@@ -104,7 +108,7 @@ const drawCardConnector = async (card) => {
   const y = card.y + margin
   let circle = new Path2D()
   circle.arc(x, y, radius, 0, 2 * Math.PI)
-  context.strokeStyle = primaryBorder
+  context.strokeStyle = css.primaryBorder
   context.lineWidth = 1
   context.stroke(circle)
   context.fillStyle = typeColor
@@ -136,7 +140,7 @@ canvas.minimap(ref='element')
 
 <style lang="stylus">
 .minimap
-  background var(--primary-background)
+  background rgba(110, 48, 75, .5)
   position fixed
   top 0
   left 0
