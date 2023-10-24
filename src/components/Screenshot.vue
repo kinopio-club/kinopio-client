@@ -23,6 +23,13 @@ onMounted(() => {
 const boxes = computed(() => store.getters['currentBoxes/all'])
 const cards = computed(() => store.getters['currentCards/all'])
 const connections = computed(() => store.getters['currentConnections/all'])
+const css = computed(() => {
+  return {
+    secondaryBackground: utils.cssVariable('secondary-background'),
+    entityRadius: parseInt(utils.cssVariable('entity-radius')),
+    primaryBorder: utils.cssVariable('primary-border')
+  }
+})
 
 const update = async () => {
   console.time('👩‍🎨 update screenshot')
@@ -77,24 +84,17 @@ const drawBackgroundTint = async () => {
 
 const drawCards = async () => {
   await nextTick()
-  const css = {
-    secondaryBackground: utils.cssVariable('secondary-background'),
-    entityRadius: parseInt(utils.cssVariable('entity-radius'))
-  }
   for (const card of cards.value) {
     if (card.y > height) { continue }
     let rect = new Path2D()
-    rect.roundRect(card.x, card.y, card.width, card.height, css.entityRadius)
-    context.fillStyle = card.backgroundColor || css.secondaryBackground
+    rect.roundRect(card.x, card.y, card.width, card.height, css.value.entityRadius)
+    context.fillStyle = card.backgroundColor || css.value.secondaryBackground
     context.fill(rect)
     await drawCardConnector(card)
   }
 }
 const drawCardConnector = async (card) => {
   await nextTick()
-  const css = {
-    primaryBorder: utils.cssVariable('primary-border')
-  }
   const connectionTypes = store.getters['currentConnections/typesByCardId'](card.id)
   let typeColor = 'transparent'
   if (connectionTypes.length) {
@@ -106,7 +106,7 @@ const drawCardConnector = async (card) => {
   const y = card.y + margin
   let circle = new Path2D()
   circle.arc(x, y, radius, 0, 2 * Math.PI)
-  context.strokeStyle = css.primaryBorder
+  context.strokeStyle = css.value.primaryBorder
   context.lineWidth = 1
   context.stroke(circle)
   context.fillStyle = typeColor
@@ -131,13 +131,10 @@ const drawConnections = async () => {
 
 const drawBoxes = async () => {
   await nextTick()
-  const css = {
-    entityRadius: parseInt(utils.cssVariable('entity-radius'))
-  }
   for (const box of boxes.value) {
     if (box.y > height) { continue }
     let rect = new Path2D()
-    rect.roundRect(box.x, box.y, box.resizeWidth, box.resizeHeight, css.entityRadius)
+    rect.roundRect(box.x, box.y, box.resizeWidth, box.resizeHeight, css.value.entityRadius)
     context.strokeStyle = box.color
     context.lineWidth = 2
     context.stroke(rect)
@@ -152,8 +149,14 @@ const drawBoxes = async () => {
 }
 
 const drawBoxInfo = async (box) => {
-  // dom get rect for .box-info w data-id
-  // round rect
+  const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
+  const DOMRect = element.getBoundingClientRect()
+  const entityRadius = css.value.entityRadius
+  const radii = [entityRadius, entityRadius, entityRadius, 0] // top-left, top-right, bottom-right, bottom-left
+  let rect = new Path2D()
+  rect.roundRect(box.x, box.y, Math.round(DOMRect.width + 4), Math.round(DOMRect.height), radii)
+  context.fillStyle = box.color
+  context.fill(rect)
 }
 
 // TODO FUTURE draw Lines
