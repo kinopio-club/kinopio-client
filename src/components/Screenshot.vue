@@ -61,7 +61,13 @@ const drawBackground = async () => {
   context.fillRect(0, 0, width, height)
 }
 const drawBackgroundTint = async () => {
-
+  const color = store.state.currentSpace.backgroundTint
+  let tint = new Path2D()
+  tint.rect(0, 0, width, height)
+  context.fillStyle = color
+  context.globalCompositeOperation = 'multiply'
+  context.fill(tint)
+  context.globalCompositeOperation = 'source-over' // default blend mode
 }
 const drawCards = async () => {
   await nextTick()
