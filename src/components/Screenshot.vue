@@ -11,40 +11,14 @@ const height = 1350
 
 const element = ref(null)
 
+// TODO move to SERVER, triggered on space load by member, and space unload by member (debounce n mins)
 onMounted(() => {
-  // TEMP: change to being manually triggered after n mins on a space, and n mins after last change,
-  // if member
   store.subscribe((mutation, state) => {
     if (mutation.type === 'isLoadingSpace' && !mutation.payload) {
       update()
     }
   })
 })
-
-// const props = defineProps({
-//   visible: Boolean
-// })
-// const state = reactive({
-// boundary: {},
-// scale: 1,
-// cards: [],
-// viewport: {},
-// isPanningViewport: false,
-// connections: []
-// })
-// const emit = defineEmits(['updateCount'])
-
-// watch(() => props.visible, (value, prevValue) => {
-//   if (value) {
-//     console.log('💁‍♀️', value)
-//   }
-// })
-// const overlayBackgroundStyle = computed(() => {
-//   const backgroundColor = store.state.currentSpace.backgroundTint
-//   return {
-//     backgroundColor
-//   }
-// })
 
 const boxes = computed(() => store.getters['currentBoxes/all'])
 const cards = computed(() => store.getters['currentCards/all'])
@@ -96,7 +70,7 @@ const drawCards = async () => {
     entityRadius: parseInt(utils.cssVariable('entity-radius'))
   }
   for (const card of cards.value) {
-    // TODO ignore items that are outside canvas
+    if (card.y > height) { continue }
     let rect = new Path2D()
     rect.roundRect(card.x, card.y, card.width, card.height, css.entityRadius)
     context.fillStyle = card.backgroundColor || css.secondaryBackground
@@ -129,7 +103,6 @@ const drawCardConnector = async (card) => {
 const drawConnections = async () => {
   await nextTick()
   connections.value.forEach(connection => {
-    // TODO ignore items that are outside canvas
     context.lineWidth = 5
     context.lineCap = 'round'
     const type = store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
@@ -139,6 +112,8 @@ const drawConnections = async () => {
   })
 }
 const drawBoxes = async () => {
+  // TODO ignore items that are outside canvas
+  // if (box.y > height) { continue }
   // filled or not filled, info area
 }
 
