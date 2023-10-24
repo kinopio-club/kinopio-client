@@ -14,7 +14,7 @@ const element = ref(null)
 // TODO move to SERVER, triggered on space load by member, and space unload by member (debounce n mins)
 onMounted(() => {
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'isLoadingSpace' && !mutation.payload) {
+    if (mutation.type === 'isLoadingSpace') {
       update()
     }
   })
@@ -53,14 +53,27 @@ const initCanvas = () => {
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   context.clearRect(0, 0, canvas.width, canvas.height)
 }
+const imageDataURL = async (url) => {
+  // adapted from https://stackoverflow.com/a/72876887
+  let image = await fetch(url)
+  image = await image.blob()
+  let bitmap = await createImageBitmap(image)
+  let imageCanvas = document.createElement('canvas')
+  let imageContext = imageCanvas.getContext('2d')
+  imageCanvas.width = bitmap.width
+  imageCanvas.height = bitmap.height
+  imageContext.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height)
+  return imageCanvas.toDataURL('image/png')
+}
 
 // background
 
 const drawBackground = async () => {
   const backgroundUrl = store.state.spaceBackgroundUrl
   const isRetina = backgroundUrl.includes('-2x.') || backgroundUrl.includes('@2x.')
+  const dataURL = await imageDataURL(backgroundUrl)
   let image = new Image()
-  image.src = backgroundUrl
+  image.src = dataURL
   const pattern = context.createPattern(image, 'repeat')
   if (isRetina) {
     const matrix = new DOMMatrix()
