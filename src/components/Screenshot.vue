@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 const store = useStore()
 let canvas, context
@@ -12,7 +13,8 @@ const height = 1350
 const element = ref(null)
 
 // TODO move to SERVER, triggered on space load by member, and space unload by member (debounce n mins)
-// save cards w: id, height , width . on space load, on space leave
+// save reference vars cards: id, height , width . on space load, on space leave
+// save reference vars boxes: boxInfoWidth, boxInfoHeight
 onMounted(() => {
   store.subscribe((mutation, state) => {
     if (mutation.type === 'isLoadingSpace' && !mutation.payload) {
@@ -35,16 +37,16 @@ const css = computed(() => {
 })
 
 const update = async () => {
-  console.time('👩‍🎨 update screenshot')
+  console.time('👩‍🎨 space screenshot')
   initCanvas()
   await drawBackground()
   await drawBackgroundTint()
+  await drawBoxes()
   await drawConnections()
   await drawCards()
-  await drawBoxes()
-
+  // TODO await drawLines()
   // TODO https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/save
-  console.timeEnd('👩‍🎨 update screenshot')
+  console.timeEnd('👩‍🎨 space screenshot')
 }
 const initCanvas = () => {
   canvas = element.value
@@ -57,11 +59,11 @@ const initCanvas = () => {
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   context.clearRect(0, 0, canvas.width, canvas.height)
 }
-const loadImage = (path) => {
+const loadImage = (url) => {
+  const proxyUrl = `${consts.apiHost()}/services/proxy/image?url=${encodeURIComponent(url)}` // proxy prevents cors errors
   return new Promise((resolve, reject) => {
     const image = new Image()
-    image.crossOrigin = 'Anonymous' // to avoid CORS
-    image.src = path
+    image.src = proxyUrl
     image.onload = () => {
       resolve(image)
     }
@@ -100,6 +102,37 @@ const drawBackgroundTint = async () => {
   context.globalCompositeOperation = 'source-over' // default blend mode
 }
 
+// boxes
+
+const drawBoxes = async () => {
+  await nextTick()
+  for (const box of boxes.value) {
+    if (box.y > height) { continue }
+    let rect = new Path2D()
+    rect.roundRect(box.x, box.y, box.resizeWidth, box.resizeHeight, css.value.entityRadius)
+    context.strokeStyle = box.color
+    context.lineWidth = 2
+    context.stroke(rect)
+    if (box.fill === 'filled') {
+      context.fillStyle = box.color
+      context.globalAlpha = 0.5
+      context.fill(rect)
+      context.globalAlpha = 1 // default alpha
+    }
+    await drawBoxInfo(box)
+  }
+}
+const drawBoxInfo = async (box) => {
+  const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
+  const DOMRect = element.getBoundingClientRect()
+  const entityRadius = css.value.entityRadius
+  const radii = [entityRadius, entityRadius, entityRadius, 0] // top-left, top-right, bottom-right, bottom-left
+  let rect = new Path2D()
+  rect.roundRect(box.x, box.y, Math.round(DOMRect.width + 4), Math.round(DOMRect.height), radii)
+  context.fillStyle = box.color
+  context.fill(rect)
+}
+
 // cards
 
 const drawCards = async () => {
@@ -126,7 +159,7 @@ const cardImageUrl = (card) => {
   }
 }
 const drawCardImage = async (card) => {
-  const imageUrl = cardImageUrl(card)
+  let imageUrl = cardImageUrl(card)
   if (!imageUrl) { return }
   try {
     const image = await loadImage(imageUrl)
@@ -171,38 +204,6 @@ const drawConnections = async () => {
     const path = new Path2D(connection.path)
     context.stroke(path)
   })
-}
-
-// boxes
-
-const drawBoxes = async () => {
-  await nextTick()
-  for (const box of boxes.value) {
-    if (box.y > height) { continue }
-    let rect = new Path2D()
-    rect.roundRect(box.x, box.y, box.resizeWidth, box.resizeHeight, css.value.entityRadius)
-    context.strokeStyle = box.color
-    context.lineWidth = 2
-    context.stroke(rect)
-    if (box.fill === 'filled') {
-      context.fillStyle = box.color
-      context.globalAlpha = 0.5
-      context.fill(rect)
-      context.globalAlpha = 1 // default alpha
-    }
-    await drawBoxInfo(box)
-  }
-}
-
-const drawBoxInfo = async (box) => {
-  const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
-  const DOMRect = element.getBoundingClientRect()
-  const entityRadius = css.value.entityRadius
-  const radii = [entityRadius, entityRadius, entityRadius, 0] // top-left, top-right, bottom-right, bottom-left
-  let rect = new Path2D()
-  rect.roundRect(box.x, box.y, Math.round(DOMRect.width + 4), Math.round(DOMRect.height), radii)
-  context.fillStyle = box.color
-  context.fill(rect)
 }
 
 // TODO FUTURE draw Lines
