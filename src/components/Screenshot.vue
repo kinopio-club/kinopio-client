@@ -29,6 +29,7 @@ const boxes = computed(() => store.getters['currentBoxes/all'])
 const cards = computed(() => store.getters['currentCards/all'])
 const connections = computed(() => store.getters['currentConnections/all'])
 const css = computed(() => {
+  // from kinopio-client: themes.js
   return {
     secondaryBackground: utils.cssVariable('secondary-background'),
     entityRadius: parseInt(utils.cssVariable('entity-radius')),
