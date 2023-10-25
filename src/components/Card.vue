@@ -1100,6 +1100,7 @@ export default {
       if (!card) { return }
       this.$store.commit('currentCards/update', card)
       this.$store.dispatch('currentCards/updateTallestCardHeight', card)
+      this.$store.dispatch('api/addToQueue', { name: 'updateCard', body: card })
     },
     correctPaths () {
       if (this.pathIsUpdated) { return }
