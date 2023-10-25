@@ -12,6 +12,7 @@ const height = 1350
 const element = ref(null)
 
 // TODO move to SERVER, triggered on space load by member, and space unload by member (debounce n mins)
+// save cards w: id, height , width . on space load, on space leave
 onMounted(() => {
   store.subscribe((mutation, state) => {
     if (mutation.type === 'isLoadingSpace' && !mutation.payload) {
@@ -40,7 +41,6 @@ const update = async () => {
   await drawBackgroundTint()
   await drawConnections()
   await drawCards()
-  console.log('🍔🍔🍔🍔boxes')
   await drawBoxes()
 
   // TODO https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/save
@@ -128,12 +128,13 @@ const cardImageUrl = (card) => {
 const drawCardImage = async (card) => {
   const imageUrl = cardImageUrl(card)
   if (!imageUrl) { return }
-  console.log('♥️', imageUrl)
   try {
     const image = await loadImage(imageUrl)
+    context.save()
     context.roundRect(card.x, card.y, card.width, card.height, css.value.entityRadius)
     context.clip()
     context.drawImage(image, card.x, card.y, card.width, card.height)
+    context.restore()
   } catch (error) {
     console.log('🚒 drawCardImage', error)
   }
