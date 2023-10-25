@@ -462,6 +462,9 @@ export default {
       return isLocked
     },
     shouldJiggle () {
+      const max = 500
+      const cardIsTooBig = this.width > max || this.card.height > max
+      if (cardIsTooBig) { return }
       const isMultipleItemsSelected = this.$store.getters.isMultipleItemsSelected
       const isShiftKeyDown = this.currentUserIsBoxSelecting
       if (isMultipleItemsSelected || isShiftKeyDown) { return }
