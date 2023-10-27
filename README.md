@@ -24,6 +24,8 @@ $ npm run serve
 $ https://kinopio.local:8080
 ```
 
+> If you're not running `kinopio-server`, comment out the `isDevelopment` urls in `kinopioDomain()`, `apiHost()`, and `websocketHost()` of  `consts.js`.
+
 ## Debugging
 
 	npm run lint
