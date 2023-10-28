@@ -5,8 +5,16 @@ import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerCloseChildDialogs') {
+      closeChildDialogs()
+    }
+  })
+})
+
 const state = reactive({
-  tipsIsVisible: false
+  freeLimitFAQIsVisible: false
 })
 
 const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCount || 0)
@@ -22,35 +30,40 @@ const triggerUpgradeUserIsVisible = () => {
   }
 }
 
-const toggleTipsIsVisible = () => {
-  state.tipsIsVisible = !state.tipsIsVisible
+const toggleFreeLimitFAQIsVisible = () => {
+  const value = !state.freeLimitFAQIsVisible
+  store.commit('triggerCloseChildDialogs')
+  state.freeLimitFAQIsVisible = value
+}
+const closeChildDialogs = () => {
+  state.freeLimitFAQIsVisible = false
 }
 </script>
 
 <template lang="pug">
-section.subsection.cards-created-progress
-  .info
+section.subsection.cards-created-progress(@click="closeChildDialogs")
+  .row
     p {{cardsCreatedCount}}/{{cardsCreatedLimit}} free cards created
+    button.small-button(@click.stop="toggleFreeLimitFAQIsVisible" :class="{active: state.freeLimitFAQIsVisible}")
+      span ?
+
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
   .row
     .button-wrap
       button(@click="triggerUpgradeUserIsVisible")
         span Upgrade for Unlimited
-  .row
-    .button-wrap
-      button(@click.stop="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
-        span What Happens When I Run Out of Free Cards?
-  .row(v-if="state.tipsIsVisible")
-    p You'll always have access to your cards and spaces. But you won't be able to create new cards unless you remove some to decrease your card count.
 </template>
 
 <style lang="stylus">
 .cards-created-progress
   width 100%
-  .info
+  .row
     display flex
     justify-content space-between
     align-items center
+    margin-bottom 0
+    .small-button
+      margin-top 0
   progress
     margin-bottom 10px
     margin-top 10px
