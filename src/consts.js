@@ -60,6 +60,8 @@ export default {
       return this.monthlyPrice()
     } else if (period === 'year') {
       return this.yearlyPrice(isStudentDiscount)
+    } else if (period === 'life') {
+      return this.lifePrice()
     }
   },
   monthlyPrice () {
@@ -110,6 +112,17 @@ export default {
     }
     if (this.isDevelopment) {
       price.stripePriceId = 'price_1Nie0DDFIr5ywhwoesLtHpVu'
+    }
+    return price
+  },
+  lifePrice () {
+    let price = {
+      amount: 150,
+      period: 'life',
+      stripePriceId: 'price_1L2ErWDFIr5ywhwodsKxEEAq' // TODO
+    }
+    if (this.isDevelopment) {
+      price.stripePriceId = 'price_1L720NDFIr5ywhwo0wS5PWAv' // TODO
     }
     return price
   }

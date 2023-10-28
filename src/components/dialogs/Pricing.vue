@@ -37,12 +37,14 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
+const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const studentDiscountIsAvailable = computed(() => store.state.currentUser.studentDiscountIsAvailable)
 const monthlyPrice = computed(() => consts.price('month').amount)
 const yearlyPrice = computed(() => {
   const isStudentDiscount = store.state.currentUser.studentDiscountIsAvailable
   return consts.price('year', isStudentDiscount).amount
 })
+const lifePrice = computed(() => consts.price('life').amount)
 
 const closeChildDialogs = () => {
   store.commit('triggerCloseChildDialogs')
@@ -64,7 +66,12 @@ const spaceUser = computed(() => store.state.currentSpace.users[0])
 <template lang="pug">
 dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeChildDialogs" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
+    //- price
+    template(v-if="isSecureAppContextIOS")
+      p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
+    template(v-else)
+      p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifePrice}}/life
+
     p.badge.success(v-if="studentDiscountIsAvailable") Your account qualifies for a student discount
     DiscountRow
     ReferredNewUserCredits
