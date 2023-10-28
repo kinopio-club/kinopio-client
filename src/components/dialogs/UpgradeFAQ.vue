@@ -7,57 +7,40 @@ const store = useStore()
 
 const dialog = ref(null)
 
-onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    }
-  })
-})
-
 const props = defineProps({
   visible: Boolean
 })
-const emit = defineEmits(['updateCount'])
-
-watch(() => props.visible, (value, prevValue) => {
-  if (value) {
-    updateDialogHeight()
-  }
-})
-
-const state = reactive({
-  count: 0,
-  dialogHeight: null
-})
-
-const updateDialogHeight = async () => {
-  if (!props.visible) { return }
-  await nextTick()
-  let element = dialog.value
-  state.dialogHeight = utils.elementHeight(element)
-}
-
-const themeName = computed(() => store.state.currentUser.theme)
-const incrementBy = () => {
-  state.count = state.count + 1
-  emit('updateCount', state.count)
-  // store.dispatch('themes/isSystem', false)
-}
 </script>
 
 <template lang="pug">
-dialog.narrow.upgrade-faq(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.upgrade-faq(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
-    p blank dialog, please duplicate
-  section
-    button(@click="incrementBy")
-      span Count is: {{ state.count }}
-    p Current theme is: {{ themeName }}
+    p Upgrade FAQ
+  section.results-section
+    details
+      summary What happens if I cancel my subscription?
+      section.subsection
+        p You'll always be able to view the cards and spaces that you create. But you won't be able to create new cards beyond the free limit.
+
+    details
+      summary Is it easy to cancel?
+      section.subsection
+        p Yes. You can cancel anytime through User → Settings → Billing and Credits
+
+    details
+      summary How long is the life plan?
+      section.subsection
+        p The life plan is a perpetual licence for as long as Kinopio operates.
+        p While Kinopio requires a webserver, it was designed to be inexpensive to host beyond the foreseeable future.
 </template>
 
 <style lang="stylus">
 .upgrade-faq
   left initial
   right 4px
+  overflow auto
+  max-height 350px
+  .results-section
+    border-top 1px solid var(--primary-border)
+    padding-top 4px
 </style>

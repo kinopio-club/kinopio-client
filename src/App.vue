@@ -891,6 +891,31 @@ li
       background-position center
       background-size 69%
 
+details
+  summary
+    cursor pointer
+    border-radius var(--entity-radius)
+    padding 5px 9px
+    &:hover
+      box-shadow var(--button-hover-shadow)
+      background-color var(--secondary-hover-background)
+    &:active
+      box-shadow var(--button-active-inset-shadow)
+      background-color var(--secondary-active-background)
+  section.subsection
+    padding 5px 9px !important
+    margin-top 0 !important
+    border-top-right-radius 0
+    border-top-left-radius 0
+details[open]
+  > summary
+    box-shadow var(--button-active-inset-shadow)
+    background-color var(--secondary-active-background)
+    border-bottom-right-radius 0
+    border-bottom-left-radius 0
+details + details
+  margin-top 2px
+
 .is-dark-theme
   label
     input[type="checkbox"]

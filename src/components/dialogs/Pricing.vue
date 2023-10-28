@@ -34,6 +34,7 @@ const state = reactive({
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
+    closeChildDialogs()
     updateDialogHeight()
     store.commit('shouldExplicitlyHideFooter', true)
   } else {
