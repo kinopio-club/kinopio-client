@@ -7,6 +7,7 @@ import DiscountRow from '@/components/DiscountRow.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
 import AboutMe from '@/components/AboutMe.vue'
+import UpgradeFAQ from '@/components/dialogs/UpgradeFAQ.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
 const store = useStore()
@@ -84,9 +85,10 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
         p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
       template(v-else)
         p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifePrice}}/life
-      button.small-button(@click.stop="toggleUpgradeFAQIsVisible" :class="{active: state.upgradeFAQIsVisible}")
-        span ?
-
+      .button-wrap
+        button.small-button(@click.stop="toggleUpgradeFAQIsVisible" :class="{active: state.upgradeFAQIsVisible}")
+          span ?
+          UpgradeFAQ(:visible="state.upgradeFAQIsVisible")
     p.badge.success(v-if="studentDiscountIsAvailable") Your account qualifies for a student discount
     DiscountRow
     ReferredNewUserCredits
@@ -136,6 +138,7 @@ dialog.pricing
     top -60px !important
   .title-row
     align-items flex-start
+    .button-wrap,
     .small-button
       margin-top 0
 

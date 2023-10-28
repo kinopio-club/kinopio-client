@@ -3,6 +3,7 @@
 
 import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
 import { useStore } from 'vuex'
+import FreeLimitFAQ from '@/components/dialogs/FreeLimitFAQ.vue'
 const store = useStore()
 
 onMounted(() => {
@@ -44,9 +45,10 @@ const closeChildDialogs = () => {
 section.subsection.cards-created-progress(@click="closeChildDialogs")
   .row
     p {{cardsCreatedCount}}/{{cardsCreatedLimit}} free cards created
-    button.small-button(@click.stop="toggleFreeLimitFAQIsVisible" :class="{active: state.freeLimitFAQIsVisible}")
-      span ?
-
+    .button-wrap
+      button.small-button(@click.stop="toggleFreeLimitFAQIsVisible" :class="{active: state.freeLimitFAQIsVisible}")
+        span ?
+      FreeLimitFAQ(:visible="state.freeLimitFAQIsVisible")
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
   .row
     .button-wrap
@@ -62,6 +64,7 @@ section.subsection.cards-created-progress(@click="closeChildDialogs")
     justify-content space-between
     align-items center
     margin-bottom 0
+    .button-wrap,
     .small-button
       margin-top 0
   progress
