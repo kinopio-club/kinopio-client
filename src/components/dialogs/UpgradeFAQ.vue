@@ -2,10 +2,8 @@
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import utils from '@/utils.js'
+// import utils from '@/utils.js'
 const store = useStore()
-
-const dialog = ref(null)
 
 const props = defineProps({
   visible: Boolean
@@ -21,7 +19,6 @@ const closeOtherDetails = (event) => {
     }
   })
 }
-
 </script>
 
 <template lang="pug">
@@ -37,7 +34,7 @@ dialog.narrow.upgrade-faq(v-if="visible" :open="visible" @click.left.stop ref="d
     details
       summary(@click="closeOtherDetails") Is it easy to cancel?
       section.subsection
-        p Yes. You can cancel anytime through User → Settings → Billing and Credits
+        p Yes. You can cancel anytime through User → Settings → Billing and Credits.
 
     details
       summary(@click="closeOtherDetails") How long is the life plan?

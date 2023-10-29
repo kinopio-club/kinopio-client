@@ -2,64 +2,48 @@
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import utils from '@/utils.js'
+// import utils from '@/utils.js'
 const store = useStore()
-
-const dialog = ref(null)
-
-onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    }
-  })
-})
 
 const props = defineProps({
   visible: Boolean
 })
-const emit = defineEmits(['updateCount'])
 
-watch(() => props.visible, (value, prevValue) => {
-  if (value) {
-    updateDialogHeight()
-  }
-})
-
-const state = reactive({
-  count: 0,
-  dialogHeight: null
-})
-
-const updateDialogHeight = async () => {
-  if (!props.visible) { return }
-  await nextTick()
-  let element = dialog.value
-  state.dialogHeight = utils.elementHeight(element)
-}
-
-const themeName = computed(() => store.state.currentUser.theme)
-const incrementBy = () => {
-  state.count = state.count + 1
-  emit('updateCount', state.count)
-  // store.dispatch('themes/isSystem', false)
+const closeOtherDetails = (event) => {
+  const summaries = document.querySelectorAll('summary')
+  const target = event.target
+  summaries.forEach(summary => {
+    if (summary !== target) {
+      const details = summary.closest('details')
+      details.removeAttribute('open')
+    }
+  })
 }
 </script>
 
 <template lang="pug">
-dialog.narrow.free-limit-faq(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.free-limit-faq(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
-    p blank dialog, please duplicate
-  section
-    button(@click="incrementBy")
-      span Count is: {{ state.count }}
-    p Current theme is: {{ themeName }}
+    p Free Limit FAQ
+  section.results-section
+    details
+      summary(@click="closeOtherDetails") How are cards counted?
+      section.subsection
+        p Cards you add will increment the card count. Cards you remove will decrement the card count.
+
+    details
+      summary(@click="closeOtherDetails") What happens when I run out of free cards?
+      section.subsection
+        p You'll always have access to your cards and spaces. But you won't be able to create new cards unless you remove some to decrease your card count.
+
 </template>
 
 <style lang="stylus">
 .free-limit-faq
   left initial
-  top initial !important
+  top -120px !important
   right 2px
-  bottom 16px
+  .results-section
+    border-top 1px solid var(--primary-border)
+    padding-top 4px
 </style>
