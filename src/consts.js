@@ -119,10 +119,10 @@ export default {
     let price = {
       amount: 150,
       period: 'life',
-      stripePriceId: 'price_1L2ErWDFIr5ywhwodsKxEEAq' // TODO
+      stripePriceId: 'price_1O6k3UDFIr5ywhwoeCdzdlAM'
     }
     if (this.isDevelopment) {
-      price.stripePriceId = 'price_1L720NDFIr5ywhwo0wS5PWAv' // TODO
+      price.stripePriceId = 'price_1O6k10DFIr5ywhwoXF87uKcl'
     }
     return price
   }
