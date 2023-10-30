@@ -97,7 +97,11 @@ const subscribe = async () => {
 
 <template lang="pug">
 .upgrade-user-stripe(v-if="visible")
-  p Tax included. You can cancel anytime.
+  p Tax included.
+    template(v-if="price.period === 'life'")
+      span This is a one-time purchase.
+    template(v-else)
+      span You can cancel anytime.
   .row
     button(@click.left="subscribe" :class="{active : state.loading.subscribe}")
       User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")

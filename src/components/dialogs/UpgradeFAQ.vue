@@ -29,17 +29,17 @@ dialog.narrow.upgrade-faq(v-if="visible" :open="visible" @click.left.stop ref="d
     details
       summary(@click="closeOtherDetails") What happens if I cancel my subscription?
       section.subsection
-        p You'll always be able to view the cards and spaces that you create. But you won't be able to create new cards beyond the free limit.
+        p You'll always be able to view the cards and spaces that you've created. But you won't be able to create new cards beyond the free limit.
 
     details
-      summary(@click="closeOtherDetails") Is it easy to cancel?
+      summary(@click="closeOtherDetails") How would I cancel my subscription?
       section.subsection
-        p Yes. You can cancel anytime through User → Settings → Billing and Credits.
+        p You can downgrade to free anytime through User → Settings → Billing and Credits.
 
     details
-      summary(@click="closeOtherDetails") How long is the life plan?
+      summary(@click="closeOtherDetails") What is the life plan?
       section.subsection
-        p The life plan is a perpetual licence for as long as Kinopio operates. Which will be for many years, likely decades.
+        p The lifetime plan is a perpetual licence for as long as Kinopio operates. Which is planned for many years, likely decades.
 </template>
 
 <style lang="stylus">

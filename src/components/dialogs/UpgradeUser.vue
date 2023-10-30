@@ -1,8 +1,13 @@
 <template lang="pug">
-dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildDialogs" @keydown.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.upgrade-user.wide(v-if="visible" :open="visible" @click.left.stop="closeChildDialogs" @keydown.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    .row
+    .row.title-row
       p Upgrade your account for unlimited cards and uploads
+      .button-wrap
+        button.small-button(@click.stop="toggleUpgradeFAQIsVisible" :class="{active: upgradeFAQIsVisible}")
+          span ?
+          UpgradeFAQ(:visible="upgradeFAQIsVisible")
+
     //- student info
     .row(v-if="studentDiscountIsAvailable && isSecureAppContextIOS")
       .badge.danger Your account qualifies for a student discount but you have to upgrade via the web to use it
@@ -14,6 +19,7 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildD
         button(:class="{active: period === 'month'}" @click.left="updatePeriod('month')") ${{monthlyPrice.amount}}/month
         button(:class="{active: period === 'year'}" @click.left="updatePeriod('year')") ${{yearlyPrice.amount}}/year
           .badge.label-badge -{{yearlyDiscount}}%
+        button(v-if="!isSecureAppContextIOS" :class="{active: period === 'life'}" @click.left="updatePeriod('life')") ${{lifetimePrice.amount}}/life
     //- checkout
     template(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
@@ -31,6 +37,7 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildD
 <script>
 import UpgradeUserStripe from '@/components/UpgradeUserStripe.vue'
 import UpgradeUserApple from '@/components/UpgradeUserApple.vue'
+import UpgradeFAQ from '@/components/dialogs/UpgradeFAQ.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -40,7 +47,8 @@ export default {
   components: {
     Loader,
     UpgradeUserStripe,
-    UpgradeUserApple
+    UpgradeUserApple,
+    UpgradeFAQ
   },
   props: {
     visible: Boolean
@@ -49,11 +57,14 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updatePageSizes') {
         this.updateDialogHeight()
+      } else if (mutation.type === 'triggerCloseChildDialogs') {
+        this.upgradeFAQIsVisible = false
       }
     })
   },
   data () {
     return {
+      upgradeFAQIsVisible: false,
       dialogHeight: null,
       period: 'year' // year, life
     }
@@ -87,6 +98,7 @@ export default {
       const result = (numerator / denomenator) * 100
       return Math.round(result)
     },
+    lifetimePrice () { return consts.price('life') },
     isUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
   methods: {
@@ -110,10 +122,14 @@ export default {
     },
     closeChildDialogs () {
       this.$store.commit('triggerCloseChildDialogs')
+    },
+    toggleUpgradeFAQIsVisible () {
+      this.upgradeFAQIsVisible = !this.upgradeFAQIsVisible
     }
   },
   watch: {
     visible (visible) {
+      this.upgradeFAQIsVisible = false
       if (visible) {
         console.log('🎡', 'isSecureAppContext', consts.isSecureAppContext, 'isSecureAppContextIOS', consts.isSecureAppContextIOS)
         this.updateDialogHeight()
@@ -128,7 +144,6 @@ export default {
 
 <style lang="stylus">
 dialog.upgrade-user
-  overflow auto
   max-height calc(100vh - 210px)
   left initial
   right 8px
@@ -142,12 +157,18 @@ dialog.upgrade-user
     min-height initial
     position absolute
     left initial
-    right -15px
-    top -6px
+    right 0
+    top -9px
     margin 0
+    z-index 1
   p
     color var(--primary)
   @media(max-height 650px)
     top -60px !important
 
+  .title-row
+    align-items flex-start
+    .button-wrap,
+    .small-button
+      margin-top 0
 </style>
