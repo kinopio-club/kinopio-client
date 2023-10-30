@@ -2,7 +2,6 @@
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-// import utils from '@/utils.js'
 const store = useStore()
 
 const props = defineProps({
@@ -32,7 +31,7 @@ dialog.narrow.upgrade-faq(v-if="visible" :open="visible" @click.left.stop ref="d
         p You'll always be able to view the cards and spaces that you've created. But you won't be able to create new cards beyond the free limit.
 
     details
-      summary(@click="closeOtherDetails") How would I cancel my subscription?
+      summary(@click="closeOtherDetails") How do I cancel my subscription?
       section.subsection
         p You can downgrade to free anytime through User → Settings → Billing and Credits.
 

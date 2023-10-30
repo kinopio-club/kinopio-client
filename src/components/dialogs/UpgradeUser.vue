@@ -17,7 +17,7 @@ onMounted(() => {
     if (mutation.type === 'updatePageSizes') {
       updateDialogHeight()
     } else if (mutation.type === 'triggerCloseChildDialogs') {
-      state.upgradeFAQIsVisible = false
+      closeUpgradeFAQ()
     }
   })
 })
@@ -46,6 +46,9 @@ const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSigned
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const toggleUpgradeFAQIsVisible = () => {
   state.upgradeFAQIsVisible = !state.upgradeFAQIsVisible
+}
+const closeUpgradeFAQ = () => {
+  state.upgradeFAQIsVisible = false
 }
 const studentDiscountIsAvailable = computed(() => store.state.currentUser.studentDiscountIsAvailable)
 const paymentProcessor = computed(() => {

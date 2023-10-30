@@ -33,6 +33,7 @@ const clearState = () => {
   state.loading.subscribe = false
   state.error.unknownServerError = false
 }
+const isLifetimePlan = computed(() => props.price.period === 'life')
 
 // credits
 
@@ -43,7 +44,7 @@ const updateCredits = async () => {
     console.log('🫧', data)
     state.credits = data.creditsUnused
   } catch (error) {
-    console.error('🚒', error)
+    console.error('🚒 updateCredits', error)
   }
   state.loading.credits = false
 }
@@ -87,7 +88,7 @@ const subscribe = async () => {
     })
     window.location = result.url
   } catch (error) {
-    console.error('🚒', error)
+    console.error('🚒 subscribe', error)
     clearState()
     state.error.unknownServerError = true
   }
@@ -98,19 +99,20 @@ const subscribe = async () => {
 <template lang="pug">
 .upgrade-user-stripe(v-if="visible")
   p Tax included.
-    template(v-if="price.period === 'life'")
+    template(v-if="isLifetimePlan")
       span This is a one-time purchase.
     template(v-else)
       span You can cancel anytime.
+
+  //- button
   .row
     button(@click.left="subscribe" :class="{active : state.loading.subscribe}")
       User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
-      template(v-if="state.credits")
+      template(v-if="state.credits && !isLifetimePlan")
         span Upgrade for ${{initialPaymentAfterCredits}}, then ${{price.amount}}/{{price.period}}
       template(v-else)
         span Upgrade for ${{price.amount}}/{{price.period}}
       Loader(:visible="state.loading.subscribe")
-
   .badge.danger(v-if="state.error.unknownServerError")
     span (シ_ _)シ Something went wrong, Please try again or contact support. Your transaction was not processed.
 
@@ -119,11 +121,13 @@ const subscribe = async () => {
     Loader(:visible="state.loading.credits")
     .badge.success(v-if="state.credits")
       span ${{state.credits}} credit
-  p(v-if="state.credits")
-    span You'll be billed ${{initialPaymentAfterCredits}} immediately.
-    span(v-if="isCreditsRemainingAfterInitialPayment") {{' '}}Your remaining ${{creditsRemainingAfterInitialPayment}} credit will be applied to future bills.
-    span {{' '}}Then you'll be billed ${{price.amount}} each {{price.period}}.
-
+  template(v-if="state.credits")
+    p(v-if="isLifetimePlan")
+      span Credits can only be used on monthly or yearly plans.
+    p(v-else)
+      span You'll be billed ${{initialPaymentAfterCredits}} immediately.
+      span(v-if="isCreditsRemainingAfterInitialPayment") {{' '}}Your remaining ${{creditsRemainingAfterInitialPayment}} credit will be applied to future bills.
+      span {{' '}}Then you'll be billed ${{price.amount}} each {{price.period}}.
 </template>
 
 <style lang="stylus">
