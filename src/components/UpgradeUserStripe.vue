@@ -100,7 +100,7 @@ const subscribe = async () => {
 .upgrade-user-stripe(v-if="visible")
   p Tax included.
     template(v-if="isLifetimePlan")
-      span This is a one-time purchase.
+      span This is a one-time perpetual license purchase.
     template(v-else)
       span You can cancel anytime.
 
