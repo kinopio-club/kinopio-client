@@ -488,7 +488,7 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       console.log('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
-      if (remoteUser.stripeSubscriptionId || remoteUser.downgradeAt || remoteUser.appleSubscriptionIsActive) {
+      if (remoteUser.stripeSubscriptionId || remoteUser.stripePlanIsPurchased || remoteUser.downgradeAt || remoteUser.appleSubscriptionIsActive) {
         context.commit('isUpgraded', true)
       } else {
         context.commit('isUpgraded', false)

@@ -1,10 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 // import utils from '@/utils.js'
 import User from '@/components/User.vue'
+const store = useStore()
 
 const state = reactive({
   aboutMeIsVisible: false
@@ -32,9 +32,8 @@ const kinopioUser = computed(() => {
         User(:user="kinopioUser" :isClickable="false" :hideYouLabel="true")
         div
           p Hi, my name is{{' '}}
-            a(href="https://pketh.org") Pirijan
-            span {{' '}}and I'm the creator of Kinopio.
-          p I believe in building ethical, economically-sustainable,
+            a(href="https://pketh.org/about") Pirijan
+            span .{{' '}} I believe in building ethical, economically-sustainable,
             span {{' '}}
             a(href="https://pketh.org/organic-software.html") organic software
             span {{' '}}

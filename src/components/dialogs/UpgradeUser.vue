@@ -1,8 +1,120 @@
+<script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import UpgradeUserStripe from '@/components/UpgradeUserStripe.vue'
+import UpgradeUserApple from '@/components/UpgradeUserApple.vue'
+import UpgradeFAQ from '@/components/dialogs/UpgradeFAQ.vue'
+import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
+import consts from '@/consts.js'
+
+const store = useStore()
+const dialog = ref(null)
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'updatePageSizes') {
+      updateDialogHeight()
+    } else if (mutation.type === 'triggerCloseChildDialogs') {
+      closeUpgradeFAQ()
+    }
+  })
+})
+
+const props = defineProps({
+  visible: Boolean
+})
+watch(() => props.visible, (value, prevValue) => {
+  state.upgradeFAQIsVisible = false
+  if (value) {
+    console.log('🎡', 'isSecureAppContext', consts.isSecureAppContext, 'isSecureAppContextIOS', consts.isSecureAppContextIOS)
+    updateDialogHeight()
+    store.commit('shouldExplicitlyHideFooter', true)
+  } else {
+    store.commit('shouldExplicitlyHideFooter', false)
+  }
+})
+
+const state = reactive({
+  upgradeFAQIsVisible: false,
+  dialogHeight: null,
+  period: 'year' // year, life
+})
+
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
+const toggleUpgradeFAQIsVisible = () => {
+  state.upgradeFAQIsVisible = !state.upgradeFAQIsVisible
+}
+const closeUpgradeFAQ = () => {
+  state.upgradeFAQIsVisible = false
+}
+const studentDiscountIsAvailable = computed(() => store.state.currentUser.studentDiscountIsAvailable)
+const paymentProcessor = computed(() => {
+  if (isSecureAppContextIOS.value) {
+    return 'Apple'
+  } else {
+    return 'Stripe'
+  }
+})
+
+// price
+
+const currentPrice = computed(() => {
+  const isStudentDiscount = studentDiscountIsAvailable.value
+  return consts.price(state.period, isStudentDiscount)
+})
+const monthlyPrice = computed(() => consts.price('month'))
+const yearlyPrice = computed(() => {
+  const isStudentDiscount = studentDiscountIsAvailable.value
+  return consts.price('year', isStudentDiscount)
+})
+const yearlyDiscount = computed(() => {
+  const base = monthlyPrice.value.amount * 12
+  const yearly = yearlyPrice.value.amount
+  // https://www.calculatorsoup.com/calculators/algebra/percent-difference-calculator.php
+  const numerator = base - yearly
+  const denomenator = (base + yearly) / 2
+  const result = (numerator / denomenator) * 100
+  return Math.round(result)
+})
+const lifetimePrice = computed(() => consts.price('life'))
+const updatePeriod = (value) => {
+  state.period = value
+}
+const price = (period) => {
+  const isStudentDiscount = studentDiscountIsAvailable.value
+  return consts.price(period, isStudentDiscount)
+}
+
+// dialog
+
+const triggerSignUpOrInIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerSignUpOrInIsVisible')
+}
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  const element = dialog.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+const closeChildDialogs = () => {
+  store.commit('triggerCloseChildDialogs')
+}
+</script>
+
 <template lang="pug">
-dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildDialogs" @keydown.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.upgrade-user.wide(v-if="props.visible" :open="props.visible" @click.left.stop="closeChildDialogs" @keydown.stop ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    .row
+    .row.title-row
       p Upgrade your account for unlimited cards and uploads
+      .button-wrap
+        button.small-button(@click.stop="toggleUpgradeFAQIsVisible" :class="{active: state.upgradeFAQIsVisible}")
+          span ?
+          UpgradeFAQ(:visible="state.upgradeFAQIsVisible")
+
     //- student info
     .row(v-if="studentDiscountIsAvailable && isSecureAppContextIOS")
       .badge.danger Your account qualifies for a student discount but you have to upgrade via the web to use it
@@ -11,9 +123,10 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildD
     //- period picker
     .row
       .segmented-buttons
-        button(:class="{active: period === 'month'}" @click.left="updatePeriod('month')") ${{monthlyPrice.amount}}/month
-        button(:class="{active: period === 'year'}" @click.left="updatePeriod('year')") ${{yearlyPrice.amount}}/year
+        button(:class="{active: state.period === 'month'}" @click.left="updatePeriod('month')") ${{monthlyPrice.amount}}/month
+        button(:class="{active: state.period === 'year'}" @click.left="updatePeriod('year')") ${{yearlyPrice.amount}}/year
           .badge.label-badge -{{yearlyDiscount}}%
+        button(v-if="!isSecureAppContextIOS" :class="{active: state.period === 'life'}" @click.left="updatePeriod('life')") ${{lifetimePrice.amount}}/life
     //- checkout
     template(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
@@ -22,113 +135,14 @@ dialog.upgrade-user(v-if="visible" :open="visible" @click.left.stop="closeChildD
       UpgradeUserStripe(:visible="!isSecureAppContextIOS" :price="currentPrice")
       UpgradeUserApple(:visible="isSecureAppContextIOS" :price="currentPrice")
 
-  section(v-if="currentUserIsSignedIn && !isUpgraded")
+  section(v-if="currentUserIsSignedIn")
     p
       img.icon(src="@/assets/lock.svg")
       span Payments securely processed by {{paymentProcessor}}
 </template>
 
-<script>
-import UpgradeUserStripe from '@/components/UpgradeUserStripe.vue'
-import UpgradeUserApple from '@/components/UpgradeUserApple.vue'
-import Loader from '@/components/Loader.vue'
-import utils from '@/utils.js'
-import consts from '@/consts.js'
-
-export default {
-  name: 'UpgradeUser',
-  components: {
-    Loader,
-    UpgradeUserStripe,
-    UpgradeUserApple
-  },
-  props: {
-    visible: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
-      }
-    })
-  },
-  data () {
-    return {
-      dialogHeight: null,
-      period: 'year' // year, life
-    }
-  },
-  computed: {
-    isSecureAppContextIOS () { return consts.isSecureAppContextIOS },
-    paymentProcessor () {
-      if (this.isSecureAppContextIOS) {
-        return 'Apple'
-      } else {
-        return 'Stripe'
-      }
-    },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    currentPrice () {
-      const isStudentDiscount = this.studentDiscountIsAvailable
-      return consts.price(this.period, isStudentDiscount)
-    },
-    monthlyPrice () { return consts.price('month') },
-    studentDiscountIsAvailable () { return this.$store.state.currentUser.studentDiscountIsAvailable },
-    yearlyPrice () {
-      const isStudentDiscount = this.studentDiscountIsAvailable
-      return consts.price('year', isStudentDiscount)
-    },
-    yearlyDiscount () {
-      const base = this.monthlyPrice.amount * 12
-      const yearly = this.yearlyPrice.amount
-      // https://www.calculatorsoup.com/calculators/algebra/percent-difference-calculator.php
-      const numerator = base - yearly
-      const denomenator = (base + yearly) / 2
-      const result = (numerator / denomenator) * 100
-      return Math.round(result)
-    },
-    isUpgraded () { return this.$store.state.currentUser.isUpgraded }
-  },
-  methods: {
-    price (period) {
-      const isStudentDiscount = this.studentDiscountIsAvailable
-      return consts.price(period, isStudentDiscount)
-    },
-    updatePeriod (value) {
-      this.period = value
-    },
-    triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerSignUpOrInIsVisible')
-    },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
-      })
-    },
-    closeChildDialogs () {
-      this.$store.commit('triggerCloseChildDialogs')
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        console.log('🎡', 'isSecureAppContext', consts.isSecureAppContext, 'isSecureAppContextIOS', consts.isSecureAppContextIOS)
-        this.updateDialogHeight()
-        this.$store.commit('shouldExplicitlyHideFooter', true)
-      } else {
-        this.$store.commit('shouldExplicitlyHideFooter', false)
-      }
-    }
-  }
-}
-</script>
-
 <style lang="stylus">
 dialog.upgrade-user
-  overflow auto
   max-height calc(100vh - 210px)
   left initial
   right 8px
@@ -142,12 +156,18 @@ dialog.upgrade-user
     min-height initial
     position absolute
     left initial
-    right -15px
-    top -6px
+    right 0
+    top -9px
     margin 0
+    z-index 1
   p
     color var(--primary)
   @media(max-height 650px)
     top -60px !important
 
+  .title-row
+    align-items flex-start
+    .button-wrap,
+    .small-button
+      margin-top 0
 </style>

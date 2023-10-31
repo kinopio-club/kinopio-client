@@ -1,11 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 import UserCredits from '@/components/UserCredits.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+const store = useStore()
 
 const props = defineProps({
   visible: Boolean
@@ -54,6 +54,7 @@ dialog.narrow.earn-credits(v-if="visible" :open="visible" @click.left.stop ref="
     p
       span when someone you refer, or invite to a space, signs up. You'll both earn a{{' '}}
       span.badge.success ${{consts.referralCreditAmount}} credit
+      span that can be used on your monthly or yearly plan.
     .row
       p There's no limit on the amount of credits you can earn.
     template(v-if="currentUserIsSignedIn")
