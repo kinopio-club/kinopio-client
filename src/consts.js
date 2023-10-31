@@ -117,7 +117,7 @@ export default {
   },
   lifePrice () {
     let price = {
-      amount: 150,
+      amount: 200,
       period: 'life',
       stripePriceId: 'price_1O6k3UDFIr5ywhwoeCdzdlAM'
     }
