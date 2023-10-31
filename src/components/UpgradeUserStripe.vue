@@ -101,7 +101,7 @@ const subscribe = async () => {
     let result
     clearState()
     state.loading.subscribe = true
-    if (props.price.period === 'life') {
+    if (isLifetimePlan.value) {
       result = await checkoutUrl()
     } else {
       result = await subscribeUrl()
