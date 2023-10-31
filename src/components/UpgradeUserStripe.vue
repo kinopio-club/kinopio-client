@@ -77,15 +77,35 @@ const isCreditsRemainingAfterInitialPayment = computed(() => {
 
 // subscribe
 
+const subscribeUrl = async () => {
+  const result = await store.dispatch('api/subscriptionUrl', {
+    priceId: props.price.stripePriceId,
+    userId: store.state.currentUser.id,
+    period: props.price.period
+  })
+  return result
+}
+
+const checkoutUrl = async () => {
+  const result = await store.dispatch('api/checkoutUrl', {
+    priceId: props.price.stripePriceId,
+    userId: store.state.currentUser.id,
+    period: props.price.period
+  })
+  return result
+}
+
 const subscribe = async () => {
   if (state.loading.subscribe) { return }
   try {
+    let result
     clearState()
     state.loading.subscribe = true
-    const result = await store.dispatch('api/subscriptionUrl', {
-      priceId: props.price.stripePriceId,
-      userId: store.state.currentUser.id
-    })
+    if (props.price.period === 'life') {
+      result = await checkoutUrl()
+    } else {
+      result = await subscribeUrl()
+    }
     window.location = result.url
   } catch (error) {
     console.error('🚒 subscribe', error)

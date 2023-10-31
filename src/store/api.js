@@ -821,6 +821,15 @@ const self = {
 
     // Billing Stripe
 
+    checkoutUrl: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/billing/stripe/checkout-url`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'subscriptionUrl', error })
+      }
+    },
     subscriptionUrl: async (context, body) => {
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
