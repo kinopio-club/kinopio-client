@@ -1,17 +1,17 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 import consts from '@/consts.js'
 import EarnCredits from '@/components/dialogs/EarnCredits.vue'
+const store = useStore()
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerCloseChildDialogs') {
-      closeDialogs()
+      closeChildDialogs()
     }
   })
 })
@@ -21,24 +21,24 @@ const state = reactive({
   earnCreditsIsVisible: false
 })
 
-const closeDialogs = () => {
+const closeChildDialogs = () => {
   state.studentInfoIsVisible = false
   state.earnCreditsIsVisible = false
 }
 const toggleEarnCreditsIsVisible = () => {
   const value = !state.earnCreditsIsVisible
-  closeDialogs()
+  store.commit('triggerCloseChildDialogs')
   state.earnCreditsIsVisible = value
 }
 const toggleStudentInfoIsVisible = () => {
   const value = !state.studentInfoIsVisible
-  closeDialogs()
+  store.commit('triggerCloseChildDialogs')
   state.studentInfoIsVisible = value
 }
 </script>
 
 <template lang="pug">
-.row.discount-row(v-if="!isSecureAppContextIOS" @click.stop="closeDialogs")
+.row.discount-row(v-if="!isSecureAppContextIOS" @click.stop="closeChildDialogs")
   .button-wrap
     button(@click.stop="toggleEarnCreditsIsVisible" :class="{ active: state.earnCreditsIsVisible }")
       span Earn Credits
