@@ -192,6 +192,7 @@ export default {
           if (!this.isUpdated) { return }
           this.isUpdated = false
           const box = this.$store.getters['currentBoxes/byId'](prevBoxId)
+          this.$store.dispatch('currentBoxes/updateInfoDimensions', {})
           if (!box) { return }
           this.$store.dispatch('history/add', { boxes: [box], useSnapshot: true })
         }

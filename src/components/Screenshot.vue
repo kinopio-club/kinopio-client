@@ -19,7 +19,9 @@ onMounted(() => {
   store.subscribe((mutation, state) => {
     if (mutation.type === 'isLoadingSpace' && !mutation.payload) {
       setTimeout(() => {
-        update()
+        store.dispatch('currentCards/updateDimensions', {})
+        store.dispatch('currentBoxes/updateInfoDimensions', {})
+        create()
       }, 500)
     }
   })
@@ -37,7 +39,7 @@ const css = computed(() => {
   }
 })
 
-const update = async () => {
+const create = async () => {
   console.time('👩‍🎨 space screenshot')
   initCanvas()
   await drawBackground()
@@ -45,7 +47,7 @@ const update = async () => {
   await drawBoxes()
   await drawConnections()
   await drawCards()
-  // TODO await drawLines()
+  // TODO FUTURE await drawLines()
   // TODO https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/save
   console.timeEnd('👩‍🎨 space screenshot')
 }
@@ -124,12 +126,10 @@ const drawBoxes = async () => {
   }
 }
 const drawBoxInfo = async (box) => {
-  const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
-  const DOMRect = element.getBoundingClientRect()
   const entityRadius = css.value.entityRadius
-  const radii = [entityRadius, entityRadius, entityRadius, 0] // top-left, top-right, bottom-right, bottom-left
+  const radii = [entityRadius, 0, entityRadius, 0] // top-left, top-right, bottom-right, bottom-left
   let rect = new Path2D()
-  rect.roundRect(box.x, box.y, Math.round(DOMRect.width + 4), Math.round(DOMRect.height), radii)
+  rect.roundRect(box.x, box.y, box.infoWidth, box.infoHeight, radii)
   context.fillStyle = box.color
   context.fill(rect)
 }
