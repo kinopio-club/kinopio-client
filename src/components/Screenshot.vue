@@ -12,16 +12,16 @@ const height = 1350
 
 const element = ref(null)
 
-// TODO move to SERVER, triggered on space load by member, and space unload by member (debounce n mins)
-// save reference vars cards: id, height , width . on space load, on space leave
-// save reference vars boxes: boxInfoWidth, boxInfoHeight
+// TODO move to SERVER, triggered on space LOAD by member, and space UNLOAD by member , space CHANGE/LEAVE by member
+
+// manual-debounce , 10min block out per space id. (handles scenario where n members leave space at the same time, overloading the screenshot func)
+// in memory store/array var, prunced to last n records
+
 onMounted(() => {
   store.subscribe((mutation, state) => {
     if (mutation.type === 'isLoadingSpace' && !mutation.payload) {
       setTimeout(() => {
-        store.dispatch('currentCards/updateDimensions', {})
-        store.dispatch('currentBoxes/updateInfoDimensions', {})
-        create()
+        temp()
       }, 500)
     }
   })
@@ -33,11 +33,18 @@ const connections = computed(() => store.getters['currentConnections/all'])
 const css = computed(() => {
   // from kinopio-client: themes.js
   return {
-    secondaryBackground: utils.cssVariable('secondary-background'),
-    entityRadius: parseInt(utils.cssVariable('entity-radius')),
-    primaryBorder: utils.cssVariable('primary-border')
+    secondaryBackground: '#e3e3e3',
+    entityRadius: 6,
+    primaryBorder: 'rgba(0,0,0,0.3)'
   }
 })
+
+const temp = async () => {
+  const spaceId = store.state.currentSpace.id
+  const url = await store.dispatch('api/createSpaceScreenshot', spaceId)
+  console.log('🌷🌷🌷🌷', url)
+  create()
+}
 
 const create = async () => {
   console.time('👩‍🎨 space screenshot')
@@ -49,6 +56,8 @@ const create = async () => {
   await drawCards()
   // TODO FUTURE await drawLines()
   // TODO https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/save
+  // resize
+  // save to s3
   console.timeEnd('👩‍🎨 space screenshot')
 }
 const initCanvas = () => {
