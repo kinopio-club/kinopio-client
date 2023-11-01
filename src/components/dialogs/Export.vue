@@ -101,7 +101,9 @@ export default {
       }
     },
     downloadLocalJSON () {
-      const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.currentSpace))
+      let currentSpace = utils.clone(this.currentSpace)
+      delete currentSpace.clients
+      const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(currentSpace))
       const fileName = this.fileName()
       const downloadAnchor = document.getElementById('export-downlaod-anchor')
       downloadAnchor.setAttribute('href', json)
