@@ -150,10 +150,12 @@ const drawCards = async () => {
   }
 }
 const cardImageUrl = (card) => {
-  const imageUrlIsUrlPreview = card.urlPreviewImage && card.urlPreviewIsVisible
+  // url preview image
+  const imageUrlIsUrlPreview = card.urlPreviewImage && card.urlPreviewIsVisible && !card.shouldHideUrlPreviewImage
   if (imageUrlIsUrlPreview) {
     return card.urlPreviewImage
   }
+  // image url in card name
   const urls = utils.urlsFromString(card.name)
   if (urls) {
     return urls.find(url => utils.urlIsImage(url))
