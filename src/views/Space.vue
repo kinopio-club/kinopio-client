@@ -50,7 +50,7 @@ import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 
 let prevCursor, endCursor, shouldCancel
-let processQueueIntervalTimer
+let processQueueIntervalTimer, updateJournalDailyPromptTimer
 
 export default {
   name: 'Space',
@@ -111,6 +111,10 @@ export default {
     processQueueIntervalTimer = setInterval(() => {
       this.$store.dispatch('api/processQueueOperations')
     }, 5000)
+    // update journal daily prompt every hour
+    updateJournalDailyPromptTimer = setInterval(() => {
+      this.$store.dispatch('currentUser/updateJournalDailyPrompt')
+    }, 1000 * 60 * 60 * 1) // 1 hour
   },
   beforeUnmount () {
     window.removeEventListener('mousemove', this.interact)
@@ -124,6 +128,7 @@ export default {
     window.removeEventListener('message', this.addCardFromOutsideAppContext)
     window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
     clearInterval(processQueueIntervalTimer)
+    clearInterval(updateJournalDailyPromptTimer)
   },
   data () {
     return {

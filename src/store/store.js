@@ -251,7 +251,11 @@ const store = createStore({
 
     codeLanguagePickerIsVisible: false,
     codeLanguagePickerPosition: {}, // x, y
-    codeLanguagePickerCardId: ''
+    codeLanguagePickerCardId: '',
+
+    // space background
+    spaceBackgroundUrl: '',
+    spaceBackgroundSize: null // { width, height }
   },
   mutations: {
     resetPageSizes: (state) => {
@@ -1492,6 +1496,17 @@ const store = createStore({
     codeLanguagePickerCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.codeLanguagePickerCardId = cardId
+    },
+
+    // Space Background
+
+    spaceBackgroundUrl: (state, imageUrl) => {
+      utils.typeCheck({ value: imageUrl, type: 'string' })
+      state.spaceBackgroundUrl = imageUrl
+    },
+    spaceBackgroundSize: (state, value) => {
+      utils.typeCheck({ value, type: 'object', allowUndefined: true })
+      state.spaceBackgroundSize = value
     }
 
   },

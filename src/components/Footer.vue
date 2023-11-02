@@ -51,6 +51,7 @@ export default {
       }
     })
     window.addEventListener('scroll', this.updatePosition)
+    window.addEventListener('resize', this.updatePosition)
     this.$nextTick(() => {
       this.updatePosition()
     })

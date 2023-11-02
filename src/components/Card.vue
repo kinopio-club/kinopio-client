@@ -462,6 +462,9 @@ export default {
       return isLocked
     },
     shouldJiggle () {
+      const max = 500
+      const cardIsTooBig = this.width > max || this.card.height > max
+      if (cardIsTooBig) { return }
       const isMultipleItemsSelected = this.$store.getters.isMultipleItemsSelected
       const isShiftKeyDown = this.currentUserIsBoxSelecting
       if (isMultipleItemsSelected || isShiftKeyDown) { return }
@@ -1097,6 +1100,7 @@ export default {
       if (!card) { return }
       this.$store.commit('currentCards/update', card)
       this.$store.dispatch('currentCards/updateTallestCardHeight', card)
+      this.$store.dispatch('api/addToQueue', { name: 'updateCard', body: card })
     },
     correctPaths () {
       if (this.pathIsUpdated) { return }

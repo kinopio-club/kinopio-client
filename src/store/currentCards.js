@@ -388,6 +388,7 @@ const currentCards = {
           context.commit('update', body)
           context.dispatch('updateTallestCardHeight', card)
           if (!dimensionsChanged) { return }
+          context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
         })

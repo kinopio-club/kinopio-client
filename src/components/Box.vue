@@ -86,6 +86,10 @@ export default {
   props: {
     box: Object
   },
+  mounted () {
+    const element = document.querySelector(`.box-info[data-box-id="${this.box.id}"]`)
+    const DOMRect = element.getBoundingClientRect()
+  },
   data () {
     return {
       isHover: false,

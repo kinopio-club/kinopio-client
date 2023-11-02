@@ -23,6 +23,7 @@ export default {
   isSecureAppContextIOS: navigator.isSecureAppContextIOS, // true = iOS app
   isSecureAppContext: navigator.isSecureAppContext, // true = iOS app
   cdnHost: 'https://cdn.kinopio.club',
+  defaultBackground: 'https://bk.kinopio.club/default-background-2x.png',
   kinopioDomain () {
     let domain = 'https://kinopio.club'
     if (this.isDevelopment) {
