@@ -873,6 +873,7 @@ const currentSpace = {
     },
     changeSpace: async (context, space) => {
       context.commit('prevSpaceIdInSession', context.state.id, { root: true })
+      context.dispatch('createScreenshot') // screenshots prev space
       console.log('🚟 Change space', space)
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('notifySpaceNotFound', false, { root: true })
