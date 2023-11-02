@@ -89,8 +89,6 @@ export default {
   mounted () {
     const element = document.querySelector(`.box-info[data-box-id="${this.box.id}"]`)
     const DOMRect = element.getBoundingClientRect()
-    console.log('🍇box', this.box.id, this.box.infoWidth, DOMRect.width)
-    // operation updateBox  w width
   },
   data () {
     return {
