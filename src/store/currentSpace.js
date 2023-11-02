@@ -189,7 +189,7 @@ const currentSpace = {
         context.dispatch('currentBoxes/updateInfoDimensions', {}, { root: true })
         console.log('🙈 create screenshot')
         const response = await context.dispatch('api/createSpaceScreenshot', context.state.id, { root: true })
-        console.log('🙈 updated screenshot', response)
+        console.log('🙈 updated screenshot', response.urls)
       } catch (error) {
         console.warn('🚑 createScreenshot', error)
       }
