@@ -181,6 +181,19 @@ const currentSpace = {
       context.commit('triggerUpdateWindowHistory', null, { root: true })
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
+    createScreenshot: async (context) => {
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      if (!canEditSpace) { return }
+      try {
+        context.dispatch('currentCards/updateDimensions', {}, { root: true })
+        context.dispatch('currentBoxes/updateInfoDimensions', {}, { root: true })
+        console.log('🙈 create screenshot')
+        const response = await context.dispatch('api/createSpaceScreenshot', context.state.id, { root: true })
+        console.log('🙈 updated screenshot', response)
+      } catch (error) {
+        console.warn('🚑 createScreenshot', error)
+      }
+    },
 
     // Users
 
@@ -745,6 +758,9 @@ const currentSpace = {
         })
       })
       context.commit('isLoadingSpace', false, { root: true })
+      setTimeout(() => {
+        context.dispatch('createScreenshot')
+      }, 2000)
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
       if (!context.rootState.isEmbedMode) {

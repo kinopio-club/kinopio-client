@@ -518,8 +518,6 @@ const self = {
       }
     },
     createSpaceScreenshot: async (context, spaceId) => {
-      context.dispatch('currentCards/updateDimensions', {}, { root: true })
-      context.dispatch('currentBoxes/updateInfoDimensions', {}, { root: true })
       try {
         spaceId = spaceId || context.rootState.currentSpace.id
         const body = { spaceId }
@@ -527,7 +525,7 @@ const self = {
         const response = await fetch(`${host}/space/screenshot`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createSpace', error })
+        context.dispatch('handleServerError', { name: 'createSpace', error, shouldNotNotifyUser: false })
       }
     },
     updateSpace: async (context, space) => {
