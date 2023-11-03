@@ -266,7 +266,8 @@ const remotePendingUpload = computed(() => {
 // tint
 
 const backgroundTintBadgeColor = computed(() => {
-  if (!state.backgroundTint || state.backgroundTint === '#fff' || state.backgroundTint === '#000') {
+  const emptyColors = ['#fff', '#000', 'rgb(0, 0, 0)', 'rgb(255, 255, 255)']
+  if (!state.backgroundTint || emptyColors.includes(state.backgroundTint)) {
     return state.defaultColor
   }
   return state.backgroundTint
