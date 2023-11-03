@@ -17,6 +17,8 @@ import qs from '@aguezz/qs-parse'
 import namesPlugin from 'colord/plugins/names'
 import getCurvePoints from '@/libs/curve_calc.js'
 import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
+import random from 'lodash-es/random'
+import randomColor from 'randomcolor'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
@@ -27,6 +29,11 @@ dayjs.extend(relativeTime)
 extend([namesPlugin]) // colord
 
 const uuidLength = 21
+const randomRGBA = (alpha) => {
+  const hex = randomColor({ hue: 'random', luminosity: 'random' })
+  const rgba = colord(hex).alpha(alpha).toRgbString()
+  return rgba
+}
 
 export default {
   loadImage (src) {
@@ -2316,5 +2323,27 @@ export default {
     if (!language) { return }
     newString = string.replace(match[0], '')
     return { language, newString }
+  },
+
+  // Background Gradient
+
+  backgroundGradientLayers () {
+    let layers = []
+    const numberOfLayers = 6
+    times(numberOfLayers, function (index) {
+      let layer = {
+        x: random(140),
+        y: random(140),
+        color1: randomRGBA(1),
+        color2: randomRGBA(0)
+      }
+      layers.push(layer)
+    })
+    const backgroundLayer = {
+      color: randomRGBA(1)
+    }
+    layers.push(backgroundLayer)
+    console.log('🐸 background gradient layers', layers)
+    return layers
   }
 }

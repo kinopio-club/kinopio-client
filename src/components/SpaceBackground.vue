@@ -132,10 +132,16 @@ const updateBackgroundSize = () => {
   store.commit('spaceBackgroundSize', { width, height })
 }
 
+// Background Gradient
+
+const layers = computed(() => {
+  const layers = utils.backgroundGradientLayers()
+  return layers
+})
 </script>
 
 <template lang="pug">
-SpaceBackgroundGradients(:visible="true")
+SpaceBackgroundGradients(:visible="true" :layers="layers" :backgroundStyles="backgroundStyles")
 //- .space-background-image(:style="backgroundStyles")
 .space-background-tint(v-if="visible" :style="{ background: backgroundTint }")
 </template>
