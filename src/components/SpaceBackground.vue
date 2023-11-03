@@ -2,8 +2,9 @@
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
+import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
+import utils from '@/utils.js'
 import postMessage from '@/postMessage.js'
 
 import { colord, extend } from 'colord'
@@ -134,7 +135,8 @@ const updateBackgroundSize = () => {
 </script>
 
 <template lang="pug">
-.space-background-image(:style="backgroundStyles")
+SpaceBackgroundGradients(:visible="true")
+//- .space-background-image(:style="backgroundStyles")
 .space-background-tint(v-if="visible" :style="{ background: backgroundTint }")
 </template>
 
