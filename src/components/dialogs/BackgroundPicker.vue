@@ -10,8 +10,8 @@ import ImageList from '@/components/ImageList.vue'
 import backgroundImagesJSON from '@/data/backgroundImages.json'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
-import sample from 'lodash-es/sample'
 
+import sample from 'lodash-es/sample'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 
@@ -86,182 +86,24 @@ const state = reactive({
   service: 'background' // background, recent, pexels
 })
 
-const searchInput = computed({
-  get () {
-    return state.search
-  },
-  set (newValue) {
-    state.search = newValue
-    if (newValue) {
-      searchService()
-    }
-  }
-})
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const currentSpace = computed(() => store.state.currentSpace)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const currentUser = computed(() => store.state.currentUser)
-const background = computed({
-  get () {
-    return currentSpace.value.background || consts.defaultBackground
-  },
-  set (url) {
-    updateSpaceBackground(url)
-  }
-})
-const pendingUpload = computed(() => {
-  const pendingUploads = store.state.upload.pendingUploads
-  return pendingUploads.find(upload => {
-    const isCurrentSpace = upload.spaceId === currentSpace.value.id
-    const isInProgress = upload.percentComplete < 100
-    return isCurrentSpace && isInProgress
-  })
-})
 
-const remotePendingUpload = computed(() => {
-  const currentSpace = store.state.currentSpace
-  let remotePendingUploads = store.state.remotePendingUploads
-  return remotePendingUploads.find(upload => {
-    const isInProgress = upload.percentComplete < 100
-    const isSpace = upload.spaceId === currentSpace.id
-    return isInProgress && isSpace
-  })
-})
-
-const backgroundTintBadgeColor = computed(() => {
-  if (!state.backgroundTint || state.backgroundTint === '#fff' || state.backgroundTint === '#000') {
-    return state.defaultColor
-  }
-  return state.backgroundTint
-})
-const serviceIsPexels = computed(() => state.service === 'pexels')
-const serviceIsRecent = computed(() => state.service === 'recent')
-const serviceIsBackground = computed(() => state.service === 'background')
-
-const backgroundImages = computed(() => {
-  let images = backgroundImagesJSON
-  images = images.filter(image => !image.isArchived)
-  return images
-})
-
-const isSpaceUrl = (image) => {
-  return image.url === background.value
-}
-const focusAndSelectSearchInput = async () => {
-  await nextTick()
-  if (utils.isMobile()) { return }
-  const element = searchInputElement.value
-  if (!element) { return }
-  element.focus()
-  const length = element.value.length
-  if (!length) { return }
-  element.setSelectionRange(0, length)
-}
-const updateService = (service) => {
-  state.service = service
-  if (service === 'background') {
-    state.selectedImages = backgroundImages.value
-  } else if (service === 'recent') {
-    const images = recentImagesFromCacheSpaces()
-    state.selectedImages = images
-  } else if (service === 'pexels') {
-    searchPexels()
-    focusAndSelectSearchInput()
-  }
-}
-
-const searchPexels = async () => {
-  state.searchIsLoading = true
-  state.error.isNoSearchResults = false
-  state.error.unknownServerError = false
-  try {
-    let url = new URL('https://api.pexels.com/v1/search')
-    const headers = new Headers({
-      'Authorization': consts.pexelsApiKey
-    })
-    const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
-    const defaultSearch = sample(defaultSearches)
-    let params = { query: state.search || defaultSearch }
-    url.search = new URLSearchParams(params).toString()
-    const response = await fetch(url, { method: 'GET', headers })
-    const data = await response.json()
-    state.images = data.photos.map(image => {
-      return {
-        id: image.id,
-        previewUrl: image.src.tiny,
-        url: image.src.large2x
-      }
-    })
-    if (!state.images.length) {
-      state.error.isNoSearchResults = true
-    }
-  } catch (error) {
-    console.error('🚒 searchService', error)
-    state.error.unknownServerError = true
-  }
-  state.searchIsLoading = false
-}
-const searchService = debounce(searchPexels, 350)
-
-const recentImagesFromCacheSpaces = () => {
-  let spaces = cache.getAllSpaces()
-  let images = []
-  spaces.forEach(space => {
-    if (!space.background) { return }
-    images.push(space.background)
-  })
-  images = uniq(images)
-  images = images.map(image => {
-    const backgroundImage = backgroundImages.value.find(item => item.url === image)
-    if (backgroundImage) {
-      return backgroundImage
-    }
-    return { url: image }
-  })
-  images = images.filter(image => Boolean(image))
-  const max = 30
-  images = images.slice(0, max)
-  return images
-}
+// dialog
 
 const toggleColorPicker = () => {
   const isVisible = state.colorPickerIsVisible
   closeDialogs()
   state.colorPickerIsVisible = !isVisible
 }
-
 const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
 }
 const closeDialogs = async () => {
   state.colorPickerIsVisible = false
-}
-
-const removeBackgroundAll = async () => {
-  removeBackground()
-  removeBackgroundTint()
-}
-const removeBackground = async () => {
-  updateSpaceBackground('')
-  closeDialogs()
-}
-const updateSpaceBackground = (url) => {
-  url = url.url || url
-  store.dispatch('currentSpace/updateSpace', { background: url })
-  store.commit('triggerUpdateBackground')
-  updatePageSizes()
-}
-const removeBackgroundTint = async () => {
-  updateBackgroundTint('')
-  closeDialogs()
-  emit('updateSpaces')
-}
-const updateBackgroundTint = (value) => {
-  state.backgroundTint = value
-  store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
-  updatePageSizes()
-  emit('updateSpaces')
 }
 const updatePageSizes = async () => {
   await nextTick()
@@ -274,6 +116,44 @@ const clearErrors = () => {
   state.error.sizeLimit = false
   state.error.unknownUploadError = false
 }
+const clearSearch = async () => {
+  state.search = ''
+  state.searchIsLoading = false
+  state.images = []
+}
+
+// input
+
+const searchInput = computed({
+  get () {
+    return state.search
+  },
+  set (newValue) {
+    state.search = newValue
+    if (newValue) {
+      searchService()
+    }
+  }
+})
+const focusAndSelectSearchInput = async () => {
+  await nextTick()
+  if (utils.isMobile()) { return }
+  const element = searchInputElement.value
+  if (!element) { return }
+  element.focus()
+  const length = element.value.length
+  if (!length) { return }
+  element.setSelectionRange(0, length)
+}
+const resetPinchCounterZoomDecimal = () => {
+  store.commit('pinchCounterZoomDecimal', 1)
+}
+
+// background images
+
+const isCurrentSpaceBackground = (image) => {
+  return image.url === background.value
+}
 const checkIfImageIsUrl = () => {
   const url = background.value
   if (!url) {
@@ -284,6 +164,52 @@ const checkIfImageIsUrl = () => {
     state.error.isNotImageUrl = true
   }
 }
+const background = computed({
+  get () {
+    return currentSpace.value.background || consts.defaultBackground
+  },
+  set (url) {
+    updateSpaceBackground(url)
+  }
+})
+const backgroundImages = computed(() => {
+  let images = backgroundImagesJSON
+  images = images.filter(image => !image.isArchived)
+  return images
+})
+const updateSpaceBackground = (url) => {
+  url = url.url || url
+  store.dispatch('currentSpace/updateSpace', { background: url })
+  store.commit('triggerUpdateBackground')
+  updatePageSizes()
+}
+const removeBackgroundAll = async () => {
+  removeBackground()
+  removeBackgroundTint()
+}
+const removeBackground = async () => {
+  updateSpaceBackground('')
+  closeDialogs()
+}
+const updateCommunityBackgroundImages = async () => {
+  state.communityBackgroundsIsLoading = true
+  if (state.communityBackgroundImages.length) {
+    state.communityBackgroundsIsLoading = false
+    return
+  }
+  let images = await store.dispatch('api/communityBackgrounds')
+  images = images.map(image => {
+    return {
+      url: image.original,
+      thumbnailUrl: image.thumb,
+      previewUrl: image.preview
+    }
+  })
+  state.communityBackgroundImages = images
+  state.communityBackgroundsIsLoading = false
+}
+
+// upload
 
 const selectFile = (event) => {
   if (!currentUserIsSignedIn.value) {
@@ -319,31 +245,120 @@ const uploadFile = async () => {
     }
   }
 }
-const clearSearch = async () => {
-  state.search = ''
-  state.searchIsLoading = false
-  state.images = []
-}
-const resetPinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', 1)
-}
-const updateCommunityBackgroundImages = async () => {
-  state.communityBackgroundsIsLoading = true
-  if (state.communityBackgroundImages.length) {
-    state.communityBackgroundsIsLoading = false
-    return
-  }
-  let images = await store.dispatch('api/communityBackgrounds')
-  images = images.map(image => {
-    return {
-      url: image.original,
-      thumbnailUrl: image.thumb,
-      previewUrl: image.preview
-    }
+const pendingUpload = computed(() => {
+  const pendingUploads = store.state.upload.pendingUploads
+  return pendingUploads.find(upload => {
+    const isCurrentSpace = upload.spaceId === currentSpace.value.id
+    const isInProgress = upload.percentComplete < 100
+    return isCurrentSpace && isInProgress
   })
-  state.communityBackgroundImages = images
-  state.communityBackgroundsIsLoading = false
+})
+const remotePendingUpload = computed(() => {
+  const currentSpace = store.state.currentSpace
+  let remotePendingUploads = store.state.remotePendingUploads
+  return remotePendingUploads.find(upload => {
+    const isInProgress = upload.percentComplete < 100
+    const isSpace = upload.spaceId === currentSpace.id
+    return isInProgress && isSpace
+  })
+})
+
+// tint
+
+const backgroundTintBadgeColor = computed(() => {
+  if (!state.backgroundTint || state.backgroundTint === '#fff' || state.backgroundTint === '#000') {
+    return state.defaultColor
+  }
+  return state.backgroundTint
+})
+const updateBackgroundTint = (value) => {
+  state.backgroundTint = value
+  store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
+  updatePageSizes()
+  emit('updateSpaces')
 }
+const removeBackgroundTint = async () => {
+  updateBackgroundTint('')
+  closeDialogs()
+  emit('updateSpaces')
+}
+
+// recent
+
+const recentImagesFromCacheSpaces = () => {
+  let spaces = cache.getAllSpaces()
+  let images = []
+  spaces.forEach(space => {
+    if (!space.background) { return }
+    images.push(space.background)
+  })
+  images = uniq(images)
+  images = images.map(image => {
+    const backgroundImage = backgroundImages.value.find(item => item.url === image)
+    if (backgroundImage) {
+      return backgroundImage
+    }
+    return { url: image }
+  })
+  images = images.filter(image => Boolean(image))
+  const max = 30
+  images = images.slice(0, max)
+  return images
+}
+
+// services
+
+const serviceIsPexels = computed(() => state.service === 'pexels')
+const serviceIsRecent = computed(() => state.service === 'recent')
+const serviceIsBackground = computed(() => state.service === 'background')
+const updateService = (service) => {
+  state.service = service
+  if (service === 'background') {
+    state.selectedImages = backgroundImages.value
+  } else if (service === 'recent') {
+    const images = recentImagesFromCacheSpaces()
+    state.selectedImages = images
+  } else if (service === 'pexels') {
+    searchPexels()
+    focusAndSelectSearchInput()
+  }
+}
+
+// pexels
+
+const searchPexels = async () => {
+  state.searchIsLoading = true
+  state.error.isNoSearchResults = false
+  state.error.unknownServerError = false
+  try {
+    let url = new URL('https://api.pexels.com/v1/search')
+    const headers = new Headers({
+      'Authorization': consts.pexelsApiKey
+    })
+    const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
+    const defaultSearch = sample(defaultSearches)
+    let params = { query: state.search || defaultSearch }
+    url.search = new URLSearchParams(params).toString()
+    const response = await fetch(url, { method: 'GET', headers })
+    const data = await response.json()
+    state.images = data.photos.map(image => {
+      return {
+        id: image.id,
+        previewUrl: image.src.tiny,
+        url: image.src.large2x
+      }
+    })
+    if (!state.images.length) {
+      state.error.isNoSearchResults = true
+    }
+  } catch (error) {
+    console.error('🚒 searchService', error)
+    state.error.unknownServerError = true
+  }
+  state.searchIsLoading = false
+}
+const searchService = debounce(searchPexels, 350)
+
 </script>
 
 <template lang="pug">
@@ -478,7 +493,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
           .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
         ul.results-list.image-list
           template(v-for="image in state.images" :key="image.id")
-            li(@click.left="updateSpaceBackground(image.url)" tabindex="0" v-on:keydown.enter="updateSpaceBackground(image.url)" :class="{ active: isSpaceUrl(image)}")
+            li(@click.left="updateSpaceBackground(image.url)" tabindex="0" v-on:keydown.enter="updateSpaceBackground(image.url)" :class="{ active: isCurrentSpaceBackground(image)}")
               img(:src="image.previewUrl")
               a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
                 button.small-button
