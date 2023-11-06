@@ -1,3 +1,47 @@
+<script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import backgroundImages from '@/data/backgroundImages.json'
+import utils from '@/utils.js'
+const store = useStore()
+
+const props = defineProps({
+  isButton: Boolean,
+  buttonIsActive: Boolean,
+  space: Object
+})
+
+const backgroundTintStyles = computed(() => {
+  const color = props.space.backgroundTint
+  if (color) {
+    return {
+      background: color
+    }
+  } else {
+    return {}
+  }
+})
+const backgroundStyles = computed(() => {
+  const defaultBackgroundThumbnail = 'https://bk.kinopio.club/background-thumbnail.svg'
+  let background = props.space.background
+  const backgroundImage = backgroundImages.find(image => {
+    const isImage = image.url === background
+    const hasThumbnailUrl = image.thumbnailUrl
+    return isImage && hasThumbnailUrl
+  })
+  if (backgroundImage) {
+    background = backgroundImage.thumbnailUrl || background
+  }
+  if (!utils.urlIsImage(background)) {
+    background = defaultBackgroundThumbnail
+  }
+  return {
+    backgroundImage: `url(${background})`
+  }
+})
+</script>
+
 <template lang="pug">
 .background-preview
   //- button
@@ -9,50 +53,6 @@
     .background-tint(:style="backgroundTintStyles")
     .background-image(:style="backgroundStyles")
 </template>
-
-<script>
-import backgroundImages from '@/data/backgroundImages.json'
-import utils from '@/utils.js'
-
-export default {
-  name: 'BackgroundPreview',
-  props: {
-    isButton: Boolean,
-    buttonIsActive: Boolean,
-    space: Object
-  },
-  computed: {
-    backgroundTintStyles () {
-      const color = this.space.backgroundTint
-      if (color) {
-        return {
-          background: color
-        }
-      } else {
-        return {}
-      }
-    },
-    backgroundStyles () {
-      const defaultBackgroundThumbnail = 'https://bk.kinopio.club/background-thumbnail.svg'
-      let background = this.space.background
-      const backgroundImage = backgroundImages.find(image => {
-        const isImage = image.url === background
-        const hasThumbnailUrl = image.thumbnailUrl
-        return isImage && hasThumbnailUrl
-      })
-      if (backgroundImage) {
-        background = backgroundImage.thumbnailUrl || background
-      }
-      if (!utils.urlIsImage(background)) {
-        background = defaultBackgroundThumbnail
-      }
-      return {
-        backgroundImage: `url(${background})`
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .background-preview
@@ -108,5 +108,4 @@ export default {
     width 28px
     background-size cover
     background-position center
-
 </style>
