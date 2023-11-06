@@ -1155,11 +1155,14 @@ export default {
     })
     return { addItems, updateItems, removeItems }
   },
-  spaceDefaultBackground (space, currentUser) {
+  newSpaceBackground (space, currentUser) {
     const background = currentUser.defaultSpaceBackground
     const backgroundTint = currentUser.defaultSpaceBackgroundTint
     if (background) {
       space.background = background
+    } else {
+      space.backgroundIsGradient = true
+      space.backgroundGradient = this.backgroundGradientLayers()
     }
     if (backgroundTint) {
       space.backgroundTint = backgroundTint
@@ -1387,7 +1390,7 @@ export default {
     space.isHidden = false
     space.isFromTweet = false
     space.collaboratorKey = nanoid()
-    space = this.spaceDefaultBackground(space, currentUser)
+    space = this.newSpaceBackground(space, currentUser)
     // summary
     space.cards.push({ id: nanoid(), name: summary, x: 80, y: 110, frameId: 0 })
     // daily prompt

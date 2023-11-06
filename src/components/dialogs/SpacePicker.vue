@@ -207,7 +207,7 @@ export default {
       space.cards = []
       space.connections = []
       space.connectionTypes = []
-      space = utils.spaceDefaultBackground(space, currentUser)
+      space = utils.newSpaceBackground(space, currentUser)
       space = cache.updateIdsInSpace(space)
       console.log('🚚 create new space', space)
       if (this.currentUserIsSignedIn) {

@@ -10,6 +10,8 @@
   "clients": [],
   "background": "https://bk.kinopio.club/blank.png",
   "backgroundTint": "#223c2f",
+  "backgroundGradient": null,
+  "backgroundIsGradient": false,
   "moonPhase": "",
   "isTemplate": false,
   "cards": [
