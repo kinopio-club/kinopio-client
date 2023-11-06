@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, ne
 import { useStore } from 'vuex'
 
 import backgroundImages from '@/data/backgroundImages.json'
+import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
@@ -12,6 +13,7 @@ const props = defineProps({
   space: Object
 })
 
+const currentSpace = computed(() => store.state.currentSpace)
 const backgroundTintStyles = computed(() => {
   const color = props.space.backgroundTint
   if (color) {
@@ -23,6 +25,7 @@ const backgroundTintStyles = computed(() => {
   }
 })
 const backgroundStyles = computed(() => {
+  if (currentSpace.value.backgroundIsGradient) { return }
   const defaultBackgroundThumbnail = 'https://bk.kinopio.club/background-thumbnail.svg'
   let background = props.space.background
   const backgroundImage = backgroundImages.find(image => {
@@ -48,10 +51,12 @@ const backgroundStyles = computed(() => {
   .preview-button(v-if="isButton")
     .background-tint(:style="backgroundTintStyles")
     button.background-button.fixed-height(:style="backgroundStyles" :class="{ active: buttonIsActive }")
+      SpaceBackgroundGradients(:visible="currentSpace.backgroundIsGradient" :layers="currentSpace.backgroundGradient")
   //- thumbnail
   .preview-wrap(v-else)
     .background-tint(:style="backgroundTintStyles")
     .background-image(:style="backgroundStyles")
+    SpaceBackgroundGradients(:visible="currentSpace.backgroundIsGradient" :layers="currentSpace.backgroundGradient")
 </template>
 
 <style lang="stylus">
@@ -76,6 +81,7 @@ const backgroundStyles = computed(() => {
     left 0
     mix-blend-mode multiply
     border-radius calc(var(--entity-radius) + 1)
+    z-index 1
   .background-image
     height 100%
     width 100%
@@ -108,4 +114,7 @@ const backgroundStyles = computed(() => {
     width 28px
     background-size cover
     background-position center
+    .space-background-gradients
+      top 0
+      left 0
 </style>
