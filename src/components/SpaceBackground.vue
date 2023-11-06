@@ -30,7 +30,8 @@ const isSpacePage = computed(() => {
   return isSpace
 })
 const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
-const backgroundIsDefault = computed(() => !store.state.currentSpace.background)
+const currentSpace = computed(() => store.state.currentSpace)
+const backgroundIsDefault = computed(() => !currentSpace.value.background)
 
 // Styles
 
@@ -54,7 +55,7 @@ const backgroundStyles = computed(() => {
 
 const kinopioBackgroundImageData = computed(() => {
   const data = backgroundImages.find(image => {
-    const background = store.state.currentSpace.background
+    const background = currentSpace.value.background
     if (!background) {
       return image.isDefault
     }
@@ -72,7 +73,7 @@ const backgroundUrl = computed(() => {
   } else if (data) {
     url = data.url
   } else {
-    url = store.state.currentSpace.background
+    url = currentSpace.value.background
   }
   return url
 })
@@ -80,7 +81,7 @@ const backgroundUrl = computed(() => {
 // Tint
 
 const backgroundTint = computed(() => {
-  let color = store.state.currentSpace.backgroundTint || 'white'
+  let color = currentSpace.value.backgroundTint || 'white'
   let darkness = 0
   if (shouldDarkenTint.value) {
     darkness = 0.5
@@ -95,6 +96,9 @@ const spaceBackgroundTintIsDark = computed(() => utils.colorIsDark(backgroundTin
 // Update State
 
 const updateBackground = async () => {
+  if (currentSpace.value.backgroundIsGradient) {
+    return
+  }
   const background = backgroundUrl.value
   if (!utils.urlIsImage(background)) {
     updateBackgroundSize()
@@ -134,16 +138,18 @@ const updateBackgroundSize = () => {
 
 // Background Gradient
 
-const layers = computed(() => {
-  const layers = utils.backgroundGradientLayers()
-  console.log('🐸 background gradient layers', layers) // space.backgroundGradient JSON, space.backgroundIsGradient BOOL
+const gradientLayers = computed(() => {
+  if (!currentSpace.value.backgroundIsGradient) { return }
+  const layers = currentSpace.value.backgroundGradient
   return layers
 })
 </script>
 
 <template lang="pug">
-SpaceBackgroundGradients(:visible="true" :layers="layers" :backgroundStyles="backgroundStyles")
-//- .space-background-image(:style="backgroundStyles")
+template(v-if="currentSpace.backgroundIsGradient")
+  SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :backgroundStyles="backgroundStyles")
+template(v-else)
+  .space-background-image(:style="backgroundStyles")
 .space-background-tint(v-if="visible" :style="{ background: backgroundTint }")
 </template>
 

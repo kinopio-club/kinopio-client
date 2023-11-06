@@ -16,6 +16,7 @@ import sample from 'lodash-es/sample'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 import times from 'lodash-es/times'
+import { nanoid } from 'nanoid'
 const store = useStore()
 
 const searchInputElement = ref(null)
@@ -158,16 +159,27 @@ const refreshGradients = () => {
   const numberOfGradients = 6
   let gradients = []
   times(numberOfGradients, (index) => {
-    const gradient = utils.backgroundGradientLayers()
+    let gradient = utils.backgroundGradientLayers()
+    gradient.id = nanoid()
     gradients.push(gradient)
   })
+  if (currentSpace.value.backgroundGradient) {
+    gradients[0] = currentSpace.value.backgroundGradient
+  }
   state.gradients = gradients
 }
 const selectGradient = (index) => {
-  console.log(index)
-  // (@click="selectGradient(gradient)")
-  // space.backgroundIsGradient = true
-  // space.backgroundGradient JSON array
+  const gradient = state.gradients[index]
+  const updates = {
+    backgroundIsGradient: true,
+    backgroundGradient: gradient
+  }
+  store.dispatch('currentSpace/updateSpace', updates)
+  store.commit('triggerUpdateBackground')
+  updatePageSizes()
+}
+const gradientIsActive = (gradient) => {
+  return currentSpace.value.backgroundGradient.id === gradient.id
 }
 
 // background images
@@ -200,7 +212,11 @@ const backgroundImages = computed(() => {
 })
 const updateSpaceBackground = (url) => {
   url = url.url || url
-  store.dispatch('currentSpace/updateSpace', { background: url })
+  const updates = {
+    backgroundIsGradient: false,
+    background: url
+  }
+  store.dispatch('currentSpace/updateSpace', updates)
   store.commit('triggerUpdateBackground')
   updatePageSizes()
 }
@@ -477,7 +493,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
       //- gradient backgrounds
       section.results-section.title-row
         ul.results-list.gradients-list
-          li.gradient-li(v-for="(gradient, index) in state.gradients" @click="selectGradient(index)")
+          li.gradient-li(v-for="(gradient, index) in state.gradients" @click="selectGradient(index)" :key="gradient.id" :class="{ active: gradientIsActive(gradient) }")
             SpaceBackgroundGradients(:visible="true" :layers="gradient")
         .right-side-button-wrap(@click="refreshGradients")
           button.small-button
