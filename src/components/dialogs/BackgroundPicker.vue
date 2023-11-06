@@ -8,13 +8,14 @@ import utils from '@/utils.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import ImageList from '@/components/ImageList.vue'
 import backgroundImagesJSON from '@/data/backgroundImages.json'
+import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
 
 import sample from 'lodash-es/sample'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
-
+import times from 'lodash-es/times'
 const store = useStore()
 
 const searchInputElement = ref(null)
@@ -26,7 +27,8 @@ const props = defineProps({
 const emit = defineEmits(['updateSpaces'])
 
 onMounted(() => {
-  state.defaultColor = utils.cssVariable('secondary-background')
+  refreshGradients()
+  updateDefaultColor()
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerUploadComplete') {
       let { spaceId, url, cardId } = mutation.payload
@@ -34,7 +36,7 @@ onMounted(() => {
       if (spaceId !== store.state.currentSpace.id) { return }
       updateSpaceBackground(url)
     } else if (mutation.type === 'triggerUpdateTheme') {
-      state.defaultColor = utils.cssVariable('secondary-background')
+      updateDefaultColor()
     }
   })
 })
@@ -83,6 +85,7 @@ const state = reactive({
   communityBackgroundsIsLoading: false,
   communityBackgroundImages: [],
   images: [],
+  gradients: [],
   service: 'background' // background, recent, pexels
 })
 
@@ -147,6 +150,24 @@ const focusAndSelectSearchInput = async () => {
 }
 const resetPinchCounterZoomDecimal = () => {
   store.commit('pinchCounterZoomDecimal', 1)
+}
+
+// background gradients
+
+const refreshGradients = () => {
+  const numberOfGradients = 6
+  let gradients = []
+  times(numberOfGradients, (index) => {
+    const gradient = utils.backgroundGradientLayers()
+    gradients.push(gradient)
+  })
+  state.gradients = gradients
+}
+const selectGradient = (index) => {
+  console.log(index)
+  // (@click="selectGradient(gradient)")
+  // space.backgroundIsGradient = true
+  // space.backgroundGradient JSON array
 }
 
 // background images
@@ -265,6 +286,9 @@ const remotePendingUpload = computed(() => {
 
 // tint
 
+const updateDefaultColor = () => {
+  state.defaultColor = utils.cssVariable('secondary-background')
+}
 const backgroundTintBadgeColor = computed(() => {
   const emptyColors = ['#fff', '#000', 'rgb(0, 0, 0)', 'rgb(255, 255, 255)']
   if (!state.backgroundTint || emptyColors.includes(state.backgroundTint)) {
@@ -450,14 +474,22 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
   template(v-if="canEditSpace")
     //- backgrounds
     template(v-if="serviceIsBackground")
+      //- gradient backgrounds
+      section.results-section.title-row
+        ul.results-list.gradients-list
+          li.gradient-li(v-for="(gradient, index) in state.gradients" @click="selectGradient(index)")
+            SpaceBackgroundGradients(:visible="true" :layers="gradient")
+        .right-side-button-wrap(@click="refreshGradients")
+          button.small-button
+            img.refresh.icon(src="@/assets/refresh.svg")
+      //- built-in backgrounds
       section.results-section
-        //- built in backgrounds
         ImageList(:images="state.selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
-        //- community backgrounds
+      //- community backgrounds
       section.results-section.community-backgrounds-section
         .row.title-row
           p.row-title Community Backgrounds
-          a.arena-link(target="_blank" href="https://www.are.na/kinopio/community-backgrounds")
+          a.right-side-button-wrap(target="_blank" href="https://www.are.na/kinopio/community-backgrounds")
             button.small-button
               img.icon.arena(src="@/assets/arena.svg")
         Loader(:visible="state.communityBackgroundsIsLoading")
@@ -580,6 +612,27 @@ dialog.background-picker
     margin-left 4px
   .community-backgrounds-section
     margin-top 10px
-  .arena-link
+  .right-side-button-wrap
+    pointer cursor
     padding-right 5px
+
+  .gradients-list
+    display flex
+    flex-wrap nowrap
+    align-items flex-start
+    li
+      width 40px
+      height 40px
+      position relative
+      padding 3px
+      padding-right 2px
+      padding-bottom 2px
+    .space-background-gradients
+      display block
+      top 3px
+      left 3px
+      width calc(100% - 6px)
+      height calc(100% - 6px)
+      border-radius var(--entity-radius)
+      pointer-events all
 </style>

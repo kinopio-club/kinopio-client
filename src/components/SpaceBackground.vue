@@ -136,6 +136,7 @@ const updateBackgroundSize = () => {
 
 const layers = computed(() => {
   const layers = utils.backgroundGradientLayers()
+  console.log('🐸 background gradient layers', layers) // space.backgroundGradient JSON, space.backgroundIsGradient BOOL
   return layers
 })
 </script>

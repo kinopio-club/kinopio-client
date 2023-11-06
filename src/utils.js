@@ -2343,7 +2343,6 @@ export default {
       color: randomRGBA(1)
     }
     layers.push(backgroundLayer)
-    console.log('🐸 background gradient layers', layers)
     return layers
   }
 }
