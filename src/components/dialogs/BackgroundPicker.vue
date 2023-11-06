@@ -179,6 +179,7 @@ const selectGradient = (index) => {
   updatePageSizes()
 }
 const gradientIsActive = (gradient) => {
+  if (!currentSpace.value.backgroundIsGradient) { return }
   return currentSpace.value.backgroundGradient.id === gradient.id
 }
 
@@ -204,6 +205,10 @@ const background = computed({
   set (url) {
     updateSpaceBackground(url)
   }
+})
+const activeBackgroundUrl = computed(() => {
+  if (currentSpace.value.backgroundIsGradient) { return }
+  return background.value
 })
 const backgroundImages = computed(() => {
   let images = backgroundImagesJSON
@@ -500,7 +505,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
             img.refresh.icon(src="@/assets/refresh.svg")
       //- built-in backgrounds
       section.results-section
-        ImageList(:images="state.selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+        ImageList(:images="state.selectedImages" :activeUrl="activeBackgroundUrl" @selectImage="updateSpaceBackground")
       //- community backgrounds
       section.results-section.community-backgrounds-section
         .row.title-row
