@@ -2,19 +2,19 @@
   {
     "url": "https://bk.kinopio.club/default-background-2x.png",
     "darkUrl": "https://bk.kinopio.club/default-background-dark-2x.png",
-    "previewUrl": "https://bk.kinopio.club/default-background-preview.png",
+    "previewUrl": "https://bk.kinopio.club/default-background-preview.svg",
     "thumbnailUrl": "https://bk.kinopio.club/background-thumbnail.svg",
     "isDefault": true
   },  
   {
     "url": "https://bk.kinopio.club/blank.png",
-    "previewUrl": "https://bk.kinopio.club/blank-preview.svg",
+    "previewUrl": "https://bk.kinopio.club/blank-preview-2.svg",
     "thumbnailUrl": "https://bk.kinopio.club/blank-thumbnail.svg"
   },
   {
     "url": "https://bk.kinopio.club/dot-grid-2x.png",
     "darkUrl": "https://bk.kinopio.club/dot-grid-dark-2x.png",
-    "previewUrl": "https://bk.kinopio.club/dot-grid.svg",
+    "previewUrl": "https://bk.kinopio.club/dot-grid-2.svg",
     "thumbnailUrl": "https://bk.kinopio.club/dot-grid-thumbnail.svg"
   },
   {
@@ -45,7 +45,7 @@
     "url": "https://bk.kinopio.club/grid-large-boxes-2x.png",
     "darkUrl": "https://bk.kinopio.club/grid-large-boxes-dark-2x.png",
     "previewUrl": "https://bk.kinopio.club/grid-large-boxes-thumbnail.png",
-    "thumbnailUrl": "https://bk.kinopio.club/grid-large-boxes-thumbnail.png"
+    "thumbnailUrl": "https://bk.kinopio.club/grid-large-boxes-thumbnail-2.svg"
   },
   {
     "url": "https://bk.kinopio.club/concentric-grid.jpeg",
