@@ -160,50 +160,34 @@ const state = reactive({
   earnCreditsIsVisible: false
 })
 
-const updateSpaceDetailsInfoIsVisible = (value) => {
-  state.spaceDetailsInfoIsVisible = value
-}
-
 const importArenaChannelIsVisible = computed(() => store.state.importArenaChannelIsVisible)
 const isPresentationMode = computed(() => store.state.isPresentationMode)
-
-const currentSpace = computed(() => store.state.currentSpace)
-
-const currentSpaceIsHidden = computed(() => currentSpace.value.isHidden)
-
 const kinopioDomain = computed(() => consts.kinopioDomain())
-
 const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
-
-const isVisible = computed(() => {
-  if (isPresentationMode.value) { return }
-  if (store.state.isAddPage) { return }
-  const contentDialogIsVisible = store.state.cardDetailsIsVisibleForCardId || store.state.connectionDetailsIsVisibleForConnectionId
-  if (contentDialogIsVisible && store.getters.isTouchDevice && !state.sidebarIsVisible) {
-    return false
-  } else {
-    return true
-  }
-})
-
-const isEmbedMode = computed(() => store.state.isEmbedMode)
 const isSpace = computed(() => {
   const isOther = isEmbedMode.value || store.state.isAddPage
   const isSpace = !isOther
   return isSpace
 })
+const userCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const userIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const isOnline = computed(() => store.state.isOnline)
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const isMobile = computed(() => utils.isMobile())
 
-const currentSpaceUrl = computed(() => store.getters['currentSpace/url'])
+// new stuff
 
 const shouldShowNewStuffIsUpdated = computed(() => {
   const isNotDefaultSpace = !store.getters['currentSpace/isHelloKinopio']
   return store.state.newStuffIsUpdated && isNotDefaultSpace && userCanEditSpace.value
 })
 
-const userCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+// current space
 
-const userIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
-
+const currentSpaceUrl = computed(() => store.getters['currentSpace/url'])
+const currentSpace = computed(() => store.state.currentSpace)
+const currentSpaceIsHidden = computed(() => currentSpace.value.isHidden)
 const currentSpaceName = computed(() => {
   const id = currentSpace.value.id
   const name = currentSpace.value.name
@@ -213,14 +197,10 @@ const currentSpaceName = computed(() => {
     return `Space ${id}`
   }
 })
-
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const isOnline = computed(() => store.state.isOnline)
 const spaceHasStatus = computed(() => {
   if (!isOnline.value) { return }
   return store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems
 })
-
 const spaceHasStatusAndStatusDialogIsNotVisible = computed(() => {
   if (spaceHasStatus.value) {
     return true
@@ -230,26 +210,29 @@ const spaceHasStatusAndStatusDialogIsNotVisible = computed(() => {
     return false
   }
 })
-
 const currentSpaceIsTemplate = computed(() => {
   if (currentSpace.value.isTemplate) { return true }
   const templateSpaceIds = templates.spaces().map(space => space.id)
   return templateSpaceIds.includes(currentSpace.value.id)
 })
 const currentSpaceIsFromTweet = computed(() => currentSpace.value.isFromTweet)
-
 const currentSpaceIsInbox = computed(() => currentSpace.value.name === 'Inbox')
-
 const shouldShowInExplore = computed(() => {
   if (currentSpace.value.privacy === 'private') { return false }
   return currentSpace.value.showInExplore
 })
-
-const notificationsUnreadCount = computed(() => {
-  if (!state.notifications) { return 0 }
-  const unread = state.notifications.filter(notification => !notification.isRead)
-  return unread.length || 0
+const backButtonIsVisible = computed(() => {
+  const spaceId = store.state.prevSpaceIdInSession
+  return spaceId && spaceId !== currentSpace.value.id
 })
+const changeToPrevSpace = () => {
+  const id = currentSpace.value.id
+  store.dispatch('currentSpace/loadPrevSpaceInSession')
+  store.commit('prevSpaceIdInSession', id)
+}
+
+// search filters
+
 const searchResultsCount = computed(() => store.state.searchResultsCards.length)
 const totalFiltersActive = computed(() => store.getters['currentUser/totalFiltersActive'])
 const searchResultsOrFilters = computed(() => {
@@ -259,34 +242,10 @@ const searchResultsOrFilters = computed(() => {
     return false
   }
 })
-
-const controlsSettingsIsVisible = computed(() => store.state.controlsSettingsIsPinned)
-
-const pricingIsVisible = computed(() => store.state.pricingIsVisible)
-
-const isFadingOut = computed(() => store.state.isFadingOutDuringTouch)
-
-const backButtonIsVisible = computed(() => {
-  const spaceId = store.state.prevSpaceIdInSession
-  return spaceId && spaceId !== currentSpace.value.id
-})
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
-
-const changeToPrevSpace = () => {
-  const id = currentSpace.value.id
-  store.dispatch('currentSpace/loadPrevSpaceInSession')
-  store.commit('prevSpaceIdInSession', id)
-}
-const openKinopio = () => {
-  const url = currentSpaceUrl.value
-  const title = `${currentSpaceName.value} – Kinopio`
-  window.open(url, title)
-}
 const showCardDetails = (card) => {
   store.dispatch('currentCards/showCardDetails', card.id)
   store.commit('previousResultItem', card)
 }
-
 const showNextSearchCard = () => {
   if (!store.state.search) { return }
   const cards = store.state.searchResultsCards
@@ -301,7 +260,6 @@ const showNextSearchCard = () => {
   }
   showCardDetails(cards[index])
 }
-
 const showPreviousSearchCard = () => {
   if (!store.state.search) { return }
   const cards = store.state.searchResultsCards
@@ -316,12 +274,31 @@ const showPreviousSearchCard = () => {
   }
   showCardDetails(cards[index])
 }
-
 const clearSearchAndFilters = () => {
   store.dispatch('closeAllDialogs')
   store.commit('clearSearch')
   store.dispatch('clearAllFilters')
 }
+
+// notifications
+
+const notificationsUnreadCount = computed(() => {
+  if (!state.notifications) { return 0 }
+  const unread = state.notifications.filter(notification => !notification.isRead)
+  return unread.length || 0
+})
+
+// embed
+
+const isEmbedMode = computed(() => store.state.isEmbedMode)
+const openKinopio = () => {
+  const url = currentSpaceUrl.value
+  const title = `${currentSpaceName.value} – Kinopio`
+  window.open(url, title)
+}
+
+// interactions
+
 const addReadOnlyJiggle = () => {
   const element = readOnlyElement.value
   if (!element) { return }
@@ -332,26 +309,18 @@ const removeReadOnlyJiggle = () => {
   state.readOnlyJiggle = false
 }
 
-const updateAppsAndExtensionsIsVisible = (value) => {
-  state.appsAndExtensionsIsVisible = value
-}
-const updateKeyboardShortcutsIsVisible = (value) => {
-  state.keyboardShortcutsIsVisible = value
-}
-const updateDonateIsVisible = (value) => {
-  state.donateIsVisible = value
-}
-const updateTemplatesIsVisible = (value) => {
-  state.templatesIsVisible = value
-}
-const updateEarnCreditsIsVisible = (value) => {
-  state.earnCreditsIsVisible = value
-}
+// visible
 
-const updateImportIsVisible = (value) => {
-  state.importIsVisible = value
-}
-
+const isVisible = computed(() => {
+  if (isPresentationMode.value) { return }
+  if (store.state.isAddPage) { return }
+  const contentDialogIsVisible = store.state.cardDetailsIsVisibleForCardId || store.state.connectionDetailsIsVisibleForConnectionId
+  if (contentDialogIsVisible && store.getters.isTouchDevice && !state.sidebarIsVisible) {
+    return false
+  } else {
+    return true
+  }
+})
 const closeAllDialogs = () => {
   state.aboutIsVisible = false
   state.spaceDetailsInfoIsVisible = false
@@ -374,6 +343,29 @@ const closeAllDialogs = () => {
   if (!store.state.sidebarIsPinned) {
     state.sidebarIsVisible = false
   }
+}
+const controlsSettingsIsVisible = computed(() => store.state.controlsSettingsIsPinned)
+const pricingIsVisible = computed(() => store.state.pricingIsVisible)
+const updateAppsAndExtensionsIsVisible = (value) => {
+  state.appsAndExtensionsIsVisible = value
+}
+const updateKeyboardShortcutsIsVisible = (value) => {
+  state.keyboardShortcutsIsVisible = value
+}
+const updateDonateIsVisible = (value) => {
+  state.donateIsVisible = value
+}
+const updateTemplatesIsVisible = (value) => {
+  state.templatesIsVisible = value
+}
+const updateEarnCreditsIsVisible = (value) => {
+  state.earnCreditsIsVisible = value
+}
+const updateImportIsVisible = (value) => {
+  state.importIsVisible = value
+}
+const updateSpaceDetailsInfoIsVisible = (value) => {
+  state.spaceDetailsInfoIsVisible = value
 }
 const togglePricingIsVisible = () => {
   const value = !pricingIsVisible.value
@@ -414,7 +406,6 @@ const toggleNotificationsIsVisible = () => {
     updateNotifications()
   }
 }
-
 const updateAddSpaceIsVisible = (value) => {
   state.addSpaceIsVisible = value
 }
@@ -423,7 +414,6 @@ const toggleAddSpaceIsVisible = () => {
   store.dispatch('closeAllDialogs')
   state.addSpaceIsVisible = !isVisible
 }
-
 const updateSidebarIsVisible = (value) => {
   state.sidebarIsVisible = value
 }
@@ -451,7 +441,6 @@ const toggleSearchIsVisible = () => {
 const setLoadingSignUpOrIn = (value) => {
   state.loadingSignUpOrIn = value
 }
-
 const updateUpgradeUserIsVisible = (value) => {
   state.upgradeUserIsVisible = value
 }
@@ -486,6 +475,7 @@ const cancelHidden = () => {
 
 // fade out
 
+const isFadingOut = computed(() => store.state.isFadingOutDuringTouch)
 const fadeOut = () => {
   fadeOutIteration = 0
   if (fadeOutTimer) { return }
@@ -509,7 +499,7 @@ const fadeOutFrame = () => {
   }
 }
 
-// update position
+// position
 
 const updatePosition = () => {
   if (!store.getters.isTouchDevice) { return }
@@ -638,10 +628,11 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                   img.icon(src="@/assets/filter.svg")
                   span {{totalFiltersActive}}
               Search(:visible="searchIsVisible")
-            //- button(@click="showPreviousSearchCard" v-if="searchResultsCount")
-            //-   img.icon.left-arrow(src="@/assets/down-arrow.svg")
-            //- button(@click="showNextSearchCard" v-if="searchResultsCount")
-            //-   img.icon.right-arrow(src="@/assets/down-arrow.svg")
+            template(v-if="!isMobile")
+              button(@click="showPreviousSearchCard" v-if="searchResultsCount")
+                img.icon.left-arrow(src="@/assets/down-arrow.svg")
+              button(@click="showNextSearchCard" v-if="searchResultsCount")
+                img.icon.right-arrow(src="@/assets/down-arrow.svg")
             button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
               img.icon.cancel(src="@/assets/add.svg")
 
