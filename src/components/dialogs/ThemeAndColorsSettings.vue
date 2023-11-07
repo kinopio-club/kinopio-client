@@ -1,5 +1,121 @@
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import utils from '@/utils.js'
+const store = useStore()
+
+const dialogElement = ref(null)
+
+onMounted(() => {
+  initDefaultColor()
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerUpdateTheme') {
+      initDefaultColor()
+    }
+  })
+})
+
+const props = defineProps({
+  visible: Boolean
+})
+
+const state = reactive({
+  colorPickerIsVisible: false,
+  defaultColor: '#e3e3e3'
+})
+
+const currentUser = computed(() => store.state.currentUser)
+const currentSpace = computed(() => store.state.currentSpace)
+const initDefaultColor = () => {
+  state.defaultColor = utils.cssVariable('secondary-background')
+}
+const closeChildDialogs = () => {
+  state.colorPickerIsVisible = false
+}
+
+// theme
+
+const themeIsSystem = computed(() => store.state.currentUser.themeIsSystem)
+const toggleThemeIsSystem = () => {
+  store.dispatch('themes/toggleIsSystem')
+}
+const updateTheme = (themeName) => {
+  store.dispatch('themes/update', themeName)
+}
+
+// user default values
+
+const defaultSpaceBackground = computed(() => currentUser.value.defaultSpaceBackground)
+const defaultSpaceBackgroundTint = computed(() => currentUser.value.defaultSpaceBackgroundTint)
+const defaultSpaceBackgroundGradient = computed(() => currentUser.value.defaultSpaceBackgroundGradient)
+const spaceDefaults = computed(() => {
+  const backgroundIsGradient = Boolean(defaultSpaceBackgroundGradient.value)
+  return {
+    background: defaultSpaceBackground.value,
+    backgroundTint: defaultSpaceBackgroundTint.value,
+    backgroundGradient: defaultSpaceBackgroundGradient.value,
+    backgroundIsGradient
+  }
+})
+const userHasDefaultBackground = computed(() => {
+  return Boolean(defaultSpaceBackground.value || defaultSpaceBackgroundTint.value || defaultSpaceBackgroundGradient.value)
+})
+const defaultCardColor = computed(() => {
+  const userDefault = currentUser.value.defaultCardBackgroundColor
+  return userDefault || state.defaultColor
+})
+const userHasDefaultCardColor = computed(() => {
+  const systemDefaultColor = utils.cssVariable('secondary-background')
+  const userDefaultColor = currentUser.value.defaultCardBackgroundColor
+  const defaultColorIsNotSystem = userDefaultColor !== systemDefaultColor
+  return userDefaultColor && defaultColorIsNotSystem
+})
+
+// card color
+
+const updateDefaultCardColor = (color) => {
+  store.dispatch('currentUser/update', { defaultCardBackgroundColor: color })
+}
+const removeDefaultCardColor = () => {
+  updateDefaultCardColor(null)
+  closeChildDialogs()
+}
+const toggleColorPicker = () => {
+  const value = !state.colorPickerIsVisible
+  closeChildDialogs()
+  state.colorPickerIsVisible = value
+}
+
+// space background
+
+const updateBackground = () => {
+  let updates
+  if (currentSpace.value.backgroundIsGradient) {
+    updates = {
+      defaultSpaceBackgroundGradient: currentSpace.value.backgroundGradient,
+      defaultSpaceBackground: null
+    }
+  } else {
+    updates = {
+      defaultSpaceBackgroundGradient: null,
+      defaultSpaceBackground: currentSpace.value.background
+    }
+  }
+  updates.defaultSpaceBackgroundTint = currentSpace.value.backgroundTint
+  store.dispatch('currentUser/update', updates)
+  closeChildDialogs()
+}
+const removeBackground = () => {
+  store.dispatch('currentUser/update', { defaultSpaceBackground: null, defaultSpaceBackgroundTint: null, defaultSpaceBackgroundGradient: null })
+  closeChildDialogs()
+}
+</script>
+
 <template lang="pug">
-dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog")
+dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.left.stop="closeChildDialogs" ref="dialogElement")
   section
     p Theme
     .button-wrap
@@ -13,12 +129,12 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
     .row
       .button-wrap
         .segmented-buttons
-          button(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible || userHasDefaultCardColor}")
+          button(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible || userHasDefaultCardColor}")
             .current-color(:style="{ 'background-color': defaultCardColor }")
             span New Card Color
           button(@click.left.stop="removeDefaultCardColor")
             img.icon.cancel(src="@/assets/add.svg")
-        ColorPicker(:currentColor="defaultCardColor" :visible="colorPickerIsVisible" @selectedColor="updateDefaultCardColor")
+        ColorPicker(:currentColor="defaultCardColor" :visible="state.colorPickerIsVisible" @selectedColor="updateDefaultCardColor")
   //- space background
   section
     .row
@@ -32,116 +148,7 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
             span Set Background
           button(@click.left.stop="removeBackground")
             img.icon.cancel(src="@/assets/add.svg")
-
 </template>
-
-<script>
-import BackgroundPreview from '@/components/BackgroundPreview.vue'
-import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import utils from '@/utils.js'
-
-export default {
-  name: 'ColorsAndThemeSettings',
-  components: {
-    BackgroundPreview,
-    ColorPicker
-  },
-  props: {
-    visible: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      const { type, payload } = mutation
-      if (type === 'triggerUpdateTheme') {
-        this.defaultColor = utils.cssVariable('secondary-background')
-      }
-    })
-  },
-  mounted () {
-    this.defaultColor = utils.cssVariable('secondary-background')
-  },
-  data () {
-    return {
-      colorPickerIsVisible: false,
-      defaultColor: '#e3e3e3'
-    }
-  },
-  computed: {
-    currentUser () { return this.$store.state.currentUser },
-    currentSpace () { return this.$store.state.currentSpace },
-    defaultSpaceBackground () { return this.currentUser.defaultSpaceBackground },
-    defaultSpaceBackgroundTint () { return this.currentUser.defaultSpaceBackgroundTint },
-    defaultSpaceBackgroundGradient () { return this.currentUser.defaultSpaceBackgroundGradient },
-    spaceDefaults () {
-      const backgroundIsGradient = Boolean(this.defaultSpaceBackgroundGradient)
-      return {
-        background: this.defaultSpaceBackground,
-        backgroundTint: this.defaultSpaceBackgroundTint,
-        backgroundGradient: this.defaultSpaceBackgroundGradient,
-        backgroundIsGradient
-      }
-    },
-    userHasDefaultBackground () {
-      return Boolean(this.defaultSpaceBackground || this.defaultSpaceBackgroundTint || this.defaultSpaceBackgroundGradient)
-    },
-    defaultCardColor () {
-      const userDefault = this.currentUser.defaultCardBackgroundColor
-      return userDefault || this.defaultColor
-    },
-    themeIsSystem () { return this.$store.state.currentUser.themeIsSystem },
-    userHasDefaultCardColor () {
-      const systemDefaultColor = utils.cssVariable('secondary-background')
-      const userDefaultColor = this.currentUser.defaultCardBackgroundColor
-      const defaultColorIsNotSystem = userDefaultColor !== systemDefaultColor
-      return userDefaultColor && defaultColorIsNotSystem
-    }
-  },
-  methods: {
-    toggleThemeIsSystem () {
-      this.$store.dispatch('themes/toggleIsSystem')
-    },
-    closeDialogs () {
-      this.colorPickerIsVisible = false
-    },
-    updateBackground () {
-      let updates
-      if (this.currentSpace.backgroundIsGradient) {
-        updates = {
-          defaultSpaceBackgroundGradient: this.currentSpace.backgroundGradient,
-          defaultSpaceBackground: null
-        }
-      } else {
-        updates = {
-          defaultSpaceBackgroundGradient: null,
-          defaultSpaceBackground: this.currentSpace.backgroundGradient
-        }
-      }
-      updates.defaultSpaceBackgroundTint = this.currentSpace.backgroundTint
-      this.$store.dispatch('currentUser/update', updates)
-      this.closeDialogs()
-    },
-    removeBackground () {
-      this.$store.dispatch('currentUser/update', { defaultSpaceBackground: null, defaultSpaceBackgroundTint: null, defaultSpaceBackgroundGradient: null })
-      this.closeDialogs()
-    },
-    updateDefaultCardColor (color) {
-      this.$store.dispatch('currentUser/update', { defaultCardBackgroundColor: color })
-    },
-    removeDefaultCardColor () {
-      this.updateDefaultCardColor(null)
-      this.closeDialogs()
-    },
-    toggleColorPicker () {
-      const value = !this.colorPickerIsVisible
-      this.closeDialogs()
-      this.colorPickerIsVisible = value
-    },
-    updateTheme (themeName) {
-      this.$store.dispatch('themes/update', themeName)
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 dialog.theme-and-colors-settings
