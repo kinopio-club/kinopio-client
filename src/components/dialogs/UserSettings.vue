@@ -8,7 +8,6 @@ const store = useStore()
 const dialogElement = ref(null)
 
 const visible = computed(() => store.state.userSettingsIsVisible)
-
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     closeChildDialogs()
@@ -16,6 +15,15 @@ watch(() => visible.value, (value, prevValue) => {
 })
 const closeChildDialogs = () => {
   store.commit('triggerCloseChildDialogs')
+}
+
+const state = reactive({
+  currentSettings: 'general' // general, controls
+})
+const currentSettingsIsGeneral = computed(() => state.currentSettings === 'general')
+const currentSettingsIsControls = computed(() => state.currentSettings === 'controls')
+const updateCurrentSettings = (value) => {
+  state.currentSettings = value
 }
 </script>
 
@@ -25,7 +33,12 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialogElement" @
     p
       img.icon.settings(src="@/assets/settings.svg")
       span User Settings
-  UserSettingsGeneral
+    .segmented-buttons
+      button(@click="updateCurrentSettings('general')" :class="{ active: currentSettingsIsGeneral }")
+        span General
+      button(@click="updateCurrentSettings('controls')" :class="{ active: currentSettingsIsControls }")
+        span Controls
+  UserSettingsGeneral(:visible="currentSettingsIsGeneral")
 </template>
 
 <style lang="stylus">
