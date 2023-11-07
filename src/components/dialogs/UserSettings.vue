@@ -1,7 +1,9 @@
 <template lang="pug">
 dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
   section
-    p User Settings
+    p
+      img.icon.settings(src="@/assets/settings.svg")
+      span User Settings
 
   //- User Preferences
   section
@@ -9,7 +11,6 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
     .row
       .button-wrap
         button(@click.left.stop="toggleControlsSettingsIsVisible" :class="{active: controlsSettingsIsVisible}")
-          img.icon.settings(src="@/assets/settings.svg")
           span Controls
         ControlsSettings(:visible="controlsSettingsIsVisible")
     //- Notifications

@@ -48,6 +48,7 @@ const initialState = {
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
   defaultSpaceBackground: undefined,
+  defaultSpaceBackgroundGradient: undefined,
   defaultSpaceBackgroundTint: undefined,
   defaultCardBackgroundColor: undefined,
   defaultConnectionControlPoint: null, // null, 'q00,00'
@@ -290,6 +291,10 @@ export default {
     defaultSpaceBackground: (state, value) => {
       state.defaultSpaceBackground = value
       cache.updateUser('defaultSpaceBackground', value)
+    },
+    defaultSpaceBackgroundGradient: (state, value) => {
+      state.defaultSpaceBackgroundGradient = value
+      cache.updateUser('defaultSpaceBackgroundGradient', value)
     },
     defaultSpaceBackgroundTint: (state, value) => {
       state.defaultSpaceBackgroundTint = value

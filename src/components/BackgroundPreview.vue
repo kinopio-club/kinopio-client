@@ -13,7 +13,6 @@ const props = defineProps({
   space: Object
 })
 
-const currentSpace = computed(() => store.state.currentSpace)
 const backgroundTintStyles = computed(() => {
   const color = props.space.backgroundTint
   if (color) {
@@ -25,7 +24,7 @@ const backgroundTintStyles = computed(() => {
   }
 })
 const backgroundStyles = computed(() => {
-  if (currentSpace.value.backgroundIsGradient) { return }
+  if (props.space.backgroundIsGradient) { return }
   let background = props.space.background
   const backgroundImage = backgroundImages.find(image => {
     if (!background) {
@@ -50,12 +49,12 @@ const backgroundStyles = computed(() => {
   .preview-button(v-if="isButton")
     .background-tint(:style="backgroundTintStyles")
     button.background-button.fixed-height(:style="backgroundStyles" :class="{ active: buttonIsActive }")
-      SpaceBackgroundGradients(:visible="currentSpace.backgroundIsGradient" :layers="currentSpace.backgroundGradient")
+      SpaceBackgroundGradients(:visible="space.backgroundIsGradient" :layers="space.backgroundGradient")
   //- thumbnail
   .preview-wrap(v-else)
     .background-tint(:style="backgroundTintStyles")
     .background-image(:style="backgroundStyles")
-    SpaceBackgroundGradients(:visible="currentSpace.backgroundIsGradient" :layers="currentSpace.backgroundGradient")
+    SpaceBackgroundGradients(:visible="space.backgroundIsGradient" :layers="space.backgroundGradient")
 </template>
 
 <style lang="stylus">

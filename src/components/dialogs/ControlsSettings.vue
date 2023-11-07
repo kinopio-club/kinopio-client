@@ -142,7 +142,7 @@ dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @clic
 
   section
     .row
-      p General
+      p New Spaces
     .row
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
         input(type="checkbox" v-model="newSpacesAreBlank")

@@ -6,6 +6,7 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
       label(:class="{active: themeIsSystem}" @click.left.prevent="toggleThemeIsSystem" @keydown.stop.enter="toggleThemeIsSystem")
         input(type="checkbox" v-model="themeIsSystem")
         span Use System Theme
+  //- card color
   section
     .row
       p Color to use as the default for new cards
@@ -18,14 +19,14 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
           button(@click.left.stop="removeDefaultCardColor")
             img.icon.cancel(src="@/assets/add.svg")
         ColorPicker(:currentColor="defaultCardColor" :visible="colorPickerIsVisible" @selectedColor="updateDefaultCardColor")
-
+  //- space background
   section
     .row
       p Set current background as the default for new spaces
     .row
       .button-wrap
         .segmented-buttons
-          button(:class="{active: currentBackgroundIsDefault}" @click.left.stop="updateBackground")
+          button(:class="{active: userHasDefaultBackground}" @click.left.stop="updateBackground")
             template(v-if="userHasDefaultBackground")
               BackgroundPreview(:space="spaceDefaults")
             span Set Background
@@ -70,19 +71,18 @@ export default {
     currentSpace () { return this.$store.state.currentSpace },
     defaultSpaceBackground () { return this.currentUser.defaultSpaceBackground },
     defaultSpaceBackgroundTint () { return this.currentUser.defaultSpaceBackgroundTint },
+    defaultSpaceBackgroundGradient () { return this.currentUser.defaultSpaceBackgroundGradient },
     spaceDefaults () {
+      const backgroundIsGradient = Boolean(this.defaultSpaceBackgroundGradient)
       return {
         background: this.defaultSpaceBackground,
-        backgroundTint: this.defaultSpaceBackgroundTint
+        backgroundTint: this.defaultSpaceBackgroundTint,
+        backgroundGradient: this.defaultSpaceBackgroundGradient,
+        backgroundIsGradient
       }
     },
     userHasDefaultBackground () {
-      return Boolean(this.defaultSpaceBackground || this.defaultSpaceBackgroundTint)
-    },
-    currentBackgroundIsDefault () {
-      const backgroundIsDefault = this.defaultSpaceBackground === this.currentSpace.background
-      const backgroundTintIsDefault = this.currentUser.defaultSpaceBackgroundTint === this.currentSpace.backgroundTint
-      return backgroundIsDefault && backgroundTintIsDefault
+      return Boolean(this.defaultSpaceBackground || this.defaultSpaceBackgroundTint || this.defaultSpaceBackgroundGradient)
     },
     defaultCardColor () {
       const userDefault = this.currentUser.defaultCardBackgroundColor
@@ -104,13 +104,24 @@ export default {
       this.colorPickerIsVisible = false
     },
     updateBackground () {
-      const background = this.currentSpace.background
-      const backgroundTint = this.currentSpace.backgroundTint
-      this.$store.dispatch('currentUser/update', { defaultSpaceBackground: background, defaultSpaceBackgroundTint: backgroundTint })
+      let updates
+      if (this.currentSpace.backgroundIsGradient) {
+        updates = {
+          defaultSpaceBackgroundGradient: this.currentSpace.backgroundGradient,
+          defaultSpaceBackground: null
+        }
+      } else {
+        updates = {
+          defaultSpaceBackgroundGradient: null,
+          defaultSpaceBackground: this.currentSpace.backgroundGradient
+        }
+      }
+      updates.defaultSpaceBackgroundTint = this.currentSpace.backgroundTint
+      this.$store.dispatch('currentUser/update', updates)
       this.closeDialogs()
     },
     removeBackground () {
-      this.$store.dispatch('currentUser/update', { defaultSpaceBackground: null, defaultSpaceBackgroundTint: null })
+      this.$store.dispatch('currentUser/update', { defaultSpaceBackground: null, defaultSpaceBackgroundTint: null, defaultSpaceBackgroundGradient: null })
       this.closeDialogs()
     },
     updateDefaultCardColor (color) {
