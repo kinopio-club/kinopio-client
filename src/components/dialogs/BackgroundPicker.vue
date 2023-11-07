@@ -68,6 +68,7 @@ watch(() => props.visible, (value, prevValue) => {
 
 const state = reactive({
   colorPickerIsVisible: false,
+  spaceBackgroundInputIsVisible: false,
   initialSearch: '',
   error: {
     isNotImageUrl: false,
@@ -250,6 +251,9 @@ const updateCommunityBackgroundImages = async () => {
   state.communityBackgroundImages = images
   state.communityBackgroundsIsLoading = false
 }
+const toggleSpaceBackgroundInputIsVisible = () => {
+  state.spaceBackgroundInputIsVisible = !state.spaceBackgroundInputIsVisible
+}
 
 // upload
 
@@ -414,11 +418,15 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
         BackgroundPreview(:space="currentSpace")
         span.title Background
       .row
-        button.small-button(v-if="canEditSpace" @click.left="removeBackgroundAll")
-          img.icon(src="@/assets/remove.svg")
+        .button-wrap
+          button.small-button(v-if="canEditSpace" :class="{active: state.spaceBackgroundInputIsVisible}" @click="toggleSpaceBackgroundInputIsVisible")
+            span URL
+        .button-wrap
+          button.small-button(v-if="canEditSpace" @click.left="removeBackgroundAll")
+            img.icon(src="@/assets/remove.svg")
 
   section(@mouseup.stop @touchend.stop)
-    .row(v-if="canEditSpace")
+    .row(v-if="canEditSpace && state.spaceBackgroundInputIsVisible")
       input(
         rows="1"
         placeholder="Paste an image URL or upload"
