@@ -12,9 +12,9 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
     .row
       .button-wrap
         .segmented-buttons
-          button(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+          button(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible || userHasDefaultCardColor}")
             .current-color(:style="{ 'background-color': defaultCardColor }")
-            span Card Color
+            span New Card Color
           button(@click.left.stop="removeDefaultCardColor")
             img.icon.cancel(src="@/assets/add.svg")
         ColorPicker(:currentColor="defaultCardColor" :visible="colorPickerIsVisible" @selectedColor="updateDefaultCardColor")
@@ -26,7 +26,7 @@ dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.le
       .button-wrap
         .segmented-buttons
           button(:class="{active: currentBackgroundIsDefault}" @click.left.stop="updateBackground")
-            template(v-if="userHasDefaults")
+            template(v-if="userHasDefaultBackground")
               BackgroundPreview(:space="spaceDefaults")
             span Set Background
           button(@click.left.stop="removeBackground")
@@ -76,7 +76,7 @@ export default {
         backgroundTint: this.defaultSpaceBackgroundTint
       }
     },
-    userHasDefaults () {
+    userHasDefaultBackground () {
       return Boolean(this.defaultSpaceBackground || this.defaultSpaceBackgroundTint)
     },
     currentBackgroundIsDefault () {
@@ -88,7 +88,13 @@ export default {
       const userDefault = this.currentUser.defaultCardBackgroundColor
       return userDefault || this.defaultColor
     },
-    themeIsSystem () { return this.$store.state.currentUser.themeIsSystem }
+    themeIsSystem () { return this.$store.state.currentUser.themeIsSystem },
+    userHasDefaultCardColor () {
+      const systemDefaultColor = utils.cssVariable('secondary-background')
+      const userDefaultColor = this.currentUser.defaultCardBackgroundColor
+      const defaultColorIsNotSystem = userDefaultColor !== systemDefaultColor
+      return userDefaultColor && defaultColorIsNotSystem
+    }
   },
   methods: {
     toggleThemeIsSystem () {
@@ -138,4 +144,8 @@ dialog.theme-and-colors-settings
     display inline-block
     vertical-align -3px
     margin-right 5px
+  .preview-wrap
+    height 16px
+    width 16px
+    border-radius var(--small-entity-radius)
 </style>
