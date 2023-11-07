@@ -63,6 +63,11 @@ const connectionDetailsIsVisibleForConnectionId = computed(() => store.state.con
 const shouldHideFooter = computed(() => store.state.shouldHideFooter)
 const isPresentationMode = computed(() => store.state.isPresentationMode)
 const isTouchDevice = computed(() => store.getters.isTouchDevice)
+const isMobile = computed(() => utils.isMobile())
+const isMobileStandalone = computed(() => utils.isMobile() && navigator.standalone) // is homescreen app
+const isFadingOut = computed(() => store.state.isFadingOutDuringTouch)
+
+// visible
 
 const isVisible = computed(() => {
   if (isAddPage.value) { return }
@@ -83,14 +88,10 @@ const controlsIsVisible = computed(() => {
   if (shouldHideFooter.value) { return }
   return true
 })
-const isMobile = computed(() => utils.isMobile())
-const isMobileStandalone = computed(() => utils.isMobile() && navigator.standalone) // is homescreen app
-const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
-const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
-const isFadingOut = computed(() => store.state.isFadingOutDuringTouch)
 
 // settings
 
+const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
 const toggleUserSettingsIsVisible = async () => {
   const value = !store.state.userSettingsIsVisible
   store.dispatch('closeAllDialogs')
@@ -122,7 +123,7 @@ const cancelHidden = () => {
   state.isHiddenOnTouch = false
 }
 
-// update position
+// position
 
 const updatePosition = async () => {
   await nextTick()
@@ -168,7 +169,6 @@ const updatePositionInVisualViewport = () => {
   .left(v-if="leftIsVisble")
     footer
       Notifications
-
   .right(v-if="controlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom
     .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
