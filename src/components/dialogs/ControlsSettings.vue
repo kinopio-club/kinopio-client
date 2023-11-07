@@ -1,5 +1,132 @@
+<script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import utils from '@/utils.js'
+import consts from '@/consts.js'
+import BackgroundPreview from '@/components/BackgroundPreview.vue'
+const store = useStore()
+
+const dialogElement = ref(null)
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'updatePageSizes') {
+      updateDialogHeight()
+    }
+  })
+})
+
+const props = defineProps({
+  visible: Boolean
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    updateDialogHeight()
+  }
+})
+
+const state = reactive({
+  dialogHeight: null,
+  panningTipsIsVisible: false,
+  outsideSpaceColorTipsIsVisible: false
+})
+
+const currentSpace = computed(() => { return store.state.currentSpace })
+const isMobile = computed(() => { return utils.isMobile() })
+const deviceSupportsHapticFeedback = computed(() => { return consts.isSecureAppContext && isMobile.value })
+
+// haptic feedback
+
+const shouldDisableHapticFeedback = computed(() => { return store.state.currentUser.shouldDisableHapticFeedback })
+const toggleShouldDisableHapticFeedback = () => {
+  const value = !shouldDisableHapticFeedback.value
+  store.commit('currentUser/shouldDisableHapticFeedback', value)
+}
+
+// new spaces are blank
+
+const newSpacesAreBlank = computed(() => { return store.state.currentUser.newSpacesAreBlank })
+const toggleNewSpacesAreBlank = () => {
+  const value = !newSpacesAreBlank.value
+  store.dispatch('currentUser/newSpacesAreBlank', value)
+}
+
+// panning
+
+const shouldDisableRightClickToPan = computed(() => { return store.state.currentUser.shouldDisableRightClickToPan })
+const panSpeedIsFast = computed(() => { return store.state.currentUser.panSpeedIsFast })
+const updatePanSpeedIsFast = (value) => {
+  store.dispatch('currentUser/update', { panSpeedIsFast: value })
+}
+const toggleShouldDisableRightClickToPan = () => {
+  const value = !shouldDisableRightClickToPan.value
+  store.dispatch('currentUser/update', { shouldDisableRightClickToPan: value })
+}
+const togglePanningTipsIsVisible = () => {
+  const value = !state.panningTipsIsVisible
+  clearTips()
+  state.panningTipsIsVisible = value
+}
+
+// should use sticky cards
+
+const shouldDisableStickyCards = computed(() => { return !store.state.currentUser.shouldUseStickyCards })
+const toggleShouldUseStickyCards = () => {
+  let value = store.state.currentUser.shouldUseStickyCards
+  value = !value
+  store.dispatch('currentUser/update', { shouldUseStickyCards: value })
+}
+
+// should pause connection directions
+
+const shouldPauseConnectionDirections = computed(() => { return store.state.currentUser.shouldPauseConnectionDirections })
+const toggleShouldPauseConnectionDirections = () => {
+  const value = !shouldPauseConnectionDirections.value
+  store.dispatch('currentUser/update', { shouldPauseConnectionDirections: value })
+  store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
+}
+
+// outside space background
+
+const updateOutsideSpaceBackgroundIsStatic = (value) => {
+  store.dispatch('currentUser/update', { outsideSpaceBackgroundIsStatic: value })
+}
+const outsideSpaceBackgroundIsStatic = computed(() => { return store.state.currentUser.outsideSpaceBackgroundIsStatic })
+const outsideSpaceStyles = computed(() => {
+  return {
+    backgroundColor: store.state.outsideSpaceBackgroundColor
+  }
+})
+const toggleOutsideSpaceColorTipsIsVisible = () => {
+  const value = !state.outsideSpaceColorTipsIsVisible
+  clearTips()
+  state.outsideSpaceColorTipsIsVisible = value
+}
+
+// dialog
+
+const controlsSettingsIsPinned = computed(() => { return store.state.controlsSettingsIsPinned })
+const toggleDialogIsPinned = () => {
+  store.dispatch('closeAllDialogs')
+  const value = !controlsSettingsIsPinned.value
+  store.dispatch('controlsSettingsIsPinned', value)
+}
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+const clearTips = () => {
+  state.panningTipsIsVisible = false
+  state.outsideSpaceColorTipsIsVisible = false
+}
+</script>
+
 <template lang="pug">
-dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="controlsSettingsIsPinned" :class="{'is-pinned': controlsSettingsIsPinned}")
+dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :data-is-pinned="controlsSettingsIsPinned" :class="{'is-pinned': controlsSettingsIsPinned}")
   section.title-row
     p Controls
     button.pin-button.small-button(:class="{active: controlsSettingsIsPinned}" @click.left="toggleDialogIsPinned" title="Pin dialog")
@@ -12,9 +139,10 @@ dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @clic
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
         input(type="checkbox" v-model="newSpacesAreBlank")
         span New Spaces Are Blank
+
   section
     .row
-      p Motion
+      p Accessibility
     .row(v-if="deviceSupportsHapticFeedback")
       label(:class="{active: shouldDisableHapticFeedback}" @click.left.prevent="toggleShouldDisableHapticFeedback" @keydown.stop.enter="toggleShouldDisableHapticFeedback")
         input(type="checkbox" v-model="shouldDisableHapticFeedback")
@@ -28,14 +156,18 @@ dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @clic
       label(:class="{ active: shouldPauseConnectionDirections }" @click.left.prevent="toggleShouldPauseConnectionDirections" @keydown.stop.enter="toggleShouldPauseConnectionDirections")
         input(type="checkbox" v-model="shouldPauseConnectionDirections")
         span Pause Connection Directions
+    //- .row
+    //-   label(:class="{active: highContrastUIButtons}" @click.left.prevent="toggleHighContrastUIButtons" @keydown.stop.enter="toggleHighContrastUIButtons")
+    //-     input(type="checkbox" v-model="highContrastUIButtons")
+    //-     span High Contrast UI Buttons
 
   section
     .row.title-row
       p Outside Space Color
       .button-wrap
-        button.small-button(@click="toggleOutsideSpaceColorTipsIsVisible" :class="{ active: outsideSpaceColorTipsIsVisible }")
+        button.small-button(@click="toggleOutsideSpaceColorTipsIsVisible" :class="{ active: state.outsideSpaceColorTipsIsVisible }")
           span ?
-    section.subsection(v-if="outsideSpaceColorTipsIsVisible")
+    section.subsection(v-if="state.outsideSpaceColorTipsIsVisible")
       p The area outside your space, visible when zoomed out
     .row
       .outside-space(:style="outsideSpaceStyles")
@@ -50,9 +182,9 @@ dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @clic
     .row.title-row
       p Panning
       .button-wrap
-        button.small-button(@click="togglePanningTipsIsVisible" :class="{ active: panningTipsIsVisible }")
+        button.small-button(@click="togglePanningTipsIsVisible" :class="{ active: state.panningTipsIsVisible }")
           span ?
-    section.subsection(v-if="panningTipsIsVisible")
+    section.subsection(v-if="state.panningTipsIsVisible")
       p Hold and drag space key, or right/middle mouse button, to Pan
     .row
       .segmented-buttons
@@ -67,121 +199,6 @@ dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @clic
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
         span Disable Right/Middle Click to Pan
 </template>
-
-<script>
-import utils from '@/utils.js'
-import consts from '@/consts.js'
-import BackgroundPreview from '@/components/BackgroundPreview.vue'
-
-export default {
-  name: 'ControlsSettings',
-  components: {
-    BackgroundPreview
-  },
-  props: {
-    visible: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
-      }
-    })
-  },
-  data () {
-    return {
-      dialogHeight: null,
-      panningTipsIsVisible: false,
-      outsideSpaceColorTipsIsVisible: false
-    }
-  },
-  computed: {
-    isMobile () { return utils.isMobile() },
-    shouldDisableStickyCards () { return !this.$store.state.currentUser.shouldUseStickyCards },
-    shouldPauseConnectionDirections () { return this.$store.state.currentUser.shouldPauseConnectionDirections },
-    shouldDisableRightClickToPan () { return this.$store.state.currentUser.shouldDisableRightClickToPan },
-    controlsSettingsIsPinned () { return this.$store.state.controlsSettingsIsPinned },
-    panSpeedIsFast () { return this.$store.state.currentUser.panSpeedIsFast },
-    outsideSpaceBackgroundIsStatic () { return this.$store.state.currentUser.outsideSpaceBackgroundIsStatic },
-    newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank },
-    shouldDisableHapticFeedback () { return this.$store.state.currentUser.shouldDisableHapticFeedback },
-    deviceSupportsHapticFeedback () { return consts.isSecureAppContext && this.isMobile },
-    outsideSpaceStyles () {
-      const color = this.$store.state.outsideSpaceBackgroundColor
-      return {
-        backgroundColor: color
-      }
-    },
-    currentSpace () { return this.$store.state.currentSpace }
-  },
-  methods: {
-    toggleShouldDisableHapticFeedback () {
-      const value = !this.shouldDisableHapticFeedback
-      this.$store.commit('currentUser/shouldDisableHapticFeedback', value)
-    },
-    toggleNewSpacesAreBlank () {
-      const value = !this.newSpacesAreBlank
-      this.$store.dispatch('currentUser/newSpacesAreBlank', value)
-    },
-    updatePanSpeedIsFast (value) {
-      this.$store.dispatch('currentUser/update', { panSpeedIsFast: value })
-    },
-    updateOutsideSpaceBackgroundIsStatic (value) {
-      this.$store.dispatch('currentUser/update', { outsideSpaceBackgroundIsStatic: value })
-    },
-    toggleShouldUseStickyCards () {
-      let value = this.$store.state.currentUser.shouldUseStickyCards
-      value = !value
-      this.$store.dispatch('currentUser/update', { shouldUseStickyCards: value })
-    },
-    toggleShouldPauseConnectionDirections () {
-      const value = !this.shouldPauseConnectionDirections
-      this.$store.dispatch('currentUser/update', { shouldPauseConnectionDirections: value })
-      this.$store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
-    },
-    toggleShouldDisableRightClickToPan () {
-      const value = !this.shouldDisableRightClickToPan
-      this.$store.dispatch('currentUser/update', { shouldDisableRightClickToPan: value })
-    },
-    toggleDialogIsPinned () {
-      this.$store.dispatch('closeAllDialogs')
-      const value = !this.controlsSettingsIsPinned
-      this.$store.dispatch('controlsSettingsIsPinned', value)
-    },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
-      })
-    },
-
-    // tips
-
-    clearTips () {
-      this.panningTipsIsVisible = false
-      this.outsideSpaceColorTipsIsVisible = false
-    },
-    togglePanningTipsIsVisible () {
-      const value = !this.panningTipsIsVisible
-      this.clearTips()
-      this.panningTipsIsVisible = value
-    },
-    toggleOutsideSpaceColorTipsIsVisible () {
-      const value = !this.outsideSpaceColorTipsIsVisible
-      this.clearTips()
-      this.outsideSpaceColorTipsIsVisible = value
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.updateDialogHeight()
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .controls-settings
