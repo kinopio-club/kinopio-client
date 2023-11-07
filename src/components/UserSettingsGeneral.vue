@@ -5,7 +5,6 @@ import { useStore } from 'vuex'
 import UserBillingAndCreditsSettings from '@/components/dialogs/UserBillingAndCreditsSettings.vue'
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
-import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 import ThemeAndColorsSettings from '@/components/dialogs/ThemeAndColorsSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import Loader from '@/components/Loader.vue'
@@ -37,7 +36,6 @@ const state = reactive({
     deleteUserPermanent: false
   },
   notificationSettingsIsVisible: false,
-  controlsSettingsIsVisible: false,
   themeAndColorsSettingsIsVisible: false
 })
 
@@ -47,7 +45,6 @@ const closeChildDialogs = () => {
   state.userBillingAndCreditsSettingsIsVisible = false
   state.userAccountSettingsIsVisible = false
   state.notificationSettingsIsVisible = false
-  state.controlsSettingsIsVisible = false
   state.themeAndColorsSettingsIsVisible = false
 }
 
@@ -55,12 +52,6 @@ const closeChildDialogs = () => {
 
 const toggleDeleteAllConfirmationVisible = () => {
   state.deleteAllConfirmationVisible = !state.deleteAllConfirmationVisible
-}
-const toggleControlsSettingsIsVisible = () => {
-  const isVisible = state.controlsSettingsIsVisible
-  closeChildDialogs()
-  state.deleteAllConfirmationVisible = false
-  state.controlsSettingsIsVisible = !isVisible
 }
 const toggleUserBillingAndCreditsSettingsIsVisible = () => {
   const isVisible = state.userBillingAndCreditsSettingsIsVisible
@@ -108,12 +99,6 @@ const deleteUserPermanent = async () => {
 <template lang="pug">
 template(v-if="visible")
   section.user-settings-general
-    //- Controls
-    .row
-      .button-wrap
-        button(@click.left.stop="toggleControlsSettingsIsVisible" :class="{active: state.controlsSettingsIsVisible}")
-          span Controls
-        ControlsSettings(:visible="state.controlsSettingsIsVisible")
     //- Notifications
     .row
       .button-wrap

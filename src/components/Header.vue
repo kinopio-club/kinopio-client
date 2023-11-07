@@ -33,7 +33,6 @@ import Import from '@/components/dialogs/Import.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
 import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
-import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 import Discovery from '@/components/Discovery.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import consts from '@/consts.js'
@@ -344,7 +343,6 @@ const closeAllDialogs = () => {
     state.sidebarIsVisible = false
   }
 }
-const controlsSettingsIsVisible = computed(() => store.state.controlsSettingsIsPinned)
 const pricingIsVisible = computed(() => store.state.pricingIsVisible)
 const updateAppsAndExtensionsIsVisible = (value) => {
   state.appsAndExtensionsIsVisible = value
@@ -682,7 +680,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
       .controls(v-if="isSpace")
         .top-controls
           SpaceUsers
-          ControlsSettings(:visible="controlsSettingsIsVisible")
           UserSettings
           UpdatePassword
           //- Share

@@ -180,7 +180,7 @@ const store = createStore({
     spaceDetailsIsPinned: false,
     sidebarIsPinned: false,
     searchIsPinned: false,
-    controlsSettingsIsPinned: false,
+    userSettingsIsPinned: false,
 
     // loading
     isLoadingSpace: false,
@@ -296,6 +296,9 @@ const store = createStore({
       if (!state.searchIsPinned) {
         state.searchIsVisible = false
       }
+      if (!state.userSettingsIsPinned) {
+        state.userSettingsIsVisible = false
+      }
       state.multipleSelectedActionsIsVisible = false
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
@@ -311,7 +314,6 @@ const store = createStore({
       state.userDetailsIsVisible = false
       state.cardListItemOptionsIsVisible = false
       state.pricingIsVisible = false
-      state.userSettingsIsVisible = false
       state.codeLanguagePickerIsVisible = false
     },
     isOnline: (state, value) => {
@@ -961,9 +963,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.searchIsPinned = value
     },
-    controlsSettingsIsPinned: (state, value) => {
+    userSettingsIsPinned: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.controlsSettingsIsPinned = value
+      state.userSettingsIsPinned = value
     },
 
     // Connection Details
@@ -1706,9 +1708,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('searchIsPinned', value)
     },
-    controlsSettingsIsPinned: (context, value) => {
+    userSettingsIsPinned: (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      context.commit('controlsSettingsIsPinned', value)
+      context.commit('userSettingsIsPinned', value)
     },
 
     // scrolling and zoom
