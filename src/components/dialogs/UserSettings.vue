@@ -1,54 +1,156 @@
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import UserBillingAndCreditsSettings from '@/components/dialogs/UserBillingAndCreditsSettings.vue'
+import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
+import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
+import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
+import ThemeAndColorsSettings from '@/components/dialogs/ThemeAndColorsSettings.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
+import Loader from '@/components/Loader.vue'
+import cache from '@/cache.js'
+import User from '@/components/User.vue'
+const store = useStore()
+
+const dialogElement = ref(null)
+
+const visible = computed(() => store.state.userSettingsIsVisible)
+watch(() => visible.value, (value, prevValue) => {
+  if (value) {
+    state.deleteAllConfirmationVisible = false
+    closeChildDialogs()
+  }
+})
+
+const isSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const currentUser = computed(() => store.state.currentUser)
+
+const state = reactive({
+  userBillingAndCreditsSettingsIsVisible: false,
+  userAccountSettingsIsVisible: false,
+  deleteAllConfirmationVisible: false,
+  loading: {
+    deleteUserPermanent: false
+  },
+  notificationSettingsIsVisible: false,
+  controlsSettingsIsVisible: false,
+  themeAndColorsSettingsIsVisible: false
+})
+
+// dialog
+
+const closeChildDialogs = () => {
+  state.userBillingAndCreditsSettingsIsVisible = false
+  state.userAccountSettingsIsVisible = false
+  state.notificationSettingsIsVisible = false
+  state.controlsSettingsIsVisible = false
+  state.themeAndColorsSettingsIsVisible = false
+}
+
+// child dialog state
+
+const toggleDeleteAllConfirmationVisible = () => {
+  state.deleteAllConfirmationVisible = !state.deleteAllConfirmationVisible
+}
+const toggleControlsSettingsIsVisible = () => {
+  const isVisible = state.controlsSettingsIsVisible
+  closeChildDialogs()
+  state.deleteAllConfirmationVisible = false
+  state.controlsSettingsIsVisible = !isVisible
+}
+const toggleUserBillingAndCreditsSettingsIsVisible = () => {
+  const isVisible = state.userBillingAndCreditsSettingsIsVisible
+  closeChildDialogs()
+  state.deleteAllConfirmationVisible = false
+  state.userBillingAndCreditsSettingsIsVisible = !isVisible
+}
+const toggleUserAccountSettingsIsVisible = () => {
+  const isVisible = state.userAccountSettingsIsVisible
+  closeChildDialogs()
+  state.deleteAllConfirmationVisible = false
+  state.userAccountSettingsIsVisible = !isVisible
+}
+const toggleNotificationSettingsIsVisible = () => {
+  const isVisible = state.notificationSettingsIsVisible
+  closeChildDialogs()
+  state.deleteAllConfirmationVisible = false
+  state.notificationSettingsIsVisible = !isVisible
+}
+const toggleThemeAndColorsSettingsIsVisible = () => {
+  const isVisible = state.themeAndColorsSettingsIsVisible
+  closeChildDialogs()
+  state.deleteAllConfirmationVisible = false
+  state.themeAndColorsSettingsIsVisible = !isVisible
+}
+
+// delete user
+
+const deleteUserPermanent = async () => {
+  state.loading.deleteUserPermanent = true
+  if (store.state.currentUser.isUpgraded) {
+    await store.dispatch('api/cancelSubscription', {
+      userId: store.state.currentUser.id
+    })
+  }
+  await store.dispatch('api/deleteUserPermanent')
+  cache.removeAll()
+  // clear history wipe state from vue-router
+  window.history.replaceState({}, 'Kinopio', '/')
+  location.reload()
+  state.loading.deleteUserPermanent = false
+}
+</script>
+
 <template lang="pug">
-dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
+dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop="closeChildDialogs")
   section
     p
       img.icon.settings(src="@/assets/settings.svg")
       span User Settings
-
   //- User Preferences
   section
     //- Controls
     .row
       .button-wrap
-        button(@click.left.stop="toggleControlsSettingsIsVisible" :class="{active: controlsSettingsIsVisible}")
+        button(@click.left.stop="toggleControlsSettingsIsVisible" :class="{active: state.controlsSettingsIsVisible}")
           span Controls
-        ControlsSettings(:visible="controlsSettingsIsVisible")
+        ControlsSettings(:visible="state.controlsSettingsIsVisible")
     //- Notifications
     .row
       .button-wrap
-        button(@click.left.stop="toggleNotificationSettingsIsVisible" :class="{active: notificationSettingsIsVisible}")
+        button(@click.left.stop="toggleNotificationSettingsIsVisible" :class="{active: state.notificationSettingsIsVisible}")
           span Notifications
-        NotificationSettings(:visible="notificationSettingsIsVisible")
+        NotificationSettings(:visible="state.notificationSettingsIsVisible")
     //- Theme and Colors
     .row
       .button-wrap
         .segmented-buttons
-          button(@click.left.stop="toggleThemeAndColorsSettingsIsVisible" :class="{active: themeAndColorsSettingsIsVisible}")
+          button(@click.left.stop="toggleThemeAndColorsSettingsIsVisible" :class="{active: state.themeAndColorsSettingsIsVisible}")
             span Theme and Colors
           ThemeToggle
-        ThemeAndColorsSettings(:visible="themeAndColorsSettingsIsVisible")
-
+        ThemeAndColorsSettings(:visible="state.themeAndColorsSettingsIsVisible")
   //- Account Settings
   section
     .row
       .button-wrap
-        button(@click.left.stop="toggleUserAccountSettingsIsVisible" :class="{active: userAccountSettingsIsVisible}")
+        button(@click.left.stop="toggleUserAccountSettingsIsVisible" :class="{active: state.userAccountSettingsIsVisible}")
           User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
           span Account
-        UserAccountSettings(:visible="userAccountSettingsIsVisible")
+        UserAccountSettings(:visible="state.userAccountSettingsIsVisible")
     .row
       .button-wrap
-        button(@click.left.stop="toggleUserBillingAndCreditsSettingsIsVisible" :class="{active: userBillingAndCreditsSettingsIsVisible}")
+        button(@click.left.stop="toggleUserBillingAndCreditsSettingsIsVisible" :class="{active: state.userBillingAndCreditsSettingsIsVisible}")
           span Billing and Credits
-        UserBillingAndCreditsSettings(:visible="userBillingAndCreditsSettingsIsVisible")
-
+        UserBillingAndCreditsSettings(:visible="state.userBillingAndCreditsSettingsIsVisible")
   //- Delete Account
   section.delete-account
     .row
-      button.danger(v-if="!deleteAllConfirmationVisible" @click.left="toggleDeleteAllConfirmationVisible")
+      button.danger(v-if="!state.deleteAllConfirmationVisible" @click.left="toggleDeleteAllConfirmationVisible")
         img.icon(src="@/assets/remove.svg")
         span Delete All Your Data
-      span(v-if="deleteAllConfirmationVisible")
+      span(v-if="state.deleteAllConfirmationVisible")
         p
           span.badge.danger Permanently delete
           span(v-if="isSignedIn") all your spaces and user data from this computer and Kinopio's servers?
@@ -66,119 +168,8 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
           button.danger(@click.left="deleteUserPermanent")
             img.icon(src="@/assets/remove.svg")
             span Delete All
-            Loader(:visible="loading.deleteUserPermanent")
-
+            Loader(:visible="state.loading.deleteUserPermanent")
 </template>
-
-<script>
-import UserBillingAndCreditsSettings from '@/components/dialogs/UserBillingAndCreditsSettings.vue'
-import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
-import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
-import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
-import ThemeAndColorsSettings from '@/components/dialogs/ThemeAndColorsSettings.vue'
-import ThemeToggle from '@/components/ThemeToggle.vue'
-import Loader from '@/components/Loader.vue'
-import cache from '@/cache.js'
-import User from '@/components/User.vue'
-
-export default {
-  name: 'UserSettings',
-  components: {
-    Loader,
-    UserBillingAndCreditsSettings,
-    UserAccountSettings,
-    NotificationSettings,
-    ControlsSettings,
-    ThemeAndColorsSettings,
-    ThemeToggle,
-    User
-  },
-  data () {
-    return {
-      userBillingAndCreditsSettingsIsVisible: false,
-      userAccountSettingsIsVisible: false,
-      deleteAllConfirmationVisible: false,
-      loading: {
-        deleteUserPermanent: false
-      },
-      notificationSettingsIsVisible: false,
-      controlsSettingsIsVisible: false,
-      themeAndColorsSettingsIsVisible: false
-    }
-  },
-  computed: {
-    visible () { return this.$store.state.userSettingsIsVisible },
-    isSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    isUpgraded () { return this.$store.state.currentUser.isUpgraded },
-    currentUser () { return this.$store.state.currentUser }
-  },
-  methods: {
-    closeDialogs () {
-      this.userBillingAndCreditsSettingsIsVisible = false
-      this.userAccountSettingsIsVisible = false
-      this.notificationSettingsIsVisible = false
-      this.controlsSettingsIsVisible = false
-      this.themeAndColorsSettingsIsVisible = false
-    },
-    toggleDeleteAllConfirmationVisible () {
-      this.deleteAllConfirmationVisible = !this.deleteAllConfirmationVisible
-    },
-    async deleteUserPermanent () {
-      this.loading.deleteUserPermanent = true
-      if (this.$store.state.currentUser.isUpgraded) {
-        await this.$store.dispatch('api/cancelSubscription', {
-          userId: this.$store.state.currentUser.id
-        })
-      }
-      await this.$store.dispatch('api/deleteUserPermanent')
-      cache.removeAll()
-      // clear history wipe state from vue-router
-      window.history.replaceState({}, 'Kinopio', '/')
-      location.reload()
-      this.loading.deleteUserPermanent = false
-    },
-    toggleControlsSettingsIsVisible () {
-      const isVisible = this.controlsSettingsIsVisible
-      this.closeDialogs()
-      this.deleteAllConfirmationVisible = false
-      this.controlsSettingsIsVisible = !isVisible
-    },
-    toggleUserBillingAndCreditsSettingsIsVisible () {
-      const isVisible = this.userBillingAndCreditsSettingsIsVisible
-      this.closeDialogs()
-      this.deleteAllConfirmationVisible = false
-      this.userBillingAndCreditsSettingsIsVisible = !isVisible
-    },
-    toggleUserAccountSettingsIsVisible () {
-      const isVisible = this.userAccountSettingsIsVisible
-      this.closeDialogs()
-      this.deleteAllConfirmationVisible = false
-      this.userAccountSettingsIsVisible = !isVisible
-    },
-    toggleNotificationSettingsIsVisible () {
-      const isVisible = this.notificationSettingsIsVisible
-      this.closeDialogs()
-      this.deleteAllConfirmationVisible = false
-      this.notificationSettingsIsVisible = !isVisible
-    },
-    toggleThemeAndColorsSettingsIsVisible () {
-      const isVisible = this.themeAndColorsSettingsIsVisible
-      this.closeDialogs()
-      this.deleteAllConfirmationVisible = false
-      this.themeAndColorsSettingsIsVisible = !isVisible
-    }
-
-  },
-  watch: {
-    visible (value) {
-      if (value) {
-        this.deleteAllConfirmationVisible = false
-        this.closeDialogs()
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 dialog.user-settings
