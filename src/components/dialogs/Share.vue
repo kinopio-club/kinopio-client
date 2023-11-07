@@ -219,7 +219,7 @@ const toggleIsShareInPresentationMode = () => {
 dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
   section
     .row.title-row
-      span Share
+      p Share
       .row
         button.small-button(@click.left.stop="isPresentationMode" title="Presentation Mode")
           img.icon(src="@/assets/presentation.svg")
@@ -380,4 +380,7 @@ dialog.share
   .private-copy-badge
     margin-left 6px
     vertical-align 1px
+  .title-row
+    p + .row
+      margin-top 0
 </style>
