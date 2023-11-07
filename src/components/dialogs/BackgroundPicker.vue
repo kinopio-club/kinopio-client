@@ -419,9 +419,8 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
           img.icon(src="@/assets/remove.svg")
 
   section(@mouseup.stop @touchend.stop)
-    .row
+    .row(v-if="canEditSpace")
       input(
-        v-if="canEditSpace"
         rows="1"
         placeholder="Paste an image URL or upload"
         v-model="background"
@@ -565,6 +564,9 @@ dialog.background-picker
     margin-left 0 !important
   .background-preview
     margin-right 6px
+    .preview-wrap
+      height 19px
+      width 19px
   .title
     color var(--primary)
   section
