@@ -20,7 +20,7 @@
     //- Name
     .textarea-wrap(:class="{'full-width': shouldHidePin}")
       textarea.name(
-        :disabled="!isSpaceMember"
+        :readonly="!isSpaceMember"
         ref="name"
         rows="1"
         placeholder="name"

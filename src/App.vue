@@ -393,9 +393,11 @@ textarea,
   border-radius 0
   padding 1px
   margin-bottom 10px
-  &:disabled
+  &:disabled,
+  &:read-only
     color var(--primary)
     border-bottom 0
+    outline none
   &.is-dark
     color var(--primary-background)
     border-color var(--primary-background)
