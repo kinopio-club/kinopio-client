@@ -93,13 +93,6 @@ export default {
     ThemeToggle,
     User
   },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerControlsSettingsIsVisible') {
-        this.controlsSettingsIsVisible = true
-      }
-    })
-  },
   data () {
     return {
       userBillingAndCreditsSettingsIsVisible: false,

@@ -97,8 +97,6 @@ const toggleUserSettingsIsVisible = async () => {
   const value = !store.state.userSettingsIsVisible
   store.dispatch('closeAllDialogs')
   store.commit('userSettingsIsVisible', value)
-  await nextTick()
-  store.commit('triggerControlsSettingsIsVisible')
 }
 
 // hide

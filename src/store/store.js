@@ -576,7 +576,6 @@ const store = createStore({
     triggerDrawConnectionFrame: (state, event) => {},
     triggerCancelLocking: () => {},
     triggerUpdateOtherCard: (state, cardId) => {},
-    triggerControlsSettingsIsVisible: () => {},
     triggerUpdateCardDetailsCardName: (state, options) => {},
     triggerCloseChildDialogs: () => {},
     triggerAddSpaceIsVisible: () => {},
