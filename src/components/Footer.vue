@@ -66,6 +66,7 @@ const isTouchDevice = computed(() => store.getters.isTouchDevice)
 const isMobile = computed(() => utils.isMobile())
 const isMobileStandalone = computed(() => utils.isMobile() && navigator.standalone) // is homescreen app
 const isFadingOut = computed(() => store.state.isFadingOutDuringTouch)
+const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 
 // visible
 
@@ -172,7 +173,7 @@ const updatePositionInVisualViewport = () => {
   .right(v-if="controlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom
     .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
-      button.small-button.translucent-button(:class="{active: userSettingsIsVisible}" title="Settings → Controls")
+      button.small-button(:class="{active: userSettingsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Settings → Controls")
         img.icon.settings(src="@/assets/settings.svg")
 </template>
 
