@@ -296,11 +296,10 @@ const pendingUpload = computed(() => {
   })
 })
 const remotePendingUpload = computed(() => {
-  const currentSpace = store.state.currentSpace
   let remotePendingUploads = store.state.remotePendingUploads
   return remotePendingUploads.find(upload => {
     const isInProgress = upload.percentComplete < 100
-    const isSpace = upload.spaceId === currentSpace.id
+    const isSpace = upload.spaceId === currentSpace.value.id
     return isInProgress && isSpace
   })
 })
@@ -427,12 +426,15 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
         data-type="name"
         maxlength="400"
       )
-    p.read-only-url(v-if="!canEditSpace && background")
-      span {{background}}
-    .row(v-if="!canEditSpace")
-      span.badge.info
-        img.icon.cancel(src="@/assets/add.svg")
-        span Space is Read Only
+
+    template(v-if="!canEditSpace")
+      .row
+        .large-background-preview
+          BackgroundPreview(:space="currentSpace")
+      .row
+        span.badge.info
+          img.icon.cancel(src="@/assets/add.svg")
+          span Space is Read Only
 
     //- upload progress
     .uploading-container(v-if="pendingUpload")
@@ -562,11 +564,16 @@ dialog.background-picker
   max-height calc(100dvh - 120px)
   .title-row
     margin-left 0 !important
-  .background-preview
-    margin-right 6px
+    .background-preview
+      margin-right 6px
+      .preview-wrap
+        height 19px
+        width 19px
+  .large-background-preview
     .preview-wrap
-      height 19px
-      width 19px
+      height 100px
+      width 100px
+
   .title
     color var(--primary)
   section
@@ -587,10 +594,6 @@ dialog.background-picker
         left 6px
   .hidden
     display none
-  .read-only-url
-    margin-top 0
-    margin-bottom 10px
-    word-break break-all
 
   .arrow-up
     position absolute
