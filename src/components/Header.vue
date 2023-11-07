@@ -1,158 +1,7 @@
-<template lang="pug">
-header.presentation-header(v-if="isPresentationMode" :style="position" :class="{'fade-out': isFadingOut}")
-  button.active(@click="disablePresentationMode" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
-    img.icon(src="@/assets/presentation.svg")
-  SelectAllBelow
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
 
-header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hidden': isHidden}")
-  //- embed
-  nav.embed-nav(v-if="isEmbedMode")
-    a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
-      button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
-        .logo
-          .logo-image
-        MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-        span {{currentSpaceName}}{{' '}}
-        img.icon.visit(src="@/assets/visit.svg")
-    .right
-      SpaceUsers
-
-  //- standard
-  nav(v-if="!isEmbedMode")
-    .left
-      //- About
-      .logo-about
-        .button-wrap
-          .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active: aboutIsVisible}" tabindex="0")
-            .logo-image
-              .label-badge.small-badge(v-if="shouldShowNewStuffIsUpdated")
-                span NEW
-            img.down-arrow(src="@/assets/down-arrow.svg")
-          About(:visible="aboutIsVisible")
-          KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-          Donate(:visible="donateIsVisible")
-          AppsAndExtensions(:visible="appsAndExtensionsIsVisible")
-      .space-meta-rows
-        .space-functions-row
-          .segmented-buttons.add-space-functions
-            //- Add Space
-            .button-wrap
-              button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
-                img.icon.add(src="@/assets/add.svg")
-                span New
-              AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
-              Templates(:visible="templatesIsVisible")
-          //- Search
-          .segmented-buttons
-            .button-wrap
-              button.search-button(@click.stop="toggleSearchIsVisible" :class="{ active: searchIsVisible || totalFiltersActive || searchResultsCount, 'translucent-button': !shouldIncreaseUIContrast }")
-                template(v-if="!searchResultsCount")
-                  img.icon.search(src="@/assets/search.svg")
-                .badge.search.search-count-badge(v-if="searchResultsCount")
-                  img.icon.search(src="@/assets/search.svg")
-                  span {{searchResultsCount}}
-                span.badge.info(v-if="totalFiltersActive")
-                  img.icon(src="@/assets/filter.svg")
-                  span {{totalFiltersActive}}
-              Search(:visible="searchIsVisible")
-            //- button(@click="showPreviousSearchCard" v-if="searchResultsCount")
-            //-   img.icon.left-arrow(src="@/assets/down-arrow.svg")
-            //- button(@click="showNextSearchCard" v-if="searchResultsCount")
-            //-   img.icon.right-arrow(src="@/assets/down-arrow.svg")
-            button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
-              img.icon.cancel(src="@/assets/add.svg")
-
-        .space-details-row.segmented-buttons
-          //- Back
-          .button-wrap(v-if="backButtonIsVisible" title="Go Back" @click.stop="changeToPrevSpace")
-            button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
-              img.icon.left-arrow(src="@/assets/down-arrow.svg")
-          //- Current Space
-          .button-wrap
-            button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-              span(v-if="currentSpaceIsInbox")
-                img.icon.inbox-icon(src="@/assets/inbox.svg")
-              span(v-show="currentSpaceIsTemplate")
-                img.icon.templates(src="@/assets/templates.svg")
-              span(v-if="currentSpaceIsFromTweet")
-                img.icon.tweet(src="@/assets/twitter.svg")
-              SpaceTodayJournalBadge(:space="currentSpace")
-              MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-              span {{currentSpaceName}}
-              PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
-              img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
-              img.icon.view-hidden(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
-            SpaceDetails(:visible="spaceDetailsIsVisible")
-            ImportArenaChannel(:visible="importArenaChannelIsVisible")
-            SpaceDetailsInfo(:visible="spaceDetailsInfoIsVisible")
-            Import(:visible="importIsVisible")
-            //- Read Only badge
-            .label-badge.read-only-badge-wrap(v-if="!userCanEditSpace")
-              span(:class="{'invisible': readOnlyJiggle}")
-                span Read Only
-              span.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
-                span Read Only
-          //- State
-          .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
-            button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              Loader(:visible="spaceHasStatus")
-              .badge.success.space-status-success(v-if="!spaceHasStatus")
-            SpaceStatus(:visible="spaceStatusIsVisible")
-          //- Offline
-          .button-wrap(v-if="!isOnline")
-            button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              img.icon.offline(src="@/assets/offline.svg")
-            Offline(:visible="offlineIsVisible")
-
-    .right
-      .controls(v-if="isSpace")
-        .top-controls
-          SpaceUsers
-          ControlsSettings(:visible="controlsSettingsIsVisible")
-          UserSettings
-          UpdatePassword
-          //- Share
-          .button-wrap
-            button(@click.left.stop="toggleShareIsVisible" :class="{active: shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              span Share
-            Share(:visible="shareIsVisible")
-            EarnCredits(:visible="earnCreditsIsVisible")
-          //- Notifications
-          .button-wrap
-            button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              span {{notificationsUnreadCount}}
-              .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
-            UserNotifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
-        .bottom-controls
-          Discovery
-          //- Sidebar
-          .button-wrap
-            button(@click.left.stop="toggleSidebarIsVisible" :class="{active: sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              img.icon.sidebar(src="@/assets/sidebar.svg")
-            Sidebar(:visible="sidebarIsVisible")
-        .row.bottom-controls
-          //- Sign Up or In
-          .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
-            button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active: signUpOrInIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              span Sign Up or In
-              Loader(:visible="loadingSignUpOrIn")
-            SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
-          //- Pricing
-          .button-wrap(v-if="!userIsUpgraded")
-            button(@click.left.stop="togglePricingIsVisible" :class="{active: pricingIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              span Pricing
-            Pricing(:visible="pricingIsVisible")
-          //- Upgrade
-          .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
-            button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              span Upgrade
-            UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
-
-  Toolbar(:visible="isSpace")
-  SelectAllBelow
-</template>
-
-<script>
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
 import SpaceDetailsInfo from '@/components/dialogs/SpaceDetailsInfo.vue'
@@ -189,8 +38,8 @@ import Discovery from '@/components/Discovery.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import consts from '@/consts.js'
 
-import { mapState, mapGetters } from 'vuex'
 import sortBy from 'lodash-es/sortBy'
+const store = useStore()
 
 let updateNotificationsIntervalTimer
 
@@ -199,546 +48,692 @@ const hiddenDuration = 20
 const updatePositionDuration = 60
 let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
 
-export default {
-  name: 'Header',
-  components: {
-    About,
-    SpaceDetails,
-    SpaceDetailsInfo,
-    SpaceStatus,
-    Offline,
-    User,
-    SignUpOrIn,
-    UpdatePassword,
-    Share,
-    UserNotifications,
-    Loader,
-    ImportArenaChannel,
-    KeyboardShortcuts,
-    AppsAndExtensions,
-    UpgradeUser,
-    Search,
-    MoonPhase,
-    AddSpace,
-    Templates,
-    PrivacyIcon,
-    SelectAllBelow,
-    Sidebar,
-    SpaceUsers,
-    Donate,
-    Toolbar,
-    Import,
-    Pricing,
-    EarnCredits,
-    SpaceTodayJournalBadge,
-    ControlsSettings,
-    Discovery,
-    UserSettings
-  },
-  props: {
-    isPinchZooming: Boolean,
-    isTouchScrolling: Boolean
-  },
-  data () {
-    return {
-      aboutIsVisible: false,
-      spaceDetailsIsVisible: false,
-      spaceDetailsInfoIsVisible: false,
-      signUpOrInIsVisible: false,
-      shareIsVisible: false,
-      notificationsIsVisible: false,
-      loadingSignUpOrIn: false,
-      keyboardShortcutsIsVisible: false,
-      appsAndExtensionsIsVisible: false,
-      upgradeUserIsVisible: false,
-      spaceStatusIsVisible: false,
-      offlineIsVisible: false,
-      position: {},
-      readOnlyJiggle: false,
-      notifications: [],
-      notificationsIsLoading: true,
-      addSpaceIsVisible: false,
-      isHidden: false,
-      templatesIsVisible: false,
-      sidebarIsVisible: false,
-      donateIsVisible: false,
-      importIsVisible: false,
-      earnCreditsIsVisible: false
+const readOnlyElement = ref(null)
+
+onMounted(() => {
+  window.addEventListener('scroll', updatePosition)
+  updatePosition()
+  updateNotifications()
+  store.commit('isLoadingSpace', true)
+  updateNotificationsIntervalTimer = setInterval(() => {
+    updateNotifications()
+  }, 1000 * 60 * 10) // 10 minutes
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'closeAllDialogs') {
+      closeAllDialogs()
+    } else if (mutation.type === 'triggerSpaceDetailsVisible') {
+      updateSpaceDetailsIsVisible(true)
+    } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+      updatePosition()
+    } else if (mutation.type === 'triggerSpaceDetailsInfoIsVisible') {
+      updateSpaceDetailsInfoIsVisible(true)
+    } else if (mutation.type === 'triggerSignUpOrInIsVisible') {
+      updateSignUpOrInIsVisible(true)
+    } else if (mutation.type === 'triggerAppsAndExtensionsIsVisible') {
+      updateAppsAndExtensionsIsVisible(true)
+    } else if (mutation.type === 'triggerKeyboardShortcutsIsVisible') {
+      updateKeyboardShortcutsIsVisible(true)
+    } else if (mutation.type === 'triggerUpgradeUserIsVisible') {
+      updateUpgradeUserIsVisible(true)
+    } else if (mutation.type === 'triggerDonateIsVisible') {
+      updateDonateIsVisible(true)
+    } else if (mutation.type === 'currentUserIsPainting') {
+      if (state.currentUserIsPainting) {
+        addReadOnlyJiggle()
+      }
+    } else if (mutation.type === 'triggerReadOnlyJiggle') {
+      addReadOnlyJiggle()
+    } else if (mutation.type === 'triggerUpdateNotifications' || mutation.type === 'triggerUserIsLoaded') {
+      updateNotifications()
+    } else if (mutation.type === 'triggerShowNextSearchCard') {
+      showNextSearchCard()
+    } else if (mutation.type === 'triggerShowPreviousSearchCard') {
+      showPreviousSearchCard()
+    } else if (mutation.type === 'triggerHideTouchInterface') {
+      hidden()
+    } else if (mutation.type === 'triggerTemplatesIsVisible') {
+      updateTemplatesIsVisible(true)
+    } else if (mutation.type === 'triggerEarnCreditsIsVisible') {
+      updateEarnCreditsIsVisible(true)
+    } else if (mutation.type === 'triggerRemovedIsVisible' || mutation.type === 'triggerAIImagesIsVisible') {
+      updateSidebarIsVisible(true)
+    } else if (mutation.type === 'triggerImportIsVisible') {
+      updateImportIsVisible(true)
+    } else if (mutation.type === 'triggerAddSpaceIsVisible') {
+      updateAddSpaceIsVisible(true)
     }
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'closeAllDialogs') {
-        this.closeAllDialogs()
-      } else if (mutation.type === 'triggerSpaceDetailsVisible') {
-        this.spaceDetailsIsVisible = true
-      } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
-        this.updatePosition()
-      } else if (mutation.type === 'triggerSpaceDetailsInfoIsVisible') {
-        this.spaceDetailsInfoIsVisible = true
-      } else if (mutation.type === 'triggerSignUpOrInIsVisible') {
-        this.signUpOrInIsVisible = true
-      } else if (mutation.type === 'triggerAppsAndExtensionsIsVisible') {
-        this.appsAndExtensionsIsVisible = true
-      } else if (mutation.type === 'triggerKeyboardShortcutsIsVisible') {
-        this.keyboardShortcutsIsVisible = true
-      } else if (mutation.type === 'triggerUpgradeUserIsVisible') {
-        this.upgradeUserIsVisible = true
-      } else if (mutation.type === 'triggerDonateIsVisible') {
-        this.donateIsVisible = true
-      } else if (mutation.type === 'currentUserIsPainting') {
-        if (state.currentUserIsPainting) {
-          this.addReadOnlyJiggle()
-        }
-      } else if (mutation.type === 'triggerReadOnlyJiggle') {
-        this.addReadOnlyJiggle()
-      } else if (mutation.type === 'triggerUpdateNotifications' || mutation.type === 'triggerUserIsLoaded') {
-        this.updateNotifications()
-      } else if (mutation.type === 'triggerShowNextSearchCard') {
-        this.showNextSearchCard()
-      } else if (mutation.type === 'triggerShowPreviousSearchCard') {
-        this.showPreviousSearchCard()
-      } else if (mutation.type === 'triggerHideTouchInterface') {
-        this.hidden()
-      } else if (mutation.type === 'triggerTemplatesIsVisible') {
-        this.templatesIsVisible = true
-      } else if (mutation.type === 'triggerEarnCreditsIsVisible') {
-        this.earnCreditsIsVisible = true
-      } else if (mutation.type === 'triggerRemovedIsVisible' || mutation.type === 'triggerAIImagesIsVisible') {
-        this.sidebarIsVisible = true
-      } else if (mutation.type === 'triggerImportIsVisible') {
-        this.importIsVisible = true
-      } else if (mutation.type === 'triggerAddSpaceIsVisible') {
-        this.addSpaceIsVisible = true
-      }
-    })
-  },
-  mounted () {
-    window.addEventListener('scroll', this.updatePosition)
-    this.updatePosition()
-    this.updateNotifications()
-    this.$store.commit('isLoadingSpace', true)
-    updateNotificationsIntervalTimer = setInterval(() => {
-      this.updateNotifications()
-    }, 1000 * 60 * 10) // 10 minutes
-  },
-  beforeUnmount () {
-    window.removeEventListener('scroll', this.updatePosition)
-    clearInterval(updateNotificationsIntervalTimer)
-  },
-  computed: {
-    ...mapState([
-      'isEmbedMode',
-      'isAddPage',
-      'importArenaChannelIsVisible',
-      'currentSpace',
-      'currentUser',
-      'newStuffIsUpdated',
-      'isLoadingSpace',
-      'isLoadingOtherItems',
-      'isJoiningSpace',
-      'isReconnectingToBroadcast',
-      'isOnline',
-      'searchIsVisible',
-      'searchResultsCards',
-      'search',
-      'previousResultItem',
-      'spaceDetailsIsPinned',
-      'sidebarIsPinned',
-      'cardDetailsIsVisibleForCardId',
-      'connectionDetailsIsVisibleForConnectionId',
-      'isPresentationMode'
-    ]),
-    ...mapGetters([
-      'isTouchDevice',
-      'currentSpace/url',
-      'currentSpace/isHelloKinopio',
-      'currentUser/canEditSpace',
-      'currentUser/isSignedIn',
-      'currentUser/totalFiltersActive'
-    ]),
-    currentSpaceIsHidden () { return this.$store.state.currentSpace.isHidden },
-    kinopioDomain () { return consts.kinopioDomain() },
-    userSettingsIsVisible () { return this.$store.state.userSettingsIsVisible },
-    isVisible () {
-      if (this.isPresentationMode) { return }
-      if (this.isAddPage) { return }
-      const contentDialogIsVisible = this.cardDetailsIsVisibleForCardId || this.connectionDetailsIsVisibleForConnectionId
-      if (contentDialogIsVisible && this.isTouchDevice && !this.sidebarIsVisible) {
-        return false
-      } else {
-        return true
-      }
-    },
-    isSpace () {
-      const isOther = this.isEmbedMode || this.isAddPage
-      const isSpace = !isOther
-      return isSpace
-    },
-    currentSpaceUrl () { return this['currentSpace/url'] },
-    shouldShowNewStuffIsUpdated () {
-      const isNotDefaultSpace = !this['currentSpace/isHelloKinopio']
-      return this.newStuffIsUpdated && isNotDefaultSpace && this.userCanEditSpace
-    },
-    userCanEditSpace () { return this['currentUser/canEditSpace']() },
-    userIsUpgraded () { return this.currentUser.isUpgraded },
-    currentSpaceName () {
-      const id = this.currentSpace.id
-      const name = this.currentSpace.name
-      if (name) {
-        return name
-      } else {
-        return `Space ${id}`
-      }
-    },
-    currentUserIsSignedIn () {
-      return this['currentUser/isSignedIn']
-    },
-    spaceHasStatus () {
-      if (!this.isOnline) { return }
-      return this.isLoadingSpace || this.isJoiningSpace || this.isReconnectingToBroadcast || this.isLoadingOtherItems
-    },
-    spaceHasStatusAndStatusDialogIsNotVisible () {
-      if (this.spaceHasStatus) {
-        return true
-      } else if (this.spaceStatusIsVisible) {
-        return true
-      } else {
-        return false
-      }
-    },
-    currentSpaceIsTemplate () {
-      const currentSpace = this.currentSpace
-      if (currentSpace.isTemplate) { return true }
-      const templateSpaceIds = templates.spaces().map(space => space.id)
-      return templateSpaceIds.includes(currentSpace.id)
-    },
-    currentSpaceIsFromTweet () {
-      return this.currentSpace.isFromTweet
-    },
-    currentSpaceIsInbox () {
-      return this.currentSpace.name === 'Inbox'
-    },
-    shouldShowInExplore () {
-      if (this.currentSpace.privacy === 'private') { return false }
-      return this.currentSpace.showInExplore
-    },
-    notificationsUnreadCount () {
-      if (!this.notifications) { return 0 }
-      const unread = this.notifications.filter(notification => !notification.isRead)
-      return unread.length || 0
-    },
-    searchResultsCount () { return this.searchResultsCards.length },
-    totalFiltersActive () { return this['currentUser/totalFiltersActive'] },
-    searchResultsOrFilters () {
-      if (this.searchResultsCount || this.totalFiltersActive) {
-        return true
-      } else {
-        return false
-      }
-    },
-    controlsSettingsIsVisible () {
-      return this.$store.state.controlsSettingsIsPinned
-    },
-    pricingIsVisible () {
-      return this.$store.state.pricingIsVisible
-    },
-    isFadingOut () { return this.$store.state.isFadingOutDuringTouch },
-    backButtonIsVisible () {
-      const spaceId = this.$store.state.prevSpaceIdInSession
-      return spaceId && spaceId !== this.currentSpace.id
-    },
-    shouldIncreaseUIContrast () {
-      return this.$store.state.currentUser.shouldIncreaseUIContrast
-    }
-  },
-  methods: {
-    changeToPrevSpace () {
-      const id = this.$store.state.currentSpace.id
-      this.$store.dispatch('currentSpace/loadPrevSpaceInSession')
-      this.$store.commit('prevSpaceIdInSession', id)
-    },
-    openKinopio () {
-      const url = this.currentSpaceUrl
-      const title = `${this.currentSpaceName} – Kinopio`
-      window.open(url, title)
-    },
-    showCardDetails (card) {
-      this.$store.dispatch('currentCards/showCardDetails', card.id)
-      this.$store.commit('previousResultItem', card)
-    },
-    showNextSearchCard () {
-      if (!this.search) { return }
-      const cards = this.searchResultsCards
-      if (!this.previousResultItem.id) {
-        this.showCardDetails(cards[0])
-        return
-      }
-      const currentIndex = cards.findIndex(card => card.id === this.previousResultItem.id)
-      let index = currentIndex + 1
-      if (cards.length === index) {
-        index = 0
-      }
-      this.showCardDetails(cards[index])
-    },
-    showPreviousSearchCard () {
-      if (!this.search) { return }
-      const cards = this.searchResultsCards
-      if (!this.previousResultItem.id) {
-        this.showCardDetails(cards[0])
-        return
-      }
-      const currentIndex = cards.findIndex(card => card.id === this.previousResultItem.id)
-      let index = currentIndex - 1
-      if (index < 0) {
-        index = cards.length - 1
-      }
-      this.showCardDetails(cards[index])
-    },
-    clearSearchAndFilters () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('clearSearch')
-      this.$store.dispatch('clearAllFilters')
-    },
-    addReadOnlyJiggle () {
-      const element = this.$refs.readOnly
-      if (!element) { return }
-      this.readOnlyJiggle = true
-      element.addEventListener('animationend', this.removeReadOnlyJiggle, false)
-    },
-    removeReadOnlyJiggle () {
-      this.readOnlyJiggle = false
-    },
-    closeAllDialogs () {
-      this.aboutIsVisible = false
-      this.spaceDetailsInfoIsVisible = false
-      this.signUpOrInIsVisible = false
-      this.shareIsVisible = false
-      this.keyboardShortcutsIsVisible = false
-      this.appsAndExtensionsIsVisible = false
-      this.upgradeUserIsVisible = false
-      this.donateIsVisible = false
-      this.spaceStatusIsVisible = false
-      this.offlineIsVisible = false
-      this.notificationsIsVisible = false
-      this.addSpaceIsVisible = false
-      this.templatesIsVisible = false
-      this.earnCreditsIsVisible = false
-      this.importIsVisible = false
-      if (!this.spaceDetailsIsPinned) {
-        this.spaceDetailsIsVisible = false
-      }
-      if (!this.sidebarIsPinned) {
-        this.sidebarIsVisible = false
-      }
-    },
-    togglePricingIsVisible () {
-      const value = !this.pricingIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('pricingIsVisible', value)
-    },
-    toggleAboutIsVisible () {
-      const isVisible = this.aboutIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.aboutIsVisible = !isVisible
-    },
-    toggleSpaceDetailsIsVisible () {
-      const isVisible = this.spaceDetailsIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.spaceDetailsIsVisible = !isVisible
-    },
-    toggleSignUpOrInIsVisible () {
-      const isVisible = this.signUpOrInIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.signUpOrInIsVisible = !isVisible
-    },
-    toggleShareIsVisible () {
-      const isVisible = this.shareIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.shareIsVisible = !isVisible
-    },
-    toggleNotificationsIsVisible () {
-      const isVisible = this.notificationsIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.notificationsIsVisible = !isVisible
-      if (this.notificationsIsVisible) {
-        this.updateNotifications()
-      }
-    },
-    toggleAddSpaceIsVisible () {
-      const isVisible = this.addSpaceIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.addSpaceIsVisible = !isVisible
-    },
-    toggleSidebarIsVisible () {
-      const isVisible = this.sidebarIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.sidebarIsVisible = !isVisible
-    },
-    toggleSpaceStatusIsVisible () {
-      const isVisible = this.spaceStatusIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.spaceStatusIsVisible = !isVisible
-    },
-    toggleOfflineIsVisible () {
-      const isVisible = this.offlineIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.offlineIsVisible = !isVisible
-    },
-    toggleSearchIsVisible () {
-      const isVisible = this.searchIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('searchIsVisible', !isVisible)
-    },
-    setLoadingSignUpOrIn (value) {
-      this.loadingSignUpOrIn = value
-    },
-    toggleUpgradeUserIsVisible () {
-      const isVisible = this.upgradeUserIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.upgradeUserIsVisible = !isVisible
-    },
+  })
+})
+onUnmounted(() => {
+  window.removeEventListener('scroll', updatePosition)
+  clearInterval(updateNotificationsIntervalTimer)
+})
 
-    // hide
+const props = defineProps({
+  isPinchZooming: Boolean,
+  isTouchScrolling: Boolean
+})
+const emit = defineEmits(['updateCount'])
 
-    hidden (event) {
-      if (!this.isTouchDevice) { return }
-      hiddenIteration = 0
-      if (hiddenTimer) { return }
-      hiddenTimer = window.requestAnimationFrame(this.hiddenFrame)
-    },
-    hiddenFrame () {
-      hiddenIteration++
-      this.isHidden = true
-      if (hiddenIteration < hiddenDuration) {
-        window.requestAnimationFrame(this.hiddenFrame)
-      } else {
-        this.cancelHidden()
-      }
-    },
-    cancelHidden () {
-      window.cancelAnimationFrame(hiddenTimer)
-      hiddenTimer = undefined
-      this.isHidden = false
-    },
+watch(() => props.isPinchZooming, (value, prevValue) => {
+  if (value) {
+    fadeOut()
+    updatePosition()
+  } else {
+    shouldCancelFadeOut = true
+    cancelFadeOut()
+  }
+})
+watch(() => props.isTouchScrolling, (value, prevValue) => {
+  if (value) {
+    fadeOut()
+    updatePosition()
+  } else {
+    shouldCancelFadeOut = true
+    cancelFadeOut()
+  }
+})
 
-    // fade out
+const state = reactive({
+  aboutIsVisible: false,
+  spaceDetailsIsVisible: false,
+  spaceDetailsInfoIsVisible: false,
+  signUpOrInIsVisible: false,
+  shareIsVisible: false,
+  notificationsIsVisible: false,
+  loadingSignUpOrIn: false,
+  keyboardShortcutsIsVisible: false,
+  appsAndExtensionsIsVisible: false,
+  upgradeUserIsVisible: false,
+  spaceStatusIsVisible: false,
+  offlineIsVisible: false,
+  position: {},
+  readOnlyJiggle: false,
+  notifications: [],
+  notificationsIsLoading: true,
+  addSpaceIsVisible: false,
+  isHidden: false,
+  templatesIsVisible: false,
+  sidebarIsVisible: false,
+  donateIsVisible: false,
+  importIsVisible: false,
+  earnCreditsIsVisible: false
+})
 
-    fadeOut () {
-      fadeOutIteration = 0
-      if (fadeOutTimer) { return }
-      shouldCancelFadeOut = false
-      fadeOutTimer = window.requestAnimationFrame(this.fadeOutFrame)
-    },
-    cancelFadeOut () {
-      window.cancelAnimationFrame(fadeOutTimer)
-      fadeOutTimer = undefined
-      this.$store.commit('isFadingOutDuringTouch', false)
-      this.cancelUpdatePosition()
-      this.updatePosition()
-    },
-    fadeOutFrame () {
-      fadeOutIteration++
-      this.$store.commit('isFadingOutDuringTouch', true)
-      if (shouldCancelFadeOut) {
-        this.cancelFadeOut()
-      } else if (fadeOutIteration < fadeOutDuration) {
-        window.requestAnimationFrame(this.fadeOutFrame)
-      }
-    },
+const updateSpaceDetailsInfoIsVisible = (value) => {
+  state.spaceDetailsInfoIsVisible = value
+}
 
-    // update position
+const importArenaChannelIsVisible = computed(() => store.state.importArenaChannelIsVisible)
+const isPresentationMode = computed(() => store.state.isPresentationMode)
 
-    updatePosition () {
-      if (!this.isTouchDevice) { return }
-      updatePositionIteration = 0
-      if (updatePositionTimer) { return }
-      updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
-    },
-    cancelUpdatePosition () {
-      window.cancelAnimationFrame(updatePositionTimer)
-      updatePositionTimer = undefined
-    },
-    updatePositionFrame () {
-      updatePositionIteration++
-      this.updatePositionInVisualViewport()
-      if (updatePositionIteration < updatePositionDuration) {
-        window.requestAnimationFrame(this.updatePositionFrame)
-      } else {
-        this.cancelUpdatePosition()
-      }
-    },
-    updatePositionInVisualViewport () {
-      const viewport = utils.visualViewport()
-      const scale = utils.roundFloat(viewport.scale)
-      const counterScale = utils.roundFloat(1 / viewport.scale)
-      const left = Math.round(viewport.offsetLeft)
-      const top = Math.round(viewport.offsetTop)
-      let style = {
-        transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
-        maxWidth: Math.round(viewport.width * scale) + 'px'
-      }
-      if (utils.isIPhone() && scale <= 1) {
-        style.transform = 'none'
-        style.zoom = counterScale
-      }
-      this.position = style
-    },
+const currentSpace = computed(() => store.state.currentSpace)
 
-    // notifications
+const currentSpaceIsHidden = computed(() => currentSpace.value.isHidden)
 
-    async updateNotifications () {
-      this.notificationsIsLoading = true
-      const notifications = await this.$store.dispatch('api/getNotifications') || []
-      this.notifications = sortBy(notifications, 'isRead')
-      this.notificationsIsLoading = false
-    },
-    markAllAsRead () {
-      const notifications = this.notifications.filter(notification => !notification.isRead)
-      const notificationIds = notifications.map(notification => notification.id)
-      this.updateNotificationsIsRead(notificationIds)
-    },
-    markAsRead (notificationId) {
-      this.updateNotificationsIsRead([notificationId])
-    },
-    updateNotificationsIsRead (notificationIds) {
-      this.notifications = this.notifications.map(notification => {
-        if (notificationIds.includes(notification.id)) {
-          notification.isRead = true
-        }
-        return notification
-      })
-      this.$store.dispatch('api/addToQueue', {
-        name: 'updateNotificationsIsRead',
-        body: notificationIds
-      })
-    },
-    disablePresentationMode () {
-      this.$store.commit('isPresentationMode', false)
-    }
-  },
-  watch: {
-    isPinchZooming (value) {
-      if (value) {
-        this.fadeOut()
-        this.updatePosition()
-      } else {
-        shouldCancelFadeOut = true
-        this.cancelFadeOut()
-      }
-    },
-    isTouchScrolling (value) {
-      if (value) {
-        this.fadeOut()
-        this.updatePosition()
-      } else {
-        shouldCancelFadeOut = true
-        this.cancelFadeOut()
-      }
-    }
+const kinopioDomain = computed(() => consts.kinopioDomain())
+
+const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
+
+const isVisible = computed(() => {
+  if (isPresentationMode.value) { return }
+  if (store.state.isAddPage) { return }
+  const contentDialogIsVisible = store.state.cardDetailsIsVisibleForCardId || store.state.connectionDetailsIsVisibleForConnectionId
+  if (contentDialogIsVisible && store.getters.isTouchDevice && !state.sidebarIsVisible) {
+    return false
+  } else {
+    return true
+  }
+})
+
+const isEmbedMode = computed(() => store.state.isEmbedMode)
+const isSpace = computed(() => {
+  const isOther = isEmbedMode.value || store.state.isAddPage
+  const isSpace = !isOther
+  return isSpace
+})
+
+const currentSpaceUrl = computed(() => store.getters['currentSpace/url'])
+
+const shouldShowNewStuffIsUpdated = computed(() => {
+  const isNotDefaultSpace = !store.getters['currentSpace/isHelloKinopio']
+  return store.state.newStuffIsUpdated && isNotDefaultSpace && userCanEditSpace.value
+})
+
+const userCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+
+const userIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+
+const currentSpaceName = computed(() => {
+  const id = currentSpace.value.id
+  const name = currentSpace.value.name
+  if (name) {
+    return name
+  } else {
+    return `Space ${id}`
+  }
+})
+
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const isOnline = computed(() => store.state.isOnline)
+const spaceHasStatus = computed(() => {
+  if (!isOnline.value) { return }
+  return store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems
+})
+
+const spaceHasStatusAndStatusDialogIsNotVisible = computed(() => {
+  if (spaceHasStatus.value) {
+    return true
+  } else if (state.spaceStatusIsVisible) {
+    return true
+  } else {
+    return false
+  }
+})
+
+const currentSpaceIsTemplate = computed(() => {
+  if (currentSpace.value.isTemplate) { return true }
+  const templateSpaceIds = templates.spaces().map(space => space.id)
+  return templateSpaceIds.includes(currentSpace.value.id)
+})
+const currentSpaceIsFromTweet = computed(() => currentSpace.value.isFromTweet)
+
+const currentSpaceIsInbox = computed(() => currentSpace.value.name === 'Inbox')
+
+const shouldShowInExplore = computed(() => {
+  if (currentSpace.value.privacy === 'private') { return false }
+  return currentSpace.value.showInExplore
+})
+
+const notificationsUnreadCount = computed(() => {
+  if (!state.notifications) { return 0 }
+  const unread = state.notifications.filter(notification => !notification.isRead)
+  return unread.length || 0
+})
+const searchResultsCount = computed(() => store.state.searchResultsCards.length)
+const totalFiltersActive = computed(() => store.getters['currentUser/totalFiltersActive'])
+const searchResultsOrFilters = computed(() => {
+  if (searchResultsCount.value || totalFiltersActive.value) {
+    return true
+  } else {
+    return false
+  }
+})
+
+const controlsSettingsIsVisible = computed(() => store.state.controlsSettingsIsPinned)
+
+const pricingIsVisible = computed(() => store.state.pricingIsVisible)
+
+const isFadingOut = computed(() => store.state.isFadingOutDuringTouch)
+
+const backButtonIsVisible = computed(() => {
+  const spaceId = store.state.prevSpaceIdInSession
+  return spaceId && spaceId !== currentSpace.value.id
+})
+const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+
+const changeToPrevSpace = () => {
+  const id = currentSpace.value.id
+  store.dispatch('currentSpace/loadPrevSpaceInSession')
+  store.commit('prevSpaceIdInSession', id)
+}
+const openKinopio = () => {
+  const url = currentSpaceUrl.value
+  const title = `${currentSpaceName.value} – Kinopio`
+  window.open(url, title)
+}
+const showCardDetails = (card) => {
+  store.dispatch('currentCards/showCardDetails', card.id)
+  store.commit('previousResultItem', card)
+}
+
+const showNextSearchCard = () => {
+  if (!store.state.search) { return }
+  const cards = store.state.searchResultsCards
+  if (!store.state.previousResultItem.id) {
+    showCardDetails(cards[0])
+    return
+  }
+  const currentIndex = cards.findIndex(card => card.id === store.state.previousResultItem.id)
+  let index = currentIndex + 1
+  if (cards.length === index) {
+    index = 0
+  }
+  showCardDetails(cards[index])
+}
+
+const showPreviousSearchCard = () => {
+  if (!store.state.search) { return }
+  const cards = store.state.searchResultsCards
+  if (!store.state.previousResultItem.id) {
+    showCardDetails(cards[0])
+    return
+  }
+  const currentIndex = cards.findIndex(card => card.id === store.state.previousResultItem.id)
+  let index = currentIndex - 1
+  if (index < 0) {
+    index = cards.length - 1
+  }
+  showCardDetails(cards[index])
+}
+
+const clearSearchAndFilters = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('clearSearch')
+  store.dispatch('clearAllFilters')
+}
+const addReadOnlyJiggle = () => {
+  const element = readOnlyElement.value
+  if (!element) { return }
+  state.readOnlyJiggle = true
+  element.addEventListener('animationend', this.removeReadOnlyJiggle, false)
+}
+const removeReadOnlyJiggle = () => {
+  state.readOnlyJiggle = false
+}
+
+const updateAppsAndExtensionsIsVisible = (value) => {
+  state.appsAndExtensionsIsVisible = value
+}
+const updateKeyboardShortcutsIsVisible = (value) => {
+  state.keyboardShortcutsIsVisible = value
+}
+const updateDonateIsVisible = (value) => {
+  state.donateIsVisible = value
+}
+const updateTemplatesIsVisible = (value) => {
+  state.templatesIsVisible = value
+}
+const updateEarnCreditsIsVisible = (value) => {
+  state.earnCreditsIsVisible = value
+}
+
+const updateImportIsVisible = (value) => {
+  state.importIsVisible = value
+}
+
+const closeAllDialogs = () => {
+  state.aboutIsVisible = false
+  state.spaceDetailsInfoIsVisible = false
+  state.signUpOrInIsVisible = false
+  state.shareIsVisible = false
+  state.keyboardShortcutsIsVisible = false
+  state.appsAndExtensionsIsVisible = false
+  state.upgradeUserIsVisible = false
+  state.donateIsVisible = false
+  state.spaceStatusIsVisible = false
+  state.offlineIsVisible = false
+  state.notificationsIsVisible = false
+  state.addSpaceIsVisible = false
+  state.templatesIsVisible = false
+  state.earnCreditsIsVisible = false
+  state.importIsVisible = false
+  if (!store.state.spaceDetailsIsPinned) {
+    state.spaceDetailsIsVisible = false
+  }
+  if (!store.state.sidebarIsPinned) {
+    state.sidebarIsVisible = false
   }
 }
+const togglePricingIsVisible = () => {
+  const value = !pricingIsVisible.value
+  store.dispatch('closeAllDialogs')
+  store.commit('pricingIsVisible', value)
+}
+const toggleAboutIsVisible = () => {
+  const isVisible = state.aboutIsVisible
+  store.dispatch('closeAllDialogs')
+  state.aboutIsVisible = !isVisible
+}
+const updateSpaceDetailsIsVisible = (value) => {
+  state.spaceDetailsIsVisible = value
+}
+const toggleSpaceDetailsIsVisible = () => {
+  const isVisible = state.spaceDetailsIsVisible
+  store.dispatch('closeAllDialogs')
+  state.spaceDetailsIsVisible = !isVisible
+}
+const updateSignUpOrInIsVisible = (value) => {
+  state.signUpOrInIsVisible = value
+}
+const toggleSignUpOrInIsVisible = () => {
+  const isVisible = state.signUpOrInIsVisible
+  store.dispatch('closeAllDialogs')
+  state.signUpOrInIsVisible = !isVisible
+}
+const toggleShareIsVisible = () => {
+  const isVisible = state.shareIsVisible
+  store.dispatch('closeAllDialogs')
+  state.shareIsVisible = !isVisible
+}
+const toggleNotificationsIsVisible = () => {
+  const isVisible = state.notificationsIsVisible
+  store.dispatch('closeAllDialogs')
+  state.notificationsIsVisible = !isVisible
+  if (state.notificationsIsVisible) {
+    updateNotifications()
+  }
+}
+
+const updateAddSpaceIsVisible = (value) => {
+  state.addSpaceIsVisible = value
+}
+const toggleAddSpaceIsVisible = () => {
+  const isVisible = state.addSpaceIsVisible
+  store.dispatch('closeAllDialogs')
+  state.addSpaceIsVisible = !isVisible
+}
+
+const updateSidebarIsVisible = (value) => {
+  state.sidebarIsVisible = value
+}
+const toggleSidebarIsVisible = () => {
+  const isVisible = state.sidebarIsVisible
+  store.dispatch('closeAllDialogs')
+  state.sidebarIsVisible = !isVisible
+}
+const toggleSpaceStatusIsVisible = () => {
+  const isVisible = state.spaceStatusIsVisible
+  store.dispatch('closeAllDialogs')
+  state.spaceStatusIsVisible = !isVisible
+}
+const toggleOfflineIsVisible = () => {
+  const isVisible = state.offlineIsVisible
+  store.dispatch('closeAllDialogs')
+  state.offlineIsVisible = !isVisible
+}
+const searchIsVisible = computed(() => store.state.searchIsVisible)
+const toggleSearchIsVisible = () => {
+  const isVisible = searchIsVisible.value
+  store.dispatch('closeAllDialogs')
+  store.commit('searchIsVisible', !isVisible)
+}
+const setLoadingSignUpOrIn = (value) => {
+  state.loadingSignUpOrIn = value
+}
+
+const updateUpgradeUserIsVisible = (value) => {
+  state.upgradeUserIsVisible = value
+}
+const toggleUpgradeUserIsVisible = () => {
+  const isVisible = state.upgradeUserIsVisible
+  store.dispatch('closeAllDialogs')
+  state.upgradeUserIsVisible = !isVisible
+}
+
+// hide
+
+const hidden = (event) => {
+  if (!store.getters.isTouchDevice) { return }
+  hiddenIteration = 0
+  if (hiddenTimer) { return }
+  hiddenTimer = window.requestAnimationFrame(hiddenFrame)
+}
+const hiddenFrame = () => {
+  hiddenIteration++
+  state.isHidden = true
+  if (hiddenIteration < hiddenDuration) {
+    window.requestAnimationFrame(hiddenFrame)
+  } else {
+    cancelHidden()
+  }
+}
+const cancelHidden = () => {
+  window.cancelAnimationFrame(hiddenTimer)
+  hiddenTimer = undefined
+  state.isHidden = false
+}
+
+// fade out
+
+const fadeOut = () => {
+  fadeOutIteration = 0
+  if (fadeOutTimer) { return }
+  shouldCancelFadeOut = false
+  fadeOutTimer = window.requestAnimationFrame(fadeOutFrame)
+}
+const cancelFadeOut = () => {
+  window.cancelAnimationFrame(fadeOutTimer)
+  fadeOutTimer = undefined
+  store.commit('isFadingOutDuringTouch', false)
+  cancelUpdatePosition()
+  updatePosition()
+}
+const fadeOutFrame = () => {
+  fadeOutIteration++
+  store.commit('isFadingOutDuringTouch', true)
+  if (shouldCancelFadeOut) {
+    cancelFadeOut()
+  } else if (fadeOutIteration < fadeOutDuration) {
+    window.requestAnimationFrame(fadeOutFrame)
+  }
+}
+
+// update position
+
+const updatePosition = () => {
+  if (!store.getters.isTouchDevice) { return }
+  updatePositionIteration = 0
+  if (updatePositionTimer) { return }
+  updatePositionTimer = window.requestAnimationFrame(updatePositionFrame)
+}
+const cancelUpdatePosition = () => {
+  window.cancelAnimationFrame(updatePositionTimer)
+  updatePositionTimer = undefined
+}
+const updatePositionFrame = () => {
+  updatePositionIteration++
+  updatePositionInVisualViewport()
+  if (updatePositionIteration < updatePositionDuration) {
+    window.requestAnimationFrame(updatePositionFrame)
+  } else {
+    cancelUpdatePosition()
+  }
+}
+const updatePositionInVisualViewport = () => {
+  const viewport = utils.visualViewport()
+  const scale = utils.roundFloat(viewport.scale)
+  const counterScale = utils.roundFloat(1 / viewport.scale)
+  const left = Math.round(viewport.offsetLeft)
+  const top = Math.round(viewport.offsetTop)
+  let style = {
+    transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
+    maxWidth: Math.round(viewport.width * scale) + 'px'
+  }
+  if (utils.isIPhone() && scale <= 1) {
+    style.transform = 'none'
+    style.zoom = counterScale
+  }
+  state.position = style
+}
+
+// notifications
+
+const updateNotifications = async () => {
+  state.notificationsIsLoading = true
+  const notifications = await store.dispatch('api/getNotifications') || []
+  state.notifications = sortBy(notifications, 'isRead')
+  state.notificationsIsLoading = false
+}
+const markAllAsRead = () => {
+  const notifications = state.notifications.filter(notification => !notification.isRead)
+  const notificationIds = notifications.map(notification => notification.id)
+  updateNotificationsIsRead(notificationIds)
+}
+const markAsRead = (notificationId) => {
+  updateNotificationsIsRead([notificationId])
+}
+const updateNotificationsIsRead = (notificationIds) => {
+  state.notifications = state.notifications.map(notification => {
+    if (notificationIds.includes(notification.id)) {
+      notification.isRead = true
+    }
+    return notification
+  })
+  store.dispatch('api/addToQueue', {
+    name: 'updateNotificationsIsRead',
+    body: notificationIds
+  })
+}
+const disablePresentationMode = () => {
+  store.commit('isPresentationMode', false)
+}
+
 </script>
+
+<template lang="pug">
+header.presentation-header(v-if="isPresentationMode" :style="state.position" :class="{'fade-out': isFadingOut}")
+  button.active(@click="disablePresentationMode" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+    img.icon(src="@/assets/presentation.svg")
+  SelectAllBelow
+
+header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut, 'hidden': state.isHidden}")
+  //- embed
+  nav.embed-nav(v-if="isEmbedMode")
+    a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
+      button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+        .logo
+          .logo-image
+        MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
+        span {{currentSpaceName}}{{' '}}
+        img.icon.visit(src="@/assets/visit.svg")
+    .right
+      SpaceUsers
+
+  //- standard
+  nav(v-if="!isEmbedMode")
+    .left
+      //- About
+      .logo-about
+        .button-wrap
+          .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active: state.aboutIsVisible}" tabindex="0")
+            .logo-image
+              .label-badge.small-badge(v-if="shouldShowNewStuffIsUpdated")
+                span NEW
+            img.down-arrow(src="@/assets/down-arrow.svg")
+          About(:visible="state.aboutIsVisible")
+          KeyboardShortcuts(:visible="state.keyboardShortcutsIsVisible")
+          Donate(:visible="state.donateIsVisible")
+          AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
+      .space-meta-rows
+        .space-functions-row
+          .segmented-buttons.add-space-functions
+            //- Add Space
+            .button-wrap
+              button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: state.addSpaceIsVisible }")
+                img.icon.add(src="@/assets/add.svg")
+                span New
+              AddSpace(:visible="state.addSpaceIsVisible" :shouldAddSpaceDirectly="true")
+              Templates(:visible="state.templatesIsVisible")
+          //- Search
+          .segmented-buttons
+            .button-wrap
+              button.search-button(@click.stop="toggleSearchIsVisible" :class="{ active: searchIsVisible || totalFiltersActive || searchResultsCount, 'translucent-button': !shouldIncreaseUIContrast }")
+                template(v-if="!searchResultsCount")
+                  img.icon.search(src="@/assets/search.svg")
+                .badge.search.search-count-badge(v-if="searchResultsCount")
+                  img.icon.search(src="@/assets/search.svg")
+                  span {{searchResultsCount}}
+                span.badge.info(v-if="totalFiltersActive")
+                  img.icon(src="@/assets/filter.svg")
+                  span {{totalFiltersActive}}
+              Search(:visible="searchIsVisible")
+            //- button(@click="showPreviousSearchCard" v-if="searchResultsCount")
+            //-   img.icon.left-arrow(src="@/assets/down-arrow.svg")
+            //- button(@click="showNextSearchCard" v-if="searchResultsCount")
+            //-   img.icon.right-arrow(src="@/assets/down-arrow.svg")
+            button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+              img.icon.cancel(src="@/assets/add.svg")
+
+        .space-details-row.segmented-buttons
+          //- Back
+          .button-wrap(v-if="backButtonIsVisible" title="Go Back" @click.stop="changeToPrevSpace")
+            button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+              img.icon.left-arrow(src="@/assets/down-arrow.svg")
+          //- Current Space
+          .button-wrap
+            button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+              span(v-if="currentSpaceIsInbox")
+                img.icon.inbox-icon(src="@/assets/inbox.svg")
+              span(v-show="currentSpaceIsTemplate")
+                img.icon.templates(src="@/assets/templates.svg")
+              span(v-if="currentSpaceIsFromTweet")
+                img.icon.tweet(src="@/assets/twitter.svg")
+              SpaceTodayJournalBadge(:space="currentSpace")
+              MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
+              span {{currentSpaceName}}
+              PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
+              img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
+              img.icon.view-hidden(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
+            SpaceDetails(:visible="state.spaceDetailsIsVisible")
+            ImportArenaChannel(:visible="importArenaChannelIsVisible")
+            SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
+            Import(:visible="state.importIsVisible")
+            //- Read Only badge
+            .label-badge.read-only-badge-wrap(v-if="!userCanEditSpace")
+              span(:class="{'invisible': state.readOnlyJiggle}")
+                span Read Only
+              span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
+                span Read Only
+          //- State
+          .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
+            button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+              Loader(:visible="spaceHasStatus")
+              .badge.success.space-status-success(v-if="!spaceHasStatus")
+            SpaceStatus(:visible="state.spaceStatusIsVisible")
+          //- Offline
+          .button-wrap(v-if="!isOnline")
+            button(@click.left="toggleOfflineIsVisible" :class="{ active: state.offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+              img.icon.offline(src="@/assets/offline.svg")
+            Offline(:visible="state.offlineIsVisible")
+
+    .right
+      .controls(v-if="isSpace")
+        .top-controls
+          SpaceUsers
+          ControlsSettings(:visible="controlsSettingsIsVisible")
+          UserSettings
+          UpdatePassword
+          //- Share
+          .button-wrap
+            button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+              span Share
+            Share(:visible="state.shareIsVisible")
+            EarnCredits(:visible="state.earnCreditsIsVisible")
+          //- Notifications
+          .button-wrap
+            button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: state.notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+              span {{notificationsUnreadCount}}
+              .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
+            UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
+        .bottom-controls
+          Discovery
+          //- Sidebar
+          .button-wrap
+            button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+              img.icon.sidebar(src="@/assets/sidebar.svg")
+            Sidebar(:visible="state.sidebarIsVisible")
+        .row.bottom-controls
+          //- Sign Up or In
+          .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
+            button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active: state.signUpOrInIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+              span Sign Up or In
+              Loader(:visible="state.loadingSignUpOrIn")
+            SignUpOrIn(:visible="state.signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
+          //- Pricing
+          .button-wrap(v-if="!userIsUpgraded")
+            button(@click.left.stop="togglePricingIsVisible" :class="{active: pricingIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+              span Pricing
+            Pricing(:visible="pricingIsVisible")
+          //- Upgrade
+          .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
+            button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+              span Upgrade
+            UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
+
+  Toolbar(:visible="isSpace")
+  SelectAllBelow
+</template>
 
 <style lang="stylus">
 header
