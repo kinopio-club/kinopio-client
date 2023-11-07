@@ -370,6 +370,7 @@ const currentSpace = {
       }
       space.userId = currentUser.id
       space = utils.newSpaceBackground(space, currentUser)
+      space.background = space.background || consts.defaultSpaceBackground
       space.isTemplate = false
       space.isHidden = false
       const nullCardUsers = true

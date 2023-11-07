@@ -1156,12 +1156,13 @@ export default {
     return { addItems, updateItems, removeItems }
   },
   newSpaceBackground (space, currentUser) {
-    const background = currentUser.defaultSpaceBackground || consts.defaultSpaceBackground
-    const backgroundTint = currentUser.defaultSpaceBackgroundTint
-    space.background = background
-    if (backgroundTint) {
-      space.backgroundTint = backgroundTint
+    if (currentUser.defaultSpaceBackgroundGradient) {
+      space.backgroundGradient = currentUser.defaultSpaceBackgroundGradient
+      space.backgroundIsGradient = true
+    } else {
+      space.background = currentUser.defaultSpaceBackground
     }
+    space.backgroundTint = currentUser.defaultSpaceBackgroundTint
     return space
   },
   emptySpace (spaceId) {
@@ -1386,6 +1387,7 @@ export default {
     space.isFromTweet = false
     space.collaboratorKey = nanoid()
     space = this.newSpaceBackground(space, currentUser)
+    space.background = space.background || consts.defaultSpaceBackground
     // summary
     space.cards.push({ id: nanoid(), name: summary, x: 80, y: 110, frameId: 0 })
     // daily prompt
