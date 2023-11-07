@@ -38,13 +38,14 @@ const toggleToolbar = (value) => {
     store.commit('currentUserToolbar', value)
   }
 }
+const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 </script>
 
 <template lang="pug">
 nav.toolbar(v-if="visible")
   //- Box
   .segmented-buttons
-    button.translucent-button(v-if="canEditSpace" :class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')" :title="boxBadgeLabel")
+    button(v-if="canEditSpace" :class="{ active: currentUserToolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }" @click="toggleToolbar('box')" :title="boxBadgeLabel")
       img.icon.box-icon(src="@/assets/box.svg")
       .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsBox")
         span {{boxBadgeLabel}}
