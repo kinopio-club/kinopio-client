@@ -56,6 +56,7 @@ const initialState = {
   weatherLocation: undefined,
   weatherUnitIsCelcius: false,
   shouldUseStickyCards: true,
+  shouldIncreaseUIContrast: false,
   shouldPauseConnectionDirections: false,
   lastUsedImagePickerService: '',
   AIImages: [],
@@ -337,6 +338,10 @@ export default {
     shouldUseStickyCards: (state, value) => {
       state.shouldUseStickyCards = value
       cache.updateUser('shouldUseStickyCards', value)
+    },
+    shouldIncreaseUIContrast: (state, value) => {
+      state.shouldIncreaseUIContrast = value
+      cache.updateUser('shouldIncreaseUIContrast', value)
     },
     shouldPauseConnectionDirections: (state, value) => {
       state.shouldPauseConnectionDirections = value

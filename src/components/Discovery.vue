@@ -1,12 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 import dayjs from 'dayjs'
 
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
+const store = useStore()
 
 let updateLiveSpacesIntervalTimer
 
@@ -39,6 +39,7 @@ const closeDialogs = () => {
   state.exploreIsVisible = false
   state.liveIsVisible = false
 }
+const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 
 // Explore
 
@@ -117,11 +118,11 @@ const normalizeLiveSpaces = (spaces) => {
 .explore-row.button-wrap
   .segmented-buttons
     //- Explore
-    button.explore-button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible}")
+    button.explore-button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
       span.explore-button-label(v-if="unreadExploreSpacesLength") &nbsp;{{ unreadExploreSpacesLength }}
     //- Live
-    button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible}")
+    button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
       img.icon.camera(src="@/assets/camera.svg")
       span(v-if="state.liveSpaces.length") {{ state.liveSpaces.length }}
   Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")

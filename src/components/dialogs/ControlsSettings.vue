@@ -70,7 +70,7 @@ const togglePanningTipsIsVisible = () => {
   state.panningTipsIsVisible = value
 }
 
-// should use sticky cards
+// disable sticky cards
 
 const shouldDisableStickyCards = computed(() => { return !store.state.currentUser.shouldUseStickyCards })
 const toggleShouldUseStickyCards = () => {
@@ -79,13 +79,21 @@ const toggleShouldUseStickyCards = () => {
   store.dispatch('currentUser/update', { shouldUseStickyCards: value })
 }
 
-// should pause connection directions
+// pause connection directions
 
 const shouldPauseConnectionDirections = computed(() => { return store.state.currentUser.shouldPauseConnectionDirections })
 const toggleShouldPauseConnectionDirections = () => {
   const value = !shouldPauseConnectionDirections.value
   store.dispatch('currentUser/update', { shouldPauseConnectionDirections: value })
   store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
+}
+
+// increase UI Contrast
+
+const shouldIncreaseUIContrast = computed(() => { return store.state.currentUser.shouldIncreaseUIContrast })
+const toggleShouldIncreaseUIContrast = () => {
+  const value = !shouldIncreaseUIContrast.value
+  store.dispatch('currentUser/update', { shouldIncreaseUIContrast: value })
 }
 
 // outside space background
@@ -153,13 +161,13 @@ dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @clic
         input(type="checkbox" v-model="shouldDisableStickyCards")
         span Disable Sticky Cards
     .row
+      label(:class="{active: shouldIncreaseUIContrast}" @click.left.prevent="toggleShouldIncreaseUIContrast" @keydown.stop.enter="toggleShouldIncreaseUIContrast")
+        input(type="checkbox" v-model="shouldIncreaseUIContrast")
+        span Increase UI Contrast
+    .row
       label(:class="{ active: shouldPauseConnectionDirections }" @click.left.prevent="toggleShouldPauseConnectionDirections" @keydown.stop.enter="toggleShouldPauseConnectionDirections")
         input(type="checkbox" v-model="shouldPauseConnectionDirections")
         span Pause Connection Directions
-    //- .row
-    //-   label(:class="{active: highContrastUIButtons}" @click.left.prevent="toggleHighContrastUIButtons" @keydown.stop.enter="toggleHighContrastUIButtons")
-    //-     input(type="checkbox" v-model="highContrastUIButtons")
-    //-     span High Contrast UI Buttons
 
   section
     .row.title-row
