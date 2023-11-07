@@ -465,6 +465,9 @@ label // used for checkbox buttons
     border-color var(--primary-background)
     img
       filter invert(1)
+  &.translucent-button
+    backdrop-filter blur(8px) !important
+    background var(--button-background-translucent)
   &.small-button
     height fit-content
     padding 0px 4px
