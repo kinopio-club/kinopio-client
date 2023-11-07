@@ -3,16 +3,26 @@ import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, w
 import { useStore } from 'vuex'
 
 import UserSettingsGeneral from '@/components/UserSettingsGeneral.vue'
+import UserSettingsControls from '@/components/UserSettingsControls.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
 
 const dialogElement = ref(null)
 
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'updatePageSizes') {
+      updateDialogHeight()
+    }
+  })
+})
+
 const visible = computed(() => store.state.userSettingsIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     closeChildDialogs()
+    updateDialogHeight()
   }
 })
 const closeChildDialogs = () => {
@@ -34,8 +44,10 @@ const updateDialogHeight = async () => {
 
 const currentSettingsIsGeneral = computed(() => state.currentSettings === 'general')
 const currentSettingsIsControls = computed(() => state.currentSettings === 'controls')
-const updateCurrentSettings = (value) => {
+const updateCurrentSettings = async (value) => {
   state.currentSettings = value
+  await nextTick()
+  updateDialogHeight()
 }
 
 // pin
@@ -65,6 +77,7 @@ dialog.user-settings.narrow.is-pinnable(v-if="visible" :open="visible" ref="dial
       button(@click="updateCurrentSettings('controls')" :class="{ active: currentSettingsIsControls }")
         span Controls
   UserSettingsGeneral(:visible="currentSettingsIsGeneral")
+  UserSettingsControls(:visible="currentSettingsIsControls")
 </template>
 
 <style lang="stylus">

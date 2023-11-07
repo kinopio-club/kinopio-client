@@ -7,24 +7,8 @@ import consts from '@/consts.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 const store = useStore()
 
-const dialogElement = ref(null)
-
-onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    }
-  })
-})
-
 const props = defineProps({
   visible: Boolean
-})
-
-watch(() => props.visible, (value, prevValue) => {
-  if (value) {
-    updateDialogHeight()
-  }
 })
 
 const state = reactive({
@@ -115,18 +99,6 @@ const toggleOutsideSpaceColorTipsIsVisible = () => {
 
 // dialog
 
-const controlsSettingsIsPinned = computed(() => { return store.state.controlsSettingsIsPinned })
-const toggleDialogIsPinned = () => {
-  store.dispatch('closeAllDialogs')
-  const value = !controlsSettingsIsPinned.value
-  store.dispatch('controlsSettingsIsPinned', value)
-}
-const updateDialogHeight = async () => {
-  if (!props.visible) { return }
-  await nextTick()
-  let element = dialogElement.value
-  state.dialogHeight = utils.elementHeight(element)
-}
 const clearTips = () => {
   state.panningTipsIsVisible = false
   state.outsideSpaceColorTipsIsVisible = false
@@ -134,12 +106,7 @@ const clearTips = () => {
 </script>
 
 <template lang="pug">
-dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :data-is-pinned="controlsSettingsIsPinned" :class="{'is-pinned': controlsSettingsIsPinned}")
-  section.title-row
-    p Controls
-    button.pin-button.small-button(:class="{active: controlsSettingsIsPinned}" @click.left="toggleDialogIsPinned" title="Pin dialog")
-      img.icon.pin(src="@/assets/pin.svg")
-
+.controls-settings(v-if="visible")
   section
     .row
       p New Spaces
@@ -211,11 +178,6 @@ dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @clic
 <style lang="stylus">
 .controls-settings
   overflow auto
-  &.is-pinned
-    left initial
-    right 8px
-  .pin-button
-    margin 0
   .panning-speed-buttons
     margin-left 6px
     margin-top 0
@@ -240,4 +202,7 @@ dialog.controls-settings.narrow.is-pinnable(v-if="visible" :open="visible" @clic
         width 18px
         height 18px
         border-radius var(--small-entity-radius)
+  section
+    border-top 1px solid var(--primary-border)
+    border-radius 0 !important
 </style>

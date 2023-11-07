@@ -97,8 +97,8 @@ const deleteUserPermanent = async () => {
 </script>
 
 <template lang="pug">
-template(v-if="visible")
-  section.user-settings-general
+.user-settings-general(v-if="visible")
+  section
     //- Notifications
     .row
       .button-wrap
@@ -162,4 +162,7 @@ template(v-if="visible")
     .subsection
       margin-top 10px
       margin-bottom 10px
+  section
+    border-top 1px solid var(--primary-border)
+    border-radius 0 !important
 </style>
