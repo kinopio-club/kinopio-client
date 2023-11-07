@@ -1,6 +1,6 @@
 <template lang="pug">
 header.presentation-header(v-if="isPresentationMode" :style="position" :class="{'fade-out': isFadingOut}")
-  button.active(@click="disablePresentationMode")
+  button.active(@click="disablePresentationMode" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
     img.icon(src="@/assets/presentation.svg")
   SelectAllBelow
 
@@ -8,7 +8,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
   //- embed
   nav.embed-nav(v-if="isEmbedMode")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
-      button
+      button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
         .logo
           .logo-image
         MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
@@ -45,7 +45,7 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           //- Search
           .segmented-buttons
             .button-wrap
-              button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible || totalFiltersActive || searchResultsCount}")
+              button.search-button(@click.stop="toggleSearchIsVisible" :class="{ active: searchIsVisible || totalFiltersActive || searchResultsCount, 'translucent-button': !shouldIncreaseUIContrast }")
                 template(v-if="!searchResultsCount")
                   img.icon.search(src="@/assets/search.svg")
                 .badge.search.search-count-badge(v-if="searchResultsCount")
@@ -59,17 +59,17 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
             //-   img.icon.left-arrow(src="@/assets/down-arrow.svg")
             //- button(@click="showNextSearchCard" v-if="searchResultsCount")
             //-   img.icon.right-arrow(src="@/assets/down-arrow.svg")
-            button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
+            button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
               img.icon.cancel(src="@/assets/add.svg")
 
         .space-details-row.segmented-buttons
           //- Back
           .button-wrap(v-if="backButtonIsVisible" title="Go Back" @click.stop="changeToPrevSpace")
-            button
+            button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
               img.icon.left-arrow(src="@/assets/down-arrow.svg")
           //- Current Space
           .button-wrap
-            button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active: spaceDetailsIsVisible}")
+            button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
               span(v-if="currentSpaceIsInbox")
                 img.icon.inbox-icon(src="@/assets/inbox.svg")
               span(v-show="currentSpaceIsTemplate")
@@ -94,13 +94,13 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
                 span Read Only
           //- State
           .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
-            button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
+            button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
               Loader(:visible="spaceHasStatus")
               .badge.success.space-status-success(v-if="!spaceHasStatus")
             SpaceStatus(:visible="spaceStatusIsVisible")
           //- Offline
           .button-wrap(v-if="!isOnline")
-            button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
+            button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
               img.icon.offline(src="@/assets/offline.svg")
             Offline(:visible="offlineIsVisible")
 
@@ -113,13 +113,13 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           UpdatePassword
           //- Share
           .button-wrap
-            button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
+            button(@click.left.stop="toggleShareIsVisible" :class="{active: shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
               span Share
             Share(:visible="shareIsVisible")
             EarnCredits(:visible="earnCreditsIsVisible")
           //- Notifications
           .button-wrap
-            button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
+            button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
               span {{notificationsUnreadCount}}
               .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
             UserNotifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
@@ -127,24 +127,24 @@ header(v-if="isVisible" :style="position" :class="{'fade-out': isFadingOut, 'hid
           Discovery
           //- Sidebar
           .button-wrap
-            button(@click.left.stop="toggleSidebarIsVisible" :class="{active : sidebarIsVisible}")
+            button(@click.left.stop="toggleSidebarIsVisible" :class="{active: sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
               img.icon.sidebar(src="@/assets/sidebar.svg")
             Sidebar(:visible="sidebarIsVisible")
         .row.bottom-controls
           //- Sign Up or In
           .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
-            button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
+            button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active: signUpOrInIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
               span Sign Up or In
               Loader(:visible="loadingSignUpOrIn")
             SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
           //- Pricing
           .button-wrap(v-if="!userIsUpgraded")
-            button(@click.left.stop="togglePricingIsVisible" :class="{active : pricingIsVisible}")
+            button(@click.left.stop="togglePricingIsVisible" :class="{active: pricingIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
               span Pricing
             Pricing(:visible="pricingIsVisible")
           //- Upgrade
           .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
-            button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
+            button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
               span Upgrade
             UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs")
 
@@ -447,6 +447,9 @@ export default {
     backButtonIsVisible () {
       const spaceId = this.$store.state.prevSpaceIdInSession
       return spaceId && spaceId !== this.currentSpace.id
+    },
+    shouldIncreaseUIContrast () {
+      return this.$store.state.currentUser.shouldIncreaseUIContrast
     }
   },
   methods: {
