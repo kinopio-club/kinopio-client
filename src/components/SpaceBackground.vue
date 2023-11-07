@@ -54,12 +54,9 @@ const backgroundStyles = computed(() => {
 // Image
 
 const kinopioBackgroundImageData = computed(() => {
-  const data = backgroundImages.find(image => {
+  const data = backgroundImages.find(item => {
     const background = currentSpace.value.background
-    if (!background) {
-      return image.isDefault
-    }
-    return background === image.url
+    return background === item.url
   })
   return data
 })
@@ -101,7 +98,8 @@ const updateBackground = async () => {
   }
   const background = backgroundUrl.value
   if (!utils.urlIsImage(background)) {
-    updateBackgroundSize()
+    store.commit('spaceBackgroundUrl', null)
+    return
   }
   try {
     const image = await utils.loadImage(background)

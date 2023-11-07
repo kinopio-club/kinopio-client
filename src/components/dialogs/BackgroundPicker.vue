@@ -201,7 +201,7 @@ const checkIfImageIsUrl = () => {
 }
 const background = computed({
   get () {
-    return currentSpace.value.background || consts.defaultBackground
+    return currentSpace.value.background
   },
   set (url) {
     updateSpaceBackground(url)

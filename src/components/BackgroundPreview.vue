@@ -26,18 +26,17 @@ const backgroundTintStyles = computed(() => {
 })
 const backgroundStyles = computed(() => {
   if (currentSpace.value.backgroundIsGradient) { return }
-  const defaultBackgroundThumbnail = 'https://bk.kinopio.club/background-thumbnail.svg'
   let background = props.space.background
   const backgroundImage = backgroundImages.find(image => {
+    if (!background) {
+      return image.isBlank
+    }
     const isImage = image.url === background
     const hasThumbnailUrl = image.thumbnailUrl
     return isImage && hasThumbnailUrl
   })
   if (backgroundImage) {
     background = backgroundImage.thumbnailUrl || background
-  }
-  if (!utils.urlIsImage(background)) {
-    background = defaultBackgroundThumbnail
   }
   return {
     backgroundImage: `url(${background})`
