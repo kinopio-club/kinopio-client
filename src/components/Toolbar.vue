@@ -1,55 +1,54 @@
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+const store = useStore()
+
+const props = defineProps({
+  visible: Boolean
+})
+
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const isTouchDevice = computed(() => store.state.isTouchDevice)
+
+const currentUserToolbar = computed(() => store.state.currentUserToolbar)
+watch(() => currentUserToolbar.value, (value, prevValue) => {
+  if (value) {
+    store.dispatch('closeAllDialogs')
+    store.dispatch('clearMultipleSelected')
+  }
+})
+
+const currentUserToolbarIsBox = computed(() => {
+  if (store.state.currentUserIsResizingBox) { return }
+  return currentUserToolbar.value === 'box'
+})
+const boxBadgeLabel = computed(() => {
+  let label = 'Draw Box'
+  if (!isTouchDevice.value) {
+    label = label + ' (B)'
+  }
+  return label
+})
+const toggleToolbar = (value) => {
+  const initialValue = 'card'
+  const shouldToggleOffBox = value === 'box' && currentUserToolbarIsBox.value
+  if (shouldToggleOffBox) {
+    store.commit('currentUserToolbar', initialValue)
+  } else {
+    store.commit('currentUserToolbar', value)
+  }
+}
+</script>
+
 <template lang="pug">
 nav.toolbar(v-if="visible")
   //- Box
   .segmented-buttons
-    button(v-if="canEditSpace" :class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')" :title="boxBadgeLabel")
+    button.translucent-button(v-if="canEditSpace" :class="{ active: currentUserToolbarIsBox }" @click="toggleToolbar('box')" :title="boxBadgeLabel")
       img.icon.box-icon(src="@/assets/box.svg")
       .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsBox")
         span {{boxBadgeLabel}}
 </template>
-
-<script>
-export default {
-  name: 'Toolbar',
-  props: {
-    visible: Boolean
-  },
-  computed: {
-    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
-    isTouchDevice () { return this.$store.state.isTouchDevice },
-    currentUserToolbar () { return this.$store.state.currentUserToolbar },
-    // currentUserToolbarIsCard () { return this.currentUserToolbar === 'card' },
-    currentUserToolbarIsBox () {
-      if (this.$store.state.currentUserIsResizingBox) { return }
-      return this.currentUserToolbar === 'box'
-    },
-    boxBadgeLabel () {
-      let label = 'Draw Box'
-      if (!this.isTouchDevice) {
-        label = label + ' (B)'
-      }
-      return label
-    }
-  },
-  methods: {
-    toggleToolbar (value) {
-      const initialValue = 'card'
-      const shouldToggleOffBox = value === 'box' && this.currentUserToolbarIsBox
-      if (shouldToggleOffBox) {
-        this.$store.commit('currentUserToolbar', initialValue)
-      } else {
-        this.$store.commit('currentUserToolbar', value)
-      }
-    }
-  },
-  watch: {
-    currentUserToolbar (value) {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.dispatch('clearMultipleSelected')
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .toolbar
@@ -66,5 +65,4 @@ export default {
     span
       width 100%
       color var(--primary)
-
 </style>
