@@ -788,6 +788,15 @@ dialog
         &:last-child
           border-top-right-radius 0
 
+.title-row-small-button-wrap
+  cursor pointer
+  padding 8px
+  padding-top 0
+  padding-right 0
+  &.section-top
+    padding 5px
+    padding-right 0
+
 .is-dark-theme
   .icon
     filter invert()

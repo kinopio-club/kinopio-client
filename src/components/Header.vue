@@ -302,7 +302,7 @@ const addReadOnlyJiggle = () => {
   const element = readOnlyElement.value
   if (!element) { return }
   state.readOnlyJiggle = true
-  element.addEventListener('animationend', this.removeReadOnlyJiggle, false)
+  element.addEventListener('animationend', removeReadOnlyJiggle, false)
 }
 const removeReadOnlyJiggle = () => {
   state.readOnlyJiggle = false

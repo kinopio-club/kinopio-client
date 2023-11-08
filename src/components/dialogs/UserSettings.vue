@@ -67,7 +67,7 @@ dialog.user-settings.narrow.is-pinnable(v-if="visible" :open="visible" ref="dial
     .row.title-row
       p
         img.icon.settings(src="@/assets/settings.svg")
-        span User Settings
+        span Settings
       button.pin-button.small-button(:class="{active: userSettingsIsPinned}" @click.left="toggleUserSettingsIsPinned" title="Pin dialog")
         img.icon.pin(src="@/assets/pin.svg")
 

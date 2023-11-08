@@ -32,40 +32,39 @@
 
   //- Pin Dialog
   .title-row(v-if="!shouldHidePin")
-    .button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
+    .button-wrap.title-row-small-button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
 
 ReadOnlySpaceInfoBadges
 
 //- member options
-.row.align-items-top(v-if="isSpaceMember")
-  //- Privacy
-  PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-  //- Pin Favorite
-  .button-wrap
-    button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-      img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-      img.icon(v-else src="@/assets/heart-empty.svg")
+.row.title-row(v-if="isSpaceMember")
+  div
+    //- Privacy
+    PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
+    //- Favorite
+    .button-wrap
+      button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+        img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+        img.icon(v-else src="@/assets/heart-empty.svg")
   //- Settings
-  .button-wrap
-    button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
-      img.icon.settings(src="@/assets/settings.svg")
-      span Settings
+  .button-wrap.title-row-small-button-wrap(@click="toggleSettingsIsVisible")
+    button.small-button(:class="{active: moreOptionsIsVisible}")
+      span ⋯
 
 //- read only options
-.row(v-if="!isSpaceMember")
+.row.title-row(v-if="!isSpaceMember")
   //- Favorite
   button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
     img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
     img.icon(v-else src="@/assets/heart-empty.svg")
-  .button-wrap
-    button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
-      img.icon.settings(src="@/assets/settings.svg")
-      span Settings
+  .button-wrap.title-row-small-button-wrap(@click="toggleSettingsIsVisible")
+    button.small-button(:class="{active: moreOptionsIsVisible}")
+      span ⋯
 
 //- Space Settings
-template(v-if="settingsIsVisible")
+template(v-if="moreOptionsIsVisible")
   //- read only space settings
   section.subsection.space-settings(v-if="!isSpaceMember")
     .row
@@ -174,7 +173,7 @@ export default {
     return {
       backgroundIsVisible: false,
       privacyPickerIsVisible: false,
-      settingsIsVisible: false,
+      moreOptionsIsVisible: false,
       exportIsVisible: false
     }
   },
@@ -300,9 +299,9 @@ export default {
       this.privacyPickerIsVisible = !isVisible
     },
     toggleSettingsIsVisible () {
-      const isVisible = this.settingsIsVisible
+      const isVisible = this.moreOptionsIsVisible
       this.closeDialogsAndEmit()
-      this.settingsIsVisible = !isVisible
+      this.moreOptionsIsVisible = !isVisible
       this.$emit('updateDialogHeight')
     },
     toggleExportIsVisible () {
@@ -386,11 +385,6 @@ export default {
 
   .background-preview-wrap
     margin-bottom 6px
-
-.row.align-items-top
-  align-items flex-start
-  .privacy-button
-    min-width 28px
 
 .space-settings
   .background-preview
