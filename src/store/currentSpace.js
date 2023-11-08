@@ -762,7 +762,7 @@ const currentSpace = {
       context.commit('isLoadingSpace', false, { root: true })
       setTimeout(() => {
         context.dispatch('createScreenshot')
-      }, 2000)
+      }, 3000)
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
       if (!context.rootState.isEmbedMode) {
