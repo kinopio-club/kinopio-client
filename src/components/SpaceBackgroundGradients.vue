@@ -48,28 +48,28 @@ const layer = (index) => {
     position absolute
     height 100%
     width 100%
-    transition opacity 4000ms
+    transition opacity 2000ms
 
-  .layer-1
+  .layer-0
     opacity 0
     z-index 100
-  .layer-2
+  .layer-1
     opacity 1
     z-index 99
-  .layer-3
+  .layer-2
     opacity 0
     z-index 98
-  .layer-4
+  .layer-3
     opacity 1
     z-index 97
-  .layer-5
+  .layer-4
     opacity 0
     z-index 96
-  .layer-6
+  .layer-5
     opacity 1
     z-index 95
-  .layer-7
-    transition background 2000ms
+  .layer-6
+    transition background 1000ms
     opacity 1
     z-index 5
 </style>
