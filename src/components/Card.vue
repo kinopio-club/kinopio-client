@@ -2152,7 +2152,6 @@ article.card-wrap
 
     .card-content
       min-width 28px
-      width 100%
       margin-right 8px
     .card-comment
       margin-right 8px

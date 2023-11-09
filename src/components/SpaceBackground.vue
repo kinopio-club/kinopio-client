@@ -2,8 +2,9 @@
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
+import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
+import utils from '@/utils.js'
 import postMessage from '@/postMessage.js'
 
 import { colord, extend } from 'colord'
@@ -29,7 +30,8 @@ const isSpacePage = computed(() => {
   return isSpace
 })
 const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
-const backgroundIsDefault = computed(() => !store.state.currentSpace.background)
+const currentSpace = computed(() => store.state.currentSpace)
+const backgroundIsDefault = computed(() => !currentSpace.value.background)
 
 // Styles
 
@@ -52,12 +54,9 @@ const backgroundStyles = computed(() => {
 // Image
 
 const kinopioBackgroundImageData = computed(() => {
-  const data = backgroundImages.find(image => {
-    const background = store.state.currentSpace.background
-    if (!background) {
-      return image.isDefault
-    }
-    return background === image.url
+  const data = backgroundImages.find(item => {
+    const background = currentSpace.value.background
+    return background === item.url
   })
   return data
 })
@@ -71,7 +70,7 @@ const backgroundUrl = computed(() => {
   } else if (data) {
     url = data.url
   } else {
-    url = store.state.currentSpace.background
+    url = currentSpace.value.background
   }
   return url
 })
@@ -79,7 +78,7 @@ const backgroundUrl = computed(() => {
 // Tint
 
 const backgroundTint = computed(() => {
-  let color = store.state.currentSpace.backgroundTint || 'white'
+  let color = currentSpace.value.backgroundTint || 'white'
   let darkness = 0
   if (shouldDarkenTint.value) {
     darkness = 0.5
@@ -94,9 +93,13 @@ const spaceBackgroundTintIsDark = computed(() => utils.colorIsDark(backgroundTin
 // Update State
 
 const updateBackground = async () => {
+  if (currentSpace.value.backgroundIsGradient) {
+    return
+  }
   const background = backgroundUrl.value
   if (!utils.urlIsImage(background)) {
-    updateBackgroundSize()
+    store.commit('spaceBackgroundUrl', null)
+    return
   }
   try {
     const image = await utils.loadImage(background)
@@ -131,10 +134,20 @@ const updateBackgroundSize = () => {
   store.commit('spaceBackgroundSize', { width, height })
 }
 
+// Background Gradient
+
+const gradientLayers = computed(() => {
+  if (!currentSpace.value.backgroundIsGradient) { return }
+  const layers = currentSpace.value.backgroundGradient
+  return layers
+})
 </script>
 
 <template lang="pug">
-.space-background-image(:style="backgroundStyles")
+template(v-if="currentSpace.backgroundIsGradient")
+  SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :backgroundStyles="backgroundStyles")
+template(v-else)
+  .space-background-image(:style="backgroundStyles")
 .space-background-tint(v-if="visible" :style="{ background: backgroundTint }")
 </template>
 

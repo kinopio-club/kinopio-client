@@ -17,6 +17,8 @@ import qs from '@aguezz/qs-parse'
 import namesPlugin from 'colord/plugins/names'
 import getCurvePoints from '@/libs/curve_calc.js'
 import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
+import random from 'lodash-es/random'
+import randomColor from 'randomcolor'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
@@ -27,6 +29,11 @@ dayjs.extend(relativeTime)
 extend([namesPlugin]) // colord
 
 const uuidLength = 21
+const randomRGBA = (alpha) => {
+  const hex = randomColor({ hue: 'random', luminosity: 'random' })
+  const rgba = colord(hex).alpha(alpha).toRgbString()
+  return rgba
+}
 
 export default {
   loadImage (src) {
@@ -1148,19 +1155,18 @@ export default {
     })
     return { addItems, updateItems, removeItems }
   },
-  spaceDefaultBackground (space, currentUser) {
-    const background = currentUser.defaultSpaceBackground
-    const backgroundTint = currentUser.defaultSpaceBackgroundTint
-    if (background) {
-      space.background = background
+  newSpaceBackground (space, currentUser) {
+    if (currentUser.defaultSpaceBackgroundGradient) {
+      space.backgroundGradient = currentUser.defaultSpaceBackgroundGradient
+      space.backgroundIsGradient = true
+    } else {
+      space.background = currentUser.defaultSpaceBackground
     }
-    if (backgroundTint) {
-      space.backgroundTint = backgroundTint
-    }
+    space.backgroundTint = currentUser.defaultSpaceBackgroundTint
     return space
   },
   emptySpace (spaceId) {
-    return { id: spaceId, name: 'Spaces…', moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], boxes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [], isHidden: false, visits: 0 }
+    return { id: spaceId, name: 'Spaces…', moonPhase: '', background: '', backgroundTint: '', backgroundGradient: null, backgroundIsGradient: false, cards: [], connections: [], connectionTypes: [], boxes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [], isHidden: false, visits: 0 }
   },
   clearSpaceMeta (space, type) {
     space.originSpaceId = space.id
@@ -1380,7 +1386,8 @@ export default {
     space.isHidden = false
     space.isFromTweet = false
     space.collaboratorKey = nanoid()
-    space = this.spaceDefaultBackground(space, currentUser)
+    space = this.newSpaceBackground(space, currentUser)
+    space.background = space.background || consts.defaultSpaceBackground
     // summary
     space.cards.push({ id: nanoid(), name: summary, x: 80, y: 110, frameId: 0 })
     // daily prompt
@@ -2316,5 +2323,26 @@ export default {
     if (!language) { return }
     newString = string.replace(match[0], '')
     return { language, newString }
+  },
+
+  // Background Gradient
+
+  backgroundGradientLayers () {
+    let layers = []
+    const numberOfLayers = 6
+    times(numberOfLayers, function (index) {
+      let layer = {
+        x: random(140),
+        y: random(140),
+        color1: randomRGBA(1),
+        color2: randomRGBA(0)
+      }
+      layers.push(layer)
+    })
+    const backgroundLayer = {
+      color: randomRGBA(1)
+    }
+    layers.push(backgroundLayer)
+    return layers
   }
 }

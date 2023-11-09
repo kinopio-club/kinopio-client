@@ -1,12 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 import dayjs from 'dayjs'
 
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
+const store = useStore()
 
 let updateLiveSpacesIntervalTimer
 
@@ -39,6 +39,7 @@ const closeDialogs = () => {
   state.exploreIsVisible = false
   state.liveIsVisible = false
 }
+const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 
 // Explore
 
@@ -115,15 +116,17 @@ const normalizeLiveSpaces = (spaces) => {
 
 <template lang="pug">
 .explore-row.button-wrap
-  .segmented-buttons
+  .segmented-buttons.space-functions-row
     //- Explore
-    button.explore-button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible}")
-      img.icon.sunglasses(src="@/assets/sunglasses.svg")
-      span.explore-button-label(v-if="unreadExploreSpacesLength") &nbsp;{{ unreadExploreSpacesLength }}
+    .button-wrap
+      button.explore-button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+        img.icon.sunglasses(src="@/assets/sunglasses.svg")
+        span.explore-button-label(v-if="unreadExploreSpacesLength") &nbsp;{{ unreadExploreSpacesLength }}
     //- Live
-    button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible}")
-      img.icon.camera(src="@/assets/camera.svg")
-      span(v-if="state.liveSpaces.length") {{ state.liveSpaces.length }}
+    .button-wrap
+      button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+        img.icon.camera(src="@/assets/camera.svg")
+        span(v-if="state.liveSpaces.length") {{ state.liveSpaces.length }}
   Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")
   Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
 </template>
@@ -134,4 +137,8 @@ const normalizeLiveSpaces = (spaces) => {
   .explore-button
     .explore-button-label
       margin-left 0
+  .button-wrap
+    margin-left 0 !important
+  .space-functions-row
+    margin-bottom 0
 </style>

@@ -26,11 +26,13 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
     template(v-if="!shouldHideAdvanced")
       article
         .row
-          span Backlinked Tag
+          p
+            span Backlinked Tag
           span.badge.keyboard-shortcut [[
       article
         .row
-          span Link to Other Spaces
+          p
+            span Link to Other Spaces
           span.badge.keyboard-shortcut /
       //- article
       //-   .row

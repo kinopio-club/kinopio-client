@@ -48,6 +48,7 @@ const initialState = {
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
   defaultSpaceBackground: undefined,
+  defaultSpaceBackgroundGradient: undefined,
   defaultSpaceBackgroundTint: undefined,
   defaultCardBackgroundColor: undefined,
   defaultConnectionControlPoint: null, // null, 'q00,00'
@@ -56,6 +57,7 @@ const initialState = {
   weatherLocation: undefined,
   weatherUnitIsCelcius: false,
   shouldUseStickyCards: true,
+  shouldIncreaseUIContrast: false,
   shouldPauseConnectionDirections: false,
   lastUsedImagePickerService: '',
   AIImages: [],
@@ -290,6 +292,10 @@ export default {
       state.defaultSpaceBackground = value
       cache.updateUser('defaultSpaceBackground', value)
     },
+    defaultSpaceBackgroundGradient: (state, value) => {
+      state.defaultSpaceBackgroundGradient = value
+      cache.updateUser('defaultSpaceBackgroundGradient', value)
+    },
     defaultSpaceBackgroundTint: (state, value) => {
       state.defaultSpaceBackgroundTint = value
       cache.updateUser('defaultSpaceBackgroundTint', value)
@@ -337,6 +343,10 @@ export default {
     shouldUseStickyCards: (state, value) => {
       state.shouldUseStickyCards = value
       cache.updateUser('shouldUseStickyCards', value)
+    },
+    shouldIncreaseUIContrast: (state, value) => {
+      state.shouldIncreaseUIContrast = value
+      cache.updateUser('shouldIncreaseUIContrast', value)
     },
     shouldPauseConnectionDirections: (state, value) => {
       state.shouldPauseConnectionDirections = value

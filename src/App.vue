@@ -393,9 +393,11 @@ textarea,
   border-radius 0
   padding 1px
   margin-bottom 10px
-  &:disabled
+  &:disabled,
+  &:read-only
     color var(--primary)
     border-bottom 0
+    outline none
   &.is-dark
     color var(--primary-background)
     border-color var(--primary-background)
@@ -465,6 +467,9 @@ label // used for checkbox buttons
     border-color var(--primary-background)
     img
       filter invert(1)
+  &.translucent-button
+    backdrop-filter blur(8px) !important
+    background var(--button-background-translucent)
   &.small-button
     height fit-content
     padding 0px 4px
@@ -782,6 +787,15 @@ dialog
           border-top-left-radius 0
         &:last-child
           border-top-right-radius 0
+
+.title-row-small-button-wrap
+  cursor pointer
+  padding 8px
+  padding-top 0
+  padding-right 0
+  &.section-top
+    padding 5px
+    padding-right 0
 
 .is-dark-theme
   .icon

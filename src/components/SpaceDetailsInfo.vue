@@ -20,7 +20,7 @@
     //- Name
     .textarea-wrap(:class="{'full-width': shouldHidePin}")
       textarea.name(
-        :disabled="!isSpaceMember"
+        :readonly="!isSpaceMember"
         ref="name"
         rows="1"
         placeholder="name"
@@ -32,14 +32,14 @@
 
   //- Pin Dialog
   .title-row(v-if="!shouldHidePin")
-    .button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
+    .button-wrap.title-row-small-button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
 
 ReadOnlySpaceInfoBadges
 
 //- member options
-.row.align-items-top(v-if="isSpaceMember")
+.row(v-if="isSpaceMember")
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
   //- Pin Favorite
@@ -386,11 +386,6 @@ export default {
 
   .background-preview-wrap
     margin-bottom 6px
-
-.row.align-items-top
-  align-items flex-start
-  .privacy-button
-    min-width 28px
 
 .space-settings
   .background-preview

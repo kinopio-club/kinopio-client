@@ -344,6 +344,7 @@ const currentSpace = {
       }
     },
     createNewSpace: (context, space) => {
+      const currentUser = context.rootState.currentUser
       context.commit('triggerSpaceZoomReset', null, { root: true })
       let name
       if (space) {
@@ -356,7 +357,7 @@ const currentSpace = {
       space.editedAt = new Date()
       space.collaboratorKey = nanoid()
       space.readOnlyKey = nanoid()
-      const newSpacesAreBlank = context.rootState.currentUser.newSpacesAreBlank
+      const newSpacesAreBlank = currentUser.newSpacesAreBlank
       if (newSpacesAreBlank) {
         space.connectionTypes = []
         space.connections = []
@@ -367,8 +368,9 @@ const currentSpace = {
         space.cards[1].x = space.cards[1].x + random(0, 20)
         space.cards[1].y = space.cards[1].y + random(0, 20)
       }
-      space.userId = context.rootState.currentUser.id
-      space = utils.spaceDefaultBackground(space, context.rootState.currentUser)
+      space.userId = currentUser.id
+      space = utils.newSpaceBackground(space, currentUser)
+      space.background = space.background || consts.defaultSpaceBackground
       space.isTemplate = false
       space.isHidden = false
       const nullCardUsers = true
@@ -760,7 +762,7 @@ const currentSpace = {
       context.commit('isLoadingSpace', false, { root: true })
       setTimeout(() => {
         context.dispatch('createScreenshot')
-      }, 2000)
+      }, 3000)
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
       if (!context.rootState.isEmbedMode) {
