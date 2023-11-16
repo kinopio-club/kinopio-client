@@ -4,6 +4,7 @@ const themes = {
   light: {
     name: 'light',
     colors: {
+      'color-scheme': 'light',
       'primary': 'black',
       'primary-border': 'rgba(0,0,0,0.3)',
       'primary-background': 'white',
@@ -34,6 +35,7 @@ const themes = {
   dark: {
     name: 'dark',
     colors: {
+      'color-scheme': 'dark',
       'primary': 'white',
       'primary-border': 'rgba(255,255,255,0.3)',
       'primary-background': 'black',
