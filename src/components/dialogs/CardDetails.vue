@@ -1494,6 +1494,8 @@ export default {
     position relative
     display flex
     align-items flex-start
+    textarea
+      max-height 250px
   .edit-message
     button
       margin-top 10px
