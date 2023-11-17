@@ -679,7 +679,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
     .right
       .controls(v-if="isSpace")
         .top-controls
-          SpaceUsers
+          SpaceUsers(:userDetailsIsInline="true")
           UserSettings
           UpdatePassword
           //- Share
