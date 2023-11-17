@@ -144,6 +144,7 @@ const copy = async (event) => {
     overflow scroll !important
     white-space pre !important
     padding 4px
+    padding-right 60px
     color var(--primary)
     background-color var(--secondary-active-background)
     font-weight normal
