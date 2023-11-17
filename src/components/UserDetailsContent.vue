@@ -188,7 +188,7 @@ const removeCollaborator = () => {
 </script>
 
 <template lang="pug">
-.user-details-content
+.user-details-content(v-if="props.visible")
   //- Other User
   section(v-if="!isCurrentUser")
     .user-info

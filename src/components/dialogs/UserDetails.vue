@@ -57,7 +57,7 @@ const scrollUserDetailsIntoView = async () => {
 
 <template lang="pug">
 dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.left.stop="closeDialogs" @keydown.stop :style="styles" ref="dialogElement")
-  UserDetailsContent(:user="user")
+  UserDetailsContent(:visible="visible" :user="user")
 </template>
 
 <style lang="stylus">
