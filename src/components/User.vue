@@ -2,10 +2,20 @@
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
+import UserDetailsInline from '@/components/dialogs/UserDetailsInline.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
 const userElement = ref(null)
+
+onMounted(() => {
+  state.userDetailsInlineIsVisible = false
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'closeAllDialogs') {
+      closeChildDialogs()
+    }
+  })
+})
 
 const props = defineProps({
   isClickable: Boolean,
@@ -15,6 +25,10 @@ const props = defineProps({
   hideYouLabel: Boolean,
   isSmall: Boolean,
   userDetailsIsInline: Boolean
+})
+
+const state = reactive({
+  userDetailsInlineIsVisible: false
 })
 
 const userId = computed(() => {
@@ -38,14 +52,18 @@ const userDetailsIsVisibleForUser = computed(() => userDetailsIsVisible.value &&
 const colorIsDark = computed(() => utils.colorIsDark(userColor.value))
 
 const toggleUserDetailsIsVisible = () => {
-  console.log('☮️☮️☮️☮️☮️', props.userDetailsIsInline)
   if (props.userDetailsIsInline) {
-    console.log('🍇🍇🍇🍇🍇')
+    toggleUserDetailsInlineIsVisible()
   } else {
-    toggleStoreUserDetailsIsVisible()
+    toggleUserDetailsGlobalIsVisible()
   }
 }
-const toggleStoreUserDetailsIsVisible = () => {
+const toggleUserDetailsInlineIsVisible = () => {
+  const value = !state.userDetailsInlineIsVisible
+  store.commit('closeAllDialogs')
+  state.userDetailsInlineIsVisible = value
+}
+const toggleUserDetailsGlobalIsVisible = () => {
   const isVisible = userDetailsIsVisibleForUser.value
   if (props.shouldCloseAllDialogs) {
     store.dispatch('closeAllDialogs')
@@ -68,6 +86,9 @@ const showUserDetails = () => {
   store.commit('userDetailsPosition', position)
   store.commit('userDetailsIsVisible', true)
 }
+const closeChildDialogs = () => {
+  state.userDetailsInlineIsVisible = false
+}
 </script>
 
 <template lang="pug">
@@ -82,6 +103,8 @@ const showUserDetails = () => {
     img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
   .label-badge.you-badge.small-badge(v-if="isCurrentUser && !hideYouLabel")
     span YOU
+  template(v-if="state.userDetailsInlineIsVisible")
+    UserDetailsInline(:visible="state.userDetailsInlineIsVisible" :user="user")
 </template>
 
 <style lang="stylus">

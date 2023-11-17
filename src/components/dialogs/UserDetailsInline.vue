@@ -25,5 +25,7 @@ dialog.narrow.user-details.user-details-inline(v-if="visible" @keyup.stop :open=
 .user-details
   cursor initial
   top calc(100% - 8px)
+  left initial
+  right 8px
   position absolute
 </style>
