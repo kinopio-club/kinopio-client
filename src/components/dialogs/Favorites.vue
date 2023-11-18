@@ -194,7 +194,7 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
     //- Spaces
     template(v-if="state.spacesIsVisible")
       .row.space-row
-        button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+        button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
           img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
           img.icon(v-else src="@/assets/heart-empty.svg")
           span Current Space

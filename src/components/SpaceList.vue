@@ -65,7 +65,7 @@ span.space-list-wrap
                 img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
               button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
                 img.icon.checkmark(src="@/assets/checkmark.svg")
-          .button-wrap.inline-favorite-wrap(v-if="spaceIsActive(space) && showFavoriteButton" @click.stop.prevent="toggleIsFavoriteSpace(space)")
+          .button-wrap.inline-favorite-wrap(v-if="spaceIsActive(space) && showFavoriteButton" @click.stop.prevent="toggleIsFavoriteSpace(space)" title="Favorite Current Space")
             button.inline-favorite.small-button(:class="{ active: isFavorite(space) }")
               img.icon.favorite-icon(v-if="isFavorite(space)" src="@/assets/heart.svg")
               img.icon.favorite-icon(v-else src="@/assets/heart-empty.svg")
