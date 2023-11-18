@@ -1,5 +1,98 @@
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import UserDetailsInline from '@/components/dialogs/UserDetailsInline.vue'
+import utils from '@/utils.js'
+const store = useStore()
+
+const userElement = ref(null)
+
+onMounted(() => {
+  state.userDetailsInlineIsVisible = false
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'closeAllDialogs') {
+      closeChildDialogs()
+    }
+  })
+})
+
+const props = defineProps({
+  isClickable: Boolean,
+  user: Object,
+  detailsOnRight: Boolean,
+  shouldCloseAllDialogs: Boolean,
+  hideYouLabel: Boolean,
+  isSmall: Boolean,
+  userDetailsIsInline: Boolean
+})
+
+const state = reactive({
+  userDetailsInlineIsVisible: false
+})
+
+const userId = computed(() => {
+  if (!props.user) { return }
+  return props.user.id
+})
+const userColor = computed(() => {
+  if (!props.user) { return }
+  return props.user.color
+})
+const isCurrentUser = computed(() => {
+  if (!props.user) { return }
+  return props.user.id === store.state.currentUser.id
+})
+const userDetailsIsVisible = computed(() => store.state.userDetailsIsVisible)
+const userDetailsIsUser = computed(() => {
+  const userDetailsUser = store.state.userDetailsUser
+  return props.user.id === userDetailsUser.id
+})
+const userDetailsIsVisibleForUser = computed(() => userDetailsIsVisible.value && userDetailsIsUser.value)
+const colorIsDark = computed(() => utils.colorIsDark(userColor.value))
+
+const toggleUserDetailsIsVisible = () => {
+  if (props.userDetailsIsInline) {
+    toggleUserDetailsInlineIsVisible()
+  } else {
+    toggleUserDetailsGlobalIsVisible()
+  }
+}
+const toggleUserDetailsInlineIsVisible = () => {
+  const value = !state.userDetailsInlineIsVisible
+  store.commit('closeAllDialogs')
+  state.userDetailsInlineIsVisible = value
+}
+const toggleUserDetailsGlobalIsVisible = () => {
+  const isVisible = userDetailsIsVisibleForUser.value
+  if (props.shouldCloseAllDialogs) {
+    store.dispatch('closeAllDialogs')
+  }
+  if (isVisible) {
+    store.commit('userDetailsIsVisible', false)
+    return
+  }
+  showUserDetails()
+}
+const showUserDetails = () => {
+  const element = userElement.value
+  let options = { element, shouldIgnoreZoom: true }
+  if (props.detailsOnRight) {
+    options.offsetX = -190
+    options.transformOriginIsTopRight = true
+  }
+  const position = utils.childDialogPositionFromParent(options)
+  store.commit('userDetailsUser', props.user)
+  store.commit('userDetailsPosition', position)
+  store.commit('userDetailsIsVisible', true)
+}
+const closeChildDialogs = () => {
+  state.userDetailsInlineIsVisible = false
+}
+</script>
+
 <template lang="pug">
-.user(:title="user.name" :data-user-id="userId" :key="userId" ref="user" @keydown.stop.enter="toggleUserDetailsIsVisible" :class="{active: userDetailsIsVisibleForUser, 'is-small': isSmall }")
+.user(:title="user.name" :data-user-id="userId" :key="userId" ref="userElement" @keydown.stop.enter="toggleUserDetailsIsVisible" :class="{active: userDetailsIsVisibleForUser, 'is-small': isSmall }")
   .user-avatar(
     @mouseup.left.stop="toggleUserDetailsIsVisible"
     @touchend.stop="toggleUserDetailsIsVisible"
@@ -10,69 +103,9 @@
     img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
   .label-badge.you-badge.small-badge(v-if="isCurrentUser && !hideYouLabel")
     span YOU
+  template(v-if="state.userDetailsInlineIsVisible")
+    UserDetailsInline(:visible="state.userDetailsInlineIsVisible" :user="user")
 </template>
-
-<script>
-import utils from '@/utils.js'
-
-export default {
-  name: 'User',
-  props: {
-    isClickable: Boolean,
-    user: Object,
-    detailsOnRight: Boolean,
-    shouldCloseAllDialogs: Boolean,
-    hideYouLabel: Boolean,
-    isSmall: Boolean
-  },
-  computed: {
-    userId () {
-      if (!this.user) { return }
-      return this.user.id
-    },
-    userColor () {
-      if (!this.user) { return }
-      return this.user.color
-    },
-    isCurrentUser () {
-      if (!this.user) { return }
-      return this.user.id === this.$store.state.currentUser.id
-    },
-    userDetailsIsVisible () { return this.$store.state.userDetailsIsVisible },
-    userDetailsIsUser () {
-      const userDetailsUser = this.$store.state.userDetailsUser
-      return this.user.id === userDetailsUser.id
-    },
-    userDetailsIsVisibleForUser () { return this.userDetailsIsVisible && this.userDetailsIsUser },
-    colorIsDark () { return utils.colorIsDark(this.userColor) }
-  },
-  methods: {
-    toggleUserDetailsIsVisible () {
-      const isVisible = this.userDetailsIsVisibleForUser
-      if (this.shouldCloseAllDialogs) {
-        this.$store.dispatch('closeAllDialogs')
-      }
-      if (isVisible) {
-        this.$store.commit('userDetailsIsVisible', false)
-        return
-      }
-      this.showUserDetails()
-    },
-    showUserDetails () {
-      const element = this.$refs.user
-      let options = { element, shouldIgnoreZoom: true }
-      if (this.detailsOnRight) {
-        options.offsetX = -190
-        options.transformOriginIsTopRight = true
-      }
-      const position = utils.childDialogPositionFromParent(options)
-      this.$store.commit('userDetailsUser', this.user)
-      this.$store.commit('userDetailsPosition', position)
-      this.$store.commit('userDetailsIsVisible', true)
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .user

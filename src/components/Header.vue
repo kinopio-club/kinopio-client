@@ -586,7 +586,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
     .right
-      SpaceUsers
+      SpaceUsers(:userDetailsIsInline="true")
 
   //- standard
   nav(v-if="!isEmbedMode")
@@ -679,7 +679,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
     .right
       .controls(v-if="isSpace")
         .top-controls
-          SpaceUsers
+          SpaceUsers(:userDetailsIsInline="true")
           UserSettings
           UpdatePassword
           //- Share
