@@ -1502,7 +1502,7 @@ const store = createStore({
     // Space Background
 
     spaceBackgroundUrl: (state, imageUrl) => {
-      utils.typeCheck({ value: imageUrl, type: 'string' })
+      utils.typeCheck({ value: imageUrl, type: 'string', allowUndefined: true })
       state.spaceBackgroundUrl = imageUrl
     },
     spaceBackgroundSize: (state, value) => {
