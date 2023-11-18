@@ -108,6 +108,9 @@ const isSpaceMemberOfCurrentSpace = computed(() => store.getters['currentUser/is
 const changeSpace = (space) => {
   store.dispatch('currentSpace/changeSpace', space)
 }
+
+// favorite space
+
 const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
 const toggleIsFavoriteSpace = () => {
   const currentSpace = store.state.currentSpace
@@ -158,7 +161,10 @@ const updateFavoriteSpaceIsEdited = () => {
     body: spaces
   })
 }
-const spaceAuthor = computed(() => {
+
+// favorite user
+
+const spaceUser = computed(() => {
   const members = store.getters['currentSpace/members'](true)
   if (members.length) {
     return members[0]
@@ -168,15 +174,15 @@ const spaceAuthor = computed(() => {
 })
 const isFavoriteUser = computed(() => {
   const isUser = Boolean(favoriteUsers.value.find(favoriteUser => {
-    return favoriteUser.id === spaceAuthor.value.id
+    return favoriteUser.id === spaceUser.value.id
   }))
   return isUser
 })
 const toggleIsFavoriteUser = () => {
   if (isFavoriteUser.value) {
-    store.dispatch('currentUser/removeFavorite', { type: 'user', item: spaceAuthor.value })
+    store.dispatch('currentUser/removeFavorite', { type: 'user', item: spaceUser.value })
   } else {
-    store.dispatch('currentUser/addFavorite', { type: 'user', item: spaceAuthor.value })
+    store.dispatch('currentUser/addFavorite', { type: 'user', item: spaceUser.value })
   }
 }
 </script>
@@ -195,11 +201,11 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
           span People
 
   //- favorite space user
-  section.extra(v-if="!state.spacesIsVisible && spaceAuthor")
+  section.extra(v-if="!state.spacesIsVisible && spaceUser")
     button(@click="toggleIsFavoriteUser")
       img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
       img.icon(v-else src="@/assets/heart-empty.svg")
-      UserLabelInline(:user="spaceAuthor")
+      UserLabelInline(:user="spaceUser")
 
   section.extra(v-if="state.spacesIsVisible")
     .row
