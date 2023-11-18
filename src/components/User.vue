@@ -15,7 +15,6 @@ onMounted(() => {
       closeChildDialogs()
     }
   })
-  console.log('♥️♥️♥️♥️♥️♥️♥️♥️♥️', props.user)
 })
 
 const props = defineProps({
