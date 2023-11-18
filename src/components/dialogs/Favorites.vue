@@ -128,8 +128,11 @@ const userDetailsSelectedUser = computed(() => {
   return store.state.userDetailsUser
 })
 const toggleUserDetails = (event, user) => {
+  const shouldShow = !store.state.userDetailsIsVisible
   closeDialogs()
-  showUserDetails(event, user)
+  if (shouldShow) {
+    showUserDetails(event, user)
+  }
 }
 const showUserDetails = async (event, user) => {
   let element = event.target
@@ -138,15 +141,6 @@ const showUserDetails = async (event, user) => {
   store.commit('userDetailsUser', user)
   store.commit('userDetailsPosition', position)
   store.commit('userDetailsIsVisible', true)
-  // offset position
-  await nextTick()
-  const child = document.querySelector('.user-details')
-  const rect = child.getBoundingClientRect()
-  options = { element, offsetX: 100, offsetY: -(rect.height + 8), shouldIgnoreZoom: true }
-  position = utils.childDialogPositionFromParent(options)
-  const userDetailsDialogWidth = 225
-  position.x = position.x - userDetailsDialogWidth
-  store.commit('userDetailsPosition', position)
 }
 const closeDialogs = () => {
   store.commit('userDetailsIsVisible', false)
@@ -215,6 +209,4 @@ dialog.favorites
     margin-left 4px
     .user
       vertical-align -3px
-  .user-details
-    left 50%
 </style>
