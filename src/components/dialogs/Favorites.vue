@@ -7,6 +7,7 @@ import SpaceList from '@/components/SpaceList.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -103,6 +104,7 @@ const checkIfShouldShowCurrentUserSpaces = (space) => {
     state.currentUserSpacesIsVisible = true
   }
 }
+const isSpaceMemberOfCurrentSpace = computed(() => store.getters['currentUser/isSpaceMember']())
 const changeSpace = (space) => {
   store.dispatch('currentSpace/changeSpace', space)
 }
@@ -156,6 +158,27 @@ const updateFavoriteSpaceIsEdited = () => {
     body: spaces
   })
 }
+const spaceAuthor = computed(() => {
+  const members = store.getters['currentSpace/members'](true)
+  if (members.length) {
+    return members[0]
+  } else {
+    return null
+  }
+})
+const isFavoriteUser = computed(() => {
+  const isUser = Boolean(favoriteUsers.value.find(favoriteUser => {
+    return favoriteUser.id === spaceAuthor.value.id
+  }))
+  return isUser
+})
+const toggleIsFavoriteUser = () => {
+  if (isFavoriteUser.value) {
+    store.dispatch('currentUser/removeFavorite', { type: 'user', item: spaceAuthor.value })
+  } else {
+    store.dispatch('currentUser/addFavorite', { type: 'user', item: spaceAuthor.value })
+  }
+}
 </script>
 
 <template lang="pug">
@@ -170,6 +193,13 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
           span Spaces
         button(@click.left.stop="hideSpaces" :class="{ active: !state.spacesIsVisible }")
           span People
+
+  //- favorite space user
+  section.extra(v-if="!state.spacesIsVisible && spaceAuthor")
+    button(@click="toggleIsFavoriteUser")
+      img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
+      img.icon(v-else src="@/assets/heart-empty.svg")
+      UserLabelInline(:user="spaceAuthor")
 
   section.extra(v-if="state.spacesIsVisible")
     .row
@@ -195,12 +225,12 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
   //- empty state
   section.extra(v-if="isEmpty && !loading")
     section.subsection
-      p
+      p(v-if="state.spacesIsVisible")
         img.icon(src="@/assets/heart.svg")
-        span Spaces to know when they've been updated.
-      p
+        span Spaces to know when they've been updated
+      p(v-if="!state.spacesIsVisible")
         img.icon(src="@/assets/heart.svg")
-        span People to follow them.
+        span People to follow them
 
 </template>
 
@@ -217,5 +247,8 @@ dialog.favorites
   section.extra
     border-top none
     padding-top 4px
-
+    button
+      .user-label-inline
+        margin-right 0
+        margin-left 5px
 </style>
