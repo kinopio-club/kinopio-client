@@ -164,26 +164,15 @@ const updateFavoriteSpaceIsEdited = () => {
 <template lang="pug">
 dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    p Favorites
+    p
+      span Favorites
+      Loader(:visible="loading" :isSmall="true")
     .row
       .segmented-buttons
         button(@click.left.stop="showSpaces" :class="{ active: state.spacesIsVisible }")
           span Spaces
-          Loader(:visible="loading")
         button(@click.left.stop="hideSpaces" :class="{ active: !state.spacesIsVisible }")
           span People
-          Loader(:visible="loading")
-
-    template(v-if="isEmpty")
-      p Spaces and people you {{' '}}
-        img.icon(src="@/assets/heart.svg")
-        span can be found here.
-      p
-        img.icon(src="@/assets/heart.svg")
-        span Spaces to know when they've been updated
-      p(v-if="loading")
-        Loader(:visible="loading")
-
   section.results-section(v-if="!isEmpty && visible")
     //- Spaces
     template(v-if="state.spacesIsVisible")
@@ -196,6 +185,15 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
           input(type="checkbox" v-model="showCurrentUserSpaces")
           User(:user="currentUser"  :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
       SpaceList(:spaces="filteredSapces" :showUser="true" @selectSpace="changeSpace")
+      Loader(:visible="loading")
+      //- empty state
+      template(v-if="isEmpty && !loading")
+        p Spaces and people you {{' '}}
+          img.icon(src="@/assets/heart.svg")
+          span can be found here.
+        p
+          img.icon(src="@/assets/heart.svg")
+          span Spaces to know when they've been updated
     //- People
     template(v-if="!state.spacesIsVisible")
       UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
@@ -209,4 +207,8 @@ dialog.favorites
     margin-left 4px
     .user
       vertical-align -3px
+  .loader
+    margin-left 5px
+    vertical-align -2px
+
 </style>
