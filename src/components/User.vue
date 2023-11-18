@@ -96,7 +96,6 @@ const closeChildDialogs = () => {
   .user-avatar(
     @mouseup.left.stop="toggleUserDetailsIsVisible"
     @touchend.stop="toggleUserDetailsIsVisible"
-    ref="userElement"
     :class="{ clickable: isClickable }"
     :style="{backgroundColor: userColor}"
   )
