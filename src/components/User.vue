@@ -15,7 +15,6 @@ onMounted(() => {
       closeChildDialogs()
     }
   })
-  console.log('🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷', props.user, props.userDetailsIsInline)
 })
 
 const props = defineProps({
@@ -97,7 +96,7 @@ const closeChildDialogs = () => {
   .user-avatar(
     @mouseup.left.stop="toggleUserDetailsIsVisible"
     @touchend.stop="toggleUserDetailsIsVisible"
-    ref="user"
+    ref="userElement"
     :class="{ clickable: isClickable }"
     :style="{backgroundColor: userColor}"
   )
