@@ -81,7 +81,11 @@ const favoriteSpacesOrderedByEdited = computed(() => {
 const filteredSapces = computed(() => {
   let spaces = favoriteSpacesOrderedByEdited.value
   if (!state.currentUserSpacesIsVisible) {
-    spaces = spaces.filter(space => space.userId !== currentUser.value.id)
+    spaces = spaces.filter(space => {
+      const userId = space.userId || space.users[0].id
+      const isUserId = userId === currentUser.value.id
+      return !isUserId
+    })
   }
   return spaces
 })
@@ -101,6 +105,18 @@ const changeSpace = (space) => {
     store.dispatch('currentSpace/changeSpace', space)
   } else {
     store.dispatch('currentSpace/changeSpace', space)
+  }
+}
+
+// favorite space
+
+const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
+const toggleIsFavoriteSpace = () => {
+  const currentSpace = store.state.currentSpace
+  if (isFavoriteSpace.value) {
+    store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
+  } else {
+    store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
   }
 }
 
@@ -177,9 +193,14 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
   section.results-section(v-if="!isEmpty && visible")
     //- Spaces
     template(v-if="state.spacesIsVisible")
-      label.show-current-user-spaces(:class="{active: state.currentUserSpacesIsVisible}")
-        input(type="checkbox" v-model="showCurrentUserSpaces")
-        User(:user="currentUser"  :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+      .row.space-row
+        button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+          img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+          img.icon(v-else src="@/assets/heart-empty.svg")
+          span Current Space
+        label(:class="{active: state.currentUserSpacesIsVisible}")
+          input(type="checkbox" v-model="showCurrentUserSpaces")
+          User(:user="currentUser"  :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
       SpaceList(:spaces="filteredSapces" :showUser="true" @selectSpace="changeSpace")
     //- People
     template(v-if="!state.spacesIsVisible")
@@ -190,7 +211,7 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
 dialog.favorites
   left initial
   right 8px
-  .show-current-user-spaces
+  .space-row
     margin-left 4px
     .user
       vertical-align -3px
