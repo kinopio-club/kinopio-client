@@ -137,6 +137,7 @@ const favoriteSpacesEditedCount = computed(() => {
 const updateFavorites = async () => {
   await store.dispatch('currentUser/restoreUserFavorites')
 }
+const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
 </script>
 
 <template lang="pug">
@@ -155,7 +156,8 @@ const updateFavorites = async () => {
     //- Favorites
     .button-wrap
       button(@click.left="toggleFavoritesIsVisible" :class="{ active: state.favoritesIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-        img.icon(src="@/assets/heart.svg")
+        img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+        img.icon(v-else src="@/assets/heart-empty.svg")
         span(v-if="favoriteSpacesEditedCount") {{ favoriteSpacesEditedCount }}
 
   Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")

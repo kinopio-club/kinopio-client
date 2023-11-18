@@ -177,10 +177,12 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
     //- Spaces
     template(v-if="state.spacesIsVisible")
       .row.space-row
+        //- favorite current space
         button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
           img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
           img.icon(v-else src="@/assets/heart-empty.svg")
           span Current Space
+        //- filter current user spaces
         label(:class="{active: state.currentUserSpacesIsVisible}")
           input(type="checkbox" v-model="showCurrentUserSpaces")
           User(:user="currentUser"  :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
