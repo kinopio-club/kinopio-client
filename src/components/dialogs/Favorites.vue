@@ -6,6 +6,7 @@ import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
+import User from '@/components/User.vue'
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -33,7 +34,8 @@ watch(() => props.visible, (value, prevValue) => {
 
 const state = reactive({
   spacesIsVisible: true,
-  userDetailsPosition: {}
+  userDetailsPosition: {},
+  currentUserSpacesIsVisible: false
 })
 
 const updateDialogHeight = async () => {
@@ -43,11 +45,6 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const userDetailsIsVisible = computed(() => store.state.userDetailsIsVisible)
-const userDetailsSelectedUser = computed(() => {
-  if (!userDetailsIsVisible.value) { return }
-  return store.state.userDetailsUser
-})
 const currentUser = computed(() => store.state.currentUser)
 const favoriteUsers = computed(() => store.state.currentUser.favoriteUsers)
 const favoriteSpaces = computed(() => store.state.currentUser.favoriteSpaces)
@@ -58,17 +55,6 @@ const isEmpty = computed(() => {
   if (noSpaces || noPeople) { return true }
   return false
 })
-const favoriteSpacesOrderedByEdited = computed(() => {
-  let spaces = utils.clone(favoriteSpaces.value)
-  spaces = spaces.map(space => {
-    space.editedAt = space.editedAt || space.updatedAt || space.createdAt
-    space.editedAt = new Date(space.editedAt)
-    return space
-  })
-  spaces = spaces.sort((a, b) => b.editedAt - a.editedAt)
-  return spaces
-})
-
 const showSpaces = () => {
   state.spacesIsVisible = true
   closeDialogs()
@@ -79,6 +65,34 @@ const hideSpaces = () => {
   closeDialogs()
   updateDialogHeight()
 }
+
+// spaces
+
+const favoriteSpacesOrderedByEdited = computed(() => {
+  let spaces = utils.clone(favoriteSpaces.value)
+  spaces = spaces.map(space => {
+    space.editedAt = space.editedAt || space.updatedAt || space.createdAt
+    space.editedAt = new Date(space.editedAt)
+    return space
+  })
+  spaces = spaces.sort((a, b) => b.editedAt - a.editedAt)
+  return spaces
+})
+const filteredSapces = computed(() => {
+  let spaces = favoriteSpacesOrderedByEdited.value
+  if (!state.currentUserSpacesIsVisible) {
+    spaces = spaces.filter(space => space.userId !== currentUser.value.id)
+  }
+  return spaces
+})
+const showCurrentUserSpaces = computed({
+  get () {
+    return state.currentUserSpacesIsVisible
+  },
+  set (newValue) {
+    state.currentUserSpacesIsVisible = !state.currentUserSpacesIsVisible
+  }
+})
 const changeSpace = (space) => {
   const spaceUser = space.user || space.users[0]
   const isSpaceUser = spaceUser.id === currentUser.value.id
@@ -89,6 +103,14 @@ const changeSpace = (space) => {
     store.dispatch('currentSpace/changeSpace', space)
   }
 }
+
+// user
+
+const userDetailsIsVisible = computed(() => store.state.userDetailsIsVisible)
+const userDetailsSelectedUser = computed(() => {
+  if (!userDetailsIsVisible.value) { return }
+  return store.state.userDetailsUser
+})
 const toggleUserDetails = (event, user) => {
   closeDialogs()
   showUserDetails(event, user)
@@ -127,12 +149,12 @@ const updateFavoriteSpaceIsEdited = () => {
     body: spaces
   })
 }
-
 </script>
 
 <template lang="pug">
 dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
+    p Favorites
     .row
       .segmented-buttons
         button(@click.left.stop="showSpaces" :class="{ active: state.spacesIsVisible }")
@@ -149,16 +171,18 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
       p
         img.icon(src="@/assets/heart.svg")
         span Spaces to know when they've been updated
-
       p(v-if="loading")
         Loader(:visible="loading")
 
   section.results-section(v-if="!isEmpty && visible")
     //- Spaces
-    div(v-show="state.spacesIsVisible")
-      SpaceList(:spaces="favoriteSpacesOrderedByEdited" :showUser="true" @selectSpace="changeSpace")
+    template(v-if="state.spacesIsVisible")
+      label.show-current-user-spaces(:class="{active: state.currentUserSpacesIsVisible}")
+        input(type="checkbox" v-model="showCurrentUserSpaces")
+        User(:user="currentUser"  :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+      SpaceList(:spaces="filteredSapces" :showUser="true" @selectSpace="changeSpace")
     //- People
-    div(v-show="!state.spacesIsVisible")
+    template(v-if="!state.spacesIsVisible")
       UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 </template>
 
@@ -166,6 +190,10 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
 dialog.favorites
   left initial
   right 8px
+  .show-current-user-spaces
+    margin-left 4px
+    .user
+      vertical-align -3px
   .user-details
     left 50%
 </style>
