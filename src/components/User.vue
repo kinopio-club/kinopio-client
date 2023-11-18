@@ -15,6 +15,7 @@ onMounted(() => {
       closeChildDialogs()
     }
   })
+  console.log('🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷', props.user, props.userDetailsIsInline)
 })
 
 const props = defineProps({
