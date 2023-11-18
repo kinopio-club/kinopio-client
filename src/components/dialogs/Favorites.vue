@@ -97,19 +97,15 @@ const showCurrentUserSpaces = computed({
     state.currentUserSpacesIsVisible = !state.currentUserSpacesIsVisible
   }
 })
-const changeSpace = (space) => {
-  const spaceUser = space.user || space.users[0]
-  const isSpaceUser = spaceUser.id === currentUser.value.id
-  const isNotSignedIn = !store.getters['currentUser/isSignedIn']
-  if (isSpaceUser && isNotSignedIn) {
-    store.dispatch('currentSpace/changeSpace', space)
-  } else {
-    store.dispatch('currentSpace/changeSpace', space)
+const checkIfShouldShowCurrentUserSpaces = (space) => {
+  const isSpaceMember = store.getters['currentUser/isSpaceMember'](space)
+  if (isSpaceMember) {
+    state.currentUserSpacesIsVisible = true
   }
 }
-
-// favorite space
-
+const changeSpace = (space) => {
+  store.dispatch('currentSpace/changeSpace', space)
+}
 const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
 const toggleIsFavoriteSpace = () => {
   const currentSpace = store.state.currentSpace
@@ -117,6 +113,7 @@ const toggleIsFavoriteSpace = () => {
     store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
   } else {
     store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
+    checkIfShouldShowCurrentUserSpaces(currentSpace)
   }
 }
 
@@ -173,44 +170,52 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
           span Spaces
         button(@click.left.stop="hideSpaces" :class="{ active: !state.spacesIsVisible }")
           span People
-  section.results-section(v-if="!isEmpty && visible")
+
+  section.extra(v-if="state.spacesIsVisible")
+    .row
+      //- favorite current space
+      button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
+        img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+        img.icon(v-else src="@/assets/heart-empty.svg")
+        span Current Space
+      //- filter current user spaces
+      label.user-filter(:class="{active: state.currentUserSpacesIsVisible}")
+        input(type="checkbox" v-model="showCurrentUserSpaces")
+        User(:user="currentUser"  :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+
+  section.results-section(v-if="!isEmpty")
     //- Spaces
     template(v-if="state.spacesIsVisible")
-      .row.space-row
-        //- favorite current space
-        button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
-          img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-          img.icon(v-else src="@/assets/heart-empty.svg")
-          span Current Space
-        //- filter current user spaces
-        label(:class="{active: state.currentUserSpacesIsVisible}")
-          input(type="checkbox" v-model="showCurrentUserSpaces")
-          User(:user="currentUser"  :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
       SpaceList(:spaces="filteredSapces" :showUser="true" @selectSpace="changeSpace")
-      Loader(:visible="loading")
-      //- empty state
-      template(v-if="isEmpty && !loading")
-        p Spaces and people you {{' '}}
-          img.icon(src="@/assets/heart.svg")
-          span can be found here.
-        p
-          img.icon(src="@/assets/heart.svg")
-          span Spaces to know when they've been updated
+
     //- People
     template(v-if="!state.spacesIsVisible")
       UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
+
+  //- empty state
+  section.extra(v-if="isEmpty && !loading")
+    section.subsection
+      p
+        img.icon(src="@/assets/heart.svg")
+        span Spaces to know when they've been updated.
+      p
+        img.icon(src="@/assets/heart.svg")
+        span People to follow them.
+
 </template>
 
 <style lang="stylus">
 dialog.favorites
   left initial
   right 8px
-  .space-row
-    margin-left 4px
+  .user-filter
     .user
       vertical-align -3px
   .loader
     margin-left 5px
     vertical-align -2px
+  section.extra
+    border-top none
+    padding-top 4px
 
 </style>
