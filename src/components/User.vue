@@ -96,14 +96,13 @@ const closeChildDialogs = () => {
   .user-avatar(
     @mouseup.left.stop="toggleUserDetailsIsVisible"
     @touchend.stop="toggleUserDetailsIsVisible"
-    ref="user"
     :class="{ clickable: isClickable }"
     :style="{backgroundColor: userColor}"
   )
     img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
   .label-badge.you-badge.small-badge(v-if="isCurrentUser && !hideYouLabel")
     span YOU
-  template(v-if="state.userDetailsInlineIsVisible")
+  template(v-if="state.userDetailsInlineIsVisible && user")
     UserDetailsInline(:visible="state.userDetailsInlineIsVisible" :user="user")
 </template>
 

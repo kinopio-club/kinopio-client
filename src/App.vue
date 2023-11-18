@@ -317,6 +317,7 @@ export default {
 
 <style lang="stylus">
 :root
+  color-scheme var(--color-scheme)
   // theme vars in themes.js
   // non-theme vars
   --primary-on-dark-background white
