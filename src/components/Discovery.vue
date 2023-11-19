@@ -6,6 +6,8 @@ import dayjs from 'dayjs'
 
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
+import Favorites from '@/components/dialogs/Favorites.vue'
+import utils from '@/utils.js'
 const store = useStore()
 
 let updateLiveSpacesIntervalTimer
@@ -14,6 +16,7 @@ onMounted(() => {
   window.addEventListener('online', updateLiveSpaces)
   updateLiveSpaces()
   updateExploreSpaces()
+  updateFavorites()
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerExploreIsVisible') {
       toggleExploreIsVisible()
@@ -30,6 +33,7 @@ onUnmounted(() => {
 const state = reactive({
   exploreIsVisible: false,
   isLoadingLiveSpaces: true,
+  favoritesIsVisible: false,
   liveIsVisible: false,
   liveSpaces: [],
   exploreSpaces: []
@@ -38,6 +42,7 @@ const state = reactive({
 const closeDialogs = () => {
   state.exploreIsVisible = false
   state.liveIsVisible = false
+  state.favoritesIsVisible = false
 }
 const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 
@@ -112,6 +117,27 @@ const normalizeLiveSpaces = (spaces) => {
   return normalizedSpaces
 }
 
+// Favorites
+
+const toggleFavoritesIsVisible = () => {
+  const isVisible = state.favoritesIsVisible
+  store.dispatch('closeAllDialogs')
+  state.favoritesIsVisible = !isVisible
+}
+const favoriteSpacesEditedCount = computed(() => {
+  const currentUser = store.state.currentUser
+  let favoriteSpaces = utils.clone(currentUser.favoriteSpaces)
+  favoriteSpaces = favoriteSpaces.filter(space => {
+    const isEditedByOtherUser = space.editedByUserId !== currentUser.id
+    const isEditedAndNotVisited = space.isEdited && space.userId !== currentUser.id
+    return isEditedByOtherUser && isEditedAndNotVisited
+  })
+  return favoriteSpaces.length
+})
+const updateFavorites = async () => {
+  await store.dispatch('currentUser/restoreUserFavorites')
+}
+const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
 </script>
 
 <template lang="pug">
@@ -127,8 +153,16 @@ const normalizeLiveSpaces = (spaces) => {
       button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
         img.icon.camera(src="@/assets/camera.svg")
         span(v-if="state.liveSpaces.length") {{ state.liveSpaces.length }}
+    //- Favorites
+    .button-wrap
+      button(@click.left="toggleFavoritesIsVisible" :class="{ active: state.favoritesIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+        img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+        img.icon(v-else src="@/assets/heart-empty.svg")
+        span(v-if="favoriteSpacesEditedCount") {{ favoriteSpacesEditedCount }}
+
   Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")
   Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
+  Favorites(:visible="state.favoritesIsVisible")
 </template>
 
 <style lang="stylus">

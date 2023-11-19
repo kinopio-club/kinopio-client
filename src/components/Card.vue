@@ -865,7 +865,7 @@ export default {
       let url = this.card.urlPreviewUrl
       url = utils.removeTrailingSlash(url)
       cardHasUrlPreviewInfo = Boolean(cardHasUrlPreviewInfo && url)
-      const nameHasUrl = this.card.name.includes(url)
+      const nameHasUrl = this.card.name?.includes(url)
       return (this.card.urlPreviewIsVisible && cardHasUrlPreviewInfo && nameHasUrl) && !this.isComment
       // return Boolean(this.card.urlPreviewIsVisible && this.card.urlPreviewUrl && cardHasUrlPreviewInfo) // && !isErrorUrl
     },

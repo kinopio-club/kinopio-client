@@ -26,13 +26,6 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
           //- Stats
           button(@click.left="toggleStatsIsVisible" :class="{active: statsIsVisible}")
             img.icon.stats(src="@/assets/stats.svg")
-          //- Stats
-          button(@click.left="toggleFavoritesIsVisible" :class="{active: favoritesIsVisible}")
-            template(v-if="favoriteSpacesEditedCount")
-              img.icon(src="@/assets/heart.svg")
-              span {{favoriteSpacesEditedCount}}
-            template(v-else)
-              img.icon(src="@/assets/heart.svg")
           //- Removed
           button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
             img.icon(src="@/assets/remove.svg")
@@ -50,7 +43,6 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
   Removed(:visible="removedIsVisible")
   AIImages(:visible="AIImagesIsVisible")
   Stats(:visible="statsIsVisible")
-  Favorites(:visible="favoritesIsVisible")
   Text(:visible="textIsVisible")
 
 </template>
@@ -63,7 +55,6 @@ import Comments from '@/components/Comments.vue'
 import Removed from '@/components/Removed.vue'
 import AIImages from '@/components/AIImages.vue'
 import Stats from '@/components/Stats.vue'
-import Favorites from '@/components/Favorites.vue'
 import Text from '@/components/Text.vue'
 
 export default {
@@ -75,7 +66,6 @@ export default {
     Removed,
     AIImages,
     Stats,
-    Favorites,
     Text
   },
   props: {
@@ -112,22 +102,9 @@ export default {
     })
   },
   computed: {
-    dialogIsPinned () { return this.$store.state.sidebarIsPinned },
-    favoriteSpacesEditedCount () {
-      const currentUser = this.$store.state.currentUser
-      let favoriteSpaces = utils.clone(currentUser.favoriteSpaces)
-      favoriteSpaces = favoriteSpaces.filter(space => {
-        const isEditedByOtherUser = space.editedByUserId !== currentUser.id
-        const isEditedAndNotVisited = space.isEdited && space.userId !== currentUser.id
-        return isEditedByOtherUser && isEditedAndNotVisited
-      })
-      return favoriteSpaces.length
-    }
+    dialogIsPinned () { return this.$store.state.sidebarIsPinned }
   },
   methods: {
-    async updateFavorites () {
-      await this.$store.dispatch('currentUser/restoreUserFavorites')
-    },
     toggleDialogIsPinned () {
       const isPinned = !this.dialogIsPinned
       this.$store.dispatch('sidebarIsPinned', isPinned)
@@ -143,7 +120,6 @@ export default {
       this.removedIsVisible = false
       this.AIImagesIsVisible = false
       this.statsIsVisible = false
-      this.favoritesIsVisible = false
       this.textIsVisible = false
     },
     toggleTagsIsVisible () {
@@ -176,11 +152,6 @@ export default {
       this.clearVisible()
       this.statsIsVisible = value
     },
-    toggleFavoritesIsVisible () {
-      const value = !this.favoritesIsVisible
-      this.clearVisible()
-      this.favoritesIsVisible = value
-    },
     toggleTextIsVisible () {
       const value = !this.textIsVisible
       this.clearVisible()
@@ -198,7 +169,6 @@ export default {
     visible (visible) {
       if (visible) {
         this.updateDialogHeight()
-        this.updateFavorites()
         this.$store.commit('shouldExplicitlyHideFooter', true)
       } else {
         this.$store.commit('shouldExplicitlyHideFooter', false)

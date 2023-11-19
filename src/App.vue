@@ -471,6 +471,15 @@ label // used for checkbox buttons
   &.translucent-button
     backdrop-filter blur(8px) !important
     background var(--button-background-translucent)
+    &:hover
+      box-shadow var(--button-hover-shadow)
+      background-color var(--secondary-hover-background)
+      outline none
+    &:active,
+    &.active
+      box-shadow var(--button-active-inset-shadow)
+      color var(--primary)
+      background-color var(--secondary-active-background)
   &.small-button
     height fit-content
     padding 0px 4px
