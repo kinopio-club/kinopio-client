@@ -242,6 +242,7 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
 
 <style lang="stylus">
 dialog.favorites
+  overflow auto
   left initial
   right 8px
   .user-filter
