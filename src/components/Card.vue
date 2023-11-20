@@ -650,6 +650,9 @@ export default {
       if (this.isLocked) {
         styles = { marginRight: '2px' }
       }
+      if (this.isAudioCard) {
+        styles.width = '100%'
+      }
       return styles
     },
     backgroundColorIsDark () {
@@ -888,10 +891,9 @@ export default {
     },
     isBeingDragged () {
       let isCardId
-      const multipleCardsSelectedIds = this.multipleCardsSelectedIds
       const currentDraggingCard = this.currentDraggingCardId
       const isDraggingCard = this.currentUserIsDraggingCard
-      if (multipleCardsSelectedIds.includes(this.id) || currentDraggingCard === this.id) {
+      if (this.isSelected || currentDraggingCard === this.id) {
         isCardId = true
       }
       return Boolean(isDraggingCard && isCardId)
