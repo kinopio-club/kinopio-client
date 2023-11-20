@@ -102,7 +102,8 @@ dialog.narrow.other-space-details(v-if="visible" :open="visible" :style="styles"
         BackgroundPreview(:space="otherSpace")
         .row-title {{ otherSpace.name }}
       .row(v-if="otherSpace.screenshotUrl")
-        img(:src="otherSpace.screenshotUrl")
+        a(:href="otherSpace.url")
+          img.space-screenshot(:src="otherSpace.screenshotUrl" @click.stop.prevent="changeSpace")
       .row
         a(:href="otherSpace.url")
           button(@click.stop.prevent="changeSpace" @keyup.enter.prevent="changeSpace")
@@ -129,6 +130,8 @@ dialog.other-space-details
     background-color var(--secondary-background)
   .row-title
     margin-left 4px
+  .space-screenshot
+    border-radius var(--entity-radius)
   .badges-wrap
     flex-wrap wrap
   li
