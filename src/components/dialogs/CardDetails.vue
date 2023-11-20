@@ -626,8 +626,9 @@ export default {
       const cardId = this.card.id
       const spaceId = this.currentSpace.id
       // remove existing image url
-      if (this.formats.image) {
-        const newName = this.name.replace(this.formats.image, '')
+      const prevImageOrFile = this.formats.image || this.formats.video || this.formats.file
+      if (prevImageOrFile) {
+        const newName = this.name.replace(prevImageOrFile, '')
         this.updateCardName(newName)
       }
       // add new image or file url
