@@ -1304,6 +1304,7 @@ export default {
       return hasTypeId
     })
     space.connections = connections
+    space.cards = space.cards.filter(card => card.name)
     return space
   },
   normalizeRemoteSpace (remoteSpace) {
