@@ -15,18 +15,15 @@ const store = useStore()
 const numberOfImages = 25
 
 const dialogElement = ref(null)
-const resultsElement = ref(null)
-const cardImageServiceSectionElement = ref(null)
-const searchSectionElement = ref(null)
 const searchInputElement = ref(null)
 const inputElement = ref(null)
+const resultsSectionElement = ref(null)
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
     if (mutation.type === 'updatePageSizes') {
       clearHeights()
-      updateHeightFromDialog()
-      updateHeightFromDialog()
+      updateDialogHeight()
     }
   })
 })
@@ -41,12 +38,12 @@ const props = defineProps({
 watch(() => props.visible, async (value, prevValue) => {
   await nextTick()
   if (value) {
-    updateHeightFromDialog()
+    updateDialogHeight()
     updateServiceFromLastUsedService()
     state.search = state.initialSearch
-    scrollIntoView()
     searchService()
     focusSearchInput()
+    scrollIntoView()
   }
 })
 
@@ -56,8 +53,7 @@ const state = reactive({
   images: [],
   search: '',
   service: 'stickers', // 'stickers', 'gifs', 'pexels', 'ai'
-  loading: false,
-  // minDialogHeight: 400, // temp remove?¿?
+  loading: true,
   dialogHeight: null,
   resultsSectionHeight: null,
   error: {
@@ -68,6 +64,18 @@ const state = reactive({
     unknownUploadError: false
   }
 })
+
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const triggerSignUpOrInIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerSignUpOrInIsVisible')
+}
+const triggerUpgradeUserIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerUpgradeUserIsVisible')
+}
+
+// input
 
 const searchInput = computed({
   get () {
@@ -81,13 +89,6 @@ const searchInput = computed({
     }
   }
 })
-const provider = computed(() => {
-  if (state.service === 'stickers' || state.service === 'gifs') {
-    return 'giphy'
-  } else {
-    return 'pexels'
-  }
-})
 const placeholder = computed(() => {
   let label = provider.value
   if (label === 'pexels') {
@@ -95,37 +96,35 @@ const placeholder = computed(() => {
   }
   return `Search ${utils.capitalizeFirstLetter(label)}`
 })
-const cardPendingUpload = computed(() => {
-  const pendingUploads = store.state.upload.pendingUploads
-  return pendingUploads.find(upload => upload.cardId === state.cardId)
+const focusSearchInput = () => {
+  if (utils.isMobile()) { return }
+  const element = searchInputElement.value
+  const length = searchInputElement.value.length
+  element.focus()
+  element.setSelectionRange(length, length)
+  store.commit('triggerUpdatePositionInVisualViewport')
+}
+const clearSearch = () => {
+  state.search = ''
+  state.loading = false
+  state.images = []
+  searchService()
+}
+
+// services
+
+const provider = computed(() => {
+  if (state.service === 'stickers' || state.service === 'gifs') {
+    return 'giphy'
+  } else {
+    return 'pexels'
+  }
 })
 const serviceIsPexels = computed(() => state.service === 'pexels')
 const serviceIsStickers = computed(() => state.service === 'stickers')
 const serviceIsAI = computed(() => state.service === 'ai')
 const serviceIsGifs = computed(() => state.service === 'gifs')
-const isNoSearchResults = computed(() => {
-  if (state.error.unknownServerError || state.error.userIsOffline) {
-    return false
-  } else if (state.search && !state.loading && !state.images.length) {
-    return true
-  } else {
-    return false
-  }
-})
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const lastUsedImagePickerService = computed(() => store.state.currentUser.lastUsedImagePickerService)
-
-const removeImage = () => {
-  emit('removeImage')
-}
-const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
-}
-const triggerUpgradeUserIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerUpgradeUserIsVisible')
-}
 const toggleServiceIsPexels = () => {
   state.service = 'pexels'
   searchAgain()
@@ -145,6 +144,25 @@ const toggleServiceIsGifs = () => {
   searchAgain()
   updateLastUsedImagePickerService()
 }
+const updateLastUsedImagePickerService = () => {
+  store.dispatch('currentUser/update', { lastUsedImagePickerService: state.service })
+}
+const updateServiceFromLastUsedService = () => {
+  if (!lastUsedImagePickerService.value) { return }
+  state.service = lastUsedImagePickerService.value
+}
+
+// search
+
+const isNoSearchResults = computed(() => {
+  if (state.error.unknownServerError || state.error.userIsOffline) {
+    return false
+  } else if (state.search && !state.loading && !state.images.length) {
+    return true
+  } else {
+    return false
+  }
+})
 const searchAgain = () => {
   state.images = []
   state.loading = true
@@ -211,19 +229,6 @@ const searchService = debounce(async () => {
   }
   state.loading = false
 }, 350)
-
-const clearErrors = () => {
-  state.error.signUpToUpload = false
-  state.error.sizeLimit = false
-  state.error.unknownServerError = false
-  state.error.userIsOffline = false
-  state.error.unknownUploadError = false
-}
-const clearHeights = () => {
-  // state.minDialogHeight = 400
-  state.dialogHeight = null
-  state.resultsSectionHeight = null
-}
 const normalizeResults = async (data, service) => {
   const pexels = service === 'pexels' && serviceIsPexels.value
   const giphy = service === 'giphy' && (serviceIsStickers.value || serviceIsGifs.value)
@@ -257,33 +262,29 @@ const normalizeResults = async (data, service) => {
       }
     })
     await nextTick()
-    updateHeightFromDialog()
+    updateDialogHeight()
     scrollIntoView()
   }
 }
-const focusSearchInput = () => {
-  if (utils.isMobile()) { return }
-  const element = searchInputElement.value
-  const length = searchInputElement.value.length
-  element.focus()
-  element.setSelectionRange(length, length)
-  store.commit('triggerUpdatePositionInVisualViewport')
+const clearErrors = () => {
+  state.error.signUpToUpload = false
+  state.error.sizeLimit = false
+  state.error.unknownServerError = false
+  state.error.userIsOffline = false
+  state.error.unknownUploadError = false
 }
-const clearSearch = () => {
-  state.search = ''
-  state.loading = false
-  state.images = []
-  searchService()
+
+// image
+
+const cardPendingUpload = computed(() => {
+  const pendingUploads = store.state.upload.pendingUploads
+  return pendingUploads.find(upload => upload.cardId === state.cardId)
+})
+const removeImage = () => {
+  emit('removeImage')
 }
 const selectImage = (image) => {
   emit('selectImage', image)
-}
-const scrollIntoView = () => {
-  if (!props.visible) { return }
-  const element = dialogElement.value
-  if (!element) { return }
-  utils.scrollIntoView({ element })
-  store.commit('triggerUpdatePositionInVisualViewport')
 }
 const isCardUrl = (image) => {
   return props.cardUrl === image.url
@@ -312,68 +313,42 @@ const uploadFile = async () => {
     }
   }
 }
-const heightIsSignificantlyDifferent = (height) => {
-  const thresholdDelta = 100
-  if (!state.resultsSectionHeight) { return true }
-  if (Math.abs(state.resultsSectionHeight - height) > thresholdDelta) {
-    return true
-  }
-}
 
-const updateHeightFromDialog = async () => {
+// styles
+
+const clearHeights = () => {
+  state.dialogHeight = null
+  state.resultsSectionHeight = null
+}
+const scrollIntoView = () => {
+  if (!props.visible) { return }
+  const element = dialogElement.value
+  if (!element) { return }
+  utils.scrollIntoView({ element })
+  store.commit('triggerUpdatePositionInVisualViewport')
+}
+const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   const element = dialogElement.value
   const dialogHeight = utils.elementHeight(element)
-  // state.minDialogHeight = Math.max(state.minDialogHeight, dialogHeight)
-  updateResultsSectionHeight()
-}
-// const updateDialogHeight = async () => {
-//   if (!props.visible) { return }
-//   await nextTick()
-//   let element = dialogElement.value
-//   state.dialogHeight = utils.elementHeight(element)
-// }
-
-const updateHeightFromFooter = async () => {
-  if (!props.visible) { return }
-  await nextTick()
-  let element = dialogElement.value
-  state.dialogHeight = utils.elementHeight(element)
-  // state.minDialogHeight = Math.max(state.minDialogHeight, state.dialogHeight)
   updateResultsSectionHeight()
 }
 const updateResultsSectionHeight = async () => {
-  await nextTick()
-  await nextTick()
   if (!props.visible) { return }
-  let resultsSection = resultsElement.value
-  let serviceSection
-  serviceSection = cardImageServiceSectionElement.value
-  let searchSection = searchSectionElement.value
-  if (!serviceSection) { return }
-  serviceSection = serviceSection.getBoundingClientRect().height
-  resultsSection = utils.elementHeight(resultsSection, true)
-  searchSection = searchSection.getBoundingClientRect().height
-  state.resultsSectionHeight = resultsSection + serviceSection + searchSection + 4
+  await nextTick()
+  let element = resultsSectionElement.value
+  state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 const resetPinchCounterZoomDecimal = () => {
   store.commit('pinchCounterZoomDecimal', 1)
 }
-const updateLastUsedImagePickerService = () => {
-  store.dispatch('currentUser/update', { lastUsedImagePickerService: state.service })
-}
-const updateServiceFromLastUsedService = () => {
-  if (!lastUsedImagePickerService.value) { return }
-  state.service = lastUsedImagePickerService.value
-}
-
 </script>
 
 <template lang="pug">
 dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   //- card options
-  section(ref="cardImageServiceSectionElement")
+  section
     .row.title-row-flex
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
@@ -414,11 +389,11 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
       .badge.danger
         span (シ_ _)シ Something went wrong, Please try again or contact support
 
-  AIImageGeneration(@selectImage="selectImage" :visible="serviceIsAI" :initialPrompt="state.search" :cardUrl="cardUrl" @updateDialogHeight="updateHeightFromDialog")
+  AIImageGeneration(@selectImage="selectImage" :visible="serviceIsAI" :initialPrompt="state.search" :cardUrl="cardUrl" @updateDialogHeight="updateDialogHeight")
     //-
   template(v-if="!serviceIsAI")
     //- search box
-    section.results-section.search-input-wrap(ref="searchSectionElement")
+    section.results-section.search-input-wrap
       .search-wrap
         img.icon.search(v-if="!state.loading" src="@/assets/search.svg" @click.left="focusSearchInput")
         Loader(:visible="state.loading")
@@ -442,7 +417,7 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
           span Can't search {{service}} while offline, Please try again later
 
     //- search results
-    section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+    section.results-section(ref="resultsSectionElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
       ul.results-list.image-list
         template(v-for="image in state.images" :key="image.id")
           li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
@@ -451,12 +426,13 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
               button.small-button
                 span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
                 img.icon.visit(src="@/assets/visit.svg")
-
 </template>
 
 <style lang="stylus">
-.image-picker
-  max-height 100vh
+dialog.image-picker
+  min-height 200px
+  max-height 70vh
+  overflow auto
   .search-wrap
     .loader
       width 13px
