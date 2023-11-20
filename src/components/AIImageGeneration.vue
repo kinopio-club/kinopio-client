@@ -1,3 +1,133 @@
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import AIImagesProgress from '@/components/AIImagesProgress.vue'
+import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
+const store = useStore()
+
+const textareaElement = ref(null)
+
+onMounted(() => {
+  console.log(`🐴 the component is now mounted.`, store.state.currentSpace)
+  // store.subscribe((mutation, state) => {
+  //   if (mutation.type === 'triggerUpdateOtherCard') {
+  //     mutation.payload
+  //   }
+  // })
+})
+
+const props = defineProps({
+  visible: Boolean,
+  initialPrompt: String,
+  cardUrl: String
+})
+const emit = defineEmits(['selectImage'])
+
+watch(() => props.visible, async (value, prevValue) => {
+  if (value) {
+    state.images = undefined
+    updatePrompt(state.initialPrompt)
+    await nextTick()
+    textareaSize()
+  }
+})
+
+const state = reactive({
+  loading: false,
+  error: false,
+  lengthError: false,
+  prompt: '',
+  images: undefined,
+  loadingPrompt: ''
+})
+
+const promptInput = computed({
+  get () {
+    return state.prompt
+  },
+  set (newValue) {
+    updatePrompt(newValue)
+  }
+})
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const promptIsLoadingPrompt = computed(() => {
+  if (!state.prompt) { return }
+  return state.prompt === state.loadingPrompt
+})
+const AIImagesIsUnderLimit = computed(() => store.getters['currentUser/AIImagesIsUnderLimit'])
+
+const isCardUrl = (image) => {
+  return props.cardUrl === image.url
+}
+const selectImage = (image) => {
+  emit('selectImage', image)
+}
+const generateImage = async () => {
+  if (!state.prompt) { return }
+  if (!AIImagesIsUnderLimit.value) { return }
+  if (state.loading && promptIsLoadingPrompt.value) { return }
+  if (state.prompt > state.lengthError) {
+    state.lengthError = true
+    return
+  }
+  state.loading = true
+  state.images = undefined
+  state.error = false
+  state.lengthError = false
+  const body = {
+    prompt: state.prompt,
+    userId: store.state.currentUser.id
+  }
+  try {
+    state.images = await store.dispatch('api/createAIImage', body)
+    updateCurrentUserAIImages()
+  } catch (error) {
+    console.error('🚒 generateImage', error)
+    state.error = true
+  }
+  state.loading = false
+}
+const updateCurrentUserAIImages = () => {
+  let AIImages = store.state.currentUser.AIImages
+  AIImages = state.images.concat(AIImages)
+  store.commit('currentUser/AIImages', AIImages)
+}
+const resetPinchCounterZoomDecimal = () => {
+  store.commit('pinchCounterZoomDecimal', 1)
+}
+const focusPromptInput = () => {
+  if (utils.isMobile()) { return }
+  const element = textareaElement.value
+  const length = element.value.length
+  element.focus()
+  element.setSelectionRange(length, length)
+  store.commit('triggerUpdatePositionInVisualViewport')
+}
+const textareaSize = () => {
+  const textarea = textareaElement.value
+  if (!textarea) { return }
+  textarea.style.height = textarea.scrollHeight + 1 + 'px'
+}
+const updatePrompt = (prompt) => {
+  state.prompt = prompt
+  state.error = false
+  state.lengthError = false
+  textareaSize()
+}
+const triggerSignUpOrInIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerSignUpOrInIsVisible')
+}
+const clear = () => {
+  updatePrompt('')
+  state.images = undefined
+  const textarea = textareaElement.value
+  textarea.style.height = 'initial'
+}
+</script>
+
 <template lang="pug">
 .ai-image-generation(v-if="visible")
   //- sign up
@@ -12,12 +142,12 @@
     //- prompt textarea
     template(v-if="currentUserIsSignedIn")
       .search-wrap
-        img.icon.openai(v-if="!loading" src="@/assets/openai.svg" @click.left="focusPromptInput")
-        Loader(:visible="loading")
+        img.icon.openai(v-if="!state.loading" src="@/assets/openai.svg" @click.left="focusPromptInput")
+        Loader(:visible="state.loading")
         textarea(
           placeholder="Puppies in a victorian style"
           v-model="promptInput"
-          ref="promptInput"
+          ref="textareaElement"
           @focus="resetPinchCounterZoomDecimal"
           @update="textareaSize"
           @keydown.enter.exact.prevent="generateImage"
@@ -36,22 +166,22 @@
           span Generate
 
       //- errors
-      .row.error-row(v-if="error")
+      .row.error-row(v-if="state.error")
         span.badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-      .row.error-row(v-if="lengthError")
+      .row.error-row(v-if="state.lengthError")
         span.badge.danger Prompts cannot be longer than 400 characters
 
   //- loading
-  template(v-if="loading")
+  template(v-if="state.loading")
     section.results
       .row.loading-row
         Loader(:visible="true")
         p.info This may take up to 30 seconds…
   //- results
-  template(v-else-if="images")
+  template(v-else-if="state.images")
     section.results
       ul.results-list.image-list
-        template(v-for="image in images")
+        template(v-for="image in state.images")
           li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
             img(:src="image.url")
   //- instructions
@@ -74,134 +204,7 @@
         img(src="https://updates.kinopio.club/dall-e-example.jpg")
 
   AIImagesProgress(:showAIImageHistoryButton="true")
-
 </template>
-
-<script>
-import AIImagesProgress from '@/components/AIImagesProgress.vue'
-import Loader from '@/components/Loader.vue'
-import utils from '@/utils.js'
-
-export default {
-  name: 'AIImageGeneration',
-  components: {
-    Loader,
-    AIImagesProgress
-  },
-  props: {
-    visible: Boolean,
-    initialPrompt: String,
-    cardUrl: String
-  },
-  data () {
-    return {
-      loading: false,
-      error: false,
-      lengthError: false,
-      prompt: '',
-      images: undefined,
-      loadingPrompt: ''
-    }
-  },
-  computed: {
-    promptInput: {
-      get () {
-        return this.prompt
-      },
-      set (newValue) {
-        this.updatePrompt(newValue)
-      }
-    },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    promptIsLoadingPrompt () {
-      if (!this.prompt) { return }
-      return this.prompt === this.loadingPrompt
-    },
-    AIImagesIsUnderLimit () { return this.$store.getters['currentUser/AIImagesIsUnderLimit'] }
-  },
-  methods: {
-    isCardUrl (image) {
-      return this.cardUrl === image.url
-    },
-    selectImage (image) {
-      this.$emit('selectImage', image)
-    },
-    async generateImage () {
-      if (!this.prompt) { return }
-      if (!this.AIImagesIsUnderLimit) { return }
-      if (this.loading && this.promptIsLoadingPrompt) { return }
-      if (this.prompt > this.lengthError) {
-        this.lengthError = true
-        return
-      }
-      this.loading = true
-      this.images = undefined
-      this.error = false
-      this.lengthError = false
-      const body = {
-        prompt: this.prompt,
-        userId: this.$store.state.currentUser.id
-      }
-      try {
-        this.images = await this.$store.dispatch('api/createAIImage', body)
-        this.updateCurrentUserAIImages()
-      } catch (error) {
-        console.error('🚒 generateImage', error)
-        this.error = true
-      }
-      this.loading = false
-    },
-    updateCurrentUserAIImages () {
-      let AIImages = this.$store.state.currentUser.AIImages
-      AIImages = this.images.concat(AIImages)
-      this.$store.commit('currentUser/AIImages', AIImages)
-    },
-    resetPinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', 1)
-    },
-    focusPromptInput () {
-      if (utils.isMobile()) { return }
-      const element = this.$refs.promptInput
-      const length = this.search.length
-      element.focus()
-      element.setSelectionRange(length, length)
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
-    },
-    textareaSize () {
-      const textarea = this.$refs.promptInput
-      if (!textarea) { return }
-      textarea.style.height = textarea.scrollHeight + 1 + 'px'
-    },
-    updatePrompt (prompt) {
-      this.prompt = prompt
-      this.error = false
-      this.lengthError = false
-      this.textareaSize()
-    },
-    triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerSignUpOrInIsVisible')
-    },
-    clear () {
-      this.updatePrompt('')
-      this.images = undefined
-      const textarea = this.$refs.promptInput
-      textarea.style.height = 'initial'
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.images = undefined
-        this.updatePrompt(this.initialPrompt)
-        this.$nextTick(() => {
-          this.textareaSize()
-        })
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .ai-image-generation
