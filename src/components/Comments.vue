@@ -38,21 +38,6 @@ export default {
   props: {
     visible: Boolean
   },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateResultsSectionHeight()
-      }
-    })
-  },
-  mounted () {
-    this.updateResultsSectionHeight()
-  },
-  data () {
-    return {
-      resultsSectionHeight: null
-    }
-  },
   computed: {
     comments () {
       let cards = this.$store.getters['currentCards/all']
@@ -81,20 +66,6 @@ export default {
     },
     userById (userId) {
       return this.$store.getters['currentSpace/userById'](userId)
-    },
-    updateResultsSectionHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeight(element, true)
-      })
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.updateResultsSectionHeight()
-      }
     }
   }
 }
