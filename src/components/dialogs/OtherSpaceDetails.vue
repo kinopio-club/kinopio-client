@@ -101,6 +101,8 @@ dialog.narrow.other-space-details(v-if="visible" :open="visible" :style="styles"
       .row
         BackgroundPreview(:space="otherSpace")
         .row-title {{ otherSpace.name }}
+      .row(v-if="otherSpace.screenshotUrl")
+        img(:src="otherSpace.screenshotUrl")
       .row
         a(:href="otherSpace.url")
           button(@click.stop.prevent="changeSpace" @keyup.enter.prevent="changeSpace")
