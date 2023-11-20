@@ -28,8 +28,10 @@ watch(() => props.visible, (value, prevValue) => {
     closeDialogs()
     updateFavorites()
     updateDialogHeight()
+    store.commit('shouldExplicitlyHideFooter', true)
   } else {
     updateFavoriteSpaceIsEdited()
+    store.commit('shouldExplicitlyHideFooter', false)
   }
 })
 
