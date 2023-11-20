@@ -55,11 +55,12 @@ aside.notifications(@click.left="closeAllDialogs")
       img.icon.filter-icon(src="@/assets/filter.svg")
 
   .item.info(v-if="notifyCurrentSpaceIsNowRemoved" @animationend="resetNotifyCurrentSpaceIsNowRemoved")
-    p Space is removed. Restore or permanently delete spaces through
+    p Space is removed
     .row
       button(@click.stop="showRemoved")
         img.icon(src="@/assets/remove.svg")
         img.icon.remove-undo(src="@/assets/undo.svg")
+        span Undo or Permanently Delete
 
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
     p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade
