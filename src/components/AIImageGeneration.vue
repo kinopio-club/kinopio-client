@@ -9,21 +9,12 @@ const store = useStore()
 
 const textareaElement = ref(null)
 
-onMounted(() => {
-  console.log(`🐴 the component is now mounted.`, store.state.currentSpace)
-  // store.subscribe((mutation, state) => {
-  //   if (mutation.type === 'triggerUpdateOtherCard') {
-  //     mutation.payload
-  //   }
-  // })
-})
-
 const props = defineProps({
   visible: Boolean,
   initialPrompt: String,
   cardUrl: String
 })
-const emit = defineEmits(['selectImage'])
+const emit = defineEmits(['selectImage', 'updateDialogHeight'])
 
 watch(() => props.visible, async (value, prevValue) => {
   if (value) {
@@ -43,6 +34,15 @@ const state = reactive({
   loadingPrompt: ''
 })
 
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+
+const triggerSignUpOrInIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerSignUpOrInIsVisible')
+}
+
+// textarea
+
 const promptInput = computed({
   get () {
     return state.prompt
@@ -51,12 +51,41 @@ const promptInput = computed({
     updatePrompt(newValue)
   }
 })
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const promptIsLoadingPrompt = computed(() => {
   if (!state.prompt) { return }
   return state.prompt === state.loadingPrompt
 })
-const AIImagesIsUnderLimit = computed(() => store.getters['currentUser/AIImagesIsUnderLimit'])
+const resetPinchCounterZoomDecimal = () => {
+  store.commit('pinchCounterZoomDecimal', 1)
+}
+const focusPromptInput = () => {
+  if (utils.isMobile()) { return }
+  const element = textareaElement.value
+  const length = element.value.length
+  element.focus()
+  element.setSelectionRange(length, length)
+  store.commit('triggerUpdatePositionInVisualViewport')
+}
+const textareaSize = () => {
+  const textarea = textareaElement.value
+  if (!textarea) { return }
+  textarea.style.height = textarea.scrollHeight + 1 + 'px'
+}
+const updatePrompt = (prompt) => {
+  state.prompt = prompt
+  state.error = false
+  state.lengthError = false
+  textareaSize()
+}
+const clear = () => {
+  updatePrompt('')
+  state.images = undefined
+  const textarea = textareaElement.value
+  textarea.style.height = 'initial'
+  emit('updateDialogHeight')
+}
+
+// images
 
 const isCardUrl = (image) => {
   return props.cardUrl === image.url
@@ -88,44 +117,19 @@ const generateImage = async () => {
     state.error = true
   }
   state.loading = false
+  await nextTick()
+  emit('updateDialogHeight')
 }
+
+// limit
+
+const AIImagesIsUnderLimit = computed(() => store.getters['currentUser/AIImagesIsUnderLimit'])
 const updateCurrentUserAIImages = () => {
   let AIImages = store.state.currentUser.AIImages
   AIImages = state.images.concat(AIImages)
   store.commit('currentUser/AIImages', AIImages)
 }
-const resetPinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', 1)
-}
-const focusPromptInput = () => {
-  if (utils.isMobile()) { return }
-  const element = textareaElement.value
-  const length = element.value.length
-  element.focus()
-  element.setSelectionRange(length, length)
-  store.commit('triggerUpdatePositionInVisualViewport')
-}
-const textareaSize = () => {
-  const textarea = textareaElement.value
-  if (!textarea) { return }
-  textarea.style.height = textarea.scrollHeight + 1 + 'px'
-}
-const updatePrompt = (prompt) => {
-  state.prompt = prompt
-  state.error = false
-  state.lengthError = false
-  textareaSize()
-}
-const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
-}
-const clear = () => {
-  updatePrompt('')
-  state.images = undefined
-  const textarea = textareaElement.value
-  textarea.style.height = 'initial'
-}
+
 </script>
 
 <template lang="pug">
