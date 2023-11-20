@@ -1,3 +1,34 @@
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import consts from '@/consts.js'
+const store = useStore()
+
+const props = defineProps({
+  showAIImageHistoryButton: Boolean
+})
+
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const AIImagesThisMonthCount = computed(() => store.getters['currentUser/AIImagesThisMonthCount'])
+const AIImagesLimit = computed(() => store.getters['currentUser/AIImagesLimit'])
+const AIImageLimitUpgradedUser = computed(() => consts.AIImageLimitUpgradedUser)
+const triggerSignUpOrInIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerSignUpOrInIsVisible')
+}
+const triggerUpgradeUserIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerUpgradeUserIsVisible')
+}
+
+const triggerAIImagesIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerAIImagesIsVisible')
+}
+</script>
+
 <template lang="pug">
 section.ai-images-progress(v-if="currentUserIsSignedIn" :class="{'margin-bottom-zero': currentUserIsUpgraded && !showAIImageHistoryButton}")
   p {{AIImagesThisMonthCount}}/{{AIImagesLimit}} AI requests used
@@ -13,44 +44,6 @@ section.ai-images-progress(v-if="currentUserIsSignedIn" :class="{'margin-bottom-
     button.upgrade-button(@click="triggerUpgradeUserIsVisible")
       span Upgrade to get {{AIImageLimitUpgradedUser}} AI requests each month
 </template>
-
-<script>
-import consts from '@/consts.js'
-
-export default {
-  name: 'AIImagesProgress',
-  props: {
-    showAIImageHistoryButton: Boolean
-  },
-  data () {
-    return {
-    }
-  },
-  computed: {
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
-    AIImagesThisMonthCount () { return this.$store.getters['currentUser/AIImagesThisMonthCount'] },
-    AIImagesLimit () { return this.$store.getters['currentUser/AIImagesLimit'] },
-    AIImageLimitUpgradedUser () { return consts.AIImageLimitUpgradedUser }
-
-  },
-  methods: {
-    triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerSignUpOrInIsVisible')
-    },
-    triggerUpgradeUserIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerUpgradeUserIsVisible')
-    },
-
-    triggerAIImagesIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerAIImagesIsVisible')
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .ai-images-progress

@@ -1053,9 +1053,13 @@ export default {
     AIImagesThisMonth: (state) => {
       if (state.isUpgraded) {
         const currentMonth = dayjs().month()
+        const currentYear = dayjs().year()
         return state.AIImages.filter(image => {
           const month = dayjs(image.createdAt).month()
-          return month === currentMonth
+          const year = dayjs(image.createdAt).year()
+          const isInCurrentMonth = month === currentMonth
+          const isInCurrentYear = year === currentYear
+          return isInCurrentMonth && isInCurrentYear
         })
       } else {
         return state.AIImages

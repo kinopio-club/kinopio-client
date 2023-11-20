@@ -1,14 +1,354 @@
-<template lang="pug">
-dialog.image-picker(
-  v-if="visible"
-  :open="visible"
-  @click.left.stop
-  ref="dialog"
-  :style="{'max-height': dialogHeight + 'px', 'min-height': minDialogHeight + 'px'}"
-)
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
 
+import Loader from '@/components/Loader.vue'
+import AIImageGeneration from '@/components/AIImageGeneration.vue'
+import utils from '@/utils.js'
+import cache from '@/cache.js'
+import consts from '@/consts.js'
+
+import debounce from 'lodash-es/debounce'
+import sample from 'lodash-es/sample'
+const store = useStore()
+
+const numberOfImages = 25
+
+const dialogElement = ref(null)
+const searchInputElement = ref(null)
+const inputElement = ref(null)
+const resultsSectionElement = ref(null)
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'updatePageSizes') {
+      clearHeights()
+      updateDialogHeight()
+    }
+  })
+})
+
+const props = defineProps({
+  visible: Boolean,
+  initialSearch: String,
+  cardUrl: String,
+  cardId: String,
+  removeIsVisible: Boolean
+})
+watch(() => props.visible, async (value, prevValue) => {
+  await nextTick()
+  if (value) {
+    updateDialogHeight()
+    updateServiceFromLastUsedService()
+    state.search = state.initialSearch
+    searchService()
+    focusSearchInput()
+    scrollIntoView()
+  }
+})
+
+const emit = defineEmits(['removeImage', 'selectImage'])
+
+const state = reactive({
+  images: [],
+  search: '',
+  service: 'stickers', // 'stickers', 'gifs', 'pexels', 'ai'
+  loading: true,
+  dialogHeight: null,
+  resultsSectionHeight: null,
+  error: {
+    unknownServerError: false,
+    userIsOffline: false,
+    signUpToUpload: false,
+    sizeLimit: false,
+    unknownUploadError: false
+  }
+})
+
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const triggerSignUpOrInIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerSignUpOrInIsVisible')
+}
+const triggerUpgradeUserIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerUpgradeUserIsVisible')
+}
+
+// input
+
+const searchInput = computed({
+  get () {
+    return state.search
+  },
+  set (newValue) {
+    state.search = newValue
+    if (newValue) {
+      state.loading = true
+      searchService()
+    }
+  }
+})
+const placeholder = computed(() => {
+  let label = provider.value
+  if (label === 'pexels') {
+    label = 'images on Pexel'
+  }
+  return `Search ${utils.capitalizeFirstLetter(label)}`
+})
+const focusSearchInput = () => {
+  if (utils.isMobile()) { return }
+  const element = searchInputElement.value
+  const length = searchInputElement.value.length
+  element.focus()
+  element.setSelectionRange(length, length)
+  store.commit('triggerUpdatePositionInVisualViewport')
+}
+const clearSearch = () => {
+  state.search = ''
+  state.loading = false
+  state.images = []
+  searchService()
+}
+
+// services
+
+const provider = computed(() => {
+  if (state.service === 'stickers' || state.service === 'gifs') {
+    return 'giphy'
+  } else {
+    return 'pexels'
+  }
+})
+const serviceIsPexels = computed(() => state.service === 'pexels')
+const serviceIsStickers = computed(() => state.service === 'stickers')
+const serviceIsAI = computed(() => state.service === 'ai')
+const serviceIsGifs = computed(() => state.service === 'gifs')
+const lastUsedImagePickerService = computed(() => store.state.currentUser.lastUsedImagePickerService)
+const toggleServiceIsPexels = () => {
+  state.service = 'pexels'
+  searchAgain()
+  updateLastUsedImagePickerService()
+}
+const toggleServiceIsAI = () => {
+  state.service = 'ai'
+  updateLastUsedImagePickerService()
+}
+const toggleServiceIsStickers = () => {
+  state.service = 'stickers'
+  searchAgain()
+  updateLastUsedImagePickerService()
+}
+const toggleServiceIsGifs = () => {
+  state.service = 'gifs'
+  searchAgain()
+  updateLastUsedImagePickerService()
+}
+const updateLastUsedImagePickerService = () => {
+  store.dispatch('currentUser/update', { lastUsedImagePickerService: state.service })
+}
+const updateServiceFromLastUsedService = () => {
+  if (!lastUsedImagePickerService.value) { return }
+  state.service = lastUsedImagePickerService.value
+}
+
+// search
+
+const isNoSearchResults = computed(() => {
+  if (state.error.unknownServerError || state.error.userIsOffline) {
+    return false
+  } else if (state.search && !state.loading && !state.images.length) {
+    return true
+  } else {
+    return false
+  }
+})
+const searchAgain = () => {
+  state.images = []
+  state.loading = true
+  searchService()
+}
+const searchPexels = async () => {
+  let url = new URL('https://api.pexels.com/v1/search')
+  const headers = new Headers({
+    'Authorization': consts.pexelsApiKey
+  })
+  const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
+  const defaultSearch = sample(defaultSearches)
+  let params = { query: state.search || defaultSearch }
+  url.search = new URLSearchParams(params).toString()
+  const response = await fetch(url, { method: 'GET', headers })
+  const data = await response.json()
+  normalizeResults(data, 'pexels')
+}
+const searchGiphy = async (isStickers) => {
+  let resource = 'gifs'
+  let endpoint = 'trending'
+  if (isStickers) {
+    resource = 'stickers'
+  }
+  if (state.search) {
+    endpoint = 'search'
+  }
+  let url = new URL(`https://api.giphy.com/v1/${resource}/${endpoint}`)
+  let params = {
+    api_key: 'pK3Etx5Jj8IAzUx9Z7H7dUcjD4PazKq7',
+    limit: numberOfImages,
+    rating: 'g'
+  }
+  if (state.search) {
+    params.q = state.search
+  }
+  url.search = new URLSearchParams(params).toString()
+  const response = await fetch(url)
+  const data = await response.json()
+  normalizeResults(data.data, 'giphy')
+}
+const searchService = debounce(async () => {
+  clearErrors()
+  state.loading = true
+  const isOffline = !store.state.isOnline
+  if (isOffline) {
+    state.loading = false
+    state.error.userIsOffline = true
+    return
+  }
+  try {
+    if (serviceIsPexels.value) {
+      await searchPexels()
+    } else if (serviceIsStickers.value) {
+      const isStickers = true
+      await searchGiphy(isStickers)
+    } else if (serviceIsGifs.value) {
+      await searchGiphy()
+    }
+  } catch (error) {
+    console.error('🚒', error)
+    state.images = []
+    state.error.unknownServerError = true
+  }
+  state.loading = false
+}, 350)
+const normalizeResults = async (data, service) => {
+  const pexels = service === 'pexels' && serviceIsPexels.value
+  const giphy = service === 'giphy' && (serviceIsStickers.value || serviceIsGifs.value)
+  // giphy
+  if (pexels) {
+    state.images = data.photos.map(image => {
+      return {
+        id: image.id,
+        previewUrl: image.src.tiny,
+        url: image.src.large
+      }
+    })
+  } else if (giphy) {
+    state.images = data.map(image => {
+      // stickers
+      if (serviceIsStickers.value) {
+        return {
+          isVideo: true,
+          id: image.id,
+          previewUrl: image.images.fixed_height_small.url,
+          url: utils.urlWithoutQueryString(image.images.original.url)
+        }
+      // gifs
+      } else {
+        return {
+          isVideo: true,
+          id: image.id,
+          previewUrl: image.images.fixed_height.url,
+          url: utils.urlWithoutQueryString(image.images.original.mp4)
+        }
+      }
+    })
+    await nextTick()
+    updateDialogHeight()
+    scrollIntoView()
+  }
+}
+const clearErrors = () => {
+  state.error.signUpToUpload = false
+  state.error.sizeLimit = false
+  state.error.unknownServerError = false
+  state.error.userIsOffline = false
+  state.error.unknownUploadError = false
+}
+
+// image
+
+const cardPendingUpload = computed(() => {
+  const pendingUploads = store.state.upload.pendingUploads
+  return pendingUploads.find(upload => upload.cardId === state.cardId)
+})
+const removeImage = () => {
+  emit('removeImage')
+}
+const selectImage = (image) => {
+  emit('selectImage', image)
+}
+const isCardUrl = (image) => {
+  return props.cardUrl === image.url
+}
+const selectFile = (event) => {
+  clearErrors()
+  if (!currentUserIsSignedIn.value) {
+    state.error.signUpToUpload = true
+    return
+  }
+  const input = inputElement.value
+  input.click()
+}
+const uploadFile = async () => {
+  const cardId = state.cardId
+  const input = inputElement.value
+  const file = input.files[0]
+  try {
+    await store.dispatch('upload/uploadFile', { file, cardId })
+  } catch (error) {
+    console.warn('🚒', error)
+    if (error.type === 'sizeLimit') {
+      state.error.sizeLimit = true
+    } else {
+      state.error.unknownUploadError = true
+    }
+  }
+}
+
+// styles
+
+const clearHeights = () => {
+  state.dialogHeight = null
+  state.resultsSectionHeight = null
+}
+const scrollIntoView = () => {
+  if (!props.visible) { return }
+  const element = dialogElement.value
+  if (!element) { return }
+  utils.scrollIntoView({ element })
+  store.commit('triggerUpdatePositionInVisualViewport')
+}
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  const element = dialogElement.value
+  const dialogHeight = utils.elementHeight(element)
+  updateResultsSectionHeight()
+}
+const updateResultsSectionHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = resultsSectionElement.value
+  state.resultsSectionHeight = utils.elementHeight(element, true)
+}
+const resetPinchCounterZoomDecimal = () => {
+  store.commit('pinchCounterZoomDecimal', 1)
+}
+</script>
+
+<template lang="pug">
+dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   //- card options
-  section(ref="cardImageServiceSection")
+  section
     .row.title-row-flex
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
@@ -21,7 +361,7 @@ dialog.image-picker(
           span GIF
       .button-wrap
         button(@click.left.stop="selectFile") Upload
-        input.hidden(type="file" ref="input" @change="uploadFile")
+        input.hidden(type="file" ref="inputElement" @change="uploadFile")
 
     //- upload progress
     .uploading-container(v-if="cardPendingUpload")
@@ -30,13 +370,13 @@ dialog.image-picker(
         Loader(:visible="true")
         span {{cardPendingUpload.percentComplete}}%
     //- errors
-    .error-container-top(v-if="error.signUpToUpload")
+    .error-container-top(v-if="state.error.signUpToUpload")
       p
         span To upload files,
         span.badge.info
           span you need to Sign Up or In
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-    .error-container-top(v-if="error.sizeLimit")
+    .error-container-top(v-if="state.error.sizeLimit")
       p
         span.badge.danger
           img.icon.cancel(src="@/assets/add.svg")
@@ -45,21 +385,22 @@ dialog.image-picker(
         span To upload files over 5mb,
         span.badge.info upgrade for unlimited
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
-    .error-container-top(v-if="error.unknownUploadError")
+    .error-container-top(v-if="state.error.unknownUploadError")
       .badge.danger
         span (シ_ _)シ Something went wrong, Please try again or contact support
 
-  AIImageGeneration(@selectImage="selectImage" :visible="serviceIsAI" :initialPrompt="search" :cardUrl="cardUrl")
+  AIImageGeneration(@selectImage="selectImage" :visible="serviceIsAI" :initialPrompt="state.search" :cardUrl="cardUrl" @updateDialogHeight="updateDialogHeight")
+    //-
   template(v-if="!serviceIsAI")
     //- search box
-    section.results-section.search-input-wrap(ref="searchSection")
+    section.results-section.search-input-wrap
       .search-wrap
-        img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
-        Loader(:visible="loading")
+        img.icon.search(v-if="!state.loading" src="@/assets/search.svg" @click.left="focusSearchInput")
+        Loader(:visible="state.loading")
         input(
           :placeholder="placeholder"
           v-model="searchInput"
-          ref="searchInput"
+          ref="searchInputElement"
           @focus="resetPinchCounterZoomDecimal"
           @keyup.stop.backspace
           @keyup.stop.enter
@@ -68,401 +409,30 @@ dialog.image-picker(
         )
         button.borderless.clear-input-wrap(@click.left="clearSearch")
           img.icon.cancel(src="@/assets/add.svg")
-      .error-container(v-if="isNoSearchResults || error.unknownServerError || error.userIsOffline")
+      .error-container(v-if="isNoSearchResults || state.error.unknownServerError || state.error.userIsOffline")
         p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
-        .badge.danger(v-if="error.unknownServerError")
+        .badge.danger(v-if="state.error.unknownServerError")
           span (シ_ _)シ Something went wrong, Please try again or contact support
-        .badge.danger(v-if="error.userIsOffline")
+        .badge.danger(v-if="state.error.userIsOffline")
           span Can't search {{service}} while offline, Please try again later
 
     //- search results
-    section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+    section.results-section(ref="resultsSectionElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
       ul.results-list.image-list
-        template(v-for="image in images" :key="image.id")
+        template(v-for="image in state.images" :key="image.id")
           li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
             img(:src="image.previewUrl")
             a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
               button.small-button
                 span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
                 img.icon.visit(src="@/assets/visit.svg")
-
 </template>
 
-<script>
-import Loader from '@/components/Loader.vue'
-import AIImageGeneration from '@/components/AIImageGeneration.vue'
-import utils from '@/utils.js'
-import cache from '@/cache.js'
-import consts from '@/consts.js'
-
-import debounce from 'lodash-es/debounce'
-import sample from 'lodash-es/sample'
-
-const numberOfImages = 25
-
-export default {
-  name: 'ImagePicker',
-  components: {
-    Loader,
-    AIImageGeneration
-  },
-  props: {
-    visible: Boolean,
-    initialSearch: String,
-    cardUrl: String,
-    cardId: String,
-    removeIsVisible: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.clearHeights()
-        this.updateHeightFromDialog()
-      }
-    })
-  },
-  data () {
-    return {
-      images: [],
-      search: '',
-      service: 'stickers', // 'stickers', 'gifs', 'pexels', 'ai'
-      loading: false,
-      minDialogHeight: 400,
-      dialogHeight: null,
-      resultsSectionHeight: null,
-      error: {
-        unknownServerError: false,
-        userIsOffline: false,
-        signUpToUpload: false,
-        sizeLimit: false,
-        unknownUploadError: false
-      }
-    }
-  },
-  computed: {
-    searchInput: {
-      get () {
-        return this.search
-      },
-      set (newValue) {
-        this.search = newValue
-        if (newValue) {
-          this.loading = true
-          this.searchService()
-        }
-      }
-    },
-    provider () {
-      if (this.service === 'stickers' || this.service === 'gifs') {
-        return 'giphy'
-      } else {
-        return 'pexels'
-      }
-    },
-    placeholder () {
-      let label = this.provider
-      if (label === 'pexels') {
-        label = 'images on Pexel'
-      }
-      return `Search ${utils.capitalizeFirstLetter(label)}`
-    },
-    cardPendingUpload () {
-      const pendingUploads = this.$store.state.upload.pendingUploads
-      return pendingUploads.find(upload => upload.cardId === this.cardId)
-    },
-    serviceIsPexels () {
-      return this.service === 'pexels'
-    },
-    serviceIsStickers () {
-      return this.service === 'stickers'
-    },
-    serviceIsAI () {
-      return this.service === 'ai'
-    },
-    serviceIsGifs () {
-      return this.service === 'gifs'
-    },
-    isNoSearchResults () {
-      if (this.error.unknownServerError || this.error.userIsOffline) {
-        return false
-      } else if (this.search && !this.loading && !this.images.length) {
-        return true
-      } else {
-        return false
-      }
-    },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    lastUsedImagePickerService () { return this.$store.state.currentUser.lastUsedImagePickerService }
-  },
-  methods: {
-    removeImage () {
-      this.$emit('removeImage')
-    },
-    triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerSignUpOrInIsVisible')
-    },
-    triggerUpgradeUserIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerUpgradeUserIsVisible')
-    },
-    toggleServiceIsPexels () {
-      this.service = 'pexels'
-      this.searchAgain()
-      this.updateLastUsedImagePickerService()
-    },
-    toggleServiceIsAI () {
-      this.service = 'ai'
-      this.updateLastUsedImagePickerService()
-    },
-    toggleServiceIsStickers () {
-      this.service = 'stickers'
-      this.searchAgain()
-      this.updateLastUsedImagePickerService()
-    },
-    toggleServiceIsGifs () {
-      this.service = 'gifs'
-      this.searchAgain()
-      this.updateLastUsedImagePickerService()
-    },
-    searchAgain () {
-      this.images = []
-      this.loading = true
-      this.searchService()
-    },
-    async searchPexels () {
-      let url = new URL('https://api.pexels.com/v1/search')
-      const headers = new Headers({
-        'Authorization': consts.pexelsApiKey
-      })
-      const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
-      const defaultSearch = sample(defaultSearches)
-      let params = { query: this.search || defaultSearch }
-      url.search = new URLSearchParams(params).toString()
-      const response = await fetch(url, { method: 'GET', headers })
-      const data = await response.json()
-      this.normalizeResults(data, 'pexels')
-    },
-    async searchGiphy (isStickers) {
-      let resource = 'gifs'
-      let endpoint = 'trending'
-      if (isStickers) {
-        resource = 'stickers'
-      }
-      if (this.search) {
-        endpoint = 'search'
-      }
-      let url = new URL(`https://api.giphy.com/v1/${resource}/${endpoint}`)
-      let params = {
-        api_key: 'pK3Etx5Jj8IAzUx9Z7H7dUcjD4PazKq7',
-        limit: numberOfImages,
-        rating: 'g'
-      }
-      if (this.search) {
-        params.q = this.search
-      }
-      url.search = new URLSearchParams(params).toString()
-      const response = await fetch(url)
-      const data = await response.json()
-      this.normalizeResults(data.data, 'giphy')
-    },
-    searchService: debounce(async function () {
-      this.clearErrors()
-      this.loading = true
-      const isOffline = !this.$store.state.isOnline
-      if (isOffline) {
-        this.loading = false
-        this.error.userIsOffline = true
-        return
-      }
-      try {
-        if (this.serviceIsPexels) {
-          await this.searchPexels()
-        } else if (this.serviceIsStickers) {
-          const isStickers = true
-          await this.searchGiphy(isStickers)
-        } else if (this.serviceIsGifs) {
-          await this.searchGiphy()
-        }
-      } catch (error) {
-        console.error('🚒', error)
-        this.images = []
-        this.error.unknownServerError = true
-      }
-      this.loading = false
-    }, 350),
-    clearErrors () {
-      this.error.signUpToUpload = false
-      this.error.sizeLimit = false
-      this.error.unknownServerError = false
-      this.error.userIsOffline = false
-      this.error.unknownUploadError = false
-    },
-    clearHeights () {
-      this.minDialogHeight = 400
-      this.dialogHeight = null
-      this.resultsSectionHeight = null
-    },
-    normalizeResults (data, service) {
-      const pexels = service === 'pexels' && this.serviceIsPexels
-      const giphy = service === 'giphy' && (this.serviceIsStickers || this.serviceIsGifs)
-      // giphy
-      if (pexels) {
-        this.images = data.photos.map(image => {
-          return {
-            id: image.id,
-            previewUrl: image.src.tiny,
-            url: image.src.large
-          }
-        })
-      } else if (giphy) {
-        this.images = data.map(image => {
-          // stickers
-          if (this.serviceIsStickers) {
-            return {
-              isVideo: true,
-              id: image.id,
-              previewUrl: image.images.fixed_height_small.url,
-              url: utils.urlWithoutQueryString(image.images.original.url)
-            }
-          // gifs
-          } else {
-            return {
-              isVideo: true,
-              id: image.id,
-              previewUrl: image.images.fixed_height.url,
-              url: utils.urlWithoutQueryString(image.images.original.mp4)
-            }
-          }
-        })
-        this.$nextTick(() => {
-          this.updateHeightFromDialog()
-          this.scrollIntoView()
-        })
-      }
-    },
-    focusSearchInput () {
-      if (utils.isMobile()) { return }
-      const element = this.$refs.searchInput
-      const length = this.search.length
-      element.focus()
-      element.setSelectionRange(length, length)
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
-    },
-    clearSearch () {
-      this.search = ''
-      this.loading = false
-      this.images = []
-      this.searchService()
-    },
-    selectImage (image) {
-      this.$emit('selectImage', image)
-    },
-    scrollIntoView () {
-      if (!this.visible) { return }
-      const element = this.$refs.dialog
-      if (!element) { return }
-      utils.scrollIntoView({ element })
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
-    },
-    isCardUrl (image) {
-      return this.cardUrl === image.url
-    },
-    selectFile (event) {
-      this.clearErrors()
-      if (!this.currentUserIsSignedIn) {
-        this.error.signUpToUpload = true
-        return
-      }
-      const input = this.$refs.input
-      input.click()
-    },
-    async uploadFile () {
-      const cardId = this.cardId
-      const input = this.$refs.input
-      const file = input.files[0]
-      try {
-        await this.$store.dispatch('upload/uploadFile', { file, cardId })
-      } catch (error) {
-        console.warn('🚒', error)
-        if (error.type === 'sizeLimit') {
-          this.error.sizeLimit = true
-        } else {
-          this.error.unknownUploadError = true
-        }
-      }
-    },
-    heightIsSignificantlyDifferent (height) {
-      const thresholdDelta = 100
-      if (!this.resultsSectionHeight) { return true }
-      if (Math.abs(this.resultsSectionHeight - height) > thresholdDelta) {
-        return true
-      }
-    },
-    updateHeightFromDialog () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        const element = this.$refs.dialog
-        const dialogHeight = utils.elementHeight(element)
-        this.minDialogHeight = Math.max(this.minDialogHeight, dialogHeight)
-        this.updateResultsSectionHeight()
-      })
-    },
-    updateHeightFromFooter () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
-        this.minDialogHeight = Math.max(this.minDialogHeight, this.dialogHeight)
-        this.updateResultsSectionHeight()
-      })
-    },
-    updateResultsSectionHeight () {
-      this.$nextTick(() => {
-        this.$nextTick(() => {
-          if (!this.visible) { return }
-          let resultsSection = this.$refs.results
-          let serviceSection
-          serviceSection = this.$refs.cardImageServiceSection
-          let searchSection = this.$refs.searchSection
-          if (!serviceSection) { return }
-          serviceSection = serviceSection.getBoundingClientRect().height
-          resultsSection = utils.elementHeight(resultsSection, true)
-          searchSection = searchSection.getBoundingClientRect().height
-          this.resultsSectionHeight = resultsSection + serviceSection + searchSection + 4
-        })
-      })
-    },
-    resetPinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', 1)
-    },
-    updateLastUsedImagePickerService () {
-      this.$store.dispatch('currentUser/update', { lastUsedImagePickerService: this.service })
-    },
-    updateServiceFromLastUsedService () {
-      if (!this.lastUsedImagePickerService) { return }
-      this.service = this.lastUsedImagePickerService
-    }
-  },
-  watch: {
-    visible (visible) {
-      this.$nextTick(() => {
-        if (visible) {
-          this.updateServiceFromLastUsedService()
-          this.search = this.initialSearch
-          this.scrollIntoView()
-          this.searchService()
-          this.focusSearchInput()
-        }
-      })
-    }
-  }
-}
-</script>
-
 <style lang="stylus">
-.image-picker
-  max-height 100vh
+dialog.image-picker
+  min-height 200px
+  max-height 70vh
+  overflow auto
   .search-wrap
     .loader
       width 13px
