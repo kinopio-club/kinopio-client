@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import backgroundImages from '@/data/backgroundImages.json'
 import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
 import { colord, extend } from 'colord'
@@ -25,6 +26,7 @@ onMounted(() => {
 
 const visible = computed(() => store.getters.isSpacePage)
 const spaceShouldHaveBorderRadius = computed(() => store.getters.spaceShouldHaveBorderRadius)
+const isSecureAppContext = computed(() => consts.isSecureAppContext)
 const isSpacePage = computed(() => {
   const isOther = store.state.isAddPage
   const isSpace = !isOther
@@ -149,7 +151,7 @@ template(v-if="currentSpace.backgroundIsGradient")
   SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :backgroundStyles="backgroundStyles")
 template(v-else)
   .space-background-image(:style="backgroundStyles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
-.space-background-tint(v-if="visible" :style="{ background: backgroundTint }")
+.space-background-tint(v-if="visible" :style="{ background: backgroundTint }" :class="{'space-border-radius': spaceShouldHaveBorderRadius && isSecureAppContext}")
 </template>
 
 <style lang="stylus">
