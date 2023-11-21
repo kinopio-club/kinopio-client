@@ -38,6 +38,7 @@ export default {
           speed = mutation.payload.speed
         }
         percent -= speed || increment
+        console.log('🌺 triggerSpaceZoomOut', speed, increment, percent)
         this.updateSpaceZoomFromTrigger(percent)
       } else if (mutation.type === 'triggerSpaceZoomIn') {
         let percent = this.$store.state.spaceZoomPercent

@@ -35,7 +35,6 @@ export default {
         shouldZoomOut = deltaY < 0
       }
       let speed = Math.max(Math.abs(deltaY), 1)
-      console.log('🌺 wheel zoom speed and event.deltaY', speed, deltaY, event)
       this.updateZoomOrigin(event)
       if (shouldZoomIn) {
         this.$store.commit('triggerSpaceZoomIn', { speed })
