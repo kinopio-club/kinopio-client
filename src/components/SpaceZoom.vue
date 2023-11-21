@@ -52,6 +52,7 @@ export default {
       } else if (mutation.type === 'triggerCenterZoomOrigin') {
         this.centerZoomOrigin()
       } else if (mutation.type === 'triggerSpaceZoomOutMax') {
+        console.log('🌺🌺🌺 zoomOutOrInMax')
         this.zoomOutOrInMax()
       }
     })
