@@ -356,7 +356,11 @@ export default {
   font-size 15px
   line-height 1.2
 
+html
+  background transparent
+
 body
+  background transparent
   margin 0
   color var(--primary)
   -webkit-user-select none
