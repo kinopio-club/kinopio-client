@@ -14,28 +14,9 @@ onMounted(() => {
     if (mutation.type === 'triggerSpaceZoomReset') {
       updateSpaceZoomFromTrigger(max.value)
       window.scrollTo(0, 0)
-    } else if (mutation.type === 'triggerSpaceZoomOut') {
-      let percent = store.state.spaceZoomPercent
-      let speed
-      if (mutation.payload) {
-        speed = mutation.payload.speed
-      }
-      percent -= speed || increment
-      console.error('🌺 triggerSpaceZoomOut', Date.now(), speed, increment, percent, store.state.spaceZoomPercent)
-      updateSpaceZoomFromTrigger(percent)
-    } else if (mutation.type === 'triggerSpaceZoomIn') {
-      let percent = store.state.spaceZoomPercent
-      let speed
-      if (mutation.payload) {
-        speed = mutation.payload.speed
-      }
-      percent += speed || increment
-      console.error('🌺🌺 triggerSpaceZoomIN', Date.now(), speed, increment, percent, store.state.spaceZoomPercent)
-      updateSpaceZoomFromTrigger(percent)
     } else if (mutation.type === 'triggerCenterZoomOrigin') {
       centerZoomOrigin()
     } else if (mutation.type === 'triggerSpaceZoomOutMax') {
-      console.error('🌺🌺🌺 zoomOutOrInMax')
       zoomOutOrInMax()
     }
   })
