@@ -24,6 +24,7 @@ onMounted(() => {
 })
 
 const visible = computed(() => store.getters.isSpacePage)
+const spaceShouldHaveBorderRadius = computed(() => store.getters.spaceShouldHaveBorderRadius)
 const isSpacePage = computed(() => {
   const isOther = store.state.isAddPage
   const isSpace = !isOther
@@ -147,7 +148,7 @@ const gradientLayers = computed(() => {
 template(v-if="currentSpace.backgroundIsGradient")
   SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :backgroundStyles="backgroundStyles")
 template(v-else)
-  .space-background-image(:style="backgroundStyles")
+  .space-background-image(:style="backgroundStyles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
 .space-background-tint(v-if="visible" :style="{ background: backgroundTint }")
 </template>
 

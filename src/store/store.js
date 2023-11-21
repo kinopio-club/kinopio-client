@@ -1809,6 +1809,11 @@ const store = createStore({
     },
     isMultipleItemsSelected: (state) => {
       return state.multipleCardsSelectedIds.length || state.multipleConnectionsSelectedIds.length || state.multipleBoxesSelectedIds.length
+    },
+    spaceShouldHaveBorderRadius: (state) => {
+      const isNativeApp = consts.isSecureAppContext
+      const isZoomedOut = state.spaceZoomPercent !== 100
+      if (isNativeApp || isZoomedOut) { return true }
     }
   },
 

@@ -374,6 +374,9 @@ body
     pointer-events none
     z-index 100
 
+.space-border-radius
+  border-radius calc(var(--entity-radius) * 2)
+
 img,
 video
   max-width 100%
