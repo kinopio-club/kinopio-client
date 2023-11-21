@@ -702,17 +702,17 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               img.icon.sidebar(src="@/assets/sidebar.svg")
             Sidebar(:visible="state.sidebarIsVisible")
         .row.bottom-controls
+          //- Pricing
+          .button-wrap(v-if="!userIsUpgraded")
+            button(@click.left.stop="togglePricingIsVisible" :class="{active: pricingIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+              span Pricing
+            Pricing(:visible="pricingIsVisible")
           //- Sign Up or In
           .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
             button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active: state.signUpOrInIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
               span Sign Up or In
               Loader(:visible="state.loadingSignUpOrIn")
             SignUpOrIn(:visible="state.signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
-          //- Pricing
-          .button-wrap(v-if="!userIsUpgraded")
-            button(@click.left.stop="togglePricingIsVisible" :class="{active: pricingIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              span Pricing
-            Pricing(:visible="pricingIsVisible")
           //- Upgrade
           .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
             button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
