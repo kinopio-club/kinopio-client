@@ -13,11 +13,13 @@ export default {
     })
   },
   mounted () {
+    console.log('🌺 scrollhandler mounted')
     window.addEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
     window.addEventListener('scroll', this.handleScrollEvents)
     this.$store.dispatch('updateWindowScroll')
   },
   beforeUnmount () {
+    console.log('🌺 scrollhandler UN mounted')
     window.removeEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
     window.removeEventListener('scroll', this.handleScrollEvents)
   },
