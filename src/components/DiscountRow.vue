@@ -49,7 +49,7 @@ const toggleStudentInfoIsVisible = () => {
 section.subsection(v-if="state.studentInfoIsVisible" @click.stop)
   p If you're a student or teacher,{{' '}}
     a(href="mailto:hi@kinopio.club?subject=Education Discount") email me
-    span {{' '}}for a 50% discount
+    span {{' '}}for a 50% discount off the yearly plan
 </template>
 
 <style lang="stylus">
