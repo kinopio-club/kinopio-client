@@ -19,11 +19,11 @@ const layer = (index) => {
   }
   return styles
 }
-
+const spaceShouldHaveBorderRadius = computed(() => store.getters.spaceShouldHaveBorderRadius)
 </script>
 
 <template lang="pug">
-.space-background-gradients(v-if="visible" :style="props.backgroundStyles")
+.space-background-gradients(v-if="visible" :style="props.backgroundStyles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
   .gradients-layer.layer-0(:style="layer(0)")
   .gradients-layer.layer-1(:style="layer(1)")
   .gradients-layer.layer-2(:style="layer(2)")

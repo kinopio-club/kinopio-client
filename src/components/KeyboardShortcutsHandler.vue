@@ -189,7 +189,7 @@ export default {
         if (shouldNativeZoom) { return }
         event.preventDefault()
         this.$store.commit('triggerCenterZoomOrigin')
-        this.$store.commit('triggerSpaceZoomOut')
+        this.$store.dispatch('zoomSpace', { shouldZoomOut: true, speed: 10 })
       // Zoom In
       } else if (isMeta && key === '=') {
         const zoom = this.$store.state.spaceZoomPercent
@@ -199,7 +199,7 @@ export default {
         }
         event.preventDefault()
         this.$store.commit('triggerCenterZoomOrigin')
-        this.$store.commit('triggerSpaceZoomIn')
+        this.$store.dispatch('zoomSpace', { shouldZoomIn: true, speed: 10 })
         // Toggle Zoom Out
       } else if (key === 'z' && isSpaceScope) {
         event.preventDefault()

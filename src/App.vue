@@ -356,7 +356,11 @@ export default {
   font-size 15px
   line-height 1.2
 
+html
+  background transparent
+
 body
+  background transparent
   margin 0
   color var(--primary)
   -webkit-user-select none
@@ -373,6 +377,9 @@ body
     position fixed
     pointer-events none
     z-index 100
+
+.space-border-radius
+  border-radius calc(var(--entity-radius) * 2)
 
 img,
 video

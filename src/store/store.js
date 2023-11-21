@@ -543,8 +543,6 @@ const store = createStore({
     triggerPickerSelect: () => {},
     triggerUpdateNotifications: () => {},
     triggerSpaceZoomReset: () => {},
-    triggerSpaceZoomOut: (state, options) => {},
-    triggerSpaceZoomIn: (state, options) => {},
     triggerSpaceZoomOutMax: (state, options) => {},
     triggerUnloadPage: () => {},
     triggerShowNextSearchCard: () => {},
@@ -1728,8 +1726,21 @@ const store = createStore({
         origin = utils.pointBetweenTwoPoints(prevOrigin, origin)
         context.commit('zoomOrigin', origin)
       }
+    },
+    zoomSpace: (context, { shouldZoomIn, shouldZoomOut, speed }) => {
+      let percent
+      const currentPercent = context.state.spaceZoomPercent
+      if (shouldZoomIn) {
+        percent = currentPercent + speed
+      } else if (shouldZoomOut) {
+        percent = currentPercent - speed
+      } else {
+        return
+      }
+      percent = Math.max(percent, consts.spaceZoom.min)
+      percent = Math.min(percent, consts.spaceZoom.max)
+      context.commit('spaceZoomPercent', percent)
     }
-
   },
   getters: {
     isSpacePage: (state) => {
@@ -1798,6 +1809,11 @@ const store = createStore({
     },
     isMultipleItemsSelected: (state) => {
       return state.multipleCardsSelectedIds.length || state.multipleConnectionsSelectedIds.length || state.multipleBoxesSelectedIds.length
+    },
+    spaceShouldHaveBorderRadius: (state) => {
+      const isNativeApp = consts.isSecureAppContext
+      const isZoomedOut = state.spaceZoomPercent !== 100
+      if (isNativeApp || isZoomedOut) { return true }
     }
   },
 
