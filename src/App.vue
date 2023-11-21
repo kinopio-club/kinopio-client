@@ -2,7 +2,7 @@
 .app(
   @pointermove="broadcastUserCursor"
   @touchstart="isTouchDevice"
-  :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
+  :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor, backgroundColor: outsideSpaceBackgroundColor }"
   :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
 )
   base(v-if="!isSpacePage" target="_blank")
@@ -107,6 +107,7 @@ export default {
     }
   },
   computed: {
+    outsideSpaceBackgroundColor () { return this.$store.state.outsideSpaceBackgroundColor },
     isThemeDark () {
       const systemTheme = this.themeFromSystem()
       const userTheme = this.$store.state.currentUser.theme
