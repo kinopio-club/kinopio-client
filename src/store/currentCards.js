@@ -12,7 +12,7 @@ import { nextTick } from 'vue'
 // https://github.com/vuejs/vuejs.org/issues/1636
 
 let currentSpaceId
-let prevMovePositions = {}
+let prevMoveDelta = { x: 0, y: 0 }
 let tallestCardHeight = 0
 let canBeSelectedSortedByY = {}
 
@@ -123,22 +123,16 @@ const currentCards = {
       state.removedCards = state.removedCards.filter(removedCard => removedCard.id !== cardId)
       cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
     },
-    moveWhileDragging: (state, cards) => {
-      cards.forEach(card => {
-        state.cards[card.id].x = card.x
-        state.cards[card.id].y = card.y
-      })
-    },
-
-    // broadcast
-
-    moveWhileDraggingBroadcast: (state, { cards }) => {
+    moveWhileDragging: (state, { cards }) => {
       cards.forEach(card => {
         const element = document.querySelector(`article[data-card-id="${card.id}"]`)
         element.style.left = card.x + 'px'
         element.style.top = card.y + 'px'
       })
     },
+
+    // broadcast
+
     moveBroadcast: (state, { cards }) => {
       cards.forEach(updated => {
         const card = state.cards[updated.id]
@@ -464,29 +458,28 @@ const currentCards = {
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
       })
       cards = cards.filter(card => Boolean(card))
-      // prevent cards with null or negative positions
+      // update card position
       cards = utils.clone(cards)
+      prevMoveDelta = {
+        x: prevMoveDelta.x + delta.x,
+        y: prevMoveDelta.y + delta.y
+      }
       cards = cards.map(card => {
         let position
-        if (prevMovePositions[card.id]) {
-          position = prevMovePositions[card.id]
-        } else {
-          position = utils.cardPositionFromElement(card.id)
-        }
-        card.x = position.x
-        card.y = position.y
         // x
-        if (card.x === undefined || card.x === null) {
+        const isNoX = card.x === undefined || card.x === null
+        if (isNoX) {
           delete card.x
         } else {
-          card.x = Math.max(0, card.x + delta.x)
+          card.x = Math.max(0, card.x + prevMoveDelta.x)
           card.x = Math.round(card.x)
         }
         // y
-        if (card.y === undefined || card.y === null) {
+        const isNoY = card.y === undefined || card.y === null
+        if (isNoY) {
           delete card.y
         } else {
-          card.y = Math.max(0, card.y + delta.y)
+          card.y = Math.max(0, card.y + prevMoveDelta.y)
           card.y = Math.round(card.y)
         }
         card = {
@@ -495,21 +488,19 @@ const currentCards = {
           z: card.z,
           id: card.id
         }
-        prevMovePositions[card.id] = card
         return card
       })
       // update
-      context.commit('moveWhileDragging', cards)
+      context.commit('moveWhileDragging', { cards })
       connections = uniqBy(connections, 'id')
       context.commit('cardsWereDragged', true, { root: true })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
-      context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveWhileDraggingBroadcast' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveWhileDragging' }, { root: true })
       connections.forEach(connection => {
         context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       })
     },
     afterMove: (context) => {
-      prevMovePositions = {}
       const spaceId = context.rootState.currentSpace.id
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const currentDraggingCard = context.getters.byId(currentDraggingCardId)
@@ -532,6 +523,11 @@ const currentCards = {
         return { id, x, y, z }
       })
       cards = cards.filter(card => Boolean(card))
+      cards = cards.map(card => {
+        card.x = card.x + prevMoveDelta.x
+        card.y = card.y + prevMoveDelta.y
+        return card
+      })
       context.commit('move', { cards, spaceId })
       cards = cards.filter(card => card)
       cards.forEach(card => {
@@ -542,12 +538,14 @@ const currentCards = {
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
       })
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
+      context.commit('broadcast/updateStore', { updates: { userId: context.rootState.currentUser.id }, type: 'clearRemoteCardsDragging' }, { root: true })
       connections = uniqBy(connections, 'id')
       context.dispatch('currentConnections/updatePaths', { connections, shouldUpdateApi: true }, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
       context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })
+      prevMoveDelta = { x: 0, y: 0 }
     },
 
     // distribute position

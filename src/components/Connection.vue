@@ -1,6 +1,6 @@
 <template lang="pug">
 template(v-if="isVisibleInViewport")
-  g.connection(v-if="cards.startCard && cards.endCard")
+  g.connection(v-if="visible" :style="connectionStyles")
     path.connection-path(
       fill="none"
       :stroke="typeColor"
@@ -48,7 +48,8 @@ let animationTimer, isMultiTouch, startCursor, currentCursor
 export default {
   name: 'Connection',
   props: {
-    connection: Object
+    connection: Object,
+    isRemote: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -105,6 +106,14 @@ export default {
       'currentCards/byId',
       'spaceCounterZoomDecimal'
     ]),
+    visible () {
+      if (this.isRemote) { return true }
+      return this.cards.startCard && this.cards.endCard
+    },
+    connectionStyles () {
+      if (!this.currentUserIsDraggingCard) { return }
+      return { pointerEvents: 'none' }
+    },
     connectionClasses () {
       return {
         active: this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected || this.isCurrentCardConnection || this.isHoveredOverConnectedCard || this.isConnectedToMultipleCardsSelected,
@@ -181,7 +190,10 @@ export default {
       if (this.currentUserIsDraggingCard) { return }
       return Boolean(this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected)
     },
-    isHovered () { return this.id === this.currentUserIsHoveringOverConnectionId },
+    isHovered () {
+      if (this.currentUserIsDraggingCard) { return }
+      return this.id === this.currentUserIsHoveringOverConnectionId
+    },
     isHoveredOverConnectedCard () {
       const cardId = this.$store.state.currentUserIsHoveringOverCardId
       if (!cardId) { return }
