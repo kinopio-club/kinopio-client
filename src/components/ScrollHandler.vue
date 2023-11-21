@@ -21,16 +21,6 @@ export default {
     window.removeEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
     window.removeEventListener('scroll', this.handleScrollEvents)
   },
-  data () {
-    return {
-    }
-  },
-  computed: {
-    ...mapState([
-    ]),
-    ...mapGetters([
-    ])
-  },
   methods: {
     handleMouseWheelEvents (event) {
       const isMeta = event.metaKey || event.ctrlKey // event.ctrlKey is true for trackpad pinch
@@ -45,6 +35,7 @@ export default {
         shouldZoomOut = deltaY < 0
       }
       let speed = Math.max(Math.abs(deltaY), 1)
+      console.log('🌺 wheel zoom speed and event.deltaY', speed, deltaY, event)
       this.updateZoomOrigin(event)
       if (shouldZoomIn) {
         this.$store.commit('triggerSpaceZoomIn', { speed })
