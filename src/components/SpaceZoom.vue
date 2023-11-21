@@ -38,7 +38,7 @@ export default {
           speed = mutation.payload.speed
         }
         percent -= speed || increment
-        console.log('🌺 triggerSpaceZoomOut', speed, increment, percent, this.$store.state.spaceZoomPercent)
+        console.error('🌺 triggerSpaceZoomOut', speed, increment, percent, this.$store.state.spaceZoomPercent)
         this.updateSpaceZoomFromTrigger(percent)
       } else if (mutation.type === 'triggerSpaceZoomIn') {
         let percent = this.$store.state.spaceZoomPercent
@@ -47,12 +47,12 @@ export default {
           speed = mutation.payload.speed
         }
         percent += speed || increment
-        console.log('🌺🌺 triggerSpaceZoomIN', speed, increment, percent, this.$store.state.spaceZoomPercent)
+        console.error('🌺🌺 triggerSpaceZoomIN', speed, increment, percent, this.$store.state.spaceZoomPercent)
         this.updateSpaceZoomFromTrigger(percent)
       } else if (mutation.type === 'triggerCenterZoomOrigin') {
         this.centerZoomOrigin()
       } else if (mutation.type === 'triggerSpaceZoomOutMax') {
-        console.log('🌺🌺🌺 zoomOutOrInMax')
+        console.error('🌺🌺🌺 zoomOutOrInMax')
         this.zoomOutOrInMax()
       }
     })
