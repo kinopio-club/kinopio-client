@@ -19,8 +19,7 @@ let prevType
 export default {
   name: 'CurrentConnection',
   props: {
-    startCardId: String,
-    startCursor: Object
+    startCardId: String
   },
   created () {
     this.$store.subscribe((mutation, state) => {

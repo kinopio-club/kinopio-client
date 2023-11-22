@@ -1,12 +1,14 @@
 <template lang="pug">
 article.card-wrap#card(
   v-if="isVisibleInViewport"
-  :style="positionStyle"
+  :style="articleStyle"
   :data-card-id="id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :data-is-visible-in-viewport="isVisibleInViewport"
   :data-is-locked="isLocked"
   :data-resize-width="resizeWidth"
+  :data-x="x"
+  :data-y="y"
   :key="id"
   ref="card"
   :class="{'is-resizing': currentUserIsResizingCard, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
@@ -430,6 +432,7 @@ export default {
       return this.selectedColor || this.remoteSelectedColor || background
     },
     connectorButtonBackground () {
+      if (this.currentUserIsDraggingCard) { return }
       if (this.hasConnections || this.isConnectingFrom || this.isConnectingTo) { return }
       return this.itemBackground
     },
@@ -609,7 +612,7 @@ export default {
       let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || this.card.backgroundColor
       return color
     },
-    positionStyle () {
+    articleStyle () {
       let z = this.card.z
       let pointerEvents = 'auto'
       if (this.currentCardDetailsIsVisible) {
@@ -622,8 +625,10 @@ export default {
         left: `${this.x}px`,
         top: `${this.y}px`,
         zIndex: z,
-        pointerEvents,
-        transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
+        pointerEvents
+      }
+      if (!this.currentUserIsDraggingCard) {
+        styles.transform = `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
       }
       styles = this.updateStylesWithWidth(styles)
       return styles
@@ -660,6 +665,7 @@ export default {
       return utils.colorIsDark(color)
     },
     connectorGlowStyle () {
+      if (this.currentUserIsDraggingCard) { return }
       const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor || this.currentUserIsHoveringOverCardIdColor || this.currentUserIsMultipleSelectedCardIdColor || this.currentUserIsHoveringOverConnectionIdColor || this.currentUserIsMultipleSelectedConnectionIdColor
       if (!color) { return }
       return { background: color }
