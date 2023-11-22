@@ -367,13 +367,6 @@ export default {
       this.$store.dispatch('currentSpace/updateTagNameColor', tag)
       this.updateCardsWithTagColor(tag.name, newColor)
     },
-    focusName () {
-      this.$nextTick(() => {
-        const element = this.$refs.name
-        if (!element) { return }
-        element.focus()
-      })
-    },
     scrollIntoView () {
       const element = this.$refs.dialog
       utils.scrollIntoView({ element })
