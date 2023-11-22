@@ -368,8 +368,11 @@ export default {
       this.updateCardsWithTagColor(tag.name, newColor)
     },
     scrollIntoView () {
-      const element = this.$refs.dialog
-      utils.scrollIntoView({ element })
+      this.$nextTick(() => {
+        const element = this.$refs.dialog
+        if (!element) { return }
+        utils.scrollIntoView({ element })
+      })
     },
     updateResultsSectionHeight () {
       if (!this.visible) { return }
