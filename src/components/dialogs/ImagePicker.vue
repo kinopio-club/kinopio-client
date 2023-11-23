@@ -278,7 +278,7 @@ const clearErrors = () => {
 
 const cardPendingUpload = computed(() => {
   const pendingUploads = store.state.upload.pendingUploads
-  return pendingUploads.find(upload => upload.cardId === state.cardId)
+  return pendingUploads.find(upload => upload.cardId === props.cardId)
 })
 const removeImage = () => {
   emit('removeImage')
@@ -299,7 +299,7 @@ const selectFile = (event) => {
   input.click()
 }
 const uploadFile = async () => {
-  const cardId = state.cardId
+  const cardId = props.cardId
   const input = inputElement.value
   const file = input.files[0]
   try {
