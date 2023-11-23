@@ -888,7 +888,7 @@ export default {
     isConnectingTo () {
       const connectingToId = this.currentConnectionSuccess.id
       if (connectingToId) {
-        postMessage.sendHaptics({ name: 'mediumImpact' })
+        postMessage.sendHaptics({ name: 'softImpact' })
       }
       return connectingToId === this.id
     },
