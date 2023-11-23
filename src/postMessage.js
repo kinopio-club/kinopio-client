@@ -9,14 +9,19 @@ window.addEventListener('message', (event) => {
   console.log('🛫 received postmessage', event)
 })
 
+const debouncedSendHaptics = debounce((body) => {
+  self.send(body)
+}, 10)
+
 const shouldPrevent = () => {
   const shouldSendPostmessages = consts.isSecureAppContext
   if (!shouldSendPostmessages) { return true }
   if (!window.webkit) { return true }
 }
 
-export default {
+const self = {
   send (body) {
+    console.log(window)
     if (shouldPrevent()) { return }
     try {
       this.logSend(body)
@@ -34,11 +39,8 @@ export default {
     if (shouldDisable) { return }
     const name = utils.capitalizeFirstLetter(body.name)
     body.name = `on${name}Feedback`
-    this.debouncedSendHaptics(body, this.send)
+    debouncedSendHaptics(body)
   },
-  debouncedSendHaptics: debounce(function (body, send) {
-    send(body)
-  }, 10),
 
   logSend (body) {
     const isBackgroundColor = body.name === 'setBackgroundColor'
@@ -48,3 +50,5 @@ export default {
     }
   }
 }
+
+export default self
