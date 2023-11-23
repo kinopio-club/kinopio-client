@@ -21,7 +21,6 @@ const shouldPrevent = () => {
 
 const self = {
   send (body) {
-    console.log(window)
     if (shouldPrevent()) { return }
     try {
       this.logSend(body)
