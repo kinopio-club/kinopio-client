@@ -89,6 +89,8 @@ item `userId`s should be `euGhpBrR9eBcjKnK16C_g`
 
 To work with code that only works on https (e.g. clipboard copy and paste), [mkcert](https://github.com/FiloSottile/mkcert) was used to create a local ssl certificate
 
+    $ brew install mkcert
+    $ mkcert -install
 	$ mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem 'kinopio.local'
 
 ## Ngrok tunnelling
