@@ -88,8 +88,7 @@ const isFiltered = computed(() => {
 const id = computed(() => props.connection.id)
 const updateConnectionIsVisible = () => {
   const connection = document.querySelector(`.connection-path[data-id="${id.value}"]`)
-  const hasChanged = state.connectionIsVisible !== Boolean(connection)
-  if (connection && hasChanged) {
+  if (connection) {
     state.connectionIsVisible = true
   } else {
     state.connectionIsVisible = false
