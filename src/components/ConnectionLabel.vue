@@ -1,3 +1,188 @@
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import utils from '@/utils.js'
+const store = useStore()
+
+const labelElement = ref(null)
+let isMultiTouch
+
+onMounted(() => {
+  updatePosition()
+  window.addEventListener('scroll', updateConnectionIsVisible)
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'spaceZoomPercent') {
+      updatePosition()
+    }
+  })
+})
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateConnectionIsVisible)
+})
+
+const props = defineProps({
+  connection: Object
+})
+const state = reactive({
+  position: {},
+  hover: false,
+  connectionIsVisible: true
+})
+watch(() => state.hover, (value, prevValue) => {
+  if (value) {
+    store.commit('currentUserIsHoveringOverConnectionId', id.value)
+  } else {
+    store.commit('currentUserIsHoveringOverConnectionId', '')
+  }
+})
+
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const isDark = computed(() => utils.colorIsDark(typeColor.value))
+const checkIsMultiTouch = (event) => {
+  isMultiTouch = false
+  if (utils.isMultiTouch(event)) {
+    isMultiTouch = true
+  }
+}
+const visible = computed(() => {
+  const hasPosition = state.position.x && state.position.y
+  return props.connection.labelIsVisible && hasPosition
+})
+
+// filter
+
+const filtersIsActive = computed(() => {
+  const types = store.state.filteredConnectionTypeIds
+  const frames = store.state.filteredFrameIds
+  return Boolean(types.length + frames.length)
+})
+const isConnectionFilteredByType = computed(() => {
+  const typeIds = store.state.filteredConnectionTypeIds
+  return typeIds.includes(connectionTypeId.value)
+})
+const isCardsFilteredByFrame = computed(() => {
+  const frameIds = store.state.filteredFrameIds
+  const cards = utils.clone(store.getters['currentCards/all'])
+  const startCardId = props.connection.startCardId
+  const endCardId = props.connection.endCardId
+  const startCard = cards.filter(card => card.id === startCardId)[0]
+  const endCard = cards.filter(card => card.id === endCardId)[0]
+  const startCardInFilter = frameIds.includes(startCard.frameId)
+  const endCardInFilter = frameIds.includes(endCard.frameId)
+  return startCardInFilter || endCardInFilter
+})
+const isFiltered = computed(() => {
+  if (filtersIsActive.value) {
+    const isInFilter = isCardsFilteredByFrame.value || isConnectionFilteredByType.value
+    if (isInFilter) {
+      return false
+    } else {
+      return true
+    }
+  } else { return false }
+})
+
+// connection
+
+const id = computed(() => props.connection.id)
+const updateConnectionIsVisible = () => {
+  const connection = document.querySelector(`.connection-path[data-id="${id.value}"]`)
+  const hasChanged = state.connectionIsVisible !== Boolean(connection)
+  if (connection && hasChanged) {
+    state.connectionIsVisible = true
+  } else {
+    state.connectionIsVisible = false
+  }
+}
+const showConnectionDetails = (event) => {
+  if (isMultiTouch) { return }
+  store.commit('triggerConnectionDetailsIsVisible', {
+    connectionId: id.value,
+    event
+  })
+}
+
+// connection type
+
+const connectionTypeId = computed(() => props.connection.connectionTypeId)
+const connectionType = computed(() => store.getters['currentConnections/typeByTypeId'](connectionTypeId.value))
+const typeColor = computed(() => {
+  if (connectionType.value) {
+    return connectionType.value.color
+  } else {
+    return 'transparent'
+  }
+})
+const typeName = computed(() => {
+  if (connectionType.value) {
+    return connectionType.value.name
+  } else {
+    return ''
+  }
+})
+
+// label
+
+const path = computed(() => props.connection.path)
+watch(() => path.value, (value, prevValue) => {
+  if (value) {
+    updatePosition()
+  }
+})
+const styles = computed(() => {
+  return {
+    background: typeColor.value,
+    left: state.position.x + 'px',
+    top: state.position.y + 'px'
+  }
+})
+const updatePosition = async () => {
+  if (!state.connectionIsVisible) { return }
+  if (!props.connection.path) { return }
+  await nextTick()
+  // rect
+  let connection = document.querySelector(`.connection-path[data-id="${id.value}"]`)
+  if (!connection) { return }
+  const zoom = utils.spaceCounterZoomDecimal() || 1
+  let rect = connection.getBoundingClientRect()
+  rect.x = rect.x + window.scrollX
+  rect.y = rect.y + window.scrollY
+  const rectPosition = utils.updatePositionWithSpaceOffset(rect)
+  rect = {
+    x: Math.round(rectPosition.x * zoom),
+    y: Math.round(rectPosition.y * zoom),
+    width: Math.round(rect.width * zoom),
+    height: Math.round(rect.height * zoom)
+  }
+  // position in center of connection
+  const connectionOffset = {
+    x: rect.width / 2,
+    y: rect.height / 2
+  }
+  let position = {
+    x: rect.x + connectionOffset.x,
+    y: rect.y + connectionOffset.y
+  }
+  // offset by label size
+  let label = labelElement.value
+  let labelOffset
+  if (label) {
+    label = label.getBoundingClientRect()
+    labelOffset = {
+      x: label.width / 4,
+      y: label.height / 4
+    }
+  } else {
+    labelOffset = { x: 0, y: 0 }
+  }
+  state.position = {
+    x: position.x - labelOffset.x,
+    y: position.y - labelOffset.y
+  }
+}
+</script>
+
 <template lang="pug">
 .connection-label.badge(
   v-if="visible"
@@ -6,193 +191,13 @@
   @touchend.stop="showConnectionDetails"
   @touchstart="checkIsMultiTouch"
   :data-id="id"
-  @mouseover.left="hover = true"
-  @mouseleave.left="hover = false"
+  @mouseover.left="state.hover = true"
+  @mouseleave.left="state.hover = false"
   :class="{filtered: isFiltered}"
-  ref="label"
+  ref="labelElement"
 )
   span.name(:class="{ 'is-dark': isDark }") {{typeName}}
 </template>
-
-<script>
-import utils from '@/utils.js'
-
-let isMultiTouch
-
-export default {
-  name: 'ConnectionLabel',
-  props: {
-    connection: Object
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'spaceZoomPercent') {
-        this.setPosition()
-      }
-    })
-  },
-  mounted () {
-    this.setPosition()
-    window.addEventListener('scroll', this.updateConnectionIsVisible)
-  },
-  beforeUnmount () {
-    window.removeEventListener('scroll', this.updateConnectionIsVisible)
-  },
-  data () {
-    return {
-      position: {},
-      hover: false,
-      connectionIsVisible: true
-    }
-  },
-  computed: {
-    visible () {
-      const hasPosition = this.position.x && this.position.y
-      return this.connection.labelIsVisible && hasPosition
-    },
-    styles () {
-      return {
-        background: this.typeColor,
-        left: this.position.x + 'px',
-        top: this.position.y + 'px'
-      }
-    },
-    id () { return this.connection.id },
-    connectionTypeId () { return this.connection.connectionTypeId },
-    connectionType () { return this.$store.getters['currentConnections/typeByTypeId'](this.connectionTypeId) },
-    typeColor () {
-      if (this.connectionType) {
-        return this.connectionType.color
-      } else {
-        return 'transparent'
-      }
-    },
-    typeName () {
-      if (this.connectionType) {
-        return this.connectionType.name
-      } else {
-        return ''
-      }
-    },
-    path () { return this.connection.path },
-    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
-
-    // filters
-    filtersIsActive () {
-      const types = this.$store.state.filteredConnectionTypeIds
-      const frames = this.$store.state.filteredFrameIds
-      return Boolean(types.length + frames.length)
-    },
-    isConnectionFilteredByType () {
-      const typeIds = this.$store.state.filteredConnectionTypeIds
-      return typeIds.includes(this.connectionTypeId)
-    },
-    isCardsFilteredByFrame () {
-      const frameIds = this.$store.state.filteredFrameIds
-      const cards = utils.clone(this.$store.getters['currentCards/all'])
-      const startCardId = this.connection.startCardId
-      const endCardId = this.connection.endCardId
-      const startCard = cards.filter(card => card.id === startCardId)[0]
-      const endCard = cards.filter(card => card.id === endCardId)[0]
-      const startCardInFilter = frameIds.includes(startCard.frameId)
-      const endCardInFilter = frameIds.includes(endCard.frameId)
-      return startCardInFilter || endCardInFilter
-    },
-    isFiltered () {
-      if (this.filtersIsActive) {
-        const isInFilter = this.isCardsFilteredByFrame || this.isConnectionFilteredByType
-        if (isInFilter) {
-          return false
-        } else {
-          return true
-        }
-      } else { return false }
-    },
-    isDark () { return utils.colorIsDark(this.typeColor) }
-  },
-  methods: {
-    checkIsMultiTouch (event) {
-      isMultiTouch = false
-      if (utils.isMultiTouch(event)) {
-        isMultiTouch = true
-      }
-    },
-    showConnectionDetails (event) {
-      if (isMultiTouch) { return }
-      this.$store.commit('triggerConnectionDetailsIsVisible', {
-        connectionId: this.id,
-        event
-      })
-    },
-    updateConnectionIsVisible () {
-      const connection = document.querySelector(`.connection-path[data-id="${this.id}"]`)
-      const hasChanged = this.connectionIsVisible !== Boolean(connection)
-      if (connection && hasChanged) {
-        this.connectionIsVisible = true
-      } else {
-        this.connectionIsVisible = false
-      }
-    },
-    setPosition () {
-      if (!this.connectionIsVisible) { return }
-      if (!this.connection.path) { return }
-      this.$nextTick(() => {
-        let connection = document.querySelector(`.connection-path[data-id="${this.id}"]`)
-        if (!connection) { return }
-        const zoom = utils.spaceCounterZoomDecimal() || 1
-        let rect = connection.getBoundingClientRect()
-        rect.x = rect.x + window.scrollX
-        rect.y = rect.y + window.scrollY
-        const rectPosition = utils.updatePositionWithSpaceOffset(rect)
-        rect = {
-          x: Math.round(rectPosition.x * zoom),
-          y: Math.round(rectPosition.y * zoom),
-          width: Math.round(rect.width * zoom),
-          height: Math.round(rect.height * zoom)
-        }
-        // position in center of connection element
-        const connectionOffset = {
-          x: rect.width / 2,
-          y: rect.height / 2
-        }
-        let position = {
-          x: rect.x + connectionOffset.x,
-          y: rect.y + connectionOffset.y
-        }
-        // offset by label size
-        let label = this.$refs.label
-        let labelOffset
-        if (label) {
-          label = label.getBoundingClientRect()
-          labelOffset = {
-            x: label.width / 4,
-            y: label.height / 4
-          }
-        } else {
-          labelOffset = { x: 0, y: 0 }
-        }
-        this.position = {
-          x: position.x - labelOffset.x,
-          y: position.y - labelOffset.y
-        }
-      })
-    }
-  },
-  watch: {
-    path (value) {
-      this.setPosition()
-    },
-    hover (value) {
-      if (value) {
-        this.$store.commit('currentUserIsHoveringOverConnectionId', this.id)
-      } else {
-        this.$store.commit('currentUserIsHoveringOverConnectionId', '')
-      }
-    }
-  }
-
-}
-</script>
 
 <style lang="stylus">
 .connection-label

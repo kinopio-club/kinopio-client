@@ -14,19 +14,19 @@ onMounted(() => {
   // })
 })
 
+const emit = defineEmits(['updateCount'])
+
 const props = defineProps({
   visible: Boolean
 })
-const emit = defineEmits(['updateCount'])
+const state = reactive({
+  count: 0
+})
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     console.log('💁‍♀️', value)
   }
-})
-
-const state = reactive({
-  count: 0
 })
 
 const themeName = computed(() => store.state.currentUser.theme)
