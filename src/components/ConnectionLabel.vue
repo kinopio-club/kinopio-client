@@ -7,10 +7,14 @@ const store = useStore()
 
 const labelElement = ref(null)
 let isMultiTouch
+let startPosition = {}
+let wasDragged = false
 
 onMounted(() => {
   updatePosition()
   window.addEventListener('scroll', updateConnectionIsVisible)
+  window.addEventListener('mouseup', stopDragging)
+  window.addEventListener('mousemove', updateLabelOffset)
   store.subscribe((mutation, state) => {
     if (mutation.type === 'spaceZoomPercent') {
       updatePosition()
@@ -27,7 +31,11 @@ const props = defineProps({
 const state = reactive({
   position: {},
   hover: false,
-  connectionIsVisible: true
+  connectionIsVisible: true,
+  isDragging: false,
+
+  labelOffsetX: 0,
+  labelOffsetY: 0
 })
 watch(() => state.hover, (value, prevValue) => {
   if (value) {
@@ -94,12 +102,18 @@ const updateConnectionIsVisible = () => {
     state.connectionIsVisible = false
   }
 }
-const showConnectionDetails = (event) => {
+const toggleConnectionDetails = (event) => {
   if (isMultiTouch) { return }
-  store.commit('triggerConnectionDetailsIsVisible', {
-    connectionId: id.value,
-    event
-  })
+  const isVisible = store.state.connectionDetailsIsVisibleForConnectionId === id.value
+  if (isVisible || wasDragged) {
+    wasDragged = false
+    store.commit('closeAllDialogs')
+  } else {
+    store.commit('triggerConnectionDetailsIsVisible', {
+      connectionId: id.value,
+      event
+    })
+  }
 }
 
 // connection type
@@ -123,6 +137,7 @@ const typeName = computed(() => {
 
 // label
 
+const connectionDetailsIsVisible = computed(() => store.state.connectionDetailsIsVisibleForConnectionId === id.value)
 const path = computed(() => props.connection.path)
 watch(() => path.value, (value, prevValue) => {
   if (value) {
@@ -136,11 +151,7 @@ const styles = computed(() => {
     top: state.position.y + 'px'
   }
 })
-const updatePosition = async () => {
-  if (!state.connectionIsVisible) { return }
-  if (!props.connection.path) { return }
-  await nextTick()
-  // rect
+const connectionRect = () => {
   let connection = document.querySelector(`.connection-path[data-id="${id.value}"]`)
   if (!connection) { return }
   const zoom = utils.spaceCounterZoomDecimal() || 1
@@ -148,12 +159,19 @@ const updatePosition = async () => {
   rect.x = rect.x + window.scrollX
   rect.y = rect.y + window.scrollY
   const rectPosition = utils.updatePositionWithSpaceOffset(rect)
-  rect = {
+  return {
     x: Math.round(rectPosition.x * zoom),
     y: Math.round(rectPosition.y * zoom),
     width: Math.round(rect.width * zoom),
     height: Math.round(rect.height * zoom)
   }
+}
+const updatePosition = async () => {
+  if (!state.connectionIsVisible) { return }
+  if (!props.connection.path) { return }
+  await nextTick()
+  const rect = connectionRect()
+  if (!rect) { return }
   // position in center of connection
   const connectionOffset = {
     x: rect.width / 2,
@@ -165,20 +183,60 @@ const updatePosition = async () => {
   }
   // offset by label size
   let label = labelElement.value
-  let labelOffset
+  let offset
   if (label) {
     label = label.getBoundingClientRect()
-    labelOffset = {
-      x: label.width / 4,
-      y: label.height / 4
+    offset = {
+      x: label.width / 4 + state.labelOffsetX,
+      y: label.height / 4 + state.labelOffsetY
     }
   } else {
-    labelOffset = { x: 0, y: 0 }
+    offset = { x: 0, y: 0 }
   }
   state.position = {
-    x: position.x - labelOffset.x,
-    y: position.y - labelOffset.y
+    x: position.x - offset.x,
+    y: position.y - offset.y
   }
+}
+const startDragging = () => {
+  state.isDragging = true
+  wasDragged = false
+}
+const stopDragging = () => {
+  state.isDragging = false
+  startPosition = {}
+}
+const updateLabelOffset = (event) => {
+  if (!state.isDragging) { return }
+  if (isMultiTouch) { return }
+  store.commit('closeAllDialogs')
+  const threshold = 5
+  const x = event.pageX + window.scrollX
+  const y = event.pageY + window.scrollY
+  if (!startPosition.x) {
+    startPosition.x = x
+    startPosition.y = y
+  }
+  const labelOffsetX = startPosition.x - x
+  const labelOffsetY = startPosition.y - y
+  if (labelOffsetX > threshold || labelOffsetY > threshold) {
+    wasDragged = true
+  }
+  // TODO set bounds
+  const rect = connectionRect()
+  if (!rect) { return }
+  // TODO
+  // dispatch x,y update
+  state.labelOffsetX = labelOffsetX
+  state.labelOffsetY = labelOffsetY
+  updatePosition()
+}
+const removeOffsets = () => {
+  console.log('🙈')
+  state.labelOffsetX = 0
+  state.labelOffsetY = 0
+  startPosition = {}
+  wasDragged = false
 }
 </script>
 
@@ -186,13 +244,17 @@ const updatePosition = async () => {
 .connection-label.badge(
   v-if="visible"
   :style="styles"
-  @click.left="showConnectionDetails"
-  @touchend.stop="showConnectionDetails"
+  @click.left="toggleConnectionDetails"
+
+  @mousedown.left.prevent="startDragging"
+  @dblclick="removeOffsets"
+
+  @touchend.stop="toggleConnectionDetails"
   @touchstart="checkIsMultiTouch"
   :data-id="id"
   @mouseover.left="state.hover = true"
   @mouseleave.left="state.hover = false"
-  :class="{filtered: isFiltered}"
+  :class="{filtered: isFiltered, active: connectionDetailsIsVisible, jiggle: state.isDragging}"
   ref="labelElement"
 )
   span.name(:class="{ 'is-dark': isDark }") {{typeName}}
@@ -203,8 +265,13 @@ const updatePosition = async () => {
   pointer-events all
   cursor pointer
   position absolute
-  transform-origin top left
   z-index 1
+  &:hover
+    box-shadow var(--hover-shadow)
+  &:active,
+  &.active
+    box-shadow var(--button-active-inset-shadow)
+
   &.cursor-default
     cursor default
   .name
