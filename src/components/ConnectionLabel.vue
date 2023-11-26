@@ -9,12 +9,14 @@ const labelElement = ref(null)
 let isMultiTouch
 let startPosition = {}
 let wasDragged = false
+const dragThreshold = 5
+let labelThreshold = {}
 
 onMounted(() => {
   updatePosition()
   window.addEventListener('scroll', updateConnectionIsVisible)
   window.addEventListener('mouseup', stopDragging)
-  window.addEventListener('mousemove', updateLabelOffset)
+  window.addEventListener('mousemove', updateOffset)
   store.subscribe((mutation, state) => {
     if (mutation.type === 'spaceZoomPercent') {
       updatePosition()
@@ -152,10 +154,10 @@ const styles = computed(() => {
   }
 })
 const connectionRect = () => {
-  let connection = document.querySelector(`.connection-path[data-id="${id.value}"]`)
-  if (!connection) { return }
+  let element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
+  if (!element) { return }
   const zoom = utils.spaceCounterZoomDecimal() || 1
-  let rect = connection.getBoundingClientRect()
+  let rect = element.getBoundingClientRect()
   rect.x = rect.x + window.scrollX
   rect.y = rect.y + window.scrollY
   const rectPosition = utils.updatePositionWithSpaceOffset(rect)
@@ -166,9 +168,18 @@ const connectionRect = () => {
     height: Math.round(rect.height * zoom)
   }
 }
+const removeOffsets = () => {
+  console.log('🙈') // TEMP
+  state.labelOffsetX = 0
+  state.labelOffsetY = 0
+  startPosition = {}
+  wasDragged = false
+}
+// position
 const updatePosition = async () => {
   if (!state.connectionIsVisible) { return }
   if (!props.connection.path) { return }
+  // ?? TODO should label offsets reset when connection path is changed (eg on card drag)???
   await nextTick()
   const rect = connectionRect()
   if (!rect) { return }
@@ -186,9 +197,13 @@ const updatePosition = async () => {
   let offset
   if (label) {
     label = label.getBoundingClientRect()
+    labelThreshold = {
+      x: Math.round(label.width / 4),
+      y: Math.round(label.height / 4)
+    }
     offset = {
-      x: label.width / 4 + state.labelOffsetX,
-      y: label.height / 4 + state.labelOffsetY
+      x: labelThreshold.x + state.labelOffsetX,
+      y: labelThreshold.y + state.labelOffsetY
     }
   } else {
     offset = { x: 0, y: 0 }
@@ -206,11 +221,11 @@ const stopDragging = () => {
   state.isDragging = false
   startPosition = {}
 }
-const updateLabelOffset = (event) => {
+// offset
+const updateOffset = (event) => {
   if (!state.isDragging) { return }
   if (isMultiTouch) { return }
   store.commit('closeAllDialogs')
-  const threshold = 5
   const x = event.pageX + window.scrollX
   const y = event.pageY + window.scrollY
   if (!startPosition.x) {
@@ -219,24 +234,32 @@ const updateLabelOffset = (event) => {
   }
   const labelOffsetX = startPosition.x - x
   const labelOffsetY = startPosition.y - y
-  if (labelOffsetX > threshold || labelOffsetY > threshold) {
+  if (labelOffsetX > dragThreshold || labelOffsetY > dragThreshold) {
     wasDragged = true
   }
-  // TODO set bounds
+  // bounds
   const rect = connectionRect()
   if (!rect) { return }
-  // TODO
-  // dispatch x,y update
-  state.labelOffsetX = labelOffsetX
-  state.labelOffsetY = labelOffsetY
+  let outOfBounds = {}
+  outOfBounds.left = x - labelThreshold.x < rect.x
+  outOfBounds.right = x - labelThreshold.x > rect.x + rect.width
+  outOfBounds.top = y - labelThreshold.y < rect.y
+  outOfBounds.bottom = y - labelThreshold.y > rect.y + rect.height
+  outOfBounds.x = outOfBounds.left || outOfBounds.right
+  outOfBounds.y = outOfBounds.top || outOfBounds.bottom
+  if (outOfBounds.x) {
+    // TODO draw border , left or right
+  } else {
+    // TODO dispatch offset y update
+    state.labelOffsetX = labelOffsetX
+  }
+  if (outOfBounds.y) {
+    // TODO draw border , top or bottom
+  } else {
+    // TODO dispatch offset y update
+    state.labelOffsetY = labelOffsetY
+  }
   updatePosition()
-}
-const removeOffsets = () => {
-  console.log('🙈')
-  state.labelOffsetX = 0
-  state.labelOffsetY = 0
-  startPosition = {}
-  wasDragged = false
 }
 </script>
 
