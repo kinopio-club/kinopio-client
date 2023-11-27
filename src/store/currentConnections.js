@@ -264,6 +264,33 @@ export default {
       context.dispatch('broadcast/update', { updates: type, type: 'updateConnectionType', handler: 'currentConnections/updateType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'updateConnectionType', body: type }, { root: true })
     },
+    updateLabelOffset: (context, { connection, labelOffsetX, labelOffsetY }) => {
+      const prevConnection = context.getters.byId(connection.id)
+      // null x or y offset isn't 0
+      if (utils.isUndefined(labelOffsetX)) {
+        labelOffsetX = prevConnection.labelOffsetX
+      }
+      if (utils.isUndefined(labelOffsetY)) {
+        labelOffsetY = prevConnection.labelOffsetY
+      }
+      // update
+      const item = {
+        id: connection.id,
+        labelOffsetX,
+        labelOffsetY
+      }
+      context.commit('update', item)
+      // context.dispatch('history/add', { connectionTypes: [type] }, { root: true }) // TODO
+      context.dispatch('broadcast/update', { updates: { connections: [item] }, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'updateConnection', body: item }, { root: true })
+    },
+    removeLabelOffset: (context, connection) => {
+      context.dispatch('updateLabelOffset', {
+        connection,
+        labelOffsetX: 0,
+        labelOffsetY: 0
+      })
+    },
 
     // remove
 

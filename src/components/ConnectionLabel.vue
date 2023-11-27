@@ -11,6 +11,7 @@ let startPosition = {}
 let wasDragged = false
 const dragThreshold = 5
 let labelThreshold = {}
+let prevOffset = { x: 0, y: 0 }
 
 onMounted(() => {
   updatePosition()
@@ -35,11 +36,7 @@ const state = reactive({
   hover: false,
   connectionIsVisible: true,
   isDragging: false,
-  outOfBounds: {},
-
-  labelOffsetX: 0, // temp
-  labelOffsetY: 0 // temp
-
+  outOfBounds: {}
 })
 watch(() => state.hover, (value, prevValue) => {
   if (value) {
@@ -143,6 +140,8 @@ const typeName = computed(() => {
 
 const connectionDetailsIsVisible = computed(() => store.state.connectionDetailsIsVisibleForConnectionId === id.value)
 const path = computed(() => props.connection.path)
+const labelOffsetX = computed(() => props.connection.labelOffsetX)
+const labelOffsetY = computed(() => props.connection.labelOffsetY)
 watch(() => path.value, (value, prevValue) => {
   if (value) {
     updatePosition()
@@ -178,14 +177,16 @@ const stopDragging = () => {
   state.isDragging = false
   state.outOfBounds = {}
   startPosition = {}
+  prevOffset = { x: 0, y: 0 }
 }
 const removeOffsets = () => {
   console.log('🙈') // TEMP
-  state.labelOffsetX = 0
-  state.labelOffsetY = 0
-  state.outOfBounds = {}
-  startPosition = {}
+  store.dispatch('currentConnections/removeLabelOffset', props.connection)
+  stopDragging()
+  // state.outOfBounds = {}
+  // startPosition = {}
   wasDragged = false
+  updatePosition()
 }
 
 // position
@@ -216,8 +217,8 @@ const updatePosition = async () => {
       y: Math.round(label.height / 4)
     }
     offset = {
-      x: labelThreshold.x + state.labelOffsetX,
-      y: labelThreshold.y + state.labelOffsetY
+      x: labelThreshold.x + labelOffsetX.value,
+      y: labelThreshold.y + labelOffsetY.value
     }
   } else {
     offset = { x: 0, y: 0 }
@@ -234,61 +235,76 @@ const updateOffset = (event) => {
   if (!state.isDragging) { return }
   if (isMultiTouch) { return }
   store.commit('closeAllDialogs')
-  const x = event.pageX + window.scrollX
-  const y = event.pageY + window.scrollY
-  if (!startPosition.x) {
-    startPosition.x = x
-    startPosition.y = y
+  const cursor = {
+    x: event.pageX + window.scrollX,
+    y: event.pageY + window.scrollY
   }
-  const labelOffsetX = startPosition.x - x
-  const labelOffsetY = startPosition.y - y
-  if (labelOffsetX > dragThreshold || labelOffsetY > dragThreshold) {
+  if (!startPosition.x) {
+    startPosition = {
+      x: cursor.x,
+      y: cursor.y
+    }
+    prevOffset = {
+      x: labelOffsetX.value,
+      y: labelOffsetY.value
+    }
+  }
+  const currentOffset = {
+    x: startPosition.x - cursor.x + prevOffset.x,
+    y: startPosition.y - cursor.y + prevOffset.y
+  }
+  if (currentOffset.x > dragThreshold || currentOffset.y > dragThreshold) {
     wasDragged = true
   }
-  // bounds
-  const rect = connectionRect()
-  if (!rect) { return }
-  // let outOfBounds = {}
-  state.outOfBounds.left = x - labelThreshold.x < rect.x
-  state.outOfBounds.right = x - labelThreshold.x > rect.x + rect.width
-  state.outOfBounds.top = y - labelThreshold.y < rect.y
-  state.outOfBounds.bottom = y - labelThreshold.y > rect.y + rect.height
-  state.outOfBounds.x = state.outOfBounds.left || state.outOfBounds.right
-  state.outOfBounds.y = state.outOfBounds.top || state.outOfBounds.bottom
-  // updateBoundaryPositions()
-  // updateOffsetXandY()
-  if (!state.outOfBounds.x) {
-    // TODO dispatch connection.offset x update
-    state.labelOffsetX = labelOffsetX // replace w connection.offsetY
-    // broadcast
+  updateOutOfBounds(event)
+  let newOffsetX, newOffsetY
+  if (!state.outOfBounds.isX) {
+    newOffsetX = currentOffset.x
   }
-  if (!state.outOfBounds.y) {
-    // TODO dispatch connection.offset y update
-    state.labelOffsetY = labelOffsetY // replace w connection.offsetY
-    // broadcast
+  if (!state.outOfBounds.isY) {
+    newOffsetY = currentOffset.y
   }
+  store.dispatch('currentConnections/updateLabelOffset', {
+    connection: props.connection,
+    labelOffsetX: newOffsetX,
+    labelOffsetY: newOffsetY
+  })
   updatePosition()
 }
 
 // boundaries
 
-// TODO convert to child component??
-
-const isOutOfBounds = computed(() => state.outOfBounds.x || state.outOfBounds.y)
+const updateOutOfBounds = (event) => {
+  const cursor = {
+    x: event.pageX + window.scrollX,
+    y: event.pageY + window.scrollY
+  }
+  let rect = connectionRect()
+  rect.x = rect.x + window.scrollX
+  rect.y = rect.y + window.scrollY
+  if (!rect) { return }
+  state.outOfBounds.isLeft = cursor.x - labelThreshold.x < rect.x
+  state.outOfBounds.isRight = cursor.x - labelThreshold.x > rect.x + rect.width
+  state.outOfBounds.isTop = cursor.y - labelThreshold.y < rect.y
+  state.outOfBounds.isBottom = cursor.y - labelThreshold.y > rect.y + rect.height
+  state.outOfBounds.isX = state.outOfBounds.isLeft || state.outOfBounds.isRight
+  state.outOfBounds.isY = state.outOfBounds.isTop || state.outOfBounds.isBottom
+}
+const isOutOfBounds = computed(() => state.outOfBounds.isX || state.outOfBounds.isY)
 const boundaryStylesLeft = computed(() => {
-  console.log('🇨🇦🇨🇦left', state.outOfBounds.left)
+  console.log('🇨🇦🇨🇦left', state.outOfBounds.isLeft, state.outOfBounds.isX)
   return null
 })
 const boundaryStylesRight = computed(() => {
-  console.log('🇨🇦🇨🇦right', state.outOfBounds.right)
+  console.log('🇨🇦🇨🇦right', state.outOfBounds.isRight)
   return null
 })
 const boundaryStylesTop = computed(() => {
-  console.log('🇨🇦🇨🇦top', state.outOfBounds.top)
+  console.log('🇨🇦🇨🇦top', state.outOfBounds.isTop)
   return null
 })
 const boundaryStylesBottom = computed(() => {
-  console.log('🇨🇦🇨🇦bottom', state.outOfBounds.bottom)
+  console.log('🇨🇦🇨🇦bottom', state.outOfBounds.isBottom)
   return null
 })
 
@@ -329,10 +345,10 @@ const boundaryStylesBottom = computed(() => {
 )
   span.name(:class="{ 'is-dark': isDark }") {{typeName}}
 template(v-if="isOutOfBounds")
-  .connection-label-boundary.left(:style="boundaryStylesLeft")
-  .connection-label-boundary.right(:style="boundaryStylesRight")
-  .connection-label-boundary.top(:style="boundaryStylesTop")
-  .connection-label-boundary.bottom(:style="boundaryStylesBottom")
+  .connection-label-boundary.left(v-if="state.outOfBounds.isLeft" :style="boundaryStylesLeft")
+  .connection-label-boundary.right(v-if="state.outOfBounds.isRight" :style="boundaryStylesRight")
+  .connection-label-boundary.top(v-if="state.outOfBounds.isTop" :style="boundaryStylesTop")
+  .connection-label-boundary.bottom(v-if="state.outOfBounds.isBottom" :style="boundaryStylesBottom")
 
 </template>
 

@@ -334,9 +334,11 @@ export default {
     cloned = JSON.parse(cloned)
     return cloned
   },
+  isUndefined (value) {
+    return value === undefined || value === null
+  },
   typeCheck ({ value, type, allowUndefined, origin }) {
-    const isUndefined = value === undefined || value === null
-    if (allowUndefined && isUndefined) {
+    if (allowUndefined && this.isUndefined(value)) {
       return true
     }
     if (type === 'array' && Array.isArray(value)) {
