@@ -10,12 +10,13 @@ let isMultiTouch
 let startPosition = {}
 let wasDragged = false
 const dragThreshold = 5
-let startOffset = { x: 0, y: 0 }
+let startOffset = { x: 0.5, y: 0.5 }
 
 onMounted(() => {
   window.addEventListener('scroll', updateConnectionIsVisible)
   window.addEventListener('mouseup', stopDragging)
   window.addEventListener('mousemove', drag)
+  updateConnectionRect()
 })
 onUnmounted(() => {
   window.removeEventListener('scroll', updateConnectionIsVisible)
@@ -28,7 +29,8 @@ const state = reactive({
   hover: false,
   connectionIsVisible: true,
   outOfBounds: {},
-  isDragging: false
+  isDragging: false,
+  connectionRect: null
 })
 watch(() => state.hover, (value, prevValue) => {
   if (value) {
@@ -46,6 +48,12 @@ watch(() => state.isDragging, (value, prevValue) => {
 })
 
 const visible = computed(() => props.connection.labelIsVisible)
+watch(() => visible.value, (value, prevValue) => {
+  if (value) {
+    store.dispatch('currentConnections/clearLabelOffset', props.connection)
+  }
+})
+
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const isDark = computed(() => utils.colorIsDark(typeColor.value))
 const checkIsMultiTouch = (event) => {
@@ -91,6 +99,7 @@ const isFiltered = computed(() => {
 // connection
 
 const id = computed(() => props.connection.id)
+const connectionDetailsIsVisible = computed(() => store.state.connectionDetailsIsVisibleForConnectionId === id.value)
 const updateConnectionIsVisible = () => {
   const connection = document.querySelector(`.connection-path[data-id="${id.value}"]`)
   if (connection) {
@@ -132,23 +141,58 @@ const typeName = computed(() => {
   }
 })
 
+// label wrap
+
+const path = computed(() => props.connection.path)
+watch(() => path.value, (value, prevValue) => {
+  updateConnectionRect()
+})
+const updateConnectionRect = () => {
+  let element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
+  if (!element) { return }
+  const zoom = utils.spaceCounterZoomDecimal() || 1
+  let rect = element.getBoundingClientRect()
+  rect.x = rect.x + window.scrollX
+  rect.y = rect.y + window.scrollY
+  const rectPosition = utils.updatePositionWithSpaceOffset(rect)
+  state.connectionRect = {
+    x: Math.round(rectPosition.x * zoom),
+    y: Math.round(rectPosition.y * zoom),
+    width: Math.round(rect.width * zoom),
+    height: Math.round(rect.height * zoom)
+  }
+}
+const connectionLabelWrapPosition = computed(() => {
+  if (!state.connectionRect) { return }
+  return {
+    left: state.connectionRect.x + 'px',
+    top: state.connectionRect.y + 'px',
+    width: state.connectionRect.width + 'px',
+    height: state.connectionRect.height + 'px'
+  }
+})
+
 // label
 
-const connectionDetailsIsVisible = computed(() => store.state.connectionDetailsIsVisibleForConnectionId === id.value)
-const path = computed(() => props.connection.path)
 const labelOffsetX = computed(() => props.connection.labelOffsetX)
 const labelOffsetY = computed(() => props.connection.labelOffsetY)
 const position = computed(() => {
-  const rect = connectionRect()
+  const rect = state.connectionRect
+  if (!rect) { return }
   const rectCenter = {
     x: rect.x + (rect.width / 2),
     y: rect.y + (rect.height / 2)
   }
-  let position = {
-    x: rectCenter.x - labelOffsetX.value,
-    y: rectCenter.y - labelOffsetY.value
+  const offsetAbsolute = {
+    x: labelOffsetX.value * state.connectionRect.width,
+    y: labelOffsetY.value * state.connectionRect.height
   }
-  return position
+  console.log('🚒🚒🚒🚒', labelOffsetX.value, state.connectionRect.width)
+  let position = {
+    x: rectCenter.x - offsetAbsolute.x,
+    y: rectCenter.y - offsetAbsolute.y
+  }
+  return offsetAbsolute
 })
 const styles = computed(() => {
   let label = labelElement.value
@@ -177,69 +221,57 @@ const stopDragging = () => {
   state.isDragging = false
   state.outOfBounds = {}
   startPosition = {}
-  startOffset = { x: 0, y: 0 }
+  startOffset = { x: 0.5, y: 0.5 }
 }
 const removeOffsets = () => {
   console.log('🙈') // TEMP
-  store.dispatch('currentConnections/removeLabelOffset', props.connection)
+  store.dispatch('currentConnections/clearLabelOffset', props.connection)
   stopDragging()
   wasDragged = false
 }
-
-// const updatePosition = async () => {
-//   if (!state.connectionIsVisible) { return }
-//   if (!props.connection.path) { return }
-//   await nextTick()
+// const updateOffsetOnPathChange = async () => {
 //   const rect = connectionRect()
 //   if (!rect) { return }
+//   await nextTick()
 //   // position in center of connection
-//   const connectionOffset = {
-//     x: rect.width / 2,
-//     y: rect.height / 2
+//   const rectCenter = {
+//     x: rect.x + (rect.width / 2),
+//     y: rect.y + (rect.height / 2)
 //   }
 //   let position = {
 //     x: rect.x + connectionOffset.x,
 //     y: rect.y + connectionOffset.y
 //   }
-//   // offset by label size
-//   let label = labelElement.value
-//   let offset
-//   if (label) {
-//     label = label.getBoundingClientRect()
-//     labelSizeThreshold = {
-//       x: Math.round(label.width / 4),
-//       y: Math.round(label.height / 4)
-//     }
-//     offset = {
-//       x: labelOffsetX.value + labelSizeThreshold.x,
-//       y: labelOffsetY.value + labelSizeThreshold.y
-//     }
-//   } else {
-//     offset = { x: 0, y: 0 }
-//   }
-//   state.position = {
-//     x: position.x - offset.x,
-//     y: position.y - offset.y
-//   }
+
+//   // state.position = {
+//   //   x: position.x - offset.x,
+//   //   y: position.y - offset.y
+//   // }
+//   store.dispatch('currentConnections/updateLabelOffset', {
+//     connection: props.connection,
+//     labelOffsetX: currentOffset.x,
+//     labelOffsetY: currentOffset.y
+//   })
+
 // }
 
 // dragging
 
-const connectionRect = () => {
-  let element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
-  if (!element) { return }
-  const zoom = utils.spaceCounterZoomDecimal() || 1
-  let rect = element.getBoundingClientRect()
-  rect.x = rect.x + window.scrollX
-  rect.y = rect.y + window.scrollY
-  const rectPosition = utils.updatePositionWithSpaceOffset(rect)
-  return {
-    x: Math.round(rectPosition.x * zoom),
-    y: Math.round(rectPosition.y * zoom),
-    width: Math.round(rect.width * zoom),
-    height: Math.round(rect.height * zoom)
-  }
-}
+// const connectionRect = () => {
+//   let element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
+//   if (!element) { return }
+//   const zoom = utils.spaceCounterZoomDecimal() || 1
+//   let rect = element.getBoundingClientRect()
+//   rect.x = rect.x + window.scrollX
+//   rect.y = rect.y + window.scrollY
+//   const rectPosition = utils.updatePositionWithSpaceOffset(rect)
+//   return {
+//     x: Math.round(rectPosition.x * zoom),
+//     y: Math.round(rectPosition.y * zoom),
+//     width: Math.round(rect.width * zoom),
+//     height: Math.round(rect.height * zoom)
+//   }
+// }
 // const labelRect = () => {
 //   let element = labelElement.value
 //   if (!element) { return }
@@ -275,12 +307,16 @@ const drag = (event) => {
       y: labelOffsetY.value
     }
   }
-  const currentOffset = {
+  const offset = {
     x: startPosition.x - cursor.x + startOffset.x,
     y: startPosition.y - cursor.y + startOffset.y
   }
-  if (currentOffset.x > dragThreshold || currentOffset.y > dragThreshold) {
+  if (offset.x > dragThreshold || offset.y > dragThreshold) {
     wasDragged = true
+  }
+  const offsetRelative = {
+    x: offset.x / state.connectionRect.x,
+    y: offset.y / state.connectionRect.y
   }
   // updateOutOfBounds(event)
   // let newOffsetX, newOffsetY
@@ -290,10 +326,13 @@ const drag = (event) => {
   // if (!state.outOfBounds.isY) {
   //   newOffsetY = currentOffset.y
   // }
+
+  // TODO MAKE relative to state.connectionRect
+
   store.dispatch('currentConnections/updateLabelOffset', {
     connection: props.connection,
-    labelOffsetX: currentOffset.x,
-    labelOffsetY: currentOffset.y
+    labelOffsetX: offsetRelative.x,
+    labelOffsetY: offsetRelative.y
   })
 }
 
@@ -336,37 +375,44 @@ const drag = (event) => {
 </script>
 
 <template lang="pug">
-.connection-label.badge(
-  v-if="visible"
-  :style="styles"
-  @click.left="toggleConnectionDetails"
+.connection-label-wrap(:style="connectionLabelWrapPosition")
+  .connection-label.badge(
+    v-if="visible"
+    :style="styles"
+    @click.left="toggleConnectionDetails"
 
-  @mousedown.left.prevent="startDragging"
-  @dblclick="removeOffsets"
+    @mousedown.left.prevent="startDragging"
+    @dblclick="removeOffsets"
+    :data-label-offset-x="labelOffsetX"
+    :data-label-offset-y="labelOffsetY"
 
-  @touchend.stop="toggleConnectionDetails"
-  @touchstart="checkIsMultiTouch"
-  :data-id="id"
-  @mouseover.left="state.hover = true"
-  @mouseleave.left="state.hover = false"
-  :class="{filtered: isFiltered, active: connectionDetailsIsVisible, jiggle: state.isDragging}"
-  ref="labelElement"
-)
-  span.name(:class="{ 'is-dark': isDark }") {{typeName}}
-//- template(v-if="isOutOfBounds")
-//-   .connection-label-boundary.left(v-if="state.outOfBounds.isLeft" :style="boundaryStylesLeft")
-//-   .connection-label-boundary.right(v-if="state.outOfBounds.isRight" :style="boundaryStylesRight")
-//-   .connection-label-boundary.top(v-if="state.outOfBounds.isTop" :style="boundaryStylesTop")
-//-   .connection-label-boundary.bottom(v-if="state.outOfBounds.isBottom" :style="boundaryStylesBottom")
+    @touchend.stop="toggleConnectionDetails"
+    @touchstart="checkIsMultiTouch"
+    :data-id="id"
+    @mouseover.left="state.hover = true"
+    @mouseleave.left="state.hover = false"
+    :class="{filtered: isFiltered, active: connectionDetailsIsVisible, jiggle: state.isDragging}"
+    ref="labelElement"
+  )
+    span.name(:class="{ 'is-dark': isDark }") {{typeName}}
+  //- template(v-if="isOutOfBounds")
+  //-   .connection-label-boundary.left(v-if="state.outOfBounds.isLeft" :style="boundaryStylesLeft")
+  //-   .connection-label-boundary.right(v-if="state.outOfBounds.isRight" :style="boundaryStylesRight")
+  //-   .connection-label-boundary.top(v-if="state.outOfBounds.isTop" :style="boundaryStylesTop")
+  //-   .connection-label-boundary.bottom(v-if="state.outOfBounds.isBottom" :style="boundaryStylesBottom")
 
 </template>
 
 <style lang="stylus">
+.connection-label-wrap
+  position absolute
+  background rgba(239, 207, 227, .6)
 .connection-label
   pointer-events all
   cursor pointer
   position absolute
   z-index 1
+  width max-content
   &:hover
     box-shadow var(--hover-shadow)
   &:active,

@@ -268,10 +268,10 @@ export default {
       const prevConnection = context.getters.byId(connection.id)
       // null x or y offset isn't 0
       if (utils.isUndefined(labelOffsetX)) {
-        labelOffsetX = prevConnection.labelOffsetX
+        labelOffsetX = utils.roundFloat(prevConnection.labelOffsetX)
       }
       if (utils.isUndefined(labelOffsetY)) {
-        labelOffsetY = prevConnection.labelOffsetY
+        labelOffsetY = utils.roundFloat(prevConnection.labelOffsetY)
       }
       // update
       const item = {
@@ -284,11 +284,11 @@ export default {
       context.dispatch('broadcast/update', { updates: { connections: [item] }, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'updateConnection', body: item }, { root: true })
     },
-    removeLabelOffset: (context, connection) => {
+    clearLabelOffset: (context, connection) => {
       context.dispatch('updateLabelOffset', {
         connection,
-        labelOffsetX: 0,
-        labelOffsetY: 0
+        labelOffsetX: 0.5,
+        labelOffsetY: 0.5
       })
     },
 
