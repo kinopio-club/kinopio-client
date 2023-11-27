@@ -581,6 +581,7 @@ export default {
       if (!this.currentUser.shouldUseStickyCards) { return true }
       if (this.embedIsVisible) { return true }
       if (this.$store.state.codeLanguagePickerIsVisible) { return true }
+      if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return true }
       const userIsConnecting = this.currentConnectionStartCardIds.length
       const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
@@ -722,7 +723,7 @@ export default {
       return this.connectionColorForCardIds(cardIds)
     },
     currentUserIsHoveringOverConnectionIdColor () {
-      const connectionId = this.$store.state.currentUserIsHoveringOverConnectionId
+      const connectionId = this.$store.state.currentUserIsHoveringOverConnectionId || this.$store.state.currentUserIsDraggingConnectionIdLabel
       return this.connectionColorForConnectionIds([connectionId])
     },
     currentUserIsMultipleSelectedConnectionIdColor () {

@@ -10,19 +10,12 @@ let isMultiTouch
 let startPosition = {}
 let wasDragged = false
 const dragThreshold = 5
-let labelThreshold = {}
-let prevOffset = { x: 0, y: 0 }
+let startOffset = { x: 0, y: 0 }
 
 onMounted(() => {
-  updatePosition()
   window.addEventListener('scroll', updateConnectionIsVisible)
   window.addEventListener('mouseup', stopDragging)
-  window.addEventListener('mousemove', updateOffset)
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'spaceZoomPercent') {
-      updatePosition()
-    }
-  })
+  window.addEventListener('mousemove', drag)
 })
 onUnmounted(() => {
   window.removeEventListener('scroll', updateConnectionIsVisible)
@@ -32,11 +25,10 @@ const props = defineProps({
   connection: Object
 })
 const state = reactive({
-  position: {},
   hover: false,
   connectionIsVisible: true,
-  isDragging: false,
-  outOfBounds: {}
+  outOfBounds: {},
+  isDragging: false
 })
 watch(() => state.hover, (value, prevValue) => {
   if (value) {
@@ -45,7 +37,15 @@ watch(() => state.hover, (value, prevValue) => {
     store.commit('currentUserIsHoveringOverConnectionId', '')
   }
 })
+watch(() => state.isDragging, (value, prevValue) => {
+  if (value) {
+    store.commit('currentUserIsDraggingConnectionIdLabel', id.value)
+  } else {
+    store.commit('currentUserIsDraggingConnectionIdLabel', '')
+  }
+})
 
+const visible = computed(() => props.connection.labelIsVisible)
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const isDark = computed(() => utils.colorIsDark(typeColor.value))
 const checkIsMultiTouch = (event) => {
@@ -54,10 +54,6 @@ const checkIsMultiTouch = (event) => {
     isMultiTouch = true
   }
 }
-const visible = computed(() => {
-  const hasPosition = state.position.x && state.position.y
-  return props.connection.labelIsVisible && hasPosition
-})
 
 // filter
 
@@ -142,18 +138,93 @@ const connectionDetailsIsVisible = computed(() => store.state.connectionDetailsI
 const path = computed(() => props.connection.path)
 const labelOffsetX = computed(() => props.connection.labelOffsetX)
 const labelOffsetY = computed(() => props.connection.labelOffsetY)
-watch(() => path.value, (value, prevValue) => {
-  if (value) {
-    updatePosition()
+const position = computed(() => {
+  const rect = connectionRect()
+  const rectCenter = {
+    x: rect.x + (rect.width / 2),
+    y: rect.y + (rect.height / 2)
   }
+  let position = {
+    x: rectCenter.x - labelOffsetX.value,
+    y: rectCenter.y - labelOffsetY.value
+  }
+  return position
 })
 const styles = computed(() => {
+  let label = labelElement.value
+  if (!label) { return }
+  // offset position by label center point
+  const labelRect = label.getBoundingClientRect()
+  const labelCenter = {
+    x: Math.round(labelRect.width / 2),
+    y: Math.round(labelRect.height / 2)
+  }
+  const newPosition = {
+    x: position.value.x - labelCenter.x,
+    y: position.value.y - labelCenter.y
+  }
   return {
     background: typeColor.value,
-    left: state.position.x + 'px',
-    top: state.position.y + 'px'
+    left: newPosition.x + 'px',
+    top: newPosition.y + 'px'
   }
 })
+const startDragging = () => {
+  state.isDragging = true
+  wasDragged = false
+}
+const stopDragging = () => {
+  state.isDragging = false
+  state.outOfBounds = {}
+  startPosition = {}
+  startOffset = { x: 0, y: 0 }
+}
+const removeOffsets = () => {
+  console.log('🙈') // TEMP
+  store.dispatch('currentConnections/removeLabelOffset', props.connection)
+  stopDragging()
+  wasDragged = false
+}
+
+// const updatePosition = async () => {
+//   if (!state.connectionIsVisible) { return }
+//   if (!props.connection.path) { return }
+//   await nextTick()
+//   const rect = connectionRect()
+//   if (!rect) { return }
+//   // position in center of connection
+//   const connectionOffset = {
+//     x: rect.width / 2,
+//     y: rect.height / 2
+//   }
+//   let position = {
+//     x: rect.x + connectionOffset.x,
+//     y: rect.y + connectionOffset.y
+//   }
+//   // offset by label size
+//   let label = labelElement.value
+//   let offset
+//   if (label) {
+//     label = label.getBoundingClientRect()
+//     labelSizeThreshold = {
+//       x: Math.round(label.width / 4),
+//       y: Math.round(label.height / 4)
+//     }
+//     offset = {
+//       x: labelOffsetX.value + labelSizeThreshold.x,
+//       y: labelOffsetY.value + labelSizeThreshold.y
+//     }
+//   } else {
+//     offset = { x: 0, y: 0 }
+//   }
+//   state.position = {
+//     x: position.x - offset.x,
+//     y: position.y - offset.y
+//   }
+// }
+
+// dragging
+
 const connectionRect = () => {
   let element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
   if (!element) { return }
@@ -169,160 +240,98 @@ const connectionRect = () => {
     height: Math.round(rect.height * zoom)
   }
 }
-const startDragging = () => {
-  state.isDragging = true
-  wasDragged = false
-}
-const stopDragging = () => {
-  state.isDragging = false
-  state.outOfBounds = {}
-  startPosition = {}
-  prevOffset = { x: 0, y: 0 }
-}
-const removeOffsets = () => {
-  console.log('🙈') // TEMP
-  store.dispatch('currentConnections/removeLabelOffset', props.connection)
-  stopDragging()
-  // state.outOfBounds = {}
-  // startPosition = {}
-  wasDragged = false
-  updatePosition()
-}
+// const labelRect = () => {
+//   let element = labelElement.value
+//   if (!element) { return }
+//   const zoom = utils.spaceCounterZoomDecimal() || 1
+//   let rect = element.getBoundingClientRect()
+//   rect.x = rect.x + window.scrollX
+//   rect.y = rect.y + window.scrollY
+//   const rectPosition = utils.updatePositionWithSpaceOffset(rect)
+//   return {
+//     x: Math.round(rectPosition.x * zoom),
+//     y: Math.round(rectPosition.y * zoom),
+//     width: Math.round(rect.width * zoom),
+//     height: Math.round(rect.height * zoom)
+//   }
+// }
 
-// position
-
-const updatePosition = async () => {
-  if (!state.connectionIsVisible) { return }
-  if (!props.connection.path) { return }
-  // ?? TODO should label offsets reset when connection path is changed (eg on card drag)???
-  await nextTick()
-  const rect = connectionRect()
-  if (!rect) { return }
-  // position in center of connection
-  const connectionOffset = {
-    x: rect.width / 2,
-    y: rect.height / 2
-  }
-  let position = {
-    x: rect.x + connectionOffset.x,
-    y: rect.y + connectionOffset.y
-  }
-  // offset by label size
-  let label = labelElement.value
-  let offset
-  if (label) {
-    label = label.getBoundingClientRect()
-    labelThreshold = {
-      x: Math.round(label.width / 4),
-      y: Math.round(label.height / 4)
-    }
-    offset = {
-      x: labelThreshold.x + labelOffsetX.value,
-      y: labelThreshold.y + labelOffsetY.value
-    }
-  } else {
-    offset = { x: 0, y: 0 }
-  }
-  state.position = {
-    x: position.x - offset.x,
-    y: position.y - offset.y
-  }
-}
-
-// offset
-
-const updateOffset = (event) => {
+const drag = (event) => {
   if (!state.isDragging) { return }
   if (isMultiTouch) { return }
   store.commit('closeAllDialogs')
   const cursor = {
-    x: event.pageX + window.scrollX,
-    y: event.pageY + window.scrollY
+    x: event.pageX, //  + window.scrollX,
+    y: event.pageY // + window.scrollY
   }
+  // record start positions
   if (!startPosition.x) {
     startPosition = {
       x: cursor.x,
       y: cursor.y
     }
-    prevOffset = {
+    startOffset = {
       x: labelOffsetX.value,
       y: labelOffsetY.value
     }
   }
   const currentOffset = {
-    x: startPosition.x - cursor.x + prevOffset.x,
-    y: startPosition.y - cursor.y + prevOffset.y
+    x: startPosition.x - cursor.x + startOffset.x,
+    y: startPosition.y - cursor.y + startOffset.y
   }
   if (currentOffset.x > dragThreshold || currentOffset.y > dragThreshold) {
     wasDragged = true
   }
-  updateOutOfBounds(event)
-  let newOffsetX, newOffsetY
-  if (!state.outOfBounds.isX) {
-    newOffsetX = currentOffset.x
-  }
-  if (!state.outOfBounds.isY) {
-    newOffsetY = currentOffset.y
-  }
+  // updateOutOfBounds(event)
+  // let newOffsetX, newOffsetY
+  // if (!state.outOfBounds.isX) {
+  //   newOffsetX = currentOffset.x
+  // }
+  // if (!state.outOfBounds.isY) {
+  //   newOffsetY = currentOffset.y
+  // }
   store.dispatch('currentConnections/updateLabelOffset', {
     connection: props.connection,
-    labelOffsetX: newOffsetX,
-    labelOffsetY: newOffsetY
+    labelOffsetX: currentOffset.x,
+    labelOffsetY: currentOffset.y
   })
-  updatePosition()
 }
 
 // boundaries
 
-const updateOutOfBounds = (event) => {
-  const cursor = {
-    x: event.pageX + window.scrollX,
-    y: event.pageY + window.scrollY
-  }
-  let rect = connectionRect()
-  rect.x = rect.x + window.scrollX
-  rect.y = rect.y + window.scrollY
-  if (!rect) { return }
-  state.outOfBounds.isLeft = cursor.x - labelThreshold.x < rect.x
-  state.outOfBounds.isRight = cursor.x - labelThreshold.x > rect.x + rect.width
-  state.outOfBounds.isTop = cursor.y - labelThreshold.y < rect.y
-  state.outOfBounds.isBottom = cursor.y - labelThreshold.y > rect.y + rect.height
-  state.outOfBounds.isX = state.outOfBounds.isLeft || state.outOfBounds.isRight
-  state.outOfBounds.isY = state.outOfBounds.isTop || state.outOfBounds.isBottom
-}
-const isOutOfBounds = computed(() => state.outOfBounds.isX || state.outOfBounds.isY)
-const boundaryStylesLeft = computed(() => {
-  console.log('🇨🇦🇨🇦left', state.outOfBounds.isLeft, state.outOfBounds.isX)
-  return null
-})
-const boundaryStylesRight = computed(() => {
-  console.log('🇨🇦🇨🇦right', state.outOfBounds.isRight)
-  return null
-})
-const boundaryStylesTop = computed(() => {
-  console.log('🇨🇦🇨🇦top', state.outOfBounds.isTop)
-  return null
-})
-const boundaryStylesBottom = computed(() => {
-  console.log('🇨🇦🇨🇦bottom', state.outOfBounds.isBottom)
-  return null
-})
-
-// const updateBoundaryPositions = () => {
-//   // TODO
-//   console.log('☮️',state.outOfBounds)
-
-//   // connectionLabelBoundaryPositions = {}
-
-//     //   // connectionLabelBoundaryLeftIsVisible: false,
-//     //   // connectionLabelBoundaryRightIsVisible: false,
-//     //   // connectionLabelBoundaryTopIsVisible: false,
-//     //   // connectionLabelBoundaryBottomIsVisible: false,
-//     //   // connectionLabelBoundaryStartX: 0,
-//     //   // connectionLabelBoundaryEndX: 0,
-//     //   // connectionLabelBoundaryStartY: 0,
-//     //   // connectionLabelBoundaryEndY: 0,
+// const updateOutOfBounds = (event) => {
+//   const cursor = {
+//     x: event.pageX + window.scrollX,
+//     y: event.pageY + window.scrollY
+//   }
+//   let rect = connectionRect()
+//   rect.x = rect.x + window.scrollX
+//   rect.y = rect.y + window.scrollY
+//   if (!rect) { return }
+//   state.outOfBounds.isLeft = cursor.x < rect.x
+//   state.outOfBounds.isRight = cursor.x > rect.x + rect.width
+//   state.outOfBounds.isTop = cursor.y < rect.y
+//   state.outOfBounds.isBottom = cursor.y > rect.y + rect.height
+//   state.outOfBounds.isX = state.outOfBounds.isLeft || state.outOfBounds.isRight
+//   state.outOfBounds.isY = state.outOfBounds.isTop || state.outOfBounds.isBottom
 // }
+// const isOutOfBounds = computed(() => state.outOfBounds.isX || state.outOfBounds.isY)
+// const boundaryStylesLeft = computed(() => {
+//   console.log('🇨🇦🇨🇦left', state.outOfBounds.isLeft, state.outOfBounds.isX)
+//   return null
+// })
+// const boundaryStylesRight = computed(() => {
+//   console.log('🇨🇦🇨🇦right', state.outOfBounds.isRight)
+//   return null
+// })
+// const boundaryStylesTop = computed(() => {
+//   console.log('🇨🇦🇨🇦top', state.outOfBounds.isTop)
+//   return null
+// })
+// const boundaryStylesBottom = computed(() => {
+//   console.log('🇨🇦🇨🇦bottom', state.outOfBounds.isBottom)
+//   return null
+// })
 
 </script>
 
@@ -344,11 +353,11 @@ const boundaryStylesBottom = computed(() => {
   ref="labelElement"
 )
   span.name(:class="{ 'is-dark': isDark }") {{typeName}}
-template(v-if="isOutOfBounds")
-  .connection-label-boundary.left(v-if="state.outOfBounds.isLeft" :style="boundaryStylesLeft")
-  .connection-label-boundary.right(v-if="state.outOfBounds.isRight" :style="boundaryStylesRight")
-  .connection-label-boundary.top(v-if="state.outOfBounds.isTop" :style="boundaryStylesTop")
-  .connection-label-boundary.bottom(v-if="state.outOfBounds.isBottom" :style="boundaryStylesBottom")
+//- template(v-if="isOutOfBounds")
+//-   .connection-label-boundary.left(v-if="state.outOfBounds.isLeft" :style="boundaryStylesLeft")
+//-   .connection-label-boundary.right(v-if="state.outOfBounds.isRight" :style="boundaryStylesRight")
+//-   .connection-label-boundary.top(v-if="state.outOfBounds.isTop" :style="boundaryStylesTop")
+//-   .connection-label-boundary.bottom(v-if="state.outOfBounds.isBottom" :style="boundaryStylesBottom")
 
 </template>
 

@@ -85,6 +85,7 @@ const store = createStore({
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
+    currentUserIsDraggingConnectionIdLabel: '',
 
     // box-selecting
     currentUserIsBoxSelecting: false,
@@ -803,6 +804,10 @@ const store = createStore({
     currentUserIsPanning: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsPanning = value
+    },
+    currentUserIsDraggingConnectionIdLabel: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.currentUserIsDraggingConnectionIdLabel = value
     },
 
     // Dragging Cards

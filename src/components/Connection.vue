@@ -192,7 +192,7 @@ export default {
     },
     isHovered () {
       if (this.currentUserIsDraggingCard) { return }
-      return this.id === this.currentUserIsHoveringOverConnectionId
+      return this.id === this.currentUserIsHoveringOverConnectionId || this.id === this.$store.state.currentUserIsDraggingConnectionIdLabel
     },
     isHoveredOverConnectedCard () {
       const cardId = this.$store.state.currentUserIsHoveringOverCardId
