@@ -35,9 +35,11 @@ const state = reactive({
   hover: false,
   connectionIsVisible: true,
   isDragging: false,
+  outOfBounds: {},
 
-  labelOffsetX: 0,
-  labelOffsetY: 0
+  labelOffsetX: 0, // temp
+  labelOffsetY: 0 // temp
+
 })
 watch(() => state.hover, (value, prevValue) => {
   if (value) {
@@ -168,14 +170,26 @@ const connectionRect = () => {
     height: Math.round(rect.height * zoom)
   }
 }
+const startDragging = () => {
+  state.isDragging = true
+  wasDragged = false
+}
+const stopDragging = () => {
+  state.isDragging = false
+  state.outOfBounds = {}
+  startPosition = {}
+}
 const removeOffsets = () => {
   console.log('🙈') // TEMP
   state.labelOffsetX = 0
   state.labelOffsetY = 0
+  state.outOfBounds = {}
   startPosition = {}
   wasDragged = false
 }
+
 // position
+
 const updatePosition = async () => {
   if (!state.connectionIsVisible) { return }
   if (!props.connection.path) { return }
@@ -213,15 +227,9 @@ const updatePosition = async () => {
     y: position.y - offset.y
   }
 }
-const startDragging = () => {
-  state.isDragging = true
-  wasDragged = false
-}
-const stopDragging = () => {
-  state.isDragging = false
-  startPosition = {}
-}
+
 // offset
+
 const updateOffset = (event) => {
   if (!state.isDragging) { return }
   if (isMultiTouch) { return }
@@ -240,27 +248,66 @@ const updateOffset = (event) => {
   // bounds
   const rect = connectionRect()
   if (!rect) { return }
-  let outOfBounds = {}
-  outOfBounds.left = x - labelThreshold.x < rect.x
-  outOfBounds.right = x - labelThreshold.x > rect.x + rect.width
-  outOfBounds.top = y - labelThreshold.y < rect.y
-  outOfBounds.bottom = y - labelThreshold.y > rect.y + rect.height
-  outOfBounds.x = outOfBounds.left || outOfBounds.right
-  outOfBounds.y = outOfBounds.top || outOfBounds.bottom
-  if (outOfBounds.x) {
-    // TODO draw border , left or right
-  } else {
-    // TODO dispatch offset y update
-    state.labelOffsetX = labelOffsetX
+  // let outOfBounds = {}
+  state.outOfBounds.left = x - labelThreshold.x < rect.x
+  state.outOfBounds.right = x - labelThreshold.x > rect.x + rect.width
+  state.outOfBounds.top = y - labelThreshold.y < rect.y
+  state.outOfBounds.bottom = y - labelThreshold.y > rect.y + rect.height
+  state.outOfBounds.x = state.outOfBounds.left || state.outOfBounds.right
+  state.outOfBounds.y = state.outOfBounds.top || state.outOfBounds.bottom
+  // updateBoundaryPositions()
+  // updateOffsetXandY()
+  if (!state.outOfBounds.x) {
+    // TODO dispatch connection.offset x update
+    state.labelOffsetX = labelOffsetX // replace w connection.offsetY
+    // broadcast
   }
-  if (outOfBounds.y) {
-    // TODO draw border , top or bottom
-  } else {
-    // TODO dispatch offset y update
-    state.labelOffsetY = labelOffsetY
+  if (!state.outOfBounds.y) {
+    // TODO dispatch connection.offset y update
+    state.labelOffsetY = labelOffsetY // replace w connection.offsetY
+    // broadcast
   }
   updatePosition()
 }
+
+// boundaries
+
+// TODO convert to child component??
+
+const isOutOfBounds = computed(() => state.outOfBounds.x || state.outOfBounds.y)
+const boundaryStylesLeft = computed(() => {
+  console.log('🇨🇦🇨🇦left', state.outOfBounds.left)
+  return null
+})
+const boundaryStylesRight = computed(() => {
+  console.log('🇨🇦🇨🇦right', state.outOfBounds.right)
+  return null
+})
+const boundaryStylesTop = computed(() => {
+  console.log('🇨🇦🇨🇦top', state.outOfBounds.top)
+  return null
+})
+const boundaryStylesBottom = computed(() => {
+  console.log('🇨🇦🇨🇦bottom', state.outOfBounds.bottom)
+  return null
+})
+
+// const updateBoundaryPositions = () => {
+//   // TODO
+//   console.log('☮️',state.outOfBounds)
+
+//   // connectionLabelBoundaryPositions = {}
+
+//     //   // connectionLabelBoundaryLeftIsVisible: false,
+//     //   // connectionLabelBoundaryRightIsVisible: false,
+//     //   // connectionLabelBoundaryTopIsVisible: false,
+//     //   // connectionLabelBoundaryBottomIsVisible: false,
+//     //   // connectionLabelBoundaryStartX: 0,
+//     //   // connectionLabelBoundaryEndX: 0,
+//     //   // connectionLabelBoundaryStartY: 0,
+//     //   // connectionLabelBoundaryEndY: 0,
+// }
+
 </script>
 
 <template lang="pug">
@@ -281,6 +328,12 @@ const updateOffset = (event) => {
   ref="labelElement"
 )
   span.name(:class="{ 'is-dark': isDark }") {{typeName}}
+template(v-if="isOutOfBounds")
+  .connection-label-boundary.left(:style="boundaryStylesLeft")
+  .connection-label-boundary.right(:style="boundaryStylesRight")
+  .connection-label-boundary.top(:style="boundaryStylesTop")
+  .connection-label-boundary.bottom(:style="boundaryStylesBottom")
+
 </template>
 
 <style lang="stylus">
@@ -301,4 +354,8 @@ const updateOffset = (event) => {
     color var(--primary-on-light-background)
     &.is-dark
       color var(--primary-on-dark-background)
+
+.connection-label-boundary
+  position absolute
+
 </style>
