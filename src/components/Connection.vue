@@ -286,7 +286,7 @@ export default {
       const offset = utils.outsideSpaceOffset().y
       const scroll = this.windowScroll.y - offset
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      let y1 = utils.coordsFromConnectionPath(this.connection.path).y
+      let y1 = utils.startCoordsFromConnectionPath(this.connection.path).y
       let y2 = utils.endCoordsFromConnectionPath(this.connection.path).y + y1
       if (y1 > y2) {
         const y = y1
