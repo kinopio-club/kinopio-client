@@ -52,7 +52,8 @@ watch(() => state.isDragging, (value, prevValue) => {
 const visible = computed(() => props.connection.labelIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
-    store.dispatch('currentConnections/clearLabelOffset', props.connection)
+    store.dispatch('currentConnections/clearLabelPosition', props.connection)
+    updateTypeColorCSS()
   }
 })
 
@@ -203,7 +204,7 @@ const styles = computed(() => {
   }
 })
 const removeOffsets = () => {
-  store.dispatch('currentConnections/clearLabelOffset', props.connection)
+  store.dispatch('currentConnections/clearLabelPosition', props.connection)
   stopDragging()
   wasDragged = false
 }
@@ -268,7 +269,7 @@ const drag = (event) => {
     y: positionAbsolute.y / state.connectionRect.height
   }
   positionRelative = normalizeRelativePosition(positionRelative)
-  store.dispatch('currentConnections/updateLabelOffset', {
+  store.dispatch('currentConnections/updateLabelPosition', {
     connection: props.connection,
     labelRelativePositionX: positionRelative.x,
     labelRelativePositionY: positionRelative.y

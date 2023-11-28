@@ -264,7 +264,7 @@ export default {
       context.dispatch('broadcast/update', { updates: type, type: 'updateConnectionType', handler: 'currentConnections/updateType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'updateConnectionType', body: type }, { root: true })
     },
-    updateLabelOffset: (context, { connection, labelRelativePositionX, labelRelativePositionY }) => {
+    updateLabelPosition: (context, { connection, labelRelativePositionX, labelRelativePositionY }) => {
       const prevConnection = context.getters.byId(connection.id)
       // normalize
       if (utils.isUndefined(labelRelativePositionX)) {
@@ -284,8 +284,8 @@ export default {
       context.dispatch('broadcast/update', { updates: { connections: [item] }, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'updateConnection', body: item }, { root: true })
     },
-    clearLabelOffset: (context, connection) => {
-      context.dispatch('updateLabelOffset', {
+    clearLabelPosition: (context, connection) => {
+      context.dispatch('updateLabelPosition', {
         connection,
         labelRelativePositionX: 0.5,
         labelRelativePositionY: 0.5
