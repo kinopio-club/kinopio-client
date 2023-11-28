@@ -17,6 +17,7 @@ onMounted(() => {
   window.addEventListener('mouseup', stopDragging)
   window.addEventListener('mousemove', drag)
   updateConnectionRect()
+  updateTypeColorCSS()
 })
 onUnmounted(() => {
   window.removeEventListener('scroll', updateConnectionIsVisible)
@@ -127,13 +128,6 @@ const toggleConnectionDetails = (event) => {
 
 const connectionTypeId = computed(() => props.connection.connectionTypeId)
 const connectionType = computed(() => store.getters['currentConnections/typeByTypeId'](connectionTypeId.value))
-const typeColor = computed(() => {
-  if (connectionType.value) {
-    return connectionType.value.color
-  } else {
-    return 'transparent'
-  }
-})
 const typeName = computed(() => {
   if (connectionType.value) {
     return connectionType.value.name
@@ -141,6 +135,19 @@ const typeName = computed(() => {
     return ''
   }
 })
+const typeColor = computed(() => {
+  if (connectionType.value) {
+    return connectionType.value.color
+  } else {
+    return 'transparent'
+  }
+})
+watch(() => typeColor.value, (value, prevValue) => {
+  updateTypeColorCSS()
+})
+const updateTypeColorCSS = () => {
+  utils.setCssVariable('type-color', typeColor.value)
+}
 
 // label wrap
 
@@ -277,12 +284,6 @@ const boundaryLeftIsVisible = computed(() => labelRelativePosition.value.x <= 0)
 const boundaryRightIsVisible = computed(() => labelRelativePosition.value.x >= 1)
 const boundaryTopIsVisible = computed(() => labelRelativePosition.value.y <= 0)
 const boundaryBottomIsVisible = computed(() => labelRelativePosition.value.y >= 1)
-const boundaryStyles = computed(() => {
-  return {
-    boxShadow: `0 0 30px 5px ${typeColor.value}`,
-    background: typeColor.value
-  }
-})
 </script>
 
 <template lang="pug">
@@ -306,10 +307,10 @@ const boundaryStyles = computed(() => {
   )
     span.name(:class="{ 'is-dark': isDark }") {{typeName}}
   template(v-if="boundaryIsVisible && state.isDragging")
-    .connection-label-boundary.left(v-if="boundaryLeftIsVisible" :style="boundaryStyles")
-    .connection-label-boundary.right(v-if="boundaryRightIsVisible" :style="boundaryStyles")
-    .connection-label-boundary.top(v-if="boundaryTopIsVisible" :style="boundaryStyles")
-    .connection-label-boundary.bottom(v-if="boundaryBottomIsVisible" :style="boundaryStyles")
+    .connection-label-boundary.left(v-if="boundaryLeftIsVisible")
+    .connection-label-boundary.right(v-if="boundaryRightIsVisible")
+    .connection-label-boundary.top(v-if="boundaryTopIsVisible")
+    .connection-label-boundary.bottom(v-if="boundaryBottomIsVisible")
 
 </template>
 
@@ -335,8 +336,11 @@ const boundaryStyles = computed(() => {
     &.is-dark
       color var(--primary-on-dark-background)
 
+--type-color white
 .connection-label-boundary
   position absolute
+  background var(--type-color)
+  box-shadow 0 0 30px 5px var(--type-color)
   &.left
     left 0
     top 0
