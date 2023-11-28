@@ -17,7 +17,6 @@ onMounted(() => {
   window.addEventListener('mouseup', stopDragging)
   window.addEventListener('mousemove', drag)
   updateConnectionRect()
-  updateTypeColorCSS()
 })
 onUnmounted(() => {
   window.removeEventListener('scroll', updateConnectionIsVisible)
@@ -53,7 +52,6 @@ const visible = computed(() => props.connection.labelIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     store.dispatch('currentConnections/clearLabelPosition', props.connection)
-    updateTypeColorCSS()
   }
 })
 
@@ -143,9 +141,6 @@ const typeColor = computed(() => {
     return 'transparent'
   }
 })
-watch(() => typeColor.value, (value, prevValue) => {
-  updateTypeColorCSS()
-})
 const updateTypeColorCSS = () => {
   utils.setCssVariable('type-color', typeColor.value)
 }
@@ -212,6 +207,9 @@ const removeOffsets = () => {
 // label dragging
 
 const startDragging = () => {
+  store.commit('closeAllDialogs')
+  store.dispatch('clearMultipleSelected')
+  updateTypeColorCSS()
   state.isDragging = true
   wasDragged = false
 }
@@ -236,7 +234,6 @@ const normalizeRelativePosition = (positionRelative) => {
 const drag = (event) => {
   if (!state.isDragging) { return }
   if (isMultiTouch) { return }
-  store.commit('closeAllDialogs')
   state.currentCursor = {
     x: event.pageX,
     y: event.pageY
@@ -341,14 +338,14 @@ const boundaryBottomIsVisible = computed(() => labelRelativePosition.value.y >= 
 .connection-label-boundary
   position absolute
   background var(--type-color)
-  box-shadow 0 0 30px 5px var(--type-color)
+  box-shadow 0 0 30px 3px var(--type-color)
   &.left
     left 0
     top 0
     width 1px
     height 100%
   &.right
-    right 0
+    right -5px
     top 0
     width 1px
     height 100%
@@ -359,7 +356,7 @@ const boundaryBottomIsVisible = computed(() => labelRelativePosition.value.y >= 
     height 1px
   &.bottom
     left 0
-    bottom 0
+    bottom -5px
     width 100%
     height 1px
 
