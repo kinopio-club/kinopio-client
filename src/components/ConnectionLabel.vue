@@ -308,8 +308,8 @@ const drag = (event) => {
     }
   }
   const offset = {
-    x: startPosition.x - cursor.x + startOffset.x,
-    y: startPosition.y - cursor.y + startOffset.y
+    x: cursor.x + startOffset.x - startPosition.x,
+    y: cursor.y + startOffset.y - startPosition.y
   }
   if (offset.x > dragThreshold || offset.y > dragThreshold) {
     wasDragged = true
