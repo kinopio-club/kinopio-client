@@ -120,6 +120,9 @@ export default {
     margin-bottom 10px
     &:hover
       text-decoration none
+  h1,
+  p.summary
+    color var(--primary-on-light-background)
   img,
   video
     max-width 100%
