@@ -116,7 +116,7 @@ export default {
     },
     connectionClasses () {
       return {
-        active: this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected || this.isCurrentCardConnection || this.isHoveredOverConnectedCard || this.isConnectedToMultipleCardsSelected,
+        active: this.isActive,
         filtered: this.isFiltered,
         hover: this.isHovered,
         'hide-connection-outline': this.shouldHideConnectionOutline,
@@ -189,6 +189,17 @@ export default {
     shouldAnimate () {
       if (this.currentUserIsDraggingCard) { return }
       return Boolean(this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected)
+    },
+    isDraggingCurrentConnectionLabel () {
+      const connectionId = this.$store.state.currentUserIsDraggingConnectionIdLabel
+      if (!connectionId) { return }
+      const connection = this.$store.getters['currentConnections/byId'](connectionId)
+      if (!connection) { return }
+      return connection.id === this.id
+    },
+    isActive () {
+      if (!this.isDraggingCurrentConnectionLabel) { return }
+      return this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected || this.isCurrentCardConnection || this.isHoveredOverConnectedCard || this.isConnectedToMultipleCardsSelected
     },
     isHovered () {
       if (this.currentUserIsDraggingCard) { return }

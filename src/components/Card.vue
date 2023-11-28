@@ -665,8 +665,17 @@ export default {
       const color = this.backgroundColor || this.defaultColor
       return utils.colorIsDark(color)
     },
+    currentUserIsDraggingLabelConnectedToCard () {
+      const connectionId = this.$store.state.currentUserIsDraggingConnectionIdLabel
+      if (!connectionId) { return }
+      const connection = this['currentConnections/byId'](connectionId)
+      if (!connection) { return }
+      const isConnected = connection.startCardId === this.id || connection.endCardId === this.id
+      return isConnected
+    },
     connectorGlowStyle () {
       if (this.currentUserIsDraggingCard) { return }
+      if (!this.currentUserIsDraggingLabelConnectedToCard) { return }
       const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor || this.currentUserIsHoveringOverCardIdColor || this.currentUserIsMultipleSelectedCardIdColor || this.currentUserIsHoveringOverConnectionIdColor || this.currentUserIsMultipleSelectedConnectionIdColor
       if (!color) { return }
       return { background: color }
@@ -1486,6 +1495,7 @@ export default {
       }
     },
     toggleCardChecked () {
+      if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return }
       if (this.preventDraggedCardFromShowingDetails) { return }
       if (!this.canEditSpace) { return }
       const value = !this.isChecked

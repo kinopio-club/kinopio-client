@@ -30,7 +30,8 @@ const state = reactive({
   connectionIsVisible: true,
   outOfBounds: {},
   isDragging: false,
-  connectionRect: null
+  connectionRect: null,
+  currentCursor: null
 })
 watch(() => state.hover, (value, prevValue) => {
   if (value) {
@@ -162,7 +163,7 @@ const updateConnectionRect = () => {
     height: Math.round(rect.height * zoom)
   }
 }
-const connectionLabelWrapPosition = computed(() => {
+const connectionLabelWrapStyles = computed(() => {
   if (!state.connectionRect) { return }
   return {
     left: state.connectionRect.x + 'px',
@@ -212,16 +213,15 @@ const stopDragging = () => {
   cursorStart = {}
 }
 const normalizeRelativePosition = (positionRelative) => {
-  const maxX = 1 //
-  const maxY = 1
+  const max = 1
   const min = 0
   positionRelative = {
     x: Math.max(min, positionRelative.x),
     y: Math.max(min, positionRelative.y)
   }
   positionRelative = {
-    x: Math.min(maxX, positionRelative.x),
-    y: Math.min(maxY, positionRelative.y)
+    x: Math.min(max, positionRelative.x),
+    y: Math.min(max, positionRelative.y)
   }
   return positionRelative
 }
@@ -229,15 +229,15 @@ const drag = (event) => {
   if (!state.isDragging) { return }
   if (isMultiTouch) { return }
   store.commit('closeAllDialogs')
-  const cursor = {
+  state.currentCursor = {
     x: event.pageX,
     y: event.pageY
   }
   // start positions
   if (!cursorStart.x) {
     cursorStart = {
-      x: cursor.x,
-      y: cursor.y
+      x: state.currentCursor.x,
+      y: state.currentCursor.y
     }
     positionAbsoluteStart = {
       x: Math.round(labelRelativePosition.value.x * state.connectionRect.width),
@@ -246,8 +246,8 @@ const drag = (event) => {
   }
   // new positions
   const cursorDelta = {
-    x: cursor.x - cursorStart.x,
-    y: cursor.y - cursorStart.y
+    x: state.currentCursor.x - cursorStart.x,
+    y: state.currentCursor.y - cursorStart.y
   }
   if (Math.abs(cursorDelta.x) > dragThreshold || Math.abs(cursorDelta.y) > dragThreshold) {
     wasDragged = true
@@ -270,44 +270,23 @@ const drag = (event) => {
 
 // boundaries
 
-// const updateOutOfBounds = (event) => {
-//   const cursor = {
-//     x: event.pageX + window.scrollX,
-//     y: event.pageY + window.scrollY
-//   }
-//   let rect = connectionRect()
-//   rect.x = rect.x + window.scrollX
-//   rect.y = rect.y + window.scrollY
-//   if (!rect) { return }
-//   state.outOfBounds.isLeft = cursor.x < rect.x
-//   state.outOfBounds.isRight = cursor.x > rect.x + rect.width
-//   state.outOfBounds.isTop = cursor.y < rect.y
-//   state.outOfBounds.isBottom = cursor.y > rect.y + rect.height
-//   state.outOfBounds.isX = state.outOfBounds.isLeft || state.outOfBounds.isRight
-//   state.outOfBounds.isY = state.outOfBounds.isTop || state.outOfBounds.isBottom
-// }
-// const isOutOfBounds = computed(() => state.outOfBounds.isX || state.outOfBounds.isY)
-// const boundaryStylesLeft = computed(() => {
-//   console.log('🇨🇦🇨🇦left', state.outOfBounds.isLeft, state.outOfBounds.isX)
-//   return null
-// })
-// const boundaryStylesRight = computed(() => {
-//   console.log('🇨🇦🇨🇦right', state.outOfBounds.isRight)
-//   return null
-// })
-// const boundaryStylesTop = computed(() => {
-//   console.log('🇨🇦🇨🇦top', state.outOfBounds.isTop)
-//   return null
-// })
-// const boundaryStylesBottom = computed(() => {
-//   console.log('🇨🇦🇨🇦bottom', state.outOfBounds.isBottom)
-//   return null
-// })
-
+const boundaryIsVisible = computed(() => {
+  return boundaryLeftIsVisible.value || boundaryRightIsVisible.value || boundaryTopIsVisible.value || boundaryBottomIsVisible.value
+})
+const boundaryLeftIsVisible = computed(() => labelRelativePosition.value.x <= 0)
+const boundaryRightIsVisible = computed(() => labelRelativePosition.value.x >= 1)
+const boundaryTopIsVisible = computed(() => labelRelativePosition.value.y <= 0)
+const boundaryBottomIsVisible = computed(() => labelRelativePosition.value.y >= 1)
+const boundaryStyles = computed(() => {
+  return {
+    boxShadow: `0 0 30px 5px ${typeColor.value}`,
+    background: typeColor.value
+  }
+})
 </script>
 
 <template lang="pug">
-.connection-label-wrap(v-if="visible" :style="connectionLabelWrapPosition")
+.connection-label-wrap(v-if="visible" :style="connectionLabelWrapStyles")
   .connection-label.badge(
     :style="styles"
     @click.left="toggleConnectionDetails"
@@ -326,18 +305,17 @@ const drag = (event) => {
     ref="labelElement"
   )
     span.name(:class="{ 'is-dark': isDark }") {{typeName}}
-  //- template(v-if="isOutOfBounds")
-  //-   .connection-label-boundary.left(v-if="state.outOfBounds.isLeft" :style="boundaryStylesLeft")
-  //-   .connection-label-boundary.right(v-if="state.outOfBounds.isRight" :style="boundaryStylesRight")
-  //-   .connection-label-boundary.top(v-if="state.outOfBounds.isTop" :style="boundaryStylesTop")
-  //-   .connection-label-boundary.bottom(v-if="state.outOfBounds.isBottom" :style="boundaryStylesBottom")
+  template(v-if="boundaryIsVisible && state.isDragging")
+    .connection-label-boundary.left(v-if="boundaryLeftIsVisible" :style="boundaryStyles")
+    .connection-label-boundary.right(v-if="boundaryRightIsVisible" :style="boundaryStyles")
+    .connection-label-boundary.top(v-if="boundaryTopIsVisible" :style="boundaryStyles")
+    .connection-label-boundary.bottom(v-if="boundaryBottomIsVisible" :style="boundaryStyles")
 
 </template>
 
 <style lang="stylus">
 .connection-label-wrap
   position absolute
-  background rgba(239, 207, 227, .6)
 .connection-label
   pointer-events all
   cursor pointer
@@ -359,5 +337,25 @@ const drag = (event) => {
 
 .connection-label-boundary
   position absolute
+  &.left
+    left 0
+    top 0
+    width 1px
+    height 100%
+  &.right
+    right 0
+    top 0
+    width 1px
+    height 100%
+  &.top
+    left 0
+    top 0
+    width 100%
+    height 1px
+  &.bottom
+    left 0
+    bottom 0
+    width 100%
+    height 1px
 
 </style>
