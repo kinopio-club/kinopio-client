@@ -7,10 +7,10 @@ const store = useStore()
 
 const labelElement = ref(null)
 let isMultiTouch
-let startPosition = {}
+let cursorStart = {}
 let wasDragged = false
 const dragThreshold = 5
-let startOffset = { x: 0.5, y: 0.5 }
+let prevPositionAbsolute
 
 onMounted(() => {
   window.addEventListener('scroll', updateConnectionIsVisible)
@@ -96,7 +96,7 @@ const isFiltered = computed(() => {
   } else { return false }
 })
 
-// connection
+// parent connection
 
 const id = computed(() => props.connection.id)
 const connectionDetailsIsVisible = computed(() => store.state.connectionDetailsIsVisibleForConnectionId === id.value)
@@ -122,7 +122,7 @@ const toggleConnectionDetails = (event) => {
   }
 }
 
-// connection type
+// parent connection type
 
 const connectionTypeId = computed(() => props.connection.connectionTypeId)
 const connectionType = computed(() => store.getters['currentConnections/typeByTypeId'](connectionTypeId.value))
@@ -172,47 +172,48 @@ const connectionLabelWrapPosition = computed(() => {
   }
 })
 
-// label
+// label position
 
 const labelOffsetX = computed(() => props.connection.labelOffsetX)
 const labelOffsetY = computed(() => props.connection.labelOffsetY)
-const position = computed(() => {
-  const rect = state.connectionRect
-  if (!rect) { return }
-  const rectCenter = {
-    x: rect.x + (rect.width / 2),
-    y: rect.y + (rect.height / 2)
-  }
+const positionAbsolute = computed(() => {
   const offsetAbsolute = {
-    x: labelOffsetX.value * state.connectionRect.width,
-    y: labelOffsetY.value * state.connectionRect.height
-  }
-  console.log('🚒🚒🚒🚒', labelOffsetX.value, state.connectionRect.width)
-  let position = {
-    x: rectCenter.x - offsetAbsolute.x,
-    y: rectCenter.y - offsetAbsolute.y
+    x: Math.round(labelOffsetX.value * state.connectionRect.width),
+    y: Math.round(labelOffsetY.value * state.connectionRect.height)
   }
   return offsetAbsolute
 })
-const styles = computed(() => {
-  let label = labelElement.value
-  if (!label) { return }
-  // offset position by label center point
+const centerPositionAbsolute = (position) => {
+  const label = labelElement.value
   const labelRect = label.getBoundingClientRect()
   const labelCenter = {
     x: Math.round(labelRect.width / 2),
     y: Math.round(labelRect.height / 2)
   }
-  const newPosition = {
-    x: position.value.x - labelCenter.x,
-    y: position.value.y - labelCenter.y
+  return {
+    x: position.x - labelCenter.x,
+    y: position.y - labelCenter.y
   }
+}
+const styles = computed(() => {
+  const label = labelElement.value
+  if (!label) { return }
+  const { x, y } = centerPositionAbsolute(positionAbsolute.value)
   return {
     background: typeColor.value,
-    left: newPosition.x + 'px',
-    top: newPosition.y + 'px'
+    left: x + 'px',
+    top: y + 'px'
   }
 })
+const removeOffsets = () => {
+  console.log('🙈') // TEMP
+  store.dispatch('currentConnections/clearLabelOffset', props.connection)
+  stopDragging()
+  wasDragged = false
+}
+
+// label dragging
+
 const startDragging = () => {
   state.isDragging = true
   wasDragged = false
@@ -220,73 +221,9 @@ const startDragging = () => {
 const stopDragging = () => {
   state.isDragging = false
   state.outOfBounds = {}
-  startPosition = {}
-  startOffset = { x: 0.5, y: 0.5 }
+  cursorStart = {}
+  // startOffset = { x: 0.5, y: 0.5 }
 }
-const removeOffsets = () => {
-  console.log('🙈') // TEMP
-  store.dispatch('currentConnections/clearLabelOffset', props.connection)
-  stopDragging()
-  wasDragged = false
-}
-// const updateOffsetOnPathChange = async () => {
-//   const rect = connectionRect()
-//   if (!rect) { return }
-//   await nextTick()
-//   // position in center of connection
-//   const rectCenter = {
-//     x: rect.x + (rect.width / 2),
-//     y: rect.y + (rect.height / 2)
-//   }
-//   let position = {
-//     x: rect.x + connectionOffset.x,
-//     y: rect.y + connectionOffset.y
-//   }
-
-//   // state.position = {
-//   //   x: position.x - offset.x,
-//   //   y: position.y - offset.y
-//   // }
-//   store.dispatch('currentConnections/updateLabelOffset', {
-//     connection: props.connection,
-//     labelOffsetX: currentOffset.x,
-//     labelOffsetY: currentOffset.y
-//   })
-
-// }
-
-// dragging
-
-// const connectionRect = () => {
-//   let element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
-//   if (!element) { return }
-//   const zoom = utils.spaceCounterZoomDecimal() || 1
-//   let rect = element.getBoundingClientRect()
-//   rect.x = rect.x + window.scrollX
-//   rect.y = rect.y + window.scrollY
-//   const rectPosition = utils.updatePositionWithSpaceOffset(rect)
-//   return {
-//     x: Math.round(rectPosition.x * zoom),
-//     y: Math.round(rectPosition.y * zoom),
-//     width: Math.round(rect.width * zoom),
-//     height: Math.round(rect.height * zoom)
-//   }
-// }
-// const labelRect = () => {
-//   let element = labelElement.value
-//   if (!element) { return }
-//   const zoom = utils.spaceCounterZoomDecimal() || 1
-//   let rect = element.getBoundingClientRect()
-//   rect.x = rect.x + window.scrollX
-//   rect.y = rect.y + window.scrollY
-//   const rectPosition = utils.updatePositionWithSpaceOffset(rect)
-//   return {
-//     x: Math.round(rectPosition.x * zoom),
-//     y: Math.round(rectPosition.y * zoom),
-//     width: Math.round(rect.width * zoom),
-//     height: Math.round(rect.height * zoom)
-//   }
-// }
 
 const drag = (event) => {
   if (!state.isDragging) { return }
@@ -297,23 +234,29 @@ const drag = (event) => {
     y: event.pageY // + window.scrollY
   }
   // record start positions
-  if (!startPosition.x) {
-    startPosition = {
+  if (!cursorStart.x) {
+    cursorStart = {
       x: cursor.x,
       y: cursor.y
     }
-    startOffset = {
-      x: labelOffsetX.value,
-      y: labelOffsetY.value
-    }
+
+    prevPositionAbsolute = positionAbsolute.value
+    prevPositionAbsolute = centerPositionAbsolute(prevPositionAbsolute)
+
+    // {
+    //   x: Math.round(labelOffsetX.value * state.connectionRect.width),
+    //   y: Math.round(labelOffsetY.value * state.connectionRect.height)
+    // }
   }
-  const offset = {
-    x: cursor.x + startOffset.x - startPosition.x,
-    y: cursor.y + startOffset.y - startPosition.y
+  console.log('🐸', prevPositionAbsolute.x, cursorStart.x, labelOffsetX.value, state.connectionRect.width)
+  let offset = {
+    x: cursor.x + prevPositionAbsolute.x - cursorStart.x,
+    y: cursor.y + prevPositionAbsolute.y - cursorStart.y
   }
   if (offset.x > dragThreshold || offset.y > dragThreshold) {
     wasDragged = true
   }
+  offset = centerPositionAbsolute(offset)
   const offsetRelative = {
     x: offset.x / state.connectionRect.x,
     y: offset.y / state.connectionRect.y
@@ -326,8 +269,6 @@ const drag = (event) => {
   // if (!state.outOfBounds.isY) {
   //   newOffsetY = currentOffset.y
   // }
-
-  // TODO MAKE relative to state.connectionRect
 
   store.dispatch('currentConnections/updateLabelOffset', {
     connection: props.connection,
