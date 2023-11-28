@@ -1692,6 +1692,7 @@ export default {
       this.$store.dispatch('currentCards/afterMove')
       if (this.isLocked) { return }
       if (this.currentUserIsPainting) { return }
+      if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return }
       if (isMultiTouch) { return }
       if (this.currentUserIsPanningReady || this.currentUserIsPanning) { return }
       if (this.currentUserIsResizingBox || this.currentUserIsDraggingBox) { return }
