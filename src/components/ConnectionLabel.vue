@@ -10,7 +10,7 @@ let isMultiTouch
 let cursorStart = {}
 let wasDragged = false
 const dragThreshold = 5
-let prevPositionAbsolute
+let positionAbsoluteStart
 
 onMounted(() => {
   window.addEventListener('scroll', updateConnectionIsVisible)
@@ -174,39 +174,27 @@ const connectionLabelWrapPosition = computed(() => {
 
 // label position
 
-const labelOffsetX = computed(() => props.connection.labelOffsetX)
-const labelOffsetY = computed(() => props.connection.labelOffsetY)
-const positionAbsolute = computed(() => {
-  const offsetAbsolute = {
-    x: Math.round(labelOffsetX.value * state.connectionRect.width),
-    y: Math.round(labelOffsetY.value * state.connectionRect.height)
-  }
-  return offsetAbsolute
-})
-const centerPositionAbsolute = (position) => {
-  const label = labelElement.value
-  const labelRect = label.getBoundingClientRect()
-  const labelCenter = {
-    x: Math.round(labelRect.width / 2),
-    y: Math.round(labelRect.height / 2)
-  }
+const labelRelativePosition = computed(() => {
   return {
-    x: position.x - labelCenter.x,
-    y: position.y - labelCenter.y
+    x: props.connection.labelRelativePositionX,
+    y: props.connection.labelRelativePositionY
   }
-}
+})
 const styles = computed(() => {
   const label = labelElement.value
   if (!label) { return }
-  const { x, y } = centerPositionAbsolute(positionAbsolute.value)
+  const labelRect = label.getBoundingClientRect()
+  const labelCenter = {
+    x: Math.round(labelRect.width / 4),
+    y: Math.round(labelRect.height / 4)
+  }
   return {
     background: typeColor.value,
-    left: x + 'px',
-    top: y + 'px'
+    left: `calc(${labelRelativePosition.value.x * 100}% - ${labelCenter.x}px)`,
+    top: `calc(${labelRelativePosition.value.y * 100}% - ${labelCenter.y}px)`
   }
 })
 const removeOffsets = () => {
-  console.log('🙈') // TEMP
   store.dispatch('currentConnections/clearLabelOffset', props.connection)
   stopDragging()
   wasDragged = false
@@ -222,58 +210,61 @@ const stopDragging = () => {
   state.isDragging = false
   state.outOfBounds = {}
   cursorStart = {}
-  // startOffset = { x: 0.5, y: 0.5 }
 }
-
+const normalizeRelativePosition = (positionRelative) => {
+  const maxX = 1 //
+  const maxY = 1
+  const min = 0
+  positionRelative = {
+    x: Math.max(min, positionRelative.x),
+    y: Math.max(min, positionRelative.y)
+  }
+  positionRelative = {
+    x: Math.min(maxX, positionRelative.x),
+    y: Math.min(maxY, positionRelative.y)
+  }
+  return positionRelative
+}
 const drag = (event) => {
   if (!state.isDragging) { return }
   if (isMultiTouch) { return }
   store.commit('closeAllDialogs')
   const cursor = {
-    x: event.pageX, //  + window.scrollX,
-    y: event.pageY // + window.scrollY
+    x: event.pageX,
+    y: event.pageY
   }
-  // record start positions
+  // start positions
   if (!cursorStart.x) {
     cursorStart = {
       x: cursor.x,
       y: cursor.y
     }
-
-    prevPositionAbsolute = positionAbsolute.value
-    prevPositionAbsolute = centerPositionAbsolute(prevPositionAbsolute)
-
-    // {
-    //   x: Math.round(labelOffsetX.value * state.connectionRect.width),
-    //   y: Math.round(labelOffsetY.value * state.connectionRect.height)
-    // }
+    positionAbsoluteStart = {
+      x: Math.round(labelRelativePosition.value.x * state.connectionRect.width),
+      y: Math.round(labelRelativePosition.value.y * state.connectionRect.height)
+    }
   }
-  console.log('🐸', prevPositionAbsolute.x, cursorStart.x, labelOffsetX.value, state.connectionRect.width)
-  let offset = {
-    x: cursor.x + prevPositionAbsolute.x - cursorStart.x,
-    y: cursor.y + prevPositionAbsolute.y - cursorStart.y
+  // new positions
+  const cursorDelta = {
+    x: cursor.x - cursorStart.x,
+    y: cursor.y - cursorStart.y
   }
-  if (offset.x > dragThreshold || offset.y > dragThreshold) {
+  if (Math.abs(cursorDelta.x) > dragThreshold || Math.abs(cursorDelta.y) > dragThreshold) {
     wasDragged = true
   }
-  offset = centerPositionAbsolute(offset)
-  const offsetRelative = {
-    x: offset.x / state.connectionRect.x,
-    y: offset.y / state.connectionRect.y
+  const positionAbsolute = {
+    x: cursorDelta.x + positionAbsoluteStart.x,
+    y: cursorDelta.y + positionAbsoluteStart.y
   }
-  // updateOutOfBounds(event)
-  // let newOffsetX, newOffsetY
-  // if (!state.outOfBounds.isX) {
-  //   newOffsetX = currentOffset.x
-  // }
-  // if (!state.outOfBounds.isY) {
-  //   newOffsetY = currentOffset.y
-  // }
-
+  let positionRelative = {
+    x: positionAbsolute.x / state.connectionRect.width,
+    y: positionAbsolute.y / state.connectionRect.height
+  }
+  positionRelative = normalizeRelativePosition(positionRelative)
   store.dispatch('currentConnections/updateLabelOffset', {
     connection: props.connection,
-    labelOffsetX: offsetRelative.x,
-    labelOffsetY: offsetRelative.y
+    labelRelativePositionX: positionRelative.x,
+    labelRelativePositionY: positionRelative.y
   })
 }
 
@@ -323,8 +314,8 @@ const drag = (event) => {
 
     @mousedown.left.prevent="startDragging"
     @dblclick="removeOffsets"
-    :data-label-offset-x="labelOffsetX"
-    :data-label-offset-y="labelOffsetY"
+    :data-label-offset-x="labelRelativePosition.x"
+    :data-label-offset-y="labelRelativePosition.y"
 
     @touchend.stop="toggleConnectionDetails"
     @touchstart="checkIsMultiTouch"

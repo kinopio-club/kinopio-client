@@ -264,24 +264,20 @@ export default {
       context.dispatch('broadcast/update', { updates: type, type: 'updateConnectionType', handler: 'currentConnections/updateType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'updateConnectionType', body: type }, { root: true })
     },
-    updateLabelOffset: (context, { connection, labelOffsetX, labelOffsetY }) => {
+    updateLabelOffset: (context, { connection, labelRelativePositionX, labelRelativePositionY }) => {
       const prevConnection = context.getters.byId(connection.id)
       // normalize
-      if (utils.isUndefined(labelOffsetX)) {
-        labelOffsetX = utils.roundFloat(prevConnection.labelOffsetX)
-        labelOffsetX = Math.max(0, labelOffsetX)
-        labelOffsetX = Math.min(1, labelOffsetX)
+      if (utils.isUndefined(labelRelativePositionX)) {
+        labelRelativePositionX = utils.roundFloat(prevConnection.labelRelativePositionX)
       }
-      if (utils.isUndefined(labelOffsetY)) {
-        labelOffsetY = utils.roundFloat(prevConnection.labelOffsetY)
-        labelOffsetY = Math.max(0, labelOffsetY)
-        labelOffsetY = Math.min(1, labelOffsetY)
+      if (utils.isUndefined(labelRelativePositionY)) {
+        labelRelativePositionY = utils.roundFloat(prevConnection.labelRelativePositionY)
       }
       // update
       const item = {
         id: connection.id,
-        labelOffsetX,
-        labelOffsetY
+        labelRelativePositionX,
+        labelRelativePositionY
       }
       context.commit('update', item)
       // context.dispatch('history/add', { connectionTypes: [type] }, { root: true }) // TODO
@@ -291,8 +287,8 @@ export default {
     clearLabelOffset: (context, connection) => {
       context.dispatch('updateLabelOffset', {
         connection,
-        labelOffsetX: 0.5,
-        labelOffsetY: 0.5
+        labelRelativePositionX: 0.5,
+        labelRelativePositionY: 0.5
       })
     },
 
