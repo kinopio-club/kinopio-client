@@ -375,9 +375,8 @@ const drag = (event) => {
 </script>
 
 <template lang="pug">
-.connection-label-wrap(:style="connectionLabelWrapPosition")
+.connection-label-wrap(v-if="visible" :style="connectionLabelWrapPosition")
   .connection-label.badge(
-    v-if="visible"
     :style="styles"
     @click.left="toggleConnectionDetails"
 

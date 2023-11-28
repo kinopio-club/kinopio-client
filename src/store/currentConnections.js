@@ -266,12 +266,16 @@ export default {
     },
     updateLabelOffset: (context, { connection, labelOffsetX, labelOffsetY }) => {
       const prevConnection = context.getters.byId(connection.id)
-      // null x or y offset isn't 0
+      // normalize
       if (utils.isUndefined(labelOffsetX)) {
         labelOffsetX = utils.roundFloat(prevConnection.labelOffsetX)
+        labelOffsetX = Math.max(0, labelOffsetX)
+        labelOffsetX = Math.min(1, labelOffsetX)
       }
       if (utils.isUndefined(labelOffsetY)) {
         labelOffsetY = utils.roundFloat(prevConnection.labelOffsetY)
+        labelOffsetY = Math.max(0, labelOffsetY)
+        labelOffsetY = Math.min(1, labelOffsetY)
       }
       // update
       const item = {
