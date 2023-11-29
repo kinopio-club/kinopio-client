@@ -280,7 +280,6 @@ export default {
         labelRelativePositionY
       }
       context.commit('update', item)
-      // context.dispatch('history/add', { connectionTypes: [type] }, { root: true }) // TODO
       context.dispatch('broadcast/update', { updates: item, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'updateConnection', body: item }, { root: true })
     },
