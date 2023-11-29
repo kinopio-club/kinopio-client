@@ -6,17 +6,27 @@ import utils from '@/utils.js'
 const store = useStore()
 
 const labelElement = ref(null)
-let isMultiTouch
+const dragThreshold = 5
+
 let cursorStart = {}
 let wasDragged = false
-const dragThreshold = 5
 let positionAbsoluteStart
 let prevLabelRelativePosition
+
+// locking
+// long press to touch drag
+const lockingPreDuration = 100 // ms
+const lockingDuration = 100 // ms
+let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
+let isMultiTouch
+let initialTouchEvent = {}
+let touchPosition = {}
+let currentTouchPosition = {}
 
 onMounted(() => {
   window.addEventListener('scroll', updateConnectionIsVisible)
   window.addEventListener('mouseup', stopDragging)
-  window.addEventListener('mousemove', drag)
+  window.addEventListener('pointermove', drag)
   updateConnectionRect()
 })
 onUnmounted(() => {
@@ -32,7 +42,11 @@ const state = reactive({
   outOfBounds: {},
   isDragging: false,
   connectionRect: null,
-  currentCursor: null
+  currentCursor: null,
+  // touch
+  isLocking: false,
+  lockingPercent: 0,
+  lockingAlpha: 0
 })
 watch(() => state.hover, (value, prevValue) => {
   if (value) {
@@ -303,6 +317,120 @@ const remoteUserDragging = computed(() => {
   return update
 })
 
+// touch dragging
+
+const lockingFrameStyle = computed(() => {
+  const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
+  const initialBorderRadius = 50
+  const padding = initialPadding * state.lockingPercent
+  const borderRadius = Math.max((state.lockingPercent * initialBorderRadius), 5) + 'px'
+  const size = `calc(100% + ${padding}px)`
+  const position = -(padding / 2) + 'px'
+  return {
+    width: size,
+    height: size,
+    left: position,
+    top: position,
+    background: store.state.currentUser.color,
+    opacity: state.lockingAlpha,
+    borderRadius: borderRadius
+  }
+})
+const cancelLocking = () => {
+  shouldCancelLocking = true
+}
+const cancelLockingAnimationFrame = () => {
+  state.isLocking = false
+  state.lockingPercent = 0
+  state.lockingAlpha = 0
+  shouldCancelLocking = false
+}
+const startLocking = (event) => {
+  console.log('startLocking', event)
+  updateTouchPosition(event)
+  updateCurrentTouchPosition(event)
+  state.isLocking = true
+  shouldCancelLocking = false
+  setTimeout(() => {
+    if (!lockingAnimationTimer) {
+      lockingAnimationTimer = window.requestAnimationFrame(lockingAnimationFrame)
+    }
+  }, lockingPreDuration)
+}
+const lockingAnimationFrame = (timestamp) => {
+  if (!lockingStartTime) {
+    lockingStartTime = timestamp
+  }
+  const elaspedTime = timestamp - lockingStartTime
+  const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
+  if (!utils.cursorsAreClose(touchPosition, currentTouchPosition)) {
+    notifyPressAndHoldToDrag()
+    cancelLockingAnimationFrame()
+  }
+  if (shouldCancelLocking) {
+    cancelLockingAnimationFrame()
+  }
+  if (state.isLocking && percentComplete <= 1) {
+    const percentRemaining = Math.abs(percentComplete - 1)
+    state.lockingPercent = percentRemaining
+    const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
+    state.lockingAlpha = alpha
+    window.requestAnimationFrame(lockingAnimationFrame)
+  } else if (state.isLocking && percentComplete > 1) {
+    console.log('🔒🐢 label lockingAnimationFrame locked')
+    lockingAnimationTimer = undefined
+    lockingStartTime = undefined
+    state.isLocking = false
+    startDragging(initialTouchEvent)
+  } else {
+    window.cancelAnimationFrame(lockingAnimationTimer)
+    lockingAnimationTimer = undefined
+    lockingStartTime = undefined
+    cancelLockingAnimationFrame()
+  }
+}
+const notifyPressAndHoldToDrag = () => {
+  const hasNotified = store.state.hasNotifiedPressAndHoldToDrag
+  if (!hasNotified) {
+    store.commit('addNotification', { message: 'Press and hold to drag', icon: 'press-and-hold' })
+  }
+  store.commit('hasNotifiedPressAndHoldToDrag', true)
+}
+const updateTouchPosition = (event) => {
+  initialTouchEvent = event
+  checkIsMultiTouch(event)
+  touchPosition = utils.cursorPositionInViewport(event)
+}
+const touchIsNearTouchPosition = (event) => {
+  const currentPosition = utils.cursorPositionInViewport(event)
+  const touchBlur = 12
+  const isTouchX = utils.isBetween({
+    value: currentPosition.x,
+    min: touchPosition.x - touchBlur,
+    max: touchPosition.x + touchBlur
+  })
+  const isTouchY = utils.isBetween({
+    value: currentPosition.y,
+    min: touchPosition.y - touchBlur,
+    max: touchPosition.y + touchBlur
+  })
+  if (isTouchX && isTouchY) {
+    return true
+  }
+}
+const updateCurrentTouchPosition = (event) => {
+  currentTouchPosition = utils.cursorPositionInViewport(event)
+  if (state.isDragging) {
+    event.preventDefault() // allows dragging without scrolling
+  }
+}
+const endInteractionTouch = (event) => {
+  cancelLocking()
+  if (touchIsNearTouchPosition(event)) {
+    toggleConnectionDetails(event)
+  }
+  stopDragging()
+}
 // boundaries
 
 const boundaryIsVisible = computed(() => {
@@ -317,29 +445,31 @@ const boundaryBottomIsVisible = computed(() => labelRelativePosition.value.y >= 
 <template lang="pug">
 .connection-label-wrap(v-if="visible" :style="connectionLabelWrapStyles")
   .connection-label.badge(
-    :style="styles"
-    @click.left="toggleConnectionDetails"
-
-    @mousedown.left.prevent="startDragging"
-    @dblclick="removeOffsets"
+    :data-id="id"
     :data-label-offset-x="labelRelativePosition.x"
     :data-label-offset-y="labelRelativePosition.y"
+    :style="styles"
 
-    @touchend.stop="toggleConnectionDetails"
-    @touchstart="checkIsMultiTouch"
-    :data-id="id"
+    @mousedown.left.prevent="startDragging"
+    @mouseup.left="toggleConnectionDetails"
+    @dblclick="removeOffsets"
+
+    @touchstart="startLocking"
+    @touchmove="updateCurrentTouchPosition"
+    @touchend="endInteractionTouch"
+
     @mouseover.left="state.hover = true"
     @mouseleave.left="state.hover = false"
     :class="{filtered: isFiltered, active: connectionDetailsIsVisible, jiggle: shouldJiggle}"
     ref="labelElement"
   )
     span.name(:class="{ 'is-dark': isDark }") {{typeName}}
+    .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
   template(v-if="boundaryIsVisible && state.isDragging")
     .connection-label-boundary.left(v-if="boundaryLeftIsVisible")
     .connection-label-boundary.right(v-if="boundaryRightIsVisible")
     .connection-label-boundary.top(v-if="boundaryTopIsVisible")
     .connection-label-boundary.bottom(v-if="boundaryBottomIsVisible")
-
 </template>
 
 <style lang="stylus">
@@ -363,6 +493,11 @@ const boundaryBottomIsVisible = computed(() => labelRelativePosition.value.y >= 
     color var(--primary-on-light-background)
     &.is-dark
       color var(--primary-on-dark-background)
+
+.locking-frame
+  position absolute
+  z-index -1
+  pointer-events none
 
 --type-color white
 .connection-label-boundary

@@ -1831,7 +1831,7 @@ export default {
       if (isDrawingConnection) { return }
       const hasNotified = this.hasNotifiedPressAndHoldToDrag
       if (!hasNotified) {
-        this.$store.commit('addNotification', { message: 'Press and hold to drag cards', icon: 'press-and-hold' })
+        this.$store.commit('addNotification', { message: 'Press and hold to drag', icon: 'press-and-hold' })
       }
       this.$store.commit('hasNotifiedPressAndHoldToDrag', true)
     },
