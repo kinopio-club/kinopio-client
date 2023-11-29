@@ -192,32 +192,24 @@ const styles = computed(() => {
     x: Math.round(labelRect.width / 4),
     y: Math.round(labelRect.height / 4)
   }
-  return {
+  let styles = {
     background: typeColor.value,
     left: `calc(${labelRelativePosition.value.x * 100}% - ${labelCenter.x}px)`,
     top: `calc(${labelRelativePosition.value.y * 100}% - ${labelCenter.y}px)`
   }
+  if (remoteUserDragging.value) {
+    styles.background = remoteUserDragging.value.userColor
+  }
+  return styles
 })
 const removeOffsets = () => {
   store.dispatch('currentConnections/clearLabelPosition', props.connection)
   stopDragging()
   wasDragged = false
 }
-
-// label dragging
-
-const startDragging = () => {
-  store.commit('closeAllDialogs')
-  store.dispatch('clearMultipleSelected')
-  updateTypeColorCSS()
-  state.isDragging = true
-  wasDragged = false
-}
-const stopDragging = () => {
-  state.isDragging = false
-  state.outOfBounds = {}
-  cursorStart = {}
-}
+const shouldJiggle = computed(() => {
+  return state.isDragging || remoteUserDragging.value
+})
 const normalizeRelativePosition = (positionRelative) => {
   const max = 1
   const min = 0
@@ -231,7 +223,32 @@ const normalizeRelativePosition = (positionRelative) => {
   }
   return positionRelative
 }
+
+// label dragging
+
+const startDragging = (event) => {
+  if (!canEditSpace.value) { return }
+  store.commit('closeAllDialogs')
+  store.dispatch('clearMultipleSelected')
+  updateTypeColorCSS()
+  state.isDragging = true
+  wasDragged = false
+  const updates = {
+    userId: store.state.currentUser.id,
+    userColor: store.state.currentUser.color,
+    connectionId: props.connection.id
+  }
+  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserDraggingConnectionLabel' })
+}
+const stopDragging = () => {
+  if (!canEditSpace.value) { return }
+  state.isDragging = false
+  state.outOfBounds = {}
+  cursorStart = {}
+  store.commit('broadcast/updateStore', { updates: { userId: store.state.currentUser.id }, type: 'removeRemoteUserDraggingConnectionLabel' })
+}
 const drag = (event) => {
+  if (!canEditSpace.value) { return }
   if (!state.isDragging) { return }
   if (isMultiTouch) { return }
   state.currentCursor = {
@@ -272,6 +289,12 @@ const drag = (event) => {
     labelRelativePositionY: positionRelative.y
   })
 }
+const remoteUserDragging = computed(() => {
+  const remoteUserDraggingConnectionLabel = store.state.remoteUserDraggingConnectionLabel
+  if (!remoteUserDraggingConnectionLabel.length) { return }
+  let update = remoteUserDraggingConnectionLabel.find(update => update.connectionId.includes(props.connection.id))
+  return update
+})
 
 // boundaries
 
@@ -300,7 +323,7 @@ const boundaryBottomIsVisible = computed(() => labelRelativePosition.value.y >= 
     :data-id="id"
     @mouseover.left="state.hover = true"
     @mouseleave.left="state.hover = false"
-    :class="{filtered: isFiltered, active: connectionDetailsIsVisible, jiggle: state.isDragging}"
+    :class="{filtered: isFiltered, active: connectionDetailsIsVisible, jiggle: shouldJiggle}"
     ref="labelElement"
   )
     span.name(:class="{ 'is-dark': isDark }") {{typeName}}

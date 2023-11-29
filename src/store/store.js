@@ -151,7 +151,7 @@ const store = createStore({
     multipleConnectionsSelectedIds: [],
     previousMultipleBoxesSelectedIds: [],
 
-    // connecting
+    // connections
     currentConnectionStartCardIds: [],
     currentConnectionSuccess: {},
     currentConnectionCursorStart: {},
@@ -161,6 +161,8 @@ const store = createStore({
     remoteConnectionDetailsVisible: [],
     remoteCurrentConnections: [],
     currentCardConnections: [],
+    // connection labels
+    remoteUserDraggingConnectionLabel: [],
 
     // tags
     tagDetailsIsVisible: false,
@@ -683,6 +685,16 @@ const store = createStore({
       connections = connections || []
       connections = connections.map(connection => connection.id)
       state.currentCardConnections = connections
+    },
+
+    // Connection Labels
+
+    updateRemoteUserDraggingConnectionLabel: (state, update) => {
+      state.remoteUserDraggingConnectionLabel = state.remoteUserDraggingConnectionLabel.filter(remoteUser => remoteUser.userId !== update.userId)
+      state.remoteUserDraggingConnectionLabel = state.remoteUserDraggingConnectionLabel.concat(update)
+    },
+    removeRemoteUserDraggingConnectionLabel: (state, update) => {
+      state.remoteUserDraggingConnectionLabel = state.remoteUserDraggingConnectionLabel.filter(remoteUser => remoteUser.userId !== update.userId)
     },
 
     // Painting
