@@ -344,20 +344,44 @@ const boundaryBottomIsVisible = computed(() => labelRelativePosition.value.y >= 
     top 0
     width 1px
     height 100%
+    animation boundaryLeft 0.3s infinite ease-out alternate
   &.right
     right -5px
     top 0
     width 1px
     height 100%
+    animation boundaryRight 0.3s infinite ease-out alternate
   &.top
     left 0
     top 0
     width 100%
     height 1px
+    animation boundaryTop 0.3s infinite ease-out alternate
   &.bottom
     left 0
     bottom -5px
     width 100%
     height 1px
+    animation boundaryBottom 0.3s infinite ease-out alternate
 
+@keyframes boundaryLeft
+  from
+    transform translateX(0)
+  to
+    transform translateX(-4px)
+@keyframes boundaryRight
+  from
+    transform translateX(0)
+  to
+    transform translateX(4px)
+@keyframes boundaryTop
+  from
+    transform translateY(0)
+  to
+    transform translateY(4px)
+@keyframes boundaryBottom
+  from
+    transform translateY(0)
+  to
+    transform translateY(-4px)
 </style>
