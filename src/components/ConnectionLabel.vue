@@ -465,7 +465,7 @@ const boundaryBottomIsVisible = computed(() => labelRelativePosition.value.y >= 
   )
     span.name(:class="{ 'is-dark': isDark }") {{typeName}}
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
-  template(v-if="boundaryIsVisible && state.isDragging")
+  template(v-if="boundaryIsVisible")
     .connection-label-boundary.left(v-if="boundaryLeftIsVisible")
     .connection-label-boundary.right(v-if="boundaryRightIsVisible")
     .connection-label-boundary.top(v-if="boundaryTopIsVisible")
@@ -502,31 +502,30 @@ const boundaryBottomIsVisible = computed(() => labelRelativePosition.value.y >= 
 --type-color white
 .connection-label-boundary
   position absolute
-  background var(--type-color)
-  box-shadow 0 0 30px 3px var(--type-color)
+  box-shadow 0 0 10px 3px var(--type-color)
   &.left
     left 0
     top 0
-    width 1px
+    width 0
     height 100%
     animation boundaryLeft 0.3s infinite ease-out alternate
   &.right
     right -5px
     top 0
-    width 1px
+    width 0
     height 100%
     animation boundaryRight 0.3s infinite ease-out alternate
   &.top
     left 0
     top 0
     width 100%
-    height 1px
+    height 0
     animation boundaryTop 0.3s infinite ease-out alternate
   &.bottom
     left 0
     bottom -5px
     width 100%
-    height 1px
+    height 0
     animation boundaryBottom 0.3s infinite ease-out alternate
 
 @keyframes boundaryLeft
