@@ -11,6 +11,7 @@ let cursorStart = {}
 let wasDragged = false
 const dragThreshold = 5
 let positionAbsoluteStart
+let prevLabelRelativePosition
 
 onMounted(() => {
   window.addEventListener('scroll', updateConnectionIsVisible)
@@ -239,6 +240,18 @@ const startDragging = (event) => {
     connectionId: props.connection.id
   }
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserDraggingConnectionLabel' })
+  // save start positions
+  if (!cursorStart.x) {
+    cursorStart = {
+      x: event.pageX,
+      y: event.pageY
+    }
+    positionAbsoluteStart = {
+      x: Math.round(labelRelativePosition.value.x * state.connectionRect.width),
+      y: Math.round(labelRelativePosition.value.y * state.connectionRect.height)
+    }
+    prevLabelRelativePosition = labelRelativePosition.value
+  }
 }
 const stopDragging = () => {
   if (!canEditSpace.value) { return }
@@ -246,6 +259,12 @@ const stopDragging = () => {
   state.outOfBounds = {}
   cursorStart = {}
   store.commit('broadcast/updateStore', { updates: { userId: store.state.currentUser.id }, type: 'removeRemoteUserDraggingConnectionLabel' })
+  store.dispatch('history/add', { connections: [{
+    id: props.connection.id,
+    labelRelativePositionX: labelRelativePosition.value.x,
+    labelRelativePositionY: labelRelativePosition.value.y
+  }],
+  useSnapshot: true })
 }
 const drag = (event) => {
   if (!canEditSpace.value) { return }
@@ -255,18 +274,6 @@ const drag = (event) => {
     x: event.pageX,
     y: event.pageY
   }
-  // start positions
-  if (!cursorStart.x) {
-    cursorStart = {
-      x: state.currentCursor.x,
-      y: state.currentCursor.y
-    }
-    positionAbsoluteStart = {
-      x: Math.round(labelRelativePosition.value.x * state.connectionRect.width),
-      y: Math.round(labelRelativePosition.value.y * state.connectionRect.height)
-    }
-  }
-  // new positions
   const cursorDelta = {
     x: state.currentCursor.x - cursorStart.x,
     y: state.currentCursor.y - cursorStart.y
