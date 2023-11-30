@@ -6,7 +6,6 @@ import utils from '@/utils.js'
 const store = useStore()
 
 const labelElement = ref(null)
-const dragThreshold = 5
 
 let cursorStart = {}
 let wasDragged = false
@@ -292,9 +291,7 @@ const drag = (event) => {
     x: state.currentCursor.x - cursorStart.x,
     y: state.currentCursor.y - cursorStart.y
   }
-  if (Math.abs(cursorDelta.x) > dragThreshold || Math.abs(cursorDelta.y) > dragThreshold) {
-    wasDragged = true
-  }
+  wasDragged = true
   const positionAbsolute = {
     x: cursorDelta.x + positionAbsoluteStart.x,
     y: cursorDelta.y + positionAbsoluteStart.y
