@@ -15,20 +15,20 @@ onMounted(() => {
   })
 })
 
+const emit = defineEmits(['updateCount'])
+
 const props = defineProps({
   visible: Boolean
 })
-const emit = defineEmits(['updateCount'])
+const state = reactive({
+  count: 0,
+  dialogHeight: null
+})
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
   }
-})
-
-const state = reactive({
-  count: 0,
-  dialogHeight: null
 })
 
 const updateDialogHeight = async () => {

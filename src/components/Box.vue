@@ -72,7 +72,7 @@ const borderWidth = 2
 // let prevCursor
 
 // locking
-// long press to touch drag card
+// long press to touch drag
 const lockingPreDuration = 100 // ms
 const lockingDuration = 100 // ms
 let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
@@ -580,7 +580,7 @@ export default {
     notifyPressAndHoldToDrag () {
       const hasNotified = this.$store.state.hasNotifiedPressAndHoldToDrag
       if (!hasNotified) {
-        this.$store.commit('addNotification', { message: 'Press and hold to drag boxes', icon: 'press-and-hold' })
+        this.$store.commit('addNotification', { message: 'Press and hold to drag', icon: 'press-and-hold' })
       }
       this.$store.commit('hasNotifiedPressAndHoldToDrag', true)
     },

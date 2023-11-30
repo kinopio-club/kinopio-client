@@ -239,6 +239,8 @@ export default {
     updateResultsSectionMaxHeight () {
       const pinchZoom = utils.visualViewport().scale
       const position = this.$store.state.connectionDetailsPosition
+      if (!this.$refs.infoSection) { return }
+      if (!this.$refs.resultsActions) { return }
       const infoSection = this.$refs.infoSection.getBoundingClientRect()
       const resultsActions = this.$refs.resultsActions.getBoundingClientRect()
       const dialogInfoHeight = infoSection.height + resultsActions.height

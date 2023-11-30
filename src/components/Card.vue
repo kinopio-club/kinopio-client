@@ -581,6 +581,7 @@ export default {
       if (!this.currentUser.shouldUseStickyCards) { return true }
       if (this.embedIsVisible) { return true }
       if (this.$store.state.codeLanguagePickerIsVisible) { return true }
+      if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return true }
       const userIsConnecting = this.currentConnectionStartCardIds.length
       const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
@@ -664,8 +665,17 @@ export default {
       const color = this.backgroundColor || this.defaultColor
       return utils.colorIsDark(color)
     },
+    currentUserIsDraggingLabelConnectedToCard () {
+      const connectionId = this.$store.state.currentUserIsDraggingConnectionIdLabel
+      if (!connectionId) { return }
+      const connection = this['currentConnections/byId'](connectionId)
+      if (!connection) { return }
+      const isConnected = connection.startCardId === this.id || connection.endCardId === this.id
+      return isConnected
+    },
     connectorGlowStyle () {
       if (this.currentUserIsDraggingCard) { return }
+      if (!this.currentUserIsDraggingLabelConnectedToCard) { return }
       const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor || this.currentUserIsHoveringOverCardIdColor || this.currentUserIsMultipleSelectedCardIdColor || this.currentUserIsHoveringOverConnectionIdColor || this.currentUserIsMultipleSelectedConnectionIdColor
       if (!color) { return }
       return { background: color }
@@ -722,7 +732,7 @@ export default {
       return this.connectionColorForCardIds(cardIds)
     },
     currentUserIsHoveringOverConnectionIdColor () {
-      const connectionId = this.$store.state.currentUserIsHoveringOverConnectionId
+      const connectionId = this.$store.state.currentUserIsHoveringOverConnectionId || this.$store.state.currentUserIsDraggingConnectionIdLabel
       return this.connectionColorForConnectionIds([connectionId])
     },
     currentUserIsMultipleSelectedConnectionIdColor () {
@@ -1485,6 +1495,7 @@ export default {
       }
     },
     toggleCardChecked () {
+      if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return }
       if (this.preventDraggedCardFromShowingDetails) { return }
       if (!this.canEditSpace) { return }
       const value = !this.isChecked
@@ -1691,6 +1702,7 @@ export default {
       this.$store.dispatch('currentCards/afterMove')
       if (this.isLocked) { return }
       if (this.currentUserIsPainting) { return }
+      if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return }
       if (isMultiTouch) { return }
       if (this.currentUserIsPanningReady || this.currentUserIsPanning) { return }
       if (this.currentUserIsResizingBox || this.currentUserIsDraggingBox) { return }
@@ -1819,7 +1831,7 @@ export default {
       if (isDrawingConnection) { return }
       const hasNotified = this.hasNotifiedPressAndHoldToDrag
       if (!hasNotified) {
-        this.$store.commit('addNotification', { message: 'Press and hold to drag cards', icon: 'press-and-hold' })
+        this.$store.commit('addNotification', { message: 'Press and hold to drag', icon: 'press-and-hold' })
       }
       this.$store.commit('hasNotifiedPressAndHoldToDrag', true)
     },

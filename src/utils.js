@@ -334,9 +334,11 @@ export default {
     cloned = JSON.parse(cloned)
     return cloned
   },
+  isUndefined (value) {
+    return value === undefined || value === null
+  },
   typeCheck ({ value, type, allowUndefined, origin }) {
-    const isUndefined = value === undefined || value === null
-    if (allowUndefined && isUndefined) {
+    if (allowUndefined && this.isUndefined(value)) {
       return true
     }
     if (type === 'array' && Array.isArray(value)) {
@@ -1025,23 +1027,23 @@ export default {
     y = (y + window.scrollY) * zoom
     return { x, y }
   },
-  coordsFromConnectionPath (path) {
-    // https://regexr.com/66idp
-    // matches first 2 digit groups in path: m295,284 q90,40 87,57 → [295, 284]
-    const pathCoordsPattern = new RegExp(/m([\d.-]{1,}),([\d-.]{1,})/)
+  curveControlPointFromPath (path) {
+    // https://regexr.com/6mptt
+    // matches 'q'-digits-,-digits-space: m295,284 q90,40 87,57 → "q90,40"
+    const pathCoordsPattern = new RegExp(/q([\d.]{1,}),([\d.]{1,})/)
     let coords = path.match(pathCoordsPattern)
-    if (!coords) { return }
     coords = {
       x: coords[1],
       y: coords[2]
     }
     return this.integerCoords(coords)
   },
-  curveControlPointFromPath (path) {
-    // https://regexr.com/6mptt
-    // matches 'q'-digits-,-digits-space: m295,284 q90,40 87,57 → "q90,40"
-    const pathCoordsPattern = new RegExp(/q([\d.]{1,}),([\d.]{1,})/)
+  startCoordsFromConnectionPath (path) {
+    // https://regexr.com/66idp
+    // matches first 2 digit groups in path: m295,284 q90,40 87,57 → [295, 284]
+    const pathCoordsPattern = new RegExp(/m([\d.-]{1,}),([\d-.]{1,})/)
     let coords = path.match(pathCoordsPattern)
+    if (!coords) { return }
     coords = {
       x: coords[1],
       y: coords[2]
@@ -1072,7 +1074,7 @@ export default {
   },
   pointOnCurve (pos, path) {
     // pos is 0 to 1
-    const start = this.coordsFromConnectionPath(path)
+    const start = this.startCoordsFromConnectionPath(path)
     let end = this.endCoordsFromConnectionPath(path)
     end = {
       x: start.x + end.x,

@@ -264,6 +264,32 @@ export default {
       context.dispatch('broadcast/update', { updates: type, type: 'updateConnectionType', handler: 'currentConnections/updateType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'updateConnectionType', body: type }, { root: true })
     },
+    updateLabelPosition: (context, { connection, labelRelativePositionX, labelRelativePositionY }) => {
+      const prevConnection = context.getters.byId(connection.id)
+      // normalize
+      if (utils.isUndefined(labelRelativePositionX)) {
+        labelRelativePositionX = utils.roundFloat(prevConnection.labelRelativePositionX)
+      }
+      if (utils.isUndefined(labelRelativePositionY)) {
+        labelRelativePositionY = utils.roundFloat(prevConnection.labelRelativePositionY)
+      }
+      // update
+      const item = {
+        id: connection.id,
+        labelRelativePositionX,
+        labelRelativePositionY
+      }
+      context.commit('update', item)
+      context.dispatch('broadcast/update', { updates: item, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'updateConnection', body: item }, { root: true })
+    },
+    clearLabelPosition: (context, connection) => {
+      context.dispatch('updateLabelPosition', {
+        connection,
+        labelRelativePositionX: 0.5,
+        labelRelativePositionY: 0.5
+      })
+    },
 
     // remove
 

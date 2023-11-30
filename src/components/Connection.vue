@@ -116,7 +116,7 @@ export default {
     },
     connectionClasses () {
       return {
-        active: this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected || this.isCurrentCardConnection || this.isHoveredOverConnectedCard || this.isConnectedToMultipleCardsSelected,
+        active: this.isActive,
         filtered: this.isFiltered,
         hover: this.isHovered,
         'hide-connection-outline': this.shouldHideConnectionOutline,
@@ -190,9 +190,20 @@ export default {
       if (this.currentUserIsDraggingCard) { return }
       return Boolean(this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected)
     },
+    isDraggingCurrentConnectionLabel () {
+      const connectionId = this.$store.state.currentUserIsDraggingConnectionIdLabel
+      if (!connectionId) { return }
+      const connection = this.$store.getters['currentConnections/byId'](connectionId)
+      if (!connection) { return }
+      return connection.id === this.id
+    },
+    isActive () {
+      if (!this.isDraggingCurrentConnectionLabel) { return }
+      return this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected || this.isCurrentCardConnection || this.isHoveredOverConnectedCard || this.isConnectedToMultipleCardsSelected
+    },
     isHovered () {
       if (this.currentUserIsDraggingCard) { return }
-      return this.id === this.currentUserIsHoveringOverConnectionId
+      return this.id === this.currentUserIsHoveringOverConnectionId || this.id === this.$store.state.currentUserIsDraggingConnectionIdLabel
     },
     isHoveredOverConnectedCard () {
       const cardId = this.$store.state.currentUserIsHoveringOverCardId
@@ -286,7 +297,7 @@ export default {
       const offset = utils.outsideSpaceOffset().y
       const scroll = this.windowScroll.y - offset
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      let y1 = utils.coordsFromConnectionPath(this.connection.path).y
+      let y1 = utils.startCoordsFromConnectionPath(this.connection.path).y
       let y2 = utils.endCoordsFromConnectionPath(this.connection.path).y + y1
       if (y1 > y2) {
         const y = y1

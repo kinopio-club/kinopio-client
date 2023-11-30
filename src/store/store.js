@@ -85,6 +85,7 @@ const store = createStore({
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
+    currentUserIsDraggingConnectionIdLabel: '',
 
     // box-selecting
     currentUserIsBoxSelecting: false,
@@ -150,7 +151,7 @@ const store = createStore({
     multipleConnectionsSelectedIds: [],
     previousMultipleBoxesSelectedIds: [],
 
-    // connecting
+    // connections
     currentConnectionStartCardIds: [],
     currentConnectionSuccess: {},
     currentConnectionCursorStart: {},
@@ -160,6 +161,8 @@ const store = createStore({
     remoteConnectionDetailsVisible: [],
     remoteCurrentConnections: [],
     currentCardConnections: [],
+    // connection labels
+    remoteUserDraggingConnectionLabel: [],
 
     // tags
     tagDetailsIsVisible: false,
@@ -684,6 +687,16 @@ const store = createStore({
       state.currentCardConnections = connections
     },
 
+    // Connection Labels
+
+    updateRemoteUserDraggingConnectionLabel: (state, update) => {
+      state.remoteUserDraggingConnectionLabel = state.remoteUserDraggingConnectionLabel.filter(remoteUser => remoteUser.userId !== update.userId)
+      state.remoteUserDraggingConnectionLabel = state.remoteUserDraggingConnectionLabel.concat(update)
+    },
+    removeRemoteUserDraggingConnectionLabel: (state, update) => {
+      state.remoteUserDraggingConnectionLabel = state.remoteUserDraggingConnectionLabel.filter(remoteUser => remoteUser.userId !== update.userId)
+    },
+
     // Painting
 
     currentUserIsPainting: (state, value) => {
@@ -803,6 +816,10 @@ const store = createStore({
     currentUserIsPanning: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsPanning = value
+    },
+    currentUserIsDraggingConnectionIdLabel: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.currentUserIsDraggingConnectionIdLabel = value
     },
 
     // Dragging Cards
