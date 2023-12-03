@@ -439,7 +439,7 @@ export default {
     margin 0
     margin-top 1px
     white-space wrap
-    overflow hidden
+    width 100%
     .icon
       margin-left 6px
 
