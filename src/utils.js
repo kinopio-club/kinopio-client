@@ -1711,7 +1711,7 @@ export default {
   },
   urlIsSpace (url) {
     if (!url) { return }
-    if (this.urlIsInvite(url)) { return }
+    if (this.urlIsInvite(url)) { return true }
     let spaceUrlPattern
     if (import.meta.env.MODE === 'development') {
       // https://regexr.com/5hjc2
@@ -1733,8 +1733,7 @@ export default {
     const isAudio = this.urlIsAudio(url)
     const isFile = this.urlIsFile(url)
     const isSpace = this.urlIsSpace(url)
-    const isInvite = this.urlIsInvite(url)
-    return !isImage && !isVideo && !isAudio && !isFile && !isSpace && !isInvite
+    return !isImage && !isVideo && !isAudio && !isFile && !isSpace
   },
   urlIsYoutube (url) {
     if (url.includes('/channel/')) { return }
