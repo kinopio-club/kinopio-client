@@ -1109,7 +1109,7 @@ code
       width 21px
       height 10px
   > .icon.private
-    margin-left 3px
+    margin-left 5px
   .user-label-inline
     display inline-block
     min-height initial

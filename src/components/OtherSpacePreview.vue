@@ -11,10 +11,10 @@ const props = defineProps({
   otherSpace: Object,
   url: String,
   parentCardId: String,
-  shouldCloseAllDialogs: Boolean,
-  shouldTruncateName: Boolean,
   isInvite: Boolean,
-  isNotClickable: Boolean
+  screenshotIsVisible: Boolean,
+  isSelected: Boolean,
+  selectedColor: String
 })
 
 const otherSpaceIsPrivate = computed(() => {
@@ -31,9 +31,6 @@ const isActive = computed(() => {
 
 const otherSpaceName = computed(() => {
   let name = props.otherSpace.name
-  if (props.shouldTruncateName) {
-    name = utils.truncated(name, 15)
-  }
   return name
 })
 
@@ -43,49 +40,18 @@ const isRemoved = computed(() => {
   return space.isRemoved
 })
 
-// dialog
-const showOtherSpaceDetailsIsVisible = async (event) => {
-  if (utils.isMultiTouch(event)) { return }
-  if (store.state.preventDraggedCardFromShowingDetails) { return }
-  let otherItem = {}
-  if (props.otherSpace) {
-    otherItem = utils.clone(props.otherSpace)
-  }
-  if (props.parentCardId) {
-    otherItem.parentCardId = props.parentCardId
-    store.dispatch('currentCards/incrementZ', props.parentCardId)
-  }
-  otherItem.url = props.url
-  otherItem.isInvite = props.isInvite
-  if (props.shouldCloseAllDialogs) {
-    store.dispatch('closeAllDialogs')
-  }
-  store.commit('currentUserIsDraggingCard', false)
-  const position = utils.cursorPositionInSpace(event)
-  store.commit('otherItemDetailsPosition', position)
-  store.commit('currentSelectedOtherItem', otherItem)
-  store.commit('otherSpaceDetailsIsVisible', true)
-  store.commit('triggerCancelLocking')
-  store.commit('currentUserIsDraggingCard', false)
-  store.commit('otherCardDetailsIsVisible', false)
-  event.stopPropagation()
-  // broadcast
-  const updates = {
-    userId: store.state.currentUser.id,
-    cardId: props.parentCardId
-  }
-  store.commit('broadcast/updateStore', { updates, type: 'clearRemoteCardsDragging' })
-  await nextTick()
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
-}
-
+const isScreenshotVisible = computed(() => props.screenshotIsVisible && props.otherSpace.screenshotUrl)
 </script>
 
 <template lang="pug">
 a.other-space-preview(@click.prevent.stop.left :href="props.url" ref="badge")
-  .badge.button-badge.link-badge(:class="{ active: isActive, 'is-not-clickable': props.isNotClickable }" @mouseup.prevent="showOtherSpaceDetailsIsVisible($event)" @touchend.prevent="showOtherSpaceDetailsIsVisible($event)")
+  template(v-if="isScreenshotVisible")
+    .preview-image-wrap
+      img.preview-image(:src="props.otherSpace.screenshotUrl" :class="{selected: props.isSelected}" @load="updateDimensions" ref="image")
+
+  .badge.link-badge(:class="{ active: isActive, 'is-screenshot-visible': isScreenshotVisible }" :style="{ background: props.selectedColor }")
     template(v-if="props.isInvite")
-      .badge.info Invite
+      .badge.info.invite-badge Invite
     template(v-if="isRemoved")
       .badge.danger
         img.icon(src="@/assets/remove.svg")
@@ -103,11 +69,33 @@ a.other-space-preview(@click.prevent.stop.left :href="props.url" ref="badge")
 <style lang="stylus">
 .other-space-preview
   text-decoration none
+  margin 0
   .badge
+    display block
+    margin 0
+  .invite-badge
     display inline-block
-  .is-not-clickable
-    box-shadow none !important
-    pointer-events none
-    // background-color var(--secondary-active-background)
+    margin-right 6px
+  .user-label-inline
+    margin-right 6px
+  .is-screenshot-visible
+    border-top-left-radius 0
+    border-top-right-radius 0
+    padding var(--subsection-padding)
 
+  // from UrlPreviewCard
+  .preview-image-wrap
+    display flex
+  .preview-image
+    width 100%
+    border-radius var(--entity-radius)
+    background var(--primary-background)
+    pointer-events none
+    -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
+    border-bottom-left-radius 0
+    border-bottom-right-radius 0
+    &.selected
+      mix-blend-mode color-burn
+  .anon-avatar
+    top 6px !important
 </style>

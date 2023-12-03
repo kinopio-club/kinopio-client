@@ -124,16 +124,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .badge.info(v-if="nameIsComment")
         span ((comment))
 
-    .row.badges-row.other-items-row(v-if="isOtherItems")
-      //- invite
-      template(v-if="inviteIsVisible")
-        OtherSpacePreview(:isInvite="inviteIsVisible" :otherSpace="otherSpace" :url="otherSpaceUrl" :parentCardId="card.id" :shouldTruncateName="true")
-      //- other space
-      template(v-if="otherSpaceIsVisible")
-        OtherSpacePreview(:otherSpace="otherSpace" :url="otherSpaceUrl" :parentCardId="card.id" :shouldTruncateName="true")
-      //- other card
-      template(v-if="otherCardIsVisible")
-        OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")
+    .row.badges-row.other-items-row(v-if="otherCardIsVisible")
+      OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")
 
     MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats")
     UrlPreview(
@@ -143,6 +135,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       :urlsIsVisibleInName="urlsIsVisible"
       @toggleUrlsIsVisible="toggleUrlsIsVisible"
     )
+    //- other space
+    template(v-if="otherSpaceIsVisible")
+      OtherSpacePreview(:otherSpace="otherSpace" :url="otherSpaceUrl" :parentCardId="card.id" :isInvite="inviteIsVisible" :screenshotIsVisible="true")
 
     //- Read Only
     template(v-if="!canEditCard")
@@ -413,9 +408,6 @@ export default {
 
     // other items
 
-    isOtherItems () {
-      return this.otherCardIsVisible || this.otherSpaceIsVisible || this.inviteIsVisible
-    },
     inviteIsVisible () {
       const isCardLink = Boolean(this.card.linkToSpaceCollaboratorKey)
       return isCardLink && this.hasUrls
@@ -1218,6 +1210,10 @@ export default {
       this.$nextTick(() => {
         this.focusName(position)
         this.$store.commit('shouldPreventNextEnterKey', false)
+      })
+      this.$store.dispatch('currentCards/update', {
+        id: this.card.id,
+        otherSpaceScreenshotIsVisible: true
       })
     },
 

@@ -137,7 +137,7 @@ article.card-wrap#card(
                 img.connector-icon(src="@/assets/connector-closed-in-card.svg")
               //- template(v-else)
               //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || otherCardIsVisible" :class="{'is-image-card': isImageCard}")
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="cardUrlPreviewIsVisible")
         UrlPreviewCard(
           :visible="true"
@@ -152,6 +152,16 @@ article.card-wrap#card(
         )
       template(v-if="otherCardIsVisible")
         OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldCloseAllDialogs="true")
+      template(v-else-if="otherSpaceIsVisible")
+        OtherSpacePreview(
+          :otherSpace="otherSpace"
+          :url="otherSpaceUrl"
+          :parentCardId="card.id"
+          :screenshotIsVisible="card.otherSpaceScreenshotIsVisible"
+          :isInvite="otherSpace.isInvite"
+          :isSelected="isSelectedOrDragging"
+          :selectedColor="selectedColor"
+        )
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -210,6 +220,7 @@ import NameSegment from '@/components/NameSegment.vue'
 import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
+import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import CardCounter from '@/components/CardCounter.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
@@ -246,6 +257,7 @@ export default {
     UrlPreviewCard,
     UserLabelInline,
     OtherCardPreview,
+    OtherSpacePreview,
     CardCounter
   },
   props: {
@@ -410,12 +422,49 @@ export default {
     urlPreviewImageIsVisible () {
       return Boolean(this.cardUrlPreviewIsVisible && this.card.urlPreviewImage && !this.card.shouldHideUrlPreviewImage)
     },
+
+    // other card
+
     otherCardIsVisible () { return Boolean(this.card.linkToCardId) },
     otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
     otherCard () {
       const card = this.$store.getters.otherCardById(this.card.linkToCardId)
       return card
     },
+
+    // other space
+
+    otherSpaceIsVisible () { return Boolean(this.otherSpace) },
+    otherSpace () {
+      let isInviteLink, collaboratorKey, readOnlyKey
+      let space = this.nameSegments.find(segment => {
+        if (segment.otherSpace) {
+          isInviteLink = segment.isInviteLink
+          collaboratorKey = segment.collaboratorKey
+          readOnlyKey = segment.readOnlyKey
+        }
+        return segment.otherSpace
+      })
+      if (!space) { return }
+      space = space.otherSpace
+      space = utils.clone(space)
+      space.isInvite = isInviteLink
+      space.collaboratorKey = collaboratorKey
+      space.readOnlyKey = readOnlyKey
+      return space
+    },
+    otherSpaceUrl () {
+      let url
+      const space = this.otherSpace
+      if (!space) { return }
+      if (space.isInvite) {
+        url = utils.inviteUrl({ spaceId: space.id, spaceName: space.name, collaboratorKey: space.collaboratorKey, readOnlyKey: space.readOnlyKey })
+      } else {
+        url = utils.urlFromSpaceAndCard({ spaceId: space.id })
+      }
+      return url
+    },
+
     isConnectorDarkInLightTheme () {
       if (this.connectionTypeColorisDark) { return this.connectionTypeColorisDark }
       return this.isDarkInLightTheme

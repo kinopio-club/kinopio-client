@@ -207,4 +207,6 @@ dialog.other-card-details
     p
       word-wrap break-word
       width 100%
+  .other-space-preview
+    pointer-events none
 </style>

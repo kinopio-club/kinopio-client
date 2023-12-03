@@ -445,7 +445,7 @@ export default {
 
   .privacy-icon
     height 12px
-    vertical-align -2px
+    vertical-align -1px
 
   .favorite-icon,
   .inbox-icon
