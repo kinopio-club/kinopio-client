@@ -44,7 +44,7 @@ const isScreenshotVisible = computed(() => props.screenshotIsVisible && props.ot
 </script>
 
 <template lang="pug">
-a.other-space-preview(@click.prevent.stop.left :href="props.url" ref="badge")
+a.other-space-preview-card(@click.prevent.stop.left :href="props.url" ref="badge")
   template(v-if="isScreenshotVisible")
     .preview-image-wrap
       img.preview-image(:src="props.otherSpace.screenshotUrl" :class="{selected: props.isSelected}" @load="updateDimensions" ref="image")
@@ -67,7 +67,7 @@ a.other-space-preview(@click.prevent.stop.left :href="props.url" ref="badge")
 </template>
 
 <style lang="stylus">
-.other-space-preview
+.other-space-preview-card
   text-decoration none
   margin 0
   > .badge

@@ -153,7 +153,7 @@ article.card-wrap#card(
       template(v-if="otherCardIsVisible")
         OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldCloseAllDialogs="true")
       template(v-else-if="otherSpaceIsVisible")
-        OtherSpacePreview(
+        OtherSpacePreviewCard(
           :otherSpace="otherSpace"
           :url="otherSpaceUrl"
           :parentCardId="card.id"
@@ -220,7 +220,7 @@ import NameSegment from '@/components/NameSegment.vue'
 import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
-import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
+import OtherSpacePreviewCard from '@/components/OtherSpacePreviewCard.vue'
 import CardCounter from '@/components/CardCounter.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
@@ -255,9 +255,9 @@ export default {
     ImageOrVideo,
     NameSegment,
     UrlPreviewCard,
+    OtherSpacePreviewCard,
     UserLabelInline,
     OtherCardPreview,
-    OtherSpacePreview,
     CardCounter
   },
   props: {
