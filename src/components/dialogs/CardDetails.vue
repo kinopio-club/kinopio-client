@@ -418,7 +418,7 @@ export default {
     },
     otherSpaceIsVisible () {
       const isCardLink = Boolean(this.card.linkToSpaceId)
-      return isCardLink && this.hasUrls
+      return isCardLink && this.hasUrls && this.otherSpace
     },
     otherCard () {
       const card = this.$store.getters.otherCardById(this.card.linkToCardId)

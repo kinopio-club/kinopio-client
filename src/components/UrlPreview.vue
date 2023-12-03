@@ -228,7 +228,6 @@ const showNone = async () => {
 
   .text
     position absolute
-    margin 8px
     background var(--secondary-hover-background)
     user-select text
     display flex
@@ -246,7 +245,7 @@ const showNone = async () => {
     max-width calc(100% - 24px)
     position static
     margin 0
-    padding 4px
+    padding 0
     display block
 
   .favicon
@@ -281,15 +280,6 @@ const showNone = async () => {
     cursor pointer
     button
       cursor pointer
-
-  button
-    &:disabled
-      opacity 1
-      background-color var(--secondary-background)
-      border-color var(--primary-transparent)
-      img,
-      span
-        opacity 0.5
 
   .transparent
     opacity 0.5
