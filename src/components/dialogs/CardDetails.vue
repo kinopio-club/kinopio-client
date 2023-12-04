@@ -124,16 +124,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .badge.info(v-if="nameIsComment")
         span ((comment))
 
-    .row.badges-row.other-items-row(v-if="isOtherItems")
-      //- invite
-      template(v-if="inviteIsVisible")
-        OtherSpacePreview(:isInvite="inviteIsVisible" :otherSpace="otherSpace" :url="otherSpaceUrl" :parentCardId="card.id" :shouldTruncateName="true")
-      //- other space
-      template(v-if="otherSpaceIsVisible")
-        OtherSpacePreview(:otherSpace="otherSpace" :url="otherSpaceUrl" :parentCardId="card.id" :shouldTruncateName="true")
-      //- other card
-      template(v-if="otherCardIsVisible")
-        OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")
+    .row.badges-row.other-items-row(v-if="otherCardIsVisible")
+      OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")
 
     MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats")
     UrlPreview(
@@ -143,6 +135,13 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       :urlsIsVisibleInName="urlsIsVisible"
       @toggleUrlsIsVisible="toggleUrlsIsVisible"
     )
+    //- other space
+    template(v-if="otherSpaceIsVisible")
+      OtherSpacePreview(
+        :otherSpace="otherSpace"
+        :url="otherSpaceUrl"
+        :card="card"
+      )
 
     //- Read Only
     template(v-if="!canEditCard")
@@ -411,43 +410,34 @@ export default {
       return tags
     },
 
-    // other items
+    // other card
 
-    isOtherItems () {
-      return this.otherCardIsVisible || this.otherSpaceIsVisible || this.inviteIsVisible
-    },
-    inviteIsVisible () {
-      const isCardLink = Boolean(this.card.linkToSpaceCollaboratorKey)
-      return isCardLink && this.hasUrls
-    },
     otherCardIsVisible () {
       const isCardLink = Boolean(this.card.linkToCardId)
-      return isCardLink && this.hasUrls
-    },
-    otherSpaceIsVisible () {
-      const isCardLink = Boolean(this.card.linkToSpaceId)
       return isCardLink && this.hasUrls
     },
     otherCard () {
       const card = this.$store.getters.otherCardById(this.card.linkToCardId)
       return card
     },
+    otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
+
+    // other space
+
+    otherSpaceIsVisible () {
+      const isCardLink = Boolean(this.card.linkToSpaceId)
+      return isCardLink && this.hasUrls && this.otherSpace
+    },
     otherSpace () {
       const space = this.$store.getters.otherSpaceById(this.card.linkToSpaceId)
       return space
     },
-    otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
     otherSpaceUrl () {
-      let url
-      const spaceId = this.card.linkToSpaceId
-      if (this.inviteIsVisible) {
-        const collaboratorKey = this.card.linkToSpaceCollaboratorKey
-        const spaceName = this.otherSpace.name
-        url = utils.inviteUrl({ spaceId, spaceName, collaboratorKey })
-      } else {
-        url = utils.urlFromSpaceAndCard({ spaceId })
-      }
-      return url
+      return utils.spaceUrl({
+        spaceId: this.otherSpace.id,
+        spaceName: this.otherSpace.name,
+        collaboratorKey: this.card.linkToSpaceCollaboratorKey
+      })
     },
 
     currentUserIsSpaceMember () { return this['currentUser/isSpaceMember']() },
@@ -1219,6 +1209,10 @@ export default {
         this.focusName(position)
         this.$store.commit('shouldPreventNextEnterKey', false)
       })
+      this.$store.dispatch('currentCards/update', {
+        id: this.card.id,
+        shouldShowOtherSpacePreviewImage: true
+      })
     },
 
     // [[Tags]]
@@ -1354,7 +1348,6 @@ export default {
       this.$store.commit('tagDetailsIsVisible', false)
     },
     hideOtherItemDetailsIsVisible () {
-      this.$store.commit('otherSpaceDetailsIsVisible', false)
       this.$store.commit('otherCardDetailsIsVisible', false)
     },
     showTagDetailsIsVisible (event, tag) {

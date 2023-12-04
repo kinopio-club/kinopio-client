@@ -16,7 +16,6 @@ main#space.space(
   BoxDetails
   CardDetails
   OtherCardDetails
-  OtherSpaceDetails
   ConnectionDetails
   CodeLanguagePicker
   MultipleSelectedActions
@@ -29,7 +28,6 @@ main#space.space(
 import Card from '@/components/Card.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
-import OtherSpaceDetails from '@/components/dialogs/OtherSpaceDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
@@ -69,8 +67,7 @@ export default {
     Boxes,
     Cards,
     LockedItemButtons,
-    Connections,
-    OtherSpaceDetails
+    Connections
   },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')

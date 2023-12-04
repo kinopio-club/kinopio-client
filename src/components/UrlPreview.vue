@@ -1,22 +1,165 @@
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
+
+import { nanoid } from 'nanoid'
+const store = useStore()
+
+let position
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerUpdateUrlPreviewComplete') {
+      const cards = store.state.prevNewTweetCards
+      store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
+    }
+  })
+})
+
+const emit = defineEmits(['toggleUrlsIsVisible'])
+
+const props = defineProps({
+  visible: Boolean,
+  loading: Boolean,
+  card: Object,
+  isSelected: Boolean,
+  user: Object,
+  urlsIsVisibleInName: Boolean
+})
+const state = reactive({
+  imageCanLoad: false,
+  moreOptionsIsVisible: false
+})
+
+const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const cardIsCreatedByCurrentUser = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](props.card))
+const canEditCard = computed(() => {
+  if (isSpaceMember.value) { return true }
+  if (canEditSpace.value && cardIsCreatedByCurrentUser.value) { return true }
+  return false
+})
+const selectedColor = computed(() => {
+  if (!props.isSelected) { return }
+  return props.user.color
+})
+
+const previewHasInfo = computed(() => Boolean(props.card.urlPreviewTitle || props.card.urlPreviewDescription))
+const isTextOnly = computed(() => shouldHideImage.value || !props.card.urlPreviewImage)
+const filteredTitle = computed(() => {
+  let title = props.card.urlPreviewTitle
+  if (!title) { return }
+  title = title.replace('on Twitter', '')
+  return title
+})
+const description = computed(() => {
+  const url = props.card.urlPreviewUrl
+  const isTwitterUrl = url.includes('twitter.com')
+  if (isTwitterUrl) {
+    let description = props.card.urlPreviewDescription
+    return utils.truncated(description, 350)
+  }
+  return null
+})
+
+// preview image
+
+const shouldLoadUrlPreviewImage = computed(() => props.card.urlPreviewImage && state.imageCanLoad)
+const previewHasImage = computed(() => Boolean(props.card.urlPreviewImage))
+const updateImageCanLoad = () => {
+  state.imageCanLoad = true
+}
+const updateDimensions = () => {
+  store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
+}
+
+// show options
+
+const toggleUrlsIsVisible = () => {
+  emit('toggleUrlsIsVisible')
+}
+const toggleMoreOptionsIsVisible = () => {
+  const value = !state.moreOptionsIsVisible
+  state.moreOptionsIsVisible = value
+}
+const shouldHideInfo = computed(() => props.card.shouldHideUrlPreviewInfo)
+const shouldHideImage = computed(() => props.card.shouldHideUrlPreviewImage)
+const isShowAll = computed(() => {
+  if (isShowNone.value) { return }
+  return !shouldHideImage.value && !shouldHideInfo.value
+})
+const isShowImage = computed(() => {
+  if (isShowNone.value) { return }
+  return shouldHideInfo.value && !shouldHideImage.value
+})
+const isShowInfo = computed(() => {
+  if (isShowNone.value) { return }
+  return shouldHideImage.value && !shouldHideInfo.value
+})
+const isShowNone = computed(() => !props.card.urlPreviewIsVisible)
+const showAll = () => {
+  const card = {
+    id: props.card.id,
+    urlPreviewIsVisible: true,
+    shouldHideUrlPreviewInfo: false,
+    shouldHideUrlPreviewImage: false
+  }
+  store.dispatch('currentCards/update', card)
+}
+const showImage = () => {
+  const card = {
+    id: props.card.id,
+    urlPreviewIsVisible: true,
+    shouldHideUrlPreviewInfo: true,
+    shouldHideUrlPreviewImage: false
+  }
+  store.dispatch('currentCards/update', card)
+}
+const showInfo = () => {
+  const card = {
+    id: props.card.id,
+    urlPreviewIsVisible: true,
+    shouldHideUrlPreviewInfo: false,
+    shouldHideUrlPreviewImage: true
+  }
+  store.dispatch('currentCards/update', card)
+}
+const showNone = async () => {
+  const card = {
+    id: props.card.id,
+    urlPreviewIsVisible: false,
+    shouldHideUrlPreviewInfo: false,
+    shouldHideUrlPreviewImage: false
+  }
+  store.dispatch('currentCards/update', card)
+  store.commit('removeUrlPreviewLoadingForCardIds', props.card.id)
+  await nextTick()
+  store.dispatch('currentConnections/updatePaths', { cardId: props.card.id, shouldUpdateApi: true })
+}
+</script>
+
 <template lang="pug">
 .row.url-preview(v-if="visible")
   Loader(:visible="loading")
   template(v-if="!loading")
-    .preview-content(:style="{background: selectedColor}" :class="{'no-padding': shouldHideInfo && !shouldHideImage, 'is-no-info': !previewHasInfo}")
+    .preview-content(:style="{background: selectedColor}" :class="{'no-padding': shouldHideInfo && !shouldHideImage, 'is-no-info': !previewHasInfo, 'min-height': state.moreOptionsIsVisible }")
       //- card details buttons
       .content-buttons(v-if="canEditCard")
         .row
           //- hide url
-          .button-wrap
+          .button-wrap(v-if="state.moreOptionsIsVisible")
             button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}")
               img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
               img.icon(v-else src="@/assets/view.svg")
               span Hide URL
           .button-wrap
-            button.icon-only-button(@click.stop="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
+            button.small-button(@click.stop="toggleMoreOptionsIsVisible" :class="{active: state.moreOptionsIsVisible}")
               img.icon.down-arrow(src="@/assets/down-arrow.svg")
         //- all, image, text, none
-        .row(v-if="previewHasInfo && moreOptionsIsVisible")
+        .row(v-if="previewHasInfo && state.moreOptionsIsVisible")
           .segmented-buttons
             button(v-if="previewHasImage && previewHasInfo" @click="showAll" :class="{active : isShowAll}")
               span All
@@ -26,7 +169,6 @@
               span Text
             button(@click="showNone" :class="{active : isShowNone}")
               span None
-
       //- image
       img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
       a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': !shouldHideInfo, transparent: isShowNone}")
@@ -39,163 +181,7 @@
             img.icon.favicon.open(v-else src="@/assets/open.svg")
             .title {{filteredTitle}}
           .description(v-if="description") {{description}}
-
 </template>
-
-<script>
-import Loader from '@/components/Loader.vue'
-import utils from '@/utils.js'
-
-import { nanoid } from 'nanoid'
-
-let position
-
-export default {
-  name: 'UrlPreview',
-  components: {
-    Loader
-  },
-  props: {
-    visible: Boolean,
-    loading: Boolean,
-    card: Object,
-    isSelected: Boolean,
-    user: Object,
-    urlsIsVisibleInName: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerUpdateUrlPreviewComplete') {
-        const cards = this.$store.state.prevNewTweetCards
-        this.$store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
-      }
-    })
-  },
-  data () {
-    return {
-      imageCanLoad: false,
-      moreOptionsIsVisible: false
-    }
-  },
-  computed: {
-    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
-    cardIsCreatedByCurrentUser () { return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card) },
-    canEditCard () {
-      if (this.isSpaceMember) { return true }
-      if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
-      return false
-    },
-    shouldHideInfo () {
-      return this.card.shouldHideUrlPreviewInfo
-    },
-    shouldHideImage () {
-      return this.card.shouldHideUrlPreviewImage
-    },
-    isTextOnly () {
-      return this.shouldHideImage || !this.card.urlPreviewImage
-    },
-    selectedColor () {
-      if (!this.isSelected) { return }
-      return this.user.color
-    },
-    filteredTitle () {
-      let title = this.card.urlPreviewTitle
-      if (!title) { return }
-      title = title.replace('on Twitter', '')
-      return title
-    },
-    description () {
-      const url = this.card.urlPreviewUrl
-      const isTwitterUrl = url.includes('twitter.com')
-      if (isTwitterUrl) {
-        let description = this.card.urlPreviewDescription
-        return utils.truncated(description, 350)
-      }
-      return null
-    },
-    shouldLoadUrlPreviewImage () {
-      return this.card.urlPreviewImage && this.imageCanLoad
-    },
-    previewHasInfo () {
-      return Boolean(this.card.urlPreviewTitle || this.card.urlPreviewDescription)
-    },
-    previewHasImage () {
-      return Boolean(this.card.urlPreviewImage)
-    },
-    isShowAll () {
-      if (this.isShowNone) { return }
-      return !this.shouldHideImage && !this.shouldHideInfo
-    },
-    isShowImage () {
-      if (this.isShowNone) { return }
-      return this.shouldHideInfo && !this.shouldHideImage
-    },
-    isShowInfo () {
-      if (this.isShowNone) { return }
-      return this.shouldHideImage && !this.shouldHideInfo
-    },
-    isShowNone () {
-      return !this.card.urlPreviewIsVisible
-    }
-  },
-  methods: {
-    toggleMoreOptionsIsVisible () {
-      const value = !this.moreOptionsIsVisible
-      this.moreOptionsIsVisible = value
-    },
-    toggleUrlsIsVisible () {
-      this.$emit('toggleUrlsIsVisible')
-    },
-    updateImageCanLoad () {
-      this.imageCanLoad = true
-    },
-    updateDimensions () {
-      this.$store.dispatch('currentCards/updateDimensions', { cards: [this.card] })
-    },
-    showAll () {
-      const card = {
-        id: this.card.id,
-        urlPreviewIsVisible: true,
-        shouldHideUrlPreviewInfo: false,
-        shouldHideUrlPreviewImage: false
-      }
-      this.$store.dispatch('currentCards/update', card)
-    },
-    showImage () {
-      const card = {
-        id: this.card.id,
-        urlPreviewIsVisible: true,
-        shouldHideUrlPreviewInfo: true,
-        shouldHideUrlPreviewImage: false
-      }
-      this.$store.dispatch('currentCards/update', card)
-    },
-    showInfo () {
-      const card = {
-        id: this.card.id,
-        urlPreviewIsVisible: true,
-        shouldHideUrlPreviewInfo: false,
-        shouldHideUrlPreviewImage: true
-      }
-      this.$store.dispatch('currentCards/update', card)
-    },
-    showNone () {
-      const card = {
-        id: this.card.id,
-        urlPreviewIsVisible: false,
-        shouldHideUrlPreviewInfo: false,
-        shouldHideUrlPreviewImage: false
-      }
-      this.$store.dispatch('currentCards/update', card)
-      this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
-      this.$nextTick(() => {
-        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
-      })
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .url-preview
@@ -217,7 +203,8 @@ export default {
     background var(--secondary-hover-background)
     border-radius var(--entity-radius)
     padding var(--subsection-padding)
-    min-height 80px
+    &.min-height
+      min-height 78px
     &.no-padding
       padding 0
     &.is-no-info
@@ -242,7 +229,6 @@ export default {
 
   .text
     position absolute
-    margin 8px
     background var(--secondary-hover-background)
     user-select text
     display flex
@@ -260,7 +246,7 @@ export default {
     max-width calc(100% - 24px)
     position static
     margin 0
-    padding 4px
+    padding 0
     display block
 
   .favicon
@@ -296,19 +282,11 @@ export default {
     button
       cursor pointer
 
-  button
-    &:disabled
-      opacity 1
-      background-color var(--secondary-background)
-      border-color var(--primary-transparent)
-      img,
-      span
-        opacity 0.5
-
   .transparent
     opacity 0.5
 
-  .icon-only-button
-    img
-      padding 0
+  .icon.down-arrow
+    padding-right 3px
+    vertical-align 2px
+
 </style>

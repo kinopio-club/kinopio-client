@@ -137,7 +137,7 @@ article.card-wrap#card(
                 img.connector-icon(src="@/assets/connector-closed-in-card.svg")
               //- template(v-else)
               //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || otherCardIsVisible" :class="{'is-image-card': isImageCard}")
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="cardUrlPreviewIsVisible")
         UrlPreviewCard(
           :visible="true"
@@ -152,6 +152,14 @@ article.card-wrap#card(
         )
       template(v-if="otherCardIsVisible")
         OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldCloseAllDialogs="true")
+      template(v-else-if="otherSpaceIsVisible")
+        OtherSpacePreviewCard(
+          :otherSpace="otherSpace"
+          :url="otherSpaceUrl"
+          :card="card"
+          :isSelected="isSelectedOrDragging"
+          :selectedColor="selectedColor"
+        )
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -210,6 +218,7 @@ import NameSegment from '@/components/NameSegment.vue'
 import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
+import OtherSpacePreviewCard from '@/components/OtherSpacePreviewCard.vue'
 import CardCounter from '@/components/CardCounter.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
@@ -244,6 +253,7 @@ export default {
     ImageOrVideo,
     NameSegment,
     UrlPreviewCard,
+    OtherSpacePreviewCard,
     UserLabelInline,
     OtherCardPreview,
     CardCounter
@@ -410,12 +420,30 @@ export default {
     urlPreviewImageIsVisible () {
       return Boolean(this.cardUrlPreviewIsVisible && this.card.urlPreviewImage && !this.card.shouldHideUrlPreviewImage)
     },
+
+    // other card
+
     otherCardIsVisible () { return Boolean(this.card.linkToCardId) },
     otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
     otherCard () {
       const card = this.$store.getters.otherCardById(this.card.linkToCardId)
       return card
     },
+
+    // other space
+
+    otherSpaceIsVisible () { return Boolean(this.card.linkToSpaceId) },
+    otherSpace () {
+      let isInviteLink, collaboratorKey, readOnlyKey
+      let space = this.nameSegments.find(segment => segment.otherSpace)
+      if (!space) { return }
+      return space.otherSpace
+    },
+    otherSpaceUrl () {
+      let segment = this.nameSegments.find(segment => segment.otherSpace)
+      return segment?.name
+    },
+
     isConnectorDarkInLightTheme () {
       if (this.connectionTypeColorisDark) { return this.connectionTypeColorisDark }
       return this.isDarkInLightTheme

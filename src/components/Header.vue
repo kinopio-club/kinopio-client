@@ -651,7 +651,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               SpaceTodayJournalBadge(:space="currentSpace")
               MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
               span {{currentSpaceName}}
-              PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
+                PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
               img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
               img.icon.view-hidden(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
             SpaceDetails(:visible="state.spaceDetailsIsVisible")

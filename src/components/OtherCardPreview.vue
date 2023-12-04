@@ -89,7 +89,6 @@ const showOtherCardDetailsIsVisible = async (event) => {
   store.commit('otherCardDetailsIsVisible', true)
   store.commit('triggerCancelLocking')
   store.commit('currentUserIsDraggingCard', false)
-  store.commit('otherSpaceDetailsIsVisible', false)
   event.stopPropagation()
   // broadcast
   const updates = {

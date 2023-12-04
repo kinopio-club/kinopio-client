@@ -5,7 +5,6 @@ import { useStore } from 'vuex'
 import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
 import SystemCommand from '@/components/SystemCommand.vue'
-import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import CodeBlock from '@/components/CodeBlock.vue'
 import utils from '@/utils.js'
 
@@ -129,12 +128,6 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   //- Tags
   template(v-if="props.segment.isTag")
     Tag(:tag="props.segment" :isClickable="true" :isActive="currentSelectedTag.name === props.segment.name" @clickTag="showTagDetailsIsVisible")
-  //- Invite
-  template(v-if="props.segment.isInviteLink")
-    OtherSpacePreview(:isInvite="true" :otherSpace="props.segment.otherSpace" :url="props.segment.name" :parentCardId="props.parentCardId" :shouldCloseAllDialogs="true")
-  //- Other Space
-  template(v-if="isSpaceLink(props.segment)")
-    OtherSpacePreview(:otherSpace="props.segment.otherSpace" :url="props.segment.name" :parentCardId="props.parentCardId" :shouldCloseAllDialogs="true")
   //- File
   span.badge.secondary-on-dark-background(v-if="props.segment.isFile")
     img.icon(src="@/assets/file.svg")

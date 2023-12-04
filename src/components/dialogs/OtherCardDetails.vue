@@ -147,7 +147,7 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
     template(v-if="otherCard.id")
       //- space
       .row
-        OtherSpacePreview(:otherSpace="otherSpace" :isNotClickable="true")
+        OtherSpacePreview(:otherSpace="otherSpace" :isStatic="true")
       //- edit
       template(v-if="canEdit")
         section.subsection.textarea-wrap
@@ -207,4 +207,6 @@ dialog.other-card-details
     p
       word-wrap break-word
       width 100%
+  .other-space-preview
+    pointer-events none
 </style>

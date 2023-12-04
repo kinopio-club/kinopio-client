@@ -439,13 +439,13 @@ export default {
     margin 0
     margin-top 1px
     white-space wrap
-    overflow hidden
+    width 100%
     .icon
       margin-left 6px
 
   .privacy-icon
     height 12px
-    vertical-align -2px
+    vertical-align -1px
 
   .favorite-icon,
   .inbox-icon
