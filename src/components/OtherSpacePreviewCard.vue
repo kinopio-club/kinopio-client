@@ -10,50 +10,52 @@ const store = useStore()
 const props = defineProps({
   otherSpace: Object,
   url: String,
-  parentCardId: String,
-  isInvite: Boolean,
-  screenshotIsVisible: Boolean,
+  card: Object,
   isSelected: Boolean,
   selectedColor: String
 })
+
+const updateDimensions = () => {
+  store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
+}
+
+// space info
 
 const otherSpaceIsPrivate = computed(() => {
   if (!props.otherSpace.privacy) { return }
   return props.otherSpace.privacy === 'private'
 })
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
-
-const isActive = computed(() => {
-  const isFromParentCard = store.state.currentSelectedOtherItem.parentCardId === props.parentCardId
-  const otherSpaceDetailsIsVisible = store.state.otherSpaceDetailsIsVisible
-  return otherSpaceDetailsIsVisible && isFromParentCard
-})
-
 const otherSpaceName = computed(() => {
   let name = props.otherSpace.name
   return name
 })
-
 const isRemoved = computed(() => {
   const space = props.otherSpace
   if (!space) { return }
   return space.isRemoved
 })
+const urlIsInvite = computed(() => utils.urlIsInvite(props.url))
 
-const isScreenshotVisible = computed(() => props.screenshotIsVisible && props.otherSpace.screenshotUrl)
+// preivew image
+
+const previewImageIsVisible = computed(() => props.card.otherSpaceScreenshotIsVisible)
+const previewImageUrl = computed(() => props.otherSpace?.screenshotUrl)
+const shouldShowPreviewImage = computed(() => previewImageIsVisible.value && previewImageUrl.value)
+
 </script>
 
 <template lang="pug">
-a.other-space-preview-card(@click.prevent.stop.left :href="props.url" ref="badge")
-  template(v-if="isScreenshotVisible")
+.other-space-preview-card
+  template(v-if="shouldShowPreviewImage")
     .preview-image-wrap
-      img.preview-image(:src="props.otherSpace.screenshotUrl" :class="{selected: props.isSelected}" @load="updateDimensions" ref="image")
+      img.preview-image(:src="previewImageUrl" :class="{selected: props.isSelected}" @load="updateDimensions" ref="image")
 
-  .badge.link-badge(:class="{ active: isActive, 'is-screenshot-visible': isScreenshotVisible }" :style="{ background: props.selectedColor }")
-    template(v-if="props.isInvite")
-      .badge.info.invite-badge Invite
+  .badge.link-badge(:class="{ 'preview-image-is-visible': shouldShowPreviewImage }" :style="{ background: props.selectedColor }")
+    template(v-if="urlIsInvite")
+      .badge.info.inline-badge Invite
     template(v-if="isRemoved")
-      .badge.danger
+      .badge.danger.inline-badge
         img.icon(src="@/assets/remove.svg")
     template(v-if="props.otherSpace")
       template(v-if="props.otherSpace.users")
@@ -62,8 +64,7 @@ a.other-space-preview-card(@click.prevent.stop.left :href="props.url" ref="badge
       img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
     template(v-else)
       Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")
-      span Loading…
-
+      span Space…
 </template>
 
 <style lang="stylus">
@@ -73,12 +74,12 @@ a.other-space-preview-card(@click.prevent.stop.left :href="props.url" ref="badge
   > .badge
     display block
     margin 0
-  .invite-badge
+  .inline-badge
     display inline-block
     margin-right 6px
   .user-label-inline
     margin-right 6px
-  .is-screenshot-visible
+  .preview-image-is-visible
     border-top-left-radius 0
     border-top-right-radius 0
     padding var(--subsection-padding)

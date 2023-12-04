@@ -1478,6 +1478,15 @@ export default {
       return id
     }
   },
+  spaceUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey }) {
+    let url
+    if (collaboratorKey || readOnlyKey) {
+      url = this.inviteUrl({ spaceId, spaceName, collaboratorKey, readOnlyKey })
+    } else {
+      url = this.url({ name: spaceName, id: spaceId })
+    }
+    return url
+  },
   spaceAndCardIdFromUrl (url) {
     url = new URL(url)
     return this.spaceAndCardIdFromPath(url.pathname) // /spaceId/cardId

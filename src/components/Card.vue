@@ -156,9 +156,7 @@ article.card-wrap#card(
         OtherSpacePreviewCard(
           :otherSpace="otherSpace"
           :url="otherSpaceUrl"
-          :parentCardId="card.id"
-          :screenshotIsVisible="card.otherSpaceScreenshotIsVisible"
-          :isInvite="otherSpace.isInvite"
+          :card="card"
           :isSelected="isSelectedOrDragging"
           :selectedColor="selectedColor"
         )
@@ -434,35 +432,16 @@ export default {
 
     // other space
 
-    otherSpaceIsVisible () { return Boolean(this.otherSpace) },
+    otherSpaceIsVisible () { return Boolean(this.card.linkToSpaceId) },
     otherSpace () {
       let isInviteLink, collaboratorKey, readOnlyKey
-      let space = this.nameSegments.find(segment => {
-        if (segment.otherSpace) {
-          isInviteLink = segment.isInviteLink
-          collaboratorKey = segment.collaboratorKey
-          readOnlyKey = segment.readOnlyKey
-        }
-        return segment.otherSpace
-      })
+      let space = this.nameSegments.find(segment => segment.otherSpace)
       if (!space) { return }
-      space = space.otherSpace
-      space = utils.clone(space)
-      space.isInvite = isInviteLink
-      space.collaboratorKey = collaboratorKey
-      space.readOnlyKey = readOnlyKey
-      return space
+      return space.otherSpace
     },
     otherSpaceUrl () {
-      let url
-      const space = this.otherSpace
-      if (!space) { return }
-      if (space.isInvite) {
-        url = utils.inviteUrl({ spaceId: space.id, spaceName: space.name, collaboratorKey: space.collaboratorKey, readOnlyKey: space.readOnlyKey })
-      } else {
-        url = utils.urlFromSpaceAndCard({ spaceId: space.id })
-      }
-      return url
+      let segment = this.nameSegments.find(segment => segment.otherSpace)
+      return segment?.name
     },
 
     isConnectorDarkInLightTheme () {

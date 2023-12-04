@@ -71,9 +71,6 @@ const changeSpace = () => {
   store.commit('closeAllDialogs')
   store.dispatch('currentSpace/changeSpace', props.otherSpace)
 }
-const updateDimensions = () => {
-  store.dispatch('currentCards/updateDimensions', { cards: [card.value] })
-}
 
 </script>
 
@@ -99,7 +96,7 @@ const updateDimensions = () => {
       //- img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
       a.preview-image-wrap.side-image(v-if="isScreenshotVisible" :href="url" @click.stop.prevent="changeSpace")
         //- TODO @click change space
-        img.preview-image.clickable-item(:src="otherSpace.screenshotUrl" @load="updateDimensions")
+        img.preview-image.clickable-item(:src="otherSpace.screenshotUrl")
       .row.info-row(:style="{background: selectedColor}")
         div
           template(v-if="props.isInvite")
