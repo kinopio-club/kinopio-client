@@ -50,7 +50,7 @@ const isRemoved = computed(() => {
 
 const previewImageIsVisible = computed(() => {
   if (!props.otherSpace) { return }
-  return card.value.shouldShowOtherSpacePreviewImage && props.otherSpace.screenshotUrl
+  return card.value.shouldShowOtherSpacePreviewImage && props.otherSpace.previewImage
 })
 
 const toggleMoreOptionsIsVisible = () => {
@@ -79,24 +79,21 @@ const changeSpace = () => {
   Loader(:visible="loading")
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}")
-      //- card details buttons
-      .content-buttons(v-if="canEditCard && otherSpace.screenshotUrl")
+      //- buttons
+      .content-buttons(v-if="canEditCard && otherSpace.previewImage")
         .row
           .button-wrap
             button.icon-only-button(@click.stop="toggleMoreOptionsIsVisible" :class="{active: state.moreOptionsIsVisible}")
               img.icon.down-arrow(src="@/assets/down-arrow.svg")
-        //- all, text, none
+        //- all, text
         .row(v-if="state.moreOptionsIsVisible")
           .segmented-buttons
             button(@click="togglePreviewImageIsVisible(true)" :class="{active : previewImageIsVisible}")
               span All
             button(@click="togglePreviewImageIsVisible(false)" :class="{active : !previewImageIsVisible}")
               span Text
-
-      //- img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
       a.preview-image-wrap.side-image(v-if="previewImageIsVisible" :href="url" @click.stop.prevent="changeSpace")
-        //- TODO @click change space
-        img.preview-image.clickable-item(:src="otherSpace.screenshotUrl")
+        img.preview-image.clickable-item(:src="otherSpace.previewImage")
       .row.info-row(:style="{background: selectedColor}")
         div
           template(v-if="props.isInvite")
@@ -107,58 +104,9 @@ const changeSpace = () => {
             span {{otherSpaceName}}
               img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
 
-  //- template(v-if="isScreenshotVisible")
-  //-   .preview-image-wrap
-  //-     img.preview-image(:src="props.otherSpace.screenshotUrl" :class="{selected: props.isSelected}" @load="updateDimensions" ref="image")
-
-  //- .badge.link-badge(:class="{ active: isActive, 'is-screenshot-visible': isScreenshotVisible }" :style="{ background: props.selectedColor }")
-  //-   template(v-if="props.isInvite")
-  //-     .badge.info.invite-badge Invite
-  //-   template(v-if="isRemoved")
-  //-     .badge.danger
-  //-       img.icon(src="@/assets/remove.svg")
-  //-   template(v-if="props.otherSpace")
-  //-     template(v-if="props.otherSpace.users")
-  //-       UserLabelInline(:user="props.otherSpace.users[0]" :shouldHideName="true")
-  //-     span {{otherSpaceName}}
-  //-     img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
-  //-   template(v-else)
-  //-     Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")
-  //-     span Loading…
-
 </template>
 
 <style lang="stylus">
-// .other-space-preview
-
-//   text-decoration none
-//   margin 0
-//   > .badge
-//     display block
-//     margin 0
-//     margin-right 6px
-//   .user-label-inline
-//     margin-right 6px
-//   .is-screenshot-visible
-//     border-top-left-radius 0
-//     border-top-right-radius 0
-//     padding var(--subsection-padding)
-
-//   // from UrlPreviewCard
-//   .preview-image-wrap
-//     display flex
-//   .preview-image
-//     width 100%
-//     border-radius var(--entity-radius)
-//     background var(--primary-background)
-//     pointer-events none
-//     -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
-//     border-bottom-left-radius 0
-//     border-bottom-right-radius 0
-//     &.selected
-//       mix-blend-mode color-burn
-//   .anon-avatar
-//     top 6px !important
 .other-space-preview
   max-height 148px
   overflow hidden
@@ -210,44 +158,6 @@ const changeSpace = () => {
     min-height initial
   .anon-avatar
     top 6px !important
-
-  // .text
-  //   // position absolute
-  //   margin 8px
-  //   background var(--secondary-hover-background)
-  //   user-select text
-  //   display flex
-  //   top 0
-  //   overflow hidden
-  //   // &.text-with-image
-  //   //   border-radius var(--entity-radius)
-  //   //   bottom 0
-  //   // &.text-only
-  //   //   position relative
-  //   //   margin 0
-  //   //   border-radius var(--entity-radius)
-
-  // .side-text
-  //   max-width calc(100% - 24px)
-  //   position static
-  //   margin 0
-  //   padding 4px
-  //   display block
-
-  // .favicon
-  //   border-radius var(--small-entity-radius)
-  //   width 14px
-  //   vertical-align -3px
-  //   display inline
-  //   margin-right 5px
-  //   margin-top 3px
-  //   &.open
-  //     width 12px
-  //     vertical-align -2px
-  // .title
-  //   display inline
-  // .description
-  //   margin-top 10px
 
   .content-buttons
     z-index 1

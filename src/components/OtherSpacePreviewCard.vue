@@ -40,8 +40,8 @@ const urlIsInvite = computed(() => utils.urlIsInvite(props.url))
 // preivew image
 
 const shouldShowPreviewImage = computed(() => props.card.shouldShowOtherSpacePreviewImage)
-const previewImageUrl = computed(() => props.otherSpace?.screenshotUrl)
-const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && previewImageUrl.value)
+const previewImage = computed(() => props.otherSpace?.previewImage)
+const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && previewImage.value)
 
 </script>
 
@@ -49,7 +49,7 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
 .other-space-preview-card
   //- preview image
   .preview-image-wrap(v-if="previewImageIsVisible")
-    img.preview-image(:src="previewImageUrl" :class="{selected: props.isSelected}" @load="updateDimensions" ref="image")
+    img.preview-image(:src="previewImage" :class="{selected: props.isSelected}" @load="updateDimensions" ref="image")
   .badge.link-badge(:class="{ 'preview-image-is-visible': previewImageIsVisible }" :style="{ background: props.selectedColor }")
     //- badges
     template(v-if="urlIsInvite")
