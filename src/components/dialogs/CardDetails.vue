@@ -1213,7 +1213,7 @@ export default {
       })
       this.$store.dispatch('currentCards/update', {
         id: this.card.id,
-        otherSpaceScreenshotIsVisible: true
+        shouldShowOtherSpacePreviewImage: true
       })
     },
 

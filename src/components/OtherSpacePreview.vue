@@ -50,7 +50,7 @@ const isRemoved = computed(() => {
 
 const previewImageIsVisible = computed(() => {
   if (!props.otherSpace) { return }
-  return card.value.otherSpaceScreenshotIsVisible && props.otherSpace.screenshotUrl
+  return card.value.shouldShowOtherSpacePreviewImage && props.otherSpace.screenshotUrl
 })
 
 const toggleMoreOptionsIsVisible = () => {
@@ -60,7 +60,7 @@ const toggleMoreOptionsIsVisible = () => {
 const togglePreviewImageIsVisible = (value) => {
   store.dispatch('currentCards/update', {
     id: props.parentCardId,
-    otherSpaceScreenshotIsVisible: value
+    shouldShowOtherSpacePreviewImage: value
   })
 }
 

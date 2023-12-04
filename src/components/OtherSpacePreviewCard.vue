@@ -39,7 +39,7 @@ const urlIsInvite = computed(() => utils.urlIsInvite(props.url))
 
 // preivew image
 
-const shouldShowPreviewImage = computed(() => props.card.otherSpaceScreenshotIsVisible)
+const shouldShowPreviewImage = computed(() => props.card.shouldShowOtherSpacePreviewImage)
 const previewImageUrl = computed(() => props.otherSpace?.screenshotUrl)
 const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && previewImageUrl.value)
 

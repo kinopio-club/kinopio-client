@@ -517,12 +517,12 @@ const self = {
         context.dispatch('handleServerError', { name: 'createSpace', error })
       }
     },
-    createSpaceScreenshot: async (context, spaceId) => {
+    createSpacePreviewImage: async (context, spaceId) => {
       try {
         spaceId = spaceId || context.rootState.currentSpace.id
         const body = { spaceId }
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/space/screenshot`, options)
+        const response = await fetch(`${host}/space/preview-image`, options)
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'createSpace', error, shouldNotNotifyUser: false })
