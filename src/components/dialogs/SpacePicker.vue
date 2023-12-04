@@ -56,6 +56,8 @@ import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import fuzzy from '@/libs/fuzzy.js'
+import dayjs from 'dayjs'
+import sortBy from 'lodash-es/sortBy'
 
 import { defineAsyncComponent } from 'vue'
 const User = defineAsyncComponent({
@@ -120,7 +122,8 @@ export default {
     },
     filteredSpaces () {
       if (!this.parentIsCardDetails) { return this.spaces }
-      let spaces = this.spaces.filter(space => {
+      let spaces = this.sortByRecentlyUpdated(this.spaces)
+      spaces = spaces.filter(space => {
         return space.name !== this.search
       })
       const options = {
@@ -142,6 +145,11 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
+    sortByRecentlyUpdated (spaces) {
+      let sorted = sortBy(spaces, space => dayjs(space.updatedAt))
+      sorted = sorted.reverse()
+      return sorted
+    },
     handleFocusBeforeFirstItem () {
       if (this.newSpaceIsVisible) { return }
       this.toggleNewSpaceIsVisible()
