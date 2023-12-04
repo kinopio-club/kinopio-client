@@ -48,14 +48,20 @@ const isRemoved = computed(() => {
   return space.isRemoved
 })
 
-const isScreenshotVisible = computed(() => {
+const previewImageIsVisible = computed(() => {
   if (!props.otherSpace) { return }
-  return props.screenshotIsVisible && props.otherSpace.screenshotUrl
+  return card.value.otherSpaceScreenshotIsVisible && props.otherSpace.screenshotUrl
 })
 
 const toggleMoreOptionsIsVisible = () => {
   const value = !state.moreOptionsIsVisible
   state.moreOptionsIsVisible = value
+}
+const togglePreviewImageIsVisible = (value) => {
+  store.dispatch('currentCards/update', {
+    id: props.parentCardId,
+    otherSpaceScreenshotIsVisible: value
+  })
 }
 
 const changeSpace = () => {
@@ -82,13 +88,13 @@ const changeSpace = () => {
         //- all, text, none
         .row(v-if="state.moreOptionsIsVisible")
           .segmented-buttons
-            button(@click="showAll" :class="{active : isScreenshotVisible}")
+            button(@click="togglePreviewImageIsVisible(true)" :class="{active : previewImageIsVisible}")
               span All
-            button(@click="showInfo" :class="{active : !isScreenshotVisible}")
+            button(@click="togglePreviewImageIsVisible(false)" :class="{active : !previewImageIsVisible}")
               span Text
 
       //- img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
-      a.preview-image-wrap.side-image(v-if="isScreenshotVisible" :href="url" @click.stop.prevent="changeSpace")
+      a.preview-image-wrap.side-image(v-if="previewImageIsVisible" :href="url" @click.stop.prevent="changeSpace")
         //- TODO @click change space
         img.preview-image.clickable-item(:src="otherSpace.screenshotUrl")
       .row.info-row(:style="{background: selectedColor}")
