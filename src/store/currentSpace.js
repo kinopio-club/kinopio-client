@@ -181,17 +181,17 @@ const currentSpace = {
       context.commit('triggerUpdateWindowHistory', null, { root: true })
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
-    createScreenshot: async (context) => {
+    createSpacePreviewImage: async (context) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       try {
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
         context.dispatch('currentBoxes/updateInfoDimensions', {}, { root: true })
-        console.log('🙈 create screenshot')
+        console.log('🙈 create space preview image')
         const response = await context.dispatch('api/createSpacePreviewImage', context.state.id, { root: true })
-        console.log('🙈 updated screenshot', response.urls)
+        console.log('🙈 updated space preview image', response.urls)
       } catch (error) {
-        console.warn('🚑 createScreenshot', error)
+        console.warn('🚑 createSpacePreviewImage', error)
       }
     },
 
@@ -761,7 +761,7 @@ const currentSpace = {
       })
       context.commit('isLoadingSpace', false, { root: true })
       setTimeout(() => {
-        context.dispatch('createScreenshot')
+        context.dispatch('createSpacePreviewImage')
       }, 3000)
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
@@ -875,7 +875,7 @@ const currentSpace = {
     },
     changeSpace: async (context, space) => {
       context.commit('prevSpaceIdInSession', context.state.id, { root: true })
-      context.dispatch('createScreenshot') // screenshots prev space
+      context.dispatch('createSpacePreviewImage') // screenshots prev space
       console.log('🚟 Change space', space)
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('notifySpaceNotFound', false, { root: true })

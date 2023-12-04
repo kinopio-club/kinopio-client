@@ -52,11 +52,10 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
     img.preview-image(:src="previewImage" :class="{selected: props.isSelected}" @load="updateDimensions" ref="image")
   .badge.link-badge(:class="{ 'preview-image-is-visible': previewImageIsVisible }" :style="{ background: props.selectedColor }")
     //- badges
-    template(v-if="urlIsInvite")
-      .badge.info.inline-badge Invite
-    template(v-if="isRemoved")
-      .badge.danger.inline-badge
-        img.icon(src="@/assets/remove.svg")
+    .badge.info.inline-badge(v-if="urlIsInvite")
+      span Invite
+    .badge.danger.inline-badge(v-if="isRemoved")
+      img.icon(src="@/assets/remove.svg")
     //- space info
     template(v-if="props.otherSpace")
       template(v-if="props.otherSpace.users")
@@ -85,6 +84,9 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
     border-top-right-radius 0
     padding var(--subsection-padding)
 
+  .anon-avatar
+    top 6px !important
+
   // from UrlPreviewCard
   .preview-image-wrap
     display flex
@@ -98,6 +100,4 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
     border-bottom-right-radius 0
     &.selected
       mix-blend-mode color-burn
-  .anon-avatar
-    top 6px !important
 </style>

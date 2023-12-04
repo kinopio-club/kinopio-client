@@ -137,7 +137,11 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
     )
     //- other space
     template(v-if="otherSpaceIsVisible")
-      OtherSpacePreview(:otherSpace="otherSpace" :url="otherSpaceUrl" :parentCardId="card.id" :isInvite="inviteIsVisible" :screenshotIsVisible="true")
+      OtherSpacePreview(
+        :otherSpace="otherSpace"
+        :url="otherSpaceUrl"
+        :card="card"
+      )
 
     //- Read Only
     template(v-if="!canEditCard")
@@ -406,40 +410,34 @@ export default {
       return tags
     },
 
-    // other items
+    // other card
 
-    inviteIsVisible () {
-      const isCardLink = Boolean(this.card.linkToSpaceCollaboratorKey)
-      return isCardLink && this.hasUrls
-    },
     otherCardIsVisible () {
       const isCardLink = Boolean(this.card.linkToCardId)
       return isCardLink && this.hasUrls
-    },
-    otherSpaceIsVisible () {
-      const isCardLink = Boolean(this.card.linkToSpaceId)
-      return isCardLink && this.hasUrls && this.otherSpace
     },
     otherCard () {
       const card = this.$store.getters.otherCardById(this.card.linkToCardId)
       return card
     },
+    otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
+
+    // other space
+
+    otherSpaceIsVisible () {
+      const isCardLink = Boolean(this.card.linkToSpaceId)
+      return isCardLink && this.hasUrls && this.otherSpace
+    },
     otherSpace () {
       const space = this.$store.getters.otherSpaceById(this.card.linkToSpaceId)
       return space
     },
-    otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
     otherSpaceUrl () {
-      let url
-      const spaceId = this.card.linkToSpaceId
-      if (this.inviteIsVisible) {
-        const collaboratorKey = this.card.linkToSpaceCollaboratorKey
-        const spaceName = this.otherSpace.name
-        url = utils.inviteUrl({ spaceId, spaceName, collaboratorKey })
-      } else {
-        url = utils.urlFromSpaceAndCard({ spaceId })
-      }
-      return url
+      return utils.spaceUrl({
+        spaceId: this.otherSpace.id,
+        spaceName: this.otherSpace.name,
+        collaboratorKey: this.card.linkToSpaceCollaboratorKey
+      })
     },
 
     currentUserIsSpaceMember () { return this['currentUser/isSpaceMember']() },

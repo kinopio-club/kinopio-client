@@ -116,7 +116,7 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
         NameSegment(:segment="segment")
     template(v-else)
       Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")
-      span Card…
+      span Card
 
 </template>
 

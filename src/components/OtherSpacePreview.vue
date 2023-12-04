@@ -10,100 +10,95 @@ const store = useStore()
 const props = defineProps({
   otherSpace: Object,
   url: String,
-  parentCardId: String,
-  isInvite: Boolean,
-  screenshotIsVisible: Boolean,
-  isSelected: Boolean,
-  selectedColor: String
+  card: Object,
+  isStatic: Boolean
 })
 
 const state = reactive({
   moreOptionsIsVisible: false
 })
 
-const card = computed(() => store.getters['currentCards/byId'](props.parentCardId))
-const cardIsCreatedByCurrentUser = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](card.value))
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const cardIsCreatedByCurrentUser = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](props.card))
 const canEditCard = computed(() => {
   if (isSpaceMember.value) { return true }
   if (canEditSpace.value && cardIsCreatedByCurrentUser.value) { return true }
   return false
 })
-
-const otherSpaceIsPrivate = computed(() => {
-  if (!props.otherSpace.privacy) { return }
-  return props.otherSpace.privacy === 'private'
-})
-const loading = computed(() => store.state.isLoadingOtherItems)
-
-const otherSpaceName = computed(() => {
-  let name = props.otherSpace.name
-  return name
-})
-
-const isRemoved = computed(() => {
-  const space = props.otherSpace
-  if (!space) { return }
-  return space.isRemoved
-})
-
-const previewImageIsVisible = computed(() => {
-  if (!props.otherSpace) { return }
-  return card.value.shouldShowOtherSpacePreviewImage && props.otherSpace.previewImage
-})
-
-const toggleMoreOptionsIsVisible = () => {
-  const value = !state.moreOptionsIsVisible
-  state.moreOptionsIsVisible = value
-}
-const togglePreviewImageIsVisible = (value) => {
-  store.dispatch('currentCards/update', {
-    id: props.parentCardId,
-    shouldShowOtherSpacePreviewImage: value
-  })
-}
-
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const changeSpace = () => {
-  if (utils.urlIsInvite(props.url)) {
+  if (isInvite.value) {
     window.location = props.url
   }
   store.commit('closeAllDialogs')
   store.dispatch('currentSpace/changeSpace', props.otherSpace)
 }
 
+// space info
+
+const isInvite = computed(() => utils.urlIsInvite(props.url))
+const isRemoved = computed(() => {
+  const space = props.otherSpace
+  if (!space) { return }
+  return space.isRemoved
+})
+const otherSpaceIsPrivate = computed(() => {
+  if (!props.otherSpace.privacy) { return }
+  return props.otherSpace.privacy === 'private'
+})
+
+// preview image
+
+const previewImageIsVisible = computed(() => {
+  if (!props.otherSpace) { return }
+  return props.card?.shouldShowOtherSpacePreviewImage && props.otherSpace.previewImage
+})
+const toggleMoreOptionsIsVisible = () => {
+  const value = !state.moreOptionsIsVisible
+  state.moreOptionsIsVisible = value
+}
+const togglePreviewImageIsVisible = (value) => {
+  store.dispatch('currentCards/update', {
+    id: props.card.id,
+    shouldShowOtherSpacePreviewImage: value
+  })
+}
 </script>
 
 <template lang="pug">
 .row.other-space-preview
-  Loader(:visible="loading")
-  template(v-if="!loading")
-    .preview-content(:style="{background: selectedColor}")
-      //- buttons
-      .content-buttons(v-if="canEditCard && otherSpace.previewImage")
-        .row
-          .button-wrap
-            button.icon-only-button(@click.stop="toggleMoreOptionsIsVisible" :class="{active: state.moreOptionsIsVisible}")
-              img.icon.down-arrow(src="@/assets/down-arrow.svg")
-        //- all, text
-        .row(v-if="state.moreOptionsIsVisible")
-          .segmented-buttons
-            button(@click="togglePreviewImageIsVisible(true)" :class="{active : previewImageIsVisible}")
-              span All
-            button(@click="togglePreviewImageIsVisible(false)" :class="{active : !previewImageIsVisible}")
-              span Text
-      a.preview-image-wrap.side-image(v-if="previewImageIsVisible" :href="url" @click.stop.prevent="changeSpace")
-        img.preview-image.clickable-item(:src="otherSpace.previewImage")
-      .row.info-row(:style="{background: selectedColor}")
-        div
-          template(v-if="props.isInvite")
-            .badge.info.invite-badge Invite
-          .row.info-row
-            template(v-if="otherSpace.users")
-              UserLabelInline(:user="otherSpace.users[0]" :shouldHideName="true")
-            span {{otherSpaceName}}
-              img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
-
+  .preview-content(:class="{ 'min-height': !isStatic }")
+    //- buttons
+    .content-buttons(v-if="canEditCard && otherSpace.previewImage && !isStatic")
+      .row
+        .button-wrap
+          button.icon-only-button(@click.stop="toggleMoreOptionsIsVisible" :class="{active: state.moreOptionsIsVisible}")
+            img.icon.down-arrow(src="@/assets/down-arrow.svg")
+      //- all, text
+      .row(v-if="state.moreOptionsIsVisible")
+        .segmented-buttons
+          button(@click="togglePreviewImageIsVisible(true)" :class="{active : previewImageIsVisible}")
+            span All
+          button(@click="togglePreviewImageIsVisible(false)" :class="{active : !previewImageIsVisible}")
+            span Text
+    a.preview-image-wrap.side-image(v-if="previewImageIsVisible" :href="url" @click.stop.prevent="changeSpace")
+      img.preview-image.clickable-item(:src="otherSpace.previewImage")
+    div
+      template(v-if="!isLoadingOtherItems")
+        //- badges
+        .badge.info.inline-badge(v-if="isInvite")
+          span Invite
+        .badge.danger.inline-badge(v-if="isRemoved")
+          img.icon(src="@/assets/remove.svg")
+        //- space info
+        template(v-if="otherSpace.users")
+          UserLabelInline(:user="otherSpace.users[0]" :shouldHideName="true")
+        span {{otherSpace.name}}
+          img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
+      template(v-else)
+        Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")
+        span Space
 </template>
 
 <style lang="stylus">
@@ -126,7 +121,10 @@ const changeSpace = () => {
     background var(--secondary-hover-background)
     border-radius var(--entity-radius)
     padding var(--subsection-padding)
-    min-height 80px
+    &.min-height
+      min-height 80px
+
+  // from UrlPreviewCard
   .preview-image
     display block
     width 100%
@@ -147,15 +145,16 @@ const changeSpace = () => {
   .icon.private
     margin-left 5px
 
-  .invite-badge
+  .inline-badge
     display inline-block
-    margin-bottom -10px
+    margin-right 6px
 
   .user-label-inline
     width 18px
     height 17px
     min-width initial
     min-height initial
+    vertical-align -2px
   .anon-avatar
     top 6px !important
 
@@ -172,13 +171,10 @@ const changeSpace = () => {
     .row
       justify-content flex-end
 
-  .inline-button-wrap
-    cursor pointer
-    button
-      cursor pointer
-
   .icon-only-button
     img
       padding 0
-
+  .loader
+    margin-right 6px
+    vertical-align -2px
 </style>
