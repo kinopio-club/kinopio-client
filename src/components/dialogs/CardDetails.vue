@@ -1350,7 +1350,6 @@ export default {
       this.$store.commit('tagDetailsIsVisible', false)
     },
     hideOtherItemDetailsIsVisible () {
-      this.$store.commit('otherSpaceDetailsIsVisible', false)
       this.$store.commit('otherCardDetailsIsVisible', false)
     },
     showTagDetailsIsVisible (event, tag) {

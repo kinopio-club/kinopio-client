@@ -37,12 +37,6 @@ const otherSpaceIsPrivate = computed(() => {
 })
 const loading = computed(() => store.state.isLoadingOtherItems)
 
-const isActive = computed(() => {
-  const isFromParentCard = store.state.currentSelectedOtherItem.parentCardId === props.parentCardId
-  const otherSpaceDetailsIsVisible = store.state.otherSpaceDetailsIsVisible
-  return otherSpaceDetailsIsVisible && isFromParentCard
-})
-
 const otherSpaceName = computed(() => {
   let name = props.otherSpace.name
   return name
