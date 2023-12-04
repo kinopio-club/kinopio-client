@@ -68,12 +68,12 @@ const togglePreviewImageIsVisible = (value) => {
 
 <template lang="pug">
 .row.other-space-preview
-  .preview-content(:class="{ 'min-height': !isStatic }")
+  .preview-content(:class="{ 'min-height': !isStatic && state.moreOptionsIsVisible }")
     //- buttons
     .content-buttons(v-if="canEditCard && otherSpace.previewImage && !isStatic")
       .row
         .button-wrap
-          button.icon-only-button(@click.stop="toggleMoreOptionsIsVisible" :class="{active: state.moreOptionsIsVisible}")
+          button.small-button(@click.stop="toggleMoreOptionsIsVisible" :class="{active: state.moreOptionsIsVisible}")
             img.icon.down-arrow(src="@/assets/down-arrow.svg")
       //- all, text
       .row(v-if="state.moreOptionsIsVisible")
@@ -122,7 +122,7 @@ const togglePreviewImageIsVisible = (value) => {
     border-radius var(--entity-radius)
     padding var(--subsection-padding)
     &.min-height
-      min-height 80px
+      min-height 68px
 
   // from UrlPreviewCard
   .preview-image
@@ -171,9 +171,10 @@ const togglePreviewImageIsVisible = (value) => {
     .row
       justify-content flex-end
 
-  .icon-only-button
-    img
-      padding 0
+  .icon.down-arrow
+    padding-right 3px
+    vertical-align 2px
+
   .loader
     margin-right 6px
     vertical-align -2px
