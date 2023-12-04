@@ -44,7 +44,7 @@ const isRemoved = computed(() => {
   return space.isRemoved
 })
 const otherSpaceIsPrivate = computed(() => {
-  if (!props.otherSpace.privacy) { return }
+  if (!props.otherSpace?.privacy) { return }
   return props.otherSpace.privacy === 'private'
 })
 
@@ -52,7 +52,7 @@ const otherSpaceIsPrivate = computed(() => {
 
 const previewImageIsVisible = computed(() => {
   if (!props.otherSpace) { return }
-  return props.card?.shouldShowOtherSpacePreviewImage && props.otherSpace.previewImage
+  return props.card?.shouldShowOtherSpacePreviewImage && props.otherSpace?.previewImage
 })
 const toggleMoreOptionsIsVisible = () => {
   const value = !state.moreOptionsIsVisible
@@ -70,7 +70,7 @@ const togglePreviewImageIsVisible = (value) => {
 .row.other-space-preview
   .preview-content(:class="{ 'min-height': !isStatic && state.moreOptionsIsVisible }")
     //- buttons
-    .content-buttons(v-if="canEditCard && otherSpace.previewImage && !isStatic")
+    .content-buttons(v-if="canEditCard && otherSpace?.previewImage && !isStatic")
       .row
         .button-wrap
           button.small-button(@click.stop="toggleMoreOptionsIsVisible" :class="{active: state.moreOptionsIsVisible}")
@@ -83,18 +83,18 @@ const togglePreviewImageIsVisible = (value) => {
           button(@click="togglePreviewImageIsVisible(false)" :class="{active : !previewImageIsVisible}")
             span Text
     a.preview-image-wrap.side-image(v-if="previewImageIsVisible" :href="url" @click.stop.prevent="changeSpace")
-      img.preview-image.clickable-item(:src="otherSpace.previewImage")
+      img.preview-image.clickable-item(:src="otherSpace?.previewImage")
     div
-      template(v-if="!isLoadingOtherItems")
+      template(v-if="!isLoadingOtherItems || !otherSpace")
         //- badges
         .badge.info.inline-badge(v-if="isInvite")
           span Invite
         .badge.danger.inline-badge(v-if="isRemoved")
           img.icon(src="@/assets/remove.svg")
         //- space info
-        template(v-if="otherSpace.users")
-          UserLabelInline(:user="otherSpace.users[0]" :shouldHideName="true")
-        span {{otherSpace.name}}
+        template(v-if="otherSpace?.users")
+          UserLabelInline(:user="otherSpace?.users[0]" :shouldHideName="true")
+        span {{otherSpace?.name}}
           img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
       template(v-else)
         Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")

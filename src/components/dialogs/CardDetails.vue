@@ -426,7 +426,7 @@ export default {
 
     otherSpaceIsVisible () {
       const isCardLink = Boolean(this.card.linkToSpaceId)
-      return isCardLink && this.hasUrls && this.otherSpace
+      return isCardLink && this.hasUrls
     },
     otherSpace () {
       const space = this.$store.getters.otherSpaceById(this.card.linkToSpaceId)
@@ -434,8 +434,8 @@ export default {
     },
     otherSpaceUrl () {
       return utils.spaceUrl({
-        spaceId: this.otherSpace.id,
-        spaceName: this.otherSpace.name,
+        spaceId: this.otherSpace?.id,
+        spaceName: this.otherSpace?.name,
         collaboratorKey: this.card.linkToSpaceCollaboratorKey
       })
     },
