@@ -39,24 +39,25 @@ const urlIsInvite = computed(() => utils.urlIsInvite(props.url))
 
 // preivew image
 
-const previewImageIsVisible = computed(() => props.card.otherSpaceScreenshotIsVisible)
+const shouldShowPreviewImage = computed(() => props.card.otherSpaceScreenshotIsVisible)
 const previewImageUrl = computed(() => props.otherSpace?.screenshotUrl)
-const shouldShowPreviewImage = computed(() => previewImageIsVisible.value && previewImageUrl.value)
+const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && previewImageUrl.value)
 
 </script>
 
 <template lang="pug">
 .other-space-preview-card
-  template(v-if="shouldShowPreviewImage")
-    .preview-image-wrap
-      img.preview-image(:src="previewImageUrl" :class="{selected: props.isSelected}" @load="updateDimensions" ref="image")
-
-  .badge.link-badge(:class="{ 'preview-image-is-visible': shouldShowPreviewImage }" :style="{ background: props.selectedColor }")
+  //- preview image
+  .preview-image-wrap(v-if="previewImageIsVisible")
+    img.preview-image(:src="previewImageUrl" :class="{selected: props.isSelected}" @load="updateDimensions" ref="image")
+  .badge.link-badge(:class="{ 'preview-image-is-visible': previewImageIsVisible }" :style="{ background: props.selectedColor }")
+    //- badges
     template(v-if="urlIsInvite")
       .badge.info.inline-badge Invite
     template(v-if="isRemoved")
       .badge.danger.inline-badge
         img.icon(src="@/assets/remove.svg")
+    //- space info
     template(v-if="props.otherSpace")
       template(v-if="props.otherSpace.users")
         UserLabelInline(:user="props.otherSpace.users[0]" :shouldHideName="true")
