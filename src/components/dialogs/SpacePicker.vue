@@ -121,36 +121,36 @@ export default {
       }
     },
     filteredSpaces () {
-      if (!this.parentIsCardDetails) { return this.spaces }
-      let spaces = this.sortByRecentlyUpdated(this.spaces)
+      let spaces = this.spaces
+      if (!this.parentIsCardDetails) { return spaces }
       spaces = spaces.filter(space => {
         const isHidden = space.isHidden
         return !space.isHidden
       })
-      const options = {
-        pre: '',
-        post: '',
-        extract: (item) => {
-          let name = item.name || ''
-          return name
-        }
+      if (this.search) {
+        const filtered = fuzzy.filter(
+          this.search,
+          spaces,
+          {
+            pre: '',
+            post: '',
+            extract: (item) => {
+              let name = item.name || ''
+              return name
+            }
+          }
+        )
+        spaces = filtered.map(item => {
+          let result = utils.clone(item.original)
+          result.matchIndexes = item.indices
+          return result
+        })
       }
-      const filtered = fuzzy.filter(this.search, spaces, options)
-      spaces = filtered.map(item => {
-        let result = utils.clone(item.original)
-        result.matchIndexes = item.indices
-        return result
-      })
       return spaces
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
-    sortByRecentlyUpdated (spaces) {
-      let sorted = sortBy(spaces, space => dayjs(space.updatedAt))
-      sorted = sorted.reverse()
-      return sorted
-    },
     handleFocusBeforeFirstItem () {
       if (this.newSpaceIsVisible) { return }
       this.toggleNewSpaceIsVisible()
