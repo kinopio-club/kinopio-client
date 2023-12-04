@@ -124,7 +124,8 @@ export default {
       if (!this.parentIsCardDetails) { return this.spaces }
       let spaces = this.sortByRecentlyUpdated(this.spaces)
       spaces = spaces.filter(space => {
-        return space.name !== this.search
+        const isHidden = space.isHidden
+        return !space.isHidden
       })
       const options = {
         pre: '',
