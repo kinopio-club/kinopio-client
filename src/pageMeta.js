@@ -18,6 +18,7 @@ const fetchSpacePublicMeta = async (spaceId) => {
 export default {
   async space (spaceId, isInvite) {
     const urlParams = new URLSearchParams(window.location.search)
+    const logo = 'https://updates.kinopio.club/logo-social-media-avatar.png'
     let path = window.document.location.pathname
     if (!spaceId) {
       const ids = utils.spaceAndCardIdFromPath(path)
@@ -32,7 +33,7 @@ export default {
     }
     document.title = name
     document.querySelector('meta[property="og:title"]').content = name
-    document.querySelector('meta[property="og:image"]').content = meta.previewImage
+    document.querySelector('meta[property="og:image"]').content = meta.previewImage || logo
     const description = 'A space to whiteboard, moodboard, brainstorm, and take notes'
     document.querySelector('meta[property="og:description"]').content = description
     document.querySelector('meta[name="description"]').content = description
