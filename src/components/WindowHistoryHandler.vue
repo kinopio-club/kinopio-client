@@ -23,6 +23,8 @@ export default {
       const isEmbedMode = this.$store.state.isEmbedMode
       space = space || this.currentSpace
       const spaceUrl = utils.url(space)
+      const preventUpdate = window.location.pathname.includes(spaceUrl)
+      if (preventUpdate) { return }
       const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
       this.$store.commit('currentSpacePath', spaceUrl, { root: true })
       if (navigator.standalone || isEmbedMode) { return }

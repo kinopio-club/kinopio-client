@@ -59,8 +59,8 @@ const shouldRequest = ({ shouldRequestRemote, apiKey }) => {
 
 const normalizeResponse = async (response) => {
   const success = [200, 201, 202, 204]
-  const data = await response.json()
   if (success.includes(response.status)) {
+    const data = await response.json()
     return data
   } else {
     throw { response, status: response.status }
