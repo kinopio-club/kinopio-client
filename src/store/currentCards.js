@@ -448,7 +448,6 @@ const currentCards = {
       let cards = context.getters.isSelected
       cards = cards.filter(card => Boolean(card))
       if (!cards.length) { return }
-      cards = cards.filter(card => !card.isLocked)
       cards = cards.filter(card => context.rootGetters['currentUser/canEditCard'](card))
       // prevent cards bunching up at 0
       cards.forEach(card => {
@@ -492,6 +491,7 @@ const currentCards = {
       })
       // update
       context.commit('moveWhileDragging', { cards })
+      context.commit('triggerUpdateLockedItemButtonsPositions', null, { root: true })
       connections = uniqBy(connections, 'id')
       context.commit('cardsWereDragged', true, { root: true })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
@@ -545,6 +545,7 @@ const currentCards = {
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
       context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })
+      context.commit('triggerUpdateLockedItemButtonsPositions', null, { root: true })
       prevMoveDelta = { x: 0, y: 0 }
     },
 
