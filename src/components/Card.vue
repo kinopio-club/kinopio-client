@@ -151,7 +151,14 @@ article.card-wrap#card(
           :backgroundColor="backgroundColor"
         )
       template(v-if="otherCardIsVisible")
-        OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldCloseAllDialogs="true")
+        OtherCardPreview(
+          :otherCard="otherCard"
+          :url="otherCardUrl"
+          :parentCardId="card.id"
+          :shouldCloseAllDialogs="true"
+          :isSelected="isSelectedOrDragging"
+          :selectedColor="selectedColor"
+        )
       template(v-else-if="otherSpaceIsVisible")
         OtherSpacePreviewCard(
           :otherSpace="otherSpace"

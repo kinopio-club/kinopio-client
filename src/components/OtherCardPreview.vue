@@ -12,7 +12,9 @@ const props = defineProps({
   url: String,
   parentCardId: String,
   shouldCloseAllDialogs: Boolean,
-  shouldTruncateName: Boolean
+  shouldTruncateName: Boolean,
+  isSelected: Boolean,
+  selectedColor: String
 })
 const state = reactive({
   nameSegments: []
@@ -30,11 +32,14 @@ onMounted(() => {
 })
 
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
-
 const isActive = computed(() => {
   const isFromParentCard = store.state.currentSelectedOtherItem.parentCardId === props.parentCardId
   const otherCardDetailsIsVisible = store.state.otherCardDetailsIsVisible
   return otherCardDetailsIsVisible && isFromParentCard
+})
+const styles = computed(() => {
+  if (!props.isSelected) { return }
+  return { background: props.selectedColor }
 })
 
 // update card
@@ -104,7 +109,7 @@ const showOtherCardDetailsIsVisible = async (event) => {
 
 <template lang="pug">
 a.other-card-preview(@click.prevent.stop :href="props.url")
-  .badge.button-badge.link-badge(:class="{ active: isActive }" @mouseup.prevent="showOtherCardDetailsIsVisible($event)" @touchend.prevent="showOtherCardDetailsIsVisible($event)")
+  .badge.button-badge.link-badge(:class="{ active: isActive }" :style="styles" @mouseup.prevent="showOtherCardDetailsIsVisible($event)" @touchend.prevent="showOtherCardDetailsIsVisible($event)")
     template(v-if="props.otherCard")
       //- removed
       template(v-if="props.otherCard.isRemoved")
