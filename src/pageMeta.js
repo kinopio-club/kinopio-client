@@ -31,7 +31,9 @@ export default {
     document.title = name
     document.querySelector('meta[property="og:title"]').content = name
     document.querySelector('meta[property="og:image"]').content = meta.previewImage
-    // document.querySelector('meta[property="og:description"]').content = this.pageDescription;
+    const description = 'A space to whiteboard, moodboard, brainstorm, and take notes'
+    document.querySelector('meta[property="og:description"]').content = description
+    document.querySelector('meta[name="description"]').content = description
     console.log('💐💐💐💐', meta)
   }
 }
