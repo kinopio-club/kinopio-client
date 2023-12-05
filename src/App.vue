@@ -70,9 +70,7 @@ export default {
   created () {
     console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'currentSpace/restoreSpace') {
-        this.updateMetaDescription()
-      } else if (mutation.type === 'broadcast/joinSpaceRoom') {
+      if (mutation.type === 'broadcast/joinSpaceRoom') {
         this.updateMetaRSSFeed()
       } else if (mutation.type === 'triggerUserIsLoaded') {
         this.updateThemeFromSystem()
@@ -85,7 +83,6 @@ export default {
     setTimeout(() => {
       window.addEventListener('scroll', this.scroll)
     }, 100)
-    this.updateMetaDescription()
     window.addEventListener('touchstart', this.touchStart)
     window.addEventListener('touchmove', this.touchMove)
     window.addEventListener('touchend', this.touchEnd)
@@ -279,17 +276,9 @@ export default {
     isTouchDevice () {
       this.$store.commit('isTouchDevice', true)
     },
-    updateMetaDescription () {
-      let description = 'Kinopio is the thinking tool for building new ideas and solving hard problems. Create spaces to brainstorm, research, plan and take notes.'
-      const metaDescription = document.querySelector('meta[name=description]')
-      const cards = this.$store.getters['currentCards/all']
-      const topLeftItem = utils.topLeftItem(cards)
-      if (!topLeftItem.name) {
-        metaDescription.setAttribute('content', description)
-      } else {
-        metaDescription.setAttribute('content', topLeftItem.name)
-      }
-    },
+
+    // rss
+
     clearMetaRSSFeed () {
       let link = document.querySelector("link[type='application/rss+xml']")
       if (link) {

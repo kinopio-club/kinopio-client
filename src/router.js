@@ -1,5 +1,6 @@
 import Space from '@/views/Space.vue'
 import store from '@/store/store.js'
+import pageMeta from '@/pageMeta.js'
 
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -130,6 +131,7 @@ const router = createRouter({
       path: '/:space',
       component: Space,
       beforeEnter: (to, from, next) => {
+        pageMeta.space()
         const path = window.location.pathname
         const urlParams = new URLSearchParams(window.location.search)
         if (urlParams.get('present')) {
@@ -181,12 +183,14 @@ const router = createRouter({
       name: 'invite',
       component: Space,
       beforeEnter: (to, from, next) => {
-        store.dispatch('currentUser/init')
         const urlParams = new URLSearchParams(window.location.search)
         const spaceId = urlParams.get('spaceId')
         const collaboratorKey = urlParams.get('collaboratorKey')
         const readOnlyKey = urlParams.get('readOnlyKey')
         const isPresentationMode = urlParams.get('present') || false
+        const isInvite = true
+        pageMeta.space(spaceId, isInvite)
+        store.dispatch('currentUser/init')
         const disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
         store.commit('disableViewportOptimizations', disableViewportOptimizations)
         store.commit('isLoadingSpace', true)
