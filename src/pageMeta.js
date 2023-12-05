@@ -5,10 +5,13 @@ const fetchSpacePublicMeta = async (spaceId) => {
   const url = `${consts.apiHost()}/space/${spaceId}/public-meta`
   try {
     const response = await fetch(url)
+    if (response.status !== 200) {
+      throw { response, status: response.status }
+    }
     const data = await response.json()
     return data
   } catch (error) {
-    console.warn('🌺🌺🌺🌺 fetchSpacePublicMeta', error) // space is created by not-signed-up user
+    console.warn('🚑 fetchSpacePublicMeta', error)
   }
 }
 
