@@ -24,7 +24,6 @@ export default {
       const ids = utils.spaceAndCardIdFromPath(path)
       spaceId = ids?.spaceId
     }
-    console.log('♥️♥️♥️♥️♥️3', spaceId, path)
     if (!spaceId) { return }
     const meta = await fetchSpacePublicMeta(spaceId)
     if (!meta) { return }
@@ -32,12 +31,14 @@ export default {
     if (isInvite) {
       name = `[Invite] ${name}`
     }
+    if (meta.privacy === 'private') {
+      name = `${name} (Private)`
+    }
     document.title = name
     document.querySelector('meta[property="og:title"]').content = name
     document.querySelector('meta[property="og:image"]').content = meta.previewImage || logo
     const description = 'A space to whiteboard, moodboard, brainstorm, and take notes'
     document.querySelector('meta[property="og:description"]').content = description
     document.querySelector('meta[name="description"]').content = description
-    console.log('♥️♥️♥️♥️♥️♥️♥️2', meta)
   }
 }
