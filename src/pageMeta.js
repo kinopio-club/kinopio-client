@@ -31,13 +31,13 @@ export default {
     if (isInvite) {
       name = `[Invite] ${name}`
     }
+    let description = 'A space to whiteboard, moodboard, brainstorm, and take notes'
     if (meta.privacy === 'private') {
-      name = `${name} (Private)`
+      description = `[Private] ${description}`
     }
     document.title = name
     document.querySelector('meta[property="og:title"]').content = name
     document.querySelector('meta[property="og:image"]').content = meta.previewImage || logo
-    const description = 'A space to whiteboard, moodboard, brainstorm, and take notes'
     document.querySelector('meta[property="og:description"]').content = description
     document.querySelector('meta[name="description"]').content = description
   }
