@@ -122,6 +122,52 @@ export default {
         themeName = 'light'
       }
       return themeName
+    },
+    isThemeDark: (state, getters, rootState) => {
+      const systemTheme = getters.themeFromSystem
+      const userTheme = rootState.currentUser.theme
+      if (systemTheme) {
+        return systemTheme === 'dark'
+      } else {
+        return userTheme === 'dark'
+      }
+    },
+    currentThemeName: (state, getters) => {
+      const isThemeDark = getters.isThemeDark
+      let themeName
+      if (isThemeDark) {
+        return 'dark'
+      } else {
+        return 'light'
+      }
+    },
+    themeColors: (state, getters) => {
+      const themeName = getters.currentThemeName
+      return themes[themeName].colors
+    },
+    previewImageThemeOptions: (state, getters, rootState) => {
+      const isDarkTheme = getters.isThemeDark
+      let background = rootState.currentSpace.background
+      let backgroundTint = rootState.currentSpace.backgroundTint
+      if (background) {
+        let domBackground = document.querySelector('.space-background-image').style.backgroundImage
+        domBackground = utils.urlFromCSSBackgroundImage(domBackground)
+        background = domBackground || background
+      }
+      if (isDarkTheme) {
+        const domBackgroundTint = document.querySelector('.space-background-tint').style.backgroundColor
+        backgroundTint = domBackgroundTint || backgroundTint
+      }
+      const themeColors = getters.themeColors
+      const theme = {
+        secondaryBackground: themeColors['secondary-background'],
+        primaryBorder: themeColors['primary-border'],
+        primaryBackground: themeColors['primary-background'],
+        entityRadius: 6,
+        backgroundTint,
+        background
+      }
+      return { isDarkTheme, theme }
     }
   }
 }

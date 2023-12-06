@@ -106,13 +106,7 @@ export default {
   computed: {
     outsideSpaceBackgroundColor () { return this.$store.state.outsideSpaceBackgroundColor },
     isThemeDark () {
-      const systemTheme = this.themeFromSystem()
-      const userTheme = this.$store.state.currentUser.theme
-      if (systemTheme) {
-        return systemTheme === 'dark'
-      } else {
-        return userTheme === 'dark'
-      }
+      return this.$store.getters['themes/isThemeDark']
     },
     spaceName () { return this.$store.state.currentSpace.name },
     isDevelopment () {

@@ -520,7 +520,8 @@ const self = {
     createSpacePreviewImage: async (context, spaceId) => {
       try {
         spaceId = spaceId || context.rootState.currentSpace.id
-        const body = { spaceId }
+        const themeOptions = context.rootGetters['themes/previewImageThemeOptions']
+        const body = { spaceId, themeOptions }
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/space/preview-image`, options)
         return normalizeResponse(response)
