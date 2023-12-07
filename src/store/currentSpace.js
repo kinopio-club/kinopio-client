@@ -760,6 +760,8 @@ const currentSpace = {
         })
       })
       context.commit('isLoadingSpace', false, { root: true })
+      // preview image
+      if (!isRemote) { return }
       setTimeout(() => {
         context.dispatch('createSpacePreviewImage')
       }, 3000)
