@@ -16,13 +16,15 @@ const props = defineProps({
   parentCardId: String
 })
 
+const parentCard = computed(() => store.getters['currentCards/byId'](props.parentCardId))
+const isCheckboxCard = computed(() => utils.checkboxFromString(parentCard.value.name))
+
 // syntax highlight
 
 const shouldSyntaxHighlight = computed(() => currentLanguage.value.name !== defaultLanguageName)
 const languageFromCodeBlock = computed(() => utils.languageFromCodeBlock(props.content))
 const currentLanguage = computed(() => {
-  const card = store.getters['currentCards/byId'](props.parentCardId)
-  let language = codeLanguages.find(codeLanguage => codeLanguage.name === card.codeBlockLanguage)
+  let language = codeLanguages.find(codeLanguage => codeLanguage.name === parentCard.value.codeBlockLanguage)
   // priority: card.codeBlockLanguage → ```js → default
   language = language || languageFromCodeBlock.value?.language || codeLanguages[0]
   return language
@@ -89,11 +91,10 @@ const copy = async (event) => {
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
-
 </script>
 
 <template lang="pug">
-.code-block
+.code-block(:class="{ narrow: isCheckboxCard }")
   .code-buttons
     .button-wrap(@click.stop="toggleCodeLanguagePicker" title="Code Language")
       button.small-button.inline-button(:class="{ active: languagePickerIsVisible }")
@@ -114,6 +115,9 @@ const copy = async (event) => {
 <style lang="stylus">
 .code-block
   position relative
+  width calc(100% + 14px)
+  &.narrow
+    width calc(100% - 14px)
   .code-buttons
     position absolute
     right 0
@@ -140,6 +144,7 @@ const copy = async (event) => {
           box-shadow var(--button-active-inset-shadow)
           background-color var(--secondary-active-background)
   pre
+    width 100%
     max-height 300px
     overflow scroll !important
     white-space pre !important
