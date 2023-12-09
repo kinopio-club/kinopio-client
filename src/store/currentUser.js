@@ -867,7 +867,7 @@ export default {
       const spaceMembers = context.rootGetters['currentSpace/members']()
       console.log('☮️☮️☮️☮️☮️☮️☮️', spaceMembers)
 
-      if (!spaceMembers) { return }
+      if (!spaceMembers.length) { return }
       const referrerId = spaceMembers[0].id
       if (!referrerId) { return }
       const referrer = await context.dispatch('api/getPublicUser', { id: referrerId }, { root: true })

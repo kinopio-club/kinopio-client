@@ -1212,6 +1212,7 @@ const currentSpace = {
       if (excludeCurrentUser) {
         members = members.filter(user => user.id !== rootState.currentUser.id)
       }
+      console.log('🌷🌷🌷🌷🌷🌷🌷🌷🌷', users, members)
       return members
     },
     memberById: (state, getters, rootState) => (id) => {
