@@ -12,6 +12,7 @@ article.card-wrap#card(
   :key="id"
   ref="card"
   :class="{'is-resizing': currentUserIsResizingCard, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
+  :title="cardNameIfComment"
 )
   .card(
     @mousedown.left.prevent="startDraggingCard"
@@ -420,6 +421,10 @@ export default {
       'spaceCounterZoomDecimal',
       'spaceZoomDecimal'
     ]),
+    cardNameIfComment () {
+      if (!this.isComment) { return }
+      return this.card.name
+    },
     isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
     isDarkInLightTheme () { return this.backgroundColorIsDark && !this.isThemeDark },
