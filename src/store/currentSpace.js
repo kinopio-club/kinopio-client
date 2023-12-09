@@ -989,7 +989,7 @@ const currentSpace = {
       const currentUserIsInvitedButCannotEditSpace = context.rootGetters['currentUser/isInvitedButCannotEditSpace'](space)
       if (spaceIsOpen && !currentUserIsSignedIn) {
         context.commit('notifySignUpToEditSpace', true, { root: true })
-      } else if (currentUserIsInvitedButCannotEditSpace) {
+      } else if (currentUserIsInvitedButCannotEditSpace && !currentUserIsSignedIn) {
         context.commit('notifySignUpToEditSpace', true, { root: true })
       } else {
         context.commit('notifySignUpToEditSpace', false, { root: true })
@@ -1212,7 +1212,6 @@ const currentSpace = {
       if (excludeCurrentUser) {
         members = members.filter(user => user.id !== rootState.currentUser.id)
       }
-      console.log('🌷🌷🌷🌷🌷🌷🌷🌷🌷', users, members)
       return members
     },
     memberById: (state, getters, rootState) => (id) => {

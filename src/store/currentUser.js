@@ -865,8 +865,6 @@ export default {
       if (!isFromSpaceInvite) { return }
       // get referrer
       const spaceMembers = context.rootGetters['currentSpace/members']()
-      console.log('☮️☮️☮️☮️☮️☮️☮️', spaceMembers)
-
       if (!spaceMembers.length) { return }
       const referrerId = spaceMembers[0].id
       if (!referrerId) { return }
