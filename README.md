@@ -101,16 +101,16 @@ use Ngrok to pipe your localhost through an external https server
 
 ### Setup Ngrok
 
-[login](http://ngrok.com) and download ngrok, then connect ngrok to the kinopio ngrok account
+[login](http://ngrok.com), install ngrok, then connect ngrok to the kinopio ngrok account
 
-    $ ./ngrok authtoken 1e2pCpJsJMwkEkqbDKF0p5eMArQ_5Ztb7NE8fqyftCnuizdab
+    $ brew install ngrok/ngrok/ngrok
+    $ ngrok authtoken 1e2pCpJsJMwkEkqbDKF0p5eMArQ_5Ztb7NE8fqyftCnuizdab
 
 ### Run Ngrok
 
-    $ ./ngrok http https://localhost:8080
+    $ ngrok http https://localhost:8080
 
 ## See Also
 
 - [are.na/kinopio](https://www.are.na/kinopio)
 - [github.com/kinopio-club](https://github.com/kinopio-club)
-
