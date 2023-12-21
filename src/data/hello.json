@@ -1037,7 +1037,9 @@
       "spaceId": "hUZAy8K_ZblEXTU80ifQs",
       "userId": null,
       "connectionTypeId": "ZnwHspiYsIDmOWGAJUcjS",
-      "distanceFromOrigin": 441
+      "distanceFromOrigin": 441,
+      "labelRelativePositionX": 0.5,
+      "labelRelativePositionY": 0.5
     },
     {
       "id": "_cW6TBJss0iqsJYhbzmtB",
@@ -1094,6 +1096,8 @@
       "userId": "euGhpBrR9eBcjKnK16C_g",
       "connectionTypeId": "J69oqhoOeogv9S54xcDDs",
       "labelIsVisible": true,
+      "labelRelativePositionX": 0.5,
+      "labelRelativePositionY": 0.5,
       "distanceFromOrigin": 787,
       "directionIsVisible": false,
       "createdAt": "2023-07-15T22:49:12.670Z",
