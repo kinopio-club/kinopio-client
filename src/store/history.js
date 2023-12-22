@@ -90,14 +90,13 @@ const self = {
         console.log('⏺ history', { newPatch: patch, pointer: state.pointer })
       }
     },
-    // trim: (state) => {
-    // TODO trim history from pointer as seperate commit method
-    // const max = 30
-    // if (state.patches.length > max) {
-    //   state.patches.shift()
-    //   state.pointer = state.pointer - 1
-    // }
-    // },
+    trim: (state) => {
+      const max = 60
+      if (state.patches.length > max) {
+        state.patches.shift()
+        state.pointer = state.pointer - 1
+      }
+    },
     clear: (state) => {
       state.patches = []
       state.pointer = 0
@@ -201,7 +200,7 @@ const self = {
         patch = patch.concat(boxes)
       }
       context.commit('add', patch)
-      // context.commit('trim')
+      context.commit('trim')
     },
 
     // Undo
