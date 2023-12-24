@@ -293,8 +293,8 @@ const drag = (event) => {
   }
   wasDragged = true
   const positionAbsolute = {
-    x: cursorDelta.x + positionAbsoluteStart.x,
-    y: cursorDelta.y + positionAbsoluteStart.y
+    x: cursorDelta.x + positionAbsoluteStart?.x,
+    y: cursorDelta.y + positionAbsoluteStart?.y
   }
   let positionRelative = {
     x: positionAbsolute.x / state.connectionRect.width,
