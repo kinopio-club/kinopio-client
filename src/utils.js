@@ -767,10 +767,11 @@ export default {
   colorIsValid (color) {
     return colord(color).isValid()
   },
-  colorIsDark (color) {
+  colorIsDark (color, brightnessThreshold) {
+    brightnessThreshold = brightnessThreshold || 0.4
     if (!color) { return }
     if (color === 'transparent') { return }
-    return colord(color).brightness() < 0.4
+    return colord(color).brightness() < brightnessThreshold
   },
   invertColor (color) {
     return colord(color).invert().toHex()

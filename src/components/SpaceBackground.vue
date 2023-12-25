@@ -83,7 +83,8 @@ const backgroundUrl = computed(() => {
 const backgroundTint = computed(() => {
   let color = currentSpace.value.backgroundTint || 'white'
   let darkness = 0
-  if (shouldDarkenTint.value) {
+  const colorIsDark = utils.colorIsDark(color, 0.2)
+  if (shouldDarkenTint.value && colorIsDark) {
     darkness = 0.5
   }
   color = colord(color).darken(darkness).toRgbString()
