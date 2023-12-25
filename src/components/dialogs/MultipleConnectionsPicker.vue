@@ -7,6 +7,7 @@ dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="di
       span Type
 
   section.results-section
+
     ul.results-list
       template(v-for="type in connectionTypes" :key="type.id")
         li(:class="{ active: connectionTypeIsActive(type) }" @click.left="changeConnectionTypes(type)" tabindex="0" v-on:keyup.enter="changeConnectionTypes(type)")

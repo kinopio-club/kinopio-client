@@ -48,16 +48,12 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         span Type
 
   section.results-section(ref="resultsSection" :style="{'max-height': resultsSectionMaxHeight}")
-    ResultsFilter(:items="connectionTypesByUpdatedAt" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
-    ul.results-list
-      template(v-for="type in connectionTypesFiltered" :key="type.id")
-        li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click.left="changeConnectionType(type)" :data-type-id="type.id")
-          .badge(:style="{backgroundColor: type.color}")
-          .name {{type.name}}
+    ConnectionTypesPicker(:connections="[currentConnection]" :connectionTypes="connectionTypesByUpdatedAt" :resultsFilterIsVisible="true" @select="changeConnectionType" :isDisabled="canEditConnection")
 </template>
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
+import ConnectionTypesPicker from '@/components/ConnectionTypesPicker.vue'
 import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
@@ -73,7 +69,8 @@ export default {
   components: {
     ColorPicker,
     ResultsFilter,
-    ConnectionDecorators
+    ConnectionDecorators,
+    ConnectionTypesPicker
   },
   name: 'ConnectionDetails',
   mounted () {
@@ -82,8 +79,6 @@ export default {
   data () {
     return {
       colorPickerIsVisible: false,
-      filter: '',
-      filteredConnectionTypes: [],
       resultsSectionMaxHeight: undefined, // number
       nextConnectionTypeColor: '',
       inputIsFocused: false
@@ -154,13 +149,6 @@ export default {
         this.$store.dispatch('currentConnections/updateType', connectionType)
       }
     },
-    connectionTypesFiltered () {
-      if (this.filter) {
-        return this.filteredConnectionTypes
-      } else {
-        return this.connectionTypesByUpdatedAt
-      }
-    },
     shouldUseLastConnectionType () { return this.$store.state.currentUser.shouldUseLastConnectionType },
     isFilteredInSpace: {
       get () {
@@ -199,9 +187,6 @@ export default {
       const newType = last(types)
       this.changeConnectionType(newType)
       this.updateNextConnectionColor()
-    },
-    connectionTypeIsActive (type) {
-      return Boolean(type.id === this.currentConnection.connectionTypeId)
     },
     removeConnection () {
       this.$store.dispatch('currentConnections/remove', this.currentConnection)
@@ -273,12 +258,6 @@ export default {
     },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
-    },
-    updateFilteredConnectionTypes (types) {
-      this.filteredConnectionTypes = types
-    },
-    updateFilter (filter) {
-      this.filter = filter
     },
     focus () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
