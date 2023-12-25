@@ -19,9 +19,12 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
             span Links
         //- second row
         .segmented-buttons
+          //- Inbox
+          button(@click.left="toggleInboxIsVisible" :class="{ active: inboxIsVisible}")
+            img.icon(src="@/assets/inbox.svg")
           //- AI Images
           button(@click.left="toggleAIImagesIsVisible" :class="{ active: AIImagesIsVisible}")
-            img.icon(src="@/assets/flower.svg")
+            img.icon.flower(src="@/assets/flower.svg")
             span AI
           //- Stats
           button(@click.left="toggleStatsIsVisible" :class="{active: statsIsVisible}")
@@ -79,6 +82,7 @@ export default {
       commentsIsVisible: false,
       removedIsVisible: false,
       AIImagesIsVisible: false,
+      inboxIsVisible: false,
       statsIsVisible: false,
       favoritesIsVisible: false,
       textIsVisible: true
@@ -119,6 +123,7 @@ export default {
       this.commentsIsVisible = false
       this.removedIsVisible = false
       this.AIImagesIsVisible = false
+      this.inboxIsVisible = false
       this.statsIsVisible = false
       this.textIsVisible = false
     },
@@ -141,6 +146,11 @@ export default {
       const value = !this.removedIsVisible
       this.clearVisible()
       this.removedIsVisible = value
+    },
+    toggleInboxIsVisible () {
+      const value = !this.inboxIsVisible
+      this.clearVisible()
+      this.inboxIsVisible = value
     },
     toggleAIImagesIsVisible () {
       const value = !this.AIImagesIsVisible
@@ -203,5 +213,8 @@ export default {
       &:first-child
         border-top-left-radius 0
         border-top-right-radius 0
+  .icon.flower
+    vertical-align -1px
+    height 11px
 
 </style>
