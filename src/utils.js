@@ -3,6 +3,7 @@ import cache from '@/cache.js'
 import moonphase from '@/moonphase.js'
 import consts from '@/consts.js'
 import codeLanguages from '@/data/codeLanguages.json'
+import helloSpace from '@/data/hello.json'
 
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
@@ -1297,6 +1298,37 @@ export default {
       }
       return connection
     })
+  },
+  newHelloSpace (user) {
+    const emptyStringKeys = ['id', 'collaboratorKey', 'readOnlyKey']
+    const emptyArrayKeys = ['users', 'collaborators', 'spectators', 'clients']
+    const deleteKeys = ['url', 'originSpaceId', 'editedAt', 'editedByUserId', 'createdAt', 'updatedAt', 'updateHash']
+    const itemNames = ['boxes', 'cards', 'connections', 'connectionTypes']
+    const userId = user?.id || 'euGhpBrR9eBcjKnK16C_g'
+    let space = this.clone(helloSpace)
+    space.name = 'Hello Kinopio'
+    space.privacy = 'private'
+    space.visits = 0
+    space.showInExplore = false
+    space.isTemplate = false
+    space.showInExploreUpdatedAt = null
+    emptyStringKeys.forEach(key => {
+      space[key] = ''
+    })
+    emptyArrayKeys.forEach(key => {
+      space[key] = []
+    })
+    deleteKeys.forEach(key => {
+      delete space[key]
+    })
+    itemNames.forEach(itemName => {
+      space[itemName] = space[itemName].map(item => {
+        item.userId = userId
+        return item
+      })
+    })
+    space.userId = userId
+    return space
   },
   normalizeSpace (space) {
     if (!this.objectHasKeys(space)) { return space }

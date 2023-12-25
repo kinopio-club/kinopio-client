@@ -57,31 +57,7 @@ Post messages are used to communicate with a parent `secureAppContext` environme
 
 The hello space serves as the entry point and marketing page for new users. It's generated within the app from `hello.json`.
 
-To update it, create the space and export it's json. Replace `hello.json` with the exported new json. Be sure to edit the following fields:
-
-| Special Fields | Value
-| ------------- |-------------|
-| `id` | `''` |
-| `name` | `Hello Kinopio` |
-| `users` | `[]` |
-| `collaborators` | `[]` |
-| `spectators` | `[]` |
-| `clients` | `[]` |
-| `privacy` | `private` |
-| `collaboratorKey` | `''` |
-| `url` | remove |
-| `originSpaceId` | remove |
-| `editedAt` | remove |
-| `editedByUserId` | remove |
-| `createdAt` | remove |
-| `updatedAt` | remove |
-| `updateHash` | remove |
-| `visits` | `0` |
-| `showInExplore` | `false` |
-| `showInExploreUpdatedAt` | `null` |
-| `isTemplate` | `false` |
-
-item `userId`s should be `euGhpBrR9eBcjKnK16C_g`
+To update it, create the space and export it's json. Replace `hello.json` with the exported new json. 
 
 ## HTTPS Signing
 
