@@ -1299,11 +1299,20 @@ export default {
       return connection
     })
   },
+  spaceItemUsersToCurrentUser (space, userId) {
+    const itemNames = ['boxes', 'cards', 'connections', 'connectionTypes']
+    itemNames.forEach(itemName => {
+      space[itemName] = space[itemName].map(item => {
+        item.userId = userId
+        return item
+      })
+    })
+    return space
+  },
   newHelloSpace (user) {
     const emptyStringKeys = ['id', 'collaboratorKey', 'readOnlyKey']
     const emptyArrayKeys = ['users', 'collaborators', 'spectators', 'clients']
     const deleteKeys = ['url', 'originSpaceId', 'editedAt', 'editedByUserId', 'createdAt', 'updatedAt', 'updateHash']
-    const itemNames = ['boxes', 'cards', 'connections', 'connectionTypes']
     const userId = user?.id || consts.moderatorUserId
     let space = this.clone(helloSpace)
     space.name = 'Hello Kinopio'
@@ -1321,12 +1330,7 @@ export default {
     deleteKeys.forEach(key => {
       delete space[key]
     })
-    itemNames.forEach(itemName => {
-      space[itemName] = space[itemName].map(item => {
-        item.userId = userId
-        return item
-      })
-    })
+    this.spaceItemUsersToCurrentUser(space, userId)
     space.userId = userId
     return space
   },
