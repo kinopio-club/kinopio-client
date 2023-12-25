@@ -6,17 +6,18 @@ import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 const store = useStore()
 
-const emit = defineEmits(['select'])
+const emit = defineEmits(['select', 'updateTypeColor'])
 
 const props = defineProps({
   resultsFilterIsVisible: Boolean,
   connectionTypes: Array,
   connections: Array,
-  isDisabled: Boolean
+  canEditConnection: Boolean
 })
 const state = reactive({
   filter: '',
-  filteredConnectionTypes: []
+  filteredConnectionTypes: [],
+  colorPickerIsVisible: false
 })
 
 // results filter
@@ -40,8 +41,17 @@ const connectionTypesFiltered = computed(() => {
 const connectionTypeIsActive = (type) => {
   return Boolean(props.connections.find(connection => connection.connectionTypeId === type.id))
 }
-const selectType = (type) => {
+const emitSelect = (type) => {
   emit('select', type)
+}
+
+// type color
+
+const toggleColorPicker = () => {
+  state.colorPickerIsVisible = !state.colorPickerIsVisible
+}
+const updateTypeColorEmit = (color) => {
+  emit('updateTypeColor', color)
 }
 </script>
 
@@ -49,8 +59,12 @@ const selectType = (type) => {
 ResultsFilter(v-if="resultsFilterIsVisible" :items="connectionTypes" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
 ul.results-list
   template(v-for="type in connectionTypesFiltered" :key="type.id")
-    li(:class="{ active: connectionTypeIsActive(type), disabled: !isDisabled }" @click.left="selectType(type)" :data-type-id="type.id")
-      .badge(:style="{backgroundColor: type.color}")
+    li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click.left="emitSelect(type)" :data-type-id="type.id")
+      //- .badge(:style="{backgroundColor: type.color}")
+      .button-wrap
+        button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
+          .current-color(:style="{backgroundColor: type.color}")
+        ColorPicker(:currentColor="type.color" :visible="state.colorPickerIsVisible" @selectedColor="updateTypeColorEmit")
       .name {{type.name}}
 </template>
 

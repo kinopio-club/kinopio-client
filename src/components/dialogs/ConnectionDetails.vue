@@ -48,12 +48,12 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         span Type
 
   section.results-section(ref="resultsSection" :style="{'max-height': resultsSectionMaxHeight}")
-    ConnectionTypesPicker(:connections="[currentConnection]" :connectionTypes="connectionTypesByUpdatedAt" :resultsFilterIsVisible="true" @select="changeConnectionType" :isDisabled="canEditConnection")
+    ConnectionTypeList(:connections="[currentConnection]" :connectionTypes="connectionTypesByUpdatedAt" :resultsFilterIsVisible="true" @select="changeConnectionType" :canEditConnection="canEditConnection" @updateTypeColor="updateTypeColor")
 </template>
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
-import ConnectionTypesPicker from '@/components/ConnectionTypesPicker.vue'
+import ConnectionTypeList from '@/components/ConnectionTypeList.vue'
 import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
@@ -70,7 +70,7 @@ export default {
     ColorPicker,
     ResultsFilter,
     ConnectionDecorators,
-    ConnectionTypesPicker
+    ConnectionTypeList
   },
   name: 'ConnectionDetails',
   mounted () {
