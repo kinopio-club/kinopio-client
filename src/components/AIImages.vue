@@ -1,3 +1,74 @@
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import AIImagesProgress from '@/components/AIImagesProgress.vue'
+import utils from '@/utils.js'
+const store = useStore()
+
+const sectionElement = ref(null)
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'updatePageSizes') {
+      updateHeight()
+    }
+  })
+})
+
+const props = defineProps({
+  visible: Boolean
+})
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    clear()
+    updateHeight()
+  }
+})
+
+const state = reactive({
+  height: null,
+  selectedAIImage: {}
+})
+
+const clear = () => {
+  state.selectedAIImage = {}
+}
+const updateHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  state.height = utils.elementHeight(sectionElement.value, true)
+}
+const AIImages = computed(() => {
+  let AIImages = store.state.currentUser.AIImages
+  AIImages = utils.clone(AIImages)
+  return AIImages.reverse()
+})
+const copy = async (event, text) => {
+  let position = utils.cursorPositionInPage(event)
+  position.x = position.x - 60
+  try {
+    await navigator.clipboard.writeText(text)
+    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
+  event.target.blur()
+}
+const isSelectedImage = (image) => {
+  return state.selectedAIImage.url === image.url
+}
+const toggleSelectedImage = (image) => {
+  if (image.url === state.selectedAIImage.url) {
+    clear()
+  } else {
+    state.selectedAIImage = image
+  }
+}
+
+</script>
+
 <template lang="pug">
 .ai-images(v-if="visible" @click.stop="clear")
   section(v-if="!AIImages.length")
@@ -7,7 +78,7 @@
         img.icon.flower(src="@/assets/flower.svg")
         span → AI
   AIImagesProgress
-  section.results-section(v-if="AIImages.length" ref="section" :style="{'max-height': height + 'px'}")
+  section.results-section(v-if="AIImages.length" ref="sectionElement" :style="{'max-height': state.height + 'px'}")
     ul.results-list.image-list
       template(v-for="image in AIImages")
         li
@@ -26,83 +97,6 @@
             button.small-button
               img.icon.copy(src="@/assets/copy.svg")
 </template>
-
-<script>
-import AIImagesProgress from '@/components/AIImagesProgress.vue'
-import utils from '@/utils.js'
-
-export default {
-  name: 'AIImages',
-  components: {
-    AIImagesProgress
-  },
-  props: {
-    visible: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateHeight()
-      }
-    })
-  },
-  data () {
-    return {
-      height: null,
-      selectedAIImage: {}
-    }
-  },
-  computed: {
-    AIImages () {
-      let AIImages = this.$store.state.currentUser.AIImages
-      AIImages = utils.clone(AIImages)
-      return AIImages.reverse()
-    }
-  },
-  methods: {
-    isSelectedImage (image) {
-      return this.selectedAIImage.url === image.url
-    },
-    clear () {
-      this.selectedAIImage = {}
-    },
-    updateHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.section
-        this.height = utils.elementHeight(element, true)
-      })
-    },
-    async copy (event, text) {
-      let position = utils.cursorPositionInPage(event)
-      position.x = position.x - 60
-      try {
-        await navigator.clipboard.writeText(text)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-      } catch (error) {
-        console.warn('🚑 copyText', error)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-      }
-      event.target.blur()
-    },
-    toggleSelectedImage (image) {
-      if (image.url === this.selectedAIImage.url) {
-        this.clear()
-      } else {
-        this.selectedAIImage = image
-      }
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.clear()
-        this.updateHeight()
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .ai-images
@@ -135,5 +129,4 @@ export default {
         min-height initial
   .flower
     vertical-align -2px
-
 </style>
