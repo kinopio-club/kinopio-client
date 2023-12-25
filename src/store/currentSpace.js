@@ -1122,6 +1122,7 @@ const currentSpace = {
       space.cards = utils.clone(rootGetters['currentCards/all'])
       space.connections = utils.clone(rootGetters['currentConnections/all'])
       space.connectionTypes = utils.clone(rootGetters['currentConnections/allTypes'])
+      space.boxes = utils.clone(rootGetters['currentBoxes/all'])
       return space
     },
 
