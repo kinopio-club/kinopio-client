@@ -1304,7 +1304,7 @@ export default {
     const emptyArrayKeys = ['users', 'collaborators', 'spectators', 'clients']
     const deleteKeys = ['url', 'originSpaceId', 'editedAt', 'editedByUserId', 'createdAt', 'updatedAt', 'updateHash']
     const itemNames = ['boxes', 'cards', 'connections', 'connectionTypes']
-    const userId = user?.id || 'euGhpBrR9eBcjKnK16C_g'
+    const userId = user?.id || consts.moderatorUserId
     let space = this.clone(helloSpace)
     space.name = 'Hello Kinopio'
     space.privacy = 'private'
