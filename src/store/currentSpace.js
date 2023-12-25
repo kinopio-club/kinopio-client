@@ -1,4 +1,3 @@
-import helloSpace from '@/data/hello.json'
 import inboxSpace from '@/data/inbox.json'
 import newSpace from '@/data/new.json'
 
@@ -21,7 +20,7 @@ let isLoadingRemoteSpace, shouldLoadNewHelloSpace
 
 const currentSpace = {
   namespaced: true,
-  state: utils.clone(helloSpace),
+  state: newSpace,
   mutations: {
 
     restoreSpace: (state, space) => {
@@ -326,7 +325,7 @@ const currentSpace = {
     },
     createNewHelloSpace: (context) => {
       const user = context.rootState.currentUser
-      let space = utils.clone(helloSpace)
+      let space = utils.newHelloSpace(user)
       space.id = nanoid()
       space.collaboratorKey = nanoid()
       space.readOnlyKey = nanoid()
@@ -1122,6 +1121,7 @@ const currentSpace = {
       space.cards = utils.clone(rootGetters['currentCards/all'])
       space.connections = utils.clone(rootGetters['currentConnections/all'])
       space.connectionTypes = utils.clone(rootGetters['currentConnections/allTypes'])
+      space.boxes = utils.clone(rootGetters['currentBoxes/all'])
       return space
     },
 

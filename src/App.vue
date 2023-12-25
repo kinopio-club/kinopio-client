@@ -263,6 +263,7 @@ export default {
     broadcastUserCursor (event) {
       if (!this.$store.getters.isSpacePage) { return }
       let updates = utils.cursorPositionInSpace(event)
+      if (!updates) { return }
       updates.userId = this.$store.state.currentUser.id
       updates.zoom = this.spaceZoomDecimal
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })

@@ -3,6 +3,7 @@ import cache from '@/cache.js'
 import moonphase from '@/moonphase.js'
 import consts from '@/consts.js'
 import codeLanguages from '@/data/codeLanguages.json'
+import helloSpace from '@/data/hello.json'
 
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
@@ -636,7 +637,7 @@ export default {
     })
   },
   pluralize (word, condition) {
-    if (condition) {
+    if (condition || condition === 0) {
       word = word + 's'
     }
     return word
@@ -1297,6 +1298,37 @@ export default {
       }
       return connection
     })
+  },
+  newHelloSpace (user) {
+    const emptyStringKeys = ['id', 'collaboratorKey', 'readOnlyKey']
+    const emptyArrayKeys = ['users', 'collaborators', 'spectators', 'clients']
+    const deleteKeys = ['url', 'originSpaceId', 'editedAt', 'editedByUserId', 'createdAt', 'updatedAt', 'updateHash']
+    const itemNames = ['boxes', 'cards', 'connections', 'connectionTypes']
+    const userId = user?.id || consts.moderatorUserId
+    let space = this.clone(helloSpace)
+    space.name = 'Hello Kinopio'
+    space.privacy = 'private'
+    space.visits = 0
+    space.showInExplore = false
+    space.isTemplate = false
+    space.showInExploreUpdatedAt = null
+    emptyStringKeys.forEach(key => {
+      space[key] = ''
+    })
+    emptyArrayKeys.forEach(key => {
+      space[key] = []
+    })
+    deleteKeys.forEach(key => {
+      delete space[key]
+    })
+    itemNames.forEach(itemName => {
+      space[itemName] = space[itemName].map(item => {
+        item.userId = userId
+        return item
+      })
+    })
+    space.userId = userId
+    return space
   },
   normalizeSpace (space) {
     if (!this.objectHasKeys(space)) { return space }
@@ -2065,6 +2097,30 @@ export default {
 
   // Name Segments 🎫
 
+  segmentsWithTextSegments (name, segments) {
+    let currentStart = 0
+    let textSegments = []
+    segments = sortBy(segments, ['startPosition'])
+    segments.forEach(({ startPosition, endPosition }) => {
+      if (currentStart < startPosition) {
+        const start = currentStart
+        const end = startPosition
+        const content = name.substring(start, end)
+        textSegments.push({ startPosition: start, endPosition: end, content, isText: true })
+      }
+      currentStart = endPosition
+    })
+    // handle trailing text
+    if (currentStart < name.length) {
+      const start = currentStart
+      const end = name.length
+      const content = name.substring(start, end)
+      textSegments.push({ startPosition: start, endPosition: end, content, isText: true })
+    }
+    segments = segments.concat(textSegments)
+    segments = sortBy(segments, ['startPosition'])
+    return segments
+  },
   cardNameSegments (name) {
     if (!name) { return [] }
     const tags = this.tagsFromString(name) || []
@@ -2077,106 +2133,45 @@ export default {
       return this.urlIsSpace(url) || this.urlIsInvite(url)
     })
     const files = urls.filter(url => this.urlIsFile(url))
-    let badges = []
     let segments = []
     tags.forEach(tag => {
       // remove previous duplicate tag names
       let startPositions = this.indexesOf(name, tag)
-      badges.forEach(badge => {
-        startPositions = startPositions.filter(position => position > badge.startPosition)
+      segments.forEach(segment => {
+        startPositions = startPositions.filter(position => position > segment.startPosition)
       })
       const startPosition = startPositions[0]
       const endPosition = startPosition + tag.length
-      badges.push({ tag, startPosition, endPosition, isTag: true })
+      segments.push({ tag, startPosition, endPosition, name: tag.substring(2, tag.length - 2), isTag: true })
     })
     links.forEach(link => {
       const startPosition = name.indexOf(link)
       const endPosition = startPosition + link.length
-      let badge = { link, startPosition, endPosition }
+      const { spaceId, spaceUrl, cardId } = this.spaceAndCardIdFromUrl(link)
+      let segment = { link, name: link, startPosition, endPosition, spaceId, spaceUrl, cardId, isLink: true }
       if (this.urlIsInvite(link)) {
-        badge.isInviteLink = true
+        segment.isInviteLink = true
+        const url = new URL(link)
+        const queryObject = qs.decode(url.search)
+        segment.spaceId = queryObject.spaceId
+        segment.collaboratorKey = queryObject.collaboratorKey
       } else if (this.urlIsSpace(link)) {
-        badge.isLink = true
+        segment.isLink = true
       }
-      badges.push(badge)
+      segments.push(segment)
     })
     files.forEach(file => {
       const startPosition = name.indexOf(file)
       const endPosition = startPosition + file.length
-      badges.push({ file, startPosition, endPosition, isFile: true })
+      segments.push({ file, startPosition, endPosition, name: this.fileNameFromUrl(file), isFile: true })
     })
     commands.forEach(command => {
       const startPosition = name.indexOf(command)
       const endPosition = startPosition + command.length
-      badges.push({ command, startPosition, endPosition, isCommand: true })
+      const commandName = this.commandNameFromCommand(command)
+      segments.push({ startPosition, endPosition, command: commandName, name: consts.systemCommands[commandName], isCommand: true })
     })
-    badges = sortBy(badges, ['startPosition'])
-    if (!badges.length) {
-      return [{ isText: true, content: name }]
-    }
-    // first segment
-    let startPosition = badges[0].startPosition
-    const leadingText = name.substring(0, startPosition)
-    segments.push({ isText: true, content: leadingText })
-    let currentPosition = startPosition
-    // other segments
-    badges.forEach((segment, index) => {
-      let newSegment
-      // tag
-      if (segment.isTag) {
-        const tag = segment.tag
-        newSegment = {
-          isTag: true,
-          name: tag.substring(2, tag.length - 2)
-        }
-      // space or card link
-      } else if (segment.isLink) {
-        let link = segment.link
-        const { spaceId, spaceUrl, cardId } = this.spaceAndCardIdFromUrl(link)
-        // link = `${consts.kinopioDomain()}/${spaceUrl}`
-        newSegment = {
-          isLink: true,
-          name: link,
-          cardId,
-          spaceId
-        }
-      // invite link
-      } else if (segment.isInviteLink) {
-        let link = segment.link
-        const url = new URL(link)
-        let queryObject = qs.decode(url.search)
-        newSegment = {
-          isInviteLink: true,
-          name: link,
-          spaceId: queryObject.spaceId,
-          collaboratorKey: queryObject.collaboratorKey
-        }
-      // file
-      } else if (segment.isFile) {
-        newSegment = {
-          isFile: true,
-          name: this.fileNameFromUrl(segment.file)
-        }
-      // button
-      } else if (segment.isCommand) {
-        const command = this.commandNameFromCommand(segment.command)
-        const name = consts.systemCommands[command]
-        newSegment = {
-          isCommand: true,
-          command,
-          name
-        }
-      }
-      currentPosition = segment.endPosition
-      segments.push(newSegment)
-    })
-    const trailingText = name.substring(currentPosition, name.length)
-    if (trailingText) {
-      segments.push({
-        isText: true,
-        content: trailingText
-      })
-    }
+    segments = this.segmentsWithTextSegments(name, segments)
     return segments
   },
   markdown () {

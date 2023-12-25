@@ -92,7 +92,7 @@ article.card-wrap#card(
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
           //- Name
-          p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
+          p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id")
             Loader(:visible="isLoadingUrlPreview")
@@ -426,6 +426,9 @@ export default {
       return this.card.name
     },
     isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
+    hasTextSegments () {
+      return this.nameSegments.find(segment => segment.isText && segment.content)
+    },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
     isDarkInLightTheme () { return this.backgroundColorIsDark && !this.isThemeDark },
     isLightInDarkTheme () { return !this.backgroundColorIsDark && this.isThemeDark },
