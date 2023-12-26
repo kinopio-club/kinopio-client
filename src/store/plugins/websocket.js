@@ -14,10 +14,7 @@ let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
 
 console.log('🌳 websocket clientId', clientId)
-let showDebugMessages = true
-if (import.meta.env.MODE === 'development') {
-  showDebugMessages = false
-}
+let showDebugMessages = false
 
 const joinSpaceRoom = (store, mutation) => {
   console.log('🌙 joining', websocket)
