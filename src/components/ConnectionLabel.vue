@@ -271,8 +271,8 @@ const stopDragging = () => {
   state.isDragging = false
   state.outOfBounds = {}
   cursorStart = {}
-  if (!labelRelativePosition.value.x) { return }
   store.commit('broadcast/updateStore', { updates: { userId: store.state.currentUser.id }, type: 'removeRemoteUserDraggingConnectionLabel' })
+  if (!labelRelativePosition.value.x) { return }
   store.dispatch('history/add', { connections: [{
     id: props.connection.id,
     labelRelativePositionX: labelRelativePosition.value.x,
