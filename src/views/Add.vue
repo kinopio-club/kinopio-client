@@ -217,6 +217,7 @@ const addCard = async () => {
   }
   console.log('🛫 new card', card)
   postMessage.send({ name: 'addCardFromAddPage', value: card })
+  postMessage.send({ name: 'onAdded', value: true })
   addCardToSpaceLocal(card, space)
 }
 const addCardToSpaceLocal = (card, space) => {
