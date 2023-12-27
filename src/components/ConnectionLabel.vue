@@ -268,6 +268,7 @@ const startDragging = (event) => {
 }
 const stopDragging = () => {
   if (!canEditSpace.value) { return }
+  if (!state.isDragging) { return }
   state.isDragging = false
   state.outOfBounds = {}
   cursorStart = {}
