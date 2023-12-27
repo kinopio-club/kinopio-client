@@ -98,7 +98,6 @@ export default {
   getters: {
     recipientUserIds: (state, getters, rootState, rootGetters) => {
       const currentUserId = rootState.currentUser.id
-      let clients = rootState.currentSpace.clients.map(client => client.id)
       let members = rootGetters['currentSpace/members'](true)
       let contributors = [] // for open spaces
       members = members.map(member => member.id)
@@ -106,7 +105,6 @@ export default {
       let userIds = members.concat(contributors)
       userIds = uniq(userIds)
       // exclude currently connected userIds
-      userIds = userIds.filter(userId => !clients.includes(userId))
       userIds = userIds.filter(userId => userId !== currentUserId)
       userIds = userIds.filter(userId => Boolean(userId))
       return userIds
