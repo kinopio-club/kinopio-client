@@ -643,7 +643,7 @@ export default {
 
   h1
     font-family var(--serif-font)
-    font-size 22px
+    font-size 20px
     font-weight bold
     margin 0
     display inline-block
