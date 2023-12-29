@@ -320,6 +320,7 @@ export default {
   --button-fixed-height 30px
   --serif-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
+  --glyphs-font GoodGlyphs, wingdings
 
 @font-face
   font-family 'Recoleta'
@@ -331,6 +332,12 @@ export default {
   font-family 'Recoleta'
   src url("assets/fonts/Recoleta-Bold.woff2") format("woff2")
   font-weight bold
+  font-style normal
+
+@font-face
+  font-family 'GoodGlyphs'
+  src url("assets/fonts/GoodGlyphs-No1.woff2") format("woff2")
+  font-weight normal
   font-style normal
 
 *

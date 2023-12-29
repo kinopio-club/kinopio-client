@@ -2192,6 +2192,7 @@ export default {
       h1Pattern: /^# ()(.+$)/gmi,
       h2Pattern: /^## ()(.+$)/gmi,
       h3Pattern: /^### ()(.+$)/gmi,
+      h4Pattern: /^#### ()(.+$)/gmi,
       // https://regexr.com/5jmf4
       // matches *text*
       emphasisPattern1: /(\*)(.*?)\1/gmi,
@@ -2234,6 +2235,9 @@ export default {
         }, {
           type: 'h3',
           result: markdown.h3Pattern.exec(text)
+        }, {
+          type: 'h4',
+          result: markdown.h4Pattern.exec(text)
         }, {
           type: 'emphasis',
           result: markdown.emphasisPattern1.exec(text)
