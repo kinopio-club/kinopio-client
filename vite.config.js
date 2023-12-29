@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import createVuePlugin from '@vitejs/plugin-vue'
+import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 import fs from 'fs'
 
@@ -9,7 +10,15 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src')
     }
   },
-  plugins: [createVuePlugin()], // .vue support
+  plugins: [
+    createVuePlugin(), // .vue support
+    VitePWA({
+      registerType: 'autoUpdate',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2}']
+      }
+    })
+  ],
   server: {
     port: 8080,
     fs: {

@@ -41,6 +41,7 @@
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
     "vite": "^3.2.7",
+    "vite-plugin-pwa": "^0.17.4",
     "yorkie": "^2.0.0"
   },
   "eslintConfig": {
