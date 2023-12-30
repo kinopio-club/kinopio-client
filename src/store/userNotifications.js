@@ -98,16 +98,20 @@ export default {
   getters: {
     recipientUserIds: (state, getters, rootState, rootGetters) => {
       const currentUserId = rootState.currentUser.id
+      const spaceIsOpen = rootState.currentSpace.privacy === 'open'
       let members = rootGetters['currentSpace/members'](true)
-      let contributors = [] // for open spaces
       members = members.map(member => member.id)
-      contributors = rootState.currentSpace.cards.map(card => card.userId)
-      let userIds = members.concat(contributors)
-      userIds = uniq(userIds)
-      // exclude currently connected userIds
-      userIds = userIds.filter(userId => userId !== currentUserId)
-      userIds = userIds.filter(userId => Boolean(userId))
-      return userIds
+      let recipients = members
+      if (spaceIsOpen) {
+        let contributors = []
+        contributors = rootState.currentSpace.cards.map(card => card.userId)
+        recipients = members.concat(contributors)
+      }
+      recipients = uniq(recipients)
+      // exclude currently connected recipients
+      recipients = recipients.filter(userId => userId !== currentUserId)
+      recipients = recipients.filter(userId => Boolean(userId))
+      return recipients
     }
   }
 }
