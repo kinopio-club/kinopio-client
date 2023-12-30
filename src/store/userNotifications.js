@@ -2,7 +2,7 @@ import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
 
-let notifiedCardAdded = []
+let notifiedCardIds = []
 
 export default {
   namespaced: true,
@@ -61,7 +61,7 @@ export default {
     addCardUpdated: (context, { cardId, type }) => {
       if (!cardId) { return }
       if (context.state.name === 'Hello Kinopio') { return }
-      if (notifiedCardAdded.includes(cardId)) { return }
+      if (notifiedCardIds.includes(cardId)) { return }
       const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
       if (!userCanEdit) { return }
       const userId = context.rootState.currentUser.id
@@ -75,7 +75,7 @@ export default {
         spaceId: context.state.id
       }
       context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
-      notifiedCardAdded.push(cardId)
+      notifiedCardIds.push(cardId)
     },
 
     // Ask to Add Space to Explore
