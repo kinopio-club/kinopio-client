@@ -171,8 +171,9 @@ const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
   .explore-button
     .explore-button-label
       margin-left 0
-  .button-wrap
-    margin-left 0 !important
   .space-functions-row
     margin-bottom 0
+    > .button-wrap
+      margin-left 0 !important
+
 </style>
