@@ -20,7 +20,7 @@ let isLoadingRemoteSpace, shouldLoadNewHelloSpace
 
 const currentSpace = {
   namespaced: true,
-  state: newSpace,
+  state: utils.clone(newSpace),
   mutations: {
 
     restoreSpace: (state, space) => {
