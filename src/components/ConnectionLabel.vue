@@ -62,7 +62,11 @@ watch(() => state.isDragging, (value, prevValue) => {
   }
 })
 
-const visible = computed(() => props.connection.labelIsVisible)
+const visible = computed(() => {
+  let element = document.querySelector(`.connection-path[data-id="${props.connection.id}"]`)
+  if (!element) { return }
+  return props.connection.labelIsVisible
+})
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     store.dispatch('currentConnections/clearLabelPosition', props.connection)
