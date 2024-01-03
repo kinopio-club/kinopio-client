@@ -97,8 +97,8 @@ const focusAndSelectName = () => {
 
 const handlePostmessage = async (event) => {
   console.log('🛫 add page: received postmessage', event)
-  const url = event.data
-  state.newName = url + state.newName
+  const value = event.data
+  state.newName = value + state.newName
   cache.updatePrevAddPageValue(state.newName)
   console.log('🏬 cached prevAddPageValue from postmessage', state.newName)
   await nextTick()
@@ -107,7 +107,11 @@ const handlePostmessage = async (event) => {
   updateMaxLengthError()
 }
 const restoreValueFromCache = async (event) => {
-  state.newName = cache.prevAddPageValue()
+  if (state.newName) { return }
+  const value = cache.prevAddPageValue()
+  console.log('restored value from cache', value)
+  state.newName = value
+  updateTextareaSize()
 }
 
 // sign in
