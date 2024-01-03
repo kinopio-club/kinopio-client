@@ -4,13 +4,13 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     p Export
   section
     .row
+      button(@click.left="duplicateSpace")
+        img.icon(src="@/assets/add.svg")
+        span Duplicate this Space
+    .row
       button(@click.left="copyText")
         img.icon.copy(src="@/assets/copy.svg")
         span Copy All Card Names
-    .row
-      button(@click.left="duplicateSpace")
-        img.icon(src="@/assets/add.svg")
-        span Make a Copy
     .row(v-if="spaceIsDuplicated")
       span.badge.success Space copied
 
@@ -37,7 +37,7 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
       p
         span Backup All
       button(@click.left="downloadAllSpacesRemote" :class="{ active: isLoadingAllSpaces }")
-        span Download all Spaces (JSON and TXT)
+        span Download All Spaces (JSON and TXT)
         Loader(:visible="isLoadingAllSpaces")
     a#export-downlaod-anchor.hidden
     .info-container(v-if="isLoadingAllSpaces")
