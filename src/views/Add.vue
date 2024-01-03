@@ -13,11 +13,6 @@ import postMessage from '@/postMessage.js'
 import { nanoid } from 'nanoid'
 const store = useStore()
 
-window.addEventListener('message', (event) => {
-  handlePostmessage(event)
-})
-console.log('🛫 postmessage listener ready')
-
 const state = reactive({
   email: '',
   password: '',
@@ -96,23 +91,14 @@ const focusAndSelectName = () => {
 
 // postmesage
 
-const handlePostmessage = async (event) => {
-  console.log('🛫 /add received postmessage', event)
-  const value = event.data
-  state.newName = value + state.newName
-  cache.updatePrevAddPageValue(state.newName)
-  console.log('🏬 cached prevAddPageValue from postmessage', state.newName)
-  await nextTick()
-  updateTextareaSize()
-  focusAndSelectName()
-  updateMaxLengthError()
-}
 const restoreValueFromCache = async (event) => {
   if (state.newName) { return }
   const value = cache.prevAddPageValue()
-  console.log('restored value from cache', value)
+  console.log('🏬 restored value from cache', value)
   state.newName = value
   updateTextareaSize()
+  focusAndSelectName()
+  updateMaxLengthError()
 }
 
 // sign in
