@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import inboxSpace from '@/data/inbox.json'
@@ -43,6 +43,10 @@ onMounted(() => {
   initCardTextarea()
   updateSpaces()
   restoreValueFromCache()
+})
+
+onBeforeUnmount(() => {
+  cache.clearPrevAddPageValue()
 })
 
 const isOnline = computed(() => store.state.isOnline)
