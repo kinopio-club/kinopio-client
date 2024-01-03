@@ -11,6 +11,7 @@ template(v-if="isVisibleInViewport")
       :data-type-name="typeName"
       :data-type-id="connectionTypeId"
       :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
+      :data-label-is-visible="connection.labelIsVisible"
       :key="id"
       :d="connectionPath"
       @mousedown.left="startDraggingConnection"
@@ -20,7 +21,7 @@ template(v-if="isVisibleInViewport")
       @keyup.stop.backspace="removeConnection"
       @keyup.stop.enter="showConnectionDetailsOnKeyup"
       :class="connectionClasses"
-      ref="connection"
+      ref="connectionElement"
       tabindex="0"
       @dragover.prevent
       @drop.prevent.stop="addCardsAndUploadFiles"
@@ -423,7 +424,7 @@ export default {
       })
       const controlPoint = curveMatch[0]
       this.curvedPath = this.updatedPath(this.curvedPath, controlPoint, x, y)
-      const element = this.$refs.connection
+      const element = this.$refs.connectionElement
       element.setAttribute('d', this.curvedPath)
       if (this.shouldAnimate) {
         window.requestAnimationFrame(this.animationFrame)
