@@ -38,9 +38,12 @@ const textareaElement = ref(null)
 
 // init
 
+window.addEventListener('message', (event) => {
+  window.addEventListener('message', insertUrl) // postmessages from browser extension and ios share sheet
+})
+
 onMounted(() => {
   initUser()
-  window.addEventListener('message', insertUrl) // postmessages from browser extension and ios share sheet
   initCardTextarea()
   updateSpaces()
 })
