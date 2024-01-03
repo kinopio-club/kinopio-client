@@ -38,15 +38,17 @@ const textareaElement = ref(null)
 
 // init
 
+window.addEventListener('message', (event) => {
+  console.log('🛫 add page: received postmessage', event)
+  restoreValue(event.data)
+})
+
 onMounted(() => {
   initUser()
   initCardTextarea()
   updateSpaces()
-  restoreValueFromCache()
+  restoreValue()
 })
-setTimeout(() => {
-  restoreValueFromCache()
-}, 300)
 
 onBeforeUnmount(() => {
   cache.clearPrevAddPageValue()
@@ -98,12 +100,12 @@ const focusAndSelectName = () => {
 
 // postmesage
 
-const restoreValueFromCache = async (event) => {
+const restoreValue = async (value) => {
   if (state.newName) { return }
-  const value = cache.prevAddPageValue()
+  value = value || cache.prevAddPageValue()
   if (!value) { return }
   state.newName = value
-  console.log('🏬 restored value from cache', value)
+  console.log('🏬 restored value', value)
   updateTextareaSize()
   focusAndSelectName()
   updateMaxLengthError()
