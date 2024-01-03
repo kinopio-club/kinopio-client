@@ -13,6 +13,11 @@ import postMessage from '@/postMessage.js'
 import { nanoid } from 'nanoid'
 const store = useStore()
 
+window.addEventListener('message', (event) => {
+  window.addEventListener('message', handlePostmessage) // postmessages from browser extension and ios share sheet
+  console.log('🛫 postmessage listener ready')
+})
+
 const state = reactive({
   email: '',
   password: '',
@@ -37,11 +42,6 @@ const state = reactive({
 const textareaElement = ref(null)
 
 // init
-
-window.addEventListener('message', (event) => {
-  window.addEventListener('message', insertUrl) // postmessages from browser extension and ios share sheet
-  console.log('🛫 postmessage listener ready')
-})
 
 onMounted(() => {
   initUser()
@@ -95,7 +95,7 @@ const focusAndSelectName = () => {
 
 // received postmesage
 
-const insertUrl = async (event) => {
+const handlePostmessage = async (event) => {
   const url = event.data
   state.newName = url + state.newName
   cache.updatePrevAddPageValue(state.newName)
