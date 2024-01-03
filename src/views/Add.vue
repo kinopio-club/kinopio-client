@@ -95,6 +95,7 @@ const insertUrl = async (event) => {
   const url = event.data
   state.newName = url + state.newName
   cache.updatePrevAddPageValue(state.newName)
+  console.log('🏬 cached prevAddPageValue from postmessage', state.newName)
   await nextTick()
   updateTextareaSize()
   focusAndSelectName()
