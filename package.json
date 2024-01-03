@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.3",
-    "@vitejs/plugin-vue": "^3.2.0",
+    "@vitejs/plugin-vue": "^5.0.0",
     "@vue/compiler-sfc": "^3.2.6",
     "@vue/eslint-config-standard": "^4.0.0",
     "autoprefixer": "^10.4.2",
@@ -40,7 +40,7 @@
     "pug": "^3.0.2",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
-    "vite": "^3.2.7",
+    "vite": "^5.0.10",
     "vite-plugin-pwa": "^0.17.4",
     "yorkie": "^2.0.0"
   },
