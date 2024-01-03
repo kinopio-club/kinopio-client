@@ -44,6 +44,9 @@ onMounted(() => {
   updateSpaces()
   restoreValueFromCache()
 })
+setTimeout(() => {
+  restoreValueFromCache()
+}, 300)
 
 onBeforeUnmount(() => {
   cache.clearPrevAddPageValue()
@@ -96,7 +99,9 @@ const focusAndSelectName = () => {
 // postmesage
 
 const restoreValueFromCache = async (event) => {
+  if (state.newName) { return }
   const value = cache.prevAddPageValue()
+  if (!value) { return }
   state.newName = value
   console.log('🏬 restored value from cache', value)
   updateTextareaSize()
