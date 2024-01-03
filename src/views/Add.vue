@@ -96,10 +96,9 @@ const focusAndSelectName = () => {
 // postmesage
 
 const restoreValueFromCache = async (event) => {
-  if (state.newName) { return }
   const value = cache.prevAddPageValue()
-  console.log('🏬 restored value from cache', value)
   state.newName = value
+  console.log('🏬 restored value from cache', value)
   updateTextareaSize()
   focusAndSelectName()
   updateMaxLengthError()
