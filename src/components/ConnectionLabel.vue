@@ -96,8 +96,10 @@ const visible = computed(() => {
   return state.connectionIsVisible && props.connection.labelIsVisible
 })
 const updateConnectionIsVisible = () => {
+  if (!props.connection.labelIsVisible) { return }
   const connection = document.querySelector(`.connection-path[data-id="${id.value}"]`)
   if (connection) {
+    updateConnectionRect()
     state.connectionIsVisible = true
   } else {
     state.connectionIsVisible = false
@@ -105,6 +107,7 @@ const updateConnectionIsVisible = () => {
 }
 watch(() => props.connection.labelIsVisible, (value, prevValue) => {
   if (value) {
+    updateConnectionRect()
     state.connectionIsVisible = true
   } else {
     store.dispatch('currentConnections/clearLabelPosition', props.connection)
@@ -173,6 +176,7 @@ watch(() => path.value, (value, prevValue) => {
   updateConnectionRect()
 })
 const updateConnectionRect = () => {
+  if (!props.connection.labelIsVisible) { return }
   let element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
   if (!element) { return }
   const zoom = utils.spaceCounterZoomDecimal() || 1
