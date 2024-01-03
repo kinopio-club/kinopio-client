@@ -40,6 +40,7 @@ const textareaElement = ref(null)
 
 window.addEventListener('message', (event) => {
   window.addEventListener('message', insertUrl) // postmessages from browser extension and ios share sheet
+  console.log('🛫 postmessage listener ready')
 })
 
 onMounted(() => {
