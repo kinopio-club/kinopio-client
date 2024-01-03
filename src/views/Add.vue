@@ -101,9 +101,8 @@ const focusAndSelectName = () => {
 // postmesage
 
 const restoreValue = async (value) => {
-  if (state.newName) { return }
+  await nextTick()
   value = value || cache.prevAddPageValue()
-  if (!value) { return }
   state.newName = value
   console.log('🏬 restored value', value)
   updateTextareaSize()
