@@ -107,7 +107,7 @@ const handlePostmessage = async (event) => {
   updateMaxLengthError()
 }
 const restoreValueFromCache = async (event) => {
-  state.newName = cache.prevAddPageValue
+  state.newName = cache.prevAddPageValue()
 }
 
 // sign in
