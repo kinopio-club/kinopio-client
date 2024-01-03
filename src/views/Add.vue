@@ -95,6 +95,7 @@ const focusAndSelectName = () => {
 // received postmesage
 
 const handlePostmessage = async (event) => {
+  console.log('🛫 add page: received postmessage', event)
   const url = event.data
   state.newName = url + state.newName
   cache.updatePrevAddPageValue(state.newName)
