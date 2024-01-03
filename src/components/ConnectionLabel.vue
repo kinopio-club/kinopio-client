@@ -104,7 +104,9 @@ const updateConnectionIsVisible = () => {
   }
 }
 watch(() => props.connection.labelIsVisible, (value, prevValue) => {
-  if (!value) {
+  if (value) {
+    state.connectionIsVisible = true
+  } else {
     store.dispatch('currentConnections/clearLabelPosition', props.connection)
   }
 })
@@ -199,8 +201,8 @@ const connectionLabelWrapStyles = computed(() => {
 
 const labelRelativePosition = computed(() => {
   return {
-    x: props.connection.labelRelativePositionX,
-    y: props.connection.labelRelativePositionY
+    x: props.connection.labelRelativePositionX || 0.5,
+    y: props.connection.labelRelativePositionY || 0.5
   }
 })
 const styles = computed(() => {
