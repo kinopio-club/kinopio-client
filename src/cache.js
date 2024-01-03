@@ -323,7 +323,7 @@ export default {
   // Add Page
 
   prevAddPageValue () {
-    return this.getLocal('prevAddPageValue') || ''
+    return window.localStorage['prevAddPageValue'] || ''
   },
   updatePrevAddPageValue (value) {
     this.storeLocal(`prevAddPageValue`, value)
