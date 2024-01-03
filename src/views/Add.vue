@@ -14,8 +14,7 @@ import { nanoid } from 'nanoid'
 const store = useStore()
 
 window.addEventListener('message', (event) => {
-  window.addEventListener('message', handlePostmessage) // postmessages from browser extension and ios share sheet
-  console.log('🛫 postmessage listener ready')
+  handlePostmessage(event)
 })
 
 const state = reactive({
