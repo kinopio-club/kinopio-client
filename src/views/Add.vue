@@ -16,6 +16,7 @@ const store = useStore()
 window.addEventListener('message', (event) => {
   handlePostmessage(event)
 })
+console.log('🛫 postmessage listener ready')
 
 const state = reactive({
   email: '',
@@ -96,7 +97,7 @@ const focusAndSelectName = () => {
 // postmesage
 
 const handlePostmessage = async (event) => {
-  console.log('🛫 add page: received postmessage', event)
+  console.log('🛫 /add received postmessage', event)
   const value = event.data
   state.newName = value + state.newName
   cache.updatePrevAddPageValue(state.newName)
