@@ -242,7 +242,6 @@ const updateTextareaSize = () => {
 const clearErrorsAndSuccess = () => {
   state.error.unknownServerError = false
   state.success = false
-  cache.clearPrevAddPageValue()
 }
 const updateMaxLengthError = () => {
   if (state.newName.length >= consts.maxCardLength - 1) {
