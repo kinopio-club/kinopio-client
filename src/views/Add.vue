@@ -46,6 +46,7 @@ onMounted(() => {
   initUser()
   initCardTextarea()
   updateSpaces()
+  restoreValueFromCache()
 })
 
 const isOnline = computed(() => store.state.isOnline)
@@ -92,7 +93,7 @@ const focusAndSelectName = () => {
   }
 }
 
-// received postmesage
+// postmesage
 
 const handlePostmessage = async (event) => {
   console.log('🛫 add page: received postmessage', event)
@@ -104,6 +105,9 @@ const handlePostmessage = async (event) => {
   updateTextareaSize()
   focusAndSelectName()
   updateMaxLengthError()
+}
+const restoreValueFromCache = async (event) => {
+  state.newName = cache.prevAddPageValue
 }
 
 // sign in
