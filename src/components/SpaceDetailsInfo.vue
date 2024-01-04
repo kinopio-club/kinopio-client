@@ -73,7 +73,7 @@ template(v-if="settingsIsVisible")
       .button-wrap
         button(@click.left="duplicateSpace")
           img.icon.add(src="@/assets/add.svg")
-          span Make a Copy
+          span Duplicate
       //- Export
       .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
@@ -98,7 +98,7 @@ template(v-if="settingsIsVisible")
       .button-wrap
         button(@click.left="duplicateSpace")
           img.icon.add(src="@/assets/add.svg")
-          span Make a Copy
+          span Duplicate
     .row
       .button-wrap(v-if="isSpaceMember")
         .segmented-buttons

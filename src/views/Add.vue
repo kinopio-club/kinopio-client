@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import inboxSpace from '@/data/inbox.json'
@@ -12,12 +12,6 @@ import postMessage from '@/postMessage.js'
 
 import { nanoid } from 'nanoid'
 const store = useStore()
-
-onMounted(() => {
-  initUser()
-  window.addEventListener('message', insertUrl) // postmessages from browser extension
-  initCardTextarea()
-})
 
 const state = reactive({
   email: '',
@@ -40,9 +34,25 @@ const state = reactive({
   spaces: []
 })
 
-const textarea = ref(null)
+const textareaElement = ref(null)
 
 // init
+
+window.addEventListener('message', (event) => {
+  console.log('🛫 add page: received postmessage', event)
+  restoreValue(event.data)
+})
+
+onMounted(() => {
+  initUser()
+  initCardTextarea()
+  updateSpaces()
+  restoreValue()
+})
+
+onBeforeUnmount(() => {
+  cache.clearPrevAddPageValue()
+})
 
 const isOnline = computed(() => store.state.isOnline)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
@@ -71,16 +81,15 @@ const initUser = async () => {
 const initCardTextarea = async () => {
   await nextTick()
   focusAndSelectName()
-  updateSpaces()
 }
 const focusName = () => {
-  const element = textarea.value
+  const element = textareaElement.value
   if (!element) { return }
   element.focus()
 }
 const focusAndSelectName = () => {
   if (utils.isMobile()) { return }
-  const element = textarea.value
+  const element = textareaElement.value
   if (!element) { return }
   const length = element.value.length
   focusName()
@@ -88,10 +97,14 @@ const focusAndSelectName = () => {
     element.setSelectionRange(0, length)
   }
 }
-const insertUrl = async (event) => {
-  const url = event.data
-  state.newName = url + state.newName
+
+// postmesage
+
+const restoreValue = async (value) => {
   await nextTick()
+  value = value || cache.prevAddPageValue()
+  state.newName = value
+  console.log('🏬 restored value', value)
   updateTextareaSize()
   focusAndSelectName()
   updateMaxLengthError()
@@ -158,6 +171,7 @@ const updateSpacesRemote = async () => {
   spaces = spaces.filter(space => space.name !== 'Inbox')
   state.spaces = spaces
 }
+
 // card
 
 const addCard = async () => {
@@ -169,30 +183,18 @@ const addCard = async () => {
   let newName = state.newName
   state.success = true
   state.newName = ''
-  textarea.value.style.height = 'initial'
+  textareaElement.value.style.height = 'initial'
   focusAndSelectName()
-  // url preview data
   const url = utils.urlFromString(newName)
-  let urlPreview = {}
-  if (url) {
-    let { links, meta } = await getUrlPreview(url)
-    urlPreview = {
-      title: utils.truncated(meta.title || meta.site),
-      description: utils.truncated(meta.description, 280),
-      image: previewImage(links),
-      favicon: previewFavicon(links)
-    }
-  }
   // create card
   let card = {
     id: nanoid(),
     name: newName,
-    z: 1,
-    urlPreviewUrl: url,
-    urlPreviewTitle: urlPreview.title,
-    urlPreviewDescription: urlPreview.description,
-    urlPreviewImage: urlPreview.image,
-    urlPreviewFavicon: urlPreview.favicon
+    z: 1
+  }
+  if (url) {
+    card.urlPreviewUrl = url
+    card.shouldUpdateUrlPreview = true
   }
   let space
   try {
@@ -217,6 +219,7 @@ const addCard = async () => {
   }
   console.log('🛫 new card', card)
   postMessage.send({ name: 'addCardFromAddPage', value: card })
+  postMessage.send({ name: 'onAdded', value: true })
   addCardToSpaceLocal(card, space)
 }
 const addCardToSpaceLocal = (card, space) => {
@@ -227,42 +230,7 @@ const addCardToSpaceLocal = (card, space) => {
   cache.updateSpace('cards', cards, space.id)
 }
 
-// card url preview (ported from Card.vue)
-
-const getUrlPreview = async (url) => {
-  try {
-    let response = await store.dispatch('api/urlPreview', url)
-    if (!response) { return }
-    let { data, host } = response
-    console.log('🚗 link preview', host, data)
-    const { links, meta } = data
-    return { links, meta }
-  } catch (error) {
-    console.warn('🚑 urlPreview', error, url)
-  }
-}
-const previewImage = ({ thumbnail }) => {
-  const minWidth = 200
-  if (!thumbnail) { return '' }
-  let image = thumbnail.find(item => {
-    let shouldSkipImage = false
-    if (item.media) {
-      if (item.media.width < minWidth) {
-        shouldSkipImage = true
-      }
-    }
-    return item.href && !shouldSkipImage
-  })
-  if (!image) { return '' }
-  return image.href || ''
-}
-const previewFavicon = ({ icon }) => {
-  if (!icon) { return '' }
-  let image = icon.find(item => item.href)
-  return image.href || ''
-}
-
-// state handlers
+// input handlers
 
 const updateKeyboardShortcutTipIsVisible = (value) => {
   state.keyboardShortcutTipIsVisible = value
@@ -273,9 +241,9 @@ const clearErrors = () => {
   state.error.tooManyAttempts = false
 }
 const updateTextareaSize = () => {
-  if (!textarea.value) { return }
+  if (!textareaElement.value) { return }
   let modifier = 0
-  textarea.value.style.height = textarea.value.scrollHeight + modifier + 'px'
+  textareaElement.value.style.height = textareaElement.value.scrollHeight + modifier + 'px'
 }
 const clearErrorsAndSuccess = () => {
   state.error.unknownServerError = false
@@ -289,11 +257,11 @@ const updateMaxLengthError = () => {
   }
 }
 const insertLineBreak = async (event) => {
-  const position = textarea.value.selectionEnd
+  const position = textareaElement.value.selectionEnd
   const name = state.newName
   const newName = name.substring(0, position) + '\n' + name.substring(position)
   setTimeout(() => {
-    textarea.value.setSelectionRange(position + 1, position + 1)
+    textareaElement.value.setSelectionRange(position + 1, position + 1)
   })
   state.newName = newName
   await nextTick()
@@ -327,7 +295,7 @@ main.add-page
         .textarea-wrap
           textarea.name(
             name="cardName"
-            ref="textarea"
+            ref="textareaElement"
             rows="1"
             :placeholder="textareaPlaceholder"
             v-model="name"

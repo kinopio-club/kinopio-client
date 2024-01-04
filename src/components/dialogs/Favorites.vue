@@ -123,6 +123,7 @@ const toggleIsFavoriteSpace = () => {
     checkIfShouldShowCurrentUserSpaces(currentSpace)
   }
 }
+const currentSpaceName = computed(() => utils.truncated(store.state.currentSpace.name))
 
 // user
 
@@ -195,31 +196,33 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
     p
       span Favorites
       Loader(:visible="loading" :isSmall="true")
-    .row
-      .segmented-buttons
-        button(@click.left.stop="showSpaces" :class="{ active: state.spacesIsVisible }")
-          span Spaces
-        button(@click.left.stop="hideSpaces" :class="{ active: !state.spacesIsVisible }")
-          span People
 
-  //- favorite space user
-  section.extra(v-if="!state.spacesIsVisible && spaceUser")
-    button(@click="toggleIsFavoriteUser")
-      img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
-      img.icon(v-else src="@/assets/heart-empty.svg")
-      UserLabelInline(:user="spaceUser")
-
-  section.extra(v-if="state.spacesIsVisible")
+  section.actions
+    //- fav space
     .row
-      //- favorite current space
       button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
         img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
         img.icon(v-else src="@/assets/heart-empty.svg")
-        span Current Space
-      //- filter current user spaces
-      label.user-filter(:class="{active: state.currentUserSpacesIsVisible}")
-        input(type="checkbox" v-model="showCurrentUserSpaces")
-        User(:user="currentUser"  :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+        span {{currentSpaceName}}
+    //- fav user
+    .row(v-if="spaceUser")
+      button(@click="toggleIsFavoriteUser")
+        img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
+        img.icon(v-else src="@/assets/heart-empty.svg")
+        UserLabelInline(:user="spaceUser")
+
+  section
+    .row
+      .button-wrap
+        .segmented-buttons
+          button(@click.left.stop="showSpaces" :class="{ active: state.spacesIsVisible }")
+            span Spaces
+          button(@click.left.stop="hideSpaces" :class="{ active: !state.spacesIsVisible }")
+            span People
+      .button-wrap
+        label.user-filter(v-if="state.spacesIsVisible" :class="{active: state.currentUserSpacesIsVisible}")
+          input(type="checkbox" v-model="showCurrentUserSpaces")
+          User(:user="currentUser"  :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
 
   section.results-section(v-if="!isEmpty")
     //- Spaces
@@ -256,6 +259,7 @@ dialog.favorites
   section.extra
     border-top none
     padding-top 4px
+  section.actions
     button
       .user-label-inline
         margin-right 0

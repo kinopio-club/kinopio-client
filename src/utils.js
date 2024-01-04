@@ -1170,7 +1170,27 @@ export default {
     return space
   },
   emptySpace (spaceId) {
-    return { id: spaceId, name: 'Loading…', moonPhase: '', background: '', backgroundTint: '', backgroundGradient: null, backgroundIsGradient: false, cards: [], connections: [], connectionTypes: [], boxes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [], isHidden: false, visits: 0 }
+    return {
+      id: spaceId,
+      name: 'Loading…',
+      moonPhase: '',
+      background: '',
+      backgroundTint: '',
+      backgroundGradient: null,
+      backgroundIsGradient: false,
+      cards: [],
+      connections: [],
+      connectionTypes: [],
+      boxes: [],
+      tags: [],
+      users: [],
+      userId: '',
+      collaborators: [],
+      spectators: [],
+      clients: [],
+      isHidden: false,
+      visits: 0
+    }
   },
   clearSpaceMeta (space, type) {
     space.originSpaceId = space.id
@@ -2192,6 +2212,7 @@ export default {
       h1Pattern: /^# ()(.+$)/gmi,
       h2Pattern: /^## ()(.+$)/gmi,
       h3Pattern: /^### ()(.+$)/gmi,
+      h4Pattern: /^#### ()(.+$)/gmi,
       // https://regexr.com/5jmf4
       // matches *text*
       emphasisPattern1: /(\*)(.*?)\1/gmi,
@@ -2234,6 +2255,9 @@ export default {
         }, {
           type: 'h3',
           result: markdown.h3Pattern.exec(text)
+        }, {
+          type: 'h4',
+          result: markdown.h4Pattern.exec(text)
         }, {
           type: 'emphasis',
           result: markdown.emphasisPattern1.exec(text)
