@@ -14,24 +14,36 @@ export default defineConfig({
     createVuePlugin(), // .vue support
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'generateSW',
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp,avif}'],
         runtimeCaching: [
           {
-            // https://regexr.com/7q06m
-            // matches files in a kinopio subdomain (cdn, bk, etc.)
-            urlPattern: /(^https:\/\/.+\.kinopio\.club\/.+\.(jpg|jpeg|png|gif|webp|avif))/gim,
-            handler: 'NetworkFirst',
+            urlPattern: /^https:\/\/cdn\.kinopio\.club\/.*/i,
+            handler: 'CacheFirst',
             options: {
-              cacheName: 'media',
+              cacheName: 'cdn-cache',
               expiration: {
-                maxEntries: 500,
-                maxAgeSeconds: 60 * 60 * 24 * 365 * 2 // 2 years
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 365 days
               },
               cacheableResponse: {
-                statuses: [200]
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/bk\.kinopio\.club\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'bk-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 365 days
               },
-              rangeRequests: true
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
             }
           }
         ]
