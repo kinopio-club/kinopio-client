@@ -100,8 +100,6 @@ onMounted(() => {
       updateImportIsVisible(true)
     } else if (mutation.type === 'triggerAddSpaceIsVisible') {
       updateAddSpaceIsVisible(true)
-    } else if (mutation.type === 'triggerOfflineIsVisible') {
-      updateOfflineIsVisible(true)
     }
   })
 })
@@ -147,7 +145,6 @@ const state = reactive({
   appsAndExtensionsIsVisible: false,
   upgradeUserIsVisible: false,
   spaceStatusIsVisible: false,
-  offlineIsVisible: false,
   position: {},
   readOnlyJiggle: false,
   notifications: [],
@@ -322,6 +319,7 @@ const isVisible = computed(() => {
     return true
   }
 })
+const offlineIsVisible = computed(() => store.state.offlineIsVisible)
 const closeAllDialogs = () => {
   state.aboutIsVisible = false
   state.spaceDetailsInfoIsVisible = false
@@ -332,7 +330,6 @@ const closeAllDialogs = () => {
   state.upgradeUserIsVisible = false
   state.donateIsVisible = false
   state.spaceStatusIsVisible = false
-  state.offlineIsVisible = false
   state.notificationsIsVisible = false
   state.addSpaceIsVisible = false
   state.templatesIsVisible = false
@@ -427,13 +424,11 @@ const toggleSpaceStatusIsVisible = () => {
   store.dispatch('closeAllDialogs')
   state.spaceStatusIsVisible = !isVisible
 }
-const updateOfflineIsVisible = (value) => {
-  state.offlineIsVisible = value
-}
 const toggleOfflineIsVisible = () => {
-  const isVisible = state.offlineIsVisible
+  const isVisible = store.state.offlineIsVisible
   store.dispatch('closeAllDialogs')
-  state.offlineIsVisible = !isVisible
+  store.commit('offlineIsVisible', !isVisible)
+  console.log(store.state.offlineIsVisible)
 }
 const searchIsVisible = computed(() => store.state.searchIsVisible)
 const toggleSearchIsVisible = () => {
@@ -677,9 +672,9 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             SpaceStatus(:visible="state.spaceStatusIsVisible")
           //- Offline
           .button-wrap(v-if="!isOnline")
-            button(@click.left="toggleOfflineIsVisible" :class="{ active: state.offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+            button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
               img.icon.offline(src="@/assets/offline.svg")
-            Offline(:visible="state.offlineIsVisible")
+            Offline(:visible="offlineIsVisible")
 
     .right
       .controls(v-if="isSpace")

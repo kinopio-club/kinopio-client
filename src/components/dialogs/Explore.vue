@@ -7,10 +7,10 @@ dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height'
         button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
           span RSS
         ExploreRssFeed(:visible="exploreRssFeedIsVisible")
-
+    OfflineBadge
     p(v-if="loading")
       Loader(:visible="loading")
-  section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+  section.results-section(ref="results && isOnline" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(
       :spaces="exploreSpaces"
       :showUser="true"
@@ -23,17 +23,19 @@ dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height'
 </template>
 
 <script>
-import Loader from '@/components/Loader.vue'
-import utils from '@/utils.js'
 import SpaceList from '@/components/SpaceList.vue'
 import ExploreRssFeed from '@/components/dialogs/ExploreRssFeed.vue'
+import OfflineBadge from '@/components/OfflineBadge.vue'
+import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'Explore',
   components: {
     Loader,
     SpaceList,
-    ExploreRssFeed
+    ExploreRssFeed,
+    OfflineBadge
   },
   props: {
     visible: Boolean,
@@ -62,10 +64,12 @@ export default {
   computed: {
     currentSpace () { return this.$store.state.currentSpace },
     currentSpaceInExplore () { return this.currentSpace.showInExplore },
-    exploreSpaces () { return this.filteredSpaces || this.spaces }
+    exploreSpaces () { return this.filteredSpaces || this.spaces },
+    isOnline () { return this.$store.state.isOnline }
   },
   methods: {
     async updateSpaces () {
+      if (!this.isOnline) { return }
       if (this.loading) { return }
       this.loading = true
       if (!this.spaces.length) {

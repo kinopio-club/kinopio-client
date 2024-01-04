@@ -51,6 +51,7 @@ const store = createStore({
     isPresentationMode: false,
     pricingIsVisible: false,
     userSettingsIsVisible: false,
+    offlineIsVisible: false,
     isFadingOutDuringTouch: false,
     prevSpaceIdInSession: '',
     outsideSpaceBackgroundColor: '',
@@ -316,6 +317,7 @@ const store = createStore({
       state.cardListItemOptionsIsVisible = false
       state.pricingIsVisible = false
       state.codeLanguagePickerIsVisible = false
+      state.offlineIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -464,6 +466,10 @@ const store = createStore({
     userSettingsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.userSettingsIsVisible = value
+    },
+    offlineIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.offlineIsVisible = value
     },
     isFadingOutDuringTouch: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

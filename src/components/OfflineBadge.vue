@@ -4,21 +4,23 @@ import { useStore } from 'vuex'
 const store = useStore()
 
 const visible = computed(() => !store.state.isOnline)
-const triggerOfflineIsVisible = () => {
-  store.commit('triggerOfflineIsVisible')
+const offlineIsVisible = computed(() => store.state.offlineIsVisible)
+const toggleOfflineIsVisible = () => {
+  const value = store.state.offlineIsVisible
+  store.commit('offlineIsVisible', !value)
 }
 </script>
 
 <template lang="pug">
-div.offline-badge
-  span.badge.info.button-badge(v-if="visible" @click="triggerOfflineIsVisible")
+.row.offline-badge
+  span.badge.info.button-badge(v-if="visible" @click="toggleOfflineIsVisible" :class="{ active: offlineIsVisible }")
     img.icon.offline(src="@/assets/offline.svg")
     span Offline
 
 </template>
 
 <style lang="stylus">
-// .offline-badge
-  // margin-top 10px
-//   margin-bottom 10px
+.offline-badge
+  .badge
+    display block !important
 </style>
