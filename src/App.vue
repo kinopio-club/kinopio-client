@@ -139,7 +139,11 @@ export default {
       const scripts = Array.from(document.querySelectorAll('script'))
       const path = scripts.find(script => {
         const src = script.src
-        return src.includes('main.js')
+        if (this.isDevelopment) {
+          return src.includes('main.js')
+        } else {
+          return src.includes('index-')
+        }
       })
       if (!path) { return }
       let hash = path.src.match(regex)[0]
