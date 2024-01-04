@@ -915,7 +915,7 @@ header
 
   .icon.offline
     height 13px
-    vertical-align -2px
+    vertical-align -1px
 
   .inbox-icon
     margin-right 4px

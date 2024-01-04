@@ -57,7 +57,7 @@ dialog.narrow.offline(v-if="visible" :open="visible" ref="dialogElement" :class=
     p Your changes will be saved locally, and sync-ed up once you're back online.
     p
       span.badge.info
-        Loader(:visible="true" :isSmall="true" :isStatic="true")
+        img.icon.offline(src="@/assets/offline.svg")
         span {{state.queue.length}} {{pluralChanges}} to sync
   section(v-else)
     p Kinopio works offline,
