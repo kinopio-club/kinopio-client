@@ -3,20 +3,41 @@ import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, w
 import { useStore } from 'vuex'
 const store = useStore()
 
+const props = defineProps({
+  isInline: Boolean,
+  isDanger: Boolean
+})
+
 const visible = computed(() => !store.state.isOnline)
 const offlineIsVisible = computed(() => store.state.offlineIsVisible)
 const toggleOfflineIsVisible = () => {
   const value = store.state.offlineIsVisible
   store.commit('offlineIsVisible', !value)
 }
+
+const classes = computed(() => {
+  return {
+    active: offlineIsVisible.value,
+    'inline-badge': props.isInline,
+    'button-badge': !props.isInline,
+    info: !props.isDanger,
+    danger: props.isDanger
+  }
+})
+const title = computed(() => {
+  if (props.isDanger) {
+    return 'Unavailable Offline'
+  } else {
+    return ''
+  }
+})
 </script>
 
 <template lang="pug">
 .row.offline-badge
-  span.badge.info.button-badge(v-if="visible" @click="toggleOfflineIsVisible" :class="{ active: offlineIsVisible }")
+  span.badge(v-if="visible" @click="toggleOfflineIsVisible" :class="classes" :title="title")
     img.icon.offline(src="@/assets/offline.svg")
-    span Offline
-
+    span(v-if="!isInline") Offline
 </template>
 
 <style lang="stylus">
