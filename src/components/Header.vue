@@ -100,6 +100,8 @@ onMounted(() => {
       updateImportIsVisible(true)
     } else if (mutation.type === 'triggerAddSpaceIsVisible') {
       updateAddSpaceIsVisible(true)
+    } else if (mutation.type === 'triggerOfflineIsVisible') {
+      updateOfflineIsVisible(true)
     }
   })
 })
@@ -424,6 +426,9 @@ const toggleSpaceStatusIsVisible = () => {
   const isVisible = state.spaceStatusIsVisible
   store.dispatch('closeAllDialogs')
   state.spaceStatusIsVisible = !isVisible
+}
+const updateOfflineIsVisible = (value) => {
+  state.offlineIsVisible = value
 }
 const toggleOfflineIsVisible = () => {
   const isVisible = state.offlineIsVisible
