@@ -4,7 +4,6 @@ import { useStore } from 'vuex'
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
-import Loader from '@/components/Loader.vue'
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -69,6 +68,4 @@ dialog.narrow.offline(v-if="visible" :open="visible" ref="dialogElement" :class=
   &.right-side
     left initial
     right 8px
-  .loader
-    vertical-align -2px
 </style>
