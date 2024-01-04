@@ -128,15 +128,16 @@ export default {
       return size + 'px'
     },
     buildHash () {
-      const regex = /(index\.)([a-z0-9])\w+/
+      // https://regexr.com/7q0fg
+      const regex = /(t=)([a-z0-9])+/
       const scripts = Array.from(document.querySelectorAll('script'))
       const path = scripts.find(script => {
         const src = script.src
-        return src.includes('index')
+        return src.includes('main.js')
       })
       if (!path) { return }
       let hash = path.src.match(regex)[0] // index.xyzabc123.js
-      return hash.replace('index.', '') // xyzabc123
+      return hash.replace('t=', '') // xyzabc123
     },
     pageCursor () {
       const isPanning = this.$store.state.currentUserIsPanning
