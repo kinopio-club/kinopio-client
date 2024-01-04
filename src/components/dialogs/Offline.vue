@@ -1,5 +1,55 @@
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import cache from '@/cache.js'
+import utils from '@/utils.js'
+import Loader from '@/components/Loader.vue'
+const store = useStore()
+
+const dialogElement = ref(null)
+
+const props = defineProps({
+  visible: Boolean
+})
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    state.queue = cache.queue()
+    checkIfShouldBeOnRightSide()
+  }
+})
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'updatePageSizes') {
+      checkIfShouldBeOnRightSide()
+    }
+  })
+})
+
+const state = reactive({
+  queue: [],
+  showOnRightSide: false
+})
+
+const currentUserIsSignedIn = computed(() => {
+  return Boolean(store.getters['currentUser/isSignedIn'])
+})
+const pluralChanges = computed(() => {
+  const condition = state.queue.length !== 1
+  return utils.pluralize('change', condition)
+})
+const checkIfShouldBeOnRightSide = async () => {
+  state.showOnRightSide = false
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.showOnRightSide = utils.elementShouldBeOnRightSide(element)
+}
+</script>
+
 <template lang="pug">
-dialog.narrow.offline(v-if="visible" :open="visible" ref="dialog" :class="{'right-side': showOnRightSide}")
+dialog.narrow.offline(v-if="visible" :open="visible" ref="dialogElement" :class="{'right-side': state.showOnRightSide}")
   section
     p Offline
   section(v-if="currentUserIsSignedIn")
@@ -8,68 +58,11 @@ dialog.narrow.offline(v-if="visible" :open="visible" ref="dialog" :class="{'righ
     p
       span.badge.info
         Loader(:visible="true" :isSmall="true" :isStatic="true")
-        span {{queue.length}} {{pluralChanges}} to sync
+        span {{state.queue.length}} {{pluralChanges}} to sync
   section(v-else)
     p Kinopio works offline,
     p Your changes are saved locally.
-
 </template>
-
-<script>
-import cache from '@/cache.js'
-import utils from '@/utils.js'
-import Loader from '@/components/Loader.vue'
-
-export default {
-  name: 'Offline',
-  props: {
-    visible: Boolean
-  },
-  components: {
-    Loader
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.checkIfShouldBeOnRightSide()
-      }
-    })
-  },
-  data () {
-    return {
-      queue: [],
-      showOnRightSide: false
-    }
-  },
-  computed: {
-    pluralChanges () {
-      const condition = this.queue.length !== 1
-      return utils.pluralize('change', condition)
-    },
-    currentUserIsSignedIn () {
-      return Boolean(this.$store.getters['currentUser/isSignedIn'])
-    }
-  },
-  methods: {
-    checkIfShouldBeOnRightSide () {
-      this.showOnRightSide = false
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.showOnRightSide = utils.elementShouldBeOnRightSide(element)
-      })
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.queue = cache.queue()
-        this.checkIfShouldBeOnRightSide()
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus" scoped>
 .offline
