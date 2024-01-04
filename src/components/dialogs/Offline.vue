@@ -4,23 +4,29 @@ dialog.narrow.offline(v-if="visible" :open="visible" ref="dialog" :class="{'righ
     p Offline
   section(v-if="currentUserIsSignedIn")
     p Kinopio works offline,
-    p Your changes will be saved locally, and synced up once you're back online. It's pretty chill.
+    p Your changes will be saved locally, and sync-ed up once you're back online.
     p
-      span.badge.info {{queue.length}} {{pluralChanges}} to sync
+      span.badge.info
+        Loader(:visible="true" :isSmall="true" :isStatic="true")
+        span {{queue.length}} {{pluralChanges}} to sync
   section(v-else)
     p Kinopio works offline,
-    p Your changes are saved locally. It's pretty chill.
+    p Your changes are saved locally.
 
 </template>
 
 <script>
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'Offline',
   props: {
     visible: Boolean
+  },
+  components: {
+    Loader
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -70,4 +76,6 @@ export default {
   &.right-side
     left initial
     right 8px
+  .loader
+    vertical-align -2px
 </style>
