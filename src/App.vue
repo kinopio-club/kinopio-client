@@ -128,16 +128,26 @@ export default {
       return size + 'px'
     },
     buildHash () {
-      // https://regexr.com/7q0fg
-      const regex = /(t=)([a-z0-9])+/
+      // https://regexr.com/7q0fp
+      // matches index-6Qua3Qgw.js
+      let regex = /(index-).[^(.js]+/
+      if (this.isDevelopment) {
+        // https://regexr.com/7q0fg
+        // matches from main.js?t=1704395941668
+        regex = /(t=)([a-z0-9])+/
+      }
       const scripts = Array.from(document.querySelectorAll('script'))
       const path = scripts.find(script => {
         const src = script.src
         return src.includes('main.js')
       })
       if (!path) { return }
-      let hash = path.src.match(regex)[0] // index.xyzabc123.js
-      return hash.replace('t=', '') // xyzabc123
+      let hash = path.src.match(regex)[0]
+      hash = hash.replace('index-', '')
+      if (this.isDevelopment) {
+        hash = hash.replace('t=', '')
+      }
+      return hash
     },
     pageCursor () {
       const isPanning = this.$store.state.currentUserIsPanning
