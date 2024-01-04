@@ -15,7 +15,26 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2}']
+        globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp,avif}'],
+        runtimeCaching: [
+          {
+            // https://regexr.com/7q06m
+            // matches files in a kinopio subdomain (cdn, bk, etc.)
+            urlPattern: /(^https:\/\/.+\.kinopio\.club\/.+\.(jpg|jpeg|png|gif|webp|avif))/gim,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'media',
+              expiration: {
+                maxEntries: 500,
+                maxAgeSeconds: 60 * 60 * 24 * 365 * 2 // 2 years
+              },
+              cacheableResponse: {
+                statuses: [200]
+              },
+              rangeRequests: true
+            }
+          }
+        ]
       }
     })
   ],
