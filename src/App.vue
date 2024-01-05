@@ -130,11 +130,10 @@ export default {
     scriptUrl () {
       const scripts = Array.from(document.querySelectorAll('script'))
       const url = scripts.find(script => {
-        const src = script.src
         if (this.isDevelopment) {
-          return src.includes('main.js')
+          return script.src.includes('main.js')
         } else {
-          return src.includes('index-')
+          return script.src.includes('index-')
         }
       })
       return url.src
