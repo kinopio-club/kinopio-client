@@ -428,7 +428,6 @@ const toggleOfflineIsVisible = () => {
   const isVisible = store.state.offlineIsVisible
   store.dispatch('closeAllDialogs')
   store.commit('offlineIsVisible', !isVisible)
-  console.log(store.state.offlineIsVisible)
 }
 const searchIsVisible = computed(() => store.state.searchIsVisible)
 const toggleSearchIsVisible = () => {

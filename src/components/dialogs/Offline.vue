@@ -51,16 +51,17 @@ const checkIfShouldBeOnRightSide = async () => {
 dialog.narrow.offline(v-if="visible" :open="visible" ref="dialogElement" :class="{'right-side': state.showOnRightSide}")
   section
     p Offline
-  section(v-if="currentUserIsSignedIn")
-    p Kinopio works offline,
-    p Your changes will be saved locally, and sync-ed up once you're back online.
-    p
-      span.badge.info
-        img.icon.offline(src="@/assets/offline.svg")
-        span {{state.queue.length}} {{pluralChanges}} to sync
-  section(v-else)
-    p Kinopio works offline,
-    p Your changes are saved locally.
+  section
+    .row
+      p Kinopio works offline
+    section.subsection(v-if="currentUserIsSignedIn")
+      p Your changes will be saved locally, and sync-ed up once you're back online
+      p
+        span.badge.info
+          img.icon.offline(src="@/assets/offline.svg")
+          span {{state.queue.length}} {{pluralChanges}} to sync
+    section.subsection(v-else)
+      p Your changes are saved locally
 </template>
 
 <style lang="stylus" scoped>
