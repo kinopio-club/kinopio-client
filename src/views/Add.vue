@@ -105,6 +105,7 @@ const restoreValue = async (value) => {
   value = value || cache.prevAddPageValue()
   state.newName = value
   console.log('🏬 restored value', value)
+  await nextTick()
   updateTextareaSize()
   focusAndSelectName()
   updateMaxLengthError()
