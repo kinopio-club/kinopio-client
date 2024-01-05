@@ -57,7 +57,7 @@ Post messages are used to communicate with a parent `secureAppContext` environme
 
 The hello space serves as the entry point and marketing page for new users. It's generated within the app from `hello.json`.
 
-To update it, create the space and export it's json. Replace `hello.json` with the exported new json. 
+To update it, create the space and export its json. Replace the contents of`hello.json` with the new json file.
 
 ## HTTPS Signing
 
