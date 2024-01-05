@@ -354,6 +354,9 @@ main.add-page
 </template>
 
 <style lang="stylus">
+*
+  font-size 16px
+
 main.add-page
   padding 8px
   min-height 100vh
