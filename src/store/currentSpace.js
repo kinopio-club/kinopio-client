@@ -1180,6 +1180,13 @@ const currentSpace = {
       const colors = cardColors.concat(boxColors)
       return uniq(colors)
     },
+    isUnavailableOffline: (state, getters, rootState, rootGetters) => {
+      const spaceId = rootState.currentSpace.id
+      const isOffline = !rootState.isOnline
+      const isNotCached = rootGetters['spaceIsNotCached'](spaceId)
+      const currentSpaceIsRemote = getters.isRemote
+      return isOffline && isNotCached && currentSpaceIsRemote
+    },
 
     // tags
 

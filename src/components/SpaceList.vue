@@ -185,8 +185,7 @@ export default {
   },
   methods: {
     isNotCached (spaceId) {
-      const spaceCardsCount = cache.space(spaceId).cards?.length
-      return Boolean(!spaceCardsCount)
+      return this.$store.getters['spaceIsNotCached'](spaceId)
     },
     isFavorite (space) {
       const favorites = this.$store.state.currentUser.favoriteSpaces

@@ -1803,6 +1803,10 @@ const store = createStore({
         return getters.otherSpaceById(spaceId)
       }
     },
+    spaceIsNotCached: (state) => (spaceId) => {
+      const spaceCardsCount = cache.space(spaceId).cards?.length
+      return Boolean(!spaceCardsCount)
+    },
     spaceZoomDecimal: (state) => {
       return state.spaceZoomPercent / 100
     },
