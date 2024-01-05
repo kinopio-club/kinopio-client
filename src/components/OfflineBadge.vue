@@ -34,8 +34,8 @@ const title = computed(() => {
 </script>
 
 <template lang="pug">
-.row.offline-badge
-  span.badge(v-if="visible" @click.stop="toggleOfflineIsVisible" :class="classes" :title="title")
+.row.offline-badge(v-if="visible")
+  span.badge(@click.stop="toggleOfflineIsVisible" :class="classes" :title="title")
     img.icon.offline(src="@/assets/offline.svg")
     span(v-if="!isInline") Offline
 </template>
