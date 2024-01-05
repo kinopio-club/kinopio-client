@@ -4,7 +4,6 @@ import { useStore } from 'vuex'
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
-import Loader from '@/components/Loader.vue'
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -52,16 +51,17 @@ const checkIfShouldBeOnRightSide = async () => {
 dialog.narrow.offline(v-if="visible" :open="visible" ref="dialogElement" :class="{'right-side': state.showOnRightSide}")
   section
     p Offline
-  section(v-if="currentUserIsSignedIn")
-    p Kinopio works offline,
-    p Your changes will be saved locally, and sync-ed up once you're back online.
-    p
-      span.badge.info
-        Loader(:visible="true" :isSmall="true" :isStatic="true")
-        span {{state.queue.length}} {{pluralChanges}} to sync
-  section(v-else)
-    p Kinopio works offline,
-    p Your changes are saved locally.
+  section
+    .row
+      p Kinopio works offline
+    section.subsection(v-if="currentUserIsSignedIn")
+      p Your changes will be saved locally, and sync-ed up once you're back online
+      p
+        span.badge.info
+          img.icon.offline(src="@/assets/offline.svg")
+          span {{state.queue.length}} {{pluralChanges}} to sync
+    section.subsection(v-else)
+      p Your changes are saved locally
 </template>
 
 <style lang="stylus" scoped>
@@ -69,6 +69,4 @@ dialog.narrow.offline(v-if="visible" :open="visible" ref="dialogElement" :class=
   &.right-side
     left initial
     right 8px
-  .loader
-    vertical-align -2px
 </style>

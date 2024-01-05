@@ -182,6 +182,13 @@ aside.notifications(@click.left="closeAllDialogs")
         span Earn More
       button(@click.left="removeNotifyEarnedCredits")
         img.icon.cancel(src="@/assets/add.svg")
+  .persistent-item.danger(v-if="notifySpaceIsUnavailableOffline")
+    OfflineBadge
+    .row
+      p
+        span Space is unavailable offline.
+    .row
+      p Only spaces that you're a member of, and have visited recently, are available offline
 
 </template>
 
@@ -192,6 +199,7 @@ import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 import templates from '@/data/templates.js'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
+import OfflineBadge from '@/components/OfflineBadge.vue'
 
 import dayjs from 'dayjs'
 
@@ -200,7 +208,8 @@ let pageWasOffline, checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 export default {
   name: 'Notifications',
   components: {
-    PrivacyIcon
+    PrivacyIcon,
+    OfflineBadge
   },
   data () {
     return {
@@ -273,6 +282,7 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     isTouchDevice () { return this.$store.state.isTouchDevice },
+    notifySpaceIsUnavailableOffline () { return this.$store.getters['currentSpace/isUnavailableOffline'] },
     privacyState () {
       return privacy.states().find(state => {
         return state.name === this.$store.state.currentSpace.privacy
@@ -453,7 +463,7 @@ export default {
   .persistent-item
     pointer-events all
     box-shadow 3px 3px 0 var(--heavy-shadow)
-    border-radius var(--small-entity-radius)
+    border-radius var(--entity-radius)
     margin-bottom 10px
     margin-right 0
     background-color var(--info-background)
@@ -474,10 +484,6 @@ export default {
     p
       margin 0
       user-select text
-    video
-      border-radius var(--small-entity-radius)
-      margin-bottom 5px
-      background-color var(--primary-background)
   .persistent-item
     animation none
   .row

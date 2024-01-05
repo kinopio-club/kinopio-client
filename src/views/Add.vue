@@ -105,6 +105,7 @@ const restoreValue = async (value) => {
   value = value || cache.prevAddPageValue()
   state.newName = value
   console.log('🏬 restored value', value)
+  await nextTick()
   updateTextareaSize()
   focusAndSelectName()
   updateMaxLengthError()
@@ -330,9 +331,10 @@ main.add-page
             span Add
           .badge.label-badge.enter-badge(v-if="state.keyboardShortcutTipIsVisible")
             span Enter
-      .row(v-if="state.success")
-        .badge.success
-          span Added to space
+      Transition(name="fadeIn")
+        .row(v-if="state.success")
+          .badge.success
+            span Added to space
 
   //- sign in
   section(v-if="!currentUserIsSignedIn")
@@ -352,6 +354,9 @@ main.add-page
 </template>
 
 <style lang="stylus">
+*
+  font-size 16px
+
 main.add-page
   padding 8px
   min-height 100vh
@@ -435,4 +440,14 @@ main.add-page
   display flex
   justify-content space-between
   align-items center
+
+.fadeIn-enter-active {
+  animation fadeIn 0.4s ease-out
+}
+
+@keyframes fadeIn
+  0%
+    opacity 0
+  100%
+    opacity 1
 </style>

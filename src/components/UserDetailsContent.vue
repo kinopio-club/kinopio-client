@@ -79,6 +79,7 @@ const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpa
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const signOut = () => {
   postMessage.send({ name: 'onLogout' })
+  store.commit('currentUser/resetLastSpaceId')
   cache.removeAll()
   // clear history wipe state from vue-router
   window.history.replaceState({}, 'Kinopio', '/')

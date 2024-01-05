@@ -68,7 +68,7 @@ export default {
     CardListItemOptions
   },
   created () {
-    console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
+    console.log('🐢 kinopio-client build', import.meta.env.MODE, this.scriptUrl)
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'broadcast/joinSpaceRoom') {
         this.updateMetaRSSFeed()
@@ -127,31 +127,16 @@ export default {
       const size = Math.max(this.$store.state.pageHeight, this.$store.state.viewportHeight)
       return size + 'px'
     },
-    buildHash () {
-      // https://regexr.com/7q0fp
-      // matches index-6Qua3Qgw.js
-      let regex = /(index-).[^(.js]+/
-      if (this.isDevelopment) {
-        // https://regexr.com/7q0fg
-        // matches from main.js?t=1704395941668
-        regex = /(t=)([a-z0-9])+/
-      }
+    scriptUrl () {
       const scripts = Array.from(document.querySelectorAll('script'))
-      const path = scripts.find(script => {
-        const src = script.src
+      const url = scripts.find(script => {
         if (this.isDevelopment) {
-          return src.includes('main.js')
+          return script.src.includes('main.js')
         } else {
-          return src.includes('index-')
+          return script.src.includes('index-')
         }
       })
-      if (!path) { return }
-      let hash = path.src.match(regex)[0]
-      hash = hash.replace('index-', '')
-      if (this.isDevelopment) {
-        hash = hash.replace('t=', '')
-      }
-      return hash
+      return url.src
     },
     pageCursor () {
       const isPanning = this.$store.state.currentUserIsPanning

@@ -4,6 +4,8 @@ import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 import fs from 'fs'
 
+const yearTime = 60 * 60 * 24 * 365 // 365 days
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -25,7 +27,7 @@ export default defineConfig({
               cacheName: 'cdn-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 365 days
+                maxAgeSeconds: yearTime
               },
               cacheableResponse: {
                 statuses: [0, 200]
@@ -39,7 +41,7 @@ export default defineConfig({
               cacheName: 'bk-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 365 days
+                maxAgeSeconds: yearTime
               },
               cacheableResponse: {
                 statuses: [0, 200]
@@ -53,7 +55,21 @@ export default defineConfig({
               cacheName: 'are-na-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 365 days
+                maxAgeSeconds: yearTime
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/d2w9rnfcy7mm78\.cloudfront\.net\/.*/i, // are.na cdn
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'are-na-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: yearTime
               },
               cacheableResponse: {
                 statuses: [0, 200]

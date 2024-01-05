@@ -558,10 +558,6 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
           template(v-for="image in state.images" :key="image.id")
             li(@click.left="updateSpaceBackground(image.url)" tabindex="0" v-on:keydown.enter="updateSpaceBackground(image.url)" :class="{ active: isCurrentSpaceBackground(image)}")
               img(:src="image.previewUrl")
-              a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
-                button.small-button
-                  span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
-                  span →
 </template>
 
 <style lang="stylus">
