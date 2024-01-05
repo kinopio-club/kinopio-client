@@ -53,7 +53,7 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 
 Post messages are used to communicate with a parent `secureAppContext` environment, such as the iOS app that wraps the website in a child webview.
 
-## How to update the Hello Kinopio Space
+## How to update the 'Hello Kinopio' Space
 
 The hello space serves as the entry point and marketing page for new users. It's generated within the app from `hello.json`.
 
