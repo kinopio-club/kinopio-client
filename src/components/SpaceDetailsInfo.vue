@@ -129,7 +129,7 @@ import cache from '@/cache.js'
 
 export default {
   name: 'SpaceDetailsInfo',
-  emits: ['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace'],
+  emits: ['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace', 'removeSpaceId'],
   components: {
     BackgroundPicker,
     BackgroundPreview,
@@ -263,8 +263,11 @@ export default {
         this.$store.dispatch('currentSpace/removeCurrentSpace')
         this.$store.commit('notifyCurrentSpaceIsNowRemoved', true)
       }
-      this.updateLocalSpaces()
+      this.$emit('removeSpaceId', currentSpaceId)
       this.changeToPrevSpace()
+      this.$nextTick(() => {
+        this.updateLocalSpaces()
+      })
     },
     changeToPrevSpace () {
       let spaces = cache.getAllSpaces().filter(space => {

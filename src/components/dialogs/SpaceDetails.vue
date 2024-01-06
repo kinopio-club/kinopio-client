@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.space-details.is-pinnable.wide(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned, 'back-button-is-visible': backButtonIsVisible}")
   section
-    SpaceDetailsInfo(@updateLocalSpaces="updateLocalSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden" @addSpace="addSpace")
+    SpaceDetailsInfo(@updateLocalSpaces="updateLocalSpaces" @removeSpaceId="removeSpaceFromSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden" @addSpace="addSpace")
   section.results-actions
     .row.title-row
       div
@@ -248,20 +248,24 @@ export default {
       spaces = inboxSpaces.concat(spaces)
       return spaces
     },
+    removeSpaceFromSpaces (spaceId) {
+      this.spaces = this.spaces.filter(space => space.id !== spaceId)
+      this.remoteSpaces = this.remoteSpaces.filter(space => space.id !== spaceId)
+    },
     updateLocalSpaces () {
       if (!this.visible) { return }
       this.debouncedUpdateLocalSpaces()
     },
     debouncedUpdateLocalSpaces: debounce(async function () {
       this.$nextTick(() => {
-        let userSpaces = cache.getAllSpaces().filter(space => {
+        let cacheSpaces = cache.getAllSpaces().filter(space => {
           return this['currentUser/canEditSpace'](space)
         })
-        userSpaces = this.updateWithExistingRemoteSpaces(userSpaces)
-        userSpaces = this.sortSpacesByEditedOrCreatedAt(userSpaces)
-        userSpaces = this.updateFavoriteSpaces(userSpaces)
-        userSpaces = this.updateInboxSpace(userSpaces)
-        this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, this.currentUser)
+        let spaces = this.updateWithExistingRemoteSpaces(cacheSpaces)
+        spaces = this.sortSpacesByEditedOrCreatedAt(spaces)
+        spaces = this.updateFavoriteSpaces(spaces)
+        spaces = this.updateInboxSpace(spaces)
+        this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(spaces, this.currentUser)
       })
     }, 350, { leading: true }),
     removeRemovedCachedSpaces (remoteSpaces) {
@@ -271,11 +275,11 @@ export default {
         cache.deleteSpace(spaceToRemove)
       })
     },
-    updateWithExistingRemoteSpaces (userSpaces) {
-      if (!utils.arrayHasItems(this.remoteSpaces)) { return userSpaces }
-      let spaces = userSpaces
+    updateWithExistingRemoteSpaces (cacheSpaces) {
+      if (!utils.arrayHasItems(this.remoteSpaces)) { return cacheSpaces }
+      let spaces = cacheSpaces
       this.remoteSpaces.forEach(space => {
-        const spaceExists = userSpaces.find(userSpace => userSpace.id === space.id)
+        const spaceExists = cacheSpaces.find(userSpace => userSpace.id === space.id)
         if (!spaceExists) {
           spaces.push(space)
         }
