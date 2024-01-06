@@ -109,6 +109,7 @@ const updateBackground = async () => {
     const image = await utils.loadImage(background)
     if (image) {
       store.commit('spaceBackgroundUrl', background)
+      await nextTick()
       updateBackgroundSize()
     }
   } catch (error) {
