@@ -643,7 +643,7 @@ export default {
 
   h1
     font-family var(--serif-font)
-    font-size 22px
+    font-size 20px
     font-weight bold
     margin 0
     display inline-block
@@ -658,7 +658,7 @@ export default {
     pointer-events all
     position absolute
     cursor pointer
-    padding 8px
+    padding 6px 8px
     padding-right 10px
     border-bottom-right-radius var(--entity-radius)
     word-break break-word

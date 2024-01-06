@@ -4,7 +4,7 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
     p
       span Notifications
       Loader(:visible="loading")
-
+    OfflineBadge
   section.results-section(v-if="filteredNotifications.length" :style="{'max-height': dialogHeight + 'px'}")
     p(v-if="!loading && !filteredNotifications.length")
       span Cards added to your spaces by collaborators can be found here
@@ -51,6 +51,7 @@ import consts from '@/consts.js'
 import cache from '@/cache.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
+import OfflineBadge from '@/components/OfflineBadge.vue'
 
 export default {
   name: 'UserNotifications',
@@ -59,7 +60,8 @@ export default {
     UserLabelInline,
     NameSegment,
     BackgroundPreview,
-    AddToExplore
+    AddToExplore,
+    OfflineBadge
   },
   props: {
     visible: Boolean,

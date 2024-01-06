@@ -12,9 +12,13 @@ aside.notifications-with-position
     img.icon.add(v-if="item.icon === 'add'" src="@/assets/add.svg")
     img.icon.checkmark(v-if="item.icon === 'checkmark'" src="@/assets/checkmark.svg")
     img.icon.cut(v-if="item.icon === 'cut'" src="@/assets/cut.svg")
+    img.icon.offline(v-if="item.icon === 'offline'" src="@/assets/offline.svg")
     span {{item.message}}
 </template>
 <script>
+
+import utils from '@/utils.js'
+
 export default {
   name: 'NotificationsWithPosition',
   props: {
@@ -22,9 +26,19 @@ export default {
   },
   computed: {
     items () {
-      const itemsInLayer = this.$store.state.notificationsWithPosition.filter(item => item.layer === this.layer)
+      let itemsInLayer = this.$store.state.notificationsWithPosition.filter(item => item.layer === this.layer)
+      itemsInLayer = utils.clone(itemsInLayer)
+      itemsInLayer = itemsInLayer.map(item => {
+        const isReadOnlyMessage = item.message === 'Space is Read Only'
+        if (this.currentSpaceIsUnavailableOffline && isReadOnlyMessage) {
+          item.message = 'Space is Unavailable Offline'
+          item.icon = 'offline'
+        }
+        return item
+      })
       return itemsInLayer
-    }
+    },
+    currentSpaceIsUnavailableOffline () { return this.$store.getters['currentSpace/isUnavailableOffline'] }
   },
   methods: {
     remove () {

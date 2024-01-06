@@ -2,7 +2,7 @@ import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
 
-let notifiedCardAdded = []
+let notifiedCardIds = []
 
 export default {
   namespaced: true,
@@ -61,7 +61,7 @@ export default {
     addCardUpdated: (context, { cardId, type }) => {
       if (!cardId) { return }
       if (context.state.name === 'Hello Kinopio') { return }
-      if (notifiedCardAdded.includes(cardId)) { return }
+      if (notifiedCardIds.includes(cardId)) { return }
       const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
       if (!userCanEdit) { return }
       const userId = context.rootState.currentUser.id
@@ -75,7 +75,7 @@ export default {
         spaceId: context.state.id
       }
       context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
-      notifiedCardAdded.push(cardId)
+      notifiedCardIds.push(cardId)
     },
 
     // Ask to Add Space to Explore
@@ -98,18 +98,20 @@ export default {
   getters: {
     recipientUserIds: (state, getters, rootState, rootGetters) => {
       const currentUserId = rootState.currentUser.id
-      let clients = rootState.currentSpace.clients.map(client => client.id)
+      const spaceIsOpen = rootState.currentSpace.privacy === 'open'
       let members = rootGetters['currentSpace/members'](true)
-      let contributors = [] // for open spaces
       members = members.map(member => member.id)
-      contributors = rootState.currentSpace.cards.map(card => card.userId)
-      let userIds = members.concat(contributors)
-      userIds = uniq(userIds)
-      // exclude currently connected userIds
-      userIds = userIds.filter(userId => !clients.includes(userId))
-      userIds = userIds.filter(userId => userId !== currentUserId)
-      userIds = userIds.filter(userId => Boolean(userId))
-      return userIds
+      let recipients = members
+      if (spaceIsOpen) {
+        let contributors = []
+        contributors = rootState.currentSpace.cards.map(card => card.userId)
+        recipients = members.concat(contributors)
+      }
+      recipients = uniq(recipients)
+      // exclude currently connected recipients
+      recipients = recipients.filter(userId => userId !== currentUserId)
+      recipients = recipients.filter(userId => Boolean(userId))
+      return recipients
     }
   }
 }

@@ -20,7 +20,7 @@ let isLoadingRemoteSpace, shouldLoadNewHelloSpace
 
 const currentSpace = {
   namespaced: true,
-  state: newSpace,
+  state: utils.clone(newSpace),
   mutations: {
 
     restoreSpace: (state, space) => {
@@ -758,7 +758,7 @@ const currentSpace = {
           })
         })
       })
-      context.commit('isLoadingSpace', false, { root: true })
+      context.dispatch('checkIfIsLoadingSpace', isRemote)
       // preview image
       if (!isRemote) { return }
       setTimeout(() => {
@@ -795,7 +795,10 @@ const currentSpace = {
       let remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (!remoteSpace) { return }
       const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
-      if (spaceIsUnchanged) { return }
+      if (spaceIsUnchanged) {
+        context.commit('isLoadingSpace', false, { root: true })
+        return
+      }
       isLoadingRemoteSpace = true
       remoteSpace = utils.normalizeSpace(remoteSpace)
       // cards
@@ -961,6 +964,17 @@ const currentSpace = {
         context.commit('triggerExploreIsVisible', null, { root: true })
       }
       context.commit('shouldShowExploreOnLoad', false, { root: true })
+    },
+    checkIfIsLoadingSpace: (context, isRemote) => {
+      const isOffline = !window.navigator.onLine
+      const currentSpaceIsRemote = context.rootGetters['currentSpace/isRemote']
+      if (isOffline) {
+        context.commit('isLoadingSpace', false, { root: true })
+      } else if (!currentSpaceIsRemote) {
+        context.commit('isLoadingSpace', false, { root: true })
+      } else if (currentSpaceIsRemote && isRemote) {
+        context.commit('isLoadingSpace', false, { root: true })
+      }
     },
     checkIfShouldUpdateNewTweetCards: (context, space) => {
       if (!space.isFromTweet) { return }
@@ -1165,6 +1179,13 @@ const currentSpace = {
       const boxColors = rootGetters['currentBoxes/colors']
       const colors = cardColors.concat(boxColors)
       return uniq(colors)
+    },
+    isUnavailableOffline: (state, getters, rootState, rootGetters) => {
+      const spaceId = rootState.currentSpace.id
+      const isOffline = !rootState.isOnline
+      const isNotCached = rootGetters['spaceIsNotCached'](spaceId)
+      const currentSpaceIsRemote = getters.isRemote
+      return isOffline && isNotCached && currentSpaceIsRemote
     },
 
     // tags

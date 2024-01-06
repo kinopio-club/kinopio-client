@@ -51,6 +51,7 @@ const store = createStore({
     isPresentationMode: false,
     pricingIsVisible: false,
     userSettingsIsVisible: false,
+    offlineIsVisible: false,
     isFadingOutDuringTouch: false,
     prevSpaceIdInSession: '',
     outsideSpaceBackgroundColor: '',
@@ -316,6 +317,7 @@ const store = createStore({
       state.cardListItemOptionsIsVisible = false
       state.pricingIsVisible = false
       state.codeLanguagePickerIsVisible = false
+      state.offlineIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -465,6 +467,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.userSettingsIsVisible = value
     },
+    offlineIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.offlineIsVisible = value
+    },
     isFadingOutDuringTouch: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.isFadingOutDuringTouch = value
@@ -580,6 +586,7 @@ const store = createStore({
     triggerUpdateCardDetailsCardName: (state, options) => {},
     triggerCloseChildDialogs: () => {},
     triggerAddSpaceIsVisible: () => {},
+    triggerOfflineIsVisible: () => {},
     triggerAppsAndExtensionsIsVisible: () => {},
 
     // Used by extensions only
@@ -1795,6 +1802,10 @@ const store = createStore({
       } else {
         return getters.otherSpaceById(spaceId)
       }
+    },
+    spaceIsNotCached: (state) => (spaceId) => {
+      const spaceCardsCount = cache.space(spaceId).cards?.length
+      return Boolean(!spaceCardsCount)
     },
     spaceZoomDecimal: (state) => {
       return state.spaceZoomPercent / 100

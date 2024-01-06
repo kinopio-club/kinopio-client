@@ -112,6 +112,8 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
           h2 {{markdown.content}}
         template(v-else-if="markdown.type === 'h3'")
           h3 {{markdown.content}}
+        template(v-else-if="markdown.type === 'h4'")
+          h4 {{markdown.content}}
         template(v-else-if="markdown.type === 'emphasis'")
           em {{markdown.content}}
         template(v-else-if="markdown.type === 'strikethrough'")
@@ -177,6 +179,10 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       font-size 16px
       margin 0
       display inline-block
+    h4
+      font-family var(--glyphs-font)
+      font-size 44px
+      margin 0
 
   .strikethrough
     text-decoration line-through

@@ -68,7 +68,7 @@ export default {
     CardListItemOptions
   },
   created () {
-    console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
+    console.log('🐢 kinopio-client build', import.meta.env.MODE, this.scriptUrl)
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'broadcast/joinSpaceRoom') {
         this.updateMetaRSSFeed()
@@ -127,16 +127,16 @@ export default {
       const size = Math.max(this.$store.state.pageHeight, this.$store.state.viewportHeight)
       return size + 'px'
     },
-    buildHash () {
-      const regex = /(index\.)([a-z0-9])\w+/
+    scriptUrl () {
       const scripts = Array.from(document.querySelectorAll('script'))
-      const path = scripts.find(script => {
-        const src = script.src
-        return src.includes('index')
+      const url = scripts.find(script => {
+        if (this.isDevelopment) {
+          return script.src.includes('main.js')
+        } else {
+          return script.src.includes('index-')
+        }
       })
-      if (!path) { return }
-      let hash = path.src.match(regex)[0] // index.xyzabc123.js
-      return hash.replace('index.', '') // xyzabc123
+      return url.src
     },
     pageCursor () {
       const isPanning = this.$store.state.currentUserIsPanning
@@ -320,6 +320,7 @@ export default {
   --button-fixed-height 30px
   --serif-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
+  --glyphs-font GoodGlyphs, wingdings
 
 @font-face
   font-family 'Recoleta'
@@ -331,6 +332,12 @@ export default {
   font-family 'Recoleta'
   src url("assets/fonts/Recoleta-Bold.woff2") format("woff2")
   font-weight bold
+  font-style normal
+
+@font-face
+  font-family 'GoodGlyphs'
+  src url("assets/fonts/GoodGlyphs-No1.woff2") format("woff2")
+  font-weight normal
   font-style normal
 
 *

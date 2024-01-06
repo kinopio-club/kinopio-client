@@ -45,6 +45,7 @@ const closeDialogs = () => {
   state.favoritesIsVisible = false
 }
 const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const isOnline = computed(() => store.state.isOnline)
 
 // Explore
 
@@ -53,7 +54,8 @@ const toggleExploreIsVisible = () => {
   store.dispatch('closeAllDialogs')
   state.exploreIsVisible = !isVisible
 }
-const unreadExploreSpacesLength = computed(() => {
+const unreadExploreSpacesCount = computed(() => {
+  if (!isOnline.value) { return }
   let readDate = store.state.currentUser.showInExploreUpdatedAt
   if (!readDate) { return }
   readDate = dayjs(readDate)
@@ -116,6 +118,10 @@ const normalizeLiveSpaces = (spaces) => {
   })
   return normalizedSpaces
 }
+const liveSpacesCount = computed(() => {
+  if (!isOnline.value) { return }
+  return state.liveSpaces.length
+})
 
 // Favorites
 
@@ -125,6 +131,7 @@ const toggleFavoritesIsVisible = () => {
   state.favoritesIsVisible = !isVisible
 }
 const favoriteSpacesEditedCount = computed(() => {
+  if (!isOnline.value) { return }
   const currentUser = store.state.currentUser
   let favoriteSpaces = utils.clone(currentUser.favoriteSpaces)
   favoriteSpaces = favoriteSpaces.filter(space => {
@@ -147,12 +154,12 @@ const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
     .button-wrap
       button.explore-button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
         img.icon.sunglasses(src="@/assets/sunglasses.svg")
-        span.explore-button-label(v-if="unreadExploreSpacesLength") &nbsp;{{ unreadExploreSpacesLength }}
+        span.explore-button-label(v-if="unreadExploreSpacesCount") &nbsp;{{ unreadExploreSpacesCount }}
     //- Live
     .button-wrap
       button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
         img.icon.camera(src="@/assets/camera.svg")
-        span(v-if="state.liveSpaces.length") {{ state.liveSpaces.length }}
+        span(v-if="liveSpacesCount") {{ liveSpacesCount }}
     //- Favorites
     .button-wrap
       button(@click.left="toggleFavoritesIsVisible" :class="{ active: state.favoritesIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
@@ -171,8 +178,9 @@ const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
   .explore-button
     .explore-button-label
       margin-left 0
-  .button-wrap
-    margin-left 0 !important
   .space-functions-row
     margin-bottom 0
+    > .button-wrap
+      margin-left 0 !important
+
 </style>

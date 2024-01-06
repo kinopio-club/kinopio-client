@@ -49,6 +49,9 @@ span.space-list-wrap
               //- template
               span(v-if="space.isTemplate")
                 img.icon.templates(src="@/assets/templates.svg" title="Template")
+              //- offline
+              span(v-if="isNotCached(space.id)")
+                OfflineBadge(:isInline="true" :isDanger="true")
               .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
               //- tweet space
               span(v-if="space.isFromTweet" title="Tweet space")
@@ -76,12 +79,14 @@ span.space-list-wrap
 import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
-import utils from '@/utils.js'
 import { defineAsyncComponent } from 'vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import Loader from '@/components/Loader.vue'
 import NameMatch from '@/components/NameMatch.vue'
+import OfflineBadge from '@/components/OfflineBadge.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
+import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 import dayjs from 'dayjs'
 import last from 'lodash-es/last'
@@ -100,7 +105,8 @@ export default {
     PrivacyIcon,
     Loader,
     NameMatch,
-    SpaceTodayJournalBadge
+    SpaceTodayJournalBadge,
+    OfflineBadge
   },
   props: {
     spaces: Array,
@@ -178,6 +184,9 @@ export default {
     }
   },
   methods: {
+    isNotCached (spaceId) {
+      return this.$store.getters['spaceIsNotCached'](spaceId)
+    },
     isFavorite (space) {
       const favorites = this.$store.state.currentUser.favoriteSpaces
       const isFavorite = favorites.find(favorite => favorite.id === space.id)

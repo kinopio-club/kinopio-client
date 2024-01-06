@@ -848,8 +848,8 @@ export default {
       })
       this.updateMediaUrls()
       this.updateTags()
-      if (this.notifiedMembers) { return }
       if (this.createdByUser.id !== this.currentUser.id) { return }
+      if (this.notifiedMembers) { return } // send card update notifications only once per card, per session
       if (card.name) {
         this.$store.dispatch('userNotifications/addCardUpdated', { cardId: this.card.id, type: 'updateCard' })
         this.notifiedMembers = true

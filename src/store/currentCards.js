@@ -126,6 +126,7 @@ const currentCards = {
     moveWhileDragging: (state, { cards }) => {
       cards.forEach(card => {
         const element = document.querySelector(`article[data-card-id="${card.id}"]`)
+        if (!element) { return }
         element.style.left = card.x + 'px'
         element.style.top = card.y + 'px'
       })
