@@ -148,6 +148,7 @@ export default {
 dialog.explore
   left initial
   right 8px
+  overflow auto
   .community
     .badge
       display flex
