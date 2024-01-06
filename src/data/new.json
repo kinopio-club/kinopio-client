@@ -56,5 +56,6 @@
   "originSpaceId": "",
   "tags": [],
   "boxes": [],
-  "visits": 0
+  "visits": 0,
+  "isRemoved": false
 }
