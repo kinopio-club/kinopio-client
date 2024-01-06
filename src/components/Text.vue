@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -11,6 +10,7 @@ import Loader from '@/components/Loader.vue'
 import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
+const store = useStore()
 
 onMounted(() => {
   updateSortedCards()
@@ -265,7 +265,10 @@ const isInSearchResultsCards = (card) => {
 template(v-if="visible")
   section.text(@click="closeDialogs")
     .row.title-row
-      div Card Text Editor
+      div
+        span Card Text Editor&nbsp;
+        Loader(:visible="isLoadingSpace" :isSmall="true")
+
       //- tips
       .button-wrap(@click.stop="toggleCardTipsIsVisible")
         button.small-button(:class="{ active: state.cardTipsIsVisible }")
@@ -290,7 +293,6 @@ template(v-if="visible")
             //- span Oldest
 
   section.text.results-section(ref="section" @click="closeDialogs")
-    Loader(:visible="isLoadingSpace")
     template(v-for="(card, index) in state.sortedCards")
       //- edit
       template(v-if="canEditCard(card)")
@@ -373,6 +375,8 @@ section.text
     img
       margin 0
       cursor auto
+  .loader
+    vertical-align -2px
   // @media(max-height 500px)
   //   dialog.card-tips
   //     top -50px
