@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
+dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   section
     .row.title-row-flex
       .button-wrap.segmented-buttons-wrap
@@ -85,7 +85,7 @@ export default {
       inboxIsVisible: false,
       statsIsVisible: false,
       favoritesIsVisible: false,
-      textIsVisible: true
+      textIsVisible: false
     }
   },
   created () {
@@ -128,56 +128,68 @@ export default {
       this.textIsVisible = false
     },
     toggleTagsIsVisible () {
-      const value = !this.tagsIsVisible
       this.clearVisible()
-      this.tagsIsVisible = value
+      this.tagsIsVisible = true
+      // updateUserLastSidebarSection('tags')
     },
     toggleLinksIsVisible () {
-      const value = !this.linksIsVisible
       this.clearVisible()
-      this.linksIsVisible = value
+      this.linksIsVisible = true
+      // updateUserLastSidebarSection('links')
     },
     toggleCommentsIsVisible () {
-      const value = !this.commentsIsVisible
       this.clearVisible()
-      this.commentsIsVisible = value
+      this.commentsIsVisible = true
+      // updateUserLastSidebarSection('comments')
     },
     toggleRemovedIsVisible () {
-      const value = !this.removedIsVisible
       this.clearVisible()
-      this.removedIsVisible = value
+      this.removedIsVisible = true
+      // updateUserLastSidebarSection('removed')
     },
     toggleInboxIsVisible () {
-      const value = !this.inboxIsVisible
       this.clearVisible()
-      this.inboxIsVisible = value
+      this.inboxIsVisible = true
+      // updateUserLastSidebarSection('inbox')
     },
     toggleAIImagesIsVisible () {
-      const value = !this.AIImagesIsVisible
       this.clearVisible()
-      this.AIImagesIsVisible = value
+      this.AIImagesIsVisible = true
+      // updateUserLastSidebarSection('AIImages')
     },
     toggleStatsIsVisible () {
-      const value = !this.statsIsVisible
       this.clearVisible()
-      this.statsIsVisible = value
+      this.statsIsVisible = true
+      // updateUserLastSidebarSection('stats')
     },
     toggleTextIsVisible () {
-      const value = !this.textIsVisible
       this.clearVisible()
-      this.textIsVisible = value
+      this.textIsVisible = true
+      // updateUserLastSidebarSection('text')
     },
     updateDialogHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
-        let element = this.$refs.dialog
+        let element = this.$refs.dialogElement
         this.dialogHeight = utils.elementHeight(element)
       })
+    },
+    restoreUserLastSidebarSection () {
+      this.clearVisible()
+      // section = store.state.currentUser.lastSidebarSection
+      // if section
+      // this[section + 'IsVisible'] = true
+      // default else
+      this.textIsVisible = true
+    },
+    updateUserLastSidebarSection (name) {
+      this.$store.dispatch('currentUser/update', { lastSidebarSection: name })
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
+        this.restoreUserLastSidebarSection()
         this.updateDialogHeight()
         this.$store.commit('shouldExplicitlyHideFooter', true)
       } else {
