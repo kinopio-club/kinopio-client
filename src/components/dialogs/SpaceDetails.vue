@@ -250,6 +250,7 @@ export default {
     },
     removeSpaceFromSpaces (spaceId) {
       this.spaces = this.spaces.filter(space => space.id !== spaceId)
+      if (!utils.arrayHasItems(this.remoteSpaces)) { return }
       this.remoteSpaces = this.remoteSpaces.filter(space => space.id !== spaceId)
     },
     updateLocalSpaces () {
