@@ -55,6 +55,9 @@ const restoreCards = async () => {
 const changeSpaceToInbox = () => {
 
 }
+const selectCard = (card) => {
+  console.log(card)
+}
 </script>
 
 <template lang="pug">
@@ -71,7 +74,7 @@ section.inbox
 
 section.results-section(v-if="visible")
   ul.results-list
-    CardList(:cards="state.cards")
+    CardList(:cards="state.cards" @selectCard="selectCard")
 //- button(@click="incrementBy")
 //-   span Count is: {{ state.count }}
 //- p Current theme is: {{ themeName }}, prop is {{ visible }}

@@ -32,10 +32,9 @@ export default {
   },
   props: {
     cards: Array,
-    search: String,
+    search: String
     // secondaryActionLabel: String,
-    primaryActionIsCardListOptions: Boolean
-    // cardListItemOptionsPositionShouldBeOnLeftSide: Boolean
+    // primaryActionIsCardListOptions: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -54,8 +53,7 @@ export default {
     ...mapState([
       'cardDetailsIsVisibleForCardId',
       'previousResultItem',
-      'currentUser',
-      'cardListItemOptionsCard'
+      'currentUser'
     ]),
     ...mapGetters([
     ]),
@@ -79,33 +77,10 @@ export default {
   methods: {
     selectCard (event, card) {
       this.$emit('selectCard', card)
-      if (this.cardListItemOptionsCard.id === card.id) {
-        this.$store.commit('cardListItemOptionsCard', '')
-        this.$store.commit('cardListItemOptionsIsVisible', false)
-        return
-      }
-      if (this.primaryActionIsCardListOptions) {
-        const element = event.target.closest('li')
-        const rect = element.getBoundingClientRect()
-        let position = utils.childDialogPositionFromParent({
-          element: event.target,
-          shouldIgnoreZoom: true,
-          offsetX: rect.width - 25,
-          offsetY: -rect.height + 12,
-          maxYOffset: 170
-        })
-        this.$store.commit('cardListItemOptionsPosition', position)
-        this.$store.commit('cardListItemOptionsCard', card)
-        this.$store.commit('cardListItemOptionsIsVisible', true)
-      }
     },
-    // secondaryAction (card) {
-    //   this.$emit('secondaryAction', card)
-    // },
     cardIsActive (card) {
-      const isActive = this.cardListItemOptionsCard.id === card.id
       const isCardDetailsVisible = this.cardDetailsIsVisibleForCardId === card.id
-      return isActive || isCardDetailsVisible
+      return isCardDetailsVisible
     },
     cardIsFocused (card) {
       return this.previousResultItem.id === card.id

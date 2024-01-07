@@ -18,7 +18,6 @@
     Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
     TagDetails
     UserDetails
-    CardListItemOptions
     WindowHistoryHandler
     KeyboardShortcutsHandler
     ScrollHandler
@@ -42,7 +41,6 @@ import NotificationsWithPosition from '@/components/NotificationsWithPosition.vu
 import SpaceBackground from '@/components/SpaceBackground.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
-import CardListItemOptions from '@/components/dialogs/CardListItemOptions.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -64,8 +62,7 @@ export default {
     NotificationsWithPosition,
     SpaceBackground,
     OutsideSpaceBackground,
-    Preload,
-    CardListItemOptions
+    Preload
   },
   created () {
     console.log('🐢 kinopio-client build', import.meta.env.MODE, this.scriptUrl)

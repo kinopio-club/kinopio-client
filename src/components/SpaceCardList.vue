@@ -10,7 +10,6 @@ const store = useStore()
 
 const props = defineProps({
   groupedItems: Array,
-  primaryActionIsCardListOptions: Boolean,
   isLoading: Boolean,
   search: String
 })
@@ -41,7 +40,7 @@ ul.results-list
       BackgroundPreview(v-if="group.space" :space="group.space")
       span {{group.spaceName}}
     //- cards
-    CardList(:cards="group.cards" :search="search" :primaryActionIsCardListOptions="primaryActionIsCardListOptions" @selectCard="selectCard")
+    CardList(:cards="group.cards" :search="search" @selectCard="selectCard")
 Loader(:visible="isLoading")
 </template>
 
