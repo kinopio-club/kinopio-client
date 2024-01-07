@@ -746,7 +746,8 @@ dialog
       border-top-right-radius 0
   > .button-wrap > button,
   > button,
-  > label
+  > label,
+  > select
     margin 0
     border-radius 0
     &:first-child
@@ -775,7 +776,9 @@ dialog
   button + button,
   label + button,
   button + label,
-  label + label
+  label + label,
+  select + button,
+  button + select
     margin-left -1px
 
 .segmented-buttons-wrap
