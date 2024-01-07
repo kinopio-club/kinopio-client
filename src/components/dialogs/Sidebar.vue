@@ -130,42 +130,42 @@ export default {
     toggleTagsIsVisible () {
       this.clearVisible()
       this.tagsIsVisible = true
-      // updateUserLastSidebarSection('tags')
+      this.updateUserLastSidebarSection('tags')
     },
     toggleLinksIsVisible () {
       this.clearVisible()
       this.linksIsVisible = true
-      // updateUserLastSidebarSection('links')
+      this.updateUserLastSidebarSection('links')
     },
     toggleCommentsIsVisible () {
       this.clearVisible()
       this.commentsIsVisible = true
-      // updateUserLastSidebarSection('comments')
+      this.updateUserLastSidebarSection('comments')
     },
     toggleRemovedIsVisible () {
       this.clearVisible()
       this.removedIsVisible = true
-      // updateUserLastSidebarSection('removed')
+      this.updateUserLastSidebarSection('removed')
     },
     toggleInboxIsVisible () {
       this.clearVisible()
       this.inboxIsVisible = true
-      // updateUserLastSidebarSection('inbox')
+      this.updateUserLastSidebarSection('inbox')
     },
     toggleAIImagesIsVisible () {
       this.clearVisible()
       this.AIImagesIsVisible = true
-      // updateUserLastSidebarSection('AIImages')
+      this.updateUserLastSidebarSection('AIImages')
     },
     toggleStatsIsVisible () {
       this.clearVisible()
       this.statsIsVisible = true
-      // updateUserLastSidebarSection('stats')
+      this.updateUserLastSidebarSection('stats')
     },
     toggleTextIsVisible () {
       this.clearVisible()
       this.textIsVisible = true
-      // updateUserLastSidebarSection('text')
+      this.updateUserLastSidebarSection('text')
     },
     updateDialogHeight () {
       if (!this.visible) { return }
@@ -176,11 +176,12 @@ export default {
     },
     restoreUserLastSidebarSection () {
       this.clearVisible()
-      // section = store.state.currentUser.lastSidebarSection
-      // if section
-      // this[section + 'IsVisible'] = true
-      // default else
-      this.textIsVisible = true
+      const section = this.$store.state.currentUser.lastSidebarSection
+      if (section) {
+        this[section + 'IsVisible'] = true
+      } else {
+        this.textIsVisible = true
+      }
     },
     updateUserLastSidebarSection (name) {
       this.$store.dispatch('currentUser/update', { lastSidebarSection: name })
