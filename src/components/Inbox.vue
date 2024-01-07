@@ -8,55 +8,54 @@ import Loader from '@/components/Loader.vue'
 const store = useStore()
 
 onMounted(() => {
-  console.log(`🐴🐴🐴`)
-  updateInboxCache()
-  restoreCards()
-  // store.subscribe((mutation, state) => {
-  //   if (mutation.type === 'triggerUpdateOtherCard') {
-  //     mutation.payload
-  //   }
-  // })
+  restoreInboxCards()
 })
-
 const props = defineProps({
   visible: Boolean
 })
-const state = reactive({
-  cards: [],
-  inboxCache: [],
-  isLoading: true
-})
-
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    console.log('🐸🐸🐸')
-    updateInboxCache()
-    restoreCards()
+    restoreInboxCards()
   }
 })
 
+const state = reactive({
+  cards: [],
+  isLoading: false
+})
+
+const loadInboxSpace = () => {
+  store.dispatch('currentSpace/loadInboxSpace')
+}
+
 // const hasInboxSpace = computed(() => !state.cards.length)
-const updateInboxCache = () => {
-  state.inboxCache = cache.getInboxSpace()
+const updateInboxCardsLocal = () => {
+  state.cards = cache.getInboxSpace()?.cards
+}
+const updateInboxCardsRemote = async () => {
+  if (!store.state.isOnline) { return }
+  const inboxLocal = cache.getInboxSpace()
+  // inboxRemote = await
+  // compare cache vs remote dates, replace state.cards if newer (or if no inboxLocal)
+  // update LS w fetched space
+  // state.cards = ..
 }
 
-const restoreCards = async () => {
+const restoreInboxCards = async () => {
+  if (state.isLoading) { return }
   try {
-    state.cards = [{ id: 1, name: 'yoyoyoy' }]
-    // const inboxCache = inboxSpace
-    // state.cards = cached inbox
-    // state.isLoading = true
-    // const inboxRemote = await
-    // compare cache vs remote dates, replace state.cards if newer
+    state.isLoading = true
+    updateInboxCardsLocal()
+    // await updateInboxCardsRemote()
   } catch (error) {
-
+    console.error('🚒 restoreInboxCards')
   }
-}
-const changeSpaceToInbox = () => {
-
+  state.isLoading = false
 }
 const selectCard = (card) => {
   console.log(card)
+  // queue operation: remove card from inbox
+  // queue operation: move card to currentSpace
 }
 </script>
 
@@ -65,10 +64,10 @@ const selectCard = (card) => {
 section.inbox
   .row.title-row
     div
-      span Inbox Cards
-      Loader(:visible="true" :isSmall="true")
+      span Move from Inbox
+      Loader(:visible="state.isLoading" :isSmall="true")
     .button-wrap
-      button.small-button(@click="changeSpaceToInbox")
+      button.small-button(@click="loadInboxSpace")
         img.icon(src="@/assets/inbox.svg")
         span Inbox
 
