@@ -21,14 +21,14 @@ watch(() => props.visible, (value, prevValue) => {
 
 const state = reactive({
   cards: [],
-  isLoading: false
+  isLoading: false,
+  noInboxCardsFound: false
 })
 
 const loadInboxSpace = () => {
   store.dispatch('currentSpace/loadInboxSpace')
 }
 
-// const hasInboxSpace = computed(() => !state.cards.length)
 const updateInboxCardsLocal = () => {
   state.cards = cache.getInboxSpace()?.cards
 }
@@ -60,7 +60,6 @@ const selectCard = (card) => {
 </script>
 
 <template lang="pug">
-//- template(v-if="hasInboxSpace")
 section.inbox
   .row.title-row
     div
@@ -77,7 +76,7 @@ section.results-section(v-if="visible")
 //- button(@click="incrementBy")
 //-   span Count is: {{ state.count }}
 //- p Current theme is: {{ themeName }}, prop is {{ visible }}
-//- template(v-else)
+//- template(v-if="state.noInboxCardsFound")
 //-   section // .badge.danger
 //-     p Inbox not found
 //-     p Add space..

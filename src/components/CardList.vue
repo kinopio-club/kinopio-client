@@ -3,17 +3,17 @@ span
   ul.results-list.card-list(ref="resultsList")
     template(v-for="card in normalizedCards")
       li(@click.stop="selectCard($event, card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
+        //- date
         span.badge.status.inline-badge
           img.icon.time(src="@/assets/time.svg")
           span {{ relativeDate(card) }}
+        //- user
         UserLabelInline(v-if="userIsNotCurrentUser(card.user.id)" :user="card.user")
+        //- name
         span.card-info
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")
             NameSegment(:segment="segment" :search="search" :isStrikeThrough="isStrikeThrough(card)")
-        //- button.small-button.secondary-action(v-if="secondaryActionLabel" @click.stop="secondaryAction")
-        //-   img.icon.visit(src="@/assets/visit.svg")
-        //-   span {{secondaryActionLabel}}
 </template>
 
 <script>
@@ -33,8 +33,6 @@ export default {
   props: {
     cards: Array,
     search: String
-    // secondaryActionLabel: String,
-    // primaryActionIsCardListOptions: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -120,10 +118,4 @@ export default {
     height 11px
   .inline-badge
     display inline-block
-  .secondary-action
-    position absolute
-    top 6px
-    right 6px
-  .icon.visit
-    vertical-align 1px
 </style>
