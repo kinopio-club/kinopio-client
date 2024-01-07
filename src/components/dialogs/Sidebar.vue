@@ -177,7 +177,9 @@ export default {
     restoreUserLastSidebarSection () {
       this.clearVisible()
       const section = this.$store.state.currentUser.lastSidebarSection
-      if (section) {
+      const values = ['text', 'stats', 'AIImagees', 'inbox', 'removed', 'comments', 'links', 'tags'] // listed in api docs
+      const isValid = values.includes(section)
+      if (section && isValid) {
         this[section + 'IsVisible'] = true
       } else {
         this.textIsVisible = true
