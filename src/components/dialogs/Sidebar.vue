@@ -47,6 +47,7 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
   AIImages(:visible="AIImagesIsVisible")
   Stats(:visible="statsIsVisible")
   Text(:visible="textIsVisible")
+  Inbox(:visible="inboxIsVisible")
 
 </template>
 
@@ -59,6 +60,7 @@ import Removed from '@/components/Removed.vue'
 import AIImages from '@/components/AIImages.vue'
 import Stats from '@/components/Stats.vue'
 import Text from '@/components/Text.vue'
+import Inbox from '@/components/Inbox.vue'
 
 export default {
   name: 'Sidebar',
@@ -69,7 +71,8 @@ export default {
     Removed,
     AIImages,
     Stats,
-    Text
+    Text,
+    Inbox
   },
   props: {
     visible: Boolean
