@@ -410,6 +410,7 @@ const currentSpace = {
       space.userId = context.rootState.currentUser.id
       space.cards = space.cards.map(card => {
         card.id = nanoid()
+        card.userId = context.rootState.currentUser.id
         return card
       })
       if (shouldCreateWithoutLoading) {
