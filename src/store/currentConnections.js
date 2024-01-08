@@ -359,10 +359,15 @@ export default {
         return start || end
       })
     },
-    typesByCardId: (state, getters) => (cardId) => {
-      const connections = getters.byCardId(cardId)
+    typesByCardId: (state, getters, rootState, rootGetters) => (cardId) => {
+      let connections = getters.byCardId(cardId)
       let types = getters.allTypes
       types = types.filter(type => Boolean(type))
+      connections = connections.filter(connection => {
+        const startCard = rootGetters['currentCards/byId'](connection.startCardId)
+        const endCard = rootGetters['currentCards/byId'](connection.endCardId)
+        return startCard && endCard
+      })
       const typeIds = connections.map(connection => connection.connectionTypeId)
       return types.filter(type => {
         return typeIds.includes(type.id)
