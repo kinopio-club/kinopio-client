@@ -351,13 +351,19 @@ export default {
       const typeIds = uniq(state.typeIds)
       return typeIds.map(id => state.types[id])
     },
-    byCardId: (state, getters) => (cardId) => {
-      const connections = getters.all
-      return connections.filter(connection => {
+    byCardId: (state, getters, rootState, rootGetters) => (cardId) => {
+      let connections = getters.all
+      connections = connections.filter(connection => {
         let start = connection.startCardId === cardId
         let end = connection.endCardId === cardId
         return start || end
       })
+      connections = connections.filter(connection => {
+        const startCard = rootGetters['currentCards/byId'](connection.startCardId)
+        const endCard = rootGetters['currentCards/byId'](connection.endCardId)
+        return startCard && endCard
+      })
+      return connections
     },
     typesByCardId: (state, getters, rootState, rootGetters) => (cardId) => {
       let connections = getters.byCardId(cardId)
