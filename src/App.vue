@@ -86,6 +86,10 @@ export default {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.logMatchMediaChange)
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.updateThemeFromSystem)
     window.addEventListener('visibilitychange', this.cancelTouch)
+
+    this.updateIsOnline()
+    window.addEventListener('online', this.updateIsOnline)
+    window.addEventListener('offline', this.updateIsOnline)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.scroll)
@@ -93,6 +97,8 @@ export default {
     window.removeEventListener('touchmove', this.touchMove)
     window.removeEventListener('touchend', this.touchEnd)
     window.removeEventListener('visibilitychange', this.cancelTouch)
+    window.removeEventListener('online', this.updateIsOnline)
+    window.removeEventListener('offline', this.updateIsOnline)
   },
   data () {
     return {
@@ -207,6 +213,13 @@ export default {
     cancelTouch () {
       this.isPinchZooming = false
       this.isTouchScrolling = false
+    },
+    updateIsOnline () {
+      const status = window.navigator.onLine
+      this.$store.commit('isOnline', status)
+      if (status) {
+        this.$store.dispatch('api/processQueueOperations')
+      }
     },
 
     //

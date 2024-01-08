@@ -85,10 +85,6 @@ export default {
     window.addEventListener('touchend', this.stopInteractions)
     window.addEventListener('resize', this.updatePageSizesDebounced)
 
-    this.updateIsOnline()
-    window.addEventListener('online', this.updateIsOnline)
-    window.addEventListener('offline', this.updateIsOnline)
-
     // when a card is added through Add.vue in a sharesheet with the space open behind it
     window.addEventListener('message', this.addCardFromOutsideAppContext)
 
@@ -119,8 +115,6 @@ export default {
     window.removeEventListener('mouseup', this.stopInteractions)
     window.removeEventListener('touchend', this.stopInteractions)
     window.removeEventListener('resize', this.updatePageSizesDebounced)
-    window.removeEventListener('online', this.updateIsOnline)
-    window.removeEventListener('offline', this.updateIsOnline)
     window.removeEventListener('unload', this.unloadPage)
     window.removeEventListener('message', this.addCardFromOutsideAppContext)
     window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
@@ -193,13 +187,6 @@ export default {
       this.$nextTick(() => {
         this.$store.dispatch('updatePageSizes')
       })
-    },
-    updateIsOnline () {
-      const status = window.navigator.onLine
-      this.$store.commit('isOnline', status)
-      if (status) {
-        this.$store.dispatch('api/processQueueOperations')
-      }
     },
     addCardFromOutsideAppContext (event) {
       if (!consts.isSecureAppContext) { return }

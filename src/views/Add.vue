@@ -57,7 +57,7 @@ onBeforeUnmount(() => {
   cache.clearPrevAddPageValue()
 })
 
-const isOnline = computed(() => store.state.isOnline)
+const isOffline = computed(() => !store.state.isOnline)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const kinopioDomain = computed(() => consts.kinopioDomain())
 const cardsCreatedIsOverLimit = computed(() => store.getters['currentUser/cardsCreatedIsOverLimit'])
@@ -305,10 +305,6 @@ const clearFilter = () => {
 main.add-page
   .add-form(v-if="currentUserIsSignedIn")
     section
-      .row(v-if="!isOnline")
-        .badge.danger
-          img.icon.offline(src="@/assets/offline.svg")
-          span Offline
       .row(v-if="cardsCreatedIsOverLimit || state.error.unknownServerError || state.error.maxLength")
         //- error: card limit
         template(v-if="cardsCreatedIsOverLimit")
@@ -370,6 +366,11 @@ main.add-page
         .row(v-if="state.success")
           .badge.success
             span Added to space
+      .row(v-if="isOffline")
+        .badge.info
+          img.icon.offline(src="@/assets/offline.svg")
+          span Offline
+        span New cards will be saved locally, and sync-ed up once you're back online
 
   //- sign in
   section(v-if="!currentUserIsSignedIn")
