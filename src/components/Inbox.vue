@@ -5,9 +5,11 @@ import { useStore } from 'vuex'
 import cache from '@/cache.js'
 import CardList from '@/components/CardList.vue'
 import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
+import { nanoid } from 'nanoid'
 const store = useStore()
 
 onMounted(() => {
@@ -32,6 +34,8 @@ const loadInboxSpace = () => {
   store.dispatch('currentSpace/loadInboxSpace')
 }
 
+// list cards
+
 const updateInboxCardsLocal = () => {
   state.cards = cache.getInboxSpace()?.cards
   sortCards()
@@ -45,7 +49,6 @@ const sortCards = () => {
   state.cards = sortBy(state.cards, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
   state.cards.reverse()
 }
-
 const restoreInboxCards = async () => {
   if (state.isLoading) { return }
   try {
@@ -58,6 +61,18 @@ const restoreInboxCards = async () => {
   state.isLoading = false
 }
 
+// remove card
+
+const removeFromCardList = (removedCard) => {
+  state.cards = state.cards.filter(card => card.id !== removedCard.id)
+}
+const removeCardFromInbox = (card) => {
+  store.dispatch('api/addToQueue', { name: 'removeCard', body: card, spaceId: card.spaceId })
+  removeFromCardList(card)
+}
+
+// update card
+
 const updateCardIsLoading = (newCard) => {
   state.cards = state.cards.map(card => {
     if (card.id === newCard.id) {
@@ -66,22 +81,27 @@ const updateCardIsLoading = (newCard) => {
     return card
   })
 }
-
-const selectCard = (card) => {
-  console.log(card, card.isLoading)
+const selectCard = async (card) => {
   if (card.isLoading) { return }
   updateCardIsLoading(card)
-  // const inboxId = cache.getInboxSpace().id
-  // api req: move card to currentSpace
-  // api req operation: remove card from inbox
+  const scroll = store.getters.windowScrollWithSpaceOffset
+  let newCard = utils.clone(card)
+  newCard.id = nanoid()
+  newCard.spaceId = store.state.currentSpace.id
+  newCard.x = scroll.x + 100 // matches KeyboardShortcutsHandler.addCard
+  newCard.y = scroll.y + 120 // matches KeyboardShortcutsHandler.addCard
+  const spaceCards = store.getters['currentCards/all']
+  newCard = utils.uniqueCardPosition(newCard, spaceCards)
+  store.dispatch('currentCards/add', newCard)
+  store.commit('cardDetailsIsVisibleForCardId', newCard.id)
+  removeCardFromInbox(card)
 }
-
 const removeCard = (card) => {
-  console.log('🐸', card)
   if (card.isLoading) { return }
   updateCardIsLoading(card)
-  // queue operation: remove card from inbox
+  removeCardFromInbox(card)
 }
+
 </script>
 
 <template lang="pug">
@@ -98,17 +118,12 @@ section.inbox
 section.results-section(v-if="visible")
   ul.results-list
     CardList(:cards="state.cards" @selectCard="selectCard" :cardsShowRemoveButton="true" @removeCard="removeCard")
-//- button(@click="incrementBy")
-//-   span Count is: {{ state.count }}
-//- p Current theme is: {{ themeName }}, prop is {{ visible }}
-//- template(v-if="state.noInboxCardsFound")
 //-   section // .badge.danger
 //-     p Inbox not found
 //-     p Add space..
 </template>
 
 <style lang="stylus">
-// .component-name
 section.inbox
   .loader
     margin-left 6px
