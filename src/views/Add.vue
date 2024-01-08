@@ -212,15 +212,16 @@ const addCard = async () => {
   try {
     const user = store.state.currentUser
     card.userId = user.id
-    console.log('🛫 create card in space', card, state.selectedSpaceId)
     let spaceId
     // save to inbox
     if (state.selectedSpaceId === 'inbox') {
+      console.log('🛫 create card in inbox space', card)
       store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })
     // save to space
     } else {
       spaceId = state.selectedSpaceId
       card.spaceId = spaceId
+      console.log('🛫 create card in space', card, state.selectedSpaceId)
       store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId })
     }
     space = { id: spaceId }
@@ -228,7 +229,6 @@ const addCard = async () => {
     console.error('🚒 addCard', error)
     state.error.unknownServerError = true
   }
-  console.log('🛫 new card', card)
   addCardToSpaceLocal(card, space)
   postMessage.send({ name: 'addCardFromAddPage', value: card })
   postMessage.send({ name: 'onAdded', value: true })
