@@ -1959,7 +1959,7 @@ export default {
     if (isSamePosition.length) {
       point.x += 20
       point.y += 20
-      this.uniqueCardPosition(point, existingPoints)
+      return this.uniqueCardPosition(point, existingPoints)
     } else {
       return point
     }
