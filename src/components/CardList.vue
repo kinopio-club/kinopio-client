@@ -2,7 +2,7 @@
 span
   ul.results-list.card-list(ref="resultsList")
     template(v-for="card in normalizedCards")
-      li(@click.stop="selectCard($event, card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
+      li(@click.stop="selectCard(card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
         //- date
         span.badge.status.inline-badge
           img.icon.time(src="@/assets/time.svg")
@@ -14,6 +14,9 @@ span
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")
             NameSegment(:segment="segment" :search="search" :isStrikeThrough="isStrikeThrough(card)")
+          //- remove
+          button.small-button.remove-button(v-if="cardsShowRemoveButton" @click.left.stop="removeCard(card)")
+            img.icon(src="@/assets/remove.svg")
 </template>
 
 <script>
@@ -32,7 +35,8 @@ export default {
   },
   props: {
     cards: Array,
-    search: String
+    search: String,
+    cardsShowRemoveButton: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -73,8 +77,11 @@ export default {
     }
   },
   methods: {
-    selectCard (event, card) {
+    selectCard (card) {
       this.$emit('selectCard', card)
+    },
+    removeCard (card) {
+      this.$emit('removeCard', card)
     },
     cardIsActive (card) {
       const isCardDetailsVisible = this.cardDetailsIsVisibleForCardId === card.id
@@ -118,4 +125,10 @@ export default {
     height 11px
   .inline-badge
     display inline-block
+  .remove-button
+    position absolute
+    top 7px
+    right 4px
+    .icon
+      vertical-align 0
 </style>

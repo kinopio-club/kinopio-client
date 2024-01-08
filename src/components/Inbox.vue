@@ -57,6 +57,10 @@ const selectCard = (card) => {
   // queue operation: remove card from inbox
   // queue operation: move card to currentSpace
 }
+
+const removeCard = (card) => {
+  console.log('🐸', card)
+}
 </script>
 
 <template lang="pug">
@@ -72,7 +76,7 @@ section.inbox
 
 section.results-section(v-if="visible")
   ul.results-list
-    CardList(:cards="state.cards" @selectCard="selectCard")
+    CardList(:cards="state.cards" @selectCard="selectCard" :cardsShowRemoveButton="true" @removeCard="removeCard")
 //- button(@click="incrementBy")
 //-   span Count is: {{ state.count }}
 //- p Current theme is: {{ themeName }}, prop is {{ visible }}
