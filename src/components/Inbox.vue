@@ -57,14 +57,30 @@ const restoreInboxCards = async () => {
   }
   state.isLoading = false
 }
+
+const updateCardIsLoading = (newCard) => {
+  state.cards = state.cards.map(card => {
+    if (card.id === newCard.id) {
+      card.isLoading = true
+    }
+    return card
+  })
+}
+
 const selectCard = (card) => {
-  console.log(card)
-  // queue operation: remove card from inbox
-  // queue operation: move card to currentSpace
+  console.log(card, card.isLoading)
+  if (card.isLoading) { return }
+  updateCardIsLoading(card)
+  // const inboxId = cache.getInboxSpace().id
+  // api req: move card to currentSpace
+  // api req operation: remove card from inbox
 }
 
 const removeCard = (card) => {
   console.log('🐸', card)
+  if (card.isLoading) { return }
+  updateCardIsLoading(card)
+  // queue operation: remove card from inbox
 }
 </script>
 

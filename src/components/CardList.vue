@@ -17,11 +17,15 @@ span
           //- remove
           button.small-button.remove-button.danger(v-if="cardsShowRemoveButton" @click.left.stop="removeCard(card)")
             img.icon(src="@/assets/remove.svg")
+          //- loading
+          Loader(:visible="card.isLoading")
+
 </template>
 
 <script>
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -31,7 +35,8 @@ export default {
   name: 'ComponentName',
   components: {
     UserLabelInline,
-    NameSegment
+    NameSegment,
+    Loader
   },
   props: {
     cards: Array,
@@ -85,7 +90,7 @@ export default {
     },
     cardIsActive (card) {
       const isCardDetailsVisible = this.cardDetailsIsVisibleForCardId === card.id
-      return isCardDetailsVisible
+      return isCardDetailsVisible || card.isLoading
     },
     cardIsFocused (card) {
       return this.previousResultItem.id === card.id
@@ -131,4 +136,8 @@ export default {
     right 4px
     .icon
       vertical-align 0
+  .loader
+    position absolute
+    top 6px
+    left 8px
 </style>
