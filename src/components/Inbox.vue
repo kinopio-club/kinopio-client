@@ -67,6 +67,8 @@ const restoreInboxCards = async () => {
 
 const removeFromCardList = (removedCard) => {
   state.cards = state.cards.filter(card => card.id !== removedCard.id)
+  // update cache
+  cache.updateSpace('cards', state.cards, removedCard.spaceId)
 }
 const removeCardFromInbox = (card) => {
   store.dispatch('api/addToQueue', { name: 'removeCard', body: card, spaceId: card.spaceId })
