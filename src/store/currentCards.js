@@ -186,8 +186,8 @@ const currentCards = {
 
     // create
 
-    add: (context, { position, isParentCard, name, id, backgroundColor }) => {
-      utils.typeCheck({ value: position, type: 'object' })
+    add: (context, { x, y, position, isParentCard, name, id, backgroundColor, width, height }) => {
+      utils.typeCheck({ value: position, type: 'object', allowUndefined: true })
       if (context.rootGetters['currentSpace/shouldPreventAddCard']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
@@ -197,17 +197,18 @@ const currentCards = {
       const defaultBackgroundColor = context.rootState.currentUser.defaultCardBackgroundColor
       let card = {
         id: id || nanoid(),
-        x: position.x,
-        y: position.y,
+        x: x || position.x,
+        y: y || position.y,
         z: highestCardZ + 1,
         name: name || '',
         frameId: 0,
         userId: context.rootState.currentUser.id,
         urlPreviewIsVisible: true,
-        width: utils.emptyCard().width,
-        height: utils.emptyCard().height,
+        width: width || utils.emptyCard().width,
+        height: height || utils.emptyCard().height,
         isLocked: false,
-        backgroundColor: backgroundColor || defaultBackgroundColor
+        backgroundColor: backgroundColor || defaultBackgroundColor,
+        isRemoved: false
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       card.spaceId = currentSpaceId
