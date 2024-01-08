@@ -15,7 +15,7 @@ span
             img.card-image(v-if="segment.isImage" :src="segment.url")
             NameSegment(:segment="segment" :search="search" :isStrikeThrough="isStrikeThrough(card)")
           //- remove
-          button.small-button.remove-button(v-if="cardsShowRemoveButton" @click.left.stop="removeCard(card)")
+          button.small-button.remove-button.danger(v-if="cardsShowRemoveButton" @click.left.stop="removeCard(card)")
             img.icon(src="@/assets/remove.svg")
 </template>
 

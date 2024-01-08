@@ -5,6 +5,9 @@ import { useStore } from 'vuex'
 import cache from '@/cache.js'
 import CardList from '@/components/CardList.vue'
 import Loader from '@/components/Loader.vue'
+
+import sortBy from 'lodash-es/sortBy'
+import dayjs from 'dayjs'
 const store = useStore()
 
 onMounted(() => {
@@ -47,6 +50,8 @@ const restoreInboxCards = async () => {
     state.isLoading = true
     updateInboxCardsLocal()
     // await updateInboxCardsRemote()
+    state.cards = sortBy(state.cards, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
+    state.cards.reverse()
   } catch (error) {
     console.error('🚒 restoreInboxCards')
   }
