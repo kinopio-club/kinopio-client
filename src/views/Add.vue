@@ -232,7 +232,6 @@ const addCard = async () => {
   addCardToSpaceLocal(card, space)
   postMessage.send({ name: 'addCardFromAddPage', value: card })
   postMessage.send({ name: 'onAdded', value: true })
-  // TODO handle if currentspace is this inbox (cache inbox id === current)
 }
 const addCardToSpaceLocal = (card, space) => {
   space = cache.space(space.id)
