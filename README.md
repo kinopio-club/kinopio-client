@@ -58,6 +58,8 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 | `space is read only` | cannot add cards or edit |
 | `space is open` | can add cards, can only edit cards they created |
 | `mobile` | touch handlers, no hover, small screen |
+| `desktop zoom out` | using the zoom bar or cmd+/- |
+| `pinch zoom out/in` | using native touch gesture on mobile |
 
 ## Post Messages
 
