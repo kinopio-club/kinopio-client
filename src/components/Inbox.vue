@@ -13,8 +13,11 @@ import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
 const store = useStore()
 
+let prevPosition
+
 onMounted(() => {
   restoreInboxCards()
+  window.addEventListener('pointerdown', updatePrevPosition)
 })
 const props = defineProps({
   visible: Boolean
@@ -35,6 +38,11 @@ const loadInboxSpace = () => {
   store.dispatch('currentSpace/loadInboxSpace')
 }
 const isOnline = computed(() => store.state.isOnline)
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const updatePrevPosition = (event) => {
+  if (!props.visible) { return }
+  prevPosition = utils.cursorPositionInPage(event)
+}
 
 // list cards
 
@@ -87,6 +95,10 @@ const updateCardIsLoading = (newCard) => {
 }
 const selectCard = async (card) => {
   if (card.isLoading) { return }
+  if (!canEditSpace.value) {
+    store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position: prevPosition, type: 'info', layer: 'app', icon: 'cancel' })
+    return
+  }
   updateCardIsLoading(card)
   const scroll = store.getters.windowScrollWithSpaceOffset
   let newCard = utils.clone(card)
