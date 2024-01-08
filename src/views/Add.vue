@@ -214,25 +214,25 @@ const addCard = async () => {
     card.userId = user.id
     console.log('🛫 create card in space', card, state.selectedSpaceId)
     let spaceId
-    // inbox
+    // save to inbox
     if (state.selectedSpaceId === 'inbox') {
-      card = await store.dispatch('api/createCardInInbox', card)
-      space = { id: card.spaceId }
-    // space
+      store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })
+    // save to space
     } else {
       spaceId = state.selectedSpaceId
       card.spaceId = spaceId
-      space = { id: spaceId }
-      card = store.dispatch('api/createCard', card)
+      store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId })
     }
+    space = { id: spaceId }
   } catch (error) {
     console.error('🚒 addCard', error)
     state.error.unknownServerError = true
   }
   console.log('🛫 new card', card)
+  addCardToSpaceLocal(card, space)
   postMessage.send({ name: 'addCardFromAddPage', value: card })
   postMessage.send({ name: 'onAdded', value: true })
-  addCardToSpaceLocal(card, space)
+  // TODO handle if currentspace is this inbox (cache inbox id === current)
 }
 const addCardToSpaceLocal = (card, space) => {
   space = cache.space(space.id)
@@ -360,12 +360,6 @@ main.add-page
         Loader(:visible="state.loading.updateSpaces")
       //- submit
       .row
-        //- .button-wrap
-        //-   a(:href="selectedSpaceUrl")
-        //-     button
-        //-       span Space{{' '}}
-        //-       img.icon.visit(src="@/assets/visit.svg")
-        //- Add
         .button-wrap
           button.success(@pointerup="addCard" :class="{disabled: state.error.maxLength}")
             img.icon.add-icon(src="@/assets/add.svg")
