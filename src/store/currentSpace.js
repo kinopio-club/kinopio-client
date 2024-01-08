@@ -193,6 +193,12 @@ const currentSpace = {
         console.warn('🚑 createSpacePreviewImage', error)
       }
     },
+    updateInboxCache: async (context) => {
+      if (context.state.name === 'inbox') { return }
+      console.log('🌍 updateInboxCache')
+      const inbox = await context.dispatch('api/getUserInboxSpace', null, { root: true })
+      cache.saveSpace(inbox)
+    },
 
     // Users
 
@@ -764,7 +770,7 @@ const currentSpace = {
       if (!isRemote) { return }
       setTimeout(() => {
         context.dispatch('createSpacePreviewImage')
-      }, 3000)
+      }, 3000) // 3 seconds
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
       if (!context.rootState.isEmbedMode) {

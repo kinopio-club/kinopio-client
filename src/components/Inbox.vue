@@ -34,14 +34,16 @@ const loadInboxSpace = () => {
 
 const updateInboxCardsLocal = () => {
   state.cards = cache.getInboxSpace()?.cards
+  sortCards()
 }
 const updateInboxCardsRemote = async () => {
   if (!store.state.isOnline) { return }
-  const inboxLocal = cache.getInboxSpace()
-  // inboxRemote = await
-  // compare cache vs remote dates, replace state.cards if newer (or if no inboxLocal)
-  // update LS w fetched space
-  // state.cards = ..
+  await store.dispatch('currentSpace/updateInboxCache')
+  updateInboxCardsLocal()
+}
+const sortCards = () => {
+  state.cards = sortBy(state.cards, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
+  state.cards.reverse()
 }
 
 const restoreInboxCards = async () => {
@@ -49,9 +51,7 @@ const restoreInboxCards = async () => {
   try {
     state.isLoading = true
     updateInboxCardsLocal()
-    // await updateInboxCardsRemote()
-    state.cards = sortBy(state.cards, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
-    state.cards.reverse()
+    updateInboxCardsRemote()
   } catch (error) {
     console.error('🚒 restoreInboxCards')
   }

@@ -48,7 +48,7 @@ import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 
 let prevCursor, endCursor, shouldCancel
-let processQueueIntervalTimer, updateJournalDailyPromptTimer
+let processQueueIntervalTimer, updateJournalDailyPromptTimer, updateInboxCache
 
 export default {
   name: 'Space',
@@ -100,14 +100,23 @@ export default {
 
     this.$store.dispatch('currentUser/restoreUserFavorites')
 
-    // retry failed sync operations every 5 seconds
+    // retry failed sync operations
     processQueueIntervalTimer = setInterval(() => {
       this.$store.dispatch('api/processQueueOperations')
-    }, 5000)
-    // update journal daily prompt every hour
+    }, 5000) // every 5 seconds
+
+    // update journal daily prompt
     updateJournalDailyPromptTimer = setInterval(() => {
       this.$store.dispatch('currentUser/updateJournalDailyPrompt')
-    }, 1000 * 60 * 60 * 1) // 1 hour
+    }, 1000 * 60 * 60 * 1) // every hour
+
+    // update inbox space in local storage
+    setTimeout(() => {
+      this.$store.dispatch('currentSpace/updateInboxCache')
+    }, 15000) // 15 seconds after mounted, one-time
+    updateInboxCache = setInterval(() => {
+      this.$store.dispatch('currentSpace/updateInboxCache')
+    }, 1000 * 60 * 60 * 1) // every 1 hour
   },
   beforeUnmount () {
     window.removeEventListener('mousemove', this.interact)
@@ -120,6 +129,7 @@ export default {
     window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
     clearInterval(processQueueIntervalTimer)
     clearInterval(updateJournalDailyPromptTimer)
+    clearInterval(updateInboxCache)
   },
   data () {
     return {
