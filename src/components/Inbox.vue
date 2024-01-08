@@ -134,9 +134,6 @@ section.inbox(v-if="visible")
 section.results-section(v-if="visible && isOnline")
   ul.results-list
     CardList(:cards="state.cards" @selectCard="selectCard" :cardsShowRemoveButton="true" @removeCard="removeCard")
-//-   section // .badge.danger
-//-     p Inbox not found
-//-     p Add space..
 </template>
 
 <style lang="stylus">
@@ -144,7 +141,4 @@ section.inbox
   .loader
     margin-left 6px
     vertical-align -2px
-//   padding-top 4px
-//   border-top 1px solid var(--primary-border)
-//   padding 4px
 </style>
