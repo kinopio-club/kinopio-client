@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import cache from '@/cache.js'
 import CardList from '@/components/CardList.vue'
 import Loader from '@/components/Loader.vue'
+import OfflineBadge from '@/components/OfflineBadge.vue'
 import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -33,6 +34,7 @@ const state = reactive({
 const loadInboxSpace = () => {
   store.dispatch('currentSpace/loadInboxSpace')
 }
+const isOnline = computed(() => store.state.isOnline)
 
 // list cards
 
@@ -105,7 +107,7 @@ const removeCard = (card) => {
 </script>
 
 <template lang="pug">
-section.inbox
+section.inbox(v-if="visible")
   .row.title-row
     div
       span Move from Inbox
@@ -114,8 +116,8 @@ section.inbox
       button.small-button(@click="loadInboxSpace")
         img.icon(src="@/assets/inbox.svg")
         span Inbox
-
-section.results-section(v-if="visible")
+  OfflineBadge
+section.results-section(v-if="visible && isOnline")
   ul.results-list
     CardList(:cards="state.cards" @selectCard="selectCard" :cardsShowRemoveButton="true" @removeCard="removeCard")
 //-   section // .badge.danger
