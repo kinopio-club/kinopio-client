@@ -34,14 +34,15 @@ const state = reactive({
   noInboxCardsFound: false
 })
 
-const loadInboxSpace = () => {
-  store.dispatch('currentSpace/loadInboxSpace')
-}
 const isOnline = computed(() => store.state.isOnline)
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const updatePrevPosition = (event) => {
   if (!props.visible) { return }
   prevPosition = utils.cursorPositionInPage(event)
+}
+
+const loadInboxSpace = () => {
+  store.dispatch('currentSpace/loadInboxSpace')
 }
 
 // list cards
