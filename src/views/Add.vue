@@ -337,6 +337,7 @@ main.add-page
           )
       //- space picker
       ResultsFilter(
+        v-if="state.filterIsVisible"
         :showFilter="state.filterIsVisible"
         :placeholder="filterPlaceholder"
         :isLoading="state.loading.updateSpaces"
