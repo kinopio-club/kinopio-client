@@ -2084,6 +2084,7 @@ export default {
       this.updateUrlPreview()
     },
     shouldUpdateUrlPreview (url) {
+      if (this.card.shouldUpdateUrlPreview) { return true }
       const previewIsVisible = this.card.urlPreviewIsVisible
       const isNotPreviewUrl = url !== this.card.urlPreviewUrl
       const isNotErrorUrl = url !== this.card.urlPreviewErrorUrl
