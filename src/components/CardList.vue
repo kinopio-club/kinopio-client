@@ -10,7 +10,7 @@ span
         //- user
         UserLabelInline(v-if="userIsNotCurrentUser(card.user.id)" :user="card.user")
         //- name
-        span.card-info
+        span.card-info(:class="{badge: card.backgroundColor}" :style="{backgroundColor: card.backgroundColor}")
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")
             NameSegment(:segment="segment" :search="search" :isStrikeThrough="isStrikeThrough(card)")
@@ -140,4 +140,6 @@ export default {
     position absolute
     top 6px
     left 8px
+  .card-info.badge
+    position initial
 </style>
