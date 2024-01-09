@@ -417,7 +417,7 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
           span Can't search {{service}} while offline, Please try again later
 
     //- search results
-    section.results-section(ref="resultsSectionElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+    section.results-section.search-results(ref="resultsSectionElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
       ul.results-list.image-list
         template(v-for="image in state.images" :key="image.id")
           li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
@@ -472,5 +472,8 @@ dialog.image-picker
 
   .sticker
     vertical-align -2px
+
+  .search-results
+    min-height 200px
 
 </style>

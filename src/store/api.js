@@ -126,7 +126,6 @@ const self = {
     // Queue
 
     addToQueue: (context, { name, body, spaceId }) => {
-      if (!context.rootGetters.isSpacePage) { return }
       body = utils.clone(body)
       body.spaceId = spaceId || context.rootState.currentSpace.id
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']

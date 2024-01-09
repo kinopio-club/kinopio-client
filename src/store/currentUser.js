@@ -72,7 +72,8 @@ const initialState = {
   shouldDisableHapticFeedback: false,
   appleAppAccountToken: null,
   appleSubscriptionIsActive: null,
-  studentDiscountIsAvailable: false
+  studentDiscountIsAvailable: false,
+  lastSidebarSection: ''
 }
 
 export default {
@@ -385,6 +386,9 @@ export default {
     },
     appleSubscriptionIsActive: (state, value) => {
       state.appleSubscriptionIsActive = value
+    },
+    lastSidebarSection: (state, value) => {
+      state.lastSidebarSection = value
     },
     initNewUser: (state) => {
       state.appleAppAccountToken = uuidv4()

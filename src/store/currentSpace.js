@@ -193,6 +193,16 @@ const currentSpace = {
         console.warn('🚑 createSpacePreviewImage', error)
       }
     },
+    updateInboxCache: async (context) => {
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const isOffline = !context.rootState.isOnline
+      if (context.state.name === 'inbox') { return }
+      if (!currentUserIsSignedIn) { return }
+      if (isOffline) { return }
+      console.log('🌍 updateInboxCache')
+      const inbox = await context.dispatch('api/getUserInboxSpace', null, { root: true })
+      cache.saveSpace(inbox)
+    },
 
     // Users
 
@@ -410,6 +420,7 @@ const currentSpace = {
       space.userId = context.rootState.currentUser.id
       space.cards = space.cards.map(card => {
         card.id = nanoid()
+        card.userId = context.rootState.currentUser.id
         return card
       })
       if (shouldCreateWithoutLoading) {
@@ -763,7 +774,7 @@ const currentSpace = {
       if (!isRemote) { return }
       setTimeout(() => {
         context.dispatch('createSpacePreviewImage')
-      }, 3000)
+      }, 3000) // 3 seconds
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
       if (!context.rootState.isEmbedMode) {

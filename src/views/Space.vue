@@ -48,7 +48,7 @@ import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 
 let prevCursor, endCursor, shouldCancel
-let processQueueIntervalTimer, updateJournalDailyPromptTimer
+let processQueueIntervalTimer, updateJournalDailyPromptTimer, updateInboxCache
 
 export default {
   name: 'Space',
@@ -85,10 +85,6 @@ export default {
     window.addEventListener('touchend', this.stopInteractions)
     window.addEventListener('resize', this.updatePageSizesDebounced)
 
-    this.updateIsOnline()
-    window.addEventListener('online', this.updateIsOnline)
-    window.addEventListener('offline', this.updateIsOnline)
-
     // when a card is added through Add.vue in a sharesheet with the space open behind it
     window.addEventListener('message', this.addCardFromOutsideAppContext)
 
@@ -104,14 +100,23 @@ export default {
 
     this.$store.dispatch('currentUser/restoreUserFavorites')
 
-    // retry failed sync operations every 5 seconds
+    // retry failed sync operations
     processQueueIntervalTimer = setInterval(() => {
       this.$store.dispatch('api/processQueueOperations')
-    }, 5000)
-    // update journal daily prompt every hour
+    }, 5000) // every 5 seconds
+
+    // update journal daily prompt
     updateJournalDailyPromptTimer = setInterval(() => {
       this.$store.dispatch('currentUser/updateJournalDailyPrompt')
-    }, 1000 * 60 * 60 * 1) // 1 hour
+    }, 1000 * 60 * 60 * 1) // every hour
+
+    // update inbox space in local storage
+    setTimeout(() => {
+      this.$store.dispatch('currentSpace/updateInboxCache')
+    }, 15000) // 15 seconds after mounted, one-time
+    updateInboxCache = setInterval(() => {
+      this.$store.dispatch('currentSpace/updateInboxCache')
+    }, 1000 * 60 * 60 * 1) // every 1 hour
   },
   beforeUnmount () {
     window.removeEventListener('mousemove', this.interact)
@@ -119,13 +124,12 @@ export default {
     window.removeEventListener('mouseup', this.stopInteractions)
     window.removeEventListener('touchend', this.stopInteractions)
     window.removeEventListener('resize', this.updatePageSizesDebounced)
-    window.removeEventListener('online', this.updateIsOnline)
-    window.removeEventListener('offline', this.updateIsOnline)
     window.removeEventListener('unload', this.unloadPage)
     window.removeEventListener('message', this.addCardFromOutsideAppContext)
     window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
     clearInterval(processQueueIntervalTimer)
     clearInterval(updateJournalDailyPromptTimer)
+    clearInterval(updateInboxCache)
   },
   data () {
     return {
@@ -193,13 +197,6 @@ export default {
       this.$nextTick(() => {
         this.$store.dispatch('updatePageSizes')
       })
-    },
-    updateIsOnline () {
-      const status = window.navigator.onLine
-      this.$store.commit('isOnline', status)
-      if (status) {
-        this.$store.dispatch('api/processQueueOperations')
-      }
     },
     addCardFromOutsideAppContext (event) {
       if (!consts.isSecureAppContext) { return }

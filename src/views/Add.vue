@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import inboxSpace from '@/data/inbox.json'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
+import ResultsFilter from '@/components/ResultsFilter.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -31,7 +32,9 @@ const state = reactive({
   newName: '',
   keyboardShortcutTipIsVisible: false,
   selectedSpaceId: 'inbox',
-  spaces: []
+  spaces: [],
+  filterIsVisible: false,
+  filteredSpaces: []
 })
 
 const textareaElement = ref(null)
@@ -54,7 +57,7 @@ onBeforeUnmount(() => {
   cache.clearPrevAddPageValue()
 })
 
-const isOnline = computed(() => store.state.isOnline)
+const isOffline = computed(() => !store.state.isOnline)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const kinopioDomain = computed(() => consts.kinopioDomain())
 const cardsCreatedIsOverLimit = computed(() => store.getters['currentUser/cardsCreatedIsOverLimit'])
@@ -169,9 +172,17 @@ const updateSpacesLocal = () => {
 }
 const updateSpacesRemote = async () => {
   let spaces = await store.dispatch('api/getUserSpaces')
+  if (!spaces) { return }
   spaces = spaces.filter(space => space.name !== 'Inbox')
   state.spaces = spaces
 }
+const filteredSpaces = computed(() => {
+  if (state.filteredSpaces.length) {
+    return state.filteredSpaces
+  } else {
+    return state.spaces
+  }
+})
 
 // card
 
@@ -201,27 +212,26 @@ const addCard = async () => {
   try {
     const user = store.state.currentUser
     card.userId = user.id
-    console.log('🛫 create card in space', card, state.selectedSpaceId)
     let spaceId
-    // inbox
+    // save to inbox
     if (state.selectedSpaceId === 'inbox') {
-      card = await store.dispatch('api/createCardInInbox', card)
-      space = { id: card.spaceId }
-    // space
+      console.log('🛫 create card in inbox space', card)
+      store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })
+    // save to space
     } else {
       spaceId = state.selectedSpaceId
       card.spaceId = spaceId
-      space = { id: spaceId }
-      card = store.dispatch('api/createCard', card)
+      console.log('🛫 create card in space', card, state.selectedSpaceId)
+      store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId })
     }
+    space = { id: spaceId }
   } catch (error) {
     console.error('🚒 addCard', error)
     state.error.unknownServerError = true
   }
-  console.log('🛫 new card', card)
+  addCardToSpaceLocal(card, space)
   postMessage.send({ name: 'addCardFromAddPage', value: card })
   postMessage.send({ name: 'onAdded', value: true })
-  addCardToSpaceLocal(card, space)
 }
 const addCardToSpaceLocal = (card, space) => {
   space = cache.space(space.id)
@@ -269,16 +279,31 @@ const insertLineBreak = async (event) => {
   updateTextareaSize()
 }
 
+// space filter
+
+const filterPlaceholder = computed(() => 'Fitler Spaces')
+const toggleFilterIsVisible = async () => {
+  const value = !state.filterIsVisible
+  state.filterIsVisible = value
+  if (value) {
+    await nextTick()
+    store.commit('triggerFocusResultsFilter')
+  } else {
+    clearFilter()
+  }
+}
+const updateFilteredItems = (spaces) => {
+  state.filteredSpaces = spaces
+}
+const clearFilter = () => {
+  state.filteredSpaces = []
+}
 </script>
 
 <template lang="pug">
 main.add-page
   .add-form(v-if="currentUserIsSignedIn")
     section
-      .row(v-if="!isOnline")
-        .badge.danger
-          img.icon.offline(src="@/assets/offline.svg")
-          span Offline
       .row(v-if="cardsCreatedIsOverLimit || state.error.unknownServerError || state.error.maxLength")
         //- error: card limit
         template(v-if="cardsCreatedIsOverLimit")
@@ -311,20 +336,25 @@ main.add-page
             @touchend="focusName"
           )
       //- space picker
+      ResultsFilter(
+        :showFilter="state.filterIsVisible"
+        :placeholder="filterPlaceholder"
+        :isLoading="state.loading.updateSpaces"
+        :items="state.spaces"
+        @updateFilteredItems="updateFilteredItems"
+        @clearFilter="clearFilter"
+      )
       .row
-        select(name="spaces" v-model="state.selectedSpaceId")
-          option(value="inbox" default) Inbox
-          template(v-for="space in state.spaces")
-            option(:value="space.id") {{space.name}}
+        .segmented-buttons
+          button(@click='toggleFilterIsVisible' :class="{ active: state.filterIsVisible }")
+            img.icon.search(src="@/assets/search.svg")
+          select(name="spaces" v-model="state.selectedSpaceId")
+            option(value="inbox" default) Inbox
+            template(v-for="space in filteredSpaces")
+              option(:value="space.id") {{space.name}}
         Loader(:visible="state.loading.updateSpaces")
       //- submit
       .row
-        //- .button-wrap
-        //-   a(:href="selectedSpaceUrl")
-        //-     button
-        //-       span Space{{' '}}
-        //-       img.icon.visit(src="@/assets/visit.svg")
-        //- Add
         .button-wrap
           button.success(@pointerup="addCard" :class="{disabled: state.error.maxLength}")
             img.icon.add-icon(src="@/assets/add.svg")
@@ -335,6 +365,11 @@ main.add-page
         .row(v-if="state.success")
           .badge.success
             span Added to space
+      .row(v-if="isOffline")
+        .badge.info
+          img.icon.offline(src="@/assets/offline.svg")
+          span Offline
+        span New cards will be saved locally, and sync-ed up once you're back online
 
   //- sign in
   section(v-if="!currentUserIsSignedIn")
@@ -426,8 +461,10 @@ main.add-page
     .badge
       display inline-block
 
-    select
+    .segmented-buttons
       width 100%
+    select
+      width calc(100% - 30px)
 
   .inbox-icon,
   .add-icon

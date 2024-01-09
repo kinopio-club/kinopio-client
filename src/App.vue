@@ -18,7 +18,6 @@
     Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
     TagDetails
     UserDetails
-    CardListItemOptions
     WindowHistoryHandler
     KeyboardShortcutsHandler
     ScrollHandler
@@ -42,7 +41,6 @@ import NotificationsWithPosition from '@/components/NotificationsWithPosition.vu
 import SpaceBackground from '@/components/SpaceBackground.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
-import CardListItemOptions from '@/components/dialogs/CardListItemOptions.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -64,8 +62,7 @@ export default {
     NotificationsWithPosition,
     SpaceBackground,
     OutsideSpaceBackground,
-    Preload,
-    CardListItemOptions
+    Preload
   },
   created () {
     console.log('🐢 kinopio-client build', import.meta.env.MODE, this.scriptUrl)
@@ -89,6 +86,10 @@ export default {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.logMatchMediaChange)
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.updateThemeFromSystem)
     window.addEventListener('visibilitychange', this.cancelTouch)
+
+    this.updateIsOnline()
+    window.addEventListener('online', this.updateIsOnline)
+    window.addEventListener('offline', this.updateIsOnline)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.scroll)
@@ -96,6 +97,8 @@ export default {
     window.removeEventListener('touchmove', this.touchMove)
     window.removeEventListener('touchend', this.touchEnd)
     window.removeEventListener('visibilitychange', this.cancelTouch)
+    window.removeEventListener('online', this.updateIsOnline)
+    window.removeEventListener('offline', this.updateIsOnline)
   },
   data () {
     return {
@@ -210,6 +213,13 @@ export default {
     cancelTouch () {
       this.isPinchZooming = false
       this.isTouchScrolling = false
+    },
+    updateIsOnline () {
+      const status = window.navigator.onLine
+      this.$store.commit('isOnline', status)
+      if (status) {
+        this.$store.dispatch('api/processQueueOperations')
+      }
     },
 
     //
@@ -749,7 +759,8 @@ dialog
       border-top-right-radius 0
   > .button-wrap > button,
   > button,
-  > label
+  > label,
+  > select
     margin 0
     border-radius 0
     &:first-child
@@ -778,7 +789,9 @@ dialog
   button + button,
   label + button,
   button + label,
-  label + label
+  label + label,
+  select + button,
+  button + select
     margin-left -1px
 
 .segmented-buttons-wrap

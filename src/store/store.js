@@ -240,11 +240,6 @@ const store = createStore({
     filteredTagNames: [],
     spaceListFilterInfo: {},
 
-    // card list item options
-    cardListItemOptionsPosition: {}, // x, y
-    cardListItemOptionsCard: {},
-    cardListItemOptionsIsVisible: false,
-
     // session data
     otherUsers: [], // { id, name color }
     otherItems: { spaces: [], cards: [] },
@@ -314,7 +309,6 @@ const store = createStore({
       state.cardsWereDragged = false
       state.boxesWereDragged = false
       state.userDetailsIsVisible = false
-      state.cardListItemOptionsIsVisible = false
       state.pricingIsVisible = false
       state.codeLanguagePickerIsVisible = false
       state.offlineIsVisible = false
@@ -1442,20 +1436,6 @@ const store = createStore({
     spaceListFilterInfo: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
       state.spaceListFilterInfo = value
-    },
-
-    // Card List Item Options
-    cardListItemOptionsPosition: (state, value) => {
-      utils.typeCheck({ value, type: 'object' })
-      state.cardListItemOptionsPosition = value
-    },
-    cardListItemOptionsCard: (state, value) => {
-      utils.typeCheck({ value, type: 'object' })
-      state.cardListItemOptionsCard = value
-    },
-    cardListItemOptionsIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.cardListItemOptionsIsVisible = value
     },
 
     // Session Data

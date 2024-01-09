@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
+dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   section
     .row.title-row-flex
       .button-wrap.segmented-buttons-wrap
@@ -19,9 +19,12 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
             span Links
         //- second row
         .segmented-buttons
+          //- Inbox
+          button(@click.left="toggleInboxIsVisible" :class="{ active: inboxIsVisible}")
+            img.icon(src="@/assets/inbox.svg")
           //- AI Images
           button(@click.left="toggleAIImagesIsVisible" :class="{ active: AIImagesIsVisible}")
-            img.icon(src="@/assets/flower.svg")
+            img.icon.flower(src="@/assets/flower.svg")
             span AI
           //- Stats
           button(@click.left="toggleStatsIsVisible" :class="{active: statsIsVisible}")
@@ -44,6 +47,7 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
   AIImages(:visible="AIImagesIsVisible")
   Stats(:visible="statsIsVisible")
   Text(:visible="textIsVisible")
+  Inbox(:visible="inboxIsVisible")
 
 </template>
 
@@ -56,6 +60,7 @@ import Removed from '@/components/Removed.vue'
 import AIImages from '@/components/AIImages.vue'
 import Stats from '@/components/Stats.vue'
 import Text from '@/components/Text.vue'
+import Inbox from '@/components/Inbox.vue'
 
 export default {
   name: 'Sidebar',
@@ -66,7 +71,8 @@ export default {
     Removed,
     AIImages,
     Stats,
-    Text
+    Text,
+    Inbox
   },
   props: {
     visible: Boolean
@@ -79,9 +85,10 @@ export default {
       commentsIsVisible: false,
       removedIsVisible: false,
       AIImagesIsVisible: false,
+      inboxIsVisible: false,
       statsIsVisible: false,
       favoritesIsVisible: false,
-      textIsVisible: true
+      textIsVisible: false
     }
   },
   created () {
@@ -119,55 +126,76 @@ export default {
       this.commentsIsVisible = false
       this.removedIsVisible = false
       this.AIImagesIsVisible = false
+      this.inboxIsVisible = false
       this.statsIsVisible = false
       this.textIsVisible = false
     },
     toggleTagsIsVisible () {
-      const value = !this.tagsIsVisible
       this.clearVisible()
-      this.tagsIsVisible = value
+      this.tagsIsVisible = true
+      this.updateUserLastSidebarSection('tags')
     },
     toggleLinksIsVisible () {
-      const value = !this.linksIsVisible
       this.clearVisible()
-      this.linksIsVisible = value
+      this.linksIsVisible = true
+      this.updateUserLastSidebarSection('links')
     },
     toggleCommentsIsVisible () {
-      const value = !this.commentsIsVisible
       this.clearVisible()
-      this.commentsIsVisible = value
+      this.commentsIsVisible = true
+      this.updateUserLastSidebarSection('comments')
     },
     toggleRemovedIsVisible () {
-      const value = !this.removedIsVisible
       this.clearVisible()
-      this.removedIsVisible = value
+      this.removedIsVisible = true
+      this.updateUserLastSidebarSection('removed')
+    },
+    toggleInboxIsVisible () {
+      this.clearVisible()
+      this.inboxIsVisible = true
+      this.updateUserLastSidebarSection('inbox')
     },
     toggleAIImagesIsVisible () {
-      const value = !this.AIImagesIsVisible
       this.clearVisible()
-      this.AIImagesIsVisible = value
+      this.AIImagesIsVisible = true
+      this.updateUserLastSidebarSection('AIImages')
     },
     toggleStatsIsVisible () {
-      const value = !this.statsIsVisible
       this.clearVisible()
-      this.statsIsVisible = value
+      this.statsIsVisible = true
+      this.updateUserLastSidebarSection('stats')
     },
     toggleTextIsVisible () {
-      const value = !this.textIsVisible
       this.clearVisible()
-      this.textIsVisible = value
+      this.textIsVisible = true
+      this.updateUserLastSidebarSection('text')
     },
     updateDialogHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
-        let element = this.$refs.dialog
+        let element = this.$refs.dialogElement
         this.dialogHeight = utils.elementHeight(element)
       })
+    },
+    restoreUserLastSidebarSection () {
+      this.clearVisible()
+      const section = this.$store.state.currentUser.lastSidebarSection
+      const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'comments', 'links', 'tags'] // listed in api docs
+      const isValid = values.includes(section)
+      if (section && isValid) {
+        this[section + 'IsVisible'] = true
+      } else {
+        this.textIsVisible = true
+      }
+    },
+    updateUserLastSidebarSection (name) {
+      this.$store.dispatch('currentUser/update', { lastSidebarSection: name })
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
+        this.restoreUserLastSidebarSection()
         this.updateDialogHeight()
         this.$store.commit('shouldExplicitlyHideFooter', true)
       } else {
@@ -203,5 +231,8 @@ export default {
       &:first-child
         border-top-left-radius 0
         border-top-right-radius 0
+  .icon.flower
+    vertical-align -1px
+    height 11px
 
 </style>
