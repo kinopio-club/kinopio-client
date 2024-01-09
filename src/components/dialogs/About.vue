@@ -58,7 +58,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             img.icon.visit(src="@/assets/visit.svg")
     .row
       AboutMe
-    .row
+    .row(v-if="!isSecureAppContextIOS")
       .button-wrap
         button(@click.left.stop="triggerDonateIsVisible")
           img.icon(src="@/assets/heart-empty.svg")
@@ -76,6 +76,7 @@ import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import Help from '@/components/dialogs/Help.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import AboutMe from '@/components/AboutMe.vue'
 
 import dayjs from 'dayjs'
@@ -137,7 +138,8 @@ export default {
     isAddPage () { return this.$store.state.isAddPage },
     childDialogIsVisible () {
       return this.whatsNewIsVisible || this.appsAndExtensionsIsVisible || this.helpIsVisible
-    }
+    },
+    isSecureAppContextIOS () { return consts.isSecureAppContextIOS }
   },
   methods: {
     triggerDonateIsVisible () {
