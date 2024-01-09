@@ -13,6 +13,7 @@ span
         span.card-info(:class="{badge: card.backgroundColor}" :style="{backgroundColor: card.backgroundColor}")
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")
+            img.card-image(v-if="urlPreviewImage(card)" :src="urlPreviewImage(card)")
             NameSegment(:segment="segment" :search="search" :isStrikeThrough="isStrikeThrough(card)")
           //- remove
           button.small-button.remove-button.danger(v-if="cardsShowRemoveButton" @click.left.stop="removeCard(card)")
@@ -82,6 +83,10 @@ export default {
     }
   },
   methods: {
+    urlPreviewImage (card) {
+      if (!card.urlPreviewIsVisible) { return }
+      return card.urlPreviewImage
+    },
     selectCard (card) {
       this.$emit('selectCard', card)
     },
