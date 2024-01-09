@@ -186,7 +186,7 @@ const currentCards = {
 
     // create
 
-    add: (context, { x, y, position, isParentCard, name, id, backgroundColor, width, height }) => {
+    add: (context, { x, y, position, isParentCard, name, id, backgroundColor, width, height, shouldUpdateUrlPreview }) => {
       utils.typeCheck({ value: position, type: 'object', allowUndefined: true })
       if (context.rootGetters['currentSpace/shouldPreventAddCard']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
@@ -208,7 +208,8 @@ const currentCards = {
         height: height || utils.emptyCard().height,
         isLocked: false,
         backgroundColor: backgroundColor || defaultBackgroundColor,
-        isRemoved: false
+        isRemoved: false,
+        shouldUpdateUrlPreview
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       card.spaceId = currentSpaceId
