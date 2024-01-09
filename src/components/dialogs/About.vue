@@ -178,6 +178,11 @@ export default {
           item.summary = utils.convertHTMLEntities(item.summary)
           return item
         })
+        if (this.isSecureAppContextIOS) {
+          data = data.filter(item => {
+            return !item.title.includes('Lifetime Plan')
+          })
+        }
         this.newStuff = data
       } catch (error) {
         console.error('🚒 updateNewStuff', error)

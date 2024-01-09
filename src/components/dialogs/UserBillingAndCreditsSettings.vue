@@ -6,6 +6,7 @@ import Loader from '@/components/Loader.vue'
 import UserCredits from '@/components/UserCredits.vue'
 import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
 const store = useStore()
@@ -46,6 +47,7 @@ const triggerUpgradeUserIsVisible = () => {
 const subscriptionIsApple = computed(() => store.getters['currentUser/subscriptionIsApple'])
 const subscriptionIsStripe = computed(() => store.getters['currentUser/subscriptionIsStripe'])
 const subscriptionIsFree = computed(() => store.getters['currentUser/subscriptionIsFree'])
+const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
@@ -80,7 +82,8 @@ const customerPortal = async () => {
 <template lang="pug">
 dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    p Billing and Credits
+    p(v-if="isSecureAppContextIOS") Billing
+    p(v-else) Billing and Credits
 
   //- free
   section(v-if="subscriptionIsFree")

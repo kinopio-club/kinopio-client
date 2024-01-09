@@ -114,6 +114,15 @@ export default {
       box-shadow 4px 4px 0 var(--heavy-shadow) !important
     &:active
       box-shadow var(--button-active-inset-shadow) !important
+    h1,
+    p.summary
+      color var(--primary-on-light-background)
+    img,
+    video
+      max-width 100%
+      border-radius var(--entity-radius)
+      margin-bottom 10px
+
   h1
     font-family var(--serif-font)
     font-size 16px
@@ -123,12 +132,4 @@ export default {
     margin-top 0
     &:hover
       text-decoration none
-    h1,
-    p.summary
-      color var(--primary-on-light-background)
-    img,
-    video
-      max-width 100%
-      border-radius var(--entity-radius)
-      margin-bottom 10px
 </style>
