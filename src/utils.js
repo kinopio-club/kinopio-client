@@ -1169,6 +1169,13 @@ export default {
     space.backgroundTint = currentUser.defaultSpaceBackgroundTint
     return space
   },
+  updateSpaceCardsCreatedThroughPublicApi (space) {
+    space.cards = space.cards.map(card => {
+      card.isCreatedThroughPublicApi = true
+      return card
+    })
+    return space
+  },
   emptySpace (spaceId) {
     return {
       id: spaceId,

@@ -336,6 +336,7 @@ const currentSpace = {
     createNewHelloSpace: (context) => {
       const user = context.rootState.currentUser
       let space = utils.newHelloSpace(user)
+      space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       space.id = nanoid()
       space.collaboratorKey = nanoid()
       space.readOnlyKey = nanoid()
@@ -377,6 +378,7 @@ const currentSpace = {
         space.cards[1].x = space.cards[1].x + random(0, 20)
         space.cards[1].y = space.cards[1].y + random(0, 20)
       }
+      space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       space.userId = currentUser.id
       space = utils.newSpaceBackground(space, currentUser)
       space.background = space.background || consts.defaultSpaceBackground
@@ -404,7 +406,8 @@ const currentSpace = {
         options.dailyPrompt = currentUser.journalDailyPrompt
       }
       // create space
-      const space = utils.journalSpace(options)
+      let space = utils.journalSpace(options)
+      space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       context.commit('clearSearch', null, { root: true })
       context.commit('shouldResetDimensionsOnLoad', true, { root: true })
       isLoadingRemoteSpace = false
@@ -423,6 +426,7 @@ const currentSpace = {
         card.userId = context.rootState.currentUser.id
         return card
       })
+      space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       if (shouldCreateWithoutLoading) {
         space.users = [context.rootState.currentUser]
         const nullCardUsers = true
@@ -1078,20 +1082,21 @@ const currentSpace = {
     },
     incrementCardsCreatedCountFromSpace (context, space) {
       const user = context.rootState.currentUser
-      const incrementCardsCreatedCountBy = space.cards.filter(card => {
+      space.cards = space.cards.filter(card => {
         return card.userId === user.id
-      }).length
+      })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: incrementCardsCreatedCountBy
+        cards: space.cards
       }, { root: true })
     },
     decrementCardsCreatedCountFromSpace (context, space) {
       const user = context.rootState.currentUser
-      const decrementCardsCreatedCountBy = space.cards.filter(card => {
+      space.cards = space.cards.filter(card => {
         return card.userId === user.id
-      }).length
+      })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: -decrementCardsCreatedCountBy
+        cards: space.cards,
+        shouldDecrement: true
       }, { root: true })
     },
 

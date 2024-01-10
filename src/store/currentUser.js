@@ -437,7 +437,15 @@ export default {
       })
       context.dispatch('api/addToQueue', { name: 'updateUser', body: updates }, { root: true })
     },
-    cardsCreatedCountUpdateBy: (context, { delta }) => {
+    cardsCreatedCountUpdateBy: (context, { cards, shouldDecrement }) => {
+      cards = cards.filter(card => !card.isCreatedThroughPublicApi)
+      cards = cards.filter(card => card.userId === context.state.id)
+      let delta = cards.length
+      if (shouldDecrement) {
+        delta = -delta
+      }
+      console.log('delta', delta)
+
       if (context.getters.shouldPreventCardsCreatedCountUpdate) { return }
       const count = context.state.cardsCreatedCount + delta
       context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })

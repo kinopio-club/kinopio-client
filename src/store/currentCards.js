@@ -218,7 +218,7 @@ const currentCards = {
       context.commit('create', { card })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: 1
+        cards: [card]
       }, { root: true })
       context.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
       context.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
@@ -244,13 +244,14 @@ const currentCards = {
         context.commit('create', { card })
       })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: newCards.length
+        cards: newCards
       }, { root: true })
     },
     paste: (context, { card, cardId }) => {
       utils.typeCheck({ value: card, type: 'object' })
       card.id = cardId || nanoid()
       card.spaceId = currentSpaceId
+      card.isCreatedThroughPublicApi = false
       const prevCards = context.getters.all
       utils.uniqueCardPosition(card, prevCards)
       const tags = utils.tagsFromStringWithoutBrackets(card.name)
@@ -268,7 +269,7 @@ const currentCards = {
       context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: 1
+        cards: [card]
       }, { root: true })
       context.dispatch('history/add', { cards: [card] }, { root: true })
       context.commit('create', { card })
@@ -641,7 +642,8 @@ const currentCards = {
       const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
       if (cardIsUpdatedByCurrentUser) {
         context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-          delta: -1
+          cards: [card],
+          shouldDecrement: true
         }, { root: true })
       }
       if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
