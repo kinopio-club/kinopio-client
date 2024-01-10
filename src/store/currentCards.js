@@ -224,8 +224,8 @@ const currentCards = {
       context.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
     },
     addMultiple: (context, newCards) => {
-      newCards.forEach(card => {
-        card = {
+      newCards = newCards.map(card => {
+        return {
           id: card.id || nanoid(),
           x: card.x,
           y: card.y,
@@ -239,6 +239,8 @@ const currentCards = {
           shouldUpdateUrlPreview: true,
           urlPreviewIsVisible: true
         }
+      })
+      newCards.forEach(card => {
         context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
         context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
         context.commit('create', { card })
