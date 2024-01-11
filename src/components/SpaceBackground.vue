@@ -122,7 +122,8 @@ const updateBackground = async () => {
     }
   }
 }
-const updateBackgroundSize = () => {
+const updateBackgroundSize = async () => {
+  await nextTick()
   let backgroundImage = store.state.spaceBackgroundUrl
   backgroundImage = utils.urlFromCSSBackgroundImage(backgroundImage)
   let image = new Image()
