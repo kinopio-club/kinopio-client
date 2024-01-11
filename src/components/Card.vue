@@ -304,17 +304,7 @@ export default {
       this.$store.commit('preventCardDetailsOpeningAnimation', false)
       this.$store.dispatch('currentCards/showCardDetails', this.card.id)
     }
-    if (this.card.shouldUpdateUrlPreview) {
-      this.updateMediaUrls()
-      const isUpdatedSuccess = await this.updateUrlPreview()
-      this.$store.dispatch('currentCards/update', {
-        id: this.card.id,
-        shouldUpdateUrlPreview: false
-      })
-      if (isUpdatedSuccess) {
-        this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
-      }
-    }
+    await this.updateUrlPreviewOnload()
     this.updateCardDimensions()
     this.checkIfShouldUpdatePreviewHtml()
     const defaultCardMaxWidth = this.$store.getters['currentCards/defaultCardMaxWidth'] + 'px'
@@ -2042,9 +2032,31 @@ export default {
 
     // url preview
 
-    async updateUrlPreview () {
+    async updateUrlPreviewOnload () {
+      if (!this.card.shouldUpdateUrlPreview) { return }
+      this.updateMediaUrls()
+      const isUpdatedSuccess = await this.updateUrlPreview()
+      this.$store.dispatch('currentCards/update', {
+        id: this.card.id,
+        shouldUpdateUrlPreview: false
+      })
+      if (isUpdatedSuccess) {
+        this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
+      }
+    },
+    updateUrlPreview () {
+      const isOffline = !this.$store.state.isOnline
       if (this.preventUpdatePrevPreview) { return }
-      // if (!this.canEditCard) { return }
+      if (isOffline) {
+        this.$store.dispatch('currentCards/update', {
+          id: this.card.id,
+          shouldUpdateUrlPreview: true
+        })
+      } else {
+        this.updateUrlPreviewOnline()
+      }
+    },
+    async updateUrlPreviewOnline () {
       this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
       const cardId = this.card.id
       let url = this.webUrl
