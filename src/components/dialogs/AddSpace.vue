@@ -8,65 +8,69 @@ dialog.add-space.narrow(
   ref="dialog"
   :style="{'max-height': dialogHeight + 'px'}"
 )
-  section
-    .row
-      //- Add Space
-      .segmented-buttons
-        button.success(@click="addSpace")
-          img.icon(src="@/assets/add.svg")
-          span New Space
-
-    //- Add Journal
-    .row
-      .segmented-buttons
-        button(@click="addJournalSpace")
-          img.icon(src="@/assets/add.svg")
-          MoonPhase(:moonPhase="moonPhase.name")
-          span Journal
-        button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
-          img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
-
-    //- Journal Settings
-    template(v-if="editPromptsIsVisible")
-      //- weather
-      section.subsection
-        Weather
-      //- daily prompt
-      section.subsection
-        .row.daily-prompt-row
-          .button-wrap
-            button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
-              img.icon.today(src="@/assets/today.svg")
-              span Prompt of the Day
-        .row(v-if="shouldCreateJournalsWithDailyPrompt")
-          p {{dailyPrompt}}
-      //- prompts
-      section.subsection
-        JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
-        //- add prompt
-        .row
-          button(@click.left="addCustomPrompt")
+  template(v-if="isOnline")
+    section
+      .row
+        //- Add Space
+        .segmented-buttons
+          button.success(@click="addSpace")
             img.icon(src="@/assets/add.svg")
-            span Prompt
+            span New Space
 
-  //- Inbox
-  section(v-if="!hasInboxSpace")
-    button(@click="addInboxSpace")
-      img.icon(src="@/assets/add.svg")
-      img.icon.inbox-icon(src="@/assets/inbox.svg")
-      span Inbox
-    p For collecting ideas to figure out later
+      //- Add Journal
+      .row
+        .segmented-buttons
+          button(@click="addJournalSpace")
+            img.icon(src="@/assets/add.svg")
+            MoonPhase(:moonPhase="moonPhase.name")
+            span Journal
+          button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
+            img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
-  //- Templates
-  section
-    .row
-      .button-wrap
-        button(@click="triggerTemplatesIsVisible")
-          img.icon.templates(src="@/assets/templates.svg")
-          span Templates
-      .button-wrap
-        button(@click="triggerImportIsVisible") Import
+      //- Journal Settings
+      template(v-if="editPromptsIsVisible")
+        //- weather
+        section.subsection
+          Weather
+        //- daily prompt
+        section.subsection
+          .row.daily-prompt-row
+            .button-wrap
+              button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
+                img.icon.today(src="@/assets/today.svg")
+                span Prompt of the Day
+          .row(v-if="shouldCreateJournalsWithDailyPrompt")
+            p {{dailyPrompt}}
+        //- prompts
+        section.subsection
+          JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
+          //- add prompt
+          .row
+            button(@click.left="addCustomPrompt")
+              img.icon(src="@/assets/add.svg")
+              span Prompt
 
+    //- Inbox
+    section(v-if="!hasInboxSpace")
+      button(@click="addInboxSpace")
+        img.icon(src="@/assets/add.svg")
+        img.icon.inbox-icon(src="@/assets/inbox.svg")
+        span Inbox
+      p For collecting ideas to figure out later
+
+    //- Templates
+    section
+      .row
+        .button-wrap
+          button(@click="triggerTemplatesIsVisible")
+            img.icon.templates(src="@/assets/templates.svg")
+            span Templates
+        .button-wrap
+          button(@click="triggerImportIsVisible") Import
+  template(v-else)
+    section
+      OfflineBadge
+      p Reconnect to add new spaces
 </template>
 
 <script>
@@ -74,6 +78,7 @@ import JournalPrompt from '@/components/JournalPrompt.vue'
 import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
 import Weather from '@/components/Weather.vue'
+import OfflineBadge from '@/components/OfflineBadge.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -85,7 +90,8 @@ export default {
   components: {
     JournalPrompt,
     MoonPhase,
-    Weather
+    Weather,
+    OfflineBadge
   },
   props: {
     visible: Boolean,
@@ -122,6 +128,9 @@ export default {
     },
     dailyPrompt () {
       return this.$store.state.currentUser.journalDailyPrompt
+    },
+    isOnline () {
+      return this.$store.state.isOnline
     }
   },
   methods: {
