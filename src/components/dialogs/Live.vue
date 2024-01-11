@@ -4,9 +4,8 @@ dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': d
     p
       img.icon.camera(src="@/assets/camera.svg")
       span Live Public Spaces
-      Loader(:visible="loading && isOnline")
-    OfflineBadge
-  section.results-section(v-if="spaces.length && isOnline" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+      Loader(:visible="loading")
+  section.results-section(v-if="spaces.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(
       :spaces="spaces"
       :showOtherUsers="true"
@@ -15,7 +14,7 @@ dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': d
       :resultsSectionHeight="resultsSectionHeight"
       :showFavoriteButton="true"
     )
-  section.empty(v-if="!spaces.length && isOnline")
+  section.empty(v-if="!spaces.length")
     p No public spaces are currently being edited, check back soon
     img.placeholder(src="@/assets/cat-book.jpg")
 </template>
@@ -23,15 +22,13 @@ dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': d
 <script>
 import SpaceList from '@/components/SpaceList.vue'
 import Loader from '@/components/Loader.vue'
-import OfflineBadge from '@/components/OfflineBadge.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'Live',
   components: {
     SpaceList,
-    Loader,
-    OfflineBadge
+    Loader
   },
   props: {
     visible: Boolean,
@@ -53,7 +50,6 @@ export default {
     }
   },
   computed: {
-    isOnline () { return this.$store.state.isOnline }
   },
   methods: {
     changeSpace (space) {

@@ -55,7 +55,6 @@ const toggleExploreIsVisible = () => {
   state.exploreIsVisible = !isVisible
 }
 const unreadExploreSpacesCount = computed(() => {
-  if (!isOnline.value) { return }
   let readDate = store.state.currentUser.showInExploreUpdatedAt
   if (!readDate) { return }
   readDate = dayjs(readDate)
@@ -119,7 +118,6 @@ const normalizeLiveSpaces = (spaces) => {
   return normalizedSpaces
 }
 const liveSpacesCount = computed(() => {
-  if (!isOnline.value) { return }
   return state.liveSpaces.length
 })
 
@@ -131,7 +129,6 @@ const toggleFavoritesIsVisible = () => {
   state.favoritesIsVisible = !isVisible
 }
 const favoriteSpacesEditedCount = computed(() => {
-  if (!isOnline.value) { return }
   const currentUser = store.state.currentUser
   let favoriteSpaces = utils.clone(currentUser.favoriteSpaces)
   favoriteSpaces = favoriteSpaces.filter(space => {
@@ -148,7 +145,7 @@ const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
 </script>
 
 <template lang="pug">
-.explore-row.button-wrap
+.explore-row.button-wrap(v-if="isOnline")
   .segmented-buttons.space-functions-row
     //- Explore
     .button-wrap

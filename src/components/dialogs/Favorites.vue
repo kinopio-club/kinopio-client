@@ -8,7 +8,6 @@ import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import User from '@/components/User.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
-import OfflineBadge from '@/components/OfflineBadge.vue'
 
 const store = useStore()
 
@@ -54,7 +53,6 @@ const currentUser = computed(() => store.state.currentUser)
 const favoriteUsers = computed(() => store.state.currentUser.favoriteUsers)
 const favoriteSpaces = computed(() => store.state.currentUser.favoriteSpaces)
 const loading = computed(() => store.state.isLoadingFavorites)
-const isOnline = computed(() => store.state.isOnline)
 const isEmpty = computed(() => {
   const noSpaces = state.spacesIsVisible && !favoriteSpaces.value.length
   const noPeople = !state.spacesIsVisible && !favoriteUsers.value.length
@@ -198,9 +196,8 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
   section
     p
       span Favorites
-      Loader(:visible="loading && isOnline" :isSmall="true")
-    OfflineBadge
-  template(v-if="isOnline")
+      Loader(:visible="loading" :isSmall="true")
+  template
     section.actions
       //- fav space
       .row
