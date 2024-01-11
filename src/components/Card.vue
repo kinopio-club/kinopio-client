@@ -719,7 +719,6 @@ export default {
     },
     connectorGlowStyle () {
       if (this.currentUserIsDraggingCard) { return }
-      if (!this.currentUserIsDraggingLabelConnectedToCard) { return }
       const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor || this.currentUserIsHoveringOverCardIdColor || this.currentUserIsMultipleSelectedCardIdColor || this.currentUserIsHoveringOverConnectionIdColor || this.currentUserIsMultipleSelectedConnectionIdColor
       if (!color) { return }
       return { background: color }
