@@ -197,52 +197,51 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
     p
       span Favorites
       Loader(:visible="loading" :isSmall="true")
-  template
-    section.actions
-      //- fav space
-      .row
-        button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
-          img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-          img.icon(v-else src="@/assets/heart-empty.svg")
-          span {{currentSpaceName}}
-      //- fav user
-      .row(v-if="spaceUser")
-        button(@click="toggleIsFavoriteUser")
-          img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
-          img.icon(v-else src="@/assets/heart-empty.svg")
-          UserLabelInline(:user="spaceUser")
+  section.actions
+    //- fav space
+    .row
+      button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
+        img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+        img.icon(v-else src="@/assets/heart-empty.svg")
+        span {{currentSpaceName}}
+    //- fav user
+    .row(v-if="spaceUser")
+      button(@click="toggleIsFavoriteUser")
+        img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
+        img.icon(v-else src="@/assets/heart-empty.svg")
+        UserLabelInline(:user="spaceUser")
 
-    section
-      .row
-        .button-wrap
-          .segmented-buttons
-            button(@click.left.stop="showSpaces" :class="{ active: state.spacesIsVisible }")
-              span Spaces
-            button(@click.left.stop="hideSpaces" :class="{ active: !state.spacesIsVisible }")
-              span People
-        .button-wrap
-          label.user-filter(v-if="state.spacesIsVisible" :class="{active: state.currentUserSpacesIsVisible}")
-            input(type="checkbox" v-model="showCurrentUserSpaces")
-            User(:user="currentUser"  :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+  section
+    .row
+      .button-wrap
+        .segmented-buttons
+          button(@click.left.stop="showSpaces" :class="{ active: state.spacesIsVisible }")
+            span Spaces
+          button(@click.left.stop="hideSpaces" :class="{ active: !state.spacesIsVisible }")
+            span People
+      .button-wrap
+        label.user-filter(v-if="state.spacesIsVisible" :class="{active: state.currentUserSpacesIsVisible}")
+          input(type="checkbox" v-model="showCurrentUserSpaces")
+          User(:user="currentUser"  :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
 
-    section.results-section(v-if="!isEmpty")
-      //- Spaces
-      template(v-if="state.spacesIsVisible")
-        SpaceList(:spaces="filteredSapces" :showUser="true" @selectSpace="changeSpace")
+  section.results-section(v-if="!isEmpty")
+    //- Spaces
+    template(v-if="state.spacesIsVisible")
+      SpaceList(:spaces="filteredSapces" :showUser="true" @selectSpace="changeSpace")
 
-      //- People
-      template(v-if="!state.spacesIsVisible")
-        UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
+    //- People
+    template(v-if="!state.spacesIsVisible")
+      UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 
-    //- empty state
-    section.extra(v-if="isEmpty && !loading")
-      section.subsection
-        p(v-if="state.spacesIsVisible")
-          img.icon(src="@/assets/heart.svg")
-          span Spaces to know when they've been updated
-        p(v-if="!state.spacesIsVisible")
-          img.icon(src="@/assets/heart.svg")
-          span People to follow them
+  //- empty state
+  section.extra(v-if="isEmpty && !loading")
+    section.subsection
+      p(v-if="state.spacesIsVisible")
+        img.icon(src="@/assets/heart.svg")
+        span Spaces to know when they've been updated
+      p(v-if="!state.spacesIsVisible")
+        img.icon(src="@/assets/heart.svg")
+        span People to follow them
 
 </template>
 
