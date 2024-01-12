@@ -23,6 +23,10 @@ onMounted(() => {
       updatePosition()
     } else if (mutation.type === 'triggerHideTouchInterface') {
       hideOnTouch()
+    } else if (mutation.type === 'isPresentationMode') {
+      if (!mutation.payload) {
+        store.commit('shouldExplicitlyHideFooter', false)
+      }
     }
   })
 })
