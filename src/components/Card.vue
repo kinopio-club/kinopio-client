@@ -1196,6 +1196,7 @@ export default {
         let connections = this['currentConnections/all']
         connections = connections.filter(connection => connection.startCardId === cardId || connection.endCardId === cardId)
         connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
+        connections = this.$store.getters['currentConnections/connectionsWithValidCards'](connections)
         const connection = connections[0]
         if (!connection) { return }
         const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
