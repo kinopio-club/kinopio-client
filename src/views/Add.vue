@@ -281,7 +281,7 @@ const insertLineBreak = async (event) => {
 
 // space filter
 
-const filterPlaceholder = computed(() => 'Fitler Spaces')
+const filterPlaceholder = computed(() => 'Filter Spaces')
 const toggleFilterIsVisible = async () => {
   const value = !state.filterIsVisible
   state.filterIsVisible = value
