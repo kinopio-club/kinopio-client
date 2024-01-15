@@ -176,7 +176,6 @@ const selectGradient = (index) => {
     backgroundGradient: gradient
   }
   store.dispatch('currentSpace/updateSpace', updates)
-  store.commit('triggerUpdateBackground')
   updatePageSizes()
 }
 const gradientIsActive = (gradient) => {
@@ -223,7 +222,6 @@ const updateSpaceBackground = (url) => {
     background: url
   }
   store.dispatch('currentSpace/updateSpace', updates)
-  store.commit('triggerUpdateBackground')
   updatePageSizes()
 }
 const removeBackgroundAll = async () => {
