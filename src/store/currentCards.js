@@ -302,6 +302,11 @@ const currentCards = {
       }
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
     },
+    updateCounter: (context, card) => {
+      context.commit('update', card)
+      context.dispatch('api/addToQueue', { name: 'updateCardCounter', body: card }, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
+    },
     updateName (context, { card, newName }) {
       const canEditCard = context.rootGetters['currentUser/canEditCard'](card)
       if (!canEditCard) { return }
