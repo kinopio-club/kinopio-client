@@ -335,16 +335,8 @@ template(v-if="visible")
 section.text
   .textarea-wrap
     cursor text
-    background-color var(--secondary-background)
-    border-radius var(--entity-radius)
-    padding 8px
-    padding-bottom 4px
-    margin-bottom 4px
+    padding 2px 4px
     position relative
-    &:hover
-      box-shadow var(--button-hover-shadow)
-    &:active
-      box-shadow var(--button-active-inset-shadow)
     textarea
       margin-bottom 0
     .read-only-name
