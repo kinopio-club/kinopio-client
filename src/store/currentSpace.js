@@ -453,6 +453,7 @@ const currentSpace = {
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
       })
       context.dispatch('updateModulesSpaceId', space)
+      context.commit('isLoadingSpace', false, { root: true })
     },
     saveImportedSpace: async (context) => {
       context.commit('isLoadingSpace', true, { root: true })
