@@ -55,7 +55,6 @@ dialog.narrow.multiple-selected-actions(
       //- Remove
       button.danger(:disabled="!canEditAll.all" @click.left="remove")
         img.icon(src="@/assets/remove.svg")
-        span Remove
       //- Merge
       button(v-if="multipleCardsIsSelected" @click="mergeSelectedCards" :disabled="!canEditAll.cards")
         img.icon(src="@/assets/merge.svg")
