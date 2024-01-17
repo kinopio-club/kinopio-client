@@ -7,9 +7,9 @@ import utils from '@/utils.js'
 export default {
   name: 'WindowHistoryHandler',
   created () {
-    this.$store.subscribe((mutation, state) => {
+    this.$store.subscribe(async (mutation, state) => {
       if (mutation.type === 'triggerUpdateWindowHistory') {
-        this.updateWindowHistory(mutation.payload)
+        await this.updateWindowHistory(mutation.payload)
         this.updateWindowTitle()
       }
     })
@@ -43,11 +43,6 @@ export default {
         title = 'Kinopio'
       }
       document.title = title
-    }
-  },
-  watch: {
-    currentSpaceName () {
-      this.updateWindowTitle()
     }
   }
 }
