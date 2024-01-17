@@ -237,7 +237,12 @@ const currentCards = {
           userId: context.rootState.currentUser.id,
           backgroundColor: card.backgroundColor,
           shouldUpdateUrlPreview: true,
-          urlPreviewIsVisible: true
+          urlPreviewIsVisible: true,
+          urlPreviewDescription: card.urlPreviewDescription,
+          urlPreviewFavicon: card.urlPreviewFavicon,
+          urlPreviewImage: card.urlPreviewImage,
+          urlPreviewTitle: card.urlPreviewTitle,
+          urlPreviewUrl: card.urlPreviewUrl
         }
       })
       newCards.forEach(card => {
