@@ -11,6 +11,8 @@ export default {
       if (mutation.type === 'triggerUpdateWindowHistory') {
         await this.updateWindowHistory(mutation.payload)
         this.updateWindowTitle()
+      } else if (mutation.type === 'triggerUpdateWindowTitle') {
+        this.updateWindowTitle()
       }
     })
   },

@@ -195,6 +195,7 @@ export default {
         this.textareaSize()
         this.$store.dispatch('currentSpace/updateSpace', { name: newName })
         this.updateLocalSpaces()
+        this.$store.commit('triggerUpdateWindowTitle')
       }
     },
     currentSpace () { return this.$store.state.currentSpace },
