@@ -237,7 +237,12 @@ const currentCards = {
           userId: context.rootState.currentUser.id,
           backgroundColor: card.backgroundColor,
           shouldUpdateUrlPreview: true,
-          urlPreviewIsVisible: true
+          urlPreviewIsVisible: true,
+          urlPreviewDescription: card.urlPreviewDescription,
+          urlPreviewFavicon: card.urlPreviewFavicon,
+          urlPreviewImage: card.urlPreviewImage,
+          urlPreviewTitle: card.urlPreviewTitle,
+          urlPreviewUrl: card.urlPreviewUrl
         }
       })
       newCards.forEach(card => {
@@ -301,6 +306,11 @@ const currentCards = {
         context.commit('triggerUpdateOtherCard', card.id, { root: true })
       }
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+    },
+    updateCounter: (context, card) => {
+      context.commit('update', card)
+      context.dispatch('api/addToQueue', { name: 'updateCardCounter', body: card }, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
     },
     updateName (context, { card, newName }) {
       const canEditCard = context.rootGetters['currentUser/canEditCard'](card)

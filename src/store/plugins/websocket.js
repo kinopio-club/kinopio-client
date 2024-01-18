@@ -83,16 +83,6 @@ const checkIfShouldUpdateLinkToItem = (store, { message, updates }) => {
   store.dispatch('currentSpace/updateOtherItems', options)
 }
 
-const checkIfShouldUpdateBackground = (store, { message, updates }) => {
-  const updateKeys = Object.keys(updates)
-  updateKeys.forEach(key => {
-    const shouldUpdateBackground = key === 'background' || key === 'backgroundTint'
-    if (message === 'updateSpace' && shouldUpdateBackground) {
-      store.commit('triggerUpdateBackground')
-    }
-  })
-}
-
 const closeWebsocket = (store) => {
   if (!websocket) { return }
   store.commit('isJoiningSpace', true)
@@ -159,7 +149,6 @@ export default function createWebSocketPlugin () {
             store.commit(`${message}`, updates)
           } else {
             store.commit(`currentSpace/${message}`, updates)
-            checkIfShouldUpdateBackground(store, data)
           }
         }
       }

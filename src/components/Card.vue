@@ -1733,6 +1733,7 @@ export default {
     },
     showCardDetails (event) {
       this.$store.dispatch('currentCards/afterMove')
+      if (this.cardDetailsIsVisibleForCardId) { return }
       if (this.isLocked) { return }
       if (this.currentUserIsPainting) { return }
       if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return }
