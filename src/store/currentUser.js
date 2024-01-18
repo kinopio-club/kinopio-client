@@ -390,7 +390,7 @@ export default {
     lastSidebarSection: (state, value) => {
       state.lastSidebarSection = value
     },
-    initNewUser: (state) => {
+    updateAppleAppAccountToken: (state) => {
       state.appleAppAccountToken = uuidv4()
     }
   },
@@ -472,7 +472,7 @@ export default {
     },
     createNewUser: (context) => {
       context.commit('themeIsSystem', true)
-      context.commit('initNewUser')
+      context.commit('updateAppleAppAccountToken')
       cache.saveUser(context.state)
       context.dispatch('createNewUserJournalPrompts')
     },
