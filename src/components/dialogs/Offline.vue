@@ -14,21 +14,11 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     state.queue = cache.queue()
-    checkIfShouldBeOnRightSide()
   }
 })
 
-onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      checkIfShouldBeOnRightSide()
-    }
-  })
-})
-
 const state = reactive({
-  queue: [],
-  showOnRightSide: false
+  queue: []
 })
 
 const currentUserIsSignedIn = computed(() => {
@@ -38,24 +28,17 @@ const pluralChanges = computed(() => {
   const condition = state.queue.length !== 1
   return utils.pluralize('change', condition)
 })
-const checkIfShouldBeOnRightSide = async () => {
-  state.showOnRightSide = false
-  if (!props.visible) { return }
-  await nextTick()
-  let element = dialogElement.value
-  state.showOnRightSide = utils.elementShouldBeOnRightSide(element)
-}
 </script>
 
 <template lang="pug">
-dialog.narrow.offline(v-if="visible" :open="visible" ref="dialogElement" :class="{'right-side': state.showOnRightSide}")
+dialog.narrow.offline(v-if="visible" :open="visible" ref="dialogElement")
   section
     p Offline
   section
     .row
       p Kinopio works offline
     section.subsection(v-if="currentUserIsSignedIn")
-      p Your changes will be saved locally, and sync-ed up once you're back online
+      p Your changes are saved locally, and will sync up when you're back online
       p
         span.badge.info
           img.icon.offline(src="@/assets/offline.svg")
@@ -65,8 +48,6 @@ dialog.narrow.offline(v-if="visible" :open="visible" ref="dialogElement" :class=
 </template>
 
 <style lang="stylus" scoped>
-.offline
-  &.right-side
-    left initial
-    right 8px
+dialog.offline
+  width 200px
 </style>
