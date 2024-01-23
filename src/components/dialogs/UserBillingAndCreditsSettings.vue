@@ -46,6 +46,7 @@ const triggerUpgradeUserIsVisible = () => {
 
 const subscriptionIsApple = computed(() => store.getters['currentUser/subscriptionIsApple'])
 const subscriptionIsStripe = computed(() => store.getters['currentUser/subscriptionIsStripe'])
+const stripePlanIsPurchased = computed(() => store.state.currentUser.stripePlanIsPurchased)
 const subscriptionIsFree = computed(() => store.getters['currentUser/subscriptionIsFree'])
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
@@ -96,7 +97,10 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
       span Customer Portal
       Loader(:visible="state.loading")
     p.badge.danger(v-if="state.error.unknownServerError")
-      span (シ_ _)シ Something went wrong, Please try again or contact support.
+      span (シ_ _)シ Something went wrong. Please try again or contact support.
+  //- stripe lifetime
+  section(v-else-if="stripePlanIsPurchased")
+    p You've purchased a lifetime plan. If you need a new receipt please contact support.
 
   //- apple
   section(v-else-if="subscriptionIsApple")
