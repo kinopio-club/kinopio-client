@@ -788,12 +788,12 @@ const currentSpace = {
       context.dispatch('clearStateMeta')
       // load local space while fetching remote space
       Promise.all([
-        context.dispatch('getRemoteSpace', space),
-        Promise.resolve(context.dispatch('restoreSpaceLocal', space))
+        context.dispatch('restoreSpaceLocal', space),
+        context.dispatch('getRemoteSpace', space)
       ])
       // restore remote space
         .then((data) => {
-          let remoteSpace = data[0]
+          let remoteSpace = data[1]
           console.log('🎑 remoteSpace', remoteSpace)
           if (!remoteSpace) { return }
           const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
