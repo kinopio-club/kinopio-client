@@ -1272,6 +1272,9 @@ const store = createStore({
       notification.id = nanoid()
       state.notifications.push(notification)
     },
+    removeNotificationByMessage: (state, message) => {
+      state.notifications = state.notifications.filter(item => item.message !== message)
+    },
     removePreviousNotification: (state) => {
       const removableNotifications = state.notifications.filter(notification => notification.isPersistentItem === false)
       const prevNotification = last(removableNotifications)
