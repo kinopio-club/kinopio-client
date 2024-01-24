@@ -241,6 +241,7 @@ export default {
       this.loading.signUpOrIn = false
       if (this.isSuccess(response)) {
         this.$store.commit('isLoadingSpace', true)
+        this.$store.commit('addNotification', { message: 'Signing In…' })
         // update user to remote user
         this.$store.commit('currentUser/updateUser', result)
         // update local spaces to remote user
