@@ -358,6 +358,7 @@ export default {
     notifySignedIn () {
       this.loading.signUpOrIn = false
       this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('removeNotificationByMessage', 'Signing In…')
       this.$store.commit('addNotification', { message: 'Signed In', type: 'success' })
     },
 
