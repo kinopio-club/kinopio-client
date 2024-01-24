@@ -783,19 +783,9 @@ const currentSpace = {
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('isAddPage', false, { root: true })
       const cachedSpace = cache.space(space.id) || space
-      const user = context.rootState.currentUser
       cachedSpace.id = cachedSpace.id || space.id
       space = utils.normalizeSpace(cachedSpace)
-      // clear state
-      isLoadingRemoteSpace = false
-      context.commit('notifySpaceIsRemoved', false, { root: true })
-      context.commit('spaceUrlToLoad', '', { root: true })
-      context.commit('userHasScrolled', false, { root: true })
-      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
-      context.commit('clearAllNotifications', null, { root: true })
-      context.commit('clearSpaceFilters', null, { root: true })
-      context.commit('clearSearch', null, { root: true })
-      context.commit('shouldPreventNextEnterKey', false, { root: true })
+      context.dispatch('clearStateMeta')
       context.dispatch('restoreSpaceLocal', space)
       if (isLocalSpaceOnly) { return }
       let remoteSpace = await context.dispatch('getRemoteSpace', space)
@@ -806,6 +796,18 @@ const currentSpace = {
         return
       }
       context.dispatch('mergeAndRestoreSpaceRemote', remoteSpace)
+    },
+    clearStateMeta: (context) => {
+      const user = context.rootState.currentUser
+      isLoadingRemoteSpace = false
+      context.commit('notifySpaceIsRemoved', false, { root: true })
+      context.commit('spaceUrlToLoad', '', { root: true })
+      context.commit('userHasScrolled', false, { root: true })
+      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
+      context.commit('clearAllNotifications', null, { root: true })
+      context.commit('clearSpaceFilters', null, { root: true })
+      context.commit('clearSearch', null, { root: true })
+      context.commit('shouldPreventNextEnterKey', false, { root: true })
     },
     restoreSpaceLocal: (context, space) => {
       const emptySpace = utils.emptySpace(space.id)
