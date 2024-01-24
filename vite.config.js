@@ -18,7 +18,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       strategies: 'generateSW',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp,avif}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp,avif,mp4}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/cdn\.kinopio\.club\/.*/i,
