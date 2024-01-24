@@ -782,10 +782,10 @@ const currentSpace = {
       }
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('isAddPage', false, { root: true })
-      const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id) || space
       const user = context.rootState.currentUser
       cachedSpace.id = cachedSpace.id || space.id
+      space = utils.normalizeSpace(cachedSpace)
       // clear state
       isLoadingRemoteSpace = false
       context.commit('notifySpaceIsRemoved', false, { root: true })
@@ -796,12 +796,7 @@ const currentSpace = {
       context.commit('clearSpaceFilters', null, { root: true })
       context.commit('clearSearch', null, { root: true })
       context.commit('shouldPreventNextEnterKey', false, { root: true })
-      // restore local space
-      context.commit('restoreSpace', emptySpace)
-      context.dispatch('history/reset', null, { root: true })
-      space = utils.normalizeSpace(cachedSpace)
-      context.dispatch('restoreSpaceInChunks', { space })
-      // merge with remote space items updated, added, removed
+      context.dispatch('restoreSpaceLocal', space)
       if (isLocalSpaceOnly) { return }
       let remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (!remoteSpace) { return }
@@ -810,6 +805,16 @@ const currentSpace = {
         context.commit('isLoadingSpace', false, { root: true })
         return
       }
+      context.dispatch('mergeAndRestoreSpaceRemote', remoteSpace)
+    },
+    restoreSpaceLocal: (context, space) => {
+      const emptySpace = utils.emptySpace(space.id)
+      context.commit('restoreSpace', emptySpace)
+      context.dispatch('history/reset', null, { root: true })
+      context.dispatch('restoreSpaceInChunks', { space })
+      console.log('🎑 local space', space)
+    },
+    mergeAndRestoreSpaceRemote: async (context, remoteSpace) => {
       isLoadingRemoteSpace = true
       remoteSpace = utils.normalizeSpace(remoteSpace)
       // cards
@@ -837,7 +842,6 @@ const currentSpace = {
         types: connectionTypeReults,
         connections: connectionResults,
         boxes: boxResults,
-        localSpace: space,
         space: remoteSpace
       })
       context.dispatch('restoreSpaceInChunks', {
