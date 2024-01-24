@@ -40,7 +40,7 @@
     "pug": "^3.0.2",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
-    "vite": "^5.0.10",
+    "vite": "^5.0.12",
     "vite-plugin-pwa": "^0.17.4",
     "yorkie": "^2.0.0"
   },
