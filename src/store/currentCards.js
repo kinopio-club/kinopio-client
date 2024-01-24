@@ -126,6 +126,7 @@ const currentCards = {
     moveWhileDragging: (state, { cards }) => {
       cards.forEach(card => {
         const element = document.querySelector(`article[data-card-id="${card.id}"]`)
+        if (!element) { return }
         element.style.left = card.x + 'px'
         element.style.top = card.y + 'px'
       })
@@ -185,8 +186,8 @@ const currentCards = {
 
     // create
 
-    add: (context, { position, isParentCard, name, id, backgroundColor }) => {
-      utils.typeCheck({ value: position, type: 'object' })
+    add: (context, { x, y, position, isParentCard, name, id, backgroundColor, width, height, shouldUpdateUrlPreview }) => {
+      utils.typeCheck({ value: position, type: 'object', allowUndefined: true })
       if (context.rootGetters['currentSpace/shouldPreventAddCard']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
@@ -196,17 +197,19 @@ const currentCards = {
       const defaultBackgroundColor = context.rootState.currentUser.defaultCardBackgroundColor
       let card = {
         id: id || nanoid(),
-        x: position.x,
-        y: position.y,
+        x: x || position.x,
+        y: y || position.y,
         z: highestCardZ + 1,
         name: name || '',
         frameId: 0,
         userId: context.rootState.currentUser.id,
         urlPreviewIsVisible: true,
-        width: utils.emptyCard().width,
-        height: utils.emptyCard().height,
+        width: width || utils.emptyCard().width,
+        height: height || utils.emptyCard().height,
         isLocked: false,
-        backgroundColor: backgroundColor || defaultBackgroundColor
+        backgroundColor: backgroundColor || defaultBackgroundColor,
+        isRemoved: false,
+        shouldUpdateUrlPreview
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       card.spaceId = currentSpaceId
@@ -215,14 +218,14 @@ const currentCards = {
       context.commit('create', { card })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: 1
+        cards: [card]
       }, { root: true })
       context.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
       context.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
     },
     addMultiple: (context, newCards) => {
-      newCards.forEach(card => {
-        card = {
+      newCards = newCards.map(card => {
+        return {
           id: card.id || nanoid(),
           x: card.x,
           y: card.y,
@@ -234,20 +237,28 @@ const currentCards = {
           userId: context.rootState.currentUser.id,
           backgroundColor: card.backgroundColor,
           shouldUpdateUrlPreview: true,
-          urlPreviewIsVisible: true
+          urlPreviewIsVisible: true,
+          urlPreviewDescription: card.urlPreviewDescription,
+          urlPreviewFavicon: card.urlPreviewFavicon,
+          urlPreviewImage: card.urlPreviewImage,
+          urlPreviewTitle: card.urlPreviewTitle,
+          urlPreviewUrl: card.urlPreviewUrl
         }
+      })
+      newCards.forEach(card => {
         context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
         context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
         context.commit('create', { card })
       })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: newCards.length
+        cards: newCards
       }, { root: true })
     },
     paste: (context, { card, cardId }) => {
       utils.typeCheck({ value: card, type: 'object' })
       card.id = cardId || nanoid()
       card.spaceId = currentSpaceId
+      card.isCreatedThroughPublicApi = false
       const prevCards = context.getters.all
       utils.uniqueCardPosition(card, prevCards)
       const tags = utils.tagsFromStringWithoutBrackets(card.name)
@@ -265,7 +276,7 @@ const currentCards = {
       context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: 1
+        cards: [card]
       }, { root: true })
       context.dispatch('history/add', { cards: [card] }, { root: true })
       context.commit('create', { card })
@@ -295,6 +306,11 @@ const currentCards = {
         context.commit('triggerUpdateOtherCard', card.id, { root: true })
       }
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+    },
+    updateCounter: (context, card) => {
+      context.commit('update', card)
+      context.dispatch('api/addToQueue', { name: 'updateCardCounter', body: card }, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
     },
     updateName (context, { card, newName }) {
       const canEditCard = context.rootGetters['currentUser/canEditCard'](card)
@@ -638,7 +654,8 @@ const currentCards = {
       const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
       if (cardIsUpdatedByCurrentUser) {
         context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-          delta: -1
+          cards: [card],
+          shouldDecrement: true
         }, { root: true })
       }
       if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {

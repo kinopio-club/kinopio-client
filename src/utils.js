@@ -767,10 +767,11 @@ export default {
   colorIsValid (color) {
     return colord(color).isValid()
   },
-  colorIsDark (color) {
+  colorIsDark (color, brightnessThreshold) {
+    brightnessThreshold = brightnessThreshold || 0.4
     if (!color) { return }
     if (color === 'transparent') { return }
-    return colord(color).brightness() < 0.4
+    return colord(color).brightness() < brightnessThreshold
   },
   invertColor (color) {
     return colord(color).invert().toHex()
@@ -1168,8 +1169,35 @@ export default {
     space.backgroundTint = currentUser.defaultSpaceBackgroundTint
     return space
   },
+  updateSpaceCardsCreatedThroughPublicApi (space) {
+    space.cards = space.cards.map(card => {
+      card.isCreatedThroughPublicApi = true
+      return card
+    })
+    return space
+  },
   emptySpace (spaceId) {
-    return { id: spaceId, name: 'Loading…', moonPhase: '', background: '', backgroundTint: '', backgroundGradient: null, backgroundIsGradient: false, cards: [], connections: [], connectionTypes: [], boxes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [], isHidden: false, visits: 0 }
+    return {
+      id: spaceId,
+      name: 'Loading…',
+      moonPhase: '',
+      background: '',
+      backgroundTint: '',
+      backgroundGradient: null,
+      backgroundIsGradient: false,
+      cards: [],
+      connections: [],
+      connectionTypes: [],
+      boxes: [],
+      tags: [],
+      users: [],
+      userId: '',
+      collaborators: [],
+      spectators: [],
+      clients: [],
+      isHidden: false,
+      visits: 0
+    }
   },
   clearSpaceMeta (space, type) {
     space.originSpaceId = space.id
@@ -1299,11 +1327,20 @@ export default {
       return connection
     })
   },
+  spaceItemUsersToCurrentUser (space, userId) {
+    const itemNames = ['boxes', 'cards', 'connections', 'connectionTypes']
+    itemNames.forEach(itemName => {
+      space[itemName] = space[itemName].map(item => {
+        item.userId = userId
+        return item
+      })
+    })
+    return space
+  },
   newHelloSpace (user) {
     const emptyStringKeys = ['id', 'collaboratorKey', 'readOnlyKey']
     const emptyArrayKeys = ['users', 'collaborators', 'spectators', 'clients']
     const deleteKeys = ['url', 'originSpaceId', 'editedAt', 'editedByUserId', 'createdAt', 'updatedAt', 'updateHash']
-    const itemNames = ['boxes', 'cards', 'connections', 'connectionTypes']
     const userId = user?.id || consts.moderatorUserId
     let space = this.clone(helloSpace)
     space.name = 'Hello Kinopio'
@@ -1321,12 +1358,7 @@ export default {
     deleteKeys.forEach(key => {
       delete space[key]
     })
-    itemNames.forEach(itemName => {
-      space[itemName] = space[itemName].map(item => {
-        item.userId = userId
-        return item
-      })
-    })
+    this.spaceItemUsersToCurrentUser(space, userId)
     space.userId = userId
     return space
   },
@@ -1934,7 +1966,7 @@ export default {
     if (isSamePosition.length) {
       point.x += 20
       point.y += 20
-      this.uniqueCardPosition(point, existingPoints)
+      return this.uniqueCardPosition(point, existingPoints)
     } else {
       return point
     }
@@ -2187,6 +2219,7 @@ export default {
       h1Pattern: /^# ()(.+$)/gmi,
       h2Pattern: /^## ()(.+$)/gmi,
       h3Pattern: /^### ()(.+$)/gmi,
+      h4Pattern: /^#### ()(.+$)/gmi,
       // https://regexr.com/5jmf4
       // matches *text*
       emphasisPattern1: /(\*)(.*?)\1/gmi,
@@ -2229,6 +2262,9 @@ export default {
         }, {
           type: 'h3',
           result: markdown.h3Pattern.exec(text)
+        }, {
+          type: 'h4',
+          result: markdown.h4Pattern.exec(text)
         }, {
           type: 'emphasis',
           result: markdown.emphasisPattern1.exec(text)

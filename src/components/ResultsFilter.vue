@@ -8,6 +8,7 @@
   input(
     name="filter"
     type="text"
+    autocomplete="off"
     :placeholder="inputPlaceholder"
     v-model="filterItems"
     ref="filterInput"

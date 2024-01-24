@@ -10,6 +10,8 @@ import ThemeToggle from '@/components/ThemeToggle.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 import User from '@/components/User.vue'
+import consts from '@/consts.js'
+
 const store = useStore()
 
 onMounted(() => {
@@ -27,6 +29,7 @@ const props = defineProps({
 const isSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const currentUser = computed(() => store.state.currentUser)
+const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
 const state = reactive({
   userBillingAndCreditsSettingsIsVisible: false,
@@ -124,7 +127,8 @@ const deleteUserPermanent = async () => {
     .row
       .button-wrap
         button(@click.left.stop="toggleUserBillingAndCreditsSettingsIsVisible" :class="{active: state.userBillingAndCreditsSettingsIsVisible}")
-          span Billing and Credits
+          span(v-if="isSecureAppContextIOS") Billing
+          span(v-else) Billing and Credits
         UserBillingAndCreditsSettings(:visible="state.userBillingAndCreditsSettingsIsVisible")
   //- Delete Account
   section.delete-account

@@ -1,10 +1,11 @@
 <script setup>
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import inboxSpace from '@/data/inbox.json'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
+import ResultsFilter from '@/components/ResultsFilter.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -12,12 +13,6 @@ import postMessage from '@/postMessage.js'
 
 import { nanoid } from 'nanoid'
 const store = useStore()
-
-onMounted(() => {
-  initUser()
-  window.addEventListener('message', insertUrl) // postmessages from browser extension
-  initCardTextarea()
-})
 
 const state = reactive({
   email: '',
@@ -37,14 +32,32 @@ const state = reactive({
   newName: '',
   keyboardShortcutTipIsVisible: false,
   selectedSpaceId: 'inbox',
-  spaces: []
+  spaces: [],
+  filterIsVisible: false,
+  filteredSpaces: []
 })
 
-const textarea = ref(null)
+const textareaElement = ref(null)
 
 // init
 
-const isOnline = computed(() => store.state.isOnline)
+window.addEventListener('message', (event) => {
+  console.log('🛫 add page: received postmessage', event)
+  restoreValue(event.data)
+})
+
+onMounted(() => {
+  initUser()
+  initCardTextarea()
+  updateSpaces()
+  restoreValue()
+})
+
+onBeforeUnmount(() => {
+  cache.clearPrevAddPageValue()
+})
+
+const isOffline = computed(() => !store.state.isOnline)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const kinopioDomain = computed(() => consts.kinopioDomain())
 const cardsCreatedIsOverLimit = computed(() => store.getters['currentUser/cardsCreatedIsOverLimit'])
@@ -71,16 +84,15 @@ const initUser = async () => {
 const initCardTextarea = async () => {
   await nextTick()
   focusAndSelectName()
-  updateSpaces()
 }
 const focusName = () => {
-  const element = textarea.value
+  const element = textareaElement.value
   if (!element) { return }
   element.focus()
 }
 const focusAndSelectName = () => {
   if (utils.isMobile()) { return }
-  const element = textarea.value
+  const element = textareaElement.value
   if (!element) { return }
   const length = element.value.length
   focusName()
@@ -88,9 +100,14 @@ const focusAndSelectName = () => {
     element.setSelectionRange(0, length)
   }
 }
-const insertUrl = async (event) => {
-  const url = event.data
-  state.newName = url + state.newName
+
+// postmesage
+
+const restoreValue = async (value) => {
+  await nextTick()
+  value = value || cache.prevAddPageValue()
+  state.newName = value
+  console.log('🏬 restored value', value)
   await nextTick()
   updateTextareaSize()
   focusAndSelectName()
@@ -155,9 +172,18 @@ const updateSpacesLocal = () => {
 }
 const updateSpacesRemote = async () => {
   let spaces = await store.dispatch('api/getUserSpaces')
+  if (!spaces) { return }
   spaces = spaces.filter(space => space.name !== 'Inbox')
   state.spaces = spaces
 }
+const filteredSpaces = computed(() => {
+  if (state.filteredSpaces.length) {
+    return state.filteredSpaces
+  } else {
+    return state.spaces
+  }
+})
+
 // card
 
 const addCard = async () => {
@@ -169,55 +195,43 @@ const addCard = async () => {
   let newName = state.newName
   state.success = true
   state.newName = ''
-  textarea.value.style.height = 'initial'
+  textareaElement.value.style.height = 'initial'
   focusAndSelectName()
-  // url preview data
   const url = utils.urlFromString(newName)
-  let urlPreview = {}
-  if (url) {
-    let { links, meta } = await getUrlPreview(url)
-    urlPreview = {
-      title: utils.truncated(meta.title || meta.site),
-      description: utils.truncated(meta.description, 280),
-      image: previewImage(links),
-      favicon: previewFavicon(links)
-    }
-  }
   // create card
   let card = {
     id: nanoid(),
     name: newName,
-    z: 1,
-    urlPreviewUrl: url,
-    urlPreviewTitle: urlPreview.title,
-    urlPreviewDescription: urlPreview.description,
-    urlPreviewImage: urlPreview.image,
-    urlPreviewFavicon: urlPreview.favicon
+    z: 1
+  }
+  if (url) {
+    card.urlPreviewUrl = url
+    card.shouldUpdateUrlPreview = true
   }
   let space
   try {
     const user = store.state.currentUser
     card.userId = user.id
-    console.log('🛫 create card in space', card, state.selectedSpaceId)
     let spaceId
-    // inbox
+    // save to inbox
     if (state.selectedSpaceId === 'inbox') {
-      card = await store.dispatch('api/createCardInInbox', card)
-      space = { id: card.spaceId }
-    // space
+      console.log('🛫 create card in inbox space', card)
+      store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })
+    // save to space
     } else {
       spaceId = state.selectedSpaceId
       card.spaceId = spaceId
-      space = { id: spaceId }
-      card = store.dispatch('api/createCard', card)
+      console.log('🛫 create card in space', card, state.selectedSpaceId)
+      store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId })
     }
+    space = { id: spaceId }
   } catch (error) {
     console.error('🚒 addCard', error)
     state.error.unknownServerError = true
   }
-  console.log('🛫 new card', card)
-  postMessage.send({ name: 'addCardFromAddPage', value: card })
   addCardToSpaceLocal(card, space)
+  postMessage.send({ name: 'addCardFromAddPage', value: card })
+  postMessage.send({ name: 'onAdded', value: true })
 }
 const addCardToSpaceLocal = (card, space) => {
   space = cache.space(space.id)
@@ -227,42 +241,7 @@ const addCardToSpaceLocal = (card, space) => {
   cache.updateSpace('cards', cards, space.id)
 }
 
-// card url preview (ported from Card.vue)
-
-const getUrlPreview = async (url) => {
-  try {
-    let response = await store.dispatch('api/urlPreview', url)
-    if (!response) { return }
-    let { data, host } = response
-    console.log('🚗 link preview', host, data)
-    const { links, meta } = data
-    return { links, meta }
-  } catch (error) {
-    console.warn('🚑 urlPreview', error, url)
-  }
-}
-const previewImage = ({ thumbnail }) => {
-  const minWidth = 200
-  if (!thumbnail) { return '' }
-  let image = thumbnail.find(item => {
-    let shouldSkipImage = false
-    if (item.media) {
-      if (item.media.width < minWidth) {
-        shouldSkipImage = true
-      }
-    }
-    return item.href && !shouldSkipImage
-  })
-  if (!image) { return '' }
-  return image.href || ''
-}
-const previewFavicon = ({ icon }) => {
-  if (!icon) { return '' }
-  let image = icon.find(item => item.href)
-  return image.href || ''
-}
-
-// state handlers
+// input handlers
 
 const updateKeyboardShortcutTipIsVisible = (value) => {
   state.keyboardShortcutTipIsVisible = value
@@ -273,9 +252,9 @@ const clearErrors = () => {
   state.error.tooManyAttempts = false
 }
 const updateTextareaSize = () => {
-  if (!textarea.value) { return }
+  if (!textareaElement.value) { return }
   let modifier = 0
-  textarea.value.style.height = textarea.value.scrollHeight + modifier + 'px'
+  textareaElement.value.style.height = textareaElement.value.scrollHeight + modifier + 'px'
 }
 const clearErrorsAndSuccess = () => {
   state.error.unknownServerError = false
@@ -289,27 +268,42 @@ const updateMaxLengthError = () => {
   }
 }
 const insertLineBreak = async (event) => {
-  const position = textarea.value.selectionEnd
+  const position = textareaElement.value.selectionEnd
   const name = state.newName
   const newName = name.substring(0, position) + '\n' + name.substring(position)
   setTimeout(() => {
-    textarea.value.setSelectionRange(position + 1, position + 1)
+    textareaElement.value.setSelectionRange(position + 1, position + 1)
   })
   state.newName = newName
   await nextTick()
   updateTextareaSize()
 }
 
+// space filter
+
+const filterPlaceholder = computed(() => 'Filter Spaces')
+const toggleFilterIsVisible = async () => {
+  const value = !state.filterIsVisible
+  state.filterIsVisible = value
+  if (value) {
+    await nextTick()
+    store.commit('triggerFocusResultsFilter')
+  } else {
+    clearFilter()
+  }
+}
+const updateFilteredItems = (spaces) => {
+  state.filteredSpaces = spaces
+}
+const clearFilter = () => {
+  state.filteredSpaces = []
+}
 </script>
 
 <template lang="pug">
 main.add-page
   .add-form(v-if="currentUserIsSignedIn")
     section
-      .row(v-if="!isOnline")
-        .badge.danger
-          img.icon.offline(src="@/assets/offline.svg")
-          span Offline
       .row(v-if="cardsCreatedIsOverLimit || state.error.unknownServerError || state.error.maxLength")
         //- error: card limit
         template(v-if="cardsCreatedIsOverLimit")
@@ -327,7 +321,7 @@ main.add-page
         .textarea-wrap
           textarea.name(
             name="cardName"
-            ref="textarea"
+            ref="textareaElement"
             rows="1"
             :placeholder="textareaPlaceholder"
             v-model="name"
@@ -342,29 +336,41 @@ main.add-page
             @touchend="focusName"
           )
       //- space picker
+      ResultsFilter(
+        v-if="state.filterIsVisible"
+        :showFilter="state.filterIsVisible"
+        :placeholder="filterPlaceholder"
+        :isLoading="state.loading.updateSpaces"
+        :items="state.spaces"
+        @updateFilteredItems="updateFilteredItems"
+        @clearFilter="clearFilter"
+      )
       .row
-        select(name="spaces" v-model="state.selectedSpaceId")
-          option(value="inbox" default) Inbox
-          template(v-for="space in state.spaces")
-            option(:value="space.id") {{space.name}}
+        .segmented-buttons
+          button(@click='toggleFilterIsVisible' :class="{ active: state.filterIsVisible }")
+            img.icon.search(src="@/assets/search.svg")
+          select(name="spaces" v-model="state.selectedSpaceId")
+            option(value="inbox" default) Inbox
+            template(v-for="space in filteredSpaces")
+              option(:value="space.id") {{space.name}}
         Loader(:visible="state.loading.updateSpaces")
       //- submit
       .row
-        //- .button-wrap
-        //-   a(:href="selectedSpaceUrl")
-        //-     button
-        //-       span Space{{' '}}
-        //-       img.icon.visit(src="@/assets/visit.svg")
-        //- Add
         .button-wrap
           button.success(@pointerup="addCard" :class="{disabled: state.error.maxLength}")
             img.icon.add-icon(src="@/assets/add.svg")
             span Add
           .badge.label-badge.enter-badge(v-if="state.keyboardShortcutTipIsVisible")
             span Enter
-      .row(v-if="state.success")
-        .badge.success
-          span Added to space
+      Transition(name="fadeIn")
+        .row(v-if="state.success")
+          .badge.success
+            span Added to space
+      .row(v-if="isOffline")
+        .badge.info
+          img.icon.offline(src="@/assets/offline.svg")
+          span Offline
+        span New cards will be saved locally, and sync-ed up once you're back online
 
   //- sign in
   section(v-if="!currentUserIsSignedIn")
@@ -384,6 +390,9 @@ main.add-page
 </template>
 
 <style lang="stylus">
+*
+  font-size 16px
+
 main.add-page
   padding 8px
   min-height 100vh
@@ -453,8 +462,10 @@ main.add-page
     .badge
       display inline-block
 
-    select
+    .segmented-buttons
       width 100%
+    select
+      width calc(100% - 30px)
 
   .inbox-icon,
   .add-icon
@@ -467,4 +478,14 @@ main.add-page
   display flex
   justify-content space-between
   align-items center
+
+.fadeIn-enter-active {
+  animation fadeIn 0.5s ease-out
+}
+
+@keyframes fadeIn
+  0%
+    opacity 0
+  100%
+    opacity 1
 </style>

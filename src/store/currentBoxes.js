@@ -225,7 +225,7 @@ export default {
     // snapping
 
     updateSnapGuides: (context, boxes) => {
-      const snapThreshold = 25
+      const snapThreshold = 10
       const closenessThreshold = 100
       const targetBoxes = utils.clone(context.getters.all)
       boxes = utils.clone(boxes)

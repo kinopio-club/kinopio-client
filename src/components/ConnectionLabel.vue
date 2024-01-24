@@ -27,6 +27,7 @@ onMounted(() => {
   window.addEventListener('mouseup', stopDragging)
   window.addEventListener('pointermove', drag)
   updateConnectionRect()
+  updateConnectionIsVisible()
 })
 onUnmounted(() => {
   window.removeEventListener('scroll', updateConnectionIsVisible)
@@ -62,13 +63,6 @@ watch(() => state.isDragging, (value, prevValue) => {
   }
 })
 
-const visible = computed(() => props.connection.labelIsVisible)
-watch(() => visible.value, (value, prevValue) => {
-  if (value) {
-    store.dispatch('currentConnections/clearLabelPosition', props.connection)
-  }
-})
-
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const isDark = computed(() => utils.colorIsDark(typeColor.value))
 const checkIsMultiTouch = (event) => {
@@ -77,6 +71,48 @@ const checkIsMultiTouch = (event) => {
     isMultiTouch = true
   }
 }
+
+// parent connection
+
+const id = computed(() => props.connection.id)
+const connectionDetailsIsVisible = computed(() => store.state.connectionDetailsIsVisibleForConnectionId === id.value)
+const toggleConnectionDetails = (event) => {
+  if (isMultiTouch) { return }
+  const isVisible = store.state.connectionDetailsIsVisibleForConnectionId === id.value
+  if (isVisible || wasDragged) {
+    wasDragged = false
+    store.commit('closeAllDialogs')
+  } else {
+    store.commit('triggerConnectionDetailsIsVisible', {
+      connectionId: id.value,
+      event
+    })
+  }
+}
+
+// visible
+
+const visible = computed(() => {
+  return state.connectionIsVisible && props.connection.labelIsVisible
+})
+const updateConnectionIsVisible = () => {
+  if (!props.connection.labelIsVisible) { return }
+  const connection = document.querySelector(`.connection-path[data-id="${id.value}"]`)
+  if (connection) {
+    updateConnectionRect()
+    state.connectionIsVisible = true
+  } else {
+    state.connectionIsVisible = false
+  }
+}
+watch(() => props.connection.labelIsVisible, (value, prevValue) => {
+  if (value) {
+    updateConnectionRect()
+    state.connectionIsVisible = true
+  } else {
+    store.dispatch('currentConnections/clearLabelPosition', props.connection)
+  }
+})
 
 // filter
 
@@ -111,32 +147,6 @@ const isFiltered = computed(() => {
   } else { return false }
 })
 
-// parent connection
-
-const id = computed(() => props.connection.id)
-const connectionDetailsIsVisible = computed(() => store.state.connectionDetailsIsVisibleForConnectionId === id.value)
-const updateConnectionIsVisible = () => {
-  const connection = document.querySelector(`.connection-path[data-id="${id.value}"]`)
-  if (connection) {
-    state.connectionIsVisible = true
-  } else {
-    state.connectionIsVisible = false
-  }
-}
-const toggleConnectionDetails = (event) => {
-  if (isMultiTouch) { return }
-  const isVisible = store.state.connectionDetailsIsVisibleForConnectionId === id.value
-  if (isVisible || wasDragged) {
-    wasDragged = false
-    store.commit('closeAllDialogs')
-  } else {
-    store.commit('triggerConnectionDetailsIsVisible', {
-      connectionId: id.value,
-      event
-    })
-  }
-}
-
 // parent connection type
 
 const connectionTypeId = computed(() => props.connection.connectionTypeId)
@@ -166,6 +176,7 @@ watch(() => path.value, (value, prevValue) => {
   updateConnectionRect()
 })
 const updateConnectionRect = () => {
+  if (!props.connection.labelIsVisible) { return }
   let element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
   if (!element) { return }
   const zoom = utils.spaceCounterZoomDecimal() || 1
@@ -194,8 +205,8 @@ const connectionLabelWrapStyles = computed(() => {
 
 const labelRelativePosition = computed(() => {
   return {
-    x: props.connection.labelRelativePositionX,
-    y: props.connection.labelRelativePositionY
+    x: props.connection.labelRelativePositionX || 0.5,
+    y: props.connection.labelRelativePositionY || 0.5
   }
 })
 const styles = computed(() => {
@@ -268,10 +279,12 @@ const startDragging = (event) => {
 }
 const stopDragging = () => {
   if (!canEditSpace.value) { return }
+  if (!state.isDragging) { return }
   state.isDragging = false
   state.outOfBounds = {}
   cursorStart = {}
   store.commit('broadcast/updateStore', { updates: { userId: store.state.currentUser.id }, type: 'removeRemoteUserDraggingConnectionLabel' })
+  if (!labelRelativePosition.value.x) { return }
   store.dispatch('history/add', { connections: [{
     id: props.connection.id,
     labelRelativePositionX: labelRelativePosition.value.x,

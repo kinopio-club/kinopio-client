@@ -20,7 +20,7 @@ let isLoadingRemoteSpace, shouldLoadNewHelloSpace
 
 const currentSpace = {
   namespaced: true,
-  state: newSpace,
+  state: utils.clone(newSpace),
   mutations: {
 
     restoreSpace: (state, space) => {
@@ -193,6 +193,16 @@ const currentSpace = {
         console.warn('🚑 createSpacePreviewImage', error)
       }
     },
+    updateInboxCache: async (context) => {
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const isOffline = !context.rootState.isOnline
+      if (context.state.name === 'inbox') { return }
+      if (!currentUserIsSignedIn) { return }
+      if (isOffline) { return }
+      console.log('🌍 updateInboxCache')
+      const inbox = await context.dispatch('api/getUserInboxSpace', null, { root: true })
+      cache.saveSpace(inbox)
+    },
 
     // Users
 
@@ -326,6 +336,7 @@ const currentSpace = {
     createNewHelloSpace: (context) => {
       const user = context.rootState.currentUser
       let space = utils.newHelloSpace(user)
+      space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       space.id = nanoid()
       space.collaboratorKey = nanoid()
       space.readOnlyKey = nanoid()
@@ -367,6 +378,7 @@ const currentSpace = {
         space.cards[1].x = space.cards[1].x + random(0, 20)
         space.cards[1].y = space.cards[1].y + random(0, 20)
       }
+      space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       space.userId = currentUser.id
       space = utils.newSpaceBackground(space, currentUser)
       space.background = space.background || consts.defaultSpaceBackground
@@ -377,7 +389,6 @@ const currentSpace = {
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
-      context.commit('triggerUpdateBackground', null, { root: true })
     },
     createNewJournalSpace: async (context) => {
       const isTomorrow = context.rootState.loadJournalSpaceTomorrow
@@ -394,13 +405,13 @@ const currentSpace = {
         options.dailyPrompt = currentUser.journalDailyPrompt
       }
       // create space
-      const space = utils.journalSpace(options)
+      let space = utils.journalSpace(options)
+      space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       context.commit('clearSearch', null, { root: true })
       context.commit('shouldResetDimensionsOnLoad', true, { root: true })
       isLoadingRemoteSpace = false
       // load space
       context.dispatch('restoreSpaceInChunks', { space })
-      context.commit('triggerUpdateBackground', null, { root: true })
     },
     createNewInboxSpace: (context, shouldCreateWithoutLoading) => {
       let space = utils.clone(inboxSpace)
@@ -410,8 +421,10 @@ const currentSpace = {
       space.userId = context.rootState.currentUser.id
       space.cards = space.cards.map(card => {
         card.id = nanoid()
+        card.userId = context.rootState.currentUser.id
         return card
       })
+      space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       if (shouldCreateWithoutLoading) {
         space.users = [context.rootState.currentUser]
         const nullCardUsers = true
@@ -421,7 +434,6 @@ const currentSpace = {
         context.commit('clearSearch', null, { root: true })
         isLoadingRemoteSpace = false
         context.dispatch('restoreSpaceInChunks', { space })
-        context.commit('triggerUpdateBackground', null, { root: true })
         nextTick(() => {
           context.dispatch('currentCards/updateDimensions', {}, { root: true })
         })
@@ -441,6 +453,7 @@ const currentSpace = {
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
       })
       context.dispatch('updateModulesSpaceId', space)
+      context.commit('isLoadingSpace', false, { root: true })
     },
     saveImportedSpace: async (context) => {
       context.commit('isLoadingSpace', true, { root: true })
@@ -454,7 +467,6 @@ const currentSpace = {
       }
       context.commit('triggerUpdateWindowHistory', space, { root: true })
       context.commit('addUserToSpace', user)
-      context.commit('triggerUpdateBackground', null, { root: true })
       context.dispatch('updateModulesSpaceId', space)
       nextTick(() => {
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
@@ -666,7 +678,6 @@ const currentSpace = {
       }
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('restoreSpace', space)
-      context.commit('triggerUpdateBackground', null, { root: true })
       // split into chunks
       const cardChunks = utils.splitArrayIntoChunks(cards, chunkSize)
       const connectionChunks = utils.splitArrayIntoChunks(connections, chunkSize)
@@ -758,12 +769,12 @@ const currentSpace = {
           })
         })
       })
-      context.commit('isLoadingSpace', false, { root: true })
+      context.dispatch('checkIfIsLoadingSpace', isRemote)
       // preview image
       if (!isRemote) { return }
       setTimeout(() => {
         context.dispatch('createSpacePreviewImage')
-      }, 3000)
+      }, 3000) // 3 seconds
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
       if (!context.rootState.isEmbedMode) {
@@ -795,7 +806,10 @@ const currentSpace = {
       let remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (!remoteSpace) { return }
       const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
-      if (spaceIsUnchanged) { return }
+      if (spaceIsUnchanged) {
+        context.commit('isLoadingSpace', false, { root: true })
+        return
+      }
       isLoadingRemoteSpace = true
       remoteSpace = utils.normalizeSpace(remoteSpace)
       // cards
@@ -962,6 +976,17 @@ const currentSpace = {
       }
       context.commit('shouldShowExploreOnLoad', false, { root: true })
     },
+    checkIfIsLoadingSpace: (context, isRemote) => {
+      const isOffline = !window.navigator.onLine
+      const currentSpaceIsRemote = context.rootGetters['currentSpace/isRemote']
+      if (isOffline) {
+        context.commit('isLoadingSpace', false, { root: true })
+      } else if (!currentSpaceIsRemote) {
+        context.commit('isLoadingSpace', false, { root: true })
+      } else if (currentSpaceIsRemote && isRemote) {
+        context.commit('isLoadingSpace', false, { root: true })
+      }
+    },
     checkIfShouldUpdateNewTweetCards: (context, space) => {
       if (!space.isFromTweet) { return }
       if (space.updateHash) { return }
@@ -1053,20 +1078,21 @@ const currentSpace = {
     },
     incrementCardsCreatedCountFromSpace (context, space) {
       const user = context.rootState.currentUser
-      const incrementCardsCreatedCountBy = space.cards.filter(card => {
+      space.cards = space.cards.filter(card => {
         return card.userId === user.id
-      }).length
+      })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: incrementCardsCreatedCountBy
+        cards: space.cards
       }, { root: true })
     },
     decrementCardsCreatedCountFromSpace (context, space) {
       const user = context.rootState.currentUser
-      const decrementCardsCreatedCountBy = space.cards.filter(card => {
+      space.cards = space.cards.filter(card => {
         return card.userId === user.id
-      }).length
+      })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: -decrementCardsCreatedCountBy
+        cards: space.cards,
+        shouldDecrement: true
       }, { root: true })
     },
 
@@ -1165,6 +1191,13 @@ const currentSpace = {
       const boxColors = rootGetters['currentBoxes/colors']
       const colors = cardColors.concat(boxColors)
       return uniq(colors)
+    },
+    isUnavailableOffline: (state, getters, rootState, rootGetters) => {
+      const spaceId = rootState.currentSpace.id
+      const isOffline = !rootState.isOnline
+      const isNotCached = rootGetters['spaceIsNotCached'](spaceId)
+      const currentSpaceIsRemote = getters.isRemote
+      return isOffline && isNotCached && currentSpaceIsRemote
     },
 
     // tags

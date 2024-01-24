@@ -351,22 +351,33 @@ export default {
       const typeIds = uniq(state.typeIds)
       return typeIds.map(id => state.types[id])
     },
-    byCardId: (state, getters) => (cardId) => {
-      const connections = getters.all
-      return connections.filter(connection => {
+    byCardId: (state, getters, rootState, rootGetters) => (cardId) => {
+      let connections = getters.all
+      connections = connections.filter(connection => {
         let start = connection.startCardId === cardId
         let end = connection.endCardId === cardId
         return start || end
       })
+      connections = getters.connectionsWithValidCards(connections)
+      return connections
     },
-    typesByCardId: (state, getters) => (cardId) => {
-      const connections = getters.byCardId(cardId)
+    typesByCardId: (state, getters, rootState, rootGetters) => (cardId) => {
+      let connections = getters.byCardId(cardId)
       let types = getters.allTypes
       types = types.filter(type => Boolean(type))
+      connections = getters.connectionsWithValidCards(connections)
       const typeIds = connections.map(connection => connection.connectionTypeId)
       return types.filter(type => {
         return typeIds.includes(type.id)
       })
+    },
+    connectionsWithValidCards: (state, getters, rootState, rootGetters) => (connections) => {
+      connections = connections.filter(connection => {
+        const startCard = rootGetters['currentCards/byId'](connection.startCardId)
+        const endCard = rootGetters['currentCards/byId'](connection.endCardId)
+        return startCard && endCard
+      })
+      return connections
     },
     typeForNewConnections: (state, getters, rootState, rootGetters) => {
       const userId = rootState.currentUser.id

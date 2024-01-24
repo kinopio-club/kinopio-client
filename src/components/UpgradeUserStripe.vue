@@ -139,7 +139,7 @@ const subscribe = async () => {
   //- credits
   .row(v-if="state.loading.credits || state.credits")
     Loader(:visible="state.loading.credits")
-    .badge.success(v-if="state.credits")
+    .badge.success(v-if="state.credits && !isLifetimePlan")
       span ${{state.credits}} credit
   template(v-if="state.credits")
     p(v-if="isLifetimePlan")

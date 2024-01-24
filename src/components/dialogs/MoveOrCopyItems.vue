@@ -199,8 +199,7 @@ export default {
         this.$store.dispatch('history/add', items)
       } else {
         this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-          delta: items.cards.length,
-          shouldIncrement: true
+          cards: items.cards
         })
       }
       this.$store.dispatch('currentConnections/removeUnusedTypes')

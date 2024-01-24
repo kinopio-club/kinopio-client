@@ -320,6 +320,18 @@ export default {
     })
   },
 
+  // Add Page
+
+  prevAddPageValue () {
+    return window.localStorage['prevAddPageValue'] || ''
+  },
+  updatePrevAddPageValue (value) {
+    this.storeLocal(`prevAddPageValue`, value)
+  },
+  clearPrevAddPageValue (value) {
+    this.storeLocal(`prevAddPageValue`, '')
+  },
+
   // API Queue
 
   queue () {

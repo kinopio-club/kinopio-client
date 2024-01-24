@@ -149,13 +149,15 @@ export default {
       const isDarkTheme = getters.isThemeDark
       let background = rootState.currentSpace.background
       let backgroundTint = rootState.currentSpace.backgroundTint
-      if (background) {
-        let domBackground = document.querySelector('.space-background-image').style.backgroundImage
+      const backgroundElement = document.querySelector('.space-background-image')
+      const backgroundTintElement = document.querySelector('.space-background-tint')
+      if (background && backgroundElement) {
+        let domBackground = backgroundElement.style.backgroundImage
         domBackground = utils.urlFromCSSBackgroundImage(domBackground)
         background = domBackground || background
       }
-      if (isDarkTheme) {
-        const domBackgroundTint = document.querySelector('.space-background-tint').style.backgroundColor
+      if (isDarkTheme && backgroundTintElement) {
+        const domBackgroundTint = backgroundTintElement.style.backgroundColor
         backgroundTint = domBackgroundTint || backgroundTint
       }
       const themeColors = getters.themeColors

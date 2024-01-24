@@ -7,7 +7,6 @@ dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height'
         button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
           span RSS
         ExploreRssFeed(:visible="exploreRssFeedIsVisible")
-
     p(v-if="loading")
       Loader(:visible="loading")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
@@ -23,10 +22,10 @@ dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height'
 </template>
 
 <script>
-import Loader from '@/components/Loader.vue'
-import utils from '@/utils.js'
 import SpaceList from '@/components/SpaceList.vue'
 import ExploreRssFeed from '@/components/dialogs/ExploreRssFeed.vue'
+import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'Explore',
@@ -144,6 +143,7 @@ export default {
 dialog.explore
   left initial
   right 8px
+  overflow auto
   .community
     .badge
       display flex

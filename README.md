@@ -49,15 +49,27 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 | `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
 | `components/layers/MagicPaint.vue` | The layers used for animating painting, scroll locking on touch, and more with `<canvas>`. As well as for multiple card and connection selection which reveals `MultipleSelectedActions` |
 
+## User States to Design For
+
+| State | Description |
+| ------------- |-------------|
+| `offline` | localstorage and API queue operations only |
+| `not signed in` | localstorage only |
+| `space is read only` | cannot add cards or edit |
+| `space is open` | can add cards, can only edit cards they created |
+| `mobile` | touch handlers, no hover, small screen |
+| `desktop zoom out` | using the zoom bar or cmd+/- |
+| `pinch zoom out/in` | using native touch gesture on mobile |
+
 ## Post Messages
 
 Post messages are used to communicate with a parent `secureAppContext` environment, such as the iOS app that wraps the website in a child webview.
 
-## How to update the Hello Kinopio Space
+## How to update the 'Hello Kinopio' Space
 
 The hello space serves as the entry point and marketing page for new users. It's generated within the app from `hello.json`.
 
-To update it, create the space and export it's json. Replace `hello.json` with the exported new json. 
+To update it, create the space and export its json. Replace the contents of`hello.json` with the new json file.
 
 ## HTTPS Signing
 

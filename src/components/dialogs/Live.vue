@@ -1,10 +1,10 @@
 <template lang="pug">
 dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-      p
-        img.icon.camera(src="@/assets/camera.svg")
-        span Live Public Spaces
-        Loader(:visible="loading")
+    p
+      img.icon.camera(src="@/assets/camera.svg")
+      span Live Public Spaces
+      Loader(:visible="loading")
   section.results-section(v-if="spaces.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(
       :spaces="spaces"
@@ -48,6 +48,8 @@ export default {
       dialogHeight: null,
       resultsSectionHeight: null
     }
+  },
+  computed: {
   },
   methods: {
     changeSpace (space) {

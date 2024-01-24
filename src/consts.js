@@ -18,7 +18,7 @@ export default {
   iframelyApiKey: '0788beaa34f65adc0fe7ac',
   rootUserId: 'euGhpBrR9eBcjKnK16C_g',
   sidebarWidth: 250,
-  systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Download Apps and Extensions' },
+  systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Apps and Extensions' },
   isDevelopment: import.meta.env.MODE === 'development',
   isSecureAppContextIOS: navigator.isSecureAppContextIOS, // true = iOS app
   isSecureAppContext: navigator.isSecureAppContext, // true = iOS app

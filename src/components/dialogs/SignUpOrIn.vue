@@ -191,11 +191,19 @@ export default {
       }
     },
 
+    checkUserAttributes () {
+      const appleToken = this.$store.state.currentUser.appleAppAccountToken
+      if (!appleToken) {
+        this.$store.commit('currentUser/updateAppleAppAccountToken')
+      }
+    },
+
     async signUp (event) {
       if (this.loading.signUpOrIn) { return }
       const email = event.target[0].value.toLowerCase()
       const password = event.target[1].value
       const confirmPassword = event.target[2].value
+      this.checkUserAttributes()
       let currentUser = utils.clone(this.$store.state.currentUser)
       if (!this.isPasswordMatchesEmail(email, password)) { return }
       if (!this.isSignUpPasswordTooShort(password)) { return }

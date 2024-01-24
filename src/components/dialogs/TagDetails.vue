@@ -347,7 +347,6 @@ export default {
     },
     closeDialogs () {
       this.colorPickerIsVisible = false
-      this.$store.commit('cardListItemOptionsIsVisible', false)
     },
     updateCardsWithTagColor (name, newColor) {
       const cards = this.cards.map(card => {

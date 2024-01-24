@@ -55,7 +55,6 @@ dialog.narrow.multiple-selected-actions(
       //- Remove
       button.danger(:disabled="!canEditAll.all" @click.left="remove")
         img.icon(src="@/assets/remove.svg")
-        span Remove
       //- Merge
       button(v-if="multipleCardsIsSelected" @click="mergeSelectedCards" :disabled="!canEditAll.cards")
         img.icon(src="@/assets/merge.svg")
@@ -337,8 +336,15 @@ export default {
     mergeSelectedCards () {
       let name = ''
       const cards = this.cardsSortedByY()
+      const urlPreview = {}
       cards.forEach(card => {
         name = `${name}\n\n${card.name.trim()}`
+
+        Object.keys(card).forEach(key => {
+          if (key.startsWith('urlPreview') && card[key] && !urlPreview[key]) {
+            urlPreview[key] = card[key]
+          }
+        })
       })
       name = name.trim()
       let newNames = []
@@ -375,7 +381,8 @@ export default {
           id: nanoid(),
           name: newName,
           x: position.x,
-          y: position.y
+          y: position.y,
+          ...urlPreview
         }
         newCards.push(newCard)
       })

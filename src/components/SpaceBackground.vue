@@ -12,18 +12,6 @@ import { colord, extend } from 'colord'
 
 const store = useStore()
 
-onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUpdateBackground') {
-      updateBackground()
-    } else if (mutation.type === 'triggerUpdateTheme') {
-      updateBackground()
-    } else if (mutation.type === 'isLoadingSpace') {
-      updateBackground()
-    }
-  })
-})
-
 const visible = computed(() => store.getters.isSpacePage)
 const spaceShouldHaveBorderRadius = computed(() => store.getters.spaceShouldHaveBorderRadius)
 const isSecureAppContext = computed(() => consts.isSecureAppContext)
@@ -40,21 +28,21 @@ const backgroundIsDefault = computed(() => !currentSpace.value.background)
 
 const backgroundStyles = computed(() => {
   if (!isSpacePage.value) { return }
-  let size = store.state.spaceBackgroundSize
-  if (size) {
-    size = `${size.width}px ${size.height}px`
-  } else {
-    size = 'initial'
+  const url = backgroundUrl.value
+  if (!url) { return }
+  const isRetina = url.includes('-2x.') || url.includes('@2x.')
+  let backgroundImage = `url('${url}')`
+  if (isRetina) {
+    backgroundImage = `image-set(${backgroundImage} 2x)`
   }
   const styles = {
-    backgroundImage: `url('${store.state.spaceBackgroundUrl}')`,
-    backgroundSize: size,
+    backgroundImage,
     transform: store.getters.zoomTransform
   }
   return styles
 })
 
-// Image
+// Image Url
 
 const kinopioBackgroundImageData = computed(() => {
   const data = backgroundImages.find(item => {
@@ -83,59 +71,20 @@ const backgroundUrl = computed(() => {
 const backgroundTint = computed(() => {
   let color = currentSpace.value.backgroundTint || 'white'
   let darkness = 0
-  if (shouldDarkenTint.value) {
+  const colorIsDark = utils.colorIsDark(color, 0.2)
+  if (shouldDarkenTint.value && colorIsDark) {
     darkness = 0.5
   }
   color = colord(color).darken(darkness).toRgbString()
   postMessage.send({ name: 'setBackgroundTintColor', value: color })
   return color
 })
+const isNoBackgroundTint = computed(() => {
+  const color = currentSpace.value.backgroundTint
+  return !color || color === 'rgb(255, 255, 255)' || color === 'white'
+})
 const shouldDarkenTint = computed(() => isThemeDark.value && !spaceBackgroundTintIsDark.value)
 const spaceBackgroundTintIsDark = computed(() => utils.colorIsDark(backgroundTint.value))
-
-// Update State
-
-const updateBackground = async () => {
-  if (currentSpace.value.backgroundIsGradient) {
-    return
-  }
-  const background = backgroundUrl.value
-  if (!utils.urlIsImage(background)) {
-    store.commit('spaceBackgroundUrl', null)
-    return
-  }
-  try {
-    const image = await utils.loadImage(background)
-    if (image) {
-      store.commit('spaceBackgroundUrl', background)
-      updateBackgroundSize()
-    }
-  } catch (error) {
-    if (background) {
-      console.warn('🚑 updateBackground', background, error)
-    }
-  }
-}
-const updateBackgroundSize = () => {
-  let backgroundImage = store.state.spaceBackgroundUrl
-  backgroundImage = utils.urlFromCSSBackgroundImage(backgroundImage)
-  let image = new Image()
-  image.src = backgroundImage
-  const isRetina = backgroundImage.includes('-2x.') || backgroundImage.includes('@2x.')
-  let width = image.width
-  let height = image.height
-  if (isRetina) {
-    width = width / 2
-    height = height / 2
-  }
-  if (width === 0 || height === 0) {
-    store.commit('spaceBackgroundSize', null)
-    return
-  }
-  width = Math.round(width)
-  height = Math.round(height)
-  store.commit('spaceBackgroundSize', { width, height })
-}
 
 // Background Gradient
 
@@ -152,6 +101,7 @@ template(v-if="currentSpace.backgroundIsGradient")
 template(v-else)
   .space-background-image(:style="backgroundStyles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
 .space-background-tint(v-if="visible" :style="{ background: backgroundTint }" :class="{'space-border-radius': spaceShouldHaveBorderRadius && isSecureAppContext}")
+.space-background-tint.dark-tint(v-if="visible && isThemeDark && isNoBackgroundTint")
 </template>
 
 <style lang="stylus">
@@ -172,4 +122,7 @@ template(v-else)
   z-index 0
   mix-blend-mode multiply
   transform-origin top left
+  &.dark-tint
+    background-color black
+    opacity 0.6
 </style>

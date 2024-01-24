@@ -63,6 +63,7 @@ article.card-wrap#card(
         @mousedown.left.stop="startResizing"
         @touchstart.stop="startResizing"
         @dblclick="removeResize"
+        title="Drag to Resize"
       )
         button.inline-button.resize-button(tabindex="-1" :class="{hidden: isPresentationMode}")
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
@@ -108,7 +109,7 @@ article.card-wrap#card(
               img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
           //- Url →
-          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible, 'is-hidden-by-opacity': isPresentationMode}" target="_blank")
+          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}" target="_blank")
             .url.inline-button-wrap
               button.inline-button(:style="{background: itemBackground}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -303,17 +304,7 @@ export default {
       this.$store.commit('preventCardDetailsOpeningAnimation', false)
       this.$store.dispatch('currentCards/showCardDetails', this.card.id)
     }
-    if (this.card.shouldUpdateUrlPreview) {
-      this.updateMediaUrls()
-      const isUpdatedSuccess = await this.updateUrlPreview()
-      this.$store.dispatch('currentCards/update', {
-        id: this.card.id,
-        shouldUpdateUrlPreview: false
-      })
-      if (isUpdatedSuccess) {
-        this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
-      }
-    }
+    await this.updateUrlPreviewOnload()
     this.updateCardDimensions()
     this.checkIfShouldUpdatePreviewHtml()
     const defaultCardMaxWidth = this.$store.getters['currentCards/defaultCardMaxWidth'] + 'px'
@@ -576,7 +567,6 @@ export default {
       return this.isLocked || (this.cardButtonUrl && !this.isComment) || this.connectorIsVisible
     },
     connectorIsVisible () {
-      if (this.isPresentationMode && !this.hasConnections) { return }
       const spaceIsOpen = this.currentSpace.privacy === 'open' && this['currentUser/isSignedIn']
       let isVisible
       if (this.isRemoteConnecting) {
@@ -718,7 +708,6 @@ export default {
     },
     connectorGlowStyle () {
       if (this.currentUserIsDraggingCard) { return }
-      if (!this.currentUserIsDraggingLabelConnectedToCard) { return }
       const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor || this.currentUserIsHoveringOverCardIdColor || this.currentUserIsMultipleSelectedCardIdColor || this.currentUserIsHoveringOverConnectionIdColor || this.currentUserIsMultipleSelectedConnectionIdColor
       if (!color) { return }
       return { background: color }
@@ -1206,6 +1195,7 @@ export default {
         let connections = this['currentConnections/all']
         connections = connections.filter(connection => connection.startCardId === cardId || connection.endCardId === cardId)
         connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
+        connections = this.$store.getters['currentConnections/connectionsWithValidCards'](connections)
         const connection = connections[0]
         if (!connection) { return }
         const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
@@ -1743,6 +1733,7 @@ export default {
     },
     showCardDetails (event) {
       this.$store.dispatch('currentCards/afterMove')
+      if (this.cardDetailsIsVisibleForCardId) { return }
       if (this.isLocked) { return }
       if (this.currentUserIsPainting) { return }
       if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return }
@@ -2042,9 +2033,31 @@ export default {
 
     // url preview
 
-    async updateUrlPreview () {
+    async updateUrlPreviewOnload () {
+      if (!this.card.shouldUpdateUrlPreview) { return }
+      this.updateMediaUrls()
+      const isUpdatedSuccess = await this.updateUrlPreview()
+      this.$store.dispatch('currentCards/update', {
+        id: this.card.id,
+        shouldUpdateUrlPreview: false
+      })
+      if (isUpdatedSuccess) {
+        this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
+      }
+    },
+    updateUrlPreview () {
+      const isOffline = !this.$store.state.isOnline
       if (this.preventUpdatePrevPreview) { return }
-      // if (!this.canEditCard) { return }
+      if (isOffline) {
+        this.$store.dispatch('currentCards/update', {
+          id: this.card.id,
+          shouldUpdateUrlPreview: true
+        })
+      } else {
+        this.updateUrlPreviewOnline()
+      }
+    },
+    async updateUrlPreviewOnline () {
       this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
       const cardId = this.card.id
       let url = this.webUrl
@@ -2083,6 +2096,7 @@ export default {
       this.updateUrlPreview()
     },
     shouldUpdateUrlPreview (url) {
+      if (this.card.shouldUpdateUrlPreview) { return true }
       const previewIsVisible = this.card.urlPreviewIsVisible
       const isNotPreviewUrl = url !== this.card.urlPreviewUrl
       const isNotErrorUrl = url !== this.card.urlPreviewErrorUrl

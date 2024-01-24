@@ -1,13 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import postMessage from '@/postMessage.js'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
+const store = useStore()
 
 onMounted(() => {
   window.addEventListener('message', handleSubscriptionSuccess) // iOS IAP subscription sheet transaction completes
@@ -100,10 +100,10 @@ const handleSubscriptionSuccess = (event) => {
 
 <template lang="pug">
 .upgrade-user-apple(v-if="visible")
-  .row(v-if="state.creditsEarned")
-    .badge.info
-      span You have ${{state.creditsEarned}} in referral credits. To redeem credits you'll need to upgrade kinopio on the {{' '}}
-      a(href="consts.kinopioDomain") web
+  //- .row(v-if="state.creditsEarned")
+  //-   .badge.info
+  //-     span You have ${{state.creditsEarned}} in referral credits. To redeem credits you'll need to upgrade kinopio on the {{' '}}
+  //-     a(href="consts.kinopioDomain") web
   .row(v-if='!isUpgraded')
     button(@click.left="subscribe" :class="{active : state.loading.subscriptionIsBeingCreated}")
       User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")

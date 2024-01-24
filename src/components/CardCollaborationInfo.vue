@@ -13,6 +13,8 @@
     //- created through api
     .badge.status.system-badge(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
+  .badge.info(v-if="card.counterIsVisible")
+    span {{card.counterValue || 0}}
 
 </template>
 

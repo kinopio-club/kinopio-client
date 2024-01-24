@@ -1,73 +1,53 @@
-<template lang="pug">
-dialog.narrow.offline(v-if="visible" :open="visible" ref="dialog" :class="{'right-side': showOnRightSide}")
-  section
-    p Offline
-  section(v-if="currentUserIsSignedIn")
-    p Kinopio works offline,
-    p Your changes will be saved locally, and synced up once you're back online. It's pretty chill.
-    p
-      span.badge.info {{queue.length}} {{pluralChanges}} to sync
-  section(v-else)
-    p Kinopio works offline,
-    p Your changes are saved locally. It's pretty chill.
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
 
-</template>
-
-<script>
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+const store = useStore()
 
-export default {
-  name: 'Offline',
-  props: {
-    visible: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.checkIfShouldBeOnRightSide()
-      }
-    })
-  },
-  data () {
-    return {
-      queue: [],
-      showOnRightSide: false
-    }
-  },
-  computed: {
-    pluralChanges () {
-      const condition = this.queue.length !== 1
-      return utils.pluralize('change', condition)
-    },
-    currentUserIsSignedIn () {
-      return Boolean(this.$store.getters['currentUser/isSignedIn'])
-    }
-  },
-  methods: {
-    checkIfShouldBeOnRightSide () {
-      this.showOnRightSide = false
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.showOnRightSide = utils.elementShouldBeOnRightSide(element)
-      })
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.queue = cache.queue()
-        this.checkIfShouldBeOnRightSide()
-      }
-    }
+const dialogElement = ref(null)
+
+const props = defineProps({
+  visible: Boolean
+})
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    state.queue = cache.queue()
   }
-}
+})
+
+const state = reactive({
+  queue: []
+})
+
+const currentUserIsSignedIn = computed(() => {
+  return Boolean(store.getters['currentUser/isSignedIn'])
+})
+const pluralChanges = computed(() => {
+  const condition = state.queue.length !== 1
+  return utils.pluralize('change', condition)
+})
 </script>
 
+<template lang="pug">
+dialog.narrow.offline(v-if="visible" :open="visible" ref="dialogElement")
+  section
+    p Offline
+  section
+    .row
+      p Kinopio works offline
+    section.subsection(v-if="currentUserIsSignedIn")
+      p Your changes are saved locally, and will sync up when you're back online
+      p
+        span.badge.info
+          img.icon.offline(src="@/assets/offline.svg")
+          span {{state.queue.length}} {{pluralChanges}} to sync
+    section.subsection(v-else)
+      p Your changes are saved locally
+</template>
+
 <style lang="stylus" scoped>
-.offline
-  &.right-side
-    left initial
-    right 8px
+dialog.offline
+  width 200px
 </style>

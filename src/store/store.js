@@ -51,6 +51,7 @@ const store = createStore({
     isPresentationMode: false,
     pricingIsVisible: false,
     userSettingsIsVisible: false,
+    offlineIsVisible: false,
     isFadingOutDuringTouch: false,
     prevSpaceIdInSession: '',
     outsideSpaceBackgroundColor: '',
@@ -239,11 +240,6 @@ const store = createStore({
     filteredTagNames: [],
     spaceListFilterInfo: {},
 
-    // card list item options
-    cardListItemOptionsPosition: {}, // x, y
-    cardListItemOptionsCard: {},
-    cardListItemOptionsIsVisible: false,
-
     // session data
     otherUsers: [], // { id, name color }
     otherItems: { spaces: [], cards: [] },
@@ -253,11 +249,8 @@ const store = createStore({
 
     codeLanguagePickerIsVisible: false,
     codeLanguagePickerPosition: {}, // x, y
-    codeLanguagePickerCardId: '',
+    codeLanguagePickerCardId: ''
 
-    // space background
-    spaceBackgroundUrl: '',
-    spaceBackgroundSize: null // { width, height }
   },
   mutations: {
     resetPageSizes: (state) => {
@@ -313,9 +306,9 @@ const store = createStore({
       state.cardsWereDragged = false
       state.boxesWereDragged = false
       state.userDetailsIsVisible = false
-      state.cardListItemOptionsIsVisible = false
       state.pricingIsVisible = false
       state.codeLanguagePickerIsVisible = false
+      state.offlineIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -465,6 +458,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.userSettingsIsVisible = value
     },
+    offlineIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.offlineIsVisible = value
+    },
     isFadingOutDuringTouch: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.isFadingOutDuringTouch = value
@@ -565,7 +562,6 @@ const store = createStore({
     triggerClearAllSpaceFilters: () => {},
     triggerScrollUserDetailsIntoView: () => {},
     triggerUpdateLockedItemButtonsPositions: () => {},
-    triggerUpdateBackground: () => {},
     triggerCenterZoomOrigin: () => {},
     triggerRemoveCardFromCardList: (state, card) => {},
     triggerUpdateTheme: () => {},
@@ -580,7 +576,9 @@ const store = createStore({
     triggerUpdateCardDetailsCardName: (state, options) => {},
     triggerCloseChildDialogs: () => {},
     triggerAddSpaceIsVisible: () => {},
+    triggerOfflineIsVisible: () => {},
     triggerAppsAndExtensionsIsVisible: () => {},
+    triggerUpdateWindowTitle: () => {},
 
     // Used by extensions only
 
@@ -1437,20 +1435,6 @@ const store = createStore({
       state.spaceListFilterInfo = value
     },
 
-    // Card List Item Options
-    cardListItemOptionsPosition: (state, value) => {
-      utils.typeCheck({ value, type: 'object' })
-      state.cardListItemOptionsPosition = value
-    },
-    cardListItemOptionsCard: (state, value) => {
-      utils.typeCheck({ value, type: 'object' })
-      state.cardListItemOptionsCard = value
-    },
-    cardListItemOptionsIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.cardListItemOptionsIsVisible = value
-    },
-
     // Session Data
 
     updateOtherUsers: (state, updatedUser) => {
@@ -1506,17 +1490,6 @@ const store = createStore({
     codeLanguagePickerCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.codeLanguagePickerCardId = cardId
-    },
-
-    // Space Background
-
-    spaceBackgroundUrl: (state, imageUrl) => {
-      utils.typeCheck({ value: imageUrl, type: 'string', allowUndefined: true })
-      state.spaceBackgroundUrl = imageUrl
-    },
-    spaceBackgroundSize: (state, value) => {
-      utils.typeCheck({ value, type: 'object', allowUndefined: true })
-      state.spaceBackgroundSize = value
     }
 
   },
@@ -1795,6 +1768,10 @@ const store = createStore({
       } else {
         return getters.otherSpaceById(spaceId)
       }
+    },
+    spaceIsNotCached: (state) => (spaceId) => {
+      const spaceCardsCount = cache.space(spaceId).cards?.length
+      return Boolean(!spaceCardsCount)
     },
     spaceZoomDecimal: (state) => {
       return state.spaceZoomPercent / 100

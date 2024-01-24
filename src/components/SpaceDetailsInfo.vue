@@ -73,7 +73,7 @@ template(v-if="settingsIsVisible")
       .button-wrap
         button(@click.left="duplicateSpace")
           img.icon.add(src="@/assets/add.svg")
-          span Make a Copy
+          span Duplicate
       //- Export
       .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
@@ -98,7 +98,7 @@ template(v-if="settingsIsVisible")
       .button-wrap
         button(@click.left="duplicateSpace")
           img.icon.add(src="@/assets/add.svg")
-          span Make a Copy
+          span Duplicate
     .row
       .button-wrap(v-if="isSpaceMember")
         .segmented-buttons
@@ -129,7 +129,7 @@ import cache from '@/cache.js'
 
 export default {
   name: 'SpaceDetailsInfo',
-  emits: ['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace'],
+  emits: ['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace', 'removeSpaceId'],
   components: {
     BackgroundPicker,
     BackgroundPreview,
@@ -195,6 +195,7 @@ export default {
         this.textareaSize()
         this.$store.dispatch('currentSpace/updateSpace', { name: newName })
         this.updateLocalSpaces()
+        this.$store.commit('triggerUpdateWindowTitle')
       }
     },
     currentSpace () { return this.$store.state.currentSpace },
@@ -263,8 +264,11 @@ export default {
         this.$store.dispatch('currentSpace/removeCurrentSpace')
         this.$store.commit('notifyCurrentSpaceIsNowRemoved', true)
       }
-      this.updateLocalSpaces()
+      this.$emit('removeSpaceId', currentSpaceId)
       this.changeToPrevSpace()
+      this.$nextTick(() => {
+        this.updateLocalSpaces()
+      })
     },
     changeToPrevSpace () {
       let spaces = cache.getAllSpaces().filter(space => {

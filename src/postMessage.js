@@ -7,6 +7,11 @@ let showDebugMessages = false
 
 window.addEventListener('message', (event) => {
   console.log('🛫 received postmessage', event)
+  const isAddPage = window.location.pathname === '/add'
+  if (isAddPage) {
+    cache.updatePrevAddPageValue(event.data)
+    console.log('🛫 cache.updatePrevAddPageValue', event.data)
+  }
 })
 
 const debouncedSendHaptics = debounce((body) => {

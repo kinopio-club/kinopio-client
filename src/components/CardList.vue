@@ -2,23 +2,31 @@
 span
   ul.results-list.card-list(ref="resultsList")
     template(v-for="card in normalizedCards")
-      li(@click.stop="selectCard($event, card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
+      li(@click.stop="selectCard(card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
+        //- date
         span.badge.status.inline-badge
           img.icon.time(src="@/assets/time.svg")
           span {{ relativeDate(card) }}
+        //- user
         UserLabelInline(v-if="userIsNotCurrentUser(card.user.id)" :user="card.user")
-        span.card-info
+        //- name
+        span.card-info(:class="{badge: card.backgroundColor}" :style="{backgroundColor: card.backgroundColor}")
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")
+            img.card-image(v-if="urlPreviewImage(card)" :src="urlPreviewImage(card)")
             NameSegment(:segment="segment" :search="search" :isStrikeThrough="isStrikeThrough(card)")
-        //- button.small-button.secondary-action(v-if="secondaryActionLabel" @click.stop="secondaryAction")
-        //-   img.icon.visit(src="@/assets/visit.svg")
-        //-   span {{secondaryActionLabel}}
+          //- remove
+          button.small-button.remove-button.danger(v-if="cardsShowRemoveButton" @click.left.stop="removeCard(card)")
+            img.icon(src="@/assets/remove.svg")
+          //- loading
+          Loader(:visible="card.isLoading")
+
 </template>
 
 <script>
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -28,14 +36,13 @@ export default {
   name: 'ComponentName',
   components: {
     UserLabelInline,
-    NameSegment
+    NameSegment,
+    Loader
   },
   props: {
     cards: Array,
     search: String,
-    // secondaryActionLabel: String,
-    primaryActionIsCardListOptions: Boolean
-    // cardListItemOptionsPositionShouldBeOnLeftSide: Boolean
+    cardsShowRemoveButton: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -54,8 +61,7 @@ export default {
     ...mapState([
       'cardDetailsIsVisibleForCardId',
       'previousResultItem',
-      'currentUser',
-      'cardListItemOptionsCard'
+      'currentUser'
     ]),
     ...mapGetters([
     ]),
@@ -77,35 +83,19 @@ export default {
     }
   },
   methods: {
-    selectCard (event, card) {
-      this.$emit('selectCard', card)
-      if (this.cardListItemOptionsCard.id === card.id) {
-        this.$store.commit('cardListItemOptionsCard', '')
-        this.$store.commit('cardListItemOptionsIsVisible', false)
-        return
-      }
-      if (this.primaryActionIsCardListOptions) {
-        const element = event.target.closest('li')
-        const rect = element.getBoundingClientRect()
-        let position = utils.childDialogPositionFromParent({
-          element: event.target,
-          shouldIgnoreZoom: true,
-          offsetX: rect.width - 25,
-          offsetY: -rect.height + 12,
-          maxYOffset: 170
-        })
-        this.$store.commit('cardListItemOptionsPosition', position)
-        this.$store.commit('cardListItemOptionsCard', card)
-        this.$store.commit('cardListItemOptionsIsVisible', true)
-      }
+    urlPreviewImage (card) {
+      if (!card.urlPreviewIsVisible) { return }
+      return card.urlPreviewImage
     },
-    // secondaryAction (card) {
-    //   this.$emit('secondaryAction', card)
-    // },
+    selectCard (card) {
+      this.$emit('selectCard', card)
+    },
+    removeCard (card) {
+      this.$emit('removeCard', card)
+    },
     cardIsActive (card) {
-      const isActive = this.cardListItemOptionsCard.id === card.id
       const isCardDetailsVisible = this.cardDetailsIsVisibleForCardId === card.id
-      return isActive || isCardDetailsVisible
+      return isCardDetailsVisible || card.isLoading
     },
     cardIsFocused (card) {
       return this.previousResultItem.id === card.id
@@ -145,10 +135,16 @@ export default {
     height 11px
   .inline-badge
     display inline-block
-  .secondary-action
+  .remove-button
+    position absolute
+    top 7px
+    right 4px
+    .icon
+      vertical-align 0
+  .loader
     position absolute
     top 6px
-    right 6px
-  .icon.visit
-    vertical-align 1px
+    left 8px
+  .card-info.badge
+    position initial
 </style>
