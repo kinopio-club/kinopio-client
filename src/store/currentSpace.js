@@ -5,6 +5,7 @@ import words from '@/data/words.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
+import postMessage from '@/postMessage.js'
 
 import { nextTick } from 'vue'
 import randomColor from 'randomcolor'
@@ -727,6 +728,7 @@ const currentSpace = {
     },
     restoreSpaceComplete: (context, { space, isRemote, timeStart }) => {
       context.dispatch('history/reset', null, { root: true })
+      postMessage.send({ name: 'restoreSpaceComplete', value: true })
       const timeEnd = utils.normalizeToUnixTime(new Date())
       let emoji = '🌳'
       if (isRemote) {
