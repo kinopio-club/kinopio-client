@@ -790,19 +790,18 @@ const currentSpace = {
       Promise.all([
         context.dispatch('restoreSpaceLocal', space),
         context.dispatch('getRemoteSpace', space)
-      ])
-      // restore remote space
-        .then((data) => {
-          let remoteSpace = data[1]
-          console.log('🎑 remoteSpace', remoteSpace)
-          if (!remoteSpace) { return }
-          const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
-          if (spaceIsUnchanged) {
-            context.commit('isLoadingSpace', false, { root: true })
-            return
-          }
-          context.dispatch('restoreSpaceRemote', remoteSpace)
-        })
+      ]).then((data) => {
+        // restore remote space
+        let remoteSpace = data[1]
+        console.log('🎑 remoteSpace', remoteSpace)
+        if (!remoteSpace) { return }
+        const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
+        if (spaceIsUnchanged) {
+          context.commit('isLoadingSpace', false, { root: true })
+          return
+        }
+        context.dispatch('restoreSpaceRemote', remoteSpace)
+      })
         .catch(error => {
           console.error('🚒 Error fetching remoteSpace', error)
         })
