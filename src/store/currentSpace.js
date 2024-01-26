@@ -5,6 +5,7 @@ import words from '@/data/words.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
+import postMessage from '@/postMessage.js'
 
 import { nextTick } from 'vue'
 import randomColor from 'randomcolor'
@@ -727,6 +728,7 @@ const currentSpace = {
     },
     restoreSpaceComplete: (context, { space, isRemote, timeStart }) => {
       context.dispatch('history/reset', null, { root: true })
+      postMessage.send({ name: 'restoreSpaceComplete', value: true })
       const timeEnd = utils.normalizeToUnixTime(new Date())
       let emoji = '🌳'
       if (isRemote) {
@@ -782,11 +784,32 @@ const currentSpace = {
       }
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('isAddPage', false, { root: true })
-      const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id) || space
-      const user = context.rootState.currentUser
       cachedSpace.id = cachedSpace.id || space.id
-      // clear state
+      space = utils.normalizeSpace(cachedSpace)
+      context.dispatch('clearStateMeta')
+      // load local space while fetching remote space
+      Promise.all([
+        context.dispatch('restoreSpaceLocal', space),
+        context.dispatch('getRemoteSpace', space)
+      ]).then((data) => {
+        // restore remote space
+        let remoteSpace = data[1]
+        console.log('🎑 remoteSpace', remoteSpace)
+        if (!remoteSpace) { return }
+        const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
+        if (spaceIsUnchanged) {
+          context.commit('isLoadingSpace', false, { root: true })
+          return
+        }
+        context.dispatch('restoreSpaceRemote', remoteSpace)
+      })
+        .catch(error => {
+          console.error('🚒 Error fetching remoteSpace', error)
+        })
+    },
+    clearStateMeta: (context) => {
+      const user = context.rootState.currentUser
       isLoadingRemoteSpace = false
       context.commit('notifySpaceIsRemoved', false, { root: true })
       context.commit('spaceUrlToLoad', '', { root: true })
@@ -796,20 +819,18 @@ const currentSpace = {
       context.commit('clearSpaceFilters', null, { root: true })
       context.commit('clearSearch', null, { root: true })
       context.commit('shouldPreventNextEnterKey', false, { root: true })
-      // restore local space
+    },
+    restoreSpaceLocal: (context, space) => {
+      console.time('🎑⏱️ restoreSpaceLocal')
+      const emptySpace = utils.emptySpace(space.id)
       context.commit('restoreSpace', emptySpace)
       context.dispatch('history/reset', null, { root: true })
-      space = utils.normalizeSpace(cachedSpace)
       context.dispatch('restoreSpaceInChunks', { space })
-      // merge with remote space items updated, added, removed
-      if (isLocalSpaceOnly) { return }
-      let remoteSpace = await context.dispatch('getRemoteSpace', space)
-      if (!remoteSpace) { return }
-      const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
-      if (spaceIsUnchanged) {
-        context.commit('isLoadingSpace', false, { root: true })
-        return
-      }
+      console.log('🎑 local space', space)
+      console.timeEnd('🎑⏱️ restoreSpaceLocal')
+    },
+    restoreSpaceRemote: async (context, remoteSpace) => {
+      console.time('🎑⏱️ restoreSpaceRemote')
       isLoadingRemoteSpace = true
       remoteSpace = utils.normalizeSpace(remoteSpace)
       // cards
@@ -832,13 +853,11 @@ const currentSpace = {
       const boxResults = utils.mergeSpaceKeyValues({ prevItems: boxes, newItems: remoteSpace.boxes })
       context.dispatch('currentBoxes/mergeUnique', { newItems: boxResults.updateItems, itemType: 'box' }, { root: true })
       context.dispatch('currentBoxes/mergeRemove', { removeItems: boxResults.removeItems, itemType: 'box' }, { root: true })
-      console.log('🎑 Merge space', {
+      console.log('🎑 merged remote space', {
         cards: cardResults,
         types: connectionTypeReults,
         connections: connectionResults,
-        boxes: boxResults,
-        localSpace: space,
-        space: remoteSpace
+        boxes: boxResults
       })
       context.dispatch('restoreSpaceInChunks', {
         space: remoteSpace,
@@ -848,6 +867,7 @@ const currentSpace = {
         addConnections: connectionResults.addItems,
         addBoxes: boxResults.addItems
       })
+      console.timeEnd('🎑⏱️ restoreSpaceRemote')
     },
     loadLastSpace: async (context) => {
       let space
