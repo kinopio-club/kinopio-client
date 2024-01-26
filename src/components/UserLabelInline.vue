@@ -8,6 +8,7 @@
   @touchend="toggleUserDetailsIsVisible"
   ref="user"
   :title="title"
+  @click.stop
 )
   .user-avatar-inline(:class="{ 'is-on-dark-background': isOnDarkBackground }")
     img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
