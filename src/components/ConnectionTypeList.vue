@@ -6,6 +6,14 @@ import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 const store = useStore()
 
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerCloseChildDialogs') {
+      hideColorPicker()
+    }
+  })
+})
+
 const emit = defineEmits(['select', 'updateTypeColor'])
 
 const props = defineProps({
@@ -47,6 +55,9 @@ const emitSelect = (type) => {
 
 // type color
 
+const hideColorPicker = () => {
+  state.colorPickerIsVisible = false
+}
 const toggleColorPicker = () => {
   state.colorPickerIsVisible = !state.colorPickerIsVisible
 }

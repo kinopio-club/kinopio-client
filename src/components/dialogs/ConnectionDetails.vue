@@ -205,6 +205,7 @@ export default {
     },
     closeColorPicker () {
       this.colorPickerIsVisible = false
+      this.$store.commit('triggerCloseChildDialogs')
     },
     updateTypeColor (newColor) {
       const connectionType = {
