@@ -331,6 +331,7 @@ export default {
   .results-actions
     .badge-in-button
       margin-left 5px
+      border-radius var(--small-entity-radius)
     label
       .badge-in-button
         margin-left 0

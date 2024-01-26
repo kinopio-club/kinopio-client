@@ -68,16 +68,23 @@ const updateTypeColorEmit = (color) => {
 
 <template lang="pug">
 ResultsFilter(v-if="resultsFilterIsVisible" :items="connectionTypes" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
-ul.results-list
+ul.results-list.connection-type-list
   template(v-for="type in connectionTypesFiltered" :key="type.id")
     li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click.left="emitSelect(type)" :data-type-id="type.id")
-      //- .badge(:style="{backgroundColor: type.color}")
-      .button-wrap
-        button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
+      .button-wrap.change-color-wrap
+        button.change-color.small-button(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: type.color}")
         ColorPicker(:currentColor="type.color" :visible="state.colorPickerIsVisible" @selectedColor="updateTypeColorEmit")
       .name {{type.name}}
 </template>
 
 <style lang="stylus">
+ul.connection-type-list
+  .change-color-wrap
+    height 20px
+  .change-color
+    height initial
+    margin-right 5px
+    > .current-color
+      margin 2px 0
 </style>
