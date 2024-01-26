@@ -1152,7 +1152,10 @@ export default {
       }
     })
     prevIds.forEach(id => {
-      const itemIsRemoved = !newIds.includes(id)
+      const prevItemNotFoundInNewItems = !newIds.includes(id)
+      const threshold = 10 * 1000 // 10 seconds
+      const prevItemUpdatedInCurrentSession = dayjs(Date.now()).diff(prevItems[id].updatedAt) < threshold
+      const itemIsRemoved = prevItemNotFoundInNewItems && !prevItemUpdatedInCurrentSession
       if (itemIsRemoved) {
         removeItems.push(prevItems[id])
       }

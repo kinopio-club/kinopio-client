@@ -240,6 +240,8 @@ export default {
       const result = await response.json()
       this.loading.signUpOrIn = false
       if (this.isSuccess(response)) {
+        this.$store.commit('isLoadingSpace', true)
+        this.$store.commit('addNotification', { message: 'Signing In…' })
         // update user to remote user
         this.$store.commit('currentUser/updateUser', result)
         // update local spaces to remote user
@@ -264,6 +266,7 @@ export default {
           this.$store.dispatch('currentSpace/loadLastSpace')
           this.$store.commit('triggerUpdateWindowHistory')
         }
+        this.$store.commit('isLoadingSpace', false)
       } else {
         await this.handleErrors(result)
       }
@@ -355,6 +358,7 @@ export default {
     notifySignedIn () {
       this.loading.signUpOrIn = false
       this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('removeNotificationByMessage', 'Signing In…')
       this.$store.commit('addNotification', { message: 'Signed In', type: 'success' })
     },
 

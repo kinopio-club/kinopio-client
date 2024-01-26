@@ -1188,9 +1188,16 @@ export default {
 
     // connector glow
 
+    createNewTypeIfNeeded () {
+      const typeIds = this.$store.state.currentConnections.typeIds
+      if (!typeIds.length) {
+        this.$store.dispatch('currentConnections/addType')
+      }
+    },
     connectionColorForCardIds (cardIds) {
       if (!cardIds.length) { return }
       let color
+      this.createNewTypeIfNeeded()
       cardIds.find(cardId => {
         let connections = this['currentConnections/all']
         connections = connections.filter(connection => connection.startCardId === cardId || connection.endCardId === cardId)
