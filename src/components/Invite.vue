@@ -122,7 +122,7 @@ section.invite
   .row.invite-url-segmented-buttons(v-if="spaceIsPrivate")
     .segmented-buttons
       button(@click="toggleInviteType('edit')" :class="{active: inviteTypeIsEdit}")
-        span To Edit
+        span Can Edit
       button(@click="toggleInviteType('readOnly')" :class="{active: inviteTypeIsReadOnly}")
         span Read Only
 
