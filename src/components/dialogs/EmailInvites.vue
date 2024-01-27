@@ -31,7 +31,8 @@ watch(() => props.visible, (value, prevValue) => {
 const state = reactive({
   count: 0,
   dialogHeight: null,
-  tipsIsVisible: false
+  tipsIsVisible: false,
+  emails: []
 })
 
 const isDarkTheme = computed(() => store.getters['themes/isThemeDark'])
@@ -52,54 +53,93 @@ const toggleTipsIsVisible = () => {
 const hideUserDetails = () => {
   store.commit('userDetailsIsVisible', false)
 }
+
+// send button
+const invitePlural = computed(() => {
+  if (state.emails.length === 0) {
+    return 'Invite'
+  } else {
+    return utils.pluralize('Invite', state.emails.length)
+  }
+})
+const emailsLength = computed(() => {
+  if (state.emails.length) {
+    return state.emails.length
+  } else {
+    return null
+  }
+})
 </script>
 
 <template lang="pug">
 dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDetails" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    .row.title-row
-      p Email Invites
-      button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
-        span ?
-    p.badge.secondary(v-if="state.tipsIsVisible")
-      p Send multiple invites by seperating emails with commas or spaces
+    //- .row.title-row
+    //-   p Email Invites to Edit
+    //-   button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
+    //-     span ?
     //- Textarea   defaultValue="" placeholder="", @textareaUpdate=textareaUpdate, @handleEnter=handleEnter maxlength 2000 shouldAutoFocus true
-    section.subsection.mail-subsection(:class="{ dark: isDarkTheme }")
-      p.field-title From
-      UserLabelInline(:user="currentUser" :isClickable="true")
-      span.badge.danger.add-your-name(v-if="!currentUser.name")
-        span Add Your Name
-      p.field-title To
-      textarea(placeholder="space@jam.com, hi@kinopio.club")
-      p.field-title Message
-      textarea(placeholder="Check this out fox x reason")
-      .row
-        button
-          img.icon.mail(src="@/assets/mail.svg")
-          span Send Invite(s) to Edit
-      //- utils.pluralize
+    section.subsection
+      .mail-subsection(:class="{ dark: isDarkTheme }")
+        //- from
+        p.field-title From
+        UserLabelInline(:user="currentUser" :isClickable="true")
+        span.badge.danger.add-your-name(v-if="!currentUser.name")
+          span Add Your Name
+        //- to
+        .row.title-row
+          p.field-title To
+          //- button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
+          //-   span ?
+        textarea(placeholder="space@jam.com, hi@kinopio.club")
+        //- ??TIPS NEEDED? not if highlight
+        //- p(v-if="state.tipsIsVisible")
+        //-   span Send multiple invites by seperating emails with commas or spaces
+        //- message
+        p.field-title Message
+        textarea(placeholder="Check this out fox x reason")
+        //- todo handle enter = send??
+        .row
+          button
+            img.icon.mail(src="@/assets/mail.svg")
+            span Email {{emailsLength}} {{invitePlural}}
+    //- todo btn loading
+    //- clear errs on submit
+
+    //- todo success msg
 
     //- .row
-    //-   .badge.danger Missing recipients, there may a typo in the email
+    //-   .badge.danger No recipients found, there may a typo in the To field
+
 </template>
 
 <style lang="stylus">
 .email-invites
+  .title-row
+    margin-bottom 0
+  section.subsection
+    border-radius var(--entity-radius)
+    padding 0
+    overflow hidden
   .mail-subsection
     --color1 #d93125
     --color2 #1240d5
-    // background var(--primary-background)
-    padding 8px
+    padding 6px 8px
     border 4px solid transparent
-    border-image 4 repeating-linear-gradient(-45deg, var(--color1) 0, var(--color1) 1em, transparent 0, transparent 2em,
-              var(--color2) 0, var(--color2) 3em, transparent 0, transparent 4em)
-    // border-image-repeat round
-    // background-origin: border-box;
-    // background-clip: border-box;
-
+    border-image 4 repeating-linear-gradient(
+      -45deg,
+      var(--color1) 0,
+      var(--color1) 1em,
+      transparent 0,
+      transparent 2em,
+      var(--color2) 0,
+      var(--color2) 3em,
+      transparent 0,
+      transparent 4em
+    )
     &.dark
-      --color1 #9a352e
-      --color2 #1240d5
+      --color1 #bd1f14
+      --color2 #1f44bf
 
   .add-your-name
     margin-left 6px !important

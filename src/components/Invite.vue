@@ -161,7 +161,7 @@ section.invite
       .button-wrap
         button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
           img.icon.mail(src="@/assets/mail.svg")
-          span Email
+          span Email Invites to Edit
       EmailInvites(:visible="state.emailInvitesIsVisible")
     //- Tips
     template(v-if="state.tipsIsVisible")
