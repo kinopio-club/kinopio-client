@@ -538,6 +538,8 @@ textarea
     -webkit-text-fill-color var(--primary)
     opacity 1
     -webkit-opacity 1
+textarea + p
+  margin-top 0
 
 .inline-button
   background-color transparent

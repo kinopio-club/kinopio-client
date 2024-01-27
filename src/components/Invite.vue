@@ -4,6 +4,7 @@ import { useStore, mapState, mapGetters } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
+import EmailInvites from '@/components/dialogs/EmailInvites.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -12,10 +13,18 @@ const store = useStore()
 
 onMounted(() => {
   store.commit('clearNotificationsWithPosition')
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerCloseChildDialogs') {
+      closeChildDialogs()
+    }
+  })
 })
+
+const emit = defineEmits(['closeDialogs', 'emailInvitesIsVisible'])
 
 const state = reactive({
   tipsIsVisible: false,
+  emailInvitesIsVisible: false,
   inviteType: 'edit' // 'edit', 'readOnly'
 })
 
@@ -106,6 +115,19 @@ const webShareInvite = () => {
   navigator.share(data)
 }
 
+// email invites
+
+const closeChildDialogs = () => {
+  state.emailInvitesIsVisible = false
+}
+const toggleEmailInvitesIsVisible = () => {
+  const value = !state.emailInvitesIsVisible
+  emit('closeDialogs')
+  state.emailInvitesIsVisible = value
+}
+watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
+  emit('emailInvitesIsVisible', value)
+})
 </script>
 
 <template lang="pug">
@@ -135,6 +157,12 @@ section.invite
           span {{inviteButtonLabel}}
         button(v-if="webShareIsSupported" @click="webShareInvite")
           img.icon.share(src="@/assets/share.svg")
+    .row(v-if="inviteTypeIsEdit")
+      .button-wrap
+        button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
+          img.icon.mail(src="@/assets/mail.svg")
+          span Email
+      EmailInvites(:visible="state.emailInvitesIsVisible")
     //- Tips
     template(v-if="state.tipsIsVisible")
       .row
