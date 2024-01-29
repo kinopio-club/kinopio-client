@@ -27,7 +27,6 @@ const props = defineProps({
   shouldAutoFocus: Boolean,
   defaultValue: String,
   htmlStringWithMatches: String
-
 })
 const state = reactive({
   newName: ''
@@ -56,6 +55,11 @@ const name = computed({
     emit('updateName', value)
   }
 })
+const safeHtmlStringWithMatches = computed(() => {
+  const string = props.htmlStringWithMatches
+  if (!string) { return }
+  return string.replaceAll('script', '')
+})
 
 // max length
 
@@ -76,7 +80,7 @@ const focusName = () => {
 <template lang="pug">
 .textarea-wrap(ref="textareaWrapElement")
   p.textarea-highlight(
-    v-html="htmlStringWithMatches"
+    v-html="safeHtmlStringWithMatches"
   )
   textarea.textarea-sizer(
     v-model="name"
