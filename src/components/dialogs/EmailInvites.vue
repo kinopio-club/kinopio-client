@@ -28,7 +28,7 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
-    // trigger space screenshot
+    store.dispatch('currentSpace/createSpacePreviewImage')
   }
 })
 
