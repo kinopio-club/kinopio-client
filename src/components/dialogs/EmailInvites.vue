@@ -172,7 +172,7 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
   .mail-subsection
     --color1 #d93125
     --color2 #1240d5
-    padding 6px 8px
+    padding 8px
     border 4px solid transparent
     border-image 4 repeating-linear-gradient(
       -45deg,
