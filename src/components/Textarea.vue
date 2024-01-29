@@ -14,6 +14,10 @@ onMounted(() => {
   if (props.shouldAutoFocus) {
     focusName()
   }
+  if (props.defaultValue) {
+    state.newName = props.defaultValue
+    updateTextareaSize()
+  }
 })
 
 const emit = defineEmits(['updateName'])

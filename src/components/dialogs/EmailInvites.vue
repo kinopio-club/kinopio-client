@@ -13,6 +13,7 @@ const textareaWrapElement = ref(null)
 const textareaMessageElement = ref(null)
 
 onMounted(() => {
+  state.defaultEmailsValue = store.state.currentUser.prevInviteEmails
   store.subscribe((mutation, state) => {
     if (mutation.type === 'updatePageSizes') {
       updateDialogHeight()
@@ -38,6 +39,7 @@ const state = reactive({
   emailsList: [],
   emailsStringWithMatches: '',
   isLoading: false,
+  defaultEmailsValue: '',
   errors: {
     noRecipients: false
   },
@@ -65,6 +67,7 @@ const updateEmailsWithMatches = (value) => {
   state.emailsList.forEach(email => {
     state.emailsStringWithMatches = state.emailsStringWithMatches.replace(email, `<span class="match">${email}</span>`)
   })
+  store.dispatch('currentUser/update', { prevInviteEmails: value })
 }
 const emailsPlaceholder = computed(() => 'space@jam.com, hi@kinopio.club')
 
@@ -136,6 +139,7 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
           p.field-title To
         Textarea(
           @updateName="updateEmailsWithMatches"
+          :defaultValue="state.defaultEmailsValue"
           :placeholder="emailsPlaceholder"
           :htmlStringWithMatches="state.emailsStringWithMatches"
           :shouldAutoFocus="true"

@@ -73,7 +73,8 @@ const initialState = {
   appleAppAccountToken: null,
   appleSubscriptionIsActive: null,
   studentDiscountIsAvailable: false,
-  lastSidebarSection: ''
+  lastSidebarSection: '',
+  prevInviteEmails: ''
 }
 
 export default {
@@ -387,11 +388,14 @@ export default {
     appleSubscriptionIsActive: (state, value) => {
       state.appleSubscriptionIsActive = value
     },
+    updateAppleAppAccountToken: (state) => {
+      state.appleAppAccountToken = uuidv4()
+    },
     lastSidebarSection: (state, value) => {
       state.lastSidebarSection = value
     },
-    updateAppleAppAccountToken: (state) => {
-      state.appleAppAccountToken = uuidv4()
+    prevInviteEmails: (state, value) => {
+      state.prevInviteEmails = value
     }
   },
   actions: {
