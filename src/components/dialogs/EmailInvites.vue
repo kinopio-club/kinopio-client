@@ -156,7 +156,7 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
     //- todo success msg
 
     //- .row
-    //-   .badge.danger No recipients found, there may a typo in the To field
+    //-   .badge.danger To field cannot be empty
 
 </template>
 
@@ -195,9 +195,11 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
 
   .textarea-wrap
     position relative
+    textarea
+      margin-bottom 0
     .textarea-sizer
       pointer-events none
-      color transparent
+      opacity 0
     .textarea-input
       position absolute
       top 0
