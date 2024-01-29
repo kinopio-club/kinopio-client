@@ -14,7 +14,10 @@ const textareaWrapElement = ref(null)
 const textareaMessageElement = ref(null)
 
 onMounted(() => {
-  state.defaultEmailsValue = store.state.currentUser.prevInviteEmails
+  if (store.state.currentUser.prevInviteEmails) {
+    state.defaultEmailsValue = store.state.currentUser.prevInviteEmails
+    updateEmailsWithMatches(state.defaultEmailsValue)
+  }
   store.subscribe((mutation, state) => {
     if (mutation.type === 'updatePageSizes') {
       updateDialogHeight()
@@ -31,6 +34,7 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
     store.dispatch('currentSpace/createSpacePreviewImage')
+    clearErrors()
   }
 })
 
@@ -61,7 +65,6 @@ const hideUserDetails = () => {
 }
 
 // emails
-
 const maxEmailsAllowed = computed(() => consts.maxInviteEmailsAllowedToSend)
 const updateEmailsWithMatches = (value) => {
   clearErrors()
@@ -115,7 +118,7 @@ const clearErrors = () => {
   state.errors.unknownServerError = false
   state.errors.maxEmailsAllowed = false
 }
-const sendInvites = () => {
+const sendInvites = async () => {
   if (state.isLoading) { return }
   if (!state.emailsList.length) {
     state.errors.noRecipients = true
@@ -128,13 +131,17 @@ const sendInvites = () => {
   clearErrors()
   try {
     state.isLoading = true
-    console.log('♥️', state.message, state.emailsList, state.currentSpace.id) // creds = user, emailslist.max = 15
-    // TODO send api
+    await store.dispatch('api/sendSpaceInviteEmails', {
+      emailsList: state.emailsList,
+      message: state.message,
+      spaceId: store.state.currentSpace.id
+    })
+    state.isSuccess = true
   } catch (error) {
     console.error('🚒 sendInvites', error)
-    state.error.unknownServerError = true
+    state.errors.unknownServerError = true
   }
-  state.isSuccess = true
+  state.isLoading = false
 }
 </script>
 
@@ -178,8 +185,10 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
           .badge.danger To field is missing valid email addresses
         .row(v-if="state.errors.maxEmailsAllowed")
           .badge.danger For spam prevention reasons, you cannot invite more than {{maxEmailsAllowed}} people at once
-        .row(v-if="state.error.unknownServerError")
-          .badge.danger (シ_ _)シ Something went wrong parsing your json, Please try again or contact support
+        Transition(name="fadeIn")
+          .row(v-if="state.errors.unknownServerError")
+            .badge.danger
+              span (シ_ _)シ Something went wrong parsing your json, Please try again or contact support
 </template>
 
 <style lang="stylus">

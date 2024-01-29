@@ -1278,4 +1278,13 @@ progress::-webkit-progress-value
 progress::-moz-progress-bar
   background-color var(--primary)
   border-radius 2px
+
+.fadeIn-enter-active {
+  animation fadeIn 0.5s ease-out
+}
+@keyframes fadeIn
+  0%
+    opacity 0
+  100%
+    opacity 1
 </style>

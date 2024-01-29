@@ -8,14 +8,13 @@ const store = useStore()
 
 const textareaWrapElement = ref(null)
 
-onMounted(() => {
-  state.newName = props.defaultValue
-  updateTextareaSize()
+onMounted(async () => {
   if (props.shouldAutoFocus) {
     focusName()
   }
   if (props.defaultValue) {
     state.newName = props.defaultValue
+    await nextTick()
     updateTextareaSize()
   }
 })

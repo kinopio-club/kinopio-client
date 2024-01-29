@@ -482,13 +482,4 @@ main.add-page
   justify-content space-between
   align-items center
 
-.fadeIn-enter-active {
-  animation fadeIn 0.5s ease-out
-}
-
-@keyframes fadeIn
-  0%
-    opacity 0
-  100%
-    opacity 1
 </style>
