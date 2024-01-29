@@ -27,10 +27,7 @@ const props = defineProps({
 
 })
 const state = reactive({
-  newName: '',
-  error: {
-    maxLength: true
-  }
+  newName: ''
 })
 
 const updateTextareaSize = () => {
@@ -53,7 +50,6 @@ const name = computed({
   set (value) {
     state.newName = value
     updateTextareaSize()
-    // updateMaxLengthError()
     emit('updateName', value)
   }
 })

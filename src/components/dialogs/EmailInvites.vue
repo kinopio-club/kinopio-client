@@ -73,14 +73,6 @@ const updateMessage = (value) => {
   state.message = value
 }
 const messagePlaceholder = computed(() => 'check this out for n reasons')
-// const message = computed({
-//   get () {
-//     return state.message
-//   },
-//   set (value) {
-//     state.message = value
-//   }
-// })
 
 // send button
 
@@ -128,7 +120,6 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
         UserLabelInline(:user="currentUser" :isClickable="true")
         span.badge.danger.add-your-name(v-if="!currentUser.name")
           span Add Your Name
-
         //- to
         .row.title-row
           p.field-title To
@@ -139,7 +130,6 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
           :shouldAutoFocus="true"
           :maxLength="600"
         )
-
         //- message
         p.field-title Message
         Textarea(
@@ -147,7 +137,6 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
           :placeholder="messagePlaceholder"
           :maxLength="1000"
         )
-
         .row.button-row
           button(@click.stop="sendInvites" :class="{ active: state.isLoading }")
             img.icon.mail(src="@/assets/mail.svg")
@@ -158,7 +147,6 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
           .badge.success Sent {{emailsLength}} {{emailPlural}}
         .row(v-if="state.errors.noRecipients")
           .badge.danger To field is missing valid emails
-
 </template>
 
 <style lang="stylus">
@@ -189,7 +177,6 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
     &.dark
       --color1 #bd1f14
       --color2 #1f44bf
-
   .add-your-name
     margin-left 6px !important
   .field-title
