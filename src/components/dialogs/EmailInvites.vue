@@ -3,11 +3,13 @@ import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, w
 import { useStore } from 'vuex'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
 const dialogElement = ref(null)
 const textareaWrapElement = ref(null)
+const textareaMessageElement = ref(null)
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -34,7 +36,12 @@ const state = reactive({
   dialogHeight: null,
   emailsList: [],
   emailsString: '',
-  emailsStringWithMatches: ''
+  emailsStringWithMatches: '',
+  isLoading: false,
+  errors: {
+    noRecipients: false
+  },
+  isSuccess: false
 })
 
 const isDarkTheme = computed(() => store.getters['themes/isThemeDark'])
@@ -59,8 +66,10 @@ const updateTextareaSizes = () => {
     const highlight = element.querySelector('.textarea-highlight')
     highlight.style.height = textarea.scrollHeight + modifier + 'px'
     textarea.style.height = textarea.scrollHeight + modifier + 'px'
-    // console.log('🍇',textarea)
   })
+  // temp msg specitic
+  const messageTextarea = textareaMessageElement.value
+  messageTextarea.style.height = messageTextarea.scrollHeight + modifier + 'px'
 }
 
 // emails
@@ -82,17 +91,23 @@ const textareaEmails = computed({
   }
 })
 const updateEmailsWithMatches = () => {
-  // if (!emailsList.length) {
   state.emailsStringWithMatches = state.emailsString
-  // return
-  // }
-
   state.emailsList.forEach(email => {
-    console.log('♥️', email)
     state.emailsStringWithMatches = state.emailsStringWithMatches.replace(email, `<span class="match">${email}</span>`)
   })
-  // state.emails = state.emails.replace(emailsStringWithMatches)
 }
+
+// message
+
+const message = computed({
+  get () {
+    return state.message
+  },
+  set (value) {
+    state.message = value
+    updateTextareaSizes()
+  }
+})
 
 // send button
 
@@ -103,6 +118,9 @@ const invitePlural = computed(() => {
     return utils.pluralize('Invite', state.emailsList.length)
   }
 })
+const emailPlural = computed(() => {
+  return utils.pluralize('email', state.emailsList.length)
+})
 const emailsLength = computed(() => {
   if (state.emailsList.length) {
     return state.emailsList.length
@@ -110,6 +128,21 @@ const emailsLength = computed(() => {
     return null
   }
 })
+const clearErrors = () => {
+  state.errors.noRecipients = false
+  state.isSuccess = false
+}
+const sendInvites = () => {
+  if (state.isLoading) { return }
+  if (!state.emailsList.length) {
+    state.errors.noRecipients = true
+    return
+  }
+  clearErrors()
+  console.log('♥️', state.message, state.emailsList, state.isLoading)
+  state.isLoading = true
+  state.isSuccess = true
+}
 </script>
 
 <template lang="pug">
@@ -144,19 +177,21 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
 
         //- message
         p.field-title Message
-        textarea(placeholder="Check this out fox x reason")
-        //- todo handle enter = send??
+        textarea(
+          placeholder="Check this out fox x reason"
+          v-model="message"
+          ref="textareaMessageElement"
+        )
         .row
-          button
+          button(@click.stop="sendInvites" :class="{ active: state.isLoading }")
             img.icon.mail(src="@/assets/mail.svg")
             span Email {{emailsLength}} {{invitePlural}}
-    //- todo btn loading
-    //- clear errs on submit
+            Loader(:visible="state.isLoading")
 
-    //- todo success msg
-
-    //- .row
-    //-   .badge.danger To field cannot be empty
+        .row(v-if="state.isSuccess")
+          .badge.success Sent {{emailsLength}} {{emailPlural}}
+        .row(v-if="state.errors.noRecipients")
+          .badge.danger To field is missing valid emails
 
 </template>
 
