@@ -41,7 +41,8 @@ const state = reactive({
   isLoading: false,
   defaultEmailsValue: '',
   errors: {
-    noRecipients: false
+    noRecipients: false,
+    unknownServerError: false
   },
   isSuccess: false
 })
@@ -109,6 +110,7 @@ const emailsLength = computed(() => {
 const clearErrors = () => {
   state.errors.noRecipients = false
   state.isSuccess = false
+  state.errors.unknownServerError = false
 }
 const sendInvites = () => {
   if (state.isLoading) { return }
@@ -117,9 +119,14 @@ const sendInvites = () => {
     return
   }
   clearErrors()
-  state.isLoading = true
-  console.log('♥️', state.message, state.emailsList)
-  // state.isLoading = true
+  try {
+    state.isLoading = true
+    console.log('♥️', state.message, state.emailsList)
+    // TODO send api
+  } catch (error) {
+    console.error('🚒 sendInvites', error)
+    state.error.unknownServerError = true
+  }
   state.isSuccess = true
 }
 </script>
@@ -162,6 +169,8 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
           .badge.success Sent {{emailsLength}} {{emailPlural}}
         .row(v-if="state.errors.noRecipients")
           .badge.danger To field is missing valid email addresses
+        .row(v-if="state.error.unknownServerError")
+          .badge.danger (シ_ _)シ Something went wrong parsing your json, Please try again or contact support
 </template>
 
 <style lang="stylus">
