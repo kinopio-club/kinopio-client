@@ -6,6 +6,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import Textarea from '@/components/Textarea.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -61,6 +62,7 @@ const hideUserDetails = () => {
 
 // emails
 
+const maxEmailsAllowed = computed(() => consts.maxInviteEmailsAllowedToSend)
 const updateEmailsWithMatches = (value) => {
   clearErrors()
   state.emailsList = utils.emailsFromString(value)
@@ -111,6 +113,7 @@ const clearErrors = () => {
   state.errors.noRecipients = false
   state.isSuccess = false
   state.errors.unknownServerError = false
+  state.errors.maxEmailsAllowed = false
 }
 const sendInvites = () => {
   if (state.isLoading) { return }
@@ -118,10 +121,14 @@ const sendInvites = () => {
     state.errors.noRecipients = true
     return
   }
+  if (state.emailsList.length > maxEmailsAllowed.value.length) {
+    state.errors.maxEmailsAllowed = true
+    return
+  }
   clearErrors()
   try {
     state.isLoading = true
-    console.log('♥️', state.message, state.emailsList)
+    console.log('♥️', state.message, state.emailsList, state.currentSpace.id) // creds = user, emailslist.max = 15
     // TODO send api
   } catch (error) {
     console.error('🚒 sendInvites', error)
@@ -169,6 +176,8 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
           .badge.success Sent {{emailsLength}} {{emailPlural}}
         .row(v-if="state.errors.noRecipients")
           .badge.danger To field is missing valid email addresses
+        .row(v-if="state.errors.maxEmailsAllowed")
+          .badge.danger For spam prevention reasons, you cannot invite more than {{maxEmailsAllowed}} people at once
         .row(v-if="state.error.unknownServerError")
           .badge.danger (シ_ _)シ Something went wrong parsing your json, Please try again or contact support
 </template>
