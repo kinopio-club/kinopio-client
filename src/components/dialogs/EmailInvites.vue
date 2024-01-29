@@ -7,6 +7,7 @@ import utils from '@/utils.js'
 const store = useStore()
 
 const dialogElement = ref(null)
+const textareaWrapElement = ref(null)
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -31,8 +32,9 @@ watch(() => props.visible, (value, prevValue) => {
 const state = reactive({
   count: 0,
   dialogHeight: null,
-  tipsIsVisible: false,
-  emails: []
+  emailsList: [],
+  emailsString: '',
+  emailsStringWithMatches: ''
 })
 
 const isDarkTheme = computed(() => store.getters['themes/isThemeDark'])
@@ -43,28 +45,67 @@ const updateDialogHeight = async () => {
   let element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
-const textareaUpdate = (value) => {
-  // parse emails
-  // save as user default value
-}
-const toggleTipsIsVisible = () => {
-  state.tipsIsVisible = !state.tipsIsVisible
-}
 const hideUserDetails = () => {
   store.commit('userDetailsIsVisible', false)
 }
 
+// textarea
+
+const updateTextareaSizes = () => {
+  const element = textareaWrapElement.value
+  let textareas = element.querySelectorAll('textarea')
+  let modifier = 1
+  textareas.forEach(textarea => {
+    const highlight = element.querySelector('.textarea-highlight')
+    highlight.style.height = textarea.scrollHeight + modifier + 'px'
+    textarea.style.height = textarea.scrollHeight + modifier + 'px'
+    // console.log('🍇',textarea)
+  })
+}
+
+// emails
+
+const textareaEmails = computed({
+  get () {
+    return state.emailsString
+  },
+  set (value) {
+    state.emailsString = value
+    state.emailsList = utils.emailsFromString(value)
+    updateTextareaSizes()
+    updateEmailsWithMatches()
+
+    // state.emailsList.forEach(x => console.log(x))
+
+    // updateEmailsList(value)
+    //
+  }
+})
+const updateEmailsWithMatches = () => {
+  // if (!emailsList.length) {
+  state.emailsStringWithMatches = state.emailsString
+  // return
+  // }
+
+  state.emailsList.forEach(email => {
+    console.log('♥️', email)
+    state.emailsStringWithMatches = state.emailsStringWithMatches.replace(email, `<span class="match">${email}</span>`)
+  })
+  // state.emails = state.emails.replace(emailsStringWithMatches)
+}
+
 // send button
+
 const invitePlural = computed(() => {
-  if (state.emails.length === 0) {
+  if (state.emailsList.length === 0) {
     return 'Invite'
   } else {
-    return utils.pluralize('Invite', state.emails.length)
+    return utils.pluralize('Invite', state.emailsList.length)
   }
 })
 const emailsLength = computed(() => {
-  if (state.emails.length) {
-    return state.emails.length
+  if (state.emailsList.length) {
+    return state.emailsList.length
   } else {
     return null
   }
@@ -74,10 +115,6 @@ const emailsLength = computed(() => {
 <template lang="pug">
 dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDetails" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    //- .row.title-row
-    //-   p Email Invites to Edit
-    //-   button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
-    //-     span ?
     //- Textarea   defaultValue="" placeholder="", @textareaUpdate=textareaUpdate, @handleEnter=handleEnter maxlength 2000 shouldAutoFocus true
     section.subsection
       .mail-subsection(:class="{ dark: isDarkTheme }")
@@ -86,15 +123,25 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
         UserLabelInline(:user="currentUser" :isClickable="true")
         span.badge.danger.add-your-name(v-if="!currentUser.name")
           span Add Your Name
+
         //- to
         .row.title-row
           p.field-title To
-          //- button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
-          //-   span ?
-        textarea(placeholder="space@jam.com, hi@kinopio.club")
-        //- ??TIPS NEEDED? not if highlight
-        //- p(v-if="state.tipsIsVisible")
-        //-   span Send multiple invites by seperating emails with commas or spaces
+
+        .textarea-wrap(ref="textareaWrapElement")
+          p.textarea-highlight(
+            v-html="state.emailsStringWithMatches"
+          )
+          textarea.textarea-sizer(
+            v-model="textareaEmails"
+            maxLength="600"
+          )
+          textarea.textarea-input(
+            placeholder="space@jam.com, hi@kinopio.club"
+            v-model="textareaEmails"
+            maxLength="600"
+          )
+
         //- message
         p.field-title Message
         textarea(placeholder="Check this out fox x reason")
@@ -145,5 +192,23 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
     margin-left 6px !important
   .field-title
     margin-bottom 2px
+
+  .textarea-wrap
+    position relative
+    .textarea-sizer
+      pointer-events none
+      color transparent
+    .textarea-input
+      position absolute
+      top 0
+      left 0
+    p.textarea-highlight
+      pointer-events none
+      position absolute
+      top 1px
+      left 1px
+      color transparent
+      .match
+        background-color var(--search-background)
 
 </style>

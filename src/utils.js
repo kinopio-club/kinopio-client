@@ -1664,6 +1664,10 @@ export default {
     // then the rest of the url path
     return new RegExp(/(^|\n| )(http:\/\/localhost:)[^\s."><]+\w\/?-?/igm)
   },
+  emailsFromString (string) {
+    // https://stackoverflow.com/a/42408099
+    return string.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gim) || []
+  },
   urlsFromString (string, skipProtocolCheck) {
     if (!string) { return [] }
     // remove markdown links
