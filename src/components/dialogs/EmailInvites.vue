@@ -74,7 +74,15 @@ const updateMessage = (value) => {
   clearErrors()
   state.message = value
 }
-const messagePlaceholder = computed(() => 'check this out for n reasons')
+const spacePrivate = computed(() => {
+  const spaceIsPrivate = store.state.currentSpace.privacy === 'private'
+  if (spaceIsPrivate) {
+    return 'private '
+  } else {
+    return ''
+  }
+})
+const messagePlaceholder = computed(() => `Check out and edit my ${spacePrivate.value}space`)
 
 // send button
 
