@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, w
 import { useStore } from 'vuex'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import Textarea from '@/components/Textarea.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 const store = useStore()
@@ -35,7 +36,6 @@ const state = reactive({
   count: 0,
   dialogHeight: null,
   emailsList: [],
-  emailsString: '',
   emailsStringWithMatches: '',
   isLoading: false,
   errors: {
@@ -56,58 +56,31 @@ const hideUserDetails = () => {
   store.commit('userDetailsIsVisible', false)
 }
 
-// textarea
-
-const updateTextareaSizes = () => {
-  const element = textareaWrapElement.value
-  let textareas = element.querySelectorAll('textarea')
-  let modifier = 1
-  textareas.forEach(textarea => {
-    const highlight = element.querySelector('.textarea-highlight')
-    highlight.style.height = textarea.scrollHeight + modifier + 'px'
-    textarea.style.height = textarea.scrollHeight + modifier + 'px'
-  })
-  // temp msg specitic
-  const messageTextarea = textareaMessageElement.value
-  messageTextarea.style.height = messageTextarea.scrollHeight + modifier + 'px'
-}
-
 // emails
 
-const textareaEmails = computed({
-  get () {
-    return state.emailsString
-  },
-  set (value) {
-    state.emailsString = value
-    state.emailsList = utils.emailsFromString(value)
-    updateTextareaSizes()
-    updateEmailsWithMatches()
-
-    // state.emailsList.forEach(x => console.log(x))
-
-    // updateEmailsList(value)
-    //
-  }
-})
-const updateEmailsWithMatches = () => {
-  state.emailsStringWithMatches = state.emailsString
+const updateEmailsWithMatches = (value) => {
+  state.emailsList = utils.emailsFromString(value)
+  state.emailsStringWithMatches = value
   state.emailsList.forEach(email => {
     state.emailsStringWithMatches = state.emailsStringWithMatches.replace(email, `<span class="match">${email}</span>`)
   })
 }
+const emailsPlaceholder = computed(() => 'space@jam.com, hi@kinopio.club')
 
 // message
 
-const message = computed({
-  get () {
-    return state.message
-  },
-  set (value) {
-    state.message = value
-    updateTextareaSizes()
-  }
-})
+const updateMessage = (value) => {
+  state.message = value
+}
+const messagePlaceholder = computed(() => 'check this out for n reasons')
+// const message = computed({
+//   get () {
+//     return state.message
+//   },
+//   set (value) {
+//     state.message = value
+//   }
+// })
 
 // send button
 
@@ -148,7 +121,6 @@ const sendInvites = () => {
 <template lang="pug">
 dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDetails" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    //- Textarea   defaultValue="" placeholder="", @textareaUpdate=textareaUpdate, @handleEnter=handleEnter maxlength 2000 shouldAutoFocus true
     section.subsection
       .mail-subsection(:class="{ dark: isDarkTheme }")
         //- from
@@ -160,29 +132,23 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
         //- to
         .row.title-row
           p.field-title To
-
-        .textarea-wrap(ref="textareaWrapElement")
-          p.textarea-highlight(
-            v-html="state.emailsStringWithMatches"
-          )
-          textarea.textarea-sizer(
-            v-model="textareaEmails"
-            maxLength="600"
-          )
-          textarea.textarea-input(
-            placeholder="space@jam.com, hi@kinopio.club"
-            v-model="textareaEmails"
-            maxLength="600"
-          )
+        Textarea(
+          @updateName="updateEmailsWithMatches"
+          :placeholder="emailsPlaceholder"
+          :htmlStringWithMatches="state.emailsStringWithMatches"
+          :shouldAutoFocus="true"
+          :maxLength="600"
+        )
 
         //- message
         p.field-title Message
-        textarea(
-          placeholder="Check this out fox x reason"
-          v-model="message"
-          ref="textareaMessageElement"
+        Textarea(
+          @updateName="updateMessage"
+          :placeholder="messagePlaceholder"
+          :maxLength="1000"
         )
-        .row
+
+        .row.button-row
           button(@click.stop="sendInvites" :class="{ active: state.isLoading }")
             img.icon.mail(src="@/assets/mail.svg")
             span Email {{emailsLength}} {{invitePlural}}
@@ -197,6 +163,7 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
 
 <style lang="stylus">
 .email-invites
+  overflow auto
   .title-row
     margin-bottom 0
   section.subsection
@@ -227,25 +194,6 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
     margin-left 6px !important
   .field-title
     margin-bottom 2px
-
-  .textarea-wrap
-    position relative
-    textarea
-      margin-bottom 0
-    .textarea-sizer
-      pointer-events none
-      opacity 0
-    .textarea-input
-      position absolute
-      top 0
-      left 0
-    p.textarea-highlight
-      pointer-events none
-      position absolute
-      top 1px
-      left 1px
-      color transparent
-      .match
-        background-color var(--search-background)
-
+  .button-row
+    margin-top 6px
 </style>

@@ -6,20 +6,25 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 const store = useStore()
 
-const textareaElement = ref(null)
+const textareaWrapElement = ref(null)
 
 onMounted(() => {
   state.newName = props.defaultValue
   updateTextareaSize()
+  if (props.shouldAutoFocus) {
+    focusName()
+  }
 })
 
-// const emit = defineEmits(['updateCount'])
+const emit = defineEmits(['updateName'])
 
 const props = defineProps({
   maxLength: Number,
-  textareaPlaceholder: Boolean,
+  placeholder: String,
   shouldAutoFocus: Boolean,
-  defaultValue: String
+  defaultValue: String,
+  htmlStringWithMatches: String
+
 })
 const state = reactive({
   newName: '',
@@ -29,12 +34,14 @@ const state = reactive({
 })
 
 const updateTextareaSize = () => {
-  if (!textareaElement.value) { return }
-  let modifier = 0
-  textareaElement.value.style.height = textareaElement.value.scrollHeight + modifier + 'px'
-}
-const clearErrorsAndSuccess = () => {
-  console.log('clearErrorsAndSuccess')
+  const element = textareaWrapElement.value
+  let textareas = element.querySelectorAll('textarea')
+  let modifier = 1
+  textareas.forEach(textarea => {
+    const highlight = element.querySelector('.textarea-highlight')
+    highlight.style.height = textarea.scrollHeight + modifier + 'px'
+    textarea.style.height = textarea.scrollHeight + modifier + 'px'
+  })
 }
 
 // name
@@ -43,88 +50,67 @@ const name = computed({
   get () {
     return state.newName
   },
-  set (newName) {
-    state.newName = newName
+  set (value) {
+    state.newName = value
     updateTextareaSize()
-    clearErrorsAndSuccess()
-    updateMaxLengthError()
+    // updateMaxLengthError()
+    emit('updateName', value)
   }
 })
-const insertLineBreak = async (event) => {
-  const position = textareaElement.value.selectionEnd
-  const name = state.newName
-  const newName = name.substring(0, position) + '\n' + name.substring(position)
-  setTimeout(() => {
-    textareaElement.value.setSelectionRange(position + 1, position + 1)
-  })
-  state.newName = newName
-  await nextTick()
-  updateTextareaSize()
-}
 
 // max length
 
 const maxLength = computed(() => props.maxLength || consts.maxCardLength)
-const updateMaxLengthError = () => {
-  if (state.newName.length >= maxLength.value - 1) {
-    state.error.maxLength = true
-  } else {
-    state.error.maxLength = false
-  }
-}
-
-// event handlers
-
-const handleEnter = (event) => {
-  console.log(event)
-}
-const handleFocus = (value) => {
-  console.log(value)
-}
+const isMaxLength = computed(() => state.newName?.length >= (maxLength.value - 1))
 
 // focus
-
 const focusName = () => {
-  const element = textareaElement.value
-  if (!element) { return }
-  element.focus()
-}
-const focusAndSelectName = () => {
   if (utils.isMobile()) { return }
-  const element = textareaElement.value
+  const element = textareaWrapElement.value
   if (!element) { return }
-  const length = element.value.length
-  focusName()
-  if (length) {
-    element.setSelectionRange(0, length)
-  }
+  const textarea = element.querySelector('.textarea-input')
+  textarea.focus()
 }
 
 </script>
 
 <template lang="pug">
-.textarea-wrap
-  textarea.name(
-    name="textarea"
-    ref="textareaElement"
-    rows="1"
-    :placeholder="textareaPlaceholder"
-    v-model="name"
-    :maxlength="maxLength"
-    @keydown.enter.exact.prevent="handleEnter"
-    @focusin="handleFocus(true)"
-    @focusout="handleFocus(false)"
-    @keyup.alt.enter.exact.stop
-    @keyup.ctrl.enter.exact.stop
-    @keydown.alt.enter.exact.stop="insertLineBreak"
-    @keydown.ctrl.enter.exact.stop="insertLineBreak"
-    @touchend="focusName"
+.textarea-wrap(ref="textareaWrapElement")
+  p.textarea-highlight(
+    v-html="htmlStringWithMatches"
   )
-span.badge.danger(v-if="state.error.maxLength")
-  img.icon.cancel(src="@/assets/add.svg")
-  span Max Length
+  textarea.textarea-sizer(
+    v-model="name"
+    :maxLength="maxLength"
+  )
+  textarea.textarea-input(
+    :placeholder="placeholder"
+    v-model="name"
+    :maxLength="maxLength"
+  )
+  span.badge.danger(v-if="isMaxLength")
+    img.icon.cancel(src="@/assets/add.svg")
+    span Max Length
 </template>
 
 <style lang="stylus">
-// .component-name
+.textarea-wrap
+  position relative
+  textarea
+    margin-bottom 0
+  .textarea-sizer
+    pointer-events none
+    opacity 0
+  .textarea-input
+    position absolute
+    top 0
+    left 0
+  p.textarea-highlight
+    pointer-events none
+    position absolute
+    top 1px
+    left 1px
+    color transparent
+    .match
+      background-color var(--search-background)
 </style>
