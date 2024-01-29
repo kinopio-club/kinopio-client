@@ -133,7 +133,7 @@ const sendInvites = async () => {
     state.isLoading = true
     await store.dispatch('api/sendSpaceInviteEmails', {
       emailsList: state.emailsList,
-      message: state.message,
+      message: state.message || messagePlaceholder.value,
       spaceId: store.state.currentSpace.id
     })
     state.isSuccess = true
