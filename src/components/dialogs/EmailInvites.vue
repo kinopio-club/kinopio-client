@@ -59,6 +59,7 @@ const hideUserDetails = () => {
 // emails
 
 const updateEmailsWithMatches = (value) => {
+  clearErrors()
   state.emailsList = utils.emailsFromString(value)
   state.emailsStringWithMatches = value
   state.emailsList.forEach(email => {
@@ -70,6 +71,7 @@ const emailsPlaceholder = computed(() => 'space@jam.com, hi@kinopio.club')
 // message
 
 const updateMessage = (value) => {
+  clearErrors()
   state.message = value
 }
 const messagePlaceholder = computed(() => 'check this out for n reasons')
@@ -104,8 +106,9 @@ const sendInvites = () => {
     return
   }
   clearErrors()
-  console.log('♥️', state.message, state.emailsList, state.isLoading)
   state.isLoading = true
+  console.log('♥️', state.message, state.emailsList)
+  // state.isLoading = true
   state.isSuccess = true
 }
 </script>
@@ -146,7 +149,7 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
         .row(v-if="state.isSuccess")
           .badge.success Sent {{emailsLength}} {{emailPlural}}
         .row(v-if="state.errors.noRecipients")
-          .badge.danger To field is missing valid emails
+          .badge.danger To field is missing valid email addresses
 </template>
 
 <style lang="stylus">
