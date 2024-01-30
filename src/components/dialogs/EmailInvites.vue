@@ -33,7 +33,6 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
-    store.dispatch('currentSpace/createSpacePreviewImage')
     clearErrors()
   }
 })
@@ -91,7 +90,7 @@ const spacePrivate = computed(() => {
     return ''
   }
 })
-const messagePlaceholder = computed(() => `Check out and edit my ${spacePrivate.value}space`)
+const messagePlaceholder = computed(() => `Read and edit my ${spacePrivate.value}space`)
 
 // send button
 

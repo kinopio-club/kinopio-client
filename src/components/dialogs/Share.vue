@@ -19,6 +19,7 @@ const store = useStore()
 const dialog = ref(null)
 
 onMounted(() => {
+  store.dispatch('currentSpace/createSpacePreviewImage')
   store.subscribe((mutation, state) => {
     if (mutation.type === 'updatePageSizes') {
       updateDialogHeight()

@@ -21,7 +21,7 @@ dialog.narrow.notification-settings(v-if="visible" :open="visible" @click.left.s
           span Email Weekly Review
 
     section
-      .row Updates when collaborators add cards to your spaces
+      .row Updates when collaborators add cards to your spaces, or invite you to their spaces
       .row
         label(:class="{active: shouldEmailNotifications}" @click.left.prevent="toggleShouldEmailNotifications" @keydown.stop.enter="toggleShouldEmailNotifications")
           input(type="checkbox" v-model="shouldEmailNotifications")
