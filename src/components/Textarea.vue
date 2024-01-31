@@ -32,7 +32,8 @@ const state = reactive({
   newName: ''
 })
 
-const updateTextareaSize = () => {
+const updateTextareaSize = async () => {
+  await nextTick()
   const element = textareaWrapElement.value
   let textareas = element.querySelectorAll('textarea')
   let modifier = 1
@@ -41,6 +42,7 @@ const updateTextareaSize = () => {
     highlight.style.height = textarea.scrollHeight + modifier + 'px'
     textarea.style.height = textarea.scrollHeight + modifier + 'px'
   })
+  element.style.height = textareas[0].scrollHeight + modifier + 'px'
 }
 
 // name
@@ -50,11 +52,14 @@ const name = computed({
     return state.newName
   },
   set (value) {
-    state.newName = value
-    updateTextareaSize()
-    emit('updateName', value)
+    updateName(value)
   }
 })
+const updateName = (value) => {
+  state.newName = value
+  updateTextareaSize()
+  emit('updateName', value)
+}
 const safeHtmlStringWithMatches = computed(() => {
   const string = props.htmlStringWithMatches
   if (!string) { return }
@@ -85,6 +90,7 @@ const focusName = () => {
   textarea.textarea-sizer(
     v-model="name"
     :maxLength="maxLength"
+    @paste="updateName"
   )
   textarea.textarea-input(
     :placeholder="placeholder"

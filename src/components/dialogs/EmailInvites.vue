@@ -13,10 +13,6 @@ const dialogElement = ref(null)
 const textareaWrapElement = ref(null)
 
 onMounted(() => {
-  if (store.state.currentUser.prevInviteEmails) {
-    state.defaultEmailsValue = store.state.currentUser.prevInviteEmails
-    updateEmailsWithMatches(state.defaultEmailsValue)
-  }
   store.subscribe((mutation, state) => {
     if (mutation.type === 'updatePageSizes') {
       updateDialogHeight()
@@ -31,6 +27,7 @@ const props = defineProps({
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
+    restorePrevInviteEmails()
     updateDialogHeight()
     clearErrors()
   }
@@ -63,6 +60,13 @@ const hideUserDetails = () => {
 }
 
 // emails
+
+const restorePrevInviteEmails = () => {
+  if (store.state.currentUser.prevInviteEmails) {
+    state.defaultEmailsValue = store.state.currentUser.prevInviteEmails
+    updateEmailsWithMatches(state.defaultEmailsValue)
+  }
+}
 const maxEmailsAllowed = computed(() => consts.maxInviteEmailsAllowedToSend)
 const updateEmailsWithMatches = (value) => {
   clearErrors()
@@ -72,6 +76,7 @@ const updateEmailsWithMatches = (value) => {
     state.emailsStringWithMatches = state.emailsStringWithMatches.replace(email, `<span class="match">${email}</span>`)
   })
   store.dispatch('currentUser/update', { prevInviteEmails: value })
+  updateDialogHeight()
 }
 const emailsPlaceholder = computed(() => 'space@jam.com, hi@kinopio.club')
 
@@ -151,9 +156,9 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
         .row.button-row
           button(@click.stop="sendInvites" :class="{ active: state.isLoading }")
             img.icon.mail(src="@/assets/mail.svg")
-            span Email {{emailsLength}} {{invitePlural}}
+            span Email {{emailsLength}} {{invitePlural}} to Edit
             Loader(:visible="state.isLoading")
-
+        //- status
         .row(v-if="state.isSuccess")
           .badge.success Sent {{emailsLength}} {{emailPlural}}
         .row(v-if="state.errors.noRecipients")
@@ -199,5 +204,5 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
   .field-title
     margin-bottom 2px
   .button-row
-    margin-top 6px
+    margin-top 10px
 </style>
