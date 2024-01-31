@@ -200,11 +200,11 @@ export default {
     },
     isActive () {
       if (!this.isDraggingCurrentConnectionLabel) { return }
-      return this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected || this.isCurrentCardConnection || this.isHoveredOverConnectedCard || this.isConnectedToMultipleCardsSelected
+      return this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected || this.isCurrentCardConnection || this.isConnectedToMultipleCardsSelected
     },
     isHovered () {
       if (this.currentUserIsDraggingCard) { return }
-      return this.id === this.currentUserIsHoveringOverConnectionId || this.id === this.$store.state.currentUserIsDraggingConnectionIdLabel
+      return this.id === this.currentUserIsHoveringOverConnectionId || this.id === this.$store.state.currentUserIsDraggingConnectionIdLabel || this.isHoveredOverConnectedCard
     },
     isHoveredOverConnectedCard () {
       const cardId = this.$store.state.currentUserIsHoveringOverCardId
