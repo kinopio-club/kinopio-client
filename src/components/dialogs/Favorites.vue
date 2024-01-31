@@ -27,7 +27,6 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     closeDialogs()
-    updateFavorites()
     updateDialogHeight()
     store.commit('shouldExplicitlyHideFooter', true)
   } else {
@@ -151,9 +150,6 @@ const showUserDetails = async (event, user) => {
 const closeDialogs = () => {
   store.commit('userDetailsIsVisible', false)
 }
-const updateFavorites = async () => {
-  await store.dispatch('currentUser/restoreUserFavorites')
-}
 const updateFavoriteSpaceIsEdited = () => {
   const spaces = favoriteSpaces.value.filter(space => space.isEdited)
   if (!spaces.length) { return }
@@ -206,7 +202,7 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
         span {{currentSpaceName}}
     //- fav user
     .row(v-if="spaceUser")
-      button(@click="toggleIsFavoriteUser")
+      button.toggle-favorite-user(@click="toggleIsFavoriteUser")
         img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
         img.icon(v-else src="@/assets/heart-empty.svg")
         UserLabelInline(:user="spaceUser")
@@ -264,4 +260,7 @@ dialog.favorites
       .user-label-inline
         margin-right 0
         margin-left 5px
+  .toggle-favorite-user
+    .user-label-inline
+      pointer-events none
 </style>

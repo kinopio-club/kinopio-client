@@ -420,6 +420,7 @@ export default {
           context.dispatch('validateUserReferralUserId')
           context.dispatch('validateFromAdvocateReferralName')
           context.dispatch('validateAdvocateReferralName')
+          context.dispatch('restoreUserFavorites')
         })
       })
     },
