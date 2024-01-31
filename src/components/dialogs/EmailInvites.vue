@@ -11,7 +11,6 @@ const store = useStore()
 
 const dialogElement = ref(null)
 const textareaWrapElement = ref(null)
-const textareaMessageElement = ref(null)
 
 onMounted(() => {
   if (store.state.currentUser.prevInviteEmails) {
@@ -76,22 +75,6 @@ const updateEmailsWithMatches = (value) => {
 }
 const emailsPlaceholder = computed(() => 'space@jam.com, hi@kinopio.club')
 
-// message
-
-const updateMessage = (value) => {
-  clearErrors()
-  state.message = value
-}
-const spacePrivate = computed(() => {
-  const spaceIsPrivate = store.state.currentSpace.privacy === 'private'
-  if (spaceIsPrivate) {
-    return 'private '
-  } else {
-    return ''
-  }
-})
-const messagePlaceholder = computed(() => `Read and edit my ${spacePrivate.value}space`)
-
 // send button
 
 const invitePlural = computed(() => {
@@ -132,7 +115,6 @@ const sendInvites = async () => {
     state.isLoading = true
     await store.dispatch('api/sendSpaceInviteEmails', {
       emailsList: state.emailsList,
-      message: state.message || messagePlaceholder.value,
       spaceId: store.state.currentSpace.id
     })
     state.isSuccess = true
@@ -165,13 +147,7 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
           :shouldAutoFocus="true"
           :maxLength="600"
         )
-        //- message
-        p.field-title Message
-        Textarea(
-          @updateName="updateMessage"
-          :placeholder="messagePlaceholder"
-          :maxLength="1000"
-        )
+        //- send
         .row.button-row
           button(@click.stop="sendInvites" :class="{ active: state.isLoading }")
             img.icon.mail(src="@/assets/mail.svg")

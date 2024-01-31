@@ -115,5 +115,5 @@ const focusName = () => {
     left 1px
     color transparent
     .match
-      background-color var(--search-background)
+      background-color var(--info-background)
 </style>
