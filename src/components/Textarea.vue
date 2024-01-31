@@ -83,7 +83,7 @@ const focusName = () => {
 </script>
 
 <template lang="pug">
-.textarea-wrap(ref="textareaWrapElement")
+.textarea-wrap.textarea-wrap-component(ref="textareaWrapElement")
   p.textarea-highlight(
     v-html="safeHtmlStringWithMatches"
   )
@@ -103,7 +103,7 @@ const focusName = () => {
 </template>
 
 <style lang="stylus">
-.textarea-wrap
+.textarea-wrap-component
   position relative
   textarea
     margin-bottom 0
