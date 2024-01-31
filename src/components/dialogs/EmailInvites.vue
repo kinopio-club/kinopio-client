@@ -30,6 +30,8 @@ watch(() => props.visible, (value, prevValue) => {
     restorePrevInviteEmails()
     updateDialogHeight()
     clearErrors()
+  } else {
+    state.defaultEmailsValue = ''
   }
 })
 
@@ -82,15 +84,12 @@ const emailsPlaceholder = computed(() => 'space@jam.com, hi@kinopio.club')
 
 // send button
 
-const invitePlural = computed(() => {
-  if (state.emailsList.length === 0) {
-    return 'Invite'
-  } else {
-    return utils.pluralize('Invite', state.emailsList.length)
-  }
-})
 const emailPlural = computed(() => {
-  return utils.pluralize('email', state.emailsList.length)
+  if (state.emailsList.length === 0) {
+    return 'Email'
+  } else {
+    return utils.pluralize('Email', state.emailsList.length)
+  }
 })
 const emailsLength = computed(() => {
   if (state.emailsList.length) {
@@ -134,6 +133,8 @@ const sendInvites = async () => {
 <template lang="pug">
 dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDetails" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
+    p Email Invites to Edit
+  section
     section.subsection
       .mail-subsection(:class="{ dark: isDarkTheme }")
         //- from
@@ -149,14 +150,13 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
           :defaultValue="state.defaultEmailsValue"
           :placeholder="emailsPlaceholder"
           :htmlStringWithMatches="state.emailsStringWithMatches"
-          :shouldAutoFocus="true"
           :maxLength="600"
         )
         //- send
         .row.button-row
           button(@click.stop="sendInvites" :class="{ active: state.isLoading }")
             img.icon.mail(src="@/assets/mail.svg")
-            span Email {{emailsLength}} {{invitePlural}} to Edit
+            span Send {{emailsLength}} {{emailPlural}}
             Loader(:visible="state.isLoading")
         //- status
         .row(v-if="state.isSuccess")
