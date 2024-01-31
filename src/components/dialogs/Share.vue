@@ -36,6 +36,7 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
     store.commit('shouldExplicitlyHideFooter', true)
+    store.dispatch('currentSpace/createSpacePreviewImage')
   } else {
     store.commit('shouldExplicitlyHideFooter', false)
   }
@@ -49,7 +50,8 @@ const state = reactive({
   embedIsVisible: false,
   exportIsVisible: false,
   importIsVisible: false,
-  isShareInPresentationMode: false
+  isShareInPresentationMode: false,
+  emailInvitesIsVisible: false
 })
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
@@ -159,7 +161,7 @@ const updateDialogHeight = () => {
   })
 }
 const dialogIsVisible = computed(() => {
-  return state.privacyPickerIsVisible || state.spaceRssFeedIsVisible || state.embedIsVisible || state.exportIsVisible || state.importIsVisible
+  return state.privacyPickerIsVisible || state.spaceRssFeedIsVisible || state.embedIsVisible || state.exportIsVisible || state.importIsVisible || state.emailInvitesIsVisible
 })
 const closeDialogs = () => {
   state.privacyPickerIsVisible = false
@@ -167,7 +169,9 @@ const closeDialogs = () => {
   state.embedIsVisible = false
   state.exportIsVisible = false
   state.importIsVisible = false
+  state.emailInvitesIsVisible = false
   store.commit('userDetailsIsVisible', false)
+  store.commit('triggerCloseChildDialogs')
 }
 
 // toggles
@@ -213,6 +217,9 @@ const toggleIsShareInPresentationMode = () => {
   closeDialogs()
   state.isShareInPresentationMode = !state.isShareInPresentationMode
 }
+const emailInvitesIsVisible = (value) => {
+  state.emailInvitesIsVisible = value
+}
 </script>
 
 <template lang="pug">
@@ -257,7 +264,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
           AskToAddToExplore
 
   //- Invite
-  Invite(v-if="isSpaceMember && currentUserIsSignedIn")
+  Invite(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
   //- Collaborators
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
     //- collaborators
@@ -350,10 +357,14 @@ dialog.share
     dialog.export,
     dialog.embed
       top -50px
+    dialog.email-invites
+      top -100px
+
   @media(max-height 500px)
     dialog.import,
     dialog.export,
-    dialog.embed
+    dialog.embed,
+    dialog.email-invites
       top -200px
 
   .segmented-buttons

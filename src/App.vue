@@ -538,6 +538,8 @@ textarea
     -webkit-text-fill-color var(--primary)
     opacity 1
     -webkit-opacity 1
+textarea + p
+  margin-top 0
 
 .inline-button
   background-color transparent
@@ -1276,4 +1278,13 @@ progress::-webkit-progress-value
 progress::-moz-progress-bar
   background-color var(--primary)
   border-radius 2px
+
+.fadeIn-enter-active {
+  animation fadeIn 0.5s ease-out
+}
+@keyframes fadeIn
+  0%
+    opacity 0
+  100%
+    opacity 1
 </style>

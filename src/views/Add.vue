@@ -251,11 +251,6 @@ const clearErrors = () => {
   state.error.signInCredentials = false
   state.error.tooManyAttempts = false
 }
-const updateTextareaSize = () => {
-  if (!textareaElement.value) { return }
-  let modifier = 0
-  textareaElement.value.style.height = textareaElement.value.scrollHeight + modifier + 'px'
-}
 const clearErrorsAndSuccess = () => {
   state.error.unknownServerError = false
   state.success = false
@@ -266,6 +261,14 @@ const updateMaxLengthError = () => {
   } else {
     state.error.maxLength = false
   }
+}
+
+// textarea
+
+const updateTextareaSize = () => {
+  if (!textareaElement.value) { return }
+  let modifier = 0
+  textareaElement.value.style.height = textareaElement.value.scrollHeight + modifier + 'px'
 }
 const insertLineBreak = async (event) => {
   const position = textareaElement.value.selectionEnd
@@ -479,13 +482,4 @@ main.add-page
   justify-content space-between
   align-items center
 
-.fadeIn-enter-active {
-  animation fadeIn 0.5s ease-out
-}
-
-@keyframes fadeIn
-  0%
-    opacity 0
-  100%
-    opacity 1
 </style>
