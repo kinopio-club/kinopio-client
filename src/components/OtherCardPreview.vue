@@ -38,8 +38,16 @@ const isActive = computed(() => {
   return otherCardDetailsIsVisible && isFromParentCard
 })
 const styles = computed(() => {
-  if (!props.isSelected) { return }
-  return { background: props.selectedColor }
+  if (!props.otherCard) { return }
+  const background = props.selectedColor || props.otherCard.backgroundColor
+  let color = utils.cssVariable('primary-on-light-background')
+  if (utils.colorIsDark(background)) {
+    color = utils.cssVariable('primary-on-dark-background')
+  }
+  return {
+    color,
+    background
+  }
 })
 
 // update card
