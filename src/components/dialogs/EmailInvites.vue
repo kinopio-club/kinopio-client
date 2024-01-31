@@ -162,13 +162,16 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
         Transition(name="fadeIn")
           .row(v-if="state.isSuccess")
             .badge.success Sent {{emailsLength}} {{emailPlural}}
-        .row(v-if="state.errors.noRecipients")
-          .badge.danger To field is missing valid email addresses
-        .row(v-if="state.errors.maxEmailsAllowed")
-          .badge.danger For spam prevention reasons, you cannot invite more than {{maxEmailsAllowed}} people at once
-        .row(v-if="state.errors.unknownServerError")
-          .badge.danger
-            span (シ_ _)シ Something went wrong, Please try again or contact support
+        Transition(name="fadeIn")
+          .row(v-if="state.errors.noRecipients")
+            .badge.danger To field is missing valid email addresses
+        Transition(name="fadeIn")
+          .row(v-if="state.errors.maxEmailsAllowed")
+            .badge.danger For spam prevention reasons, you cannot invite more than {{maxEmailsAllowed}} people at once
+        Transition(name="fadeIn")
+          .row(v-if="state.errors.unknownServerError")
+            .badge.danger
+              span (シ_ _)シ Something went wrong, Please try again or contact support
 </template>
 
 <style lang="stylus">
