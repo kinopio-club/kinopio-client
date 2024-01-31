@@ -605,7 +605,7 @@ const self = {
       if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/space/invite/${body.spaceId}`, options)
+        const response = await fetch(`${host}/space/email-invites/${body.spaceId}`, options)
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'sendSpaceInviteEmails', error })
