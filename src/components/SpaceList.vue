@@ -73,7 +73,8 @@ const props = defineProps({
   resultsSectionHeight: Number,
   disableListOptimizations: Boolean,
   showFavoriteButton: Boolean,
-  search: String
+  search: String,
+  parentDialog: String
 })
 
 const state = reactive({
@@ -268,11 +269,24 @@ const placeholder = computed(() => {
 const updateFilteredSpaces = (spaces) => {
   state.filteredSpaces = spaces
 }
+const parentDialog = computed(() => {
+  const cardDetailsIsVisible = store.state.cardDetailsIsVisibleForCardId
+  let parentDialog = props.parentDialog
+  if (cardDetailsIsVisible) {
+    parentDialog = 'cardDetails'
+  }
+  return parentDialog
+})
 const updateFilter = async (filter, isClearFilter) => {
+  const parentIsNew = parentDialog.value !== store.state.spaceListFilterInfo.parentDialog
+  if (parentIsNew) {
+    filter = ''
+  }
   state.filter = filter
   if (!isClearFilter) {
     store.commit('spaceListFilterInfo', {
       filter,
+      parentDialog: parentDialog.value,
       updatedAt: new Date().getTime()
     })
   }

@@ -16,7 +16,13 @@ dialog.templates.narrow(
         img.icon.templates(src="@/assets/templates.svg")
         span Current Space is Template
   section.results-section(:style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="templates" :showCategory="true" @selectSpace="changeSpace" :isLoading="isLoadingRemoteSpaces")
+    SpaceList(
+      :spaces="templates"
+      :showCategory="true"
+      @selectSpace="changeSpace"
+      :isLoading="isLoadingRemoteSpaces"
+      :parentDialog="parentDialog"
+    )
 </template>
 
 <script>
@@ -71,7 +77,8 @@ export default {
     },
     templates () {
       return this.userSpaces.concat(this.spaces)
-    }
+    },
+    parentDialog () { return 'templates' }
   },
   methods: {
     init () {

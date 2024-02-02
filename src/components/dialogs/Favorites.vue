@@ -110,6 +110,7 @@ const isSpaceMemberOfCurrentSpace = computed(() => store.getters['currentUser/is
 const changeSpace = (space) => {
   store.dispatch('currentSpace/changeSpace', space)
 }
+const parentDialog = computed(() => 'favorites')
 
 // favorite space
 
@@ -223,7 +224,12 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
   section.results-section(v-if="!isEmpty")
     //- Spaces
     template(v-if="state.spacesIsVisible")
-      SpaceList(:spaces="filteredSapces" :showUser="true" @selectSpace="changeSpace")
+      SpaceList(
+        :spaces="filteredSapces"
+        :showUser="true"
+        @selectSpace="changeSpace"
+        :parentDialog="parentDialog"
+      )
 
     //- People
     template(v-if="!state.spacesIsVisible")

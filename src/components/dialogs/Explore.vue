@@ -18,6 +18,7 @@ dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height'
       :userShowInExploreDate="userShowInExploreDate"
       :resultsSectionHeight="resultsSectionHeight"
       :showFavoriteButton="true"
+      :parentDialog="parentDialog"
     )
 </template>
 
@@ -61,7 +62,8 @@ export default {
   computed: {
     currentSpace () { return this.$store.state.currentSpace },
     currentSpaceInExplore () { return this.currentSpace.showInExplore },
-    exploreSpaces () { return this.filteredSpaces || this.spaces }
+    exploreSpaces () { return this.filteredSpaces || this.spaces },
+    parentDialog () { return 'explore' }
   },
   methods: {
     async updateSpaces () {

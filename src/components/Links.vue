@@ -5,7 +5,14 @@
       label(:class="{ active: currentUserSpacesIsVisibleOnly }")
         input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
         User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true")
-    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="parentIsPinned" :resultsSectionHeight="resultsSectionHeight")
+    SpaceList(
+      :spaces="filteredSpaces"
+      :showUser="true"
+      @selectSpace="changeSpace"
+      :parentIsPinned="parentIsPinned"
+      :resultsSectionHeight="resultsSectionHeight"
+      :parentDialog="parentDialog"
+    )
 
   section(v-else-if="loading")
     Loader(:visible="loading")
@@ -81,7 +88,8 @@ export default {
       } else {
         return false
       }
-    }
+    },
+    parentDialog () { return 'links' }
   },
   methods: {
     toggleCurrentUserSpacesIsVisibleOnly () {
