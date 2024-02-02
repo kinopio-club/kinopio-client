@@ -38,6 +38,7 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
       @selectSpace="selectSpace"
       :search="search"
       @focusBeforeFirstItem="handleFocusBeforeFirstItem"
+      :parentDialog="parentDialog"
     )
     .error-container(v-if="!filteredSpaces.length && !loading")
       User(:user="activeUser" :isClickable="false" :key="activeUser.id")
@@ -98,6 +99,7 @@ export default {
     }
   },
   computed: {
+    parentDialog () { return 'spacePicker' },
     activeUser () {
       const currentUser = this.$store.state.currentUser
       return this.user || currentUser

@@ -13,6 +13,7 @@ dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': d
       @selectSpace="changeSpace"
       :resultsSectionHeight="resultsSectionHeight"
       :showFavoriteButton="true"
+      :parentDialog="parentDialog"
     )
   section.empty(v-if="!spaces.length")
     p No public spaces are currently being edited, check back soon
@@ -50,6 +51,7 @@ export default {
     }
   },
   computed: {
+    parentDialog () { return 'live' }
   },
   methods: {
     changeSpace (space) {

@@ -40,6 +40,7 @@ dialog.space-details.is-pinnable.wide(v-if="visible" :open="visible" @click.left
       @addSpace="addSpace"
       :resultsSectionHeight="resultsSectionHeight"
       :showFavoriteButton="true"
+      :parentDialog="parentDialog"
     )
 </template>
 
@@ -136,6 +137,7 @@ export default {
     spaceFiltersIsActive () {
       return Boolean(this.spaceFilterShowHiddenIsActive || this.dialogSpaceFilters || utils.objectHasKeys(this.dialogSpaceFilterByUser))
     },
+    parentDialog () { return 'spaceDetails' },
     filteredSpaces () {
       let spaces
       // filter by space type

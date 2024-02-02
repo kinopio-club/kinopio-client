@@ -1,3 +1,366 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import templates from '@/data/templates.js'
+import ResultsFilter from '@/components/ResultsFilter.vue'
+import MoonPhase from '@/components/MoonPhase.vue'
+import PrivacyIcon from '@/components/PrivacyIcon.vue'
+import Loader from '@/components/Loader.vue'
+import User from '@/components/User.vue'
+import NameMatch from '@/components/NameMatch.vue'
+import OfflineBadge from '@/components/OfflineBadge.vue'
+import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
+import utils from '@/utils.js'
+import cache from '@/cache.js'
+
+import dayjs from 'dayjs'
+import last from 'lodash-es/last'
+
+const store = useStore()
+
+let unsubscribe, shouldPreventSelectSpace
+
+const spaceListElement = ref(null)
+
+onMounted(() => {
+  unsubscribe = store.subscribe((mutation) => {
+    if (mutation.type === 'triggerPickerNavigationKey') {
+      const key = mutation.payload
+      const spaces = props.spaces
+      let currentIndex = spaces.findIndex(space => space.id === state.focusOnId)
+      if (!utils.arrayHasItems(spaces)) {
+        closeDialog()
+      } else if (key === 'ArrowUp') {
+        focusPreviousItem(currentIndex)
+      } else if (key === 'ArrowDown') {
+        focusNextItem(currentIndex)
+      }
+    }
+    if (mutation.type === 'triggerPickerSelect') {
+      const spaces = props.spaces
+      const currentSpace = spaces.find(space => space.id === state.focusOnId)
+      selectSpace(null, currentSpace)
+      store.commit('shouldPreventNextEnterKey', true)
+    }
+  })
+  updateScroll()
+  spaceListElement.value.closest('section').addEventListener('scroll', updateScroll)
+})
+
+onBeforeUnmount(() => {
+  unsubscribe()
+  spaceListElement.value.closest('section').removeEventListener('scroll', updateScroll)
+})
+
+const emit = defineEmits(['focusBeforeFirstItem', 'closeDialog', 'selectSpace', 'checkmarkSpace'])
+
+const props = defineProps({
+  spaces: Array,
+  selectedSpace: Object,
+  showCategory: Boolean,
+  showUser: Boolean,
+  showOtherUsers: Boolean,
+  showUserIfCurrentUserIsCollaborator: Boolean,
+  hideExploreBadge: Boolean,
+  hideFilter: Boolean,
+  isLoading: Boolean,
+  parentIsSpaceDetails: Boolean,
+  parentIsPinned: Boolean,
+  showCheckmarkSpace: Boolean,
+  userShowInExploreDate: String,
+  showCreateNewSpaceFromSearch: Boolean,
+  resultsSectionHeight: Number,
+  disableListOptimizations: Boolean,
+  showFavoriteButton: Boolean,
+  search: String,
+  parentDialog: String
+})
+
+const state = reactive({
+  filter: '',
+  filteredSpaces: [],
+  focusOnId: '',
+  scrollY: 0,
+  scrollHeight: null,
+  heightByIndex: {}
+})
+
+// scroll
+
+watch(() => props.resultsSectionHeight, async (value, prevValue) => {
+  await nextTick()
+  updateScroll()
+})
+watch(() => props.isLoading, async (value, prevValue) => {
+  await nextTick()
+  updateScroll()
+})
+const updateScroll = () => {
+  let element = spaceListElement.value
+  if (!element) { return }
+  element = element.closest('section')
+  if (!element) {
+    console.error('scroll element not found', element)
+  }
+  state.scrollY = element.scrollTop
+  state.scrollHeight = element.getBoundingClientRect().height
+}
+
+const currentUser = computed(() => store.state.currentUser)
+
+// spaces
+
+watch(() => props.spaces, (spaces) => {
+  const cardDetailsIsVisible = store.state.cardDetailsIsVisibleForCardId
+  if (spaces && cardDetailsIsVisible) {
+    state.focusOnId = props.spaces[0].id
+  }
+}, { deep: true })
+
+const spacesFiltered = computed(() => {
+  if (state.filter) {
+    return state.filteredSpaces
+  } else {
+    return props.spaces
+  }
+})
+const isNotCached = (spaceId) => {
+  return store.getters['spaceIsNotCached'](spaceId)
+}
+const duplicateSpace = () => {
+  store.dispatch('currentSpace/duplicateSpace')
+  store.dispatch('closeAllDialogs')
+}
+const isNew = (space) => {
+  if (props.userShowInExploreDate) {
+    const readDate = dayjs(props.userShowInExploreDate)
+    const spaceDate = dayjs(space.showInExploreUpdatedAt)
+    const delta = readDate.diff(spaceDate, 'second')
+    return delta < 0
+  }
+  const isEditedByOtherUser = space.editedByUserId !== currentUser.value.id
+  if (isEditedByOtherUser) {
+    return space.isEdited
+  } else {
+    return false
+  }
+}
+const showCollaborator = (space) => {
+  const isUser = Boolean(user(space))
+  return props.showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator && isUser
+}
+const categoryClassName = (space) => {
+  const className = utils.normalizeString(space.category)
+  return className
+}
+const spaceIsActive = (space) => {
+  if (props.selectedSpace) {
+    return Boolean(props.selectedSpace.id === space.id)
+  } else {
+    return spaceIsCurrentSpace(space)
+  }
+}
+const isLoadingSpace = (space) => {
+  const isLoadingSpace = store.state.isLoadingSpace
+  return isLoadingSpace && spaceIsCurrentSpace(space)
+}
+const spaceIsCurrentSpace = (space) => {
+  const currentSpace = store.state.currentSpace.id
+  return Boolean(currentSpace === space.id)
+}
+const spaceIsTemplate = (space) => {
+  if (space.isTemplate) { return true }
+  const templateSpaceIds = templates.spaces().map(template => template.id)
+  return templateSpaceIds.includes(space.id)
+}
+const showInExplore = (space) => {
+  if (props.hideExploreBadge) { return }
+  if (space.privacy === 'private') { return }
+  return space.showInExplore
+}
+const user = (space) => {
+  let users = []
+  if (utils.arrayHasItems(space.users)) {
+    users = space.users
+  }
+  return space.user || users[0]
+}
+const selectSpace = (event, space) => {
+  if (event) {
+    if (event.metaKey || event.ctrlKey) {
+      return
+    } else {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+  }
+  if (shouldPreventSelectSpace) {
+    shouldPreventSelectSpace = false
+    return
+  }
+  if (!space) { return }
+  emit('selectSpace', space)
+}
+
+// favorites
+
+const isFavorite = (space) => {
+  const favorites = store.state.currentUser.favoriteSpaces
+  const isFavorite = favorites.find(favorite => favorite.id === space.id)
+  return Boolean(isFavorite)
+}
+const toggleIsFavoriteSpace = (space) => {
+  if (isFavorite(space)) {
+    store.dispatch('currentUser/removeFavorite', { type: 'space', item: space })
+  } else {
+    store.dispatch('currentUser/addFavorite', { type: 'space', item: space })
+  }
+}
+
+// list render optimization
+
+const itemIsVisible = (index) => {
+  if (props.disableListOptimizations) { return true }
+  if (!state.scrollY) {
+    updateScroll()
+  }
+  let threshold = 0
+  if (state.scrollY) {
+    threshold = state.scrollHeight / 2
+  }
+  const defaultHeight = 33
+  let yStart = index * defaultHeight
+  const prevHeight = state.heightByIndex[index - 1]
+  if (prevHeight) {
+    let yStart = 0
+    for (let i = 0; i - 1 < index; i++) {
+      yStart = yStart + state.heightByIndex[i]
+    }
+  }
+  const yEnd = yStart + defaultHeight
+  const isAboveScroll = (yEnd + threshold) < state.scrollY
+  const isBelowScroll = (yStart - threshold) > (state.scrollHeight + state.scrollY)
+  if (isAboveScroll || isBelowScroll) { return }
+  updateItemHeight(index)
+  return true
+}
+const updateItemHeight = (index) => {
+  let element = spaceListElement.value
+  if (!element) { return }
+  const elements = element.getElementsByClassName('.space-wrap')
+  if (!elements.length) { return }
+  const offset = 3
+  let height = elements[index].getBoundingClientRect().height
+  state.heightByIndex[index] = height
+}
+
+// results filter
+
+const placeholder = computed(() => {
+  if (!props.parentIsSpaceDetails) { return }
+  let placeholder = 'Search Spaces'
+  if (!utils.isMobile()) {
+    placeholder = placeholder + ` (${utils.metaKey()}-K)`
+  }
+  return placeholder
+})
+const updateFilteredSpaces = (spaces) => {
+  state.filteredSpaces = spaces
+}
+const parentDialog = computed(() => {
+  const cardDetailsIsVisible = store.state.cardDetailsIsVisibleForCardId
+  let parentDialog = props.parentDialog
+  if (cardDetailsIsVisible) {
+    parentDialog = 'cardDetails'
+  }
+  return parentDialog
+})
+const updateFilter = async (filter, isClearFilter) => {
+  const parentIsNew = parentDialog.value !== store.state.spaceListFilterInfo.parentDialog
+  if (parentIsNew) {
+    filter = ''
+  }
+  state.filter = filter
+  if (!isClearFilter) {
+    store.commit('spaceListFilterInfo', {
+      filter,
+      parentDialog: parentDialog.value,
+      updatedAt: new Date().getTime()
+    })
+  }
+  const spaces = spacesFiltered.value || props.spaces
+  if (!spaces.length) { return }
+  if (!filter) {
+    state.focusOnId = ''
+    await nextTick()
+    updateScroll()
+    return
+  }
+  state.focusOnId = spaces[0].id
+}
+
+// keyboard focus
+
+const focusPreviousItem = (currentIndex) => {
+  const spaces = spacesFiltered.value
+  const focusedSpaceName = props.spaces.find(space => space.id === state.focusOnId)
+  const firstItemIsFocused = props.search === focusedSpaceName
+  const firstItem = spaces[0]
+  const previousItem = spaces[currentIndex - 1]
+  if (firstItemIsFocused) {
+    closeDialog()
+  } else
+  if (previousItem) {
+    state.focusOnId = previousItem.id
+  } else {
+    state.focusOnId = firstItem.id
+    emit('focusBeforeFirstItem')
+  }
+}
+const focusNextItem = (currentIndex) => {
+  const spaces = spacesFiltered.value
+  const lastItem = last(spaces)
+  const lastItemIsFocused = lastItem.name === state.focusOnId
+  const nextItem = spaces[currentIndex + 1]
+
+  if (lastItemIsFocused) {
+    closeDialog()
+  } else if (nextItem) {
+    state.focusOnId = nextItem.id
+  } else {
+    state.focusOnId = lastItem.id
+  }
+}
+const closeDialog = () => {
+  emit('closeDialog')
+}
+const focusNextItemFromFilter = () => {
+  const spaces = spacesFiltered.value
+  const currentIndex = spaces.findIndex(space => space.id === state.focusOnId)
+  focusNextItem(currentIndex)
+}
+const focusPreviousItemFromFilter = () => {
+  const spaces = spacesFiltered.value
+  const currentIndex = spaces.findIndex(space => space.id === state.focusOnId)
+  focusPreviousItem(currentIndex)
+}
+const selectItemFromFilter = () => {
+  if (shouldPreventSelectSpace) {
+    shouldPreventSelectSpace = false
+    return
+  }
+  const spaces = spacesFiltered.value
+  const space = spaces.find(space => space.id === state.focusOnId)
+  store.commit('shouldPreventNextEnterKey', true)
+  selectSpace(null, space)
+}
+const checkmarkSpace = (space) => {
+  shouldPreventSelectSpace = true
+  emit('checkmarkSpace', space)
+}
+</script>
+
 <template lang="pug">
 span.space-list-wrap
   ResultsFilter(
@@ -14,13 +377,13 @@ span.space-list-wrap
     @focusPreviousItem="focusPreviousItemFromFilter"
     @selectItem="selectItemFromFilter"
   )
-  ul.results-list.space-list(ref="spaceList")
+  ul.results-list.space-list(ref="spaceListElement")
     template(v-for="(space, index) in spacesFiltered" :key="space.id")
-      .space-wrap(:data-item-is-visible="itemIsVisible(index)" :style="{height: heightByIndex[index] + 'px'}")
+      .space-wrap(:data-item-is-visible="itemIsVisible(index)" :style="{height: state.heightByIndex[index] + 'px'}")
         a(:href="space.url")
           li(
             @click.left="selectSpace($event, space)"
-            :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
+            :class="{ active: spaceIsActive(space), hover: state.focusOnId === space.id }"
             tabindex="0"
             @keyup.enter="selectSpace(null, space)"
           )
@@ -56,10 +419,9 @@ span.space-list-wrap
               //- tweet space
               span(v-if="space.isFromTweet" title="Tweet space")
                 img.icon.tweet(src="@/assets/twitter.svg")
-
               //- space details
               .name
-                span(v-if="this.filter")
+                span(v-if="state.filter")
                   NameMatch(:name="space.name" :indexes="space.matchIndexes")
                 span(v-else)
                   span {{space.name}}
@@ -72,354 +434,7 @@ span.space-list-wrap
             button.inline-favorite.small-button(:class="{ active: isFavorite(space) }")
               img.icon.favorite-icon(v-if="isFavorite(space)" src="@/assets/heart.svg")
               img.icon.favorite-icon(v-else src="@/assets/heart-empty.svg")
-
 </template>
-
-<script>
-import templates from '@/data/templates.js'
-import ResultsFilter from '@/components/ResultsFilter.vue'
-import MoonPhase from '@/components/MoonPhase.vue'
-import { defineAsyncComponent } from 'vue'
-import PrivacyIcon from '@/components/PrivacyIcon.vue'
-import Loader from '@/components/Loader.vue'
-import NameMatch from '@/components/NameMatch.vue'
-import OfflineBadge from '@/components/OfflineBadge.vue'
-import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
-import utils from '@/utils.js'
-import cache from '@/cache.js'
-
-import dayjs from 'dayjs'
-import last from 'lodash-es/last'
-const User = defineAsyncComponent({
-  loader: () => import('@/components/User.vue')
-})
-
-let unsubscribe, shouldPreventSelectSpace
-
-export default {
-  name: 'SpaceList',
-  components: {
-    User,
-    ResultsFilter,
-    MoonPhase,
-    PrivacyIcon,
-    Loader,
-    NameMatch,
-    SpaceTodayJournalBadge,
-    OfflineBadge
-  },
-  props: {
-    spaces: Array,
-    selectedSpace: Object,
-    showCategory: Boolean,
-    showUser: Boolean,
-    showOtherUsers: Boolean,
-    showUserIfCurrentUserIsCollaborator: Boolean,
-    hideExploreBadge: Boolean,
-    hideFilter: Boolean,
-    isLoading: Boolean,
-    parentIsSpaceDetails: Boolean,
-    parentIsPinned: Boolean,
-    showCheckmarkSpace: Boolean,
-    userShowInExploreDate: String,
-    showCreateNewSpaceFromSearch: Boolean,
-    resultsSectionHeight: Number,
-    disableListOptimizations: Boolean,
-    showFavoriteButton: Boolean
-  },
-  data () {
-    return {
-      filter: '',
-      filteredSpaces: [],
-      focusOnId: '',
-      scrollY: 0,
-      scrollHeight: null,
-      heightByIndex: {}
-    }
-  },
-  mounted () {
-    unsubscribe = this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerPickerNavigationKey') {
-        const key = mutation.payload
-        const spaces = this.spaces
-        let currentIndex = spaces.findIndex(space => space.id === this.focusOnId)
-        if (!utils.arrayHasItems(spaces)) {
-          this.closeDialog()
-        } else if (key === 'ArrowUp') {
-          this.focusPreviousItem(currentIndex)
-        } else if (key === 'ArrowDown') {
-          this.focusNextItem(currentIndex)
-        }
-      }
-      if (mutation.type === 'triggerPickerSelect') {
-        const spaces = this.spaces
-        const currentSpace = spaces.find(space => space.id === this.focusOnId)
-        this.selectSpace(null, currentSpace)
-        this.$store.commit('shouldPreventNextEnterKey', true)
-      }
-    })
-    this.updateScroll()
-    this.$refs.spaceList.closest('section').addEventListener('scroll', this.updateScroll)
-  },
-  beforeUnmount () {
-    unsubscribe()
-    this.$refs.spaceList.closest('section').removeEventListener('scroll', this.updateScroll)
-  },
-  computed: {
-    currentUser () { return this.$store.state.currentUser },
-    placeholder () {
-      if (!this.parentIsSpaceDetails) { return }
-      let placeholder = 'Search Spaces'
-      if (!utils.isMobile()) {
-        placeholder = placeholder + ` (${utils.metaKey()}-K)`
-      }
-      return placeholder
-    },
-    spacesFiltered () {
-      if (this.filter) {
-        return this.filteredSpaces
-      } else {
-        return this.spaces
-      }
-    }
-  },
-  methods: {
-    isNotCached (spaceId) {
-      return this.$store.getters['spaceIsNotCached'](spaceId)
-    },
-    isFavorite (space) {
-      const favorites = this.$store.state.currentUser.favoriteSpaces
-      const isFavorite = favorites.find(favorite => favorite.id === space.id)
-      return Boolean(isFavorite)
-    },
-    toggleIsFavoriteSpace (space) {
-      if (this.isFavorite(space)) {
-        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: space })
-      } else {
-        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: space })
-      }
-    },
-    updateScroll () {
-      let element = this.$refs.spaceList
-      if (!element) { return }
-      element = element.closest('section')
-      if (!element) {
-        console.error('scroll element not found', element)
-      }
-      this.scrollY = element.scrollTop
-      this.scrollHeight = element.getBoundingClientRect().height
-    },
-    itemIsVisible (index) {
-      if (this.disableListOptimizations) { return true }
-      if (!this.scrollY) {
-        this.updateScroll()
-      }
-      let threshold = 0
-      if (this.scrollY) {
-        threshold = this.scrollHeight / 2
-      }
-      const defaultHeight = 33
-      let yStart = index * defaultHeight
-      const prevHeight = this.heightByIndex[index - 1]
-      if (prevHeight) {
-        let yStart = 0
-        for (let i = 0; i - 1 < index; i++) {
-          yStart = yStart + this.heightByIndex[i]
-        }
-      }
-      const yEnd = yStart + defaultHeight
-      const isAboveScroll = (yEnd + threshold) < this.scrollY
-      const isBelowScroll = (yStart - threshold) > (this.scrollHeight + this.scrollY)
-      if (isAboveScroll || isBelowScroll) { return }
-      this.updateItemHeight(index)
-      return true
-    },
-    updateItemHeight (index) {
-      let element = this.$refs.spaceList
-      if (!element) { return }
-      const elements = element.getElementsByClassName('.space-wrap')
-      if (!elements.length) { return }
-      const offset = 3
-      let height = elements[index].getBoundingClientRect().height
-      this.heightByIndex[index] = height
-    },
-    duplicateSpace () {
-      this.$store.dispatch('currentSpace/duplicateSpace')
-      this.$store.dispatch('closeAllDialogs')
-    },
-    isNew (space) {
-      if (this.userShowInExploreDate) {
-        const readDate = dayjs(this.userShowInExploreDate)
-        const spaceDate = dayjs(space.showInExploreUpdatedAt)
-        const delta = readDate.diff(spaceDate, 'second')
-        return delta < 0
-      }
-      const isEditedByOtherUser = space.editedByUserId !== this.currentUser.id
-      if (isEditedByOtherUser) {
-        return space.isEdited
-      } else {
-        return false
-      }
-    },
-    showCollaborator (space) {
-      const isUser = Boolean(this.user(space))
-      return this.showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator && isUser
-    },
-    categoryClassName (space) {
-      const className = utils.normalizeString(space.category)
-      return className
-    },
-    updateFilteredSpaces (spaces) {
-      this.filteredSpaces = spaces
-    },
-    updateFilter (filter, isClearFilter) {
-      this.filter = filter
-      if (!isClearFilter) {
-        this.$store.commit('spaceListFilterInfo', {
-          filter,
-          updatedAt: new Date().getTime()
-        })
-      }
-      const spaces = this.spacesFiltered || this.spaces
-      if (!spaces.length) { return }
-      if (!filter) {
-        this.focusOnId = ''
-        this.$nextTick(() => {
-          this.updateScroll()
-        })
-        return
-      }
-      this.focusOnId = spaces[0].id
-    },
-    spaceIsActive (space) {
-      if (this.selectedSpace) {
-        return Boolean(this.selectedSpace.id === space.id)
-      } else {
-        return this.spaceIsCurrentSpace(space)
-      }
-    },
-    isLoadingSpace (space) {
-      const isLoadingSpace = this.$store.state.isLoadingSpace
-      return isLoadingSpace && this.spaceIsCurrentSpace(space)
-    },
-    spaceIsCurrentSpace (space) {
-      const currentSpace = this.$store.state.currentSpace.id
-      return Boolean(currentSpace === space.id)
-    },
-    spaceIsTemplate (space) {
-      if (space.isTemplate) { return true }
-      const templateSpaceIds = templates.spaces().map(template => template.id)
-      return templateSpaceIds.includes(space.id)
-    },
-    showInExplore (space) {
-      if (this.hideExploreBadge) { return }
-      if (space.privacy === 'private') { return }
-      return space.showInExplore
-    },
-    user (space) {
-      let users = []
-      if (utils.arrayHasItems(space.users)) {
-        users = space.users
-      }
-      return space.user || users[0]
-    },
-    focusPreviousItem (currentIndex) {
-      const spaces = this.spacesFiltered
-      const focusedSpaceName = this.spaces.find(space => space.id === this.focusOnId)
-      const firstItemIsFocused = this.search === focusedSpaceName
-      const firstItem = spaces[0]
-      const previousItem = spaces[currentIndex - 1]
-      if (firstItemIsFocused) {
-        this.closeDialog()
-      } else if (previousItem) {
-        this.focusOnId = previousItem.id
-      } else {
-        this.focusOnId = firstItem.id
-        this.$emit('focusBeforeFirstItem')
-      }
-    },
-    focusNextItem (currentIndex) {
-      const spaces = this.spacesFiltered
-      const lastItem = last(spaces)
-      const lastItemIsFocused = lastItem.name === this.focusOnId
-      const nextItem = spaces[currentIndex + 1]
-      if (lastItemIsFocused) {
-        this.closeDialog()
-      } else if (nextItem) {
-        this.focusOnId = nextItem.id
-      } else {
-        this.focusOnId = lastItem.id
-      }
-    },
-    selectSpace (event, space) {
-      if (event) {
-        if (event.metaKey || event.ctrlKey) {
-          return
-        } else {
-          event.preventDefault()
-          event.stopPropagation()
-        }
-      }
-      if (shouldPreventSelectSpace) {
-        shouldPreventSelectSpace = false
-        return
-      }
-      if (!space) { return }
-      this.$store.commit('isLoadingSpace', true)
-      this.$emit('selectSpace', space)
-    },
-    closeDialog () {
-      this.$emit('closeDialog')
-    },
-
-    focusNextItemFromFilter () {
-      const spaces = this.spacesFiltered
-      const currentIndex = spaces.findIndex(space => space.id === this.focusOnId)
-      this.focusNextItem(currentIndex)
-    },
-    focusPreviousItemFromFilter () {
-      const spaces = this.spacesFiltered
-      const currentIndex = spaces.findIndex(space => space.id === this.focusOnId)
-      this.focusPreviousItem(currentIndex)
-    },
-    selectItemFromFilter () {
-      if (shouldPreventSelectSpace) {
-        shouldPreventSelectSpace = false
-        return
-      }
-      const spaces = this.spacesFiltered
-      const space = spaces.find(space => space.id === this.focusOnId)
-      this.$store.commit('shouldPreventNextEnterKey', true)
-      this.selectSpace(null, space)
-    },
-    checkmarkSpace (space) {
-      shouldPreventSelectSpace = true
-      this.$emit('checkmarkSpace', space)
-    }
-  },
-  watch: {
-    spaces: {
-      handler (spaces) {
-        const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
-        if (spaces && cardDetailsIsVisible) {
-          this.focusOnId = spaces[0].id
-        }
-      },
-      deep: true
-    },
-    resultsSectionHeight (value) {
-      this.$nextTick(() => {
-        this.updateScroll()
-      })
-    },
-    isLoading (value) {
-      this.$nextTick(() => {
-        this.updateScroll()
-      })
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .space-list-wrap
