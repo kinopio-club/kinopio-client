@@ -200,7 +200,6 @@ const selectSpace = (event, space) => {
     return
   }
   if (!space) { return }
-  store.commit('isLoadingSpace', true)
   emit('selectSpace', space)
 }
 
