@@ -1079,7 +1079,7 @@ export default {
       const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       const isCursorInsideSlashCommand = this.isCursorInsideSlashCommand()
       if (keyIsArrowUpOrDown) { return }
-      if (key === '(') {
+      if (key === '(' && !event.shiftKey) {
         this.triggerCommentAddClosingBrackets()
       }
       if (utils.hasBlankCharacters(key)) {
