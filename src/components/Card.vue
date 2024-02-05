@@ -1678,11 +1678,11 @@ export default {
     },
     updateStylesWithWidth (styles) {
       const cardHasExtendedContent = this.cardUrlPreviewIsVisible || this.otherCardIsVisible || this.isVisualCard || this.isAudioCard
-      const cardHasMedia = this.cardHasMedia || this.cardHasUrls
+      const cardHasUrls = this.cardHasMedia || this.cardHasUrls
       if (this.width) {
         styles.width = this.width
       }
-      if (this.cardHasMedia) {
+      if (cardHasUrls) {
         styles.width = this.$store.getters['currentCards/defaultCardMaxWidth']
       }
       if (this.resizeWidth) {
