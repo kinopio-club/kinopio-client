@@ -696,7 +696,12 @@ export default {
     },
     cardContentWrapStyles () {
       let styles = {}
-      styles = this.updateStylesWithWidth(styles)
+      if (this.resizeWidth) {
+        styles.maxWidth = this.resizeWidth
+        styles.width = this.resizeWidth
+      }
+      styles.width = styles.width + 'px'
+      styles.maxWidth = styles.maxWidth + 'px'
       return styles
     },
     backgroundColorIsDark () {
