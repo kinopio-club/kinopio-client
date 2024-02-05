@@ -110,9 +110,20 @@ const removeTrailingTweetText = (description) => {
   return description
 }
 
-// instagram url signature expiry
-
-const retryPreviewImage = (event) => {
+const handleImageError = (event) => {
+  console.log('🚑 urlPreviewCard handleImageError', event)
+  const url = props.card.urlPreviewUrl
+  const isInstagram = url.includes('instagram')
+  // generic image error
+  if (!isInstagram) {
+    const card = {
+      id: props.card.id,
+      shouldHideUrlPreviewImage: true
+    }
+    store.commit('currentCards/update', card)
+    return
+  }
+  // instagram url signature expiry
   if (hasRetried) { return }
   emit('retryUrlPreview')
   hasRetried = true
@@ -143,7 +154,7 @@ const description = computed(() => {
   //- image
   template(v-if="!shouldDisplayEmbed")
     .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage")
-      img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" @load="updateDimensions" ref="image" @error="retryPreviewImage")
+      img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" @load="updateDimensions" ref="image" @error="handleImageError")
 
   //- embed
   template(v-if="shouldDisplayEmbed")
