@@ -69,7 +69,7 @@ article.card-wrap#card(
           img.resize-icon.icon(src="@/assets/resize-corner.svg")
 
     //- Content
-    span.card-content-wrap
+    span.card-content-wrap(:style="cardContentWrapStyles")
       //- Comment
       .card-comment(v-if="isComment")
         //- [·]
@@ -692,6 +692,11 @@ export default {
       if (this.isAudioCard) {
         styles.width = '100%'
       }
+      return styles
+    },
+    cardContentWrapStyles () {
+      let styles = {}
+      styles = this.updateStylesWithWidth(styles)
       return styles
     },
     backgroundColorIsDark () {
