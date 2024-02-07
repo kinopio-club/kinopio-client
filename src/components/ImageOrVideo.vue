@@ -3,8 +3,7 @@
 video(v-if="Boolean(video)" autoplay loop muted playsinline :key="video" :class="{selected: isSelectedOrDragging}" @canplay="updateDimensions" ref="video")
   source(:src="video")
 //- Image
-img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
-img.image(v-else-if="Boolean(image)" :src="image" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
+img.image(v-if="imageUrl" :src="imageUrl" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
 </template>
 
 <script>
@@ -12,13 +11,19 @@ import utils from '@/utils.js'
 
 export default {
   name: 'ImageOrVideo',
-  components: {
-  },
   props: {
     isSelectedOrDragging: Boolean,
     pendingUploadDataUrl: String,
     image: String,
     video: String
+  },
+  data () {
+    return {
+      imageUrl: null
+    }
+  },
+  created () {
+    this.imageUrl = this.image || this.pendingUploadDataUrl
   },
   emits: ['updateCardDimensions'],
   computed: {
@@ -40,6 +45,28 @@ export default {
     }
   },
   watch: {
+    image (url) {
+      if (!url && !this.pendingUploadDataUrl) {
+        this.imageUrl = null
+      }
+
+      const onLoaded = () => {
+        this.imageUrl = url
+      }
+
+      const image = new Image()
+      image.addEventListener('load', onLoaded)
+      image.src = url
+
+      if (image.complete) {
+        onLoaded()
+      }
+    },
+    pendingUploadDataUrl (url) {
+      if (url) {
+        this.imageUrl = url
+      }
+    },
     isInteractingWithItem (value) {
       if (utils.isSafari()) { return } // fixes: safari hides video when pausing
       if (value) {
