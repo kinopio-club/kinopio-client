@@ -1391,6 +1391,7 @@ export default {
     return remoteSpace
   },
   AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
+    if (!spaces) { return }
     return spaces.map(space => {
       let userId
       space.users = space.users || []

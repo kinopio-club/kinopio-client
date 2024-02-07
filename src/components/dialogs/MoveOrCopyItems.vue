@@ -197,11 +197,10 @@ export default {
         items.isRemoved = true
         this.$store.dispatch('history/resume')
         this.$store.dispatch('history/add', items)
-      } else {
-        this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-          cards: items.cards
-        })
       }
+      this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+        cards: items.cards
+      })
       this.$store.dispatch('currentConnections/removeUnusedTypes')
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('closeAllDialogs')
