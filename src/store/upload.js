@@ -52,21 +52,11 @@ export default {
     addImageDataUrl: (context, { file, cardId, spaceId }) => {
       const isImage = file.type.includes('image')
       if (!isImage) { return null }
-      const reader = new FileReader()
-      reader.onloadend = (event) => {
-        context.commit('updatePendingUpload', {
-          cardId,
-          spaceId,
-          imageDataUrl: reader.result
-        })
-      }
-      reader.onerror = (event) => {
-        throw {
-          type: 'unknownUploadError',
-          message: '(シ_ _)シ Something went wrong, Please try again or contact support'
-        }
-      }
-      reader.readAsDataURL(file)
+      context.commit('updatePendingUpload', {
+        cardId,
+        spaceId,
+        imageDataUrl: URL.createObjectURL(file)
+      })
     },
     uploadFile: async (context, { file, cardId, spaceId }) => {
       const uploadId = nanoid()
