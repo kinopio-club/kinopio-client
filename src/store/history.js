@@ -216,7 +216,7 @@ const self = {
       const patch = patches[index]
       context.commit('isPaused', true)
       patch.forEach(item => {
-        console.log('⏪', item, { pointer, totalPatches: patches.length })
+        console.log('⏪ undo', item, { pointer, totalPatches: patches.length })
         const { action } = item
         let card, connection, type, box
         switch (action) {
@@ -277,15 +277,17 @@ const self = {
 
     // Redo
 
-    redo: (context) => {
+    redo: (context, patch) => {
       const { isPaused, pointer, patches } = context.state
-      if (isPaused) { return }
-      const pointerIsNewest = pointer === patches.length
-      if (pointerIsNewest) { return }
-      const patch = patches[pointer]
+      if (!patch) {
+        if (isPaused) { return }
+        const pointerIsNewest = pointer === patches.length
+        if (pointerIsNewest) { return }
+        patch = patches[pointer]
+      }
       context.commit('isPaused', true)
       patch.forEach(item => {
-        console.log('⏩', item, { pointer, totalPatches: patches.length })
+        console.log('⏩ redo', item, { pointer, totalPatches: patches.length })
         const { action } = item
         let card, connection, type, box
         switch (action) {
@@ -337,6 +339,17 @@ const self = {
       })
       context.dispatch('resume')
       context.commit('pointer', { increment: true })
+    },
+
+    // Restore local changes over remote space
+    // replays patches between the time local space is loaded to when remote space is loaded
+
+    redoLocalUpdates: (context) => {
+      context.state.patches.forEach(patch => {
+        const actions = ['cardUpdated', 'boxUpdated']
+        const isUpdate = actions.includes(patch[0].action)
+        context.dispatch('redo', patch)
+      })
     }
   }
 }

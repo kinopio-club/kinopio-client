@@ -853,6 +853,7 @@ const currentSpace = {
       const boxResults = utils.mergeSpaceKeyValues({ prevItems: boxes, newItems: remoteSpace.boxes })
       context.dispatch('currentBoxes/mergeUnique', { newItems: boxResults.updateItems, itemType: 'box' }, { root: true })
       context.dispatch('currentBoxes/mergeRemove', { removeItems: boxResults.removeItems, itemType: 'box' }, { root: true })
+      context.dispatch('history/redoLocalUpdates', null, { root: true })
       console.log('🎑 merged remote space', {
         cards: cardResults,
         types: connectionTypeReults,
