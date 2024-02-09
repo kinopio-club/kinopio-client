@@ -828,6 +828,12 @@ const currentCards = {
       const cards = cardIds.map(id => getters.byId(id))
       return cards
     },
+    isSelectedIds: (state, getters) => {
+      let cards = getters.isSelected
+      cards = cards.filter(card => Boolean(card))
+      const cardIds = cards.map(card => card.id)
+      return cardIds
+    },
     linkedItems: (state, getters) => {
       let cardIds = []
       let spaceIds = []

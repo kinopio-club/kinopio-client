@@ -1133,9 +1133,17 @@ export default {
     const isUnchanged = isEditedAt && isCardLength && isConnectionLength
     return isUnchanged
   },
-  mergeSpaceKeyValues ({ prevItems, newItems }) {
+  mergePrevIntoNewItem ({ prevItem, newItem }) {
+    const keys = Object.keys(prevItem)
+    keys.forEach(key => {
+      newItem[key] = key
+    })
+    return newItem
+  },
+  mergeSpaceKeyValues ({ prevItems, newItems, selectedItems }) {
     prevItems = prevItems.filter(item => Boolean(item))
     newItems = newItems.filter(item => Boolean(item))
+    selectedItems = selectedItems || []
     const prevIds = prevItems.map(item => item.id)
     const newIds = newItems.map(item => item.id)
     newItems = this.normalizeItems(newItems)
@@ -1144,8 +1152,16 @@ export default {
     let updateItems = []
     let removeItems = []
     newIds.forEach(id => {
+      const itemIsSelected = selectedItems.includes(id)
       const itemExists = prevIds.includes(id)
-      if (itemExists) {
+      if (itemIsSelected) {
+        const prevItem = prevItems[id]
+        const newItem = newItems[id]
+        delete newItem.x
+        delete newItem.y
+        const mergeItem = this.mergePrevIntoNewItem({ prevItem, newItem })
+        updateItems.push(newItem)
+      } else if (itemExists) {
         updateItems.push(newItems[id])
       } else {
         addItems.push(newItems[id])

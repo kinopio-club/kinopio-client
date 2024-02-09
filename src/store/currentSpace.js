@@ -835,7 +835,8 @@ const currentSpace = {
       remoteSpace = utils.normalizeSpace(remoteSpace)
       // cards
       const cards = context.rootGetters['currentCards/all']
-      const cardResults = utils.mergeSpaceKeyValues({ prevItems: cards, newItems: remoteSpace.cards })
+      const selectedCardIds = context.rootGetters['currentCards/isSelectedIds']
+      let cardResults = utils.mergeSpaceKeyValues({ prevItems: cards, newItems: remoteSpace.cards, selectedItems: selectedCardIds })
       context.dispatch('currentCards/mergeUnique', cardResults.updateItems, { root: true })
       context.dispatch('currentCards/mergeRemove', cardResults.removeItems, { root: true })
       // connectionTypes
@@ -850,7 +851,8 @@ const currentSpace = {
       context.dispatch('currentConnections/mergeRemove', { removeItems: connectionResults.removeItems, itemType: 'connection' }, { root: true })
       // boxes
       const boxes = context.rootGetters['currentBoxes/all']
-      const boxResults = utils.mergeSpaceKeyValues({ prevItems: boxes, newItems: remoteSpace.boxes })
+      const selectedBoxIds = context.rootGetters['currentBoxes/isSelectedIds']
+      const boxResults = utils.mergeSpaceKeyValues({ prevItems: boxes, newItems: remoteSpace.boxes, selectedItems: selectedBoxIds })
       context.dispatch('currentBoxes/mergeUnique', { newItems: boxResults.updateItems, itemType: 'box' }, { root: true })
       context.dispatch('currentBoxes/mergeRemove', { removeItems: boxResults.removeItems, itemType: 'box' }, { root: true })
       context.dispatch('history/redoLocalUpdates', null, { root: true })
