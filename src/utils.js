@@ -1127,18 +1127,7 @@ export default {
 
   spaceIsUnchanged (prevSpace, newSpace) {
     if (!prevSpace.cards || !prevSpace.connections) { return false }
-    const isEditedAt = prevSpace.editedAt === newSpace.editedAt
-    const isCardLength = prevSpace.cards.length === newSpace.cards.length
-    const isConnectionLength = prevSpace.connections.length === newSpace.connections.length
-    const isUnchanged = isEditedAt && isCardLength && isConnectionLength
-    return isUnchanged
-  },
-  mergePrevIntoNewItem ({ prevItem, newItem }) {
-    const keys = Object.keys(prevItem)
-    keys.forEach(key => {
-      newItem[key] = key
-    })
-    return newItem
+    return prevSpace.editedAt === newSpace.editedAt
   },
   mergeSpaceKeyValues ({ prevItems, newItems, selectedItems }) {
     prevItems = prevItems.filter(item => Boolean(item))
