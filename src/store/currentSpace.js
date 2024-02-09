@@ -556,14 +556,6 @@ const currentSpace = {
       if (!remoteSpace) { return }
       // only restore current space
       if (remoteSpace.id !== context.state.id) { return }
-      // only cache spaces you can edit
-      const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](remoteSpace)
-      const canEditSpace = context.rootGetters['currentUser/canEditSpace'](remoteSpace)
-      if (isSpaceMember && !remoteSpace.isRemoved) {
-        cache.saveSpace(remoteSpace)
-      } else if (!isSpaceMember && canEditSpace) {
-        context.commit('addNotification', { message: 'This space is open, which means you can add to it too', icon: 'open', type: 'success' }, { root: true })
-      }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
     removeLocalSpaceIfUserIsRemoved: (context, space) => {
@@ -803,10 +795,27 @@ const currentSpace = {
           return
         }
         context.dispatch('restoreSpaceRemote', remoteSpace)
+        context.dispatch('saveCurrentSpaceToCache')
+        context.dispatch('notifySpaceIsOpen') // TODO move to trigger
       })
         .catch(error => {
           console.error('🚒 Error fetching remoteSpace', error)
         })
+    },
+    saveCurrentSpaceToCache: (context) => {
+      const space = utils.clone(context.state)
+      const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](space)
+      if (!isSpaceMember) { return }
+      if (context.state.isRemoved) { return }
+      cache.saveSpace(space)
+    },
+    notifySpaceIsOpen: (context) => {
+      const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](context.state)
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace'](context.state)
+      if (context.state.isRemoved) { return }
+      if (!isSpaceMember && canEditSpace) {
+        context.commit('addNotification', { message: 'This space is open, which means you can add to it too', icon: 'open', type: 'success' }, { root: true })
+      }
     },
     clearStateMeta: (context) => {
       const user = context.rootState.currentUser
