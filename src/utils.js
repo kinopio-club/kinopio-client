@@ -1147,7 +1147,7 @@ export default {
       if (selectedItem) {
         const prevItem = prevItems[id]
         let newItem = newItems[id]
-        // use prevItem position to avoid ppsition item jumping while dragging
+        // use prevItem position to avoid ppsition item jumping while selected items dragging
         newItem.x = prevItem.x
         newItem.y = prevItem.y
         updateItems.push(newItem)
