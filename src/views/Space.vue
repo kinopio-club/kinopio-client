@@ -117,6 +117,14 @@ export default {
     updateInboxCache = setInterval(() => {
       this.$store.dispatch('currentSpace/updateInboxCache')
     }, 1000 * 60 * 60 * 1) // every 1 hour
+
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerRestoreSpaceRemoteComplete') {
+        this.$nextTick(() => {
+          this.dragItems()
+        })
+      }
+    })
   },
   beforeUnmount () {
     window.removeEventListener('mousemove', this.interact)
@@ -283,7 +291,6 @@ export default {
       this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserResizingBoxes' })
       this.$store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
     },
-
     dragItems () {
       this.$store.dispatch('history/pause')
       const prevCursor = this.cursor()

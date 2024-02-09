@@ -844,8 +844,8 @@ const currentSpace = {
       remoteSpace = utils.normalizeSpace(remoteSpace)
       // cards
       const cards = context.rootGetters['currentCards/all']
-      const selectedCardIds = context.rootGetters['currentCards/isSelectedIds']
-      let cardResults = utils.mergeSpaceKeyValues({ prevItems: cards, newItems: remoteSpace.cards, selectedItems: selectedCardIds })
+      const selectedCards = context.rootGetters['currentCards/selectedCardsPositions']()
+      let cardResults = utils.mergeSpaceKeyValues({ prevItems: cards, newItems: remoteSpace.cards, selectedItems: selectedCards })
       context.dispatch('currentCards/mergeUnique', cardResults.updateItems, { root: true })
       context.dispatch('currentCards/mergeRemove', cardResults.removeItems, { root: true })
       // connectionTypes
@@ -879,6 +879,7 @@ const currentSpace = {
         addConnections: connectionResults.addItems,
         addBoxes: boxResults.addItems
       })
+      context.commit('triggerRestoreSpaceRemoteComplete', null, { root: true })
       console.timeEnd('🎑⏱️ restoreSpaceRemote')
     },
     loadLastSpace: async (context) => {

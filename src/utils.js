@@ -1133,6 +1133,7 @@ export default {
     prevItems = prevItems.filter(item => Boolean(item))
     newItems = newItems.filter(item => Boolean(item))
     selectedItems = selectedItems || []
+    const selectedItemIds = selectedItems.map(item => item.id)
     const prevIds = prevItems.map(item => item.id)
     const newIds = newItems.map(item => item.id)
     newItems = this.normalizeItems(newItems)
@@ -1141,14 +1142,14 @@ export default {
     let updateItems = []
     let removeItems = []
     newIds.forEach(id => {
-      const itemIsSelected = selectedItems.includes(id)
+      const selectedItem = selectedItems.find(item => item.id === id)
       const itemExists = prevIds.includes(id)
-      if (itemIsSelected) {
+      if (selectedItem) {
         const prevItem = prevItems[id]
-        const newItem = newItems[id]
-        delete newItem.x
-        delete newItem.y
-        const mergeItem = this.mergePrevIntoNewItem({ prevItem, newItem })
+        let newItem = newItems[id]
+        // use prevItem position to avoid ppsition item jumping while dragging
+        newItem.x = prevItem.x
+        newItem.y = prevItem.y
         updateItems.push(newItem)
       } else if (itemExists) {
         updateItems.push(newItems[id])
