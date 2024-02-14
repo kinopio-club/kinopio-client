@@ -860,8 +860,7 @@ const currentSpace = {
       context.dispatch('currentConnections/mergeRemove', { removeItems: connectionResults.removeItems, itemType: 'connection' }, { root: true })
       // boxes
       const boxes = context.rootGetters['currentBoxes/all']
-      const selectedBoxIds = context.rootGetters['currentBoxes/isSelectedIds']
-      const boxResults = utils.mergeSpaceKeyValues({ prevItems: boxes, newItems: remoteSpace.boxes, selectedItems: selectedBoxIds })
+      const boxResults = utils.mergeSpaceKeyValues({ prevItems: boxes, newItems: remoteSpace.boxes })
       context.dispatch('currentBoxes/mergeUnique', { newItems: boxResults.updateItems, itemType: 'box' }, { root: true })
       context.dispatch('currentBoxes/mergeRemove', { removeItems: boxResults.removeItems, itemType: 'box' }, { root: true })
       context.dispatch('history/redoLocalUpdates', null, { root: true })
