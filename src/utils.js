@@ -1127,15 +1127,13 @@ export default {
 
   spaceIsUnchanged (prevSpace, newSpace) {
     if (!prevSpace.cards || !prevSpace.connections) { return false }
-    const isEditedAt = prevSpace.editedAt === newSpace.editedAt
-    const isCardLength = prevSpace.cards.length === newSpace.cards.length
-    const isConnectionLength = prevSpace.connections.length === newSpace.connections.length
-    const isUnchanged = isEditedAt && isCardLength && isConnectionLength
-    return isUnchanged
+    return prevSpace.editedAt === newSpace.editedAt
   },
-  mergeSpaceKeyValues ({ prevItems, newItems }) {
+  mergeSpaceKeyValues ({ prevItems, newItems, selectedItems }) {
     prevItems = prevItems.filter(item => Boolean(item))
     newItems = newItems.filter(item => Boolean(item))
+    selectedItems = selectedItems || []
+    const selectedItemIds = selectedItems.map(item => item.id)
     const prevIds = prevItems.map(item => item.id)
     const newIds = newItems.map(item => item.id)
     newItems = this.normalizeItems(newItems)
@@ -1144,8 +1142,16 @@ export default {
     let updateItems = []
     let removeItems = []
     newIds.forEach(id => {
+      const selectedItem = selectedItems.find(item => item.id === id)
       const itemExists = prevIds.includes(id)
-      if (itemExists) {
+      if (selectedItem) {
+        const prevItem = prevItems[id]
+        let newItem = newItems[id]
+        // use prevItem position to avoid ppsition item jumping while selected items dragging
+        newItem.x = prevItem.x
+        newItem.y = prevItem.y
+        updateItems.push(newItem)
+      } else if (itemExists) {
         updateItems.push(newItems[id])
       } else {
         addItems.push(newItems[id])
@@ -1391,6 +1397,7 @@ export default {
     return remoteSpace
   },
   AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
+    if (!spaces) { return }
     return spaces.map(space => {
       let userId
       space.users = space.users || []

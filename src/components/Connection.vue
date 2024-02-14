@@ -425,6 +425,7 @@ export default {
       const controlPoint = curveMatch[0]
       this.curvedPath = this.updatedPath(this.curvedPath, controlPoint, x, y)
       const element = this.$refs.connectionElement
+      if (!element) { return }
       element.setAttribute('d', this.curvedPath)
       if (this.shouldAnimate) {
         window.requestAnimationFrame(this.animationFrame)
