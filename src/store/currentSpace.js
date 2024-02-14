@@ -796,11 +796,10 @@ const currentSpace = {
         }
         context.dispatch('restoreSpaceRemote', remoteSpace)
         context.dispatch('saveCurrentSpaceToCache')
-        context.dispatch('notifySpaceIsOpen') // TODO move to trigger
+        context.dispatch('notifySpaceIsOpen')
+      }).catch(error => {
+        console.error('🚒 Error fetching remoteSpace', error)
       })
-        .catch(error => {
-          console.error('🚒 Error fetching remoteSpace', error)
-        })
     },
     saveCurrentSpaceToCache: (context) => {
       const space = utils.clone(context.state)
