@@ -93,7 +93,6 @@ const self = {
     handleServerError: (context, { name, error, shouldNotNotifyUser }) => {
       console.error('🚒 handleServerError', name, error)
       if (!shouldNotNotifyUser) { return }
-      if (name === 'getLiveSpaces') { return }
       context.commit('notifyConnectionError', true, { root: true })
       context.commit('notifyConnectionErrorName', name, { root: true })
     },
@@ -448,7 +447,7 @@ const self = {
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/live-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getLiveSpaces', error, shouldNotNotifyUser: true })
+        context.dispatch('handleServerError', { name: 'getLiveSpaces', error })
       }
     },
     getSpace: async (context, { space, shouldRequestRemote, spaceReadOnlyKey }) => {
