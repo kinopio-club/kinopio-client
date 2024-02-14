@@ -48,6 +48,8 @@ let multiTouchAction, shouldCancelUndo
 
 let inertiaScrollEndIntervalTimer, prevPosition
 
+let statusRetryCount = 0
+
 export default {
   components: {
     Header,
@@ -214,12 +216,37 @@ export default {
       this.isPinchZooming = false
       this.isTouchScrolling = false
     },
+
+    // online
+
     updateIsOnline () {
-      const status = window.navigator.onLine
-      this.$store.commit('isOnline', status)
-      if (status) {
-        this.$store.dispatch('api/processQueueOperations')
+      let clientStatus = window.navigator.onLine
+      if (!clientStatus) {
+        this.$store.commit('isOnline', false)
+        return
       }
+      this.updateServerIsOnline()
+    },
+    async updateServerIsOnline () {
+      const maxIterations = 10
+      const initialDelay = 1000 // 1 second
+      const serverStatus = await this.$store.dispatch('api/getStatus')
+      console.log('☎️ status', serverStatus)
+      if (serverStatus) {
+        this.$store.commit('isOnline', true)
+        this.$store.dispatch('api/processQueueOperations')
+      // error offline
+      } else {
+        this.$store.commit('isOnline', false)
+      }
+      // retry
+      let delay // max delay is ~15 minutes
+      if (statusRetryCount < maxIterations) {
+        statusRetryCount++
+        delay = Math.pow(2, statusRetryCount) * initialDelay
+      }
+      console.log(`☎️ Retrying status in ${delay / 1000} seconds...`)
+      setTimeout(this.updateServerIsOnline, delay)
     },
 
     //
