@@ -579,6 +579,7 @@ const store = createStore({
     triggerOfflineIsVisible: () => {},
     triggerAppsAndExtensionsIsVisible: () => {},
     triggerUpdateWindowTitle: () => {},
+    triggerRestoreSpaceRemoteComplete: () => {},
 
     // Used by extensions only
 
