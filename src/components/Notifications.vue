@@ -408,26 +408,33 @@ export default {
     },
     async checkIfShouldNotifySpaceOutOfSync () {
       console.log('☎️ checkIfShouldNotifySpaceOutOfSync…')
-      const space = utils.clone(this.$store.state.currentSpace)
-      const canEditSpace = this.$store.getters['currentUser/canEditSpace'](space)
-      let remoteSpace
-      if (canEditSpace) {
-        remoteSpace = await this.$store.dispatch('api/getSpace', { space })
-      } else {
-        remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
-      }
-      if (!remoteSpace) { return }
-      const spaceUpdatedAt = dayjs(space.updatedAt)
-      const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
-      const hoursDelta = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'hour') // hourDelta
-      const updatedAtIsChanged = hoursDelta >= 1
-      console.log('☎️ checkIfShouldNotifySpaceOutOfSync result', {
-        hoursDelta,
-        updatedAtIsChanged,
-        spaceUpdatedAt: space.updatedAt,
-        remoteSpaceUpdatedAt: remoteSpace.updatedAt
-      })
-      if (updatedAtIsChanged) {
+      try {
+        const space = utils.clone(this.$store.state.currentSpace)
+        const canEditSpace = this.$store.getters['currentUser/canEditSpace'](space)
+        if (!this.currentUserIsSignedIn) { return }
+        // use
+        let remoteSpace
+        if (canEditSpace) {
+          remoteSpace = await this.$store.dispatch('api/getSpace', { space })
+        } else {
+          remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
+        }
+        if (!remoteSpace) { return }
+        const spaceUpdatedAt = dayjs(space.updatedAt)
+        const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
+        const hoursDelta = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'hour') // hourDelta
+        const updatedAtIsChanged = hoursDelta >= 1
+        console.log('☎️ checkIfShouldNotifySpaceOutOfSync result', {
+          hoursDelta,
+          updatedAtIsChanged,
+          spaceUpdatedAt: space.updatedAt,
+          remoteSpaceUpdatedAt: remoteSpace.updatedAt
+        })
+        if (updatedAtIsChanged) {
+          this.notifySpaceOutOfSync = true
+        }
+      } catch (error) {
+        console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
         this.notifySpaceOutOfSync = true
       }
     },
