@@ -260,7 +260,11 @@ export default {
     notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
     notifyConnectionErrorName () { return this.$store.state.notifyConnectionErrorName },
-    notifyServerCouldNotSave () { return this.$store.state.notifyServerCouldNotSave },
+    notifyServerCouldNotSave () {
+      const isOffline = !this.$store.state.isOnline
+      if (isOffline) { return }
+      return this.$store.state.notifyServerCouldNotSave
+    },
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
     notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
     notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
