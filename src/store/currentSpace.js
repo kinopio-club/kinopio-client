@@ -1008,7 +1008,7 @@ const currentSpace = {
       context.commit('shouldShowExploreOnLoad', false, { root: true })
     },
     checkIfIsLoadingSpace: (context, isRemote) => {
-      const isOffline = !window.navigator.onLine
+      const isOffline = !context.rootState.isOnline
       const currentSpaceIsRemote = context.rootGetters['currentSpace/isRemote']
       if (isOffline) {
         context.commit('isLoadingSpace', false, { root: true })
