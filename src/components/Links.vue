@@ -17,7 +17,7 @@
   section(v-else-if="loading")
     Loader(:visible="loading")
   section(v-else)
-    p Spaces with cards that link to this space can be found here.
+    p Spaces with cards that link to this space (backlinks) can be found here.
     p Type
       span {{' '}}
       span.badge.secondary /
