@@ -204,7 +204,7 @@ import OfflineBadge from '@/components/OfflineBadge.vue'
 
 import dayjs from 'dayjs'
 
-let pageWasOffline, checkIfShouldNotifySpaceOutOfSyncIntervalTimer
+let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
 export default {
   name: 'Notifications',
@@ -232,17 +232,10 @@ export default {
         this.addReadOnlyJiggle()
       } else if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
         this.notifyCardsCreatedIsOverLimitJiggle = true
-      } else if (mutation.type === 'isOnline') {
-        const isOnline = Boolean(mutation.payload)
-        if (!isOnline) {
-          console.log('☎️ is offline', !isOnline)
-          pageWasOffline = true
-        } else if (isOnline && pageWasOffline) {
-          this.checkIfShouldNotifySpaceOutOfSync()
-          pageWasOffline = false
-        }
       } else if (mutation.type === 'currentSpace/restoreSpace') {
         this.notifySpaceOutOfSync = false
+      } else if (mutation.type === 'triggerCheckIfShouldNotifySpaceOutOfSync') {
+        this.checkIfShouldNotifySpaceOutOfSync()
       }
     })
   },
