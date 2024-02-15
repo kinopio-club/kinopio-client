@@ -392,6 +392,8 @@ span.space-list-wrap
               //- new
               span(v-if="isNew(space)")
                 .badge.info.inline-badge.new-unread-badge
+              //- preview image
+              img.preview-thumbnail-image(v-if="space.previewThumbnailImage" :src="space.previewThumbnailImage")
               //- user(s)
               template(v-if="showOtherUsers")
                 .users(:class="{'multiple-users': space.otherUsers.length > 1}")
@@ -541,4 +543,9 @@ span.space-list-wrap
   .moon-phase
     margin-top 4px
     margin-right 4px
+
+  .preview-thumbnail-image
+    width 40px
+    border-radius var(--entity-radius)
+    margin-right 5px
 </style>
