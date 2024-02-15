@@ -222,7 +222,7 @@ export default {
     updateIsOnline () {
       let clientStatus = window.navigator.onLine
       if (!clientStatus) {
-        this.$store.commit('isOnline', false)
+        this.$store.dispatch('isOnline', false)
         return
       }
       this.updateServerIsOnline()
@@ -233,14 +233,14 @@ export default {
       const serverStatus = await this.$store.dispatch('api/getStatus')
       console.log('☎️ status', serverStatus)
       if (serverStatus) {
-        this.$store.commit('isOnline', true)
+        this.$store.dispatch('isOnline', true)
         this.$store.dispatch('api/processQueueOperations')
       // error offline
       } else {
-        this.$store.commit('isOnline', false)
+        this.$store.dispatch('isOnline', false)
       }
       // retry
-      let delay // max delay is ~15 minutes
+      let delay // delay increases up to ~15 minutes
       if (statusRetryCount < maxIterations) {
         statusRetryCount++
         delay = Math.pow(2, statusRetryCount) * initialDelay
