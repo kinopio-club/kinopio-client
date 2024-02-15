@@ -461,6 +461,7 @@ export default {
   },
   cursorsAreClose (startCursor, endCursor) {
     if (!startCursor) { return }
+    if (!endCursor) { return }
     const threshold = 5
     const xRange = {
       value: endCursor.x,
