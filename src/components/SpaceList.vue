@@ -475,7 +475,7 @@ span.space-list-wrap
 
   .favorite-icon,
   .inbox-icon
-    margin-right 4px
+    margin-right 5px
     width 12px
     min-width 12px
 
