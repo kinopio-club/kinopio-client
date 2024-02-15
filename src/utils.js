@@ -2018,7 +2018,8 @@ export default {
     return {
       id: space.id,
       name: space.name,
-      privacy: space.privacy
+      privacy: space.privacy,
+      previewThumbnailImage: space.previewThumbnailImage
     }
   },
   normalizeBroadcastUpdates (updates) {
