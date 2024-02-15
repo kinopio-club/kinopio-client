@@ -793,6 +793,7 @@ const currentSpace = {
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
+          context.dispatch('createSpacePreviewImage')
           return
         }
         context.dispatch('restoreSpaceRemote', remoteSpace)
