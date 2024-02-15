@@ -268,6 +268,7 @@ export default {
         spaces = this.sortSpacesByEditedOrCreatedAt(spaces)
         spaces = this.updateFavoriteSpaces(spaces)
         spaces = this.updateInboxSpace(spaces)
+        spaces = utils.clone(spaces)
         this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(spaces, this.currentUser)
       })
     }, 350, { leading: true }),
@@ -380,6 +381,7 @@ export default {
         this.updateFavorites()
         this.updateHeights()
         this.$store.commit('shouldExplicitlyHideFooter', true)
+        this.$store.dispatch('currentSpace/createSpacePreviewImage')
       } else {
         this.$store.commit('shouldExplicitlyHideFooter', false)
       }

@@ -194,7 +194,7 @@ const currentSpace = {
       } catch (error) {
         console.warn('🚑 createSpacePreviewImage', error)
       }
-    }, 500),
+    }, 2000), // 2 seconds
     updateInboxCache: async (context) => {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const isOffline = !context.rootState.isOnline
@@ -767,9 +767,7 @@ const currentSpace = {
       context.dispatch('checkIfIsLoadingSpace', isRemote)
       // preview image
       if (!isRemote) { return }
-      setTimeout(() => {
-        context.dispatch('createSpacePreviewImage')
-      }, 3000) // 3 seconds
+      context.dispatch('createSpacePreviewImage')
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
       if (!context.rootState.isEmbedMode) {
