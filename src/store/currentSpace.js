@@ -553,7 +553,10 @@ const currentSpace = {
           context.commit('notifyConnectionError', true, { root: true })
         }
       }
-      if (!remoteSpace) { return }
+      if (!remoteSpace) {
+        context.commit('isLoadingSpace', false, { root: true })
+        return
+      }
       // only restore current space
       if (remoteSpace.id !== context.state.id) { return }
       return utils.normalizeRemoteSpace(remoteSpace)

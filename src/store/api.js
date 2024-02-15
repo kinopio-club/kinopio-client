@@ -47,6 +47,9 @@ const squashQueue = (queue) => {
 }
 
 const shouldRequest = ({ shouldRequestRemote, apiKey, isOnline }) => {
+  if (utils.isUndefined(isOnline)) {
+    isOnline = true
+  }
   const currentUserIsSignedIn = Boolean(apiKey)
   if (isOnline && shouldRequestRemote) {
     return true
@@ -453,7 +456,8 @@ const self = {
     getSpace: async (context, { space, shouldRequestRemote, spaceReadOnlyKey }) => {
       try {
         const apiKey = context.rootState.currentUser.apiKey
-        if (!shouldRequest({ shouldRequestRemote, apiKey })) { return }
+        const isOnline = context.rootState.isOnline
+        if (!shouldRequest({ shouldRequestRemote, apiKey, isOnline })) { return }
         let spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
         console.log('🛬 getting remote space', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace, spaceReadOnlyKey })
@@ -466,8 +470,8 @@ const self = {
     getOtherItems: async (context, { cardIds, spaceIds, invites }) => {
       const max = 60
       try {
-        const isOffline = !window.navigator.onLine
-        if (isOffline) { return }
+        const isOnline = context.rootState.isOnline
+        if (!isOnline) { return }
         // normalize
         cardIds = uniq(cardIds)
         cardIds = cardIds.slice(0, max)
@@ -484,8 +488,8 @@ const self = {
       }
     },
     getSpaceAnonymously: async (context, space) => {
-      const isOffline = !window.navigator.onLine
-      if (isOffline) { return }
+      const isOnline = context.rootState.isOnline
+      if (!isOnline) { return }
       const invite = cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id) || {}
       space.collaboratorKey = space.collaboratorKey || invite.collaboratorKey
       let spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
