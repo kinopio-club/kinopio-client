@@ -404,16 +404,6 @@ span.space-list-wrap
                 User(:user="user(space)" :isClickable="false" :key="user(space).id")
               template(v-else-if="showCollaborator(space)")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id")
-              //- space meta
-              span(v-if="space.isFavorite")
-                img.icon.favorite-icon(src="@/assets/heart.svg")
-              span(v-if="space.name === 'Inbox'")
-                img.icon.inbox-icon(src="@/assets/inbox.svg")
-              SpaceTodayJournalBadge(:space="space")
-              MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-              //- template
-              span(v-if="space.isTemplate")
-                img.icon.templates(src="@/assets/templates.svg" title="Template")
               //- offline
               span(v-if="isNotCached(space.id)")
                 OfflineBadge(:isInline="true" :isDanger="true")
@@ -421,6 +411,16 @@ span.space-list-wrap
               //- tweet space
               span(v-if="space.isFromTweet" title="Tweet space")
                 img.icon.tweet(src="@/assets/twitter.svg")
+              //- space meta
+              span(v-if="space.isFavorite")
+                img.icon.favorite-icon(src="@/assets/heart.svg")
+              span(v-if="space.name === 'Inbox'")
+                img.icon.inbox-icon(src="@/assets/inbox.svg")
+              SpaceTodayJournalBadge(:space="space")
+              //- journal or template
+              MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
+              span(v-if="space.isTemplate")
+                img.icon.templates(src="@/assets/templates.svg" title="Template")
               //- space details
               .name
                 span(v-if="state.filter")
@@ -545,7 +545,7 @@ span.space-list-wrap
     margin-right 4px
 
   .preview-thumbnail-image
-    width 40px
+    width 38px
     border-radius var(--entity-radius)
     margin-right 5px
 </style>
