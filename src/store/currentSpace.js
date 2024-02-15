@@ -15,6 +15,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
 import defer from 'lodash-es/defer'
+import debounce from 'lodash-es/debounce'
 
 let spectatorIdleTimers = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
@@ -181,7 +182,7 @@ const currentSpace = {
       context.commit('triggerUpdateWindowHistory', null, { root: true })
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
-    createSpacePreviewImage: async (context) => {
+    createSpacePreviewImage: debounce(async function (context) {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       try {
@@ -193,7 +194,7 @@ const currentSpace = {
       } catch (error) {
         console.warn('🚑 createSpacePreviewImage', error)
       }
-    },
+    }, 500),
     updateInboxCache: async (context) => {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const isOffline = !context.rootState.isOnline
