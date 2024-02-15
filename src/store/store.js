@@ -580,6 +580,7 @@ const store = createStore({
     triggerAppsAndExtensionsIsVisible: () => {},
     triggerUpdateWindowTitle: () => {},
     triggerRestoreSpaceRemoteComplete: () => {},
+    triggerCheckIfShouldNotifySpaceOutOfSync: () => {},
 
     // Used by extensions only
 
@@ -1499,6 +1500,20 @@ const store = createStore({
   },
 
   actions: {
+    isOnline: (context, isOnline) => {
+      utils.typeCheck({ value: isOnline, type: 'boolean' })
+      const prevIsOnline = context.state.isOnline
+      const reconnected = isOnline && !prevIsOnline
+      const disconnected = !isOnline && prevIsOnline
+      if (reconnected) {
+        context.commit('addNotification', { icon: 'offline', message: 'Reconnected to server', type: 'success' })
+        context.commit('isLoadingSpace', false)
+        context.commit('triggerCheckIfShouldNotifySpaceOutOfSync')
+      } else if (disconnected) {
+        context.commit('addNotification', { icon: 'offline', message: 'Offline mode', type: 'info' })
+      }
+      context.commit('isOnline', isOnline)
+    },
     updateSpaceAndCardUrlToLoad: (context, path) => {
       const matches = utils.spaceAndCardIdFromPath(path)
       if (!matches) { return }

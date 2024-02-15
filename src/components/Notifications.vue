@@ -12,6 +12,7 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'redo'" src="@/assets/undo.svg" class="redo")
         img.icon(v-else-if="item.icon === 'brush-y'" src="@/assets/brush-y.svg" class="brush-y")
         img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
+        img.icon(v-else-if="item.icon === 'offline'" src="@/assets/offline.svg" class="offline")
       span {{item.message}}
     .row(v-if="item.isPersistentItem")
       button(@click="removeById(item)")
@@ -203,7 +204,7 @@ import OfflineBadge from '@/components/OfflineBadge.vue'
 
 import dayjs from 'dayjs'
 
-let pageWasOffline, checkIfShouldNotifySpaceOutOfSyncIntervalTimer
+let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
 export default {
   name: 'Notifications',
@@ -231,17 +232,10 @@ export default {
         this.addReadOnlyJiggle()
       } else if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
         this.notifyCardsCreatedIsOverLimitJiggle = true
-      } else if (mutation.type === 'isOnline') {
-        const isOnline = Boolean(mutation.payload)
-        if (!isOnline) {
-          console.log('☎️ is offline', !isOnline)
-          pageWasOffline = true
-        } else if (isOnline && pageWasOffline) {
-          this.checkIfShouldNotifySpaceOutOfSync()
-          pageWasOffline = false
-        }
       } else if (mutation.type === 'currentSpace/restoreSpace') {
         this.notifySpaceOutOfSync = false
+      } else if (mutation.type === 'triggerCheckIfShouldNotifySpaceOutOfSync') {
+        this.checkIfShouldNotifySpaceOutOfSync()
       }
     })
   },
@@ -260,7 +254,11 @@ export default {
     notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
     notifyConnectionErrorName () { return this.$store.state.notifyConnectionErrorName },
-    notifyServerCouldNotSave () { return this.$store.state.notifyServerCouldNotSave },
+    notifyServerCouldNotSave () {
+      const isOffline = !this.$store.state.isOnline
+      if (isOffline) { return }
+      return this.$store.state.notifyServerCouldNotSave
+    },
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
     notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
     notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },

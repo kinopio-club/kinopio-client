@@ -553,7 +553,10 @@ const currentSpace = {
           context.commit('notifyConnectionError', true, { root: true })
         }
       }
-      if (!remoteSpace) { return }
+      if (!remoteSpace) {
+        context.commit('isLoadingSpace', false, { root: true })
+        return
+      }
       // only restore current space
       if (remoteSpace.id !== context.state.id) { return }
       return utils.normalizeRemoteSpace(remoteSpace)
@@ -1008,7 +1011,7 @@ const currentSpace = {
       context.commit('shouldShowExploreOnLoad', false, { root: true })
     },
     checkIfIsLoadingSpace: (context, isRemote) => {
-      const isOffline = !window.navigator.onLine
+      const isOffline = !context.rootState.isOnline
       const currentSpaceIsRemote = context.rootGetters['currentSpace/isRemote']
       if (isOffline) {
         context.commit('isLoadingSpace', false, { root: true })
