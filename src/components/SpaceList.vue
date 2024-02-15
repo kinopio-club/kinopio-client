@@ -392,8 +392,6 @@ span.space-list-wrap
               //- new
               span(v-if="isNew(space)")
                 .badge.info.inline-badge.new-unread-badge
-              //- preview image
-              img.preview-thumbnail-image(v-if="space.previewThumbnailImage" :src="space.previewThumbnailImage")
               //- user(s)
               template(v-if="showOtherUsers")
                 .users(:class="{'multiple-users': space.otherUsers.length > 1}")
@@ -404,6 +402,8 @@ span.space-list-wrap
                 User(:user="user(space)" :isClickable="false" :key="user(space).id")
               template(v-else-if="showCollaborator(space)")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id")
+              //- preview image
+              img.preview-thumbnail-image(v-if="space.previewThumbnailImage" :src="space.previewThumbnailImage")
               //- offline
               span(v-if="isNotCached(space.id)")
                 OfflineBadge(:isInline="true" :isDanger="true")
@@ -432,10 +432,10 @@ span.space-list-wrap
                 img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
               button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
                 img.icon.checkmark(src="@/assets/checkmark.svg")
-          .button-wrap.inline-favorite-wrap(v-if="spaceIsActive(space) && showFavoriteButton" @click.stop.prevent="toggleIsFavoriteSpace(space)" title="Favorite Current Space")
-            button.inline-favorite.small-button(:class="{ active: isFavorite(space) }")
-              img.icon.favorite-icon(v-if="isFavorite(space)" src="@/assets/heart.svg")
-              img.icon.favorite-icon(v-else src="@/assets/heart-empty.svg")
+          //- .button-wrap.inline-favorite-wrap(v-if="spaceIsActive(space) && showFavoriteButton" @click.stop.prevent="toggleIsFavoriteSpace(space)" title="Favorite Current Space")
+          //-   button.inline-favorite.small-button(:class="{ active: isFavorite(space) }")
+          //-     img.icon.favorite-icon(v-if="isFavorite(space)" src="@/assets/heart.svg")
+          //-     img.icon.favorite-icon(v-else src="@/assets/heart-empty.svg")
 </template>
 
 <style lang="stylus">
@@ -547,5 +547,5 @@ span.space-list-wrap
   .preview-thumbnail-image
     width 38px
     border-radius var(--entity-radius)
-    margin-right 5px
+    margin-right 6px
 </style>
