@@ -545,7 +545,7 @@ span.space-list-wrap
     margin-right 4px
 
   .preview-thumbnail-image
-    width 34px
+    width 24px
     height 22px
     overflow hidden
     object-fit cover
@@ -553,4 +553,5 @@ span.space-list-wrap
     border-radius var(--entity-radius)
     margin-right 6px
     image-rendering crisp-edges
+    flex-shrink 0
 </style>
