@@ -264,6 +264,7 @@ export default {
 
 <style lang="stylus">
 .space-picker
+  overflow auto
   .results-section
     padding-top 4px
     @media(max-height 700px)
