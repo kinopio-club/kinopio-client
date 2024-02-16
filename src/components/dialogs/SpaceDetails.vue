@@ -393,10 +393,6 @@ export default {
 dialog.space-details
   &.back-button-is-visible
     left -18px
-  &.wide
-    width 300px
-    @media(max-width 414px)
-      left -45px
   button.disabled
     opacity 0.5
     pointer-events none
