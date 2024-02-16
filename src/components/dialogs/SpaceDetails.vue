@@ -39,7 +39,6 @@ dialog.space-details.is-pinnable.wide(v-if="visible" :open="visible" @click.left
       @selectSpace="changeSpace"
       @addSpace="addSpace"
       :resultsSectionHeight="resultsSectionHeight"
-      :showFavoriteButton="true"
       :parentDialog="parentDialog"
     )
 </template>

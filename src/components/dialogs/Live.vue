@@ -12,7 +12,6 @@ dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': d
       :hideExploreBadge="true"
       @selectSpace="changeSpace"
       :resultsSectionHeight="resultsSectionHeight"
-      :showFavoriteButton="true"
       :parentDialog="parentDialog"
     )
   section.empty(v-if="!spaces.length")
