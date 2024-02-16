@@ -807,10 +807,10 @@ header
       max-width 58vw
       @media(max-width 550px)
         max-width 31vw
-      @media(max-width 414px)
-        max-width 26vw
-      @media(max-width 380px)
-        max-width 21vw
+      // @media(max-width 414px)
+      //   max-width 26vw
+      // @media(max-width 380px)
+      //   max-width 21vw
       > button
         .privacy-icon
           margin-left 6px
