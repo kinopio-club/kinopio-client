@@ -663,12 +663,13 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 span Read Only
               span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
                 span Read Only
-          //- State
-          .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
-            button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              Loader(:visible="spaceHasStatus")
-              .badge.success.space-status-success(v-if="!spaceHasStatus")
-            SpaceStatus(:visible="state.spaceStatusIsVisible")
+            //- State
+            .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
+              button.small-button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+                Loader(:visible="spaceHasStatus")
+                .badge.success.space-status-success(v-if="!spaceHasStatus")
+              SpaceStatus(:visible="state.spaceStatusIsVisible")
+
           //- Offline
           .button-wrap(v-if="!isOnline")
             button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
@@ -929,10 +930,14 @@ header
     vertical-align -1px
 
   .badge.space-status-success
-    margin 0
-    padding 0 7px
+    width 16px
+    height 16px
     border-radius 10px
     vertical-align 0
+    margin 2px 2px
+    min-height initial
+    min-width initial
+    display block
 
   .badge.notification-button-badge
     margin 0
@@ -966,4 +971,12 @@ header
   flex-direction row-reverse
   button
     pointer-events all
+
+.button-wrap.space-status-button-wrap
+  position absolute
+  top 4px
+  right 4px
+  left initial
+  .loader
+    margin 2px 2px
 </style>
