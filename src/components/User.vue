@@ -24,6 +24,7 @@ const props = defineProps({
   shouldCloseAllDialogs: Boolean,
   hideYouLabel: Boolean,
   isSmall: Boolean,
+  isMedium: Boolean,
   userDetailsIsInline: Boolean
 })
 
@@ -92,7 +93,14 @@ const closeChildDialogs = () => {
 </script>
 
 <template lang="pug">
-.user(:title="user.name" :data-user-id="userId" :key="userId" ref="userElement" @keydown.stop.enter="toggleUserDetailsIsVisible" :class="{active: userDetailsIsVisibleForUser, 'is-small': isSmall }")
+.user(
+  :title="user.name"
+  :data-user-id="userId"
+  :key="userId"
+  ref="userElement"
+  @keydown.stop.enter="toggleUserDetailsIsVisible"
+  :class="{active: userDetailsIsVisibleForUser, 'is-small': isSmall, 'is-medium': isMedium }"
+)
   .user-avatar(
     @mouseup.left.stop="toggleUserDetailsIsVisible"
     @touchend.stop="toggleUserDetailsIsVisible"
@@ -138,12 +146,21 @@ const closeChildDialogs = () => {
         left 3px
         top 5px
         width 10.5px
+  &.is-medium
+    .user-avatar
+      width 22px
+      height 22px
+      .anon-avatar
+        left 4px
+        top 8px
+        width 14px
 
   .label-badge
     bottom -7px
     width initial
   .you-badge
-    width 100%
+    width max-content
+    min-width 100%
 button
   .user
     margin 0

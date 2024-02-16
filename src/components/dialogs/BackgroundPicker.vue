@@ -114,6 +114,10 @@ const updatePageSizes = async () => {
   await nextTick()
   store.dispatch('updatePageSizes')
 }
+const updatePreviewImage = async () => {
+  await nextTick()
+  store.dispatch('currentSpace/createSpacePreviewImage')
+}
 const clearErrors = () => {
   state.error.isNotImageUrl = false
   state.error.signUpToUpload = false
@@ -177,6 +181,7 @@ const selectGradient = (index) => {
   }
   store.dispatch('currentSpace/updateSpace', updates)
   updatePageSizes()
+  updatePreviewImage()
 }
 const gradientIsActive = (gradient) => {
   if (!currentSpace.value.backgroundIsGradient) { return }
@@ -223,14 +228,17 @@ const updateSpaceBackground = (url) => {
   }
   store.dispatch('currentSpace/updateSpace', updates)
   updatePageSizes()
+  updatePreviewImage()
 }
 const removeBackgroundAll = async () => {
   removeBackground()
   removeBackgroundTint()
+  updatePreviewImage()
 }
 const removeBackground = async () => {
   updateSpaceBackground('')
   closeDialogs()
+  updatePreviewImage()
 }
 const updateCommunityBackgroundImages = async () => {
   state.communityBackgroundsIsLoading = true
@@ -323,11 +331,13 @@ const updateBackgroundTint = (value) => {
   store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
   updatePageSizes()
   emit('updateSpaces')
+  updatePreviewImage()
 }
 const removeBackgroundTint = async () => {
   updateBackgroundTint('')
   closeDialogs()
   emit('updateSpaces')
+  updatePreviewImage()
 }
 
 // recent

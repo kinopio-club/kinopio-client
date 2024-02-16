@@ -987,7 +987,7 @@ export default {
       return isSpaceUser || isSpaceCollaborator
     },
     isSpaceUser: (state, getters, rootState) => (space) => {
-      let userIsInSpace = Boolean(space.users.find(user => {
+      let userIsInSpace = Boolean(space.users?.find(user => {
         return user.id === state.id
       }))
       userIsInSpace = userIsInSpace || space.userId === state.id

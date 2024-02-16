@@ -15,6 +15,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
 import defer from 'lodash-es/defer'
+import debounce from 'lodash-es/debounce'
 
 let spectatorIdleTimers = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
@@ -181,7 +182,7 @@ const currentSpace = {
       context.commit('triggerUpdateWindowHistory', null, { root: true })
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
-    createSpacePreviewImage: async (context) => {
+    createSpacePreviewImage: debounce(async function (context) {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       try {
@@ -193,7 +194,7 @@ const currentSpace = {
       } catch (error) {
         console.warn('🚑 createSpacePreviewImage', error)
       }
-    },
+    }, 2000), // 2 seconds
     updateInboxCache: async (context) => {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const isOffline = !context.rootState.isOnline
@@ -769,9 +770,7 @@ const currentSpace = {
       context.dispatch('checkIfIsLoadingSpace', isRemote)
       // preview image
       if (!isRemote) { return }
-      setTimeout(() => {
-        context.dispatch('createSpacePreviewImage')
-      }, 3000) // 3 seconds
+      context.dispatch('createSpacePreviewImage')
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
       if (!context.rootState.isEmbedMode) {
@@ -795,6 +794,7 @@ const currentSpace = {
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
+          context.dispatch('createSpacePreviewImage')
           return
         }
         context.dispatch('restoreSpaceRemote', remoteSpace)

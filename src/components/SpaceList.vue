@@ -72,7 +72,6 @@ const props = defineProps({
   showCreateNewSpaceFromSearch: Boolean,
   resultsSectionHeight: Number,
   disableListOptimizations: Boolean,
-  showFavoriteButton: Boolean,
   search: String,
   parentDialog: String
 })
@@ -209,13 +208,6 @@ const isFavorite = (space) => {
   const favorites = store.state.currentUser.favoriteSpaces
   const isFavorite = favorites.find(favorite => favorite.id === space.id)
   return Boolean(isFavorite)
-}
-const toggleIsFavoriteSpace = (space) => {
-  if (isFavorite(space)) {
-    store.dispatch('currentUser/removeFavorite', { type: 'space', item: space })
-  } else {
-    store.dispatch('currentUser/addFavorite', { type: 'space', item: space })
-  }
 }
 
 // list render optimization
@@ -389,29 +381,21 @@ span.space-list-wrap
           )
             template(v-if="itemIsVisible(index)")
               Loader(:visible="isLoadingSpace(space)")
-              //- new
-              span(v-if="isNew(space)")
-                .badge.info.inline-badge.new-unread-badge
               //- user(s)
               template(v-if="showOtherUsers")
                 .users(:class="{'multiple-users': space.otherUsers.length > 1}")
-                  User(:user="user(space)" :isClickable="false" :key="user(space).id")
+                  User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
                   template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
-                    User(:user="otherUser" :isClickable="false")
+                    User(:user="otherUser" :isClickable="false" :isMedium="true")
               template(v-else-if="showUser")
-                User(:user="user(space)" :isClickable="false" :key="user(space).id")
+                User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
               template(v-else-if="showCollaborator(space)")
-                User(:user="user(space)" :isClickable="false" :key="user(space).id")
-              //- space meta
-              span(v-if="space.isFavorite")
-                img.icon.favorite-icon(src="@/assets/heart.svg")
-              span(v-if="space.name === 'Inbox'")
-                img.icon.inbox-icon(src="@/assets/inbox.svg")
-              SpaceTodayJournalBadge(:space="space")
-              MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-              //- template
-              span(v-if="space.isTemplate")
-                img.icon.templates(src="@/assets/templates.svg" title="Template")
+                User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+              //- preview image
+              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage")
+                img.preview-thumbnail-image(:src="space.previewThumbnailImage")
+                //- new
+                .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
               //- offline
               span(v-if="isNotCached(space.id)")
                 OfflineBadge(:isInline="true" :isDanger="true")
@@ -419,6 +403,16 @@ span.space-list-wrap
               //- tweet space
               span(v-if="space.isFromTweet" title="Tweet space")
                 img.icon.tweet(src="@/assets/twitter.svg")
+              //- space meta
+              span(v-if="space.isFavorite")
+                img.icon.favorite-icon(src="@/assets/heart.svg")
+              span(v-if="space.name === 'Inbox'")
+                img.icon.inbox-icon(src="@/assets/inbox.svg")
+              SpaceTodayJournalBadge(:space="space")
+              //- journal or template
+              MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
+              span(v-if="space.isTemplate")
+                img.icon.templates(src="@/assets/templates.svg" title="Template")
               //- space details
               .name
                 span(v-if="state.filter")
@@ -430,10 +424,6 @@ span.space-list-wrap
                 img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
               button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
                 img.icon.checkmark(src="@/assets/checkmark.svg")
-          .button-wrap.inline-favorite-wrap(v-if="spaceIsActive(space) && showFavoriteButton" @click.stop.prevent="toggleIsFavoriteSpace(space)" title="Favorite Current Space")
-            button.inline-favorite.small-button(:class="{ active: isFavorite(space) }")
-              img.icon.favorite-icon(v-if="isFavorite(space)" src="@/assets/heart.svg")
-              img.icon.favorite-icon(v-else src="@/assets/heart-empty.svg")
 </template>
 
 <style lang="stylus">
@@ -446,7 +436,11 @@ span.space-list-wrap
     flex none
 
   .new-unread-badge
-    margin-top 7px
+    position absolute
+    top -2px
+    right -2px
+    left initial
+    margin 0
 
   .badge
     margin-left 0
@@ -473,7 +467,7 @@ span.space-list-wrap
 
   .favorite-icon,
   .inbox-icon
-    margin-right 4px
+    margin-right 5px
     width 12px
     min-width 12px
 
@@ -520,7 +514,7 @@ span.space-list-wrap
       top 10px
       z-index 1
     .icon.templates
-      margin-right 4px
+      margin-right 10px
 
   .space-wrap
     position relative
@@ -541,4 +535,19 @@ span.space-list-wrap
   .moon-phase
     margin-top 4px
     margin-right 4px
+
+  .preview-thumbnail-image-wrap
+    position relative
+    flex-shrink 0
+    margin-right 6px
+    width 24px
+    height 22px
+  .preview-thumbnail-image
+    width 24px
+    height 22px
+    overflow hidden
+    object-fit cover
+    object-position 0 0
+    border-radius var(--entity-radius)
+    image-rendering crisp-edges
 </style>

@@ -461,6 +461,7 @@ export default {
   },
   cursorsAreClose (startCursor, endCursor) {
     if (!startCursor) { return }
+    if (!endCursor) { return }
     const threshold = 5
     const xRange = {
       value: endCursor.x,
@@ -2017,7 +2018,8 @@ export default {
     return {
       id: space.id,
       name: space.name,
-      privacy: space.privacy
+      privacy: space.privacy,
+      previewThumbnailImage: space.previewThumbnailImage
     }
   },
   normalizeBroadcastUpdates (updates) {
