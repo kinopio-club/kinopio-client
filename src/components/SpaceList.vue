@@ -387,13 +387,13 @@ span.space-list-wrap
               //- user(s)
               template(v-if="showOtherUsers")
                 .users(:class="{'multiple-users': space.otherUsers.length > 1}")
-                  User(:user="user(space)" :isClickable="false" :key="user(space).id")
+                  User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
                   template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
-                    User(:user="otherUser" :isClickable="false")
+                    User(:user="otherUser" :isClickable="false" :isMedium="true")
               template(v-else-if="showUser")
-                User(:user="user(space)" :isClickable="false" :key="user(space).id")
+                User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
               template(v-else-if="showCollaborator(space)")
-                User(:user="user(space)" :isClickable="false" :key="user(space).id")
+                User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
               //- preview image
               img.preview-thumbnail-image(v-if="space.previewThumbnailImage" :src="space.previewThumbnailImage")
               //- offline
