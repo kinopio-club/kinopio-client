@@ -25,7 +25,7 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
               span {{notification.message}}
               //- space
               span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification.spaceId)" :class="{ active: isCurrentSpace(notification.spaceId) }")
-                BackgroundPreview(v-if="notification.space" :space="notification.space")
+                img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
                 span.space-name {{notification.space.name}}
             //- add to explore button
             .row(v-if="notification.type === 'askToAddToExplore'")
@@ -47,7 +47,6 @@ import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
-import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 
@@ -57,7 +56,6 @@ export default {
     Loader,
     UserLabelInline,
     NameSegment,
-    BackgroundPreview,
     AddToExplore,
     OfflineBadge
   },
@@ -305,4 +303,15 @@ export default {
     display inline-block
     margin-right 5px
     position relative
+  .preview-thumbnail-image
+    width 24px
+    height 22px
+    overflow hidden
+    object-fit cover
+    object-position 0 0
+    border-radius var(--entity-radius)
+    image-rendering crisp-edges
+    flex-shrink 0
+    margin-right 3px
+    vertical-align middle
 </style>
