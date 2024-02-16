@@ -381,9 +381,6 @@ span.space-list-wrap
           )
             template(v-if="itemIsVisible(index)")
               Loader(:visible="isLoadingSpace(space)")
-              //- new
-              span(v-if="isNew(space)")
-                .badge.info.inline-badge.new-unread-badge
               //- user(s)
               template(v-if="showOtherUsers")
                 .users(:class="{'multiple-users': space.otherUsers.length > 1}")
@@ -395,7 +392,10 @@ span.space-list-wrap
               template(v-else-if="showCollaborator(space)")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
               //- preview image
-              img.preview-thumbnail-image(v-if="space.previewThumbnailImage" :src="space.previewThumbnailImage")
+              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage")
+                img.preview-thumbnail-image(:src="space.previewThumbnailImage")
+                //- new
+                .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
               //- offline
               span(v-if="isNotCached(space.id)")
                 OfflineBadge(:isInline="true" :isDanger="true")
@@ -436,7 +436,11 @@ span.space-list-wrap
     flex none
 
   .new-unread-badge
-    margin-top 7px
+    position absolute
+    top -2px
+    right -2px
+    left initial
+    margin 0
 
   .badge
     margin-left 0
@@ -532,6 +536,12 @@ span.space-list-wrap
     margin-top 4px
     margin-right 4px
 
+  .preview-thumbnail-image-wrap
+    position relative
+    flex-shrink 0
+    margin-right 6px
+    width 24px
+    height 22px
   .preview-thumbnail-image
     width 24px
     height 22px
@@ -539,7 +549,5 @@ span.space-list-wrap
     object-fit cover
     object-position 0 0
     border-radius var(--entity-radius)
-    margin-right 6px
     image-rendering crisp-edges
-    flex-shrink 0
 </style>
