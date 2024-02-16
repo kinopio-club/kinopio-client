@@ -10,14 +10,12 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
       span Cards added to your spaces by collaborators can be found here
     ul.results-list(v-if="filteredNotifications.length")
       template(v-for="notification in filteredNotifications")
-        //- TODO wrap in <a> for middle click
         a(:href="spaceUrl(notification)")
           li(@click.stop.prevent="primaryAction(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }" :data-notification-id="notification.id")
             div
               //- new
               .badge.info.new-unread-badge(v-if="!notification.isRead")
               //- icon
-              img.icon.add(v-if="notification.iconClass === 'add'" src="@/assets/add.svg")
               img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
               img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
               //- user
@@ -298,5 +296,13 @@ export default {
   .space-name-wrap
     margin-left 3px
   .new-unread-badge
+    position absolute
+    top 4px
+    right 4px
+    left initial
+    margin 0
+  .icon-wrap
     display inline-block
+    margin-right 5px
+    position relative
 </style>
