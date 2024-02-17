@@ -31,9 +31,13 @@ watch(() => props.visible, (value, prevValue) => {
 
 const state = reactive({
   colorPickerIsVisible: false,
-  loadingUserspaces: false,
   spacePickerIsVisible: false,
   userSpaces: [],
+  exploreSpaces: [],
+  loading: {
+    userSpaces: false,
+    exploreSpaces: false
+  },
   error: {
     unknownServerError: false
   }
@@ -145,12 +149,12 @@ const isCollaborator = computed(() => {
 })
 const getUserSpaces = async () => {
   state.error.unknownServerError = false
-  if (state.loadingUserspaces) { return }
+  if (state.loading.userSpaces) { return }
   if (state.spacePickerIsVisible) {
     closeDialogs()
     return
   }
-  state.loadingUserspaces = true
+  state.loading.userSpaces = true
   state.spacePickerIsVisible = true
   try {
     const publicUser = await store.dispatch('api/getPublicUser', props.user)
@@ -159,10 +163,10 @@ const getUserSpaces = async () => {
     state.error.unknownServerError = true
     clearUserSpaces()
   }
-  state.loadingUserspaces = false
+  state.loading.userSpaces = false
 }
 const clearUserSpaces = () => {
-  state.loadingUserspaces = false
+  state.loading.userSpaces = false
   state.userSpaces = []
 }
 
@@ -236,11 +240,11 @@ const removeCollaborator = () => {
   //- Other User
   section(v-if="!isCurrentUser && userIsSignedIn && user.id")
     .button-wrap
-      button(@click.left.stop="getUserSpaces" :class="{active: state.loadingUserspaces || state.spacePickerIsVisible}")
+      button(@click.left.stop="getUserSpaces" :class="{active: state.loading.userSpaces || state.spacePickerIsVisible}")
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id")
         span Spaces
-        Loader(:visible="state.loadingUserspaces")
-      SpacePicker(:visible="state.spacePickerIsVisible" :loading="state.loadingUserspaces" :user="user" :userSpaces="state.userSpaces" @selectSpace="changeSpace")
+        Loader(:visible="state.loading.userSpaces")
+      SpacePicker(:visible="state.spacePickerIsVisible" :loading="state.loading.userSpaces" :user="user" :userSpaces="state.userSpaces" @selectSpace="changeSpace")
     .button-wrap
       button(:class="{active: isFavoriteUser}" @click.left.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
         img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
