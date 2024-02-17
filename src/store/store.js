@@ -1510,7 +1510,7 @@ const store = createStore({
         context.commit('isLoadingSpace', false)
         context.commit('triggerCheckIfShouldNotifySpaceOutOfSync')
       } else if (disconnected) {
-        context.commit('addNotification', { icon: 'offline', message: 'Offline mode', type: 'info' })
+        // context.commit('addNotification', { icon: 'offline', message: 'Offline mode', type: 'info' })
       }
       context.commit('isOnline', isOnline)
     },
