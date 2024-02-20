@@ -87,6 +87,7 @@ const remove = (action) => {
   bottom 0px
   display flex
   .inline-button-wrap
+    // background pink
     z-index 1
     cursor ew-resize
     button
@@ -101,6 +102,8 @@ const remove = (action) => {
     bottom 0px
     .inline-button-wrap
       // background pink
+      padding-top 0
+      padding-right 0
       transform translate(-8px, 13px)
       cursor col-resize
       button
