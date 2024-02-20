@@ -10,6 +10,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import postMessage from '@/postMessage.js'
+import SpaceList from '@/components/SpaceList.vue'
 const User = defineAsyncComponent({
   loader: () => import('@/components/User.vue')
 })
@@ -195,13 +196,12 @@ const removeCollaborator = () => {
 
 // explore spaces
 
+const exploreSpacesIsVisible = computed(() => state.exploreSpaces.length && !state.loading.exploreSpaces && !isCurrentUser.value)
 const updateExploreSpaces = async () => {
   if (!props.showExploreSpaces) { return }
   state.loading.exploreSpaces = true
   const spaces = await store.dispatch('api/getPublicUserExploreSpaces', props.user)
-  // limit 5?
   state.exploreSpaces = spaces
-  console.log('🌍🌍🌍🌍🌍🌍🌍', state.exploreSpaces)
   state.loading.exploreSpaces = false
 }
 
@@ -222,6 +222,15 @@ const updateExploreSpaces = async () => {
         a(:href="websiteUrl" v-if="websiteUrl")
           span {{user.website}}
     UserBadges(:user="user")
+
+  section.results-section.explore-spaces-section(v-if="exploreSpacesIsVisible" ref="results")
+    SpaceList(
+      :spaces="state.exploreSpaces"
+      @selectSpace="changeSpace"
+      :hideFilter="true"
+      :isLoading="state.loading.exploreSpaces"
+      :disableListOptimizaitons="true"
+    )
 
   //- Current User
   template(v-if="isCurrentUser")
@@ -278,11 +287,6 @@ const updateExploreSpaces = async () => {
       button(@click.left.stop="removeCollaborator")
         img.icon.cancel(src="@/assets/add.svg")
         span Remove From Space
-
-  section(v-if="!isCurrentUser")
-    Loader(:visible="state.loading.exploreSpaces")
-    //- spacelist state.explorespaces
-
 </template>
 
 <style lang="stylus">
@@ -334,4 +338,7 @@ const updateExploreSpaces = async () => {
       -webkit-opacity 1
     .user
       margin-right 6px
+
+  .explore-spaces-section
+    max-height 250px
 </style>
