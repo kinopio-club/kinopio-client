@@ -9,39 +9,50 @@ const props = defineProps({
   visible: Boolean,
   card: Object
 })
-// const emit = defineEmits(['updateCount'])
 
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const isPresentationMode = computed(() => store.state.isPresentationMode)
 
-const startResizing = (event) => {
+const start = (event, action) => {
   if (!canEditSpace.value) { return }
   if (utils.isMultiTouch(event)) { return }
   store.dispatch('history/pause')
   store.dispatch('closeAllDialogs')
   store.commit('preventDraggedCardFromShowingDetails', true)
   store.dispatch('currentCards/incrementZ', props.card.id)
-  store.commit('currentUserIsResizingCard', true)
   let cardIds = [props.card.id]
   const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
   if (multipleCardsSelectedIds.length) {
     cardIds = multipleCardsSelectedIds
   }
-  store.commit('currentUserIsResizingCardIds', cardIds)
   const updates = {
     userId: store.state.currentUser.id,
     cardIds: cardIds
   }
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
+  console.log('🐙🐙', action)
+  if (action === 'resize') {
+    store.commit('currentUserIsResizingCard', true)
+    store.commit('currentUserIsResizingCardIds', cardIds)
+    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
+  } else if (action === 'tilt') {
+    // store.commit('currentUserIsResizingCard', true)
+    // store.commit('currentUserIsResizingCardIds', cardIds)
+    // store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
+  }
 }
 
-const removeResize = () => {
+const remove = (action) => {
   let cardIds = [props.card.id]
   const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
   if (multipleCardsSelectedIds.length) {
     cardIds = multipleCardsSelectedIds
   }
-  store.dispatch('currentCards/removeResize', { cardIds })
+  console.log('🐙', action)
+  if (action === 'resize') {
+    store.dispatch('currentCards/removeResize', { cardIds })
+  } else if (action === 'tilt') {
+    // store.dispatch('currentCards/removeResize', { cardIds })
+  }
 }
 
 </script>
@@ -50,9 +61,9 @@ const removeResize = () => {
 //- resize
 .bottom-button-wrap(v-if="visible")
   .inline-button-wrap(
-    @mousedown.left.stop="startResizing"
-    @touchstart.stop="startResizing"
-    @dblclick="removeResize"
+    @mousedown.left.stop="start($event, 'resize')"
+    @touchstart.stop="start($event, 'resize')"
+    @dblclick="remove('resize')"
     title="Drag to Resize"
   )
     button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode}")
@@ -60,12 +71,13 @@ const removeResize = () => {
 //- tilt
 .left-bottom-button-wrap.bottom-button-wrap(v-if="visible")
   .inline-button-wrap(
+    @mousedown.left.stop="start($event, 'tilt')"
+    @touchstart.stop="start($event, 'tilt')"
+    @dblclick="remove('tilt')"
     title="Drag to Tilt"
   )
     button.inline-button
       img.resize-icon.icon(src="@/assets/resize-corner.svg")
-  //- @updatePlayhead="updateOpacity"
-  //- @resetPlayhead="resetOpacity"
 </template>
 
 <style lang="stylus">
