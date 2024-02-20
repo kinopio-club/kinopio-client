@@ -349,13 +349,13 @@ main.add-page
         @clearFilter="clearFilter"
       )
       .row
-        .segmented-buttons
-          button(@click='toggleFilterIsVisible' :class="{ active: state.filterIsVisible }")
-            img.icon.search(src="@/assets/search.svg")
-          select(name="spaces" v-model="state.selectedSpaceId")
-            option(value="inbox" default) Inbox
-            template(v-for="space in filteredSpaces")
-              option(:value="space.id") {{space.name}}
+        //- .segmented-buttons
+        //-   button(@click='toggleFilterIsVisible' :class="{ active: state.filterIsVisible }")
+        //-     img.icon.search(src="@/assets/search.svg")
+        select(name="spaces" v-model="state.selectedSpaceId")
+          option(value="inbox" default) Inbox
+          template(v-for="space in filteredSpaces")
+            option(:value="space.id") {{space.name}}
         Loader(:visible="state.loading.updateSpaces")
       //- submit
       .row
