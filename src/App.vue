@@ -774,6 +774,16 @@ dialog
     border-radius var(--entity-radius)
     z-index -1
 
+.subsection-vertical-label
+  writing-mode vertical-rl
+  position absolute
+  top 5px
+  left -7px
+  padding 2px 0
+  width 14px
+  span
+    font-size 11px
+
 .segmented-buttons
   &.first-row
     button
