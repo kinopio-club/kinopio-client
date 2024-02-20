@@ -27,10 +27,10 @@ aside.notifications(@click.left="closeAllDialogs")
           span Refresh
 
   .persistent-item.info(v-if="currentUserIsResizingCard")
-    img.icon.hand(src="@/assets/hand.svg")
+    img.icon.resize(src="@/assets/resize.svg")
     span Drag to Resize
   .persistent-item.info(v-if="currentUserIsTiltingCard")
-    img.icon.hand(src="@/assets/hand.svg")
+    img.icon.resize(src="@/assets/resize.svg")
     span Drag to Tilt
 
   .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
@@ -539,6 +539,9 @@ export default {
 
   .icon.refresh
     vertical-align 0px
+
+  .icon.resize
+    vertical-align 2px
 
   .filter-icon
     margin 0
