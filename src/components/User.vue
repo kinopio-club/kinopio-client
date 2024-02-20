@@ -111,7 +111,7 @@ const closeChildDialogs = () => {
   .label-badge.you-badge.small-badge(v-if="isCurrentUser && !hideYouLabel")
     span YOU
   template(v-if="state.userDetailsInlineIsVisible && user")
-    UserDetailsInline(:visible="state.userDetailsInlineIsVisible" :user="user")
+    UserDetailsInline(:visible="state.userDetailsInlineIsVisible" :user="user" :showExploreSpaces="true")
 </template>
 
 <style lang="stylus">

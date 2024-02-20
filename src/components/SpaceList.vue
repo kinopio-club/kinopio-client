@@ -85,6 +85,8 @@ const state = reactive({
   heightByIndex: {}
 })
 
+const isOffline = computed(() => !state.isOnline)
+
 // scroll
 
 watch(() => props.resultsSectionHeight, async (value, prevValue) => {
@@ -392,7 +394,7 @@ span.space-list-wrap
               template(v-else-if="showCollaborator(space)")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
               //- preview image
-              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage")
+              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOffline")
                 img.preview-thumbnail-image(:src="space.previewThumbnailImage")
                 //- new
                 .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")

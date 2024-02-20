@@ -410,6 +410,16 @@ const self = {
         context.dispatch('handleServerError', { name: 'getPublicUsers', error })
       }
     },
+    getPublicUserExploreSpaces: async (context, user) => {
+      console.log(user)
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/public/explore-spaces/${user.id}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getPublicUserExploreSpaces', error })
+      }
+    },
     updateUserFavorites: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline

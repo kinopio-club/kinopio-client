@@ -245,6 +245,7 @@ export default {
         statusRetryCount++
         delay = Math.pow(2, statusRetryCount) * initialDelay
       }
+      delay = delay || 15 * 60 * 1000 // 15 minutes
       console.log(`☎️ Retrying status in ${delay / 1000} seconds...`)
       setTimeout(this.updateServerIsOnline, delay)
     },
@@ -772,6 +773,16 @@ dialog
     height calc(100% + 2px)
     border-radius var(--entity-radius)
     z-index -1
+
+.subsection-vertical-label
+  writing-mode vertical-rl
+  position absolute
+  top 5px
+  left -7px
+  padding 2px 0
+  width 14px
+  span
+    font-size 11px
 
 .segmented-buttons
   &.first-row
