@@ -35,9 +35,9 @@ const start = (event, action) => {
     store.commit('currentUserIsResizingCardIds', cardIds)
     store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
   } else if (action === 'tilt') {
-    // store.commit('currentUserIsResizingCard', true)
-    // store.commit('currentUserIsResizingCardIds', cardIds)
-    // store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
+    store.commit('currentUserIsTiltingCard', true)
+    store.commit('currentUserIsTiltingCardIds', cardIds)
+    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserTiltingCards' })
   }
 }
 

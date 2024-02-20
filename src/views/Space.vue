@@ -160,6 +160,7 @@ export default {
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
     isResizingCard () { return this.$store.state.currentUserIsResizingCard },
+    isTiltingCard () { return this.$store.state.currentUserIsTiltingCard },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     isResizingBox () { return this.$store.state.currentUserIsResizingBox },
     isDraggingBox () { return this.$store.state.currentUserIsDraggingBox },
@@ -246,7 +247,7 @@ export default {
       }
     },
 
-    // cards
+    // resize cards
 
     resizeCards () {
       if (!prevCursor) { return }
@@ -262,6 +263,24 @@ export default {
       this.$store.dispatch('history/add', { cards, useSnapshot: true })
       this.$store.commit('currentUserIsResizingCard', false)
       this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserResizingCards' })
+    },
+
+    // tilt cards
+
+    tiltCards () {
+      if (!prevCursor) { return }
+      const cardIds = this.$store.state.currentUserIsTiltingCardIds
+      const deltaX = endCursor.x - prevCursor.x
+      this.$store.dispatch('currentCards/tilt', { cardIds, deltaX })
+    },
+    stopTiltingCards () {
+      if (!this.$store.state.currentUserIsTiltingCard) { return }
+      this.$store.dispatch('history/resume')
+      const cardIds = this.$store.state.currentUserIsTiltingCardIds
+      const cards = cardIds.map(id => this.$store.getters['currentCards/byId'](id))
+      this.$store.dispatch('history/add', { cards, useSnapshot: true })
+      this.$store.commit('currentUserIsTiltingCard', false)
+      this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserTiltingCards' })
     },
 
     // boxes
@@ -315,6 +334,9 @@ export default {
       }
       if (this.isResizingCard) {
         this.resizeCards()
+      }
+      if (this.isTiltingCard) {
+        this.tiltCards()
       }
       if (this.isResizingBox) {
         this.resizeBoxes()
@@ -479,6 +501,7 @@ export default {
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
       this.$store.commit('preventDraggedBoxFromShowingDetails', false)
       this.stopResizingCards()
+      this.stopTiltingCards()
       this.stopResizingBoxes()
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)

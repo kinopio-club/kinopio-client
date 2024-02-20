@@ -29,6 +29,9 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.info(v-if="currentUserIsResizingCard")
     img.icon.hand(src="@/assets/hand.svg")
     span Drag to Resize
+  .persistent-item.info(v-if="currentUserIsTiltingCard")
+    img.icon.hand(src="@/assets/hand.svg")
+    span Drag to Tilt
 
   .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
     img.icon(src="@/assets/brush.svg")
@@ -276,6 +279,7 @@ export default {
     notifyThanksForUpgrading () { return this.$store.state.notifyThanksForUpgrading },
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
     currentUserIsResizingCard () { return this.$store.state.currentUserIsResizingCard },
+    currentUserIsTiltingCard () { return this.$store.state.currentUserIsTiltingCard },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
     notifyReferralSuccessUser () { return this.$store.state.notifyReferralSuccessUser },
