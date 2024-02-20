@@ -2,42 +2,72 @@
 // import utils from '@/utils.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
-// https://vuex.vuejs.org/guide/composition-api.html#accessing-state-and-getters
 import { useStore } from 'vuex'
+import FreeLimitFAQ from '@/components/dialogs/FreeLimitFAQ.vue'
 const store = useStore()
 
-defineProps({
-  showReferButton: Boolean
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerCloseChildDialogs') {
+      closeChildDialogs()
+    }
+  })
+})
+
+const state = reactive({
+  freeLimitFAQIsVisible: false
 })
 
 const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCount || 0)
 const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
-const isPricingHidden = computed(() => store.state.isPricingHidden)
 
-const togglePricingIsVisible = () => {
-  const value = !store.state.pricingIsVisible
+const triggerUpgradeUserIsVisible = () => {
+  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
   store.dispatch('closeAllDialogs')
-  store.commit('pricingIsVisible', value)
+  if (currentUserIsSignedIn) {
+    store.commit('triggerUpgradeUserIsVisible')
+  } else {
+    store.commit('triggerSignUpOrInIsVisible')
+  }
+}
+
+const toggleFreeLimitFAQIsVisible = () => {
+  const value = !state.freeLimitFAQIsVisible
+  store.commit('triggerCloseChildDialogs')
+  state.freeLimitFAQIsVisible = value
+}
+const closeChildDialogs = () => {
+  state.freeLimitFAQIsVisible = false
 }
 </script>
 
 <template lang="pug">
-.cards-created-progress
-  .info
-    p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
-    template(v-if="!isPricingHidden")
-      button.small-button(@click="togglePricingIsVisible") Pricing
+section.subsection.cards-created-progress(@click="closeChildDialogs")
+  .row
+    p {{cardsCreatedCount}}/{{cardsCreatedLimit}} free cards created
+    .button-wrap
+      button.small-button(@click.stop="toggleFreeLimitFAQIsVisible" :class="{active: state.freeLimitFAQIsVisible}")
+        span ?
+      FreeLimitFAQ(:visible="state.freeLimitFAQIsVisible")
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
-
+  .row
+    .button-wrap
+      button(@click="triggerUpgradeUserIsVisible")
+        span Upgrade for Unlimited
 </template>
 
 <style lang="stylus">
 .cards-created-progress
   width 100%
-  .info
+  .row
     display flex
     justify-content space-between
     align-items center
-    button
+    margin-bottom 0
+    .button-wrap,
+    .small-button
       margin-top 0
+  progress
+    margin-bottom 10px
+    margin-top 10px
 </style>

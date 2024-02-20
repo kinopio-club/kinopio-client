@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog")
+dialog.wide(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog")
   section
     SpaceDetailsInfo(:shouldHidePin="true" @closeDialogs="closeDialogs")
 </template>
@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     closeDialogs () {
-      this.$store.commit('triggerSpaceDetailsCloseDialogs')
+      this.$store.commit('triggerCloseChildDialogs')
     }
   },
   watch: {

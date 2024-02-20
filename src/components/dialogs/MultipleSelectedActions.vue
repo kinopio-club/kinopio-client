@@ -29,11 +29,11 @@ dialog.narrow.multiple-selected-actions(
 
       //- More Options
       .button-wrap
-        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}")
+        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedItemActions" :class="{active : shouldShowMultipleSelectedItemActions}")
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
-    CardBoxActions(:visible="shouldShowItemActions && (cardsIsSelected || boxesIsSelected)" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }")
-    ConnectionActions(:visible="shouldShowItemActions && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll")
+    CardOrBoxActions(:visible="shouldShowMultipleSelectedItemActions && (cardsIsSelected || boxesIsSelected)" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }" :backgroundColor="userColor" :labelIsVisible="true")
+    ConnectionActions(:visible="shouldShowMultipleSelectedItemActions && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll" :backgroundColor="userColor")
 
   section
     template(v-if="oneCardOrMultipleBoxesIsSelected")
@@ -55,7 +55,6 @@ dialog.narrow.multiple-selected-actions(
       //- Remove
       button.danger(:disabled="!canEditAll.all" @click.left="remove")
         img.icon(src="@/assets/remove.svg")
-        span Remove
       //- Merge
       button(v-if="multipleCardsIsSelected" @click="mergeSelectedCards" :disabled="!canEditAll.cards")
         img.icon(src="@/assets/merge.svg")
@@ -65,16 +64,15 @@ dialog.narrow.multiple-selected-actions(
         img.icon(src="@/assets/split.svg")
         span Split
 
-    p(v-if="canEditAsNonMember && !selectedItemsIsCreatedByCurrentUser")
-      span.badge.info
-        img.icon.open(src="@/assets/open.svg")
-        span In open spaces, you can only edit cards and connections you've made
+    p.badge.info(v-if="canEditAsNonMember && !selectedItemsIsCreatedByCurrentUser")
+      img.icon.open(src="@/assets/open.svg")
+      span In open spaces, you can only edit items you created
 </template>
 
 <script>
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
-import CardBoxActions from '@/components/subsections/CardBoxActions.vue'
+import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 import ShareCard from '@/components/dialogs/ShareCard.vue'
@@ -89,7 +87,7 @@ export default {
   name: 'MultipleSelectedActions',
   components: {
     MoveOrCopyItems,
-    CardBoxActions,
+    CardOrBoxActions,
     ConnectionActions,
     AlignAndDistribute,
     ShareCard
@@ -112,7 +110,7 @@ export default {
       return isThemeDark && userColorIsLight
     },
     maxCardLength () { return consts.maxCardLength },
-    shouldShowItemActions () { return this.$store.state.currentUser.shouldShowItemActions },
+    shouldShowMultipleSelectedItemActions () { return this.$store.state.currentUser.shouldShowMultipleSelectedItemActions },
     visible () {
       const isSelectedItems = this.multipleConnectionsSelectedIds.length || this.multipleCardsSelectedIds.length || this.multipleBoxesSelectedIds.length
       return this.$store.state.multipleSelectedActionsIsVisible && isSelectedItems
@@ -338,8 +336,15 @@ export default {
     mergeSelectedCards () {
       let name = ''
       const cards = this.cardsSortedByY()
+      const urlPreview = {}
       cards.forEach(card => {
         name = `${name}\n\n${card.name.trim()}`
+
+        Object.keys(card).forEach(key => {
+          if (key.startsWith('urlPreview') && card[key] && !urlPreview[key]) {
+            urlPreview[key] = card[key]
+          }
+        })
       })
       name = name.trim()
       let newNames = []
@@ -376,7 +381,8 @@ export default {
           id: nanoid(),
           name: newName,
           x: position.x,
-          y: position.y
+          y: position.y,
+          ...urlPreview
         }
         newCards.push(newCard)
       })
@@ -399,10 +405,10 @@ export default {
       this.closeDialogs()
       this.shareCardIsVisible = !isVisible
     },
-    toggleShouldShowItemActions () {
+    toggleShouldShowMultipleSelectedItemActions () {
       this.closeDialogs()
-      const isVisible = !this.shouldShowItemActions
-      this.$store.dispatch('currentUser/shouldShowItemActions', isVisible)
+      const isVisible = !this.shouldShowMultipleSelectedItemActions
+      this.$store.dispatch('currentUser/shouldShowMultipleSelectedItemActions', isVisible)
       this.$nextTick(() => {
         this.scrollIntoView()
       })
@@ -411,7 +417,7 @@ export default {
       this.copyCardsIsVisible = false
       this.moveCardsIsVisible = false
       this.shareCardIsVisible = false
-      this.$store.commit('triggerCardDetailsCloseDialogs')
+      this.$store.commit('triggerCloseChildDialogs')
     },
     connectionType (event) {
       let connectionType = last(this.$store.getters['currentConnections/allTypes'])
@@ -527,7 +533,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
     },
     updatePinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())

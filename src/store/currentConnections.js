@@ -17,7 +17,8 @@ export default {
     ids: [],
     connections: {},
     typeIds: [],
-    types: {}
+    types: {},
+    lastTypeId: ''
   },
   mutations: {
 
@@ -89,9 +90,8 @@ export default {
       })
       cache.updateSpace('connectionTypes', state.types, currentSpaceId)
     },
-    reorderTypeToEnd: (state, type) => {
-      state.typeIds.filter(id => id !== type.id)
-      state.typeIds.push(type.id)
+    lastTypeId: (state, id) => {
+      state.lastTypeId = id
     },
 
     // broadcast
@@ -207,6 +207,7 @@ export default {
       }
       connectionType.userId = context.rootState.currentUser.id
       context.commit('createType', connectionType)
+      context.commit('lastTypeId', connectionType.id)
       context.dispatch('broadcast/update', { updates: connectionType, type: 'addConnectionType', handler: 'currentConnections/createType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
     },
@@ -262,6 +263,32 @@ export default {
       context.commit('updateType', type)
       context.dispatch('broadcast/update', { updates: type, type: 'updateConnectionType', handler: 'currentConnections/updateType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'updateConnectionType', body: type }, { root: true })
+    },
+    updateLabelPosition: (context, { connection, labelRelativePositionX, labelRelativePositionY }) => {
+      const prevConnection = context.getters.byId(connection.id)
+      // normalize
+      if (utils.isUndefined(labelRelativePositionX)) {
+        labelRelativePositionX = utils.roundFloat(prevConnection.labelRelativePositionX)
+      }
+      if (utils.isUndefined(labelRelativePositionY)) {
+        labelRelativePositionY = utils.roundFloat(prevConnection.labelRelativePositionY)
+      }
+      // update
+      const item = {
+        id: connection.id,
+        labelRelativePositionX,
+        labelRelativePositionY
+      }
+      context.commit('update', item)
+      context.dispatch('broadcast/update', { updates: item, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'updateConnection', body: item }, { root: true })
+    },
+    clearLabelPosition: (context, connection) => {
+      context.dispatch('updateLabelPosition', {
+        connection,
+        labelRelativePositionX: 0.5,
+        labelRelativePositionY: 0.5
+      })
     },
 
     // remove
@@ -324,32 +351,43 @@ export default {
       const typeIds = uniq(state.typeIds)
       return typeIds.map(id => state.types[id])
     },
-    byCardId: (state, getters) => (cardId) => {
-      const connections = getters.all
-      return connections.filter(connection => {
+    byCardId: (state, getters, rootState, rootGetters) => (cardId) => {
+      let connections = getters.all
+      connections = connections.filter(connection => {
         let start = connection.startCardId === cardId
         let end = connection.endCardId === cardId
         return start || end
       })
+      connections = getters.connectionsWithValidCards(connections)
+      return connections
     },
-    typesByCardId: (state, getters) => (cardId) => {
-      const connections = getters.byCardId(cardId)
+    typesByCardId: (state, getters, rootState, rootGetters) => (cardId) => {
+      let connections = getters.byCardId(cardId)
       let types = getters.allTypes
       types = types.filter(type => Boolean(type))
+      connections = getters.connectionsWithValidCards(connections)
       const typeIds = connections.map(connection => connection.connectionTypeId)
       return types.filter(type => {
         return typeIds.includes(type.id)
       })
     },
-    typeForNewConnections: (state, getters, rootState) => {
+    connectionsWithValidCards: (state, getters, rootState, rootGetters) => (connections) => {
+      connections = connections.filter(connection => {
+        const startCard = rootGetters['currentCards/byId'](connection.startCardId)
+        const endCard = rootGetters['currentCards/byId'](connection.endCardId)
+        return startCard && endCard
+      })
+      return connections
+    },
+    typeForNewConnections: (state, getters, rootState, rootGetters) => {
       const userId = rootState.currentUser.id
+      const shouldUseLastConnectionType = rootState.currentUser.shouldUseLastConnectionType
       let types = getters.allTypes
       types = types.filter(type => type.userId === userId)
-      if (types.length) {
-        return last(types)
+      if (shouldUseLastConnectionType) {
+        return getters.lastType
       } else {
-        const typeId = last(state.typeIds)
-        return state.types[typeId]
+        return last(types)
       }
     },
     typeByConnection: (state, getters) => (connection) => {
@@ -370,6 +408,16 @@ export default {
         return isColor && isName
       })
       return existingType
+    },
+    lastType: (state, getters) => {
+      const id = state.lastTypeId || last(state.typeIds)
+      let type = getters.typeByTypeId(id)
+      return type
+    },
+    isCardConnected: (state) => (card, connection) => {
+      let start = connection.startCardId === card.id
+      let end = connection.endCardId === card.id
+      return start || end
     },
 
     // path utils

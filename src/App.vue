@@ -2,28 +2,29 @@
 .app(
   @pointermove="broadcastUserCursor"
   @touchstart="isTouchDevice"
-  :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
-  :class="{ 'no-background': isAddPage, 'is-dark-theme': isThemeDark }"
+  :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor, backgroundColor: outsideSpaceBackgroundColor }"
+  :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
 )
-  base(v-if="isAddPage" target="_blank")
-  OutsideSpaceBackground
-  SpaceBackground
-  ItemsLocked
-  MagicPaint
+  base(v-if="!isSpacePage" target="_blank")
+  template(v-if="isSpacePage")
+    OutsideSpaceBackground
+    SpaceBackground
+    ItemsLocked
+    MagicPaint
   //- router-view is Space or Add
   router-view
-  Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
-  Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
-  TagDetails
-  UserDetails
-  CardListItemOptions
-  WindowHistoryHandler
-  KeyboardShortcutsHandler
-  ScrollHandler
-  NotificationsWithPosition(layer="app")
-  Preload
-  .badge.label-badge.development-badge(v-if="isDevelopment && !isAddPage")
-    span DEV
+  template(v-if="isSpacePage")
+    Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
+    Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
+    TagDetails
+    UserDetails
+    WindowHistoryHandler
+    KeyboardShortcutsHandler
+    ScrollHandler
+    NotificationsWithPosition(layer="app")
+    Preload
+    .badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
+      span DEV
 </template>
 
 <script>
@@ -40,13 +41,14 @@ import NotificationsWithPosition from '@/components/NotificationsWithPosition.vu
 import SpaceBackground from '@/components/SpaceBackground.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
-import CardListItemOptions from '@/components/dialogs/CardListItemOptions.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 let multiTouchAction, shouldCancelUndo
 
 let inertiaScrollEndIntervalTimer, prevPosition
+
+let statusRetryCount = 0
 
 export default {
   components: {
@@ -62,15 +64,12 @@ export default {
     NotificationsWithPosition,
     SpaceBackground,
     OutsideSpaceBackground,
-    Preload,
-    CardListItemOptions
+    Preload
   },
   created () {
-    console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
+    console.log('🐢 kinopio-client build', import.meta.env.MODE, this.scriptUrl)
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'currentSpace/restoreSpace') {
-        this.updateMetaDescription()
-      } else if (mutation.type === 'broadcast/joinSpaceRoom') {
+      if (mutation.type === 'broadcast/joinSpaceRoom') {
         this.updateMetaRSSFeed()
       } else if (mutation.type === 'triggerUserIsLoaded') {
         this.updateThemeFromSystem()
@@ -83,18 +82,25 @@ export default {
     setTimeout(() => {
       window.addEventListener('scroll', this.scroll)
     }, 100)
-    this.updateMetaDescription()
     window.addEventListener('touchstart', this.touchStart)
     window.addEventListener('touchmove', this.touchMove)
     window.addEventListener('touchend', this.touchEnd)
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.logMatchMediaChange)
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.updateThemeFromSystem)
+    window.addEventListener('visibilitychange', this.cancelTouch)
+
+    this.updateIsOnline()
+    window.addEventListener('online', this.updateIsOnline)
+    window.addEventListener('offline', this.updateIsOnline)
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.scroll)
     window.removeEventListener('touchstart', this.touchStart)
     window.removeEventListener('touchmove', this.touchMove)
     window.removeEventListener('touchend', this.touchEnd)
+    window.removeEventListener('visibilitychange', this.cancelTouch)
+    window.removeEventListener('online', this.updateIsOnline)
+    window.removeEventListener('offline', this.updateIsOnline)
   },
   data () {
     return {
@@ -103,14 +109,9 @@ export default {
     }
   },
   computed: {
+    outsideSpaceBackgroundColor () { return this.$store.state.outsideSpaceBackgroundColor },
     isThemeDark () {
-      const systemTheme = this.themeFromSystem()
-      const userTheme = this.$store.state.currentUser.theme
-      if (systemTheme) {
-        return systemTheme === 'dark'
-      } else {
-        return userTheme === 'dark'
-      }
+      return this.$store.getters['themes/isThemeDark']
     },
     spaceName () { return this.$store.state.currentSpace.name },
     isDevelopment () {
@@ -120,27 +121,27 @@ export default {
         return false
       }
     },
-    isAddPage () { return this.$store.state.isAddPage },
+    isSpacePage () { return this.$store.getters.isSpacePage },
     pageWidth () {
-      if (this.isAddPage) { return }
+      if (!this.isSpacePage) { return }
       const size = Math.max(this.$store.state.pageWidth, this.$store.state.viewportWidth)
       return size + 'px'
     },
     pageHeight () {
-      if (this.isAddPage) { return }
+      if (!this.isSpacePage) { return }
       const size = Math.max(this.$store.state.pageHeight, this.$store.state.viewportHeight)
       return size + 'px'
     },
-    buildHash () {
-      const regex = /(index\.)([a-z0-9])\w+/
+    scriptUrl () {
       const scripts = Array.from(document.querySelectorAll('script'))
-      const path = scripts.find(script => {
-        const src = script.src
-        return src.includes('index')
+      const url = scripts.find(script => {
+        if (this.isDevelopment) {
+          return script.src.includes('main.js')
+        } else {
+          return script.src.includes('index-')
+        }
       })
-      if (!path) { return }
-      let hash = path.src.match(regex)[0] // index.xyzabc123.js
-      return hash.replace('index.', '') // xyzabc123
+      return url.src
     },
     pageCursor () {
       const isPanning = this.$store.state.currentUserIsPanning
@@ -155,7 +156,11 @@ export default {
       }
       return undefined
     },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
+    isDevelpmentBadgeVisible () {
+      if (this.$store.state.isPresentationMode) { return }
+      return this.isDevelopment
+    }
   },
   methods: {
     // events
@@ -185,7 +190,7 @@ export default {
       this.isTouchScrolling = true
     },
     touchEnd () {
-      if (this.$store.state.isAddPage) { return }
+      if (!this.isSpacePage) { return }
       this.isPinchZooming = false
       this.checkIfInertiaScrollEnd()
       if (shouldCancelUndo) {
@@ -206,6 +211,43 @@ export default {
     scroll () {
       if (this.$store.state.userHasScrolled) { return }
       this.$store.commit('userHasScrolled', true)
+    },
+    cancelTouch () {
+      this.isPinchZooming = false
+      this.isTouchScrolling = false
+    },
+
+    // online
+
+    updateIsOnline () {
+      let clientStatus = window.navigator.onLine
+      if (!clientStatus) {
+        this.$store.dispatch('isOnline', false)
+        return
+      }
+      this.updateServerIsOnline()
+    },
+    async updateServerIsOnline () {
+      const maxIterations = 10
+      const initialDelay = 1000 // 1 second
+      const serverStatus = await this.$store.dispatch('api/getStatus')
+      console.log('☎️ status', serverStatus)
+      if (serverStatus) {
+        this.$store.dispatch('isOnline', true)
+        this.$store.dispatch('api/processQueueOperations')
+      // error offline
+      } else {
+        this.$store.dispatch('isOnline', false)
+      }
+      // retry
+      let delay // delay increases up to ~15 minutes
+      if (statusRetryCount < maxIterations) {
+        statusRetryCount++
+        delay = Math.pow(2, statusRetryCount) * initialDelay
+      }
+      delay = delay || 15 * 60 * 1000 // 15 minutes
+      console.log(`☎️ Retrying status in ${delay / 1000} seconds...`)
+      setTimeout(this.updateServerIsOnline, delay)
     },
 
     //
@@ -257,7 +299,9 @@ export default {
       }, 250)
     },
     broadcastUserCursor (event) {
+      if (!this.$store.getters.isSpacePage) { return }
       let updates = utils.cursorPositionInSpace(event)
+      if (!updates) { return }
       updates.userId = this.$store.state.currentUser.id
       updates.zoom = this.spaceZoomDecimal
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
@@ -265,17 +309,9 @@ export default {
     isTouchDevice () {
       this.$store.commit('isTouchDevice', true)
     },
-    updateMetaDescription () {
-      let description = 'Kinopio is the thinking tool for building new ideas and solving hard problems. Create spaces to brainstorm, research, plan and take notes.'
-      const metaDescription = document.querySelector('meta[name=description]')
-      const cards = this.$store.getters['currentCards/all']
-      const topLeftItem = utils.topLeftItem(cards)
-      if (!topLeftItem.name) {
-        metaDescription.setAttribute('content', description)
-      } else {
-        metaDescription.setAttribute('content', topLeftItem.name)
-      }
-    },
+
+    // rss
+
     clearMetaRSSFeed () {
       let link = document.querySelector("link[type='application/rss+xml']")
       if (link) {
@@ -283,10 +319,10 @@ export default {
       }
     },
     updateMetaRSSFeed () {
-      const spaceHasUrl = utils.spaceHasUrl()
       const spaceIsPrivate = this.$store.state.currentSpace.privacy === 'private'
+      const spaceIsRemote = this.$store.getters['currentSpace/isRemote']
       this.clearMetaRSSFeed()
-      if (!spaceHasUrl) { return }
+      if (!spaceIsRemote) { return }
       if (spaceIsPrivate) { return }
       const head = document.querySelector('head')
       const spaceId = this.$store.state.currentSpace.id
@@ -304,6 +340,7 @@ export default {
 
 <style lang="stylus">
 :root
+  color-scheme var(--color-scheme)
   // theme vars in themes.js
   // non-theme vars
   --primary-on-dark-background white
@@ -318,8 +355,10 @@ export default {
   --entity-radius 6px
   --small-entity-radius 3px
   --subsection-padding 5px
+  --button-fixed-height 30px
   --serif-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
+  --glyphs-font GoodGlyphs, wingdings
 
 @font-face
   font-family 'Recoleta'
@@ -333,6 +372,12 @@ export default {
   font-weight bold
   font-style normal
 
+@font-face
+  font-family 'GoodGlyphs'
+  src url("assets/fonts/GoodGlyphs-No1.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+
 *
   -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
@@ -341,7 +386,11 @@ export default {
   font-size 15px
   line-height 1.2
 
+html
+  background transparent
+
 body
+  background transparent
   margin 0
   color var(--primary)
   -webkit-user-select none
@@ -354,10 +403,13 @@ body
     min-height initial
     left initial
     right 0px
-    bottom 80px
+    bottom 40px
     position fixed
     pointer-events none
     z-index 100
+
+.space-border-radius
+  border-radius calc(var(--entity-radius) * 2)
 
 img,
 video
@@ -379,9 +431,11 @@ textarea,
   border-radius 0
   padding 1px
   margin-bottom 10px
-  &:disabled
+  &:disabled,
+  &:read-only
     color var(--primary)
     border-bottom 0
+    outline none
   &.is-dark
     color var(--primary-background)
     border-color var(--primary-background)
@@ -393,7 +447,7 @@ label // used for checkbox buttons
   touch-action manipulation
   text-align left
   padding 5px 9px
-  height 30px
+  height fit-content
   margin 0
   background-color var(--button-background)
   border 1px solid var(--primary-border)
@@ -446,21 +500,32 @@ label // used for checkbox buttons
     cursor default
     color var(--primary)
     opacity 0.5
-    pointer-events none
+    pointer-events none !important
   &.is-dark
     border-color var(--primary-background)
     img
       filter invert(1)
+  &.translucent-button
+    backdrop-filter blur(8px) !important
+    background var(--button-background-translucent)
+    &:hover
+      box-shadow var(--button-hover-shadow)
+      background-color var(--secondary-hover-background)
+      outline none
+    &:active,
+    &.active
+      box-shadow var(--button-active-inset-shadow)
+      color var(--primary)
+      background-color var(--secondary-active-background)
   &.small-button
-    height 20px
+    height fit-content
     padding 0px 4px
     input[type="checkbox"]
       width 10px
       height 10px
       vertical-align 0
-  &.variable-length-content
-    height fit-content
-
+  &.fixed-height
+    height var(--button-fixed-height)
 .unselectable
   pointer-events none !important
 
@@ -501,6 +566,8 @@ textarea
     -webkit-text-fill-color var(--primary)
     opacity 1
     -webkit-opacity 1
+textarea + p
+  margin-top 0
 
 .inline-button
   background-color transparent
@@ -600,7 +667,7 @@ dialog
   left 8px
   top 8px
   position absolute
-  max-height calc(100vh - 100px)
+  max-height 90dvh
   margin 0
   padding 0
   user-select auto
@@ -620,6 +687,8 @@ dialog
     transition left 0.1s, top 0.1s
   &.narrow
     width 230px
+  &.wide
+    width 280px
   button + button,
   button + input,
   button + label,
@@ -679,12 +748,16 @@ dialog
   section + section
     border-top 1px solid var(--primary-border)
   section.subsection + section,
-  section.subsection + .row
+  section.subsection + .row,
+  .badge + .row,
+  .loader + .row,
+  p + .row
     margin-top 10px
   section.subsection + section.subsection
     border-top 0
 
   .change-color
+    height var(--button-fixed-height)
     .current-color
       height 14px
       width 14px
@@ -705,6 +778,16 @@ dialog
     border-radius var(--entity-radius)
     z-index -1
 
+.subsection-vertical-label
+  writing-mode vertical-rl
+  position absolute
+  top 5px
+  left -7px
+  padding 2px 0
+  width 14px
+  span
+    font-size 11px
+
 .segmented-buttons
   &.first-row
     button
@@ -720,7 +803,8 @@ dialog
       border-top-right-radius 0
   > .button-wrap > button,
   > button,
-  > label
+  > label,
+  > select
     margin 0
     border-radius 0
     &:first-child
@@ -749,7 +833,9 @@ dialog
   button + button,
   label + button,
   button + label,
-  label + label
+  label + label,
+  select + button,
+  button + select
     margin-left -1px
 
 .segmented-buttons-wrap
@@ -767,6 +853,15 @@ dialog
           border-top-left-radius 0
         &:last-child
           border-top-right-radius 0
+
+.title-row-small-button-wrap
+  cursor pointer
+  padding 8px
+  padding-top 0
+  padding-right 0
+  &.section-top
+    padding 5px
+    padding-right 0
 
 .is-dark-theme
   .icon
@@ -816,7 +911,10 @@ dialog
   vertical-align 2px
 
 .icon.box-icon
-  vertical-align 0
+  vertical-align -1px
+
+.icon.comment
+  vertical-align -1px
 
 .icon.leave
   transform rotate(-45deg)
@@ -834,6 +932,14 @@ dialog
 
 .icon.arena
   width 18px
+
+.icon.clover
+  width 12px
+  vertical-align -1px
+
+.icon.key
+  height 10px
+  vertical-align 1px
 
 label,
 li
@@ -865,6 +971,31 @@ li
       background-position center
       background-size 69%
 
+details
+  summary
+    cursor pointer
+    border-radius var(--entity-radius)
+    padding 5px 9px
+    &:hover
+      box-shadow var(--button-hover-shadow)
+      background-color var(--secondary-hover-background)
+    &:active
+      box-shadow var(--button-active-inset-shadow)
+      background-color var(--secondary-active-background)
+  section.subsection
+    padding 5px 9px !important
+    margin-top 0 !important
+    border-top-right-radius 0
+    border-top-left-radius 0
+details[open]
+  > summary
+    box-shadow var(--button-active-inset-shadow)
+    background-color var(--secondary-active-background)
+    border-bottom-right-radius 0
+    border-bottom-left-radius 0
+details + details
+  margin-top 2px
+
 .is-dark-theme
   label
     input[type="checkbox"]
@@ -885,7 +1016,6 @@ li
   padding-top 0
   border-top 0
   overflow auto
-  max-height calc(92vh - 245px)
 
 ul.results-list
   margin 0
@@ -995,6 +1125,11 @@ code
     padding 0px 7px
     vertical-align 0
     margin-right 5px
+  &.dot
+    min-width initial
+    min-height initial
+    width 12px
+    height 12px
 
 .label-badge
   position absolute
@@ -1022,7 +1157,7 @@ code
       width 21px
       height 10px
   > .icon.private
-    margin-left 3px
+    margin-left 5px
   .user-label-inline
     display inline-block
     min-height initial
@@ -1129,8 +1264,8 @@ code
   background-image url('assets/logo-base.png')
 .logo
   .logo-image
-    width 44px
-    height 40px
+    width 36px
+    height 33px
     background-repeat no-repeat
     background-size contain
     display inline-block
@@ -1185,4 +1320,13 @@ progress::-webkit-progress-value
 progress::-moz-progress-bar
   background-color var(--primary)
   border-radius 2px
+
+.fadeIn-enter-active {
+  animation fadeIn 0.5s ease-out
+}
+@keyframes fadeIn
+  0%
+    opacity 0
+  100%
+    opacity 1
 </style>

@@ -11,7 +11,7 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
       p {{actionLabelCapitalized}} {{pluralItem}} to space
     .row
       .button-wrap
-        button.variable-length-content(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
+        button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
           span {{selectedSpace.name}}
           img.down-arrow(src="@/assets/down-arrow.svg")
         SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true")
@@ -197,12 +197,10 @@ export default {
         items.isRemoved = true
         this.$store.dispatch('history/resume')
         this.$store.dispatch('history/add', items)
-      } else {
-        this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-          delta: items.cards.length,
-          shouldIncrement: true
-        })
       }
+      this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+        cards: items.cards
+      })
       this.$store.dispatch('currentConnections/removeUnusedTypes')
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('closeAllDialogs')
@@ -229,7 +227,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
     },
     closeDialogs () {
       this.spacePickerIsVisible = false
@@ -254,9 +252,6 @@ export default {
 .more-or-copy-cards
   top calc(100% - 8px)
   cursor initial
-  .url-textarea
-    max-height 100px
-    width 100%
   .error-card-limit
     margin-top 10px
 </style>

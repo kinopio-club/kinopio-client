@@ -14,17 +14,14 @@ let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
 
 console.log('🌳 websocket clientId', clientId)
-let showDebugMessages = true
-if (import.meta.env.MODE === 'development') {
-  showDebugMessages = false
-}
+let showDebugMessages = false
 
 const joinSpaceRoom = (store, mutation) => {
   console.log('🌙 joining', websocket)
   if (!websocket) { return }
   const space = utils.clone(store.state.currentSpace)
   const user = utils.clone(store.state.currentUser)
-  const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
+  const currentSpaceIsRemote = store.getters['currentSpace/isRemote']
   if (!currentSpaceIsRemote) {
     store.commit('isJoiningSpace', false)
     return
@@ -84,16 +81,6 @@ const checkIfShouldUpdateLinkToItem = (store, { message, updates }) => {
   }
   if (!options) { return }
   store.dispatch('currentSpace/updateOtherItems', options)
-}
-
-const checkIfShouldUpdateBackground = (store, { message, updates }) => {
-  const updateKeys = Object.keys(updates)
-  updateKeys.forEach(key => {
-    const shouldUpdateBackground = key === 'background' || key === 'backgroundTint'
-    if (message === 'updateSpace' && shouldUpdateBackground) {
-      store.commit('triggerUpdateBackground')
-    }
-  })
 }
 
 const closeWebsocket = (store) => {
@@ -162,7 +149,6 @@ export default function createWebSocketPlugin () {
             store.commit(`${message}`, updates)
           } else {
             store.commit(`currentSpace/${message}`, updates)
-            checkIfShouldUpdateBackground(store, data)
           }
         }
       }

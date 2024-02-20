@@ -8,8 +8,10 @@
   "collaborators": [],
   "spectators": [],
   "clients": [],
-  "background": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/blank.png",
+  "background": "https://bk.kinopio.club/blank.png",
   "backgroundTint": "#223c2f",
+  "backgroundGradient": null,
+  "backgroundIsGradient": false,
   "moonPhase": "",
   "isTemplate": false,
   "cards": [
@@ -18,9 +20,9 @@
       "x": 70,
       "y": 140,
       "z": 0,
-      "name": "Use this space to collect thoughts, todos, and ideas that don't have a place to go yet\n\nCapture ideas from anywhere with the [browser extension](https://help.kinopio.club/posts/extensions)",
-      "width": 235,
-      "height": 116
+      "name": "Use this space to collect thoughts, todos, and ideas that don't have a place to go yet\n\nCapture ideas from anywhere with the [browser extension](https://help.kinopio.club/posts/extensions) or the [iOS App](https://apps.apple.com/us/app/kinopio/id6448743101)",
+      "width": 230,
+      "height": 177
     },
     {
       "id": "2",
@@ -28,8 +30,8 @@
       "y": 140,
       "z": 0,
       "name": "When you're ready, work through your cards by moving them to other spaces",
-      "width": 235,
-      "height": 66
+      "width": 230,
+      "height": 87
     }
   ],
   "connections": [],

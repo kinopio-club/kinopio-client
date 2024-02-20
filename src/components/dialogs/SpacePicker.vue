@@ -6,45 +6,45 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
         span To link to a space,
         span.badge.info you need to Sign Up or In
       button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
-  template(v-if="(parentIsCardDetails && currentUserIsSignedIn) || !parentIsCardDetails")
-    // New Space
-    section.options(v-if="shouldShowNewSpace")
+  //- New Space
+  section.options(v-if="shouldShowNewSpace")
+    .row
+      button(@click="toggleNewSpaceIsVisible" :class="{ active: newSpaceIsVisible }")
+        img.icon(src="@/assets/add.svg")
+        span New Space
+    template(v-if="newSpaceIsVisible")
       .row
-        button(@click="toggleNewSpaceIsVisible" :class="{ active: newSpaceIsVisible }")
-          img.icon(src="@/assets/add.svg")
-          span New Space
-      template(v-if="newSpaceIsVisible")
-        .row
-          .button-wrap
-          input(placeholder="name" ref="newSpaceName" v-model="newSpaceName" @keyup.space.prevent @keyup.escape.stop="toggleNewSpaceIsVisible" @keyup.stop @keyup.enter.exact="createNewSpace")
-        .row
-          button(@click="createNewSpace")
-            span Create New Space
-            Loader(:visible="isLoadingNewSpace")
+        .button-wrap
+        input(placeholder="name" ref="newSpaceName" v-model="newSpaceName" @keyup.space.prevent @keyup.escape.stop="toggleNewSpaceIsVisible" @keyup.stop @keyup.enter.exact="createNewSpace")
+      .row
+        button(@click="createNewSpace")
+          span Create New Space
+          Loader(:visible="isLoadingNewSpace")
 
-    // Type to Search
-    section.info-section(v-if="parentIsCardDetails && !search")
-      p
-        img.icon.search(src="@/assets/search.svg")
-        span Type to search spaces {{search}}
-    // Space List
-    section.results-section
-      Loader(:visible="loading")
-      SpaceList(
-        v-if="filteredSpaces.length"
-        :hideFilter="hideFilter"
-        :spaces="filteredSpaces"
-        :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator"
-        :selectedSpace="selectedSpace"
-        @selectSpace="selectSpace"
-        :search="search"
-        @focusBeforeFirstItem="handleFocusBeforeFirstItem"
-      )
-      .error-container(v-if="!filteredSpaces.length && !loading")
-        User(:user="activeUser" :isClickable="false" :key="activeUser.id")
-        span(v-if="activeUserIsCurrentUser && search") has no spaces matching {{search}}
-        span(v-else-if="activeUserIsCurrentUser") has no spaces
-        span(v-else) has no public spaces
+  //- Type to Search
+  section.info-section(v-if="parentIsCardDetails && !search")
+    p
+      img.icon.search(src="@/assets/search.svg")
+      span Type to search spaces {{search}}
+  //- Space List
+  section.results-section
+    Loader(:visible="loading")
+    SpaceList(
+      v-if="filteredSpaces.length"
+      :hideFilter="hideFilter"
+      :spaces="filteredSpaces"
+      :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator"
+      :selectedSpace="selectedSpace"
+      @selectSpace="selectSpace"
+      :search="search"
+      @focusBeforeFirstItem="handleFocusBeforeFirstItem"
+      :parentDialog="parentDialog"
+    )
+    .error-container(v-if="!filteredSpaces.length && !loading")
+      User(:user="activeUser" :isClickable="false" :key="activeUser.id")
+      span(v-if="activeUserIsCurrentUser && search") has no spaces matching {{search}}
+      span(v-else-if="activeUserIsCurrentUser") has no spaces
+      span(v-else) has no public spaces
 </template>
 
 <script>
@@ -53,9 +53,12 @@ import words from '@/data/words.js'
 import newSpace from '@/data/new.json'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import fuzzy from '@/libs/fuzzy.js'
+import dayjs from 'dayjs'
+import sortBy from 'lodash-es/sortBy'
 
 import { defineAsyncComponent } from 'vue'
 const User = defineAsyncComponent({
@@ -96,6 +99,7 @@ export default {
     }
   },
   computed: {
+    parentDialog () { return 'spacePicker' },
     activeUser () {
       const currentUser = this.$store.state.currentUser
       return this.user || currentUser
@@ -119,24 +123,31 @@ export default {
       }
     },
     filteredSpaces () {
-      if (!this.parentIsCardDetails) { return this.spaces }
-      let spaces = this.spaces.filter(space => {
-        return space.name !== this.search
+      let spaces = this.spaces
+      if (!this.parentIsCardDetails) { return spaces }
+      spaces = spaces.filter(space => {
+        const isHidden = space.isHidden
+        return !space.isHidden
       })
-      const options = {
-        pre: '',
-        post: '',
-        extract: (item) => {
-          let name = item.name || ''
-          return name
-        }
+      if (this.search) {
+        const filtered = fuzzy.filter(
+          this.search,
+          spaces,
+          {
+            pre: '',
+            post: '',
+            extract: (item) => {
+              let name = item.name || ''
+              return name
+            }
+          }
+        )
+        spaces = filtered.map(item => {
+          let result = utils.clone(item.original)
+          result.matchIndexes = item.indices
+          return result
+        })
       }
-      const filtered = fuzzy.filter(this.search, spaces, options)
-      spaces = filtered.map(item => {
-        let result = utils.clone(item.original)
-        result.matchIndexes = item.indices
-        return result
-      })
       return spaces
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
@@ -177,7 +188,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
     },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs')
@@ -208,7 +219,8 @@ export default {
       space.cards = []
       space.connections = []
       space.connectionTypes = []
-      space = utils.spaceDefaultBackground(space, currentUser)
+      space = utils.newSpaceBackground(space, currentUser)
+      space.background = space.background || consts.defaultSpaceBackground
       space = cache.updateIdsInSpace(space)
       console.log('🚚 create new space', space)
       if (this.currentUserIsSignedIn) {
@@ -252,6 +264,7 @@ export default {
 
 <style lang="stylus">
 .space-picker
+  overflow auto
   .results-section
     padding-top 4px
     @media(max-height 700px)

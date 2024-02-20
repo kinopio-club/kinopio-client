@@ -1,11 +1,12 @@
 <script setup>
+import { reactive, computed, onMounted, onUpdated, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import UserList from '@/components/UserList.vue'
 import consts from '@/consts.js'
-
-import { reactive, computed, onMounted, onUpdated, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 const store = useStore()
 
 onMounted(() => {
@@ -29,6 +30,7 @@ const otherCard = computed(() => store.state.currentSelectedOtherItem)
 const url = computed(() => `${consts.kinopioDomain()}/${otherCard.value.spaceId}/${otherCard.value.id}`)
 const canEdit = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value))
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
+const otherSpace = computed(() => store.getters.otherSpaceById(otherCard.value.spaceId))
 
 // visible
 
@@ -58,7 +60,7 @@ const styles = computed(() => {
 const scrollIntoView = async () => {
   await nextTick()
   const dialog = document.querySelector('dialog.other-card-details')
-  utils.scrollIntoView(dialog)
+  utils.scrollIntoView({ element: dialog })
 }
 
 // textarea styles
@@ -122,7 +124,7 @@ const changeSpace = (spaceId) => {
   if (store.state.currentSpace.id === spaceId) { return }
   const space = { id: spaceId }
   store.dispatch('closeAllDialogs')
-  store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+  store.dispatch('currentSpace/changeSpace', space)
 }
 const selectSpaceCard = () => {
   const isCardInCurrentSpace = otherCard.value.spaceId === store.state.currentSpace.id
@@ -142,12 +144,10 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
   section.edit-card(v-if="!cardDetailsIsVisibleForCardId && parentCardId")
     button(@click="showCardDetails") Edit Card
   section
-    //- removed
-    .row(v-if="otherCard.isRemoved")
-      .badge.danger
-        img.icon(src="@/assets/remove.svg")
-        span Removed
     template(v-if="otherCard.id")
+      //- space
+      .row
+        OtherSpacePreview(:otherSpace="otherSpace" :isStatic="true")
       //- edit
       template(v-if="canEdit")
         section.subsection.textarea-wrap
@@ -157,12 +157,13 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
             :value="otherCard.name"
             @input="updateName($event.target.value)"
             :maxlength="maxCardLength()"
+            placeholder="Type here, or paste a URL"
           )
         .row(v-if="state.errorMaxCardLength")
           .badge.danger
             img.icon.cancel(src="@/assets/add.svg")
             span Max Length
-      //- read only
+      //- badges
       template(v-else)
         .row
           p {{otherCard.name}}
@@ -170,6 +171,9 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
           .badge.info
             img.icon(src="@/assets/unlock.svg")
             span Read Only
+          .badge.danger(v-if="otherCard.isRemoved")
+            img.icon(src="@/assets/remove.svg")
+            span Removed
       //- jump to
       .row
         a(:href="url")
@@ -199,4 +203,10 @@ dialog.other-card-details
   textarea
     margin 0
     width 100%
+  section
+    p
+      word-wrap break-word
+      width 100%
+  .other-space-preview
+    pointer-events none
 </style>

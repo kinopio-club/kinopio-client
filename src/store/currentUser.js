@@ -1,75 +1,96 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
 import dayjs from 'dayjs'
+import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), for legacy todesktop support
+
+const initialState = {
+  id: nanoid(),
+  lastSpaceId: '',
+  color: randomColor({ luminosity: 'light' }),
+  name: undefined,
+  description: undefined,
+  website: undefined,
+  lastReadNewStuffId: undefined,
+  apiKey: '',
+  arenaAccessToken: '',
+  favoriteUsers: [],
+  favoriteSpaces: [],
+  favoriteColors: [],
+  cardsCreatedCount: 0,
+  isUpgraded: false,
+  isModerator: false,
+  isGuideMaker: false,
+  filterShowUsers: false,
+  filterShowDateUpdated: false,
+  filterShowAbsoluteDates: false,
+  filterUnchecked: false,
+  filterComments: false,
+  journalPrompts: [],
+  shouldCreateJournalsWithDailyPrompt: true,
+  newSpacesAreBlank: false,
+  shouldEmailNotifications: true,
+  shouldEmailBulletin: true,
+  shouldEmailWeeklyReview: true,
+  shouldShowMoreAlignOptions: false,
+  shouldUseLastConnectionType: true,
+  shouldShowItemActions: false,
+  shouldShowMultipleSelectedItemActions: false,
+  shouldDisableRightClickToPan: false,
+  shouldShowCurrentSpaceTags: false,
+  showInExploreUpdatedAt: null, // date
+  dialogSpaceFilters: null, // null, journals, spaces
+  dialogSpaceFilterByUser: {},
+  dialogSpaceFilterShowHidden: false,
+  defaultSpaceBackground: undefined,
+  defaultSpaceBackgroundGradient: undefined,
+  defaultSpaceBackgroundTint: undefined,
+  defaultCardBackgroundColor: undefined,
+  defaultConnectionControlPoint: null, // null, 'q00,00'
+  downgradeAt: null,
+  showWeather: false,
+  weatherLocation: undefined,
+  weatherUnitIsCelcius: false,
+  shouldUseStickyCards: true,
+  shouldIncreaseUIContrast: false,
+  shouldPauseConnectionDirections: false,
+  lastUsedImagePickerService: '',
+  AIImages: [],
+  theme: null,
+  themeIsSystem: false,
+  referredByUserId: '',
+  advocateReferrerName: '',
+  weather: '',
+  journalDailyPrompt: '',
+  panSpeedIsFast: false,
+  outsideSpaceBackgroundIsStatic: false,
+  shouldDisableHapticFeedback: false,
+  appleAppAccountToken: null,
+  appleSubscriptionIsActive: null,
+  studentDiscountIsAvailable: false,
+  lastSidebarSection: '',
+  prevInviteEmails: ''
+}
 
 export default {
   namespaced: true,
-  state: {
-    id: nanoid(),
-    lastSpaceId: '',
-    prevLastSpaceId: '',
-    color: randomColor({ luminosity: 'light' }),
-    name: undefined,
-    description: undefined,
-    website: undefined,
-    lastReadNewStuffId: undefined,
-    apiKey: '',
-    arenaAccessToken: '',
-    favoriteUsers: [],
-    favoriteSpaces: [],
-    favoriteColors: [],
-    cardsCreatedCount: 0,
-    isUpgraded: false,
-    isModerator: false,
-    isGuideMaker: false,
-    filterShowUsers: false,
-    filterShowDateUpdated: false,
-    filterShowAbsoluteDates: false,
-    filterUnchecked: false,
-    filterComments: false,
-    journalPrompts: [],
-    shouldCreateJournalsWithDailyPrompt: true,
-    newSpacesAreBlank: false,
-    shouldEmailNotifications: true,
-    shouldEmailBulletin: true,
-    shouldEmailWeeklyReview: true,
-    shouldShowMoreAlignOptions: false,
-    shouldUseLastConnectionType: true,
-    shouldShowItemActions: false,
-    shouldDisableRightClickToPan: false,
-    shouldShowCurrentSpaceTags: false,
-    showInExploreUpdatedAt: null, // date
-    dialogSpaceFilters: null, // null, journals, spaces
-    dialogSpaceFilterByUser: {},
-    dialogSpaceFilterShowHidden: false,
-    defaultSpaceBackground: undefined,
-    defaultSpaceBackgroundTint: undefined,
-    defaultCardBackgroundColor: undefined,
-    defaultConnectionControlPoint: null, // null, 'q00,00'
-    downgradeAt: null,
-    showWeather: false,
-    weatherLocation: undefined,
-    weatherUnitIsCelcius: false,
-    shouldUseStickyCards: true,
-    shouldDisableItemJiggle: false,
-    shouldPauseConnectionDirections: false,
-    lastUsedImagePickerService: '',
-    AIImages: [],
-    theme: null,
-    themeIsSystem: false,
-    referredByUserId: '',
-    referrerName: '',
-    weather: '',
-    journalDailyPrompt: '',
-    panSpeedIsFast: false,
-    shouldDisableHapticFeedback: false
-  },
+  state: utils.clone(initialState),
   mutations: {
+    replaceState: (state, newUser) => {
+      if (!newUser) { return }
+      Object.keys(state).forEach(key => {
+        state[key] = newUser[key] || initialState[key]
+      })
+      postMessage.send({ name: 'setApiKey', value: newUser.apiKey })
+      cache.removeLocal('user')
+      cache.storeLocal('user', newUser)
+    },
+
     color: (state, value) => {
       state.color = value
       cache.updateUser('color', value)
@@ -91,7 +112,6 @@ export default {
       cache.updateUser('email', value)
     },
     lastSpaceId: (state, spaceId) => {
-      state.prevLastSpaceId = state.lastSpaceId
       state.lastSpaceId = spaceId
       cache.updateUser('lastSpaceId', spaceId)
     },
@@ -108,11 +128,6 @@ export default {
     lastReadNewStuffId: (state, newStuffId) => {
       state.lastReadNewStuffId = newStuffId
       cache.updateUser('lastReadNewStuffId', newStuffId)
-    },
-    apiKey: (state, apiKey) => {
-      state.apiKey = apiKey
-      cache.updateUser('apiKey', apiKey)
-      postMessage.send({ name: 'setApiKey', value: apiKey })
     },
     favoriteUsers: (state, users) => {
       utils.typeCheck({ value: users, type: 'array' })
@@ -243,6 +258,10 @@ export default {
       state.shouldShowItemActions = value
       cache.updateUser('shouldShowItemActions', value)
     },
+    shouldShowMultipleSelectedItemActions: (state, value) => {
+      state.shouldShowMultipleSelectedItemActions = value
+      cache.updateUser('shouldShowMultipleSelectedItemActions', value)
+    },
     showInExploreUpdatedAt: (state, value) => {
       state.showInExploreUpdatedAt = value
       cache.updateUser('showInExploreUpdatedAt', value)
@@ -275,6 +294,10 @@ export default {
       state.defaultSpaceBackground = value
       cache.updateUser('defaultSpaceBackground', value)
     },
+    defaultSpaceBackgroundGradient: (state, value) => {
+      state.defaultSpaceBackgroundGradient = value
+      cache.updateUser('defaultSpaceBackgroundGradient', value)
+    },
     defaultSpaceBackgroundTint: (state, value) => {
       state.defaultSpaceBackgroundTint = value
       cache.updateUser('defaultSpaceBackgroundTint', value)
@@ -290,6 +313,10 @@ export default {
     panSpeedIsFast: (state, value) => {
       state.panSpeedIsFast = value
       cache.updateUser('panSpeedIsFast', value)
+    },
+    outsideSpaceBackgroundIsStatic: (state, value) => {
+      state.outsideSpaceBackgroundIsStatic = value
+      cache.updateUser('outsideSpaceBackgroundIsStatic', value)
     },
     shouldDisableHapticFeedback: (state, value) => {
       state.shouldDisableHapticFeedback = value
@@ -319,9 +346,9 @@ export default {
       state.shouldUseStickyCards = value
       cache.updateUser('shouldUseStickyCards', value)
     },
-    shouldDisableItemJiggle: (state, value) => {
-      state.shouldDisableItemJiggle = value
-      cache.updateUser('shouldDisableItemJiggle', value)
+    shouldIncreaseUIContrast: (state, value) => {
+      state.shouldIncreaseUIContrast = value
+      cache.updateUser('shouldIncreaseUIContrast', value)
     },
     shouldPauseConnectionDirections: (state, value) => {
       state.shouldPauseConnectionDirections = value
@@ -348,21 +375,37 @@ export default {
       state.referredByUserId = value
       cache.updateUser('referredByUserId', value)
     },
-    referrerName: (state, value) => {
-      state.referrerName = value
-      cache.updateUser('referrerName', value)
+    advocateReferrerName: (state, value) => {
+      state.advocateReferrerName = value
+      cache.updateUser('advocateReferrerName', value)
     },
     weather: (state, value) => {
       state.weather = value
+    },
+    appleAppAccountToken: (state, value) => {
+      state.weather = value
+    },
+    appleSubscriptionIsActive: (state, value) => {
+      state.appleSubscriptionIsActive = value
+    },
+    updateAppleAppAccountToken: (state) => {
+      state.appleAppAccountToken = uuidv4()
+    },
+    lastSidebarSection: (state, value) => {
+      state.lastSidebarSection = value
+    },
+    prevInviteEmails: (state, value) => {
+      state.prevInviteEmails = value
     }
   },
   actions: {
-    init: (context) => {
+    init: async (context) => {
       const cachedUser = cache.user()
       if (utils.objectHasKeys(cachedUser)) {
         console.log('🌸 Restore user from cache', cachedUser.id)
         context.commit('restoreUser', cachedUser)
-        context.dispatch('restoreRemoteUser', cachedUser)
+        context.dispatch('themes/restore', null, { root: true })
+        await context.dispatch('restoreRemoteUser', cachedUser)
       } else {
         console.log('🌸 Create new user')
         context.dispatch('createNewUser')
@@ -371,6 +414,15 @@ export default {
       context.commit('triggerUserIsLoaded', null, { root: true })
       context.dispatch('updateWeather')
       context.dispatch('updateJournalDailyPrompt')
+      // handle referrals
+      nextTick(() => {
+        nextTick(() => {
+          context.dispatch('validateUserReferralUserId')
+          context.dispatch('validateFromAdvocateReferralName')
+          context.dispatch('validateAdvocateReferralName')
+          context.dispatch('restoreUserFavorites')
+        })
+      })
     },
     updateWeather: async (context) => {
       const weather = await context.dispatch('api/weather', null, { root: true })
@@ -390,7 +442,15 @@ export default {
       })
       context.dispatch('api/addToQueue', { name: 'updateUser', body: updates }, { root: true })
     },
-    cardsCreatedCountUpdateBy: (context, { delta }) => {
+    cardsCreatedCountUpdateBy: (context, { cards, shouldDecrement }) => {
+      cards = cards.filter(card => !card.isCreatedThroughPublicApi)
+      cards = cards.filter(card => card.userId === context.state.id)
+      let delta = cards.length
+      if (shouldDecrement) {
+        delta = -delta
+      }
+      console.log('delta', delta)
+
       if (context.getters.shouldPreventCardsCreatedCountUpdate) { return }
       const count = context.state.cardsCreatedCount + delta
       context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
@@ -417,6 +477,7 @@ export default {
     },
     createNewUser: (context) => {
       context.commit('themeIsSystem', true)
+      context.commit('updateAppleAppAccountToken')
       cache.saveUser(context.state)
       context.dispatch('createNewUserJournalPrompts')
     },
@@ -454,7 +515,7 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       console.log('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
-      if (remoteUser.stripeSubscriptionId || remoteUser.downgradeAt) {
+      if (remoteUser.stripeSubscriptionId || remoteUser.stripePlanIsPurchased || remoteUser.downgradeAt || remoteUser.appleSubscriptionIsActive) {
         context.commit('isUpgraded', true)
       } else {
         context.commit('isUpgraded', false)
@@ -694,6 +755,14 @@ export default {
           shouldShowItemActions: value
         } }, { root: true })
     },
+    shouldShowMultipleSelectedItemActions: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      context.commit('shouldShowMultipleSelectedItemActions', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldShowMultipleSelectedItemActions: value
+        } }, { root: true })
+    },
     showInExploreUpdatedAt: (context, value) => {
       utils.typeCheck({ value, type: 'string' })
       context.commit('showInExploreUpdatedAt', value)
@@ -729,51 +798,6 @@ export default {
       }
       return space
     },
-    validateReferral: async (context) => {
-      let referralUserId
-      const referrerName = context.rootState.validateReferralFromReferrerName
-      const isFromSpaceInvite = Boolean(context.rootState.validateUserReferralBySpaceUser)
-      if (referrerName) {
-        const response = await context.dispatch('api/getPublicUserByReferrerName', { referrerName }, { root: true })
-        referralUserId = response.id
-      } else if (isFromSpaceInvite) {
-        const referralUsers = context.rootGetters['currentSpace/members']()
-        referralUserId = referralUsers[0].id
-      } else {
-        referralUserId = context.rootState.validateUserReferral
-      }
-      if (!referralUserId) { return }
-      const canBeReferred = context.getters.canBeReferred(referralUserId)
-      const publicUser = await context.dispatch('api/getPublicUser', { id: referralUserId }, { root: true })
-      if (!publicUser) {
-        context.commit('addNotification', { message: 'Invalid referral, referring user not found', type: 'danger' }, { root: true })
-        return
-      }
-      if (canBeReferred) {
-        context.commit('notifyReferralSuccessUser', publicUser, { root: true })
-        context.dispatch('update', { referredByUserId: publicUser.id })
-      } else if (!isFromSpaceInvite) {
-        context.commit('addNotification', { message: 'Only new users can be referred', type: 'danger', isPersistentItem: true }, { root: true })
-      }
-      context.commit('validateUserReferralBySpaceUser', false, { root: true })
-      context.commit('validateUserReferral', '', { root: true })
-    },
-    validateReferralByName: async (context) => {
-      if (!context.rootState.validateReferralByName) { return }
-      const referrerName = context.rootState.validateReferralByName.trim()
-      const response = await context.dispatch('api/getReferralsByReferrerName', { referrerName }, { root: true })
-      const isValid = response.isValid
-      const isSignedIn = context.getters.isSignedIn
-      if (isSignedIn) {
-        context.commit('addNotification', { message: 'Only new users can be referred', type: 'danger', isPersistentItem: true }, { root: true })
-      } else if (isValid) {
-        context.commit('notifyReferralSuccessReferrerName', true, { root: true })
-        context.dispatch('update', { referrerName })
-      } else {
-        context.commit('addNotification', { message: 'Invalid referral, refferer name not found', type: 'danger', isPersistentItem: true }, { root: true })
-      }
-      context.commit('validateReferralByName', '', { root: true })
-    },
     notifyReadOnly: (context, position) => {
       const canEditSpace = context.getters.canEditSpace()
       if (canEditSpace) { return }
@@ -783,6 +807,115 @@ export default {
         context.commit('addNotificationWithPosition', { message: 'Sign in to Edit', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
       } else {
         context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
+      }
+    },
+
+    // referrals
+
+    validateUserReferralUserId: async (context) => {
+      const referrerUserId = context.rootState.validateUserReferralUserId
+      if (!referrerUserId) { return }
+      const referrerUser = await context.dispatch('api/getPublicUser', { id: referrerUserId }, { root: true })
+      if (!referrerUser) {
+        context.commit('addNotification', { message: 'Invalid referral, referring user not found', isPersistentItem: true, type: 'danger' }, { root: true })
+        return
+      }
+      // check if current user can be referred
+      const canBeReferred = context.getters.canBeReferred(referrerUserId)
+      if (canBeReferred) {
+        context.dispatch('addReferral', referrerUser)
+      } else {
+        context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', isPersistentItem: true, type: 'danger' }, { root: true })
+      }
+      // reset state
+      context.commit('validateUserReferralUserId', '', { root: true })
+    },
+    validateFromAdvocateReferralName: async (context) => {
+      try {
+        const name = context.rootState.validateFromAdvocateReferralName
+        // get referrer
+        if (!name) { return }
+        const advocateUser = await context.dispatch('api/getAdvocateUsedUser', name, { root: true })
+        if (!advocateUser) {
+          context.commit('addNotification', { message: 'Invalid referral, referring user not found', isPersistentItem: true, type: 'danger' }, { root: true })
+          return
+        }
+        // check if current user can be referred
+        const canBeReferred = context.getters.canBeReferred(advocateUser.id)
+        if (canBeReferred) {
+          context.dispatch('addReferral', advocateUser)
+        } else {
+          context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', isPersistentItem: true, type: 'danger' }, { root: true })
+        }
+        // reset state
+        context.commit('validateFromAdvocateReferralName', '', { root: true })
+      } catch (error) {
+        console.error('🚒 validateFromAdvocateReferralName', error)
+        context.commit('addNotification', { message: 'Invalid referral, valid referrer not found', type: 'danger', isPersistentItem: true }, { root: true })
+      }
+    },
+    validateAdvocateReferralName: async (context) => {
+      // handles /for/xyz
+      // grant free accounts to press, influencers, and ambassadors. advocateReferralNames can only be used once
+      try {
+        const name = context.rootState.validateAdvocateReferralName
+        if (!name) { return }
+        const isAdvocate = await context.dispatch('api/getAdvocateUnused', name, { root: true })
+        const isSignedIn = context.getters.isSignedIn
+        if (isSignedIn) {
+          context.commit('addNotification', { message: 'Only new users can be referred this way, please contact support to manually update your account', type: 'danger', isPersistentItem: true }, { root: true })
+        } else if (isAdvocate) {
+          context.commit('notifyReferralSuccessReferrerName', true, { root: true })
+          // user.advocateReferrerName will be validated and marked as used by the server on sign up
+          context.dispatch('update', { advocateReferrerName: name })
+        } else {
+          context.commit('addNotification', { message: 'Invalid referral, valid referrer not found', type: 'danger', isPersistentItem: true }, { root: true })
+        }
+        context.commit('validateAdvocateReferralName', '', { root: true })
+      } catch (error) {
+        console.error('🚒 validateAdvocateReferralName', error)
+        context.commit('addNotification', { message: 'Invalid referral, valid referrer not found', type: 'danger', isPersistentItem: true }, { root: true })
+      }
+    },
+    validateUserReferralFromSpaceInvite: async (context) => {
+      const isFromSpaceInvite = Boolean(context.rootState.shouldValidateUserReferralFromSpaceInvite)
+      if (!isFromSpaceInvite) { return }
+      // get referrer
+      const spaceMembers = context.rootGetters['currentSpace/members']()
+      if (!spaceMembers.length) { return }
+      const referrerId = spaceMembers[0].id
+      if (!referrerId) { return }
+      const referrer = await context.dispatch('api/getPublicUser', { id: referrerId }, { root: true })
+      if (!referrer) {
+        context.commit('addNotification', { message: 'Invalid referral, referring user not found', isPersistentItem: true, type: 'danger' }, { root: true })
+        return
+      }
+      // check if current user can be referred by space invite
+      const isSignedIn = context.getters.isSignedIn
+      const canBeReferred = context.getters.canBeReferred(referrerId) && !isSignedIn
+      if (canBeReferred) {
+        context.dispatch('addReferral', referrer)
+      }
+      // reset state
+      context.commit('shouldValidateUserReferralFromSpaceInvite', false, { root: true })
+    },
+    addReferral: async (context, referrer) => {
+      try {
+        const isSignedIn = context.getters.isSignedIn
+        context.dispatch('update', { referredByUserId: referrer.id })
+        if (isSignedIn) {
+          const referral = await context.dispatch('api/createReferral', {
+            userId: referrer.id,
+            referredUserId: context.state.id
+          }, { root: true })
+          console.log('🫧 referral created', referral)
+          context.commit('notifyEarnedCredits', true, { root: true })
+        } else {
+          context.commit('notifyReferralSuccessUser', referrer, { root: true })
+        }
+      } catch (error) {
+        console.error('🚒 addReferral', error)
+        context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', isPersistentItem: true, type: 'danger' }, { root: true })
       }
     }
   },
@@ -854,14 +987,10 @@ export default {
       return isSpaceUser || isSpaceCollaborator
     },
     isSpaceUser: (state, getters, rootState) => (space) => {
-      let userIsInSpace
-      if (space.users) {
-        userIsInSpace = Boolean(space.users.find(user => {
-          return user.id === state.id
-        }))
-      } else {
-        userIsInSpace = space.userId === state.id
-      }
+      let userIsInSpace = Boolean(space.users?.find(user => {
+        return user.id === state.id
+      }))
+      userIsInSpace = userIsInSpace || space.userId === state.id
       return userIsInSpace
     },
     isSpaceCollaborator: (state, getters, rootState) => (space) => {
@@ -889,7 +1018,9 @@ export default {
       space = space || rootState.currentSpace
       const currentUserIsSignedIn = getters.isSignedIn
       const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
-      return !currentUserIsSignedIn && isInvitedToSpace
+      const isReadOnlyInvitedToSpace = rootState.spaceReadOnlyKey.spaceId === space.id
+      const inviteRequiresSignIn = !currentUserIsSignedIn && isInvitedToSpace
+      return isReadOnlyInvitedToSpace || inviteRequiresSignIn
     },
     shouldPreventCardsCreatedCountUpdate: (state, getters, rootState, rootGetters) => {
       const spaceUserIsUpgraded = rootGetters['currentSpace/spaceUserIsUpgraded']
@@ -922,8 +1053,12 @@ export default {
       return userFilters + tagNames.length + connections.length + frames.length
     },
     canBeReferred: (state, getters) => (referralUserId) => {
-      if (getters.isSignedIn) { return }
-      if (referralUserId === state.id) { return }
+      const isAlreadyReferred = state.referredByUserId
+      const isSameUser = referralUserId === state.id
+      console.log('🕵️‍♀️ canBeReferred check:', { referralUserId, referredByUserId: isAlreadyReferred, isSameUser, isUpgraded: state.isUpgraded })
+      if (isAlreadyReferred) { return }
+      if (isSameUser) { return }
+      if (state.isUpgraded) { return }
       return true
     },
 
@@ -932,9 +1067,13 @@ export default {
     AIImagesThisMonth: (state) => {
       if (state.isUpgraded) {
         const currentMonth = dayjs().month()
+        const currentYear = dayjs().year()
         return state.AIImages.filter(image => {
           const month = dayjs(image.createdAt).month()
-          return month === currentMonth
+          const year = dayjs(image.createdAt).year()
+          const isInCurrentMonth = month === currentMonth
+          const isInCurrentYear = year === currentYear
+          return isInCurrentMonth && isInCurrentYear
         })
       } else {
         return state.AIImages
@@ -944,20 +1083,31 @@ export default {
       const images = getters.AIImagesThisMonth
       return Math.floor(images.length / 2)
     },
-    AIImageLimitUpgradedUser: (state) => {
-      return 50
-    },
     AIImagesLimit: (state, getters) => {
       if (state.isUpgraded) {
-        return getters.AIImageLimitUpgradedUser
+        return consts.AIImageLimitUpgradedUser
       } else {
-        return 10
+        return consts.AIImageLimitFreeUser
       }
     },
     AIImagesIsUnderLimit: (state, getters) => {
       const current = getters.AIImagesThisMonthCount
       const limit = getters.AIImagesLimit
       return current < limit
+    },
+
+    // Billing
+
+    subscriptionIsApple: (state) => {
+      return state.appleSubscriptionIsActive
+    },
+    subscriptionIsStripe: (state, getters) => {
+      if (getters.subscriptionIsFree) { return }
+      return state.stripeSubscriptionId
+    },
+    subscriptionIsFree: (state) => {
+      const strings = ['🌷free', '🌷 free', '🫧free']
+      return strings.includes(state.stripeSubscriptionId)
     }
   }
 }

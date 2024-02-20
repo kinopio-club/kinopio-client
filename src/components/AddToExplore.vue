@@ -1,8 +1,7 @@
 <template lang="pug">
 .button-wrap.add-to-explore(@click.stop v-if="isVisible")
-  button.variable-length-content(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
+  button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
     span(v-if="!showInExplore")
-      img.icon.add(src="@/assets/add.svg")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
     span(v-if="!showInExplore") Add to Explore
     span(v-if="showInExplore") In Explore

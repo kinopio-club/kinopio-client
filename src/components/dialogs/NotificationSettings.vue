@@ -21,7 +21,7 @@ dialog.narrow.notification-settings(v-if="visible" :open="visible" @click.left.s
           span Email Weekly Review
 
     section
-      .row Updates when collaborators add cards to your spaces
+      .row Updates when collaborators add cards to your spaces, or invite you to their spaces
       .row
         label(:class="{active: shouldEmailNotifications}" @click.left.prevent="toggleShouldEmailNotifications" @keydown.stop.enter="toggleShouldEmailNotifications")
           input(type="checkbox" v-model="shouldEmailNotifications")
@@ -30,7 +30,15 @@ dialog.narrow.notification-settings(v-if="visible" :open="visible" @click.left.s
 
       template(v-if="unsubscribedSpaces.length")
         .row Resubscribe to:
-        SpaceList(:spaces="unsubscribedSpaces" :showUser="true" @selectSpace="changeSpace" :showCheckmarkSpace="true" @checkmarkSpace="resubscribeToSpace" :disableListOptimizations="true")
+        SpaceList(
+          :spaces="unsubscribedSpaces"
+          :showUser="true"
+          @selectSpace="changeSpace"
+          :showCheckmarkSpace="true"
+          @checkmarkSpace="resubscribeToSpace"
+          :disableListOptimizations="true"
+          :parentDialog="parentDialog"
+        )
 
 </template>
 
@@ -67,7 +75,8 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     shouldEmailNotifications () { return this.$store.state.currentUser.shouldEmailNotifications },
     shouldEmailBulletin () { return this.$store.state.currentUser.shouldEmailBulletin },
-    shouldEmailWeeklyReview () { return this.$store.state.currentUser.shouldEmailWeeklyReview }
+    shouldEmailWeeklyReview () { return this.$store.state.currentUser.shouldEmailWeeklyReview },
+    parentDialog () { return 'notificationSettings' }
   },
   methods: {
     toggleShouldEmailNotifications () {
@@ -104,7 +113,7 @@ export default {
       this.$store.commit('addNotification', { message: `Resubscribed to notifications from ${space.name}`, type: 'success' })
     },
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     }
   },
   watch: {

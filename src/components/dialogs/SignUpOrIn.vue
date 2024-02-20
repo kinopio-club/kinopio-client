@@ -10,7 +10,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
     p Create an account to share your spaces and access them anywhere
     ReferredNewUserCredits
     form(@submit.prevent="signUp")
-      input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
+      input(ref="email" type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
       .badge.info(v-if="error.accountAlreadyExists") An account with this email already exists, Sign In instead
       input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
       input(type="password" placeholder="Confirm Password" required @input="clearErrors")
@@ -19,7 +19,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       .badge.danger(v-if="error.passwordTooShort") Password must be longer than 4 characters
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-      button(type="submit" :class="{active : loading.signUpOrIn}")
+      button(type="submit" :class="{active : loading.signUpOrIn}" tabindex="0")
         span Sign Up
         Loader(:visible="loading.signUpOrIn")
 
@@ -27,12 +27,12 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   section(v-else)
     p Welcome back
     form(@submit.prevent="signIn")
-      input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
+      input.email(ref="email" type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
       input(type="password" placeholder="Password" required v-model="password" @input="clearErrors")
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
       .badge.danger(v-if="error.signInCredentials") Incorrect email or password
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
-      button(type="submit" :class="{active : loading.signUpOrIn}")
+      button(type="submit" :class="{active : loading.signUpOrIn}" tabindex="0")
         span Sign In
         Loader(:visible="loading.signUpOrIn")
 
@@ -124,12 +124,14 @@ export default {
     showSignUpVisible () {
       this.signUpVisible = true
       this.clearErrors()
+      this.focusEmail()
     },
 
     hideSignUpVisible () {
       this.signUpVisible = false
       this.resetVisible = false
       this.clearErrors()
+      this.focusEmail()
     },
 
     toggleResetVisible () {
@@ -189,35 +191,42 @@ export default {
       }
     },
 
+    checkUserAttributes () {
+      const appleToken = this.$store.state.currentUser.appleAppAccountToken
+      if (!appleToken) {
+        this.$store.commit('currentUser/updateAppleAppAccountToken')
+      }
+    },
+
     async signUp (event) {
       if (this.loading.signUpOrIn) { return }
       const email = event.target[0].value.toLowerCase()
       const password = event.target[1].value
       const confirmPassword = event.target[2].value
+      this.checkUserAttributes()
       let currentUser = utils.clone(this.$store.state.currentUser)
-      currentUser.isPricingHidden = this.$store.state.isPricingHidden
       if (!this.isPasswordMatchesEmail(email, password)) { return }
       if (!this.isSignUpPasswordTooShort(password)) { return }
       if (!this.isSignUpPasswordsMatch(password, confirmPassword)) { return }
       this.loading.signUpOrIn = true
-      currentUser = await this.validateReferrerName(currentUser)
       const response = await this.$store.dispatch('api/signUp', { email, password, currentUser, sessionToken })
-      const result = await response.json()
+      const newUser = await response.json()
       if (this.isSuccess(response)) {
         this.$store.commit('clearAllNotifications', false)
-        this.$store.commit('currentUser/apiKey', result.apiKey)
+        this.$store.commit('currentUser/replaceState', newUser)
         this.updateLocalSpacesWithNewUserId()
+        this.updateCurrentSpaceWithNewUserId(currentUser, newUser)
         await this.$store.dispatch('api/createSpaces')
         this.notifySignedIn()
         this.addCollaboratorToInvitedSpaces()
         const currentSpace = this.$store.state.currentSpace
-        this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
+        this.$store.commit('triggerUpdateWindowHistory')
         this.$store.dispatch('themes/restore')
         this.clearNotifications()
         this.checkIfShouldAddReferral()
         this.checkIfShouldUpgradeReferral()
       } else {
-        await this.handleErrors(result)
+        await this.handleErrors(newUser)
       }
     },
 
@@ -231,6 +240,8 @@ export default {
       const result = await response.json()
       this.loading.signUpOrIn = false
       if (this.isSuccess(response)) {
+        this.$store.commit('isLoadingSpace', true)
+        this.$store.commit('addNotification', { message: 'Signing In…' })
         // update user to remote user
         this.$store.commit('currentUser/updateUser', result)
         // update local spaces to remote user
@@ -253,15 +264,16 @@ export default {
         this.clearNotifications()
         if (shouldLoadLastSpace) {
           this.$store.dispatch('currentSpace/loadLastSpace')
-          this.$store.commit('triggerUpdateWindowHistory', { space: this.$store.state.currentSpace })
+          this.$store.commit('triggerUpdateWindowHistory')
         }
+        this.$store.commit('isLoadingSpace', false)
       } else {
         await this.handleErrors(result)
       }
     },
 
     async checkIfShouldUpgradeReferral () {
-      const referrerName = this.$store.state.currentUser.referrerName
+      const referrerName = this.$store.state.currentUser.advocateReferrerName
       if (!referrerName) { return }
       this.$store.commit('currentUser/isUpgraded', true, { root: true })
       this.$store.commit('addNotification', { message: `Your account has been upgraded to free. Thanks for helping share Kinopio`, type: 'success', isPersistentItem: true })
@@ -289,13 +301,22 @@ export default {
         cache.updateSpace('connectionTypes', space.connectionTypes, space.id)
         cache.updateSpace('connections', space.connections, space.id)
         cache.updateSpace('boxes', space.boxes, space.id)
+        cache.updateSpace('users', [{ id: userId }], space.id)
       })
+    },
+
+    updateCurrentSpaceWithNewUserId (previousUser, newUser) {
+      const currentSpace = this.$store.state.currentSpace
+      const userIsSpaceUser = this.$store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
+      if (!userIsSpaceUser) { return }
+      this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
+      this.$store.commit('currentSpace/addUserToSpace', newUser)
     },
 
     updateCurrentSpace (previousUser) {
       const currentUser = this.$store.state.currentUser
       const currentSpace = this.$store.state.currentSpace
-      this.$store.commit('triggerUpdateWindowHistory', { space: currentSpace })
+      this.$store.commit('triggerUpdateWindowHistory')
       this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
       const userIsSpaceUser = this.$store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
       if (userIsSpaceUser) {
@@ -337,6 +358,7 @@ export default {
     notifySignedIn () {
       this.loading.signUpOrIn = false
       this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('removeNotificationByMessage', 'Signing In…')
       this.$store.commit('addNotification', { message: 'Signed In', type: 'success' })
     },
 
@@ -360,20 +382,17 @@ export default {
       this.$store.dispatch('api/createSessionToken', sessionToken)
     },
 
-    async validateReferrerName (currentUser) {
-      const referrerName = currentUser.referrerName
-      if (!referrerName) { return currentUser }
-      const response = await this.$store.dispatch('api/getReferralsByReferrerName', { referrerName })
-      const isValid = response.isValid
-      if (!isValid) {
-        delete currentUser.referrerName
-      }
-      return currentUser
-    },
-
     clearNotifications () {
       this.$store.commit('notifyReferralSuccessUser', null)
       this.$store.commit('notifyReferralSuccessReferrerName', false)
+    },
+
+    focusEmail () {
+      this.$nextTick(() => {
+        const element = this.$refs.email
+        if (!element) { return }
+        element.focus()
+      })
     }
   },
   watch: {
@@ -382,6 +401,7 @@ export default {
         this.clearErrors()
         this.createSessionToken()
         this.$store.commit('shouldExplicitlyHideFooter', true)
+        this.focusEmail()
       } else {
         this.$store.commit('shouldExplicitlyHideFooter', false)
       }
@@ -394,11 +414,13 @@ export default {
 </script>
 
 <style lang="stylus">
-.sign-up-or-in
-  top calc(100% - 8px)
+dialog.sign-up-or-in
   left initial
   right 8px
   overflow auto
+  @media(max-height 750px)
+    // for ios keyboard input
+    top -50px !important
   .reset-form
     margin-top 10px
   p,

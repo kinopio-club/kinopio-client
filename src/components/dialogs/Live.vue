@@ -1,10 +1,10 @@
 <template lang="pug">
 dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-      p
-        img.icon.camera(src="@/assets/camera.svg")
-        span Live Public Spaces
-        Loader(:visible="loading")
+    p
+      img.icon.camera(src="@/assets/camera.svg")
+      span Live Public Spaces
+      Loader(:visible="loading")
   section.results-section(v-if="spaces.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(
       :spaces="spaces"
@@ -12,7 +12,7 @@ dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': d
       :hideExploreBadge="true"
       @selectSpace="changeSpace"
       :resultsSectionHeight="resultsSectionHeight"
-      :showFavoriteButton="true"
+      :parentDialog="parentDialog"
     )
   section.empty(v-if="!spaces.length")
     p No public spaces are currently being edited, check back soon
@@ -49,9 +49,12 @@ export default {
       resultsSectionHeight: null
     }
   },
+  computed: {
+    parentDialog () { return 'live' }
+  },
   methods: {
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     },
     updateDialogHeight () {
       if (!this.visible) { return }

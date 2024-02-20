@@ -1,3 +1,86 @@
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import UserLabelInline from '@/components/UserLabelInline.vue'
+import utils from '@/utils.js'
+const store = useStore()
+
+let dateIsUpdated
+let updatedAbsoluteDate
+
+onMounted(() => {
+  dateIsUpdated = false
+  updatedAbsoluteDate = ''
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerCloseChildDialogs' && props.visible) {
+      closeDialogsFromParent()
+    }
+  })
+})
+
+const emit = defineEmits(['closeDialogs'])
+
+const props = defineProps({
+  visible: Boolean,
+  createdByUser: Object,
+  updatedByUser: Object,
+  card: Object,
+  parentElement: Object
+})
+
+watch(() => props.visible, async (value, prevValue) => {
+  await nextTick()
+  if (value) {
+    scrollParentIntoView()
+  }
+})
+
+const closeDialogsFromParent = () => {
+  store.commit('userDetailsIsVisible', false)
+}
+const closeDialogs = () => {
+  store.commit('userDetailsIsVisible', false)
+  emit('closeDialogs')
+}
+const scrollParentIntoView = () => {
+  const element = props.parentElement
+  if (!element) { return }
+  utils.scrollIntoView({ element })
+}
+
+// date
+
+const dateUpdatedAt = computed(() => {
+  const date = props.card.nameUpdatedAt || props.card.createdAt
+  const showAbsoluteDate = store.state.currentUser.filterShowAbsoluteDates
+  if (date) {
+    if (showAbsoluteDate) {
+      return new Date(date).toLocaleString()
+    } else {
+      return utils.shortRelativeTime(date)
+    }
+  } else {
+    return 'now'
+  }
+})
+const toggleFilterShowAbsoluteDates = () => {
+  closeDialogs()
+  const value = !store.state.currentUser.filterShowAbsoluteDates
+  store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
+}
+
+// user
+
+const createdByUserIsNotEmpty = computed(() => utils.objectHasKeys(props.createdByUser))
+const isUpdatedByDifferentUser = computed(() => props.createdByUser.id !== props.updatedByUser.id)
+const userDetailsIsUser = (user) => {
+  if (!store.state.userDetailsIsVisible) { return }
+  const userDetailsUser = store.state.userDetailsUser
+  return user.id === userDetailsUser.id
+}
+</script>
+
 <template lang="pug">
 .row.collaboration-info(v-if="visible" @click.left.stop="closeDialogs")
   .badge.status.button-badge(@click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
@@ -13,107 +96,9 @@
     //- created through api
     .badge.status.system-badge(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
-
+  .badge.info(v-if="card.counterIsVisible")
+    span {{card.counterValue || 0}}
 </template>
-
-<script>
-import UserLabelInline from '@/components/UserLabelInline.vue'
-import utils from '@/utils.js'
-
-let dateIsUpdated
-let updatedAbsoluteDate
-
-export default {
-  name: 'CardCollaborationInfo',
-  components: {
-    UserLabelInline
-  },
-  props: {
-    visible: Boolean,
-    createdByUser: Object,
-    updatedByUser: Object,
-    card: Object,
-    parentElement: Object
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerCardDetailsCloseDialogs' && this.visible) {
-        this.closeDialogsFromParent()
-      }
-    })
-  },
-  mounted () {
-    dateIsUpdated = false
-    updatedAbsoluteDate = ''
-  },
-  computed: {
-    createdByUserIsNotEmpty () { return utils.objectHasKeys(this.createdByUser) },
-    isUpdatedByDifferentUser () { return this.createdByUser.id !== this.updatedByUser.id },
-    dateUpdatedAt () {
-      const date = this.card.nameUpdatedAt || this.card.createdAt
-      const showAbsoluteDate = this.$store.state.currentUser.filterShowAbsoluteDates
-      if (date) {
-        if (showAbsoluteDate) {
-          return this.absoluteDate(date)
-        } else {
-          return this.relativeDate(date)
-        }
-      } else {
-        return 'now'
-      }
-    },
-    userDetailsIsVisible () { return this.$store.state.userDetailsIsVisible }
-  },
-  methods: {
-    userDetailsIsUser (user) {
-      if (!this.userDetailsIsVisible) { return }
-      const userDetailsUser = this.$store.state.userDetailsUser
-      return user.id === userDetailsUser.id
-    },
-    absoluteDate (date) {
-      if (dateIsUpdated && updatedAbsoluteDate) {
-        return updatedAbsoluteDate
-      }
-      dateIsUpdated = true
-      updatedAbsoluteDate = new Date(date).toLocaleString()
-      return updatedAbsoluteDate
-    },
-    relativeDate (date) {
-      if (dateIsUpdated) {
-        return 'now'
-      }
-      dateIsUpdated = true
-      return utils.shortRelativeTime(date)
-    },
-    closeDialogsFromParent () {
-      this.$store.commit('userDetailsIsVisible', false)
-    },
-    closeDialogs () {
-      this.$store.commit('userDetailsIsVisible', false)
-      this.$emit('closeDialogs')
-    },
-    toggleFilterShowAbsoluteDates () {
-      this.closeDialogs()
-      const value = !this.$store.state.currentUser.filterShowAbsoluteDates
-      this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
-    },
-    scrollParentIntoView () {
-      const element = this.parentElement
-      if (!element) { return }
-      utils.scrollIntoView(element)
-    }
-  },
-  watch: {
-    visible (visible) {
-      this.$nextTick(() => {
-        if (visible) {
-          this.scrollParentIntoView()
-        }
-      })
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .collaboration-info

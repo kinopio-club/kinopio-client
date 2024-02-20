@@ -80,29 +80,12 @@ export default {
         this.importSpace(space)
       }
     },
-    updateSpaceItemsUserId (space) {
-      const currentUserId = this.$store.state.currentUser.id
-      space.cards = space.cards.map(card => {
-        card.userId = null
-        card.z = card.z || 1
-        card.x = card.x || 100
-        card.y = card.y || 100
-        return card
-      })
-      space.connections = space.connections.map(connection => {
-        connection.userId = currentUserId
-        return connection
-      })
-      space.boxes = space.boxes.map(box => {
-        box.userId = currentUserId
-        return box
-      })
-      return space
-    },
     async importSpace (space) {
+      const currentUserId = this.$store.state.currentUser.id
       if (!this.isValidSpace(space)) { return }
       space = utils.clearSpaceMeta(space, 'import')
-      space = this.updateSpaceItemsUserId(space)
+      space = utils.spaceItemUsersToCurrentUser(space, currentUserId)
+      space.userId = currentUserId
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       console.log('🍋 space to import', uniqueNewSpace)
       cache.saveSpace(uniqueNewSpace)
@@ -148,7 +131,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
     }
   },
   watch: {

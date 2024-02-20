@@ -13,9 +13,9 @@ const updateTheme = (themeName) => {
 </script>
 
 <template lang="pug">
-button(:class="{active: themeName === 'light'}" @click="updateTheme('light')")
+button(:class="{active: themeName === 'light'}" @click="updateTheme('light')" title="Light Mode (T)")
   img.icon.light(src="@/assets/light.svg")
-button(:class="{active: themeName === 'dark'}" @click="updateTheme('dark')")
+button(:class="{active: themeName === 'dark'}" @click="updateTheme('dark')" title="Dark Mode (T)")
   img.icon.dark(src="@/assets/dark.svg")
 </template>
 

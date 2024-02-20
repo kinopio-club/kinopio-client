@@ -1,35 +1,456 @@
+<script setup>
+import { reactive, computed, onMounted, onUpdated, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
+import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import ImageList from '@/components/ImageList.vue'
+import backgroundImagesJSON from '@/data/backgroundImages.json'
+import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
+import cache from '@/cache.js'
+import consts from '@/consts.js'
+
+import sample from 'lodash-es/sample'
+import uniq from 'lodash-es/uniq'
+import debounce from 'lodash-es/debounce'
+import times from 'lodash-es/times'
+import { nanoid } from 'nanoid'
+const store = useStore()
+
+const searchInputElement = ref(null)
+const inputElement = ref(null)
+
+const props = defineProps({
+  visible: Boolean
+})
+const emit = defineEmits(['updateSpaces'])
+
+onMounted(() => {
+  refreshGradients()
+  updateDefaultColor()
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerUploadComplete') {
+      let { spaceId, url, cardId } = mutation.payload
+      if (cardId) { return }
+      if (spaceId !== store.state.currentSpace.id) { return }
+      updateSpaceBackground(url)
+    } else if (mutation.type === 'triggerUpdateTheme') {
+      updateDefaultColor()
+    }
+  })
+})
+
+onUpdated(async () => {
+  await nextTick()
+  if (props.visible) {
+    checkIfImageIsUrl()
+  }
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    if (state.service === 'background') {
+      state.selectedImages = backgroundImages.value
+    }
+    state.backgroundTint = store.state.currentSpace.backgroundTint
+    closeDialogs()
+    clearErrors()
+    updateCommunityBackgroundImages()
+  } else {
+    if (state.error.isNotImageUrl) {
+      removeBackground()
+    }
+    store.commit('clearNotificationsWithPosition')
+  }
+})
+
+const state = reactive({
+  colorPickerIsVisible: false,
+  spaceBackgroundInputIsVisible: false,
+  initialSearch: '',
+  error: {
+    isNotImageUrl: false,
+    signUpToUpload: false,
+    userIsOffline: false,
+    sizeLimit: false,
+    unknownUploadError: false,
+    isNoSearchResults: false,
+    unknownServerError: false
+  },
+  backgroundTint: '',
+  defaultColor: '#e3e3e3',
+  search: '',
+  searchIsLoading: false,
+  selectedImages: [],
+  communityBackgroundsIsLoading: false,
+  communityBackgroundImages: [],
+  images: [],
+  gradients: [],
+  service: 'background' // background, recent, pexels
+})
+
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const currentSpace = computed(() => store.state.currentSpace)
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUser = computed(() => store.state.currentUser)
+
+// dialog
+
+const toggleColorPicker = () => {
+  const isVisible = state.colorPickerIsVisible
+  closeDialogs()
+  state.colorPickerIsVisible = !isVisible
+}
+const triggerSignUpOrInIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerSignUpOrInIsVisible')
+}
+const closeDialogs = async () => {
+  state.colorPickerIsVisible = false
+}
+const updatePageSizes = async () => {
+  await nextTick()
+  store.dispatch('updatePageSizes')
+}
+const updatePreviewImage = async () => {
+  await nextTick()
+  store.dispatch('currentSpace/createSpacePreviewImage')
+}
+const clearErrors = () => {
+  state.error.isNotImageUrl = false
+  state.error.signUpToUpload = false
+  state.error.userIsOffline = false
+  state.error.sizeLimit = false
+  state.error.unknownUploadError = false
+}
+const clearSearch = async () => {
+  state.search = ''
+  state.searchIsLoading = false
+  state.images = []
+}
+
+// input
+
+const searchInput = computed({
+  get () {
+    return state.search
+  },
+  set (newValue) {
+    state.search = newValue
+    if (newValue) {
+      searchService()
+    }
+  }
+})
+const focusAndSelectSearchInput = async () => {
+  await nextTick()
+  if (utils.isMobile()) { return }
+  const element = searchInputElement.value
+  if (!element) { return }
+  element.focus()
+  const length = element.value.length
+  if (!length) { return }
+  element.setSelectionRange(0, length)
+}
+const resetPinchCounterZoomDecimal = () => {
+  store.commit('pinchCounterZoomDecimal', 1)
+}
+
+// background gradients
+
+const refreshGradients = () => {
+  const numberOfGradients = 6
+  let gradients = []
+  times(numberOfGradients, (index) => {
+    let gradient = utils.backgroundGradientLayers()
+    gradient.id = nanoid()
+    gradients.push(gradient)
+  })
+  if (currentSpace.value.backgroundGradient) {
+    gradients[0] = currentSpace.value.backgroundGradient
+  }
+  state.gradients = gradients
+}
+const selectGradient = (index) => {
+  const gradient = state.gradients[index]
+  const updates = {
+    backgroundIsGradient: true,
+    backgroundGradient: gradient
+  }
+  store.dispatch('currentSpace/updateSpace', updates)
+  updatePageSizes()
+  updatePreviewImage()
+}
+const gradientIsActive = (gradient) => {
+  if (!currentSpace.value.backgroundIsGradient) { return }
+  return currentSpace.value.backgroundGradient.id === gradient.id
+}
+
+// background images
+
+const isCurrentSpaceBackground = (image) => {
+  return image.url === background.value
+}
+const checkIfImageIsUrl = () => {
+  const url = background.value
+  if (!url) {
+    state.error.isNotImageUrl = false
+  } else if (utils.urlIsImage(url)) {
+    state.error.isNotImageUrl = false
+  } else {
+    state.error.isNotImageUrl = true
+  }
+}
+const background = computed({
+  get () {
+    return currentSpace.value.background
+  },
+  set (url) {
+    updateSpaceBackground(url)
+  }
+})
+const activeBackgroundUrl = computed(() => {
+  if (currentSpace.value.backgroundIsGradient) { return }
+  return background.value
+})
+const backgroundImages = computed(() => {
+  let images = backgroundImagesJSON
+  images = images.filter(image => !image.isArchived)
+  return images
+})
+const updateSpaceBackground = (url) => {
+  url = url.url || url
+  const updates = {
+    backgroundIsGradient: false,
+    background: url
+  }
+  store.dispatch('currentSpace/updateSpace', updates)
+  updatePageSizes()
+  updatePreviewImage()
+}
+const removeBackgroundAll = async () => {
+  removeBackground()
+  removeBackgroundTint()
+  updatePreviewImage()
+}
+const removeBackground = async () => {
+  updateSpaceBackground('')
+  closeDialogs()
+  updatePreviewImage()
+}
+const updateCommunityBackgroundImages = async () => {
+  state.communityBackgroundsIsLoading = true
+  if (state.communityBackgroundImages.length) {
+    state.communityBackgroundsIsLoading = false
+    return
+  }
+  let images = await store.dispatch('api/communityBackgrounds')
+  images = images.map(image => {
+    return {
+      url: image.original,
+      thumbnailUrl: image.thumb,
+      previewUrl: image.preview
+    }
+  })
+  state.communityBackgroundImages = images
+  state.communityBackgroundsIsLoading = false
+}
+const toggleSpaceBackgroundInputIsVisible = () => {
+  state.spaceBackgroundInputIsVisible = !state.spaceBackgroundInputIsVisible
+}
+
+// upload
+
+const selectFile = (event) => {
+  if (!currentUserIsSignedIn.value) {
+    state.error.signUpToUpload = true
+    return
+  }
+  const input = inputElement.value
+  input.click()
+}
+const isFileTooBig = (file) => {
+  const sizeLimit = 1024 * 1024 * 1.250 // ~1mb
+  if (file.size > sizeLimit) {
+    return true
+  }
+}
+const uploadFile = async () => {
+  clearErrors()
+  const spaceId = currentSpace.value.id
+  const input = inputElement.value
+  const file = input.files[0]
+  if (isFileTooBig(file)) {
+    state.error.sizeLimit = true
+    return
+  }
+  try {
+    await store.dispatch('upload/uploadFile', { file, spaceId })
+  } catch (error) {
+    console.warn('🚒', error)
+    if (error.type === 'sizeLimit') {
+      state.error.sizeLimit = true
+    } else {
+      state.error.unknownUploadError = true
+    }
+  }
+}
+const pendingUpload = computed(() => {
+  const pendingUploads = store.state.upload.pendingUploads
+  return pendingUploads.find(upload => {
+    const isCurrentSpace = upload.spaceId === currentSpace.value.id
+    const isInProgress = upload.percentComplete < 100
+    return isCurrentSpace && isInProgress
+  })
+})
+const remotePendingUpload = computed(() => {
+  let remotePendingUploads = store.state.remotePendingUploads
+  return remotePendingUploads.find(upload => {
+    const isInProgress = upload.percentComplete < 100
+    const isSpace = upload.spaceId === currentSpace.value.id
+    return isInProgress && isSpace
+  })
+})
+
+// tint
+
+const updateDefaultColor = () => {
+  state.defaultColor = utils.cssVariable('secondary-background')
+}
+const backgroundTintBadgeColor = computed(() => {
+  const emptyColors = ['#fff', '#000', 'rgb(0, 0, 0)', 'rgb(255, 255, 255)']
+  if (!state.backgroundTint || emptyColors.includes(state.backgroundTint)) {
+    return state.defaultColor
+  }
+  return state.backgroundTint
+})
+const updateBackgroundTint = (value) => {
+  state.backgroundTint = value
+  store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
+  updatePageSizes()
+  emit('updateSpaces')
+  updatePreviewImage()
+}
+const removeBackgroundTint = async () => {
+  updateBackgroundTint('')
+  closeDialogs()
+  emit('updateSpaces')
+  updatePreviewImage()
+}
+
+// recent
+
+const recentImagesFromCacheSpaces = () => {
+  let spaces = cache.getAllSpaces()
+  let images = []
+  spaces.forEach(space => {
+    if (!space.background) { return }
+    images.push(space.background)
+  })
+  images = uniq(images)
+  images = images.map(image => {
+    const backgroundImage = backgroundImages.value.find(item => item.url === image)
+    if (backgroundImage) {
+      return backgroundImage
+    }
+    return { url: image }
+  })
+  images = images.filter(image => Boolean(image))
+  const max = 30
+  images = images.slice(0, max)
+  return images
+}
+
+// services
+
+const serviceIsPexels = computed(() => state.service === 'pexels')
+const serviceIsRecent = computed(() => state.service === 'recent')
+const serviceIsBackground = computed(() => state.service === 'background')
+const updateService = (service) => {
+  state.service = service
+  if (service === 'background') {
+    state.selectedImages = backgroundImages.value
+  } else if (service === 'recent') {
+    const images = recentImagesFromCacheSpaces()
+    state.selectedImages = images
+  } else if (service === 'pexels') {
+    searchPexels()
+    focusAndSelectSearchInput()
+  }
+}
+
+// pexels
+
+const searchPexels = async () => {
+  state.searchIsLoading = true
+  state.error.isNoSearchResults = false
+  state.error.unknownServerError = false
+  try {
+    let url = new URL('https://api.pexels.com/v1/search')
+    const headers = new Headers({
+      'Authorization': consts.pexelsApiKey
+    })
+    const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
+    const defaultSearch = sample(defaultSearches)
+    let params = { query: state.search || defaultSearch }
+    url.search = new URLSearchParams(params).toString()
+    const response = await fetch(url, { method: 'GET', headers })
+    const data = await response.json()
+    state.images = data.photos.map(image => {
+      return {
+        id: image.id,
+        previewUrl: image.src.tiny,
+        url: image.src.large2x
+      }
+    })
+    if (!state.images.length) {
+      state.error.isNoSearchResults = true
+    }
+  } catch (error) {
+    console.error('🚒 searchService', error)
+    state.error.unknownServerError = true
+  }
+  state.searchIsLoading = false
+}
+const searchService = debounce(searchPexels, 350)
+
+</script>
+
 <template lang="pug">
-dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
+dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
     .row.title-row
       div
         BackgroundPreview(:space="currentSpace")
         span.title Background
       .row
-        button.small-button(v-if="canEditSpace" @click.left="removeBackgroundAll")
-          img.icon(src="@/assets/remove.svg")
+        .button-wrap
+          button.small-button(v-if="canEditSpace" :class="{active: state.spaceBackgroundInputIsVisible}" @click="toggleSpaceBackgroundInputIsVisible")
+            span URL
+        .button-wrap
+          button.small-button(v-if="canEditSpace" @click.left="removeBackgroundAll")
+            img.icon(src="@/assets/remove.svg")
 
   section(@mouseup.stop @touchend.stop)
-    .row
+    .row(v-if="canEditSpace && state.spaceBackgroundInputIsVisible")
       input(
-        v-if="canEditSpace"
-        ref="background"
         rows="1"
         placeholder="Paste an image URL or upload"
         v-model="background"
         data-type="name"
         maxlength="400"
       )
-      .input-button-wrap(@click.left="copyUrl")
-        button.small-button
-          img.icon.copy(src="@/assets/copy.svg")
 
-    p.read-only-url(v-if="!canEditSpace && background")
-      span {{background}}
-    .row(v-if="!canEditSpace")
-      span.badge.info
-        img.icon.cancel(src="@/assets/add.svg")
-        span Space is Read Only
+    template(v-if="!canEditSpace")
+      .row
+        .large-background-preview
+          BackgroundPreview(:space="currentSpace")
+      .row
+        span.badge.info
+          img.icon.cancel(src="@/assets/add.svg")
+          span Space is Read Only
 
     //- upload progress
     .uploading-container(v-if="pendingUpload")
@@ -44,31 +465,38 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
         span {{remotePendingUpload.percentComplete}}%
 
     //- errors
-    .error-container(v-if="error.isNotImageUrl")
+    .error-container(v-if="state.error.isNotImageUrl")
       p
         span.badge.danger
           img.icon.cancel(src="@/assets/add.svg")
           span Is not an image URL
-    .error-container(v-if="error.signUpToUpload")
+    .error-container(v-if="state.error.signUpToUpload")
       p
         span To upload files,
         span.badge.info you need to Sign Up or In
       button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
-    .error-container(v-if="error.sizeLimit")
+    .error-container(v-if="state.error.sizeLimit")
       p
         span.badge.danger
           img.icon.cancel(src="@/assets/add.svg")
           span Too Big
       p
         span Background images should be smaller than 1mb
-    .error-container(v-if="error.unknownUploadError")
+    .error-container(v-if="state.error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
     //- buttons
     template(v-if="canEditSpace")
       .row
+        //- Tint
+        .button-wrap
+          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
+            span.current-color(:style="{ background: backgroundTintBadgeColor }")
+            span Tint
+          ColorPicker(:currentColor="state.backgroundTint || '#fff'" :visible="state.colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
+        //- Type
         .segmented-buttons
-          button(@click.left.stop="updateService('background')" :class="{ active: service === 'background'}")
+          button(@click.left.stop="updateService('background')" :class="{ active: state.service === 'background'}")
             img.icon.flower(src="@/assets/flower.svg")
           button(@click.left.stop="updateService('pexels')" :class="{ active: serviceIsPexels}")
             img.icon(src="@/assets/search.svg")
@@ -78,48 +506,50 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
         .button-wrap
           button(@click.left.stop="selectFile")
             span Upload
-          input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
-      //- Tint
-      .row
-        .button-wrap
-          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-            span.current-color(:style="{ background: backgroundTintBadgeColor }")
-            span Background Tint
-          ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
+          input.hidden(type="file" ref="inputElement" @change="uploadFile" accept="image/*")
 
   //- results
   template(v-if="canEditSpace")
     //- backgrounds
     template(v-if="serviceIsBackground")
+      //- gradient backgrounds
+      section.results-section.title-row
+        ul.results-list.gradients-list
+          li.gradient-li(v-for="(gradient, index) in state.gradients" @click="selectGradient(index)" :key="gradient.id" :class="{ active: gradientIsActive(gradient) }")
+            SpaceBackgroundGradients(:visible="true" :layers="gradient")
+        .right-side-button-wrap(@click="refreshGradients")
+          button.small-button
+            img.refresh.icon(src="@/assets/refresh.svg")
+      //- built-in backgrounds
       section.results-section
-        //- built in backgrounds
-        ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
-        //- community backgrounds
+        ImageList(:images="state.selectedImages" :activeUrl="activeBackgroundUrl" @selectImage="updateSpaceBackground")
+      //- community backgrounds
       section.results-section.community-backgrounds-section
-        .row.row-title
-          a.arena-link(target="_blank" href="https://www.are.na/kinopio/community-backgrounds")
-            img.icon.arena(src="@/assets/arena.svg")
-          span Community Backgrounds
-        Loader(:visible="communityBackgroundsIsLoading")
-        ImageList(v-if="!communityBackgroundsIsLoading" :images="communityBackgroundImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+        .row.title-row
+          p.row-title Community Backgrounds
+          a.right-side-button-wrap(target="_blank" href="https://www.are.na/kinopio/community-backgrounds")
+            button.small-button
+              img.icon.arena(src="@/assets/arena.svg")
+        Loader(:visible="state.communityBackgroundsIsLoading")
+        ImageList(v-if="!state.communityBackgroundsIsLoading" :images="state.communityBackgroundImages" :activeUrl="background" @selectImage="updateSpaceBackground")
 
     //- recent
     template(v-else-if="serviceIsRecent")
       section.results-section
         .row
           p.row-title Recently Used
-        ImageList(:images="selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+        ImageList(:images="state.selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
 
     //- search results
     template(v-else-if="serviceIsPexels")
       section.results-section.search-input-wrap
         .search-wrap
-          img.icon.search(v-if="!searchIsLoading" src="@/assets/search.svg" @click.left="focusSearchInput")
-          Loader(:visible="searchIsLoading")
+          img.icon.search(v-if="!state.searchIsLoading" src="@/assets/search.svg" @click.left="focusSearchInput")
+          Loader(:visible="state.searchIsLoading")
           input(
             placeholder="Search Images on Pexels"
             v-model="searchInput"
-            ref="searchInput"
+            ref="searchInputElement"
             @focus="resetPinchCounterZoomDecimal"
             @keyup.stop.backspace
             @keyup.stop.enter
@@ -128,390 +558,34 @@ dialog.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs"
           )
           button.borderless.clear-input-wrap(@click.left="clearSearch")
             img.icon.cancel(src="@/assets/add.svg")
-        .error-container(v-if="error.isNoSearchResults")
-          .badge.danger Nothing found on Pexels for {{search}}
-        .error-container(v-if="error.unknownServerError")
+        .error-container(v-if="state.error.isNoSearchResults")
+          .badge.danger Nothing found on Pexels for {{state.search}}
+        .error-container(v-if="state.error.unknownServerError")
           .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
         ul.results-list.image-list
-          template(v-for="image in images" :key="image.id")
-            li(@click.left="updateSpaceBackground(image.url)" tabindex="0" v-on:keydown.enter="updateSpaceBackground(image.url)" :class="{ active: isSpaceUrl(image)}")
+          template(v-for="image in state.images" :key="image.id")
+            li(@click.left="updateSpaceBackground(image.url)" tabindex="0" v-on:keydown.enter="updateSpaceBackground(image.url)" :class="{ active: isCurrentSpaceBackground(image)}")
               img(:src="image.previewUrl")
-              a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
-                button.small-button
-                  span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
-                  span →
-
 </template>
 
-<script>
-import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import Loader from '@/components/Loader.vue'
-import utils from '@/utils.js'
-import BackgroundPreview from '@/components/BackgroundPreview.vue'
-import ImageList from '@/components/ImageList.vue'
-import backgroundImages from '@/data/backgroundImages.json'
-import cache from '@/cache.js'
-import consts from '@/consts.js'
-import sample from 'lodash-es/sample'
-
-import uniq from 'lodash-es/uniq'
-import debounce from 'lodash-es/debounce'
-
-export default {
-  name: 'Background',
-  components: {
-    ColorPicker,
-    Loader,
-    BackgroundPreview,
-    ImageList
-  },
-  props: {
-    visible: Boolean
-  },
-  data () {
-    return {
-      colorPickerIsVisible: false,
-      initialSearch: '',
-      error: {
-        isNotImageUrl: false,
-        signUpToUpload: false,
-        userIsOffline: false,
-        sizeLimit: false,
-        unknownUploadError: false,
-        isNoSearchResults: false,
-        unknownServerError: false
-      },
-      backgroundTint: '',
-      defaultColor: '#e3e3e3',
-      search: '',
-      searchIsLoading: false,
-      selectedImages: [],
-      communityBackgroundsIsLoading: false,
-      communityBackgroundImages: [],
-      images: [],
-      service: 'background' // background, recent, pexels
-    }
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerUploadComplete') {
-        let { spaceId, url, cardId } = mutation.payload
-        if (cardId) { return }
-        if (spaceId !== this.currentSpace.id) { return }
-        this.updateSpaceBackground(url)
-      } else if (mutation.type === 'triggerUpdateTheme') {
-        this.defaultColor = utils.cssVariable('secondary-background')
-      }
-    })
-  },
-  mounted () {
-    this.defaultColor = utils.cssVariable('secondary-background')
-  },
-  updated () {
-    this.$nextTick(() => {
-      if (this.visible) {
-        this.checkIfImageIsUrl()
-      }
-    })
-  },
-  computed: {
-    searchInput: {
-      get () {
-        return this.search
-      },
-      set (newValue) {
-        this.search = newValue
-        if (newValue) {
-          this.searchService()
-        }
-      }
-    },
-    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
-    currentSpace () { return this.$store.state.currentSpace },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    currentUser () { return this.$store.state.currentUser },
-    background: {
-      get () {
-        const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/default-background-2x.png'
-        return this.currentSpace.background || defaultBackground
-      },
-      set (url) {
-        this.updateSpaceBackground(url)
-      }
-    },
-    pendingUpload () {
-      const pendingUploads = this.$store.state.upload.pendingUploads
-      return pendingUploads.find(upload => {
-        const isCurrentSpace = upload.spaceId === this.currentSpace.id
-        const isInProgress = upload.percentComplete < 100
-        return isCurrentSpace && isInProgress
-      })
-    },
-    remotePendingUpload () {
-      const currentSpace = this.$store.state.currentSpace
-      let remotePendingUploads = this.$store.state.remotePendingUploads
-      return remotePendingUploads.find(upload => {
-        const isInProgress = upload.percentComplete < 100
-        const isSpace = upload.spaceId === currentSpace.id
-        return isInProgress && isSpace
-      })
-    },
-    backgroundTintBadgeColor () {
-      if (!this.backgroundTint || this.backgroundTint === '#fff' || this.backgroundTint === '#000') {
-        return this.defaultColor
-      }
-      return this.backgroundTint
-    },
-    serviceIsPexels () { return this.service === 'pexels' },
-    serviceIsRecent () { return this.service === 'recent' },
-    serviceIsBackground () { return this.service === 'background' },
-    backgroundImages () {
-      let images = backgroundImages
-      images = images.filter(image => !image.isArchived)
-      return images
-    }
-  },
-  methods: {
-    isSpaceUrl (image) {
-      return image.url === this.background
-    },
-    focusAndSelectSearchInput () {
-      this.$nextTick(() => {
-        if (utils.isMobile()) { return }
-        const element = this.$refs.searchInput
-        if (!element) { return }
-        element.focus()
-        const length = element.value.length
-        if (!length) { return }
-        element.setSelectionRange(0, length)
-      })
-    },
-    updateService (service) {
-      this.service = service
-      if (service === 'background') {
-        this.selectedImages = this.backgroundImages
-      } else if (service === 'recent') {
-        const images = this.recentImagesFromCacheSpaces()
-        this.selectedImages = images
-      } else if (service === 'pexels') {
-        this.searchPexels()
-        this.focusAndSelectSearchInput()
-      }
-    },
-    searchService: debounce(async function () {
-      this.searchPexels()
-    }, 350),
-    async searchPexels () {
-      this.searchIsLoading = true
-      this.error.isNoSearchResults = false
-      this.error.unknownServerError = false
-      try {
-        let url = new URL('https://api.pexels.com/v1/search')
-        const headers = new Headers({
-          'Authorization': consts.pexelsApiKey
-        })
-        const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
-        const defaultSearch = sample(defaultSearches)
-        let params = { query: this.search || defaultSearch }
-        url.search = new URLSearchParams(params).toString()
-        const response = await fetch(url, { method: 'GET', headers })
-        const data = await response.json()
-        this.images = data.photos.map(image => {
-          return {
-            id: image.id,
-            previewUrl: image.src.tiny,
-            url: image.src.large2x
-          }
-        })
-        if (!this.images.length) {
-          this.error.isNoSearchResults = true
-        }
-      } catch (error) {
-        console.error('🚒 searchService', error)
-        this.error.unknownServerError = true
-      }
-      this.searchIsLoading = false
-    },
-    recentImagesFromCacheSpaces () {
-      let spaces = cache.getAllSpaces()
-      let images = []
-      spaces.forEach(space => {
-        if (!space.background) { return }
-        images.push(space.background)
-      })
-      images = uniq(images)
-      images = images.map(image => {
-        const backgroundImage = this.backgroundImages.find(item => item.url === image)
-        if (backgroundImage) {
-          return backgroundImage
-        }
-        return { url: image }
-      })
-      images = images.filter(image => Boolean(image))
-      const max = 30
-      images = images.slice(0, max)
-      return images
-    },
-    async copyUrl (event) {
-      this.$store.commit('clearNotificationsWithPosition')
-      const position = utils.cursorPositionInPage(event)
-      try {
-        await navigator.clipboard.writeText(this.background)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-      } catch (error) {
-        console.warn('🚑 copyText', error)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-      }
-    },
-    toggleColorPicker () {
-      const isVisible = this.colorPickerIsVisible
-      this.closeDialogs()
-      this.colorPickerIsVisible = !isVisible
-    },
-    triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerSignUpOrInIsVisible')
-    },
-    closeDialogs () {
-      this.colorPickerIsVisible = false
-    },
-    removeBackgroundAll () {
-      this.removeBackground()
-      this.removeBackgroundTint()
-    },
-    removeBackground () {
-      this.updateSpaceBackground('')
-      this.closeDialogs()
-    },
-    updateSpaceBackground (url) {
-      url = url.url || url
-      this.$store.dispatch('currentSpace/updateSpace', { background: url })
-      this.$store.commit('triggerUpdateBackground')
-      this.updatePageSizes()
-    },
-    removeBackgroundTint () {
-      this.updateBackgroundTint('')
-      this.closeDialogs()
-      this.$emit('updateSpaces')
-    },
-    updateBackgroundTint (value) {
-      this.backgroundTint = value
-      this.$store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
-      this.updatePageSizes()
-      this.$emit('updateSpaces')
-    },
-    updatePageSizes () {
-      this.$nextTick(() => {
-        this.$store.dispatch('updatePageSizes')
-      })
-    },
-    clearErrors () {
-      this.error.isNotImageUrl = false
-      this.error.signUpToUpload = false
-      this.error.userIsOffline = false
-      this.error.sizeLimit = false
-      this.error.unknownUploadError = false
-    },
-    checkIfImageIsUrl () {
-      const url = this.background
-      if (!url) {
-        this.error.isNotImageUrl = false
-      } else if (utils.urlIsImage(url)) {
-        this.error.isNotImageUrl = false
-      } else {
-        this.error.isNotImageUrl = true
-      }
-    },
-    selectFile (event) {
-      if (!this.currentUserIsSignedIn) {
-        this.error.signUpToUpload = true
-        return
-      }
-      const input = this.$refs.input
-      input.click()
-    },
-    isFileTooBig (file) {
-      const sizeLimit = 1024 * 1024 * 1.250 // ~1mb
-      if (file.size > sizeLimit) {
-        return true
-      }
-    },
-    async uploadFile () {
-      this.clearErrors()
-      const spaceId = this.currentSpace.id
-      const input = this.$refs.input
-      const file = input.files[0]
-      if (this.isFileTooBig(file)) {
-        this.error.sizeLimit = true
-        return
-      }
-      try {
-        await this.$store.dispatch('upload/uploadFile', { file, spaceId })
-      } catch (error) {
-        console.warn('🚒', error)
-        if (error.type === 'sizeLimit') {
-          this.error.sizeLimit = true
-        } else {
-          this.error.unknownUploadError = true
-        }
-      }
-    },
-    clearSearch () {
-      this.search = ''
-      this.searchIsLoading = false
-      this.images = []
-    },
-    resetPinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', 1)
-    },
-    async updateCommunityBackgroundImages () {
-      this.communityBackgroundsIsLoading = true
-      if (this.communityBackgroundImages.length) {
-        this.communityBackgroundsIsLoading = false
-        return
-      }
-      let images = await this.$store.dispatch('api/communityBackgrounds')
-      images = images.map(image => {
-        return {
-          url: image.original,
-          thumbnailUrl: image.thumb,
-          previewUrl: image.preview
-        }
-      })
-      this.communityBackgroundImages = images
-      this.communityBackgroundsIsLoading = false
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        if (this.service === 'background') {
-          this.selectedImages = this.backgroundImages
-        }
-        this.backgroundTint = this.currentSpace.backgroundTint
-        this.closeDialogs()
-        this.clearErrors()
-        this.updateCommunityBackgroundImages()
-      } else {
-        if (this.error.isNotImageUrl) {
-          this.removeBackground()
-        }
-        this.$store.commit('clearNotificationsWithPosition')
-      }
-    }
-  }
-}
-</script>
-
 <style lang="stylus">
-dialog.background
+dialog.background-picker
   width 255px
   overflow auto
-  max-height 86vh
+  max-height calc(100vh - 120px) //- todesktop chromium fix
+  max-height calc(100dvh - 120px)
   .title-row
     margin-left 0 !important
-  .background-preview
-    margin-right 6px
+    .background-preview
+      margin-right 6px
+      .preview-wrap
+        height 19px
+        width 19px
+  .large-background-preview
+    .preview-wrap
+      height 100px
+      width 100px
+
   .title
     color var(--primary)
   section
@@ -532,10 +606,6 @@ dialog.background
         left 6px
   .hidden
     display none
-  .read-only-url
-    margin-top 0
-    margin-bottom 10px
-    word-break break-all
 
   .arrow-up
     position absolute
@@ -580,6 +650,27 @@ dialog.background
     margin-left 4px
   .community-backgrounds-section
     margin-top 10px
-  .arena-link
+  .right-side-button-wrap
+    pointer cursor
     padding-right 5px
+
+  .gradients-list
+    display flex
+    flex-wrap nowrap
+    align-items flex-start
+    li
+      width 40px
+      height 40px
+      position relative
+      padding 3px
+      padding-right 2px
+      padding-bottom 2px
+    .space-background-gradients
+      display block
+      top 3px
+      left 3px
+      width calc(100% - 6px)
+      height calc(100% - 6px)
+      border-radius var(--entity-radius)
+      pointer-events all
 </style>

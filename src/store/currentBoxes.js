@@ -149,7 +149,9 @@ export default {
         resizeHeight: box.resizeHeight || minBoxSize,
         color: box.color || color,
         fill: box.fill || 'filled', // empty, filled
-        name: box.name || `Box ${count}`
+        name: box.name || `Box ${count}`,
+        infoHeight: 57,
+        infoWidth: 34
       }
       context.dispatch('history/add', { boxes: [box] }, { root: true })
       context.commit('create', box)
@@ -194,10 +196,36 @@ export default {
       })
     },
 
+    // dimensions
+
+    updateInfoDimensions: (context, { boxes }) => {
+      boxes = boxes || utils.clone(context.getters.all)
+      boxes.forEach(box => {
+        const prevDimensions = {
+          infoWidth: box.infoWidth,
+          infoHeight: box.infoHeight
+        }
+        const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
+        if (!element) { return }
+        const DOMRect = element.getBoundingClientRect()
+        const infoWidth = Math.round(DOMRect.width + 4)
+        const infoHeight = Math.round(DOMRect.height)
+        const dimensionsChanged = infoWidth !== prevDimensions.infoWidth || infoHeight !== prevDimensions.infoHeight
+        const body = {
+          id: box.id,
+          infoWidth,
+          infoHeight
+        }
+        if (!dimensionsChanged) { return }
+        context.commit('update', body)
+        context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
+      })
+    },
+
     // snapping
 
     updateSnapGuides: (context, boxes) => {
-      const snapThreshold = 25
+      const snapThreshold = 10
       const closenessThreshold = 100
       const targetBoxes = utils.clone(context.getters.all)
       boxes = utils.clone(boxes)

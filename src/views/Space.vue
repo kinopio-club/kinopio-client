@@ -6,7 +6,7 @@ main#space.space(
   :style="styles"
   :data-zoom="spaceZoomDecimal"
 )
-  Connections(:startCursor="startCursor")
+  Connections
   Boxes
   Cards
   LockedItemButtons
@@ -16,8 +16,8 @@ main#space.space(
   BoxDetails
   CardDetails
   OtherCardDetails
-  OtherSpaceDetails
   ConnectionDetails
+  CodeLanguagePicker
   MultipleSelectedActions
   ScrollAtEdgesHandler
   NotificationsWithPosition(layer="space")
@@ -28,10 +28,10 @@ main#space.space(
 import Card from '@/components/Card.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
-import OtherSpaceDetails from '@/components/dialogs/OtherSpaceDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
+import CodeLanguagePicker from '@/components/dialogs/CodeLanguagePicker.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
@@ -41,13 +41,14 @@ import Cards from '@/components/Cards.vue'
 import Connections from '@/components/Connections.vue'
 import LockedItemButtons from '@/components/LockedItemButtons.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 
 let prevCursor, endCursor, shouldCancel
-let processQueueIntervalTimer
+let processQueueIntervalTimer, updateJournalDailyPromptTimer, updateInboxCache
 
 export default {
   name: 'Space',
@@ -58,6 +59,7 @@ export default {
     BoxDetails,
     UserLabelCursor,
     ConnectionDetails,
+    CodeLanguagePicker,
     MultipleSelectedActions,
     ScrollAtEdgesHandler,
     NotificationsWithPosition,
@@ -65,8 +67,7 @@ export default {
     Boxes,
     Cards,
     LockedItemButtons,
-    Connections,
-    OtherSpaceDetails
+    Connections
   },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')
@@ -82,13 +83,10 @@ export default {
     window.addEventListener('touchmove', this.interact)
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
-    // keep space element updated to viewport size so connections show up
-    this.updatePageSizes()
     window.addEventListener('resize', this.updatePageSizesDebounced)
 
-    this.updateIsOnline()
-    window.addEventListener('online', this.updateIsOnline)
-    window.addEventListener('offline', this.updateIsOnline)
+    // when a card is added through Add.vue in a sharesheet with the space open behind it
+    window.addEventListener('message', this.addCardFromOutsideAppContext)
 
     this.addInteractionBlur()
 
@@ -102,10 +100,31 @@ export default {
 
     this.$store.dispatch('currentUser/restoreUserFavorites')
 
-    // retry failed sync operations every 5 seconds
+    // retry failed sync operations
     processQueueIntervalTimer = setInterval(() => {
       this.$store.dispatch('api/processQueueOperations')
-    }, 5000)
+    }, 5000) // every 5 seconds
+
+    // update journal daily prompt
+    updateJournalDailyPromptTimer = setInterval(() => {
+      this.$store.dispatch('currentUser/updateJournalDailyPrompt')
+    }, 1000 * 60 * 60 * 1) // every hour
+
+    // update inbox space in local storage
+    setTimeout(() => {
+      this.$store.dispatch('currentSpace/updateInboxCache')
+    }, 15000) // 15 seconds after mounted, one-time
+    updateInboxCache = setInterval(() => {
+      this.$store.dispatch('currentSpace/updateInboxCache')
+    }, 1000 * 60 * 60 * 1) // every 1 hour
+
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerRestoreSpaceRemoteComplete') {
+        this.$nextTick(() => {
+          this.dragItems()
+        })
+      }
+    })
   },
   beforeUnmount () {
     window.removeEventListener('mousemove', this.interact)
@@ -113,11 +132,12 @@ export default {
     window.removeEventListener('mouseup', this.stopInteractions)
     window.removeEventListener('touchend', this.stopInteractions)
     window.removeEventListener('resize', this.updatePageSizesDebounced)
-    window.removeEventListener('online', this.updateIsOnline)
-    window.removeEventListener('offline', this.updateIsOnline)
     window.removeEventListener('unload', this.unloadPage)
+    window.removeEventListener('message', this.addCardFromOutsideAppContext)
     window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
     clearInterval(processQueueIntervalTimer)
+    clearInterval(updateJournalDailyPromptTimer)
+    clearInterval(updateInboxCache)
   },
   data () {
     return {
@@ -163,7 +183,7 @@ export default {
     correctCardConnectionPaths () {
       const space = utils.clone(this.$store.state.currentSpace)
       const user = utils.clone(this.$store.state.currentUser)
-      const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
+      const currentSpaceIsRemote = this.$store.getters['currentSpace/isRemote']
       this.$store.dispatch('currentConnections/correctPaths', { shouldUpdateApi: currentSpaceIsRemote })
     },
     loadSpaceOnBackOrForward (event) {
@@ -186,12 +206,14 @@ export default {
         this.$store.dispatch('updatePageSizes')
       })
     },
-    updateIsOnline () {
-      const status = window.navigator.onLine
-      this.$store.commit('isOnline', status)
-      if (status) {
-        this.$store.dispatch('api/processQueueOperations')
-      }
+    addCardFromOutsideAppContext (event) {
+      if (!consts.isSecureAppContext) { return }
+      const currentSpace = this.$store.state.currentSpace
+      const data = event.data
+      if (data.name !== 'addedCardFromAddPage') { return }
+      const card = data.value
+      if (card.spaceId !== currentSpace.id) { return }
+      this.$store.commit('currentCards/create', { card, shouldPreventCache: true })
     },
     addInteractionBlur () {
       if (!utils.isMobile()) { return }
@@ -269,7 +291,6 @@ export default {
       this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserResizingBoxes' })
       this.$store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
     },
-
     dragItems () {
       this.$store.dispatch('history/pause')
       const prevCursor = this.cursor()
@@ -403,6 +424,7 @@ export default {
       }
     },
     addOrCloseCard (event) {
+      const sidebarIsVisible = window.document.querySelector('dialog#sidebar')
       if (this.$store.state.shouldAddCard) {
         let position = utils.cursorPositionInSpace(event)
         // prevent addCard if position is outside space
@@ -414,7 +436,7 @@ export default {
         // add card
         this.addCard(event)
       // close item details
-      } else if (this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) {
+      } else if ((this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.boxDetailsIsVisibleForBoxId) && !sidebarIsVisible) {
         this.$store.dispatch('closeAllDialogs')
       }
     },
@@ -480,8 +502,6 @@ export default {
   position relative // used by svg connections
   transform-origin top left
   z-index 0
-  &.hidden-by-mindmap
-    opacity 0.4
   .card-overlap-indicator
     position absolute
     z-index calc(var(--max-z) - 70)

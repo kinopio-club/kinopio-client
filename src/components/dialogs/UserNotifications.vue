@@ -4,20 +4,18 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
     p
       span Notifications
       Loader(:visible="loading")
-
+    OfflineBadge
   section.results-section(v-if="filteredNotifications.length" :style="{'max-height': dialogHeight + 'px'}")
     p(v-if="!loading && !filteredNotifications.length")
       span Cards added to your spaces by collaborators can be found here
     ul.results-list(v-if="filteredNotifications.length")
       template(v-for="notification in filteredNotifications")
-        //- TODO wrap in <a> for middle click
         a(:href="spaceUrl(notification)")
           li(@click.stop.prevent="primaryAction(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }" :data-notification-id="notification.id")
             div
               //- new
               .badge.info.new-unread-badge(v-if="!notification.isRead")
               //- icon
-              img.icon.add(v-if="notification.iconClass === 'add'" src="@/assets/add.svg")
               img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
               img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
               //- user
@@ -27,7 +25,7 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
               span {{notification.message}}
               //- space
               span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification.spaceId)" :class="{ active: isCurrentSpace(notification.spaceId) }")
-                BackgroundPreview(v-if="notification.space" :space="notification.space")
+                img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
                 span.space-name {{notification.space.name}}
             //- add to explore button
             .row(v-if="notification.type === 'askToAddToExplore'")
@@ -37,7 +35,7 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
               a(:href="cardUrl(notification)")
                 .card-details.badge.button-badge(@click.stop.prevent="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }")
                   template(v-for="segment in cardNameSegments(notification.card.name)")
-                    NameSegment(:segment="segment" @showTagDetailsIsVisible="showCardDetails(notification)" @showOtherSpaceDetailsIsVisible="showCardDetails(notification)")
+                    NameSegment(:segment="segment" @showTagDetailsIsVisible="showCardDetails(notification)")
                   img.card-image(v-if="notification.detailsImage" :src="notification.detailsImage")
 
 </template>
@@ -49,8 +47,8 @@ import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
-import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
+import OfflineBadge from '@/components/OfflineBadge.vue'
 
 export default {
   name: 'UserNotifications',
@@ -58,8 +56,8 @@ export default {
     Loader,
     UserLabelInline,
     NameSegment,
-    BackgroundPreview,
-    AddToExplore
+    AddToExplore,
+    OfflineBadge
   },
   props: {
     visible: Boolean,
@@ -111,14 +109,14 @@ export default {
       this.$store.commit('cardDetailsIsVisibleForCardId', null)
       if (this.isCurrentSpace(spaceId)) { return }
       const space = { id: spaceId }
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     },
     showCardDetails (notification) {
       let space = utils.clone(notification.space)
       const card = utils.clone(notification.card)
       if (this.currentSpaceId !== space.id) {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
-        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+        this.$store.dispatch('currentSpace/changeSpace', space)
       } else {
         this.$store.dispatch('currentCards/showCardDetails', card.id)
       }
@@ -199,7 +197,6 @@ export default {
       if (visible) {
         this.filteredNotifications = this.notifications
         this.updateDialogHeight()
-        this.$emit('updateNotifications')
         this.$store.commit('shouldExplicitlyHideFooter', true)
       } else {
         this.$store.commit('shouldExplicitlyHideFooter', false)
@@ -297,5 +294,24 @@ export default {
   .space-name-wrap
     margin-left 3px
   .new-unread-badge
+    position absolute
+    top 4px
+    right 4px
+    left initial
+    margin 0
+  .icon-wrap
     display inline-block
+    margin-right 5px
+    position relative
+  .preview-thumbnail-image
+    width 24px
+    height 22px
+    overflow hidden
+    object-fit cover
+    object-position 0 0
+    border-radius var(--entity-radius)
+    image-rendering crisp-edges
+    flex-shrink 0
+    margin-right 3px
+    vertical-align middle
 </style>

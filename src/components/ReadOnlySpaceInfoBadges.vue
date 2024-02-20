@@ -16,7 +16,7 @@ const showInExplore = computed(() => store.state.currentSpace.showInExplore)
     span Open to All
   .badge.status(v-if="showInExplore")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
-    span Explore
+    span In Explore
 </template>
 
 <style lang="stylus">

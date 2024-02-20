@@ -188,7 +188,7 @@ export default {
       try {
         cache.saveSpace(space)
         await this.$store.dispatch('api/createSpace', space)
-        this.$store.dispatch('currentSpace/changeSpace', { space })
+        this.$store.dispatch('currentSpace/changeSpace', space)
         this.$store.commit('addNotification', { message: 'Are.na channel imported', type: 'success' })
         this.$store.dispatch('closeAllDialogs')
       } catch (error) {

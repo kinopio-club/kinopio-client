@@ -1,146 +1,182 @@
+<script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore, mapState, mapGetters } from 'vuex'
+
+import Loader from '@/components/Loader.vue'
+import User from '@/components/User.vue'
+import EmailInvites from '@/components/dialogs/EmailInvites.vue'
+import utils from '@/utils.js'
+import consts from '@/consts.js'
+
+import randomColor from 'randomcolor'
+const store = useStore()
+
+onMounted(() => {
+  store.commit('clearNotificationsWithPosition')
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerCloseChildDialogs') {
+      closeChildDialogs()
+    }
+  })
+})
+
+const emit = defineEmits(['closeDialogs', 'emailInvitesIsVisible'])
+
+const state = reactive({
+  tipsIsVisible: false,
+  emailInvitesIsVisible: false,
+  inviteType: 'edit' // 'edit', 'readOnly'
+})
+
+const currentUser = computed(() => store.state.currentUser)
+const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const spaceName = computed(() => store.state.currentSpace.name)
+const randomUser = computed(() => {
+  const luminosity = store.state.currentUser.theme
+  const color = randomColor({ luminosity })
+  return { color }
+})
+const collaboratorKey = computed(() => store.state.currentSpace.collaboratorKey)
+const toggleTipsIsVisible = () => {
+  state.tipsIsVisible = !state.tipsIsVisible
+}
+const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
+const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
+
+// invite types
+
+const inviteTypeIsEdit = computed(() => state.inviteType === 'edit')
+const inviteTypeIsReadOnly = computed(() => state.inviteType === 'readOnly')
+const toggleInviteType = (type) => {
+  state.inviteType = type
+}
+
+// urls
+
+const editUrl = computed(() => {
+  const currentSpace = store.state.currentSpace
+  const spaceId = currentSpace.id
+  const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value })
+  console.log('🍇 invite edit url', url)
+  return url
+})
+const readOnlyUrl = computed(() => {
+  const currentSpace = store.state.currentSpace
+  const spaceId = currentSpace.id
+  const readOnlyKey = currentSpace.readOnlyKey
+  const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, readOnlyKey })
+  console.log('🍇 invite read only url', url)
+  return url
+})
+
+//  copy invite urls
+
+const copyInviteUrl = async (event) => {
+  let url
+  if (inviteTypeIsEdit.value) {
+    url = editUrl.value
+  } else if (inviteTypeIsReadOnly.value) {
+    url = readOnlyUrl.value
+  }
+  store.commit('clearNotificationsWithPosition')
+  const position = utils.cursorPositionInPage(event)
+  try {
+    await navigator.clipboard.writeText(url)
+    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyInviteUrl', error, url)
+    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
+}
+const inviteButtonLabel = computed(() => {
+  if (inviteTypeIsEdit.value) {
+    return 'Copy Invite to Edit URL'
+  } else {
+    // if inviteTypeIsReadOnly.value
+    return 'Copy Invite to Read URL'
+  }
+})
+
+// native web share
+
+const webShareIsSupported = computed(() => navigator.share)
+const webShareInvite = () => {
+  let title
+  if (inviteTypeIsEdit.value) {
+    title = 'Invite to Edit'
+  } else if (inviteTypeIsReadOnly.value) {
+    title = 'Invite to Edit Only'
+  }
+  const data = {
+    title,
+    text: spaceName.value,
+    url: editUrl.value
+  }
+  navigator.share(data)
+}
+
+// email invites
+
+const closeChildDialogs = () => {
+  state.emailInvitesIsVisible = false
+}
+const toggleEmailInvitesIsVisible = () => {
+  const value = !state.emailInvitesIsVisible
+  emit('closeDialogs')
+  state.emailInvitesIsVisible = value
+}
+watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
+  emit('emailInvitesIsVisible', value)
+})
+</script>
+
 <template lang="pug">
 section.invite
-  p Invite Collaborators
-  section.subsection
-    .row
-      p
-        .users
-          User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-          User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-        span Invite to Edit
-      button.small-button.extra-options-button.inline-button(@click="toggleTipsIsVisible" :class="{active: tipsIsVisible}")
-        span Tips
+  .row
+    p
+      .users
+        User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+        User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+      span Invite Collaborators
+    button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
+      span ?
 
-    Loader(:visible="loading")
-    template(v-if="!loading && collaboratorKey")
-      .row
-        .segmented-buttons
-          button(@click.left="copyUrl")
-            img.icon.copy(src="@/assets/copy.svg")
-            span Copy Invite URL
-          button(v-if="webShareIsSupported" @click="webShare")
-            img.icon.share(src="@/assets/share.svg")
-    //- Error
-    template(v-if="!loading && !collaboratorKey")
-      .row
-        .badge.danger シ_ _)シ Something went wrong
-      .row
-        button(@click="updateCollaboratorKey") Try Again
+  .row.invite-url-segmented-buttons(v-if="spaceIsPrivate")
+    .segmented-buttons
+      button(@click="toggleInviteType('edit')" :class="{active: inviteTypeIsEdit}")
+        span Can Edit
+      button(@click="toggleInviteType('readOnly')" :class="{active: inviteTypeIsReadOnly}")
+        span Read Only
+
+  section.subsection.invite-url-subsection
+    //- Copy Invite
+    .row
+      .segmented-buttons
+        button(@click.left="copyInviteUrl")
+          img.icon.copy(src="@/assets/copy.svg")
+          span {{inviteButtonLabel}}
+        button(v-if="webShareIsSupported" @click="webShareInvite")
+          img.icon.share(src="@/assets/share.svg")
+    .row(v-if="inviteTypeIsEdit")
+      .button-wrap
+        button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
+          img.icon.mail(src="@/assets/mail.svg")
+          span Email
+      EmailInvites(:visible="state.emailInvitesIsVisible")
     //- Tips
-    .more-info(v-if="tipsIsVisible")
-      template(v-if="spaceIsPrivate")
-        .row
-          p
-            span No account is needed to view{{' '}}
-            span.badge.danger private spaces
-            span {{' '}}– but editing requires an account.
-        hr
+    template(v-if="state.tipsIsVisible")
       .row
-        p You'll both earn a{{' '}}
-          span.badge.success $6 credit
-          span when someone you invite signs up for a Kinopio account
-      template(v-if="currentUserIsUpgraded")
-        hr
-        .row
-          .badge.success
-            span Because your account is upgraded, others can create cards here for free
+        p No account is needed to read spaces, but editing requires an account
+      .row
+        p.badge.success You'll both earn a $6 credit when someone you invite signs up for a Kinopio account
+      .row(v-if="currentUserIsUpgraded")
+        p.badge.success
+          span Because your account is upgraded, others can create cards here for free
 
 </template>
 
-<script>
-import Loader from '@/components/Loader.vue'
-import User from '@/components/User.vue'
-import utils from '@/utils.js'
-
-import randomColor from 'randomcolor'
-import { mapState, mapGetters } from 'vuex'
-
-export default {
-  name: 'Invite',
-  props: {
-    visible: Boolean
-  },
-  components: {
-    Loader,
-    User
-  },
-  mounted () {
-    this.updateCollaboratorKey()
-  },
-  data () {
-    return {
-      url: '',
-      loading: false,
-      collaboratorKey: '',
-      tipsIsVisible: false
-    }
-  },
-  computed: {
-    ...mapState([
-      'currentUser'
-    ]),
-    ...mapGetters([
-    ]),
-    spaceIsPrivate () { return this.$store.state.currentSpace.privacy === 'private' },
-    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
-    randomUser () {
-      const luminosity = this.$store.state.currentUser.theme
-      const color = randomColor({ luminosity })
-      return { color }
-    },
-    webShareIsSupported () { return navigator.share }
-  },
-  methods: {
-    async copyUrl (event) {
-      this.$store.commit('clearNotificationsWithPosition')
-      const position = utils.cursorPositionInPage(event)
-      try {
-        await navigator.clipboard.writeText(this.url)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-      } catch (error) {
-        console.warn('🚑 copyText', error)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-      }
-    },
-    webShare () {
-      const data = {
-        title: `Invite to Edit`,
-        text: this.spaceName,
-        url: this.url
-      }
-      navigator.share(data)
-    },
-    async updateCollaboratorKey () {
-      this.collaboratorKey = ''
-      const space = this.$store.state.currentSpace
-      this.loading = true
-      const collaboratorKey = await this.$store.dispatch('api/getSpaceCollaboratorKey', space)
-      this.collaboratorKey = collaboratorKey
-      this.loading = false
-      this.$store.commit('currentSpace/updateSpace', { collaboratorKey })
-      this.updateInviteUrl(collaboratorKey)
-    },
-    updateInviteUrl (collaboratorKey) {
-      const currentSpace = this.$store.state.currentSpace
-      const spaceId = currentSpace.id
-      const spaceName = currentSpace.name
-      this.url = utils.inviteUrl({ spaceId, spaceName, collaboratorKey })
-      console.log('🍇 invite url', this.url)
-    },
-    toggleTipsIsVisible () {
-      this.tipsIsVisible = !this.tipsIsVisible
-    }
-  },
-  watch: {
-    visible (visible) {
-      this.$store.commit('clearNotificationsWithPosition')
-    }
-  }
-}
-</script>
-
-<style lang="stylus" scoped>
-.invite
+<style lang="stylus">
+section.invite
   user-select text
   .badge
     margin 0
@@ -148,4 +184,11 @@ export default {
     vertical-align 0
   .users
     margin-right 5px
+  .invite-url-segmented-buttons
+    margin-bottom 0
+    button
+      border-bottom-left-radius 0
+      border-bottom-right-radius 0
+    + .invite-url-subsection
+      border-top-left-radius 0
 </style>

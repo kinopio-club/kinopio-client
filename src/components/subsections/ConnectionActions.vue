@@ -1,17 +1,19 @@
 <script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
+import { useStore } from 'vuex'
+
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
 
 import uniq from 'lodash-es/uniq'
 import uniqBy from 'lodash-es/uniqBy'
-import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
-import { useStore } from 'vuex'
 const store = useStore()
 
 const props = defineProps({
   visible: Boolean,
   connections: Array,
-  canEditAll: Object
+  canEditAll: Object,
+  backgroundColor: String
 })
 const emit = defineEmits(['closeDialogs'])
 const state = reactive({
@@ -20,7 +22,7 @@ const state = reactive({
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCardDetailsCloseDialogs' && props.visible) {
+    if (mutation.type === 'triggerCloseChildDialogs' && props.visible) {
       closeDialogs()
     }
   })
@@ -66,6 +68,9 @@ const closeDialogs = () => {
 
 <template lang="pug">
 section.subsection.connection-actions(v-if="visible")
+  p.subsection-vertical-label(:style="{ background: backgroundColor }")
+    span LINE
+
   //- Edit Connections
   .row.edit-connection-types
     //- Type Color
@@ -83,12 +88,15 @@ section.subsection.connection-actions(v-if="visible")
 
 <style lang="stylus">
 dialog section.connection-actions
+  position relative
   padding 4px
   padding-bottom 0
   background-color transparent
   border 1px solid var(--primary-border)
   padding 4px
   padding-bottom 0
+  .row
+    margin-top 0
   .button-wrap
     margin-left 0
     margin-right 4px

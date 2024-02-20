@@ -1,7 +1,7 @@
 <template lang="pug">
-dialog.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned}")
+dialog.space-details.is-pinnable.wide(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned, 'back-button-is-visible': backButtonIsVisible}")
   section
-    SpaceDetailsInfo(@updateLocalSpaces="updateLocalSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden" @addSpace="addSpace")
+    SpaceDetailsInfo(@updateLocalSpaces="updateLocalSpaces" @removeSpaceId="removeSpaceFromSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden" @addSpace="addSpace")
   section.results-actions
     .row.title-row
       div
@@ -16,8 +16,9 @@ dialog.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="clo
       .button-wrap
         // no filters
         template(v-if="!spaceFiltersIsActive")
-          button.small-button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible }")
-            img.icon(src="@/assets/filter.svg")
+          .button-wrap.title-row-small-button-wrap.section-top(@click.left.stop="toggleSpaceFiltersIsVisible")
+            button.small-button(:class="{ active: spaceFiltersIsVisible }")
+              img.icon(src="@/assets/filter.svg")
         // filters active
         template(v-if="spaceFiltersIsActive")
           .segmented-buttons
@@ -38,7 +39,7 @@ dialog.space-details.is-pinnable(v-if="visible" :open="visible" @click.left="clo
       @selectSpace="changeSpace"
       @addSpace="addSpace"
       :resultsSectionHeight="resultsSectionHeight"
-      :showFavoriteButton="true"
+      :parentDialog="parentDialog"
     )
 </template>
 
@@ -135,6 +136,7 @@ export default {
     spaceFiltersIsActive () {
       return Boolean(this.spaceFilterShowHiddenIsActive || this.dialogSpaceFilters || utils.objectHasKeys(this.dialogSpaceFilterByUser))
     },
+    parentDialog () { return 'spaceDetails' },
     filteredSpaces () {
       let spaces
       // filter by space type
@@ -175,6 +177,10 @@ export default {
       } else {
         return 'Remove'
       }
+    },
+    backButtonIsVisible () {
+      const spaceId = this.$store.state.prevSpaceIdInSession
+      return spaceId && spaceId !== this.currentSpace.id
     }
   },
   methods: {
@@ -206,10 +212,10 @@ export default {
     closeDialogs () {
       this.addSpaceIsVisible = false
       this.spaceFiltersIsVisible = false
-      this.$store.commit('triggerSpaceDetailsCloseDialogs')
+      this.$store.commit('triggerCloseChildDialogs')
     },
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space })
+      this.$store.dispatch('currentSpace/changeSpace', space)
       this.$store.dispatch('closeAllDialogs')
       this.closeDialogs()
     },
@@ -243,20 +249,26 @@ export default {
       spaces = inboxSpaces.concat(spaces)
       return spaces
     },
+    removeSpaceFromSpaces (spaceId) {
+      this.spaces = this.spaces.filter(space => space.id !== spaceId)
+      if (!utils.arrayHasItems(this.remoteSpaces)) { return }
+      this.remoteSpaces = this.remoteSpaces.filter(space => space.id !== spaceId)
+    },
     updateLocalSpaces () {
       if (!this.visible) { return }
       this.debouncedUpdateLocalSpaces()
     },
     debouncedUpdateLocalSpaces: debounce(async function () {
       this.$nextTick(() => {
-        let userSpaces = cache.getAllSpaces().filter(space => {
+        let cacheSpaces = cache.getAllSpaces().filter(space => {
           return this['currentUser/canEditSpace'](space)
         })
-        userSpaces = this.updateWithExistingRemoteSpaces(userSpaces)
-        userSpaces = this.sortSpacesByEditedOrCreatedAt(userSpaces)
-        userSpaces = this.updateFavoriteSpaces(userSpaces)
-        userSpaces = this.updateInboxSpace(userSpaces)
-        this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, this.currentUser)
+        let spaces = this.updateWithExistingRemoteSpaces(cacheSpaces)
+        spaces = this.sortSpacesByEditedOrCreatedAt(spaces)
+        spaces = this.updateFavoriteSpaces(spaces)
+        spaces = this.updateInboxSpace(spaces)
+        spaces = utils.clone(spaces)
+        this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(spaces, this.currentUser)
       })
     }, 350, { leading: true }),
     removeRemovedCachedSpaces (remoteSpaces) {
@@ -266,11 +278,11 @@ export default {
         cache.deleteSpace(spaceToRemove)
       })
     },
-    updateWithExistingRemoteSpaces (userSpaces) {
-      if (!utils.arrayExists(this.remoteSpaces)) { return userSpaces }
-      let spaces = userSpaces
+    updateWithExistingRemoteSpaces (cacheSpaces) {
+      if (!utils.arrayHasItems(this.remoteSpaces)) { return cacheSpaces }
+      let spaces = cacheSpaces
       this.remoteSpaces.forEach(space => {
-        const spaceExists = userSpaces.find(userSpace => userSpace.id === space.id)
+        const spaceExists = cacheSpaces.find(userSpace => userSpace.id === space.id)
         if (!spaceExists) {
           spaces.push(space)
         }
@@ -368,6 +380,7 @@ export default {
         this.updateFavorites()
         this.updateHeights()
         this.$store.commit('shouldExplicitlyHideFooter', true)
+        this.$store.dispatch('currentSpace/createSpacePreviewImage')
       } else {
         this.$store.commit('shouldExplicitlyHideFooter', false)
       }
@@ -378,6 +391,8 @@ export default {
 
 <style lang="stylus">
 dialog.space-details
+  &.back-button-is-visible
+    left -18px
   button.disabled
     opacity 0.5
     pointer-events none
@@ -392,7 +407,7 @@ dialog.space-details
     border-radius 100px
     margin-left 3px
   &.is-pinned
-    left -65px
+    left -45px
     top -13px
   .space-list
     .inline-favorite-wrap

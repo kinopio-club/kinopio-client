@@ -1,11 +1,75 @@
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import utils from '@/utils.js'
+
+import last from 'lodash-es/last'
+import randomColor from 'randomcolor'
+
+const store = useStore()
+
+const dialogElement = ref(null)
+
+const props = defineProps({
+  visible: Boolean,
+  selectedConnections: Array,
+  selectedConnectionTypes: Array
+})
+
+const state = reactive({
+  nextConnectionTypeColor: ''
+})
+
+// dialog
+
+watch(() => props.visible, async (value, prevValue) => {
+  await nextTick()
+  if (value) {
+    scrollIntoView()
+    updateNextConnectionColor()
+  }
+})
+const scrollIntoView = () => {
+  const element = dialogElement.value
+  utils.scrollIntoView({ element })
+}
+
+// types
+
+const connectionTypes = computed(() => store.getters['currentConnections/allTypes'])
+const changeConnectionTypes = (type) => {
+  props.selectedConnections.forEach(connection => {
+    store.dispatch('currentConnections/update', {
+      id: connection.id,
+      connectionTypeId: type.id
+    })
+  })
+}
+const connectionTypeIsActive = (type) => {
+  return props.selectedConnections.find(connection => {
+    return connection.connectionTypeId === type.id
+  })
+}
+const addConnectionType = () => {
+  store.dispatch('currentConnections/addType', { color: state.nextConnectionTypeColor })
+  const types = utils.clone(connectionTypes.value)
+  const newType = last(types)
+  changeConnectionTypes(newType)
+  updateNextConnectionColor()
+}
+const updateNextConnectionColor = () => {
+  state.nextConnectionTypeColor = randomColor({ luminosity: 'light' })
+}
+</script>
+
 <template lang="pug">
-dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="dialog" @click.left.stop)
+dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop)
   section.results-actions
     button(@click.left="addConnectionType")
       img.icon(src="@/assets/add.svg")
-      .badge.badge-in-button(:style="{backgroundColor: nextConnectionTypeColor}")
+      .badge.badge-in-button(:style="{backgroundColor: state.nextConnectionTypeColor}")
       span Type
-
   section.results-section
     ul.results-list
       template(v-for="type in connectionTypes" :key="type.id")
@@ -13,71 +77,6 @@ dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="di
           .badge(:style="{backgroundColor: type.color}")
           .name {{type.name}}
 </template>
-
-<script>
-import utils from '@/utils.js'
-
-import last from 'lodash-es/last'
-import randomColor from 'randomcolor'
-
-export default {
-  name: 'MultipleConnectionsPicker',
-  props: {
-    visible: Boolean,
-    selectedConnections: Array,
-    selectedConnectionTypes: Array
-  },
-  data () {
-    return {
-      nextConnectionTypeColor: ''
-    }
-  },
-  computed: {
-    connectionTypes () {
-      return this.$store.getters['currentConnections/allTypes']
-    }
-  },
-  methods: {
-    changeConnectionTypes (type) {
-      this.selectedConnections.forEach(connection => {
-        this.$store.dispatch('currentConnections/update', {
-          id: connection.id,
-          connectionTypeId: type.id
-        })
-      })
-    },
-    connectionTypeIsActive (type) {
-      return this.selectedConnections.find(connection => {
-        return connection.connectionTypeId === type.id
-      })
-    },
-    addConnectionType () {
-      this.$store.dispatch('currentConnections/addType', { color: this.nextConnectionTypeColor })
-      const types = utils.clone(this.connectionTypes)
-      const newType = last(types)
-      this.changeConnectionTypes(newType)
-      this.updateNextConnectionColor()
-    },
-    scrollIntoView () {
-      const element = this.$refs.dialog
-      utils.scrollIntoView(element)
-    },
-    updateNextConnectionColor () {
-      this.nextConnectionTypeColor = randomColor({ luminosity: 'light' })
-    }
-  },
-  watch: {
-    visible (visible) {
-      this.$nextTick(() => {
-        if (visible) {
-          this.scrollIntoView()
-          this.updateNextConnectionColor()
-        }
-      })
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .multiple-connections-picker

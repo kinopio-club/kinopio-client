@@ -20,7 +20,7 @@
     //- Name
     .textarea-wrap(:class="{'full-width': shouldHidePin}")
       textarea.name(
-        :disabled="!isSpaceMember"
+        :readonly="!isSpaceMember"
         ref="name"
         rows="1"
         placeholder="name"
@@ -32,19 +32,19 @@
 
   //- Pin Dialog
   .title-row(v-if="!shouldHidePin")
-    .button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
+    .button-wrap.title-row-small-button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
 
 ReadOnlySpaceInfoBadges
 
 //- member options
-.row.align-items-top(v-if="isSpaceMember")
+.row(v-if="isSpaceMember")
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
   //- Pin Favorite
   .button-wrap
-    button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+    button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
       img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
       img.icon(v-else src="@/assets/heart-empty.svg")
   //- Settings
@@ -56,7 +56,7 @@ ReadOnlySpaceInfoBadges
 //- read only options
 .row(v-if="!isSpaceMember")
   //- Favorite
-  button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+  button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
     img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
     img.icon(v-else src="@/assets/heart-empty.svg")
   .button-wrap
@@ -68,12 +68,14 @@ ReadOnlySpaceInfoBadges
 template(v-if="settingsIsVisible")
   //- read only space settings
   section.subsection.space-settings(v-if="!isSpaceMember")
+    .row(v-if="!showInExplore")
+      AskToAddToExplore
     .row
       //- Duplicate
       .button-wrap
         button(@click.left="duplicateSpace")
           img.icon.add(src="@/assets/add.svg")
-          span Make a Copy
+          span Duplicate
       //- Export
       .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
@@ -83,11 +85,13 @@ template(v-if="settingsIsVisible")
   //- member space settings
   section.subsection.space-settings(v-if="isSpaceMember")
     .row
+      AddToExplore
+    .row
       //- Template
       .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
-        button.variable-length-content(:class="{ active: currentSpaceIsUserTemplate }")
+        button(:class="{ active: currentSpaceIsUserTemplate }")
           img.icon.templates(src="@/assets/templates.svg")
-          span Make Template
+          span Mark as Template
       //- Export
       .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
@@ -98,7 +102,7 @@ template(v-if="settingsIsVisible")
       .button-wrap
         button(@click.left="duplicateSpace")
           img.icon.add(src="@/assets/add.svg")
-          span Make a Copy
+          span Duplicate
     .row
       .button-wrap(v-if="isSpaceMember")
         .segmented-buttons
@@ -125,18 +129,22 @@ import PrivacyButton from '@/components/PrivacyButton.vue'
 import templates from '@/data/templates.js'
 import Export from '@/components/dialogs/Export.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
+import AddToExplore from '@/components/AddToExplore.vue'
+import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import cache from '@/cache.js'
 
 export default {
   name: 'SpaceDetailsInfo',
-  emits: ['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace'],
+  emits: ['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace', 'removeSpaceId'],
   components: {
     BackgroundPicker,
     BackgroundPreview,
     Loader,
     PrivacyButton,
     Export,
-    ReadOnlySpaceInfoBadges
+    ReadOnlySpaceInfoBadges,
+    AskToAddToExplore,
+    AddToExplore
   },
   props: {
     shouldHidePin: Boolean,
@@ -147,7 +155,7 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerSpaceDetailsCloseDialogs') {
+      if (mutation.type === 'triggerCloseChildDialogs') {
         this.closeDialogs()
       } else if (mutation.type === 'triggerFocusSpaceDetailsName') {
         this.$nextTick(() => {
@@ -195,6 +203,7 @@ export default {
         this.textareaSize()
         this.$store.dispatch('currentSpace/updateSpace', { name: newName })
         this.updateLocalSpaces()
+        this.$store.commit('triggerUpdateWindowTitle')
       }
     },
     currentSpace () { return this.$store.state.currentSpace },
@@ -263,17 +272,22 @@ export default {
         this.$store.dispatch('currentSpace/removeCurrentSpace')
         this.$store.commit('notifyCurrentSpaceIsNowRemoved', true)
       }
-      this.updateLocalSpaces()
-      this.changeToLastSpace()
+      this.$emit('removeSpaceId', currentSpaceId)
+      this.changeToPrevSpace()
+      this.$nextTick(() => {
+        this.updateLocalSpaces()
+      })
     },
-    changeToLastSpace () {
+    changeToPrevSpace () {
       let spaces = cache.getAllSpaces().filter(space => {
         return this.$store.getters['currentUser/canEditSpace'](space)
       })
       spaces = spaces.filter(space => space.id !== this.currentSpace.id)
-      if (spaces.length) {
-        const cachedSpace = this.$store.getters.cachedOrOtherSpaceById(this.currentUser.prevLastSpaceId)
-        this.$store.dispatch('currentSpace/changeSpace', { space: cachedSpace || spaces[0] })
+      const recentSpace = spaces[0]
+      if (this.$store.state.prevSpaceIdInSession) {
+        this.$store.dispatch('currentSpace/loadPrevSpaceInSession')
+      } else if (recentSpace) {
+        this.$store.dispatch('currentSpace/changeSpace', recentSpace)
       } else {
         this.$emit('addSpace')
       }
@@ -338,14 +352,14 @@ export default {
     align-items flex-start
     margin 0
     .textarea-wrap
-      width 170px
+      width 200px
       margin-bottom 6px
       &.full-width
-        width 170px
+        width 225px
       .textarea-loader
         position absolute
         right 0
-        top 5px
+        top 0
         .loader
           width 14px
           height 14px
@@ -384,11 +398,6 @@ export default {
 
   .background-preview-wrap
     margin-bottom 6px
-
-.row.align-items-top
-  align-items flex-start
-  .privacy-button
-    min-width 28px
 
 .space-settings
   .background-preview

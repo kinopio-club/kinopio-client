@@ -54,6 +54,7 @@ const removeResize = () => {
     @mousedown.left.stop="startResizing"
     @touchstart.stop="startResizing"
     @dblclick="removeResize"
+    title="Drag to Resize"
   )
     button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode}")
       img.resize-icon.icon(src="@/assets/resize-corner.svg")

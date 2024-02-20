@@ -8,7 +8,7 @@ img.image(v-else-if="Boolean(image)" :src="image" :class="{selected: isSelectedO
 </template>
 
 <script>
-// import utils from '@/utils.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'ImageOrVideo',
@@ -41,6 +41,7 @@ export default {
   },
   watch: {
     isInteractingWithItem (value) {
+      if (utils.isSafari()) { return } // fixes: safari hides video when pausing
       if (value) {
         this.pause()
       } else {

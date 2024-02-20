@@ -1,4 +1,5 @@
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import cache from '@/cache.js'
 import postMessage from '@/postMessage.js'
 // store modules
@@ -46,12 +47,14 @@ const store = createStore({
     shouldPreventNextFocusOnName: false,
     isEmbedMode: false,
     isAddPage: false,
-    isPricingHidden: false,
     disableViewportOptimizations: false, // for urlbox
     isPresentationMode: false,
     pricingIsVisible: false,
     userSettingsIsVisible: false,
+    offlineIsVisible: false,
     isFadingOutDuringTouch: false,
+    prevSpaceIdInSession: '',
+    outsideSpaceBackgroundColor: '',
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -65,8 +68,8 @@ const store = createStore({
     searchResultsCards: [],
     previousResultItem: {},
 
-    // reset password
-    resetPasswordApiKey: '',
+    // update password
+    updatePasswordApiKey: '',
     passwordResetIsVisible: false,
 
     // services
@@ -83,6 +86,7 @@ const store = createStore({
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
+    currentUserIsDraggingConnectionIdLabel: '',
 
     // box-selecting
     currentUserIsBoxSelecting: false,
@@ -148,7 +152,7 @@ const store = createStore({
     multipleConnectionsSelectedIds: [],
     previousMultipleBoxesSelectedIds: [],
 
-    // connecting
+    // connections
     currentConnectionStartCardIds: [],
     currentConnectionSuccess: {},
     currentConnectionCursorStart: {},
@@ -158,6 +162,8 @@ const store = createStore({
     remoteConnectionDetailsVisible: [],
     remoteCurrentConnections: [],
     currentCardConnections: [],
+    // connection labels
+    remoteUserDraggingConnectionLabel: [],
 
     // tags
     tagDetailsIsVisible: false,
@@ -169,7 +175,6 @@ const store = createStore({
     remoteTagsIsFetched: false,
 
     // other items (links)
-    otherSpaceDetailsIsVisible: false,
     otherCardDetailsIsVisible: false,
     otherItemDetailsPosition: {}, // x, y
     currentSelectedOtherItem: {},
@@ -178,13 +183,14 @@ const store = createStore({
     spaceDetailsIsPinned: false,
     sidebarIsPinned: false,
     searchIsPinned: false,
-    controlsSettingsIsPinned: false,
+    userSettingsIsPinned: false,
 
     // loading
     isLoadingSpace: false,
     isJoiningSpace: false, // broadcast
     isLoadingOtherItems: false,
     spaceUrlToLoad: '',
+    spaceReadOnlyKey: {}, //  { spaceId, key }
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
     isLoadingFavorites: false,
@@ -198,10 +204,10 @@ const store = createStore({
     shouldShowExploreOnLoad: false,
 
     // referral
-    validateUserReferral: '',
-    validateUserReferralBySpaceUser: false,
-    validateReferralByName: '',
-    validateReferralFromReferrerName: '',
+    validateUserReferralUserId: '',
+    shouldValidateUserReferralFromSpaceInvite: false,
+    validateAdvocateReferralName: '',
+    validateFromAdvocateReferralName: '',
 
     // notifications
     notifications: [],
@@ -220,6 +226,7 @@ const store = createStore({
     hasNotifiedPressAndHoldToDrag: false,
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
+    notifyThanksForUpgrading: false,
     notifyReferralSuccessUser: null,
     notifyEarnedCredits: false,
     notifyReferralSuccessReferrerName: null,
@@ -233,15 +240,17 @@ const store = createStore({
     filteredTagNames: [],
     spaceListFilterInfo: {},
 
-    // card list item options
-    cardListItemOptionsPosition: {}, // x, y
-    cardListItemOptionsCard: {},
-    cardListItemOptionsIsVisible: false,
-
     // session data
     otherUsers: [], // { id, name color }
     otherItems: { spaces: [], cards: [] },
-    otherTags: []
+    otherTags: [],
+
+    // codeblocks
+
+    codeLanguagePickerIsVisible: false,
+    codeLanguagePickerPosition: {}, // x, y
+    codeLanguagePickerCardId: ''
+
   },
   mutations: {
     resetPageSizes: (state) => {
@@ -249,6 +258,7 @@ const store = createStore({
       state.pageHeight = 0
     },
     updatePageSizes: (state, itemsRect) => {
+      if (!itemsRect) { return }
       const viewportWidth = utils.visualViewport().width
       let viewportHeight = utils.visualViewport().height
       state.viewportWidth = Math.round(viewportWidth)
@@ -281,6 +291,9 @@ const store = createStore({
       if (!state.searchIsPinned) {
         state.searchIsVisible = false
       }
+      if (!state.userSettingsIsPinned) {
+        state.userSettingsIsVisible = false
+      }
       state.multipleSelectedActionsIsVisible = false
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
@@ -288,15 +301,14 @@ const store = createStore({
       state.tagDetailsIsVisible = false
       state.tagDetailsIsVisibleFromTagList = false
       state.currentSelectedTag = {}
-      state.otherSpaceDetailsIsVisible = false
       state.otherCardDetailsIsVisible = false
       state.currentSelectedOtherItem = {}
       state.cardsWereDragged = false
       state.boxesWereDragged = false
       state.userDetailsIsVisible = false
-      state.cardListItemOptionsIsVisible = false
       state.pricingIsVisible = false
-      state.userSettingsIsVisible = false
+      state.codeLanguagePickerIsVisible = false
+      state.offlineIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -334,21 +346,21 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldShowExploreOnLoad = value
     },
-    validateUserReferral: (state, userId) => {
+    validateUserReferralUserId: (state, userId) => {
       utils.typeCheck({ value: userId, type: 'string' })
-      state.validateUserReferral = userId
+      state.validateUserReferralUserId = userId
     },
-    validateUserReferralBySpaceUser: (state, value) => {
+    shouldValidateUserReferralFromSpaceInvite: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.validateUserReferralBySpaceUser = value
+      state.shouldValidateUserReferralFromSpaceInvite = value
     },
-    validateReferralByName: (state, value) => {
+    validateAdvocateReferralName: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
-      state.validateReferralByName = value
+      state.validateAdvocateReferralName = value
     },
-    validateReferralFromReferrerName: (state, value) => {
+    validateFromAdvocateReferralName: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
-      state.validateReferralFromReferrerName = value
+      state.validateFromAdvocateReferralName = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
@@ -430,10 +442,6 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.isAddPage = value
     },
-    isPricingHidden: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', allowUndefined: true })
-      state.isPricingHidden = value
-    },
     disableViewportOptimizations: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', allowUndefined: true })
       state.disableViewportOptimizations = value
@@ -450,9 +458,24 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.userSettingsIsVisible = value
     },
+    offlineIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.offlineIsVisible = value
+    },
     isFadingOutDuringTouch: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.isFadingOutDuringTouch = value
+    },
+    prevSpaceIdInSession: (state, value) => {
+      if (value === state.prevSpaceIdInSession) {
+        state.prevSpaceIdInSession = ''
+      } else {
+        state.prevSpaceIdInSession = value
+      }
+    },
+    outsideSpaceBackgroundColor: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.outsideSpaceBackgroundColor = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -475,9 +498,9 @@ const store = createStore({
       state.searchResultsCards = []
       state.previousResultItem = {}
     },
-    resetPasswordApiKey: (state, apiKey) => {
+    updatePasswordApiKey: (state, apiKey) => {
       utils.typeCheck({ value: apiKey, type: 'string' })
-      state.resetPasswordApiKey = apiKey
+      state.updatePasswordApiKey = apiKey
     },
     passwordResetIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -518,18 +541,15 @@ const store = createStore({
     triggerPickerSelect: () => {},
     triggerUpdateNotifications: () => {},
     triggerSpaceZoomReset: () => {},
-    triggerSpaceZoomOut: (state, options) => {},
-    triggerSpaceZoomIn: (state, options) => {},
     triggerSpaceZoomOutMax: (state, options) => {},
     triggerUnloadPage: () => {},
     triggerShowNextSearchCard: () => {},
     triggerShowPreviousSearchCard: () => {},
     triggerMoreFiltersIsNotVisible: () => {},
-    triggerShowConnectionDetails: (state, options) => {},
+    triggerConnectionDetailsIsVisible: (state, options) => {},
     triggerUpdateWindowHistory: (state, options) => {},
-    triggerAddCard: () => {},
-    triggerCardDetailsCloseDialogs: () => {},
-    triggerSpaceDetailsCloseDialogs: () => {},
+    triggerAddCard: (state, options) => {},
+    triggerAddChildCard: (state, options) => {},
     triggerTemplatesIsVisible: () => {},
     triggerEarnCreditsIsVisible: () => {},
     triggerImportIsVisible: () => {},
@@ -540,22 +560,27 @@ const store = createStore({
     triggerRemovedIsVisible: () => {},
     triggerAIImagesIsVisible: () => {},
     triggerClearAllSpaceFilters: () => {},
-    triggerAddToInboxIsVisible: () => {},
     triggerScrollUserDetailsIntoView: () => {},
     triggerUpdateLockedItemButtonsPositions: () => {},
-    triggerUpdateBackground: () => {},
     triggerCenterZoomOrigin: () => {},
     triggerRemoveCardFromCardList: (state, card) => {},
     triggerUpdateTheme: () => {},
     triggerUserIsLoaded: () => {},
     triggerSearchScopeIsRemote: () => {},
     triggerSearchScopeIsLocal: () => {},
-    triggerShowExplore: () => {},
     triggerCardIdUpdatePastedName: (state, options) => {},
+    triggerExploreIsVisible: () => {},
     triggerDrawConnectionFrame: (state, event) => {},
     triggerCancelLocking: () => {},
     triggerUpdateOtherCard: (state, cardId) => {},
-    triggerControlsSettingsIsVisible: () => {},
+    triggerUpdateCardDetailsCardName: (state, options) => {},
+    triggerCloseChildDialogs: () => {},
+    triggerAddSpaceIsVisible: () => {},
+    triggerOfflineIsVisible: () => {},
+    triggerAppsAndExtensionsIsVisible: () => {},
+    triggerUpdateWindowTitle: () => {},
+    triggerRestoreSpaceRemoteComplete: () => {},
+    triggerCheckIfShouldNotifySpaceOutOfSync: () => {},
 
     // Used by extensions only
 
@@ -567,10 +592,6 @@ const store = createStore({
     shouldAddCard: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldAddCard = value
-    },
-    currentUserIsHoveringOverConnectionId: (state, connectionId) => {
-      utils.typeCheck({ value: connectionId, type: 'string' })
-      state.currentUserIsHoveringOverConnectionId = connectionId
     },
     currentUserIsHoveringOverCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
@@ -612,8 +633,12 @@ const store = createStore({
       state.embedIsVisibleForCardId = cardId
     },
 
-    // Connecting
+    // Connections
 
+    currentUserIsHoveringOverConnectionId: (state, connectionId) => {
+      utils.typeCheck({ value: connectionId, type: 'string' })
+      state.currentUserIsHoveringOverConnectionId = connectionId
+    },
     currentUserIsDrawingConnection: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsDrawingConnection = value
@@ -658,6 +683,16 @@ const store = createStore({
       connections = connections || []
       connections = connections.map(connection => connection.id)
       state.currentCardConnections = connections
+    },
+
+    // Connection Labels
+
+    updateRemoteUserDraggingConnectionLabel: (state, update) => {
+      state.remoteUserDraggingConnectionLabel = state.remoteUserDraggingConnectionLabel.filter(remoteUser => remoteUser.userId !== update.userId)
+      state.remoteUserDraggingConnectionLabel = state.remoteUserDraggingConnectionLabel.concat(update)
+    },
+    removeRemoteUserDraggingConnectionLabel: (state, update) => {
+      state.remoteUserDraggingConnectionLabel = state.remoteUserDraggingConnectionLabel.filter(remoteUser => remoteUser.userId !== update.userId)
     },
 
     // Painting
@@ -779,6 +814,10 @@ const store = createStore({
     currentUserIsPanning: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsPanning = value
+    },
+    currentUserIsDraggingConnectionIdLabel: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.currentUserIsDraggingConnectionIdLabel = value
     },
 
     // Dragging Cards
@@ -906,10 +945,6 @@ const store = createStore({
 
     // Link Details
 
-    otherSpaceDetailsIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.otherSpaceDetailsIsVisible = value
-    },
     otherCardDetailsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.otherCardDetailsIsVisible = value
@@ -937,9 +972,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.searchIsPinned = value
     },
-    controlsSettingsIsPinned: (state, value) => {
+    userSettingsIsPinned: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.controlsSettingsIsPinned = value
+      state.userSettingsIsPinned = value
     },
 
     // Connection Details
@@ -1227,6 +1262,10 @@ const store = createStore({
       utils.typeCheck({ value: spaceUrl, type: 'string' })
       state.spaceUrlToLoad = spaceUrl
     },
+    spaceReadOnlyKey: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
+      state.spaceReadOnlyKey = value
+    },
 
     // Notifications
 
@@ -1234,6 +1273,9 @@ const store = createStore({
       state.notifications = state.notifications.filter(item => item.message !== notification.message)
       notification.id = nanoid()
       state.notifications.push(notification)
+    },
+    removeNotificationByMessage: (state, message) => {
+      state.notifications = state.notifications.filter(item => item.message !== message)
     },
     removePreviousNotification: (state) => {
       const removableNotifications = state.notifications.filter(notification => notification.isPersistentItem === false)
@@ -1328,6 +1370,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyThanksForDonating = value
     },
+    notifyThanksForUpgrading: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.notifyThanksForUpgrading = value
+    },
     notifyReferralSuccessUser: (state, user) => {
       utils.typeCheck({ value: user, type: 'object' })
       state.notifyReferralSuccessUser = user
@@ -1394,20 +1440,6 @@ const store = createStore({
       state.spaceListFilterInfo = value
     },
 
-    // Card List Item Options
-    cardListItemOptionsPosition: (state, value) => {
-      utils.typeCheck({ value, type: 'object' })
-      state.cardListItemOptionsPosition = value
-    },
-    cardListItemOptionsCard: (state, value) => {
-      utils.typeCheck({ value, type: 'object' })
-      state.cardListItemOptionsCard = value
-    },
-    cardListItemOptionsIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.cardListItemOptionsIsVisible = value
-    },
-
     // Session Data
 
     updateOtherUsers: (state, updatedUser) => {
@@ -1448,10 +1480,40 @@ const store = createStore({
     otherTags: (state, remoteTags) => {
       remoteTags = uniqBy(remoteTags, 'name')
       state.otherTags = remoteTags
+    },
+
+    // Code Blocks
+
+    codeLanguagePickerIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.codeLanguagePickerIsVisible = value
+    },
+    codeLanguagePickerPosition: (state, position) => {
+      utils.typeCheck({ value: position, type: 'object' })
+      state.codeLanguagePickerPosition = position
+    },
+    codeLanguagePickerCardId: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      state.codeLanguagePickerCardId = cardId
     }
+
   },
 
   actions: {
+    isOnline: (context, isOnline) => {
+      utils.typeCheck({ value: isOnline, type: 'boolean' })
+      const prevIsOnline = context.state.isOnline
+      const reconnected = isOnline && !prevIsOnline
+      const disconnected = !isOnline && prevIsOnline
+      if (reconnected) {
+        context.commit('addNotification', { icon: 'offline', message: 'Reconnected to server', type: 'success' })
+        context.commit('isLoadingSpace', false)
+        context.commit('triggerCheckIfShouldNotifySpaceOutOfSync')
+      } else if (disconnected) {
+        // context.commit('addNotification', { icon: 'offline', message: 'Offline mode', type: 'info' })
+      }
+      context.commit('isOnline', isOnline)
+    },
     updateSpaceAndCardUrlToLoad: (context, path) => {
       const matches = utils.spaceAndCardIdFromPath(path)
       if (!matches) { return }
@@ -1461,7 +1523,6 @@ const store = createStore({
       context.commit('spaceUrlToLoad', matches.spaceUrl)
     },
     updatePageSizes: (context) => {
-      const padding = 250
       const cards = context.getters['currentCards/all']
       const boxes = context.getters['currentBoxes/all']
       let items = cards.concat(boxes)
@@ -1469,10 +1530,7 @@ const store = createStore({
         x: 0, y: 0, width: 500, height: 500
       })
       let itemsRect = utils.pageSizeFromItems(items)
-      itemsRect = {
-        width: itemsRect.width + padding,
-        height: itemsRect.height + padding
-      }
+      context.commit('resetPageSizes')
       context.commit('updatePageSizes', itemsRect)
     },
     checkIfItemShouldIncreasePageSize: (context, item) => {
@@ -1512,6 +1570,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteCardDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteBoxDetailsVisible' })
+      context.commit('passwordResetIsVisible', false)
     },
     toggleCardSelected: (context, cardId) => {
       const previousMultipleCardsSelectedIds = context.state.previousMultipleCardsSelectedIds
@@ -1650,9 +1709,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('searchIsPinned', value)
     },
-    controlsSettingsIsPinned: (context, value) => {
+    userSettingsIsPinned: (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      context.commit('controlsSettingsIsPinned', value)
+      context.commit('userSettingsIsPinned', value)
     },
 
     // scrolling and zoom
@@ -1670,10 +1729,27 @@ const store = createStore({
         origin = utils.pointBetweenTwoPoints(prevOrigin, origin)
         context.commit('zoomOrigin', origin)
       }
+    },
+    zoomSpace: (context, { shouldZoomIn, shouldZoomOut, speed }) => {
+      let percent
+      const currentPercent = context.state.spaceZoomPercent
+      if (shouldZoomIn) {
+        percent = currentPercent + speed
+      } else if (shouldZoomOut) {
+        percent = currentPercent - speed
+      } else {
+        return
+      }
+      percent = Math.max(percent, consts.spaceZoom.min)
+      percent = Math.min(percent, consts.spaceZoom.max)
+      context.commit('spaceZoomPercent', percent)
     }
-
   },
   getters: {
+    isSpacePage: (state) => {
+      if (window.location.pathname === '/add') { return }
+      return !state.isAddPage
+    },
     shouldScrollAtEdges: (state, getters) => (event) => {
       let isPainting
       if (event.touches) {
@@ -1712,6 +1788,10 @@ const store = createStore({
         return getters.otherSpaceById(spaceId)
       }
     },
+    spaceIsNotCached: (state) => (spaceId) => {
+      const spaceCardsCount = cache.space(spaceId).cards?.length
+      return Boolean(!spaceCardsCount)
+    },
     spaceZoomDecimal: (state) => {
       return state.spaceZoomPercent / 100
     },
@@ -1719,7 +1799,7 @@ const store = createStore({
       return 1 / getters.spaceZoomDecimal
     },
     isTouchDevice: (state) => {
-      return state.isTouchDevice || utils.isMobile()
+      return state.isTouchDevice || utils.isMobile() || consts.isSecureAppContext
     },
     zoomTransform: (state, getters) => {
       const zoom = getters.spaceZoomDecimal
@@ -1733,6 +1813,14 @@ const store = createStore({
     },
     isInteractingWithItem: (state) => {
       return state.currentUserIsDraggingCard || state.currentUserIsDrawingConnection || state.currentUserIsResizingCard || state.currentUserIsResizingBox || state.currentUserIsDraggingBox
+    },
+    isMultipleItemsSelected: (state) => {
+      return state.multipleCardsSelectedIds.length || state.multipleConnectionsSelectedIds.length || state.multipleBoxesSelectedIds.length
+    },
+    spaceShouldHaveBorderRadius: (state) => {
+      const isNativeApp = consts.isSecureAppContext
+      const isZoomedOut = state.spaceZoomPercent !== 100
+      if (isNativeApp || isZoomedOut) { return true }
     }
   },
 

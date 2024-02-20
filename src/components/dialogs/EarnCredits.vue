@@ -1,10 +1,10 @@
 <script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
+import { useStore } from 'vuex'
+
 import UserCredits from '@/components/UserCredits.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
-
-import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
-import { useStore } from 'vuex'
 const store = useStore()
 
 const props = defineProps({
@@ -18,8 +18,8 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const url = computed(() => {
-  if (store.state.currentUser.referrerName) {
-    return consts.kinopioDomain() + '/from/' + store.state.currentUser.referrerName
+  if (store.state.currentUser.advocateReferrerName) {
+    return consts.kinopioDomain() + '/from/' + store.state.currentUser.advocateReferrerName
   } else {
     return consts.kinopioDomain() + '/refer/' + store.state.currentUser.id
   }
@@ -47,13 +47,14 @@ const triggerSignUpOrInIsVisible = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.narrow.earn-credits(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section(v-if="visible")
     p Earn Credits
   section
     p
       span when someone you refer, or invite to a space, signs up. You'll both earn a{{' '}}
       span.badge.success ${{consts.referralCreditAmount}} credit
+      span that can be used on your monthly or yearly plan.
     .row
       p There's no limit on the amount of credits you can earn.
     template(v-if="currentUserIsSignedIn")
@@ -73,7 +74,7 @@ dialog.narrow.refer(v-if="visible" :open="visible" @click.left.stop ref="dialog"
 </template>
 
 <style lang="stylus">
-.refer
+.earn-credits
   overflow auto
   top calc(100% - 8px)
   left initial

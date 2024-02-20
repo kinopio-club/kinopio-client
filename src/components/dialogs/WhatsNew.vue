@@ -22,7 +22,7 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
       a(:href="item.url" target="_blank")
         article.badge.button-badge(:style="{ backgroundColor: item._meta.color }")
           //- media
-          template(v-if="item._meta.image")
+          template(v-if="item._meta.image && isOnline")
             img(:src="item._meta.image")
           template(v-else-if="item._meta.video")
             video(autoplay loop muted playsinline)
@@ -65,6 +65,9 @@ export default {
     return {
       dialogHeight: null
     }
+  },
+  computed: {
+    isOnline () { return this.$store.state.isOnline }
   },
   methods: {
     updateUserLastRead () {
@@ -111,24 +114,22 @@ export default {
       box-shadow 4px 4px 0 var(--heavy-shadow) !important
     &:active
       box-shadow var(--button-active-inset-shadow) !important
+    h1,
+    p.summary
+      color var(--primary-on-light-background)
+    img,
+    video
+      max-width 100%
+      border-radius var(--entity-radius)
+      margin-bottom 10px
+
   h1
     font-family var(--serif-font)
     font-size 16px
     font-weight normal
     text-decoration none
-    margin-top 10px
     margin-bottom 10px
+    margin-top 0
     &:hover
       text-decoration none
-  img,
-  video
-    max-width 100%
-    border-radius var(--entity-radius)
-  .icon.refresh
-    margin 0
-    height 11px
-    vertical-align 0
-
-  // .new-unread-badge
-  //   display inline-block
 </style>

@@ -1,58 +1,61 @@
+<script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import backgroundImages from '@/data/backgroundImages.json'
+import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
+import utils from '@/utils.js'
+const store = useStore()
+
+const props = defineProps({
+  isButton: Boolean,
+  buttonIsActive: Boolean,
+  space: Object
+})
+
+const backgroundTintStyles = computed(() => {
+  const color = props.space.backgroundTint
+  if (color) {
+    return {
+      background: color
+    }
+  } else {
+    return {}
+  }
+})
+const backgroundStyles = computed(() => {
+  if (props.space.backgroundIsGradient) { return }
+  let background = props.space.background
+  const backgroundImage = backgroundImages.find(image => {
+    if (!background) {
+      return image.isBlank
+    }
+    const isImage = image.url === background
+    const hasThumbnailUrl = image.thumbnailUrl
+    return isImage && hasThumbnailUrl
+  })
+  if (backgroundImage) {
+    background = backgroundImage.thumbnailUrl || background
+  }
+  return {
+    backgroundImage: `url(${background})`
+  }
+})
+</script>
+
 <template lang="pug">
 .background-preview
   //- button
   .preview-button(v-if="isButton")
     .background-tint(:style="backgroundTintStyles")
-    button.background-button(:style="backgroundStyles" :class="{ active: buttonIsActive }")
+    button.background-button.fixed-height(:style="backgroundStyles" :class="{ active: buttonIsActive }")
+      SpaceBackgroundGradients(:visible="space.backgroundIsGradient" :layers="space.backgroundGradient")
   //- thumbnail
   .preview-wrap(v-else)
     .background-tint(:style="backgroundTintStyles")
     .background-image(:style="backgroundStyles")
+    SpaceBackgroundGradients(:visible="space.backgroundIsGradient" :layers="space.backgroundGradient")
 </template>
-
-<script>
-import backgroundImages from '@/data/backgroundImages.json'
-import utils from '@/utils.js'
-
-export default {
-  name: 'BackgroundPreview',
-  props: {
-    isButton: Boolean,
-    buttonIsActive: Boolean,
-    space: Object
-  },
-  computed: {
-    backgroundTintStyles () {
-      const color = this.space.backgroundTint
-      if (color) {
-        return {
-          background: color
-        }
-      } else {
-        return {}
-      }
-    },
-    backgroundStyles () {
-      const defaultBackgroundThumbnail = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg'
-      let background = this.space.background
-      const backgroundImage = backgroundImages.find(image => {
-        const isImage = image.url === background
-        const hasThumbnailUrl = image.thumbnailUrl
-        return isImage && hasThumbnailUrl
-      })
-      if (backgroundImage) {
-        background = backgroundImage.thumbnailUrl || background
-      }
-      if (!utils.urlIsImage(background)) {
-        background = defaultBackgroundThumbnail
-      }
-      return {
-        backgroundImage: `url(${background})`
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .background-preview
@@ -76,6 +79,7 @@ export default {
     left 0
     mix-blend-mode multiply
     border-radius calc(var(--entity-radius) + 1)
+    z-index 1
   .background-image
     height 100%
     width 100%
@@ -108,5 +112,7 @@ export default {
     width 28px
     background-size cover
     background-position center
-
+    .space-background-gradients
+      top 0
+      left 0
 </style>

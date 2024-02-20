@@ -1,15 +1,18 @@
 <template lang="pug">
 article.card-wrap#card(
   v-if="isVisibleInViewport"
-  :style="positionStyle"
+  :style="articleStyle"
   :data-card-id="id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :data-is-visible-in-viewport="isVisibleInViewport"
   :data-is-locked="isLocked"
   :data-resize-width="resizeWidth"
+  :data-x="x"
+  :data-y="y"
   :key="id"
   ref="card"
   :class="{'is-resizing': currentUserIsResizingCard, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
+  :title="cardNameIfComment"
 )
   .card(
     @mousedown.left.prevent="startDraggingCard"
@@ -58,7 +61,7 @@ article.card-wrap#card(
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
 
     //- Content
-    span.card-content-wrap
+    span.card-content-wrap(:style="cardContentWrapStyles")
       //- Comment
       .card-comment(v-if="isComment")
         //- [·]
@@ -82,7 +85,7 @@ article.card-wrap#card(
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
           //- Name
-          p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
+          p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id")
             Loader(:visible="isLoadingUrlPreview")
@@ -98,7 +101,7 @@ article.card-wrap#card(
               img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
           //- Url →
-          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible, 'is-hidden-by-opacity': isPresentationMode}" target="_blank")
+          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}" target="_blank")
             .url.inline-button-wrap
               button.inline-button(:style="{background: itemBackground}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -128,7 +131,7 @@ article.card-wrap#card(
                 img.connector-icon(src="@/assets/connector-closed-in-card.svg")
               //- template(v-else)
               //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || otherCardIsVisible" :class="{'is-image-card': isImageCard}")
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="cardUrlPreviewIsVisible")
         UrlPreviewCard(
           :visible="true"
@@ -142,7 +145,22 @@ article.card-wrap#card(
           :backgroundColor="backgroundColor"
         )
       template(v-if="otherCardIsVisible")
-        OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldCloseAllDialogs="true")
+        OtherCardPreview(
+          :otherCard="otherCard"
+          :url="otherCardUrl"
+          :parentCardId="card.id"
+          :shouldCloseAllDialogs="true"
+          :isSelected="isSelectedOrDragging"
+          :selectedColor="selectedColor"
+        )
+      template(v-else-if="otherSpaceIsVisible")
+        OtherSpacePreviewCard(
+          :otherSpace="otherSpace"
+          :url="otherSpaceUrl"
+          :card="card"
+          :isSelected="isSelectedOrDragging"
+          :selectedColor="selectedColor"
+        )
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -201,6 +219,7 @@ import NameSegment from '@/components/NameSegment.vue'
 import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
+import OtherSpacePreviewCard from '@/components/OtherSpacePreviewCard.vue'
 import CardCounter from '@/components/CardCounter.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
@@ -236,6 +255,7 @@ export default {
     ImageOrVideo,
     NameSegment,
     UrlPreviewCard,
+    OtherSpacePreviewCard,
     UserLabelInline,
     OtherCardPreview,
     CardCounter,
@@ -252,7 +272,7 @@ export default {
       } else if (type === 'triggerScrollCardIntoView') {
         if (payload === this.card.id) {
           const element = this.$refs.card
-          utils.scrollIntoView(element)
+          utils.scrollIntoView({ element })
         }
       } else if (type === 'triggerUploadComplete') {
         let { cardId, url } = payload
@@ -278,19 +298,11 @@ export default {
       this.$store.commit('preventCardDetailsOpeningAnimation', false)
       this.$store.dispatch('currentCards/showCardDetails', this.card.id)
     }
-    if (this.card.shouldUpdateUrlPreview) {
-      this.updateMediaUrls()
-      const isUpdatedSuccess = await this.updateUrlPreview()
-      this.$store.dispatch('currentCards/update', {
-        id: this.card.id,
-        shouldUpdateUrlPreview: false
-      })
-      if (isUpdatedSuccess) {
-        this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
-      }
-    }
+    await this.updateUrlPreviewOnload()
     this.updateCardDimensions()
     this.checkIfShouldUpdatePreviewHtml()
+    const defaultCardMaxWidth = this.$store.getters['currentCards/defaultCardMaxWidth'] + 'px'
+    utils.setCssVariable('card-width', defaultCardMaxWidth)
   },
   data () {
     return {
@@ -394,19 +406,44 @@ export default {
       'spaceCounterZoomDecimal',
       'spaceZoomDecimal'
     ]),
+    cardNameIfComment () {
+      if (!this.isComment) { return }
+      return this.card.name
+    },
     isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
+    hasTextSegments () {
+      return this.nameSegments.find(segment => segment.isText && segment.content)
+    },
     isImageCard () { return Boolean(this.formats.image || this.formats.video) },
     isDarkInLightTheme () { return this.backgroundColorIsDark && !this.isThemeDark },
     isLightInDarkTheme () { return !this.backgroundColorIsDark && this.isThemeDark },
     urlPreviewImageIsVisible () {
       return Boolean(this.cardUrlPreviewIsVisible && this.card.urlPreviewImage && !this.card.shouldHideUrlPreviewImage)
     },
+
+    // other card
+
     otherCardIsVisible () { return Boolean(this.card.linkToCardId) },
     otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
     otherCard () {
       const card = this.$store.getters.otherCardById(this.card.linkToCardId)
       return card
     },
+
+    // other space
+
+    otherSpaceIsVisible () { return Boolean(this.card.linkToSpaceId) },
+    otherSpace () {
+      let isInviteLink, collaboratorKey, readOnlyKey
+      let space = this.nameSegments.find(segment => segment.otherSpace)
+      if (!space) { return }
+      return space.otherSpace
+    },
+    otherSpaceUrl () {
+      let segment = this.nameSegments.find(segment => segment.otherSpace)
+      return segment?.name
+    },
+
     isConnectorDarkInLightTheme () {
       if (this.connectionTypeColorisDark) { return this.connectionTypeColorisDark }
       return this.isDarkInLightTheme
@@ -423,6 +460,7 @@ export default {
       return this.selectedColor || this.remoteSelectedColor || background
     },
     connectorButtonBackground () {
+      if (this.currentUserIsDraggingCard) { return }
       if (this.hasConnections || this.isConnectingFrom || this.isConnectingTo) { return }
       return this.itemBackground
     },
@@ -455,10 +493,12 @@ export default {
       return isLocked
     },
     shouldJiggle () {
-      const shouldDisableItemJiggle = this.currentUser.shouldDisableItemJiggle
-      const manyCardsSelected = this.multipleCardsSelectedIds.length > 10
+      const max = 500
+      const cardIsTooBig = this.width > max || this.card.height > max
+      if (cardIsTooBig) { return }
+      const isMultipleItemsSelected = this.$store.getters.isMultipleItemsSelected
       const isShiftKeyDown = this.currentUserIsBoxSelecting
-      if (isShiftKeyDown || shouldDisableItemJiggle || manyCardsSelected) { return }
+      if (isMultipleItemsSelected || isShiftKeyDown) { return }
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
     isSelectedOrDragging () {
@@ -494,9 +534,9 @@ export default {
     },
     connectionTypes () { return this['currentConnections/typesByCardId'](this.id) },
     connectionTypeColorisDark () {
-      const lastType = this.connectionTypes[this.connectionTypes.length - 1]
-      if (!lastType) { return }
-      return utils.colorIsDark(lastType.color)
+      const type = this.connectionTypes[this.connectionTypes.length - 1]
+      if (!type) { return }
+      return utils.colorIsDark(type.color)
     },
     name () {
       this.updateMediaUrls()
@@ -521,7 +561,6 @@ export default {
       return this.isLocked || (this.cardButtonUrl && !this.isComment) || this.connectorIsVisible
     },
     connectorIsVisible () {
-      if (this.isPresentationMode && !this.hasConnections) { return }
       const spaceIsOpen = this.currentSpace.privacy === 'open' && this['currentUser/isSignedIn']
       let isVisible
       if (this.isRemoteConnecting) {
@@ -568,6 +607,8 @@ export default {
     shouldNotStick () {
       if (!this.currentUser.shouldUseStickyCards) { return true }
       if (this.embedIsVisible) { return true }
+      if (this.$store.state.codeLanguagePickerIsVisible) { return true }
+      if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return true }
       const userIsConnecting = this.currentConnectionStartCardIds.length
       const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
@@ -599,7 +640,7 @@ export default {
       let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || this.card.backgroundColor
       return color
     },
-    positionStyle () {
+    articleStyle () {
       let z = this.card.z
       let pointerEvents = 'auto'
       if (this.currentCardDetailsIsVisible) {
@@ -612,8 +653,10 @@ export default {
         left: `${this.x}px`,
         top: `${this.y}px`,
         zIndex: z,
-        pointerEvents,
-        transform: `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
+        pointerEvents
+      }
+      if (!this.currentUserIsDraggingCard) {
+        styles.transform = `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
       }
       styles = this.updateStylesWithWidth(styles)
       return styles
@@ -640,14 +683,36 @@ export default {
       if (this.isLocked) {
         styles = { marginRight: '2px' }
       }
+      if (this.isAudioCard) {
+        styles.width = '100%'
+      }
+      return styles
+    },
+    cardContentWrapStyles () {
+      let styles = {}
+      if (this.resizeWidth) {
+        styles.maxWidth = this.resizeWidth
+        styles.width = this.resizeWidth
+      }
+      styles.width = styles.width + 'px'
+      styles.maxWidth = styles.maxWidth + 'px'
       return styles
     },
     backgroundColorIsDark () {
       const color = this.backgroundColor || this.defaultColor
       return utils.colorIsDark(color)
     },
+    currentUserIsDraggingLabelConnectedToCard () {
+      const connectionId = this.$store.state.currentUserIsDraggingConnectionIdLabel
+      if (!connectionId) { return }
+      const connection = this['currentConnections/byId'](connectionId)
+      if (!connection) { return }
+      const isConnected = connection.startCardId === this.id || connection.endCardId === this.id
+      return isConnected
+    },
     connectorGlowStyle () {
-      const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor || this.currentUserIsHoveringOverCardIdColor
+      if (this.currentUserIsDraggingCard) { return }
+      const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor || this.currentUserIsHoveringOverCardIdColor || this.currentUserIsMultipleSelectedCardIdColor || this.currentUserIsHoveringOverConnectionIdColor || this.currentUserIsMultipleSelectedConnectionIdColor
       if (!color) { return }
       return { background: color }
     },
@@ -695,19 +760,20 @@ export default {
       return connectionType.color
     },
     currentUserIsHoveringOverCardIdColor () {
-      const hoveringOverCardId = this.currentUserIsHoveringOverCardId
-      if (!hoveringOverCardId) { return }
-      let connections = this['currentConnections/all']
-      connections = connections.filter(connection => connection.startCardId === hoveringOverCardId || connection.endCardId === hoveringOverCardId)
-      connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
-      const connection = connections[0]
-      if (!connection) { return }
-      const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
-      if (!connectionType) {
-        const newType = this.updateTypeForConnection(connection.id)
-        return newType.color
-      }
-      return connectionType.color
+      const cardId = this.currentUserIsHoveringOverCardId
+      return this.connectionColorForCardIds([cardId])
+    },
+    currentUserIsMultipleSelectedCardIdColor () {
+      const cardIds = this.multipleCardsSelectedIds
+      return this.connectionColorForCardIds(cardIds)
+    },
+    currentUserIsHoveringOverConnectionIdColor () {
+      const connectionId = this.$store.state.currentUserIsHoveringOverConnectionId || this.$store.state.currentUserIsDraggingConnectionIdLabel
+      return this.connectionColorForConnectionIds([connectionId])
+    },
+    currentUserIsMultipleSelectedConnectionIdColor () {
+      const connectionIds = this.$store.state.multipleConnectionsSelectedIds
+      return this.connectionColorForConnectionIds(connectionIds)
     },
     updatedAt () { return this.card.nameUpdatedAt || this.card.createdAt },
     dateUpdatedAt () {
@@ -854,7 +920,7 @@ export default {
       let url = this.card.urlPreviewUrl
       url = utils.removeTrailingSlash(url)
       cardHasUrlPreviewInfo = Boolean(cardHasUrlPreviewInfo && url)
-      const nameHasUrl = this.card.name.includes(url)
+      const nameHasUrl = this.card.name?.includes(url)
       return (this.card.urlPreviewIsVisible && cardHasUrlPreviewInfo && nameHasUrl) && !this.isComment
       // return Boolean(this.card.urlPreviewIsVisible && this.card.urlPreviewUrl && cardHasUrlPreviewInfo) // && !isErrorUrl
     },
@@ -868,7 +934,7 @@ export default {
     isConnectingTo () {
       const connectingToId = this.currentConnectionSuccess.id
       if (connectingToId) {
-        postMessage.sendHaptics({ name: 'mediumImpact' })
+        postMessage.sendHaptics({ name: 'softImpact' })
       }
       return connectingToId === this.id
     },
@@ -877,10 +943,9 @@ export default {
     },
     isBeingDragged () {
       let isCardId
-      const multipleCardsSelectedIds = this.multipleCardsSelectedIds
       const currentDraggingCard = this.currentDraggingCardId
       const isDraggingCard = this.currentUserIsDraggingCard
-      if (multipleCardsSelectedIds.includes(this.id) || currentDraggingCard === this.id) {
+      if (this.isSelected || currentDraggingCard === this.id) {
         isCardId = true
       }
       return Boolean(isDraggingCard && isCardId)
@@ -1061,7 +1126,7 @@ export default {
       const isTextOnlyCard = this.normalizedName === this.card.name
       if (isTextOnlyCard) { isVisible = true }
       const threshold = 400 * this.spaceCounterZoomDecimal
-      const fallbackHeight = 200
+      const fallbackHeight = this.$store.getters['currentCards/defaultCardMaxWidth']
       const offset = utils.outsideSpaceOffset().y
       const scroll = (this.windowScroll.y - offset) * this.spaceCounterZoomDecimal
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
@@ -1088,6 +1153,8 @@ export default {
       card = utils.updateCardDimensions(card)
       if (!card) { return }
       this.$store.commit('currentCards/update', card)
+      this.$store.dispatch('currentCards/updateTallestCardHeight', card)
+      this.$store.dispatch('api/addToQueue', { name: 'updateCard', body: card })
     },
     correctPaths () {
       if (this.pathIsUpdated) { return }
@@ -1121,6 +1188,48 @@ export default {
     handleMouseLeave () {
       this.unstickToCursor()
       this.$store.commit('currentUserIsHoveringOverCardId', '')
+    },
+
+    // connector glow
+
+    createNewTypeIfNeeded () {
+      const typeIds = this.$store.state.currentConnections.typeIds
+      if (!typeIds.length) {
+        this.$store.dispatch('currentConnections/addType')
+      }
+    },
+    connectionColorForCardIds (cardIds) {
+      if (!cardIds.length) { return }
+      let color
+      this.createNewTypeIfNeeded()
+      cardIds.find(cardId => {
+        let connections = this['currentConnections/all']
+        connections = connections.filter(connection => connection.startCardId === cardId || connection.endCardId === cardId)
+        connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
+        connections = this.$store.getters['currentConnections/connectionsWithValidCards'](connections)
+        const connection = connections[0]
+        if (!connection) { return }
+        const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
+        if (!connectionType) {
+          const newType = this.updateTypeForConnection(connection.id)
+          return newType.color
+        }
+        color = connectionType.color
+      })
+      return color
+    },
+    connectionColorForConnectionIds (connectionIds) {
+      if (!connectionIds.length) { return }
+      let color
+      connectionIds.find(connectionId => {
+        const connection = this['currentConnections/byId'](connectionId)
+        if (!connection) { return }
+        const isCardConnected = this.$store.getters['currentConnections/isCardConnected'](this.card, connection)
+        if (!isCardConnected) { return }
+        const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
+        color = connectionType.color
+      })
+      return color
     },
 
     // sticky
@@ -1430,6 +1539,7 @@ export default {
       }
     },
     toggleCardChecked () {
+      if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return }
       if (this.preventDraggedCardFromShowingDetails) { return }
       if (!this.canEditSpace) { return }
       const value = !this.isChecked
@@ -1539,8 +1649,12 @@ export default {
     },
     updateStylesWithWidth (styles) {
       const cardHasExtendedContent = this.cardUrlPreviewIsVisible || this.otherCardIsVisible || this.isVisualCard || this.isAudioCard
+      const cardHasUrls = this.cardHasMedia || this.cardHasUrls
       if (this.width) {
         styles.width = this.width
+      }
+      if (cardHasUrls) {
+        styles.width = this.$store.getters['currentCards/defaultCardMaxWidth']
       }
       if (this.resizeWidth) {
         styles.maxWidth = this.resizeWidth
@@ -1602,8 +1716,10 @@ export default {
     },
     showCardDetails (event) {
       this.$store.dispatch('currentCards/afterMove')
+      if (this.cardDetailsIsVisibleForCardId) { return }
       if (this.isLocked) { return }
       if (this.currentUserIsPainting) { return }
+      if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return }
       if (isMultiTouch) { return }
       if (this.currentUserIsPanningReady || this.currentUserIsPanning) { return }
       if (this.currentUserIsResizingBox || this.currentUserIsDraggingBox) { return }
@@ -1694,7 +1810,7 @@ export default {
         this.changeSpaceAndCard(spaceId, cardId)
       } else {
         const space = { id: spaceId }
-        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+        this.$store.dispatch('currentSpace/changeSpace', space)
       }
       this.$store.dispatch('closeAllDialogs')
     },
@@ -1704,7 +1820,7 @@ export default {
       if (currentSpaceId !== spaceId) {
         this.$store.commit('loadSpaceShowDetailsForCardId', cardId)
         const space = { id: spaceId }
-        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+        this.$store.dispatch('currentSpace/changeSpace', space)
       // card in current space
       } else {
         this.$nextTick(() => {
@@ -1732,7 +1848,7 @@ export default {
       if (isDrawingConnection) { return }
       const hasNotified = this.hasNotifiedPressAndHoldToDrag
       if (!hasNotified) {
-        this.$store.commit('addNotification', { message: 'Press and hold to drag cards', icon: 'press-and-hold' })
+        this.$store.commit('addNotification', { message: 'Press and hold to drag', icon: 'press-and-hold' })
       }
       this.$store.commit('hasNotifiedPressAndHoldToDrag', true)
     },
@@ -1900,9 +2016,31 @@ export default {
 
     // url preview
 
-    async updateUrlPreview () {
+    async updateUrlPreviewOnload () {
+      if (!this.card.shouldUpdateUrlPreview) { return }
+      this.updateMediaUrls()
+      const isUpdatedSuccess = await this.updateUrlPreview()
+      this.$store.dispatch('currentCards/update', {
+        id: this.card.id,
+        shouldUpdateUrlPreview: false
+      })
+      if (isUpdatedSuccess) {
+        this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
+      }
+    },
+    updateUrlPreview () {
+      const isOffline = !this.$store.state.isOnline
       if (this.preventUpdatePrevPreview) { return }
-      // if (!this.canEditCard) { return }
+      if (isOffline) {
+        this.$store.dispatch('currentCards/update', {
+          id: this.card.id,
+          shouldUpdateUrlPreview: true
+        })
+      } else {
+        this.updateUrlPreviewOnline()
+      }
+    },
+    async updateUrlPreviewOnline () {
       this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
       const cardId = this.card.id
       let url = this.webUrl
@@ -1941,6 +2079,7 @@ export default {
       this.updateUrlPreview()
     },
     shouldUpdateUrlPreview (url) {
+      if (this.card.shouldUpdateUrlPreview) { return true }
       const previewIsVisible = this.card.urlPreviewIsVisible
       const isNotPreviewUrl = url !== this.card.urlPreviewUrl
       const isNotErrorUrl = url !== this.card.urlPreviewErrorUrl
@@ -1951,10 +2090,10 @@ export default {
     nameIncludesUrl (url) {
       const name = this.card.name
       const normalizedUrl = utils.removeTrailingSlash(url)
-      return name.includes(url) || name.includes(normalizedUrl)
+      return name.includes(url) || name.includes(normalizedUrl) || normalizedUrl.includes(name)
     },
     previewImage ({ thumbnail }) {
-      const minWidth = 200
+      const minWidth = this.$store.getters['currentCards/defaultCardMaxWidth']
       if (!thumbnail) { return '' }
       let image = thumbnail.find(item => {
         let shouldSkipImage = false
@@ -2024,7 +2163,6 @@ export default {
 
 <style lang="stylus">
 article.card-wrap
-  --card-width 200px
   pointer-events all
   position absolute
   max-width var(--card-width)
@@ -2074,7 +2212,6 @@ article.card-wrap
 
     .card-content
       min-width 28px
-      width 100%
       margin-right 8px
     .card-comment
       margin-right 8px
@@ -2121,6 +2258,7 @@ article.card-wrap
         align-self stretch
         word-break break-word
         white-space pre-line
+        width 100%
         &.is-checked
           text-decoration line-through
           h1,
@@ -2218,7 +2356,7 @@ article.card-wrap
       position absolute
       left -1px
       top -1px
-      width 10px
+      width 9.5px
 
     .resize-icon
       position absolute
@@ -2336,6 +2474,7 @@ article.card-wrap
     position absolute
     .user-label-inline
       margin-right 0
+      width max-content
     .user-badge
       display flex
       margin 0

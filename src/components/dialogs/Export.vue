@@ -4,13 +4,13 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     p Export
   section
     .row
+      button(@click.left="duplicateSpace")
+        img.icon(src="@/assets/add.svg")
+        span Duplicate this Space
+    .row
       button(@click.left="copyText")
         img.icon.copy(src="@/assets/copy.svg")
         span Copy All Card Names
-    .row
-      button(@click.left="duplicateSpace")
-        img.icon(src="@/assets/add.svg")
-        span Make a Copy
     .row(v-if="spaceIsDuplicated")
       span.badge.success Space copied
 
@@ -36,8 +36,8 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     template(v-if="currentUserIsSignedIn")
       p
         span Backup All
-      button.variable-length-content(@click.left="downloadAllSpacesRemote" :class="{ active: isLoadingAllSpaces }")
-        span Download all Spaces (JSON and TXT)
+      button(@click.left="downloadAllSpacesRemote" :class="{ active: isLoadingAllSpaces }")
+        span Download All Spaces (JSON and TXT)
         Loader(:visible="isLoadingAllSpaces")
     a#export-downlaod-anchor.hidden
     .info-container(v-if="isLoadingAllSpaces")
@@ -101,7 +101,9 @@ export default {
       }
     },
     downloadLocalJSON () {
-      const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.currentSpace))
+      let currentSpace = utils.clone(this.currentSpace)
+      delete currentSpace.clients
+      const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(currentSpace))
       const fileName = this.fileName()
       const downloadAnchor = document.getElementById('export-downlaod-anchor')
       downloadAnchor.setAttribute('href', json)
@@ -131,7 +133,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
     },
     duplicateSpace () {
       this.$store.dispatch('currentSpace/duplicateSpace')
@@ -196,6 +198,4 @@ export default {
     display none
   .info-container
     margin-top 10px
-  .url-textarea
-    max-height 100px
 </style>

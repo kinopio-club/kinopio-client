@@ -320,6 +320,18 @@ export default {
     })
   },
 
+  // Add Page
+
+  prevAddPageValue () {
+    return window.localStorage['prevAddPageValue'] || ''
+  },
+  updatePrevAddPageValue (value) {
+    this.storeLocal(`prevAddPageValue`, value)
+  },
+  clearPrevAddPageValue (value) {
+    this.storeLocal(`prevAddPageValue`, '')
+  },
+
   // API Queue
 
   queue () {
@@ -371,15 +383,5 @@ export default {
       return invitedSpace.id !== space.id
     })
     this.storeLocal('invitedSpaces', invitedSpaces)
-  },
-
-  // Billing
-
-  saveStripeIds (stripeIds) {
-    this.storeLocal('stripeIds', stripeIds)
   }
-  // stripeIds () {
-  //   return this.getLocal('stripeIds')
-  // },
-
 }

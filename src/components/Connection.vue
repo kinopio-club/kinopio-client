@@ -1,6 +1,6 @@
 <template lang="pug">
 template(v-if="isVisibleInViewport")
-  g.connection
+  g.connection(v-if="visible" :style="connectionStyles")
     path.connection-path(
       fill="none"
       :stroke="typeColor"
@@ -11,8 +11,9 @@ template(v-if="isVisibleInViewport")
       :data-type-name="typeName"
       :data-type-id="connectionTypeId"
       :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
+      :data-label-is-visible="connection.labelIsVisible"
       :key="id"
-      :d="path"
+      :d="connectionPath"
       @mousedown.left="startDraggingConnection"
       @touchstart="startDraggingConnection"
       @mouseup.left="showConnectionDetails"
@@ -20,10 +21,13 @@ template(v-if="isVisibleInViewport")
       @keyup.stop.backspace="removeConnection"
       @keyup.stop.enter="showConnectionDetailsOnKeyup"
       :class="connectionClasses"
-      ref="connection"
+      ref="connectionElement"
       tabindex="0"
       @dragover.prevent
       @drop.prevent.stop="addCardsAndUploadFiles"
+
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
     )
 
   defs
@@ -32,7 +36,7 @@ template(v-if="isVisibleInViewport")
       stop(offset="90%" :stop-color="typeColor")
 
   circle(v-if="directionIsVisible && !isUpdatingPath && isVisibleInViewport" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}")
-    animateMotion(dur="3s" repeatCount="indefinite" :path="path" rotate="auto")
+    animateMotion(dur="3s" repeatCount="indefinite" :path="connectionPath" rotate="auto")
 </template>
 
 <script>
@@ -45,7 +49,8 @@ let animationTimer, isMultiTouch, startCursor, currentCursor
 export default {
   name: 'Connection',
   props: {
-    connection: Object
+    connection: Object,
+    isRemote: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -57,9 +62,7 @@ export default {
         }
       } else if (mutation.type === 'currentCards/move') {
         this.cancelAnimation()
-      } else if (mutation.type === 'currentConnections/remove') {
-        this.controlCurve = undefined
-      } else if (mutation.type === 'triggerShowConnectionDetails') {
+      } else if (mutation.type === 'triggerConnectionDetailsIsVisible') {
         if (mutation.payload.connectionId === this.id) {
           const isFromStore = true
           this.showConnectionDetails(mutation.payload.event, isFromStore)
@@ -69,7 +72,6 @@ export default {
   },
   data () {
     return {
-      controlCurve: undefined,
       curvedPath: '',
       frameCount: 0
     }
@@ -105,9 +107,17 @@ export default {
       'currentCards/byId',
       'spaceCounterZoomDecimal'
     ]),
+    visible () {
+      if (this.isRemote) { return true }
+      return this.cards.startCard && this.cards.endCard
+    },
+    connectionStyles () {
+      if (!this.currentUserIsDraggingCard) { return }
+      return { pointerEvents: 'none' }
+    },
     connectionClasses () {
       return {
-        active: this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected || this.isCurrentCardConnection,
+        active: this.isActive,
         filtered: this.isFiltered,
         hover: this.isHovered,
         'hide-connection-outline': this.shouldHideConnectionOutline,
@@ -147,15 +157,7 @@ export default {
     connectionPath () { return this.connection.path },
     remoteCardsIsDragging () { return Boolean(this.remoteCardsDragging.length) },
     path () {
-      let path
-      if (this.controlCurve) {
-        const { controlPoint, x, y } = this.controlCurve
-        path = this.curvedPath || this.connection.path
-        path = this.updatedPath(path, controlPoint, x, y)
-      } else {
-        path = this.connection.path
-      }
-      return path
+      return this.connection.path
     },
     typeColor () {
       if (!this.connectionType) { return }
@@ -189,7 +191,33 @@ export default {
       if (this.currentUserIsDraggingCard) { return }
       return Boolean(this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected)
     },
-    isHovered () { return this.id === this.currentUserIsHoveringOverConnectionId },
+    isDraggingCurrentConnectionLabel () {
+      const connectionId = this.$store.state.currentUserIsDraggingConnectionIdLabel
+      if (!connectionId) { return }
+      const connection = this.$store.getters['currentConnections/byId'](connectionId)
+      if (!connection) { return }
+      return connection.id === this.id
+    },
+    isActive () {
+      if (!this.isDraggingCurrentConnectionLabel) { return }
+      return this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected || this.isCurrentCardConnection || this.isConnectedToMultipleCardsSelected
+    },
+    isHovered () {
+      if (this.currentUserIsDraggingCard) { return }
+      return this.id === this.currentUserIsHoveringOverConnectionId || this.id === this.$store.state.currentUserIsDraggingConnectionIdLabel || this.isHoveredOverConnectedCard
+    },
+    isHoveredOverConnectedCard () {
+      const cardId = this.$store.state.currentUserIsHoveringOverCardId
+      if (!cardId) { return }
+      return (cardId === this.startCardId || cardId === this.endCardId)
+    },
+    isConnectedToMultipleCardsSelected () {
+      const cardIds = this.$store.state.multipleCardsSelectedIds
+      if (!cardIds.length) { return }
+      return cardIds.find(cardId => {
+        return (cardId === this.startCardId || cardId === this.endCardId)
+      })
+    },
 
     // filters
     filtersIsActive () {
@@ -270,7 +298,7 @@ export default {
       const offset = utils.outsideSpaceOffset().y
       const scroll = this.windowScroll.y - offset
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      let y1 = utils.coordsFromConnectionPath(this.connection.path).y
+      let y1 = utils.startCoordsFromConnectionPath(this.connection.path).y
       let y2 = utils.endCoordsFromConnectionPath(this.connection.path).y + y1
       if (y1 > y2) {
         const y = y1
@@ -377,8 +405,10 @@ export default {
       return { x, y }
     },
     animationFrame () {
+      if (this.frameCount === 0) {
+        this.curvedPath = this.connection.path
+      }
       this.frameCount++
-      this.curvedPath = this.path
       const curvePattern = new RegExp(/(q[-0-9]*),([-0-9]*)\w+/)
       // "q90,40" from "m747,148 q90,40 -85,75"
       // "q-90,-40" from "m747,148 q-90,-40 -85,75" (negative)
@@ -392,13 +422,11 @@ export default {
         x: parseInt(points[0]),
         y: parseInt(points[1])
       })
-      this.controlCurve = {
-        controlPoint: curveMatch[0], // "q90, 40"
-        index: curveMatch.index,
-        length: curveMatch[0].length,
-        x,
-        y
-      }
+      const controlPoint = curveMatch[0]
+      this.curvedPath = this.updatedPath(this.curvedPath, controlPoint, x, y)
+      const element = this.$refs.connectionElement
+      if (!element) { return }
+      element.setAttribute('d', this.curvedPath)
       if (this.shouldAnimate) {
         window.requestAnimationFrame(this.animationFrame)
       }
@@ -406,7 +434,6 @@ export default {
     cancelAnimation () {
       window.cancelAnimationFrame(animationTimer)
       animationTimer = undefined
-      this.controlCurve = undefined
       this.curvedPath = undefined
       this.frameCount = 0
     },
@@ -415,7 +442,17 @@ export default {
       files = Array.from(files)
       const currentCursor = utils.cursorPositionInViewport(event)
       this.$store.dispatch('upload/addCardsAndUploadFiles', { files, currentCursor })
+    },
+
+    // mouse handlers
+
+    handleMouseEnter () {
+      this.$store.commit('currentUserIsHoveringOverConnectionId', this.connection.id)
+    },
+    handleMouseLeave () {
+      this.$store.commit('currentUserIsHoveringOverConnectionId', '')
     }
+
   },
   watch: {
     shouldAnimate (shouldAnimate) {

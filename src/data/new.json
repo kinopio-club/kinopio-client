@@ -10,6 +10,8 @@
   "clients": [],
   "background": "",
   "backgroundTint": "",
+  "backgroundGradient": null,
+  "backgroundIsGradient": false,
   "moonPhase": "",
   "isTemplate": false,
   "isFromTweet": false,
@@ -27,7 +29,7 @@
       "id": "wQ9-NzxQyWoIGGKEgHRMF",
       "x": 180,
       "y": 220,
-      "name": "Connect them together\n\n[More Help](https://help.kinopio.club)",
+      "name": "Connect them together\n\n[Help and Tutorials](https://help.kinopio.club)",
       "z": 3,
       "width": 184,
       "height": 65
@@ -54,5 +56,6 @@
   "originSpaceId": "",
   "tags": [],
   "boxes": [],
-  "visits": 0
+  "visits": 0,
+  "isRemoved": false
 }

@@ -12,6 +12,7 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'redo'" src="@/assets/undo.svg" class="redo")
         img.icon(v-else-if="item.icon === 'brush-y'" src="@/assets/brush-y.svg" class="brush-y")
         img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
+        img.icon(v-else-if="item.icon === 'offline'" src="@/assets/offline.svg" class="offline")
       span {{item.message}}
     .row(v-if="item.isPersistentItem")
       button(@click="removeById(item)")
@@ -21,7 +22,9 @@ aside.notifications(@click.left="closeAllDialogs")
     p Local storage error has occured, please refresh
     .row
       .button-wrap
-        button(@click.left="refreshBrowser") Refresh
+        button(@click.left="refreshBrowser")
+          img.refresh.icon(src="@/assets/refresh.svg")
+          span Refresh
 
   .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
     img.icon(src="@/assets/brush.svg")
@@ -37,7 +40,14 @@ aside.notifications(@click.left="closeAllDialogs")
         .badge.info.is-donor Donor
       span , I deeply appreciate your support
     .row
-      button(@click="removeNotifyThanksForDonating")
+      button(@click="removeNotifyThanks")
+        img.icon.cancel(src="@/assets/add.svg")
+        span Feels Good
+
+  .persistent-item.success(v-if="notifyThanksForUpgrading")
+    p Thank you for upgrading, I deeply appreciate your support
+    .row
+      button(@click="removeNotifyThanks")
         img.icon.cancel(src="@/assets/add.svg")
         span Feels Good
 
@@ -46,11 +56,12 @@ aside.notifications(@click.left="closeAllDialogs")
       img.icon.filter-icon(src="@/assets/filter.svg")
 
   .item.info(v-if="notifyCurrentSpaceIsNowRemoved" @animationend="resetNotifyCurrentSpaceIsNowRemoved")
-    p Space is removed. Restore or permanently delete spaces through
+    p Space was removed
     .row
       button(@click.stop="showRemoved")
         img.icon(src="@/assets/remove.svg")
         img.icon.remove-undo(src="@/assets/undo.svg")
+        span Restore or Permanently Delete
 
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
     p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade
@@ -60,11 +71,8 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimit" :class="{'notification-jiggle': notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
     p To add more cards, you'll need to upgrade
     .row
-      template(v-if="isPricingHidden")
-        a(:href="isPricingHiddenEmailSupportUrl")
-          button Contact Support
-      template(v-else)
-        button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+      button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+
   .persistent-item.success(v-if="notifySignUpToEditSpace" ref="readOnly" :class="{'notification-jiggle': readOnlyJiggle}")
     p
       PrivacyIcon(:privacy="privacyState.name")
@@ -73,7 +81,7 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.danger(v-if="notifySpaceNotFound")
     p Space could not be found, or is private
     .row
-      button(@click.left.stop="triggerSpaceDetailsVisible") Your Spaces
+      button(@click.left.stop="triggerSpaceDetailsVisible") Spaces
       button(v-if="!currentUserIsSignedIn" @click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
       button(@click.left="removeNotifySpaceNotFound")
         img.icon.cancel(src="@/assets/add.svg")
@@ -100,6 +108,7 @@ aside.notifications(@click.left="closeAllDialogs")
             span Email Support
       .button-wrap
         button(@click.left="refreshBrowser")
+          img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
       .button-wrap
         button(@click="removeNotifyConnectionError")
@@ -111,27 +120,36 @@ aside.notifications(@click.left="closeAllDialogs")
       span Kinopio updates are available
     .row
       .button-wrap
-        button(@click.left="refreshBrowser") Update
+        button(@click.left="refreshBrowser")
+          img.refresh.icon(src="@/assets/refresh.svg")
+          span Update
 
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
     p Error saving changes to server, retrying…
+    .row
+      .button-wrap
+        button(@click.left="refreshBrowser")
+          img.refresh.icon(src="@/assets/refresh.svg")
+          span Refresh
 
   .persistent-item.danger(v-if="notifySpaceOutOfSync")
     p Space is out of sync, please refresh
     .row
       .button-wrap
-        button(@click.left="refreshBrowser") Refresh
+        button(@click.left="refreshBrowser")
+          img.refresh.icon(src="@/assets/refresh.svg")
+          span Refresh
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="template" :class="{'notification-jiggle': readOnlyJiggle}")
     button(@click.left="duplicateSpace")
       img.icon(src="@/assets/add.svg")
-      span Make a Copy to Edit
+      span Duplicate to Edit
 
   .item.success(v-if="notifyMoveOrCopyToSpace" @animationend="resetNotifyMoveOrCopyToSpace")
     p {{notifyMoveOrCopyToSpaceDetails.message}}
     .row
       a(:href="notifyMoveOrCopyToSpaceDetails.id")
-        button.variable-length-content(@click.left.prevent.stop="changeSpace(notifyMoveOrCopyToSpaceDetails.id)") {{notifyMoveOrCopyToSpaceDetails.name}} →
+        button(@click.left.prevent.stop="changeSpace(notifyMoveOrCopyToSpaceDetails.id)") {{notifyMoveOrCopyToSpaceDetails.name}} →
 
   .persistent-item.success(v-if="notifyReferralSuccessUser")
     p
@@ -145,7 +163,7 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item.success(v-if="notifyReferralSuccessReferrerName")
-    p welcome {{referrerName}}, once you sign up your account will be upgraded to free
+    p welcome {{advocateReferrerName}}, once you sign up your account will be upgraded to free
     .row
       button(@click.left.stop="triggerSignUpOrInIsVisible")
         span Sign Up for Your Free Account
@@ -153,14 +171,25 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item.success(v-if="notifyEarnedCredits")
-    p You've earned ${{referralCreditAmount}} in referral credits, which will be used when you upgrade
+    p You've earned ${{referralCreditAmount}} in referral credits,{{' '}}
+      template(v-if="currentUserIsUpgraded")
+        span which will be used on your next payment
+      template(v-else)
+        span which will be used when you upgrade
     .row
-      button(@click.left.stop="triggerUpgradeUserIsVisible")
+      button(v-if="!currentUserIsUpgraded" @click.left.stop="triggerUpgradeUserIsVisible")
         span Upgrade
       button(@click.left.stop="triggerEarnCreditsIsVisible")
         span Earn More
       button(@click.left="removeNotifyEarnedCredits")
         img.icon.cancel(src="@/assets/add.svg")
+  .persistent-item.danger(v-if="notifySpaceIsUnavailableOffline")
+    OfflineBadge
+    .row
+      p
+        span Space is unavailable offline.
+    .row
+      p Only spaces that you're a member of, and have visited recently, are available offline
 
 </template>
 
@@ -171,15 +200,17 @@ import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 import templates from '@/data/templates.js'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
+import OfflineBadge from '@/components/OfflineBadge.vue'
 
 import dayjs from 'dayjs'
 
-let pageWasOffline, pageWasHidden, checkIfShouldNotifySpaceOutOfSyncIntervalTimer
+let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
 export default {
   name: 'Notifications',
   components: {
-    PrivacyIcon
+    PrivacyIcon,
+    OfflineBadge
   },
   data () {
     return {
@@ -201,17 +232,10 @@ export default {
         this.addReadOnlyJiggle()
       } else if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
         this.notifyCardsCreatedIsOverLimitJiggle = true
-      } else if (mutation.type === 'isOnline') {
-        const isOnline = Boolean(mutation.payload)
-        if (!isOnline) {
-          console.log('☎️ is offline', !isOnline)
-          pageWasOffline = true
-        } else if (isOnline && pageWasOffline) {
-          this.checkIfShouldNotifySpaceOutOfSync()
-          pageWasOffline = false
-        }
       } else if (mutation.type === 'currentSpace/restoreSpace') {
         this.notifySpaceOutOfSync = false
+      } else if (mutation.type === 'triggerCheckIfShouldNotifySpaceOutOfSync') {
+        this.checkIfShouldNotifySpaceOutOfSync()
       }
     })
   },
@@ -230,7 +254,11 @@ export default {
     notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
     notifyConnectionErrorName () { return this.$store.state.notifyConnectionErrorName },
-    notifyServerCouldNotSave () { return this.$store.state.notifyServerCouldNotSave },
+    notifyServerCouldNotSave () {
+      const isOffline = !this.$store.state.isOnline
+      if (isOffline) { return }
+      return this.$store.state.notifyServerCouldNotSave
+    },
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
     notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
     notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
@@ -241,17 +269,18 @@ export default {
     notifySpaceIsHidden () { return this.$store.state.notifySpaceIsHidden },
     notifyCurrentSpaceIsNowRemoved () { return this.$store.state.notifyCurrentSpaceIsNowRemoved },
     notifyThanksForDonating () { return this.$store.state.notifyThanksForDonating },
+    notifyThanksForUpgrading () { return this.$store.state.notifyThanksForUpgrading },
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
     notifyReferralSuccessUser () { return this.$store.state.notifyReferralSuccessUser },
     notifyReferralSuccessReferrerName () { return this.$store.state.notifyReferralSuccessReferrerName },
-    referrerName () { return this.$store.state.currentUser.referrerName },
+    advocateReferrerName () { return this.$store.state.currentUser.advocateReferrerName },
     notifyEarnedCredits () { return this.$store.state.notifyEarnedCredits },
-    currentUserIsSignedIn () {
-      return this.$store.getters['currentUser/isSignedIn']
-    },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     isTouchDevice () { return this.$store.state.isTouchDevice },
+    notifySpaceIsUnavailableOffline () { return this.$store.getters['currentSpace/isUnavailableOffline'] },
     privacyState () {
       return privacy.states().find(state => {
         return state.name === this.$store.state.currentSpace.privacy
@@ -268,14 +297,7 @@ export default {
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(currentSpace.id)
     },
-    referralCreditAmount () { return consts.referralCreditAmount },
-    isPricingHidden () { return this.$store.state.isPricingHidden },
-    isPricingHiddenEmailSupportUrl () {
-      let address = 'support@kinopio.club'
-      const subject = 'Upgrading from iOS'
-      const body = "I'm using Kinopio on iOS. How do I upgrade my account and how much does it cost?"
-      return `mailto:${address}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-    }
+    referralCreditAmount () { return consts.referralCreditAmount }
   },
   methods: {
     notifificationClasses (item) {
@@ -287,8 +309,9 @@ export default {
       }
       return classes
     },
-    removeNotifyThanksForDonating () {
+    removeNotifyThanks () {
       this.$store.commit('notifyThanksForDonating', false)
+      this.$store.commit('notifyThanksForUpgrading', false)
     },
     localStorageErrorIsVisible () {
       const element = document.getElementById('notify-local-storage-is-full')
@@ -296,11 +319,7 @@ export default {
       return Boolean(!isHidden)
     },
     updatePageVisibilityChange (event) {
-      if (document.visibilityState === 'hidden') {
-        pageWasHidden = true
-        return
-      }
-      if (pageWasHidden) {
+      if (document.visibilityState === 'visible') {
         this.checkIfShouldNotifySpaceOutOfSync()
       }
     },
@@ -386,26 +405,34 @@ export default {
       this.$store.commit('triggerEarnCreditsIsVisible')
     },
     async checkIfShouldNotifySpaceOutOfSync () {
-      const space = utils.clone(this.$store.state.currentSpace)
-      const canEditSpace = this.$store.getters['currentUser/canEditSpace'](space)
-      let remoteSpace
-      if (canEditSpace) {
-        remoteSpace = await this.$store.dispatch('api/getSpace', { space })
-      } else {
-        remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
-      }
-      if (!remoteSpace) { return }
-      const spaceUpdatedAt = dayjs(space.updatedAt)
-      const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
-      const hoursDelta = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'hour') // hourDelta
-      const updatedAtIsChanged = hoursDelta >= 1
-      console.log('☎️ checkIfShouldNotifySpaceOutOfSync', {
-        hoursDelta,
-        updatedAtIsChanged,
-        spaceUpdatedAt: space.updatedAt,
-        remoteSpaceUpdatedAt: remoteSpace.updatedAt
-      })
-      if (updatedAtIsChanged) {
+      console.log('☎️ checkIfShouldNotifySpaceOutOfSync…')
+      try {
+        const space = utils.clone(this.$store.state.currentSpace)
+        const canEditSpace = this.$store.getters['currentUser/canEditSpace'](space)
+        if (!this.currentUserIsSignedIn) { return }
+        // use
+        let remoteSpace
+        if (canEditSpace) {
+          remoteSpace = await this.$store.dispatch('api/getSpace', { space })
+        } else {
+          remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
+        }
+        if (!remoteSpace) { return }
+        const spaceUpdatedAt = dayjs(space.updatedAt)
+        const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
+        const hoursDelta = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'hour') // hourDelta
+        const updatedAtIsChanged = hoursDelta >= 1
+        console.log('☎️ checkIfShouldNotifySpaceOutOfSync result', {
+          hoursDelta,
+          updatedAtIsChanged,
+          spaceUpdatedAt: space.updatedAt,
+          remoteSpaceUpdatedAt: remoteSpace.updatedAt
+        })
+        if (updatedAtIsChanged) {
+          this.notifySpaceOutOfSync = true
+        }
+      } catch (error) {
+        console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
         this.notifySpaceOutOfSync = true
       }
     },
@@ -417,7 +444,7 @@ export default {
     },
     changeSpace (spaceId) {
       const space = { id: spaceId }
-      this.$store.dispatch('currentSpace/changeSpace', { space })
+      this.$store.dispatch('currentSpace/changeSpace', space)
       this.$store.dispatch('closeAllDialogs')
     },
     removeNotifyEarnedCredits () {
@@ -441,7 +468,7 @@ export default {
   .persistent-item
     pointer-events all
     box-shadow 3px 3px 0 var(--heavy-shadow)
-    border-radius var(--small-entity-radius)
+    border-radius var(--entity-radius)
     margin-bottom 10px
     margin-right 0
     background-color var(--info-background)
@@ -462,10 +489,6 @@ export default {
     p
       margin 0
       user-select text
-    video
-      border-radius var(--small-entity-radius)
-      margin-bottom 5px
-      background-color var(--primary-background)
   .persistent-item
     animation none
   .row
@@ -504,6 +527,9 @@ export default {
 
   .redo
     transform scaleX(-1)
+
+  .icon.refresh
+    vertical-align 0px
 
   .filter-icon
     margin 0

@@ -2,10 +2,11 @@
 import cache from '@/cache.js'
 import moonphase from '@/moonphase.js'
 import consts from '@/consts.js'
+import codeLanguages from '@/data/codeLanguages.json'
+import helloSpace from '@/data/hello.json'
 
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
-import random from 'lodash-es/random'
 import last from 'lodash-es/last'
 import sortBy from 'lodash-es/sortBy'
 import times from 'lodash-es/times'
@@ -16,6 +17,9 @@ import { colord, extend } from 'colord'
 import qs from '@aguezz/qs-parse'
 import namesPlugin from 'colord/plugins/names'
 import getCurvePoints from '@/libs/curve_calc.js'
+import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
+import random from 'lodash-es/random'
+import randomColor from 'randomcolor'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
@@ -26,6 +30,11 @@ dayjs.extend(relativeTime)
 extend([namesPlugin]) // colord
 
 const uuidLength = 21
+const randomRGBA = (alpha) => {
+  const hex = randomColor({ hue: 'random', luminosity: 'random' })
+  const rgba = colord(hex).alpha(alpha).toRgbString()
+  return rgba
+}
 
 export default {
   loadImage (src) {
@@ -149,26 +158,26 @@ export default {
       viewport.setAttribute('content', 'width=device-width, initial-scale=1') // index.html default
     }
   },
-  scrollIntoView (element, behavior) {
+  scrollIntoView ({ element, behavior }) {
     behavior = behavior || 'smooth'
     if (!element) { return }
-    const rect = element.getBoundingClientRect()
+    const sidebarIsVisible = document.querySelector('dialog#sidebar')
     const viewportWidth = this.visualViewport().width
-    const viewportHeight = this.visualViewport().height
-    let x = rect.x + rect.width - viewportWidth
-    let y = rect.y + rect.height - viewportHeight
-    let scrollX = 0
-    let scrollY = 0
-    if (x > 0) {
-      scrollX = x + 20
+    const isViewportNarrow = viewportWidth < (consts.maxCardLength * 2)
+    let horizontal = 'nearest'
+    let vertical = 'nearest'
+    if (sidebarIsVisible) {
+      horizontal = 'center'
+      vertical = 'center'
     }
-    if (y > 0) {
-      scrollY = y + 80
+    if (sidebarIsVisible && isViewportNarrow) {
+      horizontal = 'start'
     }
-    window.scrollBy({
-      left: scrollX,
-      top: scrollY,
-      behavior
+    scrollIntoViewIfNeeded(element, {
+      behavior,
+      scrollMode: 'if-needed',
+      block: vertical,
+      inline: horizontal
     })
   },
   cursorPositionInViewport (event) {
@@ -203,6 +212,7 @@ export default {
     position = position || this.cursorPositionInPage(event)
     // #space
     const space = document.getElementById('space')
+    if (!space) { return }
     let rect = space.getBoundingClientRect()
     position = {
       x: position.x - rect.x,
@@ -325,9 +335,11 @@ export default {
     cloned = JSON.parse(cloned)
     return cloned
   },
+  isUndefined (value) {
+    return value === undefined || value === null
+  },
   typeCheck ({ value, type, allowUndefined, origin }) {
-    const isUndefined = value === undefined || value === null
-    if (allowUndefined && isUndefined) {
+    if (allowUndefined && this.isUndefined(value)) {
       return true
     }
     if (type === 'array' && Array.isArray(value)) {
@@ -363,17 +375,7 @@ export default {
     // returns 1.23
     return Math.round(number * 100) / 100
   },
-  arrayExists (array) {
-    this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayExists' })
-    if (!array) {
-      return false
-    } else if (!array.length) {
-      return false
-    } else {
-      return true
-    }
-  },
-  arrayHasItems (array) {
+  arrayHasItems (array) { // !arrayIsEmpty, arrayExists
     this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayHasItems' })
     if (array) {
       if (array.length) {
@@ -459,6 +461,7 @@ export default {
   },
   cursorsAreClose (startCursor, endCursor) {
     if (!startCursor) { return }
+    if (!endCursor) { return }
     const threshold = 5
     const xRange = {
       value: endCursor.x,
@@ -487,7 +490,7 @@ export default {
   isAndroid () {
     return navigator.platform && (/Android/.test(navigator.platform) || /Android/.test(navigator.userAgent))
   },
-  isApple () {
+  isSafari () {
     return /Safari/.test(navigator.userAgent)
   },
   isMobile () {
@@ -635,7 +638,7 @@ export default {
     })
   },
   pluralize (word, condition) {
-    if (condition) {
+    if (condition || condition === 0) {
       word = word + 's'
     }
     return word
@@ -649,6 +652,18 @@ export default {
   },
   insertStringAtIndex (string, insert, index) {
     return string.substr(0, index) + insert + string.substr(index)
+  },
+  insertIntoArray (array, value, index) {
+    let start = array.slice(0, index)
+    const end = array.slice(index, array.length)
+    start.push(value)
+    const newArray = start.concat(end)
+    return newArray
+  },
+  removeFromArray (array, index) {
+    delete array[index]
+    array = array.filter(item => Boolean(item))
+    return array
   },
   normalizeToUnixTime (date) {
     return new Date(date).getTime()
@@ -753,10 +768,11 @@ export default {
   colorIsValid (color) {
     return colord(color).isValid()
   },
-  colorIsDark (color) {
+  colorIsDark (color, brightnessThreshold) {
+    brightnessThreshold = brightnessThreshold || 0.4
     if (!color) { return }
     if (color === 'transparent') { return }
-    return colord(color).brightness() < 0.4
+    return colord(color).brightness() < brightnessThreshold
   },
   invertColor (color) {
     return colord(color).invert().toHex()
@@ -773,7 +789,7 @@ export default {
   // normalize items
 
   normalizeItems (items) {
-    if (!this.arrayExists(items)) { return items }
+    if (!this.arrayHasItems(items)) { return items }
     items = items.filter(item => Boolean(item))
     let normalizedItems = {}
     items.forEach(item => {
@@ -964,6 +980,7 @@ export default {
     return rect
   },
   pageSizeFromItems (items) {
+    const padding = 250
     items = this.clone(items)
     items = items.filter(item => item.x && item.y)
     if (!items.length) {
@@ -974,10 +991,10 @@ export default {
     let y = 0
     items.forEach(item => {
       if (item.x > x) {
-        x = item.x
+        x = item.x + padding
       }
       if (item.y > y) {
-        y = item.y
+        y = item.y + padding
       }
     })
     const width = x + defaultSize
@@ -1013,23 +1030,23 @@ export default {
     y = (y + window.scrollY) * zoom
     return { x, y }
   },
-  coordsFromConnectionPath (path) {
-    // https://regexr.com/66idp
-    // matches first 2 digit groups in path: m295,284 q90,40 87,57 → [295, 284]
-    const pathCoordsPattern = new RegExp(/m([\d.-]{1,}),([\d-.]{1,})/)
+  curveControlPointFromPath (path) {
+    // https://regexr.com/6mptt
+    // matches 'q'-digits-,-digits-space: m295,284 q90,40 87,57 → "q90,40"
+    const pathCoordsPattern = new RegExp(/q([\d.]{1,}),([\d.]{1,})/)
     let coords = path.match(pathCoordsPattern)
-    if (!coords) { return }
     coords = {
       x: coords[1],
       y: coords[2]
     }
     return this.integerCoords(coords)
   },
-  curveControlPointFromPath (path) {
-    // https://regexr.com/6mptt
-    // matches 'q'-digits-,-digits-space: m295,284 q90,40 87,57 → "q90,40"
-    const pathCoordsPattern = new RegExp(/q([\d.]{1,}),([\d.]{1,})/)
+  startCoordsFromConnectionPath (path) {
+    // https://regexr.com/66idp
+    // matches first 2 digit groups in path: m295,284 q90,40 87,57 → [295, 284]
+    const pathCoordsPattern = new RegExp(/m([\d.-]{1,}),([\d-.]{1,})/)
     let coords = path.match(pathCoordsPattern)
+    if (!coords) { return }
     coords = {
       x: coords[1],
       y: coords[2]
@@ -1060,7 +1077,7 @@ export default {
   },
   pointOnCurve (pos, path) {
     // pos is 0 to 1
-    const start = this.coordsFromConnectionPath(path)
+    const start = this.startCoordsFromConnectionPath(path)
     let end = this.endCoordsFromConnectionPath(path)
     end = {
       x: start.x + end.x,
@@ -1111,15 +1128,13 @@ export default {
 
   spaceIsUnchanged (prevSpace, newSpace) {
     if (!prevSpace.cards || !prevSpace.connections) { return false }
-    const isEditedAt = prevSpace.editedAt === newSpace.editedAt
-    const isCardLength = prevSpace.cards.length === newSpace.cards.length
-    const isConnectionLength = prevSpace.connections.length === newSpace.connections.length
-    const isUnchanged = isEditedAt && isCardLength && isConnectionLength
-    return isUnchanged
+    return prevSpace.editedAt === newSpace.editedAt
   },
-  mergeSpaceKeyValues ({ prevItems, newItems }) {
+  mergeSpaceKeyValues ({ prevItems, newItems, selectedItems }) {
     prevItems = prevItems.filter(item => Boolean(item))
     newItems = newItems.filter(item => Boolean(item))
+    selectedItems = selectedItems || []
+    const selectedItemIds = selectedItems.map(item => item.id)
     const prevIds = prevItems.map(item => item.id)
     const newIds = newItems.map(item => item.id)
     newItems = this.normalizeItems(newItems)
@@ -1128,34 +1143,71 @@ export default {
     let updateItems = []
     let removeItems = []
     newIds.forEach(id => {
+      const selectedItem = selectedItems.find(item => item.id === id)
       const itemExists = prevIds.includes(id)
-      if (itemExists) {
+      if (selectedItem) {
+        const prevItem = prevItems[id]
+        let newItem = newItems[id]
+        // use prevItem position to avoid ppsition item jumping while selected items dragging
+        newItem.x = prevItem.x
+        newItem.y = prevItem.y
+        updateItems.push(newItem)
+      } else if (itemExists) {
         updateItems.push(newItems[id])
       } else {
         addItems.push(newItems[id])
       }
     })
     prevIds.forEach(id => {
-      const itemIsRemoved = !newIds.includes(id)
+      const prevItemNotFoundInNewItems = !newIds.includes(id)
+      const threshold = 10 * 1000 // 10 seconds
+      const prevItemUpdatedInCurrentSession = dayjs(Date.now()).diff(prevItems[id].updatedAt) < threshold
+      const itemIsRemoved = prevItemNotFoundInNewItems && !prevItemUpdatedInCurrentSession
       if (itemIsRemoved) {
         removeItems.push(prevItems[id])
       }
     })
     return { addItems, updateItems, removeItems }
   },
-  spaceDefaultBackground (space, currentUser) {
-    const background = currentUser.defaultSpaceBackground
-    const backgroundTint = currentUser.defaultSpaceBackgroundTint
-    if (background) {
-      space.background = background
+  newSpaceBackground (space, currentUser) {
+    if (currentUser.defaultSpaceBackgroundGradient) {
+      space.backgroundGradient = currentUser.defaultSpaceBackgroundGradient
+      space.backgroundIsGradient = true
+    } else {
+      space.background = currentUser.defaultSpaceBackground
     }
-    if (backgroundTint) {
-      space.backgroundTint = backgroundTint
-    }
+    space.backgroundTint = currentUser.defaultSpaceBackgroundTint
+    return space
+  },
+  updateSpaceCardsCreatedThroughPublicApi (space) {
+    space.cards = space.cards.map(card => {
+      card.isCreatedThroughPublicApi = true
+      return card
+    })
     return space
   },
   emptySpace (spaceId) {
-    return { id: spaceId, moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], boxes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [], isHidden: false, visits: 0 }
+    return {
+      id: spaceId,
+      name: 'Loading…',
+      moonPhase: '',
+      background: '',
+      backgroundTint: '',
+      backgroundGradient: null,
+      backgroundIsGradient: false,
+      cards: [],
+      connections: [],
+      connectionTypes: [],
+      boxes: [],
+      tags: [],
+      users: [],
+      userId: '',
+      collaborators: [],
+      spectators: [],
+      clients: [],
+      isHidden: false,
+      visits: 0
+    }
   },
   clearSpaceMeta (space, type) {
     space.originSpaceId = space.id
@@ -1169,6 +1221,7 @@ export default {
     space.privacy = 'private'
     space.isTemplate = false
     space.isHidden = false
+    space.collaboratorKey = nanoid()
     space.cards = space.cards.map(card => {
       card.userId = null
       if (card.nameUpdatedByUserId) {
@@ -1284,14 +1337,50 @@ export default {
       return connection
     })
   },
+  spaceItemUsersToCurrentUser (space, userId) {
+    const itemNames = ['boxes', 'cards', 'connections', 'connectionTypes']
+    itemNames.forEach(itemName => {
+      space[itemName] = space[itemName].map(item => {
+        item.userId = userId
+        return item
+      })
+    })
+    return space
+  },
+  newHelloSpace (user) {
+    const emptyStringKeys = ['id', 'collaboratorKey', 'readOnlyKey']
+    const emptyArrayKeys = ['users', 'collaborators', 'spectators', 'clients']
+    const deleteKeys = ['url', 'originSpaceId', 'editedAt', 'editedByUserId', 'createdAt', 'updatedAt', 'updateHash']
+    const userId = user?.id || consts.moderatorUserId
+    let space = this.clone(helloSpace)
+    space.name = 'Hello Kinopio'
+    space.privacy = 'private'
+    space.visits = 0
+    space.showInExplore = false
+    space.isTemplate = false
+    space.showInExploreUpdatedAt = null
+    emptyStringKeys.forEach(key => {
+      space[key] = ''
+    })
+    emptyArrayKeys.forEach(key => {
+      space[key] = []
+    })
+    deleteKeys.forEach(key => {
+      delete space[key]
+    })
+    this.spaceItemUsersToCurrentUser(space, userId)
+    space.userId = userId
+    return space
+  },
   normalizeSpace (space) {
     if (!this.objectHasKeys(space)) { return space }
-    if (!this.arrayExists(space.connections)) { return space }
+    if (!this.arrayHasItems(space.connections)) { return space }
     const connections = space.connections.filter(connection => {
       const hasTypeId = Boolean(connection.connectionTypeId)
       return hasTypeId
     })
     space.connections = connections
+    space.cards = space.cards.filter(card => card.name)
     return space
   },
   normalizeRemoteSpace (remoteSpace) {
@@ -1309,6 +1398,7 @@ export default {
     return remoteSpace
   },
   AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
+    if (!spaces) { return }
     return spaces.map(space => {
       let userId
       space.users = space.users || []
@@ -1373,7 +1463,9 @@ export default {
     space.isTemplate = false
     space.isHidden = false
     space.isFromTweet = false
-    space = this.spaceDefaultBackground(space, currentUser)
+    space.collaboratorKey = nanoid()
+    space = this.newSpaceBackground(space, currentUser)
+    space.background = space.background || consts.defaultSpaceBackground
     // summary
     space.cards.push({ id: nanoid(), name: summary, x: 80, y: 110, frameId: 0 })
     // daily prompt
@@ -1392,7 +1484,6 @@ export default {
     const userPrompts = currentUser.journalPrompts
     userPrompts.forEach(prompt => {
       if (!prompt.name) { return }
-      if (prompt.packId) { return }
       let card = { id: nanoid() }
       card.name = prompt.name
       const position = this.promptCardPosition(space.cards, card.name)
@@ -1421,20 +1512,6 @@ export default {
     if (matches) {
       return matches[0]
     }
-  },
-  randomPrompt (pack) {
-    let index = random(0, pack.prompts.length - 1)
-    return pack.prompts[index]
-  },
-  packTag (pack, cardId, space) {
-    const spaceHasTag = space.tags.find(tag => tag.name === pack.name)
-    if (spaceHasTag) { return }
-    return this.newTag({
-      name: pack.name,
-      defaultColor: pack.color,
-      cardId: cardId,
-      spaceId: space.id
-    })
   },
   promptCardPosition (cards, newCardName) {
     const lastCard = last(cards)
@@ -1476,8 +1553,14 @@ export default {
       return id
     }
   },
-  spaceHasUrl () {
-    return window.location.href !== (window.location.origin + '/')
+  spaceUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey }) {
+    let url
+    if (collaboratorKey || readOnlyKey) {
+      url = this.inviteUrl({ spaceId, spaceName, collaboratorKey, readOnlyKey })
+    } else {
+      url = this.url({ name: spaceName, id: spaceId })
+    }
+    return url
   },
   spaceAndCardIdFromUrl (url) {
     url = new URL(url)
@@ -1490,9 +1573,15 @@ export default {
     }
     return url
   },
-  inviteUrl ({ spaceId, spaceName, collaboratorKey }) {
+  inviteUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey }) {
     spaceName = this.normalizeString(spaceName)
-    const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
+    let invite = ''
+    if (collaboratorKey) {
+      invite = `collaboratorKey=${collaboratorKey}`
+    } else if (readOnlyKey) {
+      invite = `readOnlyKey=${readOnlyKey}`
+    }
+    const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&${invite}&name=${spaceName}`
     return url
   },
   spaceAndCardIdFromPath (path) {
@@ -1522,15 +1611,6 @@ export default {
       return undefined
     }
     return true
-  },
-  currentSpaceIsRemote (space, currentUser) {
-    if (!this.arrayExists(space.users)) { return true }
-    const currentUserCreatedSpace = currentUser.id === space.users[0].id
-    if (currentUserCreatedSpace) {
-      return Boolean(currentUser.apiKey)
-    } else {
-      return true
-    }
   },
   normalizeUrl (url) {
     const lastCharacterPosition = url.length - 1
@@ -1591,6 +1671,10 @@ export default {
     // then port numbers
     // then the rest of the url path
     return new RegExp(/(^|\n| )(http:\/\/localhost:)[^\s."><]+\w\/?-?/igm)
+  },
+  emailsFromString (string) {
+    // https://stackoverflow.com/a/42408099
+    return string.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gim) || []
   },
   urlsFromString (string, skipProtocolCheck) {
     if (!string) { return [] }
@@ -1674,7 +1758,7 @@ export default {
     // https://regexr.com/4rjtu
     // match an extension
     // which much be followed by either end of line, space, or ? (for qs) char
-    const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.jpe|\.jif|\.jfif|\.png|\.svg|\.webp)(?:\n| |\?|&)/igm)
+    const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.jpe|\.jif|\.jfif|\.png|\.svg|\.webp|\.avif)(?:\n| |\?|&)/igm)
     const isImage = url.match(imageUrlPattern) || url.includes('is-image=true')
     return Boolean(isImage)
   },
@@ -1699,19 +1783,23 @@ export default {
       if (!hasProtocol) { return }
     }
     url = url + ' '
-    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z)(?:\n| |\?|&)/igm)
+    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf)(?:\n| |\?|&)/igm)
     const isFile = url.toLowerCase().match(fileUrlPattern)
     return Boolean(isFile)
   },
   urlIsInvite (url) {
     url = this.urlWithProtocol(url)
     if (!url) { return }
-    url = new URL(url)
-    return url.pathname === '/invite'
+    try {
+      url = new URL(url)
+      return url.pathname === '/invite'
+    } catch (error) {
+      console.warn('🚑 urlIsInvite', error)
+    }
   },
   urlIsSpace (url) {
     if (!url) { return }
-    if (this.urlIsInvite(url)) { return }
+    if (this.urlIsInvite(url)) { return true }
     let spaceUrlPattern
     if (import.meta.env.MODE === 'development') {
       // https://regexr.com/5hjc2
@@ -1733,8 +1821,7 @@ export default {
     const isAudio = this.urlIsAudio(url)
     const isFile = this.urlIsFile(url)
     const isSpace = this.urlIsSpace(url)
-    const isInvite = this.urlIsInvite(url)
-    return !isImage && !isVideo && !isAudio && !isFile && !isSpace && !isInvite
+    return !isImage && !isVideo && !isAudio && !isFile && !isSpace
   },
   urlIsYoutube (url) {
     if (url.includes('/channel/')) { return }
@@ -1894,7 +1981,7 @@ export default {
     if (isSamePosition.length) {
       point.x += 20
       point.y += 20
-      this.uniqueCardPosition(point, existingPoints)
+      return this.uniqueCardPosition(point, existingPoints)
     } else {
       return point
     }
@@ -1931,7 +2018,8 @@ export default {
     return {
       id: space.id,
       name: space.name,
-      privacy: space.privacy
+      privacy: space.privacy,
+      previewThumbnailImage: space.previewThumbnailImage
     }
   },
   normalizeBroadcastUpdates (updates) {
@@ -1958,9 +2046,10 @@ export default {
 
   // Upload
 
-  isFileTooBig (file, userIsUpgraded) {
+  isFileTooBig ({ file, userIsUpgraded, spaceUserIsUpgraded }) {
+    const isUpgraded = userIsUpgraded || spaceUserIsUpgraded
     const sizeLimit = 1024 * 1024 * 5 // 5mb
-    if (file.size > sizeLimit && !userIsUpgraded) {
+    if (file.size > sizeLimit && !isUpgraded) {
       return true
     }
   },
@@ -2030,12 +2119,61 @@ export default {
     return styles
   },
 
+  // App Buttons
+
+  commandsFromString (string) {
+    const allowedCommands = Object.keys(consts.systemCommands)
+    // https://regexr.com/7h3ia
+    const commandPattern = new RegExp(/::systemCommand=\w+/gm)
+    let commands = string.match(commandPattern)
+    if (!commands) { return }
+    commands = commands.filter(command => {
+      const name = this.commandNameFromCommand(command)
+      return allowedCommands.includes(name)
+    })
+    return commands
+  },
+  commandNameFromCommand (string) {
+    // https://regexr.com/7h3ig
+    // ::system_command=xyz → matches xyz
+    const commandNamePattern = new RegExp(/=\w+/gm)
+    let name = string.match(commandNamePattern)
+    name = name[0]
+    name = name.replace('=', '')
+    return name
+  },
+
   // Name Segments 🎫
 
+  segmentsWithTextSegments (name, segments) {
+    let currentStart = 0
+    let textSegments = []
+    segments = sortBy(segments, ['startPosition'])
+    segments.forEach(({ startPosition, endPosition }) => {
+      if (currentStart < startPosition) {
+        const start = currentStart
+        const end = startPosition
+        const content = name.substring(start, end)
+        textSegments.push({ startPosition: start, endPosition: end, content, isText: true })
+      }
+      currentStart = endPosition
+    })
+    // handle trailing text
+    if (currentStart < name.length) {
+      const start = currentStart
+      const end = name.length
+      const content = name.substring(start, end)
+      textSegments.push({ startPosition: start, endPosition: end, content, isText: true })
+    }
+    segments = segments.concat(textSegments)
+    segments = sortBy(segments, ['startPosition'])
+    return segments
+  },
   cardNameSegments (name) {
     if (!name) { return [] }
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name, true) || []
+    const commands = this.commandsFromString(name) || []
     const markdownLinks = name.match(this.markdown().linkPattern) || []
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
@@ -2043,92 +2181,45 @@ export default {
       return this.urlIsSpace(url) || this.urlIsInvite(url)
     })
     const files = urls.filter(url => this.urlIsFile(url))
-    let badges = []
     let segments = []
     tags.forEach(tag => {
       // remove previous duplicate tag names
       let startPositions = this.indexesOf(name, tag)
-      badges.forEach(badge => {
-        startPositions = startPositions.filter(position => position > badge.startPosition)
+      segments.forEach(segment => {
+        startPositions = startPositions.filter(position => position > segment.startPosition)
       })
       const startPosition = startPositions[0]
       const endPosition = startPosition + tag.length
-      badges.push({ tag, startPosition, endPosition, isTag: true })
+      segments.push({ tag, startPosition, endPosition, name: tag.substring(2, tag.length - 2), isTag: true })
     })
     links.forEach(link => {
       const startPosition = name.indexOf(link)
       const endPosition = startPosition + link.length
-      let badge = { link, startPosition, endPosition }
+      const { spaceId, spaceUrl, cardId } = this.spaceAndCardIdFromUrl(link)
+      let segment = { link, name: link, startPosition, endPosition, spaceId, spaceUrl, cardId, isLink: true }
       if (this.urlIsInvite(link)) {
-        badge.isInviteLink = true
+        segment.isInviteLink = true
+        const url = new URL(link)
+        const queryObject = qs.decode(url.search)
+        segment.spaceId = queryObject.spaceId
+        segment.collaboratorKey = queryObject.collaboratorKey
       } else if (this.urlIsSpace(link)) {
-        badge.isLink = true
+        segment.isLink = true
       }
-      badges.push(badge)
+      segments.push(segment)
     })
     files.forEach(file => {
       const startPosition = name.indexOf(file)
       const endPosition = startPosition + file.length
-      badges.push({ file, startPosition, endPosition, isFile: true })
+      segments.push({ file, startPosition, endPosition, name: this.fileNameFromUrl(file), isFile: true })
     })
-    badges = sortBy(badges, ['startPosition'])
-    if (!badges.length) {
-      return [{ isText: true, content: name }]
-    }
-    // first segment
-    let startPosition = badges[0].startPosition
-    const leadingText = name.substring(0, startPosition)
-    segments.push({ isText: true, content: leadingText })
-    let currentPosition = startPosition
-    // other segments
-    badges.forEach((segment, index) => {
-      let newSegment
-      // tag
-      if (segment.isTag) {
-        const tag = segment.tag
-        newSegment = {
-          isTag: true,
-          name: tag.substring(2, tag.length - 2)
-        }
-      // space or card link
-      } else if (segment.isLink) {
-        let link = segment.link
-        const { spaceId, spaceUrl, cardId } = this.spaceAndCardIdFromUrl(link)
-        // link = `${consts.kinopioDomain()}/${spaceUrl}`
-        newSegment = {
-          isLink: true,
-          name: link,
-          cardId,
-          spaceId
-        }
-      // invite link
-      } else if (segment.isInviteLink) {
-        let link = segment.link
-        const url = new URL(link)
-        let queryObject = qs.decode(url.search)
-        newSegment = {
-          isInviteLink: true,
-          name: link,
-          spaceId: queryObject.spaceId,
-          collaboratorKey: queryObject.collaboratorKey
-        }
-      // file
-      } else if (segment.isFile) {
-        newSegment = {
-          isFile: true,
-          name: this.fileNameFromUrl(segment.file)
-        }
-      }
-      currentPosition = segment.endPosition
-      segments.push(newSegment)
+    commands.forEach(command => {
+      const startPosition = name.indexOf(command)
+      const endPosition = startPosition + command.length
+      const commandName = this.commandNameFromCommand(command)
+      segments.push({ startPosition, endPosition, command: commandName, name: consts.systemCommands[commandName], isCommand: true })
     })
-    const trailingText = name.substring(currentPosition, name.length)
-    if (trailingText) {
-      segments.push({
-        isText: true,
-        content: trailingText
-      })
-    }
+    segments = this.segmentsWithTextSegments(name, segments)
     return segments
   },
   markdown () {
@@ -2144,6 +2235,7 @@ export default {
       h1Pattern: /^# ()(.+$)/gmi,
       h2Pattern: /^## ()(.+$)/gmi,
       h3Pattern: /^### ()(.+$)/gmi,
+      h4Pattern: /^#### ()(.+$)/gmi,
       // https://regexr.com/5jmf4
       // matches *text*
       emphasisPattern1: /(\*)(.*?)\1/gmi,
@@ -2186,6 +2278,9 @@ export default {
         }, {
           type: 'h3',
           result: markdown.h3Pattern.exec(text)
+        }, {
+          type: 'h4',
+          result: markdown.h4Pattern.exec(text)
         }, {
           type: 'emphasis',
           result: markdown.emphasisPattern1.exec(text)
@@ -2265,5 +2360,47 @@ export default {
       }
     })
     return string
+  },
+  languageFromCodeBlock (string) {
+    // https://regexr.com/7lt5b
+    // matches first word on first line
+    const languagePattern = /^(\w)+\s/g
+    let newString = string
+    let match = string.match(languagePattern)
+    if (!match) { return }
+    const name = match[0].trim()
+    // match language
+    let language = codeLanguages.find(codeLanguage => {
+      const isName = codeLanguage.name === name
+      let isAlias
+      if (codeLanguage.aliases) {
+        isAlias = codeLanguage.aliases.includes(name)
+      }
+      return isName || isAlias
+    })
+    if (!language) { return }
+    newString = string.replace(match[0], '')
+    return { language, newString }
+  },
+
+  // Background Gradient
+
+  backgroundGradientLayers () {
+    let layers = []
+    const numberOfLayers = 6
+    times(numberOfLayers, function (index) {
+      let layer = {
+        x: random(140),
+        y: random(140),
+        color1: randomRGBA(1),
+        color2: randomRGBA(0)
+      }
+      layers.push(layer)
+    })
+    const backgroundLayer = {
+      color: randomRGBA(1)
+    }
+    layers.push(backgroundLayer)
+    return layers
   }
 }

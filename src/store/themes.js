@@ -4,12 +4,14 @@ const themes = {
   light: {
     name: 'light',
     colors: {
+      'color-scheme': 'light',
       'primary': 'black',
       'primary-border': 'rgba(0,0,0,0.3)',
       'primary-background': 'white',
       'text-link': '#143997',
       'primary-transparent': 'rgba(0,0,0,0.5)',
-      'button-background': 'rgba(255,255,255,.9)',
+      'button-background': 'rgba(255,255,255,1)',
+      'button-background-translucent': 'rgba(255,255,255,0.5)',
       'secondary-background': '#e3e3e3',
       'secondary-hover-background': '#d8d8d8',
       'secondary-active-background': '#cdcdcd',
@@ -22,18 +24,25 @@ const themes = {
       'new-unread-background': '#57a8ff',
       'secondary-active-background-dark': '#cdcdcd',
       'light-shadow': 'rgba(0,0,0,0.20)',
-      'heavy-shadow': 'rgba(0,0,0,0.25)'
+      'heavy-shadow': 'rgba(0,0,0,0.25)',
+      // codeblock
+      'code-comment': '#898989',
+      'code-punctuation': 'black',
+      'code-string': '#a2162d',
+      'code-keyword': '#00119e'
     }
   },
   dark: {
     name: 'dark',
     colors: {
+      'color-scheme': 'dark',
       'primary': 'white',
       'primary-border': 'rgba(255,255,255,0.3)',
       'primary-background': 'black',
       'text-link': '#788cc9',
       'primary-transparent': 'rgba(0,0,0,0.5)',
-      'button-background': 'rgba(0,0,0,0.7)',
+      'button-background': 'rgba(0,0,0,1)',
+      'button-background-translucent': 'rgba(0,0,0,0.3)',
       'secondary-background': '#262626',
       'secondary-hover-background': '#555',
       'secondary-active-background': '#333',
@@ -46,7 +55,12 @@ const themes = {
       'new-unread-background': '#2f6fb5',
       'secondary-active-background-dark': '#444',
       'light-shadow': 'rgba(0,0,0,0.25)',
-      'heavy-shadow': 'rgba(0,0,0,0.55)'
+      'heavy-shadow': 'rgba(0,0,0,0.55)',
+      // codeblock
+      'code-comment': '#898989',
+      'code-punctuation': 'white',
+      'code-string': '#fddd88',
+      'code-keyword': '#79e6d9'
     }
   }
 }
@@ -108,6 +122,54 @@ export default {
         themeName = 'light'
       }
       return themeName
+    },
+    isThemeDark: (state, getters, rootState) => {
+      const systemTheme = getters.themeFromSystem
+      const userTheme = rootState.currentUser.theme
+      if (systemTheme) {
+        return systemTheme === 'dark'
+      } else {
+        return userTheme === 'dark'
+      }
+    },
+    currentThemeName: (state, getters) => {
+      const isThemeDark = getters.isThemeDark
+      let themeName
+      if (isThemeDark) {
+        return 'dark'
+      } else {
+        return 'light'
+      }
+    },
+    themeColors: (state, getters) => {
+      const themeName = getters.currentThemeName
+      return themes[themeName].colors
+    },
+    previewImageThemeOptions: (state, getters, rootState) => {
+      const isDarkTheme = getters.isThemeDark
+      let background = rootState.currentSpace.background
+      let backgroundTint = rootState.currentSpace.backgroundTint
+      const backgroundElement = document.querySelector('.space-background-image')
+      const backgroundTintElement = document.querySelector('.space-background-tint')
+      if (background && backgroundElement) {
+        let domBackground = backgroundElement.style.backgroundImage
+        domBackground = utils.urlFromCSSBackgroundImage(domBackground)
+        background = domBackground || background
+      }
+      if (isDarkTheme && backgroundTintElement) {
+        const domBackgroundTint = backgroundTintElement.style.backgroundColor
+        backgroundTint = domBackgroundTint || backgroundTint
+      }
+      const themeColors = getters.themeColors
+      const theme = {
+        secondaryBackground: themeColors['secondary-background'],
+        primaryBorder: themeColors['primary-border'],
+        primaryBackground: themeColors['primary-background'],
+        entityRadius: 6,
+        backgroundTint,
+        background
+      }
+      return { isDarkTheme, theme }
     }
   }
 }

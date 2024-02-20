@@ -72,7 +72,7 @@ const borderWidth = 2
 // let prevCursor
 
 // locking
-// long press to touch drag card
+// long press to touch drag
 const lockingPreDuration = 100 // ms
 const lockingDuration = 100 // ms
 let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
@@ -85,6 +85,10 @@ export default {
   name: 'Box',
   props: {
     box: Object
+  },
+  mounted () {
+    const element = document.querySelector(`.box-info[data-box-id="${this.box.id}"]`)
+    const DOMRect = element.getBoundingClientRect()
   },
   data () {
     return {
@@ -174,9 +178,8 @@ export default {
     isPainting () { return this.$store.state.currentUserIsPainting },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     shouldJiggle () {
-      const shouldDisableItemJiggle = this.$store.state.currentUser.shouldDisableItemJiggle
-      const manyCardsSelected = this.$store.state.multipleCardsSelectedIds.length > 10
-      if (shouldDisableItemJiggle || manyCardsSelected) { return }
+      const isMultipleItemsSelected = this.$store.getters.isMultipleItemsSelected
+      if (isMultipleItemsSelected) { return }
       return this.isDragging
     },
     isDragging () {
@@ -415,8 +418,12 @@ export default {
         }
       })
     },
+    selectableCards () {
+      this.$store.dispatch('currentCards/updateCanBeSelectedSortedByY')
+      return this.$store.getters['currentCards/canBeSelectedSortedByY'].cards
+    },
     selectContainedCards () {
-      const cards = this.$store.getters['currentCards/canBeSelectedSortedByY'].cards
+      const cards = this.selectableCards()
       cards.forEach(card => {
         if (this.isItemInSelectedBoxes(card, 'card')) {
           this.$store.dispatch('addToMultipleCardsSelected', card.id)
@@ -573,7 +580,7 @@ export default {
     notifyPressAndHoldToDrag () {
       const hasNotified = this.$store.state.hasNotifiedPressAndHoldToDrag
       if (!hasNotified) {
-        this.$store.commit('addNotification', { message: 'Press and hold to drag boxes', icon: 'press-and-hold' })
+        this.$store.commit('addNotification', { message: 'Press and hold to drag', icon: 'press-and-hold' })
       }
       this.$store.commit('hasNotifiedPressAndHoldToDrag', true)
     },
@@ -636,7 +643,7 @@ export default {
 
   h1
     font-family var(--serif-font)
-    font-size 22px
+    font-size 20px
     font-weight bold
     margin 0
     display inline-block
@@ -651,7 +658,7 @@ export default {
     pointer-events all
     position absolute
     cursor pointer
-    padding 8px
+    padding 6px 8px
     padding-right 10px
     border-bottom-right-radius var(--entity-radius)
     word-break break-word

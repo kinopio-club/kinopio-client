@@ -9,7 +9,6 @@ const props = defineProps({
 })
 
 const counterValue = computed(() => props.card.counterValue || 0)
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace'])
 
 const increment = () => {
   const count = counterValue.value + 1
@@ -17,7 +16,7 @@ const increment = () => {
     id: props.card.id,
     counterValue: count
   }
-  store.dispatch('currentCards/update', card)
+  store.dispatch('currentCards/updateCounter', card)
 }
 const decrement = () => {
   let count = counterValue.value - 1
@@ -26,7 +25,7 @@ const decrement = () => {
     id: props.card.id,
     counterValue: count
   }
-  store.dispatch('currentCards/update', card)
+  store.dispatch('currentCards/updateCounter', card)
 }
 </script>
 
@@ -34,10 +33,10 @@ const decrement = () => {
 .card-counter(v-if="props.card.counterIsVisible")
   .segmented-buttons.counter-buttons
     //- -
-    button.small-button(@click="decrement" @touchend="decrement" :disabled="!canEditSpace")
+    button.small-button(@click="decrement" @touchend="decrement")
       img.icon.minus(src="@/assets/minus.svg")
     //- +
-    button.small-button(@click="increment" @touchend="increment" :disabled="!canEditSpace")
+    button.small-button(@click="increment" @touchend="increment")
       img.icon.plus(src="@/assets/add.svg")
   //- count
   .badge.info.counter {{counterValue}}

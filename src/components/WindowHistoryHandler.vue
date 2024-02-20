@@ -7,9 +7,11 @@ import utils from '@/utils.js'
 export default {
   name: 'WindowHistoryHandler',
   created () {
-    this.$store.subscribe((mutation, state) => {
+    this.$store.subscribe(async (mutation, state) => {
       if (mutation.type === 'triggerUpdateWindowHistory') {
-        this.updateWindowHistory(mutation.payload)
+        await this.updateWindowHistory(mutation.payload)
+        this.updateWindowTitle()
+      } else if (mutation.type === 'triggerUpdateWindowTitle') {
         this.updateWindowTitle()
       }
     })
@@ -19,23 +21,18 @@ export default {
     currentSpaceName () { return this.currentSpace.name }
   },
   methods: {
-    async updateWindowHistory ({ space, isRemote }) {
+    async updateWindowHistory (space) {
       const isEmbedMode = this.$store.state.isEmbedMode
       space = space || this.currentSpace
       const spaceUrl = utils.url(space)
+      const preventUpdate = window.location.pathname.includes(spaceUrl)
+      if (preventUpdate) { return }
       const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
-      const spaceHasUrl = currentUserIsSignedIn || isRemote
-      if (spaceHasUrl) {
-        this.$store.commit('currentSpacePath', spaceUrl, { root: true })
-        if (navigator.standalone || isEmbedMode) { return }
-        await this.$router.push('/' + spaceUrl)
-        const state = utils.clone(this.$store.state)
-        history.replaceState({ ...history.state, ...state }, '')
-      } else {
-        this.$store.commit('currentSpacePath', '/', { root: true })
-        if (navigator.standalone || isEmbedMode) { return }
-        this.$router.replace({ path: '/' })
-      }
+      this.$store.commit('currentSpacePath', spaceUrl, { root: true })
+      if (navigator.standalone || isEmbedMode) { return }
+      await this.$router.push('/' + spaceUrl)
+      const state = utils.clone(this.$store.state)
+      history.replaceState({ ...history.state, ...state }, '')
     },
     updateWindowTitle () {
       const spaceName = this.currentSpaceName
@@ -48,11 +45,6 @@ export default {
         title = 'Kinopio'
       }
       document.title = title
-    }
-  },
-  watch: {
-    currentSpaceName () {
-      this.updateWindowTitle()
     }
   }
 }

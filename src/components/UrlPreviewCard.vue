@@ -35,6 +35,7 @@ const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem
 // embed
 
 const toggleShouldDisplayEmbed = () => {
+  if (isTwitterUrl.value) { return }
   store.dispatch('closeAllDialogs')
   store.dispatch('currentCards/incrementZ', props.card.id)
   const embedIsVisibleForCardId = store.state.embedIsVisibleForCardId
@@ -109,9 +110,20 @@ const removeTrailingTweetText = (description) => {
   return description
 }
 
-// instagram url signature expiry
-
-const retryPreviewImage = (event) => {
+const handleImageError = (event) => {
+  console.log('🚑 urlPreviewCard handleImageError', event)
+  const url = props.card.urlPreviewUrl
+  const isInstagram = url.includes('instagram')
+  // generic image error
+  if (!isInstagram) {
+    const card = {
+      id: props.card.id,
+      shouldHideUrlPreviewImage: true
+    }
+    store.commit('currentCards/update', card)
+    return
+  }
+  // instagram url signature expiry
   if (hasRetried) { return }
   emit('retryUrlPreview')
   hasRetried = true
@@ -142,7 +154,7 @@ const description = computed(() => {
   //- image
   template(v-if="!shouldDisplayEmbed")
     .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage")
-      img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" @load="updateDimensions" ref="image" @error="retryPreviewImage")
+      img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" @load="updateDimensions" ref="image" @error="handleImageError")
 
   //- embed
   template(v-if="shouldDisplayEmbed")
@@ -153,7 +165,7 @@ const description = computed(() => {
   .row.info.badge.status.embed-info(v-if="!shouldHideInfo" :style="{background: props.backgroundColor}")
     //- play
     .button-wrap.embed-button-wrap(v-if="card.urlPreviewEmbedHtml" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
-      button.small-button
+      button.small-button(v-if="!isTwitterUrl")
         img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
         img.icon.play(v-else src="@/assets/play.svg")
       img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")

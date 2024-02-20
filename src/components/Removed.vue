@@ -143,7 +143,7 @@ export default {
     },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-      utils.scrollIntoView(element)
+      utils.scrollIntoView({ element })
     },
     restore (item) {
       if (this.cardsVisible) {
@@ -206,7 +206,7 @@ export default {
       const space = this.$store.state.currentSpace
       const remoteCards = await this.$store.dispatch('api/getSpaceRemovedCards', space)
       this.loading.cards = false
-      if (!utils.arrayExists(remoteCards)) { return }
+      if (!utils.arrayHasItems(remoteCards)) { return }
       this.removedCards = remoteCards
       this.$store.commit('currentCards/removedCards', remoteCards)
     },
