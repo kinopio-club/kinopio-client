@@ -17,16 +17,19 @@ const store = useStore()
 
 const descriptionElement = ref(null)
 
+onMounted(() => {
+  updateTextareaSize()
+  updateExploreSpaces()
+})
+
 const props = defineProps({
   visible: Boolean,
-  user: Object
+  user: Object,
+  showExploreSpaces: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   closeDialogs()
   clearUserSpaces()
-  if (value) {
-    updateTextareaSize()
-  }
 })
 
 const state = reactive({
@@ -190,6 +193,18 @@ const removeCollaborator = () => {
   store.dispatch('closeAllDialogs')
 }
 
+// explore spaces
+
+const updateExploreSpaces = async () => {
+  if (!props.showExploreSpaces) { return }
+  state.loading.exploreSpaces = true
+  const spaces = await store.dispatch('api/getPublicUserExploreSpaces', props.user)
+  // limit 5?
+  state.exploreSpaces = spaces
+  console.log('🌍🌍🌍🌍🌍🌍🌍', state.exploreSpaces)
+  state.loading.exploreSpaces = false
+}
+
 </script>
 
 <template lang="pug">
@@ -263,6 +278,11 @@ const removeCollaborator = () => {
       button(@click.left.stop="removeCollaborator")
         img.icon.cancel(src="@/assets/add.svg")
         span Remove From Space
+
+  section(v-if="!isCurrentUser")
+    Loader(:visible="state.loading.exploreSpaces")
+    //- spacelist state.explorespaces
+
 </template>
 
 <style lang="stylus">
