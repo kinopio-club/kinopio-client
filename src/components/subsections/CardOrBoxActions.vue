@@ -131,7 +131,7 @@ export default {
         label = 'box'
       }
       if (this.isCards && this.isBoxes) {
-        label = 'items'
+        label = 'card + box'
       }
       return label.toUpperCase()
     },
