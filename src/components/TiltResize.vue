@@ -1,6 +1,5 @@
 <script setup>
 import utils from '@/utils.js'
-import Slider from '@/components/Slider.vue'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
@@ -60,15 +59,11 @@ const removeResize = () => {
       img.resize-icon.icon(src="@/assets/resize-corner.svg")
 //- tilt
 .left-bottom-button-wrap.bottom-button-wrap(v-if="visible")
-  .inline-button-wrap
+  .inline-button-wrap(
+    title="Drag to Tilt"
+  )
     button.inline-button
       img.resize-icon.icon(src="@/assets/resize-corner.svg")
-  Slider(
-    :minValue="0"
-    :value="50"
-    :maxValue="100"
-    :shouldHideBadge="true"
-  )
   //- @updatePlayhead="updateOpacity"
   //- @resetPlayhead="resetOpacity"
 </template>
@@ -101,6 +96,4 @@ const removeResize = () => {
         transform scaleX(-1)
     img
       -webkit-user-drag none
-    .slider
-      position absolute
 </style>
