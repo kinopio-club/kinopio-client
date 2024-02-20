@@ -1,12 +1,17 @@
 <template lang="pug">
 section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
   .row
-    //- h1/h2
-    .segmented-buttons
-      button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }" title="Header 1")
-        span h1
-      button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }" title="Header 2")
-        span h2
+    .button-wrap.header-buttons-wrap(:class="{ 'header-is-active': isH1 || isH2 }")
+      //- h1/h2
+      .segmented-buttons
+        button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }" title="Header 1")
+          span h1
+        button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }" title="Header 2")
+          span h2
+      //- Fonts
+      button.toggle-fonts-button.small-button(v-if="isH1 || isH2")
+        span Fonts
+
     //- Tag
     .button-wrap(v-if="isCards")
       button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: tagPickerIsVisible }")
@@ -442,8 +447,24 @@ export default {
   .segmented-buttons
     margin-left 0
     margin-right 4px
-    vertical-align middle
+    vertical-align top
     margin-bottom 10px
   .segmented-buttons
     display inline-flex
+  .header-buttons-wrap
+    margin 0
+    &.header-is-active
+      margin-bottom 12px
+      .segmented-buttons
+        button
+          border-bottom-left-radius 0
+
+  .toggle-fonts-button
+    position absolute
+    bottom -9px
+    left 0
+    border-top-left-radius 0
+    border-top-right-radius 0
+    width 100%
+    text-align center
 </style>
