@@ -11,7 +11,7 @@ article.card-wrap#card(
   :data-y="y"
   :key="id"
   ref="card"
-  :class="{'is-resizing': currentUserIsResizingCard, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
+  :class="{'is-resizing': currentUserIsResizingCard, 'is-tilting': currentUserIsTiltingCard, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
   :title="cardNameIfComment"
 )
   .card(
@@ -344,6 +344,7 @@ export default {
       'currentSelectedOtherItem',
       'loadSpaceShowDetailsForCardId',
       'currentUserIsResizingCard',
+      'currentUserIsTiltingCard',
       'currentUserIsBoxSelecting',
       'searchResultsCards',
       'currentConnectionColor',
@@ -611,7 +612,7 @@ export default {
       if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return true }
       const userIsConnecting = this.currentConnectionStartCardIds.length
       const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
-      return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
+      return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.currentUserIsTiltingCard || this.isLocked
     },
     cardClasses () {
       const m = 100
@@ -1914,7 +1915,7 @@ export default {
     },
     updateCurrentTouchPosition (event) {
       currentTouchPosition = utils.cursorPositionInViewport(event)
-      if (this.isBeingDragged || this.currentUserIsResizingCard) {
+      if (this.isBeingDragged || this.currentUserIsResizingCard || this.currentUserIsTiltingCard) {
         event.preventDefault() // allows dragging cards without scrolling
       }
     },
@@ -2167,7 +2168,8 @@ article.card-wrap
   position absolute
   max-width var(--card-width)
   -webkit-touch-callout none
-  &.is-resizing
+  &.is-resizing,
+  &.is-tilting
     *
       outline none
   .card
