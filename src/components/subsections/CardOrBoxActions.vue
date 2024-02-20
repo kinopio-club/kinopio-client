@@ -1,6 +1,6 @@
 <template lang="pug">
 section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
-  p.subsection-vertical-label(:style="{ background: background }")
+  p.subsection-vertical-label(v-if="labelIsVisible" :style="{ background: background }")
     span {{label}}
   .row
     //- h1/h2
@@ -78,6 +78,7 @@ export default {
   props: {
     visible: Boolean,
     colorIsHidden: Boolean,
+    labelIsVisible: Boolean,
     tagsInCard: Array,
     backgroundColor: String,
     cards: {
