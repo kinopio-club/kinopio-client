@@ -516,6 +516,7 @@ export default {
     tiltResizeIsVisible () {
       if (this.isLocked) { return }
       if (!this.canEditSpace) { return }
+      if (this.cardPendingUpload || this.remoteCardPendingUpload) { return }
       return true
     },
     canEditSpace () { return this['currentUser/canEditSpace']() },
