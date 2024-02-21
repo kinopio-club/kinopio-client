@@ -281,6 +281,9 @@ export default {
       this.$store.dispatch('history/add', { cards, useSnapshot: true })
       this.$store.commit('currentUserIsTiltingCard', false)
       this.$store.commit('broadcast/updateStore', { updates: { userId: this.currentUser.id }, type: 'removeRemoteUserTiltingCards' })
+      cardIds.forEach(cardId => {
+        this.$store.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true })
+      })
     },
 
     // boxes

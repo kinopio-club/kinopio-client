@@ -51,7 +51,7 @@ const remove = (action) => {
   if (action === 'resize') {
     store.dispatch('currentCards/removeResize', { cardIds })
   } else if (action === 'tilt') {
-    // store.dispatch('currentCards/removeResize', { cardIds })
+    store.dispatch('currentCards/removeTilt', { cardIds })
   }
 }
 

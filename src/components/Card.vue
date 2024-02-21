@@ -7,11 +7,12 @@ article.card-wrap#card(
   :data-is-visible-in-viewport="isVisibleInViewport"
   :data-is-locked="isLocked"
   :data-resize-width="resizeWidth"
+  :data-tilt-degrees="tiltDegrees"
   :data-x="x"
   :data-y="y"
   :key="id"
   ref="card"
-  :class="{'is-resizing': currentUserIsResizingCard, 'is-tilting': currentUserIsTiltingCard, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
+  :class="articleClasses"
   :title="cardNameIfComment"
 )
   .card(
@@ -488,6 +489,7 @@ export default {
       if (!resizeWidth) { return }
       return resizeWidth
     },
+    tiltDegrees () { return this.card.tilt },
     isLocked () {
       if (!this.card) { return }
       const isLocked = this.card.isLocked
@@ -614,11 +616,19 @@ export default {
       const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
       return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.currentUserIsTiltingCard || this.isLocked
     },
+    articleClasses () {
+      const classes = {
+        'is-resizing': this.currentUserIsResizingCard,
+        'is-tilting': this.currentUserIsTiltingCard,
+        'is-hidden-by-opacity': this.isCardHiddenByCommentFilter,
+        'jiggle': this.shouldJiggle
+      }
+      return classes
+    },
     cardClasses () {
       const m = 100
       const l = 150
-      let classes = {
-        'jiggle': this.shouldJiggle,
+      const classes = {
         'active': this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.uploadIsDraggedOver,
         'filtered': this.isFiltered,
         'media-card': this.isVisualCard || this.pendingUploadDataUrl,
@@ -675,6 +685,9 @@ export default {
       if (this.isComment && !this.isSelected) {
         color = color || this.defaultColor
         styles.background = color
+      }
+      if (this.card.tilt) {
+        styles.transform = `rotate(${this.card.tilt}deg)`
       }
       styles = this.updateStylesWithWidth(styles)
       return styles
