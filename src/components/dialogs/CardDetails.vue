@@ -283,8 +283,7 @@ export default {
       previousSelectedTag: {},
       currentSearchTag: {},
       newTagColor: '',
-      shareCardIsVisible: false,
-      isUploadInProgress: false
+      shareCardIsVisible: false
     }
   },
   created () {
@@ -801,7 +800,6 @@ export default {
         return
       }
       try {
-        this.isUploadInProgress = true
         await this.$store.dispatch('upload/uploadFile', { file, cardId: this.card.id })
       } catch (error) {
         console.warn('🚒', error)
@@ -810,8 +808,6 @@ export default {
         } else {
           this.error.unknownUploadError = true
         }
-      } finally {
-        this.isUploadInProgress = false
       }
     },
     updatePastedName (event) {
@@ -1459,7 +1455,8 @@ export default {
       this.$store.commit('shouldPreventNextEnterKey', false)
       if (!card) { return }
       const cardHasName = Boolean(card.name)
-      if (!cardHasName && !this.isUploadInProgress) {
+      const cardHasPendingUpload = this.$store.getters['upload/hasPendingUploadForCardId'](cardId)
+      if (!cardHasName && !cardHasPendingUpload) {
         this.$store.dispatch('currentCards/remove', { id: cardId })
       }
       this.$store.dispatch('updatePageSizes')
