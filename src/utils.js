@@ -981,20 +981,22 @@ export default {
   },
   pageSizeFromItems (items) {
     const padding = 250
+    const defaultSize = 500
     items = this.clone(items)
     items = items.filter(item => item.x && item.y)
     if (!items.length) {
       return { width: 0, height: 0 }
     }
-    const defaultSize = 500
     let x = 0
     let y = 0
     items.forEach(item => {
+      const width = item.resizeWidth || item.width || defaultSize
+      const height = item.height
       if (item.x > x) {
-        x = item.x + padding
+        x = item.x + width + padding + window.scrollX
       }
       if (item.y > y) {
-        y = item.y + padding
+        y = item.y + height + padding + window.scrollY
       }
     })
     const width = x + defaultSize
