@@ -784,6 +784,21 @@ dialog
   span
     font-size 11px
 
+.preview-thumbnail-image
+  width 24px
+  height 22px
+  overflow hidden
+  object-fit cover
+  object-position 0 0
+  border-radius var(--entity-radius)
+  image-rendering crisp-edges
+button
+  > .preview-thumbnail-image
+    width 20px
+    height 18px
+    vertical-align -4px
+    margin-right 6px
+
 .segmented-buttons
   &.first-row
     button
