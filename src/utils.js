@@ -991,7 +991,7 @@ export default {
     let y = 0
     items.forEach(item => {
       const width = item.resizeWidth || item.width || defaultSize
-      const height = item.height
+      const height = item.resizeHeight || item.height
       if (item.x > x) {
         x = item.x + width + padding + window.scrollX
       }
