@@ -29,7 +29,6 @@ const start = (event, action) => {
     userId: store.state.currentUser.id,
     cardIds: cardIds
   }
-  console.log('🐙🐙', action)
   if (action === 'resize') {
     store.commit('currentUserIsResizingCard', true)
     store.commit('currentUserIsResizingCardIds', cardIds)
@@ -47,7 +46,6 @@ const remove = (action) => {
   if (multipleCardsSelectedIds.length) {
     cardIds = multipleCardsSelectedIds
   }
-  console.log('🐙', action)
   if (action === 'resize') {
     store.dispatch('currentCards/removeResize', { cardIds })
   } else if (action === 'tilt') {

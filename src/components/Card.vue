@@ -387,7 +387,8 @@ export default {
       'cardsWereDragged',
       'search',
       'hasNotifiedPressAndHoldToDrag',
-      'isPresentationMode'
+      'isPresentationMode',
+      'remoteUserTiltingCards'
     ]),
     ...mapGetters([
       'spaceCounterZoomDecimal',
@@ -505,7 +506,7 @@ export default {
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
     isSelectedOrDragging () {
-      return Boolean(this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor)
+      return Boolean(this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.remoteUserTiltingCardsColor)
     },
     isInSearchResultsCards () {
       const results = this.searchResultsCards
@@ -648,7 +649,7 @@ export default {
       if (this.nameIsColor) {
         nameColor = this.card.name
       }
-      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || this.card.backgroundColor
+      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.remoteUserTiltingCardsColor || nameColor || this.card.backgroundColor
       return color
     },
     articleStyle () {
@@ -678,7 +679,7 @@ export default {
       if (this.nameIsColor) {
         nameColor = this.card.name
       }
-      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || backgroundColor
+      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.remoteUserTiltingCardsColor || nameColor || backgroundColor
       let styles = {
         background: color
       }
@@ -1040,6 +1041,17 @@ export default {
         return undefined
       }
     },
+    remoteUserTiltingCardsColor () {
+      if (!this.remoteUserTiltingCards.length) { return }
+      let user = this.remoteUserTiltingCards.find(user => user.cardIds.includes(this.id))
+      if (user) {
+        user = this['currentSpace/userById'](user.userId)
+        return user.color
+      } else {
+        return undefined
+      }
+    },
+
     remoteUploadDraggedOverCardColor () {
       const draggedOverCard = this.remoteUploadDraggedOverCards.find(card => card.cardId === this.id)
       if (draggedOverCard) {
