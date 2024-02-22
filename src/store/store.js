@@ -127,6 +127,10 @@ const store = createStore({
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
     remoteUserResizingCards: [],
+    // tilting card
+    currentUserIsTiltingCard: false,
+    currentUserIsTiltingCardIds: [],
+    remoteUserTiltingCards: [],
     // dragging cards
     currentDraggingCardId: '',
     currentDraggingConnectedCardIds: [],
@@ -755,6 +759,24 @@ const store = createStore({
     updateRemoteUserResizingCards: (state, update) => {
       state.remoteUserResizingCards = state.remoteUserResizingCards.filter(remoteUser => remoteUser.userId !== update.userId)
       state.remoteUserResizingCards = state.remoteUserResizingCards.concat(update)
+    },
+
+    // Tilting Cards
+
+    currentUserIsTiltingCard: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.currentUserIsTiltingCard = value
+    },
+    currentUserIsTiltingCardIds: (state, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array' })
+      state.currentUserIsTiltingCardIds = cardIds
+    },
+    removeRemoteUserTiltingCards: (state, update) => {
+      state.remoteUserTiltingCards = state.remoteUserTiltingCards.filter(remoteUser => remoteUser.userId !== update.userId)
+    },
+    updateRemoteUserTiltingCards: (state, update) => {
+      state.remoteUserTiltingCards = state.remoteUserTiltingCards.filter(remoteUser => remoteUser.userId !== update.userId)
+      state.remoteUserTiltingCards = state.remoteUserTiltingCards.concat(update)
     },
 
     // Boxes

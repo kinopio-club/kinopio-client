@@ -7,11 +7,12 @@ article.card-wrap#card(
   :data-is-visible-in-viewport="isVisibleInViewport"
   :data-is-locked="isLocked"
   :data-resize-width="resizeWidth"
+  :data-tilt-degrees="tiltDegrees"
   :data-x="x"
   :data-y="y"
   :key="id"
   ref="card"
-  :class="{'is-resizing': currentUserIsResizingCard, 'is-hidden-by-opacity': isCardHiddenByCommentFilter}"
+  :class="articleClasses"
   :title="cardNameIfComment"
 )
   .card(
@@ -57,16 +58,8 @@ article.card-wrap#card(
 
     template(v-if="!isComment")
       ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" @updateCardDimensions="updateCardDimensions")
-    .bottom-button-wrap(v-if="resizeIsVisible")
-      //- resize
-      .resize-button-wrap.inline-button-wrap(
-        @mousedown.left.stop="startResizing"
-        @touchstart.stop="startResizing"
-        @dblclick="removeResize"
-        title="Drag to Resize"
-      )
-        button.inline-button.resize-button(tabindex="-1" :class="{hidden: isPresentationMode}")
-          img.resize-icon.icon(src="@/assets/resize-corner.svg")
+
+    TiltResize(:card="card" :visible="tiltResizeIsVisible")
 
     //- Content
     span.card-content-wrap(:style="cardContentWrapStyles")
@@ -231,6 +224,7 @@ import OtherSpacePreviewCard from '@/components/OtherSpacePreviewCard.vue'
 import CardCounter from '@/components/CardCounter.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
+import TiltResize from '@/components/TiltResize.vue'
 
 import dayjs from 'dayjs'
 import { mapState, mapGetters } from 'vuex'
@@ -265,7 +259,8 @@ export default {
     OtherSpacePreviewCard,
     UserLabelInline,
     OtherCardPreview,
-    CardCounter
+    CardCounter,
+    TiltResize
   },
   props: {
     card: Object
@@ -350,6 +345,7 @@ export default {
       'currentSelectedOtherItem',
       'loadSpaceShowDetailsForCardId',
       'currentUserIsResizingCard',
+      'currentUserIsTiltingCard',
       'currentUserIsBoxSelecting',
       'searchResultsCards',
       'currentConnectionColor',
@@ -391,7 +387,8 @@ export default {
       'cardsWereDragged',
       'search',
       'hasNotifiedPressAndHoldToDrag',
-      'isPresentationMode'
+      'isPresentationMode',
+      'remoteUserTiltingCards'
     ]),
     ...mapGetters([
       'spaceCounterZoomDecimal',
@@ -493,6 +490,7 @@ export default {
       if (!resizeWidth) { return }
       return resizeWidth
     },
+    tiltDegrees () { return this.card.tilt },
     isLocked () {
       if (!this.card) { return }
       const isLocked = this.card.isLocked
@@ -508,16 +506,17 @@ export default {
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
     isSelectedOrDragging () {
-      return Boolean(this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor)
+      return Boolean(this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.remoteUserTiltingCardsColor)
     },
     isInSearchResultsCards () {
       const results = this.searchResultsCards
       if (!results.length) { return }
       return Boolean(results.find(card => this.card.id === card.id))
     },
-    resizeIsVisible () {
+    tiltResizeIsVisible () {
       if (this.isLocked) { return }
       if (!this.canEditSpace) { return }
+      if (this.cardPendingUpload || this.remoteCardPendingUpload) { return }
       return true
     },
     canEditSpace () { return this['currentUser/canEditSpace']() },
@@ -617,13 +616,21 @@ export default {
       if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return true }
       const userIsConnecting = this.currentConnectionStartCardIds.length
       const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
-      return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.isLocked
+      return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.currentUserIsTiltingCard || this.isLocked
+    },
+    articleClasses () {
+      const classes = {
+        'is-resizing': this.currentUserIsResizingCard,
+        'is-tilting': this.currentUserIsTiltingCard,
+        'is-hidden-by-opacity': this.isCardHiddenByCommentFilter,
+        'jiggle': this.shouldJiggle
+      }
+      return classes
     },
     cardClasses () {
       const m = 100
       const l = 150
-      let classes = {
-        'jiggle': this.shouldJiggle,
+      const classes = {
         'active': this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.uploadIsDraggedOver,
         'filtered': this.isFiltered,
         'media-card': this.isVisualCard || this.pendingUploadDataUrl,
@@ -643,7 +650,7 @@ export default {
       if (this.nameIsColor) {
         nameColor = this.card.name
       }
-      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || this.card.backgroundColor
+      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.remoteUserTiltingCardsColor || nameColor || this.card.backgroundColor
       return color
     },
     articleStyle () {
@@ -673,13 +680,16 @@ export default {
       if (this.nameIsColor) {
         nameColor = this.card.name
       }
-      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || nameColor || backgroundColor
+      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.remoteUserTiltingCardsColor || nameColor || backgroundColor
       let styles = {
         background: color
       }
       if (this.isComment && !this.isSelected) {
         color = color || this.defaultColor
         styles.background = color
+      }
+      if (this.card.tilt) {
+        styles.transform = `rotate(${this.card.tilt}deg)`
       }
       styles = this.updateStylesWithWidth(styles)
       return styles
@@ -1032,6 +1042,17 @@ export default {
         return undefined
       }
     },
+    remoteUserTiltingCardsColor () {
+      if (!this.remoteUserTiltingCards.length) { return }
+      let user = this.remoteUserTiltingCards.find(user => user.cardIds.includes(this.id))
+      if (user) {
+        user = this['currentSpace/userById'](user.userId)
+        return user.color
+      } else {
+        return undefined
+      }
+    },
+
     remoteUploadDraggedOverCardColor () {
       const draggedOverCard = this.remoteUploadDraggedOverCards.find(card => card.cardId === this.id)
       if (draggedOverCard) {
@@ -1653,34 +1674,6 @@ export default {
       }
       this.$store.commit('currentUserIsDrawingConnection', true)
     },
-    startResizing (event) {
-      if (!this.canEditSpace) { return }
-      if (utils.isMultiTouch(event)) { return }
-      this.$store.dispatch('history/pause')
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      this.$store.dispatch('currentCards/incrementZ', this.id)
-      this.$store.commit('currentUserIsResizingCard', true)
-      let cardIds = [this.id]
-      const multipleCardsSelectedIds = this.multipleCardsSelectedIds
-      if (multipleCardsSelectedIds.length) {
-        cardIds = multipleCardsSelectedIds
-      }
-      this.$store.commit('currentUserIsResizingCardIds', cardIds)
-      const updates = {
-        userId: this.currentUser.id,
-        cardIds: cardIds
-      }
-      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
-    },
-    removeResize () {
-      let cardIds = [this.id]
-      const multipleCardsSelectedIds = this.multipleCardsSelectedIds
-      if (multipleCardsSelectedIds.length) {
-        cardIds = multipleCardsSelectedIds
-      }
-      this.$store.dispatch('currentCards/removeResize', { cardIds })
-    },
     updateStylesWithWidth (styles) {
       const cardHasExtendedContent = this.cardUrlPreviewIsVisible || this.otherCardIsVisible || this.isVisualCard || this.isAudioCard
       const cardHasUrls = this.cardHasMedia || this.cardHasUrls
@@ -1948,7 +1941,7 @@ export default {
     },
     updateCurrentTouchPosition (event) {
       currentTouchPosition = utils.cursorPositionInViewport(event)
-      if (this.isBeingDragged || this.currentUserIsResizingCard) {
+      if (this.isBeingDragged || this.currentUserIsResizingCard || this.currentUserIsTiltingCard) {
         event.preventDefault() // allows dragging cards without scrolling
       }
     },
@@ -2201,7 +2194,8 @@ article.card-wrap
   position absolute
   max-width var(--card-width)
   -webkit-touch-callout none
-  &.is-resizing
+  &.is-resizing,
+  &.is-tilting
     *
       outline none
   .card
@@ -2491,19 +2485,6 @@ article.card-wrap
     .audio-wrap
       margin-top 8px
       margin-left 8px
-
-  .bottom-button-wrap
-    position absolute
-    right 0px
-    bottom 0px
-    display flex
-    .resize-button-wrap
-      z-index 1
-      cursor ew-resize
-      button
-        cursor ew-resize
-    img
-      -webkit-user-drag none
 
   .lock-button-wrap
     opacity 0

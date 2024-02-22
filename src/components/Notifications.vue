@@ -26,6 +26,13 @@ aside.notifications(@click.left="closeAllDialogs")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
 
+  .persistent-item.info(v-if="currentUserIsResizingCard")
+    img.icon.resize(src="@/assets/resize.svg")
+    span Drag to Resize
+  .persistent-item.info(v-if="currentUserIsTiltingCard")
+    img.icon.resize(src="@/assets/resize.svg")
+    span Drag to Tilt
+
   .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
     img.icon(src="@/assets/brush.svg")
     span Hold and drag to paint
@@ -271,6 +278,8 @@ export default {
     notifyThanksForDonating () { return this.$store.state.notifyThanksForDonating },
     notifyThanksForUpgrading () { return this.$store.state.notifyThanksForUpgrading },
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
+    currentUserIsResizingCard () { return this.$store.state.currentUserIsResizingCard },
+    currentUserIsTiltingCard () { return this.$store.state.currentUserIsTiltingCard },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
     notifyReferralSuccessUser () { return this.$store.state.notifyReferralSuccessUser },
@@ -530,6 +539,9 @@ export default {
 
   .icon.refresh
     vertical-align 0px
+
+  .icon.resize
+    vertical-align 2px
 
   .filter-icon
     margin 0
