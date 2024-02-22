@@ -393,12 +393,13 @@ const currentSpace = {
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
     },
     createNewJournalSpace: async (context) => {
+      const isOnline = context.rootState.isOnline
       const isTomorrow = context.rootState.loadJournalSpaceTomorrow
       const currentUser = utils.clone(context.rootState.currentUser)
       context.commit('isLoadingSpace', true, { root: true })
       // weather
-      let weather = context.rootState.currentUser.weather
-      if (!weather) {
+      let weather = context.rootState.currentUser.weather || ''
+      if (!weather && isOnline) {
         weather = await context.dispatch('api/weather', null, { root: true })
       }
       // daily prompt
