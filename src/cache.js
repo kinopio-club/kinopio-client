@@ -25,7 +25,7 @@ export default {
     }
   },
   notifyCouldNotSave () {
-    const element = document.getElementById('notify-local-storage-is-full')
+    const element = document.getElementById('notify-cache-is-full')
     element.classList.remove('hidden')
   },
   pruneLocal () {

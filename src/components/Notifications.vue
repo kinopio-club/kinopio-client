@@ -18,7 +18,7 @@ aside.notifications(@click.left="closeAllDialogs")
       button(@click="removeById(item)")
         img.icon.cancel(src="@/assets/add.svg")
 
-  .persistent-item.danger.hidden#notify-local-storage-is-full
+  .persistent-item.danger.hidden#notify-cache-is-full
     p Local storage error has occured, please refresh
     .row
       .button-wrap
@@ -322,8 +322,8 @@ export default {
       this.$store.commit('notifyThanksForDonating', false)
       this.$store.commit('notifyThanksForUpgrading', false)
     },
-    localStorageErrorIsVisible () {
-      const element = document.getElementById('notify-local-storage-is-full')
+    cacheErrorIsVisible () {
+      const element = document.getElementById('notify-cache-is-full')
       const isHidden = element.className.includes('hidden')
       return Boolean(!isHidden)
     },
