@@ -231,7 +231,7 @@ export default {
       const maxIterations = 10
       const initialDelay = 1000 // 1 second
       const serverStatus = await this.$store.dispatch('api/getStatus')
-      console.log('☎️ status', serverStatus)
+      console.log('☎️ server online status', serverStatus)
       if (serverStatus) {
         this.$store.dispatch('isOnline', true)
         this.$store.dispatch('api/processQueueOperations')
