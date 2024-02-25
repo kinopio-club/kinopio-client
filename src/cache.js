@@ -345,6 +345,7 @@ export default {
   },
 
   // API Queue Buffer
+  // queue items are moved here at api.processQueueOperations
 
   queueBuffer () {
     return this.getLocal('queueBuffer') || []
