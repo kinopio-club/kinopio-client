@@ -57,7 +57,7 @@ article.card-wrap#card(
     Frames(:card="card")
 
     template(v-if="!isComment")
-      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" @updateCardDimensions="updateCardDimensions")
+      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" @updateCardDimensions="updateCardDimensions" @imageLoadError="toggleIsDisplayError(true)" @imageLoadSuccess="toggleIsDisplayError(false)")
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
 
@@ -336,7 +336,8 @@ export default {
       isAnimationUnsticking: false,
       stickyStretchResistance: 6,
       defaultColor: '#e3e3e3',
-      pathIsUpdated: false
+      pathIsUpdated: false,
+      isDisplayError: false
     }
   },
   computed: {
@@ -641,7 +642,8 @@ export default {
         'is-dark': this.backgroundColorIsDark,
         's-width': this.width < m,
         'm-width': utils.isBetween({ value: this.width, min: m, max: l }),
-        'l-width': this.width > l
+        'l-width': this.width > l,
+        'display-error': this.isDisplayError
       }
       return classes
     },
@@ -1189,6 +1191,9 @@ export default {
         this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: false })
         this.pathIsUpdated = true
       })
+    },
+    toggleIsDisplayError (value) {
+      this.isDisplayError = value
     },
 
     // migration added june 2023
@@ -2207,6 +2212,9 @@ article.card-wrap
     touch-action manipulation
     .name
       color var(--primary-on-light-background)
+    &.display-error
+      background var(--danger-background) !important
+      min-height 32px
     &:hover,
     &.hover
       box-shadow var(--hover-shadow)
