@@ -11,6 +11,11 @@ export default {
   state: {
     pendingUploads: []
   },
+  getters: {
+    hasPendingUploadForCardId: (state) => (id) => {
+      return state.pendingUploads.some(item => item.cardId === id)
+    }
+  },
   mutations: {
     s3Policy: (state, value) => {
       utils.typeCheck({ value, type: 'object', origin: 's3Policy' })
