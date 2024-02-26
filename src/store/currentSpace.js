@@ -477,18 +477,18 @@ const currentSpace = {
       })
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
     },
-    duplicateSpace: async (context) => {
+    duplicateSpace: (context) => {
       let space = utils.clone(context.state)
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
+      let uniqueNewSpace = utils.clearSpaceMeta(space, 'copy')
+      uniqueNewSpace.originSpaceId = space.id
+      uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('clearSearch', null, { root: true })
-      space = utils.clearSpaceMeta(space, 'copy')
-      const nullCardUsers = true
-      const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       isLoadingRemoteSpace = false
-      context.dispatch('loadSpace', { space: uniqueNewSpace, isLocalSpaceOnly: true })
-      await context.dispatch('saveImportedSpace')
-      context.commit('addNotification', { message: `${space.name} is now yours to edit`, type: 'success' }, { root: true })
+      context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
+      context.dispatch('saveNewSpace')
+      context.commit('addNotification', { message: `Space duplicated`, type: 'success' }, { root: true })
     },
     addSpace: (context, space) => {
       const user = context.rootState.currentUser
