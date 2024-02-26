@@ -517,6 +517,7 @@ span.space-list-wrap
       z-index 1
     .icon.templates
       margin-right 10px
+      vertical-align -2px
 
   .space-wrap
     position relative

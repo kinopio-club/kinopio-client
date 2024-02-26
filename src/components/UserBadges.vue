@@ -17,7 +17,7 @@
     span Guide Maker
   //- Ambassador
   .badge.button-badge.success(v-if="user.isAmbassador" @click.stop="toggleDescription('Ambassador')" :class="{active: name === 'Ambassador'}")
-    img.icon.star(src="@/assets/star.svg")
+    img.icon.heart(src="@/assets/heart.svg")
     span Ambassador
 
 .row(v-if="description")
