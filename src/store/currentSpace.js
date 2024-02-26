@@ -15,6 +15,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
 import defer from 'lodash-es/defer'
+import debounce from 'lodash-es/debounce'
 
 let spectatorIdleTimers = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
@@ -181,7 +182,7 @@ const currentSpace = {
       context.commit('triggerUpdateWindowHistory', null, { root: true })
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
-    createSpacePreviewImage: async (context) => {
+    createSpacePreviewImage: debounce(async function (context) {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       try {
@@ -193,7 +194,7 @@ const currentSpace = {
       } catch (error) {
         console.warn('🚑 createSpacePreviewImage', error)
       }
-    },
+    }, 2000), // 2 seconds
     updateInboxCache: async (context) => {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const isOffline = !context.rootState.isOnline
@@ -392,12 +393,13 @@ const currentSpace = {
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
     },
     createNewJournalSpace: async (context) => {
+      const isOnline = context.rootState.isOnline
       const isTomorrow = context.rootState.loadJournalSpaceTomorrow
       const currentUser = utils.clone(context.rootState.currentUser)
       context.commit('isLoadingSpace', true, { root: true })
       // weather
-      let weather = context.rootState.currentUser.weather
-      if (!weather) {
+      let weather = context.rootState.currentUser.weather || ''
+      if (!weather && isOnline) {
         weather = await context.dispatch('api/weather', null, { root: true })
       }
       // daily prompt
@@ -475,18 +477,18 @@ const currentSpace = {
       })
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
     },
-    duplicateSpace: async (context) => {
+    duplicateSpace: (context) => {
       let space = utils.clone(context.state)
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
+      let uniqueNewSpace = utils.clearSpaceMeta(space, 'copy')
+      uniqueNewSpace.originSpaceId = space.id
+      uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('clearSearch', null, { root: true })
-      space = utils.clearSpaceMeta(space, 'copy')
-      const nullCardUsers = true
-      const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       isLoadingRemoteSpace = false
-      context.dispatch('loadSpace', { space: uniqueNewSpace, isLocalSpaceOnly: true })
-      await context.dispatch('saveImportedSpace')
-      context.commit('addNotification', { message: `${space.name} is now yours to edit`, type: 'success' }, { root: true })
+      context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
+      context.dispatch('saveNewSpace')
+      context.commit('addNotification', { message: `Space duplicated`, type: 'success' }, { root: true })
     },
     addSpace: (context, space) => {
       const user = context.rootState.currentUser
@@ -553,17 +555,12 @@ const currentSpace = {
           context.commit('notifyConnectionError', true, { root: true })
         }
       }
-      if (!remoteSpace) { return }
+      if (!remoteSpace) {
+        context.commit('isLoadingSpace', false, { root: true })
+        return
+      }
       // only restore current space
       if (remoteSpace.id !== context.state.id) { return }
-      // only cache spaces you can edit
-      const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](remoteSpace)
-      const canEditSpace = context.rootGetters['currentUser/canEditSpace'](remoteSpace)
-      if (isSpaceMember && !remoteSpace.isRemoved) {
-        cache.saveSpace(remoteSpace)
-      } else if (!isSpaceMember && canEditSpace) {
-        context.commit('addNotification', { message: 'This space is open, which means you can add to it too', icon: 'open', type: 'success' }, { root: true })
-      }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
     removeLocalSpaceIfUserIsRemoved: (context, space) => {
@@ -774,9 +771,7 @@ const currentSpace = {
       context.dispatch('checkIfIsLoadingSpace', isRemote)
       // preview image
       if (!isRemote) { return }
-      setTimeout(() => {
-        context.dispatch('createSpacePreviewImage')
-      }, 3000) // 3 seconds
+      context.dispatch('createSpacePreviewImage')
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {
       if (!context.rootState.isEmbedMode) {
@@ -800,13 +795,30 @@ const currentSpace = {
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
+          context.dispatch('createSpacePreviewImage')
           return
         }
         context.dispatch('restoreSpaceRemote', remoteSpace)
+        context.dispatch('saveCurrentSpaceToCache')
+        context.dispatch('notifySpaceIsOpen')
+      }).catch(error => {
+        console.error('🚒 Error fetching remoteSpace', error)
       })
-        .catch(error => {
-          console.error('🚒 Error fetching remoteSpace', error)
-        })
+    },
+    saveCurrentSpaceToCache: (context) => {
+      const space = utils.clone(context.state)
+      const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](space)
+      if (!isSpaceMember) { return }
+      if (context.state.isRemoved) { return }
+      cache.saveSpace(space)
+    },
+    notifySpaceIsOpen: (context) => {
+      const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](context.state)
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace'](context.state)
+      if (context.state.isRemoved) { return }
+      if (!isSpaceMember && canEditSpace) {
+        context.commit('addNotification', { message: 'This space is open, which means you can add to it too', icon: 'open', type: 'success' }, { root: true })
+      }
     },
     clearStateMeta: (context) => {
       const user = context.rootState.currentUser
@@ -835,7 +847,8 @@ const currentSpace = {
       remoteSpace = utils.normalizeSpace(remoteSpace)
       // cards
       const cards = context.rootGetters['currentCards/all']
-      const cardResults = utils.mergeSpaceKeyValues({ prevItems: cards, newItems: remoteSpace.cards })
+      const selectedCards = context.rootGetters['currentCards/selectedCardsPositions']()
+      let cardResults = utils.mergeSpaceKeyValues({ prevItems: cards, newItems: remoteSpace.cards, selectedItems: selectedCards })
       context.dispatch('currentCards/mergeUnique', cardResults.updateItems, { root: true })
       context.dispatch('currentCards/mergeRemove', cardResults.removeItems, { root: true })
       // connectionTypes
@@ -853,6 +866,7 @@ const currentSpace = {
       const boxResults = utils.mergeSpaceKeyValues({ prevItems: boxes, newItems: remoteSpace.boxes })
       context.dispatch('currentBoxes/mergeUnique', { newItems: boxResults.updateItems, itemType: 'box' }, { root: true })
       context.dispatch('currentBoxes/mergeRemove', { removeItems: boxResults.removeItems, itemType: 'box' }, { root: true })
+      context.dispatch('history/redoLocalUpdates', null, { root: true })
       console.log('🎑 merged remote space', {
         cards: cardResults,
         types: connectionTypeReults,
@@ -867,6 +881,7 @@ const currentSpace = {
         addConnections: connectionResults.addItems,
         addBoxes: boxResults.addItems
       })
+      context.commit('triggerRestoreSpaceRemoteComplete', null, { root: true })
       console.timeEnd('🎑⏱️ restoreSpaceRemote')
     },
     loadLastSpace: async (context) => {
@@ -997,7 +1012,7 @@ const currentSpace = {
       context.commit('shouldShowExploreOnLoad', false, { root: true })
     },
     checkIfIsLoadingSpace: (context, isRemote) => {
-      const isOffline = !window.navigator.onLine
+      const isOffline = !context.rootState.isOnline
       const currentSpaceIsRemote = context.rootGetters['currentSpace/isRemote']
       if (isOffline) {
         context.commit('isLoadingSpace', false, { root: true })

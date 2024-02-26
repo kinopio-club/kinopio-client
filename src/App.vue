@@ -48,6 +48,8 @@ let multiTouchAction, shouldCancelUndo
 
 let inertiaScrollEndIntervalTimer, prevPosition
 
+let statusRetryCount = 0
+
 export default {
   components: {
     Header,
@@ -214,12 +216,38 @@ export default {
       this.isPinchZooming = false
       this.isTouchScrolling = false
     },
+
+    // online
+
     updateIsOnline () {
-      const status = window.navigator.onLine
-      this.$store.commit('isOnline', status)
-      if (status) {
-        this.$store.dispatch('api/processQueueOperations')
+      let clientStatus = window.navigator.onLine
+      if (!clientStatus) {
+        this.$store.dispatch('isOnline', false)
+        return
       }
+      this.updateServerIsOnline()
+    },
+    async updateServerIsOnline () {
+      const maxIterations = 10
+      const initialDelay = 1000 // 1 second
+      const serverStatus = await this.$store.dispatch('api/getStatus')
+      console.log('☎️ server online status', serverStatus)
+      if (serverStatus) {
+        this.$store.dispatch('isOnline', true)
+        this.$store.dispatch('api/processQueueOperations')
+      // error offline
+      } else {
+        this.$store.dispatch('isOnline', false)
+      }
+      // retry
+      let delay // delay increases up to ~15 minutes
+      if (statusRetryCount < maxIterations) {
+        statusRetryCount++
+        delay = Math.pow(2, statusRetryCount) * initialDelay
+      }
+      delay = delay || 15 * 60 * 1000 // 15 minutes
+      console.log(`☎️ Retrying status in ${delay / 1000} seconds...`)
+      setTimeout(this.updateServerIsOnline, delay)
     },
 
     //
@@ -598,18 +626,22 @@ label
       background-color var(--secondary-active-background)
 
 .bottom-button-wrap
-  .resize-button-wrap
+  .inline-button-wrap
     transform translate(8px, 13px)
     &:hover
-      .resize-button
+      background transparent
+      button
         opacity 1
-    .resize-button
+        background-color transparent
+    button
       border 0
       width 12px
       height 12px
       padding 0
       background-color transparent
       opacity 0.3
+      &:hover
+        background-color transparent
 
 hr
   border-top 1px solid var(--primary-border)
@@ -746,6 +778,31 @@ dialog
     border-radius var(--entity-radius)
     z-index -1
 
+.subsection-vertical-label
+  writing-mode vertical-rl
+  position absolute
+  top 5px
+  left -7px
+  padding 2px 0
+  width 14px
+  span
+    font-size 11px
+
+.preview-thumbnail-image
+  width 24px
+  height 22px
+  overflow hidden
+  object-fit cover
+  object-position 0 0
+  border-radius var(--entity-radius)
+  image-rendering crisp-edges
+button
+  > .preview-thumbnail-image
+    width 20px
+    height 18px
+    vertical-align -4px
+    margin-right 6px
+
 .segmented-buttons
   &.first-row
     button
@@ -854,8 +911,8 @@ dialog
 
 .icon.templates
   padding 0
-  height 9px
-  vertical-align 0px
+  height 12px
+  vertical-align -1px
 
 .icon.minimap
   vertical-align -2px

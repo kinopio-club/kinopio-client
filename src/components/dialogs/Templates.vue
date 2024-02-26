@@ -14,7 +14,7 @@ dialog.templates.narrow(
     .button-wrap(@click.left.prevent="toggleCurrentSpaceIsTemplate" @keydown.stop.enter="toggleCurrentSpaceIsTemplate")
       button(:class="{ active: currentSpaceIsTemplate }")
         img.icon.templates(src="@/assets/templates.svg")
-        span Current Space is Template
+        span Mark as Template
   section.results-section(:style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(
       :spaces="templates"

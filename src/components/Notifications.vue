@@ -12,18 +12,26 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'redo'" src="@/assets/undo.svg" class="redo")
         img.icon(v-else-if="item.icon === 'brush-y'" src="@/assets/brush-y.svg" class="brush-y")
         img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
+        img.icon(v-else-if="item.icon === 'offline'" src="@/assets/offline.svg" class="offline")
       span {{item.message}}
     .row(v-if="item.isPersistentItem")
       button(@click="removeById(item)")
         img.icon.cancel(src="@/assets/add.svg")
 
-  .persistent-item.danger.hidden#notify-local-storage-is-full
+  .persistent-item.danger.hidden#notify-cache-is-full
     p Local storage error has occured, please refresh
     .row
       .button-wrap
         button(@click.left="refreshBrowser")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
+
+  .persistent-item.info(v-if="currentUserIsResizingCard")
+    img.icon.resize(src="@/assets/resize.svg")
+    span Drag to Resize
+  .persistent-item.info(v-if="currentUserIsTiltingCard")
+    img.icon.resize(src="@/assets/resize.svg")
+    span Drag to Tilt
 
   .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
     img.icon(src="@/assets/brush.svg")
@@ -203,7 +211,7 @@ import OfflineBadge from '@/components/OfflineBadge.vue'
 
 import dayjs from 'dayjs'
 
-let pageWasOffline, checkIfShouldNotifySpaceOutOfSyncIntervalTimer
+let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
 export default {
   name: 'Notifications',
@@ -231,17 +239,10 @@ export default {
         this.addReadOnlyJiggle()
       } else if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
         this.notifyCardsCreatedIsOverLimitJiggle = true
-      } else if (mutation.type === 'isOnline') {
-        const isOnline = Boolean(mutation.payload)
-        if (!isOnline) {
-          console.log('☎️ is offline', !isOnline)
-          pageWasOffline = true
-        } else if (isOnline && pageWasOffline) {
-          this.checkIfShouldNotifySpaceOutOfSync()
-          pageWasOffline = false
-        }
       } else if (mutation.type === 'currentSpace/restoreSpace') {
         this.notifySpaceOutOfSync = false
+      } else if (mutation.type === 'triggerCheckIfShouldNotifySpaceOutOfSync') {
+        this.checkIfShouldNotifySpaceOutOfSync()
       }
     })
   },
@@ -260,7 +261,11 @@ export default {
     notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
     notifyConnectionErrorName () { return this.$store.state.notifyConnectionErrorName },
-    notifyServerCouldNotSave () { return this.$store.state.notifyServerCouldNotSave },
+    notifyServerCouldNotSave () {
+      const isOffline = !this.$store.state.isOnline
+      if (isOffline) { return }
+      return this.$store.state.notifyServerCouldNotSave
+    },
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
     notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
     notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
@@ -273,6 +278,8 @@ export default {
     notifyThanksForDonating () { return this.$store.state.notifyThanksForDonating },
     notifyThanksForUpgrading () { return this.$store.state.notifyThanksForUpgrading },
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
+    currentUserIsResizingCard () { return this.$store.state.currentUserIsResizingCard },
+    currentUserIsTiltingCard () { return this.$store.state.currentUserIsTiltingCard },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
     notifyReferralSuccessUser () { return this.$store.state.notifyReferralSuccessUser },
@@ -315,8 +322,8 @@ export default {
       this.$store.commit('notifyThanksForDonating', false)
       this.$store.commit('notifyThanksForUpgrading', false)
     },
-    localStorageErrorIsVisible () {
-      const element = document.getElementById('notify-local-storage-is-full')
+    cacheErrorIsVisible () {
+      const element = document.getElementById('notify-cache-is-full')
       const isHidden = element.className.includes('hidden')
       return Boolean(!isHidden)
     },
@@ -408,26 +415,33 @@ export default {
     },
     async checkIfShouldNotifySpaceOutOfSync () {
       console.log('☎️ checkIfShouldNotifySpaceOutOfSync…')
-      const space = utils.clone(this.$store.state.currentSpace)
-      const canEditSpace = this.$store.getters['currentUser/canEditSpace'](space)
-      let remoteSpace
-      if (canEditSpace) {
-        remoteSpace = await this.$store.dispatch('api/getSpace', { space })
-      } else {
-        remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
-      }
-      if (!remoteSpace) { return }
-      const spaceUpdatedAt = dayjs(space.updatedAt)
-      const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
-      const hoursDelta = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'hour') // hourDelta
-      const updatedAtIsChanged = hoursDelta >= 1
-      console.log('☎️ checkIfShouldNotifySpaceOutOfSync result', {
-        hoursDelta,
-        updatedAtIsChanged,
-        spaceUpdatedAt: space.updatedAt,
-        remoteSpaceUpdatedAt: remoteSpace.updatedAt
-      })
-      if (updatedAtIsChanged) {
+      try {
+        const space = utils.clone(this.$store.state.currentSpace)
+        const canEditSpace = this.$store.getters['currentUser/canEditSpace'](space)
+        if (!this.currentUserIsSignedIn) { return }
+        // use
+        let remoteSpace
+        if (canEditSpace) {
+          remoteSpace = await this.$store.dispatch('api/getSpace', { space })
+        } else {
+          remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
+        }
+        if (!remoteSpace) { return }
+        const spaceUpdatedAt = dayjs(space.updatedAt)
+        const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
+        const hoursDelta = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'hour') // hourDelta
+        const updatedAtIsChanged = hoursDelta >= 1
+        console.log('☎️ checkIfShouldNotifySpaceOutOfSync result', {
+          hoursDelta,
+          updatedAtIsChanged,
+          spaceUpdatedAt: space.updatedAt,
+          remoteSpaceUpdatedAt: remoteSpace.updatedAt
+        })
+        if (updatedAtIsChanged) {
+          this.notifySpaceOutOfSync = true
+        }
+      } catch (error) {
+        console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
         this.notifySpaceOutOfSync = true
       }
     },
@@ -525,6 +539,9 @@ export default {
 
   .icon.refresh
     vertical-align 0px
+
+  .icon.resize
+    vertical-align 2px
 
   .filter-icon
     margin 0

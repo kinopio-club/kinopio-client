@@ -46,8 +46,10 @@ const squashQueue = (queue) => {
   return squashed
 }
 
-const shouldRequest = ({ shouldRequestRemote, apiKey }) => {
-  const isOnline = window.navigator.onLine
+const shouldRequest = ({ shouldRequestRemote, apiKey, isOnline }) => {
+  if (utils.isUndefined(isOnline)) {
+    isOnline = true
+  }
   const currentUserIsSignedIn = Boolean(apiKey)
   if (isOnline && shouldRequestRemote) {
     return true
@@ -92,9 +94,8 @@ const self = {
   actions: {
 
     handleServerError: (context, { name, error, shouldNotNotifyUser }) => {
-      console.error('🚒', name, error)
+      console.error('🚒 handleServerError', name, error)
       if (!shouldNotNotifyUser) { return }
-      if (name === 'getLiveSpaces') { return }
       context.commit('notifyConnectionError', true, { root: true })
       context.commit('notifyConnectionErrorName', name, { root: true })
     },
@@ -151,9 +152,10 @@ const self = {
     processQueueOperations: async (context) => {
       let body
       const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
       const queue = cache.queue()
       const queueBuffer = cache.queueBuffer()
-      if (!shouldRequest({ apiKey }) || !queue.length) { return }
+      if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return }
       if (queueBuffer.length) {
         body = queueBuffer
       } else {
@@ -182,13 +184,22 @@ const self = {
           context.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
         }
       } catch (error) {
-        console.error('🚒', error, body)
+        console.error('🚒 processQueueOperations', error, body)
         context.commit('notifyServerCouldNotSave', true, { root: true })
       }
     },
 
     // Meta
 
+    getStatus: async (context) => {
+      try {
+        const response = await fetch(`${host}/`)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.log('🚒 getStatus', error)
+        return false
+      }
+    },
     getDate: async (context) => {
       try {
         const response = await fetch(`${host}/meta/date`)
@@ -206,6 +217,8 @@ const self = {
       }
     },
     getNewStuff: async (context) => {
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       const isSpacePage = context.rootGetters.isSpacePage
       if (!isSpacePage) { return }
       try {
@@ -262,7 +275,8 @@ const self = {
 
     getUser: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user`, options)
@@ -275,7 +289,8 @@ const self = {
       const isSpacePage = context.rootGetters.isSpacePage
       if (!isSpacePage) { return }
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         limit = limit || 100
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
@@ -287,7 +302,8 @@ const self = {
     },
     getUserFavorites: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/favorites`, options)
@@ -298,7 +314,8 @@ const self = {
     },
     getUserSpaces: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/spaces`, options)
@@ -311,7 +328,8 @@ const self = {
     },
     getUserRemovedSpaces: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/removed-spaces`, options)
@@ -322,7 +340,8 @@ const self = {
     },
     getUserInboxSpace: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/inbox-space`, options)
@@ -333,7 +352,8 @@ const self = {
     },
     getSpacesNotificationUnsubscribed: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/spaces-notification-unsubscribed`, options)
@@ -345,7 +365,8 @@ const self = {
     spaceNotificationResubscribe: async (context, space) => {
       const apiKey = context.rootState.currentUser.apiKey
       const user = context.rootState.currentUser
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/space/${space.id}/notification-resubscribe?userId=${user.id}`, options)
@@ -356,7 +377,8 @@ const self = {
     },
     deleteUserPermanent: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'DELETE', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/permanent`, options)
@@ -388,9 +410,20 @@ const self = {
         context.dispatch('handleServerError', { name: 'getPublicUsers', error })
       }
     },
+    getPublicUserExploreSpaces: async (context, user) => {
+      console.log(user)
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/public/explore-spaces/${user.id}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getPublicUserExploreSpaces', error })
+      }
+    },
     updateUserFavorites: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/favorites`, options)
@@ -404,6 +437,8 @@ const self = {
 
     getExploreSpaces: async (context) => {
       const isSpacePage = context.rootGetters.isSpacePage
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
         console.log('🛬 getting new spaces')
@@ -416,6 +451,8 @@ const self = {
     },
     getLiveSpaces: async (context) => {
       const isSpacePage = context.rootGetters.isSpacePage
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
         console.log('🛬 getting live spaces')
@@ -423,13 +460,14 @@ const self = {
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/live-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getLiveSpaces', error, shouldNotNotifyUser: true })
+        context.dispatch('handleServerError', { name: 'getLiveSpaces', error })
       }
     },
     getSpace: async (context, { space, shouldRequestRemote, spaceReadOnlyKey }) => {
       try {
         const apiKey = context.rootState.currentUser.apiKey
-        if (!shouldRequest({ shouldRequestRemote, apiKey })) { return }
+        const isOnline = context.rootState.isOnline
+        if (!shouldRequest({ shouldRequestRemote, apiKey, isOnline })) { return }
         let spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
         console.log('🛬 getting remote space', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace, spaceReadOnlyKey })
@@ -442,8 +480,8 @@ const self = {
     getOtherItems: async (context, { cardIds, spaceIds, invites }) => {
       const max = 60
       try {
-        const isOffline = !window.navigator.onLine
-        if (isOffline) { return }
+        const isOnline = context.rootState.isOnline
+        if (!isOnline) { return }
         // normalize
         cardIds = uniq(cardIds)
         cardIds = cardIds.slice(0, max)
@@ -460,8 +498,8 @@ const self = {
       }
     },
     getSpaceAnonymously: async (context, space) => {
-      const isOffline = !window.navigator.onLine
-      if (isOffline) { return }
+      const isOnline = context.rootState.isOnline
+      if (!isOnline) { return }
       const invite = cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id) || {}
       space.collaboratorKey = space.collaboratorKey || invite.collaboratorKey
       let spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
@@ -540,7 +578,8 @@ const self = {
     },
     getSpaceRemovedCards: async (context, space) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/space/${space.id}/removed-cards`, options)
@@ -551,7 +590,8 @@ const self = {
     },
     getSpaceCollaboratorKey: async (context, space) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/space/${space.id}/collaborator-key`, options)
@@ -562,7 +602,8 @@ const self = {
     },
     addSpaceCollaborator: async (context, { spaceId, collaboratorKey }) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       const userId = context.rootState.currentUser.id
       try {
         const body = { userId, spaceId }
@@ -576,7 +617,8 @@ const self = {
     },
     removeSpaceCollaborator: async (context, { space, user }) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const body = {
           spaceId: space.id,
@@ -591,7 +633,8 @@ const self = {
     },
     restoreRemovedSpace: async (context, space) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'PATCH', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/space/restore/${space.id}`, options)
@@ -602,7 +645,8 @@ const self = {
     },
     sendSpaceInviteEmails: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/space/email-invites/${body.spaceId}`, options)
@@ -616,7 +660,8 @@ const self = {
 
     getCardsWithLinkToSpaceId: async (context, spaceId) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/card/by-link-to-space/${spaceId}`, options)
@@ -628,7 +673,8 @@ const self = {
     updateCardsWithLinkToCardIds: async (context, body) => {
       if (!body.prevCards.length) { return }
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/card/link-to-card-ids`, options)
@@ -639,7 +685,8 @@ const self = {
     },
     updateCards: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/card/multiple`, options)
@@ -650,7 +697,8 @@ const self = {
     },
     createCards: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/card/multiple`, options)
@@ -661,7 +709,8 @@ const self = {
     },
     createCard: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/card`, options)
@@ -672,7 +721,8 @@ const self = {
     },
     createCardInInbox: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/card/to-inbox`, options)
@@ -683,7 +733,8 @@ const self = {
     },
     searchCards: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/card/search`, options)
@@ -697,7 +748,8 @@ const self = {
 
     updateConnectionTypes: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/connection-type/multiple`, options)
@@ -708,7 +760,8 @@ const self = {
     },
     createConnectionTypes: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/connection-type/multiple`, options)
@@ -722,7 +775,8 @@ const self = {
 
     updateConnections: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/connection/multiple`, options)
@@ -733,7 +787,8 @@ const self = {
     },
     createConnections: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/connection/multiple`, options)
@@ -747,7 +802,8 @@ const self = {
 
     createBoxes: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/box/multiple`, options)
@@ -761,7 +817,8 @@ const self = {
 
     getCardsWithTag: async (context, name) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       name = encodeURI(name)
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
@@ -773,7 +830,8 @@ const self = {
     },
     getUserTags: async (context, removeUnusedTags) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         let params = ''
         if (removeUnusedTags) {
@@ -917,7 +975,8 @@ const self = {
 
     getNotifications: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/notification`, options)
@@ -1045,7 +1104,8 @@ const self = {
 
     downloadAllSpaces: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
-      if (!shouldRequest({ apiKey })) { return }
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/space/download-all`, options)

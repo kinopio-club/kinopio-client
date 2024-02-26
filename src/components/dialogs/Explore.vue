@@ -17,7 +17,6 @@ dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height'
       @selectSpace="changeSpace"
       :userShowInExploreDate="userShowInExploreDate"
       :resultsSectionHeight="resultsSectionHeight"
-      :showFavoriteButton="true"
       :parentDialog="parentDialog"
     )
 </template>

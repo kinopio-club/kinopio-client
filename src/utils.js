@@ -461,6 +461,7 @@ export default {
   },
   cursorsAreClose (startCursor, endCursor) {
     if (!startCursor) { return }
+    if (!endCursor) { return }
     const threshold = 5
     const xRange = {
       value: endCursor.x,
@@ -980,20 +981,22 @@ export default {
   },
   pageSizeFromItems (items) {
     const padding = 250
+    const defaultSize = 500
     items = this.clone(items)
     items = items.filter(item => item.x && item.y)
     if (!items.length) {
       return { width: 0, height: 0 }
     }
-    const defaultSize = 500
     let x = 0
     let y = 0
     items.forEach(item => {
+      const width = item.resizeWidth || item.width || defaultSize
+      const height = item.resizeHeight || item.height
       if (item.x > x) {
-        x = item.x + padding
+        x = item.x + width + padding + window.scrollX
       }
       if (item.y > y) {
-        y = item.y + padding
+        y = item.y + height + padding + window.scrollY
       }
     })
     const width = x + defaultSize
@@ -1127,15 +1130,13 @@ export default {
 
   spaceIsUnchanged (prevSpace, newSpace) {
     if (!prevSpace.cards || !prevSpace.connections) { return false }
-    const isEditedAt = prevSpace.editedAt === newSpace.editedAt
-    const isCardLength = prevSpace.cards.length === newSpace.cards.length
-    const isConnectionLength = prevSpace.connections.length === newSpace.connections.length
-    const isUnchanged = isEditedAt && isCardLength && isConnectionLength
-    return isUnchanged
+    return prevSpace.editedAt === newSpace.editedAt
   },
-  mergeSpaceKeyValues ({ prevItems, newItems }) {
+  mergeSpaceKeyValues ({ prevItems, newItems, selectedItems }) {
     prevItems = prevItems.filter(item => Boolean(item))
     newItems = newItems.filter(item => Boolean(item))
+    selectedItems = selectedItems || []
+    const selectedItemIds = selectedItems.map(item => item.id)
     const prevIds = prevItems.map(item => item.id)
     const newIds = newItems.map(item => item.id)
     newItems = this.normalizeItems(newItems)
@@ -1144,8 +1145,16 @@ export default {
     let updateItems = []
     let removeItems = []
     newIds.forEach(id => {
+      const selectedItem = selectedItems.find(item => item.id === id)
       const itemExists = prevIds.includes(id)
-      if (itemExists) {
+      if (selectedItem) {
+        const prevItem = prevItems[id]
+        let newItem = newItems[id]
+        // use prevItem position to avoid ppsition item jumping while selected items dragging
+        newItem.x = prevItem.x
+        newItem.y = prevItem.y
+        updateItems.push(newItem)
+      } else if (itemExists) {
         updateItems.push(newItems[id])
       } else {
         addItems.push(newItems[id])
@@ -1391,6 +1400,7 @@ export default {
     return remoteSpace
   },
   AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
+    if (!spaces) { return }
     return spaces.map(space => {
       let userId
       space.users = space.users || []
@@ -1764,7 +1774,7 @@ export default {
   urlIsAudio (url) {
     if (!url) { return }
     url = url + ' '
-    const audioUrlPattern = new RegExp(/(?:\.mp3|\.m4a|\.ogg|\.wav)(?:\n| |\?|&)/igm)
+    const audioUrlPattern = new RegExp(/(?:\.mp3|\.m4a|\.ogg)(?:\n| |\?|&)/igm)
     const isAudio = url.match(audioUrlPattern)
     return Boolean(isAudio)
   },
@@ -1775,7 +1785,7 @@ export default {
       if (!hasProtocol) { return }
     }
     url = url + ' '
-    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf)(?:\n| |\?|&)/igm)
+    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf|\.wav|\.flac)(?:\n| |\?|&)/igm)
     const isFile = url.toLowerCase().match(fileUrlPattern)
     return Boolean(isFile)
   },
@@ -2010,7 +2020,8 @@ export default {
     return {
       id: space.id,
       name: space.name,
-      privacy: space.privacy
+      privacy: space.privacy,
+      previewThumbnailImage: space.previewThumbnailImage
     }
   },
   normalizeBroadcastUpdates (updates) {

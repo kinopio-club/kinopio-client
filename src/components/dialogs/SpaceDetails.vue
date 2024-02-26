@@ -39,7 +39,6 @@ dialog.space-details.is-pinnable.wide(v-if="visible" :open="visible" @click.left
       @selectSpace="changeSpace"
       @addSpace="addSpace"
       :resultsSectionHeight="resultsSectionHeight"
-      :showFavoriteButton="true"
       :parentDialog="parentDialog"
     )
 </template>
@@ -268,6 +267,7 @@ export default {
         spaces = this.sortSpacesByEditedOrCreatedAt(spaces)
         spaces = this.updateFavoriteSpaces(spaces)
         spaces = this.updateInboxSpace(spaces)
+        spaces = utils.clone(spaces)
         this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(spaces, this.currentUser)
       })
     }, 350, { leading: true }),
@@ -380,6 +380,7 @@ export default {
         this.updateFavorites()
         this.updateHeights()
         this.$store.commit('shouldExplicitlyHideFooter', true)
+        this.$store.dispatch('currentSpace/createSpacePreviewImage')
       } else {
         this.$store.commit('shouldExplicitlyHideFooter', false)
       }

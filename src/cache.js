@@ -25,7 +25,7 @@ export default {
     }
   },
   notifyCouldNotSave () {
-    const element = document.getElementById('notify-local-storage-is-full')
+    const element = document.getElementById('notify-cache-is-full')
     element.classList.remove('hidden')
   },
   pruneLocal () {
@@ -345,6 +345,7 @@ export default {
   },
 
   // API Queue Buffer
+  // queue items are moved here at api.processQueueOperations
 
   queueBuffer () {
     return this.getLocal('queueBuffer') || []

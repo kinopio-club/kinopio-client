@@ -58,7 +58,7 @@ const unreadExploreSpacesCount = computed(() => {
   let readDate = store.state.currentUser.showInExploreUpdatedAt
   if (!readDate) { return }
   readDate = dayjs(readDate)
-  const unreadSpaces = state.exploreSpaces.filter(space => {
+  const unreadSpaces = state.exploreSpaces?.filter(space => {
     const spaceDate = dayjs(space.showInExploreUpdatedAt)
     const delta = readDate.diff(spaceDate, 'second')
     return delta < 0
