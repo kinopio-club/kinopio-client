@@ -28,10 +28,10 @@ export default {
     },
     updatePendingUpload: (state, { cardId, spaceId, percentComplete, imageDataUrl }) => {
       state.pendingUploads = state.pendingUploads.map(item => {
-        if (percentComplete && (item.cardId === cardId || item.spaceId === spaceId)) {
+        if (percentComplete && item.cardId === cardId) {
           item.percentComplete = percentComplete
         }
-        if (imageDataUrl && (item.cardId === cardId || item.spaceId === spaceId)) {
+        if (imageDataUrl && item.cardId === cardId) {
           item.imageDataUrl = imageDataUrl
         }
         return item
@@ -101,12 +101,13 @@ export default {
           context.commit('broadcast/updateStore', { updates, type: 'updateRemotePendingUploads' }, { root: true })
           // end
           if (percentComplete >= 100) {
-            console.log('🛬 Upload completed or failed', event)
-            context.commit('triggerUploadComplete', {
+            const complete = {
               cardId,
               spaceId,
               url: `${consts.cdnHost}/${key}`
-            }, { root: true })
+            }
+            console.log('🛬 Upload completed or failed', event, complete)
+            context.commit('triggerUploadComplete', complete, { root: true })
             context.commit('removePendingUpload', { cardId, spaceId })
             resolve(request.response)
             nextTick(() => {
@@ -176,7 +177,6 @@ export default {
           key,
           type: file.type
         })
-        context.commit('addPendingUpload', { key, fileName, cardId })
       }
       // add presignedPostData to files
       const multiplePresignedPostData = await context.dispatch('api/createMultiplePresignedPosts', { files: filesPostData, userIsUpgraded, spaceUserIsUpgraded }, { root: true })
