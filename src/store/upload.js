@@ -92,33 +92,34 @@ export default {
         const request = new XMLHttpRequest()
         // progress
         request.upload.onprogress = (event) => {
-          const percentComplete = Math.floor(event.loaded / event.total * 100)
-          console.log(`🛫 Uploading ${fileName} for ${cardId || spaceId}, percent: ${percentComplete}`)
+          const percentComplete = event.loaded / event.total * 100
+          const percentCompleteDisplay = Math.floor(percentComplete)
+          console.log(`🛫 Uploading ${fileName} for ${cardId || spaceId}, percent: ${percentCompleteDisplay}`)
           const updates = {
             cardId,
             spaceId,
-            percentComplete,
+            percentComplete: percentCompleteDisplay,
             userId: context.rootState.currentUser.id,
             id: uploadId
           }
           context.commit('updatePendingUpload', updates)
           context.commit('broadcast/updateStore', { updates, type: 'updateRemotePendingUploads' }, { root: true })
-        }
-        // end
-        request.onload = (event) => {
-          console.log('🛬 Upload completed or failed', event)
-          context.commit('triggerUploadComplete', {
-            cardId,
-            spaceId,
-            url: `${consts.cdnHost}/${key}`
-          }, { root: true })
-          context.commit('removePendingUpload', { cardId, spaceId })
-          resolve(request.response)
-          nextTick(() => {
+          // end
+          if (percentComplete >= 100) {
+            console.log('🛬 Upload completed or failed', event)
+            context.commit('triggerUploadComplete', {
+              cardId,
+              spaceId,
+              url: `${consts.cdnHost}/${key}`
+            }, { root: true })
+            context.commit('removePendingUpload', { cardId, spaceId })
+            resolve(request.response)
             nextTick(() => {
-              context.dispatch('currentCards/updateDimensions', { cardId }, { root: true })
+              nextTick(() => {
+                context.dispatch('currentCards/updateDimensions', { cardId }, { root: true })
+              })
             })
-          })
+          }
         }
         // start
         request.open('POST', presignedPostData.url)
