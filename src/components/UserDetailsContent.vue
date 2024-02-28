@@ -10,6 +10,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import postMessage from '@/postMessage.js'
+import SpaceList from '@/components/SpaceList.vue'
 const User = defineAsyncComponent({
   loader: () => import('@/components/User.vue')
 })
@@ -17,23 +18,30 @@ const store = useStore()
 
 const descriptionElement = ref(null)
 
+onMounted(() => {
+  updateTextareaSize()
+  updateExploreSpaces()
+})
+
 const props = defineProps({
   visible: Boolean,
-  user: Object
+  user: Object,
+  showExploreSpaces: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   closeDialogs()
   clearUserSpaces()
-  if (value) {
-    updateTextareaSize()
-  }
 })
 
 const state = reactive({
   colorPickerIsVisible: false,
-  loadingUserspaces: false,
   spacePickerIsVisible: false,
   userSpaces: [],
+  exploreSpaces: [],
+  loading: {
+    userSpaces: false,
+    exploreSpaces: false
+  },
   error: {
     unknownServerError: false
   }
@@ -145,12 +153,12 @@ const isCollaborator = computed(() => {
 })
 const getUserSpaces = async () => {
   state.error.unknownServerError = false
-  if (state.loadingUserspaces) { return }
+  if (state.loading.userSpaces) { return }
   if (state.spacePickerIsVisible) {
     closeDialogs()
     return
   }
-  state.loadingUserspaces = true
+  state.loading.userSpaces = true
   state.spacePickerIsVisible = true
   try {
     const publicUser = await store.dispatch('api/getPublicUser', props.user)
@@ -159,10 +167,10 @@ const getUserSpaces = async () => {
     state.error.unknownServerError = true
     clearUserSpaces()
   }
-  state.loadingUserspaces = false
+  state.loading.userSpaces = false
 }
 const clearUserSpaces = () => {
-  state.loadingUserspaces = false
+  state.loading.userSpaces = false
   state.userSpaces = []
 }
 
@@ -186,6 +194,17 @@ const removeCollaborator = () => {
   store.dispatch('closeAllDialogs')
 }
 
+// explore spaces
+
+const exploreSpacesIsVisible = computed(() => state.exploreSpaces.length && !state.loading.exploreSpaces && !isCurrentUser.value)
+const updateExploreSpaces = async () => {
+  if (!props.showExploreSpaces) { return }
+  state.loading.exploreSpaces = true
+  const spaces = await store.dispatch('api/getPublicUserExploreSpaces', props.user)
+  state.exploreSpaces = spaces
+  state.loading.exploreSpaces = false
+}
+
 </script>
 
 <template lang="pug">
@@ -203,6 +222,15 @@ const removeCollaborator = () => {
         a(:href="websiteUrl" v-if="websiteUrl")
           span {{user.website}}
     UserBadges(:user="user")
+
+  section.results-section.explore-spaces-section(v-if="exploreSpacesIsVisible" ref="results")
+    SpaceList(
+      :spaces="state.exploreSpaces"
+      @selectSpace="changeSpace"
+      :hideFilter="true"
+      :isLoading="state.loading.exploreSpaces"
+      :disableListOptimizaitons="true"
+    )
 
   //- Current User
   template(v-if="isCurrentUser")
@@ -236,11 +264,11 @@ const removeCollaborator = () => {
   //- Other User
   section(v-if="!isCurrentUser && userIsSignedIn && user.id")
     .button-wrap
-      button(@click.left.stop="getUserSpaces" :class="{active: state.loadingUserspaces || state.spacePickerIsVisible}")
+      button(@click.left.stop="getUserSpaces" :class="{active: state.loading.userSpaces || state.spacePickerIsVisible}")
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id")
         span Spaces
-        Loader(:visible="state.loadingUserspaces")
-      SpacePicker(:visible="state.spacePickerIsVisible" :loading="state.loadingUserspaces" :user="user" :userSpaces="state.userSpaces" @selectSpace="changeSpace")
+        Loader(:visible="state.loading.userSpaces")
+      SpacePicker(:visible="state.spacePickerIsVisible" :loading="state.loading.userSpaces" :user="user" :userSpaces="state.userSpaces" @selectSpace="changeSpace")
     .button-wrap
       button(:class="{active: isFavoriteUser}" @click.left.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
         img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
@@ -310,4 +338,7 @@ const removeCollaborator = () => {
       -webkit-opacity 1
     .user
       margin-right 6px
+
+  .explore-spaces-section
+    max-height 250px
 </style>

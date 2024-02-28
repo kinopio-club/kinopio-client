@@ -1,9 +1,9 @@
 <template lang="pug">
 //- Video
-video(v-if="Boolean(video)" autoplay loop muted playsinline :key="video" :class="{selected: isSelectedOrDragging}" @canplay="updateDimensions" ref="video")
+video(v-if="Boolean(video)" autoplay loop muted playsinline :key="video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="video")
   source(:src="video")
 //- Image
-img.image(v-if="imageUrl" :src="imageUrl" :class="{selected: isSelectedOrDragging}" @load="updateDimensions")
+img.image(v-if="imageUrl" :src="imageUrl" :class="{selected: isSelectedOrDragging}" @load="handleSuccess" @error="handleError")
 </template>
 
 <script>
@@ -17,6 +17,7 @@ export default {
     image: String,
     video: String
   },
+  emits: ['updateCardDimensions', 'imageLoadSuccess', 'imageLoadError'],
   data () {
     return {
       imageUrl: null
@@ -25,7 +26,6 @@ export default {
   created () {
     this.imageUrl = this.image || this.pendingUploadDataUrl
   },
-  emits: ['updateCardDimensions'],
   computed: {
     isInteractingWithItem () { return this.$store.getters.isInteractingWithItem }
   },
@@ -42,6 +42,14 @@ export default {
       if (!this.video) { return }
       const element = this.$refs.video
       element.play()
+    },
+    handleSuccess (event) {
+      this.$emit('imageLoadSuccess')
+      this.updateDimensions()
+    },
+    handleError (event) {
+      this.$emit('imageLoadError')
+      this.updateDimensions()
     }
   },
   watch: {
@@ -49,15 +57,13 @@ export default {
       if (!url && !this.pendingUploadDataUrl) {
         this.imageUrl = null
       }
-
       const onLoaded = () => {
         this.imageUrl = url
       }
-
       const image = new Image()
       image.addEventListener('load', onLoaded)
+      image.addEventListener('error', this.handleError)
       image.src = url
-
       if (image.complete) {
         onLoaded()
       }

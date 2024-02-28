@@ -1455,7 +1455,8 @@ export default {
       this.$store.commit('shouldPreventNextEnterKey', false)
       if (!card) { return }
       const cardHasName = Boolean(card.name)
-      if (!cardHasName) {
+      const cardHasPendingUpload = this.$store.getters['upload/hasPendingUploadForCardId'](cardId)
+      if (!cardHasName && !cardHasPendingUpload) {
         this.$store.dispatch('currentCards/remove', { id: cardId })
       }
       this.$store.dispatch('updatePageSizes')

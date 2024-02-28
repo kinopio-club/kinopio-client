@@ -447,6 +447,34 @@ const currentCards = {
       })
     },
 
+    // tilt
+
+    tilt: (context, { cardIds, deltaX }) => {
+      const maxDegrees = 30
+      deltaX = -deltaX
+      cardIds.forEach(cardId => {
+        const card = context.getters.byId(cardId)
+        let tilt = card.tilt || 0
+        tilt = tilt + deltaX
+        tilt = Math.min(maxDegrees, tilt)
+        tilt = Math.max(-maxDegrees, tilt)
+        const updates = { id: cardId, tilt }
+        context.dispatch('update', updates)
+        context.dispatch('broadcast/update', { updates, type: 'tiltCard', handler: 'currentCards/update' }, { root: true })
+        context.dispatch('updateDimensions', { cards: [card] })
+        const connections = context.rootGetters['currentConnections/byCardId'](cardId)
+        context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
+      })
+    },
+    removeTilt: (context, { cardIds }) => {
+      cardIds.forEach(cardId => {
+        const body = { id: cardId, tilt: 0 }
+        context.dispatch('update', body)
+        utils.removeAllCardDimensions({ id: cardId })
+        context.dispatch('updateDimensions', { cardId })
+      })
+    },
+
     // move
 
     move: (context, { endCursor, prevCursor, delta }) => {
@@ -556,13 +584,15 @@ const currentCards = {
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
       context.commit('broadcast/updateStore', { updates: { userId: context.rootState.currentUser.id }, type: 'clearRemoteCardsDragging' }, { root: true })
       connections = uniqBy(connections, 'id')
-      context.dispatch('currentConnections/updatePaths', { connections, shouldUpdateApi: true }, { root: true })
-      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
-      context.dispatch('history/resume', null, { root: true })
-      context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
-      context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })
-      context.commit('triggerUpdateLockedItemButtonsPositions', null, { root: true })
-      prevMoveDelta = { x: 0, y: 0 }
+      nextTick(() => {
+        context.dispatch('currentConnections/updatePaths', { connections, shouldUpdateApi: true }, { root: true })
+        context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
+        context.dispatch('history/resume', null, { root: true })
+        context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
+        context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })
+        context.commit('triggerUpdateLockedItemButtonsPositions', null, { root: true })
+        prevMoveDelta = { x: 0, y: 0 }
+      })
     },
 
     // distribute position
@@ -828,6 +858,12 @@ const currentCards = {
       const cards = cardIds.map(id => getters.byId(id))
       return cards
     },
+    isSelectedIds: (state, getters) => {
+      let cards = getters.isSelected
+      cards = cards.filter(card => Boolean(card))
+      const cardIds = cards.map(card => card.id)
+      return cardIds
+    },
     linkedItems: (state, getters) => {
       let cardIds = []
       let spaceIds = []
@@ -926,6 +962,18 @@ const currentCards = {
     defaultCardMaxWidth: (state, getters, rootState, rootGetters) => {
       const maxWidth = rootState.currentSpace.defaultCardMaxWidth || 230
       return maxWidth
+    },
+    selectedCardsPositions: (state, getters) => () => {
+      const cardIds = getters.isSelectedIds
+      let cards = cardIds.map(id => {
+        const element = document.querySelector(`article[data-card-id="${id}"]`)
+        if (!element) { return }
+        const x = parseInt(element.style.left)
+        const y = parseInt(element.style.top)
+        return { id, x, y }
+      })
+      cards = cards.filter(card => Boolean(card))
+      return cards
     }
   }
 }

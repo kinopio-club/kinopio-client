@@ -584,6 +584,9 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
+        //- embed badge
+        .label-badge.space-name-badge-wrap
+          span Scroll horizontally and vertically
     .right
       SpaceUsers(:userDetailsIsInline="true")
 
@@ -639,7 +642,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
               img.icon.left-arrow(src="@/assets/down-arrow.svg")
           //- Current Space
-          .button-wrap
+          .button-wrap.space-name-button-wrap
             button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
               span(v-if="currentSpaceIsInbox")
                 img.icon.inbox-icon(src="@/assets/inbox.svg")
@@ -658,17 +661,18 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
             Import(:visible="state.importIsVisible")
             //- Read Only badge
-            .label-badge.read-only-badge-wrap(v-if="!userCanEditSpace")
+            .label-badge.space-name-badge-wrap(v-if="!userCanEditSpace")
               span(:class="{'invisible': state.readOnlyJiggle}")
                 span Read Only
               span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
                 span Read Only
-          //- State
-          .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
-            button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              Loader(:visible="spaceHasStatus")
-              .badge.success.space-status-success(v-if="!spaceHasStatus")
-            SpaceStatus(:visible="state.spaceStatusIsVisible")
+            //- State
+            .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
+              button.small-button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+                Loader(:visible="spaceHasStatus")
+                .badge.success.space-status-success(v-if="!spaceHasStatus")
+              SpaceStatus(:visible="state.spaceStatusIsVisible")
+
           //- Offline
           .button-wrap(v-if="!isOnline")
             button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
@@ -803,10 +807,14 @@ header
         vertical-align -1px
     dialog
       max-width initial
-    > .button-wrap
+    .space-name-button-wrap
       max-width 58vw
       @media(max-width 550px)
         max-width 31vw
+      // @media(max-width 414px)
+      //   max-width 26vw
+      // @media(max-width 380px)
+      //   max-width 21vw
       > button
         .privacy-icon
           margin-left 6px
@@ -893,8 +901,9 @@ header
     .view-hidden
       margin-left 5px
 
-  .read-only-badge-wrap
+  .space-name-badge-wrap
     min-width 63px
+    width max-content
     pointer-events none
     position absolute
     background-color var(--info-background)
@@ -925,10 +934,14 @@ header
     vertical-align -1px
 
   .badge.space-status-success
-    margin 0
-    padding 0 7px
+    width 16px
+    height 16px
     border-radius 10px
     vertical-align 0
+    margin 2px 2px
+    min-height initial
+    min-width initial
+    display block
 
   .badge.notification-button-badge
     margin 0
@@ -962,4 +975,12 @@ header
   flex-direction row-reverse
   button
     pointer-events all
+
+.button-wrap.space-status-button-wrap
+  position absolute
+  top 4px
+  right 4px
+  left initial
+  .loader
+    margin 2px 2px
 </style>

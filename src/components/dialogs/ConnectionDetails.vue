@@ -216,7 +216,7 @@ const toggleFilteredInSpace = () => {
 
 const lastTypeColor = computed(() => {
   const lastType = store.getters['currentConnections/lastType']
-  return lastType.color
+  return lastType?.color
 })
 const shouldUseLastConnectionType = computed(() => store.state.currentUser.shouldUseLastConnectionType)
 const toggleShouldUseLastConnectionType = () => {

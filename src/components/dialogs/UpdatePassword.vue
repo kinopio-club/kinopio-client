@@ -1,9 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 import UpdatePassword from '@/components/UpdatePassword.vue'
+const store = useStore()
 
 const visible = computed(() => store.state.passwordResetIsVisible)
 </script>
