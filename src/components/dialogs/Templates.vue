@@ -70,7 +70,11 @@ export default {
       })
     },
     templates () {
-      return this.userSpaces.concat(this.spaces)
+      const templates = this.userSpaces.concat(this.spaces)
+      return templates.map(template => {
+        template.previewThumbnailImage = `https://us-east-1.linodeobjects.com/kinopio-uploads/${template.id}/preview-image-thumbnail-${template.id}.jpg`
+        return template
+      })
     },
     parentDialog () { return 'templates' }
   },

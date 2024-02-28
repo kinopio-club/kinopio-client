@@ -401,6 +401,7 @@ span.space-list-wrap
               //- offline
               span(v-if="isNotCached(space.id)")
                 OfflineBadge(:isInline="true" :isDanger="true")
+              //- template category
               .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
               //- tweet space
               span(v-if="space.isFromTweet" title="Tweet space")
