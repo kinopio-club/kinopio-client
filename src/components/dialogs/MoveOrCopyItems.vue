@@ -34,6 +34,43 @@ watch(() => props.visible, async (value, prevValue) => {
   }
 })
 
+const mapRemoteItems = (items) => {
+  const spaceId = state.selectedSpace.id
+  return items.map(item => {
+    item.spaceId = spaceId
+    return item
+  })
+}
+const scrollIntoView = () => {
+  const element = dialogElement.value
+  utils.scrollIntoView({ element })
+}
+const closeDialogs = () => {
+  state.spacePickerIsVisible = false
+}
+
+// spaces
+
+const currentSpace = computed(() => store.state.currentSpace)
+const updateSpaces = () => {
+  const spaces = cache.getAllSpaces()
+  state.spaces = spaces.filter(space => {
+    const spaceIsNotCurrent = space.id !== currentSpace.value.id
+    const spaceHasId = Boolean(space.id)
+    return spaceIsNotCurrent && spaceHasId
+  })
+  state.selectedSpace = state.spaces[0]
+}
+const updateSelectedSpace = (space) => {
+  state.selectedSpace = space
+  state.spacePickerIsVisible = false
+}
+const toggleSpacePickerIsVisible = () => {
+  state.spacePickerIsVisible = !state.spacePickerIsVisible
+}
+
+// items
+
 const multipleCardsSelectedIds = computed(() => store.state.multipleCardsSelectedIds)
 const multipleBoxesSelectedIds = computed(() => store.state.multipleBoxesSelectedIds)
 const multipleCardsIsSelected = computed(() => {
@@ -41,74 +78,9 @@ const multipleCardsIsSelected = computed(() => {
   return Boolean(numberOfCards > 1)
 })
 const cardsCount = computed(() => multipleCardsSelectedIds.value.length)
-const currentSpace = computed(() => store.state.currentSpace)
-const pluralItem = computed(() => {
-  const condition = multipleCardsSelectedIds.value.length + multipleBoxesSelectedIds.value.length !== 1
-  return utils.pluralize('item', condition)
-})
-const actionLabel = computed(() => {
-  if (props.actionIsMove) {
-    return 'move'
-  } else {
-    return 'copy'
-  }
-})
-const actionLabelCapitalized = computed(() => utils.capitalizeFirstLetter(actionLabel.value))
-const buttonLabel = computed(() => {
-  const action = capitalize(actionLabel.value) // copy, move
-  const item = capitalize(pluralItem.value) // item, items
-  return `${action} ${item} to Space`
-})
+
 const names = computed(() => props.exportData.cards.map(card => card.name))
 const text = computed(() => utils.textFromCardNames(props.exportData.cards))
-
-const triggerUpgradeUserIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerUpgradeUserIsVisible')
-}
-const capitalize = (value) => {
-  return utils.capitalizeFirstLetter(value)
-}
-const pastTense = (value) => {
-  return utils.pastTense(value)
-}
-const copyText = async () => {
-  store.commit('clearNotificationsWithPosition')
-  const position = utils.cursorPositionInPage(event)
-  try {
-    await navigator.clipboard.writeText(text.value)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-  } catch (error) {
-    console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-  }
-}
-const toggleSpacePickerIsVisible = () => {
-  state.spacePickerIsVisible = !state.spacePickerIsVisible
-}
-const removeCards = (cards) => {
-  cards.forEach(card => {
-    store.dispatch('currentCards/remove', card)
-    store.dispatch('currentConnections/removeFromCard', card)
-  })
-}
-const removeBoxes = (boxes) => {
-  boxes.forEach(box => {
-    store.dispatch('currentBoxes/remove', box)
-  })
-}
-const notifySuccess = () => {
-  const action = pastTense(actionLabel.value)
-  const message = `${cardsCount.value} ${pluralItem.value} ${action} to ${state.selectedSpace.name}` // 3 cards copied to SpacePalace
-  store.commit('notifyMoveOrCopyToSpaceDetails', { id: state.selectedSpace.id, name: state.selectedSpace.name, message })
-  store.commit('notifyMoveOrCopyToSpace', true)
-}
-const notifyNewSpaceSuccess = (newSpace) => {
-  const action = pastTense(actionLabel.value)
-  const message = `${newSpace.name} added with ${cardsCount.value} ${pluralItem.value} ${action} ` // SpacePalace added with 3 cards copied
-  store.commit('notifyMoveOrCopyToSpaceDetails', { id: newSpace.id, name: newSpace.name, message })
-  store.commit('notifyMoveOrCopyToSpace', true)
-}
 const selectedItems = () => {
   const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
   const { cards, boxes } = props.exportData
@@ -120,6 +92,40 @@ const selectedItems = () => {
   const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
   const connectionTypes = connectionTypeIds.map(id => store.getters['currentConnections/typeByTypeId'](id))
   return { cards, connectionTypes, connections, boxes }
+}
+
+// labels
+
+const actionLabel = computed(() => {
+  if (props.actionIsMove) {
+    return 'move'
+  } else {
+    return 'copy'
+  }
+})
+const pluralItem = computed(() => {
+  const condition = multipleCardsSelectedIds.value.length + multipleBoxesSelectedIds.value.length !== 1
+  return utils.pluralize('item', condition)
+})
+const actionLabelCapitalized = computed(() => utils.capitalizeFirstLetter(actionLabel.value))
+const buttonLabel = computed(() => {
+  const action = utils.capitalizeFirstLetter(actionLabel.value) // copy, move
+  const item = utils.capitalizeFirstLetter(pluralItem.value) // item, items
+  return `${action} ${item} to Space`
+})
+
+// copy or move
+
+const removeCards = (cards) => {
+  cards.forEach(card => {
+    store.dispatch('currentCards/remove', card)
+    store.dispatch('currentConnections/removeFromCard', card)
+  })
+}
+const removeBoxes = (boxes) => {
+  boxes.forEach(box => {
+    store.dispatch('currentBoxes/remove', box)
+  })
 }
 const copyToSelectedSpace = async (items) => {
   state.loading = true
@@ -148,11 +154,6 @@ const copyToSelectedSpace = async (items) => {
   state.loading = false
 }
 
-const isCardsCreatedIsOverLimit = () => {
-  if (props.actionIsMove) { return }
-  const items = selectedItems().cards.length
-  return store.getters['currentUser/cardsCreatedWillBeOverLimit'](items)
-}
 const moveOrCopyToSpace = async () => {
   if (state.loading) { return }
   const items = selectedItems()
@@ -178,32 +179,43 @@ const moveOrCopyToSpace = async () => {
   store.dispatch('clearMultipleSelected')
   store.dispatch('closeAllDialogs')
 }
-const mapRemoteItems = (items) => {
-  const spaceId = state.selectedSpace.id
-  return items.map(item => {
-    item.spaceId = spaceId
-    return item
-  })
+const copyText = async () => {
+  store.commit('clearNotificationsWithPosition')
+  const position = utils.cursorPositionInPage(event)
+  try {
+    await navigator.clipboard.writeText(text.value)
+    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
 }
-const updateSpaces = () => {
-  const spaces = cache.getAllSpaces()
-  state.spaces = spaces.filter(space => {
-    const spaceIsNotCurrent = space.id !== currentSpace.value.id
-    const spaceHasId = Boolean(space.id)
-    return spaceIsNotCurrent && spaceHasId
-  })
-  state.selectedSpace = state.spaces[0]
+
+// should upgrade user
+
+const triggerUpgradeUserIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerUpgradeUserIsVisible')
 }
-const updateSelectedSpace = (space) => {
-  state.selectedSpace = space
-  state.spacePickerIsVisible = false
+const isCardsCreatedIsOverLimit = () => {
+  if (props.actionIsMove) { return }
+  const items = selectedItems().cards.length
+  return store.getters['currentUser/cardsCreatedWillBeOverLimit'](items)
 }
-const scrollIntoView = () => {
-  const element = dialogElement.value
-  utils.scrollIntoView({ element })
+
+// notify
+
+const notifySuccess = () => {
+  const action = utils.pastTense(actionLabel.value)
+  const message = `${cardsCount.value} ${pluralItem.value} ${action} to ${state.selectedSpace.name}` // 3 cards copied to SpacePalace
+  store.commit('notifyMoveOrCopyToSpaceDetails', { id: state.selectedSpace.id, name: state.selectedSpace.name, message })
+  store.commit('notifyMoveOrCopyToSpace', true)
 }
-const closeDialogs = () => {
-  state.spacePickerIsVisible = false
+const notifyNewSpaceSuccess = (newSpace) => {
+  const action = utils.pastTense(actionLabel.value)
+  const message = `${newSpace.name} added with ${cardsCount.value} ${pluralItem.value} ${action} ` // SpacePalace added with 3 cards copied
+  store.commit('notifyMoveOrCopyToSpaceDetails', { id: newSpace.id, name: newSpace.name, message })
+  store.commit('notifyMoveOrCopyToSpace', true)
 }
 </script>
 
