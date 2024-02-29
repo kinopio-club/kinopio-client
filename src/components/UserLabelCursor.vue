@@ -63,7 +63,7 @@ export default {
       }
     },
     colorIsDark () { return utils.colorIsDark(this.user.color) },
-    scroll () { return this.$store.getters.windowScrollWithSpaceOffset }
+    scroll () { return this.$store.getters.windowScrollWithSpaceOffset() }
   },
   methods: {
     updatePositionWithZoom (cursor) {

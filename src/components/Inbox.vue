@@ -101,7 +101,7 @@ const selectCard = async (card) => {
     return
   }
   updateCardIsLoading(card)
-  const scroll = store.getters.windowScrollWithSpaceOffset
+  const scroll = store.getters.windowScrollWithSpaceOffset()
   let newCard = utils.clone(card)
   newCard.id = nanoid()
   newCard.spaceId = store.state.currentSpace.id

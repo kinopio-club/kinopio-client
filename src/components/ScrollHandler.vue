@@ -8,12 +8,9 @@ const store = useStore()
 
 onMounted(() => {
   window.addEventListener('wheel', handleMouseWheelEvents, { passive: false })
-  window.addEventListener('scroll', handleScrollEvents)
-  store.dispatch('updateWindowScroll')
 })
 onUnmounted(() => {
   window.removeEventListener('wheel', handleMouseWheelEvents, { passive: false })
-  window.removeEventListener('scroll', handleScrollEvents)
 })
 
 // wheel
@@ -39,9 +36,6 @@ const handleMouseWheelEvents = (event) => {
 
 // scroll
 
-const handleScrollEvents = (event) => {
-  store.dispatch('updateWindowScroll')
-}
 const updateZoomOrigin = (event) => {
   const cursor = utils.cursorPositionInPage(event)
   store.dispatch('zoomOrigin', cursor)

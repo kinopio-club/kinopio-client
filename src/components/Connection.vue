@@ -87,7 +87,6 @@ export default {
       'remoteCardsSelected',
       'disableViewportOptimizations',
       'viewportHeight',
-      'windowScroll',
       'multipleConnectionsSelectedIds',
       'connectionDetailsIsVisibleForConnectionId',
       'remoteConnectionDetailsVisible',
@@ -296,7 +295,8 @@ export default {
       if (!this.connection.path) { return }
       const threshold = 400 * this.spaceCounterZoomDecimal
       const offset = utils.outsideSpaceOffset().y
-      const scroll = this.windowScroll.y - offset
+      const windowScroll = { x: window.scrollX, y: window.scrollY }
+      const scroll = windowScroll.y - offset
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
       let y1 = utils.startCoordsFromConnectionPath(this.connection.path).y
       let y2 = utils.endCoordsFromConnectionPath(this.connection.path).y + y1

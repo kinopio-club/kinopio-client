@@ -172,7 +172,7 @@ export default {
       let curve = this.createCurve(startPoint)
       this.paintCurve(context, curve)
       // broadcast curve
-      const scroll = this.$store.state.windowScroll
+      const scroll = { x: window.scrollX, y: window.scrollY }
       startPoint = {
         x: this.currentCursor.x + scroll.x,
         y: this.currentCursor.y + scroll.y

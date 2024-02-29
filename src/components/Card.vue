@@ -374,7 +374,6 @@ export default {
       'userDetailsUser',
       'disableViewportOptimizations',
       'currentDraggingConnectedCardIds',
-      'windowScroll',
       'preventDraggedCardFromShowingDetails',
       'currentUserIsPanning',
       'currentUserIsPainting',
@@ -1157,7 +1156,8 @@ export default {
       const threshold = 400 * this.spaceCounterZoomDecimal
       const fallbackHeight = this.$store.getters['currentCards/defaultCardMaxWidth']
       const offset = utils.outsideSpaceOffset().y
-      const scroll = (this.windowScroll.y - offset) * this.spaceCounterZoomDecimal
+      const windowScroll = { x: window.scrollX, y: window.scrollY }
+      const scroll = (windowScroll.y - offset) * this.spaceCounterZoomDecimal
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
       const min = scroll - threshold
       const max = scroll + viewport + threshold

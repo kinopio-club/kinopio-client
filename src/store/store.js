@@ -59,7 +59,6 @@ const store = createStore({
     // zoom and scroll
     spaceZoomPercent: 100,
     pinchCounterZoomDecimal: 1,
-    windowScroll: {},
     zoomOrigin: { x: 0, y: 0 },
 
     // search
@@ -410,10 +409,6 @@ const store = createStore({
     pinchCounterZoomDecimal: (state, value) => {
       utils.typeCheck({ value, type: 'number' })
       state.pinchCounterZoomDecimal = value
-    },
-    windowScroll: (state, value) => {
-      utils.typeCheck({ value, type: 'object' })
-      state.windowScroll = value
     },
     zoomOrigin: (state, value) => {
       state.zoomOrigin = value
@@ -1738,9 +1733,6 @@ const store = createStore({
 
     // scrolling and zoom
 
-    updateWindowScroll: (context) => {
-      context.commit('windowScroll', { x: window.scrollX, y: window.scrollY })
-    },
     zoomOrigin: (context, origin) => {
       utils.typeCheck({ value: origin, type: 'object' })
       const prevOrigin = context.state.zoomOrigin
@@ -1829,8 +1821,8 @@ const store = createStore({
       const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
       return transform
     },
-    windowScrollWithSpaceOffset: (state) => {
-      let scroll = state.windowScroll
+    windowScrollWithSpaceOffset: (state) => () => {
+      let scroll = { x: window.scrollX, y: window.scrollY }
       return utils.updatePositionWithSpaceOffset(scroll)
     },
     isInteractingWithItem: (state) => {

@@ -164,7 +164,7 @@ export default {
   methods: {
     updateRemotePosition (position) {
       const zoom = this.spaceZoomDecimal
-      const scroll = this.$store.state.windowScroll
+      const scroll = { x: window.scrollX, y: window.scrollY }
       const space = document.getElementById('space')
       const rect = space.getBoundingClientRect()
       position = {

@@ -335,7 +335,7 @@ export default {
       let childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
       const childCardData = this.$store.getters['currentCards/byId'](childCardId)
       const shouldOutdentChildToParent = childCard && !childCardData
-      const scroll = this.$store.getters.windowScrollWithSpaceOffset
+      const scroll = this.$store.getters.windowScrollWithSpaceOffset()
       const spaceBetweenCards = utils.spaceBetweenCards()
       let position = {}
       let isParentCard = true
@@ -387,7 +387,7 @@ export default {
       options = options || {}
       useSiblingConnectionType = false
       const spaceBetweenCards = utils.spaceBetweenCards()
-      const scroll = this.$store.getters.windowScrollWithSpaceOffset
+      const scroll = this.$store.getters.windowScrollWithSpaceOffset()
       const parentCardId = this.$store.state.parentCardId
       const childCardId = this.$store.state.childCardId
       let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
