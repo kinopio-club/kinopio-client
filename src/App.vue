@@ -362,13 +362,13 @@ export default {
 
 @font-face
   font-family 'Recoleta'
-  src url("assets/fonts/Recoleta-Regular.woff2") format("woff2")
+  src url("assets/fonts/recoleta/Recoleta-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 
 @font-face
   font-family 'Recoleta'
-  src url("assets/fonts/Recoleta-Bold.woff2") format("woff2")
+  src url("assets/fonts/recoleta/Recoleta-Bold.woff2") format("woff2")
   font-weight bold
   font-style normal
 
