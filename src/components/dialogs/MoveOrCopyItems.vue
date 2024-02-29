@@ -1,253 +1,239 @@
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import cache from '@/cache.js'
+import utils from '@/utils.js'
+import SpacePicker from '@/components/dialogs/SpacePicker.vue'
+import Loader from '@/components/Loader.vue'
+const store = useStore()
+
+const dialogElement = ref(null)
+
+const props = defineProps({
+  visible: Boolean,
+  actionIsMove: Boolean,
+  exportData: Object
+})
+
+const state = reactive({
+  spaces: [],
+  selectedSpace: {},
+  spacePickerIsVisible: false,
+  loading: false,
+  cardsCreatedIsOverLimit: false
+})
+
+watch(() => props.visible, async (value, prevValue) => {
+  store.commit('clearNotificationsWithPosition')
+  await nextTick()
+  if (value) {
+    closeDialogs()
+    scrollIntoView()
+    updateSpaces()
+  }
+})
+
+const multipleCardsSelectedIds = computed(() => store.state.multipleCardsSelectedIds)
+const multipleBoxesSelectedIds = computed(() => store.state.multipleBoxesSelectedIds)
+const multipleCardsIsSelected = computed(() => {
+  const numberOfCards = multipleCardsSelectedIds.value.length
+  return Boolean(numberOfCards > 1)
+})
+const cardsCount = computed(() => multipleCardsSelectedIds.value.length)
+const currentSpace = computed(() => store.state.currentSpace)
+const pluralItem = computed(() => {
+  const condition = multipleCardsSelectedIds.value.length + multipleBoxesSelectedIds.value.length !== 1
+  return utils.pluralize('item', condition)
+})
+const actionLabel = computed(() => {
+  if (props.actionIsMove) {
+    return 'move'
+  } else {
+    return 'copy'
+  }
+})
+const actionLabelCapitalized = computed(() => utils.capitalizeFirstLetter(actionLabel.value))
+const buttonLabel = computed(() => {
+  const action = capitalize(actionLabel.value) // copy, move
+  const item = capitalize(pluralItem.value) // item, items
+  return `${action} ${item} to Space`
+})
+const names = computed(() => props.exportData.cards.map(card => card.name))
+const text = computed(() => utils.textFromCardNames(props.exportData.cards))
+
+const triggerUpgradeUserIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerUpgradeUserIsVisible')
+}
+const capitalize = (value) => {
+  return utils.capitalizeFirstLetter(value)
+}
+const pastTense = (value) => {
+  return utils.pastTense(value)
+}
+const copyText = async () => {
+  store.commit('clearNotificationsWithPosition')
+  const position = utils.cursorPositionInPage(event)
+  try {
+    await navigator.clipboard.writeText(text.value)
+    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
+}
+const toggleSpacePickerIsVisible = () => {
+  state.spacePickerIsVisible = !state.spacePickerIsVisible
+}
+const removeCards = (cards) => {
+  cards.forEach(card => {
+    store.dispatch('currentCards/remove', card)
+    store.dispatch('currentConnections/removeFromCard', card)
+  })
+}
+const removeBoxes = (boxes) => {
+  boxes.forEach(box => {
+    store.dispatch('currentBoxes/remove', box)
+  })
+}
+const notifySuccess = () => {
+  const action = pastTense(actionLabel.value)
+  const message = `${cardsCount.value} ${pluralItem.value} ${action} to ${state.selectedSpace.name}` // 3 cards copied to SpacePalace
+  store.commit('notifyMoveOrCopyToSpaceDetails', { id: state.selectedSpace.id, name: state.selectedSpace.name, message })
+  store.commit('notifyMoveOrCopyToSpace', true)
+}
+const notifyNewSpaceSuccess = (newSpace) => {
+  const action = pastTense(actionLabel.value)
+  const message = `${newSpace.name} added with ${cardsCount.value} ${pluralItem.value} ${action} ` // SpacePalace added with 3 cards copied
+  store.commit('notifyMoveOrCopyToSpaceDetails', { id: newSpace.id, name: newSpace.name, message })
+  store.commit('notifyMoveOrCopyToSpace', true)
+}
+const selectedItems = () => {
+  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
+  const { cards, boxes } = props.exportData
+  const connections = store.getters['currentConnections/all'].filter(connection => {
+    const isStartCardMatch = multipleCardsSelectedIds.includes(connection.startCardId)
+    const isEndCardMatch = multipleCardsSelectedIds.includes(connection.endCardId)
+    return isStartCardMatch && isEndCardMatch
+  })
+  const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
+  const connectionTypes = connectionTypeIds.map(id => store.getters['currentConnections/typeByTypeId'](id))
+  return { cards, connectionTypes, connections, boxes }
+}
+const copyToSelectedSpace = async (items) => {
+  state.loading = true
+  const nullCardUsers = true
+  const newItems = utils.uniqueSpaceItems(utils.clone(items), nullCardUsers)
+  let { cards, connectionTypes, connections, boxes } = newItems
+  cards = mapRemoteItems(cards)
+  connectionTypes = mapRemoteItems(connectionTypes)
+  connections = mapRemoteItems(connections)
+  boxes = mapRemoteItems(boxes)
+  await store.dispatch('api/createCards', cards)
+  await store.dispatch('api/createConnectionTypes', connectionTypes)
+  await store.dispatch('api/createConnections', connections)
+  await store.dispatch('api/createBoxes', boxes)
+  const spaceIsCached = Boolean(cache.space(state.selectedSpace.id).cards)
+  if (!spaceIsCached) {
+    const space = { id: state.selectedSpace.id }
+    let remoteSpace = await store.dispatch('api/getSpace', { space, shouldRequestRemote: true })
+    cache.saveSpace(remoteSpace)
+  }
+  cache.addToSpace(newItems, state.selectedSpace.id)
+  if (props.actionIsMove) {
+    await store.dispatch('api/updateCardsWithLinkToCardIds', { prevCards: items.cards, newCards: newItems.cards })
+  }
+  console.log('🚚 copies created', newItems)
+  state.loading = false
+}
+
+const isCardsCreatedIsOverLimit = () => {
+  if (props.actionIsMove) { return }
+  const items = selectedItems().cards.length
+  return store.getters['currentUser/cardsCreatedWillBeOverLimit'](items)
+}
+const moveOrCopyToSpace = async () => {
+  if (state.loading) { return }
+  const items = selectedItems()
+  if (isCardsCreatedIsOverLimit()) {
+    state.cardsCreatedIsOverLimit = true
+    return
+  }
+  console.log('🍆🍆🍆🍆🍆🍆', items)
+  // todo replace await w operations/cache async
+  await copyToSelectedSpace(items)
+  notifySuccess()
+  if (props.actionIsMove) {
+    removeCards(items.cards)
+    removeBoxes(items.boxes)
+    items.isRemoved = true
+    store.dispatch('history/resume')
+    store.dispatch('history/add', items)
+  }
+  store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+    cards: items.cards
+  })
+  store.dispatch('currentConnections/removeUnusedTypes')
+  store.dispatch('clearMultipleSelected')
+  store.dispatch('closeAllDialogs')
+}
+const mapRemoteItems = (items) => {
+  const spaceId = state.selectedSpace.id
+  return items.map(item => {
+    item.spaceId = spaceId
+    return item
+  })
+}
+const updateSpaces = () => {
+  const spaces = cache.getAllSpaces()
+  state.spaces = spaces.filter(space => {
+    const spaceIsNotCurrent = space.id !== currentSpace.value.id
+    const spaceHasId = Boolean(space.id)
+    return spaceIsNotCurrent && spaceHasId
+  })
+  state.selectedSpace = state.spaces[0]
+}
+const updateSelectedSpace = (space) => {
+  state.selectedSpace = space
+  state.spacePickerIsVisible = false
+}
+const scrollIntoView = () => {
+  const element = dialogElement.value
+  utils.scrollIntoView({ element })
+}
+const closeDialogs = () => {
+  state.spacePickerIsVisible = false
+}
+</script>
+
 <template lang="pug">
-dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
+dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop="closeDialogs")
   section(v-if="!actionIsMove")
     //- Copy Card Names
     button(@click.left="copyText")
       img.icon.copy(src="@/assets/copy.svg")
       span Copy Card Names
-
   section
     .row
       p {{actionLabelCapitalized}} {{pluralItem}} to space
     .row
       .button-wrap
-        button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
-          img.preview-thumbnail-image(v-if="selectedSpace.previewThumbnailImage" :src="selectedSpace.previewThumbnailImage")
-          span {{selectedSpace.name}}
+        button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: state.spacePickerIsVisible}")
+          img.preview-thumbnail-image(v-if="state.selectedSpace.previewThumbnailImage" :src="state.selectedSpace.previewThumbnailImage")
+          span {{state.selectedSpace.name}}
           img.down-arrow(src="@/assets/down-arrow.svg")
-        SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true")
-    button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
+        SpacePicker(:visible="state.spacePickerIsVisible" :selectedSpace="state.selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true")
+    button(@click.left="moveOrCopyToSpace" :class="{active: state.loading}")
       img.icon.cut(v-if="actionIsMove" src="@/assets/cut.svg")
       img.icon.copy(v-else src="@/assets/copy.svg")
       span {{buttonLabel}}
-      Loader(:visible="loading")
-
-  .error-card-limit(v-if="cardsCreatedIsOverLimit")
+      Loader(:visible="state.loading")
+  .error-card-limit(v-if="state.cardsCreatedIsOverLimit")
     .badge.danger Out of Cards
     p To add more cards you'll need to upgrade
     button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
-
 </template>
-
-<script>
-import cache from '@/cache.js'
-import utils from '@/utils.js'
-import SpacePicker from '@/components/dialogs/SpacePicker.vue'
-import Loader from '@/components/Loader.vue'
-
-export default {
-  name: 'MoveOrCopyItems',
-  components: {
-    SpacePicker,
-    Loader
-  },
-  props: {
-    visible: Boolean,
-    actionIsMove: Boolean,
-    exportData: Object
-  },
-  data () {
-    return {
-      spaces: [],
-      selectedSpace: {},
-      spacePickerIsVisible: false,
-      loading: false,
-      cardsCreatedIsOverLimit: false
-    }
-  },
-  computed: {
-    multipleCardsSelectedIds () {
-      return utils.clone(this.$store.state.multipleCardsSelectedIds)
-    },
-    multipleBoxesSelectedIds () {
-      return utils.clone(this.$store.state.multipleBoxesSelectedIds)
-    },
-    multipleCardsIsSelected () {
-      const numberOfCards = this.multipleCardsSelectedIds.length
-      return Boolean(numberOfCards > 1)
-    },
-    cardsCount () {
-      return this.multipleCardsSelectedIds.length
-    },
-    currentSpace () {
-      return this.$store.state.currentSpace
-    },
-    pluralItem () {
-      const condition = this.multipleCardsSelectedIds.length + this.multipleBoxesSelectedIds.length !== 1
-      return utils.pluralize('item', condition)
-    },
-    actionLabel () {
-      if (this.actionIsMove) {
-        return 'move'
-      } else {
-        return 'copy'
-      }
-    },
-    actionLabelCapitalized () { return utils.capitalizeFirstLetter(this.actionLabel) },
-    buttonLabel () {
-      const actionLabel = this.capitalize(this.actionLabel) // copy, move
-      const pluralItem = this.capitalize(this.pluralItem) // item, items
-      return `${actionLabel} ${pluralItem} to Space`
-    },
-    names () { return this.exportData.cards.map(card => card.name) },
-    text () { return utils.textFromCardNames(this.exportData.cards) }
-  },
-  methods: {
-    triggerUpgradeUserIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerUpgradeUserIsVisible')
-    },
-    capitalize (value) {
-      return utils.capitalizeFirstLetter(value)
-    },
-    pastTense (value) {
-      return utils.pastTense(value)
-    },
-    async copyText () {
-      this.$store.commit('clearNotificationsWithPosition')
-      const position = utils.cursorPositionInPage(event)
-      try {
-        await navigator.clipboard.writeText(this.text)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-      } catch (error) {
-        console.warn('🚑 copyText', error)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-      }
-    },
-    toggleSpacePickerIsVisible () {
-      this.spacePickerIsVisible = !this.spacePickerIsVisible
-    },
-    removeCards (cards) {
-      cards.forEach(card => {
-        this.$store.dispatch('currentCards/remove', card)
-        this.$store.dispatch('currentConnections/removeFromCard', card)
-      })
-    },
-    removeBoxes (boxes) {
-      boxes.forEach(box => {
-        this.$store.dispatch('currentBoxes/remove', box)
-      })
-    },
-    notifySuccess () {
-      const actionLabel = this.pastTense(this.actionLabel)
-      const message = `${this.cardsCount} ${this.pluralItem} ${actionLabel} to ${this.selectedSpace.name}` // 3 cards copied to SpacePalace
-      this.$store.commit('notifyMoveOrCopyToSpaceDetails', { id: this.selectedSpace.id, name: this.selectedSpace.name, message })
-      this.$store.commit('notifyMoveOrCopyToSpace', true)
-    },
-    notifyNewSpaceSuccess (newSpace) {
-      const actionLabel = this.pastTense(this.actionLabel)
-      const message = `${newSpace.name} added with ${this.cardsCount} ${this.pluralItem} ${actionLabel} ` // SpacePalace added with 3 cards copied
-      this.$store.commit('notifyMoveOrCopyToSpaceDetails', { id: newSpace.id, name: newSpace.name, message })
-      this.$store.commit('notifyMoveOrCopyToSpace', true)
-    },
-    selectedItems () {
-      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
-      const { cards, boxes } = this.exportData
-      const connections = this.$store.getters['currentConnections/all'].filter(connection => {
-        const isStartCardMatch = multipleCardsSelectedIds.includes(connection.startCardId)
-        const isEndCardMatch = multipleCardsSelectedIds.includes(connection.endCardId)
-        return isStartCardMatch && isEndCardMatch
-      })
-      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
-      const connectionTypes = connectionTypeIds.map(id => this.$store.getters['currentConnections/typeByTypeId'](id))
-      return { cards, connectionTypes, connections, boxes }
-    },
-    async copyToSelectedSpace (items) {
-      this.loading = true
-      const nullCardUsers = true
-      const newItems = utils.uniqueSpaceItems(utils.clone(items), nullCardUsers)
-      let { cards, connectionTypes, connections, boxes } = newItems
-      cards = this.mapRemoteItems(cards)
-      connectionTypes = this.mapRemoteItems(connectionTypes)
-      connections = this.mapRemoteItems(connections)
-      boxes = this.mapRemoteItems(boxes)
-      await this.$store.dispatch('api/createCards', cards)
-      await this.$store.dispatch('api/createConnectionTypes', connectionTypes)
-      await this.$store.dispatch('api/createConnections', connections)
-      await this.$store.dispatch('api/createBoxes', boxes)
-      const spaceIsCached = Boolean(cache.space(this.selectedSpace.id).cards)
-      if (!spaceIsCached) {
-        const space = { id: this.selectedSpace.id }
-        let remoteSpace = await this.$store.dispatch('api/getSpace', { space, shouldRequestRemote: true })
-        cache.saveSpace(remoteSpace)
-      }
-      cache.addToSpace(newItems, this.selectedSpace.id)
-      if (this.actionIsMove) {
-        await this.$store.dispatch('api/updateCardsWithLinkToCardIds', { prevCards: items.cards, newCards: newItems.cards })
-      }
-      console.log('🚚 copies created', newItems)
-      this.loading = false
-    },
-    isCardsCreatedIsOverLimit () {
-      if (this.actionIsMove) { return }
-      const items = this.selectedItems().cards.length
-      return this.$store.getters['currentUser/cardsCreatedWillBeOverLimit'](items)
-    },
-    async moveOrCopyToSpace () {
-      if (this.loading) { return }
-      const items = this.selectedItems()
-      if (this.isCardsCreatedIsOverLimit()) {
-        this.cardsCreatedIsOverLimit = true
-        return
-      }
-      await this.copyToSelectedSpace(items)
-      this.notifySuccess()
-      if (this.actionIsMove) {
-        this.removeCards(items.cards)
-        this.removeBoxes(items.boxes)
-        items.isRemoved = true
-        this.$store.dispatch('history/resume')
-        this.$store.dispatch('history/add', items)
-      }
-      this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        cards: items.cards
-      })
-      this.$store.dispatch('currentConnections/removeUnusedTypes')
-      this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('closeAllDialogs')
-    },
-    mapRemoteItems (items) {
-      const spaceId = this.selectedSpace.id
-      return items.map(item => {
-        item.spaceId = spaceId
-        return item
-      })
-    },
-    updateSpaces () {
-      const spaces = cache.getAllSpaces()
-      this.spaces = spaces.filter(space => {
-        const spaceIsNotCurrent = space.id !== this.currentSpace.id
-        const spaceHasId = Boolean(space.id)
-        return spaceIsNotCurrent && spaceHasId
-      })
-      this.selectedSpace = this.spaces[0]
-    },
-    updateSelectedSpace (space) {
-      this.selectedSpace = space
-      this.spacePickerIsVisible = false
-    },
-    scrollIntoView () {
-      const element = this.$refs.dialog
-      utils.scrollIntoView({ element })
-    },
-    closeDialogs () {
-      this.spacePickerIsVisible = false
-    }
-  },
-  watch: {
-    visible (visible) {
-      this.$store.commit('clearNotificationsWithPosition')
-      this.$nextTick(() => {
-        if (visible) {
-          this.closeDialogs()
-          this.scrollIntoView()
-          this.updateSpaces()
-        }
-      })
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .more-or-copy-cards
