@@ -1,5 +1,7 @@
 <template lang="pug">
 section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
+  p.subsection-vertical-label(v-if="labelIsVisible" :style="{ background: background }")
+    span {{label}}
   .row
     .button-wrap.header-buttons-wrap(:class="{ 'header-is-active': isH1 || isH2 }")
       //- h1/h2
@@ -81,7 +83,9 @@ export default {
   props: {
     visible: Boolean,
     colorIsHidden: Boolean,
+    labelIsVisible: Boolean,
     tagsInCard: Array,
+    backgroundColor: String,
     cards: {
       type: Array,
       default (value) {
@@ -124,6 +128,19 @@ export default {
       if (!this.tagsInCard) { return }
       return this.tagsInCard.map(tag => tag.name)
     },
+    label () {
+      let label
+      if (this.isCards) {
+        label = 'card'
+      }
+      if (this.isBoxes) {
+        label = 'box'
+      }
+      if (this.isCards && this.isBoxes) {
+        label = 'card + box'
+      }
+      return label.toUpperCase()
+    },
     isCards () { return Boolean(this.cards.length) },
     isSingleCard () { return this.cards.length === 1 && !this.isBoxes },
     isBoxes () { return Boolean(this.boxes.length) },
@@ -160,6 +177,9 @@ export default {
       } else {
         return this.defaultColor
       }
+    },
+    background () {
+      return this.backgroundColor || this.color
     },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
@@ -432,6 +452,7 @@ export default {
 
 <style lang="stylus" scoped>
 .style-actions
+  position relative
   padding var(--subsection-padding)
   padding-bottom 0
   background-color transparent
@@ -443,6 +464,7 @@ export default {
     max-width 203px
     display block
     margin-bottom -6px
+    margin-top 0
   .button-wrap,
   .segmented-buttons
     margin-left 0

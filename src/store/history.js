@@ -30,6 +30,11 @@ import { nextTick } from 'vue'
 let showDebugMessages = false
 const showLogMessages = true // true
 
+let patches = []
+let pointer = 0
+let isPaused = false
+let snapshots = { cards: {}, connections: {}, connectionTypes: {}, boxes: {} }
+
 const normalizeUpdates = ({ item, itemType, previous, isRemoved }) => {
   // removed
   if (isRemoved) {
@@ -70,60 +75,54 @@ const normalizeUpdates = ({ item, itemType, previous, isRemoved }) => {
 
 const self = {
   namespaced: true,
-  state: {
-    patches: [],
-    pointer: 0,
-    isPaused: false,
-    snapshots: { cards: {}, connections: {}, connectionTypes: {}, boxes: {} }
-  },
   mutations: {
     add: (state, patch) => {
       utils.typeCheck({ value: patch, type: 'array', origin: 'history/add' })
       patch = patch.filter(item => Boolean(item))
       if (!patch.length) { return }
       // remove patches above pointer
-      state.patches = state.patches.slice(0, state.pointer)
+      patches = patches.slice(0, pointer)
       // add patch to pointer
-      state.patches.splice(state.pointer, 0, patch)
-      state.pointer = state.pointer + 1
+      patches.splice(pointer, 0, patch)
+      pointer = pointer + 1
       if (showLogMessages) {
-        console.log('⏺ history', { newPatch: patch, pointer: state.pointer })
+        console.log('⏺ history', { newPatch: patch, pointer })
       }
     },
     trim: (state) => {
       const max = 60
-      if (state.patches.length > max) {
-        state.patches.shift()
-        state.pointer = state.pointer - 1
+      if (patches.length > max) {
+        patches.shift()
+        pointer = pointer - 1
       }
     },
     clear: (state) => {
-      state.patches = []
-      state.pointer = 0
-      state.snapshots = { cards: {}, connections: {}, connectionTypes: {} }
+      patches = []
+      pointer = 0
+      snapshots = { cards: {}, connections: {}, connectionTypes: {} }
       if (showLogMessages) {
         console.log('⏹ clear history')
       }
     },
     isPaused: (state, value) => {
-      state.isPaused = value
+      isPaused = value
       if (showDebugMessages && showLogMessages) {
-        console.log('⏸ history is paused', state.isPaused)
+        console.log('⏸ history is paused', isPaused)
       }
     },
     pointer: (state, { increment, decrement, value }) => {
       if (increment) {
-        state.pointer = state.pointer + 1
-        state.pointer = Math.min(state.patches.length, state.pointer)
+        pointer = pointer + 1
+        pointer = Math.min(patches.length, pointer)
       } else if (decrement) {
-        state.pointer = state.pointer - 1
-        state.pointer = Math.max(0, state.pointer)
+        pointer = pointer - 1
+        pointer = Math.max(0, pointer)
       } else if (value) {
-        state.pointer = value
+        pointer = value
       }
     },
     snapshots: (state, object) => {
-      state.snapshots = object
+      snapshots = object
     }
   },
   actions: {
@@ -142,7 +141,7 @@ const self = {
       context.commit('snapshots', { cards, connections, connectionTypes, boxes })
     },
     pause: (context) => {
-      if (context.state.isPaused) { return }
+      if (isPaused) { return }
       context.commit('isPaused', true)
       context.dispatch('snapshots')
     },
@@ -153,14 +152,14 @@ const self = {
     // Add Patch
 
     add: (context, { cards, connections, connectionTypes, boxes, useSnapshot, isRemoved }) => {
-      if (context.state.isPaused) { return }
+      if (isPaused) { return }
       let patch = []
       // cards
       if (cards) {
         cards = cards.map(card => {
           let previous = context.rootGetters['currentCards/byId'](card.id)
           if (useSnapshot) {
-            previous = context.state.snapshots['cards'][card.id]
+            previous = snapshots['cards'][card.id]
           }
           return normalizeUpdates({ item: card, itemType: 'card', previous, isRemoved })
         })
@@ -171,7 +170,7 @@ const self = {
         connections = connections.map(connection => {
           let previous = context.rootGetters['currentConnections/byId'](connection.id)
           if (useSnapshot) {
-            previous = context.state.snapshots['connections'][connection.id]
+            previous = snapshots['connections'][connection.id]
           }
           return normalizeUpdates({ item: connection, itemType: 'connection', previous, isRemoved })
         })
@@ -182,7 +181,7 @@ const self = {
         connectionTypes = connectionTypes.map(type => {
           let previous = context.rootGetters['currentConnections/typeByTypeId'](type.id)
           if (useSnapshot) {
-            previous = context.state.snapshots['connectionTypes'][type.id]
+            previous = snapshots['connectionTypes'][type.id]
           }
           return normalizeUpdates({ item: type, itemType: 'connectionType', previous, isRemoved })
         })
@@ -193,7 +192,7 @@ const self = {
         boxes = boxes.map(box => {
           let previous = context.rootGetters['currentBoxes/byId'](box.id)
           if (useSnapshot) {
-            previous = context.state.snapshots['boxes'][box.id]
+            previous = snapshots['boxes'][box.id]
           }
           return normalizeUpdates({ item: box, itemType: 'box', previous, isRemoved })
         })
@@ -206,7 +205,6 @@ const self = {
     // Undo
 
     undo: (context) => {
-      let { isPaused, pointer, patches } = context.state
       if (isPaused) { return }
       if (pointer <= 0) {
         context.commit('pointer', { value: 0 })
@@ -278,7 +276,6 @@ const self = {
     // Redo
 
     redo: (context, patch) => {
-      const { isPaused, pointer, patches } = context.state
       if (!patch) {
         if (isPaused) { return }
         const pointerIsNewest = pointer === patches.length
@@ -345,7 +342,7 @@ const self = {
     // replays patches between the time local space is loaded to when remote space is loaded
 
     redoLocalUpdates: (context) => {
-      context.state.patches.forEach(patch => {
+      patches.forEach(patch => {
         const actions = ['cardUpdated', 'boxUpdated']
         const isUpdate = actions.includes(patch[0].action)
         context.dispatch('redo', patch)

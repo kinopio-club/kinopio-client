@@ -231,7 +231,7 @@ export default {
       const maxIterations = 10
       const initialDelay = 1000 // 1 second
       const serverStatus = await this.$store.dispatch('api/getStatus')
-      console.log('☎️ status', serverStatus)
+      console.log('☎️ server online status', serverStatus)
       if (serverStatus) {
         this.$store.dispatch('isOnline', true)
         this.$store.dispatch('api/processQueueOperations')
@@ -626,18 +626,22 @@ label
       background-color var(--secondary-active-background)
 
 .bottom-button-wrap
-  .resize-button-wrap
+  .inline-button-wrap
     transform translate(8px, 13px)
     &:hover
-      .resize-button
+      background transparent
+      button
         opacity 1
-    .resize-button
+        background-color transparent
+    button
       border 0
       width 12px
       height 12px
       padding 0
       background-color transparent
       opacity 0.3
+      &:hover
+        background-color transparent
 
 hr
   border-top 1px solid var(--primary-border)
@@ -774,6 +778,31 @@ dialog
     border-radius var(--entity-radius)
     z-index -1
 
+.subsection-vertical-label
+  writing-mode vertical-rl
+  position absolute
+  top 5px
+  left -7px
+  padding 2px 0
+  width 14px
+  span
+    font-size 11px
+
+.preview-thumbnail-image
+  width 24px
+  height 22px
+  overflow hidden
+  object-fit cover
+  object-position 0 0
+  border-radius var(--entity-radius)
+  image-rendering crisp-edges
+button
+  > .preview-thumbnail-image
+    width 20px
+    height 18px
+    vertical-align -4px
+    margin-right 6px
+
 .segmented-buttons
   &.first-row
     button
@@ -882,8 +911,8 @@ dialog
 
 .icon.templates
   padding 0
-  height 9px
-  vertical-align 0px
+  height 12px
+  vertical-align -1px
 
 .icon.minimap
   vertical-align -2px

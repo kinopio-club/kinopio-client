@@ -517,6 +517,7 @@ span.space-list-wrap
       z-index 1
     .icon.templates
       margin-right 10px
+      vertical-align -2px
 
   .space-wrap
     position relative
@@ -544,12 +545,4 @@ span.space-list-wrap
     margin-right 6px
     width 24px
     height 22px
-  .preview-thumbnail-image
-    width 24px
-    height 22px
-    overflow hidden
-    object-fit cover
-    object-position 0 0
-    border-radius var(--entity-radius)
-    image-rendering crisp-edges
 </style>

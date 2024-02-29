@@ -96,6 +96,7 @@ export default {
         this.updateShowInExplore()
       }
       this.notifyShowInExplore(event)
+      this.$store.dispatch('currentSpace/createSpacePreviewImage')
     },
     notifyShowInExplore (event) {
       const shouldShow = this.showInExplore

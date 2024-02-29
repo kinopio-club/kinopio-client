@@ -10,11 +10,6 @@ dialog.templates.narrow(
   section
     p Templates
   section.add-to-templates
-    //- Add to Templates
-    .button-wrap(@click.left.prevent="toggleCurrentSpaceIsTemplate" @keydown.stop.enter="toggleCurrentSpaceIsTemplate")
-      button(:class="{ active: currentSpaceIsTemplate }")
-        img.icon.templates(src="@/assets/templates.svg")
-        span Current Space is Template
   section.results-section(:style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(
       :spaces="templates"
@@ -61,7 +56,6 @@ export default {
     }
   },
   computed: {
-    currentSpaceIsTemplate () { return this.$store.state.currentSpace.isTemplate },
     categories () {
       return templates.categories()
     },
@@ -103,16 +97,6 @@ export default {
       this.localSpaces = remoteSpaces
       this.isLoadingRemoteSpaces = false
       this.updateHeight()
-    },
-    toggleCurrentSpaceIsTemplate () {
-      const currentSpace = this.$store.state.currentSpace
-      const value = !this.currentSpaceIsTemplate
-      this.$store.dispatch('currentSpace/updateSpace', { isTemplate: value })
-      if (value) {
-        this.userSpaces.unshift(currentSpace)
-      } else {
-        this.userSpaces = this.userSpaces.filter(space => space.id !== currentSpace.id)
-      }
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', space)
@@ -159,9 +143,6 @@ export default {
 <style lang="stylus">
 dialog.templates
   .results-section
-    padding-top 4px
-    .button-wrap
-      margin 4px
     .inline-badge
       &.learning
         background-color #f0e68c

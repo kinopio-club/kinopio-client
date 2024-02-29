@@ -18,13 +18,20 @@ aside.notifications(@click.left="closeAllDialogs")
       button(@click="removeById(item)")
         img.icon.cancel(src="@/assets/add.svg")
 
-  .persistent-item.danger.hidden#notify-local-storage-is-full
+  .persistent-item.danger.hidden#notify-cache-is-full
     p Local storage error has occured, please refresh
     .row
       .button-wrap
         button(@click.left="refreshBrowser")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
+
+  .persistent-item.info(v-if="currentUserIsResizingCard")
+    img.icon.resize(src="@/assets/resize.svg")
+    span Drag to Resize
+  .persistent-item.info(v-if="currentUserIsTiltingCard")
+    img.icon.resize(src="@/assets/resize.svg")
+    span Drag to Tilt
 
   .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
     img.icon(src="@/assets/brush.svg")
@@ -271,6 +278,8 @@ export default {
     notifyThanksForDonating () { return this.$store.state.notifyThanksForDonating },
     notifyThanksForUpgrading () { return this.$store.state.notifyThanksForUpgrading },
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
+    currentUserIsResizingCard () { return this.$store.state.currentUserIsResizingCard },
+    currentUserIsTiltingCard () { return this.$store.state.currentUserIsTiltingCard },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
     notifyReferralSuccessUser () { return this.$store.state.notifyReferralSuccessUser },
@@ -313,8 +322,8 @@ export default {
       this.$store.commit('notifyThanksForDonating', false)
       this.$store.commit('notifyThanksForUpgrading', false)
     },
-    localStorageErrorIsVisible () {
-      const element = document.getElementById('notify-local-storage-is-full')
+    cacheErrorIsVisible () {
+      const element = document.getElementById('notify-cache-is-full')
       const isHidden = element.className.includes('hidden')
       return Boolean(!isHidden)
     },
@@ -530,6 +539,9 @@ export default {
 
   .icon.refresh
     vertical-align 0px
+
+  .icon.resize
+    vertical-align 2px
 
   .filter-icon
     margin 0

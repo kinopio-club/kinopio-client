@@ -12,6 +12,7 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
     .row
       .button-wrap
         button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
+          img.preview-thumbnail-image(v-if="selectedSpace.previewThumbnailImage" :src="selectedSpace.previewThumbnailImage")
           span {{selectedSpace.name}}
           img.down-arrow(src="@/assets/down-arrow.svg")
         SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true")

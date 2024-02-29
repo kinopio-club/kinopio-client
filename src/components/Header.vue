@@ -584,6 +584,9 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
+        //- embed badge
+        .label-badge.space-name-badge-wrap
+          span Scroll horizontally and vertically
     .right
       SpaceUsers(:userDetailsIsInline="true")
 
@@ -658,7 +661,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
             Import(:visible="state.importIsVisible")
             //- Read Only badge
-            .label-badge.read-only-badge-wrap(v-if="!userCanEditSpace")
+            .label-badge.space-name-badge-wrap(v-if="!userCanEditSpace")
               span(:class="{'invisible': state.readOnlyJiggle}")
                 span Read Only
               span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
@@ -898,8 +901,9 @@ header
     .view-hidden
       margin-left 5px
 
-  .read-only-badge-wrap
+  .space-name-badge-wrap
     min-width 63px
+    width max-content
     pointer-events none
     position absolute
     background-color var(--info-background)

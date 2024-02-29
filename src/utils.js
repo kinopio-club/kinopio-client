@@ -981,20 +981,22 @@ export default {
   },
   pageSizeFromItems (items) {
     const padding = 250
+    const defaultSize = 500
     items = this.clone(items)
     items = items.filter(item => item.x && item.y)
     if (!items.length) {
       return { width: 0, height: 0 }
     }
-    const defaultSize = 500
     let x = 0
     let y = 0
     items.forEach(item => {
+      const width = item.resizeWidth || item.width || defaultSize
+      const height = item.resizeHeight || item.height
       if (item.x > x) {
-        x = item.x + padding
+        x = item.x + width + padding + window.scrollX
       }
       if (item.y > y) {
-        y = item.y + padding
+        y = item.y + height + padding + window.scrollY
       }
     })
     const width = x + defaultSize
@@ -1772,7 +1774,7 @@ export default {
   urlIsAudio (url) {
     if (!url) { return }
     url = url + ' '
-    const audioUrlPattern = new RegExp(/(?:\.mp3|\.m4a|\.ogg|\.wav)(?:\n| |\?|&)/igm)
+    const audioUrlPattern = new RegExp(/(?:\.mp3|\.m4a|\.ogg)(?:\n| |\?|&)/igm)
     const isAudio = url.match(audioUrlPattern)
     return Boolean(isAudio)
   },
@@ -1783,7 +1785,7 @@ export default {
       if (!hasProtocol) { return }
     }
     url = url + ' '
-    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf)(?:\n| |\?|&)/igm)
+    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf|\.wav|\.flac)(?:\n| |\?|&)/igm)
     const isFile = url.toLowerCase().match(fileUrlPattern)
     return Boolean(isFile)
   },
