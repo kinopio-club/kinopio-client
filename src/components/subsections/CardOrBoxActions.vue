@@ -480,6 +480,7 @@ export default {
       .segmented-buttons
         button
           border-bottom-left-radius 0
+          border-bottom-right-radius 0
 
   .toggle-fonts-button
     position absolute
@@ -487,6 +488,6 @@ export default {
     left 0
     border-top-left-radius 0
     border-top-right-radius 0
-    width 100%
+    width calc(100% - 4px)
     text-align center
 </style>
