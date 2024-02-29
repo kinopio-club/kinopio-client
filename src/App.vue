@@ -356,8 +356,8 @@ export default {
   --small-entity-radius 3px
   --subsection-padding 5px
   --button-fixed-height 30px
-  --serif-font recoleta, georgia, serif
-  --mono-font Menlo, Monaco, monospace
+  --header-font recoleta, georgia, serif
+  --code-font Menlo, Monaco, monospace
   --glyphs-font GoodGlyphs, wingdings
 
 @font-face
@@ -649,7 +649,7 @@ hr
 
 code,
 pre
-  font-family var(--mono-font)
+  font-family var(--code-font)
   font-size 13px
 
 p,

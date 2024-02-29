@@ -642,13 +642,13 @@ export default {
     box-shadow var(--active-shadow)
 
   h1
-    font-family var(--serif-font)
+    font-family var(--header-font)
     font-size 20px
     font-weight bold
     margin 0
     display inline-block
   h2
-    font-family var(--serif-font)
+    font-family var(--header-font)
     font-weight normal
     font-size 20px
     margin 0
