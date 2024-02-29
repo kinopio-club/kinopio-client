@@ -34,7 +34,7 @@ watch(() => props.visible, async (value, prevValue) => {
   }
 })
 
-const mapRemoteItems = (items) => {
+const updateItemsSpaceId = (items) => {
   const spaceId = state.selectedSpace.id
   return items.map(item => {
     item.spaceId = spaceId
@@ -78,7 +78,6 @@ const multipleCardsIsSelected = computed(() => {
   return Boolean(numberOfCards > 1)
 })
 const cardsCount = computed(() => multipleCardsSelectedIds.value.length)
-
 const names = computed(() => props.exportData.cards.map(card => card.name))
 const text = computed(() => utils.textFromCardNames(props.exportData.cards))
 const selectedItems = () => {
@@ -114,46 +113,46 @@ const buttonLabel = computed(() => {
   return `${action} ${item} to Space`
 })
 
+// copy text
+
+const copyText = async () => {
+  store.commit('clearNotificationsWithPosition')
+  const position = utils.cursorPositionInPage(event)
+  try {
+    await navigator.clipboard.writeText(text.value)
+    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
+}
+
 // copy or move
 
-const removeCards = (cards) => {
-  cards.forEach(card => {
-    store.dispatch('currentCards/remove', card)
-    store.dispatch('currentConnections/removeFromCard', card)
-  })
-}
-const removeBoxes = (boxes) => {
-  boxes.forEach(box => {
-    store.dispatch('currentBoxes/remove', box)
-  })
-}
-const copyToSelectedSpace = async (items) => {
+const copyToSelectedSpace = (items) => {
   state.loading = true
-  const nullCardUsers = true
-  const newItems = utils.uniqueSpaceItems(utils.clone(items), nullCardUsers)
+  const selectedSpaceId = state.selectedSpace.id
+  let newItems = utils.uniqueSpaceItems(utils.clone(items))
   let { cards, connectionTypes, connections, boxes } = newItems
-  cards = mapRemoteItems(cards)
-  connectionTypes = mapRemoteItems(connectionTypes)
-  connections = mapRemoteItems(connections)
-  boxes = mapRemoteItems(boxes)
-  await store.dispatch('api/createCards', cards)
-  await store.dispatch('api/createConnectionTypes', connectionTypes)
-  await store.dispatch('api/createConnections', connections)
-  await store.dispatch('api/createBoxes', boxes)
-  const spaceIsCached = Boolean(cache.space(state.selectedSpace.id).cards)
+  cards = updateItemsSpaceId(cards)
+  connectionTypes = updateItemsSpaceId(connectionTypes)
+  connections = updateItemsSpaceId(connections)
+  boxes = updateItemsSpaceId(boxes)
+  newItems = { cards, connectionTypes, connections, boxes }
+  // update cache
+  const spaceIsCached = Boolean(cache.space(selectedSpaceId).cards)
   if (!spaceIsCached) {
-    const space = { id: state.selectedSpace.id }
-    let remoteSpace = await store.dispatch('api/getSpace', { space, shouldRequestRemote: true })
-    cache.saveSpace(remoteSpace)
+    cache.saveSpace({ id: selectedSpaceId })
   }
-  cache.addToSpace(newItems, state.selectedSpace.id)
-  if (props.actionIsMove) {
-    await store.dispatch('api/updateCardsWithLinkToCardIds', { prevCards: items.cards, newCards: newItems.cards })
-  }
+  cache.addToSpace(newItems, selectedSpaceId)
+  // update server
+  cards.forEach(card => store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: selectedSpaceId }))
+  connectionTypes.forEach(connectionType => store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType, spaceId: selectedSpaceId }))
+  connections.forEach(connection => store.dispatch('api/addToQueue', { name: 'createConnection', body: connection, spaceId: selectedSpaceId }))
+  boxes.forEach(box => store.dispatch('api/addToQueue', { name: 'createBox', body: box, spaceId: selectedSpaceId }))
   console.log('🚚 copies created', newItems)
   state.loading = false
 }
-
 const moveOrCopyToSpace = async () => {
   if (state.loading) { return }
   const items = selectedItems()
@@ -161,9 +160,7 @@ const moveOrCopyToSpace = async () => {
     state.cardsCreatedIsOverLimit = true
     return
   }
-  console.log('🍆🍆🍆🍆🍆🍆', items)
-  // todo replace await w operations/cache async
-  await copyToSelectedSpace(items)
+  copyToSelectedSpace(items)
   notifySuccess()
   if (props.actionIsMove) {
     removeCards(items.cards)
@@ -179,16 +176,16 @@ const moveOrCopyToSpace = async () => {
   store.dispatch('clearMultipleSelected')
   store.dispatch('closeAllDialogs')
 }
-const copyText = async () => {
-  store.commit('clearNotificationsWithPosition')
-  const position = utils.cursorPositionInPage(event)
-  try {
-    await navigator.clipboard.writeText(text.value)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-  } catch (error) {
-    console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-  }
+const removeCards = (cards) => {
+  cards.forEach(card => {
+    store.dispatch('currentCards/remove', card)
+    store.dispatch('currentConnections/removeFromCard', card)
+  })
+}
+const removeBoxes = (boxes) => {
+  boxes.forEach(box => {
+    store.dispatch('currentBoxes/remove', box)
+  })
 }
 
 // should upgrade user
