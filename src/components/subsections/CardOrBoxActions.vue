@@ -11,8 +11,9 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
         button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }" title="Header 2")
           span h2
       //- Fonts
-      button.toggle-fonts-button.small-button(v-if="isH1 || isH2")
+      button.toggle-fonts-button.small-button(v-if="isH1 || isH2" @click.stop="toggleFontPickerIsVisible" :class="{ active: fontPickerIsVisible }")
         span Fonts
+      FontPicker(:visible="fontPickerIsVisible" :cards="cards")
 
     //- Tag
     .button-wrap(v-if="isCards")
@@ -67,6 +68,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
+import FontPicker from '@/components/dialogs/FontPicker.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
@@ -78,7 +80,8 @@ export default {
   components: {
     FramePicker,
     TagPickerStyleActions,
-    ColorPicker
+    ColorPicker,
+    FontPicker
   },
   props: {
     visible: Boolean,
@@ -120,6 +123,7 @@ export default {
       framePickerIsVisible: false,
       tagPickerIsVisible: false,
       colorPickerIsVisible: false,
+      fontPickerIsVisible: false,
       defaultColor: '#e3e3e3'
     }
   },
@@ -349,6 +353,7 @@ export default {
       this.framePickerIsVisible = false
       this.tagPickerIsVisible = false
       this.colorPickerIsVisible = false
+      this.fontPickerIsVisible = false
       this.$store.commit('userDetailsIsVisible', false)
       if (shouldPreventEmit === true) { return }
       this.$emit('closeDialogs')
@@ -429,6 +434,11 @@ export default {
         }
         this.$store.dispatch('currentCards/update', card)
       })
+    },
+    toggleFontPickerIsVisible () {
+      const isVisible = this.fontPickerIsVisible
+      this.closeDialogs()
+      this.fontPickerIsVisible = !isVisible
     },
 
     // boxes only
