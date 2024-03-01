@@ -1,3 +1,4 @@
+
 // vars referenced by multiple components
 
 export default {

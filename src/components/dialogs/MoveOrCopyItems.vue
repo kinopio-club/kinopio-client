@@ -132,6 +132,7 @@ const copyText = async () => {
 const copyToSelectedSpace = (items) => {
   state.loading = true
   const selectedSpaceId = state.selectedSpace.id
+  const isCurrentSpace = selectedSpaceId === store.state.currentSpace.id
   let newItems = utils.uniqueSpaceItems(utils.clone(items))
   let { cards, connectionTypes, connections, boxes } = newItems
   cards = updateItemsSpaceId(cards)
@@ -145,6 +146,13 @@ const copyToSelectedSpace = (items) => {
     cache.saveSpace({ id: selectedSpaceId })
   }
   cache.addToSpace(newItems, selectedSpaceId)
+  // update current space
+  if (isCurrentSpace) {
+    store.dispatch('currentCards/addMultiple', { cards, shouldOffsetPosition: true })
+    connectionTypes.forEach(connectionType => store.dispatch('currentConnections/addType', connectionType))
+    connections.forEach(connection => store.dispatch('currentConnections/add', { connection, type: { id: connection.connectionTypeId } }))
+    boxes.forEach(box => store.dispatch('currentBoxes/add', { box }))
+  }
   // update server
   cards.forEach(card => store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: selectedSpaceId }))
   connectionTypes.forEach(connectionType => store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType, spaceId: selectedSpaceId }))

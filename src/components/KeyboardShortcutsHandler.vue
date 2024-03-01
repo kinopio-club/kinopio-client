@@ -635,7 +635,7 @@ export default {
       cards = items.filter(item => item.isCard)
       boxes = items.filter(item => item.isBox)
       // add cards
-      this.$store.dispatch('currentCards/addMultiple', cards)
+      this.$store.dispatch('currentCards/addMultiple', { cards })
       // add new types
       connectionTypes = connectionTypes.map(type => {
         const existingType = this.$store.getters['currentConnections/existingTypeByData'](type)
@@ -688,7 +688,7 @@ export default {
           y: position.y
         }
       })
-      this.$store.dispatch('currentCards/addMultiple', cards)
+      this.$store.dispatch('currentCards/addMultiple', { cards })
       this.$store.dispatch('currentCards/distributeVertically', cards)
       this.$nextTick(() => {
         // select

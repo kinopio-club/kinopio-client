@@ -386,7 +386,7 @@ export default {
         }
         newCards.push(newCard)
       })
-      this.$store.dispatch('currentCards/addMultiple', newCards)
+      this.$store.dispatch('currentCards/addMultiple', { cards: newCards })
       prevCards = newCards // for history
       this.positionNewCards(newCards)
     },
