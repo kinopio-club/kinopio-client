@@ -299,9 +299,9 @@ export default {
   },
   methods: {
     updateIsVisibleInViewport: debounce(async function () {
-      if (this.disableViewportOptimizations) { return true }
-      if (this.isUpdatingPath) { return true }
-      if (!this.connection.path) { return }
+      if (this.disableViewportOptimizations) { this.isVisibleInViewport = true }
+      if (this.isUpdatingPath) { this.isVisibleInViewport = true }
+      if (!this.connection.path) { this.isVisibleInViewport = false }
       const threshold = 400 * this.spaceCounterZoomDecimal
       const offset = utils.outsideSpaceOffset().y
       const windowScroll = { x: window.scrollX, y: window.scrollY }
