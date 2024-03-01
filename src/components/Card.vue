@@ -229,6 +229,7 @@ import TiltResize from '@/components/TiltResize.vue'
 import dayjs from 'dayjs'
 import { mapState, mapGetters } from 'vuex'
 import qs from '@aguezz/qs-parse'
+import debounce from 'lodash-es/debounce'
 
 let isMultiTouch
 let initialTouchEvent = {}
@@ -304,6 +305,8 @@ export default {
     this.checkIfShouldUpdatePreviewHtml()
     const defaultCardMaxWidth = this.$store.getters['currentCards/defaultCardMaxWidth'] + 'px'
     utils.setCssVariable('card-width', defaultCardMaxWidth)
+    this.updateIsVisibleInViewport()
+    window.addEventListener('scroll', this.updateIsVisibleInViewport)
   },
   data () {
     return {
@@ -336,7 +339,8 @@ export default {
       isAnimationUnsticking: false,
       stickyStretchResistance: 6,
       defaultColor: '#e3e3e3',
-      pathIsUpdated: false
+      pathIsUpdated: false,
+      isVisibleInViewport: true
     }
   },
   computed: {
@@ -1140,8 +1144,10 @@ export default {
       if (!this.userDetailsIsVisible) { return }
       const user = this.createdByUser
       return user.id === this.userDetailsUser.id
-    },
-    isVisibleInViewport () {
+    }
+  },
+  methods: {
+    updateIsVisibleInViewport: debounce(async function () {
       let isVisible
       if (this.disableViewportOptimizations) { isVisible = true }
       if (this.shouldJiggle) { isVisible = true }
@@ -1168,13 +1174,15 @@ export default {
       const scrollIsBelowTop = scroll > y
       const middleIsVisible = scrollIsAboveBottom && scrollIsBelowTop
       isVisible = isVisible || (isTopVisible || isBottomVisible || middleIsVisible)
+      this.isVisibleInViewport = isVisible
       if (isVisible) {
-        this.correctPaths()
+        this.$nextTick(() => {
+          this.updateCardDimensions()
+          this.correctPaths()
+        })
       }
-      return isVisible
-    }
-  },
-  methods: {
+    }, 50, { leading: true }),
+
     updateCardDimensions () {
       let card = { id: this.card.id }
       card = utils.updateCardDimensions(card)
@@ -2176,13 +2184,6 @@ export default {
   watch: {
     linkToPreview (value) {
       this.updateUrlData()
-    },
-    isVisibleInViewport (value) {
-      if (!value) { return }
-      this.$nextTick(() => {
-        this.updateCardDimensions()
-        this.correctPaths()
-      })
     }
   }
 }
