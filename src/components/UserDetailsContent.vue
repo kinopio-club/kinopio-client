@@ -116,7 +116,7 @@ const userName = computed({
 })
 const userDescription = computed({
   get () {
-    return props.user.description
+    return props.user.description.trim()
   },
   set (newValue) {
     updateUser({ description: newValue })
@@ -217,8 +217,8 @@ const updateExploreSpaces = async () => {
         p.name.user-details-name {{user.name}}
       .other-user-info
         UserBadges(:user="user")
-        .row(v-if="user.description")
-          textarea(ref="descriptionElement" :value="user.description.trim()" disabled)
+        .row(v-if="userDescription")
+          p {{userDescription}}
         .row.website(v-if="user.website")
           p(v-if="!websiteUrl") {{user.website}}
           a(:href="websiteUrl" v-if="websiteUrl")
@@ -235,7 +235,7 @@ const updateExploreSpaces = async () => {
         input.name.user-details-name(placeholder="What's your name?" v-model="userName" name="Name" maxlength=100)
       UserBadges(:user="user")
       .row
-        textarea(ref="description" placeholder="Tell us about yourself" v-model="userDescription" name="Description" maxlength=220 rows="1")
+        textarea(ref="descriptionElement" placeholder="Tell us about yourself" v-model="userDescription" name="Description" maxlength=220 rows="1")
       .row
         input(ref="website" placeholder="Website" v-model="userWebsite" name="Website" maxlength=200 rows="1")
         a(:href="websiteUrl" v-if="websiteUrl")
@@ -343,7 +343,8 @@ const updateExploreSpaces = async () => {
   .other-user-info
     max-height 200px
     overflow scroll
-    padding-bottom 4px
+    margin-bottom -8px
+    padding-bottom 8px
   .explore-spaces-section
     max-height 100px
 </style>
