@@ -67,8 +67,17 @@ const hideUserDetails = () => {
 // session token
 
 const createSessionToken = () => {
+  if (!currentUserIsUpgraded.value) { return }
   sessionToken = nanoid()
   store.dispatch('api/createSessionToken', sessionToken)
+}
+
+// requires upgraded user (temp)
+
+const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const triggerUpgradeUserIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerUpgradeUserIsVisible')
 }
 
 // emails
@@ -155,38 +164,42 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
   section
     section.subsection
       .mail-subsection(:class="{ dark: isDarkTheme }")
-        //- from
-        p.field-title From
-        UserLabelInline(:user="currentUser" :isClickable="true")
-        span.badge.danger.add-your-name(v-if="!currentUser.name")
-          span Add Your Name
-        //- to
-        .row.title-row
-          p.field-title To
-        Textarea(
-          @updateName="updateEmailsWithMatches"
-          :defaultValue="state.defaultEmailsValue"
-          :placeholder="emailsPlaceholder"
-          :htmlStringWithMatches="state.emailsStringWithMatches"
-          :maxLength="600"
-        )
-        //- send
-        .row.button-row
-          button(@click.stop="sendInvites" :class="{ active: state.isLoading }")
-            img.icon.mail(src="@/assets/mail.svg")
-            span Send {{emailsLength}} {{emailPlural}}
-            Loader(:visible="state.isLoading")
-        //- status
-        Transition(name="fadeIn")
-          .row(v-if="state.errors.noRecipients")
-            .badge.danger To field is missing valid email addresses
-        Transition(name="fadeIn")
-          .row(v-if="state.errors.maxEmailsAllowed")
-            .badge.danger For spam prevention reasons, you cannot invite more than {{maxEmailsAllowed}} people at once
-        Transition(name="fadeIn")
-          .row(v-if="state.errors.unknownServerError")
-            .badge.danger
-              span (シ_ _)シ Something went wrong, Please try again or contact support
+        template(v-if="!currentUserIsUpgraded")
+          p To send invite emails, you'll need to upgrade
+          button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+        template(v-if="currentUserIsUpgraded")
+          //- from
+          p.field-title From
+          UserLabelInline(:user="currentUser" :isClickable="true")
+          span.badge.danger.add-your-name(v-if="!currentUser.name")
+            span Add Your Name
+          //- to
+          .row.title-row
+            p.field-title To
+          Textarea(
+            @updateName="updateEmailsWithMatches"
+            :defaultValue="state.defaultEmailsValue"
+            :placeholder="emailsPlaceholder"
+            :htmlStringWithMatches="state.emailsStringWithMatches"
+            :maxLength="600"
+          )
+          //- send
+          .row.button-row
+            button(@click.stop="sendInvites" :class="{ active: state.isLoading }")
+              img.icon.mail(src="@/assets/mail.svg")
+              span Send {{emailsLength}} {{emailPlural}}
+              Loader(:visible="state.isLoading")
+          //- status
+          Transition(name="fadeIn")
+            .row(v-if="state.errors.noRecipients")
+              .badge.danger To field is missing valid email addresses
+          Transition(name="fadeIn")
+            .row(v-if="state.errors.maxEmailsAllowed")
+              .badge.danger For spam prevention reasons, you cannot invite more than {{maxEmailsAllowed}} people at once
+          Transition(name="fadeIn")
+            .row(v-if="state.errors.unknownServerError")
+              .badge.danger
+                span (シ_ _)シ Something went wrong, Please try again or contact support
 </template>
 
 <style lang="stylus">
