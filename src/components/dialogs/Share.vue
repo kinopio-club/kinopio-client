@@ -281,9 +281,9 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
       span for your spaces to be synced and accessible anywhere.
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
-  section
+  //- Import, Export, Embed
+  section.import-export-section
     .row
-      //- Import, Export
       .segmented-buttons(@click.stop)
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: state.importIsVisible }")
           span Import
@@ -357,14 +357,11 @@ dialog.share
     dialog.export,
     dialog.embed
       top -50px
-    dialog.email-invites
-      top -100px
 
   @media(max-height 500px)
     dialog.import,
     dialog.export,
-    dialog.embed,
-    dialog.email-invites
+    dialog.embed
       top -200px
 
   .segmented-buttons
@@ -394,4 +391,7 @@ dialog.share
   .title-row
     p + .row
       margin-top 0
+
+  .import-export-section
+    border-top 1px solid var(--primary-border)
 </style>
