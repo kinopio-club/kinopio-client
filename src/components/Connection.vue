@@ -40,9 +40,11 @@ template(v-if="isVisibleInViewport")
 </template>
 
 <script>
+import { mapState, mapGetters } from 'vuex'
+
 import utils from '@/utils.js'
 
-import { mapState, mapGetters } from 'vuex'
+import debounce from 'lodash-es/debounce'
 
 let animationTimer, isMultiTouch, startCursor, currentCursor
 
@@ -70,10 +72,15 @@ export default {
       }
     })
   },
+  async mounted () {
+    this.updateIsVisibleInViewport()
+    window.addEventListener('scroll', this.updateIsVisibleInViewport)
+  },
   data () {
     return {
       curvedPath: '',
-      frameCount: 0
+      frameCount: 0,
+      isVisibleInViewport: true
     }
   },
   computed: {
@@ -288,11 +295,13 @@ export default {
       })
       this.checkIfShouldPauseConnectionDirections()
       return shouldHide
-    },
-    isVisibleInViewport () {
-      if (this.disableViewportOptimizations) { return true }
-      if (this.isUpdatingPath) { return true }
-      if (!this.connection.path) { return }
+    }
+  },
+  methods: {
+    updateIsVisibleInViewport: debounce(async function () {
+      if (this.disableViewportOptimizations) { this.isVisibleInViewport = true }
+      if (this.isUpdatingPath) { this.isVisibleInViewport = true }
+      if (!this.connection.path) { this.isVisibleInViewport = false }
       const threshold = 400 * this.spaceCounterZoomDecimal
       const offset = utils.outsideSpaceOffset().y
       const windowScroll = { x: window.scrollX, y: window.scrollY }
@@ -324,14 +333,13 @@ export default {
       const y2IsAbove = y2 + threshold < scroll
       let isTallerThanViewport = Math.abs(y2 - y1) > viewport
       if (isTallerThanViewport) {
-        return true
+        this.isVisibleInViewport = true
       } else {
         const isNotInView = y1IsBelow || y2IsAbove
-        return !isNotInView
+        this.isVisibleInViewport = !isNotInView
       }
-    }
-  },
-  methods: {
+    }, 100, { leading: true }),
+
     checkIfShouldPauseConnectionDirections () {
       this.$store.dispatch('currentSpace/unpauseConnectionDirections')
       this.$nextTick(() => {

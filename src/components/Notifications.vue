@@ -13,6 +13,7 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'brush-y'" src="@/assets/brush-y.svg" class="brush-y")
         img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
         img.icon(v-else-if="item.icon === 'offline'" src="@/assets/offline.svg" class="offline")
+        img.icon(v-else-if="item.icon === 'mail'" src="@/assets/mail.svg" class="mail")
       span {{item.message}}
     .row(v-if="item.isPersistentItem")
       button(@click="removeById(item)")
