@@ -609,6 +609,7 @@ export default {
       return this.id === this.cardDetailsIsVisibleForCardId
     },
     embedIsVisible () {
+      // youtube, spotify etc.
       const embedIsVisibleForCardId = this.$store.state.embedIsVisibleForCardId
       return this.card.id === embedIsVisibleForCardId
     },
@@ -1151,12 +1152,11 @@ export default {
       let isVisible
       if (this.disableViewportOptimizations) { isVisible = true }
       if (this.shouldJiggle) { isVisible = true }
-      if (this.currentDraggingConnectedCardIds.includes(this.id)) { isVisible = true }
+      if (this.currentDraggingConnectedCardIds.includes(this.card.id)) { isVisible = true }
       if (this.isBeingDragged) { isVisible = true }
       if (this.isPlayingAudio) { isVisible = true }
       if (this.embedIsVisible) { isVisible = true }
       const isTextOnlyCard = this.normalizedName === this.card.name
-      if (isTextOnlyCard) { isVisible = true }
       const threshold = 400 * this.spaceCounterZoomDecimal
       const fallbackHeight = this.$store.getters['currentCards/defaultCardMaxWidth']
       const offset = utils.outsideSpaceOffset().y
@@ -1165,13 +1165,16 @@ export default {
       const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
       const min = scroll - threshold
       const max = scroll + viewport + threshold
+      // top
       let y = this.y
       const isTopVisible = utils.isBetween({ value: y, min, max })
       let height = this.card.height || fallbackHeight
       height = height * this.spaceZoomDecimal
+      // bottom
       const isBottomVisible = utils.isBetween({ value: y + height, min, max })
       const scrollIsAboveBottom = scroll < y + height
       const scrollIsBelowTop = scroll > y
+      // middle
       const middleIsVisible = scrollIsAboveBottom && scrollIsBelowTop
       isVisible = isVisible || (isTopVisible || isBottomVisible || middleIsVisible)
       this.isVisibleInViewport = isVisible
