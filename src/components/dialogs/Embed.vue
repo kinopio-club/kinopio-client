@@ -171,7 +171,7 @@ export default {
 <style lang="stylus">
 .embed
   left initial
-  right 8px
+  right -8px
   overflow scroll
   @media(max-width 350px)
     right -50px
