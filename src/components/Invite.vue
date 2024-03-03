@@ -162,7 +162,6 @@ section.invite
         button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
           img.icon.mail(src="@/assets/mail.svg")
           span Email
-      EmailInvites(:visible="state.emailInvitesIsVisible")
     //- Tips
     template(v-if="state.tipsIsVisible")
       .row
@@ -172,6 +171,7 @@ section.invite
       .row(v-if="currentUserIsUpgraded")
         p.badge.success
           span Because your account is upgraded, others can create cards here for free
+EmailInvites(:visible="state.emailInvitesIsVisible")
 
 </template>
 
