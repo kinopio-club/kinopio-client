@@ -203,8 +203,9 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
 </template>
 
 <style lang="stylus">
-.email-invites
+dialog.email-invites
   overflow auto
+  top 20px !important
   .title-row
     margin-bottom 0
   section.subsection
