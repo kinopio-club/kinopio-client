@@ -7,10 +7,12 @@ import Textarea from '@/components/Textarea.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import { nanoid } from 'nanoid'
 const store = useStore()
 
 const dialogElement = ref(null)
 const textareaWrapElement = ref(null)
+let sessionToken
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -30,6 +32,7 @@ watch(() => props.visible, (value, prevValue) => {
     restorePrevInviteEmails()
     updateDialogHeight()
     clearErrors()
+    createSessionToken()
   } else {
     state.defaultEmailsValue = ''
   }
@@ -61,6 +64,13 @@ const hideUserDetails = () => {
   store.commit('userDetailsIsVisible', false)
 }
 
+// session token
+
+const createSessionToken = () => {
+  sessionToken = nanoid()
+  store.dispatch('api/createSessionToken', sessionToken)
+}
+
 // emails
 
 const restorePrevInviteEmails = () => {
@@ -85,7 +95,7 @@ const emailsPlaceholder = computed(() => 'space@jam.com, hi@kinopio.club')
 // send button
 
 const emailPlural = computed(() => {
-  if (state.emailsList.length === 0) {
+  if (state.emailsList.length === 1) {
     return 'Email'
   } else {
     return utils.pluralize('Email', state.emailsList.length)
@@ -119,14 +129,22 @@ const sendInvites = async () => {
     state.isLoading = true
     await store.dispatch('api/sendSpaceInviteEmails', {
       emailsList: state.emailsList,
-      spaceId: store.state.currentSpace.id
+      spaceId: store.state.currentSpace.id,
+      sessionToken
     })
     state.isSuccess = true
+    notifySuccessAndClose()
   } catch (error) {
     console.error('🚒 sendInvites', error)
     state.errors.unknownServerError = true
   }
   state.isLoading = false
+}
+
+const notifySuccessAndClose = () => {
+  const message = `Sent ${emailsLength.value} Invite ${emailPlural.value}`
+  store.commit('addNotification', { message, type: 'success', icon: 'mail' })
+  store.commit('triggerCloseChildDialogs')
 }
 </script>
 
@@ -159,9 +177,6 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
             span Send {{emailsLength}} {{emailPlural}}
             Loader(:visible="state.isLoading")
         //- status
-        Transition(name="fadeIn")
-          .row(v-if="state.isSuccess")
-            .badge.success Sent {{emailsLength}} {{emailPlural}}
         Transition(name="fadeIn")
           .row(v-if="state.errors.noRecipients")
             .badge.danger To field is missing valid email addresses

@@ -157,12 +157,12 @@ section.invite
           span {{inviteButtonLabel}}
         button(v-if="webShareIsSupported" @click="webShareInvite")
           img.icon.share(src="@/assets/share.svg")
-    //- .row(v-if="inviteTypeIsEdit")
-    //-   .button-wrap
-    //-     button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
-    //-       img.icon.mail(src="@/assets/mail.svg")
-    //-       span Email
-    //-   EmailInvites(:visible="state.emailInvitesIsVisible")
+    .row(v-if="inviteTypeIsEdit")
+      .button-wrap
+        button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
+          img.icon.mail(src="@/assets/mail.svg")
+          span Email
+      EmailInvites(:visible="state.emailInvitesIsVisible")
     //- Tips
     template(v-if="state.tipsIsVisible")
       .row
