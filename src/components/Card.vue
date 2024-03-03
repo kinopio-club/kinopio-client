@@ -1,6 +1,5 @@
 <template lang="pug">
 article.card-wrap#card(
-  v-if="isVisibleInViewport"
   :style="articleStyle"
   :data-card-id="card.id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
@@ -14,8 +13,12 @@ article.card-wrap#card(
   ref="card"
   :class="articleClasses"
   :title="cardNameIfComment"
+
 )
+  //- isVisibleInViewport
   .card(
+    v-if="isVisibleInViewport"
+
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
 
@@ -305,8 +308,46 @@ export default {
     this.checkIfShouldUpdatePreviewHtml()
     const defaultCardMaxWidth = this.$store.getters['currentCards/defaultCardMaxWidth'] + 'px'
     utils.setCssVariable('card-width', defaultCardMaxWidth)
-    this.updateIsVisibleInViewport()
-    window.addEventListener('scroll', this.updateIsVisibleInViewport)
+    // this.updateIsVisibleInViewport()
+    // window.addEventListener('scroll', this.updateIsVisibleInViewport)
+
+    try {
+      const viewport = utils.visualViewport()
+      let options = {
+        // root: document.querySelector("#magic-painting"),
+        rootMargin: `${viewport.height}px ${viewport.width}px `,
+
+        threshold: 1.0 // every pixel is visible
+      }
+
+      let callback = (entries, observer) => {
+        entries.forEach((entry) => {
+          console.log('🍆🍆🍆🍆🍆🍆', this.card.name, entry.isIntersecting, this.card.height, `${utils.visualViewport().height}px`)
+          // Each entry describes an intersection change for one observed
+          // target element:
+          //   entry.boundingClientRect
+          //   entry.intersectionRatio
+          //   entry.intersectionRect
+          if (entry.isIntersecting) {
+          // this.isVisibleInViewport = true
+            this.updateIsVisibleInViewport(true)
+          } else {
+          // this.isVisibleInViewport = false
+            this.updateIsVisibleInViewport(false)
+          }
+          //   entry.rootBounds
+          //   entry.target
+          //   entry.time
+        })
+      }
+
+      let observer = new IntersectionObserver(callback, options)
+      let target = this.$refs.card
+      console.log('🍌🍌🍌🍌', target, document.querySelector('main#space'))
+      observer.observe(target)
+    } catch (error) {
+      console.error('🚒🚒🚒🚒🚒🚒🚒🚒', error)
+    }
   },
   data () {
     return {
@@ -665,9 +706,12 @@ export default {
         z = 0
         pointerEvents = 'none'
       }
+      // console.log('🌍',this.card.width, this.width, this.card.height)
       let styles = {
         left: `${this.x}px`,
         top: `${this.y}px`,
+        // width: `${this.width}px`,
+        // height: `${this.card.height}px`,
         zIndex: z,
         pointerEvents
       }
@@ -1147,35 +1191,29 @@ export default {
     }
   },
   methods: {
-    updateIsVisibleInViewport: debounce(async function () {
-      let isVisible
+
+    // callback (entries, observer) {
+    //     entries.forEach((entry) => {
+    //       console.log('🍆🍆🍆🍆🍆🍆',this.card.name, entries)
+    //       // Each entry describes an intersection change for one observed
+    //       // target element:
+    //       //   entry.boundingClientRect
+    //       //   entry.intersectionRatio
+    //       //   entry.intersectionRect
+    //       //   entry.isIntersecting
+    //       //   entry.rootBounds
+    //       //   entry.target
+    //       //   entry.time
+    //     });
+    //   },
+    updateIsVisibleInViewport (value) {
+      let isVisible = value
       if (this.disableViewportOptimizations) { isVisible = true }
       if (this.shouldJiggle) { isVisible = true }
       if (this.currentDraggingConnectedCardIds.includes(this.card.id)) { isVisible = true }
       if (this.isBeingDragged) { isVisible = true }
       if (this.isPlayingAudio) { isVisible = true }
       if (this.embedIsVisible) { isVisible = true }
-      const isTextOnlyCard = this.normalizedName === this.card.name
-      const threshold = 400 * this.spaceCounterZoomDecimal
-      const fallbackHeight = this.$store.getters['currentCards/defaultCardMaxWidth']
-      const offset = utils.outsideSpaceOffset().y
-      const windowScroll = { x: window.scrollX, y: window.scrollY }
-      const scroll = (windowScroll.y - offset) * this.spaceCounterZoomDecimal
-      const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      const min = scroll - threshold
-      const max = scroll + viewport + threshold
-      // top
-      let y = this.y
-      const isTopVisible = utils.isBetween({ value: y, min, max })
-      let height = this.card.height || fallbackHeight
-      height = height * this.spaceZoomDecimal
-      // bottom
-      const isBottomVisible = utils.isBetween({ value: y + height, min, max })
-      const scrollIsAboveBottom = scroll < y + height
-      const scrollIsBelowTop = scroll > y
-      // middle
-      const middleIsVisible = scrollIsAboveBottom && scrollIsBelowTop
-      isVisible = isVisible || (isTopVisible || isBottomVisible || middleIsVisible)
       this.isVisibleInViewport = isVisible
       if (isVisible) {
         this.$nextTick(() => {
@@ -1183,9 +1221,47 @@ export default {
           this.correctPaths()
         })
       }
-    }, 50, { leading: true }),
+    },
+    // updateIsVisibleInViewport: debounce(async function () {
+    //   let isVisible
+    //   if (this.disableViewportOptimizations) { isVisible = true }
+    //   if (this.shouldJiggle) { isVisible = true }
+    //   if (this.currentDraggingConnectedCardIds.includes(this.card.id)) { isVisible = true }
+    //   if (this.isBeingDragged) { isVisible = true }
+    //   if (this.isPlayingAudio) { isVisible = true }
+    //   if (this.embedIsVisible) { isVisible = true }
+    //   const isTextOnlyCard = this.normalizedName === this.card.name
+    //   const threshold = 400 * this.spaceCounterZoomDecimal
+    //   const fallbackHeight = this.$store.getters['currentCards/defaultCardMaxWidth']
+    //   const offset = utils.outsideSpaceOffset().y
+    //   const windowScroll = { x: window.scrollX, y: window.scrollY }
+    //   const scroll = (windowScroll.y - offset) * this.spaceCounterZoomDecimal
+    //   const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
+    //   const min = scroll - threshold
+    //   const max = scroll + viewport + threshold
+    //   // top
+    //   let y = this.y
+    //   const isTopVisible = utils.isBetween({ value: y, min, max })
+    //   let height = this.card.height || fallbackHeight
+    //   height = height * this.spaceZoomDecimal
+    //   // bottom
+    //   const isBottomVisible = utils.isBetween({ value: y + height, min, max })
+    //   const scrollIsAboveBottom = scroll < y + height
+    //   const scrollIsBelowTop = scroll > y
+    //   // middle
+    //   const middleIsVisible = scrollIsAboveBottom && scrollIsBelowTop
+    //   isVisible = isVisible || (isTopVisible || isBottomVisible || middleIsVisible)
+    //   this.isVisibleInViewport = isVisible
+    //   if (isVisible) {
+    //     this.$nextTick(() => {
+    //       this.updateCardDimensions()
+    //       this.correctPaths()
+    //     })
+    //   }
+    // }, 50, { leading: true }),
 
     updateCardDimensions () {
+      if (!this.isVisibleInViewport) { return }
       let card = { id: this.card.id }
       card = utils.updateCardDimensions(card)
       if (!card) { return }
