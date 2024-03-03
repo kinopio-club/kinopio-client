@@ -2,7 +2,7 @@
 article.card-wrap#card(
   v-if="isVisibleInViewport"
   :style="articleStyle"
-  :data-card-id="id"
+  :data-card-id="card.id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :data-is-visible-in-viewport="isVisibleInViewport"
   :data-is-locked="isLocked"
@@ -10,7 +10,7 @@ article.card-wrap#card(
   :data-tilt-degrees="tiltDegrees"
   :data-x="x"
   :data-y="y"
-  :key="id"
+  :key="card.id"
   ref="card"
   :class="articleClasses"
   :title="cardNameIfComment"
@@ -32,7 +32,7 @@ article.card-wrap#card(
 
     :class="cardClasses"
     :style="cardStyle"
-    :data-card-id="id"
+    :data-card-id="card.id"
     :data-card-x="x"
     :data-card-y="y"
     :data-name-updated-at="updatedAt"
@@ -97,7 +97,7 @@ article.card-wrap#card(
         template(v-if="isLocked")
           //- based on CardUnlockButton.vue
           //- .connector maintains connection paths when card is locked
-          .lock-button-wrap.inline-button-wrap(@mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="id")
+          .lock-button-wrap.inline-button-wrap(@mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id")
             button.inline-button(tabindex="-1" :style="{background: itemBackground}")
               img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
@@ -109,7 +109,7 @@ article.card-wrap#card(
           //- Connector
           .connector.inline-button-wrap(
             v-if="connectorIsVisible"
-            :data-card-id="id"
+            :data-card-id="card.id"
             @mousedown.left="startConnecting"
             @touchstart="startConnecting"
           )
@@ -523,7 +523,6 @@ export default {
       return true
     },
     canEditSpace () { return this['currentUser/canEditSpace']() },
-    id () { return this.card.id },
     x () {
       const x = this.card.x
       if (x === undefined || x === null) {
@@ -540,7 +539,7 @@ export default {
         return y
       }
     },
-    connectionTypes () { return this['currentConnections/typesByCardId'](this.id) },
+    connectionTypes () { return this['currentConnections/typesByCardId'](this.card.id) },
     connectionTypeColorisDark () {
       const type = this.connectionTypes[this.connectionTypes.length - 1]
       if (!type) { return }
@@ -606,7 +605,7 @@ export default {
       }
     },
     currentCardDetailsIsVisible () {
-      return this.id === this.cardDetailsIsVisibleForCardId
+      return this.card.id === this.cardDetailsIsVisibleForCardId
     },
     embedIsVisible () {
       // youtube, spotify etc.
@@ -727,7 +726,7 @@ export default {
       if (!connectionId) { return }
       const connection = this['currentConnections/byId'](connectionId)
       if (!connection) { return }
-      const isConnected = connection.startCardId === this.id || connection.endCardId === this.id
+      const isConnected = connection.startCardId === this.card.id || connection.endCardId === this.card.id
       return isConnected
     },
     connectorGlowStyle () {
@@ -740,7 +739,7 @@ export default {
       const connectionId = this.connectionDetailsIsVisibleForConnectionId
       const connection = this['currentConnections/byId'](connectionId)
       if (!connection) { return }
-      const isConnected = connection.startCardId === this.id || connection.endCardId === this.id
+      const isConnected = connection.startCardId === this.card.id || connection.endCardId === this.card.id
       if (!isConnected) { return }
       const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
       if (!connectionType) {
@@ -755,7 +754,7 @@ export default {
       if (this.isBeingDragged) { return }
       let connections = this['currentConnections/all']
       connections = connections.filter(connection => this.connectionIsBeingDragged(connection))
-      const connection = connections.find(connection => connection.startCardId === this.id || connection.endCardId === this.id)
+      const connection = connections.find(connection => connection.startCardId === this.card.id || connection.endCardId === this.card.id)
       if (!connection) { return }
       const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
       if (!connectionType) {
@@ -769,7 +768,7 @@ export default {
       const visibleCardId = this.cardDetailsIsVisibleForCardId
       let connections = this['currentConnections/all']
       connections = connections.filter(connection => connection.startCardId === visibleCardId || connection.endCardId === visibleCardId)
-      connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
+      connections = connections.filter(connection => connection.startCardId === this.card.id || connection.endCardId === this.card.id)
       const connection = connections[0]
       if (!connection) { return }
       const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
@@ -906,7 +905,7 @@ export default {
             tag = utils.newTag({
               name: segment.name,
               defaultColor: this.currentUser.color,
-              cardId: this.id,
+              cardId: this.card.id,
               spaceId: this.currentSpace.id
             })
             console.warn('🦋 create missing tag', segment.name, tag, this.card)
@@ -956,23 +955,23 @@ export default {
       if (connectingToId) {
         postMessage.sendHaptics({ name: 'softImpact' })
       }
-      return connectingToId === this.id
+      return connectingToId === this.card.id
     },
     isConnectingFrom () {
-      return this.currentConnectionStartCardIds.find(cardId => cardId === this.id)
+      return this.currentConnectionStartCardIds.find(cardId => cardId === this.card.id)
     },
     isBeingDragged () {
       let isCardId
       const currentDraggingCard = this.currentDraggingCardId
       const isDraggingCard = this.currentUserIsDraggingCard
-      if (this.isSelected || currentDraggingCard === this.id) {
+      if (this.isSelected || currentDraggingCard === this.card.id) {
         isCardId = true
       }
       return Boolean(isDraggingCard && isCardId)
     },
     isSelected () {
       const multipleCardsSelectedIds = this.multipleCardsSelectedIds
-      return multipleCardsSelectedIds.includes(this.id)
+      return multipleCardsSelectedIds.includes(this.card.id)
     },
     selectedColor () {
       const color = this.currentUser.color
@@ -991,26 +990,26 @@ export default {
       }
     },
     hasConnections () {
-      const connections = this['currentConnections/byCardId'](this.id)
+      const connections = this['currentConnections/byCardId'](this.card.id)
       return Boolean(connections.length)
     },
 
     // Remote
 
     isRemoteSelected () {
-      const selectedCard = this.remoteCardsSelected.find(card => card.cardId === this.id)
+      const selectedCard = this.remoteCardsSelected.find(card => card.cardId === this.card.id)
       return Boolean(selectedCard)
     },
     isRemoteCardDetailsVisible () {
-      const visibleCard = this.remoteCardDetailsVisible.find(card => card.cardId === this.id)
+      const visibleCard = this.remoteCardDetailsVisible.find(card => card.cardId === this.card.id)
       return Boolean(visibleCard)
     },
     isRemoteCardDragging () {
-      const isDragging = this.remoteCardsDragging.find(card => card.cardId === this.id)
+      const isDragging = this.remoteCardsDragging.find(card => card.cardId === this.card.id)
       return Boolean(isDragging)
     },
     remoteCardDetailsVisibleColor () {
-      const visibleCard = this.remoteCardDetailsVisible.find(card => card.cardId === this.id)
+      const visibleCard = this.remoteCardDetailsVisible.find(card => card.cardId === this.card.id)
       if (visibleCard) {
         const user = this['currentSpace/userById'](visibleCard.userId)
         return user.color
@@ -1019,7 +1018,7 @@ export default {
       }
     },
     remoteSelectedColor () {
-      const selectedCard = this.remoteCardsSelected.find(card => card.cardId === this.id)
+      const selectedCard = this.remoteCardsSelected.find(card => card.cardId === this.card.id)
       if (selectedCard) {
         const user = this['currentSpace/userById'](selectedCard.userId)
         return user.color
@@ -1028,7 +1027,7 @@ export default {
       }
     },
     remoteCardDraggingColor () {
-      const draggingCard = this.remoteCardsDragging.find(card => card.cardId === this.id)
+      const draggingCard = this.remoteCardsDragging.find(card => card.cardId === this.card.id)
       if (draggingCard) {
         const user = this['currentSpace/userById'](draggingCard.userId)
         return user.color
@@ -1038,7 +1037,7 @@ export default {
     },
     remoteUserResizingCardsColor () {
       if (!this.remoteUserResizingCards.length) { return }
-      let user = this.remoteUserResizingCards.find(user => user.cardIds.includes(this.id))
+      let user = this.remoteUserResizingCards.find(user => user.cardIds.includes(this.card.id))
       if (user) {
         user = this['currentSpace/userById'](user.userId)
         return user.color
@@ -1048,7 +1047,7 @@ export default {
     },
     remoteUserTiltingCardsColor () {
       if (!this.remoteUserTiltingCards.length) { return }
-      let user = this.remoteUserTiltingCards.find(user => user.cardIds.includes(this.id))
+      let user = this.remoteUserTiltingCards.find(user => user.cardIds.includes(this.card.id))
       if (user) {
         user = this['currentSpace/userById'](user.userId)
         return user.color
@@ -1058,7 +1057,7 @@ export default {
     },
 
     remoteUploadDraggedOverCardColor () {
-      const draggedOverCard = this.remoteUploadDraggedOverCards.find(card => card.cardId === this.id)
+      const draggedOverCard = this.remoteUploadDraggedOverCards.find(card => card.cardId === this.card.id)
       if (draggedOverCard) {
         const user = this['currentSpace/userById'](draggedOverCard.userId)
         return user.color
@@ -1243,7 +1242,7 @@ export default {
       cardIds.find(cardId => {
         let connections = this['currentConnections/all']
         connections = connections.filter(connection => connection.startCardId === cardId || connection.endCardId === cardId)
-        connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
+        connections = connections.filter(connection => connection.startCardId === this.card.id || connection.endCardId === this.card.id)
         connections = this.$store.getters['currentConnections/connectionsWithValidCards'](connections)
         const connection = connections[0]
         if (!connection) { return }
@@ -1398,7 +1397,7 @@ export default {
 
     updateTypeForConnection (connectionId) {
       const newType = this['currentConnections/typeForNewConnections']
-      console.warn('🚑 connection was missing type', { cardId: this.id, connectionId, newType })
+      console.warn('🚑 connection was missing type', { cardId: this.card.id, connectionId, newType })
       const connection = {
         id: connectionId,
         connectionTypeId: newType.id
@@ -1549,7 +1548,7 @@ export default {
     },
     async uploadFile (event) {
       this.removeUploadIsDraggedOver()
-      this.$store.dispatch('currentCards/incrementZ', this.id)
+      this.$store.dispatch('currentCards/incrementZ', this.card.id)
       // pre-upload errors
       if (!this['currentUser/isSignedIn']) {
         this.error.signUpToUpload = true
@@ -1582,7 +1581,7 @@ export default {
       if (!this.canEditSpace) { return }
       const value = !this.isChecked
       this.$store.dispatch('closeAllDialogs')
-      this.$store.dispatch('currentCards/toggleChecked', { cardId: this.id, value })
+      this.$store.dispatch('currentCards/toggleChecked', { cardId: this.card.id, value })
       postMessage.sendHaptics({ name: 'heavyImpact' })
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
@@ -1591,15 +1590,15 @@ export default {
       event.stopPropagation()
     },
     toggleFilterShowAbsoluteDates () {
-      this.$store.dispatch('currentCards/incrementZ', this.id)
+      this.$store.dispatch('currentCards/incrementZ', this.card.id)
       this.$store.dispatch('closeAllDialogs')
       const value = !this.currentUser.filterShowAbsoluteDates
       this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
     },
     updateRemoteConnections () {
       const connection = this.remoteCurrentConnections.find(remoteConnection => {
-        const isConnectedToStart = remoteConnection.startCardId === this.id
-        const isConnectedToEnd = remoteConnection.endCardId === this.id
+        const isConnectedToStart = remoteConnection.startCardId === this.card.id
+        const isConnectedToEnd = remoteConnection.endCardId === this.card.id
         return isConnectedToStart || isConnectedToEnd
       })
       if (connection) {
@@ -1651,7 +1650,7 @@ export default {
     createCurrentConnection (event) {
       const cursor = utils.cursorPositionInViewport(event)
       const multipleCardsSelectedIds = this.multipleCardsSelectedIds
-      let cardIds = [this.id]
+      let cardIds = [this.card.id]
       if (multipleCardsSelectedIds.length) {
         cardIds = multipleCardsSelectedIds
       }
@@ -1712,7 +1711,7 @@ export default {
     updateCardConnectionPaths () {
       this.$nextTick(() => {
         this.$nextTick(() => {
-          this.$store.dispatch('currentConnections/updatePaths', { cardId: this.id, shouldUpdateApi: true })
+          this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
         })
       })
     },
@@ -1720,7 +1719,7 @@ export default {
       if (event.shiftKey) { return }
       // if the current dragging card is not already selected then clear selection
       const multipleCardsSelectedIds = this.multipleCardsSelectedIds
-      if (!multipleCardsSelectedIds.includes(this.id)) {
+      if (!multipleCardsSelectedIds.includes(this.card.id)) {
         this.$store.dispatch('clearMultipleSelected')
       }
     },
@@ -1737,17 +1736,17 @@ export default {
       event.preventDefault()
       if (this.currentUserIsDrawingConnection) { return }
       this.$store.dispatch('closeAllDialogs')
-      let connectedCardIds = this['currentCards/cardIdsConnectedToCardId'](this.id)
+      let connectedCardIds = this['currentCards/cardIdsConnectedToCardId'](this.card.id)
       this.$store.commit('currentDraggingConnectedCardIds', connectedCardIds)
       this.$store.commit('currentUserIsDraggingCard', true)
-      this.$store.commit('currentDraggingCardId', this.id)
+      this.$store.commit('currentDraggingCardId', this.card.id)
       postMessage.sendHaptics({ name: 'softImpact' })
       const updates = {
         cardId: this.card.id,
         userId: this.currentUser.id
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsDragging' })
-      this.$store.commit('parentCardId', this.id)
+      this.$store.commit('parentCardId', this.card.id)
       this.$store.commit('childCardId', '')
       this.checkIfShouldDragMultipleCards(event)
       this.$store.dispatch('currentCards/incrementSelectedZs')
@@ -1764,7 +1763,7 @@ export default {
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const shouldToggleSelected = event.shiftKey && !this.cardsWereDragged && !this.isConnectingTo
       if (shouldToggleSelected) {
-        this.$store.dispatch('toggleCardSelected', this.id)
+        this.$store.dispatch('toggleCardSelected', this.card.id)
         event.stopPropagation()
         this.$store.commit('currentUserIsDraggingCard', false)
         return
@@ -1781,9 +1780,9 @@ export default {
         window.location = event.target.href
         return
       }
-      this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
+      this.$store.commit('cardDetailsIsVisibleForCardId', this.card.id)
       this.$store.commit('preventCardDetailsOpeningAnimation', true)
-      this.$store.commit('parentCardId', this.id)
+      this.$store.commit('parentCardId', this.card.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
       this.updatePreviousResultItem()
@@ -1802,7 +1801,7 @@ export default {
       if (isMultiTouch) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
-      this.$store.dispatch('currentCards/incrementZ', this.id)
+      this.$store.dispatch('currentCards/incrementZ', this.card.id)
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingCard', false)
       const tagRect = event.target.getBoundingClientRect()
@@ -1812,7 +1811,7 @@ export default {
         pageX: window.scrollX,
         pageY: window.scrollY
       })
-      tag.cardId = this.id
+      tag.cardId = this.card.id
       this.$store.commit('currentSelectedTag', tag)
       this.$store.commit('tagDetailsIsVisible', true)
       this.cancelLocking()
