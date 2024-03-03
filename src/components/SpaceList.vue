@@ -373,7 +373,7 @@ span.space-list-wrap
   )
   ul.results-list.space-list(ref="spaceListElement")
     template(v-for="(space, index) in spacesFiltered" :key="space.id")
-      .space-wrap(:data-item-is-visible="itemIsVisible(index)" :style="{height: state.heightByIndex[index] + 'px'}")
+      .space-wrap(:data-item-is-visible="itemIsVisible(index)" :data-space-id="space.id" :style="{height: state.heightByIndex[index] + 'px'}")
         a(:href="space.url")
           li(
             @click.left="selectSpace($event, space)"
