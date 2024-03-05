@@ -918,13 +918,13 @@ export default {
     })
     return xIsInside && yIsInside
   },
-  itemsPositionsShifted (item, position) {
-    const origin = this.topLeftItem(item)
+  itemsPositionsShifted (items, position) {
+    const origin = this.topLeftItem(items)
     const delta = {
       x: position.x - origin.x,
       y: position.y - origin.y
     }
-    return item.map(item => {
+    return items.map(item => {
       item.x = item.x + delta.x
       item.y = item.y + delta.y
       return item

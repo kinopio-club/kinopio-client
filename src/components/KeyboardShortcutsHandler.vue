@@ -615,7 +615,7 @@ export default {
       cards = utils.itemsPositionsShifted(cards, position)
       boxes = utils.itemsPositionsShifted(boxes, position)
       // add items
-      this.$store.dispatch('currentCards/addMultiple', { cards: cards, shouldOffsetPosition: true })
+      this.$store.dispatch('currentCards/addMultiple', { cards })
       connectionTypes.forEach(connectionType => this.$store.dispatch('currentConnections/addType', connectionType))
       connections.forEach(connection => this.$store.dispatch('currentConnections/add', { connection, type: { id: connection.connectionTypeId } }))
       boxes.forEach(box => this.$store.dispatch('currentBoxes/add', { box }))
