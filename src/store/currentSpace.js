@@ -1344,6 +1344,7 @@ const currentSpace = {
     },
     newItems: (state, getters) => ({ items, spaceId }) => {
       items = items || getters.selectedItems
+      spaceId = spaceId || state.id
       let newItems = utils.uniqueSpaceItems(utils.clone(items))
       let { cards, connectionTypes, connections, boxes } = newItems
       cards = utils.updateItemsSpaceId(cards, spaceId)
