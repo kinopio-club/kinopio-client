@@ -12,8 +12,7 @@ const dialogElement = ref(null)
 
 const props = defineProps({
   visible: Boolean,
-  actionIsMove: Boolean,
-  exportData: Object
+  actionIsMove: Boolean
 })
 
 const state = reactive({
@@ -34,13 +33,6 @@ watch(() => props.visible, async (value, prevValue) => {
   }
 })
 
-const updateItemsSpaceId = (items) => {
-  const spaceId = state.selectedSpace.id
-  return items.map(item => {
-    item.spaceId = spaceId
-    return item
-  })
-}
 const scrollIntoView = () => {
   const element = dialogElement.value
   utils.scrollIntoView({ element })
@@ -68,6 +60,7 @@ const updateSelectedSpace = (space) => {
 const toggleSpacePickerIsVisible = () => {
   state.spacePickerIsVisible = !state.spacePickerIsVisible
 }
+const isOnline = computed(() => state.isOnline)
 
 // items
 
@@ -78,20 +71,9 @@ const multipleCardsIsSelected = computed(() => {
   return Boolean(numberOfCards > 1)
 })
 const cardsCount = computed(() => multipleCardsSelectedIds.value.length)
-const names = computed(() => props.exportData.cards.map(card => card.name))
-const text = computed(() => utils.textFromCardNames(props.exportData.cards))
-const selectedItems = () => {
-  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
-  const { cards, boxes } = props.exportData
-  const connections = store.getters['currentConnections/all'].filter(connection => {
-    const isStartCardMatch = multipleCardsSelectedIds.includes(connection.startCardId)
-    const isEndCardMatch = multipleCardsSelectedIds.includes(connection.endCardId)
-    return isStartCardMatch && isEndCardMatch
-  })
-  const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
-  const connectionTypes = connectionTypeIds.map(id => store.getters['currentConnections/typeByTypeId'](id))
-  return { cards, connectionTypes, connections, boxes }
-}
+const selectedItems = computed(() => store.getters['currentSpace/selectedItems'])
+const names = computed(() => selectedItems.value.cards.map(card => card.name))
+const text = computed(() => utils.textFromCardNames(selectedItems.value.cards))
 
 // labels
 
@@ -133,13 +115,7 @@ const copyToSelectedSpace = (items) => {
   state.loading = true
   const selectedSpaceId = state.selectedSpace.id
   const isCurrentSpace = selectedSpaceId === store.state.currentSpace.id
-  let newItems = utils.uniqueSpaceItems(utils.clone(items))
-  let { cards, connectionTypes, connections, boxes } = newItems
-  cards = updateItemsSpaceId(cards)
-  connectionTypes = updateItemsSpaceId(connectionTypes)
-  connections = updateItemsSpaceId(connections)
-  boxes = updateItemsSpaceId(boxes)
-  newItems = { cards, connectionTypes, connections, boxes }
+  const newItems = store.getters['currentSpace/newItems']({ items, selectedSpaceId })
   // update cache
   const spaceIsCached = Boolean(cache.space(selectedSpaceId).cards)
   if (!spaceIsCached) {
@@ -148,22 +124,22 @@ const copyToSelectedSpace = (items) => {
   cache.addToSpace(newItems, selectedSpaceId)
   // update current space
   if (isCurrentSpace) {
-    store.dispatch('currentCards/addMultiple', { cards, shouldOffsetPosition: true })
-    connectionTypes.forEach(connectionType => store.dispatch('currentConnections/addType', connectionType))
-    connections.forEach(connection => store.dispatch('currentConnections/add', { connection, type: { id: connection.connectionTypeId } }))
-    boxes.forEach(box => store.dispatch('currentBoxes/add', { box }))
+    store.dispatch('currentCards/addMultiple', { cards: newItems.cards, shouldOffsetPosition: true })
+    newItems.connectionTypes.forEach(connectionType => store.dispatch('currentConnections/addType', connectionType))
+    newItems.connections.forEach(connection => store.dispatch('currentConnections/add', { connection, type: { id: connection.connectionTypeId } }))
+    newItems.boxes.forEach(box => store.dispatch('currentBoxes/add', { box }))
   }
   // update server
-  cards.forEach(card => store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: selectedSpaceId }))
-  connectionTypes.forEach(connectionType => store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType, spaceId: selectedSpaceId }))
-  connections.forEach(connection => store.dispatch('api/addToQueue', { name: 'createConnection', body: connection, spaceId: selectedSpaceId }))
-  boxes.forEach(box => store.dispatch('api/addToQueue', { name: 'createBox', body: box, spaceId: selectedSpaceId }))
+  newItems.cards.forEach(card => store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: selectedSpaceId }))
+  newItems.connectionTypes.forEach(connectionType => store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType, spaceId: selectedSpaceId }))
+  newItems.connections.forEach(connection => store.dispatch('api/addToQueue', { name: 'createConnection', body: connection, spaceId: selectedSpaceId }))
+  newItems.boxes.forEach(box => store.dispatch('api/addToQueue', { name: 'createBox', body: box, spaceId: selectedSpaceId }))
   console.log('🚚 copies created', newItems)
   state.loading = false
 }
 const moveOrCopyToSpace = async () => {
   if (state.loading) { return }
-  const items = selectedItems()
+  const items = selectedItems.value
   if (isCardsCreatedIsOverLimit()) {
     state.cardsCreatedIsOverLimit = true
     return
@@ -204,7 +180,7 @@ const triggerUpgradeUserIsVisible = () => {
 }
 const isCardsCreatedIsOverLimit = () => {
   if (props.actionIsMove) { return }
-  const items = selectedItems().cards.length
+  const items = selectedItems.value.cards.length
   return store.getters['currentUser/cardsCreatedWillBeOverLimit'](items)
 }
 
@@ -237,7 +213,7 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialogEleme
     .row
       .button-wrap
         button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: state.spacePickerIsVisible}")
-          img.preview-thumbnail-image(v-if="state.selectedSpace.previewThumbnailImage" :src="state.selectedSpace.previewThumbnailImage")
+          img.preview-thumbnail-image(v-if="state.selectedSpace.previewThumbnailImage && isOnline" :src="state.selectedSpace.previewThumbnailImage")
           span {{state.selectedSpace.name}}
           img.down-arrow(src="@/assets/down-arrow.svg")
         SpacePicker(:visible="state.spacePickerIsVisible" :selectedSpace="state.selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true")

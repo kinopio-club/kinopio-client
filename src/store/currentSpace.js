@@ -1322,6 +1322,36 @@ const currentSpace = {
       } else {
         return null
       }
+    },
+
+    // copy, paste
+
+    selectedItems: (state, getters, rootState, rootGetters) => {
+      const cards = rootState.multipleCardsSelectedIds.map(cardId => {
+        return rootGetters['currentCards/byId'](cardId)
+      })
+      const boxes = rootState.multipleBoxesSelectedIds.map(boxId => {
+        return rootGetters['currentBoxes/byId'](boxId)
+      })
+      const connections = rootGetters['currentConnections/all'].filter(connection => {
+        const isStartCardMatch = rootState.multipleCardsSelectedIds.includes(connection.startCardId)
+        const isEndCardMatch = rootState.multipleCardsSelectedIds.includes(connection.endCardId)
+        return isStartCardMatch && isEndCardMatch
+      })
+      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
+      const connectionTypes = connectionTypeIds.map(id => rootGetters['currentConnections/typeByTypeId'](id))
+      return { cards, connectionTypes, connections, boxes }
+    },
+    newItems: (state, getters) => ({ items, spaceId }) => {
+      items = items || getters.selectedItems
+      let newItems = utils.uniqueSpaceItems(utils.clone(items))
+      let { cards, connectionTypes, connections, boxes } = newItems
+      cards = utils.updateItemsSpaceId(cards, spaceId)
+      connectionTypes = utils.updateItemsSpaceId(connectionTypes, spaceId)
+      connections = utils.updateItemsSpaceId(connections, spaceId)
+      boxes = utils.updateItemsSpaceId(boxes, spaceId)
+      newItems = { cards, connectionTypes, connections, boxes }
+      return newItems
     }
   }
 }

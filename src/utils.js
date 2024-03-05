@@ -1331,6 +1331,12 @@ export default {
     items = { cards, connections, connectionTypes, boxes, tags }
     return items
   },
+  updateItemsSpaceId (items, spaceId) {
+    return items.map(item => {
+      item.spaceId = spaceId
+      return item
+    })
+  },
   updateConnectionsType ({ connections, prevTypeId, newTypeId }) {
     return connections.map(connection => {
       if (connection.connectionTypeId === prevTypeId) {
