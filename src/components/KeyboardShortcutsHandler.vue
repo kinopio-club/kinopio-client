@@ -570,22 +570,18 @@ export default {
           this.$store.commit('addNotification', { message, icon: 'cut', type: 'danger' })
           return
         }
-        clipboardItems = await navigator.clipboard.read()
-        const item = clipboardItems[0]
-        const isText = item.types.includes('text/plain')
-        if (isText) {
-          const index = item.types.indexOf('text/plain')
-          const type = item.types[index]
-          const blob = await item.getType(type)
-          let text = await blob.text()
-          text = utils.trim(text)
-          const isData = JSON.parse(text)?.isKinopioData
-          if (isData) {
-            const data = JSON.parse(text)
-            this.$store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
-            return data
-          }
-          this.$store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
+        const text = await navigator.clipboard.readText()
+        const isData = utils.isStringJSON(text)
+        let data, isKinopioData
+
+        if (isData) {
+          data = JSON.parse(text)
+          isKinopioData = data?.isKinopioData
+        }
+        this.$store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
+        if (isKinopioData) {
+          return data
+        } else {
           return { text }
         }
       } catch (error) {
