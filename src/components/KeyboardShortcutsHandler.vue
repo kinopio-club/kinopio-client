@@ -559,16 +559,17 @@ export default {
 
     // Paste
 
+    notifyPasted (position) {
+      this.$store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
+    },
+
     async getClipboardData () {
       this.$store.commit('clearNotificationsWithPosition')
-      const position = currentCursorPosition || prevCursorPosition
+      let position = currentCursorPosition || prevCursorPosition
       try {
-        let clipboardItems
-        // TODO add fallback for firefox
         if (!navigator.clipboard.read) {
-          const message = 'Pasting cards is not supported by this browser'
-          this.$store.commit('addNotification', { message, icon: 'cut', type: 'danger' })
-          return
+          this.notifyPasted(position)
+          return utils.clone(this.$store.state.clipboardDataPolyfill)
         }
         const text = await navigator.clipboard.readText()
         const isData = utils.isStringJSON(text)
@@ -578,7 +579,7 @@ export default {
           data = JSON.parse(text)
           isKinopioData = data?.isKinopioData
         }
-        this.$store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
+        this.notifyPasted(position)
         if (isKinopioData) {
           return data
         } else {
@@ -603,6 +604,7 @@ export default {
     },
 
     handlePasteKinopioData (data, position) {
+      if (!data.cards) { return }
       this.$store.dispatch('history/pause')
       this.normalizePasteData(data)
       data = this.$store.getters['currentSpace/newItems']({ items: data })
@@ -703,12 +705,10 @@ export default {
       let data = { isKinopioData: true, cards, connections, connectionTypes, boxes }
       const text = utils.textFromCardNames(cards)
       console.log('🎊 copyData', data, text)
-      data = JSON.stringify(data)
-      this.$store.commit('clipboardDataPolyfill', selectedItems)
       try {
-        if (navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(data)
-        }
+        this.$store.commit('clipboardDataPolyfill', data)
+        data = JSON.stringify(data)
+        await navigator.clipboard.writeText(data)
       } catch (error) {
         console.warn('🚑 writeSelectedToClipboard', error)
         throw { error }
