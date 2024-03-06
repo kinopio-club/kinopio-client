@@ -85,7 +85,7 @@ const state = reactive({
   heightByIndex: {}
 })
 
-const isOffline = computed(() => !state.isOnline)
+const isOnline = computed(() => state.isOnline)
 
 // scroll
 
@@ -394,7 +394,7 @@ span.space-list-wrap
               template(v-else-if="showCollaborator(space)")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
               //- preview image
-              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOffline")
+              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline")
                 img.preview-thumbnail-image(:src="space.previewThumbnailImage")
                 //- new
                 .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")

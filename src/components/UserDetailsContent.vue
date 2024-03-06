@@ -116,7 +116,7 @@ const userName = computed({
 })
 const userDescription = computed({
   get () {
-    return props.user.description
+    return props.user.description.trim()
   },
   set (newValue) {
     updateUser({ description: newValue })
@@ -215,22 +215,14 @@ const updateExploreSpaces = async () => {
       .row
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id")
         p.name.user-details-name {{user.name}}
-      .row(v-if="user.description")
-        textarea(ref="descriptionElement" :value="user.description" disabled)
-      .row.website(v-if="user.website")
-        p(v-if="!websiteUrl") {{user.website}}
-        a(:href="websiteUrl" v-if="websiteUrl")
-          span {{user.website}}
-    UserBadges(:user="user")
-
-  section.results-section.explore-spaces-section(v-if="exploreSpacesIsVisible" ref="results")
-    SpaceList(
-      :spaces="state.exploreSpaces"
-      @selectSpace="changeSpace"
-      :hideFilter="true"
-      :isLoading="state.loading.exploreSpaces"
-      :disableListOptimizaitons="true"
-    )
+      .other-user-info
+        UserBadges(:user="user")
+        .row(v-if="userDescription")
+          p {{userDescription}}
+        .row.website(v-if="user.website")
+          p(v-if="!websiteUrl") {{user.website}}
+          a(:href="websiteUrl" v-if="websiteUrl")
+            span {{user.website}}
 
   //- Current User
   template(v-if="isCurrentUser")
@@ -241,14 +233,14 @@ const updateExploreSpaces = async () => {
             .current-color(:style="{ background: userColor }")
           ColorPicker(:currentColor="userColor" :visible="state.colorPickerIsVisible" @selectedColor="updateUserColor")
         input.name.user-details-name(placeholder="What's your name?" v-model="userName" name="Name" maxlength=100)
+      UserBadges(:user="user")
       .row
-        textarea(ref="description" placeholder="Tell us about yourself" v-model="userDescription" name="Description" maxlength=220 rows="1")
+        textarea(ref="descriptionElement" placeholder="Tell us about yourself" v-model="userDescription" name="Description" maxlength=220 rows="1")
       .row
         input(ref="website" placeholder="Website" v-model="userWebsite" name="Website" maxlength=200 rows="1")
         a(:href="websiteUrl" v-if="websiteUrl")
           button.inline-button
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
-      UserBadges(:user="user")
     section
       .row
         .button-wrap
@@ -287,13 +279,22 @@ const updateExploreSpaces = async () => {
       button(@click.left.stop="removeCollaborator")
         img.icon.cancel(src="@/assets/add.svg")
         span Remove From Space
+
+  //- Explore Spaces
+  section.results-section.explore-spaces-section(v-if="exploreSpacesIsVisible" ref="results")
+    SpaceList(
+      :spaces="state.exploreSpaces"
+      @selectSpace="changeSpace"
+      :hideFilter="true"
+      :isLoading="state.loading.exploreSpaces"
+      :disableListOptimizaitons="true"
+    )
 </template>
 
 <style lang="stylus">
 .user-details-content
-  .current-user
-    .user-badges
-      margin-top -10px
+  .user-badges
+    margin-top -10px
   .user-details-name
     margin-left 6px
   .error-message
@@ -339,6 +340,11 @@ const updateExploreSpaces = async () => {
     .user
       margin-right 6px
 
+  .other-user-info
+    max-height 200px
+    overflow scroll
+    margin-bottom -8px
+    padding-bottom 8px
   .explore-spaces-section
-    max-height 250px
+    max-height 100px
 </style>

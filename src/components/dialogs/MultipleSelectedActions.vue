@@ -44,10 +44,10 @@ dialog.narrow.multiple-selected-actions(
         .segmented-buttons.move-or-copy-wrap(v-if="cardsIsSelected")
           button(@click.left.stop="toggleCopyCardsIsVisible" :class="{ active: copyCardsIsVisible }")
             span Copy
-            MoveOrCopyItems(:visible="copyCardsIsVisible" :actionIsMove="false" :exportData="exportData")
+            MoveOrCopyItems(:visible="copyCardsIsVisible" :actionIsMove="false")
           button(@click.left.stop="toggleMoveCardsIsVisible" :class="{ active: moveCardsIsVisible }" :disabled="!canEditAll.cards")
             span Move
-            MoveOrCopyItems(:visible="moveCardsIsVisible" :actionIsMove="true" :exportData="exportData")
+            MoveOrCopyItems(:visible="moveCardsIsVisible" :actionIsMove="true")
       //- More Options
       AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
 
@@ -270,15 +270,6 @@ export default {
       const total = this.multipleConnectionsSelectedIds.length + this.multipleCardsSelectedIds.length
       return Boolean(total > 1)
     },
-    exportData () {
-      const cards = this.multipleCardsSelectedIds.map(cardId => {
-        return this.$store.getters['currentCards/byId'](cardId)
-      })
-      const boxes = this.multipleBoxesSelectedIds.map(boxId => {
-        return this.$store.getters['currentBoxes/byId'](boxId)
-      })
-      return { cards, boxes }
-    },
     styles () {
       const position = this.$store.state.multipleSelectedActionsPosition
       let zoom = this.spaceCounterZoomDecimal
@@ -386,7 +377,7 @@ export default {
         }
         newCards.push(newCard)
       })
-      this.$store.dispatch('currentCards/addMultiple', newCards)
+      this.$store.dispatch('currentCards/addMultiple', { cards: newCards })
       prevCards = newCards // for history
       this.positionNewCards(newCards)
     },
