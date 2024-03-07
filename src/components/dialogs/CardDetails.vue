@@ -769,7 +769,7 @@ export default {
     addSplitCards (newCards) {
       const spaceBetweenCards = 12
       let prevCard = utils.clone(this.card)
-      this.$store.dispatch('currentCards/addMultiple', newCards)
+      this.$store.dispatch('currentCards/addMultiple', { cards: newCards })
       this.$nextTick(() => {
         newCards = newCards.map(card => {
           const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)

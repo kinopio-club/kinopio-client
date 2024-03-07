@@ -223,12 +223,19 @@ const currentCards = {
       context.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
       context.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
     },
-    addMultiple: (context, newCards) => {
-      newCards = newCards.map(card => {
+    addMultiple: (context, { cards, shouldOffsetPosition }) => {
+      cards = cards.map(card => {
+        let x = card.x
+        let y = card.y
+        if (shouldOffsetPosition) {
+          const offset = 100
+          x += offset
+          y += offset
+        }
         return {
           id: card.id || nanoid(),
-          x: card.x,
-          y: card.y,
+          x,
+          y,
           z: card.z || context.state.ids.length + 1,
           name: card.name,
           frameId: card.frameId || 0,
@@ -245,13 +252,13 @@ const currentCards = {
           urlPreviewUrl: card.urlPreviewUrl
         }
       })
-      newCards.forEach(card => {
+      cards.forEach(card => {
         context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
         context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
         context.commit('create', { card })
       })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        cards: newCards
+        cards
       }, { root: true })
     },
     paste: (context, { card, cardId }) => {

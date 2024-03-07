@@ -86,6 +86,7 @@ const store = createStore({
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
     currentUserIsDraggingConnectionIdLabel: '',
+    clipboardDataPolyfill: {}, // for firefox pasting
 
     // box-selecting
     currentUserIsBoxSelecting: false,
@@ -249,7 +250,6 @@ const store = createStore({
     otherTags: [],
 
     // codeblocks
-
     codeLanguagePickerIsVisible: false,
     codeLanguagePickerPosition: {}, // x, y
     codeLanguagePickerCardId: ''
@@ -835,6 +835,10 @@ const store = createStore({
     currentUserIsDraggingConnectionIdLabel: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.currentUserIsDraggingConnectionIdLabel = value
+    },
+    clipboardDataPolyfill: (state, data) => {
+      utils.typeCheck({ value: data, type: 'object' })
+      state.clipboardDataPolyfill = data
     },
 
     // Dragging Cards

@@ -670,19 +670,6 @@ const self = {
         context.dispatch('handleServerError', { name: 'getCardsWithLinkToSpaceId', error })
       }
     },
-    updateCardsWithLinkToCardIds: async (context, body) => {
-      if (!body.prevCards.length) { return }
-      const apiKey = context.rootState.currentUser.apiKey
-      const isOnline = context.rootState.isOnline
-      if (!shouldRequest({ apiKey, isOnline })) { return }
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/card/link-to-card-ids`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'updateCardsWithLinkToCardIds', error })
-      }
-    },
     updateCards: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
