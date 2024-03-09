@@ -350,47 +350,8 @@ const handleMouseLeave = () => {
   store.commit('currentUserIsHoveringOverConnectionId', '')
 }
 
-// updateIsVisibleInViewport: debounce(async function () {
-//   if (store.state.disableViewportOptimizations) { state.isVisibleInViewport = true }
-//   if (this.isUpdatingPath) { state.isVisibleInViewport = true }
-//   if (!props.connection.path) { state.isVisibleInViewport = false }
-//   const threshold = 400 * store.getters.spaceCounterZoomDecimal
-//   const offset = utils.outsideSpaceOffset().y
-//   const windowScroll = { x: window.scrollX, y: window.scrollY }
-//   const scroll = windowScroll.y - offset
-//   const viewport = store.state.viewportHeight * store.getters.spaceCounterZoomDecimal
-//   let y1 = utils.startCoordsFromConnectionPath(props.connection.path).y
-//   let y2 = utils.endCoordsFromConnectionPath(props.connection.path).y + y1
-//   if (y1 > y2) {
-//     const y = y1
-//     y1 = y2
-//     y2 = y
-//   }
-//   //       ┌───┐
-//   //   y1  │\\\│
-//   //   ●   │\\\│
-//   //   │   │\\\│
-//   //   │   │\\\│  ┌───┐
-//   //   │   │\\\│  │\\\│
-//   //   │   └───┘  │\\\│
-//   //   │          │\\\│
-//   //   │          │\\\│ ┌───┐
-//   //   │          │\\\│ │\\\│
-//   //   │          └───┘ │\\\│
-//   //   │                │\\\│
-//   //   ●                │\\\│
-//   //   y2               │\\\│
-//   //                    └───┘
-//   const y1IsBelow = y1 - threshold > scroll + viewport
-//   const y2IsAbove = y2 + threshold < scroll
-//   let isTallerThanViewport = Math.abs(y2 - y1) > viewport
-//   if (isTallerThanViewport) {
-//     state.isVisibleInViewport = true
-//   } else {
-//     const isNotInView = y1IsBelow || y2IsAbove
-//     state.isVisibleInViewport = !isNotInView
-//   }
-// }, 100, { leading: true }),
+// is visible in viewport
+
 const initIsVisibleInViewportObserver = () => {
   if (observer) { return }
   // WIP observer
@@ -424,7 +385,6 @@ const initIsVisibleInViewportObserver = () => {
     //   threshold: 1.0 // every pixel is visible
     // }
     const target = connectionElement.value
-    console.log('🍌🍌🍌🍌', target, document.querySelector('main#space'), props.connection.id)
     if (!target) { return }
     observer = new IntersectionObserver(callback)
     observer.observe(target)

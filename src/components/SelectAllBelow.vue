@@ -34,7 +34,7 @@ export default {
   methods: {
     handleMouseDown (event) {
       this.isSelecting = true
-      this.selectAllBelow(event)
+      this.debouncedSelectAllBelow(event)
     },
     handleMouseMove (event) {
       if (!event.target.closest) { return }
@@ -75,7 +75,7 @@ export default {
     handleMouseUp (event) {
       if (!this.isSelecting) { return }
       this.isSelecting = false
-      this.selectAllBelow(event)
+      this.debouncedSelectAllBelow(event)
       this.isVisible = false
       setTimeout(() => {
         this.$store.commit('preventMultipleSelectedActionsIsVisible', false)

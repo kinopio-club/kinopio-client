@@ -728,8 +728,7 @@ export default {
         zoom = this.$store.getters.spaceZoomDecimal
       }
       // cards
-      let cards = utils.clone(this.$store.getters['currentCards/all'])
-      cards = cards.filter(card => (card.y * zoom) > position.y)
+      const cards = this.$store.getters['currentCards/isBelowY'](position.y, zoom)
       const cardIds = cards.map(card => card.id)
       // boxes
       let boxes = utils.clone(this.$store.getters['currentBoxes/all'])

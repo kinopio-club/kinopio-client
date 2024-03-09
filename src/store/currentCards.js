@@ -813,12 +813,17 @@ const currentCards = {
       return state.ids.map(id => state.cards[id])
     },
     isNotLocked: (state, getters) => {
-      let cards = getters.all
+      const cards = getters.all
       return cards.filter(card => !card.isLocked)
     },
     isLocked: (state, getters) => {
-      let cards = getters.all
+      const cards = getters.all
       return cards.filter(card => card.isLocked)
+    },
+    isBelowY: (state, getters) => (y, zoom) => {
+      zoom = zoom || 1
+      const cards = getters.all
+      return cards.filter(card => (card.y * zoom) > y)
     },
     canBeSelectedSortedByY: (state, getters) => {
       return canBeSelectedSortedByY
