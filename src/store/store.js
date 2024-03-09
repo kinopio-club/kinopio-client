@@ -122,7 +122,7 @@ const store = createStore({
     multipleCardsSelectedIds: [],
     newTweetCards: [],
     prevNewTweetCards: [],
-    embedIsVisibleForCardId: '',
+    urlEmbedIsVisibleForCardId: '',
     // resizing card
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
@@ -627,9 +627,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.preventCardDetailsOpeningAnimation = value
     },
-    embedIsVisibleForCardId: (state, cardId) => {
+    urlEmbedIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
-      state.embedIsVisibleForCardId = cardId
+      state.urlEmbedIsVisibleForCardId = cardId
     },
 
     // Connections
