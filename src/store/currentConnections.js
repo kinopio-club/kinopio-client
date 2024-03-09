@@ -267,10 +267,10 @@ export default {
     updateLabelPosition: (context, { connection, labelRelativePositionX, labelRelativePositionY }) => {
       const prevConnection = context.getters.byId(connection.id)
       // normalize
-      if (utils.isUndefined(labelRelativePositionX)) {
+      if (utils.isUndefinedOrNull(labelRelativePositionX)) {
         labelRelativePositionX = utils.roundFloat(prevConnection.labelRelativePositionX)
       }
-      if (utils.isUndefined(labelRelativePositionY)) {
+      if (utils.isUndefinedOrNull(labelRelativePositionY)) {
         labelRelativePositionY = utils.roundFloat(prevConnection.labelRelativePositionY)
       }
       // update
