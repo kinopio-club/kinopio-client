@@ -9,6 +9,8 @@ const store = useStore()
 
 let animationTimer, isMultiTouch, startCursor, currentCursor
 
+let observer
+
 const connectionElement = ref(null)
 
 onMounted(() => {
@@ -29,7 +31,7 @@ onMounted(() => {
     }
   })
   // updateIsVisibleInViewport()
-  // window.addEventListener('scroll', updateIsVisibleInViewport)
+  window.addEventListener('scroll', initIsVisibleInViewportObserver)
   initIsVisibleInViewportObserver()
 })
 
@@ -390,6 +392,7 @@ const handleMouseLeave = () => {
 //   }
 // }, 100, { leading: true }),
 const initIsVisibleInViewportObserver = () => {
+  if (observer) { return }
   // WIP observer
   try {
     let callback = (entries, observer) => {
@@ -420,9 +423,10 @@ const initIsVisibleInViewportObserver = () => {
     //   // rootMargin: 0,
     //   threshold: 1.0 // every pixel is visible
     // }
-    const observer = new IntersectionObserver(callback)
     const target = connectionElement.value
     console.log('🍌🍌🍌🍌', target, document.querySelector('main#space'), props.connection.id)
+    if (!target) { return }
+    observer = new IntersectionObserver(callback)
     observer.observe(target)
   } catch (error) {
     console.error('🚒connection🚒🚒🚒🚒🚒🚒🚒', error)
@@ -432,7 +436,7 @@ const initIsVisibleInViewportObserver = () => {
 </script>
 
 <template lang="pug">
-g.connection(v-if="visible" :style="connectionStyles")
+g.connection(v-if="visible" :style="connectionStyles" :data-id="connection.id")
   path.connection-path(
     fill="none"
     :stroke="typeColor"
@@ -462,12 +466,12 @@ g.connection(v-if="visible" :style="connectionStyles")
     @mouseleave="handleMouseLeave"
   )
 
-defs
+defs(v-if="state.isVisibleInViewport")
   linearGradient(:id="gradientId")
     stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
     stop(offset="90%" :stop-color="typeColor")
 
-circle(v-if="directionIsVisible && !isUpdatingPath && state.isVisibleInViewport" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}")
+circle(v-if="directionIsVisible && !isUpdatingPath && state.isVisibleInViewport" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}" :data-id="connection.id")
   animateMotion(dur="3s" repeatCount="indefinite" :path="connection.path" rotate="auto")
 </template>
 

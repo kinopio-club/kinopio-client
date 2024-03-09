@@ -1618,9 +1618,9 @@ const initIsVisibleInViewportObserver = () => {
         console.log('🍆card🍆🍆🍆🍆🍆', props.card.name, state.isVisibleInViewport)
       })
     }
-    const observer = new IntersectionObserver(callback)
     const target = cardElement.value
     // console.log('🍌🍌🍌🍌', target, document.querySelector('main#space'))
+    const observer = new IntersectionObserver(callback)
     observer.observe(target)
   } catch (error) {
     console.error('🚒card🚒🚒🚒🚒🚒🚒🚒', error)
