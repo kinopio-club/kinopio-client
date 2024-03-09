@@ -522,7 +522,7 @@ const remoteUserTiltingCardsColor = computed(() => {
   }
 })
 const updateCardDimensions = () => {
-  if (!state.isVisibleInViewport) { return }
+  // if (!state.isVisibleInViewport) { return }
   let card = { id: props.card.id }
   card = utils.updateCardDimensions(card)
   if (!card) { return }
@@ -1027,36 +1027,6 @@ const nameSegments = computed(() => {
   })
   return segments
 })
-const longestNameLineLength = () => {
-  let name = ''
-  nameSegments.value.forEach(segment => {
-    if (segment.isTag) {
-      name += segment.name
-    }
-    if (segment.markdown) {
-      segment.markdown.forEach(markdown => {
-        if (markdown.type === 'link') {
-          name += markdown.result[1]
-        } else if (markdown.type === 'code') {
-          // truncate code characters to compensate for badge padding
-          name += markdown.content.substring(4, markdown.content.length)
-        } else {
-          name += markdown.content
-        }
-      })
-    }
-  })
-  name = name || '.'
-  const nameLines = name.match(/[^\n]+/g)
-  let longestLineLength = 0
-  if (!nameLines) { return longestLineLength }
-  nameLines.forEach(line => {
-    if (line.length > longestLineLength) {
-      longestLineLength = line.length
-    }
-  })
-  return longestLineLength
-}
 
 // tags
 
@@ -1635,33 +1605,36 @@ const initIsVisibleInViewportObserver = () => {
   // WIP observer
   try {
     const viewport = utils.visualViewport()
-    let options = {
-      // root: document.querySelector("#magic-painting"),
-      rootMargin: `${viewport.height}px ${viewport.width}px `,
-      threshold: 1.0 // every pixel is visible
-    }
     let callback = (entries, observer) => {
       entries.forEach((entry) => {
-        console.log('🍆🍆🍆🍆🍆🍆', props.card.name, entry.isIntersecting, props.card.height, `${utils.visualViewport().height}px`)
         // Each entry describes an intersection change for one observed
         // target element:
         //   entry.boundingClientRect
         //   entry.intersectionRatio
         //   entry.intersectionRect
         if (entry.isIntersecting) {
-        // state.isVisibleInViewport = true
-          updateIsVisibleInViewport(true)
+          state.isVisibleInViewport = true
+          // updateIsVisibleInViewport(true)
         } else {
-        // state.isVisibleInViewport = false
-          updateIsVisibleInViewport(false)
+          state.isVisibleInViewport = false
+          // updateIsVisibleInViewport(false)
         }
+
+        console.log('🍆🍆🍆🍆🍆🍆', props.card.name, state.isVisibleInViewport)
+
         //   entry.rootBounds
         //   entry.target
         //   entry.time
       })
     }
-    let observer = new IntersectionObserver(callback, options)
-    let target = cardElement.value
+    // const options = {
+    //   // root: document.querySelector("#magic-painting"),
+    //   // rootMargin: `${viewport.height}px ${viewport.width}px `,
+    //   // rootMargin: 0,
+    //   threshold: 1.0 // every pixel is visible
+    // }
+    const observer = new IntersectionObserver(callback)
+    const target = cardElement.value
     console.log('🍌🍌🍌🍌', target, document.querySelector('main#space'))
     observer.observe(target)
   } catch (error) {
@@ -1719,21 +1692,21 @@ const initIsVisibleInViewportObserver = () => {
 //     })
 //   }
 // }, 50, { leading: true })
-const updateIsVisibleInViewport = async (value) => {
-  let isVisible = value
-  if (store.state.disableViewportOptimizations) { isVisible = true }
-  if (shouldJiggle.value) { isVisible = true }
-  if (store.state.currentDraggingConnectedCardIds.includes(props.card.id)) { isVisible = true }
-  if (isBeingDragged.value) { isVisible = true }
-  if (state.isPlayingAudio) { isVisible = true }
-  if (urlEmbedIsVisible.value) { isVisible = true }
-  state.isVisibleInViewport = isVisible
-  if (isVisible) {
-    await nextTick()
-    updateCardDimensions()
-    correctPaths()
-  }
-}
+// const updateIsVisibleInViewport = async (value) => {
+//   let isVisible = value
+//   if (store.state.disableViewportOptimizations) { isVisible = true }
+//   if (shouldJiggle.value) { isVisible = true }
+//   if (store.state.currentDraggingConnectedCardIds.includes(props.card.id)) { isVisible = true }
+//   if (isBeingDragged.value) { isVisible = true }
+//   if (state.isPlayingAudio) { isVisible = true }
+//   if (urlEmbedIsVisible.value) { isVisible = true }
+//   state.isVisibleInViewport = isVisible
+//   if (isVisible) {
+//     await nextTick()
+//     updateCardDimensions()
+//     correctPaths()
+//   }
+// }
 
 // mouse handlers
 
@@ -2015,10 +1988,7 @@ article.card-wrap#card(
   :title="cardNameIfComment"
 
 )
-  //- isVisibleInViewport
   .card(
-    v-if="state.isVisibleInViewport"
-
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
 
