@@ -1,480 +1,475 @@
-<template lang="pug">
-template(v-if="isVisibleInViewport")
-  g.connection(v-if="visible" :style="connectionStyles")
-    path.connection-path(
-      fill="none"
-      :stroke="typeColor"
-      stroke-width="5"
-      :data-start-card="startCardId"
-      :data-end-card="endCardId"
-      :data-id="id"
-      :data-type-name="typeName"
-      :data-type-id="connectionTypeId"
-      :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
-      :data-label-is-visible="connection.labelIsVisible"
-      :key="id"
-      :d="connectionPath"
-      @mousedown.left="startDraggingConnection"
-      @touchstart="startDraggingConnection"
-      @mouseup.left="showConnectionDetails"
-      @touchend.stop="showConnectionDetails"
-      @keyup.stop.backspace="removeConnection"
-      @keyup.stop.enter="showConnectionDetailsOnKeyup"
-      :class="connectionClasses"
-      ref="connectionElement"
-      tabindex="0"
-      @dragover.prevent
-      @drop.prevent.stop="addCardsAndUploadFiles"
-
-      @mouseenter="handleMouseEnter"
-      @mouseleave="handleMouseLeave"
-    )
-
-  defs
-    linearGradient(:id="gradientId")
-      stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
-      stop(offset="90%" :stop-color="typeColor")
-
-  circle(v-if="directionIsVisible && !isUpdatingPath && isVisibleInViewport" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}")
-    animateMotion(dur="3s" repeatCount="indefinite" :path="connectionPath" rotate="auto")
-</template>
-
-<script>
-import { mapState, mapGetters } from 'vuex'
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+const store = useStore()
 
-import debounce from 'lodash-es/debounce'
+// import debounce from 'lodash-es/debounce' // temp
 
 let animationTimer, isMultiTouch, startCursor, currentCursor
 
-export default {
-  name: 'Connection',
-  props: {
-    connection: Object,
-    isRemote: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'clearMultipleSelected') {
-        const selectedIds = this.multipleConnectionsSelectedIds
-        const selected = selectedIds.includes(this.id) || this.connectionDetailsIsVisibleForConnectionId === this.id
-        if (!selected) {
-          this.cancelAnimation()
-        }
-      } else if (mutation.type === 'currentCards/move') {
-        this.cancelAnimation()
-      } else if (mutation.type === 'triggerConnectionDetailsIsVisible') {
-        if (mutation.payload.connectionId === this.id) {
-          const isFromStore = true
-          this.showConnectionDetails(mutation.payload.event, isFromStore)
-        }
+const connectionElement = ref(null)
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'clearMultipleSelected') {
+      const selectedIds = store.state.multipleConnectionsSelectedIds
+      const selected = selectedIds.includes(props.connection.id) || store.state.connectionDetailsIsVisibleForConnectionId === props.connection.id
+      if (!selected) {
+        cancelAnimation()
       }
-    })
-  },
-  async mounted () {
-    this.updateIsVisibleInViewport()
-    window.addEventListener('scroll', this.updateIsVisibleInViewport)
-  },
-  data () {
-    return {
-      curvedPath: '',
-      frameCount: 0,
-      isVisibleInViewport: true
+    } else if (mutation.type === 'currentCards/move') {
+      cancelAnimation()
+    } else if (mutation.type === 'triggerConnectionDetailsIsVisible') {
+      if (mutation.payload.connectionId === props.connection.id) {
+        const isFromStore = true
+        showConnectionDetails(mutation.payload.event, isFromStore)
+      }
     }
-  },
-  computed: {
-    ...mapState([
-      'currentUser',
-      'remoteCardsDragging',
-      'remoteCardsSelected',
-      'currentUserIsDraggingCard',
-      'multipleCardsSelectedIds',
-      'currentDraggingCardId',
-      'remoteCardsSelected',
-      'disableViewportOptimizations',
-      'viewportHeight',
-      'multipleConnectionsSelectedIds',
-      'connectionDetailsIsVisibleForConnectionId',
-      'remoteConnectionDetailsVisible',
-      'remoteConnectionsSelected',
-      'currentUserIsHoveringOverConnectionId',
-      'shouldHideConnectionOutline',
-      'currentCardConnections',
-      'filteredConnectionTypeIds',
-      'filteredFrameIds',
-      'filteredTagNames'
-    ]),
-    ...mapGetters([
-      'currentCards/all',
-      'currentUser/isSpaceMember',
-      'currentUser/canEditSpace',
-      'currentConnections/typeByTypeId',
-      'currentCards/byId',
-      'spaceCounterZoomDecimal'
-    ]),
-    visible () {
-      if (this.isRemote) { return true }
-      return this.cards.startCard && this.cards.endCard
-    },
-    connectionStyles () {
-      if (!this.currentUserIsDraggingCard) { return }
-      return { pointerEvents: 'none' }
-    },
-    connectionClasses () {
-      return {
-        active: this.isActive,
-        filtered: this.isFiltered,
-        hover: this.isHovered,
-        'hide-connection-outline': this.shouldHideConnectionOutline,
-        'is-hidden-by-opacity': this.isHiddenByCommentFilter,
-        'is-connected-to-comment': this.isConnectedToCommentCard
-      }
-    },
-    cards () {
-      const cards = this['currentCards/all']
-      const startCard = cards.find(card => card.id === this.startCardId)
-      const endCard = cards.find(card => card.id === this.endCardId)
-      return { startCard, endCard }
-    },
-    isConnectedToCommentCard () {
-      const { startCard, endCard } = this.cards
-      if (!startCard || !endCard) { return }
-      return startCard.isComment || endCard.isComment
-    },
-    isHiddenByCommentFilter () {
-      const filterCommentsIsActive = this.currentUser.filterComments
-      if (!filterCommentsIsActive) { return }
-      const startCard = this.cards.startCard
-      const endCard = this.cards.endCard
-      const startCardIsComment = startCard.isComment || utils.isNameComment(startCard.name)
-      const endCardIsComment = startCard.isComment || utils.isNameComment(endCard.name)
-      return startCardIsComment || endCardIsComment
-    },
-    isSpaceMember () { return this['currentUser/isSpaceMember']() },
-    canEditSpace () { return this['currentUser/canEditSpace']() },
-    id () { return this.connection.id },
-    gradientId () { return `gradient-${this.id}` },
-    gradientIdReference () { return `url('#${this.gradientId}')` },
-    connectionType () { return this['currentConnections/typeByTypeId'](this.connectionTypeId) },
-    connectionTypeId () { return this.connection.connectionTypeId },
-    startCardId () { return this.connection.startCardId },
-    endCardId () { return this.connection.endCardId },
-    connectionPath () { return this.connection.path },
-    remoteCardsIsDragging () { return Boolean(this.remoteCardsDragging.length) },
-    path () {
-      return this.connection.path
-    },
-    typeColor () {
-      if (!this.connectionType) { return }
-      return this.connectionType.color
-    },
-    typeName () {
-      if (!this.connectionType) { return }
-      return this.connectionType.name
-    },
-    isSelected () {
-      const selectedIds = this.multipleConnectionsSelectedIds
-      return selectedIds.includes(this.id)
-    },
-    isRemoteSelected () {
-      const isSelected = this.remoteConnectionsSelected.find(connection => connection.connectionId === this.id)
-      return isSelected
-    },
-    isCurrentCardConnection () {
-      return this.currentCardConnections.includes(this.id)
-    },
-    detailsIsVisible () {
-      if (!this.canEditSpace) { return }
-      const detailsId = this.connectionDetailsIsVisibleForConnectionId
-      return detailsId === this.id
-    },
-    remoteDetailsIsVisible () {
-      const isSelected = this.remoteConnectionDetailsVisible.find(connection => connection.connectionId === this.id)
-      return isSelected
-    },
-    shouldAnimate () {
-      if (this.currentUserIsDraggingCard) { return }
-      return Boolean(this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected)
-    },
-    isDraggingCurrentConnectionLabel () {
-      const connectionId = this.$store.state.currentUserIsDraggingConnectionIdLabel
-      if (!connectionId) { return }
-      const connection = this.$store.getters['currentConnections/byId'](connectionId)
-      if (!connection) { return }
-      return connection.id === this.id
-    },
-    isActive () {
-      if (!this.isDraggingCurrentConnectionLabel) { return }
-      return this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected || this.isCurrentCardConnection || this.isConnectedToMultipleCardsSelected
-    },
-    isHovered () {
-      if (this.currentUserIsDraggingCard) { return }
-      return this.id === this.currentUserIsHoveringOverConnectionId || this.id === this.$store.state.currentUserIsDraggingConnectionIdLabel || this.isHoveredOverConnectedCard
-    },
-    isHoveredOverConnectedCard () {
-      const cardId = this.$store.state.currentUserIsHoveringOverCardId
-      if (!cardId) { return }
-      return (cardId === this.startCardId || cardId === this.endCardId)
-    },
-    isConnectedToMultipleCardsSelected () {
-      const cardIds = this.$store.state.multipleCardsSelectedIds
-      if (!cardIds.length) { return }
-      return cardIds.find(cardId => {
-        return (cardId === this.startCardId || cardId === this.endCardId)
-      })
-    },
+  })
+  // updateIsVisibleInViewport()
+  // window.addEventListener('scroll', updateIsVisibleInViewport)
+  initIsVisibleInViewportObserver()
+})
 
-    // filters
-    filtersIsActive () {
-      const types = this.filteredConnectionTypeIds
-      const frames = this.filteredFrameIds
-      const tags = this.filteredTagNames
-      return Boolean(types.length + frames.length + tags.length)
-    },
-    isCardsFilteredByFrame () {
-      const frameIds = this.filteredFrameIds
-      const startCard = this.cards.startCard
-      const endCard = this.cards.endCard
-      const startCardInFilter = frameIds.includes(startCard.frameId)
-      const endCardInFilter = frameIds.includes(endCard.frameId)
-      return startCardInFilter || endCardInFilter
-    },
-    isConnectionFilteredByType () {
-      const typeIds = this.filteredConnectionTypeIds
-      if (!this.connectionType) { return }
-      return typeIds.includes(this.connectionType.id)
-    },
-    isFiltered () {
-      if (this.filtersIsActive) {
-        const isInFilter = this.isCardsFilteredByFrame || this.isConnectionFilteredByType
-        if (isInFilter) {
-          return false
-        } else {
-          return true
-        }
-      } else { return false }
-    },
-    directionIsVisible () {
-      this.checkIfShouldPauseConnectionDirections()
-      return this.connection.directionIsVisible
-    },
-    isUpdatingPath () {
-      let shouldHide
-      const currentUserIsDragging = this.currentUserIsDraggingCard
-      let cards = []
-      const multipleCardsSelectedIds = this.multipleCardsSelectedIds
-      const currentCardId = this.currentDraggingCardId
-      const remoteCardsDragging = utils.clone(this.remoteCardsDragging)
-      const remoteCardsSelected = utils.clone(this.remoteCardsSelected)
-      // local multiple
-      if (multipleCardsSelectedIds.length && currentUserIsDragging) {
-        cards = multipleCardsSelectedIds.map(id => this['currentCards/byId'](id))
-      // local single
-      } else if (currentCardId && currentUserIsDragging) {
-        const currentCard = this['currentCards/byId'](currentCardId)
-        cards = [currentCard]
-      // remote multiple
-      } else if (this.remoteCardsIsDragging && remoteCardsSelected.length) {
-        cards = remoteCardsSelected.map(card => {
-          card.id = card.cardId
-          return card
-        })
-      // remote single
-      } else if (this.remoteCardsIsDragging) {
-        cards = remoteCardsDragging.map(card => {
-          card.id = card.cardId
-          return card
-        })
-      }
-      cards = cards.filter(card => Boolean(card))
-      cards.forEach(card => {
-        if (card.id === this.startCardId || card.id === this.endCardId) {
-          shouldHide = true
-        }
-      })
-      this.checkIfShouldPauseConnectionDirections()
-      return shouldHide
-    }
-  },
-  methods: {
-    updateIsVisibleInViewport: debounce(async function () {
-      if (this.disableViewportOptimizations) { this.isVisibleInViewport = true }
-      if (this.isUpdatingPath) { this.isVisibleInViewport = true }
-      if (!this.connection.path) { this.isVisibleInViewport = false }
-      const threshold = 400 * this.spaceCounterZoomDecimal
-      const offset = utils.outsideSpaceOffset().y
-      const windowScroll = { x: window.scrollX, y: window.scrollY }
-      const scroll = windowScroll.y - offset
-      const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      let y1 = utils.startCoordsFromConnectionPath(this.connection.path).y
-      let y2 = utils.endCoordsFromConnectionPath(this.connection.path).y + y1
-      if (y1 > y2) {
-        const y = y1
-        y1 = y2
-        y2 = y
-      }
-      //       ┌───┐
-      //   y1  │\\\│
-      //   ●   │\\\│
-      //   │   │\\\│
-      //   │   │\\\│  ┌───┐
-      //   │   │\\\│  │\\\│
-      //   │   └───┘  │\\\│
-      //   │          │\\\│
-      //   │          │\\\│ ┌───┐
-      //   │          │\\\│ │\\\│
-      //   │          └───┘ │\\\│
-      //   │                │\\\│
-      //   ●                │\\\│
-      //   y2               │\\\│
-      //                    └───┘
-      const y1IsBelow = y1 - threshold > scroll + viewport
-      const y2IsAbove = y2 + threshold < scroll
-      let isTallerThanViewport = Math.abs(y2 - y1) > viewport
-      if (isTallerThanViewport) {
-        this.isVisibleInViewport = true
-      } else {
-        const isNotInView = y1IsBelow || y2IsAbove
-        this.isVisibleInViewport = !isNotInView
-      }
-    }, 100, { leading: true }),
+const props = defineProps({
+  connection: Object,
+  isRemote: Boolean
+})
 
-    checkIfShouldPauseConnectionDirections () {
-      this.$store.dispatch('currentSpace/unpauseConnectionDirections')
-      this.$nextTick(() => {
-        this.$store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
-      })
-    },
-    removeConnection () {
-      if (!this.isSpaceMember) { return }
-      this.$store.dispatch('currentConnections/remove', this.connection)
-      this.$store.dispatch('currentConnections/removeUnusedTypes')
-    },
-    checkIsMultiTouch (event) {
-      isMultiTouch = false
-      if (utils.isMultiTouch(event)) {
-        isMultiTouch = true
-      }
-    },
-    showConnectionDetails (event, isFromStore) {
-      if (isMultiTouch) { return }
-      if (!this.canEditSpace) { this.$store.commit('triggerReadOnlyJiggle') }
-      if (!isFromStore) {
-        currentCursor = utils.cursorPositionInViewport(event)
-        if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
-      }
-      if (!this.connection.path) {
-        console.error('🚒 no connection path', this.connection.path)
-        return
-      }
-      this.$store.dispatch('closeAllDialogs')
-      if (event.shiftKey) {
-        this.$store.dispatch('toggleMultipleConnectionsSelected', this.id)
-        this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.multipleConnectionsSelectedIds))
-        return
-      }
-      const dialogPosition = utils.cursorPositionInSpace(event)
-      this.$store.dispatch('connectionDetailsIsVisibleForConnectionId', this.id)
-      this.$store.commit('connectionDetailsPosition', dialogPosition)
-      this.$store.dispatch('clearMultipleSelected')
-    },
-    startDraggingConnection (event) {
-      this.checkIsMultiTouch(event)
-      this.$store.commit('shouldHideConnectionOutline', true)
-      startCursor = utils.cursorPositionInViewport(event)
-    },
-    showConnectionDetailsOnKeyup (event) {
-      this.showConnectionDetails(event)
-      this.focusOnDialog(event)
-    },
-    focusOnDialog (event) {
-      this.$nextTick(() => {
-        document.querySelector('dialog.connection-details button').focus()
-      })
-    },
-    updatedPath (path, controlPoint, x, y) {
-      return path.replace(controlPoint, `q${x},${y}`)
-    },
-    newPointPosition (base, cycleProgress, isForwardCycle) {
-      if (isForwardCycle) {
-        return Math.round(base + Math.exp(cycleProgress / 6))
-      } else {
-        return Math.round(base - Math.exp(cycleProgress / 6))
-      }
-    },
-    controlPointPosition ({ x, y }) {
-      const framesPerDirection = 24
-      const completedCycles = Math.floor(this.frameCount / framesPerDirection)
-      const cycleProgress = (this.frameCount - completedCycles * framesPerDirection) / framesPerDirection
-      const isForwardCycle = utils.isEvenNumber(completedCycles)
-      x = this.newPointPosition(x, cycleProgress, isForwardCycle)
-      y = this.newPointPosition(y, cycleProgress, isForwardCycle)
-      return { x, y }
-    },
-    animationFrame () {
-      if (this.frameCount === 0) {
-        this.curvedPath = this.connection.path
-      }
-      this.frameCount++
-      const curvePattern = new RegExp(/(q[-0-9]*),([-0-9]*)\w+/)
-      // "q90,40" from "m747,148 q90,40 -85,75"
-      // "q-90,-40" from "m747,148 q-90,-40 -85,75" (negative)
-      // "q-200,-0" from "m217,409 q200,1 492,-78" (variable length)
-      const curveMatch = this.curvedPath.match(curvePattern)
-      const points = curveMatch[0].substring(1, curveMatch[0].length).split(',')
-      // ["90", "40"] from "q90,40"
-      // ["90", "-40"] from "q-90,-40" (negative)
-      // ["200", "1"] from "q200,1" (variable length)
-      const { x, y } = this.controlPointPosition({
-        x: parseInt(points[0]),
-        y: parseInt(points[1])
-      })
-      const controlPoint = curveMatch[0]
-      this.curvedPath = this.updatedPath(this.curvedPath, controlPoint, x, y)
-      const element = this.$refs.connectionElement
-      if (!element) { return }
-      element.setAttribute('d', this.curvedPath)
-      if (this.shouldAnimate) {
-        window.requestAnimationFrame(this.animationFrame)
-      }
-    },
-    cancelAnimation () {
-      window.cancelAnimationFrame(animationTimer)
-      animationTimer = undefined
-      this.curvedPath = undefined
-      this.frameCount = 0
-    },
-    addCardsAndUploadFiles (event) {
-      let files = event.dataTransfer.files
-      files = Array.from(files)
-      const currentCursor = utils.cursorPositionInViewport(event)
-      this.$store.dispatch('upload/addCardsAndUploadFiles', { files, currentCursor })
-    },
+const state = reactive({
+  curvedPath: '',
+  frameCount: 0,
+  isVisibleInViewport: true
+})
+watch(() => props.connection.connectionPath, (value, prevValue) => {
+  state.curvedPath = value
+})
 
-    // mouse handlers
-
-    handleMouseEnter () {
-      this.$store.commit('currentUserIsHoveringOverConnectionId', this.connection.id)
-    },
-    handleMouseLeave () {
-      this.$store.commit('currentUserIsHoveringOverConnectionId', '')
-    }
-
-  },
-  watch: {
-    shouldAnimate (shouldAnimate) {
-      if (shouldAnimate) {
-        animationTimer = window.requestAnimationFrame(this.animationFrame)
-      }
-    },
-    connectionPath (path) {
-      this.curvedPath = path
-    }
+const visible = computed(() => {
+  if (props.isRemote) { return true }
+  return cards.value.startCard && cards.value.endCard
+})
+const connectionStyles = computed(() => {
+  if (!store.state.currentUserIsDraggingCard) { return }
+  return { pointerEvents: 'none' }
+})
+const connectionClasses = computed(() => {
+  return {
+    active: isActive.value,
+    filtered: isFiltered.value,
+    hover: isHovered.value,
+    'hide-connection-outline': store.state.shouldHideConnectionOutline,
+    'is-hidden-by-opacity': isHiddenByCommentFilter.value,
+    'is-connected-to-comment': isConnectedToCommentCard.value
   }
+})
+const cards = computed(() => {
+  const cards = store.getters['currentCards/all']
+  const startCard = cards.find(card => card.id === props.connection.startCardId)
+  const endCard = cards.find(card => card.id === props.connection.endCardId)
+  return { startCard, endCard }
+})
+const isConnectedToCommentCard = computed(() => {
+  const { startCard, endCard } = cards.value
+  if (!startCard || !endCard) { return }
+  return startCard.isComment || endCard.isComment
+})
+const isHiddenByCommentFilter = computed(() => {
+  const filterCommentsIsActive = store.state.currentUser.filterComments
+  if (!filterCommentsIsActive) { return }
+  const startCard = cards.value.startCard
+  const endCard = cards.value.endCard
+  const startCardIsComment = startCard.isComment || utils.isNameComment(startCard.name)
+  const endCardIsComment = startCard.isComment || utils.isNameComment(endCard.name)
+  return startCardIsComment || endCardIsComment
+})
+const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const gradientId = computed(() => `gradient-${props.connection.id}`)
+const gradientIdReference = computed(() => `url('#${gradientId.value}')`)
+const connectionType = computed(() => store.getters['currentConnections/typeByTypeId'](props.connection.connectionTypeId))
+const remoteCardsIsDragging = computed(() => Boolean(store.state.remoteCardsDragging.length))
+const typeColor = computed(() => {
+  if (!connectionType.value) { return }
+  return connectionType.value.color
+})
+const typeName = computed(() => {
+  if (!connectionType.value) { return }
+  return connectionType.value.name
+})
+const isSelected = computed(() => {
+  const selectedIds = store.state.multipleConnectionsSelectedIds
+  return selectedIds.includes(props.connection.id)
+})
+const isRemoteSelected = computed(() => {
+  const isSelected = store.state.remoteConnectionsSelected.find(connection => connection.connectionId === props.connection.id)
+  return isSelected
+})
+const isCurrentCardConnection = computed(() => {
+  return store.state.currentCardConnections.includes(props.connection.id)
+})
+const detailsIsVisible = computed(() => {
+  if (!canEditSpace.value) { return }
+  const detailsId = store.state.connectionDetailsIsVisibleForConnectionId
+  return detailsId === props.connection.id
+})
+const remoteDetailsIsVisible = computed(() => {
+  const isSelected = store.state.remoteConnectionDetailsVisible.find(connection => connection.connectionId === props.connection.id)
+  return isSelected
+})
+const shouldAnimate = computed(() => {
+  if (store.state.currentUserIsDraggingCard) { return }
+  return Boolean(isSelected.value || detailsIsVisible.value || remoteDetailsIsVisible.value || isRemoteSelected.value)
+})
+watch(() => shouldAnimate.value, (value, prevValue) => {
+  if (value) {
+    animationTimer = window.requestAnimationFrame(animationFrame)
+  }
+})
 
+const isDraggingCurrentConnectionLabel = computed(() => {
+  const connectionId = store.state.currentUserIsDraggingConnectionIdLabel
+  if (!connectionId) { return }
+  const connection = store.getters['currentConnections/byId'](connectionId)
+  if (!connection) { return }
+  return connection.id === props.connection.id
+})
+const isActive = computed(() => {
+  if (!isDraggingCurrentConnectionLabel.value) { return }
+  return isSelected.value || detailsIsVisible.value || remoteDetailsIsVisible.value || isRemoteSelected.value || isCurrentCardConnection.value || isConnectedToMultipleCardsSelected.value
+})
+const isHovered = computed(() => {
+  if (store.state.currentUserIsDraggingCard) { return }
+  return props.connection.id === store.state.currentUserIsHoveringOverConnectionId || props.connection.id === store.state.currentUserIsDraggingConnectionIdLabel || isHoveredOverConnectedCard.value
+})
+const isHoveredOverConnectedCard = computed(() => {
+  const cardId = store.state.currentUserIsHoveringOverCardId
+  if (!cardId) { return }
+  return (cardId === props.connection.startCardId || cardId === props.connection.endCardId)
+})
+const isConnectedToMultipleCardsSelected = computed(() => {
+  const cardIds = store.state.multipleCardsSelectedIds
+  if (!cardIds.length) { return }
+  return cardIds.find(cardId => {
+    return (cardId === props.connection.startCardId || cardId === props.connection.endCardId)
+  })
+})
+
+// filters
+const filtersIsActive = computed(() => {
+  const types = store.state.filteredConnectionTypeIds
+  const frames = store.state.filteredFrameIds
+  const tags = store.state.filteredTagNames
+  return Boolean(types.length + frames.length + tags.length)
+})
+const isCardsFilteredByFrame = computed(() => {
+  const frameIds = store.state.filteredFrameIds
+  const startCard = cards.value.startCard
+  const endCard = cards.value.endCard
+  const startCardInFilter = frameIds.includes(startCard.frameId)
+  const endCardInFilter = frameIds.includes(endCard.frameId)
+  return startCardInFilter || endCardInFilter
+})
+const isConnectionFilteredByType = computed(() => {
+  const typeIds = store.state.filteredConnectionTypeIds
+  if (!connectionType.value) { return }
+  return typeIds.includes(connectionType.value.id)
+})
+const isFiltered = computed(() => {
+  if (filtersIsActive.value) {
+    const isInFilter = isCardsFilteredByFrame.value || isConnectionFilteredByType.value
+    if (isInFilter) {
+      return false
+    } else {
+      return true
+    }
+  } else { return false }
+})
+const directionIsVisible = computed(() => {
+  checkIfShouldPauseConnectionDirections()
+  return props.connection.directionIsVisible
+})
+const isUpdatingPath = computed(() => {
+  let shouldHide
+  const currentUserIsDragging = store.state.currentUserIsDraggingCard
+  let cards = []
+  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
+  const currentCardId = store.state.currentDraggingCardId
+  const remoteCardsDragging = utils.clone(store.state.remoteCardsDragging)
+  const remoteCardsSelected = utils.clone(store.state.remoteCardsSelected)
+  // local multiple
+  if (multipleCardsSelectedIds.length && currentUserIsDragging) {
+    cards = multipleCardsSelectedIds.map(id => store.getters['currentCards/byId'](id))
+  // local single
+  } else if (currentCardId && currentUserIsDragging) {
+    const currentCard = store.getters['currentCards/byId'](currentCardId)
+    cards = [currentCard]
+  // remote multiple
+  } else if (remoteCardsIsDragging.value && remoteCardsSelected.length) {
+    cards = remoteCardsSelected.map(card => {
+      card.id = card.cardId
+      return card
+    })
+  // remote single
+  } else if (remoteCardsIsDragging.value) {
+    cards = remoteCardsDragging.map(card => {
+      card.id = card.cardId
+      return card
+    })
+  }
+  cards = cards.filter(card => Boolean(card))
+  cards.forEach(card => {
+    if (card.id === props.connection.startCardId || card.id === props.connection.endCardId) {
+      shouldHide = true
+    }
+  })
+  checkIfShouldPauseConnectionDirections()
+  return shouldHide
+})
+
+const checkIfShouldPauseConnectionDirections = async () => {
+  store.dispatch('currentSpace/unpauseConnectionDirections')
+  await nextTick()
+  store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
 }
+const removeConnection = () => {
+  if (!isSpaceMember.value) { return }
+  store.dispatch('currentConnections/remove', props.connection)
+  store.dispatch('currentConnections/removeUnusedTypes')
+}
+const checkIsMultiTouch = (event) => {
+  isMultiTouch = false
+  if (utils.isMultiTouch(event)) {
+    isMultiTouch = true
+  }
+}
+const showConnectionDetails = (event, isFromStore) => {
+  if (isMultiTouch) { return }
+  if (!canEditSpace.value) { store.commit('triggerReadOnlyJiggle') }
+  if (!isFromStore) {
+    currentCursor = utils.cursorPositionInViewport(event)
+    if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
+  }
+  if (!props.connection.path) {
+    console.error('🚒 no connection path', props.connection.path)
+    return
+  }
+  store.dispatch('closeAllDialogs')
+  if (event.shiftKey) {
+    store.dispatch('toggleMultipleConnectionsSelected', props.connection.id)
+    store.commit('previousMultipleConnectionsSelectedIds', utils.clone(store.state.multipleConnectionsSelectedIds))
+    return
+  }
+  const dialogPosition = utils.cursorPositionInSpace(event)
+  store.dispatch('connectionDetailsIsVisibleForConnectionId', props.connection.id)
+  store.commit('connectionDetailsPosition', dialogPosition)
+  store.dispatch('clearMultipleSelected')
+}
+const startDraggingConnection = (event) => {
+  checkIsMultiTouch(event)
+  store.commit('shouldHideConnectionOutline', true)
+  startCursor = utils.cursorPositionInViewport(event)
+}
+const showConnectionDetailsOnKeyup = (event) => {
+  showConnectionDetails(event)
+  focusOnDialog(event)
+}
+const focusOnDialog = async (event) => {
+  await nextTick()
+  document.querySelector('dialog.connection-details button').focus()
+}
+const updatedPath = (path, controlPoint, x, y) => {
+  return path.replace(controlPoint, `q${x},${y}`)
+}
+const newPointPosition = (base, cycleProgress, isForwardCycle) => {
+  if (isForwardCycle) {
+    return Math.round(base + Math.exp(cycleProgress / 6))
+  } else {
+    return Math.round(base - Math.exp(cycleProgress / 6))
+  }
+}
+const controlPointPosition = ({ x, y }) => {
+  const framesPerDirection = 24
+  const completedCycles = Math.floor(state.frameCount / framesPerDirection)
+  const cycleProgress = (state.frameCount - completedCycles * framesPerDirection) / framesPerDirection
+  const isForwardCycle = utils.isEvenNumber(completedCycles)
+  x = newPointPosition(x, cycleProgress, isForwardCycle)
+  y = newPointPosition(y, cycleProgress, isForwardCycle)
+  return { x, y }
+}
+const animationFrame = () => {
+  if (state.frameCount === 0) {
+    state.curvedPath = props.connection.path
+  }
+  state.frameCount++
+  const curvePattern = new RegExp(/(q[-0-9]*),([-0-9]*)\w+/)
+  // "q90,40" from "m747,148 q90,40 -85,75"
+  // "q-90,-40" from "m747,148 q-90,-40 -85,75" (negative)
+  // "q-200,-0" from "m217,409 q200,1 492,-78" (variable length)
+  const curveMatch = state.curvedPath.match(curvePattern)
+  const points = curveMatch[0].substring(1, curveMatch[0].length).split(',')
+  // ["90", "40"] from "q90,40"
+  // ["90", "-40"] from "q-90,-40" (negative)
+  // ["200", "1"] from "q200,1" (variable length)
+  const { x, y } = controlPointPosition({
+    x: parseInt(points[0]),
+    y: parseInt(points[1])
+  })
+  const controlPoint = curveMatch[0]
+  state.curvedPath = updatedPath(state.curvedPath, controlPoint, x, y)
+  const element = connectionElement.value
+  if (!element) { return }
+  element.setAttribute('d', state.curvedPath)
+  if (shouldAnimate.value) {
+    window.requestAnimationFrame(animationFrame)
+  }
+}
+const cancelAnimation = () => {
+  window.cancelAnimationFrame(animationTimer)
+  animationTimer = undefined
+  state.curvedPath = undefined
+  state.frameCount = 0
+}
+const addCardsAndUploadFiles = (event) => {
+  let files = event.dataTransfer.files
+  files = Array.from(files)
+  const currentCursor = utils.cursorPositionInViewport(event)
+  store.dispatch('upload/addCardsAndUploadFiles', { files, currentCursor })
+}
+
+// mouse handlers
+
+const handleMouseEnter = () => {
+  store.commit('currentUserIsHoveringOverConnectionId', props.connection.id)
+}
+const handleMouseLeave = () => {
+  store.commit('currentUserIsHoveringOverConnectionId', '')
+}
+
+// updateIsVisibleInViewport: debounce(async function () {
+//   if (store.state.disableViewportOptimizations) { state.isVisibleInViewport = true }
+//   if (this.isUpdatingPath) { state.isVisibleInViewport = true }
+//   if (!props.connection.path) { state.isVisibleInViewport = false }
+//   const threshold = 400 * store.getters.spaceCounterZoomDecimal
+//   const offset = utils.outsideSpaceOffset().y
+//   const windowScroll = { x: window.scrollX, y: window.scrollY }
+//   const scroll = windowScroll.y - offset
+//   const viewport = store.state.viewportHeight * store.getters.spaceCounterZoomDecimal
+//   let y1 = utils.startCoordsFromConnectionPath(props.connection.path).y
+//   let y2 = utils.endCoordsFromConnectionPath(props.connection.path).y + y1
+//   if (y1 > y2) {
+//     const y = y1
+//     y1 = y2
+//     y2 = y
+//   }
+//   //       ┌───┐
+//   //   y1  │\\\│
+//   //   ●   │\\\│
+//   //   │   │\\\│
+//   //   │   │\\\│  ┌───┐
+//   //   │   │\\\│  │\\\│
+//   //   │   └───┘  │\\\│
+//   //   │          │\\\│
+//   //   │          │\\\│ ┌───┐
+//   //   │          │\\\│ │\\\│
+//   //   │          └───┘ │\\\│
+//   //   │                │\\\│
+//   //   ●                │\\\│
+//   //   y2               │\\\│
+//   //                    └───┘
+//   const y1IsBelow = y1 - threshold > scroll + viewport
+//   const y2IsAbove = y2 + threshold < scroll
+//   let isTallerThanViewport = Math.abs(y2 - y1) > viewport
+//   if (isTallerThanViewport) {
+//     state.isVisibleInViewport = true
+//   } else {
+//     const isNotInView = y1IsBelow || y2IsAbove
+//     state.isVisibleInViewport = !isNotInView
+//   }
+// }, 100, { leading: true }),
+const initIsVisibleInViewportObserver = () => {
+  // WIP observer
+  try {
+    let callback = (entries, observer) => {
+      entries.forEach((entry) => {
+        // Each entry describes an intersection change for one observed
+        // target element:
+        //   entry.boundingClientRect
+        //   entry.intersectionRatio
+        //   entry.intersectionRect
+        if (entry.isIntersecting) {
+          state.isVisibleInViewport = true
+          // updateIsVisibleInViewport(true)
+        } else {
+          state.isVisibleInViewport = false
+          // updateIsVisibleInViewport(false)
+        }
+
+        console.log('🍌connection🍌🍌🍌🍌🍌🍌🍌', props.connection.id, state.isVisibleInViewport)
+
+        //   entry.rootBounds
+        //   entry.target
+        //   entry.time
+      })
+    }
+    // const options = {
+    //   // root: document.querySelector("#magic-painting"),
+    //   // rootMargin: `${viewport.height}px ${viewport.width}px `,
+    //   // rootMargin: 0,
+    //   threshold: 1.0 // every pixel is visible
+    // }
+    const observer = new IntersectionObserver(callback)
+    const target = connectionElement.value
+    console.log('🍌🍌🍌🍌', target, document.querySelector('main#space'), props.connection.id)
+    observer.observe(target)
+  } catch (error) {
+    console.error('🚒connection🚒🚒🚒🚒🚒🚒🚒', error)
+  }
+}
+
 </script>
+
+<template lang="pug">
+g.connection(v-if="visible" :style="connectionStyles")
+  path.connection-path(
+    fill="none"
+    :stroke="typeColor"
+    stroke-width="5"
+    :data-start-card="connection.startCardId"
+    :data-end-card="connection.endCardId"
+    :data-id="connection.id"
+    :data-type-name="typeName"
+    :data-type-id="connection.connectionTypeId"
+    :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
+    :data-label-is-visible="connection.labelIsVisible"
+    :key="connection.id"
+    :d="connection.path"
+    @mousedown.left="startDraggingConnection"
+    @touchstart="startDraggingConnection"
+    @mouseup.left="showConnectionDetails"
+    @touchend.stop="showConnectionDetails"
+    @keyup.stop.backspace="removeConnection"
+    @keyup.stop.enter="showConnectionDetailsOnKeyup"
+    :class="connectionClasses"
+    ref="connectionElement"
+    tabindex="0"
+    @dragover.prevent
+    @drop.prevent.stop="addCardsAndUploadFiles"
+
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
+  )
+
+defs
+  linearGradient(:id="gradientId")
+    stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
+    stop(offset="90%" :stop-color="typeColor")
+
+circle(v-if="directionIsVisible && !isUpdatingPath && state.isVisibleInViewport" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}")
+  animateMotion(dur="3s" repeatCount="indefinite" :path="connection.path" rotate="auto")
+</template>
 
 <style lang="stylus">
 .connection-path

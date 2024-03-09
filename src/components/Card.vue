@@ -1606,14 +1606,8 @@ const userDetailsIsUser = computed(() => {
 const initIsVisibleInViewportObserver = () => {
   // WIP observer
   try {
-    const viewport = utils.visualViewport()
     let callback = (entries, observer) => {
       entries.forEach((entry) => {
-        // Each entry describes an intersection change for one observed
-        // target element:
-        //   entry.boundingClientRect
-        //   entry.intersectionRatio
-        //   entry.intersectionRect
         if (entry.isIntersecting) {
           state.isVisibleInViewport = true
           // updateIsVisibleInViewport(true)
@@ -1621,26 +1615,15 @@ const initIsVisibleInViewportObserver = () => {
           state.isVisibleInViewport = false
           // updateIsVisibleInViewport(false)
         }
-
-        console.log('🍆🍆🍆🍆🍆🍆', props.card.name, state.isVisibleInViewport)
-
-        //   entry.rootBounds
-        //   entry.target
-        //   entry.time
+        console.log('🍆card🍆🍆🍆🍆🍆', props.card.name, state.isVisibleInViewport)
       })
     }
-    // const options = {
-    //   // root: document.querySelector("#magic-painting"),
-    //   // rootMargin: `${viewport.height}px ${viewport.width}px `,
-    //   // rootMargin: 0,
-    //   threshold: 1.0 // every pixel is visible
-    // }
     const observer = new IntersectionObserver(callback)
     const target = cardElement.value
-    console.log('🍌🍌🍌🍌', target, document.querySelector('main#space'))
+    // console.log('🍌🍌🍌🍌', target, document.querySelector('main#space'))
     observer.observe(target)
   } catch (error) {
-    console.error('🚒🚒🚒🚒🚒🚒🚒🚒', error)
+    console.error('🚒card🚒🚒🚒🚒🚒🚒🚒', error)
   }
 }
 // callback (entries, observer) {
