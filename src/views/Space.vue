@@ -369,15 +369,6 @@ export default {
       }
       return cursor
     },
-    normalizeSpaceCardsZ () {
-      const sorted = sortBy(this.unlockedCards, ['z'])
-      const zList = sorted.map(card => card.z)
-      const isNormalized = uniq(zList).length === zList.length
-      if (isNormalized) { return }
-      sorted.forEach((card, index) => {
-        this.$store.dispatch('currentCards/update', { id: card.id, z: index })
-      })
-    },
     addCard (event) {
       let position = utils.cursorPositionInSpace(event)
       const isParentCard = true
@@ -387,7 +378,6 @@ export default {
       }
       this.$store.dispatch('currentUser/notifyReadOnly', position)
       if (this.spaceIsReadOnly) { return }
-      this.normalizeSpaceCardsZ()
       this.$store.dispatch('currentCards/add', { position, isParentCard })
       this.$store.commit('childCardId', '')
     },
