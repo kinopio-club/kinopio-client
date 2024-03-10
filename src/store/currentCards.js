@@ -127,6 +127,7 @@ const currentCards = {
       cards.forEach(card => {
         const element = document.querySelector(`article[data-card-id="${card.id}"]`)
         if (!element) { return }
+        if (!element.dataset.isVisibleInViewport) { return }
         element.style.left = card.x + 'px'
         element.style.top = card.y + 'px'
       })
@@ -579,6 +580,7 @@ const currentCards = {
         card.y = card.y + prevMoveDelta.y
         return card
       })
+      context.dispatch('incrementSelectedZs')
       context.commit('move', { cards, spaceId })
       cards = cards.filter(card => card)
       cards.forEach(card => {
@@ -633,15 +635,6 @@ const currentCards = {
 
     // z-index
 
-    incrementSelectedZs: (context) => {
-      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const currentDraggingCardId = context.rootState.currentDraggingCardId
-      if (multipleCardsSelectedIds.length) {
-        multipleCardsSelectedIds.forEach(id => context.dispatch('incrementZ', id))
-      } else {
-        context.dispatch('incrementZ', currentDraggingCardId)
-      }
-    },
     clearAllZs: (context) => {
       let cards = context.getters.all
       cards.forEach(card => {
@@ -655,8 +648,8 @@ const currentCards = {
       const card = context.getters.byId(id)
       if (!card) { return }
       if (card.isLocked) { return }
+      const cards = context.getters.all
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
-      let cards = context.getters.all
       let highestCardZ = utils.highestCardZ(cards)
       if (highestCardZ > maxInt) {
         context.dispatch('clearAllZs')
@@ -668,6 +661,30 @@ const currentCards = {
       if (!userCanEdit) { return }
       context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
       context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
+    },
+    incrementSelectedZs: (context) => {
+      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+      const currentDraggingCardId = context.rootState.currentDraggingCardId
+      if (multipleCardsSelectedIds.length) {
+        // calculate the highest z once, and update all selected
+        const cards = context.getters.all
+        const maxInt = Number.MAX_SAFE_INTEGER - 1000
+        let highestCardZ = utils.highestCardZ(cards)
+        if (highestCardZ > maxInt) {
+          context.dispatch('clearAllZs')
+          highestCardZ = 1
+        }
+        multipleCardsSelectedIds.forEach(id => {
+          const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
+          const body = { id, z: highestCardZ + 1 }
+          context.commit('update', body)
+          if (!userCanEdit) { return }
+          context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
+          context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
+        })
+      } else {
+        context.dispatch('incrementZ', currentDraggingCardId)
+      }
     },
 
     // remove

@@ -333,7 +333,7 @@ const filterShowDateUpdated = computed(() => store.state.currentUser.filterShowD
 const articleStyle = computed(() => {
   let z = props.card.z
   let pointerEvents = 'auto'
-  if (currentCardDetailsIsVisible.value) {
+  if (currentCardDetailsIsVisible.value || currentCardIsBeingDragged.value) {
     z = 2147483646 // max z
   } else if (isLocked.value) {
     z = 0
@@ -355,6 +355,7 @@ const articleStyle = computed(() => {
   return styles
 })
 const cardStyle = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   let backgroundColor, nameColor
   backgroundColor = props.card.backgroundColor
   if (nameIsColor.value) {
@@ -375,6 +376,7 @@ const cardStyle = computed(() => {
   return styles
 })
 const cardContentStyles = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   let styles = {}
   if (isLocked.value) {
     styles = { marginRight: '2px' }
@@ -385,6 +387,7 @@ const cardContentStyles = computed(() => {
   return styles
 })
 const cardContentWrapStyles = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   let styles = {}
   if (resizeWidth.value) {
     styles.maxWidth = resizeWidth.value
@@ -395,6 +398,7 @@ const cardContentWrapStyles = computed(() => {
   return styles
 })
 const articleClasses = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   const classes = {
     'is-resizing': store.state.currentUserIsResizingCard,
     'is-tilting': store.state.currentUserIsTiltingCard,
@@ -404,6 +408,7 @@ const articleClasses = computed(() => {
   return classes
 })
 const cardClasses = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   const m = 100
   const l = 150
   const classes = {
@@ -422,6 +427,7 @@ const cardClasses = computed(() => {
   return classes
 })
 const shouldJiggle = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   const max = 500
   const cardIsTooBig = width.value > max || props.card.height > max
   if (cardIsTooBig) { return }
@@ -1275,7 +1281,6 @@ const startDraggingCard = (event) => {
   store.commit('parentCardId', props.card.id)
   store.commit('childCardId', '')
   checkIfShouldDragMultipleCards(event)
-  store.dispatch('currentCards/incrementSelectedZs')
 }
 const notifyPressAndHoldToDrag = () => {
   if (isLocked.value) { return }
@@ -1448,7 +1453,6 @@ const remoteCardDetailsVisibleColor = computed(() => {
   }
 })
 const showCardDetails = (event) => {
-  store.dispatch('currentCards/afterMove')
   if (store.state.cardDetailsIsVisibleForCardId) { return }
   if (isLocked.value) { return }
   if (store.state.currentUserIsPainting) { return }

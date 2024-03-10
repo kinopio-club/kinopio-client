@@ -485,8 +485,14 @@ export default {
 
     stopInteractions (event) {
       console.log('💣 stopInteractions')
-      this.$store.dispatch('currentCards/afterMove')
-      this.$store.dispatch('currentBoxes/afterMove')
+      const isCardsSelected = this.$store.state.currentDraggingCardId || this.$store.state.multipleCardsSelectedIds.length
+      const isBoxesSelected = this.$store.state.multipleBoxesSelectedIds
+      if (isCardsSelected) {
+        this.$store.dispatch('currentCards/afterMove')
+      }
+      if (isBoxesSelected) {
+        this.$store.dispatch('currentBoxes/afterMove')
+      }
       this.addInteractionBlur()
       if (event.touches) {
         this.$store.commit('triggerUpdatePositionInVisualViewport')
