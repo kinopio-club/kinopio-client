@@ -1579,94 +1579,23 @@ const userDetailsIsUser = computed(() => {
 // is visible in viewport
 
 const initIsVisibleInViewportObserver = () => {
-  // WIP observer
   try {
     let callback = (entries, observer) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           state.isVisibleInViewport = true
-          // updateIsVisibleInViewport(true)
         } else {
           state.isVisibleInViewport = false
-          // updateIsVisibleInViewport(false)
         }
-        console.log('🍆card🍆🍆🍆🍆🍆', props.card.name, state.isVisibleInViewport)
       })
     }
     const target = cardElement.value
-    // console.log('🍌🍌🍌🍌', target, document.querySelector('main#space'))
     const observer = new IntersectionObserver(callback)
     observer.observe(target)
   } catch (error) {
-    console.error('🚒card🚒🚒🚒🚒🚒🚒🚒', error)
+    console.error('🚒 card initIsVisibleInViewportObserver', error)
   }
 }
-// callback (entries, observer) {
-//     entries.forEach((entry) => {
-//       console.log('🍆🍆🍆🍆🍆🍆',props.card.name, entries)
-//       // Each entry describes an intersection change for one observed
-//       // target element:
-//       //   entry.boundingClientRect
-//       //   entry.intersectionRatio
-//       //   entry.intersectionRect
-//       //   entry.isIntersecting
-//       //   entry.rootBounds
-//       //   entry.target
-//       //   entry.time
-//     });
-//   },
-// updateIsVisibleInViewport: debounce(async function () {
-//   let isVisible
-//   if (store.state.disableViewportOptimizations) { isVisible = true }
-//   if (shouldJiggle.value) { isVisible = true }
-//   if (store.state.currentDraggingConnectedCardIds.includes(props.card.id)) { isVisible = true }
-//   if (currentCardIsBeingDragged.value) { isVisible = true }
-//   if (state.isPlayingAudio) { isVisible = true }
-//   if (urlEmbedIsVisible.value) { isVisible = true }
-//   const isTextOnlyCard = normalizedName.value === props.card.name
-//   const threshold = 400 * this.spaceCounterZoomDecimal
-//   const fallbackHeight = store.getters['currentCards/defaultCardMaxWidth']
-//   const offset = utils.outsideSpaceOffset().y
-//   const windowScroll = { x: window.scrollX, y: window.scrollY }
-//   const scroll = (windowScroll.y - offset) * this.spaceCounterZoomDecimal
-//   const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-//   const min = scroll - threshold
-//   const max = scroll + viewport + threshold
-//   // top
-//   let y = y.value
-//   const isTopVisible = utils.isBetween({ value: y, min, max })
-//   let height = props.card.height || fallbackHeight
-//   height = height * store.state.spaceZoomDecimal
-//   // bottom
-//   const isBottomVisible = utils.isBetween({ value: y + height, min, max })
-//   const scrollIsAboveBottom = scroll < y + height
-//   const scrollIsBelowTop = scroll > y
-//   // middle
-//   const middleIsVisible = scrollIsAboveBottom && scrollIsBelowTop
-//   isVisible = isVisible || (isTopVisible || isBottomVisible || middleIsVisible)
-//   state.isVisibleInViewport = isVisible
-//   if (isVisible) {
-//     this.$nextTick(() => {
-//       updateCardDimensions()
-//       this.correctPaths()
-//     })
-//   }
-// }, 50, { leading: true })
-// const updateIsVisibleInViewport = async (value) => {
-//   let isVisible = value
-//   if (store.state.disableViewportOptimizations) { isVisible = true }
-//   if (shouldJiggle.value) { isVisible = true }
-//   if (store.state.currentDraggingConnectedCardIds.includes(props.card.id)) { isVisible = true }
-//   if (currentCardIsBeingDragged.value) { isVisible = true }
-//   if (state.isPlayingAudio) { isVisible = true }
-//   if (urlEmbedIsVisible.value) { isVisible = true }
-//   state.isVisibleInViewport = isVisible
-//   if (isVisible) {
-//     await nextTick()
-//     updateCardDimensions()
-//     correctPaths()
-//   }
-// }
 
 // mouse handlers
 
@@ -1946,7 +1875,6 @@ article.card-wrap#card(
   ref="cardElement"
   :class="articleClasses"
   :title="cardNameIfComment"
-
 )
   .card(
     @mousedown.left.prevent="startDraggingCard"
