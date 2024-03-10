@@ -524,7 +524,6 @@ const remoteUserTiltingCardsColor = computed(() => {
   }
 })
 const updateCardDimensions = () => {
-  // if (!state.isVisibleInViewport) { return }
   let card = { id: props.card.id }
   card = utils.updateCardDimensions(card)
   if (!card) { return }

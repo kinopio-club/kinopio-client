@@ -5,8 +5,6 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 const store = useStore()
 
-// import debounce from 'lodash-es/debounce' // temp
-
 let animationTimer, isMultiTouch, startCursor, currentCursor
 
 let observer
@@ -30,7 +28,6 @@ onMounted(() => {
       }
     }
   })
-  // updateIsVisibleInViewport()
   window.addEventListener('scroll', initIsVisibleInViewportObserver)
   initIsVisibleInViewportObserver()
 })
@@ -354,42 +351,22 @@ const handleMouseLeave = () => {
 
 const initIsVisibleInViewportObserver = () => {
   if (observer) { return }
-  // WIP observer
   try {
     let callback = (entries, observer) => {
       entries.forEach((entry) => {
-        // Each entry describes an intersection change for one observed
-        // target element:
-        //   entry.boundingClientRect
-        //   entry.intersectionRatio
-        //   entry.intersectionRect
         if (entry.isIntersecting) {
           state.isVisibleInViewport = true
-          // updateIsVisibleInViewport(true)
         } else {
           state.isVisibleInViewport = false
-          // updateIsVisibleInViewport(false)
         }
-
-        console.log('🍌connection🍌🍌🍌🍌🍌🍌🍌', props.connection.id, state.isVisibleInViewport)
-
-        //   entry.rootBounds
-        //   entry.target
-        //   entry.time
       })
     }
-    // const options = {
-    //   // root: document.querySelector("#magic-painting"),
-    //   // rootMargin: `${viewport.height}px ${viewport.width}px `,
-    //   // rootMargin: 0,
-    //   threshold: 1.0 // every pixel is visible
-    // }
     const target = connectionElement.value
     if (!target) { return }
     observer = new IntersectionObserver(callback)
     observer.observe(target)
   } catch (error) {
-    console.error('🚒connection🚒🚒🚒🚒🚒🚒🚒', error)
+    console.error('🚒 connection initIsVisibleInViewportObserver', error)
   }
 }
 
