@@ -361,6 +361,15 @@ export default {
       connections = getters.connectionsWithValidCards(connections)
       return connections
     },
+    byMultipleCardIds: (state, getters, rootState, rootGetters) => (cardIds) => {
+      let connections = getters.all
+      connections = connections.filter(connection => {
+        let start = cardIds.includes(connection.startCardId)
+        let end = cardIds.includes(connection.endCardId)
+        return start || end
+      })
+      return connections
+    },
     typesByCardId: (state, getters, rootState, rootGetters) => (cardId) => {
       let connections = getters.byCardId(cardId)
       let types = getters.allTypes
@@ -370,6 +379,11 @@ export default {
       return types.filter(type => {
         return typeIds.includes(type.id)
       })
+    },
+    isSelected: (state, getters, rootState) => {
+      let connectionIds = rootState.multipleConnectionsSelectedIds
+      const connections = connectionIds.map(id => getters.byId(id))
+      return connections
     },
     connectionsWithValidCards: (state, getters, rootState, rootGetters) => (connections) => {
       connections = connections.filter(connection => {
