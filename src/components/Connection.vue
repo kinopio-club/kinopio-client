@@ -50,6 +50,11 @@ const visible = computed(() => {
   if (props.isRemote) { return true }
   return cards.value.startCard && cards.value.endCard
 })
+const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+
+// styles
+
 const connectionStyles = computed(() => {
   if (!store.state.currentUserIsDraggingCard) { return }
   return { pointerEvents: 'none' }
@@ -64,6 +69,22 @@ const connectionClasses = computed(() => {
     'is-connected-to-comment': isConnectedToCommentCard.value
   }
 })
+
+// connection type
+
+const connectionType = computed(() => store.getters['currentConnections/typeByTypeId'](props.connection.connectionTypeId))
+const typeColor = computed(() => {
+  if (!connectionType.value) { return }
+  return connectionType.value.color
+})
+const typeName = computed(() => {
+  if (!connectionType.value) { return }
+  return connectionType.value.name
+})
+
+// cards
+
+const remoteCardsIsDragging = computed(() => Boolean(store.state.remoteCardsDragging.length))
 const cards = computed(() => {
   const cards = store.getters['currentCards/all']
   const startCard = cards.find(card => card.id === props.connection.startCardId)
@@ -75,29 +96,30 @@ const isConnectedToCommentCard = computed(() => {
   if (!startCard || !endCard) { return }
   return startCard.isComment || endCard.isComment
 })
-const isHiddenByCommentFilter = computed(() => {
-  const filterCommentsIsActive = store.state.currentUser.filterComments
-  if (!filterCommentsIsActive) { return }
-  const startCard = cards.value.startCard
-  const endCard = cards.value.endCard
-  const startCardIsComment = startCard.isComment || utils.isNameComment(startCard.name)
-  const endCardIsComment = startCard.isComment || utils.isNameComment(endCard.name)
-  return startCardIsComment || endCardIsComment
+const isConnectedToMultipleCardsSelected = computed(() => {
+  const cardIds = store.state.multipleCardsSelectedIds
+  if (!cardIds.length) { return }
+  return cardIds.find(cardId => {
+    return (cardId === props.connection.startCardId || cardId === props.connection.endCardId)
+  })
 })
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const gradientId = computed(() => `gradient-${props.connection.id}`)
-const gradientIdReference = computed(() => `url('#${gradientId.value}')`)
-const connectionType = computed(() => store.getters['currentConnections/typeByTypeId'](props.connection.connectionTypeId))
-const remoteCardsIsDragging = computed(() => Boolean(store.state.remoteCardsDragging.length))
-const typeColor = computed(() => {
-  if (!connectionType.value) { return }
-  return connectionType.value.color
+const isHoveredOverConnectedCard = computed(() => {
+  const cardId = store.state.currentUserIsHoveringOverCardId
+  if (!cardId) { return }
+  return (cardId === props.connection.startCardId || cardId === props.connection.endCardId)
 })
-const typeName = computed(() => {
-  if (!connectionType.value) { return }
-  return connectionType.value.name
+const isCurrentCardConnection = computed(() => {
+  return store.state.currentCardConnections.includes(props.connection.id)
 })
+const addCardsAndUploadFiles = (event) => {
+  let files = event.dataTransfer.files
+  files = Array.from(files)
+  const currentCursor = utils.cursorPositionInViewport(event)
+  store.dispatch('upload/addCardsAndUploadFiles', { files, currentCursor })
+}
+
+// selected
+
 const isSelected = computed(() => {
   const selectedIds = store.state.multipleConnectionsSelectedIds
   return selectedIds.includes(props.connection.id)
@@ -106,9 +128,9 @@ const isRemoteSelected = computed(() => {
   const isSelected = store.state.remoteConnectionsSelected.find(connection => connection.connectionId === props.connection.id)
   return isSelected
 })
-const isCurrentCardConnection = computed(() => {
-  return store.state.currentCardConnections.includes(props.connection.id)
-})
+
+// connection details
+
 const detailsIsVisible = computed(() => {
   if (!canEditSpace.value) { return }
   const detailsId = store.state.connectionDetailsIsVisibleForConnectionId
@@ -118,15 +140,34 @@ const remoteDetailsIsVisible = computed(() => {
   const isSelected = store.state.remoteConnectionDetailsVisible.find(connection => connection.connectionId === props.connection.id)
   return isSelected
 })
-const shouldAnimate = computed(() => {
-  if (store.state.currentUserIsDraggingCard) { return }
-  return Boolean(isSelected.value || detailsIsVisible.value || remoteDetailsIsVisible.value || isRemoteSelected.value)
-})
-watch(() => shouldAnimate.value, (value, prevValue) => {
-  if (value) {
-    animationTimer = window.requestAnimationFrame(animationFrame)
+const showConnectionDetails = (event, isFromStore) => {
+  if (isMultiTouch) { return }
+  if (!canEditSpace.value) { store.commit('triggerReadOnlyJiggle') }
+  if (!isFromStore) {
+    currentCursor = utils.cursorPositionInViewport(event)
+    if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
   }
-})
+  if (!props.connection.path) {
+    console.error('🚒 no connection path', props.connection.path)
+    return
+  }
+  store.dispatch('closeAllDialogs')
+  if (event.shiftKey) {
+    store.dispatch('toggleMultipleConnectionsSelected', props.connection.id)
+    store.commit('previousMultipleConnectionsSelectedIds', utils.clone(store.state.multipleConnectionsSelectedIds))
+    return
+  }
+  const dialogPosition = utils.cursorPositionInSpace(event)
+  store.dispatch('connectionDetailsIsVisibleForConnectionId', props.connection.id)
+  store.commit('connectionDetailsPosition', dialogPosition)
+  store.dispatch('clearMultipleSelected')
+}
+const showConnectionDetailsOnKeyup = (event) => {
+  showConnectionDetails(event)
+  focusOnDialog(event)
+}
+
+// label
 
 const isDraggingCurrentConnectionLabel = computed(() => {
   const connectionId = store.state.currentUserIsDraggingConnectionIdLabel
@@ -135,28 +176,18 @@ const isDraggingCurrentConnectionLabel = computed(() => {
   if (!connection) { return }
   return connection.id === props.connection.id
 })
-const isActive = computed(() => {
-  if (!isDraggingCurrentConnectionLabel.value) { return }
-  return isSelected.value || detailsIsVisible.value || remoteDetailsIsVisible.value || isRemoteSelected.value || isCurrentCardConnection.value || isConnectedToMultipleCardsSelected.value
-})
-const isHovered = computed(() => {
-  if (store.state.currentUserIsDraggingCard) { return }
-  return props.connection.id === store.state.currentUserIsHoveringOverConnectionId || props.connection.id === store.state.currentUserIsDraggingConnectionIdLabel || isHoveredOverConnectedCard.value
-})
-const isHoveredOverConnectedCard = computed(() => {
-  const cardId = store.state.currentUserIsHoveringOverCardId
-  if (!cardId) { return }
-  return (cardId === props.connection.startCardId || cardId === props.connection.endCardId)
-})
-const isConnectedToMultipleCardsSelected = computed(() => {
-  const cardIds = store.state.multipleCardsSelectedIds
-  if (!cardIds.length) { return }
-  return cardIds.find(cardId => {
-    return (cardId === props.connection.startCardId || cardId === props.connection.endCardId)
-  })
-})
 
-// filters
+// space filters
+
+const isHiddenByCommentFilter = computed(() => {
+  const filterCommentsIsActive = store.state.currentUser.filterComments
+  if (!filterCommentsIsActive) { return }
+  const startCard = cards.value.startCard
+  const endCard = cards.value.endCard
+  const startCardIsComment = startCard.isComment || utils.isNameComment(startCard.name)
+  const endCardIsComment = startCard.isComment || utils.isNameComment(endCard.name)
+  return startCardIsComment || endCardIsComment
+})
 const filtersIsActive = computed(() => {
   const types = store.state.filteredConnectionTypeIds
   const frames = store.state.filteredFrameIds
@@ -186,10 +217,23 @@ const isFiltered = computed(() => {
     }
   } else { return false }
 })
+
+// direction
+
+const gradientId = computed(() => `gradient-${props.connection.id}`)
+const gradientIdReference = computed(() => `url('#${gradientId.value}')`)
 const directionIsVisible = computed(() => {
   checkIfShouldPauseConnectionDirections()
   return props.connection.directionIsVisible
 })
+const checkIfShouldPauseConnectionDirections = async () => {
+  store.dispatch('currentSpace/unpauseConnectionDirections')
+  await nextTick()
+  store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
+}
+
+// path
+
 const isUpdatingPath = computed(() => {
   let shouldHide
   const currentUserIsDragging = store.state.currentUserIsDraggingCard
@@ -227,58 +271,6 @@ const isUpdatingPath = computed(() => {
   checkIfShouldPauseConnectionDirections()
   return shouldHide
 })
-
-const checkIfShouldPauseConnectionDirections = async () => {
-  store.dispatch('currentSpace/unpauseConnectionDirections')
-  await nextTick()
-  store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
-}
-const removeConnection = () => {
-  if (!isSpaceMember.value) { return }
-  store.dispatch('currentConnections/remove', props.connection)
-  store.dispatch('currentConnections/removeUnusedTypes')
-}
-const checkIsMultiTouch = (event) => {
-  isMultiTouch = false
-  if (utils.isMultiTouch(event)) {
-    isMultiTouch = true
-  }
-}
-const showConnectionDetails = (event, isFromStore) => {
-  if (isMultiTouch) { return }
-  if (!canEditSpace.value) { store.commit('triggerReadOnlyJiggle') }
-  if (!isFromStore) {
-    currentCursor = utils.cursorPositionInViewport(event)
-    if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
-  }
-  if (!props.connection.path) {
-    console.error('🚒 no connection path', props.connection.path)
-    return
-  }
-  store.dispatch('closeAllDialogs')
-  if (event.shiftKey) {
-    store.dispatch('toggleMultipleConnectionsSelected', props.connection.id)
-    store.commit('previousMultipleConnectionsSelectedIds', utils.clone(store.state.multipleConnectionsSelectedIds))
-    return
-  }
-  const dialogPosition = utils.cursorPositionInSpace(event)
-  store.dispatch('connectionDetailsIsVisibleForConnectionId', props.connection.id)
-  store.commit('connectionDetailsPosition', dialogPosition)
-  store.dispatch('clearMultipleSelected')
-}
-const startDraggingConnection = (event) => {
-  checkIsMultiTouch(event)
-  store.commit('shouldHideConnectionOutline', true)
-  startCursor = utils.cursorPositionInViewport(event)
-}
-const showConnectionDetailsOnKeyup = (event) => {
-  showConnectionDetails(event)
-  focusOnDialog(event)
-}
-const focusOnDialog = async (event) => {
-  await nextTick()
-  document.querySelector('dialog.connection-details button').focus()
-}
 const updatedPath = (path, controlPoint, x, y) => {
   return path.replace(controlPoint, `q${x},${y}`)
 }
@@ -289,6 +281,7 @@ const newPointPosition = (base, cycleProgress, isForwardCycle) => {
     return Math.round(base - Math.exp(cycleProgress / 6))
   }
 }
+// move control point to simulate jiggling effect
 const controlPointPosition = ({ x, y }) => {
   const framesPerDirection = 24
   const completedCycles = Math.floor(state.frameCount / framesPerDirection)
@@ -298,6 +291,7 @@ const controlPointPosition = ({ x, y }) => {
   y = newPointPosition(y, cycleProgress, isForwardCycle)
   return { x, y }
 }
+// line jiggling animation
 const animationFrame = () => {
   if (state.frameCount === 0) {
     state.curvedPath = props.connection.path
@@ -331,20 +325,57 @@ const cancelAnimation = () => {
   state.curvedPath = undefined
   state.frameCount = 0
 }
-const addCardsAndUploadFiles = (event) => {
-  let files = event.dataTransfer.files
-  files = Array.from(files)
-  const currentCursor = utils.cursorPositionInViewport(event)
-  store.dispatch('upload/addCardsAndUploadFiles', { files, currentCursor })
+const shouldAnimate = computed(() => {
+  if (store.state.currentUserIsDraggingCard) { return }
+  return Boolean(isSelected.value || detailsIsVisible.value || remoteDetailsIsVisible.value || isRemoteSelected.value)
+})
+watch(() => shouldAnimate.value, (value, prevValue) => {
+  if (value) {
+    animationTimer = window.requestAnimationFrame(animationFrame)
+  }
+})
+
+// utils
+
+const removeConnection = () => {
+  if (!isSpaceMember.value) { return }
+  store.dispatch('currentConnections/remove', props.connection)
+  store.dispatch('currentConnections/removeUnusedTypes')
+}
+const focusOnDialog = async (event) => {
+  await nextTick()
+  document.querySelector('dialog.connection-details button').focus()
 }
 
-// mouse handlers
+// dragging WIP
 
+const startDraggingConnection = (event) => {
+  checkIsMultiTouch(event)
+  store.commit('shouldHideConnectionOutline', true)
+  startCursor = utils.cursorPositionInViewport(event)
+}
+
+// interaction handlers
+
+const isActive = computed(() => {
+  if (!isDraggingCurrentConnectionLabel.value) { return }
+  return isSelected.value || detailsIsVisible.value || remoteDetailsIsVisible.value || isRemoteSelected.value || isCurrentCardConnection.value || isConnectedToMultipleCardsSelected.value
+})
+const isHovered = computed(() => {
+  if (store.state.currentUserIsDraggingCard) { return }
+  return props.connection.id === store.state.currentUserIsHoveringOverConnectionId || props.connection.id === store.state.currentUserIsDraggingConnectionIdLabel || isHoveredOverConnectedCard.value
+})
 const handleMouseEnter = () => {
   store.commit('currentUserIsHoveringOverConnectionId', props.connection.id)
 }
 const handleMouseLeave = () => {
   store.commit('currentUserIsHoveringOverConnectionId', '')
+}
+const checkIsMultiTouch = (event) => {
+  isMultiTouch = false
+  if (utils.isMultiTouch(event)) {
+    isMultiTouch = true
+  }
 }
 
 // is visible in viewport
@@ -369,7 +400,6 @@ const initIsVisibleInViewportObserver = () => {
     console.error('🚒 connection initIsVisibleInViewportObserver', error)
   }
 }
-
 </script>
 
 <template lang="pug">
