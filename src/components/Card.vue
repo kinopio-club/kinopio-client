@@ -77,6 +77,7 @@ onMounted(async () => {
     store.dispatch('currentCards/showCardDetails', props.card.id)
   }
   await updateUrlPreviewOnload()
+  updateCardDimensions()
   checkIfShouldUpdatePreviewHtml()
   const defaultCardMaxWidth = store.getters['currentCards/defaultCardMaxWidth'] + 'px'
   utils.setCssVariable('card-width', defaultCardMaxWidth)
