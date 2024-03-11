@@ -442,17 +442,18 @@ export default {
       this.cardsCheckboxIsChecked = cardsChecked.length === this.cards.length
     },
     addCheckboxToCards () {
+      let updates = []
       this.cards.forEach(card => {
         if (!utils.checkboxFromString(card.name)) {
           const update = {
             id: card.id,
             name: `[] ${card.name}`
           }
-          this.$store.dispatch('currentCards/update', update)
+          updates.push(update)
         }
       })
+      this.$store.dispatch('currentCards/update', updates)
       this.cardsHaveCheckboxes = true
-      this.updateCardDimensions()
     },
     updateCardDimensions () {
       const cards = utils.clone(this.cards)

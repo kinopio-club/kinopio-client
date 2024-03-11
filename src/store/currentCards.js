@@ -225,6 +225,7 @@ const currentCards = {
       context.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
     },
     addMultiple: (context, { cards, shouldOffsetPosition }) => {
+      const spaceId = context.rootState.currentSpace.id
       cards = cards.map(card => {
         let x = card.x
         let y = card.y
@@ -254,10 +255,10 @@ const currentCards = {
         }
       })
       cards.forEach(card => {
-        context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
         context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
         context.commit('create', { card })
       })
+      context.dispatch('api/addToQueue', { name: 'createMultipleCards', body: { cards, spaceId } }, { root: true })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         cards
       }, { root: true })
