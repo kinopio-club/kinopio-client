@@ -307,15 +307,15 @@ export default {
         })
         newCards = newCards.map(card => {
           card = utils.updateCardDimensions(card)
-          this.$store.dispatch('currentCards/update', {
+          return {
             id: card.id,
             name: card.name,
             y: card.y,
             width: card.width,
             height: card.height
-          })
-          return card
+          }
         })
+        this.$store.dispatch('currentCards/updateMultiple', newCards)
         this.$store.dispatch('closeAllDialogs')
       })
     },
@@ -442,17 +442,17 @@ export default {
       this.cardsCheckboxIsChecked = cardsChecked.length === this.cards.length
     },
     addCheckboxToCards () {
-      let updates = []
+      let updatedCards = []
       this.cards.forEach(card => {
         if (!utils.checkboxFromString(card.name)) {
           const update = {
             id: card.id,
             name: `[] ${card.name}`
           }
-          updates.push(update)
+          updatedCards.push(update)
         }
       })
-      this.$store.dispatch('currentCards/updateMultiple', updates)
+      this.$store.dispatch('currentCards/updateMultiple', updatedCards)
       this.cardsHaveCheckboxes = true
     },
     updateCardDimensions () {
