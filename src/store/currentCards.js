@@ -375,41 +375,46 @@ const currentCards = {
     // dimensions
 
     updateDimensions: (context, { cards, cardId }) => {
-      let newCards = []
-      if (cards) {
-        utils.typeCheck({ value: cards, type: 'array' })
-        newCards = cards
-      } else if (cardId) {
-        utils.typeCheck({ value: cardId, type: 'string' })
-        const card = context.getters.byId(cardId)
-        if (!card) { return }
-        newCards.push(card)
-      } else {
-        newCards = context.getters.all
-      }
-      newCards = utils.clone(newCards)
-      newCards = newCards.filter(card => Boolean(card))
-      newCards.forEach(card => {
-        const prevDimensions = {
-          width: card.width,
-          height: card.height
+      nextTick(() => {
+        let newCards = []
+        let updates = {
+          cards: [],
+          spaceId: context.rootState.currentSpace.id
         }
-        nextTick(() => {
+        if (cards) {
+          utils.typeCheck({ value: cards, type: 'array' })
+          newCards = cards
+        } else if (cardId) {
+          utils.typeCheck({ value: cardId, type: 'string' })
+          const card = context.getters.byId(cardId)
+          if (!card) { return }
+          newCards.push(card)
+        } else {
+          newCards = context.getters.all
+        }
+        newCards = utils.clone(newCards)
+        newCards = newCards.filter(card => Boolean(card))
+        newCards.forEach(card => {
+          const prevDimensions = {
+            width: card.width,
+            height: card.height
+          }
           card = utils.updateCardDimensions(card)
           if (!card) { return }
           const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
+          if (!dimensionsChanged) { return }
           const body = {
             id: card.id,
-            width: Math.ceil(card.width),
-            height: Math.ceil(card.height)
+            width: card.width,
+            height: card.height
           }
           context.commit('update', body)
           context.dispatch('updateTallestCardHeight', card)
-          if (!dimensionsChanged) { return }
-          context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
-          context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
+          updates.cards.push(body)
         })
+        context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
+        context.dispatch('currentConnections/updateMultplePaths', updates.cards, { root: true })
       })
     },
     resetDimensions: (context, { cardIds, cardId }) => {
