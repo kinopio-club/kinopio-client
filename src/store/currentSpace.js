@@ -186,8 +186,6 @@ const currentSpace = {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       try {
-        context.dispatch('currentCards/updateDimensions', {}, { root: true })
-        context.dispatch('currentBoxes/updateInfoDimensions', {}, { root: true })
         console.log('🙈 create space preview image')
         const response = await context.dispatch('api/createSpacePreviewImage', context.state.id, { root: true })
         console.log('🙈 updated space preview image', response.urls)
