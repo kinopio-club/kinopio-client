@@ -670,7 +670,8 @@ const connectorGlowStyle = computed(() => {
     currentUserIsHoveringOverConnectionColor.value ||
     currentUserIsMultipleSelectedConnectionColor.value ||
     currentUserIsHoveringOverConnectedCardColor.value ||
-    currentUserIsMultipleSelectedCardColor.value
+    currentUserIsMultipleSelectedCardColor.value ||
+    currentUserIsCreatingConnectionColor.value
   return { background: color }
 })
 const connectionColor = (connection) => {
@@ -729,6 +730,14 @@ const currentUserIsMultipleSelectedCardColor = computed(() => {
   const cardIds = store.state.multipleCardsSelectedIds
   const connection = connectionsFromMultipleCardsConnectedToCurrentCard(cardIds)
   return connectionColor(connection)
+})
+// a current connection is being made by dragging from this card's connector
+const currentUserIsCreatingConnectionColor = computed(() => {
+  if (!store.state.currentUserIsDrawingConnection) { return }
+  const cardIds = store.state.currentConnectionStartCardIds
+  const isCurrentlyConnecting = cardIds.includes(props.card.id)
+  if (!isCurrentlyConnecting) { return }
+  return store.state.currentConnectionColor
 })
 
 // card buttons
