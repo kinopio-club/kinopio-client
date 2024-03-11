@@ -316,6 +316,25 @@ const currentCards = {
       }
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
     },
+    updateMultiple: (context, cards) => {
+      const spaceId = context.rootState.currentSpace.id
+      let updates = {
+        cards,
+        spaceId: context.rootState.currentSpace.id
+      }
+      context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
+      context.dispatch('history/add', { cards }, { root: true })
+      context.dispatch('updateDimensions', { cards })
+      cards.forEach(card => {
+        context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
+        context.commit('update', card)
+        if (card.name) {
+          context.commit('updateCardNameInOtherItems', card, { root: true })
+          context.commit('triggerUpdateOtherCard', card.id, { root: true })
+        }
+        cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      })
+    },
     updateCounter: (context, card) => {
       context.commit('update', card)
       context.dispatch('api/addToQueue', { name: 'updateCardCounter', body: card }, { root: true })
@@ -453,12 +472,14 @@ const currentCards = {
       })
     },
     removeResize: (context, { cardIds }) => {
+      let updates = []
       cardIds.forEach(cardId => {
         const body = { id: cardId, resizeWidth: null, width: null }
-        context.dispatch('update', body)
+        updates.push(body)
         utils.removeAllCardDimensions({ id: cardId })
         context.dispatch('updateDimensions', { cardId })
       })
+      context.dispatch('updateMultiple', updates)
     },
 
     // tilt

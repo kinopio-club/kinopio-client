@@ -452,7 +452,7 @@ export default {
           updates.push(update)
         }
       })
-      this.$store.dispatch('currentCards/update', updates)
+      this.$store.dispatch('currentCards/updateMultiple', updates)
       this.cardsHaveCheckboxes = true
     },
     updateCardDimensions () {

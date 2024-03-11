@@ -439,9 +439,6 @@ const shouldJiggle = computed(() => {
 const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
   const cardHasUrlsOrMedia = cardHasMedia.value || cardHasUrls.value
-  if (width.value) {
-    styles.width = width.value
-  }
   if (cardHasUrlsOrMedia) {
     styles.width = store.getters['currentCards/defaultCardMaxWidth']
   }
