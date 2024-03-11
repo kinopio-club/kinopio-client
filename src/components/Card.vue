@@ -2138,6 +2138,9 @@ article.card-wrap
       vertical-align -2px
       margin-left 3px
 
+    .checkbox-wrap
+      z-index 1
+
     .name-wrap,
     .card-comment
       display flex

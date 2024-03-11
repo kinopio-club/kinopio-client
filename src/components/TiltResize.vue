@@ -85,6 +85,7 @@ const remove = (action) => {
   bottom 0px
   display flex
   .inline-button-wrap
+    // background teal
     z-index 1
     cursor ew-resize
     button
