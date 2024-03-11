@@ -86,7 +86,7 @@ const self = {
       patches.splice(pointer, 0, patch)
       pointer = pointer + 1
       if (showLogMessages) {
-        console.error('⏺ history', { newPatch: patch, pointer })
+        console.log('⏺ history', { newPatch: patch, pointer })
       }
     },
     trim: (state) => {
