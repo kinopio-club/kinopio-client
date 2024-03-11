@@ -1599,7 +1599,7 @@ const initIsVisibleInViewportObserver = () => {
       })
     }
     const target = cardElement.value
-    const observer = new IntersectionObserver(callback)
+    const observer = new IntersectionObserver(callback, { rootMargin: '50%' })
     observer.observe(target)
   } catch (error) {
     console.error('🚒 card initIsVisibleInViewportObserver', error)

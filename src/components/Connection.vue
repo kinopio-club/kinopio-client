@@ -394,7 +394,7 @@ const initIsVisibleInViewportObserver = () => {
     }
     const target = connectionElement.value
     if (!target) { return }
-    observer = new IntersectionObserver(callback)
+    observer = new IntersectionObserver(callback, { rootMargin: '50%' })
     observer.observe(target)
   } catch (error) {
     console.error('🚒 connection initIsVisibleInViewportObserver', error)
