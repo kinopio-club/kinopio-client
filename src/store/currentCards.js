@@ -74,9 +74,12 @@ const currentCards = {
         card.y = Math.round(card.y)
       }
       const keys = Object.keys(card)
+      const prevCard = state.cards[card.id]
+      let updatedCard = utils.clone(prevCard)
       keys.forEach(key => {
-        state.cards[card.id][key] = card[key]
+        updatedCard[key] = card[key]
       })
+      state.cards[card.id] = updatedCard
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
     move: (state, { cards, spaceId }) => {
